@@ -43,6 +43,14 @@ public class StlWindow extends Frame
    }                        
    public void actionPerformed(ActionEvent evt)
    {
+     if(evt.getSource() instanceof MenuItem)
+     {
+     	MenuItem mi = (MenuItem)evt.getSource();
+        String arg = mi.getLabel();
+	if(arg.equals("Close"))  {
+	 	dispose();
+        }
+     }
    }   
    private void createLayout()
    {
@@ -104,7 +112,14 @@ public class StlWindow extends Frame
    }               
    private void createMenus()
    {
-   }   
+        MenuBar mbar = new MenuBar();
+
+        mbar.add(Util.makeMenu("File", new Object[]
+        {
+                 "Close"
+        }, this));
+	setMenuBar(mbar);
+   } 
 	public void mouseClicked(MouseEvent evt)
 	  {}
    	public void mouseEntered(MouseEvent evt)

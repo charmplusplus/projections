@@ -9,12 +9,7 @@ import projections.analysis.*;
 
 public class TimelineData
 {
-    // IF YOU MAKE A STUPID NAME FOR A VARIABLE AT LEAST COMMENT IT
-    // SHEESH!!!  --JMU
-    // what do these mean for God's sake ? -- sayantan
-    
     int vpw, vph;
-    // is this timeline width and height ?
     int tlw, tlh;
     int lcw;
     int ath, abh;
@@ -32,7 +27,6 @@ public class TimelineData
     String         oldpstring;
     
     // boolean for testing if entries are to be colored by Object ID
-    // **CW** 12/12/2003 Obsolete?
     public boolean colorbyObjectId;
     
 
@@ -123,9 +117,6 @@ public class TimelineData
 	float S = (float)1.0;
 	float B = (float)1.0;
 	float delta = (float)(1.0/Analysis.getNumUserEntries());
-	// **sharon** somehow getLogDirectory() returns null
-	//if (new File(Analysis.getLogDirectory() +
-	//	       File.separator + "color.map").exists()) {
 	if (new File("bin/color.map").exists()) {
 	    try {
 		Util.restoreColors(entryColor, "Timeline Graph", null);
@@ -133,18 +124,16 @@ public class TimelineData
 		System.err.println("unable to load color.map");
 	    } 
 	} else {
-	    for(int i=0; i<Analysis.getNumUserEntries(); i++)
-		{
-		    entries[i] = 0;
-		    entryColor[i] = Analysis.getEntryColor(i);
-		}   
+	    for (int i=0; i<Analysis.getNumUserEntries(); i++) {
+		entries[i] = 0;
+		entryColor[i] = Analysis.getEntryColor(i);
+	    }   
 	}
 	
     }   
     
     public void createTLOArray()
     {
-	//  System.out.println("createTLOArray() called in TimelineData \n");
 	TimelineObject[][] oldtloArray = tloArray;
 	UserEvent[][] oldUserEventsArray = userEventsArray;
 	oldmesgVector = mesgVector;
@@ -215,7 +204,8 @@ public class TimelineData
 			    tloArray[newpindex][n].setUsage();
 			    tloArray[newpindex][n].setPackUsage();
 			    for (int j=0;
-				 j<tloArray[newpindex][n].messages.length;j++) {
+				 j<tloArray[newpindex][n].messages.length;
+				 j++) {
 				mesgVector[newp].addElement((TimelineMessage)tloArray[newpindex][n].messages[j]);
 			    }
 			}
@@ -401,7 +391,10 @@ public class TimelineData
    }
 
 
-   public void drawConnectingLine(int pCreation,long creationtime,int pCurrent,long executiontime,TimelineObject objCurrent,int drawordelete){
+    public void drawConnectingLine(int pCreation,long creationtime,
+				   int pCurrent,long executiontime,
+				   TimelineObject objCurrent,
+				   int drawordelete) {
 	double yscale;
 	
 	int startpe_position,endpe_position;
@@ -411,7 +404,8 @@ public class TimelineData
 	double calc_xscale = (double )(pixelIncrement/timeIncrement);
 	long time = endTime-beginTime+1;
 	int mywidth=dim.width;
-	int maxx = offset + (int)((endTime-beginTime)*pixelIncrement/timeIncrement);
+	int maxx = offset + (int)((endTime-beginTime)*
+				  pixelIncrement/timeIncrement);
 	int h=objCurrent.h;
 	int startY=objCurrent.startY;
 	
@@ -421,107 +415,110 @@ public class TimelineData
 	int count =0;
 	TimelineLine line;
 	
-	if(drawordelete == 2){
-		int flag  = 0;
-		int i;
-		for (i=0;i<mesgCreateExecVector.size();i++){
-			line = (TimelineLine ) mesgCreateExecVector.elementAt(i);
-			if(line.pCurrent == pCurrent && line.executiontime == executiontime){
-				flag = 1;
-				break;
-			}
+	if (drawordelete == 2) {
+	    int flag  = 0;
+	    int i;
+	    for (i=0;i<mesgCreateExecVector.size();i++) {
+		line = (TimelineLine ) mesgCreateExecVector.elementAt(i);
+		if (line.pCurrent == pCurrent && 
+		    line.executiontime == executiontime) {
+		    flag = 1;
+		    break;
 		}
-		if(flag == 1){
-			mesgCreateExecVector.remove(i);
-		}
-		displayCanvas.repaint();
-		
-		return;
+	    }
+	    if (flag == 1) { 
+		mesgCreateExecVector.remove(i);
+	    }
+	    displayCanvas.repaint();
+	    
+	    return;
 	}
 	
-	for(int i =0;i < processorList.size();i++){
-		int pe = processorList.nextElement();
-		if(pe == pCreation)
-			startpe_position = count;
-		if(pe == pCurrent)
-			endpe_position = count;
-		count++;	
+	for (int i =0;i < processorList.size();i++) {
+	    int pe = processorList.nextElement();
+	    if (pe == pCreation) {
+		startpe_position = count;
+	    }
+	    if (pe == pCurrent) {
+		endpe_position = count;
+	    }
+	    count++;	
 	}
 	processorList.reset();
 	yscale = (double )dim.height/(double )(processorList.size());
 	
-	int x1 = (int )((double )(creationtime - beginTime)*calc_xscale+offset);
-	int x2 = (int )((double )(executiontime - beginTime)*calc_xscale+offset);
+	int x1 = (int)((double)(creationtime - beginTime)*
+		       calc_xscale+offset);
+	int x2 = (int)((double)(executiontime - beginTime)*
+		       calc_xscale+offset);
 	int y1 = (int )(yscale * (double )startpe_position + h+startY+5+5);
 	int y2 = (int )(yscale * (double )endpe_position + h);
 	
-
-	//g.setColor(new Color(100,1s,255));
-	//g.drawLine(x1,y1,x2,y2);
-	line = new TimelineLine(pCreation,pCurrent,objCurrent,creationtime,executiontime);
+	line = new TimelineLine(pCreation,pCurrent,objCurrent,
+				creationtime,executiontime);
 	mesgCreateExecVector.add(line);
 	displayCanvas.repaint();
-	//g.drawLine(offset,0,offset,tlh);
-	//g.drawLine(maxx,0,maxx,tlh);
-}
+    }
 
-
-   public void drawAllLines(){
+    public void drawAllLines(){
    	Graphics g = displayCanvas.getGraphics();
-   	if(!mesgCreateExecVector.isEmpty()){
-		 	g.setColor(Analysis.foreground);
+   	if (!mesgCreateExecVector.isEmpty()) {
+	    g.setColor(Analysis.foreground);
+	    
+	    Dimension dim = displayCanvas.getSize();
+	    double calc_xscale = (double )(pixelIncrement/timeIncrement);
+	    double yscale = (double )dim.height/
+		(double)(processorList.size());
 
-			Dimension dim = displayCanvas.getSize();
-			double calc_xscale = (double )(pixelIncrement/timeIncrement);
-			double yscale = (double )dim.height/(double )(processorList.size());
+	    for (int i=0;i<mesgCreateExecVector.size();i++) {
+		TimelineLine lineElement = 
+		    (TimelineLine)mesgCreateExecVector.elementAt(i);
+		int startpe_position=0;
+		int endpe_position=0;
+		processorList.reset();
+		for (int j=0;j<processorList.size();j++) {
+		    int pe = processorList.nextElement();
+		    if (pe == lineElement.pCreation) {
+			startpe_position = j;
+		    }
+		    if (pe == lineElement.pCurrent) {
+			endpe_position = j;
+		    }
+		}
+		int x1 = 
+		    (int)((double)(lineElement.creationtime - beginTime)*
+			  calc_xscale+offset);
+		int x2 = 
+		    (int)((double)(lineElement.executiontime - beginTime)*
+			  calc_xscale+offset);
+		int y1 = (int)(yscale * (double)startpe_position + 
+			       lineElement.obj.h+lineElement.obj.startY+5+5);
+		int y2 = (int)(yscale * (double)endpe_position +
+			       lineElement.obj.h);
+		g.drawLine(x1,y1,x2,y2);
+	    }
+	}
+    }
 
-
-			for(int i=0;i<mesgCreateExecVector.size();i++){
-				TimelineLine lineElement = (TimelineLine )mesgCreateExecVector.elementAt(i);
-				int startpe_position=0;
-				int endpe_position=0;
-				processorList.reset();
-				for(int j=0;j<processorList.size();j++){
-					int pe = processorList.nextElement();
-					if(pe == lineElement.pCreation)
-						startpe_position = j;
-					if(pe == lineElement.pCurrent)
-						endpe_position = j;
-				}
-				
-				int x1 = (int )((double )(lineElement.creationtime - beginTime)*calc_xscale+offset);
-				int x2 = (int )((double )(lineElement.executiontime - beginTime)*calc_xscale+offset);
-				int y1 = (int )(yscale * (double )startpe_position + lineElement.obj.h+lineElement.obj.startY+5+5);
-				int y2 = (int )(yscale * (double )endpe_position +lineElement.obj.h);
-				
-				g.drawLine(x1,y1,x2,y2);
+    public void clearAllLines() {
+	if (tloArray != null) {
+	    for (int i=0;i<tloArray.length;i++) {
+		if (tloArray[i] != null)
+		    for (int j=0;j<tloArray[i].length;j++) {
+			if (tloArray[i][j]!= null) {
+			    tloArray[i][j].clearCreationLine();
 			}
-	 }
+		    }
+	    }
+	}
+	mesgCreateExecVector.clear();
+    }
 
-   }
-
-	 public void clearAllLines() {
-	     if (tloArray != null) {
-		 for (int i=0;i<tloArray.length;i++) {
-		     if (tloArray[i] != null)
-			 for (int j=0;j<tloArray[i].length;j++) {
-			     if (tloArray[i][j]!= null) {
-				 tloArray[i][j].clearCreationLine();
-			     }
-			 }
-		 }
-	     }
-	     mesgCreateExecVector.clear();
-	 }
-
-
-	 public void addProcessor(int pCreation){
-	 	oldplist = processorList.copyOf();
-	 	processorList.insert(pCreation);
-		numPs = processorList.size();
-		timelineWindow.validPEs = processorList;
-		timelineWindow.procRangeDialog(false);
-	 }
+    public void addProcessor(int pCreation){
+	oldplist = processorList.copyOf();
+	processorList.insert(pCreation);
+	numPs = processorList.size();
+	timelineWindow.validPEs = processorList;
+	timelineWindow.procRangeDialog(false);
+    }
 }
-
-

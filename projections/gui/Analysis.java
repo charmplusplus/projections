@@ -85,11 +85,29 @@ public class Analysis {
     
     private static Color[] functionColors;
 
+    // *CW* Major hack - make functions and entry methods share the same 
+    // color set.
+    private static Color[] universalColors;
+
     /****************** Jump from Timeline to graphs ******/
     // Used for storing user defined startTime and endTime when jumping from
     // TimelineWindow to other graphs
     private static long jStartTime, jEndTime;
     private static boolean jTimeAvailable;
+
+    // **CW** Hack - potentially expensive.
+    private static void splitUniversalColors() {
+	int numEntries = sts.getEntryCount();
+	entryColors = new Color[numEntries];
+	for (int i=0; i<numEntries; i++) {
+	    entryColors[i] = universalColors[i];
+	}
+	int numFunc = sts.getNumFunctionEvents();
+	functionColors = new Color[numFunc];
+	for (int i=0; i<numFunc; i++) {
+	    functionColors[i] = universalColors[i+numEntries];
+	}
+    }
 
     /**
      *  initAnalysis can be considered as Analysis's "constructor".
@@ -116,7 +134,8 @@ public class Analysis {
 	    ColorSaver.setLocation(colorsaved);
 	    if ((new File(colorsaved)).exists()) {
 		try {
-		    entryColors = ColorSaver.loadColors();
+		    universalColors = ColorSaver.loadColors();
+		    splitUniversalColors();
 
 		    // ORTHOGONAL SYSTEM OF COLORS - FOR NOW
 		    // SPECIAL NOTE: This assumes the colors were
@@ -125,13 +144,20 @@ public class Analysis {
 		    //		    activityManager.setColors(entryColors);
 		} catch (IOException exception) {
 		    System.err.println("Failed to load colors!!!");
-		    entryColors = createColorMap(sts.getEntryCount());
+		    universalColors = 
+			createColorMap(sts.getEntryCount()+
+				       sts.getNumFunctionEvents());
+		    splitUniversalColors();
 		}
 	    } else {
 		// create default color maps for entry methods as well as user
 		// events.
-		entryColors = createColorMap(sts.getEntryCount());
-		functionColors = createColorMap(sts.getNumFunctionEvents());
+		// entryColors = createColorMap(sts.getEntryCount());
+		// functionColors = createColorMap(sts.getNumFunctionEvents());
+		universalColors = 
+		    createColorMap(sts.getEntryCount()+
+				   sts.getNumFunctionEvents());
+		splitUniversalColors();
 	    }
 	    grayColors = createGrayscaleColorMap(sts.getEntryCount());
 	    userEventColors = createColorMap(sts.getNumUserDefinedEvents());

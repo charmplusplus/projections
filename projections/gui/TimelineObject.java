@@ -87,7 +87,7 @@ public class TimelineObject extends Component
 	// be a general way of dealing with this.
 	if (isFunction) {
 	    int textIndex = 0;
-	    int textSize = 6+(tle.callStack.size()*2);
+	    int textSize = 7+(tle.callStack.size()*2);
 
 	    bubbletext = new String[textSize];
 	    bubbletext[textIndex++] = "Function: " +
@@ -96,6 +96,8 @@ public class TimelineObject extends Component
 		format_.format(beginTime);
 	    bubbletext[textIndex++] = "End Time: " +
 		format_.format(endTime);
+	    bubbletext[textIndex++] = "Total Time: " +
+		U.t(endTime-beginTime);
 	    bubbletext[textIndex++] = "Msgs created: " + msgs.length;
 	    bubbletext[textIndex++] = "Id: " + tid.id[0] + ":" + tid.id[1] + 
 		":" + tid.id[2];
@@ -492,6 +494,7 @@ public class TimelineObject extends Component
 	  }
 		 
 	  int pixelwidth = right-left+1;
+	  /*
 	  if (isFunction) {
 	      g.setColor(c);
 	      for (int x=0; x<w+h-2; x += 4) {
@@ -502,6 +505,10 @@ public class TimelineObject extends Component
 	      g.setColor(c);
 	      g.fillRect(left, startY, pixelwidth, h);
 	  }
+	  */
+
+	  g.setColor(c);
+	  g.fillRect(left, startY, pixelwidth, h);
 
 	  if(entry == -1)
 	  {

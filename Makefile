@@ -44,6 +44,7 @@ SRC=\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
     projections/gui/ColorWindowFrame.java\
+    projections/gui/CommWindow.java\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\
     projections/gui/EntryPointWindow.java\

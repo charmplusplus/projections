@@ -50,6 +50,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // Graphs
 		    false,  // Timelines
 		    false,  // Usage Profile
+			false,  // Communication Histogram
 		    false,  // Animations
 		    false,  // View Log Files
 		    false,  // Histograms
@@ -102,6 +103,7 @@ public class MainMenuManager extends MenuManager
 		"Graphs",
 		"Timelines",
 		"Usage Profile",
+		"Communication Histogram",
 		"Animations",
 		"View Log Files",
 		"Histograms",
@@ -141,6 +143,7 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("Timelines") ||
 		       arg.equals("Animations") ||
 		       arg.equals("Usage Profile") ||
+			   arg.equals("Communication Histogram") ||
 		       arg.equals("View Log Files") ||
 		       arg.equals("Overview") ||
 		       arg.equals("Performance Counters") ||

@@ -20,6 +20,7 @@ public class MainWindow extends JFrame
     private TimelineWindow       timelineWindow;
     private AnimationWindow      animationWindow;
     private ProfileWindow        profileWindow;
+    private CommWindow           commWindow;
     private HelpWindow           helpWindow;
     private LogFileViewerWindow  logFileViewerWindow;
     private HistogramWindow      histogramWindow;
@@ -114,6 +115,8 @@ public class MainWindow extends JFrame
 	    showAnimationWindow();
 	} else if (item.equals("Usage Profile")) {
 	    showChildWindow(profileWindow, "ProfileWindow");
+	} else if (item.equals("Communication Histogram")) {
+		showChildWindow(commWindow, "CommWindow");
 	} else if (item.equals("View Log Files")) {
 	    showChildWindow(logFileViewerWindow, "LogFileViewerWindow");
 	} else if (item.equals("Overview")) {

@@ -20,6 +20,14 @@ public class CommWindow extends GenericGraphWindow
 	private JPanel		checkBoxPanel;
 	private Checkbox	mssgs;
 	private Checkbox	bytes;
+
+    /**
+     *  **CW** STUPID mix of old and new ... will need to standardize soon.
+     *  ... if I ever get my butt to it
+     */
+    public CommWindow(MainWindow mainWindow) {
+	this();
+    }
 	
 	public CommWindow(){
 		super("Projections Communications");

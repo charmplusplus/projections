@@ -1,0 +1,103 @@
+Design document for generalized bar graph interface 
+
+Orion Sky Lawlor, olawlor@acm.org, 4/2/2002
+---------------------------------------------------
+The graph interface will be used by:
+
+-- "Graphs" portion of projections.
+
+Draw overlapped bars, in different colors.  May want
+to use lines instead of bars.
+
+X axis can represent time (i.e., interval number) or
+processor number.  The X axis bounds are known.
+
+Y axis can represent percent CPU utilization or
+a "count" (e.g., number of messages or length of queue).
+The Y axis bounds are not known-- they must be 
+determined from the data.
+
+Natural data representation is a 3D array, indexed by time
+interval, processor, and entry point.
+
+-- "Usage Profile" portion of projections.
+
+Draw stacked bars, in different colors.  Lines don't
+make much sense.
+
+X axis is always processors, but should also be
+able to display time.  The bounds are known.
+
+Y axis always represents percent CPU utilization.
+The bounds are known beforehand.
+
+Natural data representation is a 2D array, indexed by processor
+and then entry point, giving the percent CPU utilization of that
+entry point on that processor.
+
+-- Histogram portion, to be written.
+
+Draw a single set of bars, in a fixed color.  May
+want to use lines instead of bars.
+
+X axis could represent (binned) time/method invocation,
+number of messages sent, or cache hit ratio.  Bounds are
+always known beforehand.
+
+Y axis always represents a count.  The bounds are not known.
+
+Natural data representation is a 1D array of integers,
+mapping x axis bin to count.
+
+
+------------------------------------------------------------------
+Since the users are all different, these items must be generic,
+probably created using a special (callback) object:
+
+-X axis name, bounds, and interval description. The X axis
+is always discrete, although it may be rather coarse (4 divisions)
+or very fine (thousands of divisions).  X axis bounds are always
+known.
+
+-Y axis name and location description.  The Y axis may be continuous
+(CPU utilization) or discrete (queue length), although it's probably
+reasonable to always treat it as discrete.  The Y axis bounds may
+not be known.
+
+-Source of data: single, multiple, or stacked bar graph.  Need to 
+be able to specify color for each bar. May also want to be able 
+to create a popup window (display a string) or handle mouse clicks.
+
+
+------------------------------------------------------------------
+The basic features we need from "Graph" are:
+
+-Programmer interface:
+Create Graph object and add it to our layout:
+	Graph g=new Graph();
+	somePanel.add(g);
+
+Occasionally push in a new data source, x axis, and y axis:
+	DataSource d=new MyDataSource(...);
+	XAxis x=new MyXAxis(...);
+	YAxis y=new MyYAxis(...);
+	g.setData(d,x,y);
+The "setData" method should update the Graph's internal data
+structures (if any) and ask for a repaint.  "setData" is separate
+from the constructor so the displayed data can be updated without
+having to detach and delete the old Graph.
+
+
+-User interface:
+(First Version:)
+Draw coordinate axes.
+Draw single, multiple, or stacked bar graphs.
+
+(Add-ons:)
+Add ability to switch between bar and line graphs.
+Rotate X axis index names and Y axis title to fit better in available space.
+Add ability to zoom & scroll the X axis.  Y axis probably doesn't need this.
+Add ability to "hover" mouse over a bar and get a popup window with datasource.getPopup.
+Add ability to click on a bar and call datasource.mouseClicked.
+Support a print command: "Graph.print(Graphics g,int printWidth,int printHeight)"
+Add a basic graph window, to make simple clients lives much easier.

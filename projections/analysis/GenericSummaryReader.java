@@ -63,7 +63,9 @@ public class GenericSummaryReader
     private StreamTokenizer tokenizer;
     private int tokenType;
 
-    public GenericSummaryReader(String filename, double Nversion) {
+    public GenericSummaryReader(String filename, double Nversion) 
+	throws IOException
+    {
 	try {
 	    reader = new BufferedReader(new FileReader(filename));
 	    version = Nversion;
@@ -71,7 +73,7 @@ public class GenericSummaryReader
 	    reader.close();
 	    reader = null;
 	} catch (IOException e) {
-	    System.err.println("Error reading file " + filename);
+	    throw new IOException("Error reading file " + filename);
 	}
     }
 

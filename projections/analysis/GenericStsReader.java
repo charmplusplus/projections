@@ -35,7 +35,9 @@ public class GenericStsReader
     public EntryTypeData entryList[];
     public long msgSizeList[];
 
-    public GenericStsReader(String filename, double Nversion) {
+    public GenericStsReader(String filename, double Nversion) 
+	throws IOException
+    {
 	try {
 	    reader = new BufferedReader(new FileReader(filename));
 	    version = Nversion;
@@ -43,7 +45,7 @@ public class GenericStsReader
 	    reader.close();
 	    reader = null;
 	} catch (IOException e) {
-	    System.err.println("Error reading file " + filename);
+	    throw new IOException("Error reading file " + filename);
 	}
     }
 

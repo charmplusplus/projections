@@ -15,6 +15,7 @@ SRC=\
     projections/analysis/LogReader.java\
     projections/analysis/PackTime.java\
     projections/analysis/ProjDefs.java\
+    projections/analysis/RangeHistory.java\
     projections/analysis/Sorter.java\
     projections/analysis/StsReader.java\
     projections/analysis/SumAnalyzer.java\

@@ -1,5 +1,20 @@
 package projections.gui;
 
+// use this by:
+//
+// OrderedIntList list = new OrderedIntList();
+// list.insert(8);
+// list.insert(2);
+// list.insert(5);
+// 
+// int e;
+// list.reset();
+// while (e=nextElement()) != -1) { 
+//   System.out.println(e);
+// }
+// 
+// will print out: 2, 5, 8 on separate lines
+
 public class OrderedIntList
 {
    private Link head;

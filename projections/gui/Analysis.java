@@ -32,12 +32,6 @@ public class Analysis {
     public static final int FTYPE_SUMDETAIL = 1;
     public static final int FTYPE_LOG = 2;
     
-    // Version variable. Analysis will take the default version number
-    // via MainWindow (which is either hardcoded or runtime defined). 
-    // It can also subsequently be overriden by the actual data read 
-    // in the .sts file.
-    private static double version;
-    
     /******************* Initialization ************/
     private static StsReader sts;
     
@@ -304,7 +298,7 @@ public class Analysis {
 					 long endtime, OrderedIntList phases) {
 	if( sts.hasLogFiles()) { //.log files
 	    UsageCalc u=new UsageCalc();
-	    return u.usage(pnum, begintime, endtime,version );
+	    return u.usage(pnum, begintime, endtime, getVersion() );
 	} else /*The files are sum files*/ {
 	    int temp,numUserEntries=sts.getEntryCount();
 	    long[][] data;

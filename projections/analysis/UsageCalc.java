@@ -150,16 +150,16 @@ public class UsageCalc extends ProjDefs
 			intervalCalc(data,type, entry, (time));
 			break;
 		    case CREATION:
-			log.nextInt();
-			log.nextInt();
-			log.nextLong();
-			log.nextInt();
-			log.nextInt();
+			log.nextInt();  // mtype
+			log.nextInt();  // ep idx
+			log.nextLong(); // time stamp
+			log.nextInt();  // event id
+			log.nextInt();  // pe id
 			if (version > 1.0)
-			    log.nextInt();
+			    log.nextInt();  // msg length
 			if(version > 4.9) {
-			    sendTime = log.nextLong();
-			    //System.out.println("SendTime "+sendTime);
+			    sendTime = log.nextLong();  // send time
+			    // System.out.println("SendTime "+sendTime);
 			} else {
 			    sendTime = 0;
 			}

@@ -207,9 +207,9 @@ run: bin/projections.jar
 
 clean:
 	@ echo "** Removing temporary files"
-	- rm bin/*.jar
-	- rm projections/*/*.class
-	- rm projections/*/*/*.class
+	- rm -f bin/*.jar
+	- rm -f projections/*/*.class
+	- rm -f projections/*/*/*.class
 
 
 

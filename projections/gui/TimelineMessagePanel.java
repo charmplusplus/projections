@@ -59,9 +59,9 @@ public class TimelineMessagePanel extends JPanel {
 	    if (messages[row].destPEs != null) {
 		tableData[row][5] = "";
 		for (int i=0; i<messages[row].destPEs.length-1; i++) {
-		    tableData[row][5] += messages[row].destPEs[i] + ", ";
+		    tableData[row][5] = (String)tableData[row][5] + messages[row].destPEs[i] + ", ";
 		}
-		tableData[row][5] += 
+		tableData[row][5] = (String)tableData[row][5] + 
 		    messages[row].destPEs[messages[row].destPEs.length-1] + "";
 	    } else {
 		tableData[row][5] = "unknown";

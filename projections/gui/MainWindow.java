@@ -214,6 +214,7 @@ public class MainWindow extends Frame
    {
         int i=0;
 	String loadSts=null;
+	Analysis.setVersion(3.0);
         while (i < args.length) {
 	  if (args[i].equals("-h")) {
 	     help();

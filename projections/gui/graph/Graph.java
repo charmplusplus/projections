@@ -269,13 +269,24 @@ public class Graph extends Canvas implements MouseMotionListener
 	  double maxvalueY = yAxis.getMax();                              //max y Value 
 	  maxvalueY += (10 - maxvalueY%10);				  // adjust so that the max axis value is in the multiples of 10
 	  pixelincrementY = (double)(originY-30) / maxvalueY;
-	  pixelincrementY = (int)pixelincrementY;
+	 // pixelincrementY = (int)pixelincrementY;
 	  sw = fm.getHeight();
           int labelincrementY = (int)Math.ceil((sw + 20) / pixelincrementY);
-          labelincrementY = Util.getBestIncrement(labelincrementY);
+          labelincrementY = Util.getBestIncrement(labelincrementY);	// according to chee wai getBestIncrement is very inefficient
+									// same functionality could probably be incorporated in a simpler
+									// function
 
-          for(int i=0; i<=maxvalueY; i++)			      // drawing yAxis divisions
+	int subincrement = labelincrementY/10;
+	if (subincrement < 1) subincrement = 1;
+          //for(int i=0; i<=maxvalueY; i++)			      // drawing yAxis divisions
+          for(int i=0; i<=maxvalueY; i+=subincrement)			      // drawing yAxis divisions
           {
+// for each i from 0 to maxY (even if it is something like a million), we are checking for the cond below & displaying it
+// efficient of maxY is low (less than the height of the graph
+// erroneous behavior if maxY > height of the graph
+
+// rather than going thru each i (i=i+1) select a subincrement value and increment i by that value
+
                  cury = originY - (int)(i*pixelincrementY);
  
                  if(i % labelincrementY == 0)
@@ -308,7 +319,7 @@ public class Graph extends Canvas implements MouseMotionListener
            if(BarGraphType == STACKED)
 		for(int j=0; j<yValues; j++)
 		{
-			y = (int) (originY - (data[j]*pixelincrementY));
+			y = (int) (originY - (int)(data[j]*pixelincrementY));
 			for(int k=0; k<j;k++)			// stacked: so subtract all the previous y values
 				y -= (int)(data[k]*pixelincrementY);
 
@@ -355,7 +366,7 @@ public class Graph extends Canvas implements MouseMotionListener
 		for(int k=0; k<yValues; k++)
 		{
 			g.setColor(dataSource.getColor((int)temp[k][0]));
-			y = (int)(originY-(temp[k][1]*pixelincrementY));
+			y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
 			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(temp[k][1]*pixelincrementY));
 		}
 
@@ -366,7 +377,7 @@ public class Graph extends Canvas implements MouseMotionListener
 		for(int j=0; j<yValues; j++)
 			sum += data[j];
 		sum /= yValues;
-		y = (int) (originY - (sum*pixelincrementY));
+		y = (int) (originY - (int)(sum*pixelincrementY));
 		g.fillRect(x1-(barWidth/2),y,barWidth,(int)(sum*pixelincrementY));
 	   }
 	}
@@ -392,7 +403,7 @@ public class Graph extends Canvas implements MouseMotionListener
 	   for(int j=0; j<yValues; j++) 
 	   {	
 		g.setColor(dataSource.getColor(j));
-		y2[j] = (int) (originY - (data[j]*pixelincrementY));
+		y2[j] = (int) (originY - (int)(data[j]*pixelincrementY));
 		if(x1 != -1)	//is there any other condition that needs to be checked?
 			g.drawLine(x1,y1[j],x2,y2[j]);
 		y1[j] = y2[j];		
@@ -408,7 +419,7 @@ public class Graph extends Canvas implements MouseMotionListener
    public static void main(String [] args){
 	Frame f = new Frame();
 	Panel mainPanel = new Panel();
-	double data[][]={{20,21,49,3},{25,34,8,10},{23,20,54,3},{20,27,4,40},{25,21,7,4},{20,21,8,10},{24,26,44,4},{22,26,20,5},{29,29,5,20},{20,21,8,7},{24,20,10,3},{21,25,6,8},{34,23,11,11},{20,20,20,20},{27,25,4,5},{21,20,5,7},{21,24,5,8},{26,22,5,3},{26,29,7,10},{29,20,8,6},{21,24,9,4}};
+	double data[][]={{2000,21,49,3},{25,34,8,10},{23,20,54,3},{20,27,4,40},{25,21,7,4},{20,21,8,10},{24,26,44,4},{22,26,20,5},{29,29,5,20},{20,21,8,7},{24,20,10,3},{21,25,6,8},{34,23,11,11},{20,20,20,20},{27,25,4,5},{21,20,5,7},{21,24,5,8},{26,22,5,3},{26,29,7,10},{29,20,8,6},{21,24,9,4}};
 
 	f.addWindowListener(new WindowAdapter()
           {

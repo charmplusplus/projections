@@ -6,6 +6,8 @@ import java.awt.*;
 
 public class TimelineData
 {
+  // IF YOU MAKE A STUPID NAME FOR A VARIABLE AT LEAST COMMENT IT
+  // SHEESH!!!  --JMU
    int vpw, vph;
    int tlw, tlh;
    int lcw;
@@ -279,3 +281,5 @@ public class TimelineData
 	  return tlo;
    }   
 }
+
+

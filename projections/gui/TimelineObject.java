@@ -163,15 +163,23 @@ public class TimelineObject extends Component
    }   
    public void mouseClicked(MouseEvent evt)
    {
-	  if(entry >= 0)
+     if(entry >= 0 && (evt.getModifiers()&InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) // is left mouse button pressed?
 		 OpenMessageWindow();
    }   
    public void mouseEntered(MouseEvent evt)
    {
+   }   
+   public void mouseExited(MouseEvent evt)
+   {
+   }   
+   public void mousePressed(MouseEvent evt)
+   {
 	  if(entry == -1 && data.showIdle == false)
 		 return;
 
-	  if(!inside)
+	  if(!inside && 
+	     (evt.getModifiers()&InputEvent.BUTTON3_MASK)==  // is right mouse pressed?
+	     InputEvent.BUTTON3_MASK)
 	  {
 		 inside = true;
 		 TimelineObject to = TimelineObject.this;
@@ -180,12 +188,11 @@ public class TimelineObject extends Component
 	  
 		 if(bubble == null)
 			bubble = new Bubble(this, bubbletext);
-	  
 		 bubble.setLocation(scrnloc.x + evt.getX(), scrnloc.y + size.height + 2);
 		 bubble.setVisible(true);
 	  }     
    }   
-   public void mouseExited(MouseEvent evt)
+   public void mouseReleased(MouseEvent evt)
    {
 	  if(inside)
 	  {
@@ -197,10 +204,6 @@ public class TimelineObject extends Component
 		 inside = false;
 	  }      
    }   
-   public void mousePressed(MouseEvent evt)
-   {}   
-   public void mouseReleased(MouseEvent evt)
-   {}   
    private void OpenMessageWindow()
    {
 	  if(msgwindow == null)
@@ -270,7 +273,6 @@ public class TimelineObject extends Component
 		 if(right == w-1)
 			g.drawLine(w-1, 0, w-1, h-1);
 	  }
-	  
 	  
 	  double scale= pixelwidth /((double)(viewet - viewbt + 1)); 
 

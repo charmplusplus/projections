@@ -31,13 +31,54 @@ public class TimelineWindow extends Frame
    
    private TimelineMessageWindow messageWindow;
    
-   class NoUpdatePanel extends Panel
-   {
-	  public void update(Graphics g)
-	  {
-		 paint(g);
-	  }
-   }      
+   private AxisMouseController mouseController;
+
+  private class AxisMouseController {
+    public MouseAdapter mouseAdapter = null;
+    public MouseMotionAdapter mouseMotionAdapter = null;
+    public TimelineDisplayCanvas canvas_;
+    public TimelineAxisCanvas timeline_;
+    AxisMouseController(TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) {
+      canvas_ = canvas;
+      timeline_ = timeline;
+      mouseAdapter = new MouseAdapter() {
+	public void mousePressed(MouseEvent e) {
+	  canvas_.rubberBand.anchor(timeline_.screenToCanvas(e.getPoint()));
+	  canvas_.repaint();
+	}
+	public void mouseReleased(MouseEvent e) {
+	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
+	  canvas_.rubberBand.end(timeline_.screenToCanvas(e.getPoint()));
+	  canvas_.repaint();
+	  Rectangle rect = canvas_.rubberBand.bounds();
+	  double startTime = timeline_.canvasToTime(rect.x);
+	  double endTime = timeline_.canvasToTime(rect.x+rect.width);
+	  data.scale = 
+	    (float) ((data.endTime-data.beginTime)/(endTime-startTime));
+	  scaleField.setText("" + data.scale);
+	  setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	  setAllSizes();
+	  displayCanvas.makeNewImage();
+	  axisTopCanvas.makeNewImage();
+	  axisBotCanvas.makeNewImage();
+	  HSB.setValue(timeline_.calcHSBOffset(startTime));
+	  displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+	  setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	}
+      };
+      mouseMotionAdapter = new MouseMotionAdapter() {
+	public void mouseDragged(MouseEvent e) {
+	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
+	  canvas_.repaint();
+	}
+      };
+    }
+  };
+
+  class NoUpdatePanel extends Panel
+  {
+    public void update(Graphics g) { paint(g); }
+  }      
    public TimelineWindow(MainWindow mainWindow)
    {
 	  this.mainWindow = mainWindow;
@@ -78,78 +119,86 @@ public class TimelineWindow extends Frame
 	  
 	  ShowRangeDialog();
    }   
+
+  private double calcLeftTime(
+    double leftTime, double rightTime, double oldScale, double newScale) 
+  {
+    double timeShowing = (rightTime-leftTime)*oldScale/newScale;
+    double timeDiff = Math.abs((rightTime-leftTime)-timeShowing);
+    if (oldScale > newScale) { return leftTime - timeDiff/2; }
+    else { return leftTime + timeDiff/2; }
+  }
+
    public void actionPerformed(ActionEvent evt)
    {
-	  if(evt.getSource() instanceof Button)
-	  {
-		 Button b = (Button)evt.getSource();
-		 
-		 if(b == bSelectRange)
-		 {
-			ShowRangeDialog();
-		 }
-		 else if(b == bColors)
-		 {
-			ShowColorWindow();
-		 }
-		 else      
-		 {
-			if(b == bDecrease)
-			{
-			   data.scale = (float)((int)(data.scale * 4)-1)/4;
-			   if(data.scale < 1.0)
-				  data.scale = (float)1.0;
-			}
-			else if(b == bIncrease)
-			{
-			   data.scale = (float)((int)(data.scale * 4)+1)/4;
-			}
-			else if(b == bReset)
-			{
-			   data.scale = (float)1.0;
-			}
-			
-			scaleField.setText("" + data.scale);
+     if (evt.getSource() instanceof Button) {
+       Button b = (Button)evt.getSource();
+       if(b == bSelectRange) { ShowRangeDialog(); }
+       else if(b == bColors) { ShowColorWindow(); }
+       else {
+	 int leftVal = HSB.getValue();
+	 int rightVal = leftVal + data.vpw;
+	 double leftTime = axisBotCanvas.canvasToTime(leftVal);
+	 double rightTime = axisBotCanvas.canvasToTime(rightVal);
+	 double oldScale = data.scale;
 
-			setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			setTLSizes();
-			setScales();
-			setTLBounds();
-
-			displayCanvas.makeNewImage();
-			axisTopCanvas.makeNewImage();
-			axisBotCanvas.makeNewImage();
-			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		 }   
-	  }
-	  else if(evt.getSource() instanceof MenuItem)
-	  {
-		 String arg = ((MenuItem)evt.getSource()).getLabel();
-		 if(arg.equals("Close"))
-			Close();
-		 else if(arg.equals("Modify Ranges"))
-			ShowRangeDialog();
-		 else if(arg.equals("Print Timeline"))
-			PrintTimeline();   
-		 else if(arg.equals("Index"))
-			mainWindow.ShowHelpWindow();
-		 else if(arg.equals("About"))
-			mainWindow.ShowAboutDialog((Frame) this);       
-	  }
-	  else
-	  {
-		 data.scale = scaleField.getValue();
-		 
-		 setCursor(new Cursor(Cursor.WAIT_CURSOR));
-		 setTLSizes();
-		 setScales();
-		 setTLBounds();
-		 
-		 displayCanvas.makeNewImage();
-		 axisTopCanvas.makeNewImage();
-		 axisBotCanvas.makeNewImage();
-		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	  }                  
+	 if (b == bDecrease) {
+	   data.scale = (float)((int)(data.scale * 4)-1)/4;
+	   if (data.scale < 1.0) { data.scale = (float)1.0; }
+	 }
+	 else if (b == bIncrease) {
+	   data.scale = (float)((int)(data.scale * 4)+1)/4;
+	 }
+	 else if (b == bReset) { data.scale = (float)1.0; }
+	 scaleField.setText("" + data.scale);
+	 double newLeftTime = 
+	   calcLeftTime(leftTime, rightTime, oldScale, data.scale);
+	 
+	 setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	 // setTLSizes();
+	 // setScales();
+	 // setTLBounds();
+	 setAllSizes();
+	 displayCanvas.makeNewImage();
+	 axisTopCanvas.makeNewImage();
+	 axisBotCanvas.makeNewImage();
+	 if (data.scale != 1.0) {
+	   HSB.setValue(axisBotCanvas.calcHSBOffset(newLeftTime));
+	   displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+	 }
+	 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+       }   
+     }
+     else if(evt.getSource() instanceof MenuItem) {
+       String arg = ((MenuItem)evt.getSource()).getLabel();
+       if(arg.equals("Close")) Close();
+       else if(arg.equals("Modify Ranges")) ShowRangeDialog();
+       else if(arg.equals("Print Timeline")) PrintTimeline();   
+       else if(arg.equals("Index")) mainWindow.ShowHelpWindow();
+       else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
+     }
+     else {
+       int leftVal = HSB.getValue();
+       int rightVal = leftVal + data.vpw;
+       double leftTime = axisBotCanvas.canvasToTime(leftVal);
+       double rightTime = axisBotCanvas.canvasToTime(rightVal);
+       double oldScale = data.scale;
+       data.scale = scaleField.getValue();
+       if (data.scale < 1.0) { data.scale = (float)1.0; }
+       double newLeftTime = 
+	 calcLeftTime(leftTime, rightTime, oldScale, data.scale);
+	 
+       setCursor(new Cursor(Cursor.WAIT_CURSOR));
+       setAllSizes();
+       displayCanvas.makeNewImage();
+       axisTopCanvas.makeNewImage();
+       axisBotCanvas.makeNewImage();
+       if (data.scale != 1.0) {
+	 HSB.setValue(axisBotCanvas.calcHSBOffset(newLeftTime));
+	 displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+       }
+       setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+     }                  
    }   
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {
@@ -186,6 +235,7 @@ public class TimelineWindow extends Frame
 	  rangeDialog.dispose();
 	  rangeDialog = null;
 
+	  setSize(640,480);
 	  if(data.beginTime != data.oldBT || data.endTime != data.oldET 
 		 || (data.processorList != null && !data.processorList.equals(data.oldplist)))
 	  {
@@ -209,6 +259,7 @@ public class TimelineWindow extends Frame
 		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	  }   
    }   
+  
    private void CreateLayout()
    {
 	  //// MAIN PANEL
@@ -221,6 +272,15 @@ public class TimelineWindow extends Frame
 	  axisBotCanvas = new TimelineAxisCanvas(data, "bot");
 	  displayCanvas = new TimelineDisplayCanvas(data); 
 	  data.displayCanvas = displayCanvas;   
+	  
+	  mouseController = new AxisMouseController(displayCanvas, axisTopCanvas);
+
+	  axisTopCanvas.addMouseListener(mouseController.mouseAdapter);
+	  axisTopCanvas.addMouseMotionListener(
+	    mouseController.mouseMotionAdapter);
+	  axisBotCanvas.addMouseListener(mouseController.mouseAdapter);
+	  axisBotCanvas.addMouseMotionListener(
+	    mouseController.mouseMotionAdapter);
 	  
 	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
 	  VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
@@ -791,6 +851,8 @@ public class TimelineWindow extends Frame
    }   
    public void setScales()
    {
+     // ignoring the calculated value because the disaply canvas somehow 
+     // doesn't correspond.
 	  int hsbval = HSB.getValue();
 	  int vsbval = VSB.getValue();
 	  
@@ -822,7 +884,8 @@ public class TimelineWindow extends Frame
 		 data.labelIncrement = (int)Math.ceil(maxLabelLen/data.pixelIncrement); 
 		 data.labelIncrement = Util.getBestIncrement(data.labelIncrement); 
 	  }
-	  int newhsb = (int)(minx * data.pixelIncrement / data.timeIncrement) + data.offset;
+	  int newhsb = data.scale == 1.0 ? 0 : hsbval;
+	  // (int)(minx * data.pixelIncrement / data.timeIncrement) + data.offset;
 	  HSB.setValue(newhsb);
 	  VSB.setValue(vsbval);
    }   

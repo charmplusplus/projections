@@ -243,7 +243,7 @@ public class MainWindow extends Frame
 	f.setTitle("Projections");
 	f.setResizable(false);
 	f.setVisible(true);
-	if (loadSts!=null) f.openFile(loadSts);
+	if (loadSts!=null) { f.openFile(loadSts); f.ShowTimelineWindow(); }
    }   
    public void paint(Graphics g)
    {

@@ -70,3 +70,4 @@ public class TimelineLabelCanvas extends Canvas
 	  paint(g);
    }   
 }
+

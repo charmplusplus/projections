@@ -1,12 +1,14 @@
 package projections.gui;
 
 import java.awt.*;
+import java.awt.event.*;
 
-public class TimelineDisplayCanvas extends Container
+public class TimelineDisplayCanvas extends Container 
 {
    private TimelineData data;
    private Image offscreen;
-   
+   public Rubberband rubberBand = null;
+
    public TimelineDisplayCanvas(TimelineData data)
    {
 	  this.data = data;
@@ -15,6 +17,7 @@ public class TimelineDisplayCanvas extends Container
    //Make sure we aren't made too tiny
    public Dimension getMinimumSize() {return new Dimension(150,100);}   
    public Dimension getPreferredSize() {return new Dimension(550,400);}   
+  
    public void makeNewImage()
    {
 	  if(data.tlh > 0 && data.tlw > 0)
@@ -22,6 +25,7 @@ public class TimelineDisplayCanvas extends Container
 		 try
 		 {
 			offscreen = createImage(data.tlw, data.tlh);
+			rubberBand = new RubberbandHorizontalZoom(offscreen);
 		 }
 		 catch(OutOfMemoryError e)
 		 {
@@ -58,10 +62,10 @@ public class TimelineDisplayCanvas extends Container
 								x,y, x + data.vpw, y + data.vph, null);
 	  }                          
    }   
-   public void update(Graphics g)
-   {
-	  paint(g);
-   }   
+  public void update(Graphics g)
+  {
+     paint(g);
+  }   
    public void updateColors()
    {
 	  if(offscreen != null)
@@ -72,4 +76,5 @@ public class TimelineDisplayCanvas extends Container
 		 repaint();
 	  }   
    }   
+  
 }

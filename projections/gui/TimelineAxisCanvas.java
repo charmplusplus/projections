@@ -1,6 +1,7 @@
 package projections.gui;
 
 import java.awt.*;
+import java.awt.event.*;
 
 public class TimelineAxisCanvas extends Canvas
 {
@@ -9,14 +10,48 @@ public class TimelineAxisCanvas extends Canvas
    private String type;
    private FontMetrics fm;
    private Image offscreen;
+   private Component component_;
+   private long beginCoord_;
+   private long endCoord_;
    
    public TimelineAxisCanvas(TimelineData data, String type)
    {
 	  this.data = data;
 	  this.type = type;
+	  component_ = this;
 	  setBackground(Color.black);
 	  setForeground(Color.white);
+	  this.addMouseListener(new MouseAdapter() {
+	      public void mouseEntered(MouseEvent e) {
+		component_.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+	      }
+	      public void mouseExited(MouseEvent e) {
+		component_.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	      }
+	  });
    }   
+  // given a coordinate in coordinates from beginning of TimelineAxisCanvas, 
+  // return the time in us
+  public double canvasToTime(int x) {
+    return (x-beginCoord_)/(double)(endCoord_-beginCoord_)*(data.endTime-data.beginTime)+data.beginTime;
+  }
+  // given a coordinte in screen coords, return coodinate in scaled axis
+  public Point screenToCanvas(Point p) {
+    int x = p.x;
+    int startX = data.timelineWindow.getHSBValue();
+    int newX = startX+x;
+    p.x = newX;
+    return p;
+  }
+  // return the int value of the HSB to make the image start at the requested
+  // time
+  public int calcHSBOffset(double startTime) {
+    double percentOffset = 
+      (startTime-data.beginTime)/(data.endTime-data.beginTime);
+    double actualOffset = percentOffset*(endCoord_-beginCoord_);
+    return (int)(actualOffset + beginCoord_ + 0.5);
+  }
+
    public void makeNewImage()
    {
 	  offscreen = null;
@@ -57,7 +92,9 @@ public class TimelineAxisCanvas extends Canvas
 			int maxx = data.offset + (int)((data.endTime-data.beginTime)*data.pixelIncrement/data.timeIncrement);
 			og.setColor(getForeground());
 			og.drawLine(data.offset, axispos, maxx, axispos);
-		 
+			beginCoord_ = data.offset;
+			endCoord_ = maxx;
+	  
 			int curx;
 			String tmp;
 			for(int x=0; x<data.numIntervals; x++)
@@ -88,9 +125,8 @@ public class TimelineAxisCanvas extends Canvas
 	  if(offscreen != null)
 	  {
 		 int x = data.timelineWindow.getHSBValue();
-	  
-		 g.drawImage(offscreen, 0,0,     data.vpw, data.ath, 
-								x,0, x + data.vpw, data.ath, null);
+		 g.drawImage(offscreen, 0, 0, data.vpw, data.ath, 
+			     x, 0, x + data.vpw, data.ath, null);
 	  }                       
    }   
    public void update(Graphics g)

@@ -358,6 +358,15 @@ public class TimelineObject extends Component
     public TimelineMessage searchMesg(Vector v,int eventid){
 	// the binary search should deal with indices and not absolute
 	// values, hence size-1.
+	//
+	// if eventid = -1, the event has no source. Link to the end of
+	// the last event. (No spontaneous event creation is allowed in
+	// charm++) **CW** VERIFY THIS!
+	if (eventid == -1) {
+	    // still trying to find a way to make everything work together
+	    // while linking to the previous event.
+	    return null;  
+	}
 	return binarySearch(v,eventid,0,v.size()-1);
     }
     

@@ -231,6 +231,7 @@ public class LogLoader extends ProjDefs
 			TE.isFunction = true;
 			TE.BeginTime = LE.Time-BeginTime;
 			TE.EntryPoint = LE.FunctionID;
+			TE.EventID = -1; // no source.
 			TE.id = enclosingDummy.id;
 			cstack.push(LE.ampiData, TE.id.id[0], 
 				    TE.id.id[1], TE.id.id[2]);
@@ -265,7 +266,7 @@ public class LogLoader extends ProjDefs
 						   enclosingDummy.MsgLen, 
 						   enclosingDummy.recvTime, 
 						   enclosingDummy.id,
-						   enclosingDummy.EventID,
+						   -1, // EventID no source.
 						   enclosingDummy.cpuBegin, 
 						   enclosingDummy.cpuEnd,
 						   enclosingDummy.numPapiCounts,
@@ -277,6 +278,7 @@ public class LogLoader extends ProjDefs
 			    TE.isFunction = true;
 			    TE.BeginTime = LE.Time-BeginTime;
 			    TE.EntryPoint = ampiData.FunctionID;
+			    TE.EventID = -1; // no source.
 			    TE.id = tid;
 			    TE.callStack =
 				cstack.getStack(TE.id.id[0], TE.id.id[1],

@@ -5,6 +5,7 @@
 
 SRC=\
     projections/analysis/AsciiIntegerReader.java\
+    projections/analysis/BGSummaryReader.java\
     projections/analysis/Chare.java\
     projections/analysis/Entry.java\
     projections/analysis/EPNamdDefs.java\
@@ -33,12 +34,11 @@ SRC=\
     projections/gui/AnimationColorBarPanel.java\
     projections/gui/AnimationDisplayPanel.java\
     projections/gui/AnimationWindow.java\
+    projections/gui/BGGraphWindow.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
-# No longer needed.
-#    projections/gui/ColorSelectWindow.java\
     projections/gui/ColorWindowFrame.java\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\

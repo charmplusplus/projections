@@ -57,11 +57,11 @@ public abstract class GenericGraphWindow
 // create a standard layout which can be called from child class or overridden by it
 // returns a Main Panel with vertical box layout and graphPanel attached
    protected JPanel getMainPanel(){
-	JPanel mainPanel = new JPanel();
+        JPanel mainPanel = new JPanel();
 	graphCanvas = new Graph();
         graphPanel = new GraphPanel(graphCanvas);
         mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
-        mainPanel.add(graphPanel);
+	mainPanel.add(graphPanel);
 	return mainPanel;
    }
 

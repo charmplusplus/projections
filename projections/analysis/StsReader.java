@@ -14,10 +14,10 @@ import projections.gui.Analysis;
 
 public class StsReader extends ProjDefs
 {
-	private String baseName, sumBaseName;
-	private boolean hasSum, hasLog;
+	private String baseName, sumBaseName, bgSumName;
+	private boolean hasSum, hasLog, hasBGSum;
 	
-	private long totalTime;
+	private long totalTime=0;
 	private int NumPe;
 	private int EntryCount;
 	private String  EntryNames[][];
@@ -70,6 +70,9 @@ public class StsReader extends ProjDefs
 
 		// "if user selected a summary sts file ..."
 		hasSum=(new File(getSumName(0))).isFile();
+		bgSumName=getBgSumName();
+		hasBGSum = (bgSumName != null);
+
 		// "No summary?!? Maybe user selected a normal sts file ..."
 		if (!hasSum) {
 		    sumBaseName = baseName;
@@ -241,8 +244,11 @@ public class StsReader extends ProjDefs
    public long getTotalTime() {return totalTime;}   
    public boolean hasLogFiles() {return hasLog;}   
    public boolean hasSumFiles() {return hasSum;}   
-   public void setTotalTime(long t) {totalTime=t;}   
-
+    public boolean hasBGSumFile() {return hasBGSum;}
+   public void setTotalTime(long t) {
+       totalTime=t;
+   }   
+    public String getBGSumName() {return bgSumName;}
 
     // assume .sts
     private String getBaseName(String filename) {
@@ -252,5 +258,15 @@ public class StsReader extends ProjDefs
     // assume .sum.sts
     private String getSumBaseName(String filename) {
 	return filename.substring(0, filename.length()-8); 
+    }
+
+    private String getBgSumName() {
+	if ((new File(sumBaseName + ".sum")).isFile()) {
+	    return sumBaseName + ".sum";
+	} else if ((new File(baseName + ".sum")).isFile()) {
+	    return baseName + ".sum";
+	} else {
+	    return null;
+	}
     }
 }

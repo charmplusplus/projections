@@ -2,6 +2,8 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
+
 import java.text.*;
 
 public class TimelineWindow extends Frame
@@ -269,6 +271,7 @@ public class TimelineWindow extends Frame
        else if(arg.equals("Print Timeline")) PrintTimeline();   
        else if(arg.equals("Index")) mainWindow.ShowHelpWindow();
        else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
+       else if(arg.equals("Save Colors")) ShowSaveColorDialog((Frame)this);
      }
      else {
        int leftVal = HSB.getValue();
@@ -527,7 +530,8 @@ public class TimelineWindow extends Frame
 	  mbar.add(Util.makeMenu("Tools", new Object[]
 	  {
 		 "Modify Ranges",
-		 "Change Colors"
+		 "Change Colors",
+		 "Save Colors"
 	  },
 	  this));
 	  
@@ -1074,6 +1078,19 @@ public class TimelineWindow extends Frame
 		 colorWindow = new TimelineColorWindow(this,data);
 	  colorWindow.setVisible(true);
    }   
+    private void ShowSaveColorDialog(Frame parent)
+    {
+	int numEntries = data.getNumUserEvents();
+
+	// display file chooser dialog
+	JFileChooser fileChooser = new JFileChooser();
+	fileChooser.showSaveDialog(this);
+
+	for (int entry=0; entry<numEntries; entry++) {
+	    
+	}
+    }
+
    private void ShowRangeDialog()
    {
 	  data.oldBT = data.beginTime;

@@ -22,11 +22,13 @@ public class Analysis {
 	private static LogLoader logLoader;  //Only for .log files
 	
 	private static SumAnalyzer sumAnalyzer; //Only for .sum files
+    private static BGSummaryReader bgSumReader; // Only for basename.sum files
 	
 	/******************* Graphs ***************/
 	private static int[][][] systemUsageData;
 	private static int[][][][] systemMsgsData;
 	private static int[][][][] userEntryData;
+    private static int[] bgData;
 	
     /*****************Color Maps 6/27/2002 *************/
     private static Color[] entryColors;
@@ -278,6 +280,24 @@ public class Analysis {
 		status("initAnalysis("+filename+"):");
 		sts=new StsReader(filename);
 		
+		if (sts.hasBGSumFile()) {
+		    try {
+			System.out.println("Has unified summary file." +
+					   sts.getBGSumName());
+			bgSumReader = new BGSummaryReader(sts.getBGSumName(),
+							  4.0);
+			System.out.println("intervals = " + bgSumReader.numIntervals);
+			System.out.println("size = " + bgSumReader.intervalSize);
+
+			sts.setTotalTime((long)(bgSumReader.numIntervals*
+						bgSumReader.intervalSize*
+						1.0e6));
+			bgData = bgSumReader.processorUtil;
+		    } catch (Exception e) {
+			System.err.println("Exception caught while reading " +
+					   "unified summary file.");
+		    }
+		}
 		if( sts.hasSumFiles() ) { //.sum files
 			try {
 				sumAnalyzer = new SumAnalyzer( sts );
@@ -307,6 +327,13 @@ public class Analysis {
     }
     return colors;
   }
+
+    public static int[] getBGData() {
+	for (int i=0; i<bgData.length; i++) {
+	    System.out.println(bgData[i]);
+	}
+	return bgData;
+    }
 
         /**
            replace LoadGraphData(), with one more parameter containing
@@ -360,4 +387,8 @@ public class Analysis {
 		//System.out.println("gui.Analysis> "+msg);
 	}
 
+    // this is a hack, people should not use this
+    public static long getIntervalSize() {
+	return (long)(bgSumReader.intervalSize*1.0e6);
+    }
 }

@@ -25,10 +25,11 @@ public class MainWindow extends Frame
    private IntervalWindow 	intervalWindow;
    private EPCharWindow 	epCharWindow;
 
+    private BGGraphWindow       bgWindow;
     private EPAnalysis           epAnalysis;
 
    private AboutDialog          aboutDialog;
-
+    
    private MainTitlePanel       titlePanel;
    private MainButtonPanel      buttonPanel;
    private boolean toolsEnabled = false;
@@ -92,6 +93,8 @@ public class MainWindow extends Frame
 		 {
 			if(arg.equals("Graphs"))
 			   showChildWindow(graphWindow,"GraphWindow");
+			if(arg.equals("Unified Summary Graph"))
+			   showChildWindow(bgWindow,"BGGraphWindow");
 			else if(arg.equals("Timelines"))
 			   showChildWindow(timelineWindow,"TimelineWindow");
 			else if(arg.equals("Animations"))
@@ -176,6 +179,7 @@ public class MainWindow extends Frame
 
 	  mbar.add(Util.makeMenu("Tools", new Object[]
 	  {
+	      "Unified Summary Graph",
 	         "Multirun Analysis",
 		 "Generate EP Data",
 		 "Graphs",

@@ -1,14 +1,13 @@
 package projections.gui;
-
-import projections.gui.*;
-
-import java.awt.*;
+import java.awt.event.*;
 import javax.swing.*;
 
 /**
  *  ProjectionsWindow
  *  written by Chee Wai Lee
  *  6/28/2002
+ *  changed by Sindhura Bandhakavi
+ *  8/1/2002
  *
  *  This class should be inherited by all projections tools that present
  *  some kind of main window and show a dialog box requiring the user to
@@ -23,18 +22,38 @@ import javax.swing.*;
  *  corresponding dialog (which should be a subclass of RangeDialog).
  *
  */
-// changed the ProjectionsWindow to extend JFrame instead of Frame - Sindhura
+
 public abstract class ProjectionsWindow 
     extends JFrame
 {
-    RangeDialog dialog;
-    boolean isDialogCancelled = true;
-
+    protected RangeDialog dialog;
+    protected boolean isDialogCancelled = true;
     abstract void showDialog();
-    void dialogCancelled(boolean state){ isDialogCancelled = state;}
 
-    public abstract void setProcessorRange(OrderedIntList validPEs);
-    public abstract void setStartTime(long time);
-    public abstract void setEndTime(long time);
+// variables to be set by RangeDialog
+    protected OrderedIntList validPEs;
+    protected long startTime;
+    protected long endTime;
+
+// functions for RangeDialog to work
+    protected void dialogCancelled(boolean state)         { isDialogCancelled = state;}
+    protected void setProcessorRange(OrderedIntList proc) { validPEs = proc; }
+    protected void setStartTime(long time)                { startTime = time; }
+    protected void setEndTime(long time)                  { endTime = time; }
+
+// constructor 
+    public ProjectionsWindow(){
+  	  addWindowListener(new WindowAdapter(){
+                 public void windowClosing(WindowEvent e){
+			  close();
+                 }
+          });
+    }
+
+// close the window	
+    public void close(){
+		dispose();
+    }
+
 }
 

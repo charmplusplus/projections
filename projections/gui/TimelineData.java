@@ -174,26 +174,28 @@ public class TimelineData
 			     }
 
 			     // copy user events from larger array into smaller array
-			     oldNumItems = oldUserEventsArray[oldpindex].length;
-			     newNumItems = 0;
-			     startIndex = 0;
-			     endIndex = oldNumItems -1;
-			     
-			     // calculate which part of the old array to copy
-			     for (n=0; n<oldNumItems; n++) {
-			       if (oldUserEventsArray[oldpindex][n].EndTime < beginTime) { startIndex++; }
-			       else { break; }
-			     }
-			     for (n=oldNumItems-1; n>=0; n--) {
-			       if (oldUserEventsArray[oldpindex][n].BeginTime > endTime) { endIndex--; }
-			       else { break; }
-			     }
-			     newNumItems = endIndex - startIndex + 1;
-
-			     // copy the array
-			     userEventsArray[newpindex] = new UserEvent[newNumItems];
-			     for (n=0; n<newNumItems; n++) {
-			       userEventsArray[newpindex][n] = oldUserEventsArray[oldpindex][startIndex+n];
+			     if (oldUserEventsArray != null && oldUserEventsArray[oldpindex] != null) {
+			       oldNumItems = oldUserEventsArray[oldpindex].length;
+			       newNumItems = 0;
+			       startIndex = 0;
+			       endIndex = oldNumItems -1;
+			       
+			       // calculate which part of the old array to copy
+			       for (n=0; n<oldNumItems; n++) {
+				 if (oldUserEventsArray[oldpindex][n].EndTime < beginTime) { startIndex++; }
+				 else { break; }
+			       }
+			       for (n=oldNumItems-1; n>=0; n--) {
+				 if (oldUserEventsArray[oldpindex][n].BeginTime > endTime) { endIndex--; }
+				 else { break; }
+			       }
+			       newNumItems = endIndex - startIndex + 1;
+			       
+			       // copy the array
+			       userEventsArray[newpindex] = new UserEvent[newNumItems];
+			       for (n=0; n<newNumItems; n++) {
+				 userEventsArray[newpindex][n] = oldUserEventsArray[oldpindex][startIndex+n];
+			       }
 			     }
 			   }
 			}                                       

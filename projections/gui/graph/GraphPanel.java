@@ -8,6 +8,9 @@ import javax.swing.*;
 public class GraphPanel extends JPanel
    implements ActionListener, ItemListener, AdjustmentListener
 {
+        private static final Color BACKGROUND = Color.white;
+        private static final Color FOREGROUND = Color.white;
+
  	private JPanel mainPanel; 
 	private Graph displayCanvas;
 	private Scrollbar HSB;
@@ -43,8 +46,8 @@ public class GraphPanel extends JPanel
  
 	  mainPanel = new JPanel();
           mainPanel.setLayout(null);
-          mainPanel.setBackground(Color.black);
-          mainPanel.setForeground(Color.white);
+          mainPanel.setBackground(BACKGROUND);
+          mainPanel.setForeground(FOREGROUND);
           mainPanel.add(displayCanvas);
           mainPanel.add(HSB);
 	  mainPanel.setSize(getPreferredSize());

@@ -169,7 +169,7 @@ public class ProfileWindow extends ProjectionsWindow
 	    String arg = ((MenuItem)evt.getSource()).getLabel();
 	    if (arg.equals("Close")) {
 		close();
-	    } else if(arg.equals("Select Processors")) {
+	    } else if(arg.equals("Select Range")) {
 		showDialog();
 	    }
 	} else if (evt.getSource() instanceof FloatTextField) {
@@ -329,7 +329,7 @@ public class ProfileWindow extends ProjectionsWindow
 	
 	mbar.add(Util.makeMenu("File", new Object[]
 	    {
-		"Select Processors",
+		"Select Range",
 		"Print Profile",
 		null,
 		"Close"

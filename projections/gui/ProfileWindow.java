@@ -192,7 +192,7 @@ public class ProfileWindow extends Frame
    private void Close()
    {
 	  setVisible(false);
-	  mainWindow.CloseProfileWindow();
+	  mainWindow.closeChildWindow(this);
 	  dispose();
    }   
    public void CloseDialog()

@@ -80,7 +80,7 @@ public class GenericLogReader extends ProjDefs
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
 	    break;
-	case BEGIN_INTERRUPT: END_INTERRUPT:
+	case BEGIN_INTERRUPT: case END_INTERRUPT:
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();

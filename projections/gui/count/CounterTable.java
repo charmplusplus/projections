@@ -717,12 +717,28 @@ public class CounterTable extends AbstractTableModel
       String parentStr = file.getParent();
       File parent = new File(parentStr);
       String parentParentStr = parent.getParent();
-      String retVal = 
-	parentStr.substring(parentParentStr.length()+1, parentStr.length());
+      String retVal = "["+
+	parentStr.substring(parentParentStr.length()+1, parentStr.length())+
+	"]"+getStartString(file.getName());
       return retVal;
     }
     catch (Exception e) { ProjectionsFileChooser.handleException(null, e); }
     return null;
+  }
+
+  /** Return start string of name, assuming name in format of: 
+   *  startStr.count.sts. */
+  private String getStartString(String name) throws IOException {
+    int lastDotIndex = name.lastIndexOf(".");
+    int nextDotIndex = name.lastIndexOf(".", lastDotIndex-1);
+    if (!name.endsWith(".count") && !name.endsWith(".sts")) {
+      throw new IOException(
+	"Expect count files to end with .count or .sts:\n"+name);
+    }
+    // given that the sts has name like: "namd2.count.sts", find
+    // all files of the name "namd2.x.count"
+    String retVal = name.substring(0, nextDotIndex);
+    return retVal;
   }
 
   /** Return header renderer for column at index col. */
@@ -908,7 +924,8 @@ public class CounterTable extends AbstractTableModel
 	  tableRows[totalIndex].summary[j].totTime += 
 	    tableRows[i].summary[j].totTime;
 	  tableRows[totalIndex].summary[j].avgCount +=
-	    tableRows[i].summary[j].avgCount;
+	    tableRows[i].summary[j].avgCount * 
+	    tableRows[i].summary[j].numCalled;
 	}
       }
     }

@@ -261,9 +261,10 @@ public class LogReader
 	    for (pe=0; pe<numProcessors; pe++) {
 		processorList.insert(pe);
 	    }
-        }
-	// **CW** stupid, but restore length based on the new processor list.
-	numProcessors = processorList.size();
+        } else {
+	    // **CW** required to set numProcessors to the correct values.
+	    numProcessors = processorList.size();
+	}
 
 	ProgressDialog bar=new ProgressDialog("Reading log files...");
 	double allocEffort=0.5;//Number of logs the allocations are worth

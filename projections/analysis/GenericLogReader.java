@@ -1,5 +1,6 @@
 package projections.analysis;
 
+import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
@@ -33,6 +34,10 @@ public class GenericLogReader extends ProjDefs
 	} catch (IOException e) {
 	    System.err.println("Error reading file " + filename);
 	}
+    }
+
+    public GenericLogReader(int peNum, double Nversion) {
+	GenericLogReader(Analysis.sts.getLogName(peNum), Nversion);
     }
 
     /**

@@ -125,7 +125,6 @@ public class SumAnalyzer extends ProjDefs
 	                  System.out.println("Unrecorgnized syntax at end of line 2");
                         for (int i=1; i<(int)tokenizer.nval; i++)
                         ProcessorUtilization[p][nUsageRead++] = val;
-System.out.println(val+" "+tokenizer.nval);
                     }
                     else
                       tokenizer.pushBack();

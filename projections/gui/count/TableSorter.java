@@ -1,5 +1,8 @@
 package projections.gui.count;
 
+// JMU: made sortByColumn(int) private because it doesn't update the model
+//      after it is called!!!
+
 /**
  * A sorter for TableModels. The sorter has a model (conforming to TableModel) 
  * and itself implements TableModel. TableSorter does not store or copy 
@@ -276,7 +279,7 @@ public class TableSorter extends TableMap {
         model.setValueAt(aValue, indexes[aRow], aColumn);
     }
 
-    public void sortByColumn(int column) {
+    private void sortByColumn(int column) {
         sortByColumn(column, true);
     }
 
@@ -286,6 +289,15 @@ public class TableSorter extends TableMap {
         sortingColumns.addElement(new Integer(column));
         sort(this);
         super.tableChanged(new TableModelEvent(this)); 
+    }
+
+    /** JMU mod: Write over the orignalIndices and return it, map from
+     *  original indices to sorted table indices. */
+    public int[] mapRows(int[] originalIndices) {
+      for (int i=0; i<originalIndices.length; i++) {
+	originalIndices[i] = indexes[originalIndices[i]];
+      }
+      return originalIndices;
     }
 
     // There is no-where else to put this. 

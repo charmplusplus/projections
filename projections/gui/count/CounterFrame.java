@@ -18,14 +18,15 @@ public class CounterFrame extends JFrame
 {
   // STARTING WINDOW POSITION??
   // SHOULD RETURN ERROR IF PROBLEM LOADING FILES???
+  // GIVE HELP BOX IN THIS WINDOW
   
   /** Constructor. */
   public CounterFrame() { 
     super("Performance Counter Analysis");
     // set up table
-    TableSorter sorter = new TableSorter(cTable_);
-    jTable_ = new JTable(sorter);
-    sorter.addMouseListenerToHeaderInTable(jTable_);
+    sorter_ = new TableSorter(cTable_);
+    jTable_ = new JTable(sorter_);
+    sorter_.addMouseListenerToHeaderInTable(jTable_);
     jTable_.setColumnSelectionAllowed(false);
     // set up bottom stuff
     JPanel panel = new JPanel(new FlowLayout());
@@ -35,7 +36,7 @@ public class CounterFrame extends JFrame
     createGraph.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
 	int[] selectedRows = jTable_.getSelectedRows();
-	cTable_.createGraph(selectedRows);
+	cTable_.createGraph(sorter_.mapRows(selectedRows));
       }
     });
     // create window
@@ -66,6 +67,12 @@ public class CounterFrame extends JFrame
       cTable_, 0, cTable_.getRowCount()-1, TableModelEvent.ALL_COLUMNS));
   }
 
+  public void sortByColumn(int index) {
+    if (cTable_.getColumnCount() > index) { 
+      sorter_.sortByColumn(index, false);
+    }
+  }
+
   /** Create and return menu for the CounterFrame. */
   private JMenuBar createMenu() {
     // file
@@ -91,6 +98,7 @@ public class CounterFrame extends JFrame
     return menuBar;
   }
   
+  TableSorter        sorter_   = null;
   JTable             jTable_   = null;
   CounterTable       cTable_   = new CounterTable();
   ProjectionsFileMgr fileMgr_  = null;

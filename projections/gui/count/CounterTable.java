@@ -231,7 +231,7 @@ public class CounterTable extends AbstractTableModel
     public EPValues(String n, int index, LogData[] procData, int numCounters) 
     {
       int i, j;
-      name = n;
+      name = '['+(new Integer(index)).toString()+"] "+n;
       // DO NUMBER CHECK HERE???
       summary = new CounterSummary[numCounters];
       for (i=0; i<summary.length; i++) { summary[i] = new CounterSummary(); }

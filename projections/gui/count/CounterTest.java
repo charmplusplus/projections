@@ -39,6 +39,7 @@ public class CounterTest
       f.setSize(800,600);
       f.setVisible(true);
       f.loadFiles();
+      f.sortByColumn(1);
 
       /*
       // try again (to test gui)

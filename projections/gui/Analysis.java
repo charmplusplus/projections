@@ -28,6 +28,9 @@ public class Analysis {
 	private static int[][][][] systemMsgsData;
 	private static int[][][][] userEntryData;
 	
+    /*****************Color Maps 6/27/2002 *************/
+    private static Color[] entryColors;
+
 	/****************** Timeline ******************/
 	public static Vector createTL( int p, long bt, long et ) {
 		try {
@@ -158,6 +161,24 @@ public class Analysis {
 	public static long getTotalTime() {
 		return sts.getTotalTime();
 	}
+
+    public static Color getEntryColor(int entryIdx) {
+	if (entryIdx < sts.getEntryCount()) {
+	    return entryColors[entryIdx];
+	} else {
+	    return null;
+	}
+    }
+
+    public static void setEntryColor(int entryIdx, Color color) {
+	if (entryIdx < sts.getEntryCount()) {
+	    entryColors[entryIdx] = color;
+	} else {
+	    System.err.println("Warning: entry point index " + entryIdx +
+			       " not found. Cannot set color");
+	}
+    }
+
 	/******************* Usage Profile ******************
 	This data gives the amount of processor time used by 
 	each entry point (indices 0..numUserEntries-1), idle
@@ -241,6 +262,20 @@ public class Analysis {
 		if ( sts.hasLogFiles() ) { //.log files
 			logLoader = new LogLoader( sts);
 		}
+
+		// set up color maps for the entire toolkit.
+		entryColors = new Color[sts.getEntryCount()];
+		float H = (float)1.0;
+		float S = (float)1.0;
+		float B = (float)1.0;
+		float delta = (float)(1.0/sts.getEntryCount());
+		for(int i=0; i<sts.getEntryCount(); i++)
+		    {
+			entryColors[i] = Color.getHSBColor(H, S, B);
+			H -= delta;
+			if(H < 0.0)
+			    H = (float)1.0;
+		    }
 	}
 
         /**

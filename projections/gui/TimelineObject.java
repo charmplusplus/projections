@@ -217,7 +217,7 @@ public class TimelineObject extends Component
 	  if(entry == -1)
 		 c = getForeground();
 	  else
-		 c = data.entryColor[entry];
+		 c = Analysis.getEntryColor(entry);
 	  
 
 	  int w   = getSize().width;

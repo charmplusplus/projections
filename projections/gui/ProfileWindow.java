@@ -26,8 +26,6 @@ public class ProfileWindow extends Frame
    private Button bColors;
    private ProfileObject[][] poArray;
    private float xscale=1, yscale=1;
-   private int[] entries;
-   private Color[] entryColor;
    private long begintime, endtime;
    private ProfileDialog2 dialog;
    
@@ -832,7 +830,8 @@ public class ProfileWindow extends Frame
 				break;
 			poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);
 			displayCanvas.add(poArray[poNo][poindex]);
-			poArray[poNo][poindex].setForeground(colors[entry]);
+			// poArray[poNo][poindex].setForeground(colors[entry]);
+			poArray[poNo][poindex].setForeground(Analysis.getEntryColor(entry));
 			poindex++;
 		}
 	}

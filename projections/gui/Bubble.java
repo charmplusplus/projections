@@ -3,17 +3,28 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.*;
+
 public class Bubble extends Window
+implements MouseListener
 {
    private FontMetrics fm;
    private String[] text;
-   
+	//private JPanel textPanel;
+   //private Button closeButton;
    public Bubble(Component c, String[] s)
    {
 	  super(getFrame(c));
 	  
 	  text = s;
- 
+	  
+	  GridBagConstraints gbc = new GridBagConstraints();
+	  GridBagLayout gbl = new GridBagLayout();
+	  
+	  gbc.fill = GridBagConstraints.BOTH;
+	  
+	  addMouseListener(this);
+	  
 	  setBackground(new Color(255, 255, 200));
 	  setForeground(Color.black);
 	  setSize(getPreferredSize());
@@ -28,6 +39,23 @@ public class Bubble extends Window
 	  
 	  return f;
    }   
+	
+	public void mouseClicked(MouseEvent e) {
+		this.setVisible(false);
+	}
+	
+	public void mouseEntered(MouseEvent e) {
+	}
+	
+	public void mouseExited(MouseEvent e) {
+	}
+	
+	public void mousePressed(MouseEvent e) {
+	}
+	
+	public void mouseReleased(MouseEvent e){
+	}
+	
    public Dimension getMinimumSize()
    {
 	  return getPreferredSize();
@@ -86,6 +114,7 @@ public class Bubble extends Window
 		 fm = g.getFontMetrics(g.getFont());
 	  
 	  int sh = fm.getHeight() + 2;   
+
 	  
 	  g.setColor(Color.black);
 	  g.drawRect(0, 0, w-1, h-1);
@@ -93,7 +122,7 @@ public class Bubble extends Window
 	  g.setColor(getForeground());
 	  
 	  for(int i=0; i<text.length; i++)
-		 g.drawString(text[i], 4, (i+1)*sh + 2);    
+		 g.drawString(text[i], 10, (i+1)*sh );    
    }   
    public void setBubbleText(String[] s)
    {

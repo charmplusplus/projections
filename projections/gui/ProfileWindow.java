@@ -917,6 +917,7 @@ public class ProfileWindow extends Frame
 			poArray[poNo][poindex].setForeground(colors[entry]);
 			poindex++;
 		}
+		if(Analysis.getVersion() >= 5.0){
 		//Drawing the entry point message sendTime
 		for(i=0; i<usg[1].length; i++)
 		{
@@ -938,6 +939,7 @@ public class ProfileWindow extends Frame
 			displayCanvas.add(poArray[poNo][poindex]);
 			poArray[poNo][poindex].setForeground(colors[entry]);
 			poindex++;
+		}
 		}
 	}
 }

@@ -23,8 +23,9 @@ import java.io.*;
 public class MultiRunDataAnalyzer {
 
     // analysis count + types
-    public static final int TOTAL_ANALYSIS_TAGS = 1;
+    public static final int TOTAL_ANALYSIS_TAGS = 2;
     public static final int ANALYZE_SUM = 0;
+    public static final int ANALYZE_AVG = 1;
 
     private int numEPs;
     private int numSets;
@@ -62,12 +63,21 @@ public class MultiRunDataAnalyzer {
 		"[" + originalData.stsReaders[i].machineName + "]";
 	}
 
+	// simple data tabulation
 	computeSum(originalData);
-	// computeAverage();
+	computeAverage(originalData);
 	// computeMax();
 	// computeMin();
 	// computeStdDeviation();
 
+	// data analysis for configurations
+	// computeSumAcrossEPs(originalData);
+
+	// data analysis for EP
+	// computePercentGrowth(originalData);
+	
+	// significance analysis for EP
+	// computeSignificance();
     }
 
     public void computeSum(MultiRunData originalData) {
@@ -86,30 +96,45 @@ public class MultiRunDataAnalyzer {
     }
 
     /**
+     *  Assumption: computeSum is run before computeAverage
+     */
+    public void computeAverage(MultiRunData originalData) {
+	for (int i=0; i<numSets; i++) {
+	    for (int j=0; j<numEPs; j++) {
+		analyzedDataTable[ANALYZE_AVG][i][j] =
+		    analyzedDataTable[ANALYZE_SUM][i][j] / 
+		    originalData.stsReaders[i].numPe;
+	    }
+	}
+    }
+
+    /**
      *   getData takes the appropriate part of the analyzed data and
      *   returns the handle to the calling method (should be the controller
      *   on behalf of the GUI.
      *  
      */
-
-    // ***CURRENT IMP*** for now, do not filter the EPs or configs
-
-    public MultiRunDataSource getData(int dataType) {
+    public MultiRunDataSource getData(int dataType, boolean filterTable[]) {
 	String titleString = "";
 	switch (dataType) {
 	case ANALYZE_SUM:
 	    titleString = "Sum";
 	    break;
+	case ANALYZE_AVG:
+	    titleString = "Average";
+	    break;
 	}
-	return new MultiRunDataSource(analyzedDataTable[dataType], null,
+	return new MultiRunDataSource(filter(analyzedDataTable[dataType],
+					     filterTable),
+				      null,
 				      titleString);
     }
 
-    public MultiRunXAxis getMRXAxisData() {
-	return new MultiRunXAxis(configList);
+    public MultiRunXAxis getMRXAxisData(boolean filterTable[]) {
+	return new MultiRunXAxis(filter(configList, filterTable));
     }
 
-    public MultiRunYAxis getMRYAxisData(int dataType) {
+    public MultiRunYAxis getMRYAxisData(int dataType, boolean filterTable[]) {
 	String title = "";
 
 	if (dataType == ANALYZE_SUM) {
@@ -118,11 +143,12 @@ public class MultiRunDataAnalyzer {
 
 	return new MultiRunYAxis(MultiRunYAxis.TIME,
 				 title, 
-				 getMax(analyzedDataTable[dataType]));
+				 getMax(filter(analyzedDataTable[dataType],
+					       filterTable)));
     }
 
-    public String[] getMRLegendData() {
-	return epNamesList;
+    public String[] getMRLegendData(boolean filterTable[]) {
+	return filter(epNamesList, filterTable);
     }
 
     private double getMax(double[][] inTable) {
@@ -145,5 +171,56 @@ public class MultiRunDataAnalyzer {
 	    }
 	}
 	return max;
+    }
+
+    private double[][] filter(double[][] data, boolean filterTable[]) {
+	if (filterTable != null) {
+	    double returnData[][];
+	    
+	    returnData = new double[data.length][getNumValid(filterTable)];
+	    
+	    for (int i=0; i<returnData.length; i++) {
+		int jIdx = 0;
+		for (int j=0; j<filterTable.length; j++) {
+		    if (filterTable[j]) {
+			returnData[i][jIdx] = data[i][j];
+			jIdx++;
+		    }
+		}
+	    }
+	    return returnData;
+	} else {
+	    return data;
+	}
+    }
+
+    private String[] filter(String[] data, boolean filterTable[]) {
+	if (filterTable != null) {
+	    String returnData[];
+
+	    returnData = new String[getNumValid(filterTable)];
+
+	    int iIdx = 0;
+	    for (int i=0; i<filterTable.length; i++) {
+		if (filterTable[i]) {
+		    returnData[iIdx] = data[i];
+		    iIdx++;
+		}
+	    }
+	    return returnData;
+	} else {
+	    return data;
+	}
+    }
+
+    private int getNumValid(boolean filterTable[]) {
+	int count = 0;
+
+	for (int i=0; i<filterTable.length; i++) {
+	    if (filterTable[i]) {
+		count++;
+	    }
+	}
+	return count;
     }
 }

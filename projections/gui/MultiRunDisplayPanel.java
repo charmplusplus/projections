@@ -15,29 +15,34 @@ import java.io.*;
  *  MultiRunDisplayPanel contains the data display visual object for multiple
  *  run analysis.
  *
- *  ***CURRENT IMP*** no associated legend as yet. 
- *
  */
 public class MultiRunDisplayPanel extends Container 
 {
-    // settings
-    private boolean textMode = true; // default to text display
+    boolean hasData = false;
+    boolean currentTextmode;
 
     // gui components
+    private GridBagConstraints gbc;
     private MultiRunWindow mainWindow;
     private MultiRunController controller;
 
     private Panel mainPanel;
+
+    private Panel textPanel;
     private TextArea displayArea;
 
+    private GraphPanel graphPanel;
+    private Panel graphComponent;
+    private Graph graphCanvas;
+    private Canvas emptyGraphCanvas;
+
     // data items
-    private MultiRunDataSource dataSource;
+    private MultiRunDataSource dataSources[];
     private MultiRunXAxis xAxisData;
-    private MultiRunYAxis yAxisData;
+    private MultiRunYAxis yAxisDatas[];
     private String legendData[];
 
     private MultiRunTextRenderer renderer;
-    private boolean textmode = true;
 
     public MultiRunDisplayPanel(MultiRunWindow NmainWindow,
 				MultiRunController Ncontroller) {
@@ -49,59 +54,104 @@ public class MultiRunDisplayPanel extends Container
 
 	setBackground(Color.lightGray);
 
-	////// Main Panel
-	mainPanel = new Panel();
+	textPanel = new Panel();
 	displayArea = new TextArea("",40,120,TextArea.SCROLLBARS_BOTH);
 	// use a fixed width font
 	displayArea.setFont(Font.decode("monospaced"));
+	textPanel.add(displayArea);
+
+	emptyGraphCanvas = new Canvas();
+	emptyGraphCanvas.setBackground(Color.black);
+	// make initial empty graph canvas the same size as the text area
+	emptyGraphCanvas.setSize(displayArea.getSize());
+	graphComponent = new Panel();
+	graphComponent.add(emptyGraphCanvas);
+	graphComponent.setSize(displayArea.getSize());
+
+	graphCanvas = new Graph();
+	graphPanel = new GraphPanel(graphCanvas);
 
 	// default to text display
-	mainPanel.add(displayArea);
+	currentTextmode = true;
 
         GridBagLayout      gbl = new GridBagLayout();
-        GridBagConstraints gbc = new GridBagConstraints();
+        gbc = new GridBagConstraints();
 
         gbc.fill = GridBagConstraints.BOTH;
 
 	this.setLayout(gbl);
 
-	Util.gblAdd(this, mainPanel, gbc, 0,0, 1,1, 2,1, 2,2,2,2);
+	Util.gblAdd(this, textPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2);
     }
 
-    public void setData(MultiRunDataSource NdataSource, 
-			MultiRunXAxis NxAxis, MultiRunYAxis NyAxis,
-			String[] NlegendData) {
+    public void setDisplayMode(boolean textmode) {
+	displayData(textmode);
+    }
+
+    public void setData(MultiRunDataSource NdataSources[], 
+			MultiRunXAxis NxAxis, MultiRunYAxis NyAxes[],
+			String[] NlegendData,
+			boolean textmode) {
 	// in the most general case, data may need to be maintained.
-	dataSource = NdataSource; 
+	dataSources = NdataSources; 
 	xAxisData = NxAxis;
-	yAxisData = NyAxis;
+	yAxisDatas = NyAxes;
 	legendData = NlegendData;
-	if (textmode) {
-	    printData();
-	} else {
-	    // display onto graph
+
+	updateComponents();
+	// if setting data for the first time, 
+	if (hasData == false) {
+	    graphComponent.remove(emptyGraphCanvas);
+	    graphComponent.add(graphPanel);
+	    hasData = true;
 	}
+	displayData(textmode);
     }
 
-    public void printData()
-    {
+    private void updateComponents() {
+	// update text component
 	try {
-	    // ***CURRENT IMP*** hardcode for now
-	    MultiRunDataSource allData[] = new MultiRunDataSource[1];
-	    allData[0] = dataSource;
 	    MultiRunTextAreaWriter writer = 
 		new MultiRunTextAreaWriter(displayArea);
 	    renderer.generateOutput(writer,
-				    allData,
+				    dataSources,
 				    legendData,
 				    xAxisData.getIndexNames());
 	    writer.close();
 	} catch (IOException e) {
 	    System.err.println("Error writing data to stream!");
 	}
+	// update graph component
+	// the graph has no capability of showing more than one type of
+	// data, hence, it will always show the first type.
+	graphCanvas.setData(dataSources[0], xAxisData, yAxisDatas[0]);
     }
 
-    public void printData(Writer writer) 
+    private void displayData(boolean textmode)
+    {
+	if (textmode) {
+	    // text mode
+	    if (textmode != currentTextmode) {
+		// need to re-introduce text components into the panel
+		this.remove(graphComponent);
+		Util.gblAdd(this, textPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2);
+		currentTextmode = textmode;
+	    }
+	} else {
+	    // graphics mode
+	    if (textmode != currentTextmode) {
+		// need to re-introduce graph components into the panel
+		this.remove(textPanel);
+		Util.gblAdd(this, graphComponent, gbc, 0,0, 1,1, 1,1, 2,2,2,2);
+		currentTextmode = textmode;
+	    }
+	}
+	repaint();
+    }
+
+    // for output to other sources
+    // ***CURRENT IMP*** not implemented yet
+    public void displayData(Writer writer) 
     {
     }
 }

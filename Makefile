@@ -97,6 +97,7 @@ SRC=\
     projections/gui/MultiRunControlPanel.java\
     projections/gui/MultiRunDisplayPanel.java\
     projections/gui/MultiRunTextAreaWriter.java\
+    projections/gui/MultiRunFileDialogControl.java\
     projections/gui/MultiRunWindow.java\
     projections/gui/U.java\
     projections/gui/Util.java\
@@ -118,11 +119,15 @@ SRC=\
     projections/gui/graph/YAxis.java\
     projections/gui/graph/YAxisFixed.java\
     projections/gui/graph/YAxisAuto.java\
+    projections/gui/graph/DataSource.java\
+    projections/gui/graph/DataSource1D.java\
+    projections/gui/graph/LegendPanel.java\
+    projections/gui/graph/LegendCanvas.java\
+    projections/gui/graph/GraphPanel.java\
+    projections/gui/graph/Graph.java\
     projections/gui/graph/MultiRunDataSource.java\
     projections/gui/graph/MultiRunXAxis.java\
-    projections/gui/graph/MultiRunYAxis.java\
-    projections/gui/graph/DataSource.java\
-    projections/gui/graph/DataSource1D.java
+    projections/gui/graph/MultiRunYAxis.java
 
 
 all: bin/projections.jar

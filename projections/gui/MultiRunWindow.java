@@ -1,5 +1,6 @@
 package projections.gui;
 
+import projections.gui.graph.*;
 import projections.misc.*;
 
 import java.io.*;
@@ -28,6 +29,7 @@ public class MultiRunWindow extends Frame
     private MainWindow mainWindow;
     private MultiRunControlPanel controlPanel;
     private MultiRunDisplayPanel displayPanel;
+    private LegendPanel legendPanel;
 
     public MultiRunWindow(MainWindow mainWindow) 
     {
@@ -88,9 +90,11 @@ public class MultiRunWindow extends Frame
 	// summary data sets.
 
 	JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+	MultiRunFileDialogControl accessory = new MultiRunFileDialogControl();
 	fc.setDialogTitle("Choose directories for summary data");
 	fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	fc.setMultiSelectionEnabled(true);
+	fc.setAccessory(accessory);
 	int returnVal = fc.showDialog(this,"Choose");
 
 	if (returnVal == JFileChooser.APPROVE_OPTION) {
@@ -99,21 +103,10 @@ public class MultiRunWindow extends Frame
 	    for (int i=0;i<inDirs.length;i++) {
 		inDirPathnames[i] = inDirs[i].getAbsolutePath();
 	    }
-	    // ***CURRENT IMP***
-	    // hardcoded the basename and the isDefaultRoot
-	    // flag to true (user cannot choose multiple directories as
-	    // input).
-	    //
-	    // This should be corrected to allow user to choose arbitrary
-	    // directories as input and specify a basename that does not
-	    // depend on the directory name.
-	    //
-	    // Should be possible using the Accessory component in 
-	    // JFileChooser
 	    if (inDirs.length > 0) {
-		controller.processUserInput(inDirs[0].getName(), 
+		controller.processUserInput(((MultiRunFileDialogControl)fc.getAccessory()).getBaseName(), 
 					    inDirPathnames,
-					    true);
+					    ((MultiRunFileDialogControl)fc.getAccessory()).isDefault());
 	    }
 	}
     }
@@ -126,6 +119,8 @@ public class MultiRunWindow extends Frame
 
 	displayPanel = new MultiRunDisplayPanel(this, controller);
 	controlPanel = new MultiRunControlPanel(this, controller);
+	legendPanel = new LegendPanel();
+	controller.registerLegend(legendPanel);
 
 	GridBagLayout      gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
@@ -133,8 +128,9 @@ public class MultiRunWindow extends Frame
 	p.setLayout(gbl);
 
 	gbc.fill = GridBagConstraints.BOTH;
-	Util.gblAdd(p, displayPanel, gbc, 0,0, 1,1, 2,1, 2,2,2,2); 
-	Util.gblAdd(p, controlPanel, gbc, 0,1, 1,1, 2,1, 2,2,2,2); 
+	Util.gblAdd(p, displayPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2); 
+	Util.gblAdd(p, controlPanel, gbc, 0,1, 2,1, 1,0, 2,2,2,2); 
+	Util.gblAdd(p, legendPanel,  gbc, 1,0, 1,1, 1,1, 2,2,2,2); 
     }
 
 }

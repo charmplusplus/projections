@@ -81,6 +81,23 @@ public class MultiRunDataSource extends DataSource
 	}
 	return colorMap[valNo];
     }
+
+    /**
+     *  Create the specified Color Map
+     *
+     */
+    public Color[] getColorMap() {
+	// need to construct from defaults
+	if (colorMap == null) {
+	    Color newMap[] = new Color[getValueCount()];
+	    for (int i=0; i<newMap.length; i++) {
+		newMap[i] = super.getColor(i);
+	    }
+	    return newMap;
+	} else {
+	    return colorMap;
+	}
+    }
   
     /**
      * Return the values associated with this index.
@@ -106,5 +123,14 @@ public class MultiRunDataSource extends DataSource
     // public void mouseClicked(int index,int valNo,double value,
     //                          java.awt.event.MouseEvent evt)
     //    - implemented in superclass for now
+
+    /**
+     *  sets a new color map to this data source object. The user is
+     *  responsible for ensuring that the color of the graph display
+     *  is consistent with the colors displayed in the legend.
+     */
+    public void setColors(Color NcolorMap[]) {
+	colorMap = NcolorMap;
+    }
 }
 

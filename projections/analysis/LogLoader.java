@@ -79,6 +79,7 @@ public class LogLoader extends ProjDefs
 	  TimelineEvent     TE          = null;
 	  TimelineMessage   TM          = null;
 	  PackTime          PT          = null;
+	  boolean tempte;
    
 	  Vector Timeline = null;
 	  System.gc ();
@@ -86,13 +87,13 @@ public class LogLoader extends ProjDefs
 	  // open the file
 	  try
 	  {
-		 Timeline = new Vector();
-		 log = new AsciiIntegerReader(
+		Timeline = new Vector();
+		log = new AsciiIntegerReader(
 			new BufferedReader (new FileReader (sts.getLogName(PeNum))));
 
-		 log.nextLine();//First line contains junk
+		log.nextLine();//First line contains junk
 
-	 while (true) { //Seek to time Begin
+	 	while (true) { //Seek to time Begin
 			LE = readlogentry(log);
 			if (LE.Entry == -1) continue;
 
@@ -106,6 +107,7 @@ public class LogLoader extends ProjDefs
 	  
 			if(LE.Time >= Begin) break;
 		 }
+		 if (Time == Long.MIN_VALUE) Time = Begin;
 		 if(LE.Time > End)
 		 {
 			switch (LE.TransactionType)
@@ -143,13 +145,14 @@ public class LogLoader extends ProjDefs
 						break;
 			   
 					 case CREATION:
-						if(TE==null) //Start a new dummy event
-						   Timeline.addElement(TE=new TimelineEvent(
-							   Time,Long.MAX_VALUE,Entry,LE.Pe));
-						TE.addMessage (TM=new TimelineMessage (
-							LE.Time - BeginTime,LE.Entry));
+						tempte = false;
+						if(TE==null) { //Start a new dummy event
+						   Timeline.addElement(TE=new TimelineEvent(LE.Time-BeginTime,LE.Time-BeginTime,Entry,LE.Pe));
+						   tempte = true;
+						}
+						TE.addMessage (TM=new TimelineMessage (LE.Time - BeginTime,LE.Entry));
+						if (tempte) TE=null;
 						break;
-					
 					 case USER_EVENT:
 						if(TE==null) //Start a new dummy event
 						   Timeline.addElement(TE=new TimelineEvent(
@@ -160,15 +163,16 @@ public class LogLoader extends ProjDefs
 
 					 case BEGIN_PACK:
 						if(TE==null) //Start a new dummy event
-						   Timeline.addElement(TE=new TimelineEvent(
-							   Time,Long.MAX_VALUE,Entry,LE.Pe));
-						TE.addPack (PT=new PackTime(LE.Time));
+						   Timeline.addElement(TE=new TimelineEvent(LE.Time-BeginTime,LE.Time-BeginTime,-1,LE.Pe));
+						TE.addPack (PT=new PackTime(LE.Time-BeginTime));
 						break;
 
 					 case END_PACK:
 						if(PT!=null)
-						   PT.EndTime = LE.Time;
+						  PT.EndTime = LE.Time-BeginTime;
 						PT=null;
+						if (TE.EntryPoint == -1)
+						   TE=null;
 						break;
 
 					 case BEGIN_IDLE:
@@ -271,7 +275,7 @@ public class LogLoader extends ProjDefs
 	  {
 		 case USER_EVENT:
 			Temp.MsgType = log.nextInt();
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
 			return Temp;
@@ -281,7 +285,7 @@ public class LogLoader extends ProjDefs
 		 case END_PACK:
 		 case BEGIN_UNPACK:
 		 case END_UNPACK:
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			Temp.Pe      = log.nextInt();
 			return Temp;
 		 case CREATION:
@@ -289,14 +293,14 @@ public class LogLoader extends ProjDefs
 		 case END_PROCESSING:
 			Temp.MsgType = log.nextInt();
 			Temp.Entry   = log.nextInt();
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
 			return Temp;
 		 case ENQUEUE:
 		 case DEQUEUE:
 			Temp.MsgType = log.nextInt();
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
 			return Temp;
@@ -304,21 +308,21 @@ public class LogLoader extends ProjDefs
 		 case FIND:
 		 case DELETE:
 			Temp.MsgType = log.nextInt();
-			Temp.Time    = log.nextInt();
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
+			Temp.Time    = log.nextLong();
 			Temp.Pe      = log.nextInt();
 			return Temp;
 		 case BEGIN_INTERRUPT:
 		 case END_INTERRUPT:
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
 			return Temp;
 		 case BEGIN_COMPUTATION:
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			return Temp;
 		 case END_COMPUTATION:
-			Temp.Time    = log.nextInt();
+			Temp.Time    = log.nextLong();
 			return Temp;
 		 default:
 			System.out.println ("ERROR: weird event type " + Temp.TransactionType);

@@ -203,15 +203,16 @@ public class MainWindow extends Frame
         // set current version
 	Analysis.setVersion(CUR_VERSION);
         int i=0;
+	String loadSts=null;
         while (i < args.length) {
 	  if (args[i].equals("-h")) {
 	     help();
 	  }
-	  if (args[i].equals("-V")) {
+	  else if (args[i].equals("-V")) {
 	     System.out.println("Projections version: "+Analysis.getVersion());
 	     System.exit(0);
 	  }
-	  if (args[i].equals("-u")) {
+	  else if (args[i].equals("-u")) {
 	     i++;
 	     if (i==args.length) help();
 	     double useVersion = Double.parseDouble(args[i]);
@@ -221,6 +222,8 @@ public class MainWindow extends Frame
 	     }
 	     Analysis.setVersion(useVersion);
 	  }
+	  else /*unrecognized argument*/
+	     loadSts=args[i];
           i++;
 	}
 
@@ -229,6 +232,7 @@ public class MainWindow extends Frame
 	f.setTitle("Projections");
 	f.setResizable(false);
 	f.setVisible(true);
+	if (loadSts!=null) f.openFile(loadSts);
    }   
    public void paint(Graphics g)
    {
@@ -292,11 +296,12 @@ public class MainWindow extends Frame
 	  });
 	  d.setFile("pgm.sts");
 	  d.setVisible(true);
-
-	  String filename = d.getFile();
-	  if(filename == null)
-		 return;
+	  String filename=d.getFile();
+	  if (filename==null) return;
 	  filename = d.getDirectory() + filename;
+	  openFile(filename);
+   }
+   private void openFile(String filename) {
 	  try
 	  {
 		 filename = filename.substring(0, filename.length()-4);

@@ -147,8 +147,6 @@ public class TimelineWindow extends Frame
 	  CreateMenus();
 	  CreateLayout();
 	  pack();
-	  setVisible(true);
-	  
 	  ShowRangeDialog();
    }   
 
@@ -267,13 +265,14 @@ public class TimelineWindow extends Frame
 	  rangeDialog.dispose();
 	  rangeDialog = null;
 
-	  setSize(640,480);
 	  if(data.beginTime != data.oldBT || data.endTime != data.oldET ||
 	     (data.processorList != null && 
 	      !data.processorList.equals(data.oldplist)))
 	  {
 	    procRangeDialog();
 	  }
+	  setVisible(true);
+	  
    }
 
   private void procRangeDialog() {

@@ -378,8 +378,10 @@ public class LogLoader extends ProjDefs
 			    PT.EndTime = LE.Time-BeginTime;
 			}
 			PT=null;
-			if (TE.EntryPoint == -1) {
-			    TE=null;
+			if (TE != null) {
+			    if (TE.EntryPoint == -1) {
+				TE=null;
+			    }
 			}
 			break;
 		    case BEGIN_IDLE:

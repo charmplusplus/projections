@@ -379,12 +379,13 @@ public class MainWindow extends Frame
 	  }
 	  catch(IOException e)
 	  {
-		 InvalidFileDialog ifd = new InvalidFileDialog(null);
+		 InvalidFileDialog ifd = new InvalidFileDialog(this);
 		 ifd.setVisible(true);
 	  }
 	  catch(StringIndexOutOfBoundsException e)
 	  {
-		 InvalidFileDialog ifd = new InvalidFileDialog(null);
+		 e.printStackTrace();
+		 InvalidFileDialog ifd = new InvalidFileDialog(this);
 		 ifd.setVisible(true);
 	  }
    }                     

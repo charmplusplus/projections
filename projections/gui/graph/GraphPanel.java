@@ -6,101 +6,92 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class GraphPanel extends JPanel
-   implements ActionListener, ItemListener, AdjustmentListener
+    implements ActionListener, ItemListener, AdjustmentListener
 {
-        private static final Color BACKGROUND = Color.black;
-        private static final Color FOREGROUND = Color.white;
-
- 	private JPanel mainPanel; 
+    private static final Color BACKGROUND = Color.black;
+    private static final Color FOREGROUND = Color.white;
+    
+    private JPanel mainPanel; 
     private JScrollPane displayPanel;
-	private Graph displayCanvas;
+    private Graph displayCanvas;
 
-	private Button             bIncreaseX;
-	private Button             bDecreaseX;
-	private Button             bResetX;
-	private Checkbox           cbLineGraph;
-	private Checkbox           cbBarGraph;
-	private Label              lScale;
-	private FloatTextField     scaleField;
- 	
-	public GraphPanel(Graph g)
-   	{
-          addComponentListener(new ComponentAdapter()
-          {
-                 public void componentResized(ComponentEvent e)
-                 {
-                        if(mainPanel != null)
-                        {
-                           setAllBounds();
-			   displayCanvas.repaint();
-                           //UpdateDisplay();
-                        }
-                 }
-          });
- 
-          setBackground(Color.lightGray);
-
-	  displayCanvas = g;		
-
-	  createLayout();
-	}
+    private Button             bIncreaseX;
+    private Button             bDecreaseX;
+    private Button             bResetX;
+    private Checkbox           cbLineGraph;
+    private Checkbox           cbBarGraph;
+    private Label              lScale;
+    private FloatTextField     scaleField;
+    
+    public GraphPanel(Graph g)
+    {
+	addComponentListener(new ComponentAdapter()
+	    {
+		public void componentResized(ComponentEvent e) {
+		    if (mainPanel != null) {
+			displayCanvas.repaint();
+		    }
+		}
+	    });
+	
+	setBackground(Color.lightGray);
+	displayCanvas = g;		
+	createLayout();
+    }
 
     private void createLayout() {
 
-	  mainPanel = new JPanel();
-          mainPanel.setLayout(null);
-          mainPanel.setBackground(BACKGROUND);
-          mainPanel.setForeground(FOREGROUND);
-	  mainPanel.setSize(getPreferredSize());
-          
-	  displayPanel = new JScrollPane(displayCanvas);
-	  mainPanel.add(displayPanel);
-
-	  lScale  = new Label("X-Axis Scale: ", Label.CENTER);
+	lScale  = new Label("X-Axis Scale: ", Label.CENTER);
  
-          scaleField = new FloatTextField(1, 5);
-          scaleField.addActionListener(this);
-	  scaleField.setText("1.0"); 
+	scaleField = new FloatTextField(1, 5);
+	scaleField.addActionListener(this);
+	scaleField.setText("1.0"); 
 
-          bDecreaseX = new Button("<<");
-          bIncreaseX = new Button(">>");
-          bResetX    = new Button("Reset");
-          bIncreaseX.addActionListener(this);
-          bDecreaseX.addActionListener(this);
-          bResetX.addActionListener(this);
+	bDecreaseX = new Button("<<");
+	bIncreaseX = new Button(">>");
+	bResetX    = new Button("Reset");
+	bIncreaseX.addActionListener(this);
+	bDecreaseX.addActionListener(this);
+	bResetX.addActionListener(this);
+	
+	CheckboxGroup cbgGraphType = new CheckboxGroup();
+	cbLineGraph = new Checkbox("Line Graph", false,  cbgGraphType);
+	cbBarGraph  = new Checkbox("Bar Graph",  true, cbgGraphType);
+	cbLineGraph.addItemListener(this);
+	cbBarGraph.addItemListener(this);
+	
+	if (displayCanvas.getGraphType() == Graph.LINE) {
+	    cbLineGraph.setState(true); 
+	    cbBarGraph.setState(false);
+	}
 
-	  CheckboxGroup cbgGraphType = new CheckboxGroup();
-          cbLineGraph = new Checkbox("Line Graph", false,  cbgGraphType);
-          cbBarGraph  = new Checkbox("Bar Graph",  true, cbgGraphType);
-          cbLineGraph.addItemListener(this);
-          cbBarGraph.addItemListener(this);
-
-	  if(displayCanvas.getGraphType() == Graph.LINE)
-	  {
-		cbLineGraph.setState(true); 
-		cbBarGraph.setState(false);
-	  }
-
-          GridBagLayout gbl = new GridBagLayout();
-          GridBagConstraints gbc = new GridBagConstraints();
+	GridBagLayout gbl = new GridBagLayout();
+	GridBagConstraints gbc = new GridBagConstraints();
  
-          JPanel buttonPanel = new JPanel();
-          buttonPanel.setLayout(gbl);
- 
-          Util.gblAdd(buttonPanel, cbLineGraph, gbc, 0,0, 1,1, 1,0);
-          Util.gblAdd(buttonPanel, cbBarGraph,  gbc, 1,0, 1,1, 1,0);
-          Util.gblAdd(buttonPanel, bDecreaseX,  gbc, 2,0, 1,1, 1,0);
-          Util.gblAdd(buttonPanel, lScale,      gbc, 3,0, 1,1, 1,0);
-          Util.gblAdd(buttonPanel, scaleField,  gbc, 4,0, 1,1, 1,0);
-          Util.gblAdd(buttonPanel, bIncreaseX,  gbc, 5,0, 1,1, 1,0);
-          Util.gblAdd(buttonPanel, bResetX,     gbc, 6,0, 1,1, 1,0);
+	JPanel buttonPanel = new JPanel();
+	buttonPanel.setLayout(gbl);
+	gbc.fill = GridBagConstraints.NONE;
+	Util.gblAdd(buttonPanel, cbLineGraph, gbc, 0,0, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, cbBarGraph,  gbc, 1,0, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, bDecreaseX,  gbc, 2,0, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, lScale,      gbc, 3,0, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, scaleField,  gbc, 4,0, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, bIncreaseX,  gbc, 5,0, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, bResetX,     gbc, 6,0, 1,1, 1,0);
 
-	  /////// put it together
-          setLayout(gbl);
-          gbc.fill = GridBagConstraints.BOTH;
-          Util.gblAdd(this, mainPanel,   gbc, 0,0, 1,1, 1,1, 10,10,10,10);
-          Util.gblAdd(this, buttonPanel, gbc, 0,1, 1,1, 1,0, 10,10,10,10);
-   }
+	/////// put it together
+	setLayout(gbl);
+	gbc.fill = GridBagConstraints.BOTH;
+
+	mainPanel = new JPanel();
+	mainPanel.setLayout(gbl);
+	
+	displayPanel = new JScrollPane(displayCanvas);
+	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,1);
+	
+	Util.gblAdd(this, mainPanel,   gbc, 0,0, 1,1, 1,1, 5,5,5,5);
+	Util.gblAdd(this, buttonPanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
+    }
 
    //Make sure we aren't made too tiny
    public Dimension getMinimumSize() {return new Dimension(150,100);}
@@ -136,7 +127,6 @@ public class GraphPanel extends JPanel
           }
  
 	  displayCanvas.setScale((double)scale); 
-          setAllBounds();
           displayCanvas.repaint();
    }
 
@@ -147,37 +137,12 @@ public class GraphPanel extends JPanel
 
    public void itemStateChanged(ItemEvent evt)
    {
- 
-          Checkbox c = (Checkbox) evt.getSource();
-          if(c == cbLineGraph)
-                 displayCanvas.setGraphType(Graph.LINE);
-          else if(c == cbBarGraph)
-                 displayCanvas.setGraphType(Graph.BAR);
-
-          setAllBounds();
-          displayCanvas.repaint();
-          //UpdateDisplay();*/
-   }
-
-   public void setAllBounds()
-   {
-          //// set the sizes
-          int mpw, mph, sbh, dcw, dch;
-          mpw = mainPanel.getSize().width;
-          mph = mainPanel.getSize().height;
-	  if(mpw == 0 || mph == 0)
-		return;
-
-          sbh = 20;
- 
-          dcw = mpw-30;
-          dch = mph - 30 - sbh;
- 
-          // --> set the bounds
-          // must set the bounds for the axes before the display canvas so that
-          // the scales are set appropriately.
- 
-          displayCanvas.setBounds(30, 30, dcw, dch);
+       Checkbox c = (Checkbox) evt.getSource();
+       if(c == cbLineGraph)
+	   displayCanvas.setGraphType(Graph.LINE);
+       else if(c == cbBarGraph)
+	   displayCanvas.setGraphType(Graph.BAR);
+       displayCanvas.repaint();
    }
 
    public static void main(String [] args){

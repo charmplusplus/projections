@@ -29,9 +29,7 @@ public class LogLoader extends ProjDefs
     private boolean deltaEncoded = false;
     private int tokenExpected = 2;
 
-    private boolean isProcessing = false; // **bloody hack**
-
-    // ***CW*** considered a hack.
+    private boolean isProcessing = false;
     boolean ampiTraceOn = false;
     
     public LogLoader() 
@@ -136,16 +134,12 @@ public class LogLoader extends ProjDefs
 	    log = 
 		new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
 
-	    // to ignore dummy thread EPs
-	    //  ***CW*** I consider this a hack. A more elegant way must
+	    // to treat dummy thread EPs as a special-case EP
+	    //  **CW** I consider this a hack. A more elegant way must
 	    // be found design-wise.
 	    if (Analysis.getNumFunctionEvents() > 0) {
 		ampiTraceOn = true;
 	    }
-
-	    /*
-	    log.nextLine(); //First line contains junk
-	    */
 
 	    // **CW** first line is no longer junk.
 	    // With the advent of the delta-encoding format, it should
@@ -164,11 +158,11 @@ public class LogLoader extends ProjDefs
 		deltaEncoded = false;
 	    }
 
-	    // **CW** each time we open the file, we need to reset the
+	    // Each time we open the file, we need to reset the
 	    // previous event timestamp to 0 to support delta encoding.
 	    prevTime = 0;
 
-	    isProcessing = false; // *hack* - use global
+	    isProcessing = false; 
 	    while (true) { //Seek to time Begin
 		LE = readlogentry(log);
 		if (LE.Entry == -1) {
@@ -202,7 +196,6 @@ public class LogLoader extends ProjDefs
 		    return Timeline;                              
 		case END_PROCESSING:
 		default:
-		    //	  System.out.println ("overlaid, end");
 		    Timeline.addElement(TE=new TimelineEvent(Begin-BeginTime,
 							     End-BeginTime,
 							     LE.Entry,LE.Pe));
@@ -212,21 +205,28 @@ public class LogLoader extends ProjDefs
 	    }
 	    //Throws EOFException at end of file; break if past endTime
 	    CallStackManager cstack = new CallStackManager();
-	    // **CW** this is definitely a hack. Enclosing dummy thread EPs
-	    // for functions need to be preserved to maintain thread IDs
-	    // because the functions do not trace them!
-	    //
-	    // this hack assumes functions will *always* be enclosed by
-	    // a dummy thread EP (which is not always true since we can
-	    // always choose a time that cuts out the preceeding dummy
-	    // thread EP while keeping the function).
 	    LogEntry enclosingDummy = null;
+	    ObjectId tid = null;
+	    AmpiFunctionData ampiData = null;
 	    while(true) {
 		if (LE.Entry != -1) {
 		    switch (LE.TransactionType) {
 		    case BEGIN_FUNC:
-			// this ugliness is the culmination of years of
-			// bad projections coding!
+			// Phase 1: Check stack for preceeding functions.
+			//          If one is found, we need to "terminate"
+			//          the timeline event associated with it.
+			// **CW** Right now, there is an unavoidable bug
+			// that enclosingDummy could be empty.
+
+			// end previous function's (or Dummy Thread EP's)
+			// timeline event.
+			if (TE != null) {
+			    TE.EndTime = LE.Time - BeginTime;
+			}
+
+			// Phase 2: Handle current function. Note that the
+			//          Function's messaging properties need
+			//          to be suppressed.
 			TE = new TimelineEvent();
 			TE.isFunction = true;
 			TE.BeginTime = LE.Time-BeginTime;
@@ -240,11 +240,49 @@ public class LogLoader extends ProjDefs
 			Timeline.addElement(TE);
 			break;
 		    case END_FUNC:
+			// Phase 1: End current function.
 			if (TE != null) {
 			    TE.EndTime = LE.Time - BeginTime;
 			    cstack.pop(TE.id.id[0], TE.id.id[1], TE.id.id[2]);
 			}
 			TE = null;
+
+			// Phase 2: "create" a new Begin for any previous
+			//          functions or the dummy thread ep that
+			//          is supposed to enclose it.
+			tid = enclosingDummy.id;
+			ampiData =
+			    (AmpiFunctionData)cstack.read(tid.id[0],
+							  tid.id[1],
+							  tid.id[2]);
+			// Dealing with dummy thread ep
+			if ((ampiData == null) ||
+			    (ampiData.FunctionID == 0)) {
+			    TE = new TimelineEvent(LE.Time-BeginTime,
+						   LE.Time-BeginTime,
+						   enclosingDummy.Entry, 
+						   enclosingDummy.Pe,
+						   enclosingDummy.MsgLen, 
+						   enclosingDummy.recvTime, 
+						   enclosingDummy.id,
+						   enclosingDummy.EventID,
+						   enclosingDummy.cpuBegin, 
+						   enclosingDummy.cpuEnd,
+						   enclosingDummy.numPapiCounts,
+						   enclosingDummy.papiCounts);
+			    Timeline.addElement(TE);
+			} else {
+			    // "create" previous function on stack.
+			    TE = new TimelineEvent();
+			    TE.isFunction = true;
+			    TE.BeginTime = LE.Time-BeginTime;
+			    TE.EntryPoint = ampiData.FunctionID;
+			    TE.id = tid;
+			    TE.callStack =
+				cstack.getStack(TE.id.id[0], TE.id.id[1],
+						TE.id.id[2]);
+			    Timeline.addElement(TE);
+			}
 			break;
 		    case BEGIN_PROCESSING:
 			if (isProcessing) {
@@ -255,13 +293,43 @@ public class LogLoader extends ProjDefs
 			    }
 			    TE = null;
 			}
-			// **CW** ignore dummy thread EPs
-			if ((Analysis.getNumFunctionEvents() > 0) &&
-			    (LE.Entry == 0)) {
-			    enclosingDummy = LE;
-			    break;
-			}
 			isProcessing = true;
+
+			// Handle Dummy Thread EPs to see if we need to
+			// resume a function entry.
+			if (ampiTraceOn && (LE.Entry == 0)) {
+			    enclosingDummy = LE;
+			    tid = enclosingDummy.id;
+			    ampiData =
+				(AmpiFunctionData)cstack.read(tid.id[0],
+							      tid.id[1],
+							      tid.id[2]);
+			    // only handle if there's a function. Otherwise
+			    // treat as normal Dummy Thread EP.
+			    if ((ampiData != null) &&
+				(ampiData.FunctionID != 0)) {
+				// "create" last function on stack. Note
+				// that the enclosing dummy thread ep's
+				// messaging properties need to be transfered
+				// to the function's timeline event.
+				TE = new TimelineEvent();
+				TE.isFunction = true;
+				TE.BeginTime = LE.Time-BeginTime;
+				TE.EntryPoint = ampiData.FunctionID;
+				TE.SrcPe = enclosingDummy.Pe;
+				TE.EventID = enclosingDummy.EventID;
+				TE.MsgLen = enclosingDummy.MsgLen;
+				TE.RecvTime = enclosingDummy.recvTime;
+				TE.id = tid;
+				TE.callStack =
+				    cstack.getStack(TE.id.id[0], TE.id.id[1],
+						    TE.id.id[2]);
+				Timeline.addElement(TE);
+				break;
+			    }
+			}
+
+			// Normal case of handling EPs
 			TE = new TimelineEvent(LE.Time-BeginTime, 
 					       LE.Time-BeginTime,
 					       LE.Entry, LE.Pe,
@@ -273,19 +341,30 @@ public class LogLoader extends ProjDefs
 			Timeline.addElement(TE);
 			break;
 		    case END_PROCESSING:
-			// this code automatically drops end events that
-			// duplicated, which is the intended behavior.
 
-			// **CW** this is REALLY stupid, but no choice
-			// for now ... any end processing event will
-			// drop the enclosingDummy entity for functions
-			// because we can NO LONGER TELL if the 
-			// "matching" TE is a Dummy Thread EP (no thanks
-			// to intervening function TEs).
-			if (Analysis.getNumFunctionEvents() > 0) {
-			    enclosingDummy = null;
-			    break;
+			// Handle Dummy Thread EPs to see if we need
+			// to close off a currently operating function.
+			if (ampiTraceOn && (LE.Entry == 0)) {
+			    tid = enclosingDummy.id;
+			    ampiData =
+				(AmpiFunctionData)cstack.read(tid.id[0],
+							      tid.id[1],
+							      tid.id[2]);
+			    // only handle if there's a function. Otherwise
+			    // treat as normal Dummy Thread EP.
+			    if ((ampiData != null) &&
+				(ampiData.FunctionID != 0)) {
+				// end previous function's timeline event.
+				if (TE != null) {
+				    TE.EndTime = LE.Time - BeginTime;
+				}
+				TE = null;
+				enclosingDummy = null;
+				break;
+			    }
 			}
+
+			// Normal case of handling EPs
 			if (TE != null) {
 			    TE.EndTime = LE.Time - BeginTime;
 			    TE.cpuEnd = LE.cpuEnd;

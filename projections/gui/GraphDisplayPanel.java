@@ -52,8 +52,8 @@ public class GraphDisplayPanel extends Container
 	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
 	  
 	  mainPanel.setLayout(null);
-	  mainPanel.setBackground(Color.black);
-	  mainPanel.setForeground(Color.white);
+	  mainPanel.setBackground(Analysis.background);
+	  mainPanel.setForeground(Analysis.foreground);
 	  mainPanel.add(titleCanvas);
 	  mainPanel.add(yAxisCanvas);
 	  mainPanel.add(wAxisCanvas);
@@ -182,7 +182,7 @@ public class GraphDisplayPanel extends Container
    }   
    public void paint(Graphics g)
    {
-       // silly hack
+       // silly hack for printing
        if (g instanceof PrinterGraphics) {
 	   mainPanel.setBackground(Color.white);
        } else {
@@ -228,7 +228,7 @@ public class GraphDisplayPanel extends Container
 	  
 	  mainPanel.setSize(oldSize);
 	  setAllBounds();
-	  mainPanel.setBackground(Color.black);
+	  mainPanel.setBackground(Analysis.background);
    }   
 
    public void setAllBounds()

@@ -19,7 +19,6 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 
     private MainRunStatusPanel statusPanel;
     private JPanel fillerPanel;
-
     private boolean empty;
 
     public MainSummaryGraphPanel(MainRunStatusPanel statusPanel) {
@@ -29,6 +28,7 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	addChangeListener(this.statusPanel);
 	fillerPanel = new JPanel();
 	fillerPanel.setBackground(Color.black);
+
 	setEmpty();
     }
 

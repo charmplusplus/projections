@@ -13,7 +13,19 @@ import projections.gui.graph.*;
 public class MainWindow extends JFrame
     implements ActionListener
 {
+    private static final int NUM_WINDOWS = 7;
+
+    private static final int GRAPH_WIN = 0;
+    private static final int MULTI_WIN = 1;
+    private static final int PROFILE_WIN = 2;
+    private static final int COMM_WIN = 3;
+    private static final int GRAPHING_WIN = 4;
+    private static final int LOGVIEW_WIN = 5;
+    private static final int HIST_WIN = 6;
+
     public static double 	CUR_VERSION = 4.0;
+
+    private Object childWindows[];
 
     // should be tables of objects dependent indexed by runs in the future.
     private GraphWindow          graphWindow;
@@ -62,13 +74,15 @@ public class MainWindow extends JFrame
 		    System.exit(0);
 		}
 	    });
-	
+
 	setBackground(Color.lightGray);
+
+	childWindows = new Object[NUM_WINDOWS];
 	
 	menuManager = new MainMenuManager(this);
 	createLayout();
     }                              
-    
+
     public void actionPerformed(ActionEvent evt)
     {
     }
@@ -110,27 +124,27 @@ public class MainWindow extends JFrame
     // interface with the menu manager
     public void menuToolSelected(String item) {	
 	if (item.equals("Graphs")) {
-	    showChildWindow(graphWindow, "GraphWindow");
+	    showChildWindow("GraphWindow", GRAPH_WIN);
 	} else if (item.equals("Histograms")) {
-	    showChildWindow(histogramWindow, "HistogramWindow");
+	    showChildWindow("HistogramWindow", HIST_WIN);
 	} else if (item.equals("Timelines")) {
 	    showTimelineWindow();
 	} else if (item.equals("Animations")) {
 	    showAnimationWindow();
 	} else if (item.equals("Usage Profile")) {
-	    showChildWindow(profileWindow, "ProfileWindow");
+	    showChildWindow("ProfileWindow", PROFILE_WIN);
 	} else if (item.equals("Communication Histogram")) {
-		showChildWindow(commWindow, "CommWindow");
+		showChildWindow("CommWindow", COMM_WIN);
 	} else if (item.equals("View Log Files")) {
-	    showChildWindow(logFileViewerWindow, "LogFileViewerWindow");
+	    showChildWindow("LogFileViewerWindow", LOGVIEW_WIN);
 	} else if (item.equals("Overview")) {
 	    showStlWindow();
 	} else if (item.equals("Multirun Analysis")) {
-	    showChildWindow(multiRunWindow, "MultiRunWindow");
+	    showChildWindow("MultiRunWindow", MULTI_WIN);
 	} else if (item.equals("Performance Counters")) {
 	    showCounterWindow();
 	} else if (item.equals("General Graph")) {
-	    showChildWindow(graphingWindow, "GraphingWindow");
+	    showChildWindow("GraphingWindow", GRAPHING_WIN);
 	} else if (item.equals("Interval Graph")) {
 	    // ?
 	} else if (item.equals("Entry Point Characteristics Graph")) {
@@ -138,22 +152,64 @@ public class MainWindow extends JFrame
 	} else if (item.equals("Generate EP Data")) {
 	}
     }
-     
-    /* show the child window
-     *  if the childWindow has not been created yet, then create an object of type childClass
-     *  by invoking the corresponding constructor 
-     *  see http://developer.java.sun.com/developer/technicalArticles/ALT/Reflection/ for example use of Java Reflection
+
+    /**
+     *   Menu interface - changing background and foreground colors
      */
-    public void showChildWindow(Object childWindow, String childClass)
+    public void changeBackground()
+    {
+	JColorChooser colorWindow = new JColorChooser();
+	Color returnColor =
+	    colorWindow.showDialog(this, "Background Color",
+				   Analysis.background);
+	if (returnColor != null) {
+	    Analysis.background = returnColor;
+	    repaintAllWindows();
+	}
+    }
+     
+    public void changeForeground()
+    {
+	JColorChooser colorWindow = new JColorChooser();
+	Color returnColor =
+	    colorWindow.showDialog(this, "Foreground Color",
+				   Analysis.foreground);
+	if (returnColor != null) {
+	    Analysis.foreground = returnColor;
+	    repaintAllWindows();
+	}
+    }
+
+    // repaints all windows to reflect global drawing changes.
+    private void repaintAllWindows() {
+	for (int i=0; i<NUM_WINDOWS;i++) {
+	    if (childWindows[i] != null) {
+		((Frame)childWindows[i]).repaint();
+	    }
+	}
+	this.repaint();
+    }
+
+    /* show the child window
+     *  if the childWindow has not been created yet, then create an 
+     *  object of type childClass by invoking the corresponding constructor 
+     *  see 
+     *http://developer.java.sun.com/developer/technicalArticles/ALT/Reflection/
+     * for example use of Java Reflection
+     */
+    public void showChildWindow(String childClass, int windowIndex)
     {
 	try {
-	    if(childWindow == null) {
-		// get the name of the class within the current package and create an instance of that class
-		String className = getClass().getPackage().getName() + "." + childClass;
+	    if(childWindows[windowIndex] == null) {
+		// get the name of the class within the current package 
+		// and create an instance of that class
+		String className = 
+		    getClass().getPackage().getName() + "." + childClass;
 		Class cls  = Class.forName(className);
-		Constructor ctr = cls.getConstructor(new Class[]{this.getClass()});
-		childWindow = ctr.newInstance(new Object[] {this});
-		//	childWindow.setVisible(true); ?? NEEDED??
+		Constructor ctr = 
+		    cls.getConstructor(new Class[]{this.getClass()});
+		childWindows[windowIndex] = 
+		    ctr.newInstance(new Object[] {this});
 	    }
 	} catch(Exception e) {
 	    e.printStackTrace();

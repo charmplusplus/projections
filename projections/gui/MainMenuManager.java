@@ -18,6 +18,7 @@ public class MainMenuManager extends MenuManager
     implements ActionListener, ItemListener
 {
     private JMenu fileMenu;
+    private JMenu preferencesMenu;
     private JMenu toolMenu;
     private JMenu counterMenu;
 
@@ -43,6 +44,12 @@ public class MainMenuManager extends MenuManager
 		    false, // close all
 		    false, // separator
 		    true   // quit
+		});
+	    setEnabled(preferencesMenu,
+		       new boolean[]
+		{
+		    true,  // change background
+		    true   // change foreground
 		});
 	    setEnabled(toolMenu,
 		       new boolean[]
@@ -91,6 +98,14 @@ public class MainMenuManager extends MenuManager
 	    });
 	menubar.add(fileMenu);
 
+	preferencesMenu = makeJMenu("Preferences",
+				    new Object[]
+	    {
+		"Change Background Color",
+		"Change Foreground Color"
+	    });
+	menubar.add(preferencesMenu);
+
 	menubar.add(makeJMenu("View", 
 			   new Object[]
 	    {
@@ -137,6 +152,10 @@ public class MainMenuManager extends MenuManager
 		parent.closeAll();
 	    } else if (arg.equals("Quit")) {
 		parent.shutdown();
+	    } else if (arg.equals("Change Background Color")) {
+		parent.changeBackground();
+	    } else if (arg.equals("Change Foreground Color")) {
+		parent.changeForeground();
 	    } else if (arg.equals("Multirun Analysis") ||
 		       arg.equals("Histograms") ||
 		       arg.equals("Graphs") ||

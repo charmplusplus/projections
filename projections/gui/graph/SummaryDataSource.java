@@ -7,6 +7,8 @@ public class SummaryDataSource extends DataSource
 {
   private int numIntervals;
   private double dataValues[];
+
+    private Color graphColor = Color.white;
   
   public SummaryDataSource(double[] data) {
     dataValues = data;
@@ -26,8 +28,12 @@ public class SummaryDataSource extends DataSource
    */
   public int getValueCount() { return 1; }
   
-  public Color getColor(int valNo) { return Color.white; }
+  public Color getColor(int valNo) { return graphColor; }
   
+    public void setColor(Color newColor) {
+	graphColor = newColor;
+    }
+
   /**
    * Return the values associated with this index.
    *  The index passed in is between 0 and getIndexCount()-1, inclusive.

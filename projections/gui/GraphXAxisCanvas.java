@@ -15,8 +15,8 @@ public class GraphXAxisCanvas extends Canvas
    
    public GraphXAxisCanvas()
    {
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
    }   
    private void drawAxis(Graphics g)
    {
@@ -140,8 +140,8 @@ public class GraphXAxisCanvas extends Canvas
 	  
 	  drawAxis(pg);
 	  
-	  ((Graphics2D)pg).setBackground(Color.black);
-	  setForeground(Color.white);
+	  ((Graphics2D)pg).setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
    }   
    public void setBounds(int x, int y, int w, int h)
    {

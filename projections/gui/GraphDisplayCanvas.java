@@ -10,7 +10,7 @@ public class GraphDisplayCanvas extends Canvas
    
    public GraphDisplayCanvas()
    {
-	  setBackground(Color.black);
+	  setBackground(Analysis.background);
    }   
    private void addDataForBar(ZItem item, int x)
    {
@@ -47,8 +47,10 @@ public class GraphDisplayCanvas extends Canvas
 	  int w = getSize().width;
 	  int h = getSize().height;
 	 
-	  g.clearRect(0, 0, w, h);
+	  g.setColor(Analysis.background);
+	  g.fillRect(0, 0, w, h);
    
+	  g.setColor(Analysis.foreground);
 	  g.translate(-data.displayPanel.getHSBValue(), 0);
 	  
 	  if(data.graphtype == GraphData.LINE)

@@ -27,8 +27,8 @@ public class GraphYAxisCanvas extends Canvas
 	  pixelincrement = 0;
 	  maxvalue = 0;
 	  labelincrement = 0;
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
    }   
    public int getPreferredWidth()
    {

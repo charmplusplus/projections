@@ -53,6 +53,10 @@ public class CommWindow extends GenericGraphWindow
 		pack();
 		setVisible(true);
 	}
+
+    public void repaint() {
+	refreshGraph();
+    }
 	
 	public void itemStateChanged(ItemEvent ae){
 		if(ae.getSource() instanceof Checkbox){
@@ -165,7 +169,7 @@ public class CommWindow extends GenericGraphWindow
 		setXAxis("Byte Size", "");
 		setYAxis("Frequency", "");
 	}
-	
+
 	protected void showDialog(){
 		if(dialog == null)
 			dialog = new RangeDialog(this, "select Range");

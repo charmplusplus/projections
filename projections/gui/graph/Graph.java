@@ -26,8 +26,6 @@ public class Graph extends JPanel
     private double xscale;
     
     private static final int FONT_SIZE = 12;   
-    private static final Color BACKGROUND = Color.black;
-    private static final Color FOREGROUND = Color.white;
     
     private static final double PI = 3.142;
 
@@ -36,7 +34,6 @@ public class Graph extends JPanel
     private Color labelColor;
     
     private JLabel yLabel;	// to print y axis title vertically
-    private int w,h;
     double pixelincrementX, pixelincrementY;
     // number of pixels per tick and labels
     double tickIncrementX, tickIncrementY;
@@ -47,6 +44,7 @@ public class Graph extends JPanel
 
     private int maxSumY;
     private int barWidth, width;
+    private int w,h;
 
     private int baseWidth = -1;
 
@@ -60,7 +58,7 @@ public class Graph extends JPanel
 	
 	GraphType = BAR;	   // default GraphType is BAR
 	BarGraphType = STACKED;    // default BarGraphType is STACKED
-	labelColor = FOREGROUND;
+	labelColor = Analysis.foreground;
 	stackArray = null;
 	dataSource = null;
 	
@@ -227,9 +225,6 @@ public class Graph extends JPanel
 	    g.setFont(font);
 	    fm = g.getFontMetrics(font);
 	}
-	w = getWidth();
-	h = getHeight();
-
 	drawDisplay(g);
     }
 
@@ -240,14 +235,11 @@ public class Graph extends JPanel
 	    pg.setFont(font);
 	    fm = pg.getFontMetrics(font);
 	}
-	w = getWidth();
-	h = getHeight();
-
 	setBackground(Color.white);
 	setForeground(Color.black);
 	drawDisplay(pg);
-	setBackground(BACKGROUND);
-	setForeground(FOREGROUND);
+	setBackground(Analysis.background);
+	setForeground(Analysis.foreground);
     }
 
     public void mouseMoved(MouseEvent e) {
@@ -315,9 +307,12 @@ public class Graph extends JPanel
     private void drawDisplay(Graphics _g)
     {
 	Graphics2D g = (Graphics2D)_g;
-	g.setBackground(BACKGROUND);
-	g.setColor(FOREGROUND);
 	
+	g.setBackground(Analysis.background);
+	g.setColor(Analysis.foreground);
+
+	w = getWidth();
+	h = getHeight();
 	g.clearRect(0, 0, w, h);
 	
 	if ((xAxis != null) && (yAxis != null)) {
@@ -381,7 +376,7 @@ public class Graph extends JPanel
 	g.drawString(title, -(h+fm.stringWidth(title))/2, 
 		     fm.getHeight());
 	g.rotate(PI/2);
-	g.setColor(FOREGROUND);	  
+	g.setColor(Analysis.foreground);	  
 
 	// width available for drawing the graph
     	width = (int)((baseWidth-30-originX)*xscale);

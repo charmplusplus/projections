@@ -31,6 +31,11 @@ public class Analysis {
     public static final int FTYPE_SUMMARY = 0;
     public static final int FTYPE_SUMDETAIL = 1;
     public static final int FTYPE_LOG = 2;
+
+    // allows user definitions for foreground and background colors of
+    // gui tools.
+    public static Color background = Color.black;
+    public static Color foreground = Color.white;
     
     /******************* Initialization ************/
     private static StsReader sts;

@@ -6,7 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class GraphPanel extends JPanel
-    implements ActionListener, ItemListener
+    implements ActionListener
 {
     private static final Color BACKGROUND = Color.black;
     private static final Color FOREGROUND = Color.white;
@@ -15,12 +15,12 @@ public class GraphPanel extends JPanel
     private JScrollPane displayPanel;
     private Graph displayCanvas;
 
-    private Button             bIncreaseX;
-    private Button             bDecreaseX;
-    private Button             bResetX;
-    private Checkbox           cbLineGraph;
-    private Checkbox           cbBarGraph;
-    private Label              lScale;
+    private JButton             bIncreaseX;
+    private JButton             bDecreaseX;
+    private JButton             bResetX;
+    private JRadioButton        cbLineGraph;
+    private JRadioButton        cbBarGraph;
+    private JLabel              lScale;
     private FloatTextField     scaleField;
     
     public GraphPanel(Graph g)
@@ -32,27 +32,32 @@ public class GraphPanel extends JPanel
 
     private void createLayout() {
 	
-	lScale  = new Label("X-Axis Scale: ", Label.CENTER);
+	lScale  = new JLabel("X-Axis Scale: ", SwingConstants.CENTER);
 	
 	scaleField = new FloatTextField(1, 5);
 	scaleField.addActionListener(this);
 	
-	bDecreaseX = new Button("<<");
-	bIncreaseX = new Button(">>");
-	bResetX    = new Button("Reset");
+	bDecreaseX = new JButton("<<");
+	bIncreaseX = new JButton(">>");
+	bResetX    = new JButton("Reset");
 	bIncreaseX.addActionListener(this);
 	bDecreaseX.addActionListener(this);
 	bResetX.addActionListener(this);
 	
-	CheckboxGroup cbgGraphType = new CheckboxGroup();
-	cbLineGraph = new Checkbox("Line Graph", false,  cbgGraphType);
-	cbBarGraph  = new Checkbox("Bar Graph",  true, cbgGraphType);
-	cbLineGraph.addItemListener(this);
-	cbBarGraph.addItemListener(this);
+	ButtonGroup cbgGraphType = new ButtonGroup();
+	cbLineGraph = new JRadioButton("Line Graph");
+	cbLineGraph.setActionCommand("line");
+	cbBarGraph  = new JRadioButton("Bar Graph",  true);
+	cbBarGraph.setActionCommand("bar");
+	cbgGraphType.add(cbLineGraph);
+	cbgGraphType.add(cbBarGraph);
+
+	cbLineGraph.addActionListener(this);
+	cbBarGraph.addActionListener(this);
 	
+	// making sure the states are consistent
 	if (displayCanvas.getGraphType() == Graph.LINE) {
-	    cbLineGraph.setState(true); 
-	    cbBarGraph.setState(false);
+	    cbLineGraph.setSelected(true); 
 	}
 	
 	GridBagLayout gbl = new GridBagLayout();
@@ -93,8 +98,8 @@ public class GraphPanel extends JPanel
 	float oldScale = scaleField.getValue();
 	float scale = 0;
 	
-	if (evt.getSource() instanceof Button) {
-	    Button b = (Button) evt.getSource();
+	if (evt.getSource() instanceof JButton) {
+	    JButton b = (JButton) evt.getSource();
  	    if (b == bDecreaseX) {
 		scale = (float)((int)(oldScale * 4)-1)/4;
 		if (scale < 1.0)
@@ -113,16 +118,12 @@ public class GraphPanel extends JPanel
 	    // hence the conservative approach.
 	    scale = oldScale;
 	    displayCanvas.setScale((double)scale);
-	}
-    }
-
-    public void itemStateChanged(ItemEvent evt)
-    {
-	Checkbox c = (Checkbox) evt.getSource();
-	if (c == cbLineGraph) {
-	    displayCanvas.setGraphType(Graph.LINE);
-	} else if (c == cbBarGraph) {
-	    displayCanvas.setGraphType(Graph.BAR);
+	} else if (evt.getSource() instanceof JRadioButton) {
+	    if (evt.getActionCommand().equals("line")) {
+		displayCanvas.setGraphType(Graph.LINE);
+	    } else if (evt.getActionCommand().equals("bar")) {
+		displayCanvas.setGraphType(Graph.BAR);
+	    }
 	}
     }
 

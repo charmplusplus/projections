@@ -15,13 +15,16 @@ import projections.misc.LogEntryData;
 public class CommWindow extends GenericGraphWindow 
     implements ItemListener
 {
-	private double[][] 	msgCount;
-	private double[][] 	byteCount;
+	private double[][] 	msgCount;		// rename to sentMsgCount
+	private double[][] 	byteCount;		// rename to sentBytCount
+	private double[][] 	recivedMsgCount;		
+	private double[][]	exclusiveSent;
 	private ArrayList		histogram;
 	private int[]			histArray;
 	private String[][]	histText;
 	private String[][]	msgText;
 	private String[][]	byteText;
+	private String 		currentArrayName;
 	private String[][]	popupText;
 	private String[][]	EPNames;
 	private JPanel			mainPanel;
@@ -30,6 +33,9 @@ public class CommWindow extends GenericGraphWindow
 	private Checkbox		sentMssgs;
 	private Checkbox		sentBytes;
 	private Checkbox		histogramCB;
+	private Checkbox		recivedMssgs;
+	private Checkbox		sentExclusive;
+
 
     /**
      *  **CW** STUPID mix of old and new ... will need to standardize soon.
@@ -46,7 +52,7 @@ public class CommWindow extends GenericGraphWindow
     	getContentPane().add(mainPanel);
 		setLayout();
 		showDialog();
-		setPopupText(msgText);
+		setPopupText("histArray");
 		pack();
 		setVisible(true);
 	}
@@ -58,22 +64,35 @@ public class CommWindow extends GenericGraphWindow
 			 if(cb == histogramCB){
 				//System.out.println("HistogramView");
 				setDataSource("Histogram", histArray, this);
-				setPopupText(histText);
+				setPopupText("histArray");
 				setYAxis("Frequency", null);
 				setXAxis("Byte Size", "bytes");
 				super.refreshGraph();
 			}else if(cb == sentMssgs){
 				//System.out.println("mssgs");
 				setDataSource("Communications", msgCount, this);
-				setPopupText(msgText);
+				setPopupText("msgCount");
+				//setPopupText(msgText);
 				setYAxis("Messages Sent", "");
 				setXAxis("Processor", null);
 				super.refreshGraph();
 			}else if(cb == sentBytes){
 				//System.out.println("bytes");
 				setDataSource("Communications", byteCount, this);
-				setPopupText(byteText);
+				setPopupText("byteCount");
 				setYAxis("Bytes Sent", "bytes");
+				setXAxis("Processor", null);
+				super.refreshGraph();
+			}else if(cb == recivedMssgs){
+				setDataSource("Communications", recivedMsgCount, this);
+				setPopupText("recivedMsgCount");
+				setYAxis("Mssages Recived", "");
+				setXAxis("Processor", null);
+				super.refreshGraph();
+			}else if(cb == sentExclusive){
+				setDataSource("Communications", exclusiveSent, this);
+				setPopupText("exclusiveSent");
+				setYAxis("Messages Sent Externally", "");
 				setXAxis("Processor", null);
 				super.refreshGraph();
 			}
@@ -81,24 +100,43 @@ public class CommWindow extends GenericGraphWindow
 		}
 	}
 	
+	private void setPopupText(String input){
+		currentArrayName = input;
+	}
+	
 	private void setPopupText(String[][] input){
 		popupText = input;
-		
-		//if(popupText == histText)
-			//System.out.println("Histogram Text Set");
 	}
 	
 	 public String[] getPopup(int xVal, int yVal){
 	 	 //System.out.println("CommWindow.getPopup()");
 		 //System.out.println(xVal +", " +yVal);
-		 if( (xVal < 0) || (yVal <0) || popupText==null)
+		 if( (xVal < 0) || (yVal <0) || currentArrayName==null)
 			 return null;
 			 
 		 if(EPNames == null)
 		 	EPNames = Analysis.getEntryNames();
 
 		 String[] rString = new String[2];
+		 
+		 if(currentArrayName.equals("histArray")){
+		 	rString[0] = xVal + " bytes";
+			rString[1] = "Count = " +  histArray[xVal];
+		 }else if(currentArrayName.equals("msgCount")){
+		 	rString[0] = "EPid: " + EPNames[yVal][0];
+			rString[1] = "Count = " + msgCount[xVal][yVal];
+		 }else if(currentArrayName.equals("byteCount")){
+		 	rString[0] = "EPid: " + EPNames[yVal][0];
+			rString[1] = "Bytes = " + byteCount[xVal][yVal];
+		 }else if(currentArrayName.equals("recivedMsgCount")){
+		 	rString[0] = "EPid: " + EPNames[yVal][0];
+			rString[1] = "Count = " + recivedMsgCount[xVal][yVal];
+		 }else if(currentArrayName.equals("exclusiveSent")){
+		 	rString[0] = "EPid: " + EPNames[yVal][0];
+			rString[1] = "Count = " + exclusiveSent[xVal][yVal];
+		 }
 
+/*		
 		 if(popupText != histText){
 			 rString[0] = "EPid: " + EPNames[yVal][0];
 			 rString[1] = popupText[xVal][yVal];
@@ -107,8 +145,9 @@ public class CommWindow extends GenericGraphWindow
 			rString[1] = popupText[xVal][1];
 			//System.out.println("==> " + rString[0]);
 			//System.out.println("==> " + rString[1]);
-		}			 
-
+		}			
+		
+*/
 		//System.out.println("==> " + rString);
 		return rString;
 	 }	
@@ -133,25 +172,31 @@ public class CommWindow extends GenericGraphWindow
 		checkBoxPanel = new JPanel();
 		
 		CheckboxGroup cbg = new CheckboxGroup();
-		histogramCB = new Checkbox("Histogram", cbg, false);
-		sentMssgs = new Checkbox("Messages Sent (mssgs)", cbg, true);
+		histogramCB = new Checkbox("Histogram", cbg, true);
+		sentMssgs = new Checkbox("Messages Sent (mssgs)", cbg, false);
 		sentBytes = new Checkbox("Messages Sent (bytes)", cbg, false);
+		recivedMssgs = new Checkbox("Messages Recived", cbg, false);
+		sentExclusive = new Checkbox("Messages Sent Externally", cbg, false);
 		
 		histogramCB.addItemListener(this);
 		sentMssgs.addItemListener(this);
 		sentBytes.addItemListener(this);
+		recivedMssgs.addItemListener(this);
+		sentExclusive.addItemListener(this);
 		
 		Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, sentMssgs, gbc, 1,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, sentBytes, gbc, 2,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, recivedMssgs, gbc, 3,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 4,0, 1,1, 1,1);
 					
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, checkBoxPanel, gbc, 0,2, 1,1, 0,0);
 	}
 		
 	protected void setGraphSpecificData(){
-		setXAxis("Processor", "");
-		setYAxis("Messages Sent", "");
+		setXAxis("Byte Size", "");
+		setYAxis("Frequency", "");
 	}
 	
 	protected void showDialog(){
@@ -165,14 +210,12 @@ public class CommWindow extends GenericGraphWindow
 	
 		msgCount = new double[validPEs.size()][];
 		byteCount = new double[validPEs.size()][];
+		recivedMsgCount = new double[validPEs.size()][];
+		exclusiveSent = new double[validPEs.size()][];
 		msgText = new String[validPEs.size()][];
 		byteText = new String[validPEs.size()][];
 		getData();
-		refreshGraph();
-	}
-
-	public void refreshGraph(){
-		setDataSource("Communcations", msgCount, this);
+		setDataSource("Histogram", histArray, this);
 		super.refreshGraph();
 	}
 	
@@ -187,6 +230,46 @@ public class CommWindow extends GenericGraphWindow
 		histogram = new ArrayList();
 		
 		while(peList.hasMoreElements()){
+			int pe = peList.nextElement();
+			glr = new GenericLogReader(Analysis.getLogName(pe), Analysis.getVersion());
+			
+			try{
+				msgCount[pe] = new double[numEPs];
+				byteCount[pe] = new double[numEPs];
+				recivedMsgCount[pe] = new double[numEPs];
+				exclusiveSent[pe] = new double[numEPs];
+				msgText[pe] = new String[numEPs];
+				byteText[pe] = new String[numEPs];
+				int EPid;
+				
+				glr.nextEventOnOrAfter(startTime, logdata);
+				
+				while(true){ 		// we'll just use the EOFException to break us out of this loop :)
+					glr.nextEvent(logdata);
+					if(logdata.type == ProjDefs.CREATION){
+						EPid = logdata.entry;
+						msgCount[pe][EPid] ++;
+						msgText[pe][EPid] = "Count = " + msgCount[pe][EPid];		// need to get rid of this
+						byteCount[pe][EPid] += logdata.msglen;
+						byteText[pe][EPid] = "Bytes: " + byteCount[pe][EPid];  	// and this too
+						histogram.add(new MyArray(logdata.msglen));
+					} else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
+						EPid = logdata.entry;
+						recivedMsgCount[pe][EPid] ++;
+						if(logdata.pe == pe)
+							exclusiveSent[pe][EPid] ++;
+					}
+				}
+			
+			}catch (java.io.EOFException e){
+			}catch (Exception e){
+				System.out.println("Exception: " +e);
+				e.printStackTrace();
+			}
+		}
+		
+		
+		/*while(peList.hasMoreElements()){
 			int pe = peList.nextElement();
 			glr = new GenericLogReader(Analysis.getLogName(pe), Analysis.getVersion());
 			
@@ -231,6 +314,7 @@ public class CommWindow extends GenericGraphWindow
 			}
 			
 		}
+		*/
 
 		int max = ((MyArray)histogram.get(0)).index;
 		int min = ((MyArray)histogram.get(0)).index;
@@ -257,6 +341,18 @@ public class CommWindow extends GenericGraphWindow
 			histArray[index] += 1;
 			histText[index][0] = index + " bytes";
 			histText[index][1] = "Count = " + histArray[index];
+		}
+		
+		for(int k=0; k<numPe; k++){
+			for(int j=0; j<numEPs; j++){
+				exclusiveSent[k][j] = msgCount[k][j] - exclusiveSent[k][j];
+				
+				// AJ - i'm doing this to prevent any negitive numbers from 
+				// getting sent into the stack array because it messes up
+				// the drawing				
+				if(exclusiveSent[k][j] < 0)
+					exclusiveSent[k][j] = 0;
+			}
 		}
 	
 		/*

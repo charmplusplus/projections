@@ -9,7 +9,10 @@ public class TimelineLine{
 	public int x2,y2;
 	// Pe on which execution of the message occurs
 	public int pCurrent;
+	public int pCreation;
 	public long executiontime;
+	public TimelineObject obj;
+	public long creationtime;
 
 	TimelineLine(int x1,int y1,int x2,int y2,int pCurrent,long executiontime){
 		this.x1 = x1;
@@ -20,4 +23,12 @@ public class TimelineLine{
 		this.executiontime = executiontime;
 		
 	};
+
+	TimelineLine(int pCreation,int pCurrent,TimelineObject obj,long creationtime,long executiontime){
+		this.pCreation = pCreation;
+		this.pCurrent=pCurrent;
+		this.obj=obj;
+		this.creationtime = creationtime;
+		this.executiontime = executiontime;
+	}
 };

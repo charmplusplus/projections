@@ -127,7 +127,7 @@ public class TimelineWindow extends Frame
 			if(displayCanvas != null && axisTopCanvas != null && axisBotCanvas != null)
 			{
 			   setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			   setAllSizes();
+			   setAllSizes(false);
 			   displayCanvas.makeNewImage();
 			   axisTopCanvas.makeNewImage();
 			   axisBotCanvas.makeNewImage();
@@ -182,7 +182,7 @@ public class TimelineWindow extends Frame
       (float) ((data.endTime-data.beginTime)/(endTime-startTime));
     scaleField.setText("" + data.scale);
     setCursor(new Cursor(Cursor.WAIT_CURSOR));
-    setAllSizes();
+    setAllSizes(true);
     displayCanvas.makeNewImage();
     axisTopCanvas.makeNewImage();
     axisBotCanvas.makeNewImage();
@@ -258,7 +258,7 @@ public class TimelineWindow extends Frame
 	 // setTLSizes();
 	 // setScales();
 	 // setTLBounds();
-	 setAllSizes();
+	 setAllSizes(false);
 	 displayCanvas.makeNewImage();
 	 axisTopCanvas.makeNewImage();
 	 axisBotCanvas.makeNewImage();
@@ -313,7 +313,7 @@ public class TimelineWindow extends Frame
 	 calcLeftTime(leftTime, rightTime, oldScale, data.scale);
 	 
        setCursor(new Cursor(Cursor.WAIT_CURSOR));
-       setAllSizes();
+       setAllSizes(true);
        displayCanvas.makeNewImage();
        axisTopCanvas.makeNewImage();
        axisBotCanvas.makeNewImage();
@@ -384,7 +384,7 @@ public class TimelineWindow extends Frame
 	  for(int i=0; i<data.userEventsArray[p].length; i++)
 	    displayCanvas.add(data.userEventsArray[p][i]);    
     
-    setAllSizes();
+    setAllSizes(true);
     labelCanvas.makeNewImage();
     axisTopCanvas.makeNewImage();
     axisBotCanvas.makeNewImage();
@@ -1002,9 +1002,20 @@ public class TimelineWindow extends Frame
 	  
 	  pjob.end(); 
    }   
+		
+	 private void setAllSizes(boolean clearordraw){
+	 	if(clearordraw){
+			data.clearAllLines();
+			setAllSizes();
+		}	
+		else{
+			setAllSizes();
+			data.drawAllLines();
+		}
+	 }
+	 
    private void setAllSizes()
    {
-		data.clearAllLines();
 	  data.mpw = mainPanel.getSize().width;
 	  data.mph = mainPanel.getSize().height;
 	  

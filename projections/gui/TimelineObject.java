@@ -303,13 +303,13 @@ public class TimelineObject extends Component
 				 	if(creationLine == 0)
 					 	created_message= searchMesg(data.mesgVector[pCreation],EventID);
 					if(created_message != null){
-						data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,h,startY,creationLine);			
+						data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,this,creationLine);			
 						creationLine = 2;
 					}
 		 		}
 				
 			}else{
-				data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,h,startY,creationLine);
+				data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,this,creationLine);
 				creationLine = 1;
 			}
 		}	

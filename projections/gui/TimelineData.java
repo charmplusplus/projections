@@ -463,7 +463,7 @@ public class TimelineData
    }
 
 
-   public void drawConnectingLine(int pCreation,long creationtime,int pCurrent,long executiontime,int h,int startY,int drawordelete){
+   public void drawConnectingLine(int pCreation,long creationtime,int pCurrent,long executiontime,TimelineObject objCurrent,int drawordelete){
 	double yscale;
 	
 	int startpe_position,endpe_position;
@@ -474,6 +474,8 @@ public class TimelineData
 	long time = endTime-beginTime+1;
 	int mywidth=dim.width;
 	int maxx = offset + (int)((endTime-beginTime)*pixelIncrement/timeIncrement);
+	int h=objCurrent.h;
+	int startY=objCurrent.startY;
 	
 	processorList.reset();
 	startpe_position = 0;
@@ -516,22 +518,45 @@ public class TimelineData
 	int y2 = (int )(yscale * (double )endpe_position + h);
 	
 
-	//g.setColor(new Color(100,100,255));
+	//g.setColor(new Color(100,1s,255));
 	//g.drawLine(x1,y1,x2,y2);
-	line = new TimelineLine(x1,y1,x2,y2,pCurrent,executiontime);
+	line = new TimelineLine(pCreation,pCurrent,objCurrent,creationtime,executiontime);
 	mesgCreateExecVector.add(line);
 	displayCanvas.repaint();
 	//g.drawLine(offset,0,offset,tlh);
 	//g.drawLine(maxx,0,maxx,tlh);
-   }
+}
+
 
    public void drawAllLines(){
    	Graphics g = displayCanvas.getGraphics();
    	if(!mesgCreateExecVector.isEmpty()){
 		 	g.setColor(new Color(100,100,255));
+
+			Dimension dim = displayCanvas.getSize();
+			double calc_xscale = (double )(pixelIncrement/timeIncrement);
+			double yscale = (double )dim.height/(double )(processorList.size());
+
+
 			for(int i=0;i<mesgCreateExecVector.size();i++){
 				TimelineLine lineElement = (TimelineLine )mesgCreateExecVector.elementAt(i);
-				g.drawLine(lineElement.x1,lineElement.y1,lineElement.x2,lineElement.y2);
+				int startpe_position=0;
+				int endpe_position=0;
+				processorList.reset();
+				for(int j=0;j<processorList.size();j++){
+					int pe = processorList.nextElement();
+					if(pe == lineElement.pCreation)
+						startpe_position = j;
+					if(pe == lineElement.pCurrent)
+						endpe_position = j;
+				}
+				
+				int x1 = (int )((double )(lineElement.creationtime - beginTime)*calc_xscale+offset);
+				int x2 = (int )((double )(lineElement.executiontime - beginTime)*calc_xscale+offset);
+				int y1 = (int )(yscale * (double )startpe_position + lineElement.obj.h+lineElement.obj.startY+5+5);
+				int y2 = (int )(yscale * (double )endpe_position +lineElement.obj.h);
+				
+				g.drawLine(x1,y1,x2,y2);
 			}
 	 }
 

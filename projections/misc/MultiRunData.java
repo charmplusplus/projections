@@ -46,14 +46,14 @@ public class MultiRunData {
 		stsReaders[i] = 
 		    new GenericStsReader(getSumStsFilename(NbaseName,
 							   NdataSetPathnames[i]),
-					 MainWindow.CUR_VERSION);
+					 Analysis.getVersion());
 		sumReaders[i] = new GenericSummaryReader[stsReaders[i].numPe];
 		for (int j=0; j<sumReaders[i].length; j++) {
 		    sumReaders[i][j] = 
 			new GenericSummaryReader(getSumFilename(NbaseName,
 								NdataSetPathnames[i],
 								j),
-						 MainWindow.CUR_VERSION);
+						 Analysis.getVersion());
 		}
 	    }
 	}

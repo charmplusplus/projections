@@ -5,12 +5,12 @@
 
 SRC=\
     projections/analysis/AsciiIntegerReader.java\
-    projections/analysis/BGSummaryReader.java\
     projections/analysis/Chare.java\
     projections/analysis/Entry.java\
     projections/analysis/EPNamdDefs.java\
     projections/analysis/EPDataGenerator.java\
     projections/analysis/Interval.java\
+    projections/analysis/IntervalData.java\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\
@@ -20,6 +20,7 @@ SRC=\
     projections/analysis/Sorter.java\
     projections/analysis/StsReader.java\
     projections/analysis/SumAnalyzer.java\
+    projections/analysis/SumDetailReader.java\
     projections/analysis/TimelineEvent.java\
     projections/analysis/TimelineMessage.java\
     projections/analysis/UserEvent.java\
@@ -29,8 +30,6 @@ SRC=\
     projections/analysis/MultiRunDataAnalyzer.java\
     projections/analysis/ParseTokenizer.java\
     projections/analysis/GenericLogReader.java\
-    projections/analysis/GenericStsReader.java\
-    projections/analysis/GenericSumDetailReader.java\
     projections/analysis/GenericSummaryReader.java\
     projections/analysis/ObjectId.java\
     projections/analysis/ProjectionsReader.java\
@@ -40,7 +39,6 @@ SRC=\
     projections/gui/AnimationDisplayPanel.java\
     projections/gui/AnimationWindow.java\
     projections/gui/AreaGraphPanel.java\
-    projections/gui/BGGraphWindow.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
     projections/gui/ColorMap.java\
@@ -151,9 +149,7 @@ SRC=\
     projections/gui/count/CounterTest.java\
     projections/gui/count/TableMap.java\
     projections/gui/count/TableSorter.java\
-    projections/misc/ChareData.java\
     projections/misc/CommandLineException.java\
-    projections/misc/EntryTypeData.java\
     projections/misc/EntryNotFoundException.java\
     projections/misc/ErrorDialog.java\
     projections/misc/LogEntryData.java\

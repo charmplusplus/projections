@@ -28,9 +28,9 @@ public class DataSource2D extends DataSource
   }
   
   public String[] getPopup(int xVal, int yVal){
-    //System.out.println("DataSource2D.getPopup()");
-    if(parent == null)
-	 	return null;	 
+    if(parent == null){
+	 	return null;	
+	 } 
     return parent.getPopup(xVal, yVal);
   }
 
@@ -42,7 +42,7 @@ public class DataSource2D extends DataSource
   public void getValues(int index,double[] values)
   {
     for(int j=0;j<data[index].length;j++)
-	values[j]=(double)data[index][j];
+		values[j]=(double)data[index][j];
   }
 }
 

@@ -24,6 +24,7 @@ public class CommWindow extends GenericGraphWindow
 	private String[][]	msgText;
 	private String[][]	byteText;
 	private String[][]	popupText;
+	private String[][]	EPNames;
 	private JPanel			mainPanel;
 	private JPanel			graphPanel;
 	private JPanel			checkBoxPanel;
@@ -90,17 +91,23 @@ public class CommWindow extends GenericGraphWindow
 	
 	 public String[] getPopup(int xVal, int yVal){
 	 	 //System.out.println("CommWindow.getPopup()");
+		 //System.out.println(xVal +", " +yVal);
 		 if( (xVal < 0) || (yVal <0) || popupText==null)
 			 return null;
+			 
+		 if(EPNames == null)
+		 	EPNames = Analysis.getUserEntryNames();
 
 		 String[] rString = new String[2];
 
 		 if(popupText != histText){
-			 rString[0] = "EPid: " + yVal;
+			 rString[0] = "EPid: " + EPNames[yVal][0];
 			 rString[1] = popupText[xVal][yVal];
 		}else{
 			rString[0] = popupText[xVal][0];
 			rString[1] = popupText[xVal][1];
+			//System.out.println("==> " + rString[0]);
+			//System.out.println("==> " + rString[1]);
 		}			 
 
 		//System.out.println("==> " + rString);
@@ -157,10 +164,10 @@ public class CommWindow extends GenericGraphWindow
 			dialog.setAllData();
 		}
 	
-		msgCount = new double[dialog.numProcessors][];
-		byteCount = new double[dialog.numProcessors][];
-		msgText = new String[dialog.numProcessors][];
-		byteText = new String[dialog.numProcessors][];
+		msgCount = new double[validPEs.size()][];
+		byteCount = new double[validPEs.size()][];
+		msgText = new String[validPEs.size()][];
+		byteText = new String[validPEs.size()][];
 		getData();
 		refreshGraph();
 	}

@@ -9,13 +9,16 @@ import projections.gui.*;
 public class YAxisAuto extends YAxisFixed
 {
   private static double sourceToMax(DataSource data) {
+  
+	 
     double max=0;
     int ni=data.getIndexCount(),nv=data.getValueCount();
     double[] values=new double[nv];
+	 
     for (int i=0;i<ni;i++) {
-      data.getValues(i,values);
+	   data.getValues(i,values);
       for (int v=0;v<nv;v++) {
-	if (values[v]>max) max=values[v];
+			if (values[v]>max) max=values[v];
       }
     }
     /*delete[] values*/  

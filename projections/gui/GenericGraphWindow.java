@@ -119,7 +119,7 @@ public abstract class GenericGraphWindow
     }
 
     protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
-	dataSource = new DataSource1D(title,data);
+	dataSource = new DataSource1D(title,data,parent);
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);

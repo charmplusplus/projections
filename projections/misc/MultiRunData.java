@@ -21,7 +21,7 @@ import java.io.*;
 public class MultiRunData 
 {
     // IO reader objects (holds data after construction unless on exception)
-    private GenericStsReader stsReaders[];
+    private StsReader stsReaders[];
     // sumReaders dim 1 - indexed by Run Log ID
     // sumReaders dim 2 - indexed by PE number
     private GenericSummaryReader sumReaders[][];
@@ -88,13 +88,12 @@ public class MultiRunData
 				      "with zero runs!");
 	    }
 
-	    stsReaders = new GenericStsReader[numRuns];
+	    stsReaders = new StsReader[numRuns];
 	    sumReaders = new GenericSummaryReader[numRuns][];
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
-		    new GenericStsReader(listOfStsFilenames[run],
-					 Analysis.getVersion());
-		int numPE = stsReaders[run].numPe;
+		    new StsReader(listOfStsFilenames[run]);
+		int numPE = stsReaders[run].getProcessorCount();
 		sumReaders[run] =
 		    new GenericSummaryReader[numPE];
 		for (int pe=0; pe<numPE; pe++) {
@@ -107,18 +106,18 @@ public class MultiRunData
 	    // there has to be at least one run and all sts files have to
 	    // agree on the number of entries (or we will be comparing
 	    // oranges with apples)
-	    numEPs = stsReaders[0].entryCount;
+	    numEPs = stsReaders[0].getEntryCount();
 
 	    // acquiring epNames and run names
 	    epNames = new String[numEPs];
 	    for (int ep=0; ep<numEPs; ep++) {
-		epNames[ep] = stsReaders[0].entryList[ep].name;
+		epNames[ep] = stsReaders[0].getEntryNames()[ep][0];
 	    }
 	    
 	    runNames = new String[numRuns];
 	    for (int run=0; run<numRuns; run++) {
-		runNames[run] = "(" + stsReaders[run].numPe + ")" +
-		    "[" + stsReaders[run].machineName + "]";
+		runNames[run] = "(" + stsReaders[run].getProcessorCount() + 
+		    ")" + "[" + stsReaders[run].getMachineName() + "]";
 	    }
 
 	    // begin computing information
@@ -168,7 +167,7 @@ public class MultiRunData
 		// make sure statistics objects are clean.
 		timeStats.reset();
 		numCallsStats.reset();
-		for (int pe=0; pe<stsReaders[run].numPe; pe++) {
+		for (int pe=0; pe<stsReaders[run].getProcessorCount(); pe++) {
 		    // this is silly because of a design fault where
 		    // GenericSummaryReader uses a reversed indexing scheme
 		    // from this code.
@@ -185,7 +184,7 @@ public class MultiRunData
 	runWallTimes = new double[numRuns];
 	for (int run=0; run<numRuns; run++) {
 	    timeStats.reset();
-	    for (int pe=0; pe<stsReaders[run].numPe; pe++) {
+	    for (int pe=0; pe<stsReaders[run].getProcessorCount(); pe++) {
 		// intervalSize in sumReaders is given in seconds. However,
 		// we are working with microseconds.
 		timeStats.accumulate(sumReaders[run][pe].numIntervals *

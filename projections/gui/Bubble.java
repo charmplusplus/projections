@@ -17,7 +17,7 @@ public class Bubble extends Window
 	  setBackground(new Color(255, 255, 200));
 	  setForeground(Color.black);
 	  setSize(getPreferredSize());
-   }   
+    }   
    static Frame getFrame(Component c)
    {
 	  Frame f = null;
@@ -42,23 +42,35 @@ public class Bubble extends Window
 		 Graphics g = getGraphics();
 		 if(g != null)
 		 {
-			fm = g.getFontMetrics(g.getFont());
+			//fm = g.getFontMetrics(g.getFont());
+			fm = g.getFontMetrics();
 			g.dispose();
 		 }   
 	  }
 	  
-	  if(fm == null || text == null)
-		 return new Dimension(w, h);
-		 
-	  int sh = fm.getHeight()+2;
+	  if(text == null){
+		return new Dimension(w, h);
+	  }	 
+	
+	  if(fm != null){
+	  	int sh = fm.getHeight()+2;
 	  
-	  h = sh * text.length + 6;
+		  h = sh * text.length + 6;
 	  
-	  w = fm.stringWidth(text[0]);
-	  for(int i=1; i<text.length; i++)
-		 w = Math.max(fm.stringWidth(text[i]), w);
+		  w = fm.stringWidth(text[0]);
+		  for(int i=1; i<text.length; i++)
+			 w = Math.max(fm.stringWidth(text[i]), w);
 	  
-	  w += 8;
+		  w += 8;
+	  }else{
+	  	w = text[0].length();
+		for(int i=1; i<text.length; i++)
+			 w = Math.max(text[i].length(), w);
+		w *= 8;	 
+		w += 8;
+		h = text.length * 15;
+		h+= 8;
+	  }
 	  
 	  return new Dimension(w, h);
    }   

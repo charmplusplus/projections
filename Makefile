@@ -76,6 +76,7 @@ SRC=\
     projections/gui/IntervalWindow.java\
     projections/gui/IntTextField.java\
     projections/gui/InvalidFileDialog.java\
+    projections/gui/JFloatTextField.java\
     projections/gui/JSelectField.java\
     projections/gui/JTimeTextField.java\
     projections/gui/LabelPanel.java\

@@ -36,27 +36,27 @@ public class Graph extends JPanel
     private Color labelColor;
     
     private JLabel yLabel;	// to print y axis title vertically
-    private int w,h,tickincrementX,tickincrementY;
-    double pixelincrementX,pixelincrementY;
+    private int w,h;
+    double pixelincrementX, pixelincrementY;
+    // number of pixels per tick and labels
+    double tickIncrementX, tickIncrementY;
+
+    long valuesPerTick, valuesPerLabel;
 
     private double[][] stackArray;
 
     private int maxSumY;
     private int barWidth, width;
 
-    // **CW** tentative hack
-    private int baseWidth;
+    private int baseWidth = -1;
 
-    private boolean fitToScreen = false;
-	
     private Bubble bubble;
-	 private int bubbleXVal;
-	 private int bubbleYVal;
+    private int bubbleXVal;
+    private int bubbleYVal;
 
     public Graph()
     {
 	setPreferredSize(new Dimension(400,300));	
-	baseWidth = getSize().width;
 	
 	GraphType = BAR;	   // default GraphType is BAR
 	BarGraphType = STACKED;    // default BarGraphType is STACKED
@@ -227,8 +227,8 @@ public class Graph extends JPanel
 	    g.setFont(font);
 	    fm = g.getFontMetrics(font);
 	}
-	w = getSize().width;
-	h = getSize().height;
+	w = getWidth();
+	h = getHeight();
 
 	drawDisplay(g);
     }
@@ -240,8 +240,8 @@ public class Graph extends JPanel
 	    pg.setFont(font);
 	    fm = pg.getFontMetrics(font);
 	}
-	w = getSize().width;
-	h = getSize().height;
+	w = getWidth();
+	h = getHeight();
 
 	setBackground(Color.white);
 	setForeground(Color.black);
@@ -334,6 +334,11 @@ public class Graph extends JPanel
 
     private void drawAxes(Graphics2D g) {
 
+	// if there's nothing to draw, don't draw anything!!!
+	if (dataSource == null) {
+	    return;
+	}
+
 	String yTitle = yAxis.getTitle();
 	String temp   = "";
 	
@@ -352,6 +357,10 @@ public class Graph extends JPanel
 	    maxvalueY = yAxis.getMax();                               
 //		 System.out.println("Graph.java > drawAxes > maxvalueY = " + maxvalueY);
 	}
+
+	// baseWidth is whatever the width of the parent window at the time.
+	// xscale will control just how much more of the graph one can see.
+	baseWidth = getParent().getWidth();
 
 	originX = fm.getHeight()*2 + fm.stringWidth(String.valueOf(maxvalueY));
 	originY = h - (30 + fm.getHeight()*2);
@@ -381,35 +390,10 @@ public class Graph extends JPanel
 	int maxvalue = dataSource.getIndexCount();
 	int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
 
-	// *NOTE* tickincrement = # of values per tick.
-	if (fitToScreen) {
-	    tickincrementX = (int)Math.ceil(5/((double)(width)/maxvalue));
-	    tickincrementX = Util.getBestIncrement(tickincrementX);
-	} else {
-	    tickincrementX = 1;
-	}
-	int numintervalsX = (int)Math.ceil((double)maxvalue/tickincrementX);
+	// *NOTE* pixelincrementX = # pixels per value.
+	pixelincrementX = ((double)width)/maxvalue;
+	setBestIncrements(pixelincrementX, maxvalue);
 
-	// *NOTE* pixelincrementX = # pixels per tick.
-	pixelincrementX = (double)(width)/numintervalsX;
-	// make sure the number of pixels per tick is not too small.
-	if (pixelincrementX < 4.0) {
-	    pixelincrementX = 4.0;
-	}
-
-	// expand the panel width to accomodate the graph even for the "fit
-	// to screen" case where rounding errors *will* sometimes cause it
-	// to actually be larger than the screen.
-	if (width < (int)(pixelincrementX*numintervalsX)) {
-	    width = (int)(pixelincrementX*numintervalsX);
-	    baseWidth = (int)((width/xscale)+30+originX);
-	    w = width+30+originX;
-	    setPreferredSize(new Dimension(w,h));
-	    revalidate();
-	}
-
-	int labelincrementX = (int)Math.ceil((sw + 20) / pixelincrementX);
-	labelincrementX = Util.getBestIncrement(labelincrementX);
 	// draw xAxis
 	g.drawLine(originX, originY, (int)width+originX, originY);
 	// draw yAxis
@@ -418,20 +402,19 @@ public class Graph extends JPanel
       	int mini = 0;
 	int maxi = maxvalue;
 
-	if (maxi > numintervalsX) {
-	    maxi = numintervalsX;
-	}
-
 	int curx, cury;
 	String s;
 
-	//drawing xAxis divisions
-	for (int i=mini;i<maxi; i++) {
+	// drawing xAxis divisions
+	// based on the prior algorithm, it is guaranteed that the number of
+	// iterations is finite since the number of pixels per tick will
+	// never be allowed to be too small.
+	for (int i=mini;i<maxi; i+=valuesPerTick) {
 	    curx = originX + (int)(i*pixelincrementX);
-	    curx += (int)(pixelincrementX / 2);
-	    if (i % labelincrementX == 0) {
+	    curx += (int)(tickIncrementX / 2);
+	    // labels have higher lines.
+	    if (i % valuesPerLabel == 0) {
          	g.drawLine(curx, originY+5, curx, originY-5);
-		// can set multiplier? 
 		s = xAxis.getIndexName(i);
 		g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + 
 			     fm.getHeight());
@@ -471,25 +454,10 @@ public class Graph extends JPanel
 	int numX = dataSource.getIndexCount();
 	int numY = dataSource.getValueCount();
 	double [] data = new double[numY];
-	int x1;
-	// if the number of pixels between ticks is small, use a 1 or 2 pixel
-	// separator depending on an odd or even number of pixels. Otherwise,
-	// it is a simple percentage of the tick space.
-	if (pixelincrementX < 6.0) {
-	    if ((int)(pixelincrementX)%2 == 0) {
-		barWidth = (int)(pixelincrementX-1);
-	    } else {
-		barWidth = (int)(pixelincrementX-2);
-	    }
-	} else {
-	    barWidth = (int)(pixelincrementX*0.75);
-	}
 
+	// NO OPTIMIZATION simple draw. Every value gets drawn on screen.
 	for (int i=0; i<numX; i++) {
 	    dataSource.getValues(i, data);
-	    // calculate X value
-	    x1 = originX + (int)(i*pixelincrementX) + 
-		(int)(pixelincrementX/2);
 	    if (BarGraphType == STACKED) {
 		int y = 0;
 		for (int k=0; k<numY; k++) {
@@ -498,7 +466,9 @@ public class Graph extends JPanel
 		    y = originY - (int)(stackArray[i][k]*pixelincrementY);
 		    g.setColor(dataSource.getColor(k));
 		    // using data[i] to get the heigh of this bar
-		    g.fillRect(x1-(barWidth/2),y, barWidth, 
+		    g.fillRect(originX + (int)(i*pixelincrementX), y, 
+			       (int)((i+1)*pixelincrementX) - 
+			       (int)(i*pixelincrementX), 
 			       (int)(data[k]*pixelincrementY));
 		}
 	    } else if (BarGraphType == UNSTACKED) {
@@ -535,7 +505,9 @@ public class Graph extends JPanel
 		for(int k=0; k<numY; k++) {
 		    g.setColor(dataSource.getColor((int)temp[k][0]));
 		    y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
-		    g.fillRect(x1-(barWidth/2),y,barWidth,
+		    g.fillRect(originX + (int)(i*pixelincrementX), y,
+			       (int)((i+1)*pixelincrementX) -
+			       (int)(i*pixelincrementX),
 			       (int)(temp[k][1]*pixelincrementY));
 		}
 	    } else {
@@ -547,7 +519,9 @@ public class Graph extends JPanel
 		}
 		sum /= numY;
 		y = (int)(originY - (int)(sum*pixelincrementY));
-		g.fillRect(x1-(barWidth/2),y,barWidth,
+		g.fillRect(originX + (int)(i*pixelincrementX),y,
+			   (int)((i+1)*pixelincrementX) -
+			   (int)(i*pixelincrementX),
 			   (int)(sum*pixelincrementY));
 	    }		
 	}
@@ -671,6 +645,66 @@ public class Graph extends JPanel
 	return maxValue;
     }
 
+    /**
+     *  Sets global (yucks!) variables to reflect the "best" number of pixels
+     *  for Labels (5, 10, 50, 100, 500, 1000 etc ...) and the number of pixels
+     *  for each tick (1, 10, 100, 1000 etc ...) based on the "best" label
+     *  pixel number.
+     */
+    private void setBestIncrements(double pixelsPerValue, long maxValue) {
+	long index = 0;
+	long labelValue = getNextLabelValue(index);
+	long tickValue = getNextTickValue(index++);
+
+	while (true) {
+	    // is the number of pixels to display a label too small?
+	    if (fm.stringWidth(String.valueOf(maxValue)) >
+		(pixelsPerValue*labelValue*0.8)) {
+		labelValue = getNextLabelValue(index);
+		tickValue = getNextTickValue(index++);
+		continue;
+	    } else {
+		// will my component ticks be too small?
+		if ((pixelsPerValue*tickValue) < 2.0) {
+		    labelValue = getNextLabelValue(index);
+		    tickValue = getNextTickValue(index++);
+		    continue;
+		} else {
+		    // everything is A OK. Set the global variables.
+		    tickIncrementX = tickValue*pixelsPerValue;
+		    valuesPerTick = tickValue;
+		    valuesPerLabel = labelValue;
+		    return;
+		}
+	    }
+	}
+    }
+
+    /**
+     *  Returns the next value in the series: 1, 5, 10, 50, 100, etc ...
+     */
+    private long getNextLabelValue(long prevIndex) {
+	if (prevIndex == 0) {
+	    return 1;
+	}
+	if (prevIndex%2 == 0) {
+	    return (long)java.lang.Math.pow(10,prevIndex/2);
+	} else {
+	    return (long)(java.lang.Math.pow(10,(prevIndex+1)/2))/2;
+	}
+    }
+
+    /**
+     *  Given a label value, what is the appropriate tick value.
+     *  Returns a value from 1, 10, 100, 1000 etc ...
+     */
+    private long getNextTickValue(long prevIndex) {
+	if (prevIndex == 0) {
+	    return 1; // special case
+	}
+	return (long)java.lang.Math.pow(10,(prevIndex-1)/2);
+    }
+
     public static void main(String [] args){
 	JFrame f = new JFrame();
 	JPanel mainPanel = new JPanel();
@@ -711,4 +745,3 @@ public class Graph extends JPanel
         f.setVisible(true);
     }
 }
-

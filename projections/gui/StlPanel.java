@@ -108,18 +108,20 @@ public class StlPanel extends ScalePanel.Child
 	//Figure out what portion of time and processors are visible
 	double tl=req.xInv(0),th=req.xInv(req.w-1);//Time edges
 	double pl=req.yInv(0),ph=req.yInv(req.h-1);//Procesor edges
-	if (tl<0) tl=0; //Clip time to present data
-	if (th>=totalTime) th=totalTime-0.001;
-	if (pl<0) pl=0; //Clip processors to data
-	if (ph>=nPe) ph=nPe-0.001;
-		
+	//Clip time to present data
+	if (tl<0) tl=0; if (tl>=totalTime) tl=totalTime-0.001;
+	if (th<0) th=0; if (th>=totalTime) th=totalTime-0.001;
+	//Clip processors to data
+	if (pl<0) pl=0; if (pl>=nPe) pl=nPe-0.001;
+	if (ph<0) ph=0; if (ph>=nPe) ph=nPe-0.001;
+	
 	//Figure out where the data block lies on the screen
 	int startx=(int)Math.ceil(req.x(tl)), endx=(int)Math.floor(req.x(th));
 	int starty=(int)Math.ceil(req.y(pl)), endy=(int)Math.floor(req.y(ph));
 	int wid=endx-startx, ht=endy-starty;
 	
-	//System.out.println("req.w " + req.w + "th " + th);
-	//System.out.println("XRange " + startx + "-" + endx);
+	//System.out.println("req.w " + req.w + " time range: " + tl + " - " + th);
+	//System.out.println("XRange " + startx + " - " + endx);
 	//Determine mapping from x pixels to time bins
 	double x2t_off=req.xInv(startx)/intervalSize;
 	double x2t_slope=pix2time/intervalSize;
@@ -146,8 +148,9 @@ public class StlPanel extends ScalePanel.Child
 			    if (y_min<starty) y_min=starty;
 			    if (y_max>endy) y_max=endy;
 			    renderRow(colors[proc],x2t_off,x2t_slope,offBuf,
-				      wid,y_min-starty,y_max-starty,startx,
-				      endx);
+				      wid,
+				      y_min-starty,y_max-starty,
+				      startx-startx,endx-startx);
 			    p++;
 			}
 		    }

@@ -8,7 +8,7 @@ import javax.swing.*;
 public class GraphPanel extends JPanel
    implements ActionListener, ItemListener, AdjustmentListener
 {
-        private static final Color BACKGROUND = Color.white;
+        private static final Color BACKGROUND = Color.black;
         private static final Color FOREGROUND = Color.white;
 
  	private JPanel mainPanel; 

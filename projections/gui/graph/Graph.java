@@ -1,13 +1,7 @@
 package projections.gui.graph;
 
 import projections.gui.*; 
-//import java.awt.*;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.FontMetrics;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
  
@@ -31,8 +25,10 @@ public class Graph extends JPanel implements MouseMotionListener
    private int hsbval;
 
    private static final int FONT_SIZE = 12;   
-   private static final Color BACKGROUND = Color.white;
-   private static final Color FOREGROUND = Color.black;
+   private static final Color BACKGROUND = Color.black;
+   private static final Color FOREGROUND = Color.white;
+
+    private static final double PI = 3.142;
 
    private FontMetrics fm;
    private Color labelColor;
@@ -44,8 +40,6 @@ public class Graph extends JPanel implements MouseMotionListener
 
    public Graph()
    {
-        setBackground(BACKGROUND);
-        setForeground(FOREGROUND);
 	setSize(getPreferredSize());	
 	
 	GraphType = BAR;			// default GraphType is BAR
@@ -66,8 +60,6 @@ public class Graph extends JPanel implements MouseMotionListener
 	yAxis = y;
 	dataSource = d;
 	
-        setBackground(BACKGROUND);
-        setForeground(FOREGROUND);
 	setSize(getPreferredSize());	
 	
 	GraphType = BAR;			// default GraphType is BAR
@@ -113,7 +105,7 @@ public class Graph extends JPanel implements MouseMotionListener
 	if(BarGraphType == UNSTACKED)
 		return("unstacked");
 	return("stacked");
-  }
+   }
 
    public void setData(DataSource d, XAxis x, YAxis  y)
    {
@@ -131,7 +123,6 @@ public class Graph extends JPanel implements MouseMotionListener
 	labelColor = c;
    }
 
-
    public void setHSBValue(int val){
 	hsbval = val;
    }
@@ -147,7 +138,8 @@ public class Graph extends JPanel implements MouseMotionListener
 
 	  w = getSize().width;
           h = getSize().height;
-	  
+
+	  /* is explicit double buffering truely needed anymore in Swing?
 	  if(offscreen == null)
 	  {
 		drawDisplay(g);          
@@ -159,7 +151,9 @@ public class Graph extends JPanel implements MouseMotionListener
           drawDisplay(og);		
  
           g.drawImage(offscreen, 0,0,w,h, 0,0,w,h, null);
+	  */
 
+	  drawDisplay(g);
    }
 
    public void print(Graphics pg)
@@ -167,8 +161,8 @@ public class Graph extends JPanel implements MouseMotionListener
           setBackground(Color.white);
           setForeground(Color.black);
           drawDisplay(pg);
-          setBackground(Color.black);
-          setForeground(Color.white);
+          setBackground(BACKGROUND);
+          setForeground(FOREGROUND);
    }
   
    public void mouseMoved(MouseEvent e) {
@@ -202,8 +196,12 @@ public class Graph extends JPanel implements MouseMotionListener
           super.setBounds(x, y, w, h);
    }
 
-   private void drawDisplay(Graphics g)
+   private void drawDisplay(Graphics _g)
    {
+       Graphics2D g = (Graphics2D)_g;
+       g.setBackground(BACKGROUND);
+       g.setColor(FOREGROUND);
+
           if(fm == null)
           {
                  fm = g.getFontMetrics(g.getFont());
@@ -213,8 +211,7 @@ public class Graph extends JPanel implements MouseMotionListener
 
           g.clearRect(0, 0, w, h);
 	  g.translate(-hsbval, 0); 
-	  g.setColor(getForeground());
-	 
+
 	  if((xAxis != null) && (yAxis != null))
 	  {
 	  	drawAxes(g);	
@@ -223,10 +220,9 @@ public class Graph extends JPanel implements MouseMotionListener
 	  	else
 			drawLineGraph(g);
 	  }
-
    }
 
-   private void drawAxes(Graphics g)
+   private void drawAxes(Graphics2D g)
    {
 // set font
 	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
@@ -243,7 +239,8 @@ public class Graph extends JPanel implements MouseMotionListener
  
           yLabel = new JLabel(temp);
 		
-	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
+	  originX = fm.getHeight()*3;
+	  //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
 	  originY = h - (30 + 2 * fm.getHeight());				// i.e. find the left and the lower margins
 
 	  g.setColor(labelColor);
@@ -254,8 +251,11 @@ public class Graph extends JPanel implements MouseMotionListener
 	  g.drawString(title,(w-fm.stringWidth(title))/2, 10 + fm.getHeight());		// display Graph title
 
 	  title = yAxis.getTitle();
-	  g.drawString(title,10, (originY+30)/2);					// display yAxis title
-	  g.setColor(getForeground());	  
+	  g.rotate(-PI/2);
+	  g.drawString(title, -(h+fm.stringWidth(title))/2, 
+		       fm.getHeight());    // display yAxis title
+	  g.rotate(PI/2);
+	  g.setColor(FOREGROUND);	  
 
 	  double width = (w-30-originX)*xscale;		     // width available for drawing the graph
 	  int maxvalue = dataSource.getIndexCount();         // total number of x values
@@ -330,7 +330,7 @@ public class Graph extends JPanel implements MouseMotionListener
 	}
    }
 
-   private void drawBarGraph(Graphics g) {
+    private void drawBarGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount();  //no. of y values for each x
 	double [] data = new double[yValues];
@@ -411,37 +411,39 @@ public class Graph extends JPanel implements MouseMotionListener
 	}
    }
 
-   public void drawLineGraph(Graphics g){
-
+    public void drawLineGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
-	int yValues = dataSource.getValueCount();  //no. of y values for each x
+	int yValues = dataSource.getValueCount(); // no. of y values for each x
 	double [] data = new double[yValues];
-	int x1 = -1, x2 = 0;		// x1,y1 store previous values
+
+	// x1,y1 store previous values
+	int x1 = -1;
 	int [] y1 = new int[yValues];
-	int [] y2 = new int[yValues];		// x2, y2 to store present values so that line graph can be drawn
+	// x2, y2 to store present values so that line graph can be drawn
+	int x2 = 0;		
+	int [] y2 = new int[yValues];  
 
-	for(int i=0; i<yValues; i++)
-		y1[i] = -1;
-
-	for(int i=0; i < xValues; i++)			// do only till the window is reached 
-	{
-	   dataSource.getValues(i,data);
-	   x2 = originX + (int)(i*pixelincrementX) + (int)(pixelincrementX/2);    //calculate x value
+	for (int i=0; i<yValues; i++) {
+	    y1[i] = -1;
+	}
+	// do only till the window is reached 
+	for (int i=0; i < xValues; i++) {	
+	    dataSource.getValues(i,data);
+	    //calculate x value
+	    x2 = originX + (int)(i*pixelincrementX) + 
+		(int)(pixelincrementX/2);    
 	 
-	   for(int j=0; j<yValues; j++) 
-	   {	
+	    for (int j=0; j<yValues; j++) {
 		g.setColor(dataSource.getColor(j));
 		y2[j] = (int) (originY - (int)(data[j]*pixelincrementY));
-		if(x1 != -1)	//is there any other condition that needs to be checked?
-			g.drawLine(x1,y1[j],x2,y2[j]);
+		//is there any other condition that needs to be checked?
+		if(x1 != -1)	
+		    g.drawLine(x1,y1[j],x2,y2[j]);
 		y1[j] = y2[j];		
-           }
-	
-	   x1 = x2;
-
+	    }
+	    x1 = x2;
 	}
-
-   }
+    }
 
 
    public static void main(String [] args){

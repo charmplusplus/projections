@@ -19,9 +19,9 @@ public class LogLoader extends ProjDefs
    {
 	  int              I;
 	  int              Type;
-	  int              Time;
+	  long              Time;
 	  int              Len;
-	  int              Begin;
+//	  long              Begin;
 	  long 	       back;
 	  String           Line;
 	  RandomAccessFile InFile;
@@ -51,10 +51,10 @@ public class LogLoader extends ProjDefs
 			   st   = new StringTokenizer(Line);
 			   if(Integer.parseInt(st.nextToken()) == END_COMPUTATION)
 			   {
-				  Time = Integer.parseInt(st.nextToken());
+				  Time = Long.parseLong(st.nextToken());
 				  if (Time > EndTime)
-		      EndTime = Time;
-		  break;
+		      			EndTime = Time;
+		  		  break;
 			   }   
 			}
 			

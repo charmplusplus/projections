@@ -81,10 +81,10 @@ public class CounterFrame extends JFrame
     cTable_.loadFiles(fileMgr_, progress_, jTable_);
     System.out.println("Finished loading files");
     tabbedPane_.removeAll();
-    for (i=0; i<fileMgr_.getNumFiles(); i++) {
-      String name = getRunName(i);
+    for (i=0; i<cTable_.getNumSims(); i++) {
+      String name = cTable_.getRunName(i);
       tabbedPane_.addTab(name, null, cTable_.getCounterPanel(i), 
-			 fileMgr_.getStsFile(i).getCanonicalPath());
+			 cTable_.getToolTip(i));
     }
     jTable_.tableChanged(new TableModelEvent(
       cTable_, 0, cTable_.getRowCount()-1, TableModelEvent.ALL_COLUMNS));
@@ -119,18 +119,6 @@ public class CounterFrame extends JFrame
       public void actionPerformed(ActionEvent ae) { System.exit(0); }
     });
     return menuBar;
-  }
-
-  private String getRunName(int idx) 
-    throws IOException
-  {
-    File stsFile = fileMgr_.getStsFile(idx);
-    String parentStr = stsFile.getParent();
-    File parent = new File(parentStr);
-    String parentParentStr = parent.getParent();
-    String retVal = 
-      parentStr.substring(parentParentStr.length()+1, parentStr.length());
-    return retVal;
   }
 
   

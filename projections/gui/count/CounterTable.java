@@ -23,6 +23,10 @@ import projections.gui.graph.*;
  *  */
 public class CounterTable extends AbstractTableModel 
 {
+  // ***********************************************************************
+  // NOTES/TODO
+  // ***********************************************************************
+
   // WHAT OTHER CHECKS SHOULD I DO TO MAKE SURE OUTPUTS MATCH?
   // FIX getProxIndex!!!
   // (EVERYWHERE) SEARCH FOR LENGTH AND REPLACE BY NUMBER???
@@ -33,6 +37,13 @@ public class CounterTable extends AbstractTableModel
   // COLOR CODE THE COUNTER DATA
   // CHECK FLOPS VS GR_FLOPS FOR MFLOPS RATING
   // DIALOG BOXES FOR SYSTEM.OUT.PRINTLN()
+  // BOLDFACE TOTAL, MAKE STATIC?
+  // CHANGE VARIABLE NAMES TO REFLECT NEW MEANING
+  // ADD PERCENTAGE OF TIME!!!
+
+  // ***********************************************************************
+  // LINKS
+  // ***********************************************************************
 
   // http://java.sun.com/products/jdk/1.1/docs/api/packages.html
   // http://java.sun.com/products/jfc/swingdoc-api-1.1/index.html
@@ -40,6 +51,11 @@ public class CounterTable extends AbstractTableModel
   // http://java.sun.com/docs/books/tutorial/uiswing/misc/border.html
   // http://java.sun.com/docs/books/tutorial/2d/index.html
 
+  // ***********************************************************************
+  // PUBLIC METHODS
+  // ***********************************************************************
+
+  /** Constructor. */
   public CounterTable() { 
     leftJustify_.setHorizontalAlignment(JLabel.LEFT);
     rightJustify_.setHorizontalAlignment(JLabel.RIGHT);
@@ -49,14 +65,19 @@ public class CounterTable extends AbstractTableModel
     doubleFormat_.setMaximumFractionDigits(2);
   }
 
+  /** Override AbstractTableModel, return current sheet's numCols. */
   public int getColumnCount() { 
     if (currSheet_ != null) { return currSheet_.numCols; } 
     else { return 0; }
   }
+
+  /** Override AbstractTableModel, return current sheet's numRows. */
   public int getRowCount() {
     if (currSheet_ != null) { return currSheet_.numRows; } 
     else { return 0; }
   }
+
+  /** Override AbstractTableModel, return string for header of table. */
   public String getColumnName(int columnIndex) { 
     if (currSheet_ != null) {
       if (columnIndex == 0) { return "Entry Point"; }
@@ -77,6 +98,8 @@ public class CounterTable extends AbstractTableModel
     }
     return new Integer(columnIndex).toString(); 
   }
+
+  /** Override AbstractTableModel, return class so know how to format screen */
   public Class getColumnClass(int columnIndex) {
     if (currSheet_ != null) {
       if (columnIndex == 0) { return java.lang.String.class; }
@@ -84,14 +107,14 @@ public class CounterTable extends AbstractTableModel
     }
     return java.lang.String.class;
   }
+
+  /** Override AbstractTableModel, return value for display. */
   public Object getValueAt(int row, int col) { 
     if (currSheet_ != null) {
       if (col == 0) { return currSheet_.tableRows[row].name; }
       else {
 	int counter = (col-1) / EPValue.NUM_VALUES_PER_COUNTER;
 	CounterSummary s = currSheet_.tableRows[row].summary[counter];
-
-
 	int pos = (col-1) % EPValue.NUM_VALUES_PER_COUNTER;
 	switch (pos) {
 	  case EPValue.AVG_CALLED: 
@@ -113,6 +136,35 @@ public class CounterTable extends AbstractTableModel
     else { return new Integer(-1); }
   }
 
+  /** Return number of simulations (note not files) to display. */
+  public int getNumSims() { return sheet_.size(); }
+
+  /** Return name of simulation at index. */
+  public String getRunName(int index) {
+    try {
+      Sheet sheet = (Sheet) sheet_.elementAt(index);
+      File stsFile = new File(sheet.fileName);
+      String parentStr = stsFile.getParent();
+      File parent = new File(parentStr);
+      String parentParentStr = parent.getParent();
+      String retVal = 
+	parentStr.substring(parentParentStr.length()+1, parentStr.length());
+      return retVal;
+    }
+    catch (Exception e) { ProjectionsFileChooser.handleException(null, e); }
+    return null;
+  }
+
+  /** Return tool tip for simulation at index. */
+  public String getToolTip(int index) {
+    try {
+      Sheet sheet = (Sheet) sheet_.elementAt(index);
+      return sheet.fileName;
+    }
+    catch (Exception e) { ProjectionsFileChooser.handleException(null, e); }
+    return null;
+  }
+
   /** Given file manager, load files and update progress bar. */
   public void loadFiles(
     ProjectionsFileMgr fileMgr, JProgressBar progress, JTable table) 
@@ -121,8 +173,47 @@ public class CounterTable extends AbstractTableModel
     try {
       int i, j;
       int numFiles = fileMgr.getNumFiles();
-      sheet_ = new Sheet[numFiles];
-      for (i=0; i<numFiles; i++) { sheet_[i] = new Sheet(fileMgr, i); }
+      sheet_ = new Vector(fileMgr.getNumFiles());
+      Sheet firstSheet = null;
+      for (i=0; i<numFiles; i++) { 
+	Sheet sheet = new Sheet(fileMgr, i);
+	sheet_.addElement(sheet); 
+	if (i == 0) { firstSheet = sheet; }
+	else {
+	  if (!sheet.sameEPs(sheet)) {
+	    throw new IOException("sts1: "+fileMgr.getStsFile(0)+"\n"+
+				  "sts2: "+fileMgr.getStsFile(i)+"\n");
+	  }
+	}
+      }
+
+      // search through and try to find similar files
+      // use a Vector of Vectors of Files to group similar files
+      Vector similarCollection = new Vector();
+      boolean[] inSimilar = new boolean[numFiles];
+      for (i=0; i<numFiles; i++) { inSimilar[i] = false; }
+      for (i=0; i<numFiles; i++) {
+	if (!inSimilar[i]) {
+	  inSimilar[i] = true;
+	  Sheet searchSheet = (Sheet) sheet_.elementAt(i);
+	  Vector similar = new Vector();
+	  similar.add(searchSheet);
+	  similarCollection.add(similar);
+	  j=i+1;
+	  while (j<numFiles) {
+	    // yes, this is a n^2 algo.  it will never need to scale.
+	    if (!inSimilar[j]) {
+	      Sheet sheet = (Sheet) sheet_.elementAt(j);
+	      if (sheet.similarTo(searchSheet)) { 
+		similar.add(sheet);  
+		inSimilar[j] = true;
+	      }
+	    }
+	    j++;
+	  }
+	}
+      }
+      userMergeSimilar(similarCollection);
       setSheet(0, table);
     }
     catch (IOException e) {
@@ -131,26 +222,28 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
-  /** Return the list of counters and their colors for this sheet */
+  /** Return the list of counters and their colors for this sheet. */
   public Component getCounterPanel(int index) {
-    if (sheet_ == null || sheet_[index] == null) { return null; }
-    CounterListTable clTable = new CounterListTable(sheet_[index].counters);
+    Sheet sheet = (Sheet) sheet_.elementAt(index);
+    if (sheet_ == null || sheet == null) { return null; }
+    CounterListTable clTable = new CounterListTable(sheet.counters);
     JTable table = new JTable(clTable);
     table.setRowSelectionAllowed(false);
     clTable.configure(table);
     JPanel panel = new JPanel();
     panel.add(new JScrollPane(table));
     Dimension d = table.getPreferredSize();
-    int numCounters = sheet_[index].counters.length;
+    int numCounters = sheet.counters.length;
     // adjust because table doesn't want to display header
     d.height = Math.min(100, (d.height / numCounters ) * (numCounters + 1));  
     panel.setPreferredSize(d);
     return panel;
   }
 
+  /** Set the current display spreadsheet to the index. */
   public void setSheet(int index, JTable table) {
     // save sorted column here, also set columns correctly
-    currSheet_ = sheet_[index];
+    currSheet_ = (Sheet) sheet_.elementAt(index);
     super.fireTableStructureChanged();
     TableColumn column = null;
     column = table.getColumnModel().getColumn(0);
@@ -166,30 +259,7 @@ public class CounterTable extends AbstractTableModel
     // this, 0, currSheet_.numRows-1, TableModelEvent.ALL_COLUMNS));
   }
 
-  private ColorHeader getCounterHeader(int col) {
-    if (currSheet_ != null) {
-      if (col == 0) { return new ColorHeader(null, null); }
-      else {
-	int counter = (col-1) / EPValue.NUM_VALUES_PER_COUNTER;
-	int pos = (col-1) % EPValue.NUM_VALUES_PER_COUNTER;
-	String mod = null;
-	switch (pos) {
-	  case EPValue.AVG_CALLED: mod = EPValue.AVG_CALLED_STR;  break;
-	  case EPValue.AVG_TIME:   mod = EPValue.AVG_TIME_STR;    break;
-	  case EPValue.AVG_CVAL:   mod = EPValue.AVG_CVAL_STR;    break;
-	  case EPValue.AVG_CSTDEV: mod = EPValue.AVG_CSTDEV_STR;  break;
-	  case EPValue.MAX_CVAL:   mod = EPValue.MAX_CVAL_STR;    break;
-	  case EPValue.MIN_CVAL:   mod = EPValue.MIN_CVAL_STR;    break;
-	  default: mod = "ERROR";  break;
-	}
-	return new ColorHeader(
-	  currSheet_.counters[counter].color,
-	  currSheet_.counters[counter].counterCode+": "+mod);
-      }
-    }   
-    else { return new ColorHeader(null, null); }
-  } 
-
+  /** Pop up a window that shows the stats across processors for this sim */
   public void createGraph(int[] selectedRows) {
     if (selectedRows.length == 0) {
       System.out.println("ERROR there are no selected rows");
@@ -226,6 +296,7 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
+  /* Pop up a window displaying MFlops for all EPs and their significance. */
   public void calcMFlops() {
     if (currSheet_ == null) { System.out.println("NO DATA IN TABLE"); }
     else {
@@ -294,27 +365,81 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
-  private Sheet[] sheet_     = null;
-  private Sheet   currSheet_ = null;
+  // ***********************************************************************
+  // PRIVATE VARIABLES
+  // ***********************************************************************
+
+  // Vector of sheets (for each simulation)
+  private Vector sheet_     = null;
+  // pointer to currently selected sheet
+  private Sheet  currSheet_ = null;
+  // renderer to left justify object in cell (does not affect not header)
   private DefaultTableCellRenderer leftJustify_ = 
     new DefaultTableCellRenderer();
+  // renderer to right justify object in cell (does not affect header)
   private DefaultTableCellRenderer rightJustify_ = 
     new DefaultTableCellRenderer();
+  // set the ints to have commas in appropriate places
   private DecimalFormat intFormat_ = new DecimalFormat();
+  // set the double to have commas and same sig figs
   private DecimalFormat doubleFormat_ = new DecimalFormat();
-  private static final LineBorder border_ = (LineBorder)
-	BorderUIResource.LineBorderUIResource.createGrayLineBorder();
   
-  /** Each sheet represents a simulation. */
+  // ***********************************************************************
+  // PRIVATE METHODS
+  // ***********************************************************************
+
+  /** Let the user choose if they want to merge similar files. 
+   *  After this function called, Sheet. may be rearranged. 
+   *  similarCollection is Vector of Vector of Sheet. */
+  private void userMergeSimilar(Vector similarCollection) {
+    for (int i=0; i<similarCollection.size(); i++) {
+      System.out.println("Similar #"+i+":");
+      Vector similar = (Vector) similarCollection.elementAt(i);
+      for (int j=0; j<similar.size(); j++) {
+	Sheet sheet = (Sheet) similar.elementAt(j);
+	System.out.println("  "+sheet.fileName);
+      }
+    }
+  }
+
+  /** Return header renderer for column at index col. */
+  private ColorHeader getCounterHeader(int col) {
+    if (currSheet_ != null) {
+      if (col == 0) { return new ColorHeader(null, null); }
+      else {
+	int counter = (col-1) / EPValue.NUM_VALUES_PER_COUNTER;
+	int pos = (col-1) % EPValue.NUM_VALUES_PER_COUNTER;
+	String mod = null;
+	switch (pos) {
+	  case EPValue.AVG_CALLED: mod = EPValue.AVG_CALLED_STR;  break;
+	  case EPValue.AVG_TIME:   mod = EPValue.AVG_TIME_STR;    break;
+	  case EPValue.AVG_CVAL:   mod = EPValue.AVG_CVAL_STR;    break;
+	  case EPValue.AVG_CSTDEV: mod = EPValue.AVG_CSTDEV_STR;  break;
+	  case EPValue.MAX_CVAL:   mod = EPValue.MAX_CVAL_STR;    break;
+	  case EPValue.MIN_CVAL:   mod = EPValue.MIN_CVAL_STR;    break;
+	  default: mod = "ERROR";  break;
+	}
+	return new ColorHeader(
+	  currSheet_.counters[counter].color,
+	  currSheet_.counters[counter].counterCode+": "+mod);
+      }
+    }   
+    else { return new ColorHeader(null, null); }
+  } 
+
+  // ***********************************************************************
+  // PRIVATE CLASSES 
+  // ***********************************************************************
+
+  /** Each sheet represents a simulation's data. */
   private class Sheet {
     public int numCols  = 0;  // number of data columns in simulation 
     public int numRows  = 0;  // number of EPs in simulation
     public int numProcs = 0;  // number of processors for this simulation
 
     public String           fileName  = null;  // just store name of file
-    public GenericStsReader stsReader = null;  // to read and hold data for sts
     public Counter[]        counters  = null;  // stores name/description
-    public EPValue[]       tableRows = null;  // store row data
+    public EPValue[]        tableRows = null;  // store row data
     public LogData[]        data      = null;  // to store data for log files
     
     public Sheet(ProjectionsFileMgr fileMgr, int index) 
@@ -323,7 +448,7 @@ public class CounterTable extends AbstractTableModel
       int i, j;
       fileName = fileMgr.getStsFile(index).getCanonicalPath();
       // read sts file
-      stsReader = new GenericStsReader(
+      GenericStsReader stsReader = new GenericStsReader(
 	fileMgr.getStsFile(index).getCanonicalPath(), 1.0);
       // read log file data
       File[] logFiles = fileMgr.getLogFiles(index);
@@ -358,7 +483,30 @@ public class CounterTable extends AbstractTableModel
       }
     }
 
-    private int getProcIndex(File file, int foo) { return foo; }
+    public boolean similarTo(Sheet sheet) {
+      if (sheet.numRows != numRows) { return false; }
+      if (sheet.numProcs != numProcs) { return false; }
+      if (!sameEPs(sheet)) { return false; }
+      return true;
+    }
+
+    public boolean sameEPs(Sheet sheet) {
+      if (sheet.tableRows.length != tableRows.length) { return false; }
+      for (int i=0; i<tableRows.length; i++) {
+	if (!sheet.tableRows[i].name.equals(tableRows[i].name)) {
+	  return false; 
+	}
+      }
+      return true;
+    }
+
+    /** Based on filename, return true index (foo is returned now, faking out
+     *  this function).  This function exists because in file list, 128 can
+     *  come before 2. */
+    private int getProcIndex(File file, int foo) { 
+      System.out.println("Sheet.getProcIndex(file, foo) FIX!!!!");
+      return foo; 
+    }
   }
 
   /** Represents each row in the table. */
@@ -416,6 +564,7 @@ public class CounterTable extends AbstractTableModel
 
   }
 
+  /* used by the EPValue for each counter sum or avg across all procs. */
   private class CounterSummary {
     public double avgNumCalled = 0;
     public double avgTime      = 0;
@@ -427,6 +576,7 @@ public class CounterTable extends AbstractTableModel
     public CounterSummary() { }
   }
 
+  /* For sts data, the raw counts controlled by this class. */
   private class LogData { 
     public int procNum;
     public int procTotal;
@@ -476,6 +626,7 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
+  /** For each counter, store the raw data for all EPs */
   private class CounterResults {
     public Counter     counter     = null;
     public CountData[] countData   = null;
@@ -527,7 +678,7 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
-  /** Store the raw data from each file */
+  /** Each counter has different types of stats, store them here. */
   private abstract class CountData {
     public static final int NUM_CALLED = 0;
     public static final int TOTAL_TIME = 1;
@@ -574,6 +725,7 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
+  /* Superclass of CountData for double type data. */
   private class DoubleCountData extends CountData {
     public double[] values = null;
     public DoubleCountData(String line, String code, int type, int numEPs) 
@@ -587,6 +739,7 @@ public class CounterTable extends AbstractTableModel
     public double getValue(int index) { return values[index]; }
   }
 
+  /* Superclass of CountData for int type data. */
   private class IntCountData extends CountData {
     public int[] values = null;
     public IntCountData(String line, String code, int type, int numEPs) 
@@ -600,6 +753,7 @@ public class CounterTable extends AbstractTableModel
     public double getValue(int index) { return (double) values[index]; }
   }
 
+  /** To enable the correct format for both int and scientific. */
   private class FormattedNumber extends Number {
     double       number;
     NumberFormat format;

@@ -1,5 +1,6 @@
 package projections.analysis;
 
+import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
@@ -35,6 +36,17 @@ public class GenericStsReader
     public EntryTypeData entryList[];
     public long msgSizeList[];
 
+    /**
+     *  A wrapper constructor that expects the version to be provided
+     *  by the sts file. If none is found, it defaults to the version
+     *  provided at the runtime of projections.
+     */
+    public GenericStsReader(String filename)
+	throws IOException
+    {
+	this(filename, -1.0);
+    }
+
     public GenericStsReader(String filename, double Nversion) 
 	throws IOException
     {
@@ -44,6 +56,11 @@ public class GenericStsReader
 	    read();
 	    reader.close();
 	    reader = null;
+	    // if sts reader fails to provide a version number, use
+	    // the default version.
+	    if (version < 0.0) {
+		version = Analysis.getVersion();
+	    }
 	} catch (IOException e) {
 	    throw new IOException("Error reading file " + filename);
 	}
@@ -57,7 +74,9 @@ public class GenericStsReader
 	while ((line = reader.readLine()) != null) {
 	    StringTokenizer st = new StringTokenizer(line);
 	    String s1 = st.nextToken();
-	    if (s1.equals("MACHINE")) {
+	    if (s1.equals("VERSION")) {
+		version = Double.parseDouble(st.nextToken());
+	    } else if (s1.equals("MACHINE")) {
 		machineName = st.nextToken();
 	    } else if (s1.equals("PROCESSORS")) {
 		numPe = Integer.parseInt(st.nextToken());

@@ -14,6 +14,8 @@ public class ProjectionsStatistics {
     protected long count;
     protected double sum;
     protected double sumOfSquares;
+    protected double max;
+    protected double min;
 
     public ProjectionsStatistics() {
     }
@@ -43,6 +45,8 @@ public class ProjectionsStatistics {
 	count = 0;
 	sum = 0;
 	sumOfSquares = 0;
+	max = Double.MIN_VALUE;
+	min = Double.MAX_VALUE;
     }
 
     // standard convenience utility methods.
@@ -50,6 +54,12 @@ public class ProjectionsStatistics {
 	count++;
 	sum += item;
 	sumOfSquares += item*item;
+	if (item > max) {
+	    max = item;
+	}
+	if (item < min) {
+	    min = item;
+	}
     }
 
     // Accessor methods (which also computes the appropriate 
@@ -65,6 +75,14 @@ public class ProjectionsStatistics {
 
     public double getMean() {
 	return sum/count;
+    }
+
+    public double getMax() {
+	return max;
+    }
+
+    public double getMin() {
+	return min;
     }
 
     /**

@@ -5,218 +5,198 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class GraphAttributesWindow extends ColorWindowFrame
-   implements ActionListener
+    implements ActionListener
 {
-   private ColorSelectWindow colorSelectWindow;
-   private GraphData data;
+    private ColorSelectWindow colorSelectWindow;
+    private GraphData data;
+    
+    private Checkbox[]     cbSystemUsage;
+    private ColorPanel[]   cpSystemUsage;
+    private ColorPanel[][] cpSystemMsgs;
+    private ColorPanel[][] cpUserEntry;
+    private Checkbox[][]   cbSystemMsgs;
+    private Checkbox[][]   cbUserEntry;
+    
+    private ColorPanel  selectedCP;
+    
+    private GrayPanel p1, p2, p4;
+   
+    private Button bAll, bClear, bApply, bClose;
+   
+    public GraphAttributesWindow(Frame parent, GraphData data)
+    {
+	super(parent);
+	this.data = data;
+	
+	addWindowListener(new WindowAdapter()
+	    {                    
+		public void windowClosing(WindowEvent e)
+		{
+		    Close();
+		}
+	    });
+	
+	setBackground(Color.lightGray);
+	setTitle("Select Display Items");
+	setLocation(0, 0);
+	
+	CreateLayout();
+	pack();
+    }   
 
-   private Checkbox[]     cbSystemUsage;
-   private ColorPanel[]   cpSystemUsage;
-   private ColorPanel[][] cpSystemMsgs;
-   private ColorPanel[][] cpUserEntry;
-   private Checkbox[][]   cbSystemMsgs;
-   private Checkbox[][]   cbUserEntry;
-   
-   private ColorPanel  selectedCP;
-   
-   private GrayPanel p1, p2, p4;
-   
-   
-   private Button bAll, bClear, bApply, bClose;
-   
-   public GraphAttributesWindow(Frame parent, GraphData data)
-   {
-	  super(parent);
-	  this.data = data;
-	  
-	  addWindowListener(new WindowAdapter()
-	  {                    
-		 public void windowClosing(WindowEvent e)
-		 {
-			Close();
-		 }
-	  });
-	  
-	  setBackground(Color.lightGray);
-	  setTitle("Select Display Items");
-	  setLocation(0, 0);
-		
-	  CreateLayout();
-	  pack();
-   }   
-   public void actionPerformed(ActionEvent evt)
-   {
-	  if(evt.getSource() instanceof ColorPanel)
-	  {   
-		 selectedCP = (ColorPanel)evt.getSource();
-		 String s = "TEST";
-
-		 // construct name of dialog
-		 for(int a=0; a<3; a++)
-			if(selectedCP == cpSystemUsage[a])
-			   s = data.systemUsage[a].name;
+    public void actionPerformed(ActionEvent evt)
+    {
+	if(evt.getSource() instanceof ColorPanel) {   
+	    selectedCP = (ColorPanel)evt.getSource();
+	    String s = "TEST";
+	    
+	    // construct name of dialog
+	    for(int a=0; a<3; a++)
+		if(selectedCP == cpSystemUsage[a])
+		    s = data.systemUsage[a].name;
 		 
-		 for(int a=0; a<5; a++)
-			for(int t=0; t<2; t++)
-			   if(selectedCP == cpSystemMsgs[a][t])
-			   {
-				  s = data.systemMsgs[a][t].name;
-				  s += data.systemMsgs[a][t].type;
-			   }   
-			   
-		 for(int a=0; a<data.numUserEntries; a++) 
-			for(int t=0; t<2; t++)
-			   if(selectedCP == cpUserEntry[a][t])
-			   {
-				  s = data.userEntry[a][t].name;
-				  s += data.userEntry[a][t].type;
-			   }   
-		 /* Obsolete? Linux JVM does not like it.
-		 if (colorSelectWindow == null) {
-		     colorSelectWindow = new ColorSelectWindow(this, selectedCP.getColor(), s);
-		     colorSelectWindow.show();
-		 } else {
-		     colorSelectWindow.setColor(selectedCP.getColor());
-		     colorSelectWindow.setString(s);
-		     colorSelectWindow.show();
-		 }
-		 */
-		 JColorChooser colorWindow = new JColorChooser();
-		 Color returnColor =
-		     colorWindow.showDialog(this, s,
-					    selectedCP.getColor());
-		 if (returnColor != null) {
-		     selectedCP.setColor(returnColor);
-		 }
-	  }   
-	  else if(evt.getSource() instanceof Button)
-	  {
-		 Button b = (Button) evt.getSource();
-	  
-		 if(b == bAll || b== bClear)
-		 {
-			boolean dest=(b==bAll);
-			for(int a=0; a<3; a++)  if (null!=cbSystemUsage[a])
-			   cbSystemUsage[a].setState(dest);
-			for(int a=0; a<5; a++) if (null!=cbSystemMsgs[a][0])
-			{
-			   cbSystemMsgs[a][0].setState(dest);
-			   cbSystemMsgs[a][1].setState(dest);
-			}   
-			for(int a=0; a<data.numUserEntries; a++)  if (null!=cbUserEntry[a][0])
-			{
-			   cbUserEntry[a][0].setState(dest);
-			   cbUserEntry[a][1].setState(dest);
-			}   
-		 }
-		 else if(b == bClose)
-		 {
-			Close();   
-		 } 
-		 else if(b == bApply)
-		 {
-			int numOnGraph = 0;
-			
-			for(int a=0; a<3; a++)
-			if (null!=cbSystemUsage[a])
-			{   
-			   data.systemUsage[a].state = cbSystemUsage[a].getState();
-			   data.systemUsage[a].color = cpSystemUsage[a].getColor();
-			   if(data.systemUsage[a].state == true &&
-				data.systemUsage[a].exists == true)
-				  numOnGraph++;
-			}   
-			for(int a=0; a<5; a++)
-			if (null!=cbSystemMsgs[a][0])
-			{
-			   for(int t=0; t<3; t++)
-			   {
-				  if(t < 2)
-				  {
-					 data.systemMsgs[a][t].state = cbSystemMsgs[a][t].getState();
-					 data.systemMsgs[a][t].color = cpSystemMsgs[a][t].getColor();
-				  }
-				  else
-				  {   
-					 if(data.systemMsgs[a][0].state || data.systemMsgs[a][1].state)
-						data.systemMsgs[a][2].state = true;
-					 else
-						data.systemMsgs[a][2].state = false;   
-					 data.systemMsgs[a][2].color = data.systemMsgs[a][0].color;
-				  }   
-				  if(data.systemMsgs[a][t].state == true &&
-					data.systemMsgs[a][t].exists == true)
-					 numOnGraph++;
-			   }      
-			}
-			for(int a=0; a<data.numUserEntries; a++)
-			if (null!=cbUserEntry[a][0])
-			{
-			   for(int t=0; t<3; t++)
-			   {
-				  if(t < 2)
-				  {
-					 data.userEntry[a][t].state = cbUserEntry[a][t].getState();
-					 data.userEntry[a][t].color = cpUserEntry[a][t].getColor();
-				  }
-				  else
-				  {
-					 if(data.userEntry[a][0].state || data.userEntry[a][1].state)
-						data.userEntry[a][2].state = true;
-					 else
-						data.userEntry[a][2].state = false;   
-					 data.userEntry[a][2].color = data.userEntry[a][0].color;
-				  }
-				  if(data.userEntry[a][t].state == true &&
-					data.userEntry[a][t].exists == true)
-					 numOnGraph++;
-			   }         
-			}
-		 
-			data.onGraph = new ZItem[numOnGraph];
-			int onGraphIndex = 0;
-			
-			for(int a=0; a<3; a++)
-			if (data.systemUsage[a].exists)
-			{   
-			   if(data.systemUsage[a].state == true)
-				  data.onGraph[onGraphIndex++] = data.systemUsage[a];
-			}                         
-			for(int a=0; a<5; a++)
-			{
-			   for(int t=0; t<3; t++)
-			   if (data.systemMsgs[a][t].exists)
-			   {
-				  if(data.systemMsgs[a][t].state == true)
-					 data.onGraph[onGraphIndex++] = data.systemMsgs[a][t];
-			   }
+	    for(int a=0; a<5; a++)
+		for(int t=0; t<2; t++)
+		    if(selectedCP == cpSystemMsgs[a][t]) {
+			s = data.systemMsgs[a][t].name;
+			s += data.systemMsgs[a][t].type;
+		    }   
+	    for(int a=0; a<data.numUserEntries; a++) 
+		for(int t=0; t<2; t++)
+		    if(selectedCP == cpUserEntry[a][t]) {
+			s = data.userEntry[a][t].name;
+			s += data.userEntry[a][t].type;
+		    }   
+	    /* Obsolete? Linux JVM does not like it.
+	       if (colorSelectWindow == null) {
+	       colorSelectWindow = new ColorSelectWindow(this, selectedCP.getColor(), s);
+	       colorSelectWindow.show();
+	       } else {
+	       colorSelectWindow.setColor(selectedCP.getColor());
+	       colorSelectWindow.setString(s);
+	       colorSelectWindow.show();
+	       }
+	    */
+	    JColorChooser colorWindow = new JColorChooser();
+	    Color returnColor =
+		colorWindow.showDialog(this, s,
+				       selectedCP.getColor());
+	    if (returnColor != null) {
+		selectedCP.setColor(returnColor);
+	    }
+	} else if(evt.getSource() instanceof Button) {
+	    Button b = (Button) evt.getSource();
+	    if(b == bAll || b== bClear) {
+		boolean dest=(b==bAll);
+		for(int a=0; a<3; a++)  if (null!=cbSystemUsage[a])
+		    cbSystemUsage[a].setState(dest);
+		for(int a=0; a<5; a++) if (null!=cbSystemMsgs[a][0]) {
+		    cbSystemMsgs[a][0].setState(dest);
+		    cbSystemMsgs[a][1].setState(dest);
+		}   
+		for(int a=0; a<data.numUserEntries; a++)  
+		    if (null!=cbUserEntry[a][0]) {
+			cbUserEntry[a][0].setState(dest);
+			cbUserEntry[a][1].setState(dest);
+		    }   
+	    } else if(b == bClose) {
+		Close();   
+	    } else if(b == bApply) {
+		int numOnGraph = 0;
+		for(int a=0; a<3; a++)
+		    if (null!=cbSystemUsage[a]) {
+			data.systemUsage[a].state = 
+			    cbSystemUsage[a].getState();
+			data.systemUsage[a].color = 
+			    cpSystemUsage[a].getColor();
+			if(data.systemUsage[a].state == true &&
+			   data.systemUsage[a].exists == true)
+			    numOnGraph++;
+		    }   
+		for(int a=0; a<5; a++)
+		    if (null!=cbSystemMsgs[a][0]) {
+			for(int t=0; t<3; t++) {
+			    if(t < 2) {
+				data.systemMsgs[a][t].state = 
+				    cbSystemMsgs[a][t].getState();
+				data.systemMsgs[a][t].color = 
+				    cpSystemMsgs[a][t].getColor();
+			    } else {
+				if(data.systemMsgs[a][0].state || 
+				   data.systemMsgs[a][1].state)
+				    data.systemMsgs[a][2].state = true;
+				else
+				    data.systemMsgs[a][2].state = false;   
+				data.systemMsgs[a][2].color = 
+				    data.systemMsgs[a][0].color;
+			    }   
+			    if(data.systemMsgs[a][t].state == true &&
+			       data.systemMsgs[a][t].exists == true)
+				numOnGraph++;
+			}      
+		    }
+		for(int a=0; a<data.numUserEntries; a++)
+		    if (null!=cbUserEntry[a][0]) {
+			for(int t=0; t<3; t++) {
+			    if(t < 2) {
+				data.userEntry[a][t].state = 
+				    cbUserEntry[a][t].getState();
+				data.userEntry[a][t].color = 
+				    cpUserEntry[a][t].getColor();
+			    } else {
+				if(data.userEntry[a][0].state || 
+				   data.userEntry[a][1].state)
+				    data.userEntry[a][2].state = true;
+				else
+				    data.userEntry[a][2].state = false;   
+				data.userEntry[a][2].color = 
+				    data.userEntry[a][0].color;
+			    }
+			    if(data.userEntry[a][t].state == true &&
+			       data.userEntry[a][t].exists == true)
+				numOnGraph++;
 			}         
-			for(int a=0; a<data.numUserEntries; a++)
-			{
-			   for(int t=0; t<3; t++)
-			   if (data.userEntry[a][t].exists)
-			   {
-				  if(data.userEntry[a][t].state == true)
-					 data.onGraph[onGraphIndex++] = data.userEntry[a][t];
-			   }      
+		    }
+		data.onGraph = new ZItem[numOnGraph];
+		int onGraphIndex = 0;
+		for(int a=0; a<3; a++)
+		    if (data.systemUsage[a].exists) {
+			if(data.systemUsage[a].state == true)
+			    data.onGraph[onGraphIndex++] = data.systemUsage[a];
+		    }                         
+		for(int a=0; a<5; a++) {
+		    for(int t=0; t<3; t++)
+			if (data.systemMsgs[a][t].exists) {
+			    if(data.systemMsgs[a][t].state == true)
+				data.onGraph[onGraphIndex++] = 
+				    data.systemMsgs[a][t];
 			}
-			
-			data.setData(); 
-
-			data.legendPanel.UpdateLegend();
-			data.displayPanel.setAllBounds();
-			data.displayPanel.UpdateDisplay();
-		 }
-	  }           
-   }   
+		}         
+		for(int a=0; a<data.numUserEntries; a++) {
+		    for(int t=0; t<3; t++)
+			if (data.userEntry[a][t].exists) {
+			    if(data.userEntry[a][t].state == true)
+				data.onGraph[onGraphIndex++] = 
+				    data.userEntry[a][t];
+			}      
+		}
+		data.setData(); 
+		data.legendPanel.UpdateLegend();
+		data.displayPanel.setAllBounds();
+		data.displayPanel.UpdateDisplay();
+	    }
+	}           
+    } 
+  
     /* no longer needed
-   public void applyNewColor(Color c)
-   {
-	  selectedCP.setColor(c);
-   }   
+       public void applyNewColor(Color c)
+       {
+       selectedCP.setColor(c);
+       }   
     */
-   public void Close()
-   {
+
+    public void Close()
+    {
 	  setVisible(false);
 	  for(int a=0; a<3; a++)
 	  if (cbSystemUsage[a]!=null)

@@ -5,389 +5,355 @@ import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
+import java.util.*;
 
 /**
- *
  *  Written by Chee Wai Lee
  *  3/29/2002
+ *  Updated:
+ *    2/4/2003 - Chee Wai Lee. Streamlined some features.
  *
  *  MultiRunDataAnalyzer is the object that will analyze data read into 
- *  MultiRunData and produce intermediate data that can be presented
- *  on the gui (not yet) or onto a text file (either on the terminal window,
- *  simple text gui canvas (not yet) or onto a file.
+ *  MultiRunData and produce intermediate data that can then be presented
+ *  on a gui.
  *
- *  It should really be a base class upon which other data analyzer modules
- *  can inherit from.
+ *  This includes the categorization of data according to the module's
+ *  interpretation of the data.
  *
+ *  **CW** NOTE TO SELF - seems very tightly coupled with MultiRunData.
+ *  May well be appropriate to make data analyzers inherit from base data
+ *  classes. 
  */
-
 public class MultiRunDataAnalyzer {
 
-    // analysis count + types (starts from zero and contigious)
-    public static final int TOTAL_ANALYSIS_TAGS = 4;
-    public static final int ANALYZE_SUM = 0;
-    public static final int ANALYZE_AVG = 1;
-    public static final int ANALYZE_MIN = 2;
-    public static final int ANALYZE_MAX = 3;
+    private MultiRunData data;
 
-    // private tags 
-    private static final int TOTAL_EP_SUMMARY_TAGS = 4;
-    private static final int TOTAL_CONFIG_SUMMARY_TAGS = 1;
+    // data table - acquired from MultiRunData
+    private double dataTable[][][];
 
-    // ep summary tags (starts from zero and contigious)
-    private static final int EP_GROWTH_PERCENT = 0;
-    private static final int EP_SUM = 1;  // used to check for zero EPs
-    private static final int EP_AVG_PERCENT = 2;
-    private static final int EP_SIGNIFICANCE = 3;
+    // extra data entries not directly read from the File formats.
+    // Dimension 0 - indexed by data type (eg. time)
+    // Dimension 1 - indexed by Run Log ID
+    // Dimension 2 - indexed by Special Entry ID (eg. Idle time)
+    private double extraTable[][][];
 
-    // config summary tags (starts from zero and contigious)
-    private static final int CONFIG_SUM = 0;
+    // accompanying static fields for extraTable. The information is
+    // publically published for use by the GUI and Data Analyzer(s).
+    public static final int NUM_EXTR_TYPES = 1;
+    public static final int EXTR_TYPE_TIME = 0;
 
+    public static final int NUM_EXTR_ENTRIES = 1;
+    public static final int EXTR_OVERHEAD = 0;
+
+    // special statistical information. Used by the analyzer to deduce
+    // certain properties of the runs.
+    // runTimeSums - indexed by Run Log ID
+    private double runTimeSum[];
+    // epTimeMean - indexed by Entry Point ID
+    private double epTimeMean[];
+    // epTimeVariance - indexed by Entry Point ID
+    private double epTimeVariance[];
+
+    // statistical information on the extra information.
+    // extraTimeMean - indexed by extra entry ID
+    private double extraTimeMean[];
+    // extraTimeVariance - indexed by extra entry ID
+    private double extraTimeVariance[];
+
+    // Categorization support data structure
+    // Dimension 0 - indexed by data type.
+    // Dimension 1 - indexed by the category ID. 
+    // Each vector is the list of EPs that fall into the category.
+    private Vector categories[][];
+    private String catNames[];
+
+    // accompanying static data needs to be published for the TableModel
+    private static final int NUM_CATEGORIES = 4;
+    private static final int CAT_EP_NO_CHANGE = 0;
+    private static final int CAT_EP_INSIGNIFICANT = 1;
+    private static final int CAT_EP_CHANGE = 2;
+    private static final int CAT_OVERHEAD_IDLE = 3;
+
+    // base data information
+    private int numRuns;
     private int numEPs;
-    private int numSets;
-
-    private int significanceMap[];
-
-    private String epNamesList[];
-    private String configList[];
-    // Simple Post-analysis output table
-    // analyzedDataTable dim 1 - indexed by analysis tag type
-    // analyzedDataTable dim 2 - indexed by the log set ID
-    // analyzedDataTable dim 3 - indexed by entry point ID
-    private double analyzedDataTable[][][];
-
-    // ****************************************************************
-    // analysis data that is either output-type dependent or is to be used
-    // for internal analyzer purposes (like computing the significance
-    // mapping). These are computed "as-is-convenient" when computing other
-    // data.
     
-    // summary data for the same EP across all runs
-    // epSummaryData dim 1 - indexed by summary tag type
-    // epSummaryData dim 2 - indexed by entry point ID
-    private double epSummaryData[][];
+    // names - for publishing onto the appropriate GUI.
+    private String epNames[];
+    private String runNames[];
 
-    // summary data for the same configuration across all EPs
-    // configSummaryData dim 1 - indexed by summary tag type
-    // configSummaryData dim 2 - indexed by the log set ID
-    private double configSummaryData[][];
+    // Create one statistics object for each data type read from
+    // the summary format. These can be reused independently.
+    private ProjectionsStatistics timeStats; 
+    private ProjectionsStatistics numCallsStats;
+    
+    public MultiRunDataAnalyzer(MultiRunData data) {
 
-    public MultiRunDataAnalyzer() {
+	timeStats = new ProjectionsStatistics();
+	numCallsStats = new ProjectionsStatistics();
+
+	this.data = data;
+	numEPs = data.getNumEPs();
+	numRuns = data.getNumRuns();
+
+	epNames = data.getEPNames();
+	runNames = data.getRunNames();
+
+	dataTable = data.getData();
+
+	// perform analysis phase 1 - compute basic statistical info
+	computeDerivedInformation();
+	// perform analysis phase 2 - compute any extra information
+	computeExtraInformation();
+	// perform analysis phase 3 - compute extra statistical info
+	computeExtraDerivedInformation();
+
+	constructCategories();
     }
 
-    public void analyzeData(MultiRunData originalData) {
+    // ****** Data analysis methods *******
 
-	numEPs = originalData.stsReaders[0].entryCount;
-	numSets = originalData.stsReaders.length;
-
-	// setup summary data
-	epSummaryData = new double[TOTAL_EP_SUMMARY_TAGS][numEPs];
-	configSummaryData = new double[TOTAL_CONFIG_SUMMARY_TAGS][numSets];
-
-	analyzedDataTable = 
-	    new double[TOTAL_ANALYSIS_TAGS][numSets][numEPs];
-
-	epNamesList = new String[numEPs];
-	configList = new String[numSets];
-
-
-	// acquiring epNames and configuration names
-	for (int i=0; i<numEPs; i++) {
-	    epNamesList[i] = originalData.stsReaders[0].entryList[i].name;
+    /**
+     *  Computes the derived statistics from the base information. We can
+     *  thus compute things like the total time used across all EPs, across
+     *  all PEs.
+     *
+     *  Derived information may be obtained from the extra information.
+     *  Hence, they use a combined information table.
+     */
+    private void computeDerivedInformation() {
+	// compute runTimeSum - This does NOT include idle time.
+	runTimeSum = new double[numRuns];
+	for (int run=0; run<numRuns; run++) {
+	    // make sure statistics object is clean.
+	    timeStats.reset();
+	    timeStats.accumulate(dataTable[MultiRunData.TYPE_TIME][run]);
+	    runTimeSum[run] = timeStats.getSum();
 	}
-
-	for (int i=0; i<numSets; i++) {
-	    configList[i] = "(" + originalData.stsReaders[i].numPe + ")" +
-		"[" + originalData.stsReaders[i].machineName + "]";
+	// compute epTimeMean and epTimeVariance
+	epTimeMean = new double[numEPs];
+	epTimeVariance = new double[numEPs];
+	for (int ep=0; ep<numEPs; ep++) {
+	    // make sure statistics object is clean.
+	    timeStats.reset();
+	    for (int run=0; run<numRuns; run++) {
+		timeStats.accumulate(dataTable[MultiRunData.TYPE_TIME][run][ep]);
+	    }
+	    epTimeMean[ep] = timeStats.getMean();
+	    epTimeVariance[ep] = timeStats.getVariance(epTimeMean[ep]);
 	}
-
-	// simple data tabulation
-	computeSum(originalData);
-	computeAverage(originalData);
-	// computeMax();
-	// computeMin();
-	// computeStdDeviation();
-
-	// data analysis for configurations
-	// computeSumAcrossEPs(); // tagged with computeSum
-
-	// data analysis for EP
-	// computeSumAcrossConfigs();  // tagged with computeSum
-	computeAvgPercentGrowth();
-	computeAvgPercentContribution();
-	
-	// significance analysis for EP
-	computeSignificanceMap();
     }
 
-    public void computeSum(MultiRunData originalData) {
-	// processing a data set
-	for (int i=0; i<numSets; i++) {
-	    configSummaryData[CONFIG_SUM][i] = 0;
-	    // processing each EP in the dataset
-	    for (int j=0; j<numEPs; j++) {
-		analyzedDataTable[ANALYZE_SUM][i][j] = 0;
-		// taking each processor data point for a set
-		double min = Double.MAX_VALUE;
-		double max = Double.MIN_VALUE;
-		for (int k=0; k<originalData.stsReaders[i].numPe; k++) {
-		    double value =
-			originalData.sumReaders[i][k].epData[j][GenericSummaryReader.TOTAL_TIME];
-		    analyzedDataTable[ANALYZE_SUM][i][j] +=
-			value;
-		    if (value > max) {
-			max = value;
-		    }
-		    if (value < min) {
-			min = value;
-		    }
+    public void computeExtraInformation() {
+	// Overhead + Idle time
+	// initialize structure
+	extraTable = 
+	    new double[NUM_EXTR_TYPES][numRuns][NUM_EXTR_ENTRIES];
+
+	double runWallTimes[] = data.getRunWallTimes();
+	for (int run=0; run<numRuns; run++) {
+	    extraTable[EXTR_TYPE_TIME][run][EXTR_OVERHEAD] =
+		runWallTimes[run] - runTimeSum[run];
+	}
+    }
+
+    public void computeExtraDerivedInformation() {
+	// To be implemented if statistical information is
+	// desired for the extra information. In this case, it
+	// is a little tough to get that information.
+    }
+
+    // ******* Categorization methods for derived informatoin *******
+
+    /**
+     *  This method sets up the necessary categorization data structures
+     *  before handing them to the "AI" for categorization of each
+     *  Entry Point.
+     */
+    private void constructCategories() {
+	// prepare categorization data structures
+	categories = 
+	    new Vector[MultiRunData.NUM_TYPES][NUM_CATEGORIES];
+	catNames = new String[NUM_CATEGORIES];
+	for (int cat=0; cat<NUM_CATEGORIES; cat++) {
+	    catNames[cat] = getCategoryName(cat);
+	}
+	for (int type=0; type<MultiRunData.NUM_TYPES; type++) {
+	    for (int category=0; category<NUM_CATEGORIES; category++) {
+		categories[type][category] = new Vector();
+	    }
+	    categorize(type);
+	}
+    }
+
+    /**
+     *  This method allows us to put our hardcoding in one easy
+     *  to monitor place.
+     */
+    private String getCategoryName(int categoryID) {
+	switch (categoryID) {
+	case CAT_EP_NO_CHANGE:
+	    return "EPs with little change";
+	case CAT_EP_INSIGNIFICANT:
+	    return "Insignificant EPs";
+	case CAT_EP_CHANGE:
+	    return "EPs with change";
+	case CAT_OVERHEAD_IDLE:
+	    return "Idle time and System Overhead";
+	default:
+	    return "unknown category";
+	}
+    }
+
+    public void categorize(int dataType) {
+	// first, categorize the application's EPs
+	for (int ep=0; ep<numEPs; ep++) {
+	    // TEST #1 - Significance
+	    // test to see if majority of runs shows ep is insignificant
+	    int insigCount = 0;
+	    for (int run=0; run<numRuns; run++) {
+		if (dataTable[dataType][run][ep] < 0.01*runTimeSum[run]) {
+		    insigCount++;
 		}
-		analyzedDataTable[ANALYZE_MIN][i][j] = min;
-		analyzedDataTable[ANALYZE_MAX][i][j] = max;
-		configSummaryData[CONFIG_SUM][i] +=
-		    analyzedDataTable[ANALYZE_SUM][i][j];
-		epSummaryData[EP_SUM][j] +=
-		    analyzedDataTable[ANALYZE_SUM][i][j];
+	    }
+	    if (insigCount > numRuns/2) {
+		categories[dataType][CAT_EP_INSIGNIFICANT].add(new Integer(ep));
+		break;
+	    }
+	    // TEST #2 - Change
+	    // test to see if the values generally climbs or drops from run 
+	    // to run. The current implementation is extremely crude and may
+	    // form the basis for future automated performance analysis
+	    // research.
+	    //
+	    // For example, the current scheme is unable to realize that a
+	    // curve that is upward growing but tapers off is a good curve.
+	    // This requires runs to be ordered in some fashion.
+	    int incrementCount = 0;
+	    int decrementCount = 0;
+	    double avgDeviation = 0.0;
+	    double startValue = dataTable[dataType][0][ep];
+	    for (int run=1; run<numRuns; run++) {
+		avgDeviation +=
+		    Math.abs(dataTable[dataType][run][ep] - startValue);
+		if (dataTable[dataType][run][ep] > startValue) {
+		    incrementCount++;
+		} else if (dataTable[dataType][run][ep] < startValue) {
+		    decrementCount++;
+		}
+	    }
+	    avgDeviation /= numRuns-1;
+	    if (((incrementCount > numRuns*0.75) || 
+		 (decrementCount > numRuns*0.75)) &&
+		(avgDeviation > 0.05*epTimeMean[ep])) {
+		categories[dataType][CAT_EP_CHANGE].add(new Integer(ep));
+	    } else {
+		categories[dataType][CAT_EP_NO_CHANGE].add(new Integer(ep));
+	    }
+	}
+	// then, add special (extra) EPs to the appropriate category
+	for (int entry=0; entry<NUM_EXTR_ENTRIES; entry++) {
+	    switch (entry) {
+	    case EXTR_OVERHEAD:
+		categories[dataType][CAT_OVERHEAD_IDLE].add(new Integer(numEPs+EXTR_OVERHEAD));
+		break;
 	    }
 	}
     }
 
+    // **** Interface to Tables and Table Models ****
+    
     /**
-     *  Assumption: computeSum is run before computeAverage
+     *  This call is made by the table model for the appropriate category.
+     *  As such, it supplies the index it needs data from.
      */
-    public void computeAverage(MultiRunData originalData) {
-	for (int i=0; i<numSets; i++) {
-	    for (int j=0; j<numEPs; j++) {
-		analyzedDataTable[ANALYZE_AVG][i][j] =
-		    analyzedDataTable[ANALYZE_SUM][i][j] / 
-		    originalData.stsReaders[i].numPe;
-	    }
+    public int getNumRows(int dataType, int categoryIndex) {
+	return categories[dataType][categoryIndex].size();
+    }
+    
+    /**
+     *  The only reason we still pass in the dataType and categoryIndex
+     *  is to provide the flexibility to return additional columns
+     *  depending on the data type or category type.
+     */
+    public int getNumColumns(int dataType, int categoryIndex) {
+	return numRuns;
+    }
+
+    public double getTableValueAt(int dataType, int categoryIndex, 
+				  int row, int col) {
+	int epIndex = 
+	    ((Integer)categories[dataType][categoryIndex].elementAt(row)).intValue();
+	// if extra info, use different array.
+	if (epIndex >= numEPs) {
+	    return extraTable[dataType][col][numEPs-epIndex];
+	} else {
+	    return dataTable[dataType][col][epIndex];
 	}
     }
 
     /**
-     *   getData takes the appropriate part of the analyzed data and
-     *   returns the handle to the calling method (should be the controller
-     *   on behalf of the GUI.
-     *  
+     *  Needed by MultiRunTables to begin constructing the individual
+     *  tables.
      */
-    public MultiRunDataSource getData(int dataType, boolean filterTable[],
-				      int sortMap[]) {
+    public String[] getCategoryNames() {
+	return catNames;
+    }
+
+    // **** Standard Interface to Graphs ****
+
+    /**
+     *   getDataSource takes the appropriate part of the analyzed data and
+     *   constructs a DataSource object suitable for display on an 
+     *   AreaGraphPanel.
+     */
+    public MultiRunDataSource getDataSource(int dataType) {
+	double dataArray[][];
+
 	String titleString = "";
 	switch (dataType) {
-	case ANALYZE_SUM:
-	    titleString = "Sum";
+	case MultiRunData.TYPE_TIME:
+	    titleString = "Time taken";
 	    break;
-	case ANALYZE_AVG:
-	    titleString = "Average";
+	case MultiRunData.TYPE_NUM_MSG_SENT:
+	    titleString = "Messages sent per processor";
 	    break;
-	case ANALYZE_MIN:
-	    titleString = "Min";
-	    break;
-	case ANALYZE_MAX:
-	    titleString = "Max";
+	case MultiRunData.TYPE_SIZE_MSG:
+	    titleString = "Amount of data sent";
 	    break;
 	}
-	return new MultiRunDataSource(filter(Util.applyMap(analyzedDataTable[dataType],
-							   sortMap),
-					     Util.applyMap(filterTable,
-							   sortMap)),
-				      null,
+
+	return new MultiRunDataSource(dataTable[dataType],
+				      null, // currently no color map
 				      titleString);
     }
 
-    public MultiRunXAxis getMRXAxisData(boolean filterTable[]) {
-	return new MultiRunXAxis(filter(configList, filterTable));
+    public MultiRunXAxis getMRXAxisData() {
+	return new MultiRunXAxis(runNames);
     }
 
-    public MultiRunYAxis getMRYAxisData(int dataType, boolean filterTable[]) {
+    public MultiRunYAxis getMRYAxisData(int dataType) {
 	String title = "";
 
-	if (dataType == ANALYZE_SUM) {
+	switch (dataType) {
+	case MultiRunData.TYPE_TIME:
 	    title = "Time summed across processors (us)";
+	    break;
+	case MultiRunData.TYPE_NUM_MSG_SENT:
+	    title = "Number of messages sent per processor";
+	    break;
+	case MultiRunData.TYPE_SIZE_MSG:
+	    title = "Total amount of data sent (bytes)";
+	    break;
 	}
 
+	ProjectionsStatistics stats =
+	    new ProjectionsStatistics();
+	for (int run=0; run<numRuns; run++) {
+	    stats.accumulate(dataTable[dataType][run]);
+	}
 	return new MultiRunYAxis(MultiRunYAxis.TIME,
 				 title, 
-				 getMax(filter(analyzedDataTable[dataType],
-					       filterTable)));
-    }
-
-    public String[] getMRLegendData(boolean filterTable[],
-				    int sortMap[]) {
-	return filter(Util.applyMap(epNamesList, sortMap),
-		      Util.applyMap(filterTable, sortMap));
-    }
-
-    /**
-     *  This function must be called *after* the sum data is computed.
-     *  Otherwise, it is meaningless.
-     *
-     */
-    public boolean[] getNonZeroFilter() {
-	boolean filter[] = new boolean[epNamesList.length];
-	for (int i=0; i<filter.length; i++) {
-	    if (epSummaryData[EP_SUM][i] == 0.0) {
-		filter[i] = false;
-	    } else {
-		filter[i] = true;
-	    }
-	}
-	return filter;
-    }
-
-    /**
-     *  Returns a index-to-index map (for re-sorting) that allows
-     *  data to be displayed in a different order.
-     *
-     *  May provide parameters in the future to fine-tune significance
-     *  analysis.
-     *
-     *  returns a copy of the internal map.
-     */
-    public int[] getSignificanceMap() {
-	int significance[] = new int[epNamesList.length];
-
-	// default to a direct map
-	if (significanceMap == null) {
-	    for (int i=0; i<significance.length; i++) {
-		significance[i] = i;
-	    }
-	} else {
-	    for (int i=0; i<significanceMap.length; i++) {
-		significance[i] = significanceMap[i];
-	    }
-	}
-	
-	return significance;
-    }
-
-    public int[] getGrowthMap() {
-	int growth[] = new int[epNamesList.length];
-	return Sorter.sort(epSummaryData[EP_GROWTH_PERCENT]);
-    }
-
-    public int[] getSizeMap() {
-	int epSize[] = new int[epNamesList.length];
-	return Sorter.sort(epSummaryData[EP_AVG_PERCENT]);
-    }
-
-    /**
-     *  Computes the average total time growth percentage of EPs across 
-     *  all runs.
-     *  Useful to see if the EP scales well.
-     *  Assumes that the summation data has already been computed in
-     *  analyzedDataTable.
-     */
-    private void computeAvgPercentGrowth() {
-	for (int ep=0; ep<numEPs; ep++) {
-	    double growthPercent = 0;
-	    for (int config=1; config<numSets; config++) {
-		double previous = analyzedDataTable[ANALYZE_SUM][config-1][ep];
-		double current = analyzedDataTable[ANALYZE_SUM][config][ep];
-		growthPercent += (previous - current)/previous;
-	    }
-	    epSummaryData[EP_GROWTH_PERCENT][ep] = growthPercent/(numEPs-1);
-	}
-    }
-
-    private void computeAvgPercentContribution() {
-	for (int ep=0; ep<numEPs; ep++) {
-	    double percentContrib = 0;
-	    for (int config=0; config<numSets; config++) {
-		percentContrib +=
-		    analyzedDataTable[ANALYZE_SUM][config][ep] /
-		    configSummaryData[CONFIG_SUM][config];
-	    }
-	    epSummaryData[EP_AVG_PERCENT][ep] = percentContrib/numEPs;
-	}
-    }
-
-    private void computeSignificanceMap() {
-
-	significanceMap = new int[epNamesList.length];
-
-	// the rate of growth contributes 20% and EP time percentage
-	// contributes 80%
-	for (int i=0; i<epNamesList.length; i++) {
-	    epSummaryData[EP_SIGNIFICANCE][i] =
-		epSummaryData[EP_GROWTH_PERCENT][i]*0.2 +
-		epSummaryData[EP_AVG_PERCENT][i]*0.8;
-	}
-
-	significanceMap = Sorter.sort(epSummaryData[EP_SIGNIFICANCE]);
-    }
-
-    private double getMax(double[][] inTable) {
-	double max = 0.0; // negative values not expected
-	for (int i=0;i<inTable.length;i++) {
-	    for (int j=0;j<inTable[i].length;j++) {
-		if (max < inTable[i][j]) {
-		    max = inTable[i][j];
-		}
-	    }
-	}
-	return max;
-    }
-
-    private double getMax(double[] inTable) {
-	double max = 0.0;
-	for (int i=0; i<inTable.length;i++) {
-	    if (max < inTable[i]) {
-		max = inTable[i];
-	    }
-	}
-	return max;
-    }
-
-    private double[][] filter(double[][] data, boolean filterTable[]) {
-	if (filterTable != null) {
-	    double returnData[][];
-	    
-	    returnData = new double[data.length][getNumValid(filterTable)];
-	    
-	    for (int i=0; i<returnData.length; i++) {
-		int jIdx = 0;
-		for (int j=0; j<filterTable.length; j++) {
-		    if (filterTable[j]) {
-			returnData[i][jIdx] = data[i][j];
-			jIdx++;
-		    }
-		}
-	    }
-	    return returnData;
-	} else {
-	    return data;
-	}
-    }
-
-    private String[] filter(String[] data, boolean filterTable[]) {
-	if (filterTable != null) {
-	    String returnData[];
-
-	    returnData = new String[getNumValid(filterTable)];
-
-	    int iIdx = 0;
-	    for (int i=0; i<filterTable.length; i++) {
-		if (filterTable[i]) {
-		    returnData[iIdx] = data[i];
-		    iIdx++;
-		}
-	    }
-	    return returnData;
-	} else {
-	    return data;
-	}
-    }
-
-    private int getNumValid(boolean filterTable[]) {
-	int count = 0;
-
-	for (int i=0; i<filterTable.length; i++) {
-	    if (filterTable[i]) {
-		count++;
-	    }
-	}
-	return count;
+				 stats.getMax());
     }
 }

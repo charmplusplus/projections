@@ -3,16 +3,23 @@ package projections.gui.graph;
 import projections.gui.*;
 
 import java.awt.*;
+import javax.swing.*;
+import java.awt.event.*;
 
 public class LegendPanel 
-    extends Panel
+    extends JPanel
 {
     private LegendCanvas canvas;
-    private ScrollPane sp;
+    private JScrollPane sp;
 
-    private Panel buttonPanel;
-    private Button clearAll;
-    private Button selectAll;
+    private JPanel buttonPanel;
+    private JButton clearAll;
+    private JButton selectAll;
+    private JButton group;
+    private JButton ungroup;
+    private JButton saveGroup;
+
+    private JTextField groupName;
 
     public LegendPanel()
     {
@@ -20,19 +27,21 @@ public class LegendPanel
 
 	setBackground(Color.lightGray);
 
-	sp = new ScrollPane();
+	sp = new JScrollPane();
 	canvas = new LegendCanvas();
 
 	sp.add(canvas);
 	sp.setBackground(Color.lightGray);
 	
-	buttonPanel = new Panel();
-	clearAll = new Button("Unselect All");
+	buttonPanel = new JPanel();
+	clearAll = new JButton("Unselect All");
 	clearAll.setActionCommand("unselect");
 	clearAll.addActionListener(canvas);
-	selectAll = new Button("Select All");
+	selectAll = new JButton("Select All");
 	selectAll.setActionCommand("select");
 	selectAll.addActionListener(canvas);
+	group = new JButton("Group Selected");
+	ungroup = new JButton("Ungroup");
 	buttonPanel.add(clearAll);
 	buttonPanel.add(selectAll);
 

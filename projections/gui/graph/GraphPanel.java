@@ -12,8 +12,8 @@ public class GraphPanel extends JPanel
         private static final Color FOREGROUND = Color.white;
 
  	private JPanel mainPanel; 
+    private JScrollPane displayPanel;
 	private Graph displayCanvas;
-	private Scrollbar HSB;
 
 	private Button             bIncreaseX;
 	private Button             bDecreaseX;
@@ -41,19 +41,20 @@ public class GraphPanel extends JPanel
           setBackground(Color.lightGray);
 
 	  displayCanvas = g;		
-	
-	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
- 
+
+	  createLayout();
+	}
+
+    private void createLayout() {
+
 	  mainPanel = new JPanel();
           mainPanel.setLayout(null);
           mainPanel.setBackground(BACKGROUND);
           mainPanel.setForeground(FOREGROUND);
-          mainPanel.add(displayCanvas);
-          mainPanel.add(HSB);
 	  mainPanel.setSize(getPreferredSize());
           
-	  HSB.setBackground(Color.lightGray);
-          HSB.addAdjustmentListener(this);
+	  displayPanel = new JScrollPane(displayCanvas);
+	  mainPanel.add(displayPanel);
 
 	  lScale  = new Label("X-Axis Scale: ", Label.CENTER);
  
@@ -107,7 +108,7 @@ public class GraphPanel extends JPanel
 
    public void actionPerformed(ActionEvent evt)
    {
-          float scale=Float.valueOf(scaleField.getText()).floatValue(); 
+          float scale=scaleField.getValue();
  
           if(evt.getSource() instanceof Button)
           {
@@ -134,15 +135,6 @@ public class GraphPanel extends JPanel
                  scale = scaleField.getValue();
           }
  
-           if(scale > 1)
-                 HSB.setVisible(true);
-           else
-                 HSB.setVisible(false);
-	
-	  int dcw = displayCanvas.getSize().width;
-          int dw  = (int)(scale * dcw);
-          HSB.setMaximum(dw);
- 
 	  displayCanvas.setScale((double)scale); 
           setAllBounds();
           displayCanvas.repaint();
@@ -150,9 +142,9 @@ public class GraphPanel extends JPanel
 
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {
-	 displayCanvas.setHSBValue(HSB.getValue());
 	 displayCanvas.repaint();
    }
+
    public void itemStateChanged(ItemEvent evt)
    {
  
@@ -186,19 +178,6 @@ public class GraphPanel extends JPanel
           // the scales are set appropriately.
  
           displayCanvas.setBounds(30, 30, dcw, dch);
-	  displayCanvas.setHSBValue(HSB.getValue());
-          HSB.setBounds (30,mph-sbh, dcw, sbh);
- 
-          float scale=Float.valueOf(scaleField.getText()).floatValue(); 
-          HSB.setMaximum((int)(scale * dcw));
-          HSB.setVisibleAmount(dcw);
-          HSB.setBlockIncrement(dcw);
- 
-	  displayCanvas.setScale(scale); 
-          if(scale > 1)
-                 HSB.setVisible(true);
-          else
-                 HSB.setVisible(false);
    }
 
    public static void main(String [] args){

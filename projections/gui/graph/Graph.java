@@ -1,136 +1,136 @@
 package projections.gui.graph;
 
 import projections.gui.*; 
+
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
  
-public class Graph extends JPanel implements MouseMotionListener
+public class Graph extends JPanel 
+    implements MouseMotionListener
 {
-   public static final int STACKED    = 0;		// type of the bar graph
-   public static final int UNSTACKED  = 1;		// single, multiple or stacked
-
-   public static final int SINGLE     = 3;		// take the average of all y-values
-   public static final int BAR     = 4;		// Graph type, bar graph
-   public static final int LINE    = 5;		// or line graph
-
-   private int GraphType;
-   private int BarGraphType;
-   private DataSource dataSource;
-   private XAxis xAxis;
-   private YAxis yAxis;
-   private int originX;
-   private int originY;
-   private double xscale;
-   private int hsbval;
-
-   private static final int FONT_SIZE = 12;   
-   private static final Color BACKGROUND = Color.black;
-   private static final Color FOREGROUND = Color.white;
-
+    public static final int STACKED   = 0;  // type of the bar graph
+    public static final int UNSTACKED = 1;  // single, multiple or stacked
+    public static final int AREA      = 2;  // Area graph (stacked)
+    public static final int SINGLE    = 3;  // take the average of all y-values
+    public static final int BAR       = 4;  // Graph type, bar graph
+    public static final int LINE      = 5;  // or line graph
+    
+    private int GraphType;
+    private int BarGraphType;
+    private DataSource dataSource;
+    private XAxis xAxis;
+    private YAxis yAxis;
+    private int originX;
+    private int originY;
+    private double xscale;
+    private int hsbval;
+    
+    private static final int FONT_SIZE = 12;   
+    private static final Color BACKGROUND = Color.black;
+    private static final Color FOREGROUND = Color.white;
+    
     private static final double PI = 3.142;
 
-   private FontMetrics fm;
-   private Color labelColor;
-   private Image offscreen; 
-   
-   private JLabel yLabel;	// to print y axis title vertically
-   private int w,h,tickincrementX,tickincrementY;
-   double pixelincrementX,pixelincrementY;
-
-   public Graph()
-   {
+    private FontMetrics fm;
+    private Color labelColor;
+    private Image offscreen; 
+    
+    private JLabel yLabel;	// to print y axis title vertically
+    private int w,h,tickincrementX,tickincrementY;
+    double pixelincrementX,pixelincrementY;
+    
+    public Graph()
+    {
 	setSize(getPreferredSize());	
 	
-	GraphType = BAR;			// default GraphType is BAR
-	BarGraphType = UNSTACKED;                 // default BarGraphType is UNSTACKED
-//	labelColor = Color.yellow;
-	labelColor = FOREGROUND;
+	GraphType = BAR;	       // default GraphType is BAR
+	BarGraphType = UNSTACKED;      // default BarGraphType is UNSTACKED
+	labelColor = Color.yellow;
 	
 	xscale = 1.0;
 	hsbval = 0;
 	offscreen = null;
-
+	
 	addMouseMotionListener(this);
-   }
-
-   public Graph(DataSource d, XAxis x, YAxis  y)
-   {
+    }
+    
+    public Graph(DataSource d, XAxis x, YAxis  y)
+    {
+	// call default constructor
+	this();
+	
 	xAxis = x;
 	yAxis = y;
 	dataSource = d;
-	
-	setSize(getPreferredSize());	
-	
-	GraphType = BAR;			// default GraphType is BAR
-	BarGraphType = STACKED;			
-	labelColor = Color.yellow;
+    }
 
-	xscale = 1.0;
-	hsbval = 0;
-	offscreen = null;
-
-	addMouseMotionListener(this);
-   }
-
-   //Make sure we aren't made too tiny
-   public Dimension getMinimumSize() {return new Dimension(300,200);}
-   public Dimension getPreferredSize() {return new Dimension(300,200);}
-
-   public void setGraphType(int type)
-   {
-	if((type == LINE) || (type == BAR))
-		GraphType = type;                      // set the Graphtype to LINE or BAR 
-	else
-		; //unknown graph type.. do nothing ; draw a bargraph
-   }
-
-   public int getGraphType()
-   {
-	return GraphType;
-   }
-
-   public void setBarGraphType(int type)
-   {
-	if((type == STACKED) || (type == UNSTACKED) || (type == SINGLE))
-		BarGraphType = type;                      // set the Graphtype to STACKED or UNSTACKED or SINGLE
-	else
-		; //unknown bar graph type.. do nothing ; draw STACKED bar graph
-   }
-
-   private String getBarGraphType()
-   {
-	if(BarGraphType == SINGLE)
-		return("avg");
-	if(BarGraphType == UNSTACKED)
-		return("unstacked");
-	return("stacked");
-   }
-
-   public void setData(DataSource d, XAxis x, YAxis  y)
-   {
+    public void setData(DataSource d, XAxis x, YAxis  y)
+    {
         xAxis = x;
         yAxis = y;
         dataSource = d;
-   }
-
-   public void setData(DataSource d)
-   {
+    }
+    
+    public void setData(DataSource d)
+    {
         dataSource = d;
-   }
+    }
+    
+    //Make sure we aren't made too tiny
+    public Dimension getMinimumSize() {return new Dimension(500,400);}
+    public Dimension getPreferredSize() {return new Dimension(500,400);}
+    
+    // ***** API Interface to the control panel *****
 
-   public void setLabelColor(Color c){
+    public void setGraphType(int type)
+    {
+	if ((type == LINE) || (type == BAR)) {
+	    GraphType = type;      // set the Graphtype to LINE or BAR 
+	} else if (type == AREA) {
+	    GraphType = type;
+	    
+	} else {
+	    ; //unknown graph type.. do nothing ; draw a bargraph
+	}
+    }
+
+    public int getGraphType()
+    {
+	return GraphType;
+    }
+
+    public void setBarGraphType(int type)
+    {
+	if((type == STACKED) || (type == UNSTACKED) || (type == SINGLE))
+	    BarGraphType = type;
+	else
+	    ; //unknown bar graph type.. do nothing ; draw STACKED bar graph
+    }
+
+    private String getBarGraphType()
+    {
+	if(BarGraphType == SINGLE)
+	    return("avg");
+	if(BarGraphType == UNSTACKED)
+	    return("unstacked");
+	return("stacked");
+    }
+    
+    public void setLabelColor(Color c){
 	labelColor = c;
-   }
+    }
 
-   public void setHSBValue(int val){
+    public void setHSBValue(int val){
 	hsbval = val;
-   }
- 
-   public void setScale(double val){
+    }
+    
+    public void setScale(double val){
 	xscale = val;
-   }
+    }
 
+    // ***** Painting Routines *****
+    
    public void paintComponent(Graphics g)
    {
 	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
@@ -139,31 +139,17 @@ public class Graph extends JPanel implements MouseMotionListener
 	  w = getSize().width;
           h = getSize().height;
 
-	  /* is explicit double buffering truely needed anymore in Swing?
-	  if(offscreen == null)
-	  {
-		drawDisplay(g);          
-       		return;
-	  }
- 
-          Graphics og = offscreen.getGraphics();
- 
-          drawDisplay(og);		
- 
-          g.drawImage(offscreen, 0,0,w,h, 0,0,w,h, null);
-	  */
-
 	  drawDisplay(g);
    }
 
-   public void print(Graphics pg)
-   {
-          setBackground(Color.white);
-          setForeground(Color.black);
-          drawDisplay(pg);
-          setBackground(BACKGROUND);
-          setForeground(FOREGROUND);
-   }
+    public void print(Graphics pg)
+    {
+	setBackground(Color.white);
+	setForeground(Color.black);
+	drawDisplay(pg);
+	setBackground(BACKGROUND);
+	setForeground(FOREGROUND);
+    }
   
    public void mouseMoved(MouseEvent e) {
        //System.out.println("Mouse moved"+ e);
@@ -215,10 +201,13 @@ public class Graph extends JPanel implements MouseMotionListener
 	  if((xAxis != null) && (yAxis != null))
 	  {
 	  	drawAxes(g);	
-    	  	if (GraphType == BAR)
-	  		drawBarGraph(g);
-	  	else
-			drawLineGraph(g);
+    	  	if (GraphType == BAR) {
+		    drawBarGraph(g);
+	  	} else if (GraphType == AREA) {
+		    drawAreaGraph(g);
+		} else {
+		    drawLineGraph(g);
+		}
 	  }
    }
 
@@ -239,7 +228,7 @@ public class Graph extends JPanel implements MouseMotionListener
  
           yLabel = new JLabel(temp);
 		
-	  originX = fm.getHeight()*3;
+	  originX = fm.getHeight()*4;
 	  //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
 	  originY = h - (30 + 2 * fm.getHeight());				// i.e. find the left and the lower margins
 
@@ -295,7 +284,23 @@ public class Graph extends JPanel implements MouseMotionListener
                         g.drawLine(curx, originY+2, curx, originY-2);
           }
 
+	  // **CW** NOTE: This is incorrect behavior for stacked graphs!
+	  /*
 	  double maxvalueY = yAxis.getMax();                              //max y Value 
+	  */
+
+	  double maxvalueY;
+	  // stacked will have to use its own prefix sum computation for
+	  // now. Not sure if DataSource is the right place to do this.
+	  if (((GraphType == BAR) && (BarGraphType == STACKED)) ||
+	      (GraphType == AREA)) {
+	      maxvalueY = findMaxOfSums();
+	  } else {
+	      // assume unstacked
+	      maxvalueY = yAxis.getMax();
+	  }
+
+
 	  maxvalueY += (10 - maxvalueY%10);				  // adjust so that the max axis value is in the multiples of 10
 	  pixelincrementY = (double)(originY-30) / maxvalueY;
 	 // pixelincrementY = (int)pixelincrementY;
@@ -445,11 +450,95 @@ public class Graph extends JPanel implements MouseMotionListener
 	}
     }
 
+    public void drawAreaGraph(Graphics2D g) {
+	int xValues = dataSource.getIndexCount();
+	int yValues = dataSource.getValueCount(); // no. of y values for each x
+	double data[] = new double[yValues];
+
+	Polygon polygon = new Polygon();
+
+	// do only till the window is reached 
+	// layers have to be drawn in reverse (highest first).
+	for (int layer=yValues-1; layer>=0; layer--) {	
+
+	    // construct the polygon for the values.
+	    polygon = new Polygon();
+	    // polygon.reset(); // 1.4.1 Java only
+
+	    int xPixel; 
+	    int yPixel;
+
+	    for (int idx=0; idx<xValues; idx++) {
+		// get the y values given the x value
+		// **CW** NOTE to self: This is silly. Why do I have to
+		// get the data each time when I only need to get it once!?
+		// Fix once I have the time.
+		dataSource.getValues(idx,data);
+
+		//calculate x & y pixel values
+		xPixel = originX + (int)(idx*pixelincrementX) + 
+		    (int)(pixelincrementX/2);    
+		// **CW** NOTE will need some refactoring to prevent
+		// recomputation of the prefix sum each time we go through
+		// the Y values.
+		prefixSum(data);
+	    	yPixel = (int) (originY - (int)(data[layer]*pixelincrementY));
+
+		// if first point, add the baseline point before adding
+		// the first point.
+		if (idx == 0) {
+		    // just so it does not overwrite the Axis line.
+		    polygon.addPoint(xPixel, originY-1);
+		}
+		// add new point to polygon
+		polygon.addPoint(xPixel, yPixel);
+		// if last point, add the baseline point after adding
+		// the last point.
+		if (idx == xValues-1) {
+		    // just so it does not overwrite the Axis line.
+		    polygon.addPoint(xPixel, originY-1);
+		}
+		
+	    }
+	    // draw the filled polygon.
+	    g.setColor(dataSource.getColor(layer));
+	    g.fill(polygon);
+	    // draw a black outline.
+	    g.setColor(Color.black);
+	    g.draw(polygon);
+	}
+    }
+
+    // in-place computation of the prefix sum
+    private void prefixSum(double data[]) {
+	// computation is offset by 1
+	for (int i=0; i<data.length-1; i++) {
+	    data[i+1] = data[i+1]+data[i];
+	}
+    }
+
+    private double findMaxOfSums() {
+	double maxValue = 0.0;
+
+	int xValues = dataSource.getIndexCount();
+	int yValues = dataSource.getValueCount(); // no. of y values for each x
+	double data[] = new double[yValues];
+
+	for (int i=0; i<xValues; i++) {
+	    dataSource.getValues(i, data);
+	    prefixSum(data);
+	    if (maxValue < data[yValues-1]) {
+		maxValue = data[yValues-1];
+	    }
+	}
+
+	return maxValue;
+    }
 
    public static void main(String [] args){
 	JFrame f = new JFrame();
 	JPanel mainPanel = new JPanel();
-	double data[][]={{2000,21,49,3},{25,34,8,10},{23,20,54,3},{20,27,4,40},{25,21,7,4},{20,21,8,10},{24,26,44,4},{22,26,20,5},{29,29,5,20},{20,21,8,7},{24,20,10,3},{21,25,6,8},{34,23,11,11},{20,20,20,20},{27,25,4,5},{21,20,5,7},{21,24,5,8},{26,22,5,3},{26,29,7,10},{29,20,8,6},{21,24,9,4}};
+	double data[][]={{20,21,49,3},{25,34,8,10},{23,20,54,3},{20,27,4,40},{25,21,7,4},{20,21,8,10},{24,26,44,4},{22,26,20,5},{29,29,5,20},{20,21,8,7},{24,20,10,3},{21,25,6,8},{34,23,11,11},{20,20,20,20},{27,25,4,5},{21,20,5,7},{21,24,5,8},{26,22,5,3},{26,29,7,10},{29,20,8,6},{21,24,9,4}};
 
 	f.addWindowListener(new WindowAdapter()
           {
@@ -463,8 +552,20 @@ public class Graph extends JPanel implements MouseMotionListener
         XAxis xa=new XAxisFixed("Entry Point Execution Time","ms");
         YAxis ya=new YAxisAuto("Count","",ds);
  	Graph g=new Graph();
+	/* **TESTCASE - UNSTACKED BAR** 
 	g.setGraphType(Graph.BAR);
 	g.setBarGraphType(Graph.UNSTACKED);
+	*/
+	/* **TESTCASE - STACKED BAR**
+	g.setGraphType(Graph.BAR);
+	g.setBarGraphType(Graph.STACKED);
+	*/
+	/* **TESTCASE - AREA (STACKED)** */
+	g.setGraphType(Graph.AREA);
+	/* **TESTCASE - LINE (UNSTACKED)** 
+	g.setGraphType(Graph.LINE);
+	*/
+
         g.setData(ds,xa,ya);
         mainPanel.add(g);
 	f.getContentPane().add(mainPanel);
@@ -472,9 +573,6 @@ public class Graph extends JPanel implements MouseMotionListener
 	f.setSize(500,400);
         f.setTitle("Projections");
         f.setVisible(true);
-	
    }
-
-
 }
 

@@ -39,6 +39,7 @@ SRC=\
     projections/gui/AnimationColorBarPanel.java\
     projections/gui/AnimationDisplayPanel.java\
     projections/gui/AnimationWindow.java\
+    projections/gui/AreaGraphPanel.java\
     projections/gui/BGGraphWindow.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
@@ -90,8 +91,8 @@ SRC=\
     projections/gui/MenuManager.java\
     projections/gui/MultiRunCallBack.java\
     projections/gui/MultiRunControlPanel.java\
-    projections/gui/MultiRunDisplayPanel.java\
     projections/gui/MultiRunFileDialogControl.java\
+    projections/gui/MultiRunTables.java\
     projections/gui/MultiRunTextAreaWriter.java\
     projections/gui/MultiRunWindow.java\
     projections/gui/MyButton.java\
@@ -158,8 +159,7 @@ SRC=\
     projections/misc/LogEntryData.java\
     projections/misc/LogLoadException.java\
     projections/misc/MultiRunData.java\
-    projections/misc/MultiRunController.java\
-    projections/misc/MultiRunTextRenderer.java\
+    projections/misc/MultiRunTableModel.java\
     projections/misc/PrintUtils.java\
     projections/misc/ProgressDialog.java\
     projections/misc/ProjectionsStatistics.java\

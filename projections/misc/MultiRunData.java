@@ -9,167 +9,132 @@ import java.io.*;
  *
  *  Written by Chee Wai Lee
  *  3/28/2002
+ *  Updated:
+ *    2/4/2003 - Chee Wai Lee. streamlined the code. Move the construction
+ *               of the basic summed table from MultiRunDataAnalyzer.
  *
- *  MultiRunData is the main class encapsulating raw data read from multiple
+ *  MultiRunData is the main class encapsulating data read from multiple
  *  summary or log files.
+ *
  */
 
-public class MultiRunData {
+public class MultiRunData 
+{
+    // IO reader objects (holds data after construction unless on exception)
+    private GenericStsReader stsReaders[];
+    // sumReaders dim 1 - indexed by Run Log ID
+    // sumReaders dim 2 - indexed by PE number
+    private GenericSummaryReader sumReaders[][];
+    
+    // Data entries computed from IO reader objects summed across all
+    // PEs. The data should be accessed via accessor methods.
+    // Dimension 0 - indexed by data type (time, #msg, msgsize)
+    // Dimension 1 - indexed by Run Log ID
+    // Dimension 2 - indexed by Entry Point ID
+    private double dataTable[][][];
 
-    // IO reader objects
-    public GenericStsReader stsReaders[];
-    // sumReaders dim 1 - indexed by set ID
-    // sumReaders dim 2 - indexed by processor index
-    public GenericSummaryReader sumReaders[][];
+    // accompanying static data for dataTable. These types are publically
+    // published for use by the GUI and Data Analyzer(s).
+    public static final int NUM_TYPES = 4;
+    public static final int TYPE_TIME = 0;
+    public static final int TYPE_TIMES_CALLED = 1;
+    public static final int TYPE_NUM_MSG_SENT = 2;
+    public static final int TYPE_SIZE_MSG = 3;    
 
-    public MultiRunData() {
-    }
+    // Short names of data types associated with Multirun data. Can
+    // be used by GUIs to automatically generate components like buttons
+    // or radio boxes.
+    private static final String typeNames[] =
+    {"Execution Time", "Num Msgs Received", "Num Msgs Sent", "Msg Size"};
 
+    // Non-standard data entries from summary files.
+    // runTimes - The total absolute wall time the run took summed across
+    //            all PEs. Effectively the total amount of work done +
+    //            overhead.
+    // Dimension 0 - indexed by Run Log ID
+    private double runWallTimes[];
+    
+    // fixed statically determinable information after reading the
+    // sts data.
+    private int numRuns;
+    private int numEPs;
+    
+    // Names
+    private String[] epNames;
+    private String[] runNames;
+
+    // Create one statistics object for each data type read from
+    // the summary format. These can be reused independently.
+    private ProjectionsStatistics timeStats; 
+    private ProjectionsStatistics numCallsStats;
+    
     /**
-     *
-     *  initialize is essentially a request to read a brand new set of
-     *  data. This could be the initial data set or changes in datasets.
-     *
+     *  Constructs the sets of StsReaders and SummaryReaders (which on 
+     *  construction, reads the appropriate files and holds its data).
+     *  These entities can then be probed for information.
      */
-    public void initialize(String NbaseName, String NdataSetPathnames[],
-			   boolean NisDefault, int NlogType) 
+    public MultiRunData(String listOfStsFilenames[]) 
 	throws IOException
     {
-	if (NisDefault) {
-	    NdataSetPathnames = getSubDirectories(NdataSetPathnames[0]);
-	}
-	if (NlogType == MultiRunController.SUMMARY) {
-	    stsReaders = new GenericStsReader[NdataSetPathnames.length];
-	    sumReaders = new GenericSummaryReader[NdataSetPathnames.length][];
+	timeStats = new ProjectionsStatistics();
+	numCallsStats = new ProjectionsStatistics();
+	
+	try {
+	    numRuns = listOfStsFilenames.length;
 
-	    for (int i=0; i<stsReaders.length; i++) {
-		stsReaders[i] = 
-		    new GenericStsReader(getSumStsFilename(NbaseName,
-							   NdataSetPathnames[i]),
+	    // check for empty array and throw exception
+	    if (numRuns == 0) {
+		throw new IOException("MultiRunData cannot be initialized " +
+				      "with zero runs!");
+	    }
+
+	    stsReaders = new GenericStsReader[numRuns];
+	    sumReaders = new GenericSummaryReader[numRuns][];
+	    for (int run=0; run<numRuns; run++) {
+		stsReaders[run] =
+		    new GenericStsReader(listOfStsFilenames[run],
 					 Analysis.getVersion());
-		sumReaders[i] = new GenericSummaryReader[stsReaders[i].numPe];
-		for (int j=0; j<sumReaders[i].length; j++) {
-		    sumReaders[i][j] = 
-			new GenericSummaryReader(getSumFilename(NbaseName,
-								NdataSetPathnames[i],
-								j),
+		int numPE = stsReaders[run].numPe;
+		sumReaders[run] =
+		    new GenericSummaryReader[numPE];
+		for (int pe=0; pe<numPE; pe++) {
+		    sumReaders[run][pe] =
+			new GenericSummaryReader(getSumFilename(listOfStsFilenames[run],
+								pe),
 						 Analysis.getVersion());
 		}
 	    }
-	}
-    }
+	    // there has to be at least one run and all sts files have to
+	    // agree on the number of entries (or we will be comparing
+	    // oranges with apples)
+	    numEPs = stsReaders[0].entryCount;
 
-    /**
-     * This should be the preferred way of initializing multirun data from
-     * now onwards.
-     */
-    public void initialize(String listOfStsFilenames[]) 
-	throws IOException
-    {
-	stsReaders = new GenericStsReader[listOfStsFilenames.length];
-	sumReaders = new GenericSummaryReader[listOfStsFilenames.length][];
-	for (int i=0; i<stsReaders.length; i++) {
-	    stsReaders[i] =
-		new GenericStsReader(listOfStsFilenames[i],
-				     Analysis.getVersion());
-	    sumReaders[i] =
-		new GenericSummaryReader[stsReaders[i].numPe];
-	    for (int j=0; j<sumReaders[i].length; j++) {
-		System.out.println(getSumFilename(listOfStsFilenames[i],j));
-		sumReaders[i][j] =
-		    new GenericSummaryReader(getSumFilename(listOfStsFilenames[i],
-							    j),
-					     Analysis.getVersion());
+	    // acquiring epNames and run names
+	    epNames = new String[numEPs];
+	    for (int ep=0; ep<numEPs; ep++) {
+		epNames[ep] = stsReaders[0].entryList[ep].name;
 	    }
-	}
-    }
-
-    /**
-     *
-     *  addDataSets adds additional log data sets to the one currently
-     *  loaded into AccumulatedData. This allows scaling data to be
-     *  viewed and compared incrementally.
-     *
-     *  [[[[not to be implemented in first phase of project]]]]
-     */
-    public void addDataSets(String dataSetPathnames[]) 
-	throws IOException
-    {
-    }
-
-    /**
-     *
-     *  dropDataSets allows the user to drop log data sets from the
-     *  ones already loaded into AccumulatedData. This aids in selective
-     *  comparisons at analysis time and data generation.
-     *
-     *  [[[[not to be implemented in first phase of project]]]]
-     */
-    public void dropDataSets(int logSetIDs[]) {
-
-    }
-
-    private String[] getSubDirectories(String NrootPathName) 
-	throws IOException
-    {
-	File rootPath = new File(NrootPathName);
-	File subDirListing[];
-	String retPathNames[];
-
-	if (!rootPath.isDirectory()) {
-	    throw new IOException("Invalid root path - " +
-					  NrootPathName);
-	}
-	subDirListing = rootPath.listFiles(new FileFilter() 
-	    {
-		public boolean accept(File path) {
-		    return path.isDirectory();
-		}
-	    });		
-	if (subDirListing.length > 0) {
-	    retPathNames = new String[subDirListing.length];
-	    for (int i=0; i<subDirListing.length; i++) {
-		retPathNames[i] = subDirListing[i].getAbsolutePath();
+	    
+	    runNames = new String[numRuns];
+	    for (int run=0; run<numRuns; run++) {
+		runNames[run] = "(" + stsReaders[run].numPe + ")" +
+		    "[" + stsReaders[run].machineName + "]";
 	    }
-	} else {
-	    throw new IOException("Default root has no " + 
-					  "subdirectories");
-	}
-	return retPathNames;
-    }
 
-    private String getSumStsFilename(String NbaseName, String NlogSetPathName)
-    {
-	if (!NlogSetPathName.endsWith(File.separator)) {
-	    NlogSetPathName += File.separator;
+	    // begin computing information
+	    computeBaseInformation();
+	} catch (IOException e) {
+	    throw new IOException("MultiRun data read failed: " + 
+				  Character.LINE_SEPARATOR + e);
 	}
-	return NlogSetPathName + NbaseName + ".sum.sts";
     }
-
-    private File getSumStsFile(String NbaseName, String NlogSetPathName) 
-	throws IOException
-    {
-	String sumStsPathName = getSumStsFilename(NbaseName, NlogSetPathName);
-	File sumStsFile = new File(sumStsPathName);
-	if (!sumStsFile.isFile()) {
-	    throw new IOException("Invalid sts file - " +
-				  sumStsPathName);
-	}
-	return sumStsFile;
-    }
-
-    private String getSumFilename(String NbaseName, String NlogSetPathName,
-				  int pe) 
-    {
-	if (!NlogSetPathName.endsWith(File.separator)) {
-	    NlogSetPathName += File.separator;
-	}
-	return NlogSetPathName + NbaseName + "." + pe + ".sum";
-    }
-
+    
     /**
-     *  This version of the method acquires the summary filename from the
+     *  This method acquires the summary filename from the
      *  sts filename.
+     *
+     *  **CW** BUggy ... cannot deal with normal log-generated sts files.
+     *  Please fix.
      */
     private String getSumFilename(String stsFilename, int pe) {
 	String  withoutSts = 
@@ -183,19 +148,135 @@ public class MultiRunData {
 	} else {
 	    return withoutSts + "." + pe + ".sum";
 	}
-	
+    }
+    
+    /**
+     *  Computes data for each entry in dataTable from the readers using
+     *  the inherited accumulate methods from ProjectionsData across PEs.
+     *
+     *  The simplest of such computations is the sum of all values. In
+     *  future, however, we may want to compute simple statistics such
+     *  as the mean and variance of the data across PEs.
+     */
+    private void computeBaseInformation() {
+	dataTable = 
+	    new double[NUM_TYPES][numRuns][numEPs];
+
+	for (int run=0; run<numRuns; run++) {
+	    for (int ep=0; ep<numEPs; ep++) {
+		// gathering statistics across all PEs
+		// make sure statistics objects are clean.
+		timeStats.reset();
+		numCallsStats.reset();
+		for (int pe=0; pe<stsReaders[run].numPe; pe++) {
+		    // this is silly because of a design fault where
+		    // GenericSummaryReader uses a reversed indexing scheme
+		    // from this code.
+		    timeStats.accumulate(sumReaders[run][pe].epData[ep][GenericSummaryReader.TOTAL_TIME]);
+		    numCallsStats.accumulate(sumReaders[run][pe].epData[ep][GenericSummaryReader.NUM_MSGS]);
+		}
+		dataTable[TYPE_TIME][run][ep] = timeStats.getSum();
+		dataTable[TYPE_TIMES_CALLED][run][ep] =
+		    numCallsStats.getSum();
+	    }
+	}
+
+	// other data - run total times
+	runWallTimes = new double[numRuns];
+	for (int run=0; run<numRuns; run++) {
+	    timeStats.reset();
+	    for (int pe=0; pe<stsReaders[run].numPe; pe++) {
+		timeStats.accumulate(sumReaders[run][pe].numIntervals *
+				     sumReaders[run][pe].intervalSize);
+	    }
+	    runWallTimes[run] = timeStats.getSum();
+	}
     }
 
-    private File getSumFile(String NbaseName, String NlogSetPathName, int pe) 
-	throws IOException
-    {
-	String sumPathName = getSumFilename(NbaseName, NlogSetPathName, pe);
-	File sumFile = new File(sumPathName);
-	if (!sumFile.isFile()) {
-	    throw new IOException("Invalid summary file - " +
-				  sumPathName);
+    // Accessor Methods
+
+    /**
+     *  Returns the number of Entry Points read by the readers.
+     */
+    public int getNumEPs() {
+	return numEPs;
+    }
+
+    /**
+     *  Returns the number of Runs read by the readers.
+     */
+    public int getNumRuns() {
+	return numRuns;
+    }
+
+    /**
+     *  Returns the data table given a certain type index.
+     */
+    public double[][] getData(int type) {
+	return dataTable[type];
+    }
+
+    /**
+     *  Get everything.
+     */
+    public double[][][] getData() {
+	return dataTable;
+    }
+
+    /**
+     *  Returns the entry point row given a type and a run ID.
+     */
+    public double[] getEPData(int type, int runID) {
+	return dataTable[type][runID];
+    }
+
+    /**
+     *  Convenience Method. Returns the Run column given a type and
+     *  an Entry Point ID.
+     *
+     *  EFFICIENCY NOTE: This method should only be used if the Data
+     *    Analyzer wishes to traverse the data columns repeatedly.
+     *    Otherwise, it is more efficient to obtain the whole table 
+     *    using getData.
+     */
+    public double[] getRunData(int type, int ep) {
+	double[] returnData = new double[numRuns];
+
+	for (int run=0; run<numRuns; run++) {
+	    returnData[run] = dataTable[type][run][ep];
 	}
-	return sumFile;
+	return returnData;
+    }
+
+    /**
+     *  Returns the total amount of time spent by the application
+     *  for each run summed across all PEs of that run. Effectively
+     *  gives the total amount of work + overhead for the run.
+     */
+    public double[] getRunWallTimes() {
+	return runWallTimes;
+    }
+
+    /**
+     *  Returns an array of names corresponding to each EP ID.
+     */
+    public String[] getEPNames() {
+	return epNames;
+    }
+
+    /**
+     *  Returns an array of names corresponding to each Run ID.
+     */
+    public String[] getRunNames() {
+	return runNames;
+    }
+
+    /**
+     *  Returns the statically assigned string associated with the
+     *  provided data type.
+     */
+    public static String getTypeName(int dataType) {
+	return typeNames[dataType];
     }
 }
 

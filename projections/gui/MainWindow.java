@@ -84,6 +84,7 @@ public class MainWindow extends JFrame
 	    mainPanel = new MainWindowPanel(bgimage);
 	} catch (Exception E) {
 	    System.out.println("Error loading background image.  Continuing.");
+	    mainPanel = new MainWindowPanel(null);
 	}
 	
 	setContentPane(mainPanel);

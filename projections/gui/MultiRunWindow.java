@@ -2,8 +2,10 @@ package projections.gui;
 
 import projections.gui.graph.*;
 import projections.misc.*;
+import projections.analysis.*;
 
 import java.io.*;
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -12,6 +14,9 @@ import javax.swing.*;
 /**
  *  Written by Chee Wai Lee
  *  3/27/2002
+ *  Updated:
+ *    2/4/2003 - Chee Wai Lee. Removed the confusing Controller model and
+ *               integrated its basic functionality in the Window code.
  *
  *  MultiRunWindow presents the main display window for multi-run analysis
  *  data. It starts by presenting a file dialog for users to select a set
@@ -19,81 +24,55 @@ import javax.swing.*;
  *
  */
 
-public class MultiRunWindow extends Frame 
+public class MultiRunWindow extends JFrame 
+    implements ActionListener, ItemListener
 {
-    // Controller object
-    private MultiRunController controller;
-
     // Gui components
     private MainWindow mainWindow;
     private MultiRunControlPanel controlPanel;
-    private MultiRunDisplayPanel displayPanel;
-    private LegendPanel legendPanel;
+    private MultiRunTables tablesPanel;
+    private AreaGraphPanel graphPanel;
+
+    private MultiRunDataAnalyzer analyzer;
+
+    private JPanel mainPanel;
+
+    // Layout variables. In this case, we want to keep them because we
+    // will be switching between the table and graph view continuously.
+    GridBagLayout      gbl;
+    GridBagConstraints gbc;
+
+    // data display modes
+    private static final int MODE_GRAPH = 0;
+    private static final int MODE_TABLE = 1;
+    private int displayMode;
+
+    private int selectedDataType;
 
     public MultiRunWindow(MainWindow mainWindow) 
     {
 	this.mainWindow = mainWindow;
 
-	// creates a controller object if it does not already exist
-	if (controller == null) {
-	    controller = new MultiRunController(this);
-	}
-
 	addWindowListener(new WindowAdapter()
 	    {
 		public void windowClosing(WindowEvent e)
 		{
-		    Close();
+		    close();
 		}
 	    });
 	setBackground(Color.lightGray);
 
-	CreateLayout();
-	pack();
-
-	setTitle("Multi-Run Analysis");
-	setVisible(true);
 	showFileDialog();
     }
 
-    public void Close()
+    public void close()
     {
 	setVisible(false);
 	dispose();
 	mainWindow.closeChildWindow(this);
     }
 
-    /**
-     *  The file dialog implemented will restrict users to the following
-     *  summary data set structure:
-     *
-     *  1) The root directory of the summary data set must be named using
-     *     the BASENAME of the summary data where summary files are named
-     *     BASENAME.0.sum.
-     *  2) There is *exactly* one root directory.
-     *  3) Every child of the root directory *must* also be a directory.
-     *  4) Each subdirectory's name will be used to annotate the data
-     *     displayed on the GUI.
-     *  5) Each subdirectory *must* contain *exactly* one set of summary
-     *     data. log data is ignored.
-     *
-     */
     public void showFileDialog() {
-	// tentatively using a Swing File chooser object.
-	// A more specific dialog box should be used to allow the user
-	// to specify more options than just the root directory for
-	// summary data sets.
-
-	/*
-	JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
-	MultiRunFileDialogControl accessory = new MultiRunFileDialogControl();
-	fc.setDialogTitle("Choose directories for summary data");
-	fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-	fc.setMultiSelectionEnabled(true);
-	fc.setAccessory(accessory);
-	int returnVal = fc.showDialog(this,"Choose");
-	*/
-
 	try {
 	    ProjectionsFileChooser fc = 
 		new ProjectionsFileChooser(this, "Multirun Analysis",
@@ -101,52 +80,144 @@ public class MultiRunWindow extends Frame
 	    MultiRunCallBack callback = new MultiRunCallBack(this, fc);
 	    int returnVal = fc.showDialog(callback);
 	    // the callback will decide what happens
-	    /*
-	    if (returnVal == JFileChooser.APPROVE_OPTION) {
-		File inDirs[] = fc.getSelectedFiles();
-		String inDirPathnames[] = new String[inDirs.length];
-		for (int i=0;i<inDirs.length;i++) {
-		    inDirPathnames[i] = inDirs[i].getAbsolutePath();
-		}
-		if (inDirs.length > 0) {
-		    controller.processUserInput(((MultiRunFileDialogControl)fc.getAccessory()).getBaseName(), 
-						inDirPathnames,
-						((MultiRunFileDialogControl)fc.getAccessory()).isDefault());
-		}
-	    }
-	    */
 	} catch (Exception e) {
 	    System.out.println("Filechooser error. Please fix");
 	    ProjectionsFileChooser.handleException(this, e);
 	}
     }
 
+    /**
+     *  This method is called by MultiRunCallBack at the successful
+     *  completion of the choosing of files in ProjectionsFileChooser.
+     */
     public void beginAnalysis(ProjectionsFileChooser fc) {
-	// called by MultiRunCallBack
-	String inFilenames[] = fc.userSelect_returnVal;
-	controller.processUserInput(inFilenames);
+	String stsFilenames[] = fc.userSelect_returnVal;
+	try {
+	    MultiRunData data = new MultiRunData(stsFilenames);
+	    analyzer = new MultiRunDataAnalyzer(data);
+
+	    // setting default data type
+	    selectedDataType = MultiRunData.TYPE_TIME;
+
+	    // set up the graph and table panels using the analyzed data
+	    createDisplayPanels();
+
+	    // set up the window GUI for display
+	    createLayout();
+	    pack();
+	    setTitle("Multi-Run Analysis");
+	    setVisible(true);
+	} catch (IOException e) {
+	    System.err.println(e.toString());
+	}
     }
 
-    private void CreateLayout()
+    private void createLayout()
     {
-	Panel p = new Panel();
-	add("Center", p);
-	p.setBackground(Color.gray);
+	mainPanel = new JPanel();
+	mainPanel.setBackground(Color.gray);
 
-	displayPanel = new MultiRunDisplayPanel(this, controller);
-	controlPanel = new MultiRunControlPanel(this, controller);
-	legendPanel = new LegendPanel();
-	controller.registerLegend(legendPanel);
+	// initially default to showing the graph view
+	displayMode = MODE_GRAPH;
 
-	GridBagLayout      gbl = new GridBagLayout();
-	GridBagConstraints gbc = new GridBagConstraints();
+	controlPanel = new MultiRunControlPanel(this, selectedDataType);
 
-	p.setLayout(gbl);
+	gbl = new GridBagLayout();
+	gbc = new GridBagConstraints();
 
+	mainPanel.setLayout(gbl);
 	gbc.fill = GridBagConstraints.BOTH;
-	Util.gblAdd(p, displayPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2); 
-	Util.gblAdd(p, controlPanel, gbc, 0,1, 2,1, 1,0, 2,2,2,2); 
-	Util.gblAdd(p, legendPanel,  gbc, 1,0, 1,1, 1,1, 2,2,2,2); 
+
+	Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2); 
+	Util.gblAdd(mainPanel, controlPanel, gbc, 0,1, 2,1, 1,0, 2,2,2,2); 
+
+	setContentPane(mainPanel);
     }
 
+    /**
+     *	Setup both the graph and table display panels using
+     *	the analyzer code. This method is unusual in that it is separate
+     *  from the createLayout code but yet creates 2 GUI components to
+     *  be used in createLayout.
+     */
+    private void createDisplayPanels() {
+	// for graph mode
+	Graph graphCanvas = createGraphCanvas();
+	graphPanel = new AreaGraphPanel(graphCanvas);
+	// for table mode
+	tablesPanel = new MultiRunTables(selectedDataType, analyzer);
+    }
+
+    /**
+     *  Convenience method for creating a Graph object using the 3 accessor
+     *  methods found in MultiRunDataAnalyzer.
+     */
+    private Graph createGraphCanvas() {
+	MultiRunDataSource dataSource = 
+	    analyzer.getDataSource(selectedDataType);
+	MultiRunXAxis xAxis =
+	    analyzer.getMRXAxisData();
+	MultiRunYAxis yAxis =
+	    analyzer.getMRYAxisData(selectedDataType);
+	Graph graphCanvas =
+	    new Graph(dataSource, xAxis, yAxis);
+	graphCanvas.setGraphType(Graph.AREA);
+	return graphCanvas;
+    }
+
+    /**
+     *  This method should be called in response to an action that results
+     *  from a user's request to change the display mode of the window.
+     */
+    private void setDisplayMode(int mode) {
+	// optimization
+	if (mode == displayMode) {
+	    return;
+	}
+	displayMode = mode;
+	switch (mode) {
+	case MODE_GRAPH:
+	    Util.gblAdd(mainPanel, graphPanel, gbc,  0,0, 1,1, 1,1, 2,2,2,2);
+	    graphPanel.repaint();
+	    break;
+	case MODE_TABLE:
+	    Util.gblAdd(mainPanel, tablesPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2);
+	    tablesPanel.repaint();
+	    break;
+	}
+    }
+
+    // listener codes
+
+    public void itemStateChanged(ItemEvent e) {
+	if (e.getSource() instanceof JRadioButton) {
+	    JRadioButton button = (JRadioButton)e.getSource();
+	    if (e.getStateChange() == ItemEvent.SELECTED) {
+		if (button.getText().equals("text")) {
+		    setDisplayMode(MODE_TABLE);
+		} else if (button.getText().equals("graph")) {
+		    setDisplayMode(MODE_GRAPH);
+		} else {
+		    selectedDataType = 
+			controlPanel.getSelectedIdx(e.getItemSelectable());
+		    // update graph
+		    Graph graphCanvas = 
+			createGraphCanvas();
+		    graphPanel.setGraph(graphCanvas);
+		    // update tables
+		    tablesPanel.setType(selectedDataType);
+		}
+	    }
+	}
+    }
+
+    public void actionPerformed(ActionEvent e) {
+	// do nothing for now.
+	if (e.getSource() instanceof JButton) {
+	    JButton button = (JButton)e.getSource();
+	    if (button.getText().equals("Close Window")) {
+		close();
+	    }
+	}
+    }
 }

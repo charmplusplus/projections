@@ -3,7 +3,7 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 
-public class ColorSelectWindow extends Frame
+public class ColorSelectWindow extends Dialog
    implements AdjustmentListener, ActionListener
 {
    private Label lRed, lGreen, lBlue;
@@ -87,6 +87,8 @@ public class ColorSelectWindow extends Frame
    }
    public ColorSelectWindow(ColorWindowFrame parent, Color currentColor, String s)
    {
+       super(parent);
+       this.setModal(true);
 	  this.currentColor = currentColor;
 	  myParent=parent;
 	  title = s;

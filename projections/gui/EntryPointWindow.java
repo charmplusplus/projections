@@ -20,7 +20,7 @@ import java.text.DecimalFormat;
 
 /* based on Josh's UserEventWindow class */
 
-public class EntryPointWindow extends JFrame
+public class EntryPointWindow extends JFrame implements ActionListener
 {
 
 	// structure for storing each row
@@ -72,7 +72,8 @@ public class EntryPointWindow extends JFrame
 			      default: return "ERROR";
 		        }
     		}	
-		
+
+		/* for the proper working of the sorter */		
 		public Class getColumnClass(int columnIndex) {
       			if (columnIndex == 1) { return java.lang.String.class; }
 			      else { return projections.gui.FormattedNumber.class; }
@@ -102,7 +103,30 @@ public class EntryPointWindow extends JFrame
 	    data = temp;
 
   	}
-	
+
+	/* save data in the chosen file when "save" button is pressed */
+      	public void actionPerformed(ActionEvent ae) {
+				int returnVal = fileChooser.showSaveDialog(this);
+			   try{
+				if(returnVal == JFileChooser.APPROVE_OPTION) {
+                                        fileChooser.approveSelection();
+					FileWriter outputFile = new FileWriter(fileChooser.getSelectedFile());
+					// save data into the selected file
+					for(int i=0; i<currRow; i++){
+					// use sorter,instead of 'epTable' or 'data' so that the file is stored as sorted
+					   	for(int j=0;j<numCols;j++)		
+							outputFile.write(sorter.getValueAt(i,j).toString() + "\t");
+					  	outputFile.write("\n");
+					}
+					outputFile.close();
+				}
+				JOptionPane.showMessageDialog(this,"File Saved","Information",JOptionPane.INFORMATION_MESSAGE);
+			   }catch(Exception e){
+				System.out.println("Exception: "+e);
+				JOptionPane.showMessageDialog(this,"Error While Saving File" + e,"Error",JOptionPane.ERROR_MESSAGE);
+			   }
+	}
+
 	/** Constructor */
 	public EntryPointWindow(){
 		super("Longest EntryPoints");
@@ -112,14 +136,12 @@ public class EntryPointWindow extends JFrame
     		}
 	
 		JButton saveButton = new JButton("Save");		
-		    saveButton.addActionListener(new ActionListener() {
-      			public void actionPerformed(ActionEvent ae) {
-      			// ADD CODE TO SAVE DATA IN A FILE
-			}
-    		});
+		    saveButton.addActionListener(this); 
 
 		for(int i=0; i<data.length; i++)
 			data[i] = new RowData();		// explicitly call constructor to initialize value[] in RowData
+
+		fileChooser =  new JFileChooser();
 
 		// set up the table
 		epTable = new EPTable();
@@ -196,6 +218,7 @@ public class EntryPointWindow extends JFrame
   	private JTable             jTable      = null;
 	private EPTable		   epTable;
  	private DecimalFormat format = null;
+	private final JFileChooser fileChooser;
 
 	// variables for table
 

@@ -294,7 +294,6 @@ public class LogReader
 	}
 	int seq = 0;
         processorList.reset();
-	int nPe=processorList.size();
  	int curPe = processorList.nextElement();
 	curPeIdx = 0;
 	for (;curPe!=-1; curPe=processorList.nextElement()) {

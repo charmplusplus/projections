@@ -16,28 +16,26 @@ public class GraphDisplayCanvas extends Canvas
    {
 	  int h = getSize().height;
 	  
-	  int element, count, y;
-	
-	  if(data.xmode == GraphData.PROCESSOR) {
-		// gzheng
-		// figure out the real processor number
-		data.origProcList.reset();
-		y = item.curPData[x];
-		/* we want non-contigious data support
-                int pe = data.origProcList.nextElement();
-                for (int j=0; j<x; j++)
-                  pe = data.origProcList.nextElement();
-		 y = item.curPData[pe];
-		*/
+	  int element, count, y = 0;
+
+	  if (data.xmode == GraphData.PROCESSOR) {
+	      y = item.curPData[x];
+	      /* we want non-contigious data support
+	      // gzheng
+	      // figure out the real processor number
+	      int pe = data.origProcList.nextElement();
+	      for (int j=0; j<x; j++)
+	      pe = data.origProcList.nextElement();
+	      y = item.curPData[pe];
+	      */
+	  } else {
+	      y = item.curIData[x];   
 	  }
-	  else
-		 y = item.curIData[x];   
-								  
-	  if(item.ymode == GraphData.BOTH)  
-		 y = h - (int)(data.wscale * y);
-	  else           
-		 y = h - (int)(data.yscale * y);
-						   
+	  if (item.ymode == GraphData.BOTH) {
+	      y = h - (int)(data.wscale * y);
+	  } else {
+	      y = h - (int)(data.yscale * y);
+	  }				   
 	  graphDataList.insert(y, item.color);
    }   
 
@@ -133,7 +131,9 @@ public class GraphDisplayCanvas extends Canvas
 		 count = 0;
 		 x2 = data.offset3 + (int)(x * data.xscale);
 		
-		 if(data.xmode == GraphData.PROCESSOR) {
+		 if (data.xmode == GraphData.PROCESSOR) {
+		     y2 = item.curPData[x];
+		     /*
 		   // gzheng
 		   // figure out the real processor number
 		   data.origProcList.reset();
@@ -141,6 +141,7 @@ public class GraphDisplayCanvas extends Canvas
                    for (int j=0; j<x; j++)
                           pe = data.origProcList.nextElement();
 		   y2 = item.curPData[pe];
+		     */
 		 }
 		 else
 			y2 = item.curIData[x];   

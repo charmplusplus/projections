@@ -151,8 +151,17 @@ public class AnimationDisplayPanel extends Panel
 	}
 	if (curP != pold) {
 	    pold = curP;
+	    // need to translate curP to actual PE number
+	    int count = 0;
+	    int pe = 0;
+	    OrderedIntList validPEs = animationWindow.validPEs;
+	    validPEs.reset();
+	    while (count <= curP) {
+		pe = validPEs.nextElement();
+		count++;
+	    }
 	    if ((curP >= 0) && (curI != -1)) {
-		animationWindow.setStatusInfo(curP, curI, data[curP][curI]);
+		animationWindow.setStatusInfo(pe, curI, data[curP][curI]);
 	    } else {
 		animationWindow.setStatusInfo(-1, -1, -1);   
 	    }   

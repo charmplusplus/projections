@@ -252,9 +252,12 @@ public class GraphData
 	//	int numProcessors = Analysis.getNumProcessors();
 	for (int p=0; p<numProcessors; p++) {
 	    item.curPData[p] = 0;
+	    /* In the non-contigious case, we already know the data is
+	       there!
 	    if (!processor.list.contains(p)) {
 		continue;
 	    }
+	    */
 	    if (item.data[p]==null) {
 		//System.out.println("Warning: no data for P="+p);
 		continue;

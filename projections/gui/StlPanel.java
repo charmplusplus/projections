@@ -49,52 +49,48 @@ public class StlPanel extends ScalePanel.Child
     //Return a string describing the given panel location
     public String getPointInfo(double time,double procs)
     {
-	try {
-	    int p=(int)procs;
-	    if (p<0 || p>=nPe || procs<0) 
-		return "";
-	    long t=(long)time;
-	    if (t<0 || t>=totalTime) 
-		return "";
-	    if (validPEs != null ) {
-		int count=0;
-		int pe=0;
-		validPEs.reset();
-		while (count <= p) {
-		    pe = validPEs.nextElement();
-		    count++;
+	int p=(int)procs;
+	if (p<0 || p>=nPe || procs<0) 
+	    return "";
+	long t=(long)time;
+	if (t<0 || t>=totalTime) 
+	    return "";
+	if (validPEs != null ) {
+	    int count=0;
+	    int pe=0;
+	    validPEs.reset();
+	    while (count <= p) {
+		pe = validPEs.nextElement();
+		count++;
+	    }
+	    int numEP = Analysis.getNumUserEntries();
+	    int interval = (int)(t/intervalSize);
+	    int utiliz=utilData[p][interval];
+	    long  timedisplay = t+(long)startTime;
+	    if (mode == StlWindow.MODE_UTILIZATION) {
+		return "Processor "+pe+": Usage = "+utiliz+"%"+
+		    " at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
+	    } else {
+		// **CW** most significant EP information at this point
+		// is not preserved (maybe it should be), hence we will
+		// reconstruct the information.
+		int maxEP = 0;
+		int max = 0;
+		for (int ep=0; ep<numEP; ep++) {
+		    if (data[ep][p][interval] >= max) {
+			max = data[ep][p][interval];
+			maxEP = ep;
+		    }
 		}
-		int numEP = Analysis.getNumUserEntries();
-		int interval = (int)(t/intervalSize);
-		int utiliz=utilData[pe][interval];
-		long  timedisplay = t+(long)startTime;
-		if (mode == StlWindow.MODE_UTILIZATION) {
+		if (max > 0) {
+		    return "Processor "+pe+": Usage = "+utiliz+"%"+
+			" at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
+			" EP = " + Analysis.getEntryName(maxEP);
+		} else {
 		    return "Processor "+pe+": Usage = "+utiliz+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
-		} else {
-		    // **CW** most significant EP information at this point
-		    // is not preserved (maybe it should be), hence we will
-		    // reconstruct the information.
-		    int maxEP = 0;
-		    int max = 0;
-		    for (int ep=0; ep<numEP; ep++) {
-			if (data[ep][pe][interval] >= max) {
-			    max = data[ep][pe][interval];
-			    maxEP = ep;
-			}
-		    }
-		    if (max > 0) {
-			return "Processor "+pe+": Usage = "+utiliz+"%"+
-			    " at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
-			    " EP = " + Analysis.getEntryName(maxEP);
-		    } else {
-			return "Processor "+pe+": Usage = "+utiliz+"%"+
-			    " at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
-		    }
 		}
 	    }
-	} catch (Exception e) { 
-	    // do nothing
 	}
 	return "";
     }
@@ -149,7 +145,7 @@ public class StlPanel extends ScalePanel.Child
 			    int y_max=(int)Math.floor(req.y(p+1));
 			    if (y_min<starty) y_min=starty;
 			    if (y_max>endy) y_max=endy;
-			    renderRow(colors[proc],x2t_off,x2t_slope,offBuf,
+			    renderRow(colors[p],x2t_off,x2t_slope,offBuf,
 				      wid,
 				      y_min-starty,y_max-starty,
 				      startx-startx,endx-startx);

@@ -70,12 +70,12 @@ public class CounterTable extends AbstractTableModel
 
   /** Override AbstractTableModel, return current sheet's numRows. */
   public int getRowCount() {
-    if (currSheet_ != null) { return currSheet_.numRows; } 
+    if (currSheet_ != null) { return currSheet_.numRows; }
     else { return 0; }
   }
 
   /** Override AbstractTableModel, return string for header of table. */
-  public String getColumnName(int columnIndex) { 
+  public String getColumnName(int columnIndex) {
     if (currSheet_ != null) {
       if (columnIndex == 0) { return "Entry Point"; }
       else {
@@ -120,13 +120,13 @@ public class CounterTable extends AbstractTableModel
 	    return new FormattedNumber(s.totTime, doubleFormat_);
 	  case EPValue.AVG_CVAL:   
 	    return new FormattedNumber(s.avgCount, doubleFormat_);
-	  case EPValue.AVG_CSTDEV: 
+	  case EPValue.AVG_CSTDEV:
 	    return new FormattedNumber(s.stdevCount, doubleFormat_);
-	  case EPValue.MAX_CVAL:   
+	  case EPValue.MAX_CVAL:
 	    return new FormattedNumber(s.maxCount, intFormat_);    
 	  case EPValue.MIN_CVAL:   
 	    return new FormattedNumber(s.minCount, intFormat_);    
-	  default: return new Integer(-1);            
+	  default: return new Integer(-1);
 	}
       }
     }
@@ -154,17 +154,32 @@ public class CounterTable extends AbstractTableModel
   }
 
   /** Given file manager, load files and update progress bar. */
+
+    public FrameCallBack callback;
+    public void loadFiles(
+    ProjectionsFileMgr fileMgr, JProgressBar progress, JTable table, CallBack callback)
+	throws IOException, Exception
+    {
+	this.callback = (FrameCallBack ) callback;
+	loadFiles(fileMgr,progress,table);
+    }
+
+
+
+
+  public JTable table;
   public void loadFiles(
-    ProjectionsFileMgr fileMgr, JProgressBar progress, JTable table) 
+    ProjectionsFileMgr fileMgr, JProgressBar progress, JTable table)
     throws IOException, Exception
   {
+    this.table = table;
     int i, j;
     int numFiles = fileMgr.getNumFiles();
     sheet_ = new Vector(fileMgr.getNumFiles());
     Sheet firstSheet = null;
-    for (i=0; i<numFiles; i++) { 
+    for (i=0; i<numFiles; i++) {
       Sheet sheet = new Sheet(fileMgr, i);
-      sheet_.addElement(sheet); 
+      sheet_.addElement(sheet);
       if (i == 0) { firstSheet = sheet; }
       else {
 	if (!sheet.sameEPs(sheet)) {
@@ -173,7 +188,7 @@ public class CounterTable extends AbstractTableModel
 	}
       }
     }
-    
+
     // search through and try to find similar files
     // use a Vector of Vectors of Files to group similar files
     Vector similarCollection = new Vector();
@@ -191,8 +206,8 @@ public class CounterTable extends AbstractTableModel
 	  // yes, this is a n^2 algo.  it will never need to scale.
 	  if (!inSimilar[j]) {
 	    Sheet sheet = (Sheet) sheet_.elementAt(j);
-	    if (sheet.similarTo(searchSheet)) { 
-	      similar.add(sheet);  
+	    if (sheet.similarTo(searchSheet)) {
+	      similar.add(sheet);
 	      inSimilar[j] = true;
 	    }
 	  }
@@ -202,9 +217,12 @@ public class CounterTable extends AbstractTableModel
     }
     if (removeSingleEntries(similarCollection)) {
       userMergeSimilar(similarCollection);
+    }else{
+    	//System.out.println("No similar files ");
+    	sortSheets();  // sorts based on numPEs
+    	setSheet(0, table);
+	callback.callBack();
     }
-    sortSheets();  // sorts based on numPEs
-    setSheet(0, table);
   }
 
   /** Return the list of counters and their colors for this sheet. */
@@ -220,7 +238,7 @@ public class CounterTable extends AbstractTableModel
     Dimension d = table.getPreferredSize();
     int numCounters = sheet.counters.length;
     // adjust because table doesn't want to display header
-    d.height = Math.min(100, (d.height / numCounters ) * (numCounters + 1));  
+    d.height = Math.min(100, (d.height / numCounters ) * (numCounters + 1));
     panel.setPreferredSize(d);
     return panel;
   }
@@ -286,7 +304,8 @@ public class CounterTable extends AbstractTableModel
       // find the correct counter to use
       boolean found = false;
       int counterIndex = -1;
-      for (i=0; i<s.counters.length || !found; i++) {
+//      System.out.println("s.counters.length "+s.counters.length);
+      for (i=0; i<s.counters.length && !found; i++) {
 	if (s.counters[i].counterCode.equals("GR_FLOPS")) {
 	  found = true;
 	  counterIndex = i;
@@ -406,7 +425,7 @@ public class CounterTable extends AbstractTableModel
 	title = title.concat(" L1 Miss "+data[0][numSets*2+1]);  numSets++; 
       }
       if (foundL2)  { 
-	title = title.concat(" L2 Miss "+data[0][numSets*2+1]);  numSets++; 
+	title = title.concat(" L2 Miss "+data[0][numSets*2+1]);  numSets++;
       }
       if (foundTLB) { 
 	title = title.concat(" TLB Miss "+data[0][numSets*2+1]);  numSets++; 
@@ -437,7 +456,8 @@ public class CounterTable extends AbstractTableModel
       for (i=0; i<counterIndex.length; i++) {
 	Sheet s = (Sheet) sheet_.elementAt(i);
 	boolean found = false;
-	for (j=0; j<s.counters.length || !found; j++) {
+	
+	for (j=0; j<s.counters.length && !found; j++) {
 	  if (s.counters[j].counterCode.equals("GR_FLOPS")) {
 	    found = true;
 	    counterIndex[i] = j;
@@ -451,13 +471,13 @@ public class CounterTable extends AbstractTableModel
 	data[i] = new double[selectedRows.length];
 	Sheet s = (Sheet) sheet_.elementAt(i);
 	for (j=0; j<selectedRows.length; j++) {
-	  data[i][j] = 
+	  data[i][j] =
 	    s.tableRows[selectedRows[j]].summary[counterIndex[i]].avgCount;
 	}
       }
       // set up graph
       String[] xAxisLabels = new String[sheet_.size()];
-      for (i=0; i<sheet_.size(); i++) { 
+      for (i=0; i<sheet_.size(); i++) {
 	xAxisLabels[i] = ((Sheet) sheet_.elementAt(i)).sheetName;
       }
       DataSource2D source = new DataSource2D("EPs Across Procs", data);
@@ -496,7 +516,7 @@ public class CounterTable extends AbstractTableModel
   private Wait wait_ = new Wait(false);
   // carries results of merge window, true if merge selected picked
   private boolean merge_;
-  
+
   // ***********************************************************************
   // PRIVATE METHODS
   // ***********************************************************************
@@ -536,11 +556,11 @@ public class CounterTable extends AbstractTableModel
       totalTime += sCache.totTime;
     }
     double overallCacheMiss = total/totalTime;
-    System.out.println("CACHE MISS "+overallCacheMiss); 
+    System.out.println("CACHE MISS "+overallCacheMiss);
     for (i=0; i<iEPs.length; i++) { data[i][offset*2+1] = overallCacheMiss; }
   }
 
-  /** Sorts the sheets so that lowest numPEs is first.  
+  /** Sorts the sheets so that lowest numPEs is first.
    *  Yes, this is bubblesort.
    *  Yes, bubblesort is very slow. */
   private void sortSheets() {
@@ -557,70 +577,47 @@ public class CounterTable extends AbstractTableModel
     }
   }
 
-  /** Let the user choose if they want to merge similar files. 
-   *  After this function called, Sheet. may be rearranged. 
+  /** Let the user choose if they want to merge similar files.
+   *  After this function called, Sheet. may be rearranged.
    *  similarCollection is Vector of Vector of Sheet. */
+
+
+   public Vector similarCollection;
+   public JList[]  list;
+   public JTextArea[] names;
+
   private void userMergeSimilar(Vector similarCollection) throws Exception {
     int numGroups = similarCollection.size();
-    JList[] list = new JList[numGroups];  // each groups list (user selects)
-    JTextArea[] names = new JTextArea[numGroups];  // name of new group
+    this.similarCollection = similarCollection;
+    list = new JList[numGroups];  // each groups list (user selects)
+    names = new JTextArea[numGroups];  // name of new group
     JPanel listPanel = createListPanel(similarCollection, list, names);
+    callback.f.setVisible(false);
     JDialog dialog = createMergeDialog(listPanel, numGroups);
 
-    // pop up dialog
-    wait_.setValue(true);
-    dialog.setVisible(true);
-    Thread th = new Thread() { public void run() { wait_.waitFor(false); } };
-    th.run();
-    dialog.setVisible(false);
+    // when the dialog box appears the main frame should disappear
 
-    int i, j;
-    Vector similar;
-    Sheet sheet;
-    if (!merge_) { return; }
-    else {
-      // merge selected and recursively call this function
-      System.out.println("Merging files");
-      i=0;
-      while (i<similarCollection.size()) {
-	similar = (Vector) similarCollection.elementAt(i);
-	int[] selected = list[i].getSelectedIndices();
-	if (selected.length == 0) { similarCollection.removeElement(similar); }
-	else {
-	  // loop through the sheets and remove the selected files,
-	  // then create a new sheet out of them and add to the sheet vector
-	  Sheet[] toMerge = new Sheet[selected.length];
-	  for (j=0; j<selected.length; j++) {
-	    sheet = (Sheet) similar.elementAt(selected[j]);
-	    toMerge[j] = sheet;
-	    sheet_.removeElement(sheet);
-	  }
-	  for (j=0; j<toMerge.length; j++) { 
-	    similar.removeElement(toMerge[j]);
-	  }
-	  sheet_.add(new Sheet(toMerge, names[i].getText())); 
-	  i++;
-	}
-      }
-      // search through the similarCollection to find out if any similar stuff
-      // actually exists.  if not return, otherwise call this function again
-      if (removeSingleEntries(similarCollection)) { 
-	userMergeSimilar(similarCollection); 
-      }
-    }
+
+    // pop up dialog
+    //wait_.setValue(true);
+    dialog.setVisible(true);
+    //Thread th = new Thread() { public void run() { wait_.waitFor(false); } };
+    //th.run();
+    //dialog.setVisible(false);
+
   }
 
-  /** Go through the similar Collection and construct a panel for each 
+  /** Go through the similar Collection and construct a panel for each
    *  one allowing the user to select files that should be merged
    *  and add constructed panel to the listPanel */
   private JPanel createListPanel(
-    Vector similarCollection, JList[] list, JTextArea[] names) 
+    Vector similarCollection, JList[] list, JTextArea[] names)
   {
     int i, j;
     Sheet sheet = null;
     Vector similar = null;
     int numGroups = similarCollection.size();
-    
+
     JPanel listPanel = new JPanel(new GridLayout(numGroups, 1));
     for (i=0; i<numGroups; i++) {
       similar = (Vector) similarCollection.elementAt(i);
@@ -649,6 +646,7 @@ public class CounterTable extends AbstractTableModel
   }
 
   /** Construct the merge dialog and return it. */
+  public JDialog dialog;
   private JDialog createMergeDialog(JPanel listPanel, int numPanels) {
     JTextArea instructions = new JTextArea(
       "Projections has found several performance analysis runs\n"+
@@ -668,12 +666,14 @@ public class CounterTable extends AbstractTableModel
     instructions.setEditable(false);
 
     // create dialog so user can choose
-    JDialog dialog = new JDialog();
+    dialog = new JDialog();
     dialog.setTitle(
       "Projections: Performance Counter Analysis (Merge Similar Files)");
     dialog.setSize(600, 240 + 125*numPanels);
     dialog.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) { System.exit(0); }
+      public void windowClosing(WindowEvent e) {
+      	//System.exit(0);
+      }
     });
     dialog.getContentPane().setLayout(new BorderLayout());
     dialog.getContentPane().add(instructions, BorderLayout.NORTH);
@@ -682,10 +682,58 @@ public class CounterTable extends AbstractTableModel
     WaitButton no = new WaitButton("Don't Merge Any", wait_);
     WaitButton yes = new WaitButton("Merge Selected", wait_);
     no.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { merge_ = false; }
+      public void actionPerformed(ActionEvent e) { merge_ = false;
+      sortSheets();  // sorts based on numPEs
+    	setSheet(0, table);
+	callback.callBack();
+	dialog.setVisible(false);
+     }
     });
     yes.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent e) { merge_ = true; }
+      public void actionPerformed(ActionEvent e) {
+      	int i, j;
+    	Vector similar;
+    	Sheet sheet;
+      	merge_ = true;
+	try{
+	if (!merge_) { return; }
+    	else {
+      	// merge selected and recursively call this function
+      	System.out.println("Merging files");
+      	i=0;
+      	while (i<similarCollection.size()) {
+		similar = (Vector) similarCollection.elementAt(i);
+		int[] selected = list[i].getSelectedIndices();
+		if (selected.length == 0) { similarCollection.removeElement(similar); }
+		else {
+	  	// loop through the sheets and remove the selected files,
+	  	// then create a new sheet out of them and add to the sheet vector
+	  		Sheet[] toMerge = new Sheet[selected.length];
+	  		for (j=0; j<selected.length; j++) {
+	    			sheet = (Sheet) similar.elementAt(selected[j]);
+				toMerge[j] = sheet;
+	    			sheet_.removeElement(sheet);
+	  		}
+	  		for (j=0; j<toMerge.length; j++) {
+	    			similar.removeElement(toMerge[j]);
+	  		}
+	  		sheet_.add(new Sheet(toMerge, names[i].getText()));
+	  		i++;
+		}
+      	}
+      // search through the similarCollection to find out if any similar stuff
+      // actually exists.  if not return, otherwise call this function again
+      	if (removeSingleEntries(similarCollection)) {
+		userMergeSimilar(similarCollection);
+      	}
+	sortSheets();  // sorts based on numPEs
+    	setSheet(0, table);
+	callback.callBack();
+	dialog.setVisible(false);
+
+   	}
+	}catch (Exception ex){ex.printStackTrace();}
+	}
     });
     Panel buttons = new Panel(new FlowLayout());
     buttons.add(no, BorderLayout.WEST);
@@ -695,7 +743,7 @@ public class CounterTable extends AbstractTableModel
   }
 
   /** Search through Vector of Vector of Sheets in similarCollection,
-   *  and remove if 2nd Vector only has one Sheet. 
+   *  and remove if 2nd Vector only has one Sheet.
    *  Return true if there are any similar entries in the collection,
    *  false otherwise. */
   private boolean removeSingleEntries(Vector similarCollection) {
@@ -726,7 +774,7 @@ public class CounterTable extends AbstractTableModel
     return null;
   }
 
-  /** Return start string of name, assuming name in format of: 
+  /** Return start string of name, assuming name in format of:
    *  startStr.count.sts. */
   private String getStartString(String name) throws IOException {
     int lastDotIndex = name.lastIndexOf(".");
@@ -782,12 +830,13 @@ public class CounterTable extends AbstractTableModel
     public LogData[]        data      = null;  // to store data for log files
 
     public boolean          merged = false;    // true if composed of merger
-    
+
     /** Constructor, read from file. */
-    public Sheet(ProjectionsFileMgr fileMgr, int index) 
+    public Sheet(ProjectionsFileMgr fileMgr, int index)
       throws IOException
-    { 
+    {
       int i, j;
+
       sheetName = fileMgr.getStsFile(index).getCanonicalPath();
       // read sts file
       GenericStsReader stsReader = new GenericStsReader(
@@ -799,14 +848,14 @@ public class CounterTable extends AbstractTableModel
 	throw new IOException("Sheet() "+sheetName+" expect numProcs "+
 			    logFiles.length+" got "+numProcs);
       }
-      data = new LogData[logFiles.length]; 
+      data = new LogData[logFiles.length];
       boolean first = true;
       int numEP = -1;
       for (i=0; i<logFiles.length; i++) {
 	int realIndex = getProcIndex(logFiles[i], i);
 	data[realIndex] = new LogData(logFiles[i], i, this, first, sheetName);
 	if (first) { numEP = data[realIndex].numEPs; }
-	else { 
+	else {
 	  if (numEP != data[realIndex].numEPs) {
 	    throw new IOException("Sheet() "+sheetName+" expect numEPs "+numEP+
 	      " proc "+realIndex+" has "+data[realIndex].numEPs);
@@ -1187,7 +1236,12 @@ public class CounterTable extends AbstractTableModel
       readLine(line, code, numEPs);
     }
     public void setValue(int index, double num) { values[index] = num; }
-    public double getValue(int index) { return values[index]; }
+    public double getValue(int index) {
+		if(index < values.length)
+			return values[index];
+		else
+			return 0.0;
+	}
   }
 
   /* Superclass of CountData for int type data. */

@@ -12,7 +12,7 @@ import projections.gui.*;
 
 /** Joshua Mostkoff Unger
  *  Parallel Programming Laboratory
- * 
+ *
  *  CounterFrame manages the input/output for the CounterTable data. */
 public class CounterFrame extends JFrame
 {
@@ -21,9 +21,10 @@ public class CounterFrame extends JFrame
   // GIVE HELP BOX IN THIS WINDOW
   
   /** Constructor. */
-  public CounterFrame() { 
+  public CounterFrame() {
     super("Performance Counter Analysis");
     // set up table and tabs
+
     sorter_ = new TableSorter(cTable_);
     jTable_ = new JTable(sorter_);
     jTable_.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
@@ -75,36 +76,35 @@ public class CounterFrame extends JFrame
     // define closing behavior
     super.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     super.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) { System.exit(0); }
+      public void windowClosing(WindowEvent e) {
+      	//System.exit(0);
+	setVisible(false);
+      }
     });
+
   }
 
   /** Set the fileMgr */
   public void setFileMgr(ProjectionsFileMgr fileMgr) { fileMgr_ = fileMgr; }
 
   /** Tell the CounterTable to start loading its data. */
-  public void loadFiles() 
-    throws Exception 
+  public void loadFiles()
+    throws Exception
   {
-    int i;
-    if (fileMgr_ == null) { 
+
+    if (fileMgr_ == null) {
       throw new Exception("ERROR in CounterFrame.loadFiles():\n"+
 			  "      Must call setFileMgr before load files!\n");
     }
-    cTable_.loadFiles(fileMgr_, progress_, jTable_);
-    System.out.println("Finished loading files");
-    tabbedPane_.removeAll();
-    for (i=0; i<cTable_.getNumSims(); i++) {
-      String name = cTable_.getRunName(i);
-      tabbedPane_.addTab(name, null, cTable_.getCounterPanel(i), 
-			 cTable_.getToolTip(i));
-    }
-    jTable_.tableChanged(new TableModelEvent(
-      cTable_, 0, cTable_.getRowCount()-1, TableModelEvent.ALL_COLUMNS));
+    FrameCallBack callback = new FrameCallBack(this);
+    cTable_.loadFiles(fileMgr_, progress_, jTable_,callback);
+
+
+    
   }
 
   public void sortByColumn(int index) {
-    if (cTable_.getColumnCount() > index) { 
+    if (cTable_.getColumnCount() > index) {
       sorter_.sortByColumn(index, false);
     }
   }
@@ -122,19 +122,22 @@ public class CounterFrame extends JFrame
     menuItem.setMnemonic('o');
     menuItem.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
-	System.out.println("Do open");
+
       }
     });
     // file-quit
     menuItem = (JMenuItem) file.add(new JMenuItem("Quit"));
     menuItem.setMnemonic('q');
     menuItem.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) { System.exit(0); }
+      public void actionPerformed(ActionEvent ae) {
+      //System.exit(0);
+      setVisible(false);
+      }
     });
     return menuBar;
   }
 
-  
+
   TableSorter        sorter_      = null;
   JTable             jTable_      = null;
   CounterTable       cTable_      = new CounterTable();

@@ -20,19 +20,19 @@ public class CounterTest
     CounterFrame f = new CounterFrame();
     ProjectionsFileMgr fileMgr = null;
     try {
-      ProjectionsFileChooser fc = 
-	new ProjectionsFileChooser(f, "Performance Counter Analysis", 
+      ProjectionsFileChooser fc =
+	new ProjectionsFileChooser(f, "Performance Counter Analysis",
 				   ProjectionsFileChooser.MULTIPLE_FILES);
       if (args.length==0) {
 	if (fc.showDialog()==JFileChooser.APPROVE_OPTION) {
 	  fileMgr = fc.getProjectionsFileMgr();
 	}
-	else { 
-	  System.out.println("No files chosen!"); 
+	else {
+	  System.out.println("No files chosen!");
 	  System.exit(0);
 	}
       }
-      else { 
+      else {
 	boolean test = false;
 	for (int i=0; i<args.length && !test; i++) {
 	  File file = new File(args[i]);
@@ -44,8 +44,8 @@ public class CounterTest
 	  }
 	}
 	if (test) { fc.getFiles(args); }
-	fileMgr = (test) ? 
-	  fc.getProjectionsFileMgr() : new ProjectionsFileMgr(args); 
+	fileMgr = (test) ?
+	  fc.getProjectionsFileMgr() : new ProjectionsFileMgr(args);
       }
       fileMgr.printSts();
       f.setFileMgr(fileMgr);

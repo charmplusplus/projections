@@ -118,7 +118,6 @@ SRC=\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\
     projections/gui/SelectField.java\
-    projections/gui/SplitScrollPanel.java\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
     projections/gui/TimeTextField.java\

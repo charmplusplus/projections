@@ -33,13 +33,11 @@ public class StlPanel extends ScalePanel.Child
 		if (p<0 || p>=nPe || procs<0) return "";
 		long t=(long)time;
 		if (t<0 || t>=totalTime) return "";
-		validPEs.reset();
-		////// TODO get processor p out of validPEs
-	//	if(p>= 0 && p < validPEs.size() && ((int )t/intervalSize) < data[0].length) {
-		
+				
 		if (validPEs != null ){
 			int count=0;
 			int pe=0;
+			validPEs.reset();
 			while (count <= p){
 				
 				pe = validPEs.nextElement();
@@ -51,8 +49,7 @@ public class StlPanel extends ScalePanel.Child
 				return "Processor "+pe+": Usage = "+utiliz+"%"+
 					" at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
 		}
-	//	}
-		}catch (Exception e){;};
+		}catch (Exception e){};
 		return "";		
 	}
 	//Draw yourself into (0,0,w,h) in the given graphics,
@@ -84,19 +81,18 @@ public class StlPanel extends ScalePanel.Child
 		double x2t_slope=pix2time/intervalSize;
 		
 		int testwidth = endx-startx;
-	//	System.out.println("x2t_off = " + x2t_off +" x2t_slope = " + x2t_slope + "endx - startx " + testwidth + "   IntervalSize " + intervalSize);
+		//System.out.println("pix2time "+ pix2time);
+		//System.out.println("x2t_off = " + x2t_off +" x2t_slope = " + x2t_slope + "endx - startx " + testwidth + "   IntervalSize " + intervalSize);
 		
 		if(validPEs != null){
 		if (wid>0 && ht>0) 
 		{//Write data to offscreen buffer
 			byte[] offBuf=new byte[wid*ht];
 			int proc_min=(int)Math.floor(pl), proc_max=(int)Math.ceil(ph);
-			//changing for test
 			validPEs.reset();
 			int proc;
 			int p =0;
 			while((proc = validPEs.nextElement()) != -1){
-				//	System.out.println("Image for PE " + proc);
 					if(proc != -1){
 						int y_min=(int)Math.floor(req.y(p));
 						int y_max=(int)Math.floor(req.y(p+1));
@@ -120,7 +116,8 @@ public class StlPanel extends ScalePanel.Child
 		req.g.fillRect(startx,0,req.w,starty);//Top
 		req.g.fillRect(endx,starty,req.w,endy);//Right
 		req.g.fillRect(0,endy,req.w,req.h);//Bottom
-		// Test Code
+
+
 	}
 	/*Render this row of data into the given offscreen buffer.
 	 * We want dest[y*w+x]=src[slope*x+off] for all suitable x and y.
@@ -132,27 +129,32 @@ public class StlPanel extends ScalePanel.Child
 		int iOff=(int)(65536*off);//To fixed-point
 		int iSlope=(int)(65536*slope);//To fixed-point
 		int iCur=iOff+xLo*iSlope;
+		int srcIndex=0;
 		for (int x=xLo;x<xHi;x++) {
 			//Simple approach: just take point sample of source
 			//OLD: byte val=(byte)src[(int)(off+x*slope)];
-			int srcIndex = iCur>>16;
+			srcIndex = iCur>>16;
 			if(srcIndex < 0){
 			//	System.out.println("hahahahha\n");
 				srcIndex = 0;
 			}else{	
 				if(srcIndex >= src.length){
 					// System.out.println("Index greater than data points \n");
+					iCur+=iSlope;
 				}else{
 					//System.out.println("Number of elements in each row " + src.length);
 					byte val=(byte)src[srcIndex];
+				//	System.out.println("val = " + val);
 					iCur+=iSlope;
 						int loc=yLo*w+x;
 					for (int y=yLo;y<yHi;y++,loc+=w)
 						if(loc < dest.length)
 							dest[loc]=val; //OLD: dest[y*w+x]=val;
+							//System.out.println("BAAD");
 				}
 			}	
 		}
+		//System.out.println("Max srcIndex = " + srcIndex);
 	}
 	public void setColorMap(ColorModel cm) {
 		colorMap=cm;
@@ -180,12 +182,33 @@ public class StlPanel extends ScalePanel.Child
 		else	
 			desiredIntervals = 7000;
 		
-		// System.out.println("desiredIntervals : " + desiredIntervals);
-                intervalSize=(int)(totalTime/desiredIntervals);
- 		
-                Analysis.LoadGraphData(desiredIntervals,intervalSize,
-                                       0, desiredIntervals-1,false,validPEs);
+		double trialintervalSize = (totalTime/desiredIntervals);
+		if(trialintervalSize < 5 ){
+			desiredIntervals = desiredIntervals/(5);
+			trialintervalSize = (totalTime/desiredIntervals);
+		}
+                intervalSize = (int )trialintervalSize;
+		//System.out.println("desiredIntervals : " + desiredIntervals + " intervalSize " + intervalSize);
+ 		int totalIntervals = (int )Analysis.getTotalTime()/intervalSize;
+		int startInterval = (int )startTime/intervalSize;
+		int endInterval = (int )endTime/intervalSize;
+                Analysis.LoadGraphData(totalIntervals,intervalSize,
+                                       startInterval, endInterval,false,validPEs);
                 data=Analysis.getSystemUsageData(1);
+		int sum = 0;
+		int cj;
+		validPEs.reset();
+		/*cj = validPEs.nextElement();
+		if(data!= null && data[cj] != null){
+		for(int ci =0;ci<data[cj].length;ci++)
+			sum += data[cj][ci];
+		double avg = ((double )sum)/(double) data[cj].length;
+		
+		//System.out.println("data length = " + data[cj].length+ " data avg = " + avg);
+		}else{
+		//	System.out.println("datapointer = " + data + " " + data[0]);
+		}*/
+		validPEs.reset();
                 nPe = validPEs.size();
                 repaint();
         }

@@ -65,8 +65,9 @@ public class StlWindow extends ProjectionsWindow
 	if(arg.equals("Set Range")){
 	//	System.out.println(arg);
 		showDialog();
-		setStlPanelData(0);
-		repaint();
+	/*	setStlPanelData(0);
+		stl.setData(validPEs,startTime,endTime); 
+		repaint();*/
         }
      }
    }  
@@ -117,7 +118,8 @@ public class StlWindow extends ProjectionsWindow
 	  
 	  stl.setColorMap(cm.getColorModel());
 	  
-	stl.setData(7000);
+	//if(n != 1)
+	//	stl.setData(7000);
 	 /// The problem of the window been large than the number of processors rises from this point 
 		double horSize, verSize;
 		if(validPEs == null){
@@ -180,6 +182,7 @@ public class StlWindow extends ProjectionsWindow
 		
 	//	setAllData();
 		
+		//validPEs.printList();
 		 setStlPanelData(0);
 		 stl.setData(validPEs,startTime,endTime); 
 		//System.out.println("Button pressed \n");	

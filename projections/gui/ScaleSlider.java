@@ -87,8 +87,10 @@ public class ScaleSlider extends Canvas
 		//Draw tick marks
 		double cur=tickStart;
 		int x;
+		
 		while ((x=val2coor(cur))<=w-hw) {
 			int tick[]={x,0, x,h};
+			int test_w = w-hw;
 			poly(g,tick,Color.black,false,0,0);
 			cur+=tickSep;
 		}
@@ -123,8 +125,9 @@ public class ScaleSlider extends Canvas
 		}
 		if (withFill)
 			g.fillPolygon(xc,yc,xc.length);
-		else
+		else{
 			g.drawPolyline(xc,yc,xc.length);
+		}	
 	}
 	public void setMax(double m) {max=m; repaint();}
 //***************** State *********************
@@ -136,7 +139,11 @@ public class ScaleSlider extends Canvas
 		repaint();
 	}
 	private void setVal2coor(int screenSize) {
-		val2slope=(screenSize-2*hw)/(max-min);
+		if((max-min) == 0){
+			val2slope=(screenSize-2*hw)/1;
+		}else{	
+			val2slope=(screenSize-2*hw)/(max-min);
+		}	
 		val2offset=hw-val2slope*min;
 		coor2slope=1.0/val2slope;
 		coor2offset=-val2offset/val2slope;
@@ -165,5 +172,7 @@ public class ScaleSlider extends Canvas
 		}
 	}
 	private final int val2coor(double val) 
-	  { return (int)(val2slope*val+val2offset+0.5); }
+	  { 
+		return (int)(val2slope*val+val2offset+0.5); 
+	  }
 }

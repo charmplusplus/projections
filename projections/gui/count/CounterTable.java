@@ -839,9 +839,9 @@ public class CounterTable extends AbstractTableModel
 
       sheetName = fileMgr.getStsFile(index).getCanonicalPath();
       // read sts file
-      GenericStsReader stsReader = new GenericStsReader(
-	fileMgr.getStsFile(index).getCanonicalPath(), 1.0);
-      numProcs = stsReader.numPe;
+      StsReader stsReader = 
+	  new StsReader(fileMgr.getStsFile(index).getCanonicalPath());
+      numProcs = stsReader.getProcessorCount();
       // read log file data
       File[] logFiles = fileMgr.getLogFiles(index);
       if (numProcs != logFiles.length) {
@@ -864,11 +864,11 @@ public class CounterTable extends AbstractTableModel
 	first = false;
       }
       // now initialize the EPValue by summarizing over all processors
-      tableRows = new EPValue[stsReader.entryCount+1];
-      numRows = stsReader.entryCount+1;
+      tableRows = new EPValue[stsReader.getEntryCount()+1];
+      numRows = stsReader.getEntryCount()+1;
       for (i=0; i<numRows-1; i++) {
 	tableRows[i] = new EPValue(
-	  stsReader.entryList[i].name, i, data, counters.length, true);
+	  stsReader.getEntryNames()[i][0], i, data, counters.length, true);
       }
       calcEPValueTotals();  // total each column in last row
     }

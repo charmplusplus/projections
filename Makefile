@@ -7,17 +7,13 @@ SRC=\
     projections/analysis/AsciiIntegerReader.java\
     projections/analysis/Chare.java\
     projections/analysis/Entry.java\
-    projections/analysis/Event.java\
-    projections/analysis/LogAnalyzer.java\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\
     projections/analysis/PackTime.java\
-    projections/analysis/Program.java\
     projections/analysis/ProjDefs.java\
-    projections/analysis/Pseudo.java\
+    projections/analysis/StsReader.java\
     projections/analysis/SumAnalyzer.java\
-    projections/analysis/SumLoader.java\
     projections/analysis/TimelineEvent.java\
     projections/analysis/TimelineMessage.java\
     projections/analysis/UsageCalc.java\
@@ -30,6 +26,7 @@ SRC=\
     projections/gui/AnimationWindow.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
+    projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
     projections/gui/ColorSelectWindow.java\
     projections/gui/ColorWindowFrame.java\
@@ -75,8 +72,11 @@ SRC=\
     projections/gui/ProfileTitleCanvas.java\
     projections/gui/ProfileWindow.java\
     projections/gui/ProfileYLabelCanvas.java\
+    projections/gui/ScalePanel.java\
+    projections/gui/ScaleSlider.java\
     projections/gui/SelectField.java\
-    projections/gui/SrcFilter.java\
+    projections/gui/StlPanel.java\
+    projections/gui/StlWindow.java\
     projections/gui/TimeTextField.java\
     projections/gui/TimelineAxisCanvas.java\
     projections/gui/TimelineColorWindow.java\
@@ -93,9 +93,8 @@ SRC=\
     projections/gui/ZItem.java\
     projections/misc/EntryNotFoundException.java\
     projections/misc/LogLoadException.java\
-    projections/misc/MyLinkedList.java\
-    projections/misc/MyLinkedListNode.java\
-    projections/misc/SummaryFormatException.java
+    projections/misc/SummaryFormatException.java\
+    projections/misc/ProgressDialog.java
 
 
 all: bin/projections.jar

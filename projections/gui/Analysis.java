@@ -112,6 +112,8 @@ public class Analysis {
 	// data.
 	if( sts.hasSumFiles() ) { //.sum files
 	    try {
+		// clear memory first ...
+		sumAnalyzer = null;
 		sumAnalyzer = new SumAnalyzer();
 		setTotalTime(sumAnalyzer.GetTotalTime());
 	    } catch (SummaryFormatException e) {
@@ -437,6 +439,8 @@ public class Analysis {
 				       int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
 	try {
+	    // clear memory first
+	    systemUsageData[1] = null;
 	    systemUsageData[1] = 
 		sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
 					       intervalSize);

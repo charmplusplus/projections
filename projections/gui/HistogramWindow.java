@@ -70,7 +70,6 @@ public class HistogramWindow extends GenericGraphWindow
 	
 	pack();
 	showDialog();
-	setVisible(true);
     }   
     
     /* if there is an epFrame existing, dispose it before disposing 
@@ -90,10 +89,12 @@ public class HistogramWindow extends GenericGraphWindow
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
-	    if (!startUp)
+	    if (!startUp) {
 		refreshGraph();
-	    else
+	    } else {
 		showEntryDialog();
+	    }
+	    setVisible(true);
 	}
     }
 

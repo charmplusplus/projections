@@ -102,12 +102,6 @@ public class MainMenuManager extends MenuManager
 	    });
 	menubar.add(preferencesMenu);
 
-	menubar.add(makeJMenu("View", 
-			   new Object[]
-	    {
-		new JCheckBoxMenuItem("WindowShade")
-		    }));
-	
 	toolMenu = makeJMenu("Tools", 
 			     new Object[]
 	    {

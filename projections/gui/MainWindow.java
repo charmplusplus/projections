@@ -280,6 +280,12 @@ public class MainWindow extends JFrame
     
     private void openFile(String filename) {
 	try {
+	    // clear the old summary data away, otherwise chance of 
+	    // running out of memory is great.
+	    sumDataSource = null;
+	    sumXAxis = null;
+	    sumYAxis = null;
+	    graphPanel = null;
 	    Analysis.initAnalysis(filename, this);
 	    setTitle("Projections - " + filename);
 	    Analysis.loadSummaryData();

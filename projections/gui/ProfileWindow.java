@@ -13,79 +13,79 @@ public class ProfileWindow extends ProjectionsWindow
 { 
     private static final int NUM_SYS_EPS = 3;
     
-   private NoUpdatePanel        mainPanel, displayPanel;
-   private Panel                labelCanvas2, titlePanel;
-   private ProfileLabelCanvas   labelCanvas;
-   private ProfileAxisCanvas    axisCanvas;
-   private ProfileDisplayCanvas displayCanvas;
-   private ProfileColorWindow   colorWindow;
-   private Label lTitle, lTitle2;
-   private Scrollbar HSB, VSB;
-   private ProfileData data;
-   private FloatTextField xScaleField, yScaleField;
-   private Button bDecreaseX, bIncreaseX, bResetX;
-   private Button bDecreaseY, bIncreaseY, bResetY;
-   private Button bColors;
-   private Button bPieChart;
+    private NoUpdatePanel        mainPanel, displayPanel;
+    private Panel                labelCanvas2, titlePanel;
+    private ProfileLabelCanvas   labelCanvas;
+    private ProfileAxisCanvas    axisCanvas;
+    private ProfileDisplayCanvas displayCanvas;
+    private ProfileColorWindow   colorWindow;
+    private Label lTitle, lTitle2;
+    private Scrollbar HSB, VSB;
+    private ProfileData data;
+    private FloatTextField xScaleField, yScaleField;
+    private Button bDecreaseX, bIncreaseX, bResetX;
+    private Button bDecreaseY, bIncreaseY, bResetY;
+    private Button bColors;
+    private Button bPieChart;
 
     // a boolean variable that indicates if the colors have been set.
     // If so, we simply want to preserve the old settings and allow the
     // user to change them without forcing them back to the old values.
     // Right now, still a very ugly hack.
     private boolean colorsSet = false;
-   private Color[][] colors;
-   private ProfileObject[][] poArray;
-   private float xscale=1, yscale=1;
-   private float[][] avg;
-   private float thresh;
-   private int avgSize;
-   
-   private PieChartWindow pieChartWindow;
+    private Color[][] colors;
+    private ProfileObject[][] poArray;
+    private float xscale=1, yscale=1;
+    private float[][] avg;
+    private float thresh;
+    private int avgSize;
+    
+    private PieChartWindow pieChartWindow;
 
     private EntrySelectionDialog entryDialog;
    
-   class NoUpdatePanel extends Panel
-   {
-	  public void update(Graphics g)
-	  {
-		 paint(g);
-	  }
-   }
+    class NoUpdatePanel extends Panel
+    {
+	public void update(Graphics g)
+	{
+	    paint(g);
+	}
+    }
 
-   public ProfileWindow(MainWindow parentWindow, Integer myWindowID)
-   {
-       super(parentWindow, myWindowID);
-
-	  addComponentListener(new ComponentAdapter()
-	  {
-		 public void componentResized(ComponentEvent e)
-		 {
- 			if(displayCanvas != null)
+    public ProfileWindow(MainWindow parentWindow, Integer myWindowID)
+    {
+	super(parentWindow, myWindowID);
+	
+	addComponentListener(new ComponentAdapter()
+	    {
+		public void componentResized(ComponentEvent e)
+		{
+		    if(displayCanvas != null)
 			{
-			   setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			   setSizes();
-			   setScales();
-			   labelCanvas.makeNewImage();
-			   axisCanvas.makeNewImage();
-			   labelCanvas2.invalidate();
-			   mainPanel.validate();
-			   setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			    setSizes();
+			    setScales();
+			    labelCanvas.makeNewImage();
+			    axisCanvas.makeNewImage();
+			    labelCanvas2.invalidate();
+			    mainPanel.validate();
+			    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}   
-		 }
-	  });
+		}
+	    });
 	  
-	  setBackground(Color.lightGray);
+	setBackground(Color.lightGray);
+	
+	data = new ProfileData(this);
+	
+	setTitle("Projections Usage Profile");
+	
+	CreateMenus();
+	CreateLayout();
 	  
-	  data = new ProfileData(this);
-	  
-	  setTitle("Projections Usage Profile");
-	  
-	  CreateMenus();
-	  CreateLayout();
-	  
-	  pack();
-	  showDialog(); 
-   }   
+	pack();
+	showDialog(); 
+    }   
 
     public void actionPerformed(ActionEvent evt)
     {
@@ -167,8 +167,6 @@ public class ProfileWindow extends ProjectionsWindow
 		close();
 	    } else if(arg.equals("Select Processors")) {
 		showDialog();
-	    } else if(arg.equals("Print Profile")) {
-		PrintProfile();   
 	    }
 	} else if (evt.getSource() instanceof FloatTextField) {
 	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
@@ -221,7 +219,7 @@ public class ProfileWindow extends ProjectionsWindow
 	
 	HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
 	VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
-	
+
 	mainPanel.setLayout(null);
 	mainPanel.setBackground(Color.black);
 	mainPanel.add(labelCanvas);
@@ -355,531 +353,263 @@ public class ProfileWindow extends ProjectionsWindow
     {
 	int numEPs = Analysis.getNumUserEntries();
 
-	    // this block sets up the initial colors scheme (which will
-	    // later be changed based on the number of significant entry
-	    // methods.
-	    if (!colorsSet) {
-		colors = new Color[1][numEPs+NUM_SYS_EPS];
-		
-		for(int i=0; i<numEPs; i++)
-		    {
-			// if the data is an entry method whose color is 
-			// found in analysis, then use it.
-			colors[0][i] = Analysis.getEntryColor(i);
-		    }   
-		// Idle time is White and is placed at the top
-		// Pack time is black (to see the first division between entry
-		// data and non entry data).
-		// Unpack time is orange (to provide the constrast).
-		colors[0][numEPs] = Color.black;
-		colors[0][numEPs+1] = Color.orange;
-		colors[0][numEPs+2] = Color.white;
-	    }
-		displayCanvas.removeAll();
-
-		// extra column is that of the average data.
-		data.numPs = data.plist.size()+1;
-		poArray = new ProfileObject[data.numPs][];
-
-		int numUserEntries = Analysis.getNumUserEntries();
-
-		int curPe;
-		// why +4 now and not +5?
-		// the first row is for entry method execution time the second is for 
-		//time spent sending messages in that entry method
-		
-		avg=new float[2][numUserEntries+NUM_SYS_EPS];
-		double avgScale=1.0/data.plist.size();
-
-		int poCount=1;
-		int progressCount = 0;
-		int nEl=data.plist.size();
-
-		ProgressMonitor progressBar;
-		progressBar = 
-		    new ProgressMonitor(Analysis.guiRoot, 
-					"Computing Usage Values",
-					"", 0, nEl*2);
-		progressBar.setProgress(0);
-		// **CW** Hack for colors to work - 
-		// Profile really should be cleanly rewritten.
-		// split the original loop:
-		// Phase 1a - compute average work
-		// Phase 1b - assign colors based on average work
-		// Phase 2 - create profile objects
-
-		// *CW* *** New code ****
-		// Phase 1a
-		data.plist.reset();
-		for (int i =0;i<avg[0].length;i++) {
-		    avg[0][i] = 0.0f;
-		    avg[1][i] = 0.0f;
-		}
-		while (data.plist.hasMoreElements()) {
-		    curPe = data.plist.currentElement();
-		    if (!progressBar.isCanceled()) {
-			progressBar.setNote("Computing Average : " + curPe);
-			progressBar.setProgress(progressCount);
-		    } else {
-			break;
-		    }
-
-		    data.plist.nextElement();
-
-		    // the first row is for entry method execution time 
-		    // the second is for time spent sending messages in 
-		    // that entry method
-		    float cur[][] =
-			Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-		    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
-			avg[0][i]+=(float)(cur[0][i]*avgScale);
-			avg[1][i]+=(float)(cur[1][i]*avgScale);
-		    }
-		    progressCount++;
-		}
-
-		// Phase 1b
-		progressBar.setNote("Assigning Colors");
-		progressBar.setProgress(progressCount);
-		Vector sigElements = new Vector();
-		// we only wish to compute for EPs
-		for (int i=0; i<numEPs; i++) {
-		    // anything greater than 5% is "significant"
-		    if (avg[0][i]+avg[1][i] > 1.0) {
-			sigElements.add(new Integer(i));
-		    }
-		}
-
-		// copy to an array for Color assignment (maybe that should be
-		// a new interface for color assignment).
-		int sigIndices[] = new int[sigElements.size()];
-		for (int i=0; i<sigIndices.length; i++) {
-		    sigIndices[i] = ((Integer)sigElements.elementAt(i)).intValue();
-		}
-		if (!colorsSet) {
-		    Color[] newUserColors = 
-			Analysis.createColorMap(numEPs, sigIndices);
-		    // copy the new Colors into our color array. 
-		    // (and let the system colors
-		    // remain as they are)
-		    for (int i=0; i<newUserColors.length; i++) {
-			colors[0][i] = newUserColors[i];
-		    }
-		    colorsSet = true;
-		}
-
-		// Phase 2
-		data.plist.reset();
-		while (data.plist.hasMoreElements())
-		{
-		    curPe = data.plist.currentElement();
-		    if (!progressBar.isCanceled()) {
-			progressBar.setNote("Reading Entry Point Usage : " +
-					    curPe);
-			progressBar.setProgress(progressCount);
-		    } else {
-			break;
-		    }
-		    data.plist.nextElement();
-		    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-		    usage2po(cur,curPe,poCount++,colors[0]);
-		    progressCount++;
-		}
-		usage2po(avg,-1,0,colors[0]);
-		progressBar.close();
-
-		String sTitle = "Profile of Usage for Processor";
-		if(data.plist.size() > 1)
-			sTitle += "s";
-
-		sTitle += " " + data.plist.listToString();
-		lTitle.setText(sTitle);
-		lTitle.invalidate();
-
-		sTitle = "(Time " + U.t(bt) + " - " + U.t(et) + ")";
-		lTitle2.setText(sTitle);
-		lTitle2.invalidate();
-	
-		titlePanel.validate();
-
-		setSizes();
-		setScales();
-		labelCanvas.makeNewImage();
-		axisCanvas.makeNewImage();
-		labelCanvas2.invalidate();
-		mainPanel.validate();      		
+	// this block sets up the initial colors scheme (which will
+	// later be changed based on the number of significant entry
+	// methods.
+	if (!colorsSet) {
+	    colors = new Color[1][numEPs+NUM_SYS_EPS];
+	    
+	    for (int i=0; i<numEPs; i++) {
+		// if the data is an entry method whose color is 
+		// found in analysis, then use it.
+		colors[0][i] = Analysis.getEntryColor(i);
+	    }   
+	    // Idle time is White and is placed at the top
+	    // Pack time is black (to see the first division between entry
+	    // data and non entry data).
+	    // Unpack time is orange (to provide the constrast).
+	    colors[0][numEPs] = Color.black;
+	    colors[0][numEPs+1] = Color.orange;
+	    colors[0][numEPs+2] = Color.white;
 	}
+	displayCanvas.removeAll();
 
-    private void PrintProfile()
-    {
-	PrintJob pjob = getToolkit().getPrintJob(this, "Print Profile", null);
-	  
-	if(pjob == null)
-	    return;
-		 
-	Dimension d = pjob.getPageDimension();
+	// extra column is that of the average data.
+	data.numPs = data.plist.size()+1;
+	poArray = new ProfileObject[data.numPs][];
 	
-	int marginLeft;
-	int marginTop;
-	if(d.width < d.height)
-	  {  
-		 marginLeft = (int)(0.6 * d.width / 8.5);    
-		 marginTop  = (int)(0.6 * d.height / 11.0);
-	  }
-	  else
-	  {
-		 marginLeft = (int)(0.6 * d.width / 11.0);
-		 marginTop  = (int)(0.6 * d.height / 8.5);
-	  }      
-	  
-	  int printWidth  = d.width  - 2*marginLeft;
-	  int printHeight = d.height - 2*marginTop;
-	  
-	  
-	  // Determine what processor range we're going to print
-	  int hsbval = HSB.getValue();
-	  
-	  float pwidth = (float)(data.dcw - 2*data.offset)/data.numPs;
+	int numUserEntries = Analysis.getNumUserEntries();
+	
+	int curPe;
+	// why +4 now and not +5?
+	// the first row is for entry method execution time the second is for 
+	//time spent sending messages in that entry method
+	
+	avg=new float[2][numUserEntries+NUM_SYS_EPS];
+	double avgScale=1.0/data.plist.size();
+	
+	int poCount=1;
+	int progressCount = 0;
+	int nEl=data.plist.size();
+	
+	ProgressMonitor progressBar;
+	progressBar = 
+	    new ProgressMonitor(Analysis.guiRoot, 
+				"Computing Usage Values",
+				"", 0, nEl*2);
+	progressBar.setProgress(0);
+	// **CW** Hack for colors to work - 
+	// Profile really should be cleanly rewritten.
+	// split the original loop:
+	// Phase 1a - compute average work
+	// Phase 1b - assign colors based on average work
+	// Phase 2 - create profile objects
+	
+	// *CW* *** New code ****
+	// Phase 1a
+	data.plist.reset();
+	for (int i =0;i<avg[0].length;i++) {
+	    avg[0][i] = 0.0f;
+	    avg[1][i] = 0.0f;
+	}
+	while (data.plist.hasMoreElements()) {
+	    curPe = data.plist.currentElement();
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote("Computing Average : " + curPe);
+		progressBar.setProgress(progressCount);
+	    } else {
+		break;
+	    }
+	    
+	    data.plist.nextElement();
+	    
+	    // the first row is for entry method execution time 
+	    // the second is for time spent sending messages in 
+	    // that entry method
+	    float cur[][] =
+		Analysis.GetUsageData(curPe,bt,et,data.phaselist);
+	    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
+		avg[0][i]+=(float)(cur[0][i]*avgScale);
+		avg[1][i]+=(float)(cur[1][i]*avgScale);
+	    }
+	    progressCount++;
+	}
+	
+	// Phase 1b
+	progressBar.setNote("Assigning Colors");
+	progressBar.setProgress(progressCount);
+	Vector sigElements = new Vector();
+	// we only wish to compute for EPs
+	for (int i=0; i<numEPs; i++) {
+	    // anything greater than 5% is "significant"
+	    if (avg[0][i]+avg[1][i] > 1.0) {
+		sigElements.add(new Integer(i));
+	    }
+	}
+	
+	// copy to an array for Color assignment (maybe that should be
+	// a new interface for color assignment).
+	int sigIndices[] = new int[sigElements.size()];
+	for (int i=0; i<sigIndices.length; i++) {
+	    sigIndices[i] = ((Integer)sigElements.elementAt(i)).intValue();
+	}
+	if (!colorsSet) {
+	    Color[] newUserColors = 
+		Analysis.createColorMap(numEPs, sigIndices);
+	    // copy the new Colors into our color array. 
+	    // (and let the system colors
+	    // remain as they are)
+	    for (int i=0; i<newUserColors.length; i++) {
+		colors[0][i] = newUserColors[i];
+	    }
+	    colorsSet = true;
+	}
+	
+	// Phase 2
+	data.plist.reset();
+	while (data.plist.hasMoreElements()) {
+	    curPe = data.plist.currentElement();
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote("Reading Entry Point Usage : " +
+				    curPe);
+		progressBar.setProgress(progressCount);
+	    } else {
+		break;
+	    }
+	    data.plist.nextElement();
+	    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
+	    usage2po(cur,curPe,poCount++,colors[0]);
+	    progressCount++;
+	}
+	usage2po(avg,-1,0,colors[0]);
+	progressBar.close();
+	
+	String sTitle = "Profile of Usage for Processor";
+	if(data.plist.size() > 1)
+	    sTitle += "s";
+	
+	sTitle += " " + data.plist.listToString();
+	lTitle.setText(sTitle);
+	lTitle.invalidate();
+	
+	sTitle = "(Time " + U.t(bt) + " - " + U.t(et) + ")";
+	lTitle2.setText(sTitle);
+	lTitle2.invalidate();
+	
+	titlePanel.validate();
+	
+	setSizes();
+	setScales();
+	labelCanvas.makeNewImage();
+	axisCanvas.makeNewImage();
+	labelCanvas2.invalidate();
+	mainPanel.validate();      		
+    }
 
-	  int minp = (int)Math.ceil((hsbval - data.offset - 0.5*pwidth)/pwidth);
-	  if(minp < 0) minp = 0;
+    private void setScales()
+    {
+	data.dcw = (int)(xscale * data.vpw);
+	data.dch = (int)(yscale * data.vph);
+	
+	if(xscale > 1)
+	    HSB.setVisible(true);
+	else
+	    HSB.setVisible(false);
+	
+	if(yscale > 1)
+	    VSB.setVisible(true);
+	else
+	    VSB.setVisible(false);
+	
+	HSB.setMaximum(data.dcw);
+	VSB.setMaximum(data.dch);  
+	HSB.setVisibleAmount(data.vpw);
+	VSB.setVisibleAmount(data.vph); 
+	HSB.setBlockIncrement(data.vpw);
+	VSB.setBlockIncrement(data.vph);
+	
+	displayCanvas.setBounds(0, 0, data.dcw, data.dch);
+	
+	double hscale = (double)(data.dch - data.offset)/100;
+	float width   = (float)(data.dcw - 2*data.offset)/data.numPs;
+	int w = (int)(Math.ceil(0.75*width));
+	int ow = (int)((width - w)/2);
 	  
-	  int maxp = (int)Math.floor((hsbval + data.vpw - data.offset - 0.5*pwidth)/pwidth);
-	  if(maxp > data.numPs-1) maxp = data.numPs-1;
-	  if(minp > maxp) minp = maxp;
-			
-	  System.out.println("Want to print from Processor " + minp + " to Processor " + maxp);
-	  
-	  
-	  // Determine what percentage range we're going to print
-	  int vsbval = VSB.getValue();
-	  
-	  float yheight = (float)((data.dch - data.offset) / 100.0);
-	  
-	  int maxy = 100 - (int)Math.floor((vsbval - data.offset)/yheight);
-	  if(maxy > 100) maxy = 100;
-	  
-	  int miny = 100 - (int)Math.ceil((vsbval + data.vph - data.offset)/yheight);
-	  if(miny < 0) miny = 0;
-	  
-	  System.out.println("Want to print from " + miny + "% to " + maxy + "%");
-	  
-	  
-	  // Get our first page
-	  Graphics pg = pjob.getGraphics();
-	  pg.setColor(Color.white);
-	  pg.fillRect(0, 0, d.width, d.height);
-	  
-	  Font normalfont = new Font("SansSerif", Font.PLAIN, 10);
-	  pg.setFont(normalfont);
-	  
-	  pg.translate(marginLeft, marginTop);
-	  FontMetrics pfm = pg.getFontMetrics(normalfont);
-	  
-		   
-	  // Figure out the scales to print to the page.
-	  
-	  int textheight = pfm.getHeight();
-	  int axiswidth = pfm.stringWidth("100%") + 20;
-	  int labelheight = 2*textheight + 15;
-	  int titleheight = 3*textheight + 15;
-	  
-	  int canvaswidth = printWidth - axiswidth;
-	  int canvasheight = printHeight - labelheight - titleheight; 
+	if (poArray != null) {
+	    for (int p=0; p<data.numPs; p++) {
+		int h = data.dch;
+		double rem = 0.0;
+		if (poArray[p] != null) {
+		    for (int i=0; i<poArray[p].length; i++) {
+			if (poArray[p][i] != null) {
+			    double objhtD = (hscale*poArray[p][i].getUsage());
+			    objhtD += rem;
+			    
+			    int   objht;
+			    if(objhtD - (int)objhtD >= 0.5)
+				objht = (int)objhtD + 1;
+			    else
+				objht = (int)objhtD;
+			    rem = objhtD - objht;      
+			    
+			    poArray[p][i].setBounds((int)(width*p+
+							  data.offset+ow), 
+						    h - objht, w, objht);   
+			    h -= objht;
+			} else {
+			    System.out.println("POARRAY[" + p + 
+					       "][" + i + "} IS NULL");
+			}      
+		    }
+		}
+	    }
+	} 
+	displayCanvas.makeNewImage();           
+    }   
 
-	  int curheight = 0;
+    private void setSizes()
+    {
+	int acw, lch, sbh, sbw, mpw, mph, lch2;
+	
+	mpw = mainPanel.getSize().width;
+	mph = mainPanel.getSize().height;
+	
+	acw  = 50;
+	lch  = 30;
+	lch2 = 30;
+	sbh  = 20;
+	sbw  = 20;
 	  
-	  // DRAW THE TITLE     
-	  String title = "PROJECTIONS USAGE PROFILE FOR " + Analysis.getFilename();
-	  pg.setColor(Color.black);
-	  curheight += textheight;
-	  pg.drawString(title, (printWidth - pfm.stringWidth(title))/2, curheight);
+	data.vpw = mpw - acw - sbw;
+	data.vph = mph - lch - lch2 - sbh;
+	
+	data.dcw = (int)(xscale * data.vpw);
+	data.dch = (int)(yscale * data.vph);
 	  
-	  title = "Profile of Usage for Processor";
-	  if(data.plist.size() > 1)
-		 title += "s";
-	  title += " " + data.plist.listToString();
-	  curheight += 5 + textheight;
-	  pg.drawString(title, (printWidth - pfm.stringWidth(title))/2, curheight);
+	if(xscale > 1)
+	    HSB.setVisible(true);
+	else
+	    HSB.setVisible(false);
 	  
-	  title = "(Time " + U.t(data.begintime) + " - " + U.t(data.endtime);
-	  curheight += 5 + textheight;
-	  pg.drawString(title, (printWidth - pfm.stringWidth(title))/2, curheight);
-	  
-	  // DRAW THE PROCESSOR LABELS
-	  curheight = canvasheight + titleheight;
-	  
-	  int numprocs = maxp - minp + 1;
-	  float width = ((float)canvaswidth/numprocs);
-
-	  int maxwidth = pfm.stringWidth("" + Analysis.getNumProcessors()) + 20; 
-	  
-
-	  int labelincrement = (int)(Math.ceil((double)maxwidth/width));
-	  labelincrement = Util.getBestIncrement(labelincrement);
-	  int longlineht  = 10;
-	  int shortlineht = 5;
-
-	  data.plist.reset();
-	  for(int p=0; p<minp; p++)
-		 data.plist.nextElement();
+	if(yscale > 1)
+	    VSB.setVisible(true);
+	else
+	    VSB.setVisible(false);
 		 
-	  for(int p=0; p<numprocs; p++)
-	  {   
-		 String tmp = "" + data.plist.nextElement();
-		 int xloc = axiswidth + (int)((p+0.5)*width);
-		 if((p % labelincrement) == 0)
-		 {
-			pg.drawLine(xloc, curheight, xloc, curheight + longlineht);
-			xloc -= (int)(0.5 * pfm.stringWidth(tmp));
-			pg.drawString(tmp, xloc, curheight + longlineht + textheight + 5);
-		 }
-		 else
-		 {
-			pg.drawLine(xloc, curheight, xloc, curheight + shortlineht);
-		 }      
-	  }
-	  
-	  curheight += longlineht + textheight*2 + 10;
-	  String tmp = "Processor Number";
-	  pg.drawString(tmp, (canvaswidth - pfm.stringWidth(tmp))/2 + axiswidth, curheight);
-	  
-	  // DRAW THE PERCENTAGE AXIS AND LABELS
-	  pg.drawLine(axiswidth, titleheight, axiswidth, titleheight + canvasheight);
-	 
-	  float deltay = ((float)canvasheight / (maxy - miny));
-	  labelincrement = (int)(Math.ceil(textheight / deltay));
-	  labelincrement = Util.getBestIncrement(labelincrement);
-	  
-	  for(int y=0; y<maxy-miny+1; y++)
-	  {
-		 curheight = titleheight + canvasheight - (int)(y * deltay); 
-		 
-		 if((y+miny) % labelincrement == 0)
-		 {  
-			tmp = "" + (y+miny);
-			pg.drawLine(axiswidth-10, curheight, axiswidth, curheight);
-			curheight += (int)(0.5*textheight); 
-			pg.drawString(tmp, axiswidth-15-pfm.stringWidth(tmp), curheight);
-		 }
-		 else
-		 {
-			pg.drawLine(axiswidth-7, curheight, axiswidth, curheight);
-		 }
-	  }
-	  
-	  curheight = (canvasheight + textheight)/2 + titleheight;
-	  tmp = "%";
-	  pg.drawString(tmp, 0, curheight);
-	  
-	  
-	  // DRAW THE BARS
-	  
-	  int curx, cury;
-	  for(int p=minp; p<=maxp; p++)
-	  {
-		 curx = axiswidth + (int)(p*width) + (int)(0.125 * width);
-		 cury = titleheight + canvasheight;
-		 
-		 float usage = 0;
-		 int item = -1;
-		 while(usage < miny)
-		 {
-			item++;
-			usage += poArray[p][item].getUsage();
-		 }   
-		 
-		 float firstusage = 0;
-		 if(item == -1)
-		 {
-			item = 0;
-			firstusage = poArray[p][item].getUsage();
-		 }   
-		 else
-		 {
-			firstusage = usage - miny;
-			usage = miny;
-		 }
-		 
-		 
-		 double rem = 0.0;
-		 int w = (int)(0.75 * width);
-		 for(int i=item; i<poArray[p].length; i++)
-		 {
-			String name = poArray[p][i].getName();
-			Color c;
-			if(name.equals("MESSAGE PACKING"))
-			   c = Color.pink;
-			else if(name.equals("OVERHEAD"))
-			   c = Color.black;
-			else if(name.equals("IDLE"))
-			   c = Color.black;
-			else         
-			   c = poArray[p][i].getForeground();
-			
-			pg.setColor(c);
-					   
-			float curusage;           
-			if(firstusage >= 0)
-			{
-			   curusage = firstusage;
-			   firstusage = -1;
-			}   
-			else
-			   curusage = poArray[p][i].getUsage();
-			
-			usage += curusage;
-			if(usage > maxy)
-			   curusage = maxy - usage + curusage;     
-			   
-			double objhtD = (deltay*curusage);
-			
-			objhtD += rem;
-				  
-			int   objht;
-			if(objhtD - (int)objhtD >= 0.5)
-			   objht = (int)objhtD + 1;
-			else
-			   objht = (int)objhtD;
-			rem = objhtD - objht;        
-				  
-			cury -= objht;
-	  
-			Rectangle r = pg.getClipBounds();
-			pg.setClip(curx, cury, w, objht);
-	  
-			pg.fillRect(curx, cury, w, objht);
-	  
-			if(name.equals("OVERHEAD"))
-			{
-			   pg.setColor(Color.white);
-			   for(int n=0; n<objht + w; n+=4)
-			   {
-				  pg.drawLine(curx+n, cury, curx, cury+n);
-				  pg.drawLine(curx+n+1, cury, curx, cury+n+1);
-			   }
-			}
-			pg.setClip(r);
-			
-			if(usage > maxy) break;
-		 }   
-	  }
-	  
-	  // PRINT THE PAGE    
-	  pg.dispose();   
-	  pjob.end();
-   }   
-
-   private void setScales()
-   {
-	   data.dcw = (int)(xscale * data.vpw);
-	  data.dch = (int)(yscale * data.vph);
-	  
-	  if(xscale > 1)
-		 HSB.setVisible(true);
-	  else
-		 HSB.setVisible(false);
-	  
-	  if(yscale > 1)
-		 VSB.setVisible(true);
-	  else
-		 VSB.setVisible(false);
-		 
-	  HSB.setMaximum(data.dcw);
-	  VSB.setMaximum(data.dch);  
-	  HSB.setVisibleAmount(data.vpw);
-	  VSB.setVisibleAmount(data.vph); 
-	  HSB.setBlockIncrement(data.vpw);
-	  VSB.setBlockIncrement(data.vph);
-	  
-	  displayCanvas.setBounds(0, 0, data.dcw, data.dch);
-
-	  double hscale = (double)(data.dch - data.offset)/100;
-	  float width   = (float)(data.dcw - 2*data.offset)/data.numPs;
-	  int w = (int)(Math.ceil(0.75*width));
-	  int ow = (int)((width - w)/2);
-	  
-	  if(poArray != null)
-	  {
-		 for(int p=0; p<data.numPs; p++)
-		 {
-			int h = data.dch;
-			double rem = 0.0;
-			if(poArray[p] != null)
-			{
-			   for(int i=0; i<poArray[p].length; i++)
-			   {
-				  if(poArray[p][i] != null)
-				  {
-					 double objhtD = (hscale*poArray[p][i].getUsage());
-					 objhtD += rem;
-				  
-					 int   objht;
-					 if(objhtD - (int)objhtD >= 0.5)
-						objht = (int)objhtD + 1;
-					 else
-						objht = (int)objhtD;
-					 rem = objhtD - objht;      
-				
-					 poArray[p][i].setBounds((int)(width*p+data.offset+ow), h - objht, w, objht);   
-				  
-					 h -= objht;
-				  }
-				  else
-				  {
-					 System.out.println("POARRAY[" + p + "][" + i + "} IS NULL");
-				  }      
-			   }
-			}
-		 }
-	  } 
-	  
-	  displayCanvas.makeNewImage();           
-   }   
-
-   private void setSizes()
-   {
-	  int acw, lch, sbh, sbw, mpw, mph, lch2;
-	  
-	  mpw = mainPanel.getSize().width;
-	  mph = mainPanel.getSize().height;
-	  
-	  acw  = 50;
-	  lch  = 30;
-	  lch2 = 30;
-	  sbh  = 20;
-	  sbw  = 20;
-	  
-	  data.vpw = mpw - acw - sbw;
-	  data.vph = mph - lch - lch2 - sbh;
-	  
-	  data.dcw = (int)(xscale * data.vpw);
-	  data.dch = (int)(yscale * data.vph);
-	  
-	  if(xscale > 1)
-		 HSB.setVisible(true);
-	  else
-		 HSB.setVisible(false);
-	  
-	  if(yscale > 1)
-		 VSB.setVisible(true);
-	  else
-		 VSB.setVisible(false);
-		 
-	  HSB.setMaximum(data.dcw);
-	  VSB.setMaximum(data.dch);   
-	  HSB.setBlockIncrement(data.vpw);
-	  VSB.setBlockIncrement(data.vph);            
-	  
-	  axisCanvas.setBounds   (0,       0,       acw, data.vph);
-	  displayPanel.setBounds (acw,     0,       data.vpw, data.vph);
-	  displayCanvas.setBounds(0, 0, data.dcw, data.dch);
-	  labelCanvas.setBounds  (acw,     data.vph,     data.vpw, lch);
-	  labelCanvas2.setBounds (acw, data.vph+lch,     data.vpw, lch2);
-	  
-	  VSB.setBounds          (mpw-sbw, 0,       sbw, data.vph);
-	  HSB.setBounds          (acw,     mph-sbh, data.vpw, sbh);
-   }   
+	HSB.setMaximum(data.dcw);
+	VSB.setMaximum(data.dch);   
+	HSB.setBlockIncrement(data.vpw);
+	VSB.setBlockIncrement(data.vph);            
+	
+	axisCanvas.setBounds   (0,       0,       acw, data.vph);
+	displayPanel.setBounds (acw,     0,       data.vpw, data.vph);
+	displayCanvas.setBounds(0, 0, data.dcw, data.dch);
+	labelCanvas.setBounds  (acw,     data.vph,     data.vpw, lch);
+	labelCanvas2.setBounds (acw, data.vph+lch,     data.vpw, lch2);
+	
+	VSB.setBounds          (mpw-sbw, 0,       sbw, data.vph);
+	HSB.setBounds          (acw,     mph-sbh, data.vpw, sbh);
+    }   
 
     public void showDialog()
     {
@@ -888,6 +618,8 @@ public class ProfileWindow extends ProjectionsWindow
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
+	    // **CW** another major code hack!!
+	    MakePOArray(data.begintime, data.endtime);
 	    setVisible(true);
 	}
     }   

@@ -3,6 +3,8 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 import projections.analysis.*;
+import java.util.Vector;
+import java.text.DecimalFormat;
 
 public class TimelineObject extends Component
    implements MouseListener
@@ -24,11 +26,44 @@ public class TimelineObject extends Component
    
    private TimelineMessage[] messages;
    private PackTime[] packs;
+   // private UserEvent[] userEvents;
+
+  private static DecimalFormat format_ = new DecimalFormat();
+
+/*
+   TAKE THIS OUT FOR NOW BECAUSE THEY DRAW THEMSELVES.
+   THIS IS BETTER BECAUSE TimelineObjects HAVE BOUNDS WHICH CUT OFF
+   SOME USEREVENTS
+  // this may be called multiple times, so resize array when it does
+  public void addUserEvents(Vector userEventVector) {
+    if (userEventVector == null) { return; }
+    int numEvents = userEventVector.size();
+    if (numEvents == 0) { return; }
+
+    int i;
+    if (userEvents == null) {
+      userEvents = new UserEvent[numEvents];
+      for (i=0; i<numEvents; i++) {
+	userEvents[i] = (UserEvent) userEventVector.elementAt(i);
+      }
+    }
+    else {
+      int numCurrEvents = userEvents.length;
+      UserEvent[] tmp = new UserEvent[numCurrEvents+numEvents];
+      for (i=0; i<numCurrEvents; i++) { tmp[i] = userEvents[i]; }
+      for (i=0; i<numEvents; i++) { 
+	tmp[numCurrEvents+i] = (UserEvent) userEventVector.elementAt(i); 
+      }
+    }
+  }
+*/
 
    public TimelineObject(TimelineData data, long bt, long et, int n, 
 						 TimelineMessage[] msgs, PackTime[] packs,
 						 int p1, int p2, int mlen)
    {
+          format_.setGroupingUsed(true);
+
 	  setBackground(Color.black);
 	  setForeground(Color.white);
 	  
@@ -57,8 +92,8 @@ public class TimelineObject extends Component
 		 bubbletext[0] = (Analysis.getUserEntryNames())[n][1] + "::" + 
 					  (Analysis.getUserEntryNames())[n][0]; 
 		 bubbletext[1] = "Msg Len: " + msglen;
-		 bubbletext[2] = "Begin Time: " + bt;
-		 bubbletext[3] = "End Time: " + et;
+		 bubbletext[2] = "Begin Time: " + format_.format(bt);
+		 bubbletext[3] = "End Time: " + format_.format(et);
 		 bubbletext[4] = "Total Time: " + U.t(et-bt);
 		 bubbletext[5] = "Packing: " + U.t(packtime);
 		 if (packtime>0)
@@ -70,8 +105,8 @@ public class TimelineObject extends Component
 	  {
 		 bubbletext = new String[4];
 		 bubbletext[0] = "IDLE TIME";
-		 bubbletext[1] = "Begin Time: " + bt;
-		 bubbletext[2] = "End Time: " + et;
+		 bubbletext[1] = "Begin Time: " + format_.format(bt);
+		 bubbletext[2] = "End Time: " + format_.format(et);
 		 bubbletext[3] = "Total Time: " + U.t(et-bt);
 	  }
 	  
@@ -82,10 +117,10 @@ public class TimelineObject extends Component
    {
 	  msgwindow = null;
    }   
-   private void drawLeftArrow(Graphics g, Color c, int h)
+   private void drawLeftArrow(Graphics g, Color c, int startY, int h)
    {
 	  int[] xpts = {5, 0, 5};
-	  int[] ypts = {0, h/2, h-1};
+	  int[] ypts = {startY, startY+h/2, startY+h-1};
 	  
 	  g.setColor(c);
 	  g.fillPolygon(xpts, ypts, 3);
@@ -96,10 +131,10 @@ public class TimelineObject extends Component
 	  g.setColor(c.darker());
 	  g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);   
    }   
-   private void drawRightArrow(Graphics g, Color c, int h, int w)
+   private void drawRightArrow(Graphics g, Color c, int startY, int h, int w)
    {
 	  int[] xpts = {w-6, w, w-6};
-	  int[] ypts = {0, h/2, h-1};
+	  int[] ypts = {startY, startY+h/2, startY+h-1};
 	  
 	  g.setColor(c);
 	  g.fillPolygon(xpts, ypts, 3);
@@ -225,8 +260,10 @@ public class TimelineObject extends Component
 		 c = Analysis.getEntryColor(entry);
 	  
 
-	  int w   = getSize().width;
-	  int h   = getSize().height - 5;
+	  // leave 5 pixels above and below
+	  int startY = 5;
+	  int w      = getSize().width;
+	  int h      = getSize().height - 10;
 	  
 	  int left  = 0;
 	  int right = w-1;
@@ -236,14 +273,14 @@ public class TimelineObject extends Component
 		 
 	  if(beginTime < data.beginTime)
 	  {
-		 drawLeftArrow(g, c, h);
+		 drawLeftArrow(g, c, startY, h);
 		 left = 5;
 		 viewbt = data.beginTime;
 	  }
 		 
 	  if(endTime > data.endTime)
 	  {
-		 drawRightArrow(g, c, h, w);
+		 drawRightArrow(g, c, startY, h, w);
 		 right = w-6;
 		 viewet = data.endTime;
 	  }
@@ -251,29 +288,29 @@ public class TimelineObject extends Component
 	  g.setColor(c);
 	  
 	  int pixelwidth = right-left+1;
-	  g.fillRect(left, 0, pixelwidth, h);
+	  g.fillRect(left, startY, pixelwidth, h);
 	  
 	  if(entry == -1)
 	  {
 		 g.setColor(getBackground());
 		 for(int x=0; x<w+h-2; x += 4)
 		 {
-			g.drawLine(x, 0, x-h, h);
-			g.drawLine(x+1, 0, x-h+1, h);
+			g.drawLine(x, startY, x-h, startY+h);
+			g.drawLine(x+1, startY, x-h+1, startY+h);
 		 }
 	  }
 
 	  if(w > 2)
 	  {
 		 g.setColor(c.brighter());
-		 g.drawLine(left, 0, right, 0);
+		 g.drawLine(left, startY, right, startY);
 		 if(left == 0)
-			g.drawLine(0, 0, 0, h-1);
+			g.drawLine(0, startY, 0, startY+h-1);
 		 
 		 g.setColor(c.darker());
-		 g.drawLine(left, h-1, right, h-1);
+		 g.drawLine(left, startY+h-1, right, startY+h-1);
 		 if(right == w-1)
-			g.drawLine(w-1, 0, w-1, h-1);
+			g.drawLine(w-1, startY, w-1, startY+h-1);
 	  }
 	  
 	  double scale= pixelwidth /((double)(viewet - viewbt + 1)); 
@@ -289,7 +326,7 @@ public class TimelineObject extends Component
 			   int pos = (int)((msgtime - viewbt) * scale);
 			   if(beginTime < data.beginTime)
 				  pos += 5;
-			   g.drawLine(pos, h, pos, h+5);
+			   g.drawLine(pos, startY+h, pos, startY+h+5);
 			}
 		 }
 	  }               
@@ -307,10 +344,11 @@ public class TimelineObject extends Component
 			   int pos = (int)((pbt - viewbt) * scale);
 			   if(beginTime < data.beginTime)
 				  pos += 5;
-			   g.fillRect(pos, h, (int)(pet-pbt+1), 3);
+			   g.fillRect(pos, startY+h, (int)(pet-pbt+1), 3);
 			}
 		 }
 	  }               
+
    }   
    public void print(Graphics pg, long minx, long maxx, double pixelIncrement, int timeIncrement)
    {
@@ -343,14 +381,14 @@ public class TimelineObject extends Component
 		 
 	  if(beginTime < minx)
 	  {
-		 drawLeftArrow(pg, c, h);
+		 drawLeftArrow(pg, c, 0, h);
 		 left = 5;
 		 viewbt = minx;
 	  }
 		 
 	  if(endTime > maxx)
 	  {
-		 drawRightArrow(pg, c, h, w);
+		 drawRightArrow(pg, c, 0, h, w);
 		 right = w-6;
 		 viewet = maxx;
 	  }
@@ -419,7 +457,7 @@ public class TimelineObject extends Component
 			}
 		 }
 	  }
-	  
+
 	  pg.setClip(r);               
    }   
    public void setBounds(int ylocation)

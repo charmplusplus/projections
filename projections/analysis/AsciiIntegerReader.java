@@ -36,6 +36,32 @@ class AsciiIntegerReader {
 		len=file.read(buffer,0,1000);
 		if (len<=0) throw new EOFException();
 	}
+
+    public long skip(long n) 
+	throws IOException
+    {
+	int charsSkipped = 0;
+
+	if (idx+n <= len) {
+	    charsSkipped += n;
+	    idx += n;
+	} else {
+	    charsSkipped += len-idx;
+	    idx += charsSkipped;
+	    long temp = file.skip(n-charsSkipped);
+	    if (temp > 0) {
+		charsSkipped += temp;
+		try {
+		    fillBuffer();
+		} catch (EOFException e) {
+		    // do nothing - should not happen since there is
+		    // at least one item in the skipped region.
+		}
+	    }
+	}
+	return charsSkipped;
+    }
+
 	final public boolean isSpace(char c) {
 		return c==' '||c=='\n'||c=='\t';
 	}

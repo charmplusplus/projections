@@ -7,6 +7,9 @@ import java.awt.event.*;
 public class ColorPanel extends Canvas
    implements MouseListener
 {
+    private int type;
+    private int index;
+
    private int w, h;
    private Color background;
    private Color foreground;
@@ -16,14 +19,26 @@ public class ColorPanel extends Canvas
    
    private ActionListener actionListener = null;
 
-   public ColorPanel(Color f)
+   public ColorPanel(int type, int index, Color f)
    {
+       this.type = type;
+       this.index = index;
 	  background = Color.black;
 	  foreground = f;
 	  w = wDefault;
 	  h = hDefault;
 	  addMouseListener(this);
    }   
+
+   public ColorPanel(Color f)
+   {
+          background = Color.black;
+          foreground = f;
+          w = wDefault;
+          h = hDefault;
+          addMouseListener(this);
+   }
+
    public ColorPanel(Color f, int w, int h)
    {
 	  background = Color.black;
@@ -133,4 +148,12 @@ public class ColorPanel extends Canvas
 	  foreground = c;
 	  repaint();
    }   
+
+    public int getType() {
+	return type;
+    }
+
+    public int getIndex() {
+	return index;
+    }
 }

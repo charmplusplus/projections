@@ -37,6 +37,7 @@ SRC=\
     projections/gui/ColorSelectWindow.java\
     projections/gui/ColorWindowFrame.java\
     projections/gui/Converter.java\
+    projections/gui/EntrySelectionDialog.java\
     projections/gui/FloatTextField.java\
     projections/gui/GraphAttributesWindow.java\
     projections/gui/GraphControlPanel.java\
@@ -86,6 +87,8 @@ SRC=\
     projections/gui/ProfileYLabelCanvas.java\
     projections/gui/ProjectionsFileChooser.java\
     projections/gui/ProjectionsFileMgr.java\
+    projections/gui/ProjectionsWindow.java\
+    projections/gui/RangeDialog.java\
     projections/gui/ScalePanel.java\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\

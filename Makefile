@@ -122,6 +122,7 @@ SRC=\
     projections/gui/TimelineObject.java\
     projections/gui/TimelineRangeDialog.java\
     projections/gui/TimelineWindow.java\
+    projections/gui/TimelineLine.java\
     projections/gui/U.java\
     projections/gui/Util.java\
     projections/gui/UserEventWindow.java\

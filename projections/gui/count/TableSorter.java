@@ -292,6 +292,11 @@ public class TableSorter extends TableMap {
         super.tableChanged(new TableModelEvent(this)); 
     }
 
+    /** JMU mod: return mapped row. */
+    public int mapRow(int originalRow) {
+      return indexes[originalRow];
+    }
+
     /** JMU mod: Write over the orignalIndices and return it, map from
      *  original indices to sorted table indices. */
     public int[] mapRows(int[] originalIndices) {
@@ -314,7 +319,7 @@ public class TableSorter extends TableMap {
                 int viewColumn = columnModel.getColumnIndexAtX(e.getX()); 
                 int column = tableView.convertColumnIndexToModel(viewColumn); 
                 if (e.getClickCount() == 1 && column != -1) {
-                    //System.out.println("Sorting ..."); 
+                    // System.out.println("Sorting ..."); 
                     int shiftPressed = e.getModifiers()&InputEvent.SHIFT_MASK; 
                     boolean ascending = (shiftPressed != 0); 
                     sorter.sortByColumn(column, ascending); 

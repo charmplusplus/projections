@@ -63,18 +63,18 @@ public class LogReader extends ProjDefs
 	{
 		if (!byEntryPoint) return;
 	if (userEntries[entry][TYPE]==null) {
-		userEntries[entry][TYPE]=new int[numProcessors][numIntervals];
+		userEntries[entry][TYPE]=new int[numProcessors][numIntervals+1];
 		if (TYPE==PROCESS) //Add a time array, too
-			userEntries[entry][TIME]=new int[numProcessors][numIntervals];
+			userEntries[entry][TIME]=new int[numProcessors][numIntervals+1];
 	}
 	userEntries[entry][TYPE][curPe][interval]++;
 	
 	int catIdx=mtypeToCategoryIdx(mtype);
 	if (catIdx!=-1) {
 		if (categorized[catIdx][TYPE]==null) {
-			categorized[catIdx][TYPE]=new int[numProcessors][numIntervals];
+			categorized[catIdx][TYPE]=new int[numProcessors][numIntervals+1];
 			if (TYPE==PROCESS) //Add a time array, too
-			  categorized[catIdx][TIME]=new int[numProcessors][numIntervals];
+			  categorized[catIdx][TIME]=new int[numProcessors][numIntervals+1];
 		}
 		categorized[catIdx][TYPE][curPe][interval]++;
 	}
@@ -171,13 +171,14 @@ public class LogReader extends ProjDefs
 	numUserEntries = sts.getEntryCount();
 	intervalSize=reqIntervalSize;
 	numIntervals = (int) (totalTime / (double)intervalSize + 1.0);
+        //System.out.println(numIntervals);
 	byEntryPoint=NbyEntryPoint;
 
 	ProgressDialog bar=new ProgressDialog("Reading log files...");
 	double allocEffort=0.5;//Number of logs the allocations are worth
 	double totalEffort=allocEffort+sts.getProcessorCount();
 	bar.progress(0,"allocating");
-	sysUsgData = new int[3][numProcessors][numIntervals];
+	sysUsgData = new int[3][numProcessors][numIntervals+1];
 	if (byEntryPoint) {
 		userEntries = new int[numUserEntries][3][][];
 		categorized = new int[5][3][][];

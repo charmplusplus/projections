@@ -10,6 +10,7 @@ SRC=\
     projections/analysis/Entry.java\
     projections/analysis/EPNamdDefs.java\
     projections/analysis/EPDataGenerator.java\
+    projections/analysis/Interval.java\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\

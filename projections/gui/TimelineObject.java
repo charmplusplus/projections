@@ -14,7 +14,7 @@ public class TimelineObject extends Component
    private int     entry;
    private boolean inside = false; 
    private int pCurrent, pCreation;
-   private float  usage;
+   private double  usage;
    private float packusage;
    private long packtime;
    
@@ -129,7 +129,7 @@ public class TimelineObject extends Component
    }   
    public float getNetUsage()
    {
-	  return usage - packusage;
+	  return (float)usage - packusage;
    }   
    public int getNumMsgs()
    {
@@ -156,7 +156,7 @@ public class TimelineObject extends Component
    }   
    public float getUsage()
    {
-	  return usage;
+	  return (float)usage;
    }   
    public void mouseClicked(MouseEvent evt)
    {
@@ -468,8 +468,8 @@ public class TimelineObject extends Component
 	  if(endTime   > data.endTime)
 		 usage -= (endTime - data.endTime);
 	
-	  usage *= 100;
 	  usage /= (data.endTime - data.beginTime + 1);
+	  usage *= 100;
    }   
    public void update(Graphics g)
    {

@@ -10,36 +10,28 @@ import javax.swing.*;
 public class HistogramWindow extends GenericGraphWindow 
     implements ActionListener
 {
-    // GUI sub-components
-    private JButton entrySelectionButton;
-    private JButton epTableButton;
+    // Gui components
+    JButton entrySelectionButton;
+    JButton epTableButton;
 
     // Data maintained by HistogramWindow
     // countData is indexed by bin index followed by ep id.
     private double[][] counts;
-    private long longestExecutionTime;
     
-    //variables to be passed to EntrySelectionDialog
-    private EntrySelectionDialog entryDialog;
-    private boolean stateArray[][];
-    private boolean existsArray[][];
-    private Color colorArray[][];
-    private String [] entryNames; 
-    
-    private EntryPointWindow epFrame = null;
-
     // variables (in addition to those in the super class) 
     // to be set by TimeBinDialog.
     public int numBins;
     public long binSize;
-    public long threshold;
+    public long minBinSize;
 
     private HistogramWindow thisWindow;
 
+    private boolean newDialog; // a temporary hack
+
     void windowInit() {
-	threshold = 1000; // 1ms default
 	numBins = 100;  // default to 100 bins
 	binSize = 1000; // 1ms default bin size
+	minBinSize = 0; // default, look at all bins
 	// use GenericGraphWindow's method for the rest.
 	super.windowInit();
     }
@@ -52,29 +44,6 @@ public class HistogramWindow extends GenericGraphWindow
 	setTitle("Projections Histograms");
 	setGraphSpecificData();
 
-	epFrame = new EntryPointWindow();
-	epFrame.setSize(600,600);
-
-	// initializing data fields
-	int noEPs = Analysis.getNumUserEntries();
-	existsArray = new boolean[1][noEPs];
-	for (int i=0; i<noEPs; i++) {
-	    existsArray[0][i] = true;
-	}
-	stateArray = new boolean[1][noEPs];	
-	for (int i=0; i<noEPs; i++) {
-	    stateArray[0][i] = true;
-	}
-	String names[][] = Analysis.getEntryNames();
-	entryNames = new String[noEPs];
-	for (int i=0; i<noEPs ; i++) {
-	    entryNames[i] = names[i][0];
-	}
-	colorArray = new Color[1][noEPs];
-	for (int i=0; i<noEPs; i++) {
-	    colorArray[0][i] = Analysis.getEntryColor(i);
-	}
-	
 	createMenus();
 	getContentPane().add(getMainPanel());
 	
@@ -82,12 +51,7 @@ public class HistogramWindow extends GenericGraphWindow
 	showDialog();
     }   
     
-    /* if there is an epFrame existing, dispose it before disposing 
-       the window 
-    */
     public void close(){
-	if(epFrame != null)
-	    epFrame.dispose();
 	super.close();
     }
 
@@ -99,22 +63,27 @@ public class HistogramWindow extends GenericGraphWindow
 	if (dialog == null) {
 	    dialog = 
 		new TimeBinDialog(this, "Select Histogram Time Range");
+	    newDialog = true;
 	} else {
 	    setDialogData();
+	    newDialog = false;
 	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
-	    System.out.println("Bin Size is " + U.t(binSize));
-	    System.out.println("Threshold is " + U.t(threshold));
 	    final SwingWorker worker = new SwingWorker() {
 		    public Object construct() {
 			if (dialog.isModified()) {
+			    counts = thisWindow.getCounts();
+			} else if (newDialog) { // temp hack
 			    counts = thisWindow.getCounts();
 			}
 			return null;
 		    }
 		    public void finished() {
+			setGraphSpecificData();
+			setDataSource("Histogram", counts, thisWindow);
+			refreshGraph();
 			thisWindow.setVisible(true);
 		    }
 		};
@@ -128,9 +97,9 @@ public class HistogramWindow extends GenericGraphWindow
 
     public void getDialogData() {
 	TimeBinDialog dialog = (TimeBinDialog)this.dialog;
-	threshold = dialog.getThreshold();
 	numBins = dialog.getNumBins();
 	binSize = dialog.getBinSize();
+	minBinSize = dialog.getMinBinSize();
 	// use GenericGraphWindow's method for the rest.
 	super.getDialogData();
     }
@@ -139,24 +108,8 @@ public class HistogramWindow extends GenericGraphWindow
 	TimeBinDialog dialog = (TimeBinDialog)this.dialog;
 	dialog.setBinSize(binSize);
 	dialog.setNumBins(numBins);
-	dialog.setThreshold(threshold);
+	dialog.setMinBinSize(minBinSize);
 	super.setDialogData();
-    }
-
-    /* Show the EntrySelectionDialog to select Entrypoints to be considered */
-    // **CW** 1/12/2004 this should really be the legend panel. Will be fixed
-    // once the generic legend panel gets written.
-    void showEntryDialog()
-    {
-	int noEPs = Analysis.getNumUserEntries();
-	String typeLabelStrings[] = {"Entry Points"};
-
-	if (entryDialog == null)
-	    entryDialog = 
-		new EntrySelectionDialog(this, typeLabelStrings, stateArray,
-					 colorArray,existsArray,entryNames);
-	entryDialog.showDialog();
-	refreshGraph();
     }
 
     public void actionPerformed(ActionEvent evt)
@@ -165,10 +118,15 @@ public class HistogramWindow extends GenericGraphWindow
 	    JMenuItem m = (JMenuItem)evt.getSource();
 	    if(m.getText().equals("Set Range"))
 		showDialog();
-	    else if(m.getText().equals("Select Entry Points"))
-		showEntryDialog();
 	    else if(m.getText().equals("Close"))
 		close();
+	} else if (evt.getSource() instanceof JButton) {
+	    JButton b = (JButton)evt.getSource();
+	    if (b.getText().equals("Select Entries")) {
+		System.out.println("selecting entries for display");
+	    } else if (b.getText().equals("Out-of-Range EPs")) {
+		System.out.println("Showing out of range entries");
+	    }
 	}
     } 
 
@@ -196,11 +154,6 @@ public class HistogramWindow extends GenericGraphWindow
 	buttonPanel.add(entrySelectionButton);
 	buttonPanel.add(epTableButton);
 
-	/*
-	mainPanel.add(Box.createRigidArea(new Dimension(0,6)));
-	mainPanel.add(new JScrollPane(statusArea,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-
-	*/
         Util.gblAdd(mainPanel, graphPanel,  gbc, 0,0, 1,1, 1,1);
         Util.gblAdd(mainPanel, buttonPanel, gbc, 0,1, 1,1, 0,0);
 
@@ -208,22 +161,24 @@ public class HistogramWindow extends GenericGraphWindow
     }  
 
     protected void setGraphSpecificData(){
-	setXAxis("Entry Point Execution Time (us)","us", 0, binSize);
-	setYAxis("Instances", "");
+	setXAxis("Bin Interval Size (" + U.t(binSize) + ")", 
+		 "", minBinSize, 1.0);
+	setYAxis("Number of Occurrences", "");
     }
 
     protected void refreshGraph()
     {
 	// get new counts and redraw the graph
 	counts = getCounts();
-	setDataSource("Histogram",counts);
+	setDataSource("Histogram", counts, thisWindow);
 	super.refreshGraph();
     }
 
     public String[] getPopup(int xVal, int yVal) {
-	String bubbleText[] = new String[10];
+	String bubbleText[] = new String[3];
 
-	bubbleText[0] = "Entry: " + entryNames[yVal];
+	bubbleText[0] = Analysis.getEntryName(yVal);
+	//	bubbleText[0] = "Entry: " + entryNames[yVal];
 	bubbleText[1] = "Count: " + counts[xVal][yVal];
 	bubbleText[2] = "Bin: " + U.t(xVal*binSize) +
 	    " to " + U.t((xVal+1)*binSize);
@@ -231,33 +186,14 @@ public class HistogramWindow extends GenericGraphWindow
 	return bubbleText;
     }
 
-    private void showEpFrame() {
-	epFrame.setVisible(true);
-    }
-
     private double[][] getCounts()
     {
-	int instances = 0;
-	longestExecutionTime=0;
 	int numEPs = Analysis.getNumUserEntries();
 
 	OrderedIntList tmpPEs = validPEs.copyOf();
 	GenericLogReader r;
-        double [][] countData = new double[numBins][numEPs];
-	for (int i=0; i<numBins; i++) {
-	    for (int j=0; j<numEPs; j++) {
-		countData[i][j] = 0.0;
-	    }
-	}
-
-	// each time we reset data, we have to assume everything exists until
-	// proven otherwise ...
-	for (int i=0; i<numEPs; i++) {
-	    existsArray[0][i] = true;
-	}
-
-	// we also clear away the data in the epFrame
-	epFrame.clearTableData();
+	// we create an extra bin to hold overflows.
+        double [][] countData = new double[numBins+1][numEPs];
 
 	LogEntryData logdata,logdata2;
 	logdata = new LogEntryData();
@@ -285,52 +221,25 @@ public class HistogramWindow extends GenericGraphWindow
 		    r.nextEventOfType(ProjDefs.BEGIN_PROCESSING,logdata);
 		    r.nextEventOfType(ProjDefs.END_PROCESSING,logdata2);
 		    // if the entry method is selected, count it
-		    if (stateArray[0][logdata.entry]) {
-			long executionTime = (logdata2.time - logdata.time);
-			
-			// apply thresholding feature
-			if (executionTime < threshold) {
-			    break;
-			}
-			
-			int targetBin = (int)(executionTime/binSize);
-			if (targetBin >= numBins) {
-			    // if not within range, enter the data into 
-			    // the table
-			    epFrame.writeToTable(pe,entryNames[logdata.entry],
-						 logdata.time,logdata2.time,
-						 colorArray[0][logdata.entry]);
-			    if (executionTime > longestExecutionTime) {
-				longestExecutionTime = executionTime;
-			    }
-			    targetBin = numBins-1;
-			}
-			countData[targetBin][logdata.entry]+=1.0;
-			instances++;
+		    long executionTime = (logdata2.time - logdata.time);
+		    
+		    int targetBin = (int)(executionTime/binSize);
+		    if (targetBin >= numBins) {
+			targetBin = numBins;
 		    }
+		    countData[targetBin][logdata.entry]+=1.0;
 		    if (logdata2.time > endTime) {
 			break;
 		    }
 		}
-	    }catch(EOFException e){
+	    } catch(EOFException e) {
 	     	// do nothing just reached end-of-file
-	    }catch(Exception e){
+	    } catch(Exception e) {
 		System.out.println("Exception " + e);
 		e.printStackTrace();
 	    }
 	}
 	progressBar.close();
-
-	// now filter away those EPs that never showed up
-	for (int ep=0; ep<numEPs; ep++) {
-	    double epCount = 0.0;
-	    for (int bin=0; bin<numBins; bin++) {
-		epCount += counts[bin][ep];
-	    }
-	    if (epCount == 0.0) {
-		existsArray[0][ep] = false;
-	    }
-	}
 	return countData;
     }
     

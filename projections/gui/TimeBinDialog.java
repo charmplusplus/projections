@@ -9,14 +9,10 @@ import javax.swing.*;
  *  by Chee Wai Lee
  *  2/20/2004
  * 
- *  Formerly named SimpleThresholdDialog which was ill-conceived.
- *
  *  This is the basic dialog abstraction to allow a user to specify
  *  a range of time in projections for which entities (events) are
  *  to be placed into a user-defined number of bins according to a 
  *  certain time (bin) size.
- *
- *  A corresponding time-based threshold value can be applied.
  *
  *  The obvious use of this is for Histograms of any sort.
  */
@@ -26,15 +22,16 @@ public class TimeBinDialog extends RangeDialog
     protected JPanel binPanel;
     protected JLabel numBinsLabel;
     protected JLabel binSizeLabel;
-    protected JLabel thresholdLabel;
+    protected JLabel minBinSizeLabel;
+    protected JLabel binRangeLabel;
 
     protected JIntTextField numBinsField;
     protected JTimeTextField binSizeField;
-    protected JTimeTextField thresholdField; 
+    protected JTimeTextField minBinSizeField;
 
     protected int numBins;
     protected long binSize;
-    protected long threshold; // time in milliseconds
+    protected long minBinSize;
 
     public TimeBinDialog(ProjectionsWindow mainWindow,
 			 String titleString) {
@@ -42,7 +39,7 @@ public class TimeBinDialog extends RangeDialog
 	// default values
 	numBins = 100;
 	binSize = 10000;
-	threshold = 1000;
+	minBinSize = 0;
     }
     
     public void actionPerformed(ActionEvent evt) {
@@ -57,6 +54,7 @@ public class TimeBinDialog extends RangeDialog
 		    return;
 		} 
 	    } else if (b == bUpdate) {
+		setBinRangeText();
 	    }
 	}
 	// let superclass handle its own action routines.
@@ -84,20 +82,24 @@ public class TimeBinDialog extends RangeDialog
 	binSizeField.addKeyListener(this);
 	binSizeField.addFocusListener(this);
 
-	thresholdLabel = new JLabel("Min threshold:", JLabel.LEFT);
-	thresholdField = new JTimeTextField(threshold, 12);
-	thresholdField.addActionListener(this);
-	thresholdField.addKeyListener(this);
-	thresholdField.addFocusListener(this);
+	minBinSizeLabel = new JLabel("Starting Bin Size:", JLabel.LEFT);
+	minBinSizeField = new JTimeTextField(minBinSize, 12);
+	minBinSizeField.addActionListener(this);
+	minBinSizeField.addKeyListener(this);
+	minBinSizeField.addFocusListener(this);
+
+	binRangeLabel = new JLabel("", JLabel.LEFT);
+	setBinRangeText();
 
 	binPanel = new JPanel();
 	binPanel.setLayout(gbl);
-	Util.gblAdd(binPanel, numBinsLabel,   gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, numBinsField,   gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, binSizeLabel,   gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, binSizeField,   gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, thresholdLabel, gbc, 0,1, 1,1, 1,1);
-	Util.gblAdd(binPanel, thresholdField, gbc, 1,1, 1,1, 1,1);
+	Util.gblAdd(binPanel, numBinsLabel,    gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(binPanel, numBinsField,    gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(binPanel, binSizeLabel,    gbc, 2,0, 1,1, 1,1);
+	Util.gblAdd(binPanel, binSizeField,    gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(binPanel, minBinSizeLabel, gbc, 0,1, 2,1, 1,1);
+	Util.gblAdd(binPanel, minBinSizeField, gbc, 1,1, 2,1, 1,1);
+	Util.gblAdd(binPanel, binRangeLabel,   gbc, 0,2, 4,1, 1,1);
 
 	inputPanel.setLayout(gbl);
 	Util.gblAdd(inputPanel, baseMainPanel,  gbc, 0,0, 1,1, 1,1);
@@ -110,11 +112,15 @@ public class TimeBinDialog extends RangeDialog
 	if (field instanceof JIntTextField) {
 	    if (field == numBinsField) {
 		numBins = numBinsField.getValue();
+		setBinRangeText();
 	    }
 	} else if (field instanceof JTimeTextField) {
 	    if (field == binSizeField) {
 		binSize = binSizeField.getValue();
+	    } else if (field == minBinSizeField) {
+		minBinSize = minBinSizeField.getValue();
 	    }
+	    setBinRangeText();
 	}
 	super.updateData(field);
     }
@@ -141,6 +147,15 @@ public class TimeBinDialog extends RangeDialog
 	// this method is included for completeness.
     }
 
+    void setBinRangeText() {
+	binRangeLabel.setText("Bin size ranges from : " +
+			      U.t(minBinSizeField.getValue()) +
+			      " to " + 
+			      U.t(minBinSizeField.getValue() +
+				  numBinsField.getValue() *
+				  binSizeField.getValue()));
+    }
+
     // Accessor methods
 
     public int getNumBins() {
@@ -159,11 +174,11 @@ public class TimeBinDialog extends RangeDialog
 	this.binSize = binSize;
     }
 
-    public long getThreshold() {
-	return threshold;
+    public long getMinBinSize() {
+	return minBinSize;
     }
 
-    public void setThreshold(long threshold) {
-	this.threshold = threshold;
+    public void setMinBinSize(long size) {
+	this.minBinSize = size;
     }
 }

@@ -48,8 +48,6 @@ public class AnimationDisplayPanel extends Panel
 				  
 		void showDialog()
 		{
-			System.out.println("startTime " + startTime);
-						
 			
 			if(dialog == null)
 				dialog = new IntervalRangeDialog(this, "Select Range");

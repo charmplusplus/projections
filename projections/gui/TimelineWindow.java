@@ -27,9 +27,11 @@ public class TimelineWindow extends Frame
    
    private FontMetrics fm;
    
-  // basic zoom controls
+  // basic zoom controls  **sharon**
    private Button bSelectRange, bColors, bDecrease, bIncrease, bReset;
-   private Button bZoomSelected, bLoadSelected, bJumpAnimation;
+   private Button bZoomSelected, bLoadSelected;
+   private Button bJumpAnimation, bJumpProfile, bJumpGraph, bJumpHistogram,
+   		  bJumpComm, bJumpStl;
    private TextField highlightTime, selectionBeginTime, selectionEndTime, selectionDiff;
    private DecimalFormat format;
    private FloatTextField scaleField;
@@ -227,26 +229,34 @@ public class TimelineWindow extends Frame
     }
   }
 
-   // **sharon** finish this function
+   // **sharon** finish this function, garbage deletion question
    public void jumpToGraph(String b) {
-     if (b == "Animation")
-     	{
-	   if (mouseController.selected_) {
-      	     Rectangle rect = displayCanvas.rubberBand.bounds();
-             mouseController.selected_ = false;
-             if (rect.width == 0) { return; }
-             double jStart = axisBotCanvas.canvasToTime(rect.x);
-             double jEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
+     Rectangle rect = displayCanvas.rubberBand.bounds();
+     double jStart = axisBotCanvas.canvasToTime(rect.x);
+     double jEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
       	       
-	     Analysis.setJTimeAvailable(true);
-	   
-	     Analysis.setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
-	     new Thread(new Runnable() {public void run() {
-	      AnimationWindow animationWindow = new AnimationWindow();
-	      animationWindow.setVisible(true);
-	      }}).start();
-	   }
-	}
+     Analysis.setJTimeAvailable(true);
+     if (rect.width == 0) {
+	Analysis.setJTime((long)(0), Analysis.getTotalTime());
+     } else Analysis.setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
+	
+     if (b == "Animation") {
+     	AnimationWindow animationWindow = new AnimationWindow();
+     } else if (b == "Profile") {
+     	ProfileWindow profileWindow = new ProfileWindow(new MainWindow());
+     } else if (b == "Graph") {
+     	GraphWindow graphWindow = new GraphWindow(new MainWindow());
+     } else if (b == "Histogram") {
+     	HistogramWindow histogramWindow = new HistogramWindow(new MainWindow());
+     } else if (b == "Comm") {
+     	CommWindow commWindow = new CommWindow();
+     } else if (b == "Stl") {
+     	StlWindow stlWindow = new StlWindow();
+     }
+		
+     	     
+	
+    
      
      
    }
@@ -255,12 +265,17 @@ public class TimelineWindow extends Frame
    {
      if (evt.getSource() instanceof Button) {
        Button b = (Button)evt.getSource();
-       if(b == bSelectRange) { ShowRangeDialog(); }
-       else if(b == bColors) { ShowColorWindow(); }
-       else if(b == bZoomSelected) { zoomSelected(); }
+       if (b == bSelectRange)        { ShowRangeDialog(); }
+       else if (b == bColors)        { ShowColorWindow(); }
+       else if (b == bZoomSelected)  { zoomSelected(); }
+       else if (b == bLoadSelected) { loadSelected(); }
        // **sharon** jump to graph
        else if(b == bJumpAnimation) { jumpToGraph("Animation"); }
-       else if (b == bLoadSelected) { loadSelected(); }
+       else if(b == bJumpProfile)   { jumpToGraph("Profile"); }
+       else if(b == bJumpGraph)     { jumpToGraph("Graph"); }
+       else if(b == bJumpHistogram) { jumpToGraph("Histogram"); }
+       else if(b == bJumpComm)      { jumpToGraph("Comm"); }
+       else if(b == bJumpStl)       { jumpToGraph("Stl"); }
        else {
 	 int leftVal = HSB.getValue();
 	 int rightVal = leftVal + data.vpw;
@@ -569,17 +584,33 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(zoomPanel, new Label("Selection Length", Label.CENTER), gbc, 5,1, 1,1, 1,1);
 
 	  // JUMP TO GRAPH	
-	  
+	  // **sharon** finish all the views
 	  bJumpAnimation = new Button("Animation");
+	  bJumpProfile = new Button("Usage Profile");
+	  bJumpGraph = new Button("Graph");
+	  bJumpHistogram = new Button("Histogram");
+	  bJumpComm = new Button("Communication");
+	  bJumpStl = new Button("Overview");
+	  
 	  bJumpAnimation.addActionListener(this);
+	  bJumpProfile.addActionListener(this);
+	  bJumpGraph.addActionListener(this);
+	  bJumpHistogram.addActionListener(this);
+	  bJumpComm.addActionListener(this);
+	  bJumpStl.addActionListener(this);
 	  
 	  Panel jumpPanel = new Panel();
 	  jumpPanel.setLayout(gbl);
 	  gbc.fill = GridBagConstraints.BOTH;
 	  
-	  Util.gblAdd(jumpPanel, new Label(" "), gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, new Label("Jump to graph: ", Label.CENTER),   gbc, 1,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, new Label(" "),  gbc, 0,0, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, new Label("Jump to graph: ", Label.LEFT),   gbc, 1,1, 1,1, 1,1);
 	  Util.gblAdd(jumpPanel, bJumpAnimation,  gbc, 2,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, bJumpProfile,    gbc, 3,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, bJumpGraph, 	  gbc, 4,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, bJumpHistogram,  gbc, 5,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, bJumpComm,       gbc, 6,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, bJumpStl,        gbc, 7,1, 1,1, 1,1);
 	  
 
 	  //// WINDOW

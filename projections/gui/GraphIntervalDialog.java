@@ -69,12 +69,21 @@ public class GraphIntervalDialog extends Dialog
 	numProcs = Analysis.getNumProcessors();
 	
 	// setup the initial interval and size values
-	if(numIntervals <= 0)  {
+	if (numIntervals <= 0)  {
 	    intervalSize = 1000; // default to milliseconds
 	    numIntervals = getNumIntervals(intervalSize);
 	}
+	
 	// setup the initial start and end values
-	if (intervalStart <= 0 || intervalEnd <= 0) {
+	// check to see if jumped here from TimelineWindow
+	if (Analysis.checkJTimeAvailable() == true) {
+	    startTime = Analysis.getJStart();
+	    endTime = Analysis.getJEnd();
+	    intervalStart = (int)(startTime/intervalSize);
+	    intervalEnd = (int)(endTime/intervalSize);
+	    Analysis.setJTimeAvailable(false);
+	}
+	else if (intervalStart <= 0 || intervalEnd <= 0) {
 	    intervalStart = 0;
 	    intervalEnd = numIntervals-1;
 	    startTime = 0;

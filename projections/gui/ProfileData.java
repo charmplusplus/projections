@@ -20,9 +20,16 @@ public class ProfileData
 	  
 	  this.profileWindow = profileWindow;
 	  numPs     = Analysis.getNumProcessors();
-	  begintime = 0;
+	  
+	  if(Analysis.checkJTimeAvailable() == true) { 
+		begintime = Analysis.getJStart();
+		endtime = Analysis.getJEnd();
+		Analysis.setJTimeAvailable(false);}
+	  else {
+	  	begintime = 0;
+	  	endtime   = Analysis.getTotalTime();}
+	  
 	  pstring   = "0";
-	  endtime   = Analysis.getTotalTime();
 	  offset    = 10;
 	  plist     = null;
 	  phaselist = null;

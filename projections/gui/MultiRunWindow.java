@@ -27,11 +27,15 @@ import javax.swing.*;
 public class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
+    private MultiRunWindow thisWindow;
+
     // Gui components
     private MultiRunControlPanel controlPanel;
     private MultiRunTables tablesPanel;
+    private JDialog tablesWindow;
     private GraphPanel graphPanel;
     private Graph graphCanvas;
+    private ProjectionsFileChooser fc;
 
     private MultiRunData data;
     private MultiRunDataAnalyzer analyzer;
@@ -43,16 +47,12 @@ public class MultiRunWindow extends ProjectionsWindow
     GridBagLayout      gbl;
     GridBagConstraints gbc;
 
-    // data display modes
-    private static final int MODE_GRAPH = 0;
-    private static final int MODE_TABLE = 1;
-    private int displayMode;
-
     private int selectedDataType;
 
     public MultiRunWindow(MainWindow parentWindow, Integer myWindowID) 
     {
 	super(parentWindow, myWindowID);
+	thisWindow = this;
 	setBackground(Color.lightGray);
 	showDialog();
     }
@@ -80,51 +80,50 @@ public class MultiRunWindow extends ProjectionsWindow
     }
 
     public void showFileDialog() {
-	try {
-	    ProjectionsFileChooser fc = 
-		new ProjectionsFileChooser(this, "Multirun Analysis",
-					   ProjectionsFileChooser.MULTIPLE_FILES);
-	    MultiRunCallBack callback = new MultiRunCallBack(this, fc);
-	    int returnVal = fc.showDialog(callback);
-	    // the callback will decide what happens
-	} catch (Exception e) {
-	    System.out.println("Filechooser error. Please fix");
-	    ProjectionsFileChooser.handleException(this, e);
-	}
+	fc = new ProjectionsFileChooser(this, "Multirun Analysis",
+					ProjectionsFileChooser.MULTIPLE_FILES);
+	fc.showDialog();
     }
 
     /**
-     *  This method is called by MultiRunCallBack at the successful
-     *  completion of the choosing of files in ProjectionsFileChooser.
+     *  For now, this will have to do. In the future, perhaps an interface
+     *  for windows using the ProjectionsFileChooser can be developed that
+     *  will required the following method to be implemented from which
+     *  ProjectionsFileChooser may call.
      */
-    public void beginAnalysis(ProjectionsFileChooser fc) {
-	String stsFilenames[] = fc.userSelect_returnVal;
-	try {
-	    data = new MultiRunData(stsFilenames);
-	    analyzer = new MultiRunDataAnalyzer(data);
-	    // setting default data type
-	    selectedDataType = MultiRunData.TYPE_TIME;
-
-	    // set up the graph and table panels using the analyzed data
-	    createDisplayPanels();
-
-	    // set up the window GUI for display
-	    createLayout();
-	    pack();
-	    setTitle("Multiple Run Analysis");
-	    setVisible(true);
-	} catch (IOException e) {
-	    System.err.println(e.toString());
-	}
+    public void dialogCallback() {
+	final SwingWorker worker = new SwingWorker() {
+		public Object construct() {
+		    try {
+			data = 
+			    new MultiRunData(fc.userSelect_returnVal);
+			analyzer = new MultiRunDataAnalyzer(data);
+			// setting default data type
+			selectedDataType = MultiRunData.TYPE_TIME;
+			
+			// set up the graph and table panels using the 
+			// analyzed data
+			thisWindow.createDisplayPanels();
+		    } catch (IOException e) {
+			System.err.println(e.toString());
+		    }
+		    return null;
+		}
+		public void finished() {
+		    // set up the window GUI for display
+		    thisWindow.createLayout();
+		    thisWindow.pack();
+		    thisWindow.setTitle("Multiple Run Analysis");
+		    thisWindow.setVisible(true);
+		}
+	    };
+	worker.start();
     }
 
     private void createLayout()
     {
 	mainPanel = new JPanel();
 	mainPanel.setBackground(Color.gray);
-
-	// initially default to showing the graph view
-	displayMode = MODE_GRAPH;
 
 	controlPanel = new MultiRunControlPanel(this, selectedDataType);
 
@@ -161,56 +160,24 @@ public class MultiRunWindow extends ProjectionsWindow
 	tablesPanel = new MultiRunTables(selectedDataType, analyzer);
     }
 
-    /**
-     *  This method should be called in response to an action that results
-     *  from a user's request to change the display mode of the window.
-     */
-    private void setDisplayMode(int mode) {
-	// optimization
-	if (mode == displayMode) {
-	    return;
-	}
-	displayMode = mode;
-	switch (mode) {
-	case MODE_GRAPH:
-	    mainPanel.remove(tablesPanel);
-	    Util.gblAdd(mainPanel, graphPanel, gbc,  0,0, 1,1, 1,1, 2,2,2,2);
-	    mainPanel.validate();
-	    graphPanel.repaint();
-	    break;
-	case MODE_TABLE:
-	    mainPanel.remove(graphPanel);
-	    Util.gblAdd(mainPanel, tablesPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2);
-	    mainPanel.validate();
-	    tablesPanel.repaint();
-	    break;
-	}
-    }
-
     // listener codes
 
     public void itemStateChanged(ItemEvent e) {
 	if (e.getSource() instanceof JRadioButton) {
 	    JRadioButton button = (JRadioButton)e.getSource();
 	    if (e.getStateChange() == ItemEvent.SELECTED) {
-		if (button.getText().equals("Table")) {
-		    setDisplayMode(MODE_TABLE);
-		} else if (button.getText().equals("Graph")) {
-		    setDisplayMode(MODE_GRAPH);
-		} else {
-		    selectedDataType = 
-			controlPanel.getSelectedIdx(e.getItemSelectable());
-		    // update graph
-		    MultiRunDataSource dataSource = 
-			analyzer.getDataSource(selectedDataType);
-		    MultiRunXAxis xAxis =
-			analyzer.getMRXAxisData();
-		    MultiRunYAxis yAxis =
-			analyzer.getMRYAxisData(selectedDataType);
-		    graphCanvas.setData(dataSource, xAxis, yAxis);
-		    // update tables
-		    tablesPanel.setType(selectedDataType);
-		}
+		selectedDataType = 
+		    controlPanel.getSelectedIdx(e.getItemSelectable());
+		// update graph
+		MultiRunDataSource dataSource = 
+		    analyzer.getDataSource(selectedDataType);
+		MultiRunXAxis xAxis =
+		    analyzer.getMRXAxisData();
+		MultiRunYAxis yAxis =
+		    analyzer.getMRYAxisData(selectedDataType);
+		graphCanvas.setData(dataSource, xAxis, yAxis);
+		// update tables
+		tablesPanel.setType(selectedDataType);
 	    }
 	}
     }
@@ -221,6 +188,16 @@ public class MultiRunWindow extends ProjectionsWindow
 	    JButton button = (JButton)e.getSource();
 	    if (button.getText().equals("Close Window")) {
 		close();
+	    } else if (button.getText().equals("Display Tables")) {
+		if (tablesWindow == null) {
+		    tablesWindow = new JDialog(this);
+		    tablesWindow.getContentPane().add(tablesPanel);
+		    // **CW** stop gap solution ...
+		    tablesWindow.setSize(new Dimension(500,300));
+		    tablesWindow.show();
+		} else {
+		    tablesWindow.show();
+		}
 	    }
 	}
     }

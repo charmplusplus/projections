@@ -11,11 +11,6 @@ import java.util.*;
 
 public class MultiRunControlPanel extends JPanel
 {
-    private ButtonGroup displayModes;
-    private JPanel modePanel;
-    private JRadioButton textMode;
-    private JRadioButton graphMode;
-
     private ButtonGroup dataTypeModes;
     private JPanel dataTypePanel;
     private JRadioButton dataTypeButtons[];
@@ -33,22 +28,6 @@ public class MultiRunControlPanel extends JPanel
 	this.mainWindow = mainWindow;
 
 	setBackground(Color.lightGray);
-
-	// data display modes
-	displayModes = new ButtonGroup();
-	modePanel = new JPanel();
-
-	textMode = new JRadioButton("Table", false);
-	textMode.addItemListener(mainWindow);
-	graphMode = new JRadioButton("Graph", true);
-	graphMode.addItemListener(mainWindow);
-
-	displayModes.add(textMode);
-	displayModes.add(graphMode);
-
-	modePanel.add(textMode);
-	modePanel.add(graphMode);
-	modePanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
 	// data type selectors
 	dataTypeModes = new ButtonGroup();
@@ -78,13 +57,12 @@ public class MultiRunControlPanel extends JPanel
 	
 	gbc.fill = GridBagConstraints.HORIZONTAL;
 
-	Util.gblAdd(this, modePanel,     gbc, 0,0, 1,1, 1,0, 1,1,1,1);
-	Util.gblAdd(this, dataTypePanel, gbc, 0,1, 2,1, 1,0, 1,1,1,1);
+	Util.gblAdd(this, dataTypePanel,  gbc, 0,0, 1,2, 1,0, 1,1,1,1);
 
 	gbc.fill = GridBagConstraints.BOTH;
 	
-	Util.gblAdd(this, displayTable,  gbc, 2,1, 1,1, 1,0, 1,1,1,1);
-	Util.gblAdd(this, done,          gbc, 2,2, 1,1, 1,0, 1,1,1,1);
+	Util.gblAdd(this, displayTable,  gbc, 1,0, 1,1, 1,0, 1,1,1,1);
+	Util.gblAdd(this, done,          gbc, 1,1, 1,1, 1,0, 1,1,1,1);
     }
 
     /**

@@ -62,9 +62,6 @@ public class MainMenuManager extends MenuManager
 		    false,  // Histograms
 		    false,  // Overview
 		    true,   // Multirun Analysis
-		    false,  // separator
-		    true,   // Performance Counters
-		    false,  // Interval Graph
 		});
 	    break;
 	case OPENED_FILES :
@@ -112,10 +109,7 @@ public class MainMenuManager extends MenuManager
 		"View Log Files",
 		"Histograms",
 		"Overview",
-		"Multirun Analysis",
-		null,
-		"Performance Counters",
-		"Interval Graph",
+		"Multirun Analysis"
 	    });
 	menubar.add(toolMenu);
 
@@ -149,9 +143,7 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("Usage Profile") ||
 		       arg.equals("Communication Histogram") ||
 		       arg.equals("View Log Files") ||
-		       arg.equals("Overview") ||
-		       arg.equals("Performance Counters") ||
-		       arg.equals("Interval Graph")) {
+		       arg.equals("Overview")) {
 		parent.menuToolSelected(arg);
 	    }
 	}
@@ -159,7 +151,7 @@ public class MainMenuManager extends MenuManager
 
     public void itemStateChanged(ItemEvent e) {
     }
-
+    
     // Interface methods to MainWindow
     public void fileOpened() {
 	stateChanged(OPENED_FILES);

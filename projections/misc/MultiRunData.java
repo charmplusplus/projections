@@ -4,6 +4,7 @@ import projections.analysis.*;
 import projections.gui.*;
 
 import java.io.*;
+import javax.swing.*;
 
 /**
  *
@@ -149,6 +150,7 @@ public class MultiRunData
 	    // Solution to the horrendous memory usage: we only require
 	    // the summarized information. Hence only one reader is
 	    // required at any one time.
+	    ProgressMonitor progressBar;
 	    if (hasSummary) {
 		GenericSummaryReader reader;
 		OrderedIntList validPEs;
@@ -160,8 +162,30 @@ public class MultiRunData
 		    // approximates any incomplete data by scaling the values
 		    // actually read by a scale factor.
 		    double scale = numPE/(validPEs.size()*1.0);
+		    progressBar =
+			new ProgressMonitor(Analysis.guiRoot, 
+					    "Reading summary Data for run " +
+					    run + " of " + numRuns,
+					    "", 0, validPEs.size());
+		    // faster response time would be better in this case.
+		    progressBar.setMillisToDecideToPopup(100);
+		    // lower time threshold would also be helpful.
+		    progressBar.setMillisToPopup(1000);
+		    int count = 0;
 		    while (validPEs.hasMoreElements()) {
 			int pe = validPEs.nextElement();
+			if (!progressBar.isCanceled()) {
+			    progressBar.setNote("Reading Processor " +
+						 pe + " data.");
+			    progressBar.setProgress(count);
+			} else {
+			    // not the best thing to do, but will suffice
+			    // until a more elegant system is in place.
+			    System.err.println("Fatal error! Multirun " +
+					       " cannot function without " +
+					       " a complete read!");
+			    System.exit(-1);
+			}
 			reader = 
 			    new GenericSummaryReader(stsReaders[run].getSumName(pe),
 						     Analysis.getVersion());
@@ -173,7 +197,9 @@ public class MultiRunData
 			}
 			runWallTimes[run] += reader.numIntervals *
 			    reader.intervalSize * 1000000.0 * scale;
+			count++;
 		    }
+		    progressBar.close();
 		}
 	    } else if (hasLog) {
 	    } else {

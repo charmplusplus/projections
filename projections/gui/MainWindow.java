@@ -171,8 +171,6 @@ public class MainWindow extends JFrame
 	    showChildWindow("StlWindow", OVERVIEW_WIN);
 	} else if (item.equals("Multirun Analysis")) {
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
-	} else if (item.equals("Performance Counters")) {
-	    showCounterWindow();
 	}
     }
 
@@ -249,24 +247,6 @@ public class MainWindow extends JFrame
 	} 
     }
     
-    public void showCounterWindow()
-    {
-	CounterFrame f = new CounterFrame();
-	ProjectionsFileMgr fileMgr = null;
-	try {
-	    ProjectionsFileChooser fc =
-		new ProjectionsFileChooser(f, "Performance Counter Analysis",
-					   ProjectionsFileChooser.MULTIPLE_FILES);
-	    
-	    CounterCallBack callback = new CounterCallBack(f,fc);
-	    int retval = fc.showDialog(callback);
-	}
-	catch(Exception exc) { 
-	    System.out.println("something got screwed");
-	    ProjectionsFileChooser.handleException(f, exc); 
-	}
-    }
-
     public void showOpenFileDialog()
     {
 	// create a file chooser with current directory set to "."

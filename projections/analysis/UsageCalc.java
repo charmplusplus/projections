@@ -25,9 +25,10 @@ public class UsageCalc extends ProjDefs
 	
 	private void intervalCalc(float[][] data,int type, int entry, long time)
 	{
-
-	if (time<beginTime) time=beginTime;
-	if (time>endTime) time=endTime;
+	if(type != CREATION){
+		if (time<beginTime) time=beginTime;
+		if (time>endTime) time=endTime;
+	}
 
 	switch(type) {
 	case BEGIN_PROCESSING:
@@ -43,7 +44,7 @@ public class UsageCalc extends ProjDefs
 	    break;
 	case CREATION:
 		if(curEntry != -1){
-			data[1][curEntry] += (float )time;
+			data[1][curEntry] = data[1][curEntry] + (float )time;
 		}
 		break;
 	case BEGIN_IDLE:
@@ -134,8 +135,9 @@ public class UsageCalc extends ProjDefs
 				log.nextInt();
 				if (version > 1.0)
 				 	log.nextInt();
-				if(version >= 5.0){
+				if(version > 4.9){
 					sendTime = log.nextLong();
+					//System.out.println("SendTime "+sendTime);
 				}else{
 					sendTime = 0;
 				}
@@ -155,6 +157,7 @@ public class UsageCalc extends ProjDefs
 	    {System.out.println("Exception while reading log file "+pnum); }
 	total = 0;
 	for(int j=0; j<(dataLen-1); j++){ //Scale times to percent
+		//System.out.println("Data " + data[0][j] + " Send Time "+ data[1][j]);
 		data[0][j] = data[0][j] - data[1][j];
 		data[0][j] = (float )(100.0*data[0][j])/(float )(endTime-beginTime);
 		data[1][j] = (float )(100.0*data[1][j])/(float )(endTime-beginTime);

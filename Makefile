@@ -89,6 +89,8 @@ SRC=\
     projections/gui/ProjectionsFileMgr.java\
     projections/gui/ProjectionsWindow.java\
     projections/gui/RangeDialog.java\
+    projections/gui/Rubberband.java\
+    projections/gui/RubberbandHorizontalZoom.java\
     projections/gui/ScalePanel.java\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\
@@ -108,9 +110,14 @@ SRC=\
     projections/gui/TimelineWindow.java\
     projections/gui/U.java\
     projections/gui/Util.java\
+    projections/gui/Wait.java\
+    projections/gui/WaitButton.java\
     projections/gui/ZItem.java\
+    projections/gui/count/ColorHeader.java\
+    projections/gui/count/Counter.java\
     projections/gui/count/CounterFrame.java\
     projections/gui/count/CounterTable.java\
+    projections/gui/count/CounterListTable.java\
     projections/gui/count/CounterTest.java\
     projections/gui/count/TableMap.java\
     projections/gui/count/TableSorter.java\
@@ -131,6 +138,7 @@ SRC=\
     projections/gui/graph/DataSource1D.java\
     projections/gui/graph/GraphPanel.java\
     projections/gui/graph/Graph.java\
+    projections/gui/graph/Coordinate.java\
     projections/gui/graph/LegendPanel.java\
     projections/gui/graph/LegendCanvas.java\
     projections/gui/graph/MultiRunDataSource.java\
@@ -149,7 +157,7 @@ all: bin/projections.jar
 
 projections/gui/MainWindow.class: $(SRC)
 	@ echo "Compiling java sources:"
-	@ javac -d . -O $(SRC)
+	@ javac -d . -deprecation -O $(SRC)
 	@ echo "Complete."
 
 bin/projections.jar: projections/gui/MainWindow.class $(SRC)

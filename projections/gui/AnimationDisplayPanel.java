@@ -19,6 +19,10 @@ public class AnimationDisplayPanel extends Panel
     private int hoffset;
     private int voffset;
     private float psize = (float)0.75;
+    private float fontOffset = (float)0.90;
+    private FontMetrics fm = null;
+    private Font font = null;
+    
 
     // -1 is an initial "invalid" value. Once a valid is set by someone,
     // this -1 value goes away forever.
@@ -47,13 +51,10 @@ public class AnimationDisplayPanel extends Panel
 		    h = getSize().height;
 		    if (w > 0 && h > 0) {
 			offscreen = createImage(w, h); 
-			numcols = 
-			    (int)Math.ceil(Math.sqrt((double)(w*numPs)/h));
-			if (numcols > numPs) {
-			    numcols = numPs;
-			}
-			numrows = (int)Math.ceil((double)numPs/numcols);
 			
+	   		numcols = (int)Math.sqrt(numPs)-(int)(Math.sqrt(numPs)%5);
+	    		if (numcols == 0) { numcols = Math.min(numPs, 10); }
+			numrows = (int)Math.ceil((double)numPs/numcols);
 			pwidth  = Math.min(w/numcols, h/numrows);
 			pheight = pwidth;
 			
@@ -61,8 +62,13 @@ public class AnimationDisplayPanel extends Panel
 			voffset  = (h-numrows*pheight)/2;
 			phoffset = (int)((1-psize)*pwidth)/2;
 			pvoffset = (int)((1-psize)*pheight)/2;
+			
 			clearScreen();
 		    }   
+		    
+		    w = getSize().width;
+		    h = getSize().height;
+		    
 		}
 	    }); 
           
@@ -94,6 +100,12 @@ public class AnimationDisplayPanel extends Panel
 	return curI;
     }   
     
+    //sharon add getNumI() for AnimationWindow slider bar
+     public int getNumI()
+    {
+	return numIs;
+    }   
+    
     //Make sure we aren't made too tiny
     public Dimension getMinimumSize() {return new Dimension(150,100);}   
     public Dimension getPreferredSize() {return new Dimension(550,400);}   
@@ -106,6 +118,12 @@ public class AnimationDisplayPanel extends Panel
 	int ph = (int)(pheight*psize);
           
 	g.translate(tothoffset, totvoffset);
+	
+	if(font == null){
+	    font = new Font("Times New Roman",Font.BOLD,12);
+	    g.setFont(font);
+	    fm = g.getFontMetrics(font);		    
+	}
 
 	int p = 0;
 	for (int r=0; r<numrows; r++) {
@@ -113,7 +131,15 @@ public class AnimationDisplayPanel extends Panel
 		int usage = data[p++][I];
 		if (usage >=0 && usage <=100) {
 		    g.setColor(colors[usage]);
-		    g.fillRect(c*pwidth, r*pheight, pw, ph);           
+		    g.fillRect(c*pwidth, r*pheight, pw, ph); 
+
+		    if ((fm.stringWidth(String.valueOf(numPs)) <= (fontOffset*pw))
+		    && (fm.getHeight() <= (fontOffset*ph))) {
+		    	g.setColor(Color.black);
+		    	g.drawString(String.valueOf(p-1), 
+			    c*pwidth + (pw-fm.stringWidth(String.valueOf(p-1)))/2,
+			    r*pheight + (ph+fm.getHeight())/2);		    
+		    }   
 		} 
 		if (p >= numPs) {
 		    break;
@@ -208,13 +234,12 @@ public class AnimationDisplayPanel extends Panel
 	if (numIs > 0) {
 	    curI = 0;
 	}
+	
 	w = getSize().width;
 	h = getSize().height;
 	if (w>0 && h>0) {
-	    numcols = (int)Math.ceil(Math.sqrt((double)(w*numPs)/h));
-	    if (numcols > numPs) {
-		numcols = numPs;
-	    }
+	    numcols = (int)Math.sqrt(numPs)-(int)(Math.sqrt(numPs)%5);
+	    if (numcols == 0) { numcols = Math.min(numPs, 10); }
 	    numrows = (int)Math.ceil((double)numPs/numcols);
 	    pwidth  = Math.min(w/numcols, h/numrows);
 	    pheight = pwidth;
@@ -223,7 +248,7 @@ public class AnimationDisplayPanel extends Panel
 	    voffset  = (h-numrows*pheight)/2;
 	    phoffset = (int)((1-psize)*pwidth)/2;
 	    pvoffset = (int)((1-psize)*pheight)/2;
-
+	    
 	    animationWindow.setTitleInfo(curI);
 	    clearScreen();
 	}   
@@ -232,6 +257,5 @@ public class AnimationDisplayPanel extends Panel
     public void update(Graphics g)
     {
 	paint(g);
-    }   
-   
+    }      
 }

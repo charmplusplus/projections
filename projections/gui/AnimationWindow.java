@@ -5,7 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class AnimationWindow extends ProjectionsWindow
-   implements ActionListener
+   implements ActionListener, AdjustmentListener
 {
     private AnimationColorBarPanel colorbarPanel;
     private AnimationDisplayPanel  displayPanel;
@@ -19,6 +19,7 @@ public class AnimationWindow extends ProjectionsWindow
     
     //private Label lTitle, lStatus;
     private Label lTitle, lStatus, lDelay;
+    private Scrollbar slider;
     
     private int redrawDelay; //Real time between frames (ms)
     private int curInterval = 0; //Frame number
@@ -129,7 +130,7 @@ public class AnimationWindow extends ProjectionsWindow
 	    // System.out.println("event on delay field");
 	    // Get redraw in milliseconds
 	    redrawDelay=(int)(delayField.getValue()/1000); 
-	} else if(evt.getSource() instanceof Button) {
+	}else if(evt.getSource() instanceof Button) {
 	    Button b = (Button)evt.getSource();
 	    if (b == bPlusOne) {
 		changeCurI(displayPanel.getCurI() + 1);
@@ -154,11 +155,18 @@ public class AnimationWindow extends ProjectionsWindow
 	    }
 	}                        
     }   
+    
+    public void adjustmentValueChanged(AdjustmentEvent e){
+    	if(slider.getValueIsAdjusting()){
+	    changeCurI(slider.getValue());
+	}
+    }
 
     private void changeCurI(int i)
     {
 	displayPanel.setCurI(i);
 	setTitleInfo(displayPanel.getCurI()); 
+	slider.setValue(i);
     }   
 
     private void createLayout()
@@ -182,6 +190,11 @@ public class AnimationWindow extends ProjectionsWindow
 	lDelay = new Label("Frame Refresh Delay:", Label.CENTER);
 	delayField = new TimeTextField("500 ms", 8);
 	delayField.addActionListener(this);
+	
+	//sharon implementing slider bar
+	slider = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0,
+	displayPanel.getNumI());
+	slider.addAdjustmentListener(this);
           
 	setRanges = new Button("Set Ranges");
 	setRanges.addActionListener(this);
@@ -203,12 +216,13 @@ public class AnimationWindow extends ProjectionsWindow
 	gbc.fill = GridBagConstraints.BOTH;
           
 	controlPanel.setLayout(gbl);
-	Util.gblAdd(controlPanel, bMinusOne,  gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(controlPanel, bPlusOne,   gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(controlPanel, bAuto,      gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(controlPanel, lDelay,     gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(controlPanel, delayField, gbc, 4,0, 1,1, 1,1);
-	Util.gblAdd(controlPanel, setRanges,  gbc, 5,0, 1,1, 1,1);
+	Util.gblAdd(controlPanel, slider,     gbc, 0,0, 6,1, 1,1);
+	Util.gblAdd(controlPanel, bMinusOne,  gbc, 0,1, 1,1, 1,1);
+	Util.gblAdd(controlPanel, bPlusOne,   gbc, 1,1, 1,1, 1,1);
+	Util.gblAdd(controlPanel, bAuto,      gbc, 2,1, 1,1, 1,1);
+	Util.gblAdd(controlPanel, lDelay,     gbc, 3,1, 1,1, 1,1);
+	Util.gblAdd(controlPanel, delayField, gbc, 4,1, 1,1, 1,1);
+	Util.gblAdd(controlPanel, setRanges,  gbc, 5,1, 1,1, 1,1);
           
 	mainPanel.setBackground(Color.gray);
 	mainPanel.setLayout(gbl);

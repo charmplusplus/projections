@@ -262,6 +262,8 @@ public class LogReader
 		processorList.insert(pe);
 	    }
         }
+	// **CW** stupid, but restore length based on the new processor list.
+	numProcessors = processorList.size();
 
 	ProgressDialog bar=new ProgressDialog("Reading log files...");
 	double allocEffort=0.5;//Number of logs the allocations are worth

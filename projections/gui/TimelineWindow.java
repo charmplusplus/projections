@@ -776,11 +776,15 @@ public class TimelineWindow extends Frame
 	  HSB.setBounds          (data.lcw,          data.mph-data.sbh, data.vpw, data.sbh);
 	  VSB.setBounds          (data.mpw-data.sbw, 0,                 data.sbw, data.mph-data.sbh);
 	  
-	  HSB.setVisibleAmount(data.vpw);
-	  HSB.setBlockIncrement(data.vpw);
+	  int vpw = data.vpw;
+	  if (vpw < 1) vpw = 1;
+	  HSB.setVisibleAmount(vpw);
+	  HSB.setBlockIncrement(vpw);
 		 
-	  VSB.setVisibleAmount(data.vph);
-	  VSB.setBlockIncrement(data.vph);
+          int vph = data.vph;
+	  if (vph < 1) vph = 1;
+	  VSB.setVisibleAmount(vph);
+	  VSB.setBlockIncrement(vph);
 	  
 	  setTLBounds();
 	   

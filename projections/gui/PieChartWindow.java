@@ -62,7 +62,7 @@ public class PieChartWindow extends Frame{
         arc = null;
         outOfRadius = 1;
 
-        names = Analysis.getUserEntryNames();
+        names = Analysis.getEntryNames();
 
         addWindowListener(new WindowAdapter(){
             public void windowClosing(WindowEvent e){close();}

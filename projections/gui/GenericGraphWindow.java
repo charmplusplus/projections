@@ -27,9 +27,9 @@ public abstract class GenericGraphWindow
    protected abstract void setGraphSpecificData();
 
 // Graph specific data, so that implementation can be changed if required
-   private DataSource dataSource;
-   private XAxisFixed xAxis;
-   private YAxis yAxis;
+   protected DataSource dataSource;
+   protected XAxisFixed xAxis;
+   protected YAxis yAxis;
 
 // assuming all projections graph windows need a menu bar and a file menu
     protected JMenuBar menuBar  = new JMenuBar();

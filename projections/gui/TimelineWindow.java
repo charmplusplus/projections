@@ -823,7 +823,7 @@ public class TimelineWindow extends Frame
 		 data.processorList.nextElement();
 		 
 	  NumberFormat df = NumberFormat.getInstance();
-	  String[][] names = Analysis.getUserEntryNames();
+	  String[][] names = Analysis.getEntryNames();
 
 	  int curp = miny;
 	  int curlegenditem = 0;

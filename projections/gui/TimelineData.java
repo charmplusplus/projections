@@ -2,8 +2,10 @@ package projections.gui;
 
 import java.util.Vector;
 import java.io.*;
-import projections.analysis.*;
 import java.awt.*;
+
+import projections.analysis.*;
+import projections.misc.*;
 
 public class TimelineData
 {
@@ -157,7 +159,7 @@ public class TimelineData
 		 
 		 processorList.reset();
 		 oldplist.reset();
-		 
+
 		 newp = processorList.nextElement();
 		 oldp = oldplist.nextElement();
 		 while(newp != -1)
@@ -242,12 +244,17 @@ public class TimelineData
 	  
 	  int pnum;
 	  processorList.reset();
-	  for(int p=0; p<processorList.size(); p++)
+	  int numPEs = processorList.size();
+	  ProgressDialog bar = new ProgressDialog("Reading timeline data");
+	  for(int p=0; p<numPEs; p++)
 	  {
+	      if (!bar.progress(p+1, numPEs, (p+1) + " of " + numPEs)) {
+		  break;
+	      }
 		 pnum = processorList.nextElement();
 		 if(tloArray[p] == null) { tloArray[p] = getData(pnum, p); }
 	  }
-	  
+	  bar.done();
 	  for(int e=0; e<Analysis.getNumUserEntries(); e++)
 		 entries[e] = 0;
 	  

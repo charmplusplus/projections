@@ -45,17 +45,22 @@ public class ProfileDisplayCanvas extends Container
 		 repaint(); 
 	  }   
    }   
-   public void paint(Graphics g)
-   {
-	  if(offscreen != null)
-	  {
-		 int x = data.profileWindow.getHSBValue();
-		 int y = data.profileWindow.getVSBValue();
-	  
-		 g.drawImage(offscreen, x,y, x + data.vpw, y + data.vph, 
-								x,y, x + data.vpw, y + data.vph, null);                  
-	  }                          
-   }   
+
+    public void paint(Graphics g)
+    {
+	if (offscreen != null) {
+	    int x = data.profileWindow.getHSBValue();
+	    int y = data.profileWindow.getVSBValue();
+	    
+	    g.drawImage(offscreen, 
+			x, y, 
+			x + data.vpw, y + data.vph, 
+			x, y, 
+			x + data.vpw, y + data.vph, 
+			null);
+	}                          
+    }   
+
    public void update(Graphics g)
    {
 	  paint(g);

@@ -69,7 +69,7 @@ public class EPAnalysis
 				 Analysis.getNumUserDefinedEvents()+
 				 NUM_SYS_EPS];
 	userEventNames = Analysis.getUserEventNames();
-	entryNames = Analysis.getUserEntryNames();
+	entryNames = Analysis.getEntryNames();
 
 	categoryData = new double[NUM_TYPE][NUM_CATEGORY];
 

@@ -13,9 +13,8 @@ import projections.misc.LogEntryData;
 
 
 public class CommWindow extends GenericGraphWindow 
-						implements ItemListener
+    implements ItemListener
 {
-
 	private double[][] 	msgCount;
 	private double[][] 	byteCount;
 	private ArrayList		histogram;
@@ -96,7 +95,7 @@ public class CommWindow extends GenericGraphWindow
 			 return null;
 			 
 		 if(EPNames == null)
-		 	EPNames = Analysis.getUserEntryNames();
+		 	EPNames = Analysis.getEntryNames();
 
 		 String[] rString = new String[2];
 

@@ -117,7 +117,7 @@ public class EPCharWindow extends ProjectionsWindow
    {
         //if(startUp) startUp = false;
 
-        int noEPs = Analysis.getUserEntryCount();
+        int noEPs = Analysis.getNumUserEntries();
         String typeLabelStrings[] = {"Entry Points"};
 
         boolean existsArray[][] = new boolean[1][noEPs];

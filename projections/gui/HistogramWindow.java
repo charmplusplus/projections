@@ -42,12 +42,12 @@ public class HistogramWindow extends GenericGraphWindow
 	  setTitle("Projections Histograms");
 	  setGraphSpecificData();
 
-	  int noEPs = Analysis.getUserEntryCount();
+	  int noEPs = Analysis.getNumUserEntries();
 	  stateArray = new boolean[1][noEPs];	// where should this be?
 	  for(int i=0; i < noEPs; i++)
 		stateArray[0][i] = true;
 	  
-          String names[][] = Analysis.getUserEntryNames();
+          String names[][] = Analysis.getEntryNames();
 	  entryNames = new String[noEPs];
        	  for(int i=0; i<noEPs ; i++)
 		entryNames[i] = names[i][0];
@@ -101,7 +101,7 @@ public class HistogramWindow extends GenericGraphWindow
    {
 	if(startUp) startUp = false;
 
-	int noEPs = Analysis.getUserEntryCount();
+	int noEPs = Analysis.getNumUserEntries();
 	String typeLabelStrings[] = {"Entry Points"};
 
 	boolean existsArray[][] = new boolean[1][noEPs];

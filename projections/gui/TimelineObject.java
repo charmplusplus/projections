@@ -99,13 +99,13 @@ public class TimelineObject extends Component
 	  if(n != -1)
 	  {
 		 bubbletext  = new String[11];
-		 int ecount = Analysis.getUserEntryCount();
+		 int ecount = Analysis.getNumUserEntries();
 		 if (n >= ecount) {
 		   System.out.println("Fatal error: invalid entry "+n+"!");
 		   System.exit(1) ;
 		 }
-		 bubbletext[0] = (Analysis.getUserEntryNames())[n][1] + "::" + 
-					  (Analysis.getUserEntryNames())[n][0]; 
+		 bubbletext[0] = (Analysis.getEntryNames())[n][1] + "::" + 
+					  (Analysis.getEntryNames())[n][0]; 
 		 bubbletext[1] = "Msg Len: " + msglen;
 		 bubbletext[2] = "Begin Time: " + format_.format(bt);
 		 bubbletext[3] = "End Time: " + format_.format(et);
@@ -165,13 +165,13 @@ public class TimelineObject extends Component
 	  if(n != -1)
 	  {
 		 bubbletext  = new String[10];
-		 int ecount = Analysis.getUserEntryCount();
+		 int ecount = Analysis.getNumUserEntries();
 		 if (n >= ecount) {
 		   System.out.println("Fatal error: invalid entry "+n+"!");
 		   System.exit(1) ;
 		 }
-		 bubbletext[0] = (Analysis.getUserEntryNames())[n][1] + "::" + 
-					  (Analysis.getUserEntryNames())[n][0]; 
+		 bubbletext[0] = (Analysis.getEntryNames())[n][1] + "::" + 
+					  (Analysis.getEntryNames())[n][0]; 
 		 bubbletext[1] = "Msg Len: " + msglen;
 		 bubbletext[2] = "Begin Time: " + format_.format(bt);
 		 bubbletext[3] = "End Time: " + format_.format(et);

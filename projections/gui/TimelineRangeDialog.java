@@ -124,7 +124,7 @@ public class TimelineRangeDialog extends Dialog
 	  nField.addTextListener(this);
 	  pField.addTextListener(this);
 	  
-	  String[][] names = Analysis.getUserEntryNames();
+	  String[][] names = Analysis.getEntryNames();
 	  int n = Analysis.getNumUserEntries();
 	  
 	  for(int i=0; i<n ; i++)

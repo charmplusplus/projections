@@ -142,6 +142,7 @@ public class GraphWindow extends Frame
 	  mbar.setHelpMenu(helpMenu);
 	  setMenuBar(mbar);                                                     
    }   
+
    private void ExportData()
    {
 	  if(data == null)
@@ -329,27 +330,28 @@ public class GraphWindow extends Frame
        }
    }   
 
-   private void setChildDatas()
-   {
-	   controlPanel.setGraphData(data);
-	  displayPanel.setGraphData(data);
-	  legendPanel.setGraphData(data);
-	  
-	  data.graphWindow  = this;
-	  data.controlPanel = controlPanel;
-	  data.displayPanel = displayPanel;
-	  data.legendPanel  = legendPanel;
-   }   
-   public void setIntervalSize(long x)
-   {
-	  intervalsize = x;
-   }   
+    private void setChildDatas()
+    {
+	controlPanel.setGraphData(data);
+	displayPanel.setGraphData(data);
+	legendPanel.setGraphData(data);
+	
+	data.graphWindow  = this;
+	data.controlPanel = controlPanel;
+	data.displayPanel = displayPanel;
+	data.legendPanel  = legendPanel;
+    }   
+
+    public void setIntervalSize(long x)
+    {
+	intervalsize = x;
+    }   
     
-   public void setIntervalRange(int start, int end) {
-       intervalStart = start;
-       intervalEnd = end;
-       intervalRangeSize = intervalEnd - intervalStart + 1;
-   }
+    public void setIntervalRange(int start, int end) {
+	intervalStart = start;
+	intervalEnd = end;
+	intervalRangeSize = intervalEnd - intervalStart + 1;
+    }
 
     public void setTimes(long start, long end) {
 	startTime = start;
@@ -399,7 +401,7 @@ public class GraphWindow extends Frame
 		 d.setLocation((w-d.getSize().width)/2, (h-d.getSize().height)/2);
 		 d.setVisible(true);
 	  
-		 Analysis.LoadGraphData(intervalRangeSize, intervalsize, 
+		 Analysis.LoadGraphData(intervalsize, 
 					intervalStart, intervalEnd,
 					true, processorList);
 		 if(data == null || !oldProcList.equals(processorList) ||

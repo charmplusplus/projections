@@ -35,6 +35,15 @@ class ColorMap {
 			addBreak(dex[i-1],r[i-1],g[i-1],b[i-1],
 				dex[i],r[i],g[i],b[i]);
 	}
+	
+	/**
+	 * Map this color index into an actual color, suitable
+	 * for use in a regular "int" Java image.
+	 */
+	public int apply(byte v) {
+		return (0xff<<24)|(red[v]<<16)|(green[v]<<8)|(blue[v]<<0);
+	}
+
 	public ColorModel getColorModel()
 	{
 		if (!cm_cached)

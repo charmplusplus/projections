@@ -44,7 +44,7 @@ public class FloatTextField extends TextField
 	try {
 	    return (Float.valueOf(getText().trim())).floatValue();
 	} catch(NumberFormatException e) {
-	    return 1;
+	    return (Float.valueOf(lastValue)).floatValue();
 	}
     }   
 

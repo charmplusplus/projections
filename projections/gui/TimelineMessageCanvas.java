@@ -23,7 +23,7 @@ public class TimelineMessageCanvas extends Canvas
 	  w = 0;
 	  h = 0;
 	  msgs = obj.getMessages();
-	  names = Analysis.getUserEntryNames();
+	  names = Analysis.getEntryNames();
 
           sTitles = new String[numTitles];
 	  width = new int[numTitles];

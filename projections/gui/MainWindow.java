@@ -13,7 +13,7 @@ import projections.gui.graph.*;
 public class MainWindow extends JFrame
     implements ActionListener
 {
-    private static double 	CUR_VERSION = 4.0;
+    public static double 	CUR_VERSION = 4.0;
 
     // should be tables of objects dependent indexed by runs in the future.
     private GraphWindow          graphWindow;
@@ -33,7 +33,6 @@ public class MainWindow extends JFrame
     // GraphWindow and ProfileWindow.
     private GraphingWindow       graphingWindow;
 
-    private BGGraphWindow       bgWindow;
     private EPAnalysis           epAnalysis;
     
     // components associated with the main window
@@ -132,8 +131,6 @@ public class MainWindow extends JFrame
 	    showCounterWindow();
 	} else if (item.equals("General Graph")) {
 	    showChildWindow(graphingWindow, "GraphingWindow");
-	} else if (item.equals("Unified Summary Graph")) {
-	    // ?
 	} else if (item.equals("Interval Graph")) {
 	    // ?
 	} else if (item.equals("Entry Point Characteristics Graph")) {
@@ -165,7 +162,7 @@ public class MainWindow extends JFrame
 
     public void showTimelineWindow()
     {
-	if(timelineWindow == null) {
+	if (timelineWindow == null) {
 	    timelineWindow = new TimelineWindow(this);
 	    timelineWindow.setSize(640,480);
 	}
@@ -322,7 +319,6 @@ public class MainWindow extends JFrame
     {
         int i=0;
 	String loadSts=null;
-	Analysis.setVersion(CUR_VERSION);
         while (i < args.length) {
 	    if (args[i].equals("-h")) {
 		help();
@@ -339,7 +335,7 @@ public class MainWindow extends JFrame
 		    System.out.println("Invalid (future) Projections version!");
 		    System.exit(1);
 		}
-		Analysis.setVersion(useVersion);
+		CUR_VERSION = useVersion;
 	    }
 	    else /*unrecognized argument*/
 		loadSts=args[i];

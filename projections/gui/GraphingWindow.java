@@ -21,6 +21,7 @@ public class GraphingWindow
     private MainWindow mainWindow;
 
     private double data[][];
+    protected IntervalRangeDialog dialog;
 
     public GraphingWindow(MainWindow mainWindow) {
 	super("Graph");
@@ -30,7 +31,7 @@ public class GraphingWindow
 
     protected void showDialog() {
 	if (dialog == null) {
-	    dialog = new RangeDialog(this, "Select Range");
+	    dialog = new IntervalRangeDialog(this, "Select Range");
 	}
 	int result = dialog.showDialog();
 	if (result == RangeDialog.DIALOG_OK) {
@@ -45,7 +46,11 @@ public class GraphingWindow
 	setBarGraphType(Graph.STACKED);
 	setXAxis("Intervals", "");
 	setDataSource("Time spent by EP", data);
+	dataSource.setColors(Analysis.getColorMap());
 	setYAxis("Time", "ms");
+	System.out.println(Analysis.getColorMap().length);
+	System.out.println(data.length);
+	System.out.println(data[0].length);
     }
 
     private void createLayout() {
@@ -67,38 +72,31 @@ public class GraphingWindow
 	if (Analysis.hasSumDetailData()) {
 	    int numPEs = Analysis.getNumProcessors();
 	    int numEPs = Analysis.getNumUserEntries();
-	    // **CW** quite an ugly hack. 
-	    // numIntervals here actually refers to the maximum number of
-	    // intervals across all processors.
-	    int numIntervals = 
-		Analysis.getSumDetailNumIntervals();
-	    data = new double[numIntervals][numEPs];
-	    ProjectionsStatistics timeStats[][] = 
-		new ProjectionsStatistics[numIntervals][numEPs];
-	    for (int interval=0; interval<numIntervals; interval++) {
-		for (int ep=0; ep<numEPs; ep++) {
-		    timeStats[interval][ep] = new ProjectionsStatistics();
-		}
-	    }
-	    for (int pe=0; pe<numPEs; pe++) {
-		double tempData[][] = 
-		    Analysis.getSumDetailData(pe,GenericSumDetailReader.TOTAL_TIME);
-		// each sumd file has its own number of intervals
-		// **CW** ANOTHER HACK!!!!!
-		numIntervals = tempData[0].length;
-		for (int interval=0; interval<numIntervals; interval++) {
-		    for (int ep=0; ep<numEPs; ep++) {
-			// sum detail data uses a reversed index format from
-			// graph's DataSource2D objects.
-			timeStats[interval][ep].accumulate(tempData[ep][interval]);
-		    }
-		}
-	    }
-	    for (int interval=0; interval<numIntervals; interval++) {
-		for (int ep=0; ep<numEPs; ep++) {
-		    data[interval][ep] = timeStats[interval][ep].getSum();
+	    int maxIntervals = 
+		Analysis.getNumIntervals();
+	    double intervalSize = Analysis.getIntervalSize();
+	    int startInterval =
+		(int)(startTime/(intervalSize*1000000));
+	    int endInterval =
+		(int)(endTime/(intervalSize*1000000));
+	    System.out.println(intervalSize);
+	    System.out.println(startTime + " " + endTime);
+	    System.out.println(startInterval + " " + endInterval);
+	    // unfortunately, the dimensions used in data construction is
+	    // the inverse of the dimensions used for graph display!!!
+	    double tempData[][];
+	    tempData = 
+		Analysis.getDataSummedAcrossProcessors(SumDetailReader.TOTAL_TIME,
+						       validPEs,
+						       startInterval, 
+						       endInterval);
+	    data = new double[endInterval-startInterval+1][numEPs];
+	    for (int ep=0; ep<tempData.length; ep++) {
+		for (int interval=0;interval<tempData[ep].length;interval++) {
+		    data[interval][ep] = tempData[ep][interval];
 		}
 	    }
 	}
     }
 }
+

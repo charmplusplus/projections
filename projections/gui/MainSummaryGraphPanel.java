@@ -41,6 +41,7 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	    empty = false;
 	}
 	insertTab(title, null, panel, tooltip, getTabCount());
+	setForegroundAt(0, Color.black);
     }
 
     public void removeCurrent() {
@@ -65,7 +66,10 @@ public class MainSummaryGraphPanel extends JTabbedPane {
     private void setEmpty() {
 	empty = true;
 	// bypass standard add function.
-	insertTab("No Data", null, fillerPanel, "No Data loaded", 0);
+	insertTab("No Summary Data Available", null, fillerPanel, 
+		  "No Summary Data loaded", 0);
+	// make this an obvious warning color
+	setForegroundAt(0, Color.red);
 	setSelectedIndex(0);
     }
 

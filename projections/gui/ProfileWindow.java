@@ -413,11 +413,10 @@ public class ProfileWindow extends Frame
 		avg=new float[2][numUserEntries+4];
 		double avgScale=1.0/data.plist.size();
 
-		int poNo=1;
-		ProgressDialog bar=new ProgressDialog("Computing entry point usage...");
+		int poCount=1;
+		ProgressDialog bar=new ProgressDialog("Computing Average entry point usage");
 
-		// Why +2 instead of +1?
-		int nEl=data.plist.size()+2;
+		int nEl=data.plist.size();
 
 		// **CW** Hack for colors to work - Profile really should be cleanly rewritten.
 		// split the original loop:
@@ -443,14 +442,14 @@ public class ProfileWindow extends Frame
 		// *CW* *** New code ****
 		// Phase 1a
 		data.plist.reset();
-		for(int i =0;i<avg[0].length;i++){
-			avg[0][i] = 0.0f;
-			avg[1][i] = 0.0f;
+		for (int i =0;i<avg[0].length;i++) {
+		    avg[0][i] = 0.0f;
+		    avg[1][i] = 0.0f;
 		}
 		while (data.plist.hasMoreElements()) {
-		    if (!bar.progress(poNo,nEl,poNo+" of "+nEl))
-			break;
 		    curPe = data.plist.currentElement();
+		    if (!bar.progress(poCount++,nEl,curPe+" of "+nEl))
+			break;
 		    data.plist.nextElement();
 		// the first row is for entry method execution time the second is for 
 		//time spent sending messages in that entry method
@@ -460,6 +459,8 @@ public class ProfileWindow extends Frame
 			avg[1][i]+=(float)(cur[1][i]*avgScale);
 		    }		    
 		}
+		bar.done();
+
 		// Phase 1b
 		Vector sigElements = new Vector();
 		// we only wish to compute for EPs
@@ -483,13 +484,17 @@ public class ProfileWindow extends Frame
 		}
 
 		// Phase 2
+		bar = new ProgressDialog("Computing Entry Point Usage");
+		poCount = 1;
 		data.plist.reset();
 		while (data.plist.hasMoreElements())
 		{
 		    curPe = data.plist.currentElement();
+		    if (!bar.progress(poCount,nEl,curPe+" of "+nEl))
+			break;
 		    data.plist.nextElement();
 		    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-		    usage2po(cur,curPe,poNo++,colors);
+		    usage2po(cur,curPe,poCount++,colors);
 		}
 		usage2po(avg,-1,0,colors);
 		bar.done();
@@ -908,7 +913,7 @@ public class ProfileWindow extends Frame
 	private void usage2po(float usg[][],int curPe,int poNo,Color[] colors)
 	{
 		int numUserEntries = Analysis.getNumUserEntries();
-		String[][] names = Analysis.getUserEntryNames();
+		String[][] names = Analysis.getEntryNames();
 		int i,poindex=0,poLen=0;
 
 		float thresh=0.01f;//Percent below which to ignore

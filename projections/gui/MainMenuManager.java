@@ -60,7 +60,6 @@ public class MainMenuManager extends MenuManager
 		    true,   // Performance Counters
 		    false,  // General Graph
 		    false,  // Interval Graph
-		    false,  // Unified Summary Graph
 		    false,  // Generate EP Data
 		    false,  // Entry Point Characteristics Graph
 		});
@@ -114,7 +113,6 @@ public class MainMenuManager extends MenuManager
 		"Performance Counters",
 		"General Graph",
 		"Interval Graph",
-		"Unified Summary Graph",
 		"Generate EP Data",
 		"Entry Point Characteristics Graph"
 	    });
@@ -151,7 +149,6 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("Performance Counters") ||
 		       arg.equals("General Graph") ||
 		       arg.equals("Interval Graph") ||
-		       arg.equals("Unified Summary Graph") ||
 		       arg.equals("Entry Point Characteristics Graph") ||
 		       arg.equals("Generate EP Data")) {
 		parent.menuToolSelected(arg);

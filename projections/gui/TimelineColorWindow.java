@@ -130,7 +130,7 @@ public class TimelineColorWindow extends ColorWindowFrame
 	  GridBagConstraints gbc = new GridBagConstraints();
 	  gbc.fill = GridBagConstraints.BOTH;
 
-	  names = Analysis.getUserEntryNames();
+	  names = Analysis.getEntryNames();
 	  cpEntry = new ColorPanel[Analysis.getNumUserEntries()];
 	  
 	  LWPanel p1 = new LWPanel();

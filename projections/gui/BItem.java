@@ -8,4 +8,4 @@ public class BItem
    public int            maxMsgs;
    public int            maxTime;
    public long            size;
-} 
+}

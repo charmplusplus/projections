@@ -9,11 +9,9 @@ public class ProfileColorWindow extends ColorWindowFrame
    
    public ProfileColorWindow(ProfileData data)
    {
-      this.data = data;
-   }
-   
+	  this.data = data;
+   }   
    public void applyNewColor(Color c)
    {
-   }
-}                                     
-   
+   }   
+}

@@ -1,5 +1,9 @@
-
 package projections.gui;
+
+/**
+ * This static class is the interface projections.gui uses
+ * to talk to the projections.analysis classes.
+ */
 import java.io.*;
 import projections.analysis.*;
 import projections.misc.*;
@@ -7,145 +11,23 @@ import java.util.*;
 import java.awt.*;
 
 public class Analysis {
-	private static MyLinkedList timeline;
-	private static int numProcessors;
-	private static long totalTime;
-	private static long intervalLength;
-	private static double SampleLength;
-	private static int versionNum;
-	private static int avgTime;
-	private static int charesCreated;
-	private static int charesProcessed;
-	private static int msgsCreated;
-	private static int msgsProcessed;
-	private static int BOCs;
-	private static int numUserEntries;
-	private static int DisplayUsageOrderSize;
-	private static int phases;
-	private static String[][] userEntryNames;
-	private static String filename;
+	/******************* Initialization ************/
+	private static StsReader sts;
+	
+	private static LogLoader logLoader;  //Only for .log files
+	
+	private static SumAnalyzer sumAnalyzer; //Only for .sum files
+	
+	/******************* Graphs ***************/
 	private static int[][][] systemUsageData;
 	private static int[][][][] systemMsgsData;
 	private static int[][][][] userEntryData;
-	private static int[] DisplayUsageOrder;
-	private static LogAnalyzer logAnalyzer;
-	private static LogReader logReader;
-	private static SumAnalyzer sumAnalyzer;
-	private static int SumFileType;
-	
-	// SumFileType = 0 when you are using .log files and it = 1 when you are using .sum files
-	public static void initAnalysis( String s ) throws IOException {
-		filename = s;
-		File name = new File( s + ".0.sum" );
-		if( name.isFile() ) {
-			SumFileType = 1;
-			sumAnalyzer = new SumAnalyzer( filename );
-			userEntryNames = sumAnalyzer.getuserentries();
-			long suminfo[];
-			try {
-				suminfo = sumAnalyzer.ReadInProcessorUtilization();
-				numProcessors = (int)suminfo[ 0 ];
-				numUserEntries = (int)suminfo[ 1 ];
-				intervalLength = suminfo[ 2 ]; // in microseconds
-				totalTime = suminfo[ 3 ]; //in microseconds
-				phases = (int)suminfo[ 4 ];
-				versionNum = (int)suminfo[ 5 ];
-			}
-			catch( SummaryFormatException E ) {
-				System.out.println( "Caught SummaryFormatException" );
-			}
-			catch( IOException E ) {
-				System.out.println( "Couldn't read sum file " + name );
-			}
-		}
-		else {
-			SumFileType = 0;
-			logAnalyzer = new LogAnalyzer( filename );
-			numProcessors = logAnalyzer.numpe();
-			totalTime = logAnalyzer.totaltime();
-			numUserEntries = logAnalyzer.numuserentries();
-			userEntryNames = logAnalyzer.getuserentries();
-		}
-	}
-	public static int ReturnFileType() {
-		return SumFileType;
-	}
-
-	public static void QuickLoad2( GraphWindow gw, int numIntervals, long intervalSize ) {
-		if( SumFileType == 0 ) { // Input .sts has corresponding .log files to analyze
-			logReader = new LogReader( filename );
-			logReader.ReadInLogFile( numProcessors, numUserEntries, totalTime, intervalSize );
-			systemUsageData = logReader.getSystemUsageData();
-			systemMsgsData = logReader.getSystemMsgs();
-			userEntryData = logReader.getUserEntries();
-		}
-		else {
-			
-			// Input .sts has corresponding .sum files to analyze
-			systemUsageData = new int[ 3 ][ numProcessors ][ numIntervals ];
-			// systemUsageData[0][][] holds the values that display the queue size
-			// systemUsageData[1][][] holds the values that display processor utilization
-			// systemUsageData[2][][] holds the values that display the idle times
-			try {
-				systemUsageData[ 1 ] = sumAnalyzer.GetSystemUsageData( numProcessors, numIntervals, totalTime, intervalLength );
-			}
-			catch( SummaryFormatException E ) {
-				System.out.println( "Caught SummaryFormatException" );
-			}
-			catch( IOException e ) {
-				System.out.println( "Caught IOExcpetion" );
-			}
-		}
-	}
-	
-	/******************* Usage ******************
-	This data gives the amount of processor time used by 
-	each entry point (indices 0..numUserEntries-1), idle
-	(numUserEntries), packing (numUserEntries+1), ang unpacking 
-	(numUserEntries+2).
-	
-	The returned values are in percent. 
-	*/
-	public static float[] GetUsageData( int pnum, long begintime, long endtime, OrderedIntList phases ) {
-		if( 0 == SumFileType ) { //.log files
-			UsageCalc usagecalculator;
-			usagecalculator = new UsageCalc( filename, numUserEntries );
-			usagecalculator.ReadInLogFiles( pnum, (int)begintime, (int)endtime );
-			return usagecalculator.getData();
-		}
-		else /*The files are sum files*/ {
-			int temp;
-			long[][] data;
-			long[][] phasedata;
-			if( versionNum > 2 ) {
-				phases.reset();
-				data = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
-				if( phases.hasMoreElements() ) {
-					while( phases.hasMoreElements() && ( pnum > -1 ) ) {
-						phasedata = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
-						for( int q = 0;q < numUserEntries;q++ ) {
-							data[ pnum ][ q ] = data[ pnum ][ q ] + phasedata[ pnum ][ q ];
-						}
-					}
-				}
-			}
-			else {
-				data = sumAnalyzer.GetChareTime();
-			}
-			float ret[]=new float[numUserEntries+4];
-			//Convert to percent-- .sum entries are always over the 
-			// entire program run.
-			for (int q=0;q<numUserEntries;q++)
-				ret[q]=(float)(100.0*data[pnum][q]/totalTime);
-			return ret;
-		}
-	}
 	
 	/****************** Timeline ******************/
-	public static MyLinkedList createTL( int p, long bt, long et ) {
+	public static Vector createTL( int p, long bt, long et ) {
 		try {
-			if( logAnalyzer != null ) {
-				return logAnalyzer.createtimeline( p, bt, et );
+			if( logLoader != null ) {
+				return logLoader.createtimeline( p, bt, et );
 			}
 			else {
 				return null;
@@ -156,68 +38,42 @@ public class Analysis {
 			return null;
 		}
 	}
-	public static long searchTimeline( int n, int p, int e ) throws EntryNotFoundException {
-		try {
-			return logAnalyzer.searchtimeline( p, e, n );
+	public static int[][] getAnimationData( int numPs, int intervalSize ) {
+		int nInt=(int)(sts.getTotalTime()/intervalSize);
+		LoadGraphData(nInt,intervalSize,false);
+		int[][] animationdata = new int[ numPs ][ nInt ];
+		for( int p = 0;p < numPs; p++ ) {
+			for( int t = 0;t < nInt;t++ ) {
+				animationdata[ p ][ t ] = getSystemUsageData(1)[p][t];
+			}
 		}
-		catch( LogLoadException lle ) {
-			System.out.println( "LogLoadException" );
-			return -1;
-		}
+		return animationdata;
 	}
-	
 	/**************** Utility/Access *************/
-	public static int getNumPhases() {
-		return phases;
-	}
-	public static int[][] getSystemUsageData( int a ) {
-		return systemUsageData[ a ];
-	}
-	public static int[][] getSystemMsgsData( int a, int t ) {
-		return systemMsgsData[ a ][ t ];
-	}
-	public static int[][] getUserEntryData( int a, int t ) {
-		return userEntryData[ a ][ t ];
-	}
-	public static int getNumProcessors() {
-		return numProcessors;
-	}
-	public static long getTotalTime() {
-		return totalTime;
-	}
-	public static String getFilename() {
-		return filename;
-	}
-	public static int getNumUserEntries() {
-		return numUserEntries;
-	}
-	public static String[][] getUserEntryNames() {
-		return userEntryNames;
-	}
+	public static String getFilename() {return sts.getFilename();}
 	public static String[][] getLogFileText( int num ) {
-		if( logAnalyzer == null ) {
+		if( logLoader == null ) {
 			return null;
 		}
 		else {
-			MyLinkedList list = null;
+			Vector v = null;
 			try {
-				list = logAnalyzer.viewlog( num );
+				v = logLoader.view(num);
 			}
 			catch( LogLoadException e ) {
 				
 			}
-			if( list == null ) {
+			if( v == null ) {
 				return null;
 			}
-			int length = list.length();
+			int length = v.size();
 			if( length == 0 ) {
 				return null;
 			}
 			String[][] text = new String[ length ][ 2 ];
 			ViewerEvent ve;
 			for( int i = 0;i < length;i++ ) {
-				list.next();
-				ve = (ViewerEvent)list.data();
+				ve = (ViewerEvent)v.elementAt(i);
 				text[ i ][ 0 ] = "" + ve.Time;
 				switch( ve.EventType ) {
 				  case ( ProjDefs.CREATION ):
@@ -270,22 +126,141 @@ public class Analysis {
 			return text;
 		}
 	}
-	public static int[][] getAnimationData( int numPs, int numIs ) {
-		int[][] animationdata = new int[ numPs ][ numIs ];
-		for( int i = 0;i < numPs;i++ ) {
-			for( int j = 0;j < numIs;j++ ) {
-				animationdata[ i ][ j ] = (int)( Math.random() * 100 );
+	public static int getNumPhases() {
+		if (sumAnalyzer!=null)
+			return sumAnalyzer.GetPhaseCount();
+		else
+			return 0;
+	}
+	public static int getNumProcessors() {
+		return sts.getProcessorCount();
+	}
+	public static int getNumUserEntries() {
+		return sts.getEntryCount();
+	}
+	public static int[][] getSystemMsgsData( int a, int t ) {
+		return systemMsgsData[ a ][ t ];
+	}
+	public static int[][] getSystemUsageData( int a ) {
+		return systemUsageData[ a ];
+	}
+	public static long getTotalTime() {
+		return sts.getTotalTime();
+	}
+	/******************* Usage Profile ******************
+	This data gives the amount of processor time used by 
+	each entry point (indices 0..numUserEntries-1), idle
+	(numUserEntries), packing (numUserEntries+1), and unpacking 
+	(numUserEntries+2).
+	
+	The returned values are in percent CPU time spent. 
+	*/
+	public static float[] GetUsageData( int pnum, long begintime, long endtime, OrderedIntList phases ) {
+		status("GetUsageData(pe "+pnum+"):");
+		if( sts.hasLogFiles()) { //.log files
+			UsageCalc u=new UsageCalc();
+			return u.usage(sts, pnum, begintime, endtime );
+		}
+		else /*The files are sum files*/ {
+			int temp,numUserEntries=sts.getEntryCount();
+			long[][] data;
+			long[][] phasedata;
+			/*BAD: silently ignores begintime and endtime*/
+			if( sumAnalyzer.GetPhaseCount()>1 ) {
+				phases.reset();
+				data = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
+				if( phases.hasMoreElements() ) {
+					while( phases.hasMoreElements() && ( pnum > -1 ) ) {
+						phasedata = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
+						for( int q = 0;q < numUserEntries;q++ ) {
+							data[ pnum ][ q ] += phasedata[ pnum ][ q ];
+						}
+					}
+				}
+			}
+			else {
+				data = sumAnalyzer.GetChareTime();
+			}
+			float ret[]=new float[numUserEntries+4];
+			//Convert to percent-- .sum entries are always over the 
+			// entire program run.
+			double scale=100.0/sts.getTotalTime();
+			for (int q=0;q<numUserEntries;q++)
+				ret[q]=(float)(scale*data[pnum][q]);
+			return ret;
+		}
+	}
+	public static int[][] getUserEntryData( int a, int t ) {
+		return userEntryData[ a ][ t ];
+	}
+	public static String[][] getUserEntryNames() {
+		return sts.getEntryNames();
+	}
+	public static boolean hasSystemMsgsData( int a, int t ) {
+		if (systemMsgsData==null) return false;
+		return null!=systemMsgsData[a][t];
+	}
+	public static boolean hasUserEntryData( int a, int t ) {
+		if (userEntryData==null) return false;
+		return null!=userEntryData[a][t];
+	}
+	public static void initAnalysis( String filename ) throws IOException 
+	{
+		status("initAnalysis("+filename+"):");
+		sts=new StsReader(filename);
+		
+		if( sts.hasSumFiles() ) { //.sum files
+			try {
+				sumAnalyzer = new SumAnalyzer( sts );
+			}
+			catch( SummaryFormatException E ) {
+				System.out.println( "Caught SummaryFormatException" );
 			}
 		}
-		return animationdata;
+		else { //.log files
+			logLoader = new LogLoader( sts);
+		}
+	}
+	public static void LoadGraphData(int numIntervals, 
+		long intervalSize, boolean byEntryPoint) 
+	{
+		status("LoadGraphData("+intervalSize+" us):");
+		if( sts.hasLogFiles()) { // .log files
+			LogReader logReader = new LogReader();
+			logReader.read(sts, sts.getTotalTime(), intervalSize, byEntryPoint );
+			systemUsageData = logReader.getSystemUsageData();
+			systemMsgsData = logReader.getSystemMsgs();
+			userEntryData = logReader.getUserEntries();
+			logReader=null;
+		}
+		else { // .sum files
+			systemUsageData = new int[ 3 ][][];
+			// systemUsageData[0][][] -- queue size
+			// systemUsageData[1][][] -- processor utilization
+			// systemUsageData[2][][] -- idle times
+			try {
+				systemUsageData[ 1 ] = sumAnalyzer.GetSystemUsageData( 
+					numIntervals, intervalSize);
+			}
+			catch( SummaryFormatException E ) {
+				System.out.println( "Caught SummaryFormatException" );
+			}
+			catch( IOException e ) {
+				System.out.println( "Caught IOExcpetion" );
+			}
+		}
+	}
+	public static long searchTimeline( int n, int p, int e ) throws EntryNotFoundException {
+		try {
+			return logLoader.searchtimeline( p, e, n );
+		}
+		catch( LogLoadException lle ) {
+			System.out.println( "LogLoadException" );
+			return -1;
+		}
+	}
+	private static void status(String msg) {
+		//For debugging/profiling:
+		//System.out.println("gui.Analysis> "+msg);
 	}
 }
-
-
-
-
-
-
-
-
-

@@ -17,89 +17,79 @@ public class LogFileViewerDialog extends Dialog
    
    public LogFileViewerDialog(LogFileViewerWindow logFilesWindow)
    {
-      super((Frame)logFilesWindow, "Select Log File", true);
-      
-      this.logFilesWindow = logFilesWindow;
-      
-      pmax = Analysis.getNumProcessors() - 1;
-      Label l1 = new Label("Select a processor to view the log file for.");
-      Label l2 = new Label("Valid processors: (0 - " + pmax + ")");
-      
-      textField = new IntTextField(0, 5);
-      textField.addTextListener(this);
-      textField.addActionListener(this);
-      
-      bOK = new Button("OK");
-      bCancel = new Button("Cancel");
-      
-      bOK.addActionListener(this);
-      bCancel.addActionListener(this); 
-      
-      GridBagLayout gbl = new GridBagLayout();
-      GridBagConstraints gbc = new GridBagConstraints();
-      
-      gbc.fill = GridBagConstraints.BOTH;
-      setLayout(gbl);
+	  super((Frame)logFilesWindow, "Select Log File", true);
+	  
+	  this.logFilesWindow = logFilesWindow;
+	  
+	  pmax = Analysis.getNumProcessors() - 1;
+	  Label l1 = new Label("Select a processor to view the log file for.");
+	  Label l2 = new Label("Valid processors: (0 - " + pmax + ")");
+	  
+	  textField = new IntTextField(0, 5);
+	  textField.addTextListener(this);
+	  textField.addActionListener(this);
+	  
+	  bOK = new Button("OK");
+	  bCancel = new Button("Cancel");
+	  
+	  bOK.addActionListener(this);
+	  bCancel.addActionListener(this); 
+	  
+	  GridBagLayout gbl = new GridBagLayout();
+	  GridBagConstraints gbc = new GridBagConstraints();
+	  
+	  gbc.fill = GridBagConstraints.BOTH;
+	  setLayout(gbl);
 
-      Util.gblAdd(this, l1,        gbc, 0,0, 1,1, 1,1, 5,5,0,5);
-      Util.gblAdd(this, l2,        gbc, 0,1, 1,1, 1,1, 0,5,5,5);
-      Util.gblAdd(this, textField, gbc, 0,2, 1,1, 1,1, 5,5,5,5);
-      
-      Panel p = new Panel();
-      p.add(bOK);
-      p.add(bCancel);
-      Util.gblAdd(this, p, gbc, 0,3, 1,1, 1,1, 5,5,5,5);
-      
-      pack();
-      
-      Toolkit tk = Toolkit.getDefaultToolkit();
-      Dimension d = tk.getScreenSize();
-      setLocation((d.width - getSize().width)/2, (d.height - getSize().height)/2);
-   }
-   
+	  Util.gblAdd(this, l1,        gbc, 0,0, 1,1, 1,1, 5,5,0,5);
+	  Util.gblAdd(this, l2,        gbc, 0,1, 1,1, 1,1, 0,5,5,5);
+	  Util.gblAdd(this, textField, gbc, 0,2, 1,1, 1,1, 5,5,5,5);
+	  
+	  Panel p = new Panel();
+	  p.add(bOK);
+	  p.add(bCancel);
+	  Util.gblAdd(this, p, gbc, 0,3, 1,1, 1,1, 5,5,5,5);
+	  
+	  pack();
+   }   
    public void actionPerformed(ActionEvent evt)
    {
-      if(evt.getSource() instanceof Button)
-      {
-         Button b = (Button)evt.getSource();
-         
-         if(b == bOK)
-         {
-            logFilesWindow.setLogFileNum(textField.getValue());
-         }
-         
-         logFilesWindow.CloseDialog();
-      }
-      else if(evt.getSource() instanceof IntTextField)
-      {
-         logFilesWindow.setLogFileNum(textField.getValue());
-         logFilesWindow.CloseDialog();
-      }             
-   }
-   
+	  if(evt.getSource() instanceof Button)
+	  {
+		 Button b = (Button)evt.getSource();
+		 
+		 if(b == bOK)
+		 {
+			logFilesWindow.setLogFileNum(textField.getValue());
+		 }
+		 
+		 logFilesWindow.CloseDialog();
+	  }
+	  else if(evt.getSource() instanceof IntTextField)
+	  {
+		 logFilesWindow.setLogFileNum(textField.getValue());
+		 logFilesWindow.CloseDialog();
+	  }             
+   }   
    public void textValueChanged(TextEvent evt)
    {
-      if(evt.getSource() instanceof IntTextField)
-      {
-         int lastCaretPosition;
-         IntTextField f = (IntTextField)evt.getSource();
-         
-         if(f.getValue() < 0)
-         {
-            lastCaretPosition = f.getCaretPosition();
-            f.setText("" + 0);
-            f.setCaretPosition(lastCaretPosition);
-         }
-         else if(f.getValue() > pmax)
-         {
-            lastCaretPosition = f.getCaretPosition();
-            f.setText("" + pmax);
-            f.setCaretPosition(lastCaretPosition);
-         }   
-      }
-   }                    
-}               
-      
-      
-      
-         
+	  if(evt.getSource() instanceof IntTextField)
+	  {
+		 int lastCaretPosition;
+		 IntTextField f = (IntTextField)evt.getSource();
+		 
+		 if(f.getValue() < 0)
+		 {
+			lastCaretPosition = f.getCaretPosition();
+			f.setText("" + 0);
+			f.setCaretPosition(lastCaretPosition);
+		 }
+		 else if(f.getValue() > pmax)
+		 {
+			lastCaretPosition = f.getCaretPosition();
+			f.setText("" + pmax);
+			f.setCaretPosition(lastCaretPosition);
+		 }   
+	  }
+   }   
+}

@@ -6,7 +6,6 @@ public class LWPanel extends Container
 {
    public void paint(Graphics g)
    {
-      super.paint(g);
-   }
+	  super.paint(g);
+   }   
 }
-      

@@ -8,7 +8,7 @@ public class ZItem
    String  type;
    String  parent;
    Color   color;
-   boolean state;
+   boolean state,exists;
    int[][] data;
    int[]   curPData;
    int[]   curIData;
@@ -16,15 +16,14 @@ public class ZItem
 
    public ZItem()
    {
-      name   = null;
-      type   = null;
-      parent = null;
-      color  = null;
-      state  = false;
-      data   = null;
-      curPData = null;
-      curIData = null;
-      ymode  = -1;
+	  name   = null;
+	  type   = null;
+	  parent = null;
+	  color  = null;
+	  state  = false;
+	  data   = null;
+	  curPData = null;
+	  curIData = null;
+	  ymode  = -1;
    }   
-}   
-   
+}

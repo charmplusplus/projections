@@ -4,6 +4,5 @@ import java.awt.*;
 
 public abstract class ColorWindowFrame extends Frame
 {
-   public abstract void applyNewColor(Color c);
+   public abstract void applyNewColor(Color c);   
 }
-   

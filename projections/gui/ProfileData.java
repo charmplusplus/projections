@@ -17,22 +17,14 @@ public class ProfileData
    
    public ProfileData(ProfileWindow profileWindow)
    {
-      
-      this.profileWindow = profileWindow;
-      numPs     = Analysis.getNumProcessors();
-      begintime = 0;
-      pstring   = "0";
-      endtime   = Analysis.getTotalTime();
-      offset    = 10;
-      plist     = null;
-      phaselist = null;
-   }
-}  
-
-
-
-
-
-
-
-
+	  
+	  this.profileWindow = profileWindow;
+	  numPs     = Analysis.getNumProcessors();
+	  begintime = 0;
+	  pstring   = "0";
+	  endtime   = Analysis.getTotalTime();
+	  offset    = 10;
+	  plist     = null;
+	  phaselist = null;
+   }   
+}

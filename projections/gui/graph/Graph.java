@@ -107,7 +107,11 @@ public class Graph extends Canvas implements MouseMotionListener
         xAxis = x;
         yAxis = y;
         dataSource = d;
-	
+   }
+
+   public void setData(DataSource d)
+   {
+        dataSource = d;
    }
 
    public void setLabelColor(Color c){
@@ -200,13 +204,15 @@ public class Graph extends Canvas implements MouseMotionListener
           g.clearRect(0, 0, w, h);
 	  g.translate(-hsbval, 0); 
 	  g.setColor(getForeground());
-	  
-	  drawAxes(g);
-
-    	  if (GraphType == BAR)
-	  	drawBarGraph(g);
-	  else
-		drawLineGraph(g);
+	 
+	  if((xAxis != null) && (yAxis != null))
+	  {
+	  	drawAxes(g);	
+    	  	if (GraphType == BAR)
+	  		drawBarGraph(g);
+	  	else
+			drawLineGraph(g);
+	  }
 
    }
 
@@ -220,7 +226,7 @@ public class Graph extends Canvas implements MouseMotionListener
 	  originY = h - (30 + 2 * fm.getHeight());				// i.e. find the left and the lower margins
 
 	  g.setColor(labelColor);
-	  String title = xAxis.getTitle()+" ("+getBarGraphType()+")";
+	  String title = xAxis.getTitle();			//+" ("+getBarGraphType()+")";
 	  g.drawString(title,(w-fm.stringWidth(title))/2, h - 10);			// display xAxis title
 
 	  title = dataSource.getTitle();

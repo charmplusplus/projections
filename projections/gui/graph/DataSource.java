@@ -41,8 +41,8 @@ public abstract class DataSource
    */
   public Color getColor(int valNo) {
     switch (valNo%4) {
-    case 0: return Color.white;
-    case 1: return Color.red;
+    case 0: return Color.red;
+    case 1: return Color.white;
     case 2: return Color.blue;
     case 3: return Color.gray;
     }

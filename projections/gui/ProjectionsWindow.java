@@ -27,7 +27,6 @@ public abstract class ProjectionsWindow
     extends Frame
 {
     RangeDialog dialog;
-
     abstract void showDialog();
 
     public abstract void setProcessorRange(OrderedIntList validPEs);

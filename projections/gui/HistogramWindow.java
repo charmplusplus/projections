@@ -1,13 +1,25 @@
 package projections.gui;
 import projections.gui.graph.*;
+import projections.misc.LogEntryData;
+import projections.analysis.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 
-public class HistogramWindow extends Frame
+public class HistogramWindow extends ProjectionsWindow 
    implements ActionListener
 {
+   static final int NO_OF_BINS = 50;
+   static final int FREQUENCY  = 100;	// ms?
+
    private MainWindow mainWindow;
+   private GraphPanel graphPanel;
+   private Graph graphCanvas;
+
+   private OrderedIntList validPEs;
+   private long startTime;
+   private long endTime;
 
    public HistogramWindow(MainWindow mainWindow)
    {
@@ -17,101 +29,131 @@ public class HistogramWindow extends Frame
 	  {
 		 public void windowClosing(WindowEvent e)
 		 {
-			Close();
+			close();
 		 }
 	  });
 
 	  setBackground(Color.lightGray);
 	  setTitle("Projections Histograms");
 
-	  CreateMenus();
-	  CreateLayout();
+	  createMenus();
+	  createLayout();
 	  pack();
 	  setVisible(true);
-
-	  // ShowDialog();
+		
+	  showDialog();
    }   
-   /*
-   private void ShowDialog()
+ 
+   void showDialog()
    {
-	  if(dialog == null)
-		 dialog = new LogFileViewerDialog(this);
-	  dialog.setVisible(true);
+	if(dialog == null)
+		 dialog = new RangeDialog(this,"Select Range");
+	dialog.displayDialog();
+	refreshGraph();
    }
 
-   public void CloseDialog()
+   public void setProcessorRange(OrderedIntList proc)
    {
-	  if(dialog != null)
-	  {
-		 dialog.dispose();
-		 dialog = null;
-	  }
+  	validPEs = proc;
    }
-   */
+
+   public void setStartTime(long time)
+   {
+	startTime = time;
+   }
+
+   public void setEndTime(long time)
+   {
+	endTime = time;
+   }
 
    public void actionPerformed(ActionEvent evt)
    {
 	  if(evt.getSource() instanceof MenuItem)
 	  {
 		 MenuItem m = (MenuItem)evt.getSource();
-		 if(m.getLabel().equals("Set Ranges"))
-		   /*ShowDialog()*/;
+		 if(m.getLabel().equals("Set Range"))
+		        showDialog();
 		 else if(m.getLabel().equals("Close"))
-			Close();
+			close();
 	  }
-   }   
-   private void Close()
+   }  
+ 
+   private void close()
    {
 	  setVisible(false);
 	  mainWindow.CloseHistogramWindow();
 	  dispose();
-  }   
-  private void CreateLayout()
+  } 
+  
+  private void createLayout()
   {
-	  Panel p = new Panel();
-	  p.setBackground(Color.lightGray);
+ 	  graphCanvas = new Graph();
+	  graphPanel = new GraphPanel(graphCanvas);	
+	  add(graphPanel);
+   }  
 
-	  GridBagLayout gbl = new GridBagLayout();
-	  GridBagConstraints gbc = new GridBagConstraints();
-	  gbc.fill = GridBagConstraints.BOTH;
-
-	  setLayout(gbl);
-
-	  Util.gblAdd(this, p, gbc, 0,0, 1,1, 1,1);
-
-	  p.setLayout(gbl);
-
-	  /*FIXME: hardcoded data*/
-	  int data[]={0,1,5,14,3,0,0,7,5,1,0};
+   private void refreshGraph()
+   {
+// get new counts and redraw the graph
+	  int [] counts = getCounts();
+	  DataSource ds=new DataSource1D("Histogram (Granularity = 100us)",counts);
+	  XAxis xa=new XAxisFixed("Entry Point Execution Time","");
+	  YAxis ya=new YAxisAuto("Number of Entry Points","",ds);
 	  
-	  DataSource ds=new DataSource1D("Histogram",data);
-	  XAxis xa=new XAxisFixed("Entry Point Execution Time","ms");
-	  YAxis ya=new YAxisAuto("Count","",ds);
+	  graphCanvas.setData(ds,xa,ya);
+	  graphCanvas.repaint();
+   }
 
-/*Tiny test: try out these objects*/
-	  System.out.println("Data source: '"+ds.getTitle()+"'; "+
-	    ds.getIndexCount()+" data points, each with "+
-	    ds.getValueCount()+" values");
-	  System.out.println("XAxis: '"+xa.getTitle()+"'; "+
-	    "index 3's name is '"+xa.getIndexName(3)+"'");
-	  System.out.println("YAxis: '"+ya.getTitle()+"'; "+
-	    "from "+ya.getMin()+" to "+ya.getMax()+", "+
-	    "with values like '"+ya.getValueName(5.0)+"'");
-	  
-	  /*FIXME: actually add the graph display here--
-	  Graph g=new Graph();
-	  g.setData(ds,xa,ya);
-	  p.add(g);
-	  */
-	  
+   private int[] getCounts()
+   {
+	  GenericLogReader r;
+	  int maxdiff=0;
+	  int [] counts = new int[NO_OF_BINS];
+	  for(int i=0; i<NO_OF_BINS; i++)
+		counts[i] = 0;
 
-   }   
-   private void CreateMenus()
+	  LogEntryData logdata,logdata2;
+	  logdata = new LogEntryData();
+	  logdata2 = new LogEntryData();
+	  
+	  while(validPEs.hasMoreElements()) 
+	  {
+	  	r = new GenericLogReader(Analysis.getLogName(validPEs.nextElement()),Analysis.getVersion());
+	    try{
+		r.nextEventOnOrAfter(startTime,logdata);
+		while(true){
+			r.nextEventOfType(ProjDefs.BEGIN_PROCESSING,logdata);
+			r.nextEventOfType(ProjDefs.END_PROCESSING,logdata2);
+			int diff = (int)((logdata2.time - logdata.time)/FREQUENCY);
+			if(diff >= NO_OF_BINS) 
+			{
+				maxdiff=(diff>maxdiff)?diff:maxdiff;
+				diff = NO_OF_BINS-1;
+			}
+			counts[diff]++;
+			if(logdata2.time > endTime)
+				break;
+		}
+	     }catch(EOFException e){
+	     	// do nothing just reached end-of-file
+	     }catch(Exception e){
+		System.out.println("Exception " + e);
+	     }
+         }
+
+	  System.out.println("Entry Point with longest time difference: " + maxdiff);
+
+	 return(counts);
+   }
+
+   private void createMenus()
    {
 	  MenuBar mbar = new MenuBar();
 
 	  mbar.add(Util.makeMenu("File", new Object[]
 	  {
+		 "Set Range",
 		 "Close"
 	  },
 	  this));

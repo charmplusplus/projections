@@ -22,6 +22,8 @@ SRC=\
     projections/analysis/DataAnalyzer.java\
     projections/analysis/MRStsReader.java\
     projections/analysis/MRSummaryReader.java\
+    projections/analysis/GenericLogReader.java\
+    projections/analysis/GenericStsReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
     projections/gui/AnimationColorBarPanel.java\
@@ -104,6 +106,7 @@ SRC=\
     projections/misc/AccumulatedData.java\
     projections/misc/ChareData.java\
     projections/misc/EntryTypeData.java\
+    projections/misc/LogEntryData.java\
     projections/misc/CommandLineException.java\
     projections/gui/graph/XAxis.java\
     projections/gui/graph/XAxisFixed.java\

@@ -1,5 +1,6 @@
 package projections.gui;
 
+import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -242,5 +243,33 @@ public class Util
 	    newFilter[i] = (filter1[i] && filter2[i]);
 	}
 	return newFilter;
+    }
+
+    public static void saveColors(Color[] colors) throws IOException {
+	FileOutputStream fileStream = 
+	    new FileOutputStream(Analysis.getLogDirectory() +
+				 File.separator +
+				 "color.map");
+	ObjectOutputStream objStream =
+	    new ObjectOutputStream(fileStream);
+	for (int i=0; i<colors.length; i++) {
+	    objStream.writeObject(colors[i]);
+	}
+	objStream.close();
+    }
+
+    public static void restoreColors(Color[] colors)
+	throws IOException, ClassNotFoundException
+    {
+	FileInputStream fileStream =
+	    new FileInputStream(Analysis.getLogDirectory() +
+				File.separator +
+				"color.map");
+	ObjectInputStream objStream =
+	    new ObjectInputStream(fileStream);
+	for (int i=0; i<colors.length; i++) {
+	    colors[i] = (Color)objStream.readObject();
+	}
+	objStream.close();
     }
 }

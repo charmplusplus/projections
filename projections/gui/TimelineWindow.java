@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import java.io.*;
+
 import java.text.*;
 
 public class TimelineWindow extends Frame
@@ -271,7 +273,29 @@ public class TimelineWindow extends Frame
        else if(arg.equals("Print Timeline")) PrintTimeline();   
        else if(arg.equals("Index")) mainWindow.ShowHelpWindow();
        else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
-       else if(arg.equals("Save Colors")) ShowSaveColorDialog((Frame)this);
+       else if(arg.equals("Save Colors")) {
+	   try {
+	       Util.saveColors(data.entryColor);
+	   } catch (IOException e) {
+	       System.err.println("Attempt to write to color.map failed");
+	   }
+       }
+       else if(arg.equals("Restore Colors")) {
+	   try {
+	       Util.restoreColors(data.entryColor);
+	   } catch (IOException e) {
+	       System.err.println("Attempt to read from color.map failed");
+	   } catch (ClassNotFoundException e) {
+	       System.err.println("Color class not found!!!");
+	   }
+	   data.displayCanvas.updateColors();
+       }
+       else if (arg.equals("Default Colors")) {
+	   for (int i=0; i<data.entryColor.length; i++) {
+	       data.entryColor[i] = Analysis.getEntryColor(i);
+	   }
+	   data.displayCanvas.updateColors();
+       }
      }
      else {
        int leftVal = HSB.getValue();
@@ -531,7 +555,9 @@ public class TimelineWindow extends Frame
 	  {
 		 "Modify Ranges",
 		 "Change Colors",
-		 "Save Colors"
+		 "Save Colors",
+		 "Restore Colors",
+		 "Default Colors"
 	  },
 	  this));
 	  
@@ -1078,18 +1104,6 @@ public class TimelineWindow extends Frame
 		 colorWindow = new TimelineColorWindow(this,data);
 	  colorWindow.setVisible(true);
    }   
-    private void ShowSaveColorDialog(Frame parent)
-    {
-	int numEntries = data.getNumUserEvents();
-
-	// display file chooser dialog
-	JFileChooser fileChooser = new JFileChooser();
-	fileChooser.showSaveDialog(this);
-
-	for (int entry=0; entry<numEntries; entry++) {
-	    
-	}
-    }
 
    private void ShowRangeDialog()
    {

@@ -29,6 +29,9 @@ public class Analysis {
 	private static int[][][][] systemMsgsData;
 	private static int[][][][] userEntryData;
     private static int[] bgData;
+
+    private static String logDirectory;
+
 	
     /*****************Color Maps 6/27/2002 *************/
     private static Color[] entryColors;
@@ -279,6 +282,8 @@ public class Analysis {
 	{
 		status("initAnalysis("+filename+"):");
 		sts=new StsReader(filename);
+
+		logDirectory = dirFromFile(filename);
 		
 		if (sts.hasBGSumFile()) {
 		    try {
@@ -390,5 +395,14 @@ public class Analysis {
     // this is a hack, people should not use this
     public static long getIntervalSize() {
 	return (long)(bgSumReader.intervalSize*1.0e6);
+    }
+
+    private static String dirFromFile(String filename) {
+	// pre condition - filename is a full path name
+	return filename.substring(0,filename.lastIndexOf(File.separator));
+    }
+
+    public static String getLogDirectory() {
+	return logDirectory;
     }
 }

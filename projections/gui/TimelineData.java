@@ -1,6 +1,7 @@
 package projections.gui;
 
 import java.util.Vector;
+import java.io.*;
 import projections.analysis.*;
 import java.awt.*;
 
@@ -102,11 +103,22 @@ public class TimelineData
 	  float S = (float)1.0;
 	  float B = (float)1.0;
 	  float delta = (float)(1.0/Analysis.getNumUserEntries());
-	  for(int i=0; i<Analysis.getNumUserEntries(); i++)
-	  {
-	      entries[i] = 0;
-	      entryColor[i] = Analysis.getEntryColor(i);
-	  }   
+	  if (new File(Analysis.getLogDirectory() +
+		       File.separator + "color.map").exists()) {
+	      try {
+		  Util.restoreColors(entryColor);
+	      } catch (IOException e) {
+		  System.err.println("unable to load color.map");
+	      } catch (ClassNotFoundException e) {
+		  System.err.println("Color class not found??");
+	      }
+	  } else {
+	      for(int i=0; i<Analysis.getNumUserEntries(); i++)
+		  {
+		      entries[i] = 0;
+		      entryColor[i] = Analysis.getEntryColor(i);
+		  }   
+	  }
 		 
    }   
    public void createTLOArray()

@@ -132,6 +132,7 @@ public class OrderedIntList
 	  
 	  String result = "";
 	  
+/*
 	  while(tmp != -1)
 	  {
 		 min = tmp;
@@ -150,6 +151,53 @@ public class OrderedIntList
 		 else
 			result += new String("" + min + "-" + max); 
 	  }   
+*/
+	  int interval = -1;
+ 	  min = max = -1;
+	  while(tmp != -1)
+	  {
+		if (min == -1) {
+		  min = tmp;
+		  tmp = nextElement();
+	  	}
+		else if (interval == -1) {
+                  interval = tmp-min;
+		  max = tmp;
+		  tmp = nextElement();
+		}
+		else {
+		  while((tmp - max) == interval)
+		  {
+			max= tmp;
+			tmp = nextElement();
+		  }
+		  if (max == min+interval) {
+		    if(!result.equals(""))
+			result += ",";
+		    result += new String("" + min); 
+		    min = max; 
+		    interval = -1;
+		  }
+		  else {
+		    if(!result.equals(""))
+			result += ",";
+		    result += new String("" + min + "-" + max); 
+		    if (interval > 1) result += new String(":" + interval);
+		    min = interval = max = -1;
+		  }
+		}
+	  }   
+	  // handle the leftover
+          if (min != -1) {
+		if(!result.equals(""))
+			result += ",";
+		result += new String("" + min); 
+	  }
+          if (max != -1) {
+		if(!result.equals(""))
+			result += ",";
+		result += new String("" + max); 
+	  }
 	  return result;
    }   
    public int nextElement()

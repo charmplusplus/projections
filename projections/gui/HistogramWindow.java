@@ -180,9 +180,12 @@ public class HistogramWindow extends GenericGraphWindow
 	bubbleText[0] = Analysis.getEntryName(yVal);
 	//	bubbleText[0] = "Entry: " + entryNames[yVal];
 	bubbleText[1] = "Count: " + counts[xVal][yVal];
-	bubbleText[2] = "Bin: " + U.t(xVal*binSize+minBinSize) +
-	    " to " + U.t((xVal+1)*binSize+minBinSize);
-
+	if (xVal < numBins) {
+	    bubbleText[2] = "Bin: " + U.t(xVal*binSize+minBinSize) +
+		" to " + U.t((xVal+1)*binSize+minBinSize);
+	} else {
+	    bubbleText[2] = "Bin: > " + U.t(numBins*binSize+minBinSize);
+	}
 	return bubbleText;
     }
 

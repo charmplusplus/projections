@@ -5,10 +5,9 @@ public class PackTime
 
 public long BeginTime, EndTime;
 
-public PackTime ()
+public PackTime (long bt)
 {
-	BeginTime = EndTime = 0;
+	BeginTime = bt;
+	EndTime = -1;
 }
-
 }
-

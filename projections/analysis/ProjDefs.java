@@ -68,17 +68,16 @@ String read (FileReader InFile) throws IOException
   String Temp = new String ("");
 
   do
-    {
-      C = (char) InFile.read ();
-      if ((C == -1) || (C == 65535))
-        throw new EOFException ();
-      else if ((C != ' ') && (C != '\n'))
-        Temp += C;
-    }
+	{
+	  C = (char) InFile.read ();
+	  if ((C == -1) || (C == 65535))
+		throw new EOFException ();
+	  else if ((C != ' ') && (C != '\n'))
+		Temp += C;
+	}
   while ((C != ' ') && (C != '\n'));
   return Temp;
 }
-
 /** Reads in one line of text from the file referenced by member InFile,
  *  delimited by a space or newline character.
  *  @return String representing line of text read in from Infile
@@ -91,16 +90,14 @@ String readln (FileReader InFile) throws IOException
   String Temp = new String ("");
 
   do
-    {
-      C = (char) InFile.read ();
-      if ((C == -1) || (C == 65535))
-        throw new EOFException ();
-      else if (C != '\n')
-        Temp += C;
-    }
+	{
+	  C = (char) InFile.read ();
+	  if ((C == -1) || (C == 65535))
+		throw new EOFException ();
+	  else if (C != '\n')
+		Temp += C;
+	}
   while (C != '\n');
   return Temp;
 }
-
 }
-

@@ -7,4 +7,3 @@ public int Replay, TransactionType, MsgType, Entry, Time, EventID,
 	Dest, Pe;
 
 }
-

@@ -104,11 +104,8 @@ public class TimelineData
 	  float delta = (float)(1.0/Analysis.getNumUserEntries());
 	  for(int i=0; i<Analysis.getNumUserEntries(); i++)
 	  {
-		 entries[i] = 0;
-		 entryColor[i] = Color.getHSBColor(H, S, B);
-		 H -= delta;
-		 if(H < 0.0)
-			H = (float)1.0;
+	      entries[i] = 0;
+	      entryColor[i] = Analysis.getEntryColor(i);
 	  }   
 		 
    }   

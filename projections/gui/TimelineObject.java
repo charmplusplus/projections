@@ -257,8 +257,7 @@ public class TimelineObject extends Component
 	  if(entry == -1)
 		 c = getForeground();
 	  else
-		 c = Analysis.getEntryColor(entry);
-	  
+		 c = data.entryColor[entry];
 
 	  // leave 5 pixels above and below
 	  int startY = 5;

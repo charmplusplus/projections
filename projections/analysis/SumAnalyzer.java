@@ -449,11 +449,18 @@ public class SumAnalyzer extends ProjDefs
 					     expString);
 	int exponent;
 	expString=expString.substring(1);//Clip off leading "e"
-	try { 
-	    exponent=Integer.parseInt(expString);
-	} catch (NumberFormatException e) {
-	    throw new SummaryFormatException("Couldn't parse exponent "+
-					     expString);
+	// the old scheme does not take into account the fact that 
+	// "e+kk" is a valid exponent string.
+	if (expString.equals("")) {
+	    tokenizer.nextToken(); // get rid of the stupid "+" symbol
+	    exponent=(int)(nextNumber("exponent"));
+	} else {
+	    try { 
+		exponent=Integer.parseInt(expString);
+	    } catch (NumberFormatException e) {
+		throw new SummaryFormatException("Couldn't parse exponent "+
+						 expString);
+	    }
 	}
 	return mantissa*Math.pow(10.0,exponent);
     }

@@ -21,6 +21,7 @@ SRC=\
     projections/analysis/UsageInterval.java\
     projections/analysis/ViewerEvent.java\
     projections/analysis/MultiRunDataAnalyzer.java\
+    projections/analysis/ParseTokenizer.java\
     projections/analysis/GenericLogReader.java\
     projections/analysis/GenericStsReader.java\
     projections/analysis/GenericSummaryReader.java\
@@ -51,6 +52,7 @@ SRC=\
     projections/gui/GraphYAxisCanvas.java\
     projections/gui/GrayLWPanel.java\
     projections/gui/GrayPanel.java\
+    projections/gui/GrepFileFilter.java\
     projections/gui/HelpWindow.java\
     projections/gui/HistogramWindow.java\
     projections/gui/IntTextField.java\
@@ -82,6 +84,8 @@ SRC=\
     projections/gui/ProfileTitleCanvas.java\
     projections/gui/ProfileWindow.java\
     projections/gui/ProfileYLabelCanvas.java\
+    projections/gui/ProjectionsFileChooser.java\
+    projections/gui/ProjectionsFileMgr.java\
     projections/gui/ScalePanel.java\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\
@@ -102,6 +106,11 @@ SRC=\
     projections/gui/U.java\
     projections/gui/Util.java\
     projections/gui/ZItem.java\
+    projections/gui/count/CounterFrame.java\
+    projections/gui/count/CounterTable.java\
+    projections/gui/count/CounterTest.java\
+    projections/gui/count/TableMap.java\
+    projections/gui/count/TableSorter.java\
     projections/misc/ChareData.java\
     projections/misc/CommandLineException.java\
     projections/misc/EntryTypeData.java\
@@ -138,6 +147,9 @@ all: bin/projections.jar
 projections/gui/MainWindow.class: $(SRC)
 	@ echo "Compiling java sources:"
 	@ javac -d . -O $(SRC)
+	@ echo "NOTE: Deprecation warnings for ProjectionsFileChooser"
+	@ echo "      due to Thread.suspend() and Thread.resume()."
+	@ echo "      Please ignore. (JMU 06.24.2002)"
 	@ echo "Complete."
 
 bin/projections.jar: projections/gui/MainWindow.class $(SRC)

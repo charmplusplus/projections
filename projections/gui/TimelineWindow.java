@@ -278,21 +278,20 @@ public class TimelineWindow extends Frame
        else if(arg.equals("Index")) mainWindow.ShowHelpWindow();
        else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
        */
+       else if(arg.equals("Change Colors")) { ShowColorWindow(); }
        else if(arg.equals("Save Colors")) {
 	   try {
-	       Util.saveColors(data.entryColor);
+	       Util.saveColors(data.entryColor, "Timeline Graph");
 	   } catch (IOException e) {
 	       System.err.println("Attempt to write to color.map failed");
 	   }
        }
        else if(arg.equals("Restore Colors")) {
 	   try {
-	       Util.restoreColors(data.entryColor);
+	       Util.restoreColors(data.entryColor, "Timeline Graph");
 	   } catch (IOException e) {
 	       System.err.println("Attempt to read from color.map failed");
-	   } catch (ClassNotFoundException e) {
-	       System.err.println("Color class not found!!!");
-	   }
+	   } 
 	   data.displayCanvas.updateColors();
        }
        else if (arg.equals("Default Colors")) {
@@ -562,6 +561,11 @@ public class TimelineWindow extends Frame
 	  mbar.add(Util.makeMenu("Tools", new Object[]
 	  {
 		 "Modify Ranges",
+	  },
+	  this));
+	  
+	  mbar.add(Util.makeMenu("Colors", new Object[]
+	  {
 		 "Change Colors",
 		 "Save Colors",
 		 "Restore Colors",

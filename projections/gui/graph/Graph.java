@@ -375,6 +375,7 @@ public class Graph extends JPanel
       tickincrementX = Util.getBestIncrement(tickincrementX);
       
       int numintervalsX = (int)Math.ceil((double)maxvalue/tickincrementX);
+     // System.out.println("tickincrementX "+ tickincrementX + "numintervalsX"+numintervalsX +"\n");
       pixelincrementX = (double)(width) / numintervalsX;
       
       int labelincrementX = (int)Math.ceil((sw + 20) / pixelincrementX);
@@ -400,7 +401,7 @@ public class Graph extends JPanel
          if(i % labelincrementX == 0)
          {
          	g.drawLine(curx, originY+5, curx, originY-5);
-            s = "" + (int)xAxis.getIndex(i);						// can set multiplier? 
+            s = "" + (int)xAxis.getIndex(i*tickincrementX);						// can set multiplier? 
             g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + fm.getHeight());
          }
          else
@@ -418,9 +419,10 @@ public class Graph extends JPanel
 	   }
 	   maxvalueY += (10 - maxvalueY%10);				  // adjust so that the max axis value is in the multiples of 10
 
-	   // System.out.println("max value Y = " + maxvalueY);
+	 //   System.out.println("max value Y = " + maxvalueY);
 
 	   pixelincrementY = (double)(originY-30) / maxvalueY;
+	//   System.out.println("pixelincrementX "+pixelincrementX +" pixelincrementY "+ pixelincrementY +"\n");
 //    pixelincrementY = (int)pixelincrementY;
 	   sw = fm.getHeight();
       
@@ -537,83 +539,131 @@ public class Graph extends JPanel
 	}
 
 	
-    private void drawBarGraph(Graphics2D g) {
+    private void drawBarGraph(Graphics2D g) {    	
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount();  //no. of y values for each x
+	//System.out.println("drawBarGraph called "+xValues+"\n");
+	double [] data1 = new double[yValues];
 	double [] data = new double[yValues];
 	int x1,x2;
 	int y;
    barWidth  = (int)(pixelincrementX*(0.75)) ;
-        //if(barWidth<6) barWidth=6;
-          
-	for(int i=0; i < xValues; i++)
+        //if(barWidth<6) barWidth=6;         
+	  int numintervalsX = (int)Math.ceil((double)xValues/tickincrementX);
+	for(int i=0; i < numintervalsX; i++)
 	{
-	   dataSource.getValues(i,data);
-	   x1 = originX + (int)(i*pixelincrementX) + (int)(pixelincrementX/2);    //calculate x value
- 
-           if(BarGraphType == STACKED)
-		for(int j=0; j<yValues; j++)
-		{
-			y = (int) (originY - (int)(data[j]*pixelincrementY));
-			for(int k=0; k<j;k++)			// stacked: so subtract all the previous y values
-				y -= (int)(data[k]*pixelincrementY);
 
-			g.setColor(dataSource.getColor(j));
-			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(data[j]*pixelincrementY));
+	 
+	   x1 = originX + (int)(i*pixelincrementX) + (int)(pixelincrementX/2);    //calculate x value
+ 	  /*if(x1 > width){
+	  	System.err.println("x1 > width\n");
+	  }*/
+           if(BarGraphType == STACKED){
+	   	for(int j=0; j<yValues; j++){
+			data1[j] = 0.0;
 		}
+		int m;
+		for(m=0; m < tickincrementX;m++){
+			if(i*tickincrementX+m >= xValues){
+				break;
+			}
+			dataSource.getValues(i*tickincrementX+m,data);
+			for(int j=0; j<yValues; j++)
+			{
+				data1[j] += data[j];
+				for(int k=0; k<j;k++)			// stacked: so subtract all the previous y values
+					data1[j] -= (data[k]);						
+			}
+		}
+		if(m != 0){
+			for(int j=0;j<yValues;j++){
+				data1[j] = (double)Math.round((double)data1[j]/m);
+				int ybar = originY - (int )(data1[j]*pixelincrementY);
+				g.setColor(dataSource.getColor(j));
+				g.fillRect(x1-(barWidth/2),ybar,barWidth,(int)(data1[j]*pixelincrementY));
+			}
+		}
+		
+	   }
 	   else if(BarGraphType == UNSTACKED)			// unstacked.. sort the values and then display them
 	   {
+
 		int maxIndex=0;
 		double maxValue=0;
 		double [][] temp = new double[yValues][2];      // one col to retain color (actual index) information
 								// and the other to hold the actual data
-		for(int k=0;k<yValues;k++)
-		{	
-		   temp[k][0] = k;
-		   temp[k][1] = data[k];
+		int m;				
+		for(int k=0;k<yValues;k++){
+			temp[k][0] = 0;
+			temp[k][1] = 0.0;
 		}
-
-		for(int k=0; k<yValues; k++)
-		{
-		  maxValue = temp[k][1];
-		  maxIndex = k;
-
-		  for(int j=k;j<yValues;j++)
-		  {
-		    if(temp[j][1]>maxValue)
-		    {
-			maxIndex = j;
-			maxValue = temp[j][1];
-		    }
-		   }
- 
-		  int t = (int)temp[k][0];
-		  double t2 = temp[k][1];
-
-		  temp[k][0] = temp[maxIndex][0];
-		  temp[k][1] = maxValue;		//swap the contents of maxValue with the ith value
-		  temp[maxIndex][0] = t;
-		  temp[maxIndex][1] = t2;
+		for(m=0;m<tickincrementX;m++){	
+			if(i*tickincrementX +m >= xValues){
+				break;
+			}
+			dataSource.getValues(i*tickincrementX+m,data);
+			for(int k=0;k<yValues;k++)
+			{	
+			   temp[k][0] = k;
+			   temp[k][1] += data[k];
+			}
 		}
-		// now display the graph
+		if(m != 0){
+			for(int k=0;k<yValues;k++){
+				temp[k][1] = (double )Math.round((double)temp[k][1]/m);
+			}
+			for(int k=0; k<yValues; k++)
+			{
+			  maxValue = temp[k][1];
+			  maxIndex = k;
+		
+			  for(int j=k;j<yValues;j++)
+			  {
+			    if(temp[j][1]>maxValue)
+			    {
+				maxIndex = j;
+				maxValue = temp[j][1];
+			    }
+			   }
+ 	
+			  int t = (int)temp[k][0];
+			  double t2 = temp[k][1];
 	
-	
-		for(int k=0; k<yValues; k++)
-		{
-			g.setColor(dataSource.getColor((int)temp[k][0]));
-			y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
-			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(temp[k][1]*pixelincrementY));
+			  temp[k][0] = temp[maxIndex][0];
+			  temp[k][1] = maxValue;		//swap the contents of maxValue with the ith value
+			  temp[maxIndex][0] = t;
+			  temp[maxIndex][1] = t2;
+			}
+			// now display the graph
+		
+		
+			for(int k=0; k<yValues; k++)
+			{
+				g.setColor(dataSource.getColor((int)temp[k][0]));
+				y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
+				g.fillRect(x1-(barWidth/2),y,barWidth,(int)(temp[k][1]*pixelincrementY));
+			}
 		}
-
 	   }
 	   else							// single.. display average value
 	   {
+
 		double sum=0;
-		for(int j=0; j<yValues; j++)
-			sum += data[j];
-		sum /= yValues;
-		y = (int) (originY - (int)(sum*pixelincrementY));
-		g.fillRect(x1-(barWidth/2),y,barWidth,(int)(sum*pixelincrementY));
+		int m;
+		for(m=0;m < tickincrementX;m++){
+			if(i*tickincrementX +m >= xValues){
+				break;
+			}
+			dataSource.getValues(i*tickincrementX+m,data);
+			for(int j=0; j<yValues; j++){
+				sum += data[j];
+			}
+		}
+		if(m!= 0){
+			sum /= (yValues*m);
+			y = (int) (originY - (int)(sum*pixelincrementY));
+			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(sum*pixelincrementY));
+		}
 	   }
 	}
    }
@@ -634,8 +684,27 @@ public class Graph extends JPanel
 	    y1[i] = -1;
 	}
 	// do only till the window is reached 
-	for (int i=0; i < xValues; i++) {	
-	    dataSource.getValues(i,data);
+	int numintervalsX = (int)Math.ceil((double)xValues/tickincrementX);
+	double [] data1 = new double[yValues];
+	for (int i=0; i < numintervalsX; i++) {
+	    int m;
+	    for(int j=0;j<yValues;j++){
+	    	data1[j] = 0.0;
+	    }
+	    
+	    for(m=0;m<tickincrementX;m++){		
+		if(i*tickincrementX +m >= xValues){
+				break;
+		}
+		dataSource.getValues(i*tickincrementX+m,data);	    	    	
+		for(int j=0;j<yValues;j++){
+			data1[j] += data[j];
+		}
+	    }
+	    if(m != 0){    
+	    	for(int j=0;j<yValues;j++){
+			data[j] = Math.round((double)data1[j]/m);
+		}
 	    //calculate x value
 	    x2 = originX + (int)(i*pixelincrementX) + 
 		(int)(pixelincrementX/2);    
@@ -649,6 +718,7 @@ public class Graph extends JPanel
 		y1[j] = y2[j];		
 	    }
 	    x1 = x2;
+	    }
 	}
     }
 

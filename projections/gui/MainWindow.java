@@ -240,6 +240,7 @@ public class MainWindow extends JFrame
 		graphPanel = 
 		    new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
 		summaryGraphPanel.add("data", graphPanel, "run data");
+		
 	    }
 	    menuManager.fileOpened();
 	} catch(IOException e) {

@@ -53,6 +53,20 @@ public class GraphUtil {
 	return bestSize;
     }
 
+    // a Utilization to Absolute time transformation method
+    public static void utilToTime(double data[], double originalSize) {
+	for (int i=0; i<data.length; i++) {
+	    data[i] = (data[i]*originalSize)/100;
+	}
+    }
+
+    // a Absolute time to Utilization transformation method
+    public static void timeToUtil(double data[], double intervalSize) {
+	for (int i=0; i<data.length; i++) {
+	    data[i] = (data[i]/intervalSize)*100;
+	}
+    }
+
     // a general averaging strategy rebin facility.
     public static double[] rebin(double data[], double originalSize,
 				 int newNumIntervals) {

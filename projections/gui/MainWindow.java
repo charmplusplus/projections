@@ -287,21 +287,23 @@ public class MainWindow extends JFrame
 	    Analysis.loadSummaryData();
 	    if (Analysis.hasSummaryData()) {
 		double[] data = Analysis.getSummaryAverageData(); 
+		long originalSize = Analysis.getSummaryIntervalSize();
 		//		System.out.println("Getting best size");
 		long bestSize = 
-		    (long)GraphUtil.getBestIntervalSize(Analysis.getSummaryIntervalSize(),
+		    (long)GraphUtil.getBestIntervalSize(originalSize,
 							data.length);
 		//		System.out.println(bestSize);
-		/*
-		long bestSize = Analysis.getSummaryIntervalSize();
-		*/
-		if (bestSize != Analysis.getSummaryIntervalSize()) {
+		if (bestSize != originalSize) {
 		    // if there are changes
 		    //		    System.out.println("rebinning");
+		    // transform the data into absolute time first.
+		    GraphUtil.utilToTime(data, (double)originalSize);
 		    double[] newdata =
-			GraphUtil.rebin(data,Analysis.getSummaryIntervalSize(),
+			GraphUtil.rebin(data, originalSize,
 					(double)bestSize);
 		    //		    System.out.println("done rebinning");
+		    // transform the re-binned data to utilization.
+		    GraphUtil.timeToUtil(newdata, (double)bestSize);
 		    sumDataSource = new SummaryDataSource(newdata);
 		    sumXAxis =
 			new SummaryXAxis(newdata.length,

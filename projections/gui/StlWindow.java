@@ -124,10 +124,22 @@ public class StlWindow extends ProjectionsWindow
 	// This never changes from the get-go, so there's no reason (like 
 	// in the previous code) to keep resetting it.
 	utilColorMap = new ColorMap();
-	utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0); //Blue to red
-	utilColorMap.addBreak(70,255, 0,0, 100,255, 255,255);//red to white
-	// Overflow-- green. Should not happen for utilization.
-	utilColorMap.addBreak(101,0, 255,0, 255,0, 255,0); 
+	// sets bluish background for zero values and range to bright Red
+	// for value 70.
+	// WAY TO READ THIS:  VAL  RED  GRN  BLU
+	utilColorMap.addBreak(0,   0,   0,   55, 
+			      70,  255, 0,   0); 
+	// Range from bright Red to White from 70 to 100
+	utilColorMap.addBreak(70,  255, 0,   0, 
+			      100, 255, 255, 255);
+	// 12/9/2004 - new semantics. Anything that's not a valid utilization
+	//             is blue (200 shades to indicate intensity) for 
+	//             Idle time.
+	utilColorMap.addBreak(101, 0,   0,   55, 
+			      201, 0,   0,   255);
+	// everything else is green (should not happen).
+	utilColorMap.addBreak(202, 0,   255, 0,
+			      255, 0,   255, 0);
 	stl.setColorMap(utilColorMap);
     }  
 

@@ -30,6 +30,11 @@ public class StlPanel extends ScalePanel.Child
     // dimension 1 - indexed by interval index
     private int[][] utilData;
 
+    // idleData & mergedData (for supporting - utilization for now - 
+    // the other two data formats)
+    private int[][] idleData;
+    private int[][] mergedData;
+
     private int[][] colors; //The color per processor per interval
     private int intervalSize;//Length of an interval, in microseconds
 
@@ -65,10 +70,12 @@ public class StlPanel extends ScalePanel.Child
 	    }
 	    int numEP = Analysis.getNumUserEntries();
 	    int interval = (int)(t/intervalSize);
-	    int utiliz=utilData[p][interval];
+	    
 	    long  timedisplay = t+(long)startTime;
 	    if (mode == StlWindow.MODE_UTILIZATION) {
-		return "Processor "+pe+": Usage = "+utiliz+"%"+
+		return "Processor " + pe + 
+		    ": Usage = " + utilData[p][interval]+"%" +
+		    " IDLE = " + idleData[p][interval]+"%" +
 		    " at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
 	    } else {
 		// **CW** most significant EP information at this point
@@ -83,11 +90,13 @@ public class StlPanel extends ScalePanel.Child
 		    }
 		}
 		if (max > 0) {
-		    return "Processor "+pe+": Usage = "+utiliz+"%"+
+		    return "Processor "+pe+": Usage = "+
+			utilData[p][interval]+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
 			" EP = " + Analysis.getEntryName(maxEP);
 		} else {
-		    return "Processor "+pe+": Usage = "+utiliz+"%"+
+		    return "Processor "+pe+": Usage = "+
+			utilData[p][interval]+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
 		}
 	    }
@@ -207,6 +216,7 @@ public class StlPanel extends ScalePanel.Child
 
     /**
      * Convert processor usage (0..100) to color values.
+     * 12/9/04 - and idle "usage" (101..201) to a blue-scale.
      */
     private void applyColorMap(int [][]data) {
 	int nPE=data.length;
@@ -215,19 +225,19 @@ public class StlPanel extends ScalePanel.Child
 	    int n=data[p].length;
 	    colors[p] = new int[n];
 	    for (int i=0;i<n;i++) {
-		if ((data[p][i] > 127) || (data[p][i] < 0)) {
-		    // This happens when there are data-based bugs, but
-		    // we want to be able to deal with it here without
-		    // breaking overview. So, set to 127 (maps to green,
-		    // an anomalous color).
-		    // Why not 255? Because Bloody byte in Java is signed!
-		    data[p][i] = 127;
+		// old constraints on byte removed. we only need
+		// to make sure the index is between 0 and 255.
+		// (so the array on the colorMap side will not
+		//  be busted).
+		if (data[p][i] > 255 || data[p][i] < 0) {
+		    // apply the "wrong" green color.
+		    colors[p][i]=colorMap.apply(255);
 		}
-		colors[p][i]=colorMap.apply((byte)data[p][i]);
+		colors[p][i]=colorMap.apply(data[p][i]);
 	    }
 	}
     }
-
+    
     /**
      *  colors should not have to be re-created here. Will have to re-work
      *  this to make it more efficient some time soon.
@@ -264,7 +274,7 @@ public class StlPanel extends ScalePanel.Child
 	this.mode = mode;
 	int numEPs = Analysis.getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
-	    applyColorMap(utilData);
+	    applyColorMap(mergedData);
 	} else if (mode == StlWindow.MODE_EP) {
 	    setData(validPEs, startTime, endTime);
 	    applyColorMap(data);
@@ -302,11 +312,32 @@ public class StlPanel extends ScalePanel.Child
 	int numEPs = Analysis.getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
 	    // we want to avoid loading the 4-D array if possible.
-		 //System.out.println("intervalSize("+intervalSize+") startInterval("+startInterval+") endInterval("+endInterval+")");
 	    Analysis.LoadGraphData(intervalSize,
 				   startInterval, endInterval,false,validPEs);
 	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
-	    applyColorMap(utilData);
+	    idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
+	    mergedData = 
+		new int[utilData.length][utilData[0].length];
+	    // merge the two data into utilData
+	    for (int i=0; i<utilData.length; i++) {
+		for (int j=0; j<utilData[i].length; j++) {
+		    // I only wish to see idle data if there is no
+		    // utilization data.
+		    if (utilData[i][j] == 0) {
+			// 101 is the starting range for idle color
+			// representation. However, we want non-idle
+			// scenarios to remain "black".
+			if (idleData[i][j] > 0) {
+			    mergedData[i][j] = 101 + idleData[i][j]; 
+			} else {
+			    mergedData[i][j] = 0;
+			}
+		    } else {
+			mergedData[i][j] = utilData[i][j]; 
+		    }
+		}
+	    }
+	    applyColorMap(mergedData);
 	} else if (mode == StlWindow.MODE_EP) {
 	    Analysis.LoadGraphData(intervalSize,
 				   startInterval, endInterval,true,validPEs);
@@ -314,9 +345,10 @@ public class StlPanel extends ScalePanel.Child
 	    for (int ep=0; ep<numEPs; ep++) {
 		data[ep] = Analysis.getUserEntryData(ep, LogReader.TIME);
 	    }
-	    // Utilization data has already been computed by LoadGraphData
-	    // in Analysis.java. Might as well use it.
+	    // Utilization & Idle data has already been computed by 
+	    // LoadGraphData in Analysis.java. Might as well use it.
 	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
+	    idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
 	    applyColorMap(data);
 	}
 	validPEs.reset();

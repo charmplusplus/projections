@@ -23,5 +23,6 @@ public abstract class XAxis
     * e.g., "7", "10-11ms"
     */
    public abstract String getIndexName(int index);
-
+   public double getIndex(int index) { return index;};
+   public double getMultiplier() { return 1;};
 }

@@ -161,7 +161,7 @@ public class AreaGraphPanel extends JPanel
 	    xScaleField.setText("" + xScale);
 	    yScaleField.setText("" + yScale);
 	}
-	displayCanvas.setScale((double)xScale); 
+	displayCanvas.setScaleX((double)xScale); 
 	// **CW** for now, do nothing with the y scale.
 	displayCanvas.repaint();
     }

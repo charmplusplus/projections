@@ -105,11 +105,12 @@ public class TimelineWindow extends Frame
 
   class NoUpdatePanel extends Panel
   {
-    public void update(Graphics g) { paint(g); }
+      public void update(Graphics g) { paint(g); }
   }      
-   public TimelineWindow(MainWindow mainWindow)
-   {
-	  this.mainWindow = mainWindow;
+    
+    public TimelineWindow(MainWindow mainWindow)
+    {
+	this.mainWindow = mainWindow;
 	  
 	  format = new DecimalFormat();
 	  format.setGroupingUsed(true);
@@ -513,7 +514,7 @@ public class TimelineWindow extends Frame
 
 	  
 	  mainPanel.setLayout(null);
-	  mainPanel.setBackground(Color.black);
+	  mainPanel.setBackground(Analysis.background);
 	  mainPanel.add(labelCanvas);
 	  mainPanel.add(axisTopCanvas);
 	  mainPanel.add(axisBotCanvas);

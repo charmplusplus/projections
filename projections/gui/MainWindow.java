@@ -109,7 +109,7 @@ public class MainWindow extends JFrame
 	
 	titlePanel  = new MainTitlePanel(this);
 	runStatusPanel = new MainRunStatusPanel();
-	summaryGraphPanel = new MainSummaryGraphPanel(runStatusPanel);
+	summaryGraphPanel = new MainSummaryGraphPanel(this, runStatusPanel);
 
 	Util.gblAdd(mainPanel, titlePanel,        
 		    gbc, 0,0, 1,1, 1,0, 0,0,0,0);
@@ -186,6 +186,9 @@ public class MainWindow extends JFrame
 	    if (childWindows[i] != null) {
 		((Frame)childWindows[i]).repaint();
 	    }
+	}
+	if (timelineWindow != null) {
+	    timelineWindow.validate();
 	}
 	this.repaint();
     }

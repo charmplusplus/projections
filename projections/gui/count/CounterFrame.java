@@ -16,9 +16,12 @@ import projections.gui.*;
  *  CounterFrame manages the input/output for the CounterTable data. */
 public class CounterFrame extends JFrame
 {
-  // STARTING WINDOW POSITION??
-  // SHOULD RETURN ERROR IF PROBLEM LOADING FILES???
-  // GIVE HELP BOX IN THIS WINDOW
+  TableSorter        sorter_      = null;
+  JTable             jTable_      = null;
+  CounterTable       cTable_      = new CounterTable();
+  ProjectionsFileMgr fileMgr_     = null;
+  JProgressBar       progress_    = new JProgressBar();
+  JTabbedPane        tabbedPane_  = new JTabbedPane();
   
   /** Constructor. */
   public CounterFrame() {
@@ -136,18 +139,4 @@ public class CounterFrame extends JFrame
     });
     return menuBar;
   }
-
-
-  TableSorter        sorter_      = null;
-  JTable             jTable_      = null;
-  CounterTable       cTable_      = new CounterTable();
-  ProjectionsFileMgr fileMgr_     = null;
-  JProgressBar       progress_    = new JProgressBar();
-  JTabbedPane        tabbedPane_  = new JTabbedPane();
 }
-
-
-
-
-
-

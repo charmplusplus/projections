@@ -15,6 +15,9 @@ public class Graph extends JPanel
     public static final int SINGLE    = 3;  // take the average of all y-values
     public static final int BAR       = 4;  // Graph type, bar graph
     public static final int LINE      = 5;  // or line graph
+
+    public static final int X_AXIS = 0;
+    public static final int Y_AXIS = 1;
     
     private int GraphType;
     private int BarGraphType;
@@ -23,7 +26,7 @@ public class Graph extends JPanel
     private YAxis yAxis;
     private int originX;
     private int originY;
-    private double xscale;
+    private double xscale, yscale;
     
     private static final int FONT_SIZE = 12;   
     
@@ -31,7 +34,6 @@ public class Graph extends JPanel
 
     private Font font = null;
     private FontMetrics fm = null;
-    private Color labelColor;
     
     // to print y axis title vertically
     private JLabel yLabel;	
@@ -42,7 +44,8 @@ public class Graph extends JPanel
     double tickIncrementX, tickIncrementY;
 
     // "best" values to be derived from pixelincrements
-    long valuesPerTick, valuesPerLabel;
+    long valuesPerTickX, valuesPerLabelX;
+    long valuesPerTickY, valuesPerLabelY;
 
     private double barWidth;
 
@@ -65,7 +68,6 @@ public class Graph extends JPanel
 	
 	GraphType = BAR;	   // default GraphType is BAR
 	BarGraphType = STACKED;    // default BarGraphType is STACKED
-	labelColor = Analysis.foreground;
 	stackArray = null;
 	dataSource = null;
 	
@@ -144,16 +146,18 @@ public class Graph extends JPanel
 	repaint();
     }
 
-    public void setLabelColor(Color c) {
-	labelColor = c;
+    public void setScaleX(double val) {
+	xscale = val;
+	setPreferredSize(new Dimension((int)(baseWidth*xscale),getHeight()));
+	revalidate();
 	repaint();
     }
 
-    public void setScale(double val) {
-	xscale = val;
+    public void setScaleY(double val) {
+	yscale = val;
 	setPreferredSize(new Dimension((int)(baseWidth*xscale),getHeight()));
-	repaint();
 	revalidate();
+	repaint();
     }
 
     private void createStackArray() {
@@ -230,11 +234,13 @@ public class Graph extends JPanel
 	    pg.setFont(font);
 	    fm = pg.getFontMetrics(font);
 	}
-	setBackground(Color.white);
-	setForeground(Color.black);
+	Color oldBackground = Analysis.background;
+	Color oldForeground = Analysis.foreground;
+	Analysis.background = Color.white;
+	Analysis.foreground = Color.black;
 	drawDisplay(pg);
-	setBackground(Analysis.background);
-	setForeground(Analysis.foreground);
+	Analysis.background = oldBackground;
+	Analysis.foreground = oldForeground;
     }
 
     public void mouseMoved(MouseEvent e) {
@@ -286,7 +292,7 @@ public class Graph extends JPanel
 		//System.out.println("not Stacked");
 	    }
 	}
-    }	
+    }
 
     public void mouseDragged(MouseEvent e) {
     }
@@ -321,14 +327,6 @@ public class Graph extends JPanel
 	    return;
 	}
 
-	String yTitle = yAxis.getTitle();
-	String temp   = "";
-	
-	for (int i=0; i < yTitle.length(); i++) {
-	    temp += yTitle.charAt(i)+"\n";
-	}
-	yLabel = new JLabel(temp);
-	
 	// get max y Value
 	double maxvalueY;
 	if (((GraphType == BAR) && (BarGraphType == STACKED)) || 
@@ -346,7 +344,6 @@ public class Graph extends JPanel
 	originY = h - (30 + fm.getHeight()*2);
 
 	// i.e. find the left and the lower margins
-	g.setColor(labelColor);
 	String title = xAxis.getTitle();
 	//+" ("+getBarGraphType()+")";
 	   
@@ -361,7 +358,6 @@ public class Graph extends JPanel
 	g.drawString(title, -(h+fm.stringWidth(title))/2, 
 		     fm.getHeight());
 	g.rotate(PI/2);
-	g.setColor(Analysis.foreground);	  
 
 	// width available for drawing the graph
     	width = (int)((baseWidth-30-originX)*xscale);
@@ -372,7 +368,7 @@ public class Graph extends JPanel
 
 	// *NOTE* pixelincrementX = # pixels per value.
 	pixelincrementX = ((double)width)/maxvalue;
-	setBestIncrements(pixelincrementX, maxvalue);
+	setBestIncrements(X_AXIS, pixelincrementX, maxvalue);
 
 	// draw xAxis
 	g.drawLine(originX, originY, (int)width+originX, originY);
@@ -389,11 +385,11 @@ public class Graph extends JPanel
 	// based on the prior algorithm, it is guaranteed that the number of
 	// iterations is finite since the number of pixels per tick will
 	// never be allowed to be too small.
-	for (int i=mini;i<maxi; i+=valuesPerTick) {
+	for (int i=mini;i<maxi; i+=valuesPerTickX) {
 	    curx = originX + (int)(i*pixelincrementX);
 	    curx += (int)(tickIncrementX / 2);
 	    // labels have higher lines.
-	    if (i % valuesPerLabel == 0) {
+	    if (i % valuesPerLabelX == 0) {
          	g.drawLine(curx, originY+5, curx, originY-5);
 		s = xAxis.getIndexName(i);
 		g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + 
@@ -439,7 +435,7 @@ public class Graph extends JPanel
 	// represented by each tick AND there is enough pixel resolution
 	// for each bar, we set the width of the visual bar to be 80% of
 	// the tick distance.
-	if ((valuesPerTick == 1) && (tickIncrementX >= 5.0)) {
+	if ((valuesPerTickX == 1) && (tickIncrementX >= 5.0)) {
 	    barWidth = 0.8*tickIncrementX;
 	} else {
 	    barWidth = 1.0;
@@ -456,7 +452,7 @@ public class Graph extends JPanel
 		    y = originY - (int)(stackArray[i][k]*pixelincrementY);
 		    g.setColor(dataSource.getColor(k));
 		    // using data[i] to get the height of this bar
-		    if (valuesPerTick == 1) {
+		    if (valuesPerTickX == 1) {
 			g.fillRect(originX + (int)(i*pixelincrementX +
 						   tickIncrementX/2 -
 						   barWidth/2), y,
@@ -504,7 +500,7 @@ public class Graph extends JPanel
 		for(int k=0; k<numY; k++) {
 		    g.setColor(dataSource.getColor((int)temp[k][0]));
 		    y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
-		    if (valuesPerTick == 1) {
+		    if (valuesPerTickX == 1) {
 			g.fillRect(originX + (int)(i*pixelincrementX +
 						   tickIncrementX/2 -
 						   barWidth/2), y,
@@ -586,6 +582,10 @@ public class Graph extends JPanel
 	    int xPixel; 
 	    int yPixel;
 
+	    // offsetY is meant to allow the area graph to not draw over
+	    // the origin line.
+	    int offsetY = -2;
+
 	    for (int idx=0; idx<xValues; idx++) {
 		// get the y values given the x value
 		// **CW** NOTE to self: This is silly. Why do I have to
@@ -600,13 +600,14 @@ public class Graph extends JPanel
 		// recomputation of the prefix sum each time we go through
 		// the Y values.
 		prefixSum(data);
-	    	yPixel = (int) (originY - (int)(data[layer]*pixelincrementY));
+	    	yPixel = (int) (originY - (int)(data[layer]*pixelincrementY) +
+				offsetY);
 
 		// if first point, add the baseline point before adding
 		// the first point.
 		if (idx == 0) {
 		    // just so it does not overwrite the Axis line.
-		    polygon.addPoint(xPixel, originY-1);
+		    polygon.addPoint(xPixel, originY+offsetY);
 		}
 		// add new point to polygon
 		polygon.addPoint(xPixel, yPixel);
@@ -614,9 +615,8 @@ public class Graph extends JPanel
 		// the last point.
 		if (idx == xValues-1) {
 		    // just so it does not overwrite the Axis line.
-		    polygon.addPoint(xPixel, originY-1);
+		    polygon.addPoint(xPixel, originY+offsetY);
 		}
-		
 	    }
 	    // draw the filled polygon.
 	    g.setColor(dataSource.getColor(layer));
@@ -653,15 +653,17 @@ public class Graph extends JPanel
     }
 
     /**
-     *  Determines "best" values for tickIncrements and valuesPerTick and
-     *  valuesPerLabel.
+     *  Determines "best" values for tickIncrementsX and valuesPerTickX and
+     *  valuesPerLabelX OR tickIncrementsY and valuesPerTickY and 
+     *  valuesPerLabelY
      *
      *  Sets global (yucks!) variables to reflect the "best" number of pixels
      *  for Labels (5, 10, 50, 100, 500, 1000 etc ...) and the number of pixels
      *  for each tick (1, 10, 100, 1000 etc ...) based on the "best" label
      *  pixel number.
      */
-    private void setBestIncrements(double pixelsPerValue, long maxValue) {
+    private void setBestIncrements(int axis, double pixelsPerValue, 
+				   long maxValue) {
 	long index = 0;
 	long labelValue = getNextLabelValue(index);
 	long tickValue = getNextTickValue(index++);
@@ -681,9 +683,15 @@ public class Graph extends JPanel
 		    continue;
 		} else {
 		    // everything is A OK. Set the global variables.
-		    tickIncrementX = tickValue*pixelsPerValue;
-		    valuesPerTick = tickValue;
-		    valuesPerLabel = labelValue;
+		    if (axis == X_AXIS) {
+			tickIncrementX = tickValue*pixelsPerValue;
+			valuesPerTickX = tickValue;
+			valuesPerLabelX = labelValue;
+		    } else if (axis == Y_AXIS) {
+			tickIncrementY = tickValue*pixelsPerValue;
+			valuesPerTickY = tickValue;
+			valuesPerLabelY = labelValue;
+		    }
 		    return;
 		}
 	    }

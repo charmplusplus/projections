@@ -8,21 +8,27 @@ import javax.swing.*;
 public class GraphPanel extends JPanel
     implements ActionListener
 {
-    private static final Color BACKGROUND = Color.black;
-    private static final Color FOREGROUND = Color.white;
-    
     private JPanel mainPanel; 
     private JScrollPane displayPanel;
     private Graph displayCanvas;
 
+    private JRadioButton        cbLineGraph;
+    private JRadioButton        cbBarGraph;
+    private JRadioButton        cbAreaGraph;
+    private JCheckBox           cbStacked;
+
     private JButton             bIncreaseX;
     private JButton             bDecreaseX;
     private JButton             bResetX;
-    private JRadioButton        cbLineGraph;
-    private JRadioButton        cbBarGraph;
-    private JLabel              lScale;
-    private FloatTextField     scaleField;
-    
+    private JLabel              lScaleX;
+    private JFloatTextField     scaleFieldX;
+
+    private JButton             bIncreaseY;
+    private JButton             bDecreaseY;
+    private JButton             bResetY;
+    private JLabel              lScaleY;
+    private JFloatTextField     scaleFieldY;
+
     public GraphPanel(Graph g)
     {
 	setBackground(Color.lightGray);
@@ -31,11 +37,46 @@ public class GraphPanel extends JPanel
     }
 
     private void createLayout() {
+	GridBagLayout gbl = new GridBagLayout();
+	GridBagConstraints gbc = new GridBagConstraints();
 	
-	lScale  = new JLabel("X-Axis Scale: ", SwingConstants.CENTER);
+	// Graph Type Panel
+	JPanel graphTypePanel = new JPanel();
+	graphTypePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "graph type"));
+
+	graphTypePanel.setLayout(gbl);
+	gbc.fill = GridBagConstraints.HORIZONTAL;
+
+	ButtonGroup cbgGraphType = new ButtonGroup();
+	cbLineGraph = new JRadioButton("Line Graph");
+	cbLineGraph.setActionCommand("line");
+	cbBarGraph  = new JRadioButton("Bar Graph",  true);
+	cbBarGraph.setActionCommand("bar");
+	cbAreaGraph = new JRadioButton("Area Graph");
+	cbAreaGraph.setActionCommand("area");
+	cbgGraphType.add(cbLineGraph);
+	cbgGraphType.add(cbBarGraph);
+	cbgGraphType.add(cbAreaGraph);
+
+	cbLineGraph.addActionListener(this);
+	cbBarGraph.addActionListener(this);
+	cbAreaGraph.addActionListener(this);
+
+	Util.gblAdd(graphTypePanel, cbLineGraph, gbc, 0,0, 1,1, 1,0);
+	Util.gblAdd(graphTypePanel, cbBarGraph,  gbc, 1,0, 1,1, 1,0);
+	Util.gblAdd(graphTypePanel, cbAreaGraph, gbc, 2,0, 1,1, 1,0);
+
+	// making sure the states are consistent
+	if (displayCanvas.getGraphType() == Graph.LINE) {
+	    cbLineGraph.setSelected(true); 
+	}
 	
-	scaleField = new FloatTextField(1, 5);
-	scaleField.addActionListener(this);
+	// the X scale tools
+	JPanel xScalePanel = new JPanel();
+	xScalePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "x-scale"));
+	lScaleX  = new JLabel("X-Axis Scale: ", SwingConstants.CENTER);
+	scaleFieldX = new JFloatTextField(1, 5);
+	scaleFieldX.addActionListener(this);
 	
 	bDecreaseX = new JButton("<<");
 	bIncreaseX = new JButton(">>");
@@ -43,37 +84,46 @@ public class GraphPanel extends JPanel
 	bIncreaseX.addActionListener(this);
 	bDecreaseX.addActionListener(this);
 	bResetX.addActionListener(this);
-	
-	ButtonGroup cbgGraphType = new ButtonGroup();
-	cbLineGraph = new JRadioButton("Line Graph");
-	cbLineGraph.setActionCommand("line");
-	cbBarGraph  = new JRadioButton("Bar Graph",  true);
-	cbBarGraph.setActionCommand("bar");
-	cbgGraphType.add(cbLineGraph);
-	cbgGraphType.add(cbBarGraph);
 
-	cbLineGraph.addActionListener(this);
-	cbBarGraph.addActionListener(this);
+	xScalePanel.setLayout(gbl);
+	gbc.fill = GridBagConstraints.HORIZONTAL;
+
+	Util.gblAdd(xScalePanel, bDecreaseX,  gbc, 0,0, 1,1, 0,0);
+	Util.gblAdd(xScalePanel, lScaleX,     gbc, 1,0, 1,1, 0,0);
+	Util.gblAdd(xScalePanel, scaleFieldX, gbc, 2,0, 1,1, 1,0);
+	Util.gblAdd(xScalePanel, bIncreaseX,  gbc, 3,0, 1,1, 0,0);
+	Util.gblAdd(xScalePanel, bResetX,     gbc, 4,0, 1,1, 0,0);
+
+	// the Y scale tools
+	JPanel yScalePanel = new JPanel();
+	yScalePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "y-scale"));
+	lScaleY  = new JLabel("Y-Axis Scale: ", SwingConstants.CENTER);
+	scaleFieldY = new JFloatTextField(1, 5);
+	scaleFieldY.addActionListener(this);
 	
-	// making sure the states are consistent
-	if (displayCanvas.getGraphType() == Graph.LINE) {
-	    cbLineGraph.setSelected(true); 
-	}
-	
-	GridBagLayout gbl = new GridBagLayout();
-	GridBagConstraints gbc = new GridBagConstraints();
-	
+	bDecreaseY = new JButton("<<");
+	bIncreaseY = new JButton(">>");
+	bResetY    = new JButton("Reset");
+	bIncreaseY.addActionListener(this);
+	bDecreaseY.addActionListener(this);
+	bResetY.addActionListener(this);
+
+	yScalePanel.setLayout(gbl);
+	gbc.fill = GridBagConstraints.HORIZONTAL;
+
+	Util.gblAdd(yScalePanel, bDecreaseY,  gbc, 0,0, 1,1, 0,0);
+	Util.gblAdd(yScalePanel, lScaleY,     gbc, 1,0, 1,1, 0,0);
+	Util.gblAdd(yScalePanel, scaleFieldY, gbc, 2,0, 1,1, 1,0);
+	Util.gblAdd(yScalePanel, bIncreaseY,  gbc, 3,0, 1,1, 0,0);
+	Util.gblAdd(yScalePanel, bResetY,     gbc, 4,0, 1,1, 0,0);
+
 	JPanel buttonPanel = new JPanel();
 	buttonPanel.setLayout(gbl);
-	gbc.fill = GridBagConstraints.NONE;
-	Util.gblAdd(buttonPanel, cbLineGraph, gbc, 0,0, 1,1, 1,0);
-	Util.gblAdd(buttonPanel, cbBarGraph,  gbc, 1,0, 1,1, 1,0);
-	Util.gblAdd(buttonPanel, bDecreaseX,  gbc, 2,0, 1,1, 1,0);
-	Util.gblAdd(buttonPanel, lScale,      gbc, 3,0, 1,1, 1,0);
-	Util.gblAdd(buttonPanel, scaleField,  gbc, 4,0, 1,1, 1,0);
-	Util.gblAdd(buttonPanel, bIncreaseX,  gbc, 5,0, 1,1, 1,0);
-	Util.gblAdd(buttonPanel, bResetX,     gbc, 6,0, 1,1, 1,0);
-	
+	gbc.fill = GridBagConstraints.BOTH;
+
+	Util.gblAdd(buttonPanel, graphTypePanel, gbc, 0,0, 2,1, 1,0);
+	Util.gblAdd(buttonPanel, xScalePanel,    gbc, 0,1, 1,1, 1,0);
+	Util.gblAdd(buttonPanel, yScalePanel,    gbc, 1,1, 1,1, 1,0);
 	/////// put it together
 	setLayout(gbl);
 	gbc.fill = GridBagConstraints.BOTH;
@@ -95,34 +145,61 @@ public class GraphPanel extends JPanel
 
     public void actionPerformed(ActionEvent evt)
     {
-	float oldScale = scaleField.getValue();
-	float scale = 0;
+	// get recorded values
+	float oldScaleX = scaleFieldX.getValue();
+	float oldScaleY = scaleFieldY.getValue();
+	// clean current slate
+	float scaleX = 0;
+	float scaleY = 0;
 	
 	if (evt.getSource() instanceof JButton) {
 	    JButton b = (JButton) evt.getSource();
  	    if (b == bDecreaseX) {
-		scale = (float)((int)(oldScale * 4)-1)/4;
-		if (scale < 1.0)
-		    scale = (float)1.0;
+		scaleX = (float)((int)(oldScaleX * 4)-1)/4;
+		if (scaleX < 1.0)
+		    scaleX = (float)1.0;
 	    } else if (b == bIncreaseX) {
-		scale = (float)((int)(oldScale * 4)+1)/4;
+		scaleX = (float)((int)(oldScaleX * 4)+1)/4;
 	    } else if (b == bResetX) {
-		scale = (float)1.0;
+		scaleX = (float)1.0;
+	    } else if (b == bDecreaseY) {
+		scaleY = (float)((int)(oldScaleY * 4)-1)/4;
+		if (scaleY < 1.0)
+		    scaleY = (float)1.0;
+	    } else if (b == bIncreaseY) {
+		scaleY = (float)((int)(oldScaleY * 4)+1)/4;
+	    } else if (b == bResetY) {
+		scaleY = (float)1.0;
 	    }
-	    if (scale != oldScale) {
-		scaleField.setText("" + scale);
-		displayCanvas.setScale((double)scale); 
+	    // minimum value is 1.0, this is used to test if
+	    // the which flag was set.
+	    if ((scaleX != oldScaleX) && (scaleX > 0.0)) {
+		scaleFieldX.setText("" + scaleX);
+		displayCanvas.setScaleX((double)scaleX); 
 	    }
-	} else if (evt.getSource() instanceof FloatTextField) {
+	    if ((scaleY != oldScaleY) && (scaleY > 0.0)) {
+		scaleFieldY.setText("" + scaleY);
+		displayCanvas.setScaleY((double)scaleY); 
+	    }
+	} else if (evt.getSource() instanceof JFloatTextField) {
+	    JFloatTextField field = (JFloatTextField)evt.getSource();
 	    // we really won't know if the value has changed or not,
 	    // hence the conservative approach.
-	    scale = oldScale;
-	    displayCanvas.setScale((double)scale);
+	    if (field == scaleFieldX) {
+		scaleX = oldScaleX;
+		displayCanvas.setScaleX((double)scaleX);
+	    } else if (field == scaleFieldY) {
+		scaleY = oldScaleY;
+		displayCanvas.setScaleY((double)scaleY);
+	    }
 	} else if (evt.getSource() instanceof JRadioButton) {
 	    if (evt.getActionCommand().equals("line")) {
 		displayCanvas.setGraphType(Graph.LINE);
 	    } else if (evt.getActionCommand().equals("bar")) {
 		displayCanvas.setGraphType(Graph.BAR);
+	    } else if (evt.getActionCommand().equals("area")) {
+		// area graphs are automatically stacked.
+		displayCanvas.setGraphType(Graph.AREA);
 	    }
 	}
     }
@@ -146,7 +223,7 @@ public class GraphPanel extends JPanel
         YAxis ya=new YAxisAuto("Count","",ds);
         Graph g=new Graph();
         g.setGraphType(Graph.LINE);
-        g.setBarGraphType(Graph.UNSTACKED);
+        g.setBarGraphType(Graph.STACKED);
         g.setData(ds,xa,ya);
         mainPanel = new GraphPanel(g);
 	JMenuBar mbar = new JMenuBar();

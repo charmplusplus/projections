@@ -21,8 +21,8 @@ public class TimelineAxisCanvas extends Canvas
 	  this.data = data;
 	  this.type = type;
 	  component_ = this;
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
 	  this.addMouseListener(new MouseAdapter() {
 	      public void mouseEntered(MouseEvent e) {
 		component_.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
@@ -69,6 +69,11 @@ public class TimelineAxisCanvas extends Canvas
 		 Graphics og = offscreen.getGraphics();
 		 og.setClip(0, 0, data.tlw, data.ath);
 	  
+		 Color oldColor = og.getColor();
+		 og.setColor(Analysis.background);
+		 og.fillRect(0,0, data.tlw, data.ath);
+		 og.setColor(oldColor);
+
 		 if(fm == null)
 		 {
 			fm = og.getFontMetrics(og.getFont());
@@ -93,7 +98,7 @@ public class TimelineAxisCanvas extends Canvas
 			
 			
 			int maxx = data.offset + (int)((data.endTime-data.beginTime)*data.pixelIncrement/data.timeIncrement);
-			og.setColor(getForeground());
+			og.setColor(Analysis.foreground);
 			og.drawLine(data.offset, axispos, maxx, axispos);
 			beginCoord_ = data.offset;
 			endCoord_ = maxx;

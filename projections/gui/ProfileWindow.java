@@ -206,12 +206,6 @@ public class ProfileWindow extends Frame
 			ShowDialog();
 		 else if(arg.equals("Print Profile"))
 			PrintProfile();   
-		 /* Useless, should remove.
-		 else if(arg.equals("Index"))
-			ShowHelpWindow();
-		 else if(arg.equals("About"))
-			ShowAboutDialog();       
-		 */
 	  }
 	  else if(evt.getSource() instanceof FloatTextField)
 	  {

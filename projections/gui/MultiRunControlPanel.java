@@ -37,9 +37,9 @@ public class MultiRunControlPanel extends JPanel
 	displayModes = new ButtonGroup();
 	modePanel = new JPanel();
 
-	textMode = new JRadioButton("text", false);
+	textMode = new JRadioButton("Table", false);
 	textMode.addItemListener(mainWindow);
-	graphMode = new JRadioButton("graph", true);
+	graphMode = new JRadioButton("Graph", true);
 	graphMode.addItemListener(mainWindow);
 
 	displayModes.add(textMode);

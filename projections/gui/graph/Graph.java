@@ -133,8 +133,8 @@ public class Graph extends JPanel
     
    public void paintComponent(Graphics g)
    {
-	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
 	  super.paintComponent(g);
+	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
 
 	  w = getSize().width;
           h = getSize().height;
@@ -164,6 +164,7 @@ public class Graph extends JPanel
    public void mouseDragged(MouseEvent e) {
    }
 
+    /* **CW** I believe this is messing up Swing's double buffering support.
    public void setBounds(int x, int y, int w, int h)
    { 
 	
@@ -181,7 +182,7 @@ public class Graph extends JPanel
           }
           super.setBounds(x, y, w, h);
    }
-
+    */
    private void drawDisplay(Graphics _g)
    {
        Graphics2D g = (Graphics2D)_g;

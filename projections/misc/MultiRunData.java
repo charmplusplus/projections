@@ -186,8 +186,11 @@ public class MultiRunData
 	for (int run=0; run<numRuns; run++) {
 	    timeStats.reset();
 	    for (int pe=0; pe<stsReaders[run].numPe; pe++) {
+		// intervalSize in sumReaders is given in seconds. However,
+		// we are working with microseconds.
 		timeStats.accumulate(sumReaders[run][pe].numIntervals *
-				     sumReaders[run][pe].intervalSize);
+				     (sumReaders[run][pe].intervalSize*
+				      1000000.0));
 	    }
 	    runWallTimes[run] = timeStats.getSum();
 	}

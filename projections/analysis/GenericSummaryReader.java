@@ -111,7 +111,7 @@ public class GenericSummaryReader
 	tokenizer.checkNextString("ep");
 	numEPs = (int)tokenizer.nextNumber("number of entry methods");
 	tokenizer.checkNextString("interval");
-	double intervalSize = 
+	intervalSize = 
 	    tokenizer.nextScientific("processor usage sample interval"); 
 	if (versionNum > 2) {
 	    tokenizer.checkNextString("phases");

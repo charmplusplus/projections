@@ -142,17 +142,6 @@ public class MultiRunWindow extends JFrame
      */
     private void createDisplayPanels() {
 	// for graph mode
-	Graph graphCanvas = createGraphCanvas();
-	graphPanel = new AreaGraphPanel(graphCanvas);
-	// for table mode
-	tablesPanel = new MultiRunTables(selectedDataType, analyzer);
-    }
-
-    /**
-     *  Convenience method for creating a Graph object using the 3 accessor
-     *  methods found in MultiRunDataAnalyzer.
-     */
-    private Graph createGraphCanvas() {
 	MultiRunDataSource dataSource = 
 	    analyzer.getDataSource(selectedDataType);
 	MultiRunXAxis xAxis =
@@ -161,8 +150,9 @@ public class MultiRunWindow extends JFrame
 	    analyzer.getMRYAxisData(selectedDataType);
 	Graph graphCanvas =
 	    new Graph(dataSource, xAxis, yAxis);
-	graphCanvas.setGraphType(Graph.AREA);
-	return graphCanvas;
+	graphPanel = new AreaGraphPanel(graphCanvas);
+	// for table mode
+	tablesPanel = new MultiRunTables(selectedDataType, analyzer);
     }
 
     /**
@@ -177,11 +167,15 @@ public class MultiRunWindow extends JFrame
 	displayMode = mode;
 	switch (mode) {
 	case MODE_GRAPH:
+	    mainPanel.remove(tablesPanel);
 	    Util.gblAdd(mainPanel, graphPanel, gbc,  0,0, 1,1, 1,1, 2,2,2,2);
+	    mainPanel.validate();
 	    graphPanel.repaint();
 	    break;
 	case MODE_TABLE:
+	    mainPanel.remove(graphPanel);
 	    Util.gblAdd(mainPanel, tablesPanel, gbc, 0,0, 1,1, 1,1, 2,2,2,2);
+	    mainPanel.validate();
 	    tablesPanel.repaint();
 	    break;
 	}
@@ -193,17 +187,21 @@ public class MultiRunWindow extends JFrame
 	if (e.getSource() instanceof JRadioButton) {
 	    JRadioButton button = (JRadioButton)e.getSource();
 	    if (e.getStateChange() == ItemEvent.SELECTED) {
-		if (button.getText().equals("text")) {
+		if (button.getText().equals("Table")) {
 		    setDisplayMode(MODE_TABLE);
-		} else if (button.getText().equals("graph")) {
+		} else if (button.getText().equals("Graph")) {
 		    setDisplayMode(MODE_GRAPH);
 		} else {
 		    selectedDataType = 
 			controlPanel.getSelectedIdx(e.getItemSelectable());
 		    // update graph
-		    Graph graphCanvas = 
-			createGraphCanvas();
-		    graphPanel.setGraph(graphCanvas);
+		    MultiRunDataSource dataSource = 
+			analyzer.getDataSource(selectedDataType);
+		    MultiRunXAxis xAxis =
+			analyzer.getMRXAxisData();
+		    MultiRunYAxis yAxis =
+			analyzer.getMRYAxisData(selectedDataType);
+		    graphPanel.setData(dataSource, xAxis, yAxis);
 		    // update tables
 		    tablesPanel.setType(selectedDataType);
 		}

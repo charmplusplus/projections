@@ -39,11 +39,11 @@ public class MultiRunDataAnalyzer {
 
     // accompanying static fields for extraTable. The information is
     // publically published for use by the GUI and Data Analyzer(s).
-    public static final int NUM_EXTR_TYPES = 1;
-    public static final int EXTR_TYPE_TIME = 0;
-
     public static final int NUM_EXTR_ENTRIES = 1;
     public static final int EXTR_OVERHEAD = 0;
+
+    private static final String extraNames[] =
+    {"Idle Time and System Overhead"};
 
     // special statistical information. Used by the analyzer to deduce
     // certain properties of the runs.
@@ -148,11 +148,13 @@ public class MultiRunDataAnalyzer {
 	// Overhead + Idle time
 	// initialize structure
 	extraTable = 
-	    new double[NUM_EXTR_TYPES][numRuns][NUM_EXTR_ENTRIES];
+	    new double[MultiRunData.NUM_TYPES][numRuns][NUM_EXTR_ENTRIES];
 
 	double runWallTimes[] = data.getRunWallTimes();
+	// Overhead and Idle time only applies to the time type. All other
+	// information is (correctly) left at zero.
 	for (int run=0; run<numRuns; run++) {
-	    extraTable[EXTR_TYPE_TIME][run][EXTR_OVERHEAD] =
+	    extraTable[MultiRunData.TYPE_TIME][run][EXTR_OVERHEAD] =
 		runWallTimes[run] - runTimeSum[run];
 	}
     }
@@ -218,7 +220,7 @@ public class MultiRunDataAnalyzer {
 	    }
 	    if (insigCount > numRuns/2) {
 		categories[dataType][CAT_EP_INSIGNIFICANT].add(new Integer(ep));
-		break;
+		continue;
 	    }
 	    // TEST #2 - Change
 	    // test to see if the values generally climbs or drops from run 
@@ -268,6 +270,7 @@ public class MultiRunDataAnalyzer {
      *  As such, it supplies the index it needs data from.
      */
     public int getNumRows(int dataType, int categoryIndex) {
+	// we need one additional row for the header
 	return categories[dataType][categoryIndex].size();
     }
     
@@ -277,18 +280,39 @@ public class MultiRunDataAnalyzer {
      *  depending on the data type or category type.
      */
     public int getNumColumns(int dataType, int categoryIndex) {
-	return numRuns;
+	// we need one additional column for the entry point names.
+	return numRuns+1;
     }
 
-    public double getTableValueAt(int dataType, int categoryIndex, 
+    public String getColumnName(int dataType, int categoryIndex, int col) {
+	// first column is always the entry point name
+	if (col == 0) {
+	    return "Entry Point Name";
+	} else {
+	    return runNames[col-1];
+	}
+    }
+
+    public Object getTableValueAt(int dataType, int categoryIndex, 
 				  int row, int col) {
 	int epIndex = 
 	    ((Integer)categories[dataType][categoryIndex].elementAt(row)).intValue();
-	// if extra info, use different array.
-	if (epIndex >= numEPs) {
-	    return extraTable[dataType][col][numEPs-epIndex];
+
+	// column 0 is always the entry point name/description
+	if (col == 0) {
+	    // if extra info, use the string found in extraNames
+	    if (epIndex >= numEPs) {
+		return extraNames[numEPs-epIndex];
+	    } else {
+		return epNames[epIndex];
+	    }
 	} else {
-	    return dataTable[dataType][col][epIndex];
+	    // if extra info, use different array.
+	    if (epIndex >= numEPs) {
+		return new Double(extraTable[dataType][col-1][numEPs-epIndex]);
+	    } else {
+		return new Double(dataTable[dataType][col-1][epIndex]);
+	    }
 	}
     }
 
@@ -315,6 +339,9 @@ public class MultiRunDataAnalyzer {
 	case MultiRunData.TYPE_TIME:
 	    titleString = "Time taken";
 	    break;
+	case MultiRunData.TYPE_TIMES_CALLED:
+	    titleString = "Number of times called";
+	    break;
 	case MultiRunData.TYPE_NUM_MSG_SENT:
 	    titleString = "Messages sent per processor";
 	    break;
@@ -338,6 +365,9 @@ public class MultiRunDataAnalyzer {
 	switch (dataType) {
 	case MultiRunData.TYPE_TIME:
 	    title = "Time summed across processors (us)";
+	    break;
+	case MultiRunData.TYPE_TIMES_CALLED:
+	    title = "Number of times entry point was called";
 	    break;
 	case MultiRunData.TYPE_NUM_MSG_SENT:
 	    title = "Number of messages sent per processor";

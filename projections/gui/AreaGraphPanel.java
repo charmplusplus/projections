@@ -118,6 +118,7 @@ public class AreaGraphPanel extends JPanel
 	gbc.fill = GridBagConstraints.BOTH;
 
 	mainPanel = new JPanel();
+	mainPanel.setLayout(gbl);
 	displayPanel = new JScrollPane(displayCanvas);
 	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,1, 0,0,0,0);
 
@@ -170,7 +171,7 @@ public class AreaGraphPanel extends JPanel
     {
 	displayCanvas.repaint();
     }
-    
+
     public void setAllBounds()
     {
 	//// set the sizes
@@ -192,9 +193,8 @@ public class AreaGraphPanel extends JPanel
 	displayCanvas.setBounds(30, 30, dcw, dch);
     }
 
-    public void setGraph(Graph graphPanel) {
-	displayCanvas = graphPanel;
-	setAllBounds();
+    public void setData(DataSource dataSource, XAxis xAxis, YAxis yAxis) {
+	displayCanvas.setData(dataSource, xAxis, yAxis);
 	repaint();
     }
 

@@ -58,13 +58,31 @@ public class MultiRunTableModel
     }
 
     /**
+     *  For populating the header row of the table.
+     */
+    public String getColumnName(int columnIndex) {
+	return analysisModule.getColumnName(dataType, category, columnIndex);
+    }
+
+    /**
      *  This method is closely tied to the display table. The analysisModule
      *  is expected to ask the display table for the currently displayed
      *  table (hence in the MultiRun case, the category) and to supply data 
      *  accordingly.
      */
     public Object getValueAt(int row, int column) {
-	return new Double(analysisModule.getTableValueAt(dataType, category, 
-							 row, column));
+	return analysisModule.getTableValueAt(dataType, category, 
+					      row, column);
+    }
+
+    /**
+     *  To allow the table to be more intelligent in recognizing the
+     *  format of a value.
+     *
+     *  In particular, it allows the Sorter to recognize numbers and
+     *  causes right-indentation to be enforced for numbers.
+     */
+    public Class getColumnClass(int column) {
+	return getValueAt(0, column).getClass();
     }
 }

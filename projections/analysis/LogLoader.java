@@ -15,7 +15,7 @@ public class LogLoader extends ProjDefs
 {
    private StsReader sts;
    private long    BeginTime, EndTime;
-    private String validPEString;
+   private String validPEString;
 
     private int basePE, upperPE;
     private boolean validPERange;
@@ -28,7 +28,7 @@ public class LogLoader extends ProjDefs
 	  int              Type;
 	  long              Time;
 	  int              Len;
-//	  long              Begin;
+	  // long              Begin;
 	  long 	       back;
 	  String           Line;
 	  File testFile;
@@ -49,7 +49,7 @@ public class LogLoader extends ProjDefs
 	  upperPE = -1;
 	  for(I = 0; I<nPe; I++)
 	  {
-		  bar.progress(I,nPe,I+" of "+nPe);
+		 bar.progress(I,nPe,I+" of "+nPe);
 		 try
 		 {
 		     // test the file to see if it exists ...
@@ -71,8 +71,8 @@ public class LogLoader extends ProjDefs
 			}
 			validPEStringBuffer.append(String.valueOf(I));
 			*/
-	    back = InFile.length()-80*3; //Seek to the end of the file
-	    if (back < 0) back = 0;
+			back = InFile.length()-80*3; //Seek to the end of the file
+			if (back < 0) back = 0;
 			InFile.seek(back);
 			while(InFile.readByte() != '\n');
 			while(true)  //Throws EOFException at end of file
@@ -102,7 +102,7 @@ public class LogLoader extends ProjDefs
 	  bar.done();
 	  sts.setTotalTime(EndTime-BeginTime);
    }            
-   public Vector createtimeline (int PeNum, long Begin, long End)
+   public Vector createtimeline (int PeNum, long Begin, long End, Vector Timeline, Vector userEventVector)
 	  throws LogLoadException
    {
 	  int               Entry       = 0;
@@ -111,17 +111,17 @@ public class LogLoader extends ProjDefs
 	  AsciiIntegerReader log        = null;
 	  LogEntry          LE          = null;
 	  TimelineEvent     TE          = null;
+	  Hashtable         userEvents  = new Hashtable();  // store unfinished userEvents
+	  UserEvent         userEvent   = null;  // jsut for temp purposes
 	  TimelineMessage   TM          = null;
 	  PackTime          PT          = null;
 	  boolean tempte;
    
-	  Vector Timeline = null;
 	  System.gc ();
 
 	  // open the file
 	  try
 	  {
-		Timeline = new Vector();
 		log = new AsciiIntegerReader(
 			new BufferedReader (new FileReader (sts.getLogName(PeNum))));
 
@@ -186,12 +186,28 @@ public class LogLoader extends ProjDefs
 						if (tempte) TE=null;
 						break;
 					 case USER_EVENT:
-						if(TE==null) //Start a new dummy event
-						   Timeline.addElement(TE=new TimelineEvent(
-							   Time,Long.MAX_VALUE,Entry,LE.Pe));
-						TE.addMessage (TM=new TimelineMessage(LE.Time - BeginTime,-LE.MsgType,0));
+					        // don't mess with TE, that's just for EPs
+					        userEventVector.addElement(new UserEvent(LE.Time-BeginTime,LE.MsgType,LE.EventID,UserEvent.SINGLE));
 						break;
-
+				         case USER_EVENT_PAIR:
+						Integer key = new Integer(LE.EventID);
+					        userEvent = (UserEvent) userEvents.get(key);
+					        if (userEvent != null) {
+						  // the next is a bit confusing
+						  // basically there is a CharmEventID and an UserEventID (the id of the userEvent)
+						  // but the log entry calls the CharmEventID just EventID and the UserEventID
+						  if (userEvent.CharmEventID != LE.EventID || userEvent.UserEventID != LE.MsgType) {
+						    System.out.println("WARN: LogLoader.createtimeline() USER_EVENT_PAIR does not match same EventID");
+						  }
+						  userEvent.EndTime = LE.Time-BeginTime;
+						  userEvents.remove(key);
+						  userEventVector.addElement(userEvent);
+						}
+						else { 
+						  userEvent = new UserEvent(LE.Time-BeginTime,LE.MsgType,LE.EventID,UserEvent.PAIR); 
+						  userEvents.put(key, userEvent);
+						}
+					        break;
 					 case BEGIN_PACK:
 						if(TE==null) //Start a new dummy event
 						   Timeline.addElement(TE=new TimelineEvent(LE.Time-BeginTime,LE.Time-BeginTime,-1,LE.Pe));
@@ -280,6 +296,7 @@ public class LogLoader extends ProjDefs
 			   return null;
 
 		 case USER_EVENT:
+	         case USER_EVENT_PAIR:
 		 case DEQUEUE:
 		 case INSERT:
 		 case FIND:
@@ -306,6 +323,12 @@ public class LogLoader extends ProjDefs
 	  {
 		 case USER_EVENT:
 			Temp.MsgType = log.nextInt();
+			Temp.Time    = log.nextLong();
+			Temp.EventID = log.nextInt();
+			Temp.Pe      = log.nextInt();
+			return Temp;
+	         case USER_EVENT_PAIR:
+		        Temp.MsgType = log.nextInt();
 			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
@@ -360,7 +383,9 @@ public class LogLoader extends ProjDefs
 			Temp.Time    = log.nextLong();
 			return Temp;
 		 default:
-			System.out.println ("ERROR: weird event type " + Temp.TransactionType);
+			System.out.println ("ERROR: weird event type " + 
+					    Temp.TransactionType);
+			log.nextLine();  // ignore rest of this line
 			return Temp;
 	  }
    }   

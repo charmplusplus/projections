@@ -26,5 +26,9 @@ public class DataSource1D extends DataSource
   {
     values[0]=(double)data[index];
   }
+  
+  public String[]getPopup(int xVal, int yVal){
+   	return null;
+  }
 }
 

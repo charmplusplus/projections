@@ -56,6 +56,11 @@ public abstract class GenericGraphWindow
 				    this);
 	  setJMenuBar(menuBar);
    }
+	
+	public String[] getPopup(int xVal, int yVal){
+		//System.out.println("GenericGraphWindow.getPopup()");
+		return null;
+	};
 
     // create a standard layout which can be called from child class or 
     // overridden by it
@@ -113,6 +118,19 @@ public abstract class GenericGraphWindow
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
     }
 
+    protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
+	dataSource = new DataSource1D(title,data);
+	if(yAxis != null)
+	    yAxis = 
+		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+    }
+
+    protected void setDataSource(String title, double [][] data, GenericGraphWindow parent){
+	dataSource = new DataSource2D(title,data, parent);
+	if(yAxis != null)
+	    yAxis = 
+		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+    }
     // refresh graph
     protected void refreshGraph(){    
 	graphCanvas.setData(dataSource,xAxis,yAxis);

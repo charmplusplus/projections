@@ -34,6 +34,11 @@ public abstract class DataSource
   public abstract int getValueCount();
   
   /**
+   * Return the text to be shown in the mouse-over popup
+	*/
+  public abstract String[]getPopup(int xVal, int yVal);
+  
+  /**
    * Return the Color of this value.
    *  The valNo passed in is between 0 and getValueCount()-1, inclusive.
    *  The default is to cycle through red, green, blue, and gray.
@@ -62,15 +67,6 @@ public abstract class DataSource
    */
   public abstract void getValues(int index,double[] values);
   
-  
-  /**
-   * Return a set of strings to show in a popup when the mouse 
-   *     is over this bar.
-   * Return null (the default) if you have nothing to display.
-   */
-  public String[] getPopup(int index,int valNo,double value) {
-    return null;
-  }
   
   /**
    * The user just clicked at this location on this bar.

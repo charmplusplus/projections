@@ -132,4 +132,8 @@ public class MultiRunDataSource extends DataSource
     public void setColors(Color NcolorMap[]) {
 	colorMap = NcolorMap;
     }
+	 
+	 public String[]getPopup(int xVal, int yVal){
+	 	return null;
+	 }
 }

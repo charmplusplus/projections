@@ -228,15 +228,15 @@ public class Graph extends JPanel
 
     public void print(Graphics pg)
     {
-	setBackground(Color.white);
-	setForeground(Color.black);
-	drawDisplay(pg);
-	setBackground(BACKGROUND);
-	setForeground(FOREGROUND);
+		setBackground(Color.white);
+		setForeground(Color.black);
+		drawDisplay(pg);
+		setBackground(BACKGROUND);
+		setForeground(FOREGROUND);
     }
   
    public void mouseMoved(MouseEvent e) {
-       //System.out.println("Mouse moved"+ e);
+      //System.out.println("Mouse moved"+ e);
 		int x = e.getX();
     	int y = e.getY();
 		int index,valNo;
@@ -255,19 +255,13 @@ public class Graph extends JPanel
 			bubble = null;
 		}
    }
-	
-	// This should be inherited if a popup is wanted
-	public String[] getPopup(int xVal, int yVal){
-		// System.out.println("graph.getPopup(xVal, yVal)");
-		return null;
-	}
-	
+
 	public void showPopup(int xVal, int yVal, int xPos, int yPos){
-		// System.out.println("graph.showPopup()");
-		System.out.println(xVal +", " + yVal);
-		String text[] = getPopup(xVal, yVal);
+		//System.out.println("graph.showPopup()");
+		//System.out.println(xVal +", " + yVal);
+		String text[] = dataSource.getPopup(xVal, yVal);
 		if(text == null){
-			//System.out.println("Null text recieved");
+			System.out.println("Null text recieved");
 			return;
 		}
 		// else display ballon
@@ -275,10 +269,10 @@ public class Graph extends JPanel
 		// I'm doing these calculations, i probably should see if i can avoid it
 		if(bubble == null){
 			if(BarGraphType== STACKED){
-				bX = originX + (int)(xVal*pixelincrementX) + (int)(pixelincrementX/2) + barWidth + 10;
-				bY = (int) (originY - (int)(stackArray[xVal][yVal]*pixelincrementY) +15);	
+				//bX = originX + (int)(xVal*pixelincrementX) + (int)(pixelincrementX/2) + barWidth + 10;
+				//bY = (int) (originY - (int)(stackArray[xVal][yVal]*pixelincrementY) +15);	
 				bubble = new Bubble(this, text);
-				bubble.setLocation(bX, bY);
+				bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
 				bubble.setVisible(true);		
 				// System.out.println(bX +", " + bY);	
 			}else{

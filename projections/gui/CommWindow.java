@@ -41,7 +41,6 @@ public class CommWindow extends GenericGraphWindow
 	
 	public CommWindow(){
 		super("Projections Communications");
-		// graphCanvas = new MyGraph();
 		setGraphSpecificData();
 		mainPanel = new JPanel();
     	getContentPane().add(mainPanel);
@@ -49,7 +48,6 @@ public class CommWindow extends GenericGraphWindow
 		showDialog();
 		setPopupText(msgText);
 		pack();
-
 		setVisible(true);
 	}
 	
@@ -57,32 +55,28 @@ public class CommWindow extends GenericGraphWindow
 		if(ae.getSource() instanceof Checkbox){
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));			
 			Checkbox cb = (Checkbox)ae.getSource();
-						
 			 if(cb == histogramCB){
-				System.out.println("HistogramView");
-				
-				setDataSource("Histogram", histArray);
+				//System.out.println("HistogramView");
+				setDataSource("Histogram", histArray, this);
 				setPopupText(histText);
 				setYAxis("Frequency", null);
 				setXAxis("Byte Size", "bytes");
 				super.refreshGraph();
 			}else if(cb == sentMssgs){
-				System.out.println("mssgs");
-				setDataSource("Communications", msgCount);
+				//System.out.println("mssgs");
+				setDataSource("Communications", msgCount, this);
 				setPopupText(msgText);
 				setYAxis("Messages Sent", "");
 				setXAxis("Processor", null);
 				super.refreshGraph();
 			}else if(cb == sentBytes){
-				System.out.println("bytes");
-				setDataSource("Communications", byteCount);
+				//System.out.println("bytes");
+				setDataSource("Communications", byteCount, this);
 				setPopupText(byteText);
 				setYAxis("Bytes Sent", "bytes");
 				setXAxis("Processor", null);
 				super.refreshGraph();
 			}
-			
-			
 			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
@@ -90,11 +84,30 @@ public class CommWindow extends GenericGraphWindow
 	private void setPopupText(String[][] input){
 		popupText = input;
 		
-		if(popupText == histText)
-			System.out.println("Histogram Text Set");
+		//if(popupText == histText)
+			//System.out.println("Histogram Text Set");
 	}
 	
-	protected JPanel getMainPanel(){
+	 public String[] getPopup(int xVal, int yVal){
+	 	 //System.out.println("CommWindow.getPopup()");
+		 if( (xVal < 0) || (yVal <0) || popupText==null)
+			 return null;
+
+		 String[] rString = new String[2];
+
+		 if(popupText != histText){
+			 rString[0] = "EPid: " + yVal;
+			 rString[1] = popupText[xVal][yVal];
+		}else{
+			rString[0] = popupText[xVal][0];
+			rString[1] = popupText[xVal][1];
+		}			 
+
+		//System.out.println("==> " + rString);
+		return rString;
+	 }	
+	
+/*	protected JPanel getMainPanel(){
 		JPanel mainPanel = new JPanel();
 		graphCanvas = new MyGraph();
       graphPanel = new GraphPanel(graphCanvas);
@@ -102,7 +115,7 @@ public class CommWindow extends GenericGraphWindow
 		mainPanel.add(graphPanel);
 		return mainPanel;
    }
-	
+*/	
 	protected void setLayout(){
 		GridBagConstraints gbc = new GridBagConstraints();
 		GridBagLayout gbl = new GridBagLayout();
@@ -128,30 +141,14 @@ public class CommWindow extends GenericGraphWindow
 					
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, checkBoxPanel, gbc, 0,2, 1,1, 0,0);
-		
-		
-		
-	
-	/*
-		checkBoxPanel.setLayout(new GridLayout(2, 1));
-		checkBoxPanel.add(getMainPanel());
-		CheckboxGroup cbg = new CheckboxGroup();
-		checkBoxPanel.add(new Checkbox("mssgs", cbg, true));
-		checkBoxPanel.add(new Checkbox("bytes", cbg, false));
-	*/
 	}
-	
-	public String[][] getPopupText(){
-		return popupText;
-	}
-	
+		
 	protected void setGraphSpecificData(){
 		setXAxis("Processor", "");
 		setYAxis("Messages Sent", "");
 	}
 	
 	protected void showDialog(){
-		
 		if(dialog == null)
 			dialog = new RangeDialog(this, "select Range");
 		int dialogstatus = dialog.showDialog();
@@ -169,7 +166,7 @@ public class CommWindow extends GenericGraphWindow
 	}
 
 	public void refreshGraph(){
-		setDataSource("Communcations", msgCount);
+		setDataSource("Communcations", msgCount, this);
 		super.refreshGraph();
 	}
 	
@@ -221,26 +218,6 @@ public class CommWindow extends GenericGraphWindow
 						}						
 					}			
 				}
-				
-				
-/*				// Is this the best way? I have to read twice, but wont have to read again
-				// The other choice would be to sort on read using a default size bin, but 
-				// for each time the user wishes to change the bin size, we'll need to reread
-				// Will a user want to change bin size? 
-				histogram = new int[count];
-				count = 0;
-				glr.nextEventOnOrAfter(startTime, logdata);
-				while(true){
-					grl.nextEvent(logdata);
-					if(logdata.type == ProjDefs.CREATION){
-						histogram[count] = logdata.msglen;
-					}else if(logdata.type == ProjDefs.END_PROCESSING){
-						break;
-					}
-				}
-*/				
-				// Do we allready have a sorting routine writting?  quickSort(histogram);
-				
 			}catch(java.io.EOFException e){
 			}catch(Exception e){
 				System.out.println("Exception: " +e);
@@ -283,28 +260,9 @@ public class CommWindow extends GenericGraphWindow
 		*/
 			
 	}
-
-
-	 private class MyGraph extends Graph{
-		 public String[] getPopup(int xVal, int yVal){
-		 	 String[][] popupText = getPopupText();
-			 if( (xVal < 0) || (yVal <0) || popupText==null)
-				 return null;
-				 
-			 String[] rString = new String[2];
-			 
-			 if(popupText != histText){
-				 rString[0] = "EPid: " + yVal;
-				 rString[1] = popupText[xVal][yVal];
-			}else{
-				rString[0] = popupText[xVal][0];
-				rString[1] = popupText[xVal][1];
-			}			 
-			 
-			 return rString;
-		 }	
-	 }
 	 
+	 // Needed for Communications Histogram since it is currently being
+	 // implemented via ArrayList which iwll not allow the use of a int array
 	 private class MyArray {
 		public int index;	
 		public MyArray(int setIndex){

@@ -43,5 +43,9 @@ public class SummaryDataSource extends DataSource
   public void getValues(int index, double[] values) {
     values[0] = dataValues[index];
   }
+  
+  public String[]getPopup(int xVal, int yVal){
+   	return null;
+  }
 }
 

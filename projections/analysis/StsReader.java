@@ -22,7 +22,7 @@ public class StsReader extends ProjDefs
     private String baseName;
     private String logDirectory;
 
-    private boolean hasSum, hasSumDetail, hasLog, hasBGSum;
+    private boolean hasSum, hasSumDetail, hasLog;
 
     public static final int NUM_TYPES = 4;
     public static final int LOG = 0;
@@ -32,8 +32,6 @@ public class StsReader extends ProjDefs
 
     private OrderedIntList validPEs[];
     private StringBuffer validPEStringBuffers[];
-    private int lastPE[];
-    private boolean inRange[];
 	
     // Sts header information
     private double version;
@@ -68,8 +66,6 @@ public class StsReader extends ProjDefs
 	throws LogLoadException   
     {
 	validPEs = new OrderedIntList[NUM_TYPES];
-	lastPE = new int[NUM_TYPES];
-	inRange = new boolean[NUM_TYPES];
 	for (int i=0; i<NUM_TYPES; i++) {
 	    validPEs[i] = new OrderedIntList();
 	}
@@ -175,7 +171,6 @@ public class StsReader extends ProjDefs
 		    validPEs[LOG].insert(i);
 		}
 	    }
-	    hasBGSum = (getBGSumName() != null);
 	    InFile.close();
 	} catch (FileNotFoundException e) {
 	    throw new LogLoadException (FileName, LogLoadException.OPEN);
@@ -314,10 +309,6 @@ public class StsReader extends ProjDefs
 	return hasSumDetail;
     }
 
-    public boolean hasBGSumFile() {
-	return hasBGSum;
-    }
-
     public String getLogPathname() {
 	return logDirectory;
     }
@@ -337,14 +328,5 @@ public class StsReader extends ProjDefs
     public String getSumDetailName(int pnum) {
 	return baseName + "." + pnum + ".sumd";
     }
-	
-    public String getBGSumName() {
-	if ((new File(baseName + ".sum")).isFile()) {
-	    return baseName + ".sum";
-	} else {
-	    return null;
-	}
-    }
-
 }
 

@@ -59,27 +59,21 @@ public class SumDetailReader
     public SumDetailReader(String filename, double Nversion) 
 	throws IOException
     {
-	super();
-	try {
-	    reader = new BufferedReader(new FileReader(filename));
-	    version = Nversion;
-	    readData();  // readData() calls read() in superclass
-	    reader.close();
-	    reader = null;
-	} catch (IOException e) {
-	    throw new IOException("Error reading file " + filename +
-				  ": " + e.toString());
-	}
+	super(filename);
+	reader = new BufferedReader(new FileReader(filename));
+	version = Nversion;
+	readData();  // readData() calls read() in superclass
+	reader.close();
+	reader = null;
     }
 
-    // Method to nullify data for garbage collection
-    protected void nullifyData() {
-	rawData = null;
-    }
-
-    // Method to recognize the file type. For now, just say "yes".
-    protected boolean isAvailable() {
-	return true;
+    /**
+     *  SumDetailReader expects a file. The availability check is implemented
+     *  as such.
+     */
+    protected boolean checkAvailable() {
+	File sourceFile = new File(sourceString);
+	return sourceFile.canRead();
     }
 
     protected long read() 

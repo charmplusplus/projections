@@ -22,9 +22,7 @@ public class MultiRunData
 {
     // IO reader objects (holds data after construction unless on exception)
     private StsReader stsReaders[];
-    // sumReaders dim 1 - indexed by Run Log ID
-    // sumReaders dim 2 - indexed by PE number
-    private GenericSummaryReader sumReaders[][];
+
     // stsReaders is unsorted by numPEs whilst the rest of this module has
     // their data arrays sorted. Therefore, a mapping has to be maintained
     // in the event that the stsReader has to be accessed.
@@ -63,15 +61,11 @@ public class MultiRunData
     private int numRuns;
     private int numEPs;
     
-    // Names
+    // Names. epNames should be common to all runs or bad things will
+    // happen.
     private String[] epNames;
     private String[] runNames;
 
-    // Create one statistics object for each data type read from
-    // the summary format. These can be reused independently.
-    private ProjectionsStatistics timeStats; 
-    private ProjectionsStatistics numCallsStats;
-    
     /**
      *  Constructs the sets of StsReaders and SummaryReaders (which on 
      *  construction, reads the appropriate files and holds its data).
@@ -80,9 +74,6 @@ public class MultiRunData
     public MultiRunData(String listOfStsFilenames[]) 
 	throws IOException
     {
-	timeStats = new ProjectionsStatistics();
-	numCallsStats = new ProjectionsStatistics();
-
 	try {
 	    numRuns = listOfStsFilenames.length;
 
@@ -94,123 +85,108 @@ public class MultiRunData
 
 	    stsReaders = new StsReader[numRuns];
 	    int pesPerRun[] = new int[numRuns];
-	    sumReaders = new GenericSummaryReader[numRuns][];
 
-	    // The run sequence supplied by the sts file list is not
-	    // necessarily sorted  in order of number of PEs.
+	    // The run sequence supplied by the sts file list MUST BE
+	    // sorted  in order of number of PEs.
+	    // For now, this will have to suffice. Perhaps in future
+	    // we'd be able to find a flexible (and meaningful) way to 
+	    // deal with arbitrary sets of data.
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
 		    new StsReader(listOfStsFilenames[run]);
 		pesPerRun[run] = stsReaders[run].getProcessorCount();
 	    }
+	    // ensure that both the stsReaders array and pesPerRun array
+	    // are sorted and consistent.
+	    sortedStsMap = MiscUtil.sortAndMap(pesPerRun);
+	    MiscUtil.applyMap(stsReaders, sortedStsMap);
 
-	    sortedStsMap = MiscUtil.sort(pesPerRun);
+	    // ***** Apply consistency checks ***** 
 
+	    // If summary files exist, read those first
+	    // else read log files. This must be uniformly true for all
+	    // runs. The PE file set need not be complete ... we'll work
+	    // with whatever information we have and approximate from there.
+	    boolean hasSummary = true;
+	    boolean hasLog = true;
 	    for (int run=0; run<numRuns; run++) {
-		int numPE = pesPerRun[run];
-		sumReaders[run] =
-		    new GenericSummaryReader[numPE];
-		for (int pe=0; pe<numPE; pe++) {
-		    sumReaders[run][pe] =
-			new GenericSummaryReader(getSumFilename(listOfStsFilenames[sortedStsMap[run]],
-								pe),
-						 Analysis.getVersion());
-		}
+		hasSummary = (hasSummary && stsReaders[run].hasSumFiles());
+		hasLog = (hasLog && stsReaders[run].hasLogFiles());
 	    }
 
 	    // there has to be at least one run and all sts files have to
 	    // agree on the number of entries (or we will be comparing
 	    // oranges with apples)
 	    numEPs = stsReaders[0].getEntryCount();
-
-	    // acquiring epNames and run names
+	    for (int run=1; run<numRuns; run++) {
+		if (numEPs != stsReaders[run].getEntryCount()) {
+		    System.err.println("Error! Incompatible data sets!");
+		    System.exit(-1);
+		}
+	    }
+	    // acquiring epNames and run names from the first run since
+	    // the rest are consistent.
 	    epNames = new String[numEPs];
 	    for (int ep=0; ep<numEPs; ep++) {
 		epNames[ep] = stsReaders[0].getEntryNames()[ep][0];
 	    }
-	    
+
+	    // generating the (somewhat) human-readable names of runs.
 	    runNames = new String[numRuns];
 	    for (int run=0; run<numRuns; run++) {
 		runNames[run] = "(" + pesPerRun[run] + 
 		    ")" + "[" + 
-		    stsReaders[sortedStsMap[run]].getMachineName() + "]";
+		    stsReaders[run].getMachineName() + "]";
 	    }
 
-	    // begin computing information
-	    computeBaseInformation();
+	    // setup the base Table data for the readers to fill in.
+	    dataTable = 
+		new double[NUM_TYPES][numRuns][numEPs];
+	    // setup the wall times for each of the runs.
+	    runWallTimes = new double[numRuns];
+
+	    // ***** Read data files. *****
+	    // Solution to the horrendous memory usage: we only require
+	    // the summarized information. Hence only one reader is
+	    // required at any one time.
+	    if (hasSummary) {
+		GenericSummaryReader reader;
+		OrderedIntList validPEs;
+		for (int run=0; run<numRuns; run++) {
+		    int numPE = pesPerRun[run];
+		    validPEs = 
+			stsReaders[run].getValidProcessorList(StsReader.SUMMARY);
+		    validPEs.reset();
+		    // approximates any incomplete data by scaling the values
+		    // actually read by a scale factor.
+		    double scale = numPE/(validPEs.size()*1.0);
+		    while (validPEs.hasMoreElements()) {
+			int pe = validPEs.nextElement();
+			reader = 
+			    new GenericSummaryReader(stsReaders[run].getSumName(pe),
+						     Analysis.getVersion());
+			for (int ep=0; ep<numEPs; ep++) {
+			    dataTable[TYPE_TIME][run][ep] += 
+				reader.epData[ep][GenericSummaryReader.TOTAL_TIME] * scale;
+			    dataTable[TYPE_TIMES_CALLED][run][ep] +=
+				reader.epData[ep][GenericSummaryReader.NUM_MSGS] * scale;
+			}
+			runWallTimes[run] += reader.numIntervals *
+			    reader.intervalSize * 1000000.0 * scale;
+		    }
+		}
+	    } else if (hasLog) {
+	    } else {
+		// no data available!!! BAD!!!
+		System.err.println("No data available! Catastrophic error!");
+		System.exit(-1);
+	    }
 	} catch (IOException e) {
 	    throw new IOException("MultiRun data read failed: " + 
 				  Character.LINE_SEPARATOR + e);
 	}
     }
     
-    /**
-     *  This method acquires the summary filename from the
-     *  sts filename.
-     *
-     *  **CW** BUggy ... cannot deal with normal log-generated sts files.
-     *  Please fix.
-     */
-    private String getSumFilename(String stsFilename, int pe) {
-	String  withoutSts = 
-	    stsFilename.substring(0, stsFilename.lastIndexOf('.'));
-	// behavior depends on whether the sts file is a summary based one
-	// or a standard sts file.
-	if (withoutSts.substring(withoutSts.lastIndexOf('.'), 
-				 withoutSts.length()).equals(".sum")) {
-	    return withoutSts.substring(0, withoutSts.lastIndexOf('.')) +
-		"." + pe + ".sum";
-	} else {
-	    return withoutSts + "." + pe + ".sum";
-	}
-    }
-    
-    /**
-     *  Computes data for each entry in dataTable from the readers using
-     *  the inherited accumulate methods from ProjectionsData across PEs.
-     *
-     *  The simplest of such computations is the sum of all values. In
-     *  future, however, we may want to compute simple statistics such
-     *  as the mean and variance of the data across PEs.
-     */
-    private void computeBaseInformation() {
-	dataTable = 
-	    new double[NUM_TYPES][numRuns][numEPs];
-
-	for (int run=0; run<numRuns; run++) {
-	    for (int ep=0; ep<numEPs; ep++) {
-		// gathering statistics across all PEs
-		// make sure statistics objects are clean.
-		timeStats.reset();
-		numCallsStats.reset();
-		for (int pe=0; pe<stsReaders[run].getProcessorCount(); pe++) {
-		    // this is silly because of a design fault where
-		    // GenericSummaryReader uses a reversed indexing scheme
-		    // from this code.
-		    timeStats.accumulate(sumReaders[run][pe].epData[ep][GenericSummaryReader.TOTAL_TIME]);
-		    numCallsStats.accumulate(sumReaders[run][pe].epData[ep][GenericSummaryReader.NUM_MSGS]);
-		}
-		dataTable[TYPE_TIME][run][ep] = timeStats.getSum();
-		dataTable[TYPE_TIMES_CALLED][run][ep] =
-		    numCallsStats.getSum();
-	    }
-	}
-
-	// other data - run total times
-	runWallTimes = new double[numRuns];
-	for (int run=0; run<numRuns; run++) {
-	    timeStats.reset();
-	    for (int pe=0; pe<stsReaders[run].getProcessorCount(); pe++) {
-		// intervalSize in sumReaders is given in seconds. However,
-		// we are working with microseconds.
-		timeStats.accumulate(sumReaders[run][pe].numIntervals *
-				     (sumReaders[run][pe].intervalSize*
-				      1000000.0));
-	    }
-	    runWallTimes[run] = timeStats.getSum();
-	}
-    }
-
     // Accessor Methods
 
     /**

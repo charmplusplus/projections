@@ -30,8 +30,10 @@ public class MultiRunWindow extends ProjectionsWindow
     // Gui components
     private MultiRunControlPanel controlPanel;
     private MultiRunTables tablesPanel;
-    private AreaGraphPanel graphPanel;
+    private GraphPanel graphPanel;
+    private Graph graphCanvas;
 
+    private MultiRunData data;
     private MultiRunDataAnalyzer analyzer;
 
     private JPanel mainPanel;
@@ -52,6 +54,7 @@ public class MultiRunWindow extends ProjectionsWindow
     {
 	super(parentWindow, myWindowID);
 	setBackground(Color.lightGray);
+	showDialog();
     }
 
     /**
@@ -97,10 +100,8 @@ public class MultiRunWindow extends ProjectionsWindow
     public void beginAnalysis(ProjectionsFileChooser fc) {
 	String stsFilenames[] = fc.userSelect_returnVal;
 	try {
-	    MultiRunData data = new MultiRunData(stsFilenames);
-	    System.out.println("data read done");
+	    data = new MultiRunData(stsFilenames);
 	    analyzer = new MultiRunDataAnalyzer(data);
-
 	    // setting default data type
 	    selectedDataType = MultiRunData.TYPE_TIME;
 
@@ -110,7 +111,7 @@ public class MultiRunWindow extends ProjectionsWindow
 	    // set up the window GUI for display
 	    createLayout();
 	    pack();
-	    setTitle("Multi-Run Analysis");
+	    setTitle("Multiple Run Analysis");
 	    setVisible(true);
 	} catch (IOException e) {
 	    System.err.println(e.toString());
@@ -153,9 +154,9 @@ public class MultiRunWindow extends ProjectionsWindow
 	    analyzer.getMRXAxisData();
 	MultiRunYAxis yAxis =
 	    analyzer.getMRYAxisData(selectedDataType);
-	Graph graphCanvas =
+	graphCanvas =
 	    new Graph(dataSource, xAxis, yAxis);
-	graphPanel = new AreaGraphPanel(graphCanvas);
+	graphPanel = new GraphPanel(graphCanvas);
 	// for table mode
 	tablesPanel = new MultiRunTables(selectedDataType, analyzer);
     }
@@ -206,7 +207,7 @@ public class MultiRunWindow extends ProjectionsWindow
 			analyzer.getMRXAxisData();
 		    MultiRunYAxis yAxis =
 			analyzer.getMRYAxisData(selectedDataType);
-		    graphPanel.setData(dataSource, xAxis, yAxis);
+		    graphCanvas.setData(dataSource, xAxis, yAxis);
 		    // update tables
 		    tablesPanel.setType(selectedDataType);
 		}

@@ -20,6 +20,7 @@ public class MultiRunControlPanel extends JPanel
     private JPanel dataTypePanel;
     private JRadioButton dataTypeButtons[];
 
+    private JButton displayTable;
     private JButton done;
 
     private Label cmdLineLabel;
@@ -65,6 +66,8 @@ public class MultiRunControlPanel extends JPanel
 
 	dataTypePanel.setBorder(BorderFactory.createLineBorder(Color.black));
 
+	displayTable = new JButton("Display Tables");
+	displayTable.addActionListener(mainWindow);
 	done = new JButton("Close Window");
 	done.addActionListener(mainWindow);
 
@@ -80,7 +83,8 @@ public class MultiRunControlPanel extends JPanel
 
 	gbc.fill = GridBagConstraints.BOTH;
 	
-	Util.gblAdd(this, done,          gbc, 2,1, 1,1, 1,0, 1,1,1,1);
+	Util.gblAdd(this, displayTable,  gbc, 2,1, 1,1, 1,0, 1,1,1,1);
+	Util.gblAdd(this, done,          gbc, 2,2, 1,1, 1,0, 1,1,1,1);
     }
 
     /**

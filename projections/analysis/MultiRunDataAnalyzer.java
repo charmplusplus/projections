@@ -91,6 +91,9 @@ public class MultiRunDataAnalyzer {
     // the summary format. These can be reused independently.
     private ProjectionsStatistics timeStats; 
     private ProjectionsStatistics numCallsStats;
+
+    // OUTPUT data array
+    double outputData[][];
     
     public MultiRunDataAnalyzer(MultiRunData data) {
 
@@ -371,13 +374,12 @@ public class MultiRunDataAnalyzer {
     public MultiRunDataSource getDataSource(int dataType) {
 	// output array - indexed by run then by entry (combination of
 	// both EPs and extra information.
-	double dataArray[][];
 	Color colorMap[];
 
 	int numYvalues =
 	    numEPs - categories[dataType][CAT_EP_INSIGNIFICANT].size() + 1 +
 	    NUM_EXTR_ENTRIES;
-	dataArray = new double[numRuns][numYvalues];
+	outputData = new double[numRuns][numYvalues];
 
 	String titleString = "";
 	switch (dataType) {
@@ -397,16 +399,10 @@ public class MultiRunDataAnalyzer {
 
 	// **CW** 0 will be replaced by an appropriate static
 	// constants.
-	computeOutputArray(dataArray, dataType, 0);
+	computeOutputArray(outputData, dataType, 0);
 	colorMap = computeColorMap(numYvalues, dataType, 0);
-
-	/*
-	for (int i=0; i<colorMap.length; i++) {
-	    System.out.println(colorMap[i]);
-	}
-	*/
-
-	return new MultiRunDataSource(dataArray,
+	
+	return new MultiRunDataSource(outputData,
 				      colorMap,
 				      titleString);
     }
@@ -417,32 +413,34 @@ public class MultiRunDataAnalyzer {
 
     public MultiRunYAxis getMRYAxisData(int dataType) {
 	String title = "";
+	int outAxisType = MultiRunYAxis.TIME; // default
 
 	switch (dataType) {
 	case MultiRunData.TYPE_TIME:
 	    title = "Time summed across processors (us)";
+	    outAxisType = MultiRunYAxis.TIME;
 	    break;
 	case MultiRunData.TYPE_TIMES_CALLED:
 	    title = "Number of times entry point was called";
+	    outAxisType = MultiRunYAxis.MSG;
 	    break;
 	case MultiRunData.TYPE_NUM_MSG_SENT:
 	    title = "Number of messages sent per processor";
+	    outAxisType = MultiRunYAxis.MSG;
 	    break;
 	case MultiRunData.TYPE_SIZE_MSG:
 	    title = "Total amount of data sent (bytes)";
+	    outAxisType = MultiRunYAxis.MSG;
 	    break;
 	}
 
 	ProjectionsStatistics stats =
 	    new ProjectionsStatistics();
-	// **CW**
-	// we can get away with accumulating over dataTable only because
-	// we are using stacked graphs. If possible, should find a more
-	// general solution.
 	for (int run=0; run<numRuns; run++) {
-	    stats.accumulate(dataTable[dataType][run]);
+	    stats.accumulate(outputData[run]);
 	}
-	return new MultiRunYAxis(MultiRunYAxis.TIME,
+
+	return new MultiRunYAxis(outAxisType,
 				 title, 
 				 stats.getMax());
     }

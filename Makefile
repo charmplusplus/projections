@@ -32,10 +32,10 @@ SRC=\
     projections/analysis/GenericLogReader.java\
     projections/analysis/GenericSummaryReader.java\
     projections/analysis/ObjectId.java\
+    projections/analysis/ProjectionsFormatException.java\
     projections/analysis/ProjectionsReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
-    projections/gui/AreaGraphPanel.java\
     projections/gui/BackGroundImagePanel.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\

@@ -7,7 +7,7 @@ public class MiscUtil {
      *  mapping feature is unlikely to be used in large data sets.
      *  As a side effect, the input array also becomes sorted.
      */ 
-    public static int[] sort(int unsorted[]) {
+    public static int[] sortAndMap(int unsorted[]) {
 	int map[];
 	int length;
 	int temp;
@@ -41,18 +41,50 @@ public class MiscUtil {
 
     /**
      *  This method returns only the sort mapping but will not modify the
-     *  input array.
+     *  input array. getSortMap is intended to work with small arrays, so
+     *  the cloning operation is not expected to be too expensive.
      */
     public static int[] getSortMap(int unsorted[]) {
 	int tempArray[] = (int [])(unsorted.clone());
 
-	return sort(tempArray);
+	return sortAndMap(tempArray);
+    }
+
+    /**
+     *  Actually applying a given map to an array of the correct size.
+     *  Code will throw an ArrayIndexOutOfBoundsException if the sizes do
+     *  not match.
+     *
+     *  The simplest solution is to clone the target array and then apply
+     *  the values to the original array. This is alright since applyMap
+     *  is intended to work with smaller arrays.
+     *
+     *  Uses on primitive arrays should first convert it to objects and
+     *  then back again.
+     */
+    public static void applyMap(Object targetArray[], int map[]) {
+	if (targetArray.length != map.length) {
+	    throw new ArrayIndexOutOfBoundsException("Sizes do not match!");
+	}
+	
+	Object tempArray[] = (Object [])(targetArray.clone());
+	for (int i=0; i<map.length; i++) {
+	    targetArray[i] = tempArray[map[i]];
+	}
     }
 
     public static void main(String args[]) {
 	int mydata[] = {4, 6, 2, 3, 1, 8};
+	String myObjectData[] = new String[6]; 
+	// myObjectData is basically an string array that makes sense
+	// if its indices are sorted according to mydata.
+	myObjectData[0] = "than";
+	myObjectData[1] = "your";
+	myObjectData[2] = "Charm++\'s";
+	myObjectData[3] = "better";
+	myObjectData[4] = "My";
+	myObjectData[5] = "Charm++";
 	int result[];
-	// result = MiscUtil.sort(mydata);
 	result = MiscUtil.getSortMap(mydata);
 	for (int i=0; i<mydata.length; i++) {
 	    System.out.print(result[i] + " ");
@@ -60,6 +92,11 @@ public class MiscUtil {
 	System.out.println();
 	for (int i=0; i<mydata.length; i++) {
 	    System.out.print(mydata[i] + " " );
+	}
+	System.out.println();
+	MiscUtil.applyMap(myObjectData, result);
+	for (int i=0; i<myObjectData.length; i++) {
+	    System.out.print(myObjectData[i] + " ");
 	}
 	System.out.println();
     }

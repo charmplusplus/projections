@@ -51,7 +51,7 @@ public class Graph extends JPanel
 
     // for stacked data
     private double[][] stackArray;
-    private int maxSumY;
+    private double maxSumY;
 
     private int width;
     private int w,h;
@@ -170,32 +170,45 @@ public class Graph extends JPanel
 		    tempMax = stackArray[k][numY-1];
 		}
 	    }
-	    maxSumY = (int)(Math.ceil(tempMax));
+	    maxSumY = tempMax;
 	} else {
 	    stackArray = null;
 	}
     }
 
-    // getXValue(x)
-    // 	returns the x value of the bar graph the mouse is currently over
-    // 	if the mouse is not over any bar data, then return -1
+    /**  
+     *  getXValue
+     *	returns the x value of the bar graph the mouse is currently over
+     * 	if the mouse is not over any bar data, then return -1.
+     */
     private int getXValue(int xPos) {
    	if( (xPos > originX) && (xPos < (int)width+originX)) {
-	    int numX = dataSource.getIndexCount();
-	    int x1;
-	    for (int k=0; k<numX; k++) {
-		x1 = originX + (int)(k*pixelincrementX) + 
-		    (int)(pixelincrementX/2);
-		if ((xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2))) {
-		    return k;
-		}
+	    // get the expected value
+	    int displacement = xPos - originX;
+	    int expectedValue = (int)(displacement/pixelincrementX);
+	    // now find out if it the mouse actually falls onto the drawn bar
+	    int x1; 
+	    x1 = originX + (int)(expectedValue*pixelincrementX) +
+		(int)(pixelincrementX/2);
+	    if ((xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2))) {
+		return expectedValue;
 	    }
 	}
 	return -1;
     }
 	
+    /**
+     *  getYValue returns the y value INDEX of the graph the mouse is
+     *  currently over if the graph is stacked. Behaviour is currently
+     *  undefined for unstacked graphs.
+     *
+     *  In the case of the Y Axis, the number of Y indices is expected to
+     *  be relatively small, even though the range of Y can be very large.
+     *  Hence, the array looping code is adequate for now.
+     */
     private int getYValue(int xVal, int yPos) {
-	if ((xVal >= 0) && (yPos < originY) && (yPos > 30) && 
+	if ((xVal >= 0) && 
+	    (yPos < originY) && (yPos > 30) && 
 	    (stackArray != null)) {
 	    int numY = dataSource.getValueCount();
 	    int y;
@@ -281,9 +294,8 @@ public class Graph extends JPanel
 		bubble.setVisible(true);
 		bubbleXVal = xVal;
 		bubbleYVal = yVal;
-		//System.out.println(bubbleXVal +", " + bubbleYVal);	
 	    } else {
-		//System.out.println("not Stacked");
+		// do nothing
 	    }
 	}
     }
@@ -387,8 +399,8 @@ public class Graph extends JPanel
 	// iterations is finite since the number of pixels per tick will
 	// never be allowed to be too small.
 	for (int i=mini;i<maxi; i+=valuesPerTickX) {
-	    curx = originX + (int)(i*pixelincrementX);
-	    curx += (int)(tickIncrementX / 2);
+	    curx = originX + (int)(i*pixelincrementX) + 
+		(int)(tickIncrementX / 2);
 	    // labels have higher lines.
 	    if (i % valuesPerLabelX == 0) {
          	g.drawLine(curx, originY+5, curx, originY-5);
@@ -413,31 +425,19 @@ public class Graph extends JPanel
 	// draw yAxis
 	g.drawLine(originX, originY, originX , 30);
 	
-	int cury;
-	String s;
-	int sw = fm.stringWidth("" + (maxvalueX*xAxis.getMultiplier()));
-
-	// adjust so that the max axis value is in the multiples of 10
-	maxvalueY += (10 - maxvalueY%10);
 	pixelincrementY = (double)(originY-30) / maxvalueY;
-	sw = fm.getHeight();
-      
-	int labelincrementY = (int)Math.ceil((sw + 20) / pixelincrementY);
-	// according to chee wai getBestIncrement is very inefficient
-	labelincrementY = Util.getBestIncrement(labelincrementY);
-	// same functionality could probably be incorporated in a simpler
-	// function
-
-	int subincrement = labelincrementY/10;
-	if (subincrement < 1) subincrement = 1;
-
+	setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
+	int sw = fm.getHeight();
+	int cury;
+	String yLabel;
 	// drawing yAxis divisions
-      	for (int i=0; i<=maxvalueY; i+=subincrement) {
+      	for (long i=0; i<=maxvalueY; i+=valuesPerTickY) {
 	    cury = originY - (int)(i*pixelincrementY);
-            if (i % labelincrementY == 0) {
+            if (i % valuesPerLabelY == 0) {
 		g.drawLine(originX+5, cury, originX-5,cury);
-		s = "" + (int)(i); 
-		g.drawString(s, originX-fm.stringWidth(s)-5, cury + sw/2);
+		yLabel = "" + (long)(i); 
+		g.drawString(yLabel, originX-fm.stringWidth(yLabel)-5, 
+			     cury + sw/2);
 	    } else {
             	g.drawLine(originX+2, cury, originX-2, cury);
 	    }
@@ -453,7 +453,7 @@ public class Graph extends JPanel
 	// represented by each tick AND there is enough pixel resolution
 	// for each bar, we set the width of the visual bar to be 80% of
 	// the tick distance.
-	if ((valuesPerTickX == 1) && (tickIncrementX >= 5.0)) {
+	if ((valuesPerTickX == 1) && (tickIncrementX >= 3.0)) {
 	    barWidth = 0.8*tickIncrementX;
 	} else {
 	    barWidth = 1.0;
@@ -693,7 +693,8 @@ public class Graph extends JPanel
 	int labelWidth = 0;
 	while (true) {
 	    if (axis == X_AXIS) {
-		labelWidth = fm.stringWidth(xAxis.getIndexName((int)maxValue));
+		labelWidth = 
+		    fm.stringWidth(xAxis.getIndexName((int)(maxValue-1)));
 	    } else {
 		labelWidth = fm.getHeight();
 	    }

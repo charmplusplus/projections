@@ -299,6 +299,17 @@ public class TimelineObject extends Component
 		}else{	
 			if(creationLine<2){
 			 	if(data.mesgVector[pCreation] == null || data.mesgVector[pCreation].isEmpty()){
+					// if the processor at which this message was not created load it. 
+					if(data.mesgVector[pCreation]==null){
+						data.addProcessor(pCreation);
+						// if the message send is within the time interval draw the blue line
+						created_message= searchMesg(data.mesgVector[pCreation],EventID);
+						if(created_message != null){
+							data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,this,creationLine);			
+							creationLine = 2;
+						}
+
+					}
 			 	 }else{
 				 	if(creationLine == 0)
 					 	created_message= searchMesg(data.mesgVector[pCreation],EventID);

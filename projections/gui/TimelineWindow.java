@@ -223,7 +223,7 @@ public class TimelineWindow extends Frame
       scaleField.setText(""+1.0);
       if (data.processorList == null) { data.oldplist = null; }
       else { data.oldplist = data.processorList.copyOf(); }
-      procRangeDialog();
+      procRangeDialog(true);
     }
   }
 
@@ -363,13 +363,17 @@ public class TimelineWindow extends Frame
 	     (data.processorList != null && 
 	      !data.processorList.equals(data.oldplist)))
 	  {
-	    procRangeDialog();
+	    procRangeDialog(true);
 	  }
 	  setVisible(true);
 	  
    }
+	
 
-  private void procRangeDialog() {
+
+  public void procRangeDialog(boolean keeplines) {
+		//keeplines describes if the lines from message creation
+		// to execution are to be retained or not.
     setCursor(new Cursor(Cursor.WAIT_CURSOR));
     data.tlh = data.tluh * data.numPs;
     VSB.setMaximum(data.tlh);
@@ -384,7 +388,7 @@ public class TimelineWindow extends Frame
 	  for(int i=0; i<data.userEventsArray[p].length; i++)
 	    displayCanvas.add(data.userEventsArray[p][i]);    
     
-    setAllSizes(true);
+    setAllSizes(keeplines);
     labelCanvas.makeNewImage();
     axisTopCanvas.makeNewImage();
     axisBotCanvas.makeNewImage();

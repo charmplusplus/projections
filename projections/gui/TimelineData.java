@@ -47,6 +47,7 @@ public class TimelineData
    
    public TimelineObject[][] tloArray;
    public Vector [] mesgVector;	  
+	 public Vector [] oldmesgVector;
 	
    UserEvent[][] userEventsArray = null;
    
@@ -144,6 +145,7 @@ public class TimelineData
 	//	System.out.println("createTLOArray() called in TimelineData \n");
 	  TimelineObject[][] oldtloArray = tloArray;
 	  UserEvent[][] oldUserEventsArray = userEventsArray;
+		oldmesgVector = mesgVector;
 	  mesgVector = new Vector[Analysis.getNumProcessors()];
 	  for(int i=0;i < Analysis.getNumProcessors();i++){
 	  	mesgVector[i] = null;
@@ -176,6 +178,7 @@ public class TimelineData
 			   if(beginTime == oldBT && endTime == oldET) {
 			     tloArray[newpindex] = oldtloArray[oldpindex];
 			     userEventsArray[newpindex] = oldUserEventsArray[oldpindex];
+					 mesgVector[oldp] = oldmesgVector[newp];
 			   }
 			   else
 			   {
@@ -298,7 +301,6 @@ public class TimelineData
    }   
    private TimelineObject[] getData(int pnum, int index)  // index into userEventArray
    {
-		//System.out.println("getData called in TimelineData \n");
 	  Vector tl, msglist, packlist;
 	  TimelineEvent tle;
 
@@ -574,6 +576,15 @@ public class TimelineData
 			}
 		}
 		mesgCreateExecVector.clear();
+	 }
+
+
+	 public void addProcessor(int pCreation){
+	 	oldplist = processorList.copyOf();
+	 	processorList.insert(pCreation);
+		numPs = processorList.size();
+		processorString = processorList.listToString();
+		timelineWindow.procRangeDialog(false);
 	 }
 }
 

@@ -1,8 +1,5 @@
 package projections.gui.count;
 
-// JMU: made sortByColumn(int) private because it doesn't update the model
-//      after it is called!!!
-
 /**
  * A sorter for TableModels. The sorter has a model (conforming to TableModel) 
  * and itself implements TableModel. TableSorter does not store or copy 
@@ -16,6 +13,10 @@ package projections.gui.count;
  * with the rows in a different order. The sorting algorthm used is stable 
  * which means that it does not move around rows when its comparison 
  * function returns 0 to denote that they are equivalent. 
+ *
+ * JMU: made sortByColumn(int) private because it doesn't update the model
+ *      after it is called!!!
+ *      made various other modes
  *
  * @version 1.5 12/17/97
  * @author Philip Milne

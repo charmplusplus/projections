@@ -8,6 +8,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import javax.swing.event.*;
+import javax.swing.border.*;
+import javax.swing.plaf.*;
 
 import projections.analysis.*;
 import projections.gui.*;
@@ -60,15 +62,15 @@ public class CounterTable extends AbstractTableModel
       if (columnIndex == 0) { return "Entry Point"; }
       else {
 	int counter = (columnIndex-1) / EPValue.NUM_VALUES_PER_COUNTER;
-	String cStr = ":"+currSheet_.counters[counter].counterCode;
+	String code = currSheet_.counters[counter].counterCode;
 	int pos = (columnIndex-1) % EPValue.NUM_VALUES_PER_COUNTER;
 	switch (pos) {
-	  case EPValue.AVG_CALLED: return EPValue.AVG_CALLED_STR+cStr;
-	  case EPValue.AVG_TIME:   return EPValue.AVG_TIME_STR+cStr;
-	  case EPValue.AVG_CVAL:   return EPValue.AVG_CVAL_STR+cStr;
-	  case EPValue.AVG_CSTDEV: return EPValue.AVG_CSTDEV_STR+cStr;
-	  case EPValue.MAX_CVAL:   return EPValue.MAX_CVAL_STR+cStr;
-	  case EPValue.MIN_CVAL:   return EPValue.MIN_CVAL_STR+cStr;
+	  case EPValue.AVG_CALLED: return EPValue.AVG_CALLED_STR+":"+code;
+	  case EPValue.AVG_TIME:   return EPValue.AVG_TIME_STR+":"+code;
+	  case EPValue.AVG_CVAL:   return code+":"+EPValue.AVG_CVAL_STR;
+	  case EPValue.AVG_CSTDEV: return code+":"+EPValue.AVG_CSTDEV_STR;
+	  case EPValue.MAX_CVAL:   return code+":"+EPValue.MAX_CVAL_STR;
+	  case EPValue.MIN_CVAL:   return code+":"+EPValue.MIN_CVAL_STR;
 	  default: return "ERROR";
 	}
       }
@@ -117,22 +119,74 @@ public class CounterTable extends AbstractTableModel
     throws IOException
   {
     try {
-      int i;
+      int i, j;
       int numFiles = fileMgr.getNumFiles();
       sheet_ = new Sheet[numFiles];
       for (i=0; i<numFiles; i++) { sheet_[i] = new Sheet(fileMgr, i); }
-      currSheet_ = sheet_[0];
-      super.fireTableStructureChanged();
-      table.getColumnModel().getColumn(0).setCellRenderer(leftJustify_);
-      for (i=1; i<currSheet_.numCols; i++) {
-	table.getColumnModel().getColumn(i).setCellRenderer(rightJustify_);
-      }
+      setSheet(0, table);
     }
     catch (IOException e) {
       throw new IOException("ERROR in CounterTable.loadFiles()\n"+
 			    e.getMessage());
     }
   }
+
+  /** Return the list of counters and their colors for this sheet */
+  public Component getCounterPanel(int index) {
+    if (sheet_ == null || sheet_[index] == null) { return null; }
+    CounterListTable clTable = new CounterListTable(sheet_[index].counters);
+    JTable table = new JTable(clTable);
+    table.setRowSelectionAllowed(false);
+    clTable.configure(table);
+    JPanel panel = new JPanel();
+    panel.add(new JScrollPane(table));
+    Dimension d = table.getPreferredSize();
+    int numCounters = sheet_[index].counters.length;
+    // adjust because table doesn't want to display header
+    d.height = Math.min(100, (d.height / numCounters ) * (numCounters + 1));  
+    panel.setPreferredSize(d);
+    return panel;
+  }
+
+  public void setSheet(int index, JTable table) {
+    // save sorted column here, also set columns correctly
+    currSheet_ = sheet_[index];
+    super.fireTableStructureChanged();
+    TableColumn column = null;
+    column = table.getColumnModel().getColumn(0);
+    column.setCellRenderer(leftJustify_);
+    column.setPreferredWidth(250);
+    for (int i=1; i<currSheet_.numCols; i++) {
+      column = table.getColumnModel().getColumn(i);
+      column.setCellRenderer(rightJustify_);
+      column.setPreferredWidth(110);
+      column.setHeaderRenderer(getCounterHeader(i));
+    }
+  }
+
+  private ColorHeader getCounterHeader(int col) {
+    if (currSheet_ != null) {
+      if (col == 0) { return new ColorHeader(null, null); }
+      else {
+	int counter = (col-1) / EPValue.NUM_VALUES_PER_COUNTER;
+	int pos = (col-1) % EPValue.NUM_VALUES_PER_COUNTER;
+	String mod = null;
+	switch (pos) {
+	  case EPValue.AVG_CALLED: mod = EPValue.AVG_CALLED_STR;  break;
+	  case EPValue.AVG_TIME:   mod = EPValue.AVG_TIME_STR;    break;
+	  case EPValue.AVG_CVAL:   mod = EPValue.AVG_CVAL_STR;    break;
+	  case EPValue.AVG_CSTDEV: mod = EPValue.AVG_CSTDEV_STR;  break;
+	  case EPValue.MAX_CVAL:   mod = EPValue.MAX_CVAL_STR;    break;
+	  case EPValue.MIN_CVAL:   mod = EPValue.MIN_CVAL_STR;    break;
+	  default: mod = "ERROR";  break;
+	}
+	return new ColorHeader(
+	  currSheet_.counters[counter].color,
+	  currSheet_.counters[counter].counterCode+": "+mod);
+      }
+    }   
+    else { return new ColorHeader(null, null); }
+  } 
 
   public void createGraph(int[] selectedRows) {
     if (selectedRows.length == 0) {
@@ -247,6 +301,8 @@ public class CounterTable extends AbstractTableModel
     new DefaultTableCellRenderer();
   private DecimalFormat intFormat_ = new DecimalFormat();
   private DecimalFormat doubleFormat_ = new DecimalFormat();
+  private static final LineBorder border_ = (LineBorder)
+	BorderUIResource.LineBorderUIResource.createGrayLineBorder();
   
   /** Each sheet represents a simulation. */
   private class Sheet {
@@ -291,19 +347,10 @@ public class CounterTable extends AbstractTableModel
     private int getProcIndex(File file, int foo) { return foo; }
   }
 
-  private class Counter {
-    public String counterCode = null;
-    public String description = null;
-
-    public Counter(String code, String desc) { 
-      counterCode = code; 
-      description = desc;
-    }
-  };
-
   /** Represents each row in the table. */
   private class EPValue { 
-    public final static int NUM_VALUES_PER_COUNTER = 6;
+    public final static int NUM_VALUES_PER_COUNTER = 3;
+    public final static int LONG_NUM_VALUES_PER_COUNTER = 6;
 
     public final static int AVG_CALLED = 0;
     public final static int AVG_TIME   = 1;
@@ -312,12 +359,12 @@ public class CounterTable extends AbstractTableModel
     public final static int MAX_CVAL   = 4;
     public final static int MIN_CVAL   = 5;
     
-    public final static String AVG_CALLED_STR = "avg_called_per_proc";
-    public final static String AVG_TIME_STR   = "avg_time_per_proc";
-    public final static String AVG_CVAL_STR   = "avg_val_counter";
-    public final static String AVG_CSTDEV_STR = "avg_stdev_counter";
-    public final static String MAX_CVAL_STR   = "max_val_counter";
-    public final static String MIN_CVAL_STR   = "min_val_counter";
+    public final static String AVG_CALLED_STR = "numCalled per proc (avg)";
+    public final static String AVG_TIME_STR   = "totTime(s) per proc (avg)";
+    public final static String AVG_CVAL_STR   = "per EP (avg over all procs)";
+    public final static String AVG_CSTDEV_STR = "stDev per EP (avg over all procs)";
+    public final static String MAX_CVAL_STR   = "maxCount over all procs";
+    public final static String MIN_CVAL_STR   = "minCount over all procs";
 
     public String           name    = null;
     public CounterSummary[] summary = null;
@@ -484,14 +531,16 @@ public class CounterTable extends AbstractTableModel
 	t.whitespaceChars('[', '[');
 	t.whitespaceChars(']', ']');
 	t.wordChars('_', '_');
+	t.wordChars('(', '(');
+	t.wordChars(')', ')');
 	t.checkNextString(code);
 	String typeStr = null;
 	switch (type) {
           case NUM_CALLED: typeStr = "num_called";     break;
-          case TOTAL_TIME: typeStr = "total_time";     break;
+          case TOTAL_TIME: typeStr = "total_time(s)";  break;
           case MAX_VALUE:  typeStr = "max_value";      break;
           case MIN_VALUE:  typeStr = "min_value";      break;
-          case AVG_COUNT:  typeStr = "average_count";  break;
+          case AVG_COUNT:  typeStr = "avg_count";      break;
           default:         typeStr = "UNKNOWN TYPE";   break;
 	}
 	t.checkNextString(typeStr);

@@ -23,11 +23,21 @@ public class CounterFrame extends JFrame
   /** Constructor. */
   public CounterFrame() { 
     super("Performance Counter Analysis");
-    // set up table
+    // set up table and tabs
     sorter_ = new TableSorter(cTable_);
     jTable_ = new JTable(sorter_);
+    jTable_.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
     sorter_.addMouseListenerToHeaderInTable(jTable_);
     jTable_.setColumnSelectionAllowed(false);
+    JPanel mainPanel = new JPanel(new BorderLayout());
+    tabbedPane_.addChangeListener(new ChangeListener() {
+      public void stateChanged(ChangeEvent e) {
+	cTable_.setSheet(tabbedPane_.getSelectedIndex(), jTable_);
+	// sorter_.tableChanged(new TableModelEvent(sorter_));
+      }
+    });
+    mainPanel.add(tabbedPane_, BorderLayout.NORTH);
+    mainPanel.add(new JScrollPane(jTable_), BorderLayout.CENTER);
     // set up bottom stuff
     JPanel panel = new JPanel(new FlowLayout());
     progress_.setBorderPainted(true);
@@ -46,7 +56,7 @@ public class CounterFrame extends JFrame
     // create window
     super.getContentPane().setLayout(new BorderLayout());
     super.getContentPane().add(createMenu(), BorderLayout.NORTH);
-    super.getContentPane().add(new JScrollPane(jTable_), BorderLayout.CENTER);
+    super.getContentPane().add(mainPanel, BorderLayout.CENTER);
     super.getContentPane().add(panel, BorderLayout.SOUTH);
     // define closing behavior
     super.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -62,11 +72,19 @@ public class CounterFrame extends JFrame
   public void loadFiles() 
     throws Exception 
   {
+    int i;
     if (fileMgr_ == null) { 
       throw new Exception("ERROR in CounterFrame.loadFiles():\n"+
 			  "      Must call setFileMgr before load files!\n");
     }
     cTable_.loadFiles(fileMgr_, progress_, jTable_);
+    System.out.println("Finished loading files");
+    tabbedPane_.removeAll();
+    for (i=0; i<fileMgr_.getNumFiles(); i++) {
+      String name = getRunName(i);
+      tabbedPane_.addTab(name, null, cTable_.getCounterPanel(i), 
+			 fileMgr_.getStsFile(i).getCanonicalPath());
+    }
     jTable_.tableChanged(new TableModelEvent(
       cTable_, 0, cTable_.getRowCount()-1, TableModelEvent.ALL_COLUMNS));
   }
@@ -101,12 +119,26 @@ public class CounterFrame extends JFrame
     });
     return menuBar;
   }
+
+  private String getRunName(int idx) 
+    throws IOException
+  {
+    File stsFile = fileMgr_.getStsFile(idx);
+    String parentStr = stsFile.getParent();
+    File parent = new File(parentStr);
+    String parentParentStr = parent.getParent();
+    String retVal = 
+      parentStr.substring(parentParentStr.length()+1, parentStr.length());
+    return retVal;
+  }
+
   
-  TableSorter        sorter_   = null;
-  JTable             jTable_   = null;
-  CounterTable       cTable_   = new CounterTable();
-  ProjectionsFileMgr fileMgr_  = null;
-  JProgressBar       progress_ = new JProgressBar();
+  TableSorter        sorter_      = null;
+  JTable             jTable_      = null;
+  CounterTable       cTable_      = new CounterTable();
+  ProjectionsFileMgr fileMgr_     = null;
+  JProgressBar       progress_    = new JProgressBar();
+  JTabbedPane        tabbedPane_  = new JTabbedPane();
 }
 
 

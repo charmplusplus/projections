@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 
 public class Util 
 {
@@ -82,7 +83,58 @@ public class Util
 	  }
 
 	  return m;
+   }
+
+/* Swing version of the above function */   
+   public static JMenu makeJMenu(Object parent, Object[] items, Object target)
+   {  
+	  JMenu m = null;
+	  if (parent instanceof JMenu)
+		 m = (JMenu)parent;
+	  else if (parent instanceof String)
+		 m = new JMenu((String)parent);
+	  else
+		 return null;
+
+	  for (int i = 0; i < items.length; i++)
+	  {  
+		 if (items[i] instanceof String)
+		 {  
+			JMenuItem mi = new JMenuItem((String)items[i]);
+			if (target instanceof ActionListener)
+			{
+			   mi.addActionListener((ActionListener)target);
+			}
+			m.add(mi);
+		 }
+		 else if (items[i] instanceof JCheckBoxMenuItem && target instanceof ItemListener)
+		 {  
+			JCheckBoxMenuItem cmi = (JCheckBoxMenuItem)items[i];
+			cmi.addItemListener((ItemListener)target);
+			m.add(cmi);
+		 }
+		 else if (items[i] instanceof JRadioButtonMenuItem)
+		 {  
+			JRadioButtonMenuItem cmi = (JRadioButtonMenuItem)items[i];
+			cmi.addActionListener((ActionListener)target);
+			m.add(cmi);
+		 }
+		 else if (items[i] instanceof JMenuItem)
+		 {  
+			JMenuItem mi = (JMenuItem)items[i];
+			if (target instanceof ActionListener)
+			   mi.addActionListener((ActionListener)target);
+			m.add(mi);
+		 }
+		 else if (items[i] == null)
+		 {
+			m.addSeparator();
+		 }
+	  }
+
+	  return m;
    }   
+
    public static void waitForImage(Component component, Image image) 
    {
 	  MediaTracker tracker = new MediaTracker(component);

@@ -119,8 +119,8 @@ public class EntryPointWindow extends JFrame implements ActionListener
 					  	outputFile.write("\n");
 					}
 					outputFile.close();
-				}
 				JOptionPane.showMessageDialog(this,"File Saved","Information",JOptionPane.INFORMATION_MESSAGE);
+				}
 			   }catch(Exception e){
 				System.out.println("Exception: "+e);
 				JOptionPane.showMessageDialog(this,"Error While Saving File" + e,"Error",JOptionPane.ERROR_MESSAGE);

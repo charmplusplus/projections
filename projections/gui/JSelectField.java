@@ -1,34 +1,22 @@
 package projections.gui;
 
-import java.awt.*;
+import javax.swing.*;
 import java.awt.event.*;
+/** This class is used for the input of processor range
+*   validates for proper range */
 
-/** Validates processor range input
-*   @deprecated In the process of conversion to Swing... Use JSelectField instead */
-
-public class SelectField extends TextField
-   implements TextListener
+public class JSelectField extends JTextField
 {
    private String lastValue;
    private int    lastCaretPosition;
-   
-   public SelectField(String defval, int size)
+
+   public JSelectField(String defval, int size)
    {
 	  super(defval, size);
-	  addTextListener(this);
-	  addKeyListener(new KeyAdapter()
-	  {
-		 public void keyTyped(KeyEvent evt)
-		 {
-			char ch = evt.getKeyChar();
-			if(!(('0' <= ch && ch <= '9') || ch=='-' || ch==',' || ch==':' || Character.isISOControl(ch)))
-			   evt.consume();
-			else
-			   lastCaretPosition = getCaretPosition();
-		 }
-	  });
+          setInputVerifier(new RangeVerifier());  
 	  lastValue = "" + defval;
-   }   
+   } 
+  
    private void checkValue()
    {
 	  String tmp = getText();
@@ -185,8 +173,25 @@ public class SelectField extends TextField
 	  
 	  return tmpList;
    }   
+
+/* verify if the input characters are valid or not */
+
+   class RangeVerifier extends InputVerifier {
+     public boolean verify(JComponent input) {
+       JTextField tf = (JTextField) input;
+       String procRange = tf.getText();
+       for(int i=0; i<procRange.length(); i++)
+       {
+	char ch = procRange.charAt(i);
+        if(!(('0' <= ch && ch <= '9') || ch=='-' || ch==',' || ch==':' || Character.isISOControl(ch)))
+		return false;
+       }
+       return true;
+     }
+   }
+
    public void textValueChanged(TextEvent evt)
    {
-	  checkValue();
-   }   
+          checkValue();
+   }  
 }

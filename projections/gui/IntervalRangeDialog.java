@@ -1,16 +1,20 @@
 package projections.gui;
 
-import java.awt.*;
+//import java.awt.*;
+import javax.swing.*;
+import java.awt.Insets;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
 import java.awt.event.*;
 
 public class IntervalRangeDialog extends RangeDialog
     implements ActionListener, KeyListener, FocusListener
 {
     // Additional GUI objects
-    Panel sizePanel, thresholdPanel;
+    JPanel sizePanel, thresholdPanel;
 
-    TimeTextField sizeField;
-    TimeTextField thresholdField;
+    JTimeTextField sizeField;
+    JTimeTextField thresholdField;
 
     // Additional Data definitions
     long intervalSize;
@@ -19,18 +23,18 @@ public class IntervalRangeDialog extends RangeDialog
     public IntervalRangeDialog(ProjectionsWindow parentWindow,
 			       String titleString)
     {
-	super(parentWindow, titleString);
+	super((IntervalWindow)parentWindow, titleString);
 	intervalSize = 1000;  // default to 1ms.
 	threshold = 0;        // default to no threshold.
     }
 
     public void actionPerformed(ActionEvent evt) 
     {
-	if (evt.getSource() instanceof Button) {
-	    Button b = (Button) evt.getSource();
+	if (evt.getSource() instanceof JButton) {
+	    JButton b = (JButton) evt.getSource();
 	    if (b == bOK) {
 		// point user to an inconsistent field.
-		TextComponent someField = checkConsistent();
+		JTextField someField = checkConsistent();
 		if (someField != null) {
 		    someField.selectAll();
 		    someField.requestFocus();
@@ -43,16 +47,16 @@ public class IntervalRangeDialog extends RangeDialog
 		updateData(sizeField);
 		updateData(thresholdField);
 	    }
-	} else if (evt.getSource() instanceof TextComponent) {
+	} else if (evt.getSource() instanceof JTextField) {
 	    // do nothing. Everything supported in superclass.
 	}
 	// let superclass handle its own action routines.
 	super.actionPerformed(evt);
     }
 
-    Panel createMainLayout() {
-	Panel inputPanel = new Panel();
-	Panel baseMainPanel = super.createMainLayout();
+    JPanel createMainLayout() {
+	JPanel inputPanel = new JPanel();
+	JPanel baseMainPanel = super.createMainLayout();
 
 	GridBagLayout gbl      = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
@@ -60,10 +64,10 @@ public class IntervalRangeDialog extends RangeDialog
 	gbc.insets = new Insets(2,2,2,2);
 
 	// create interval size panel
-	sizePanel = new Panel();
+	sizePanel = new JPanel();
 	sizePanel.setLayout(gbl);
-	Label sizeLabel = new Label("Interval Size :", Label.LEFT);
-	sizeField = new TimeTextField(intervalSize, 12);
+	JLabel sizeLabel = new JLabel("Interval Size :", JLabel.LEFT);
+	sizeField = new JTimeTextField(intervalSize, 12);
 	sizeField.addActionListener(this);
 	sizeField.addKeyListener(this);
 	sizeField.addFocusListener(this);
@@ -71,10 +75,10 @@ public class IntervalRangeDialog extends RangeDialog
 	Util.gblAdd(sizePanel, sizeField, gbc, 1,0, 1,1, 1,1);
 
 	// create threshold panel
-	thresholdPanel = new Panel();
+	thresholdPanel = new JPanel();
 	thresholdPanel.setLayout(gbl);
-	Label thresholdLabel = new Label("EP threshold :", Label.LEFT);
-	thresholdField = new TimeTextField(threshold, 12);
+	JLabel thresholdLabel = new JLabel("EP threshold :", JLabel.LEFT);
+	thresholdField = new JTimeTextField(threshold, 12);
 	thresholdField.addActionListener(this);
 	thresholdField.addKeyListener(this);
 	thresholdField.addFocusListener(this);
@@ -89,8 +93,8 @@ public class IntervalRangeDialog extends RangeDialog
 	return inputPanel;
     }
 
-    void updateData(TextComponent field) {
-	if (field instanceof TimeTextField) {
+    void updateData(JTextField field) {
+	if (field instanceof JTimeTextField) {
 	    if (field == sizeField) {
 		intervalSize = sizeField.getValue();
 	    } else if (field == thresholdField) {
@@ -100,7 +104,7 @@ public class IntervalRangeDialog extends RangeDialog
 	super.updateData(field);
     }
 
-    TextComponent checkConsistent() {
+    JTextField checkConsistent() {
 	// interval size should not be less than or equal to zero us.
 	// it should also not be larger than the selected time range.
 	if (intervalSize <= 0 || intervalSize > totalTime) {
@@ -114,7 +118,12 @@ public class IntervalRangeDialog extends RangeDialog
     }
 
     void setAllData() {
-	// SINDHURA, FILL THIS IN ACCORDING TO WHAT YOUR WINDOW REQUIRES.
+	// set interval size & threshold in the IntervalWindow
+	// then call the superclass function to set other data like processors and range
+	// is there a better way to do this??
+	IntervalWindow parentWindow_ = (IntervalWindow)parentWindow;
+	parentWindow_.setIntervalSize(intervalSize);
+	parentWindow_.setThresholdTime(threshold);
 	super.setAllData();
     }
 }

@@ -21,6 +21,7 @@ public class MainWindow extends Frame
    private HistogramWindow      histogramWindow;
    private StlWindow            stlWindow;
    private MultiRunWindow       multiRunWindow;
+   private IntervalWindow 	intervalWindow;
 
    private AboutDialog          aboutDialog;
 
@@ -75,7 +76,9 @@ public class MainWindow extends Frame
 			ShowAboutDialog(this);
 		 // does not depend on tools being enabled
 		 else if(arg.equals("Multirun Analysis"))
-		     ShowMultiRunWindow();
+		        ShowMultiRunWindow();
+		 else if(arg.equals("Interval Graph"))
+		        ShowIntervalWindow();
 
 		 else if(toolsEnabled)
 		 {
@@ -122,6 +125,11 @@ public class MainWindow extends Frame
    {
 	  timelineWindow = null;
    }   
+   public void closeIntervalWindow()
+   {
+	intervalWindow = null;
+   }
+
    private void CreateLayout()
    {
 	  try {
@@ -174,6 +182,7 @@ public class MainWindow extends Frame
 		 "Animations",
 		 "View Log Files",
 		 "Histograms",
+		 "Interval Graph",
 		 "Overview"
 	  },
 	  this));
@@ -275,7 +284,13 @@ public class MainWindow extends Frame
    {
 	   if(multiRunWindow == null)
 		 multiRunWindow = new MultiRunWindow(this);
-   }   
+   } 
+   public void ShowIntervalWindow()
+   {
+	   if(intervalWindow == null)
+		 intervalWindow = new IntervalWindow(this);
+   }
+   
    public void ShowHelpWindow()
    {
 	  if(helpWindow == null)

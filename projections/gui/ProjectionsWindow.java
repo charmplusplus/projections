@@ -3,6 +3,7 @@ package projections.gui;
 import projections.gui.*;
 
 import java.awt.*;
+import javax.swing.*;
 
 /**
  *  ProjectionsWindow
@@ -22,9 +23,9 @@ import java.awt.*;
  *  corresponding dialog (which should be a subclass of RangeDialog).
  *
  */
-
+// changed the ProjectionsWindow to extend JFrame instead of Frame - Sindhura
 public abstract class ProjectionsWindow 
-    extends Frame
+    extends JFrame
 {
     RangeDialog dialog;
     boolean isDialogCancelled = true;

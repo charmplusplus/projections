@@ -2,6 +2,8 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+/** Validates Time input fields
+* @deprecated As a part of conversion to Swing .... Use JTimeTextField instead */
 
 public class TimeTextField extends TextField
    implements TextListener

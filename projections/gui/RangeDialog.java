@@ -1,6 +1,12 @@
 package projections.gui;
 
-import java.awt.*;
+import javax.swing.*;
+import javax.swing.text.*;
+//import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.event.*;
 
 /**
@@ -16,25 +22,25 @@ import java.awt.event.*;
  *  as it was not destroyed and garbage collected.
  *
  */
-public class RangeDialog extends Dialog
+public class RangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
     ProjectionsWindow parentWindow;
 
     // inheritable GUI objects
-    Panel mainPanel, buttonPanel;
+    JPanel mainPanel, buttonPanel;
 
-    SelectField processorsField;
-    TimeTextField startTimeField;
-    TimeTextField endTimeField;
+    JSelectField processorsField;
+    JTimeTextField startTimeField;
+    JTimeTextField endTimeField;
 
-    Panel timePanel, processorsPanel;
-    Button bOK, bUpdate, bCancel;
+    JPanel timePanel, processorsPanel;
+    JButton bOK, bUpdate, bCancel;
 
     // private GUI objects
-    private Label startTextLabel, endTextLabel, totalTimeTextLabel,
+    private JLabel startTextLabel, endTextLabel, totalTimeTextLabel,
 	processorTextLabel;
-    private Label totalTimeLabel, validTimeRangeLabel, validProcessorsLabel;
+    private JLabel totalTimeLabel, validTimeRangeLabel, validProcessorsLabel;
 
     // Data definitions
     long totalTime;
@@ -56,7 +62,7 @@ public class RangeDialog extends Dialog
     public RangeDialog(ProjectionsWindow parentWindow, 
 		       String titleString)
     {
-	super((Frame)parentWindow, titleString, true);
+	super((JFrame)parentWindow, titleString, true);
 
 	this.parentWindow = parentWindow;
 	startTime = 0;
@@ -75,12 +81,12 @@ public class RangeDialog extends Dialog
      */
     public void actionPerformed(ActionEvent evt)
     {
-	if(evt.getSource() instanceof Button) {
-	    Button b = (Button) evt.getSource();
+	if(evt.getSource() instanceof JButton) {
+	    JButton b = (JButton) evt.getSource();
 	  
 	    if(b == bOK) {
 		// point user to an inconsistent field.
-		TextComponent someField = checkConsistent();
+		JTextField someField = checkConsistent();
 		if (someField != null) {
 		    someField.selectAll();
 		    someField.requestFocus();
@@ -100,11 +106,11 @@ public class RangeDialog extends Dialog
 	    }
 	    setVisible(false);
 	    dispose();
-	} else if (evt.getSource() instanceof TextComponent) {
+	} else if (evt.getSource() instanceof JTextField) {
 	    // perform an update in response to an "Enter" action event
 	    // since the Enter key is typically hit after some keyboard
 	    // input.
-	    updateData((TextComponent)evt.getSource());
+	    updateData((JTextField)evt.getSource());
 	    bOK.setEnabled(true);
 	}     
     }   
@@ -117,8 +123,8 @@ public class RangeDialog extends Dialog
 	// when keyboard focus is lost from a text field, it is assumed
 	// that the user has confirmed the data. Hence, perform an update and
 	// enable the OK button.
-	if (evt.getComponent() instanceof TextComponent) {
-	    updateData((TextComponent)evt.getComponent());
+	if (evt.getComponent() instanceof JTextField) {
+	    updateData((JTextField)evt.getComponent());
 	    bOK.setEnabled(true);
 	}
     }
@@ -140,8 +146,8 @@ public class RangeDialog extends Dialog
      */
     public void keyTyped(KeyEvent evt) {
 	int keycode = evt.getKeyCode();
-	if (evt.getComponent() instanceof TextComponent) {
-	    TextComponent field = (TextComponent)evt.getComponent();
+	if (evt.getComponent() instanceof JTextField) {
+	    JTextField field = (JTextField)evt.getComponent();
 	    
 	    switch (keycode) {
 	    case KeyEvent.VK_ENTER:
@@ -193,9 +199,9 @@ public class RangeDialog extends Dialog
 	mainPanel = createMainLayout();
 	buttonPanel = createButtonLayout();
 
-	this.setLayout(new BorderLayout());
-	this.add(mainPanel, BorderLayout.CENTER);
-	this.add(buttonPanel, BorderLayout.SOUTH);
+	this.getContentPane().setLayout(new BorderLayout());
+	this.getContentPane().add(mainPanel, BorderLayout.CENTER);
+	this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
 	layoutComplete = true;
 	
 	pack();
@@ -218,9 +224,9 @@ public class RangeDialog extends Dialog
      *  use the inheritable references to the fields and his/her own 
      *  label objects to construct the layout.
      */
-    Panel createMainLayout() {
+    JPanel createMainLayout() {
 
-	Panel inputPanel = new Panel();
+	JPanel inputPanel = new JPanel();
 
 	// Standard Layout behavior for all subcomponents
 	GridBagLayout      gbl = new GridBagLayout();
@@ -229,12 +235,12 @@ public class RangeDialog extends Dialog
 	gbc.insets = new Insets(2, 2, 2, 2);
 	  
 	// Default processor range layout
-	processorsPanel = new Panel();
+	processorsPanel = new JPanel();
 	processorsPanel.setLayout(gbl);
-	validProcessorsLabel = new Label("Valid Processors = " + 
-					 validProcessors, Label.LEFT);
-	processorTextLabel = new Label("Processors :", Label.LEFT);
-	processorsField = new SelectField(validProcessors, 12);
+	validProcessorsLabel = new JLabel("Valid Processors = " + 
+					 validProcessors, JLabel.LEFT);
+	processorTextLabel = new JLabel("Processors :", JLabel.LEFT);
+	processorsField = new JSelectField(validProcessors, 12);
 	// set listeners
 	processorsField.addActionListener(this);
 	// layout
@@ -246,17 +252,17 @@ public class RangeDialog extends Dialog
 		    gbc, 1,1, 1,1, 1,1);
 
 	// Default time range layout
-	timePanel = new Panel();
+	timePanel = new JPanel();
 	timePanel.setLayout(gbl);
-	validTimeRangeLabel = new Label("Valid Time Range = " +
+	validTimeRangeLabel = new JLabel("Valid Time Range = " +
 					U.t(startTime) + " to " +
-					U.t(endTime), Label.LEFT);
-	startTextLabel = new Label("Start Time :", Label.LEFT);
-	startTimeField = new TimeTextField(startTime, 12);
-	endTextLabel = new Label("End Time :", Label.LEFT);
-	endTimeField = new TimeTextField(endTime, 12);
-	totalTimeTextLabel = new Label("Total Time selected :", Label.LEFT);
-	totalTimeLabel = new Label(U.t(totalTime), Label.LEFT);
+					U.t(endTime), JLabel.LEFT);
+	startTextLabel = new JLabel("Start Time :", JLabel.LEFT);
+	startTimeField = new JTimeTextField(startTime, 12);
+	endTextLabel = new JLabel("End Time :", JLabel.LEFT);
+	endTimeField = new JTimeTextField(endTime, 12);
+	totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
+	totalTimeLabel = new JLabel(U.t(totalTime), JLabel.LEFT);
 	// set listeners
 	startTimeField.addActionListener(this);
 	endTimeField.addActionListener(this);
@@ -303,12 +309,12 @@ public class RangeDialog extends Dialog
      *  use the inheritable references to the buttons and his/her own 
      *  button objects to construct the layout.
      */
-    Panel createButtonLayout() {
-	Panel buttonPanel = new Panel();
+    JPanel createButtonLayout() {
+	JPanel buttonPanel = new JPanel();
 
-	bOK     = new Button("OK");
-	bUpdate = new Button("Update");
-	bCancel = new Button("Cancel");
+	bOK     = new JButton("OK");
+	bUpdate = new JButton("Update");
+	bCancel = new JButton("Cancel");
 	
         buttonPanel.add(bOK);
 	buttonPanel.add(bUpdate);
@@ -331,8 +337,8 @@ public class RangeDialog extends Dialog
      *  Inheriting subclasses should make a superclass call after doing
      *  its own field updates.
      */
-    void updateData(TextComponent field) {
-	if (field instanceof TimeTextField) {
+    void updateData(JTextField field) {
+	if (field instanceof JTimeTextField) {
 	    // if the field is a time-based field
 	    if (field == startTimeField) {
 		startTime = startTimeField.getValue();
@@ -343,7 +349,7 @@ public class RangeDialog extends Dialog
 		totalTime = endTime - startTime;
 		totalTimeLabel.setText(U.t(totalTime));
 	    }
-	} else if (field instanceof SelectField) {
+	} else if (field instanceof JSelectField) {
 	    // if the field is a range selection field
 	    if (field == processorsField) {
 		// if the data is okay, keep it. Otherwise, replace it
@@ -362,7 +368,7 @@ public class RangeDialog extends Dialog
      *  Inheriting subclasses should make a superclass call after doing
      *  its own consistency checks.
      */
-    TextComponent checkConsistent() {
+    JTextField checkConsistent() {
 	// start time cannot be greater or equal to end time
 	if (startTime >= endTime) {
 	    return startTimeField;

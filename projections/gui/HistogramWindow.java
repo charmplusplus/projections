@@ -3,7 +3,9 @@ import projections.gui.graph.*;
 import projections.misc.LogEntryData;
 import projections.analysis.*;
 
-import java.awt.*;
+//import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;
@@ -49,7 +51,7 @@ public class HistogramWindow extends ProjectionsWindow
 		 }
 	  });
 
-	  setBackground(Color.lightGray);
+	  setBackground(Color.black);
 	  setTitle("Projections Histograms");
 
 	  int noEPs = Analysis.getUserEntryCount();
@@ -131,14 +133,14 @@ public class HistogramWindow extends ProjectionsWindow
 
    public void actionPerformed(ActionEvent evt)
    {
-	  if(evt.getSource() instanceof MenuItem)
+	  if(evt.getSource() instanceof JMenuItem)
 	  {
-		 MenuItem m = (MenuItem)evt.getSource();
-		 if(m.getLabel().equals("Set Range"))
+		 JMenuItem m = (JMenuItem)evt.getSource();
+		 if(m.getText().equals("Set Range"))
 		        showDialog();
-		 else if(m.getLabel().equals("Select Entry Points"))
+		 else if(m.getText().equals("Select Entry Points"))
 			showEntryDialog();
-		 else if(m.getLabel().equals("Close"))
+		 else if(m.getText().equals("Close"))
 			close();
 	  }
    } 
@@ -168,7 +170,7 @@ public class HistogramWindow extends ProjectionsWindow
 	  mainPanel.add(graphPanel);
           mainPanel.add(Box.createRigidArea(new Dimension(0,6)));
 	  mainPanel.add(new JScrollPane(statusArea,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
-	  add(mainPanel);
+	  getContentPane().add(mainPanel);
   }  
 
    private void refreshGraph()
@@ -211,7 +213,6 @@ public class HistogramWindow extends ProjectionsWindow
 	  GenericLogReader r;
 	  if(recordEP)
 	  {
-		//epFrame = new EPFrame();
 		if(epFrame == null){
 			epFrame = new EntryPointWindow();
 	  		epFrame.setSize(600,600);
@@ -271,9 +272,9 @@ public class HistogramWindow extends ProjectionsWindow
 
    private void createMenus()
    {
-	  MenuBar mbar = new MenuBar();
+	  JMenuBar mbar = new JMenuBar();
 
-	  mbar.add(Util.makeMenu("File", new Object[]
+	  mbar.add(Util.makeJMenu("File", new Object[]
 	  {
 		 "Set Range",
 		 "Select Entry Points",
@@ -281,21 +282,22 @@ public class HistogramWindow extends ProjectionsWindow
 	  },
 	  this));
 
-          mbar.add(Util.makeMenu("View", new Object[]
+          mbar.add(Util.makeJMenu("View", new Object[]
           {
-                 new CheckboxMenuItem("Show Longest EPs")
+                 new JCheckBoxMenuItem("Show Longest EPs")
           },
           this));
 
-	  Menu helpMenu = new Menu("Help");
+	  // setHelpMenu not yet implemented in JMenuBar
+	  /*Menu helpMenu = new Menu("Help");
 	  mbar.add(Util.makeMenu(helpMenu, new Object[]      {
 
 		 "Index",
 		 "About"
 	  },
 	  this));
+	  mbar.setHelpMenu(helpMenu);*/
 
-	  mbar.setHelpMenu(helpMenu);
-	  setMenuBar(mbar);
+	  setJMenuBar(mbar);
     }
 }

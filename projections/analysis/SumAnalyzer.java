@@ -89,9 +89,12 @@ public class SumAnalyzer extends ProjDefs
 			NumEntryMsgs = new int [nPe][numEntry];
 		}
 		ProcessorUtilization[p] = new int[IntervalCount + 20];
+
 		//Read the SECOND line (processor usage)
 		int nUsageRead=0;
 		boolean error = false;
+/*
+     OLD FORMAT === UNCOMPRESSED ==
 		while (StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) {
 		  try { ProcessorUtilization[p][nUsageRead++] = (int)tokenizer.nval; }
 		  catch (ArrayIndexOutOfBoundsException e) {
@@ -107,6 +110,31 @@ public class SumAnalyzer extends ProjDefs
 		//Make sure we're at the end of the line
 		if (StreamTokenizer.TT_EOL!=tokenType)
 			throw new SummaryFormatException("extra garbage at end of line 2");
+*/
+
+        	while ((tokenType=tokenizer.nextToken()) != 
+		        StreamTokenizer.TT_EOL && nUsageRead < myCount) 
+		{
+          	  if (tokenType == StreamTokenizer.TT_NUMBER) {
+                    int val =  (int)tokenizer.nval;
+            	    ProcessorUtilization[p][nUsageRead++] = val;
+                    if ((tokenType=tokenizer.nextToken()) == '+') 
+		    {
+                        tokenType=tokenizer.nextToken();
+                        if (tokenType !=  StreamTokenizer.TT_NUMBER)
+	                  System.out.println("Unrecorgnized syntax at end of line 2");
+                        for (int i=1; i<(int)tokenizer.nval; i++)
+                        ProcessorUtilization[p][nUsageRead++] = val;
+System.out.println(val+" "+tokenizer.nval);
+                    }
+                    else
+                      tokenizer.pushBack();
+                  }
+                  else 
+	            System.out.println("extra garbage at end of line 2");
+	        }
+                if (myCount != nUsageRead) 
+                  System.out.println("numIntervals not agree" + IntervalCount + "v.s. " + nUsageRead+"!");
 		   
 		// Read in the THIRD line (time spent by entries)
 		CurrentUserEntry = 0;

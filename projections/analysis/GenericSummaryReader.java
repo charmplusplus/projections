@@ -120,6 +120,7 @@ public class GenericSummaryReader
 	epData = new long[numEPs][NUM_TAGS];
 
 	// Read the SECOND line (processor usage)
+/*
 	int nUsageRead=0;
 	while (StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) {
 	    processorUtil[nUsageRead++] = (int)tokenizer.nval;
@@ -128,6 +129,32 @@ public class GenericSummaryReader
 	if (StreamTokenizer.TT_EOL!=tokenType) {
 	    throw new IOException("extra garbage at end of line 2");
 	}
+*/
+	int nUsageRead=0;
+        while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+          if (tokenType == StreamTokenizer.TT_NUMBER) {
+            processorUtil[nUsageRead++] = (int)tokenizer.nval;
+            if ((tokenType=tokenizer.nextToken()) == StreamTokenizer.TT_WORD) {
+              int val =  (int)tokenizer.nval;
+              if (tokenizer.sval.equals(":")) {
+                tokenType=tokenizer.nextToken();
+                if (tokenType !=  StreamTokenizer.TT_NUMBER)
+	          throw new IOException("Unrecorgnized syntax at end of line 2");
+                for (int i=1; i<(int)tokenizer.nval; i++)
+                  processorUtil[nUsageRead++] = val;
+System.out.println(val+" "+tokenizer.nval);
+              }
+              else
+	        throw new IOException("Unrecorgnized garbage at end of line 2");
+            }
+            else
+              tokenizer.pushBack();
+          }
+          else 
+	    throw new IOException("extra garbage at end of line 2");
+	}
+        if (numIntervals != nUsageRead) 
+            throw new IOException("numIntervals not agree!");
 
 	// Read in the THIRD line (time spent by entries)
 	int currentUserEntry = 0;

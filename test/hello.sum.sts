@@ -1,0 +1,115 @@
+MACHINE net-linux
+PROCESSORS 4
+TOTAL_CHARES 32
+TOTAL_EPS 61
+TOTAL_MSGS 14
+TOTAL_PSEUDOS 0
+TOTAL_EVENTS 0
+CHARE 0 null
+CHARE 1 Chare
+CHARE 2 Group
+CHARE 3 FutureBOC
+CHARE 4 FutureMain
+CHARE 5 CkGroupInitCallback
+CHARE 6 CkGroupReadyCallback
+CHARE 7 CkReductionMgr
+CHARE 8 CkLocMgr
+CHARE 9 CkArrayMap
+CHARE 10 RRMap
+CHARE 11 PropMap
+CHARE 12 CkMapsInit
+CHARE 13 CkArray
+CHARE 14 CkVerboseListenerCreator
+CHARE 15 ArrayElement
+CHARE 16 ckcallback_main
+CHARE 17 ckcallback_group
+CHARE 18 TempoChare
+CHARE 19 TempoGroup
+CHARE 20 TempoArray
+CHARE 21 waitqd_QDChare
+CHARE 22 BaseLB
+CHARE 23 NullLB
+CHARE 24 LBDBInit
+CHARE 25 LBDatabase
+CHARE 26 Main
+CHARE 27 Hello
+CHARE 28 dummy_thread_chare
+CHARE 29 dummy_thread_chare
+CHARE 30 dummy_pack_chare
+CHARE 31 dummy_unpack_chare
+ENTRY CHARE 0 null 0 0
+ENTRY CHARE 1 FutureBOC(FutureInitMsg* impl_msg) 3 2
+ENTRY CHARE 2 SetFuture(FutureInitMsg* impl_msg) 3 2
+ENTRY CHARE 3 FutureMain(CkArgMsg* impl_msg) 4 0
+ENTRY CHARE 4 CkGroupInitCallback(void) 5 0
+ENTRY CHARE 5 callMeBack(CkGroupCallbackMsg* impl_msg) 5 3
+ENTRY CHARE 6 CkGroupReadyCallback(void) 6 0
+ENTRY CHARE 7 callMeBack(CkGroupCallbackMsg* impl_msg) 6 3
+ENTRY CHARE 8 CkReductionMgr(void) 7 0
+ENTRY CHARE 9 ReductionStarting(CkReductionNumberMsg* impl_msg) 7 5
+ENTRY CHARE 10 RecvMsg(CkReductionMsg* impl_msg) 7 4
+ENTRY CHARE 11 LateMigrantMsg(CkReductionMsg* impl_msg) 7 4
+ENTRY CHARE 12 MigrantDied(CkReductionNumberMsg* impl_msg) 7 5
+ENTRY CHARE 13 CkLocMgr(const CkGroupID &map, const CkGroupID &lbdb, int numInitial) 8 6
+ENTRY CHARE 14 deliver(CkMessage* impl_msg) 8 -1
+ENTRY CHARE 15 migrateIncoming(CkArrayElementMigrateMessage* impl_msg) 8 7
+ENTRY CHARE 16 updateLocation(const CkArrayIndexMax &idx, int nowOnPe) 8 6
+ENTRY CHARE 17 reclaimRemote(const CkArrayIndexMax &idx, int deletedOnPe) 8 6
+ENTRY CHARE 18 dummyAtSync(void) 8 0
+ENTRY CHARE 19 RRMap(void) 10 0
+ENTRY CHARE 20 PropMap(void) 11 0
+ENTRY CHARE 21 CkMapsInit(CkArgMsg* impl_msg) 12 0
+ENTRY CHARE 22 CkArray(const CkArrayOptions &i, const CkMarshalledMessage &ctorMsg) 13 6
+ENTRY CHARE 23 insertElement(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 24 remoteDoneInserting(void) 13 0
+ENTRY CHARE 25 deliver(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 26 deliverViaQueue(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 27 sendBroadcast(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 28 recvBroadcast(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 29 CkVerboseListenerCreator(void) 14 0
+ENTRY CHARE 30 ArrayElement(CkMigrateMessage* impl_msg) 15 0
+ENTRY CHARE 31 ArrayElement(void) 15 0
+ENTRY CHARE 32 ckDestroy(void) 15 0
+ENTRY CHARE 33 ckcallback_main(CkArgMsg* impl_msg) 16 0
+ENTRY CHARE 34 ckcallback_group(void) 17 0
+ENTRY CHARE 35 call(const CkCallback &c, const CkMarshalledMessage &msg) 17 6
+ENTRY CHARE 36 TempoChare(void) 18 0
+ENTRY CHARE 37 tempoGeneric(TempoMessage* impl_msg) 18 8
+ENTRY CHARE 38 TempoGroup(void) 19 0
+ENTRY CHARE 39 tempoGeneric(TempoMessage* impl_msg) 19 8
+ENTRY CHARE 40 TempoArray(CkMigrateMessage* impl_msg) 20 0
+ENTRY CHARE 41 TempoArray(void) 20 0
+ENTRY CHARE 42 tempoGeneric(TempoMessage* impl_msg) 20 8
+ENTRY CHARE 43 waitqd_QDChare(CkArgMsg* impl_msg) 21 0
+ENTRY CHARE 44 waitQD(void) 21 0
+ENTRY CHARE 45 onQD(CkQdMsg* impl_msg) 21 1
+ENTRY CHARE 46 BaseLB(void) 22 0
+ENTRY CHARE 47 unregister(void) 22 0
+ENTRY CHARE 48 NullLB(void) 23 0
+ENTRY CHARE 49 migrationsDone(void) 23 0
+ENTRY CHARE 50 LBDBInit(CkArgMsg* impl_msg) 24 0
+ENTRY CHARE 51 LBDatabase(void) 25 0
+ENTRY CHARE 52 Main(CkArgMsg* impl_msg) 26 0
+ENTRY CHARE 53 done(void) 26 0
+ENTRY CHARE 54 Hello(CkMigrateMessage* impl_msg) 27 0
+ENTRY CHARE 55 Hello(void) 27 0
+ENTRY CHARE 56 SayHi(int hiNo) 27 6
+ENTRY CHARE 57 dummy_thread_ep 28 10
+ENTRY CHARE 58 dummy_thread_ep 29 11
+ENTRY CHARE 59 dummy_pack_ep 30 12
+ENTRY CHARE 60 dummy_unpack_ep 31 13
+MESSAGE 0 4
+MESSAGE 1 1
+MESSAGE 2 8
+MESSAGE 3 12
+MESSAGE 4 76
+MESSAGE 5 8
+MESSAGE 6 8
+MESSAGE 7 12
+MESSAGE 8 20
+MESSAGE 9 20
+MESSAGE 10 0
+MESSAGE 11 0
+MESSAGE 12 0
+MESSAGE 13 0
+END

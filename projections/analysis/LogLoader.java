@@ -318,12 +318,18 @@ public class LogLoader extends ProjDefs
 			}
 			break;
 		    case BEGIN_IDLE:
+			if (MainWindow.IGNORE_IDLE) {
+			    break;
+			}
 			TE = new TimelineEvent(LE.Time - BeginTime,
 					       Long.MAX_VALUE,
 					       -1,-1); 
 			Timeline.addElement(TE);
 			break;
 		    case END_IDLE:
+			if (MainWindow.IGNORE_IDLE) {
+			    break;
+			}
 			if (TE != null) {   
 			    TE.EndTime = LE.Time - BeginTime;
 			}

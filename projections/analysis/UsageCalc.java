@@ -29,6 +29,7 @@ public class UsageCalc extends ProjDefs
     // **CW** support variables for delta encoding
     private long prevTime = 0;
     private boolean deltaEncoded = false;
+    private int tokenExpected = 2;
     
     private void intervalCalc(float[][] data,int type, int entry, long time) {
 
@@ -145,7 +146,8 @@ public class UsageCalc extends ProjDefs
 	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
 	    // **CW** a hack to avoid parsing the string - simply count
 	    // the number of tokens.
-	    if (headerTokenizer.countTokens() > 1) {
+	    if (Analysis.getVersion() >= 6.0) tokenExpected = 3;
+	    if (headerTokenizer.countTokens() > tokenExpected) {
 		deltaEncoded = true;
 	    } else {
 		deltaEncoded = false;
@@ -159,6 +161,7 @@ public class UsageCalc extends ProjDefs
 	
 	    startTime = 0;
 	    time=0;
+	    boolean isProcessing = false;
 	    try { 
 		while (time<endTime) { //EOF exception terminates loop
 		    log.nextLine();//Skip old junk at end of line
@@ -175,7 +178,11 @@ public class UsageCalc extends ProjDefs
 			}
 			intervalCalc(data,type, 0, (time));
 			break;
-		    case BEGIN_PROCESSING: case END_PROCESSING:
+		    case BEGIN_PROCESSING: 
+			if (isProcessing) {
+			    // bad, ignore.
+			    break;
+			}
 			log.nextInt(); //skip message type
 			entry = log.nextInt();
 			if (deltaEncoded) {
@@ -185,6 +192,23 @@ public class UsageCalc extends ProjDefs
 			    time = log.nextLong();
 			}
 			intervalCalc(data,type, entry, (time));
+			isProcessing = true;
+			break;
+		    case END_PROCESSING:
+			if (!isProcessing) {
+			    // bad, ignore.
+			    break;
+			}
+			log.nextInt(); //skip message type
+			entry = log.nextInt();
+			if (deltaEncoded) {
+			    prevTime += log.nextLong();
+			    time = prevTime;
+			} else {
+			    time = log.nextLong();
+			}
+			intervalCalc(data,type, entry, (time));
+			isProcessing = false;
 			break;
 		    case CREATION:
 			log.nextInt();  // mtype
@@ -247,8 +271,11 @@ public class UsageCalc extends ProjDefs
 			// **CW** We can no longer ignore events we do not
 			// care about. Delta encoding requires that every
 			// event be processed.
-			System.out.println("Warning: Unknown Event! This " +
-					   "can mess up delta encoding!");
+			if (deltaEncoded) {
+			    System.out.println("Warning: Unknown Event! " +
+					       "This " +
+					       "can mess up delta encoding!");
+			}
 			break;
 		    }
 		}

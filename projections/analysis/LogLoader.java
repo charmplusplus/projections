@@ -24,6 +24,9 @@ public class LogLoader extends ProjDefs
     // **CW** register previous event timestamp to support delta encoding.
     private long prevTime = 0;
     private boolean deltaEncoded = false;
+    private int tokenExpected = 2;
+
+    private boolean isProcessing = false; // **bloody hack**
     
     public LogLoader() 
 	throws LogLoadException
@@ -130,8 +133,8 @@ public class LogLoader extends ProjDefs
 	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
 	    // **CW** a hack to avoid parsing the string - simply count
 	    // the number of tokens.
-            int tokenExpected = 2;
-	    if (Analysis.getVersion() >= 6.0)  tokenExpected = 3;
+	    if (Analysis.getVersion() >= 6.0)  
+		tokenExpected = 3;
 	    if (headerTokenizer.countTokens() >= tokenExpected) {
 		deltaEncoded = true;
                 System.out.println("DELTA format found.");
@@ -143,6 +146,7 @@ public class LogLoader extends ProjDefs
 	    // previous event timestamp to 0 to support delta encoding.
 	    prevTime = 0;
 
+	    isProcessing = false; // *hack* - use global
 	    while (true) { //Seek to time Begin
 		LE = readlogentry(log);
 		if (LE.Entry == -1) {
@@ -296,17 +300,23 @@ public class LogLoader extends ProjDefs
 		    }
 		}
 		LE = readlogentry(log);
-		if ((LE.Time - BeginTime) > End) {
-		    break;
+		// this will still eventually end because of the 
+		// END COMPUTATION event.
+		if (LE.Entry != -1) {
+		    if ((LE.Time - BeginTime) > End) {
+			break;
+		    }
 		}
 	    }
 
 	    // check to see if we are stopping in the middle of a message.
 	    // if so, we need to keep reading to get its end time
 	    while (TE != null) {
-		if (LE.TransactionType == END_PROCESSING) {
-		    TE.EndTime = LE.Time - BeginTime;
-		    TE=null;
+		if (LE.Entry != -1) {
+		    if (LE.TransactionType == END_PROCESSING) {
+			TE.EndTime = LE.Time - BeginTime;
+			TE=null;
+		    }
 		}
 		LE = readlogentry (log);
 	    }
@@ -329,6 +339,10 @@ public class LogLoader extends ProjDefs
 	VE.Time        = LE.Time - BeginTime;
 	VE.EventType   = LE.TransactionType;
 
+	if (LE.Entry == -1) {
+	    return null;
+	}
+
 	switch (LE.TransactionType) {
 	case BEGIN_IDLE:
 	case END_IDLE:
@@ -341,17 +355,13 @@ public class LogLoader extends ProjDefs
 	case BEGIN_PROCESSING:
 	case END_PROCESSING:
 	case ENQUEUE:
-	    if ((LE.Entry != -1) && (LE.Entry != -1)) {
-		String e2desc[][] = Analysis.getEntryNames();
-		VE.Dest = new String(e2desc[LE.Entry][1] + 
-				     "::" + e2desc[LE.Entry][0]);     
-		if (LE.TransactionType != CREATION) {
-		    VE.SrcPe = LE.Pe;
-		}
-		return VE;
-	    } else {
-		return null;
+	    String e2desc[][] = Analysis.getEntryNames();
+	    VE.Dest = new String(e2desc[LE.Entry][1] + 
+				 "::" + e2desc[LE.Entry][0]);     
+	    if (LE.TransactionType != CREATION) {
+		VE.SrcPe = LE.Pe;
 	    }
+	    return VE;
 	case USER_EVENT:
 	case USER_EVENT_PAIR:
 	case DEQUEUE:
@@ -391,7 +401,8 @@ public class LogLoader extends ProjDefs
 	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case USER_EVENT_PAIR:
 	    Temp.MsgType = log.nextInt();
 	    if (deltaEncoded) {
@@ -402,7 +413,8 @@ public class LogLoader extends ProjDefs
 	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case BEGIN_IDLE:
 	case END_IDLE:
 	case BEGIN_PACK:
@@ -416,8 +428,14 @@ public class LogLoader extends ProjDefs
 		Temp.Time    = log.nextLong();
 	    }
 	    Temp.Pe      = log.nextInt();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case BEGIN_PROCESSING:
+	    if (isProcessing) {
+		// bad, ignore and clear rest of line.
+		log.nextLine();  // ignore rest of this line
+		break;
+	    }
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
 	    if (deltaEncoded) {
@@ -438,9 +456,15 @@ public class LogLoader extends ProjDefs
 		Temp.id = new ObjectId(log.nextInt(), log.nextInt(), 
 				       log.nextInt());;
 	    }
-	    return Temp;
-	case CREATION:
+	    isProcessing = true;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case END_PROCESSING:
+	    if (!isProcessing) {
+		// bad, ignore and clear rest of line.
+		log.nextLine();  // ignore rest of this line
+		break;
+	    }
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
 	    if (deltaEncoded) {
@@ -460,7 +484,31 @@ public class LogLoader extends ProjDefs
 		Temp.TransactionType == CREATION) {
 		Temp.sendTime = log.nextLong();
 	    }
-	    return Temp;
+	    isProcessing = false;
+	    log.nextLine();  // ignore rest of this line
+	    break;
+	case CREATION:
+	    Temp.MsgType = log.nextInt();
+	    Temp.Entry   = log.nextInt();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
+	    Temp.EventID = log.nextInt();
+	    Temp.Pe      = log.nextInt();
+	    if (Analysis.getVersion() > 1.0) {
+		Temp.MsgLen  = log.nextInt();
+	    } else {
+		Temp.MsgLen  = -1;
+	    }
+	    if (Analysis.getVersion() >= 5.0 && 
+		Temp.TransactionType == CREATION) {
+		Temp.sendTime = log.nextLong();
+	    }
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case CREATION_MULTICAST:
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
@@ -478,7 +526,8 @@ public class LogLoader extends ProjDefs
 	    for (int i=0; i<Temp.destPEs.length; i++) {
 		Temp.destPEs[i] = log.nextInt();
 	    }
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case ENQUEUE:
 	case DEQUEUE:
 	    Temp.MsgType = log.nextInt();
@@ -490,7 +539,8 @@ public class LogLoader extends ProjDefs
 	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case INSERT:
 	case FIND:
 	case DELETE:  // **CW** no longer pertinent???
@@ -498,7 +548,8 @@ public class LogLoader extends ProjDefs
 	    Temp.Time    = log.nextLong();
 	    Temp.Time    = log.nextLong();
 	    Temp.Pe      = log.nextInt();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case BEGIN_INTERRUPT:
 	case END_INTERRUPT:
 	    if (deltaEncoded) {
@@ -509,26 +560,29 @@ public class LogLoader extends ProjDefs
 	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case BEGIN_COMPUTATION:
 	    // begin computation's timestamp is not delta encoded.
 	    Temp.Time    = log.nextLong();
 	    if (deltaEncoded) {
 		prevTime += Temp.Time;
 	    }
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case END_COMPUTATION:
 	    // end computation's timestamp is not delta encoded.
 	    Temp.Time    = log.nextLong();
-	    return Temp;
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	default:
 	    System.out.println ("ERROR: weird event type " + 
 				Temp.TransactionType);
 	    log.nextLine();  // ignore rest of this line
-	    return Temp;
 	}
+	return Temp;
     }   
-
+    
     public long searchtimeline(int PeNum, int Entry, int Num)
 	throws LogLoadException, EntryNotFoundException
     {
@@ -557,7 +611,8 @@ public class LogLoader extends ProjDefs
 	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
 	    // **CW** a hack to avoid parsing the string - simply count
 	    // the number of tokens.
-	    if (headerTokenizer.countTokens() > 1) {
+	    if (Analysis.getVersion() >= 6.0) tokenExpected = 3;
+	    if (headerTokenizer.countTokens() > tokenExpected) {
 		deltaEncoded = true;
 	    } else {
 		deltaEncoded = false;
@@ -619,7 +674,8 @@ public class LogLoader extends ProjDefs
 	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
 	    // **CW** a hack to avoid parsing the string - simply count
 	    // the number of tokens.
-	    if (headerTokenizer.countTokens() > 1) {
+	    if (Analysis.getVersion() >= 6.0)  tokenExpected = 3;
+	    if (headerTokenizer.countTokens() > tokenExpected) {
 		deltaEncoded = true;
 	    } else {
 		deltaEncoded = false;

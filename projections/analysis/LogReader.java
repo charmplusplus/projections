@@ -57,6 +57,7 @@ public class LogReader
     // **CW** variables to support delta encoding
     private long prevTime = 0;
     private boolean deltaEncoded = false;
+    private int tokenExpected = 2;
 
     public long getIntervalSize() {
 	return intervalSize;
@@ -304,7 +305,8 @@ public class LogReader
 		    new StringTokenizer(logHeader);
 		// **CW** a hack to avoid parsing the string - simply count
 		// the number of tokens.
-		if (headerTokenizer.countTokens() > 1) {
+		if (Analysis.getVersion() >= 6.0)  tokenExpected = 3;
+		if (headerTokenizer.countTokens() > tokenExpected) {
 		    deltaEncoded = true;
 		} else {
 		    deltaEncoded = false;
@@ -327,6 +329,8 @@ public class LogReader
 		    //User cancelled load
 		    break;
 		}
+
+		boolean isProcessing = false;
 		try { 
 		    while (true) { //EOFException will terminate loop
 			log.nextLine();//Skip any junk from previous line
@@ -344,8 +348,6 @@ public class LogReader
 			    intervalCalc(type, 0, 0, (time-progStartTime));
 			    break;
 			case CREATION:
-			case BEGIN_PROCESSING: 
-                        case END_PROCESSING:
 			    mtype = log.nextInt();
 			    entry = log.nextInt();
 			    if (deltaEncoded) {
@@ -363,6 +365,54 @@ public class LogReader
 			    }
 			    intervalCalc(type, mtype, entry, 
 					 (time-progStartTime));
+			    break;
+			case BEGIN_PROCESSING: 
+			    if (isProcessing) {
+				// bad, ignore.
+				break;
+			    }
+			    mtype = log.nextInt();
+			    entry = log.nextInt();
+			    if (deltaEncoded) {
+				prevTime += log.nextLong();
+				time = prevTime;
+			    } else {
+				time = log.nextLong();
+			    }
+			    event = log.nextInt();
+			    pe = log.nextInt();
+			    if (Analysis.getVersion() > 1.0) {
+				msglen = log.nextInt();
+			    } else {
+				msglen = -1;
+			    }
+			    intervalCalc(type, mtype, entry, 
+					 (time-progStartTime));
+			    isProcessing = true;
+			    break;
+                        case END_PROCESSING:
+			    if (!isProcessing) {
+				// bad, ignore.
+				break;
+			    }
+			    mtype = log.nextInt();
+			    entry = log.nextInt();
+			    if (deltaEncoded) {
+				prevTime += log.nextLong();
+				time = prevTime;
+			    } else {
+				time = log.nextLong();
+			    }
+			    event = log.nextInt();
+			    pe = log.nextInt();
+			    if (Analysis.getVersion() > 1.0) {
+				msglen = log.nextInt();
+			    } else {
+				msglen = -1;
+			    }
+			    intervalCalc(type, mtype, entry, 
+					 (time-progStartTime));
+			    isProcessing = false;
 			    break;
 			case ENQUEUE:
 			    mtype = log.nextInt();

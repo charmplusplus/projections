@@ -34,8 +34,10 @@ public class EPAnalysis
 	if (dialog == null) {
 	    dialog = new RangeDialog(this, "Select Range");
 	}
-	dialog.displayDialog();
-	if (isDialogCancelled) {
+	int status = dialog.showDialog();
+//	dialog.displayDialog();
+//	if (isDialogCancelled) {
+	if (status == RangeDialog.DIALOG_CANCELLED){
 	    // close the EPAnalysis window
 	    dialog = null;
 	    closeWindow();

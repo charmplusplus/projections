@@ -33,6 +33,7 @@ public class HistogramWindow extends GenericGraphWindow
    private EntryPointWindow epFrame;
 
    private boolean startUp;			// show both range dialog & epdialog during startup
+ 
 // later replace this with HistogramWindow()
    public HistogramWindow(MainWindow mainWindow)
    {
@@ -81,12 +82,18 @@ public class HistogramWindow extends GenericGraphWindow
    {
 	if(dialog == null)
 		 dialog = new RangeDialog(this,"Select Range");
-	dialog.displayDialog();
-	if(!isDialogCancelled)
+	int dialogstatus = dialog.showDialog();
+//	dialog.displayDialog();
+//	if(!isDialogCancelled)
+	if(dialogstatus == RangeDialog.DIALOG_OK)
+	{
+		//setAllData();	// get the values input from the dialog	
+		dialog.setAllData();
 		if(!startUp)
 			refreshGraph();
 		else
 			showEntryDialog();
+	}
    }
 
 /* Show the EntrySelectionDialog to select Entrypoints to be considered */
@@ -103,7 +110,6 @@ public class HistogramWindow extends GenericGraphWindow
 	  
 	if(entryDialog == null)
 		 entryDialog = new EntrySelectionDialog(this, typeLabelStrings,stateArray,colorArray,existsArray,entryNames);
-	entryDialog.setModal(true);
 	entryDialog.showDialog();
 	refreshGraph();
    }
@@ -209,7 +215,8 @@ public class HistogramWindow extends GenericGraphWindow
 			if(stateArray[0][logdata.entry]){			// if the entry method is selected, count it
 				long executionTime = (logdata2.time - logdata.time);
 				totalExecutionTime += executionTime;
-				long diff = (long)(executionTime/FREQUENCY);
+
+				int diff = (int)(executionTime/FREQUENCY);
 				if(diff >= NO_OF_BINS) 
 				{
 				// enter the data into the table
@@ -219,7 +226,7 @@ public class HistogramWindow extends GenericGraphWindow
 				    longestExecutionTime=(executionTime>longestExecutionTime)?executionTime:longestExecutionTime;
 				    diff = NO_OF_BINS-1;
 				}
-				counts[(int)diff]++;
+				counts[diff]++;
 				instances++;
 			 }
 			if(logdata2.time > endTime)

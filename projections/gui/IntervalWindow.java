@@ -1,7 +1,7 @@
 package projections.gui;
 import projections.misc.LogEntryData;
 import projections.analysis.*;
-import projections.gui.graph.*;
+// import projections.gui.graph.*;
 
 import java.awt.Container;
 import java.awt.BorderLayout;
@@ -18,11 +18,8 @@ import javax.swing.*;
 *  along with the stretched eps.  
 */
 
-public class IntervalWindow extends ProjectionsWindow
+public class IntervalWindow extends GenericGraphWindow
 	implements ActionListener,ItemListener{
-
-   private GraphPanel graphPanel;
-   private Graph graphCanvas;
 
 //variables (other than those set by super class) to be set by RangeDialog
    private long thresholdTime;	// to record EPs that cross this time
@@ -41,12 +38,14 @@ public class IntervalWindow extends ProjectionsWindow
 //later replace this with IntervalWindow()
    public IntervalWindow(MainWindow mainWindow)
    {
-          super();
-          setTitle("Projections Interval Graph");
-
-          createLayout();
+          super("Projections Interval Graph");
+	 
+	  setGraphSpecificData();
 	  createMenus();
-          pack();
+          getContentPane().add(getMainPanel());
+	  //createLayout();
+       
+	  pack();
           setVisible(true);
           showDialog();
 	  refreshGraph();
@@ -57,32 +56,21 @@ public class IntervalWindow extends ProjectionsWindow
    {
         if(dialog == null)
                  dialog = new IntervalRangeDialog(this,"Select Range");
-        dialog.displayDialog();
-        if(!isDialogCancelled)
+
+	int status = dialog.showDialog();
+        //dialog.displayDialog();
+        //if(!isDialogCancelled)
+	if(status == RangeDialog.DIALOG_OK)
 	{
 	// Range has been changed, so get new data while refreshing
+		setAllData();
 		getNewData = true;
                 refreshGraph();
 	}
    }
 
 /* functions for RangeDialog to work */
-/*   public void setProcessorRange(OrderedIntList proc)
-   {
-        validPEs = proc;
-   }
- 
-   public void setStartTime(long time)
-   {
-        startTime = time;
-   }
- 
-   public void setEndTime(long time)
-   {
-        endTime = time;
-   }
-*/
-   public void setIntervalSize(long size)
+  /* public void setIntervalSize(long size)
    {
 	intervalSize = size;
    }
@@ -91,7 +79,13 @@ public class IntervalWindow extends ProjectionsWindow
    {
 	thresholdTime = time;
    }
-
+*/
+   public void setAllData(){
+	//super.setAllData();	// set processors etc. then set this window specific data, from IntervalRangeDialog object
+	IntervalRangeDialog intervalDialog = (IntervalRangeDialog)dialog;
+	intervalSize = intervalDialog.getIntervalSize();
+ 	thresholdTime = intervalDialog.getThresholdTime();
+   }
 
    public void actionPerformed(ActionEvent evt)
    {
@@ -129,15 +123,6 @@ public class IntervalWindow extends ProjectionsWindow
         System.out.println(s);
     }
 
-/* add graphPanel to the window */
-  private void createLayout()
-  {
-	  Container contentPane = getContentPane();
-          graphCanvas = new Graph();
-          graphPanel = new GraphPanel(graphCanvas);
-	  contentPane.add(graphPanel,BorderLayout.CENTER);
-  }
-
 /* create the menu bar */
    protected void createMenus()
    {
@@ -167,19 +152,14 @@ public class IntervalWindow extends ProjectionsWindow
 	  },
 	  this)); 
 
-// setHelpMenu is not yet implemented for JMenuBar
-         /* JMenu helpMenu = new JMenu("Help");
-          mbar.add(Util.makeJMenu(helpMenu, new Object[]      {
-                 "Index",
-                 "About"
-          },
-          this));
- 
-          mbar.setHelpMenu(helpMenu);*/
-
     }
 
-   private void refreshGraph()
+   protected void setGraphSpecificData(){
+	setXAxis("Time Interval","");
+	setYAxis("#","");		
+   }
+
+   protected void refreshGraph()
    {	
 	  // get new data only if either range or entrypoint changes. 
 	  // not when a change is made btw "sends vs Eps" or "bytes vs Eps"
@@ -207,14 +187,10 @@ public class IntervalWindow extends ProjectionsWindow
 	  	}
 
 	  	// set values and draw the graph
-          	DataSource ds     = new DataSource2D(titleString,data);
-          	XAxisFixed xa     = new XAxisFixed("Time Interval ("+U.t(startTime)+" - "+U.t(endTime) + ")","");
 	  	double multiplier = (double)(endTime-startTime)/(dataSource.length-1);	// in us
-	  	xa.setLimits(startTime/1000,multiplier/1000);			// to display in ms
-          	YAxis ya=new YAxisAuto("#","",ds);
- 
-          	graphCanvas.setData(ds,xa,ya);
-         	graphCanvas.repaint();
+		setXAxis("Time Interval ("+U.t(startTime)+" - "+U.t(endTime) + ")","ms",startTime/1000,multiplier/1000); // to display in ms
+		setDataSource(titleString,data);
+		super.refreshGraph();
 	  }	
    }
 

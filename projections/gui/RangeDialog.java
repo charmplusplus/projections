@@ -1,5 +1,4 @@
 package projections.gui;
-
 import javax.swing.*;
 import javax.swing.text.*;
 
@@ -28,9 +27,14 @@ import projections.analysis.*;
  *
  *  Added a history combo box - 8/20/2002
  */
+
 public class RangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
+    // Constant variables
+    public static final int DIALOG_OK = 0;
+    public static final int DIALOG_CANCELLED = 1;
+  
     ProjectionsWindow parentWindow;
 
     // inheritable GUI objects
@@ -52,9 +56,9 @@ public class RangeDialog extends JDialog
     private JLabel totalTimeLabel, validTimeRangeLabel, validProcessorsLabel;
 
     // Data definitions
-    long totalTime;
-    long startTime;
-    long endTime;
+    protected long totalTime;
+    protected long startTime;
+    protected long endTime;
 
     long totalValidTime;
     String validProcessors;
@@ -63,9 +67,9 @@ public class RangeDialog extends JDialog
     RangeHistory history;
     Vector historyVector;
     Vector historyStringVector;
-
     // flags
     boolean layoutComplete = false;
+    int dialogState = DIALOG_CANCELLED;	// default state
 
     /**
      *  Constructor. Creation of the dialog object should be separate from
@@ -76,7 +80,6 @@ public class RangeDialog extends JDialog
 		       String titleString)
     {
 	super((JFrame)parentWindow, titleString, true);
-
 	this.parentWindow = parentWindow;
 	startTime = 0;
 	endTime = Analysis.getTotalTime();
@@ -122,8 +125,9 @@ public class RangeDialog extends JDialog
 		    someField.requestFocus();
 		    return;
 		} else {
-		    setAllData();
-		    parentWindow.dialogCancelled(false);
+		   dialogState = DIALOG_OK;	// set local variable state 
+		   /* setAllData();
+		    parentWindow.dialogCancelled(false);*/
 		}
 		setVisible(false);
 	    } else if (b == bUpdate) {
@@ -131,9 +135,10 @@ public class RangeDialog extends JDialog
 		updateData(processorsField);
 		updateData(startTimeField);
 		updateData(endTimeField);
-	    } else if (b == bCancel){
-		parentWindow.dialogCancelled(true);
-		setVisible(false);
+		return;	// CHECK this return
+	    }else if (b == bCancel){
+	    	setVisible(false);
+		dialogState = DIALOG_CANCELLED;
 	    } else if (b == bAddToHistory) {
 		long start = startTimeField.getValue();
 		long end = endTimeField.getValue();
@@ -167,7 +172,6 @@ public class RangeDialog extends JDialog
     public void focusGained(FocusEvent evt) {
 	// do nothing
     }
-
     public void focusLost(FocusEvent evt) {
 	// when keyboard focus is lost from a text field, it is assumed
 	// that the user has confirmed the data. Hence, perform an update and
@@ -239,9 +243,10 @@ public class RangeDialog extends JDialog
 	    {
 		public void windowClosing(WindowEvent e)
 		{
-		    parentWindow.dialogCancelled(true);
+		    dialogState = DIALOG_CANCELLED;
+//		    parentWindow.dialogCancelled(true);
 		    setVisible(false);
-		    dispose();
+//		    dispose();		// should it be able to dispose itself??
 		}
 	    });
 	
@@ -324,7 +329,7 @@ public class RangeDialog extends JDialog
 		    gbc, 0,0, 4,1, 1,1);
 	Util.gblAdd(timePanel, startTextLabel, 
 		    gbc, 0,1, 1,1, 1,1);
-	Util.gblAdd(timePanel, startTimeField,
+        Util.gblAdd(timePanel, startTimeField,
 		    gbc, 1,1, 1,1, 1,1);
 	Util.gblAdd(timePanel, endTextLabel,
 		    gbc, 2,1, 1,1, 1,1);
@@ -472,6 +477,29 @@ public class RangeDialog extends JDialog
 	parentWindow.setStartTime(startTime);
 	parentWindow.setEndTime(endTime);
     }
-}
 
+    /**
+     *  write accessor functions for private data instead of coupling with the parent window
+     */
+     OrderedIntList getProcessorRange(){
+	return processorsField.getValue(numProcessors);
+     }
+	
+     long getStartTime(){
+	return startTime;
+     }
+     long getEndTime(){
+	return endTime;
+     }
+
+     /**
+      *  show the dialog and return the status
+      */
+     int showDialog(){
+	// make sure that the dialog is modal
+	this.setModal(true);
+	this.displayDialog();
+	return dialogState;	// return if the dialog is cancelled or if OK is pressed
+     }
+}
 

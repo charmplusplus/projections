@@ -69,8 +69,10 @@ public class EPCharWindow extends ProjectionsWindow
    {
         if(dialog == null)
                  dialog = new RangeDialog(this,"Select Range"); // OR IntervalRangeDialog AS NEEDED
-        dialog.displayDialog();
-        if(!isDialogCancelled)
+	int status = dialog.showDialog();
+        //dialog.displayDialog();
+        //if(!isDialogCancelled)
+	if(status == RangeDialog.DIALOG_OK)
 	{
 	// Range has been changed, so get new data while refreshing
 	//	getNewData = true;

@@ -12,16 +12,20 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 import projections.misc.ProgressDialog;
 
-public class StlWindow extends Frame
+public class StlWindow extends ProjectionsWindow
 	implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 {
    private ScaleSlider hor,ver;
    private ScalePanel scalePanel;
    private StlPanel stl;
    private Label status;
-   
+   private boolean okorcancelled;
+  
+   private long intervalSize;
+  
    public StlWindow()
    {
 	  addWindowListener(new WindowAdapter()
@@ -36,11 +40,18 @@ public class StlWindow extends Frame
 	  setForeground(Color.lightGray);
 	  setTitle("Projections-- Overview");
 	  
+	  
 	  createMenus();
 	  createLayout();
 	  pack();
-	  
-	  setVisible(true);
+	  showDialog();
+	  if(okorcancelled)
+		  setVisible(true);
+	  else {
+	  	
+		//close();
+		dispose();
+	  }
    }                        
    public void actionPerformed(ActionEvent evt)
    {
@@ -51,52 +62,73 @@ public class StlWindow extends Frame
 	if(arg.equals("Close"))  {
 	 	dispose();
         }
+	if(arg.equals("Set Range")){
+	//	System.out.println(arg);
+		showDialog();
+		setStlPanelData(0);
+		repaint();
+        }
      }
-   }   
+   }  
    private void createLayout()
    {
 	  GridBagLayout      gbl = new GridBagLayout();
 	  GridBagConstraints gbc = new GridBagConstraints();
 	  
-	  setLayout(gbl);
+	  this.getContentPane().setLayout(gbl);
 	  
 	  gbc.fill  = GridBagConstraints.HORIZONTAL;
 	  gbc.gridx = 0; gbc.gridy=2;
-	  add(status=new Label(""),gbc);
+	  this.getContentPane().add(status=new Label(""),gbc);
 	  status.setBackground(Color.black);
 	  status.setForeground(Color.lightGray);
 	  
 	  gbc.fill  = GridBagConstraints.HORIZONTAL;
 	  gbc.gridx = 0; gbc.gridy=1;
 	  hor=new ScaleSlider(Scrollbar.HORIZONTAL);
-	  add(hor,gbc);
+	  this.getContentPane().add(hor,gbc);
 	  hor.addMouseListener(this);
 	  
 	  gbc.fill  = GridBagConstraints.VERTICAL;
 	  gbc.gridx = 1; gbc.gridy=0;
 	  ver=new ScaleSlider(Scrollbar.VERTICAL);
-	  add(ver,gbc);
+	  this.getContentPane().add(ver,gbc);
 	  ver.addMouseListener(this);
 	  
 	  gbc.fill  = GridBagConstraints.BOTH;
 	  gbc.gridx = 0; gbc.gridy=0;
 	  gbc.weightx = 1; gbc.weighty=1;
 	  stl=new StlPanel();
-	  ScalePanel scalePanel=new ScalePanel(hor,ver,stl);
-	  add(scalePanel,gbc);
+	  scalePanel=new ScalePanel(hor,ver,stl);
+	  this.getContentPane().add(scalePanel,gbc);
 	  scalePanel.setStatusDisplay(this);
-	  
-	  ColorMap cm=new ColorMap();
+	  setStlPanelData(1);
+  }  
+
+   private void setStlPanelData(int n){
+	if(scalePanel == null)
+		System.out.println("How  can it be ");
+   	 ColorMap cm=new ColorMap();
 	  cm.addBreak( 0,  0,  0, 55,    70,255,  0,  0); //Blue to red
 	  cm.addBreak(70,255,  0,  0,   100,255,255,255); //red to white
 	  //cm.addBreak(51,0,255,  0,   100,255, 55,30); //red to green (POOR FOR COLORBLIND PEOPLE)
 	  cm.addBreak(101,0,255,0, 255,0,255,0); //Overflow-- green
+	  
+	  
 	  stl.setColorMap(cm.getColorModel());
 	  
-	  stl.setData(7000);
-	  
-		double horSize=Analysis.getTotalTime();
-		double verSize=Analysis.getNumProcessors();
+	stl.setData(7000);
+	 /// The problem of the window been large than the number of processors rises from this point 
+		double horSize, verSize;
+		if(validPEs == null){
+			horSize=Analysis.getTotalTime();
+			verSize=Analysis.getNumProcessors();
+		}else{	
+			 horSize = endTime-startTime;
+			 if(horSize <= 0)
+			 	horSize = Analysis.getTotalTime();
+			 verSize = (double )validPEs.size();
+		}	 
 		scalePanel.setScales(horSize,verSize);
 	
 	double hMin=scalePanel.toSlider(1.0/horSize);
@@ -110,7 +142,10 @@ public class StlWindow extends Frame
 	ver.setMin(vMin); ver.setMax(vMax);
 	ver.setValue(vMin);
 	ver.setTicks(Math.floor(vMin),1);
-   }               
+
+   	
+   }
+   
    private void createMenus()
    {
         MenuBar mbar = new MenuBar();
@@ -119,8 +154,48 @@ public class StlWindow extends Frame
         {
                  "Close"
         }, this));
-	setMenuBar(mbar);
+        mbar.add(Util.makeMenu("Modify", new Object[]
+        {
+                 "Set Range"
+        }, this));
+	 setMenuBar(mbar);
    } 
+
+/* Show the RangeDialog to set processor numbers and interval times */
+   void showDialog()
+   {
+     try {
+        if(dialog == null)
+                 dialog = new IntervalRangeDialog((ProjectionsWindow) this,"Select Range",false,false);
+        else{
+		dialog.dispose();
+                dialog = new IntervalRangeDialog((ProjectionsWindow) this,"Select Range",false,false);
+	}
+        //dialog.displayDialog();
+
+	int dialogStatus = dialog.showDialog();
+	if(dialogStatus == RangeDialog.DIALOG_OK)
+	{
+		// Range has been changed, so get new data while refreshing
+		
+	//	setAllData();
+		
+		 setStlPanelData(0);
+		 stl.setData(validPEs,startTime,endTime); 
+		//System.out.println("Button pressed \n");	
+		okorcancelled = true;
+	}
+	if(dialogStatus == RangeDialog.DIALOG_CANCELLED){
+		//dialog.setVisible(false);
+		//System.out.println("Someone cancelled \n");
+		okorcancelled = false;
+	}
+	}catch (Exception e){ e.printStackTrace();};
+   }
+
+
+
+   
    public void mouseClicked(MouseEvent evt)
 	  {}
    public void mouseEntered(MouseEvent evt)
@@ -139,5 +214,22 @@ public class StlWindow extends Frame
 	  {}
    public void setStatus(String msg) {
    	status.setText(msg);
-   }   
+   }
+   
+   public void setAllData(){
+         //super.setAllData();     Projections Window doesn't have setAllData
+         IntervalRangeDialog intervalDialog = (IntervalRangeDialog)dialog;
+         intervalSize = intervalDialog.getIntervalSize();
+   }
 }
+
+
+
+
+
+
+
+
+
+
+

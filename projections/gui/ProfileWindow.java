@@ -917,7 +917,7 @@ public class ProfileWindow extends Frame
 			poArray[poNo][poindex].setForeground(colors[entry]);
 			poindex++;
 		}
-		if(Analysis.getVersion() >= 5.0){
+		if(Analysis.getVersion() > 4.9){
 		//Drawing the entry point message sendTime
 		for(i=0; i<usg[1].length; i++)
 		{

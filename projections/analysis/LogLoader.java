@@ -168,7 +168,8 @@ public class LogLoader extends ProjDefs
 				  switch(LE.TransactionType)
 				  {
 					 case BEGIN_PROCESSING:
-						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe,LE.MsgLen, LE.recvTime, LE.id));
+					//	Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe,LE.MsgLen, LE.recvTime, LE.id));
+						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe,LE.MsgLen, LE.recvTime, LE.id,LE.EventID));
 						break;
 					 case END_PROCESSING:
 						if(TE!=null)
@@ -182,7 +183,8 @@ public class LogLoader extends ProjDefs
 						   Timeline.addElement(TE=new TimelineEvent(LE.Time-BeginTime,LE.Time-BeginTime,Entry,LE.Pe,LE.MsgLen));
 						   tempte = true;
 						}
-						TE.addMessage (TM=new TimelineMessage (LE.Time - BeginTime,LE.Entry,LE.MsgLen));
+						//TE.addMessage (TM=new TimelineMessage (LE.Time - BeginTime,LE.Entry,LE.MsgLen));
+						TE.addMessage (TM=new TimelineMessage (LE.Time - BeginTime,LE.Entry,LE.MsgLen,LE.EventID));
 						if (tempte) TE=null;
 						break;
 					 case USER_EVENT:

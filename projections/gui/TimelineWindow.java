@@ -16,7 +16,7 @@ public class TimelineWindow extends Frame
    private NoUpdatePanel         mainPanel, displayPanel;
    private TimelineLabelCanvas   labelCanvas;
    private TimelineAxisCanvas    axisTopCanvas, axisBotCanvas;
-   private TimelineDisplayCanvas displayCanvas;
+   public TimelineDisplayCanvas displayCanvas;
    private TimelineRangeDialog   rangeDialog;
    private TimelineColorWindow   colorWindow;
    

@@ -15,6 +15,7 @@ public class TimelineObject extends Component
    private long    beginTime, endTime, recvTime;
    private int     entry;
    private int     msglen;
+   private int EventID;
    private ObjectId tid;
    private boolean inside = false; 
    private int pCurrent, pCreation;
@@ -25,12 +26,13 @@ public class TimelineObject extends Component
    private TimelineData data;
    private Frame f;
    
-   private TimelineMessage[] messages;
+   public TimelineMessage[] messages;
    private PackTime[] packs;
    // private UserEvent[] userEvents;
 
   private static DecimalFormat format_ = new DecimalFormat();
-
+  double scale;
+  int left;
 /*
    TAKE THIS OUT FOR NOW BECAUSE THEY DRAW THEMSELVES.
    THIS IS BETTER BECAUSE TimelineObjects HAVE BOUNDS WHICH CUT OFF
@@ -122,6 +124,83 @@ public class TimelineObject extends Component
 	  
 	  addMouseListener(this);
    }   
+
+   public TimelineObject(TimelineData data, long bt, long et, int n, 
+						 TimelineMessage[] msgs, PackTime[] packs,
+						 int p1, int p2, int mlen, long rt, ObjectId id, int eventid)
+   {
+          format_.setGroupingUsed(true);
+
+	  setBackground(Color.black);
+	  setForeground(Color.white);
+	  
+	  this.data = data;
+	  beginTime = bt;
+	  endTime   = et;
+	  entry     = n;
+	  messages  = msgs;
+	  this.packs= packs;
+	  pCurrent  = p1;
+	  pCreation = p2;
+	  EventID = eventid;
+	  f = (Frame)data.timelineWindow;
+          msglen = mlen;
+	  recvTime = rt;
+	  if (id != null) {
+	    tid = new ObjectId(id);
+	  }
+	  else 
+	    tid = new ObjectId();
+	  
+	  setUsage();
+	  setPackUsage();
+	  
+	  if(n != -1)
+	  {
+		 bubbletext  = new String[10];
+		 int ecount = Analysis.getUserEntryCount();
+		 if (n >= ecount) {
+		   System.out.println("Fatal error: invalid entry "+n+"!");
+		   System.exit(1) ;
+		 }
+		 bubbletext[0] = (Analysis.getUserEntryNames())[n][1] + "::" + 
+					  (Analysis.getUserEntryNames())[n][0]; 
+		 bubbletext[1] = "Msg Len: " + msglen;
+		 bubbletext[2] = "Begin Time: " + format_.format(bt);
+		 bubbletext[3] = "End Time: " + format_.format(et);
+		 bubbletext[4] = "Total Time: " + U.t(et-bt);
+		 bubbletext[5] = "Packing: " + U.t(packtime);
+		 if (packtime>0)
+			bubbletext[4]+=" (" + (100*(float)packtime/(et-bt+1)) + "%)";
+		 bubbletext[6] = "Msgs created: " + msgs.length;
+		 bubbletext[7] = "Created by processor " + pCreation;
+		 bubbletext[8] = "Id: " + tid.id[0]+":"+tid.id[1]+":"+tid.id[2];
+		 bubbletext[9] = "Recv Time: " + recvTime;
+	  }
+	  else
+	  {
+		 bubbletext = new String[4];
+		 bubbletext[0] = "IDLE TIME";
+		 bubbletext[1] = "Begin Time: " + format_.format(bt);
+		 bubbletext[2] = "End Time: " + format_.format(et);
+		 bubbletext[3] = "Total Time: " + U.t(et-bt);
+	  }
+	  
+	  
+	  addMouseListener(this);
+   } 
+
+
+
+
+
+
+
+
+
+
+
+
    public void CloseMessageWindow()
    {
 	  msgwindow = null;
@@ -207,9 +286,48 @@ public class TimelineObject extends Component
    }   
    public void mouseClicked(MouseEvent evt)
    {
-     if(entry >= 0)
+   	TimelineMessage created_message;
+       if(entry >= 0){
 		 OpenMessageWindow();
-   }   
+		  System.out.println("This method is created by "+ pCreation + "Event id is " + EventID);
+		 if(data.mesgVector[pCreation] == null || data.mesgVector[pCreation].isEmpty()){
+		 	System.out.println("Processor Out of range");
+		 }else{
+		 	created_message= searchMesg(data.mesgVector[pCreation],EventID);
+			if(created_message == null){
+				System.out.println("Time out of range ");
+			}else{
+				System.out.println("Mesg " + created_message.EventID +" created at " + created_message.Time);
+				System.out.println("xscale within = " + scale + "left =" + left);
+				data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,scale);			
+			}
+		 }
+		 
+       }
+   } 
+
+
+   public TimelineMessage searchMesg(Vector v,int eventid){
+   	return binarySearch(v,eventid,1,v.size());
+   }
+   
+   public TimelineMessage binarySearch(Vector v,int eventid,int start,int end){
+   	int mid = (start + end)/2;
+	TimelineMessage middle = (TimelineMessage)v.elementAt(mid);
+	if(middle.EventID == eventid){
+		return middle;
+	}
+	if(start==end){
+		return null;
+	}
+	if(middle.EventID > eventid){
+		return binarySearch(v,eventid,start,mid);
+	}else{
+		return binarySearch(v,eventid,mid+1,end);
+	}
+   }
+
+   
    public void mouseEntered(MouseEvent evt)
    {
 	  if(entry == -1 && data.showIdle == false)
@@ -273,7 +391,7 @@ public class TimelineObject extends Component
 	  int w      = getSize().width;
 	  int h      = getSize().height - 10;
 	  
-	  int left  = 0;
+	  left  = 0;
 	  int right = w-1;
 	  
 	  long viewbt = beginTime;
@@ -321,7 +439,7 @@ public class TimelineObject extends Component
 			g.drawLine(w-1, startY, w-1, startY+h-1);
 	  }
 	  
-	  double scale= pixelwidth /((double)(viewet - viewbt + 1)); 
+	  scale= pixelwidth /((double)(viewet - viewbt + 1)); 
 
 	  if(data.showMsgs == true && messages != null)
 	  {

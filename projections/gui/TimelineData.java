@@ -22,7 +22,7 @@ public class TimelineData
    float scale;
   public int   offset;
    
-   OrderedIntList processorList;
+  public OrderedIntList processorList;
    OrderedIntList oldplist;
    String         processorString;
    String         oldpstring;
@@ -35,7 +35,9 @@ public class TimelineData
    int[]          entries;
    Color[]        entryColor;
    
-   TimelineObject[][] tloArray;
+   public TimelineObject[][] tloArray;
+   public Vector [] mesgVector;	  
+	
    UserEvent[][] userEventsArray = null;
    
    TimelineDisplayCanvas displayCanvas;
@@ -54,7 +56,7 @@ public class TimelineData
    
    boolean showPacks, showIdle, showMsgs;
 
-   TimelineWindow timelineWindow;
+   public TimelineWindow timelineWindow;
    
    public TimelineData(TimelineWindow timelineWindow)
    {
@@ -68,6 +70,7 @@ public class TimelineData
 	  oldpstring = null;
 	  
 	  this.timelineWindow = timelineWindow;
+	  displayCanvas = timelineWindow.displayCanvas;
 	  lcw = 100;
 	  sbw = 20;
 	  sbh = 20;   
@@ -97,6 +100,7 @@ public class TimelineData
 	  xmaxpixel = 1;
 	  
 	  tloArray = null;
+	  mesgVector = null;
 	  entries = new int[Analysis.getNumUserEntries()];
 	  entryColor = new Color[Analysis.getNumUserEntries()];
 	  float H = (float)1.0;
@@ -125,6 +129,10 @@ public class TimelineData
    {
 	  TimelineObject[][] oldtloArray = tloArray;
 	  UserEvent[][] oldUserEventsArray = userEventsArray;
+	  mesgVector = new Vector[Analysis.getNumProcessors()];
+	  for(int i=0;i < Analysis.getNumProcessors();i++){
+	  	mesgVector[i] = null;
+	  }
 	  
 	  tloArray = new TimelineObject[processorList.size()][];
 	  userEventsArray = new UserEvent[processorList.size()][];
@@ -176,10 +184,13 @@ public class TimelineData
 
 			     // copy the array
 			     tloArray[newpindex] = new TimelineObject[newNumItems];
+			     mesgVector[newp] = new Vector();
 			     for(n=0; n<newNumItems; n++) {
 			       tloArray[newpindex][n] = oldtloArray[oldpindex][n+startIndex];
 			       tloArray[newpindex][n].setUsage();
 			       tloArray[newpindex][n].setPackUsage();
+			       for(int j=0;j<tloArray[newpindex][n].messages.length;j++)
+				       mesgVector[newp].addElement((TimelineMessage)tloArray[newpindex][n].messages[j]);
 			     }
 
 			     // copy user events from larger array into smaller array
@@ -273,10 +284,12 @@ public class TimelineData
 	  int numItems;
 	  long btime, etime, rtime;
 	  int entry, pSrc, numMsgs, numpacks, msglen;
+	  int EventID;
           ObjectId tid;
 		
 	  tl = new Vector();
 	  Vector userEvents = new Vector();
+	  mesgVector[pnum] = new Vector();
 	  Analysis.createTL(pnum, beginTime, endTime, tl, userEvents);
 	  // proc userEvents
 	  int numUserEvents = userEvents.size();
@@ -301,6 +314,7 @@ public class TimelineData
 		 msglen  = tle.MsgLen;
  		 tid   = tle.id;
 		 rtime = tle.RecvTime;
+		 EventID = tle.EventID;
 			
 		 msglist = tle.MsgsSent;
 		 if(msglist == null)
@@ -309,8 +323,10 @@ public class TimelineData
 			numMsgs = msglist.size();
 			
 		 TimelineMessage[] msgs = new TimelineMessage[numMsgs];
-		 for(int m=0; m<numMsgs; m++)
+		 for(int m=0; m<numMsgs; m++){
 			msgs[m] = (TimelineMessage)msglist.elementAt(m);
+		 	mesgVector[pnum].addElement((TimelineMessage)msglist.elementAt(m));
+		 }	
 
 		 packlist = tle.PackTimes;
 		 if(packlist == null)
@@ -322,7 +338,9 @@ public class TimelineData
 		 for(int p=0; p<numpacks; p++)
 			packs[p] = (PackTime)packlist.elementAt(p);
 		 
-		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen, rtime, tid);
+		 //tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen, rtime, tid);
+		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen, rtime, tid,EventID);
+		 
 	  }
 
 	  /*
@@ -422,6 +440,48 @@ public class TimelineData
        if (userEventsArray[i] != null) { num += userEventsArray[i].length; }
      }
      return num;
+   }
+
+
+   public void drawConnectingLine(int pCreation,long creationtime,int pCurrent,long executiontime,double xscale){
+   	Graphics g = displayCanvas.getGraphics();
+	double yscale;
+	
+	int startpe_position,endpe_position;
+	
+	
+	Dimension dim = displayCanvas.getSize();
+	//double calc_xscale = (pixelIncrement/timeIncrement);
+	double calc_xscale = (double )(dim.width-65)/(double )(endTime-beginTime+1);
+	calc_xscale = calc_xscale * 0.98;
+	long time = endTime-beginTime+1;
+	int mywidth=dim.width;
+	System.out.println("xscale in Data " + calc_xscale+" time is " + time + " width "+ mywidth);
+	
+	
+	processorList.reset();
+	startpe_position = 0;
+	endpe_position = 0;
+	int count =0;
+	for(int i =0;i < processorList.size();i++){
+		int pe = processorList.nextElement();
+		if(pe == pCreation)
+			startpe_position = count;
+		if(pe == pCurrent)
+			endpe_position = count;
+		count++;	
+	}
+	processorList.reset();
+	yscale = (double )dim.height/(double )(processorList.size());
+	
+	int x1 = (int )((double )(creationtime - beginTime)*calc_xscale+30);
+	int x2 = (int )((double )(executiontime - beginTime)*calc_xscale+30);
+	int y1 = (int )(yscale * (double )startpe_position + 20);
+	int y2 = (int )(yscale * (double )endpe_position + 20);
+
+	System.out.println("start "+x1+" execution co-rdinate " + x2);
+	g.setColor(new Color(100,100,255));
+	g.drawLine(x1,y1,x2,y2);
    }
 }
 

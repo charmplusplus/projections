@@ -5,9 +5,10 @@ import java.util.Vector;
 
 public class TimelineEvent
 {
-
+ 
 public long BeginTime, EndTime, RecvTime;
 public int EntryPoint, SrcPe, MsgLen;
+public int EventID; //seq no of processor
 public ObjectId id;
 public Vector MsgsSent;  // of class TimelineMessage
 public Vector PackTimes; // of class PackTime
@@ -22,6 +23,18 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId 
         RecvTime = r;
 	id = new ObjectId(d);
 }
+
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d,int eventid)
+{
+	BeginTime=bt; EndTime=et;
+	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
+        RecvTime = r;
+	id = new ObjectId(d);
+	EventID = eventid;
+}
+
+
+
 public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 {
 	BeginTime=bt; EndTime=et;

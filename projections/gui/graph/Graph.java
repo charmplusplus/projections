@@ -146,7 +146,9 @@ public class Graph extends JPanel
 
     public void setScale(double val) {
 	xscale = val;
+	setPreferredSize(new Dimension((int)(baseWidth*xscale),getHeight()));
 	repaint();
+	revalidate();
     }
      
 	 
@@ -394,15 +396,16 @@ public class Graph extends JPanel
 	if (pixelincrementX < 4.0) {
 	    pixelincrementX = 4.0;
 	}
+
 	// expand the panel width to accomodate the graph even for the "fit
 	// to screen" case where rounding errors *will* sometimes cause it
 	// to actually be larger than the screen.
 	if (width < (int)(pixelincrementX*numintervalsX)) {
-	    System.out.println("resize needed");
 	    width = (int)(pixelincrementX*numintervalsX);
 	    baseWidth = (int)((width/xscale)+30+originX);
 	    w = width+30+originX;
 	    setPreferredSize(new Dimension(w,h));
+	    revalidate();
 	}
 
 	int labelincrementX = (int)Math.ceil((sw + 20) / pixelincrementX);
@@ -665,7 +668,6 @@ public class Graph extends JPanel
 		maxValue = data[yValues-1];
 	    }
 	}
-
 	return maxValue;
     }
 

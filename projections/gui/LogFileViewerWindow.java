@@ -63,7 +63,7 @@ public class LogFileViewerWindow extends Frame
    private void Close()
    {
 	  setVisible(false);
-	  mainWindow.CloseLogFileViewerWindow();
+	  mainWindow.closeChildWindow(this);
 	  dispose();
    }   
    public void CloseDialog()

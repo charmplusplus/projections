@@ -11,9 +11,10 @@ import java.net.*;
 
 import projections.analysis.*;
 import projections.gui.graph.*;
+import projections.misc.*;
 
 public class MainWindow extends JFrame
-    implements ActionListener
+    implements ActionListener, ScalePanel.StatusDisplay
 {
     protected static final int NUM_WINDOWS = 10;
 
@@ -70,8 +71,15 @@ public class MainWindow extends JFrame
     private SummaryXAxis         sumXAxis;
     private SummaryYAxis         sumYAxis;
     private GraphPanel           graphPanel;
+    private ScalePanel           scalePanel;
+    private StlPanel             stl;
+    private ScaleSlider          hor, ver;
+    private Label                status;
+    private ScalePanel.StatusDisplay sd;
 
     private Image bgimage;
+    private GridBagConstraints gbc;
+    private GridBagLayout gbl;   
 
     public MainWindow()
     {
@@ -143,8 +151,8 @@ public class MainWindow extends JFrame
 
 	setContentPane(background);
 
-	GridBagLayout      gbl = new GridBagLayout();
-	GridBagConstraints gbc = new GridBagConstraints();
+	gbl = new GridBagLayout();
+	gbc = new GridBagConstraints();
 	gbc.fill = GridBagConstraints.BOTH;
 	background.setLayout(gbl);
 
@@ -317,6 +325,10 @@ public class MainWindow extends JFrame
 	sumXAxis = null;
 	sumYAxis = null;
 	graphPanel = null;
+	//ScalePanel scalePanel = null;
+	//StlPanel stl = null;
+	hor = null;
+	ver = null;
 	final SwingWorker worker = new SwingWorker() {
 		public Object construct() {
 		    try {
@@ -331,45 +343,70 @@ public class MainWindow extends JFrame
 			    new InvalidFileDialog(thisWindow);
 			ifd.setVisible(true);
 		    }
+		    
+
+		    status = new Label("");
+		    status.setBackground(Color.black);
+		    status.setForeground(Color.lightGray);
+		    hor=new ScaleSlider(Scrollbar.HORIZONTAL);
+	
+		    ver=new ScaleSlider(Scrollbar.VERTICAL);
+
+		    stl = new StlPanel();
+		    scalePanel=new ScalePanel(hor,ver,stl);
+		    scalePanel.setStatusDisplay(thisWindow);
+
+		    OrderedIntList validPEs = Analysis.getValidProcessorList();
+		    long startTime = 0;
+		    long endTime = Analysis.getTotalTime();
+
+		    ColorMap utilColorMap = new ColorMap();
+		    utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0); //Blue to red
+		    utilColorMap.addBreak(70,255, 0,0, 100,255, 255,255);//red to white
+		    // Overflow-- green. Should not happen for utilization.
+		    utilColorMap.addBreak(101,0, 255,0, 255,0, 255,0); 
+		    stl.setColorMap(utilColorMap);
+
+
+		    double horSize, verSize;
+		    if (validPEs == null) {
+			horSize=Analysis.getTotalTime();
+			verSize=Analysis.getNumProcessors();
+		    } else {	
+			horSize = endTime-startTime;
+			if(horSize <= 0)
+			    horSize = Analysis.getTotalTime();
+			verSize = (double)validPEs.size();
+		    }	 
+		    scalePanel.setScales(horSize,verSize);
+	
+		    double hMin=scalePanel.toSlider(1.0/horSize);
+		    double hMax=scalePanel.toSlider(0.01);//0.1ms fills screen
+		    hor.setMin(hMin); hor.setMax(hMax);
+		    hor.setValue(hMin);
+		    hor.setTicks(Math.floor(hMin),1);
+	
+		    double vMin=scalePanel.toSlider(1.0/verSize);
+		    double vMax=scalePanel.toSlider(1.0);//One processor fills screen
+		    ver.setMin(vMin); ver.setMax(vMax);
+		    ver.setValue(vMin);
+		    ver.setTicks(Math.floor(vMin),1);
+
+		    stl.setData(validPEs,startTime,endTime);
+
 		    return null;
 		}
 		public void finished() {
 		    setTitle("Projections - " + newfile);
-		    if (Analysis.hasSummaryData()) {
-			Analysis.loadSummaryData();
-			double[] data = Analysis.getSummaryAverageData();
-			long originalSize = Analysis.getSummaryIntervalSize();
-			long bestSize =
-			    (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);
-			if (bestSize != originalSize) {
-			    // if there are changes
-			    // transform the data into absolute time first.
-			    IntervalUtils.utilToTime(data,
-						     (double)originalSize);
-			    double[] newdata =
-				IntervalUtils.rebin(data, originalSize,
-						    (double)bestSize);
-			    // transform the re-binned data to utilization.
-			    IntervalUtils.timeToUtil(newdata,
-						     (double)bestSize);
-			    sumDataSource = new SummaryDataSource(newdata);
-			    sumXAxis =
-				new SummaryXAxis(newdata.length,
-						 (long)bestSize);
-			} else {
-			    sumDataSource = new SummaryDataSource(data);
-			    sumXAxis =
-				new SummaryXAxis(data.length,
-						 (long)(Analysis.getSummaryIntervalSize()));
-			}
-			sumYAxis = new SummaryYAxis();
-			graphPanel =
-			    new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
-			summaryGraphPanel.add("data", graphPanel, "run data");
+		    
+		    summaryGraphPanel.add("data", scalePanel, "overview");
+ 		    Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
+ 		    Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
+		    Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
 
-		    }
 		    menuManager.fileOpened();
 		}
+
 	    };
 	    worker.start();
     }
@@ -413,7 +450,7 @@ public class MainWindow extends JFrame
     {
 	if(graphWindow != null)
 	    return true;
-	else
+	else  
 	    return false;
     }
 
@@ -461,4 +498,8 @@ public class MainWindow extends JFrame
 	if (loadSts!=null) { f.openFile(loadSts); }
     }
 
+
+    public void setStatus(String msg) {
+   	status.setText(msg);
+    }
 }

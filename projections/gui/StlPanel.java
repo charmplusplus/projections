@@ -322,4 +322,5 @@ public class StlPanel extends ScalePanel.Child
 	validPEs.reset();
 	repaint();
     }
+
 }

@@ -18,8 +18,8 @@ public class Counter {
     
     if      (code.equals("CYCLES0"))      { color = Color.yellow;       } // 0
     else if (code.equals("INSTR"))        { color = Color.blue;         } // 1
-    else if (code.equals("LOAD"))         { color = new Color(90,90,0); } // 2
-    else if (code.equals("STORE"))        { color = new Color(90,90,0); } // 3
+    else if (code.equals("LOAD"))         { color = Color.orange;       } // 2
+    else if (code.equals("STORE"))        { color = Color.magenta;      } // 3
     else if (code.equals("STORE_COND"))   { color = new Color(90,90,0); } // 4
     else if (code.equals("FAIL_COND"))    { color = new Color(90,90,0); } // 5
     else if (code.equals("DECODE_BR"))    { color = new Color(90,90,0); } // 6
@@ -39,7 +39,7 @@ public class Counter {
     else if (code.equals("GR_ST_COND"))   { color = new Color(90,90,0); } // 20
     else if (code.equals("GR_FLOPS"))     { color = Color.red;          } // 21
     else if (code.equals("QUADWORDS1"))   { color = new Color(90,90,0); } // 22
-    else if (code.equals("TLB_MISS"))     { color = new Color(90,90,0); } // 23
+    else if (code.equals("TLB_MISS"))     { color = Color.pink;         } // 23
     else if (code.equals("MIS_BR"))       { color = new Color(90,90,0); } // 24
     else if (code.equals("L1_DMISS"))     { color = Color.cyan;         } // 25
     else if (code.equals("L2_DMISS"))     { color = Color.green;        } // 26

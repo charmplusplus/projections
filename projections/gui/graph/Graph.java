@@ -9,7 +9,6 @@ import javax.swing.*;
 public class Graph extends JPanel 
     implements MouseMotionListener
 {
-
     public static final int STACKED   = 0;  // type of the bar graph
     public static final int UNSTACKED = 1;  // single, multiple or stacked
     public static final int AREA      = 2;  // Area graph (stacked)
@@ -17,11 +16,16 @@ public class Graph extends JPanel
     public static final int BAR       = 4;  // Graph type, bar graph
     public static final int LINE      = 5;  // or line graph
     
-    private int GraphType;
-    private int BarGraphType;
+    // data variables
     private DataSource dataSource;
     private XAxis xAxis;
     private YAxis yAxis;
+
+    // graph type variables
+    private int GraphType;
+    private int BarGraphType;
+
+    // graph parameters
     private int originX;
     private int originY;
     private double xscale;
@@ -33,36 +37,34 @@ public class Graph extends JPanel
     
     private static final double PI = 3.142;
 
-
-   private FontMetrics fm;
-   private Color labelColor;
-   private Image offscreen; 
+    private FontMetrics fm;
+    private Color labelColor;
    
-   private JLabel yLabel;	// to print y axis title vertically
-   private int w,h,tickincrementX,tickincrementY;
-   double pixelincrementX,pixelincrementY;
+    private int w,h;
 
-   private double[][] stackArray;
+    private int tickincrementX, tickincrementY;
+    double pixelincrementX,pixelincrementY;
 
-   private int maxSumY;
-	private int barWidth, width;
+    private double[][] stackArray;
 
-   public Graph()
-   {
-       setSize(getPreferredSize());	
+    private int maxSumY;
+    private int barWidth, width;
 
-       GraphType = BAR;		 // default GraphType is BAR
-       BarGraphType = STACKED;   // default BarGraphType is STACKED
-       labelColor = Color.yellow;
-       stackArray = null;
-       dataSource = null;
-
-       xscale = 1.0;
-       hsbval = 0;
-       offscreen = null;
+    public Graph()
+    {
+	setSize(getPreferredSize());	
 	
-       addMouseMotionListener(this);
-   }
+	GraphType = BAR;		 // default GraphType is BAR
+	BarGraphType = STACKED;   // default BarGraphType is STACKED
+	labelColor = Color.yellow;
+	stackArray = null;
+	dataSource = null;
+	
+	xscale = 1.0;
+	hsbval = 0;
+	
+	addMouseMotionListener(this);
+    }
     
     public Graph(DataSource d, XAxis x, YAxis  y)
     {
@@ -291,10 +293,6 @@ public class Graph extends JPanel
 	g.setFont(new Font("Times New Roman", Font.BOLD, FONT_SIZE));
 	fm = g.getFontMetrics(g.getFont());
 
-	// acquire component size
-	w = getSize().width;
-	h = getSize().height;
-	
 	// set up parameters for drawing
 	double maxvalueY;  // **CW** NOTE: Assumes Y axis is always numeric!
 
@@ -334,6 +332,8 @@ public class Graph extends JPanel
 
 	// determine scheme for ticks and labels
 	double pixelsPerYValue = h/(double)maxvalueY;
+
+	// ********** draw the X Axis **********
 	
     }
 
@@ -342,17 +342,12 @@ public class Graph extends JPanel
        g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
        fm = g.getFontMetrics(g.getFont()); 
           
-       w = getSize().width;
-       h = getSize().height;
-
        String yTitle = yAxis.getTitle();
        String temp   = "";
 	
        for(int i=0; i < yTitle.length(); i++)
 	   temp += yTitle.charAt(i)+"\n";
  
-       yLabel = new JLabel(temp);
-		
        originX = fm.getHeight()*4;
        //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
        originY = h - (30 + 2 * fm.getHeight());	// i.e. find the left and the lower margins
@@ -731,7 +726,6 @@ public class Graph extends JPanel
 		maxValue = data[yValues-1];
 	    }
 	}
-
 	return maxValue;
     }
 

@@ -147,8 +147,3 @@ public class UserEventWindow extends JFrame
   }
 }
 
-
-
-
-
-

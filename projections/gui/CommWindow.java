@@ -14,9 +14,10 @@ import projections.misc.LogEntryData;
 public class CommWindow extends GenericGraphWindow
     implements ItemListener
 {
-    private double[][] 	msgCount;		// rename to sentMsgCount
-    private double[][] 	byteCount;		// rename to sentBytCount
-    private double[][] 	recivedMsgCount;
+    private double[][] 	sentMsgCount;
+    private double[][] 	sentByteCount;
+    private double[][] 	receivedMsgCount;
+    private double[][] 	receivedByteCount;
     private double[][]	exclusiveSent;
     private int[][]     hopCount;
     private double[][]  avgHopCount;
@@ -31,10 +32,11 @@ public class CommWindow extends GenericGraphWindow
     private JPanel	graphPanel;
     private JPanel	checkBoxPanel;
 
-    private Checkbox    sentMssgs;
+    private Checkbox    sentMsgs;
     private Checkbox	sentBytes;
     private Checkbox    histogramCB;
-    private Checkbox	recivedMssgs;
+    private Checkbox	receivedMsgs;
+    private Checkbox    receivedBytes;
     private Checkbox	sentExclusive;
     private Checkbox    hopCountCB;
 
@@ -72,23 +74,29 @@ public class CommWindow extends GenericGraphWindow
 		setYAxis("Frequency", null);
 		setXAxis("Byte Size", "bytes");
 		super.refreshGraph();
-	    } else if(cb == sentMssgs) {
-		setDataSource("Communications", msgCount, this);
-		setPopupText("msgCount");
+	    } else if(cb == sentMsgs) {
+		setDataSource("Communications", sentMsgCount, this);
+		setPopupText("sentMsgCount");
 		setYAxis("Messages Sent", "");
 		setXAxis("Processor", "");
 		super.refreshGraph();
 	    }else if(cb == sentBytes){
 		//System.out.println("bytes");
-		setDataSource("Communications", byteCount, this);
-		setPopupText("byteCount");
+		setDataSource("Communications", sentByteCount, this);
+		setPopupText("sentByteCount");
 		setYAxis("Bytes Sent", "bytes");
 		setXAxis("Processor", "");
 		super.refreshGraph();
-	    }else if(cb == recivedMssgs){
-		setDataSource("Communications", recivedMsgCount, this);
-		setPopupText("recivedMsgCount");
-		setYAxis("Mssages Recived", "");
+	    }else if(cb == receivedMsgs){
+		setDataSource("Communications", receivedMsgCount, this);
+		setPopupText("receivedMsgCount");
+		setYAxis("Messages Received", "");
+		setXAxis("Processor", "");
+		super.refreshGraph();
+	    }else if(cb == receivedBytes){
+		setDataSource("Communications", receivedByteCount, this);
+		setPopupText("receivedByteCount");
+		setYAxis("Bytes Received", "");
 		setXAxis("Processor", "");
 		super.refreshGraph();
 	    }else if(cb == sentExclusive){
@@ -99,7 +107,7 @@ public class CommWindow extends GenericGraphWindow
 		super.refreshGraph();
 	    } else if (cb == hopCountCB) {
 		if (avgHopCount == null) {
-		    avgHopCount = averageHops(hopCount, recivedMsgCount);
+		    avgHopCount = averageHops(hopCount, receivedMsgCount);
 		}
 		setDataSource("Communications", avgHopCount, this);
 		setPopupText("avgHopCount");
@@ -129,15 +137,18 @@ public class CommWindow extends GenericGraphWindow
 	if (currentArrayName.equals("histArray")) {
 	    rString[0] = xVal + " bytes";
 	    rString[1] = "Count = " +  histArray[xVal];
-	} else if(currentArrayName.equals("msgCount")) {
+	} else if(currentArrayName.equals("sentMsgCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + msgCount[xVal][yVal];
-	} else if(currentArrayName.equals("byteCount")) {
+	    rString[1] = "Count = " + sentMsgCount[xVal][yVal];
+	} else if(currentArrayName.equals("sentByteCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Bytes = " + byteCount[xVal][yVal];
-	} else if(currentArrayName.equals("recivedMsgCount")) {
+	    rString[1] = "Bytes = " + sentByteCount[xVal][yVal];
+	} else if(currentArrayName.equals("receivedMsgCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + recivedMsgCount[xVal][yVal];
+	    rString[1] = "Count = " + receivedMsgCount[xVal][yVal];
+	} else if(currentArrayName.equals("receivedByteCount")) {
+	    rString[0] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "Count = " + receivedByteCount[xVal][yVal];
 	} else if(currentArrayName.equals("exclusiveSent")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + exclusiveSent[xVal][yVal];
@@ -160,30 +171,33 @@ public class CommWindow extends GenericGraphWindow
 
 	CheckboxGroup cbg = new CheckboxGroup();
 	histogramCB = new Checkbox("Histogram", cbg, true);
-	sentMssgs = new Checkbox("Messages Sent (mssgs)", cbg, false);
-	sentBytes = new Checkbox("Messages Sent (bytes)", cbg, false);
-	recivedMssgs = new Checkbox("Messages Recived", cbg, false);
+	sentMsgs = new Checkbox("Messages Sent", cbg, false);
+	sentBytes = new Checkbox("Bytes Sent", cbg, false);
+	receivedMsgs = new Checkbox("Messages Received", cbg, false);
+	receivedBytes = new Checkbox("Bytes Received", cbg, false);
 	sentExclusive = new Checkbox("Messages Sent Externally", cbg, false);
 	if (MainWindow.BLUEGENE) {
 	    hopCountCB = new Checkbox("Hop Count (BG only)", cbg, false);
 	}
 
 	histogramCB.addItemListener(this);
-	sentMssgs.addItemListener(this);
+	sentMsgs.addItemListener(this);
 	sentBytes.addItemListener(this);
-	recivedMssgs.addItemListener(this);
+	receivedMsgs.addItemListener(this);
+	receivedBytes.addItemListener(this);
 	sentExclusive.addItemListener(this);
 	if (MainWindow.BLUEGENE) {
 	    hopCountCB.addItemListener(this);
 	}
 
 	Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentMssgs, gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 1,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, sentBytes, gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, recivedMssgs, gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 4,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 4,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 5,0, 1,1, 1,1);
 	if (MainWindow.BLUEGENE) {
-	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 5,0, 1,1, 1,1);
+	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 6,0, 1,1, 1,1);
 	}
 
 	Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
@@ -206,9 +220,10 @@ public class CommWindow extends GenericGraphWindow
 	    getDialogData();
 	    final SwingWorker worker =  new SwingWorker() {
 		    public Object construct() {
-			msgCount = new double[validPEs.size()][];
-			byteCount = new double[validPEs.size()][];
-			recivedMsgCount = new double[validPEs.size()][];
+			sentMsgCount = new double[validPEs.size()][];
+			sentByteCount = new double[validPEs.size()][];
+			receivedMsgCount = new double[validPEs.size()][];
+			receivedByteCount = new double[validPEs.size()][];
 			exclusiveSent = new double[validPEs.size()][];
 			if (MainWindow.BLUEGENE) {
 			    hopCount = new int[validPEs.size()][];
@@ -270,9 +285,10 @@ public class CommWindow extends GenericGraphWindow
 	    glr = new GenericLogReader(Analysis.getLogName(pe),
 				       Analysis.getVersion());
 	    try {
-		msgCount[curPeArrayIndex] = new double[numEPs];
-		byteCount[curPeArrayIndex] = new double[numEPs];
-		recivedMsgCount[curPeArrayIndex] = new double[numEPs];
+		sentMsgCount[curPeArrayIndex] = new double[numEPs];
+		sentByteCount[curPeArrayIndex] = new double[numEPs];
+		receivedMsgCount[curPeArrayIndex] = new double[numEPs];
+		receivedByteCount[curPeArrayIndex] = new double[numEPs];
 		exclusiveSent[curPeArrayIndex] = new double[numEPs];
 		if (MainWindow.BLUEGENE) {
 		    hopCount[curPeArrayIndex] = new int[numEPs];
@@ -286,12 +302,13 @@ public class CommWindow extends GenericGraphWindow
 		    glr.nextEvent(logdata);
 		    if (logdata.type == ProjDefs.CREATION) {
 			EPid = logdata.entry;
-			msgCount[curPeArrayIndex][EPid]++;
-			byteCount[curPeArrayIndex][EPid] += logdata.msglen;
+			sentMsgCount[curPeArrayIndex][EPid]++;
+			sentByteCount[curPeArrayIndex][EPid] += logdata.msglen;
 			histogram.add(new Integer(logdata.msglen));
 		    } else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
 			EPid = logdata.entry;
-			recivedMsgCount[curPeArrayIndex][EPid]++;
+			receivedMsgCount[curPeArrayIndex][EPid]++;
+			receivedByteCount[curPeArrayIndex][EPid] += logdata.msglen;
 			if (logdata.pe == pe) {
 			    exclusiveSent[curPeArrayIndex][EPid] ++;
 			}
@@ -338,7 +355,7 @@ public class CommWindow extends GenericGraphWindow
 
 	for(int k=0; k<numPe; k++){
 	    for(int j=0; j<numEPs; j++){
-		exclusiveSent[k][j] = msgCount[k][j] - exclusiveSent[k][j];
+		exclusiveSent[k][j] = sentMsgCount[k][j] - exclusiveSent[k][j];
 
 		// Apurva - i'm doing this to prevent any negitive numbers
 		// from getting sent into the stack array because it messes up

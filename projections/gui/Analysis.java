@@ -225,6 +225,11 @@ public class Analysis {
 	public static int[][] getUserEntryData( int a, int t ) {
 		return userEntryData[ a ][ t ];
 	}
+
+    public static String getLogName(int peNum) {
+	return sts.getLogName(peNum);
+    }
+
 	public static String[][] getUserEntryNames() {
 		return sts.getEntryNames();
 	}

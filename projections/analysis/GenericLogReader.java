@@ -37,7 +37,15 @@ public class GenericLogReader extends ProjDefs
     }
 
     public GenericLogReader(int peNum, double Nversion) {
-	GenericLogReader(Analysis.sts.getLogName(peNum), Nversion);
+	String filename = Analysis.getLogName(peNum);
+	streamFilename = filename;
+	try {
+	    reader = new AsciiIntegerReader(new FileReader(filename));
+	    version = Nversion;
+	    reader.nextLine(); // skip over the useless header
+	} catch (IOException e) {
+	    System.err.println("Error reading file " + filename);
+	}
     }
 
     /**

@@ -4,6 +4,7 @@ import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
+import java.util.*;
 
 /**
  *  Written by Chee Wai Lee
@@ -24,6 +25,9 @@ public class GenericLogReader extends ProjDefs
     private String streamFilename;
     private AsciiIntegerReader reader;
     private double version;
+
+    // indexed by EP with a Vector of run length encoding blocks.
+    private Vector intervalData[];
 
     public GenericLogReader(String filename, double Nversion) {
 	streamFilename = filename;
@@ -89,7 +93,6 @@ public class GenericLogReader extends ProjDefs
 	    if(Analysis.getVersion() >= 5.0 && data.type == CREATION){
 				data.sendTime = reader.nextLong();
 	    }
-	    
 	    break;
 	case ENQUEUE: case DEQUEUE:
 	    data.mtype = reader.nextInt();
@@ -191,5 +194,12 @@ public class GenericLogReader extends ProjDefs
 		return;
 	    }
 	}
+    }
+
+    /**
+     *  
+     */
+    public Vector[] loadIntervalData() {
+	return null;
     }
 }

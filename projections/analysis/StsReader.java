@@ -1,20 +1,27 @@
 package projections.analysis;
 
-/** This class reads the .sts file and parses out the
- * entry point names and numbers, message names, etc.
- */
-
-
 import java.io.*;
 import java.util.*;
 import java.lang.*;
-import projections.misc.*;
-import java.awt.Color;
-import projections.gui.Analysis;
 
+import projections.gui.*;
+import projections.misc.*;
+
+/** 
+ *  StsReader
+ *  Modified by Chee Wai Lee.
+ *  4/7/2003
+ *
+ *  StsReader provides the necessary abstractions to reason about a
+ *  projections .sts file and its associated data files (eg. .log, .sum
+ *  .sumd etc).
+ * 
+ */
 public class StsReader extends ProjDefs
 {
-    private String baseName, bgSumName;
+    private String baseName;
+    private String logDirectory;
+
     private boolean hasSum, hasSumDetail, hasLog, hasBGSum;
 
     public static final int NUM_TYPES = 4;
@@ -23,133 +30,51 @@ public class StsReader extends ProjDefs
     public static final int COUNTER = 2;
     public static final int SUMDETAIL = 3;
 
+    private OrderedIntList validPEs[];
     private StringBuffer validPEStringBuffers[];
     private int lastPE[];
     private boolean inRange[];
 	
-    private long totalTime=0;
+    // Sts header information
+    private double version;
+    private String Machine;
     private int NumPe;
+    private int TotalChares;
     private int EntryCount;
-    private String EntryNames[][];
-    
-    //This stuff seems pretty useless to me
-    private int TotalChares,TotalMsgs;
-    private String Machine, ClassNames[];
+    private int TotalMsgs;
+
+    // Sts data
+    private String ClassNames[];    // indexed by chare id
     private Chare ChareList[];
-    private long MsgTable[];
-    private int userEventIndex = 0;
-    private Hashtable UserEventIndices = new Hashtable();
-    // index by Integer, return String name
-    private Hashtable UserEvents = new Hashtable();  
-    private Hashtable UserEventColors = new Hashtable();
-    private String UserEventNames[];
+    private long MsgTable[];        // indexed by msg id
+    // indexed by (ep id) X (type) where type == 0 -> entry name
+    //                               and type == 1 -> class (chare) name
+    private String EntryNames[][];  
     
-    public int getNumUserDefinedEvents() {
-	return UserEvents.size();
-    }
-
-    public int getUserEventIndex(int eventID) {
-	Integer key = new Integer(eventID);
-	return ((Integer)UserEventIndices.get(key)).intValue();
-    }
-
-    public Color getUserEventColor(int eventID) {
-	Integer key = new Integer(eventID);
-	return (Color) UserEventColors.get(key);
-    }
-
-    public String getUserEventName(int eventID) { 
-	Integer key = new Integer(eventID);
-	return (String) UserEvents.get(key);
-    }
-
-    public String[] getUserEventNames() {
-	// gets an array by logical (not user-given) index
-	return UserEventNames;
-    }
-
-    public String getValidProcessorString(int type) {
-	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
-	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
-	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
-	    break;
-	}
-	return validPEStringBuffers[type].toString();
-    }
-
-    /**
-     *  Implements the state machine for constructing the valid PE string
-     *  for the appropriate data type.
-     */
-    private void addPEToValidString(int type, int pe) {
-	// start of the string
-	if (lastPE[type] == -1) {
-	    validPEStringBuffers[type].append(pe);
-	    lastPE[type] = pe;
-	} else {
-	    if (pe == lastPE[type]+1) {
-		// contigious
-		if (!inRange[type]) {
-		    validPEStringBuffers[type].append('-');
-		    inRange[type] = true;
-		}
-		lastPE[type] = pe;
-	    } else if (pe > lastPE[type]+1) {
-		// disjoint, start new range.
-		if (inRange[type]) {
-		    // finish off the last range
-		    validPEStringBuffers[type].append(lastPE[type]);
-		    inRange[type] = false;
-		}
-		validPEStringBuffers[type].append(',');
-		validPEStringBuffers[type].append(pe);
-	    } else {
-		// detection loop should be going in forward pe order.
-		System.err.println("PE values cannot go backwards! " +
-				   "Catastrophic error, exiting.");
-		System.exit(-1);
-	    }
-	}
-    }
-
-    private void closeValidStrings() {
-	for (int type=0; type<NUM_TYPES; type++) {
-	    if (inRange[type]) {
-		validPEStringBuffers[type].append(lastPE[type]);
-	    }
-	}
-    }
-
-    /** Read in and decipher the .sts file.
+    // User Event information
+    private int userEventIndex = 0;
+    private Hashtable userEventIndices = new Hashtable();
+    // index by Integer, return String name
+    private Hashtable userEvents = new Hashtable();  
+    private String userEventNames[];
+    
+    /** 
+     *  The StsReader constructor reads the .sts file indicated.
      *  @exception LogLoadException if an error occurs while reading in the
      *      the state file
-     *  FileName is the full filename.
+     *  Pre-condition: FileName is the full pathname of the sts file.
      */
-    public StsReader(String FileName) throws LogLoadException   
+    public StsReader(String FileName) 
+	throws LogLoadException   
     {
-	validPEStringBuffers = new StringBuffer[NUM_TYPES];
+	validPEs = new OrderedIntList[NUM_TYPES];
 	lastPE = new int[NUM_TYPES];
 	inRange = new boolean[NUM_TYPES];
 	for (int i=0; i<NUM_TYPES; i++) {
-	    validPEStringBuffers[i] = new StringBuffer("");
-	    lastPE[i] = -1;
-	    inRange[i] = false;
+	    validPEs[i] = new OrderedIntList();
 	}
 	baseName = getBaseName(FileName);
 
-	totalTime=-1;
 	try {
 	    BufferedReader InFile = 
 		new BufferedReader(new InputStreamReader(new FileInputStream(FileName)));
@@ -159,8 +84,7 @@ public class StsReader extends ProjDefs
 		StringTokenizer st = new StringTokenizer(Line);
 		String s1 = st.nextToken();
 		if (s1.equals("VERSION")) {
-		    double ver = Double.parseDouble(st.nextToken());
-		    Analysis.setVersion(ver);
+		    version = Double.parseDouble(st.nextToken());
 		} else if (s1.equals("MACHINE")) {
 		    Machine = st.nextToken();
 		} else if (s1.equals("PROCESSORS")) {
@@ -210,19 +134,19 @@ public class StsReader extends ProjDefs
 		    MsgTable[ID] = Size;
 		} else if (s1.equals("EVENT")) {
 		    Integer key = new Integer(st.nextToken());
-		    if (!UserEvents.containsKey(key)) {
+		    if (!userEvents.containsKey(key)) {
 			String eventName = "";
 			while (st.hasMoreTokens()) {
 			    eventName = eventName + st.nextToken() + " ";
 			}
-			UserEvents.put(key, eventName);
-			UserEventNames[userEventIndex] = eventName;
-			UserEventIndices.put(key, 
+			userEvents.put(key, eventName);
+			userEventNames[userEventIndex] = eventName;
+			userEventIndices.put(key, 
 					     new Integer(userEventIndex++));
 		    }
 		} else if (s1.equals("TOTAL_EVENTS")) {
 		    // restored by Chee Wai - 7/29/2002
-		    UserEventNames = 
+		    userEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals ("END")) {
 		    break;
@@ -231,7 +155,7 @@ public class StsReader extends ProjDefs
 		
 	    // determine if any of the data files exist.
 	    // We assume they are automatically valid and this is reflected
-	    // in the validPEStringBuffers. In future, whether or not the
+	    // in the validPEs. In future, whether or not the
 	    // values are valid should be defered to after the data file has
 	    // been successfullly read.
 	    hasLog = false;
@@ -240,31 +164,18 @@ public class StsReader extends ProjDefs
 	    for (int i=0;i<NumPe;i++) {
 		if ((new File(getSumName(i))).isFile()) {
 		    hasSum = true;
-		    addPEToValidString(SUMMARY, i);
+		    validPEs[SUMMARY].insert(i);
 		}
 		if ((new File(getSumDetailName(i))).isFile()) {
 		    hasSumDetail = true;
-		    addPEToValidString(SUMDETAIL, i);
+		    validPEs[SUMDETAIL].insert(i);
 		}
 		if ((new File(getLogName(i))).isFile()) {
 		    hasLog = true;
-		    addPEToValidString(LOG, i);
+		    validPEs[LOG].insert(i);
 		}
 	    }
-	    closeValidStrings();
-	    bgSumName=getBgSumName();
-	    hasBGSum = (bgSumName != null);
-	
-	    // set up UserEventColors
-	    int numColors = UserEvents.size();
-	    Color[] userEventColorMap = Analysis.createColorMap(numColors);
-	    Enumeration keys = UserEvents.keys();
-	    int colorIndex = 0;
-	    while (keys.hasMoreElements()) {
-		UserEventColors.put((Integer)keys.nextElement(), 
-				    userEventColorMap[colorIndex]);
-		colorIndex++;
-	    }
+	    hasBGSum = (getBGSumName() != null);
 	    InFile.close();
 	} catch (FileNotFoundException e) {
 	    throw new LogLoadException (FileName, LogLoadException.OPEN);
@@ -272,47 +183,9 @@ public class StsReader extends ProjDefs
 	    throw new LogLoadException (FileName, LogLoadException.READ);
 	}
     }
-    
-    public int getEntryCount() { return EntryCount;}   
-    
-    /** 
-     * Gives the user entry points as read in from the .sts file as an 
-     * array of two strings:  one for the name of the entry point with 
-     * BOC or CHARE prepended to the front and a second containing the 
-     * name of its parent BOC or chare.
-     * @return a two-dimensional array of Strings containing these records
-     */
-    public String[][] getEntryNames() {
-	return EntryNames;
-    }   
-    
-    public String getFilename() {return baseName;}   
-    
-    public String getLogName(int pnum) {
-	return baseName+"."+pnum+".log";
-    }   
-    public int getProcessorCount() {
-	return NumPe;
-    }   
-    
-    public String getSumName(int pnum) {
-	return baseName+"."+pnum+".sum";
-    }   
-    
-    public String getSumDetailName(int pnum) {
-	return baseName + "." + pnum + ".sumd";
-    }
-	
-    public long getTotalTime() {return totalTime;}   
-    public boolean hasLogFiles() {return hasLog;}   
-    public boolean hasSumFiles() {return hasSum;}   
-    public boolean hasSumDetailFiles() {return hasSumDetail;}
-    public boolean hasBGSumFile() {return hasBGSum;}
-    public void setTotalTime(long t) {
-	totalTime=t;
-    }   
-    public String getBGSumName() {return bgSumName;}
 
+    /** ************** Private working/util Methods ************** */
+    
     private String getBaseName(String filename) {
 	String baseName = null;
 	if (filename.endsWith(".sum.sts")) {
@@ -327,11 +200,151 @@ public class StsReader extends ProjDefs
 	return baseName;
     }
 
-    private String getBgSumName() {
+    private String dirFromFile(String filename) {
+	// pre condition - filename is a full path name
+	int index = filename.lastIndexOf(File.separator);
+	if (index != -1) {
+	    return filename.substring(0,index);
+	}
+	return(".");	// present directory
+    }
+
+    /** ****************** Accessor Methods ******************* */
+
+    // *** Data accessors ***
+    public double getVersion() {
+	return version;
+    }
+
+    public int getEntryCount() { 
+	return EntryCount;
+    }   
+    
+    public int getProcessorCount() {
+	return NumPe;
+    }   
+
+    public String getMachineName() {
+	return Machine;
+    }
+    
+    /** 
+     * Gives the user entry points as read in from the .sts file as an 
+     * array of two strings:  one for the name of the entry point with 
+     * BOC or CHARE prepended to the front and a second containing the 
+     * name of its parent BOC or chare.
+     * @return a two-dimensional array of Strings containing these records
+     */
+    public String[][] getEntryNames() {
+	return EntryNames;
+    }   
+    
+    // *** user event accessors ***
+    public int getNumUserDefinedEvents() {
+	return userEvents.size();
+    }
+
+    public int getUserEventIndex(int eventID) {
+	Integer key = new Integer(eventID);
+	return ((Integer)userEventIndices.get(key)).intValue();
+    }
+
+    public String getUserEventName(int eventID) { 
+	Integer key = new Integer(eventID);
+	return (String) userEvents.get(key);
+    }
+
+    public String[] getUserEventNames() {
+	// gets an array by logical (not user-given) index
+	return userEventNames;
+    }
+
+    // *** Derived information accessor ***
+    public String getValidProcessorString(int type) {
+	switch (type) {
+	case LOG:
+	    if (!hasLog) {
+		System.err.println("Warning: No log files.");
+	    }
+	    break;
+	case SUMMARY:
+	    if (!hasSum) {
+		System.err.println("Warning: No summary files.");
+	    }
+	    break;
+	case SUMDETAIL:
+	    if (!hasSumDetail) {
+		System.err.println("Warning: No summary detail files.");
+	    }
+	    break;
+	}
+	return validPEs[type].listToString();
+    }
+
+    public OrderedIntList getValidProcessorList(int type) {
+	switch (type) {
+	case LOG:
+	    if (!hasLog) {
+		System.err.println("Warning: No log files.");
+	    }
+	    break;
+	case SUMMARY:
+	    if (!hasSum) {
+		System.err.println("Warning: No summary files.");
+	    }
+	    break;
+	case SUMDETAIL:
+	    if (!hasSumDetail) {
+		System.err.println("Warning: No summary detail files.");
+	    }
+	    break;
+	}
+	return validPEs[type];
+    }
+
+    public boolean hasLogFiles() {
+	return hasLog;
+    }   
+
+    public boolean hasSumFiles() {
+	return hasSum;
+    }
+   
+    public boolean hasSumDetailFiles() {
+	return hasSumDetail;
+    }
+
+    public boolean hasBGSumFile() {
+	return hasBGSum;
+    }
+
+    public String getLogPathname() {
+	return logDirectory;
+    }
+
+    public String getFilename() { 
+	return baseName;
+    }   
+    
+    public String getLogName(int pnum) {
+	return baseName+"."+pnum+".log";
+    }   
+
+    public String getSumName(int pnum) {
+	return baseName+"."+pnum+".sum";
+    }   
+    
+    public String getSumDetailName(int pnum) {
+	return baseName + "." + pnum + ".sumd";
+    }
+	
+    public String getBGSumName() {
 	if ((new File(baseName + ".sum")).isFile()) {
 	    return baseName + ".sum";
 	} else {
 	    return null;
 	}
     }
+
 }
+

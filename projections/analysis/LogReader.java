@@ -12,107 +12,118 @@ processor, and time interval.
 */
 import java.lang.*;
 import java.io.*;
-import projections.misc.*;
-import projections.gui.*;
 import java.util.*;
 
-public class LogReader extends ProjDefs
+import projections.misc.*;
+import projections.gui.*;
+
+public class LogReader 
+    extends ProjDefs
 {
-	public static final int SYS_Q=0; //sysUsgData[SYS_Q] is length of message queue
-	public static final int SYS_CPU=1; //sysUsgData[SYS_CPU] is percent processing time
-	public static final int SYS_IDLE=2; //sysUsgData[SYS_IDLE] is percent idle time
-	public static final int IDLE_ENTRY=-1; //Magic entry method (indicates "idle")
-	public static final int CREATE=0; //Number of creations bin
-	public static final int PROCESS=1; //Number of invocations bin
-	public static final int TIME=2; //Time (us) spent processing bin
+    //sysUsgData[SYS_Q] is length of message queue
+    public static final int SYS_Q=0; 
+    //sysUsgData[SYS_CPU] is percent processing time
+    public static final int SYS_CPU=1; 
+    //sysUsgData[SYS_IDLE] is percent idle time
+    public static final int SYS_IDLE=2; 
+    //Magic entry method (indicates "idle")
+    public static final int IDLE_ENTRY=-1;
+    //Number of creations bin 
+    public static final int CREATE=0; 
+    //Number of invocations bin
+    public static final int PROCESS=1; 
+    //Time (us) spent processing bin
+    public static final int TIME=2; 
 
-	private int[][][] sysUsgData;
-	private int[][][][] userEntries;
-	private int[][][][] categorized;
-	private long progStartTime;
-	private int numProcessors;
-	private int numUserEntries; //Number of user entry points
-	private long startTime; //Time the current entry method started
-	private int currentEntry; //Currently executing entry method
-	private int currentMtype; //Current message type
-	private int interval;//Current interval number
-	private int curPe;//Current source processor #
-	private int numIntervals;//Total number of intervals
-	private long intervalSize;//Length of an interval (us)
-        private int intervalStart;// start of range of interesting intervals
-        private int intervalEnd; // end of range of interesting intervals
+    private int[][][] sysUsgData;
+    private int[][][][] userEntries;
+    private int[][][][] categorized;
+    private long progStartTime;
+    private int numProcessors;
+    private int numUserEntries; //Number of user entry points
+    private long startTime; //Time the current entry method started
+    private int currentEntry; //Currently executing entry method
+    private int currentMtype; //Current message type
+    private int interval;//Current interval number
+    private int curPe;//Current source processor #
+    private int numIntervals;//Total number of intervals
+    private long intervalSize;//Length of an interval (us)
+    private int intervalStart;// start of range of interesting intervals
+    private int intervalEnd; // end of range of interesting intervals
 
-	private int processing;
-	private boolean byEntryPoint;
+    private int processing;
+    private boolean byEntryPoint;
+    
+    public long getIntervalSize() {
+	return intervalSize;
+    }
 	
-	/**
-          Add the given amount of time to the current entry for interval j
-        */
-	final private void addToInterval(int extra,int j,boolean maxPercents)
-	{
-	if (processing<=0) return; //Not processing at all
+    /**
+       Add the given amount of time to the current entry for interval j
+    */
+    final private void addToInterval(int extra,int j,boolean maxPercents)
+    {
+	if (processing<=0) {
+	    return; //Not processing at all
+	}
 	if (j < intervalStart || j > intervalEnd) {  // Not within interest
 	    return;
 	}
-	if (currentEntry == IDLE_ENTRY) //Idle time
-		sysUsgData[SYS_IDLE][curPe][j-intervalStart] += maxPercents?100:extra;
-	else { //Processing an entry method
-	    // System.out.println("Adding "+extra+"us for #"+curPe+":"+j);
-		sysUsgData[SYS_CPU][curPe][j-intervalStart] += maxPercents?100:extra;
-		if (byEntryPoint) {
-			userEntries[currentEntry][TIME][curPe][j-intervalStart] += extra; 
-			int catIdx=mtypeToCategoryIdx(currentMtype); 
-			if (catIdx!=-1) categorized[catIdx][TIME][curPe][j-intervalStart]+=extra;
+	if (currentEntry == IDLE_ENTRY) { //Idle time
+	    sysUsgData[SYS_IDLE][curPe][j-intervalStart] += 
+		maxPercents?100:extra;
+	} else { //Processing an entry method
+	    sysUsgData[SYS_CPU][curPe][j-intervalStart] += 
+		maxPercents?100:extra;
+	    if (byEntryPoint) {
+		userEntries[currentEntry][TIME][curPe][j-intervalStart] += 
+		    extra; 
+		int catIdx = mtypeToCategoryIdx(currentMtype); 
+		if (catIdx!=-1) {
+		    categorized[catIdx][TIME][curPe][j-intervalStart]+=extra;
 		}
+	    }
 	}
 	startTime+=extra;
-	}
+    }
 
-	/**
-           Add this entry point to the counts
-        */
-	final private void count(int mtype,int entry,int TYPE)
-	{
-	  if (!byEntryPoint) return;
-/*  gzheng to save memory, only allocate memory for those processors in the list
-	  if (userEntries[entry][TYPE]==null) {
-	    userEntries[entry][TYPE]=new int[numProcessors][numIntervals+1];
-	    if (TYPE==PROCESS) //Add a time array, too
-	      userEntries[entry][TIME]=new int[numProcessors][numIntervals+1];
-	  }
-*/
-	  if (userEntries[entry][TYPE][curPe]==null) {
+    /**
+       Add this entry point to the counts
+    */
+    final private void count(int mtype,int entry,int TYPE)
+    {
+	if (!byEntryPoint) { 
+	    return;
+	}
+	if (userEntries[entry][TYPE][curPe]==null) {
 	    userEntries[entry][TYPE][curPe]=new int[numIntervals+1];
-	  }
-	  if (TYPE==PROCESS && userEntries[entry][TIME][curPe] == null) { //Add a time array, too
-	      userEntries[entry][TIME][curPe]=new int[numIntervals+1];
-	  }
-	  userEntries[entry][TYPE][curPe][interval-intervalStart]++;
-	
-	  int catIdx=mtypeToCategoryIdx(mtype);
-	  if (catIdx!=-1) {
-/*  gzheng to save memory, only allocate memory for those processors in the list
-		if (categorized[catIdx][TYPE]==null) {
-			categorized[catIdx][TYPE]=new int[numProcessors][numIntervals+1];
-			if (TYPE==PROCESS) //Add a time array, too
-			  categorized[catIdx][TIME]=new int[numProcessors][numIntervals+1];
-		}
-*/
-		if (categorized[catIdx][TYPE][curPe]==null) {
-			categorized[catIdx][TYPE][curPe]=new int[numIntervals+1];
-			if (TYPE==PROCESS) //Add a time array, too
-			  categorized[catIdx][TIME][curPe]=new int[numIntervals+1];
-		}
-		categorized[catIdx][TYPE][curPe][interval-intervalStart]++;
-	  }
 	}
+	if (TYPE==PROCESS && 
+	    userEntries[entry][TIME][curPe] == null) { //Add a time array, too
+	    userEntries[entry][TIME][curPe]=new int[numIntervals+1];
+	}
+	userEntries[entry][TYPE][curPe][interval-intervalStart]++;
+	
+	int catIdx=mtypeToCategoryIdx(mtype);
+	if (catIdx!=-1) {
+	    if (categorized[catIdx][TYPE][curPe]==null) {
+		categorized[catIdx][TYPE][curPe]=new int[numIntervals+1];
+		if (TYPE==PROCESS) { //Add a time array, too
+		    categorized[catIdx][TIME][curPe]=new int[numIntervals+1];
+		}
+	    }
+	    categorized[catIdx][TYPE][curPe][interval-intervalStart]++;
+	}
+    }
 
-	/**
-           This is called when a log entry crosses a timing interval boundary
-        */
-	private void fillToInterval(int newinterval)
-	{
-	if (interval>=newinterval) return; //Nothing to do in this case
+    /**
+       This is called when a log entry crosses a timing interval boundary
+    */
+    private void fillToInterval(int newinterval)
+    {
+	if (interval>=newinterval) {
+	    return; //Nothing to do in this case
+	}
 	
 	//Finish off the current interval
 	int extra = (int) ((interval+1)*intervalSize - startTime);
@@ -122,96 +133,105 @@ public class LogReader extends ProjDefs
 	rescale(interval);
 
 	//Fill in any intervals we would skip over completely
-	for(int j=interval+1; j<newinterval; j++)
-		addToInterval((int)intervalSize,j,true);
+	for (int j=interval+1; j<newinterval; j++) {
+	    addToInterval((int)intervalSize,j,true);
+	}
 
 	interval = newinterval;
-	}
-	public int[][][][] getSystemMsgs()
-	{ return categorized; }
-	public int[][][] getSystemUsageData()
-	{ return sysUsgData; }
-	public int[][][][] getUserEntries()
-	{ return userEntries; }
+    }
 
+    public int[][][][] getSystemMsgs() { 
+	return categorized; 
+    }
+
+    public int[][][] getSystemUsageData() { 
+	return sysUsgData; 
+    }
+
+    public int[][][][] getUserEntries() {
+	return userEntries;
+    }
+    
     // the interval values used are absolute. Only when array access is
     // required would it be offset by intervalStart.
-    private void intervalCalc(int type, int mtype, int entry, long time) throws IOException 
+    private void intervalCalc(int type, int mtype, int entry, long time) 
+	throws IOException 
     {
-/*	if (entry < 0 || entry >= numUserEntries)
-	{
-	  System.out.println("Error: Invalid entry number "+entry+" in log file");   
-	  throw new IOException();
-	} */
 	fillToInterval((int)(time/intervalSize));
-	switch(type) {
+	switch (type) {
 	case ENQUEUE:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
-		sysUsgData[SYS_Q][curPe][interval-intervalStart]++;//Lengthen system queue
+		// Lengthen system queue
+		sysUsgData[SYS_Q][curPe][interval-intervalStart]++;
 	    }
-		break;
+	    break;
 	case CREATION:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
-		sysUsgData[SYS_Q][curPe][interval-intervalStart]++;//Lengthen system queue
+		// Lengthen system queue
+		sysUsgData[SYS_Q][curPe][interval-intervalStart]++;
 		count(mtype,entry,CREATE);
 	    }
-		break;
+	    break;
 	case BEGIN_PROCESSING:
-		processing++;
-		startTime = time;
+	    processing++;
+	    startTime = time;
 	    if (interval >= intervalStart && interval <= intervalEnd) {
-		sysUsgData[SYS_Q][curPe][interval-intervalStart]--;//Shorten system queue
+		//Shorten system queue
+		sysUsgData[SYS_Q][curPe][interval-intervalStart]--;
 		count(currentMtype = mtype,currentEntry = entry,PROCESS);
 	    }
-		break;
+	    break;
 	case END_PROCESSING:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
 		addToInterval((int)(time-startTime),interval,false);
 	    }
-		processing--;
-		break;
+	    processing--;
+	    break;
 	case BEGIN_IDLE:
-		processing++;
-		startTime = time;
-		currentEntry = IDLE_ENTRY;
-		break;
+	    processing++;
+	    startTime = time;
+	    currentEntry = IDLE_ENTRY;
+	    break;
 	case END_IDLE:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
 		addToInterval((int)(time-startTime),interval,false);
 	    }
-		processing--;
-		break;
+	    processing--;
+	    break;
 	default:
-		System.out.println("Unhandled type "+type+" in logreader!");
-		break;
+	    System.out.println("Unhandled type "+type+" in logreader!");
+	    break;
 	}
-	}
+    }
 
-        /**
-           Maps a message type to a categorized system message number
-        */
-	final private int mtypeToCategoryIdx(int mtype) {
-		switch(mtype) {
-		case NEW_CHARE_MSG: return 0;
-		case FOR_CHARE_MSG: return 1;
-		case BOC_INIT_MSG: return 2;
-		case LDB_MSG: return 3;
-		case QD_BROADCAST_BOC_MSG: case QD_BOC_MSG:
-			return 4;
-		default:
-			return -1;
-		}
+    /**
+       Maps a message type to a categorized system message number
+    */
+    final private int mtypeToCategoryIdx(int mtype) {
+	switch (mtype) {
+	case NEW_CHARE_MSG: 
+	    return 0;
+	case FOR_CHARE_MSG: 
+	    return 1;
+	case BOC_INIT_MSG: 
+	    return 2;
+	case LDB_MSG: 
+	    return 3;
+	case QD_BROADCAST_BOC_MSG: case QD_BOC_MSG:
+	    return 4;
+	default:
+	    return -1;
 	}
+    }
 
-        /**
-           read log file, with one more parameter containing 
-           a list of processors to read.
-        */
-	public void read(StsReader sts,
-		long totalTime, long reqIntervalSize,
-		int NintervalStart, int NintervalEnd,
-		boolean NbyEntryPoint, OrderedIntList processorList)
-	{
+    /**
+       read log file, with one more parameter containing 
+       a list of processors to read.
+    */
+    public void read(long reqIntervalSize,
+		     int NintervalStart, int NintervalEnd,
+		     boolean NbyEntryPoint, OrderedIntList processorList)
+    {
 	int type;
 	int mtype;
 	long time;
@@ -220,41 +240,37 @@ public class LogReader extends ProjDefs
 	int pe;
 	int msglen;
 	
-	numProcessors = sts.getProcessorCount();
-	numUserEntries = sts.getEntryCount();
-	intervalSize=reqIntervalSize;
+	numProcessors = Analysis.getNumProcessors();
+	numUserEntries = Analysis.getNumUserEntries();
+	intervalSize = reqIntervalSize;
 	intervalStart = NintervalStart;
 	intervalEnd = NintervalEnd;
 	numIntervals = intervalEnd - intervalStart + 1;
-	//	numIntervals = (int) (totalTime / (double)intervalSize + 1.0);
-        //System.out.println(numIntervals);
 	byEntryPoint=NbyEntryPoint;
-
+	
 	// assume full range of processor if null
         if (processorList == null) {
-          processorList = new OrderedIntList();
-          for (pe=0; pe<numProcessors; pe++)
-	    processorList.insert(pe);
+	    processorList = new OrderedIntList();
+	    for (pe=0; pe<numProcessors; pe++) {
+		processorList.insert(pe);
+	    }
         }
 
 	ProgressDialog bar=new ProgressDialog("Reading log files...");
 	double allocEffort=0.5;//Number of logs the allocations are worth
-	double totalEffort=allocEffort+sts.getProcessorCount();
+	double totalEffort=allocEffort+numProcessors;
 	bar.progress(0,"allocating");
-//	sysUsgData = new int[3][numProcessors][numIntervals+1];
 	sysUsgData = new int[3][numProcessors][];
 	if (byEntryPoint) {
-		userEntries = new int[numUserEntries][3][numProcessors][];
-//		userEntries = new int[numUserEntries][3][][];
-//		categorized = new int[5][3][][];
-		categorized = new int[5][3][numProcessors][];
+	    userEntries = new int[numUserEntries][3][numProcessors][];
+	    categorized = new int[5][3][numProcessors][];
 	}
 	int seq = 0;
         processorList.reset();
 	int nPe=processorList.size();
  	curPe = processorList.nextElement();
 	for (;curPe!=-1; curPe=processorList.nextElement())
-	  try {
+	    try {
 		// gzheng: allocate sysUsgData only when needed.
                 sysUsgData[0][curPe] = new int [numIntervals+1];
                 sysUsgData[1][curPe] = new int [numIntervals+1];
@@ -264,76 +280,82 @@ public class LogReader extends ProjDefs
 		interval = 0;
 	        currentEntry = -1;
 	        startTime =0;
-		FileReader file = new FileReader(sts.getLogName(curPe));
-		AsciiIntegerReader log=new AsciiIntegerReader(new BufferedReader(file));
+		FileReader file = new FileReader(Analysis.getLogName(curPe));
+		AsciiIntegerReader log = 
+		    new AsciiIntegerReader(new BufferedReader(file));
 		log.nextLine(); // The first line contains junk
 		//The second line gives the program start time
 		log.nextInt();
 		progStartTime = 0;//log.nextLong();
 		int nLines=2;
-		if (!bar.progress(allocEffort+curPe,totalEffort,"Loading "+seq+" of "+nPe))
-			break;//User cancelled load
-		
-		try { while (true) { //EOFException will terminate loop
+		if (!bar.progress(allocEffort+curPe, totalEffort,
+				  "Loading " + seq + " of " + nPe)) {
+		    //User cancelled load
+		    break;
+		}
+		try { 
+		    while (true) { //EOFException will terminate loop
 			log.nextLine();//Skip any junk from previous line
 			type = log.nextInt();
 		  	nLines++;
 			switch (type) {
 			case BEGIN_IDLE: case END_IDLE:
-				time = log.nextLong();
-				pe = log.nextInt();
-				intervalCalc(type, 0, 0, (time-progStartTime));
-				break;
+			    time = log.nextLong();
+			    pe = log.nextInt();
+			    intervalCalc(type, 0, 0, (time-progStartTime));
+			    break;
 			case CREATION:
 			case BEGIN_PROCESSING: 
                         case END_PROCESSING:
-				mtype = log.nextInt();
-				entry = log.nextInt();
-				time = log.nextLong();
-				event = log.nextInt();
-				pe = log.nextInt();
-				if (Analysis.getVersion() > 1.0)
-				  msglen = log.nextInt();
-			 	else
-				  msglen = -1;
-				 
-			//System.out.println(type+" "+mtype+" "+entry+" "+time);
-				intervalCalc(type, mtype, entry, (time-progStartTime));
-				break;
+			    mtype = log.nextInt();
+			    entry = log.nextInt();
+			    time = log.nextLong();
+			    event = log.nextInt();
+			    pe = log.nextInt();
+			    if (Analysis.getVersion() > 1.0) {
+				msglen = log.nextInt();
+			    } else {
+				msglen = -1;
+			    }
+			    intervalCalc(type, mtype, entry, 
+					 (time-progStartTime));
+			    break;
 			case ENQUEUE:
-				mtype = log.nextInt();
-				time = log.nextLong();
-				event = log.nextInt();
-				pe = log.nextInt();
-				intervalCalc(type, mtype, 0, (time-progStartTime));
-				break;
+			    mtype = log.nextInt();
+			    time = log.nextLong();
+			    event = log.nextInt();
+			    pe = log.nextInt();
+			    intervalCalc(type, mtype, 0, (time-progStartTime));
+			    break;
 			case END_COMPUTATION:
-				time = log.nextLong();
-				fillToInterval(numIntervals);
- 				break;
+			    time = log.nextLong();
+			    fillToInterval(numIntervals);
+			    break;
  			default:
- 				break;//Just skip this line
+			    break;//Just skip this line
  			}
-		}} catch (EOFException e) {
-			log.close();
+		    }
+		} catch (EOFException e) {
+		    log.close();
+		} catch (IOException e) {
+		    log.close();
 		}
-		catch (IOException e) {
-			log.close();
-		}
-	    }
-	  catch (IOException e)
-	  { System.out.println("Exception reading log file #"+curPe); return;}
-	  bar.done();
-	}
-	//Convert system usage and idle time from us to percent of an interval
-	private void rescale(int j)
-	{
-	    if (j < intervalStart || j > intervalEnd) {
+	    } catch (IOException e) { 
+		System.out.println("Exception reading log file #"+curPe); 
 		return;
 	    }
-	sysUsgData[SYS_CPU ][curPe][j-intervalStart]=
-		(int)(sysUsgData[SYS_CPU ][curPe][j-intervalStart]*100/intervalSize);
-	sysUsgData[SYS_IDLE][curPe][j-intervalStart]=
-		(int)(sysUsgData[SYS_IDLE][curPe][j-intervalStart]*100/intervalSize);
+	bar.done();
+    }
+
+    //Convert system usage and idle time from us to percent of an interval
+    private void rescale(int j) {
+	if (j < intervalStart || j > intervalEnd) {
+	    return;
 	}
+	sysUsgData[SYS_CPU ][curPe][j-intervalStart] =
+	    (int)(sysUsgData[SYS_CPU ][curPe][j-intervalStart]*100/intervalSize);
+	sysUsgData[SYS_IDLE][curPe][j-intervalStart] =
+	    (int)(sysUsgData[SYS_IDLE][curPe][j-intervalStart]*100/intervalSize);
+    }
+
 }

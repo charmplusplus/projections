@@ -70,7 +70,7 @@ public void done() {
 		if (isCancelled) return false;
 		if (newWork>0.001+curWork) {
 			curWork=newWork;
-			if (windowShown) bar.repaint(40);
+			if (windowShown && bar!=null) bar.repaint(40);
 		}
 		setLabel(newLabel);
 		return true;

@@ -5,6 +5,7 @@ import java.awt.*;
 public class Counter {
   public String counterCode = null;
   public String description = null;
+  public String fileName = null;
   public Color  color = null;
   private static final Color[] COLOR_LIST = 
     { Color.blue, Color.cyan, Color.darkGray, Color.gray, Color.green, 
@@ -12,10 +13,15 @@ public class Counter {
       Color.white, Color.yellow };
   private static int colorLoc = 0;
   
-  public Counter(String code, String desc) { 
+  public Counter(String code, String desc, String fileName) { 
     counterCode = code; 
     description = desc;
-    
+    this.fileName = fileName;
+    calcColor();
+  }
+
+  private void calcColor() {
+    String code = counterCode;
     if      (code.equals("CYCLES0"))      { color = Color.yellow;       } // 0
     else if (code.equals("INSTR"))        { color = Color.blue;         } // 1
     else if (code.equals("LOAD"))         { color = Color.orange;       } // 2

@@ -316,7 +316,7 @@ public class TimelineWindow extends Frame
 		 colorWindow = null;
 	  }   
 	  setVisible(false);
-	  mainWindow.CloseTimelineWindow();
+	  mainWindow.closeChildWindow(this);
 	  dispose();
    }   
    public void CloseColorWindow()

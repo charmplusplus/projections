@@ -7,6 +7,7 @@ import java.awt.Graphics;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.FontMetrics;
+import java.awt.Font;
 import java.awt.event.*;
 import javax.swing.*;
  
@@ -14,8 +15,8 @@ public class Graph extends JPanel implements MouseMotionListener
 {
    public static final int STACKED    = 0;		// type of the bar graph
    public static final int UNSTACKED  = 1;		// single, multiple or stacked
+
    public static final int SINGLE     = 3;		// take the average of all y-values
-   
    public static final int BAR     = 4;		// Graph type, bar graph
    public static final int LINE    = 5;		// or line graph
 
@@ -29,27 +30,33 @@ public class Graph extends JPanel implements MouseMotionListener
    private double xscale;
    private int hsbval;
 
+   private static final int FONT_SIZE = 25;   
+   private static final Color BACKGROUND = Color.white;
+   private static final Color FOREGROUND = Color.black;
+
    private FontMetrics fm;
    private Color labelColor;
    private Image offscreen; 
-
+   
+   private JLabel yLabel;	// to print y axis title vertically
    private int w,h,tickincrementX,tickincrementY;
    double pixelincrementX,pixelincrementY;
 
    public Graph()
    {
-        setBackground(Color.black);
-        setForeground(Color.white);
+        setBackground(BACKGROUND);
+        setForeground(FOREGROUND);
 	setSize(getPreferredSize());	
 	
 	GraphType = BAR;			// default GraphType is BAR
 	BarGraphType = UNSTACKED;                 // default BarGraphType is UNSTACKED
-	labelColor = Color.yellow;
+//	labelColor = Color.yellow;
+	labelColor = FOREGROUND;
 	
 	xscale = 1.0;
 	hsbval = 0;
 	offscreen = null;
-	
+
 	addMouseMotionListener(this);
    }
 
@@ -59,8 +66,8 @@ public class Graph extends JPanel implements MouseMotionListener
 	yAxis = y;
 	dataSource = d;
 	
-        setBackground(Color.black);
-        setForeground(Color.white);
+        setBackground(BACKGROUND);
+        setForeground(FOREGROUND);
 	setSize(getPreferredSize());	
 	
 	GraphType = BAR;			// default GraphType is BAR
@@ -135,11 +142,8 @@ public class Graph extends JPanel implements MouseMotionListener
 
    public void paintComponent(Graphics g)
    {
+	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
 	  super.paintComponent(g);
-
-g.setColor(Color.black);
-g.fillRect(0, 0, getWidth(), getHeight());
-g.setColor(getForeground());
 
 	  w = getSize().width;
           h = getSize().height;
@@ -198,18 +202,12 @@ g.setColor(getForeground());
           super.setBounds(x, y, w, h);
    }
 
- /*  public void update(Graphics g)
-   {
-          paintComponent(g);
-   }*/
-
    private void drawDisplay(Graphics g)
    {
           if(fm == null)
           {
                  fm = g.getFontMetrics(g.getFont());
           }
-	  
           w = getSize().width;
           h = getSize().height;
 
@@ -230,11 +228,22 @@ g.setColor(getForeground());
 
    private void drawAxes(Graphics g)
    {
-
-          w = getSize().width;
+// set font
+	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
+	  fm = g.getFontMetrics(g.getFont()); 
+          
+	  w = getSize().width;
           h = getSize().height;
 
-	  originX = (30 + fm.stringWidth(yAxis.getTitle()));			// determine where to do draw the graph
+	  String yTitle = yAxis.getTitle();
+	  String temp   = "";
+	
+	  for(int i=0; i < yTitle.length(); i++)
+		temp += yTitle.charAt(i)+"\n";
+ 
+          yLabel = new JLabel(temp);
+		
+	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
 	  originY = h - (30 + 2 * fm.getHeight());				// i.e. find the left and the lower margins
 
 	  g.setColor(labelColor);
@@ -250,7 +259,7 @@ g.setColor(getForeground());
 
 	  double width = (w-30-originX)*xscale;		     // width available for drawing the graph
 	  int maxvalue = dataSource.getIndexCount();         // total number of x values
-	  int sw = fm.stringWidth("" + maxvalue);
+	  int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
 	  tickincrementX = (int)Math.ceil(5/((double)(width)/maxvalue));
           tickincrementX = Util.getBestIncrement(tickincrementX);
           int numintervalsX = (int)Math.ceil((double)maxvalue/tickincrementX);
@@ -265,7 +274,9 @@ g.setColor(getForeground());
           int maxi = maxvalue;							// (int)Math.ceil((hsbval - data.offset3 + w)/pixelincrement);
           if(mini < 0) mini = 0;
           if(maxi > numintervalsX) maxi = numintervalsX;
-	 
+
+	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
+	  fm = g.getFontMetrics(g.getFont()); 
           int curx,cury;
           String s;
           for(int i=mini;i<maxi; i++)	//drawing xAxis divisions
@@ -277,7 +288,7 @@ g.setColor(getForeground());
                  if(i % labelincrementX == 0)
                  {
                         g.drawLine(curx, originY+5, curx, originY-5);
-                        s = "" + i;						// can set multiplier? 
+                        s = "" + (int)xAxis.getIndex(i);						// can set multiplier? 
                         g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + fm.getHeight());
            	 }
            	else

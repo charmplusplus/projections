@@ -158,8 +158,7 @@ public class ProjectionsFileChooser
     button2.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
 	dialog_.setVisible(false);
-	wait_ = false;
-	thread_.notify();
+	wait_.setValue(false);
       }
     });
     JPanel panel = new JPanel();
@@ -172,15 +171,7 @@ public class ProjectionsFileChooser
   /** Create a thread to allow blocking functions. */
   private Thread initThread() {
     return new Thread() {
-      public void run() 
-      {
-	while (wait_) {
-	  if (wait_) { 
-	    try { this.wait(); } catch (InterruptedException ie) { }
-	  }
-	  else { return; }
-	}
-      }
+      public void run() { wait_.waitFalse(); }
     };
   }
 
@@ -231,7 +222,7 @@ public class ProjectionsFileChooser
     list_.setSelectedIndices(selectAll);
     dialog_.getContentPane().add(new JScrollPane(list_), BorderLayout.CENTER);
     dialog_.setVisible(true);
-    wait_ = true;
+    wait_.setValue(true);
     thread_.run();
     // thread waits for user's input, and only stops when user finished
     int[] selected = list_.getSelectedIndices();
@@ -249,7 +240,22 @@ public class ProjectionsFileChooser
   private JDialog      dialog_   = null;   // user picks files to use
   private JList        list_     = null;   // stores found files
   private int          listSize_ = 0;      // size of list_
-  private boolean      wait_     = false;  // true if dialog waiting
+  private Wait         wait_     = new Wait(); // true if dialog waiting
   private Thread       thread_   = null;   // to allow block function
-  private ProjectionsFileMgr fileMgr_ = null;  // based on sts, get helper files
+  private ProjectionsFileMgr fileMgr_ = null; // based on sts, get helper files
+
+  private class Wait {
+    public Wait() { }
+    public synchronized void waitFalse() {
+      while (wait_) {
+	if (wait_) { try { wait(); } catch (InterruptedException ie) { } }
+	else { return; }
+      }
+    }
+    public synchronized void setValue(boolean val) {
+      wait_ = val;
+      notifyAll();
+    }
+    private boolean wait_ = true;
+  }
 }

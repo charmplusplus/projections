@@ -1,4 +1,5 @@
 package projections.gui;
+import projections.gui.graph.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -6,15 +7,7 @@ import java.awt.event.*;
 public class HistogramWindow extends Frame
    implements ActionListener
 {
-   private LogFileViewerDialog dialog;
-   private int logfilenum = -1;
    private MainWindow mainWindow;
-   private int oldlogfilenum = -1;
-
-   private LogFileViewerTextArea textArea;
-   private Label lTitle;
-   private Button bOpen, bClose;
-   private Panel titlePanel;
 
    public HistogramWindow(MainWindow mainWindow)
    {
@@ -39,17 +32,8 @@ public class HistogramWindow extends Frame
 	  // ShowDialog();
    }   
    /*
-   public void setLogFileNum(int p)
-   {
-	  logfilenum = p;
-	  lTitle.setText("LOG FILE FOR PROCESSOR " + p);
-	  lTitle.invalidate();
-	  titlePanel.validate();
-   }
-
    private void ShowDialog()
    {
-	  oldlogfilenum = logfilenum;
 	  if(dialog == null)
 		 dialog = new LogFileViewerDialog(this);
 	  dialog.setVisible(true);
@@ -62,45 +46,28 @@ public class HistogramWindow extends Frame
 		 dialog.dispose();
 		 dialog = null;
 	  }
-
-	  setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	  if(logfilenum != oldlogfilenum)
-		 textArea.setText(Analysis.getLogFileText(logfilenum));
-	  setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
    }
    */
 
    public void actionPerformed(ActionEvent evt)
    {
-	  /*
 	  if(evt.getSource() instanceof MenuItem)
 	  {
 		 MenuItem m = (MenuItem)evt.getSource();
-		 if(m.getLabel().equals("Open File"))
-			ShowDialog();
+		 if(m.getLabel().equals("Set Ranges"))
+		   /*ShowDialog()*/;
 		 else if(m.getLabel().equals("Close"))
 			Close();
 	  }
-	  else if(evt.getSource() instanceof Button)
-	  {
-		 Button b = (Button)evt.getSource();
-
-		 if(b == bOpen)
-			ShowDialog();
-		 else if(b == bClose)
-			Close();
-	  }
-	  */
    }   
    private void Close()
    {
 	  setVisible(false);
 	  mainWindow.CloseHistogramWindow();
 	  dispose();
-   }   
+  }   
   private void CreateLayout()
-   {
-	  /*
+  {
 	  Panel p = new Panel();
 	  p.setBackground(Color.lightGray);
 
@@ -112,31 +79,32 @@ public class HistogramWindow extends Frame
 
 	  Util.gblAdd(this, p, gbc, 0,0, 1,1, 1,1);
 
-	  textArea = new LogFileViewerTextArea();
-
 	  p.setLayout(gbl);
 
-	  titlePanel = new Panel();
-	  titlePanel.setBackground(Color.black);
-	  lTitle = new Label("", Label.CENTER);
-	  lTitle.setForeground(Color.white);
-	  lTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
-	  titlePanel.add(lTitle);
+	  /*FIXME: hardcoded data*/
+	  int data[]={0,1,5,14,3,0,0,7,5,1,0};
+	  
+	  DataSource ds=new DataSource1D("Histogram",data);
+	  XAxis xa=new XAxisFixed("Entry Point Execution Time","ms");
+	  YAxis ya=new YAxisAuto("Count","",ds);
 
-	  Util.gblAdd(p, titlePanel, gbc, 0,0, 1,1, 1,0, 5,5,0,5);
-
-	  Util.gblAdd(p, textArea, gbc, 0,1, 1,1, 1,1, 0,5,5,5);
-
-	  Panel p2 = new Panel();
-	  bOpen = new Button("Open File");
-	  bClose = new Button("Close Window");
-	  bOpen.addActionListener(this);
-	  bClose.addActionListener(this);
-
-	  p2.add(bOpen);
-	  p2.add(bClose);
-	  Util.gblAdd(p, p2, gbc, 0,2, 1,1, 1,0, 0,5,5,5);
+/*Tiny test: try out these objects*/
+	  System.out.println("Data source: '"+ds.getTitle()+"'; "+
+	    ds.getIndexCount()+" data points, each with "+
+	    ds.getValueCount()+" values");
+	  System.out.println("XAxis: '"+xa.getTitle()+"'; "+
+	    "index 3's name is '"+xa.getIndexName(3)+"'");
+	  System.out.println("YAxis: '"+ya.getTitle()+"'; "+
+	    "from "+ya.getMin()+" to "+ya.getMax()+", "+
+	    "with values like '"+ya.getValueName(5.0)+"'");
+	  
+	  /*FIXME: actually add the graph display here--
+	  Graph g=new Graph();
+	  g.setData(ds,xa,ya);
+	  p.add(g);
 	  */
+	  
+
    }   
    private void CreateMenus()
    {
@@ -144,8 +112,6 @@ public class HistogramWindow extends Frame
 
 	  mbar.add(Util.makeMenu("File", new Object[]
 	  {
-		 "Open File",
-		 null,
 		 "Close"
 	  },
 	  this));

@@ -13,11 +13,18 @@ public class UsageCalc extends ProjDefs
 	private int dataLen;
 	private long packtime,packstarttime;
 	private long unpacktime,unpackstarttime;
-	private int curEntry = -1;		
 	private int numUserEntries;
+    
+    // curEntry is global because it has to deal with the relationship
+    // between BEGIN_PROCESSING and END_PROCESSING events within the
+    // same log file.
+    //
+    // it needs, however, to be reset between the reading of two log files.
+    private int curEntry = -1;
 	
 	private void intervalCalc(float[] data,int type, int entry, long time)
 	{
+
 	if (time<beginTime) time=beginTime;
 	if (time>endTime) time=endTime;
 
@@ -78,6 +85,7 @@ public class UsageCalc extends ProjDefs
 	try {
 		FileReader file = new FileReader(sts.getLogName(pnum));
 		AsciiIntegerReader log=new AsciiIntegerReader(new BufferedReader(file));
+		curEntry = -1;
 		log.nextLine(); // The first line contains junk
 		//The second line gives the program start time
 		log.nextInt();

@@ -316,12 +316,19 @@ public class Graph extends JPanel
 	}
 	yLabel = new JLabel(temp);
 		
-	originX = fm.getHeight()*4;
-	// originX = (30 + fm.stringWidth(yAxis.getTitle()) + 
-	// fm.stringWidth(""+yAxis.getMax()));			
-	originY = h - (30 + 2 * fm.getHeight());
-	// i.e. find the left and the lower margins
+	// get max y Value
+	double maxvalueY;
+	if (((GraphType == BAR) && (BarGraphType == STACKED)) || 
+	    (GraphType == AREA)) {
+	    maxvalueY = maxSumY;
+	} else {
+	    maxvalueY = yAxis.getMax();                               
+	}
 
+	originX = fm.getHeight()*2 + fm.stringWidth(String.valueOf(maxvalueY));
+	originY = h - (30 + fm.getHeight()*2);
+
+	// i.e. find the left and the lower margins
 	g.setColor(labelColor);
 	String title = xAxis.getTitle();
 	//+" ("+getBarGraphType()+")";
@@ -365,6 +372,7 @@ public class Graph extends JPanel
 	// to screen" case where rounding errors *will* sometimes cause it
 	// to actually be larger than the screen.
 	if (width < (int)(pixelincrementX*numintervalsX)) {
+	    System.out.println("resize needed");
 	    width = (int)(pixelincrementX*numintervalsX);
 	    baseWidth = (int)((width/xscale)+30+originX);
 	    w = width+30+originX;
@@ -403,14 +411,6 @@ public class Graph extends JPanel
 	    }
 	}
 
-	// get max y Value
-	double maxvalueY;
-	if (((GraphType == BAR) && (BarGraphType == STACKED)) || 
-	    (GraphType == AREA)) {
-	    maxvalueY = maxSumY;
-	} else {
-	    maxvalueY = yAxis.getMax();                               
-	}
 	// adjust so that the max axis value is in the multiples of 10
 	maxvalueY += (10 - maxvalueY%10);
 	pixelincrementY = (double)(originY-30) / maxvalueY;
@@ -442,7 +442,7 @@ public class Graph extends JPanel
 	int numX = dataSource.getIndexCount();
 	int numY = dataSource.getValueCount();
 	double [] data = new double[numY];
-	int x1, x2;
+	int x1;
 	// if the number of pixels between ticks is small, use a 1 or 2 pixel
 	// separator depending on an odd or even number of pixels. Otherwise,
 	// it is a simple percentage of the tick space.

@@ -118,8 +118,11 @@ public class Analysis {
 				1000000));
 	}
 	// setting up point-based data.
-	// **CW** do nothing for now. No current designs for point-based data.
+	// **CW** for backward compatibility - initialize the log files
+	// by creating the log reader so that the timing information is
+	// available to the older tools.
 	if (sts.hasLogFiles()) {
+	    logLoader = new LogLoader();
 	}
     }
     

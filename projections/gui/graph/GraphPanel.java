@@ -29,6 +29,7 @@ public class GraphPanel extends JPanel
 	    {
 		public void componentResized(ComponentEvent e) {
 		    if (mainPanel != null) {
+			displayCanvas.setBounds(displayPanel.getViewportBorderBounds());
 			displayCanvas.repaint();
 		    }
 		}

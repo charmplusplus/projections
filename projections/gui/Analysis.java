@@ -209,9 +209,16 @@ public class Analysis {
 		if (systemMsgsData==null) return false;
 		return null!=systemMsgsData[a][t];
 	}
+
+	/**
+	  check if one user entry data of type t is there.
+	*/
 	public static boolean hasUserEntryData( int a, int t ) {
 		if (userEntryData==null) return false;
-		return null!=userEntryData[a][t];
+		if (userEntryData[a][t] == null) return false;
+		for (int pe=0; pe<getNumProcessors(); pe++)
+		  if (userEntryData[a][t][pe] != null) return true;
+		return false;
 	}
 	public static void initAnalysis( String filename ) throws IOException 
 	{

@@ -239,17 +239,23 @@ public class GraphData
 	  {
 	    item.curIData[i] = 0;
 	    // gzheng
-	    // need to check if these i is in interval.list
+	    // need to check if the i is in interval.list
 	    if (!interval.list.contains(i)) continue;
 	    count = 0;
 	    processor.list.reset();
 	    while((element = processor.list.nextElement()) >= 0)
 	    {
+		// systemUsageData can be null
+	    	if (item.data[element]==null) {
+		  // System.out.println("Warning: setCurIData no data for P="+element);
+		  continue;
+	    	}
 		item.curIData[i] += item.data[element][i];
 		count++;
 	    }
-	    if(item.ymode == BOTH)
-		item.curIData[i] /= count;
+	    if(item.ymode == BOTH) {
+		if (count != 0) item.curIData[i] /= count;
+	    }
 	    else
 		max = Math.max(item.curIData[i], max);     
 	  }
@@ -265,7 +271,11 @@ public class GraphData
 //  for (int p=processor.list.nextElement(); p!=-1; p=processor.list.nextElement())
 	    item.curPData[p] = 0;
 	    if (!processor.list.contains(p)) {
-//		System.out.println("Warning: Proc: "+p+" is not in the list.");
+		//System.out.println("Warning: Proc: "+p+" is not in the list.");
+		continue;
+	    }
+	    if (item.data[p]==null) {
+		//System.out.println("Warning: no data for P="+p);
 		continue;
 	    }
 	    count = 0;

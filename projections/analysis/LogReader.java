@@ -68,19 +68,19 @@ public class LogReader extends ProjDefs
 	final private void count(int mtype,int entry,int TYPE)
 	{
 	  if (!byEntryPoint) return;
+/*  gzheng to save memory, only allocate memory for those processors in the list
 	  if (userEntries[entry][TYPE]==null) {
 	    userEntries[entry][TYPE]=new int[numProcessors][numIntervals+1];
 	    if (TYPE==PROCESS) //Add a time array, too
 	      userEntries[entry][TIME]=new int[numProcessors][numIntervals+1];
 	  }
-/*  gzheng to save memory, only allocate memory for those processors in the list
+*/
 	  if (userEntries[entry][TYPE][curPe]==null) {
 	    userEntries[entry][TYPE][curPe]=new int[numIntervals+1];
 	  }
 	  if (TYPE==PROCESS && userEntries[entry][TIME][curPe] == null) { //Add a time array, too
 	      userEntries[entry][TIME][curPe]=new int[numIntervals+1];
 	  }
-*/
 	  userEntries[entry][TYPE][curPe][interval]++;
 	
 	  int catIdx=mtypeToCategoryIdx(mtype);
@@ -215,8 +215,8 @@ public class LogReader extends ProjDefs
 //	sysUsgData = new int[3][numProcessors][numIntervals+1];
 	sysUsgData = new int[3][numProcessors][];
 	if (byEntryPoint) {
-// gzheng		userEntries = new int[numUserEntries][3][numProcessors][];
-		userEntries = new int[numUserEntries][3][][];
+		userEntries = new int[numUserEntries][3][numProcessors][];
+//		userEntries = new int[numUserEntries][3][][];
 		categorized = new int[5][3][][];
 	}
 	int seq = 0;
@@ -225,6 +225,7 @@ public class LogReader extends ProjDefs
  	curPe = processorList.nextElement();
 	for (;curPe!=-1; curPe=processorList.nextElement())
 	  try {
+		// gzheng: allocate sysUsgData only when needed.
                 sysUsgData[0][curPe] = new int [numIntervals+1];
                 sysUsgData[1][curPe] = new int [numIntervals+1];
                 sysUsgData[2][curPe] = new int [numIntervals+1];

@@ -16,16 +16,15 @@ public class GraphIntervalDialog extends Dialog
    private int numIntervals;
    private OrderedIntList processorList;
    private String processorString;
-   private int oldnum;
    
    private Button bOK, bCancel;
 	  
-   public GraphIntervalDialog(GraphWindow graphWindow, int nI, String pStr)
+   public GraphIntervalDialog(GraphWindow graphWindow, int nI, long iSize, String pStr)
    {
 	  super((Frame)graphWindow, "Set Interval Size", true);
 		
-	  oldnum = nI;
 	  numIntervals = nI;
+	  intervalSize = iSize;
 	  
 	  this.graphWindow = graphWindow;
 
@@ -40,13 +39,14 @@ public class GraphIntervalDialog extends Dialog
 	  
 	  totalTime    = Analysis.getTotalTime();
 
-	  if(numIntervals < 0) 
-		 numIntervals = 50;
-	  if(numIntervals > totalTime)
+	  if(numIntervals <= 0)  {
+	    numIntervals = 50;
+	    if(numIntervals > totalTime)
 		 numIntervals = (int)totalTime;
-	  intervalSize = totalTime / numIntervals;
-	  intervalSize=U.makeEven(intervalSize);
-	  numIntervals=(int)(totalTime/intervalSize+1);
+	    intervalSize = totalTime / numIntervals;
+	    intervalSize=U.makeEven(intervalSize);
+	    numIntervals=(int)(totalTime/intervalSize+1);
+	  }
 	  
           int numProcs = Analysis.getNumProcessors();
 	  if (pStr == null)

@@ -19,6 +19,7 @@ public class MainWindow extends Frame
    private LogFileViewerWindow  logFileViewerWindow;
    private HistogramWindow      histogramWindow;
    private StlWindow            stlWindow;
+   private MultiRunWindow       multiRunWindow;
 
    private AboutDialog          aboutDialog;
 
@@ -59,6 +60,9 @@ public class MainWindow extends Frame
 			ShowHelpWindow();
 		 else if(arg.equals("About"))
 			ShowAboutDialog(this);
+		 // does not depend on tools being enabled
+		 else if(arg.equals("Multirun Analysis"))
+		     ShowMultiRunWindow();
 
 		 else if(toolsEnabled)
 		 {
@@ -78,7 +82,11 @@ public class MainWindow extends Frame
 			   ShowStlWindow();
 		 }
 	  }
-   }               
+   }
+   public void CloseMultiRunWindow()
+   {
+       multiRunWindow = null;
+   }
    public void CloseGraphWindow()
    {
 	  graphWindow = null;
@@ -146,6 +154,7 @@ public class MainWindow extends Frame
 
 	  mbar.add(Util.makeMenu("Tools", new Object[]
 	  {
+	         "Multirun Analysis",
 		 "Graphs",
 		 "Timelines",
 		 "Usage Profile",
@@ -245,6 +254,11 @@ public class MainWindow extends Frame
    {
 	   if(graphWindow == null)
 		 graphWindow = new GraphWindow(this);
+   }   
+   public void ShowMultiRunWindow()
+   {
+	   if(multiRunWindow == null)
+		 multiRunWindow = new MultiRunWindow(this);
    }   
    public void ShowHelpWindow()
    {

@@ -301,7 +301,6 @@ public class Graph extends JPanel
     public void showPopup(int xVal, int yVal, int xPos, int yPos){
 
 	Point offset = getBubbleOffset();
-
 	String text[] = dataSource.getPopup(xVal, yVal);
 	if (text == null) {
 	    return;
@@ -345,6 +344,11 @@ public class Graph extends JPanel
 	w = getWidth();
 	h = getHeight();
 	g.clearRect(0, 0, w, h);
+
+	// if there's nothing to draw, don't draw anything!!!
+	if (dataSource == null) {
+	    return;
+	}
 	
 	// xOffset and yOffsets are determined by the scrollbars that *may*
 	// be asked to control this drawing component.
@@ -361,7 +365,7 @@ public class Graph extends JPanel
 	g.drawString(title,
 		     (w-fm.stringWidth(title))/2 + xOffset, 
 		     h - 10 + yOffset);
-
+    
 	// display Graph title
 	title = dataSource.getTitle();
 	g.drawString(title,
@@ -405,10 +409,6 @@ public class Graph extends JPanel
     }
 
     private void drawXAxis(Graphics2D g) {
-	// if there's nothing to draw, don't draw anything!!!
-	if (dataSource == null) {
-	    return;
-	}
 
 	// width available for drawing the graph
     	width = (int)((baseWidth-30-originX)*xscale);
@@ -448,11 +448,6 @@ public class Graph extends JPanel
     }
 
     private void drawYAxis(Graphics2D g) {
-
-	// if there's nothing to draw, don't draw anything!!!
-	if (dataSource == null) {
-	    return;
-	}
 
 	// draw yAxis
 	g.drawLine(originX, originY, originX , 30);
@@ -601,7 +596,11 @@ public class Graph extends JPanel
 	}
 	// do only till the window is reached 
 	for (int i=0; i < xValues; i++) {	
-	    dataSource.getValues(i,data);
+	    if (GraphStacked) {
+		data = stackArray[i];
+	    } else {
+		dataSource.getValues(i,data);
+	    }
 	    //calculate x value
 	    x2 = originX + (int)(i*pixelincrementX) + 
 		(int)(pixelincrementX/2);    

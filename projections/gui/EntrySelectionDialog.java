@@ -134,10 +134,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 		    for (int ep=0; ep<numEPs; ep++) {
 			if (existsArray[type][ep]) {
 			    entryPointSelection[type][ep].setState(dest);
-			} else {
-			    System.out.println("exists array false for ep " + ep);
-			    entryPointSelection[type][ep].setState(false);
-			}
+			} 
 		    }   
 		}
 	    } else if (b == bCancel) {
@@ -156,8 +153,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 		if (callbackTarget != null) {
 		    callbackTarget.applyDialogColors();
 		}
-		setVisible(false);
-		dispose();
+		hide();
 	    }
 	}           
     }   

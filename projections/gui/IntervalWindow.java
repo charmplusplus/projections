@@ -117,6 +117,10 @@ public class IntervalWindow extends GenericGraphWindow
         System.out.println(s);
     }
 
+    public String[] getPopup(int xVal, int yVal) {
+	return null;
+    }
+
     /* create the menu bar */
     protected void createMenus()
     {

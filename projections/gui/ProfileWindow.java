@@ -232,6 +232,9 @@ public class ProfileWindow extends ProjectionsWindow
 	mainPanel.add(displayPanel);
 	mainPanel.add(HSB);
 	mainPanel.add(VSB);
+
+	// tentative hack to make the canvas at least show up.
+	mainPanel.setSize(new Dimension(600,400));
 	  
 	displayPanel.setLayout(null);
 	displayPanel.add(displayCanvas);

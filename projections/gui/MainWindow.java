@@ -15,7 +15,7 @@ import projections.gui.graph.*;
 public class MainWindow extends JFrame
     implements ActionListener
 {
-    private static final int NUM_WINDOWS = 9;
+    private static final int NUM_WINDOWS = 10;
 
     private static final int GRAPH_WIN = 0;
     private static final int MULTI_WIN = 1;
@@ -26,6 +26,7 @@ public class MainWindow extends JFrame
     private static final int HIST_WIN = 6;
     private static final int TIMELINE_WIN = 7;
     private static final int OVERVIEW_WIN = 8;
+    private static final int GEN_GRAPH_WIN = 9;
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
@@ -54,6 +55,7 @@ public class MainWindow extends JFrame
     private StlWindow            stlWindow;
     private MultiRunWindow       multiRunWindow;
     private AnimationWindow      animationWindow;
+    private GeneralGraphWindow   generalGraphWindow;
 
     // components associated with the main window
     private MainTitlePanel        titlePanel;
@@ -113,8 +115,10 @@ public class MainWindow extends JFrame
 	toolDescriptions[COMM_WIN] = "Communication";
 	toolDescriptions[LOGVIEW_WIN] = "View Logs";
 	toolDescriptions[HIST_WIN] = "Histograms";
+	toolDescriptions[ANIMATION_WIN] = "Animation";
 	toolDescriptions[TIMELINE_WIN] = "Timeline";
 	toolDescriptions[OVERVIEW_WIN] = "Overview";
+	toolDescriptions[GEN_GRAPH_WIN] = "General Graph";
 
 	// cross-tool masks allow tools to decide if their parameter sets
 	// are compatible and hence may "cross over" from one tool to the
@@ -175,6 +179,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("LogFileViewerWindow", LOGVIEW_WIN);
 	} else if (item.equals("Overview")) {
 	    showChildWindow("StlWindow", OVERVIEW_WIN);
+	} else if (item.equals("General Graph")) {
+	    showChildWindow("GeneralGraphWindow", GEN_GRAPH_WIN);
 	} else if (item.equals("Multirun Analysis")) {
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
 	}

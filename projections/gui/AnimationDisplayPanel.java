@@ -214,7 +214,8 @@ public class AnimationDisplayPanel extends Panel
 	    voffset  = (h-numrows*pheight)/2;
 	    phoffset = (int)((1-psize)*pwidth)/2;
 	    pvoffset = (int)((1-psize)*pheight)/2;
-	    
+
+	    animationWindow.setTitleInfo(curI);
 	    clearScreen();
 	}   
     }   

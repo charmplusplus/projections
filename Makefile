@@ -55,6 +55,7 @@ SRC=\
     projections/gui/EntryPointWindow.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
+    projections/gui/GeneralGraphWindow.java\
     projections/gui/GenericGraphWindow.java\
     projections/gui/GraphAttributesWindow.java\
     projections/gui/GraphControlPanel.java\

@@ -150,7 +150,6 @@ public class TimelineWindow extends ProjectionsWindow
 	setTitle("Projections Timeline");
 	CreateMenus();
 	CreateLayout();
-	pack();
 	showDialog();
     }   
     
@@ -173,6 +172,7 @@ public class TimelineWindow extends ProjectionsWindow
 			    return null;
 			}
 			public void finished() {
+			    thisWindow.pack();
 			    thisWindow.setVisible(true);
 			}
 		    };

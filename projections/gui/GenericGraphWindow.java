@@ -69,10 +69,7 @@ public abstract class GenericGraphWindow
 	setJMenuBar(menuBar);
     }
     
-    public String[] getPopup(int xVal, int yVal){
-	//System.out.println("GenericGraphWindow.getPopup()");
-	return null;
-    };
+    public abstract String[] getPopup(int xVal, int yVal);
     
     // create a standard layout which can be called from child class or 
     // overridden by it
@@ -137,6 +134,19 @@ public abstract class GenericGraphWindow
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+    }
+
+    // This should be the correct way of setting a data source with a partial
+    // set of colors
+    protected void setDataSource(String title, double data[][], 
+				 Color colorMap[],
+				 GenericGraphWindow parent) {
+	dataSource = new DataSource2D(title, data, parent);
+	dataSource.setColors(colorMap);
+	if (yAxis != null) {
+	    yAxis = 
+		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+	}
     }
 
     protected void setDataSource(String title, int [] data, GenericGraphWindow parent){

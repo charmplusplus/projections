@@ -199,6 +199,10 @@ public class HistogramWindow extends GenericGraphWindow
 	// print to the screen
     }
 
+    public String[] getPopup(int xVal, int yVal) {
+	return null;
+    }
+
     private int[] getCounts()
     {
 	int instances = 0;

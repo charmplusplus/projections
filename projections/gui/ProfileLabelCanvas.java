@@ -15,8 +15,8 @@ public class ProfileLabelCanvas extends Canvas
 	  this.data = data;
 	  offscreen = null;
 	  maxwidth = 0;
-	  setForeground(Color.white);
-	  setBackground(Color.black);
+	  setForeground(Analysis.foreground);
+	  setBackground(Analysis.background);
    }   
    private void drawLabels(Graphics g)
    {    

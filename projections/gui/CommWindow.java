@@ -32,7 +32,6 @@ public class CommWindow extends GenericGraphWindow
     private Checkbox	recivedMssgs;
     private Checkbox	sentExclusive;
 
-    // uncomfirmed stupid hacks
     private CommWindow  thisWindow;
 
     public CommWindow(MainWindow mainWindow, Integer myWindowID) {

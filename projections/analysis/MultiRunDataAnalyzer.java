@@ -6,6 +6,7 @@ import projections.misc.*;
 
 import java.io.*;
 import java.util.*;
+import java.awt.*; // unfortunate!!!
 
 /**
  *  Written by Chee Wai Lee
@@ -73,6 +74,10 @@ public class MultiRunDataAnalyzer {
     private static final int CAT_EP_INSIGNIFICANT = 1;
     private static final int CAT_EP_CHANGE = 2;
     private static final int CAT_OVERHEAD_IDLE = 3;
+
+    // static color assignments for categories
+    private static final Color catColors[] =
+    { Color.green, Color.yellow, Color.red, Color.white };
 
     // base data information
     private int numRuns;
@@ -330,9 +335,21 @@ public class MultiRunDataAnalyzer {
      *   getDataSource takes the appropriate part of the analyzed data and
      *   constructs a DataSource object suitable for display on an 
      *   AreaGraphPanel.
+     *
+     *   This is the default behavior where every EP is displayed "as is"
+     *   except for insignificant EPs which appear as a single gray group.
      */
     public MultiRunDataSource getDataSource(int dataType) {
+	// output array - indexed by run then by entry (combination of
+	// both EPs and extra information.
 	double dataArray[][];
+	Color colorMap[];
+
+	int numYvalues =
+	    numEPs - categories[dataType][CAT_EP_INSIGNIFICANT].size() + 1 +
+	    NUM_EXTR_ENTRIES;
+	dataArray = new double[numRuns][numYvalues];
+	colorMap = new Color[numYvalues];
 
 	String titleString = "";
 	switch (dataType) {
@@ -350,8 +367,13 @@ public class MultiRunDataAnalyzer {
 	    break;
 	}
 
-	return new MultiRunDataSource(dataTable[dataType],
-				      null, // currently no color map
+	// **CW** 0 will be replaced by an appropriate static
+	// constants.
+	computeOutputArray(dataArray, dataType, 0);
+	computeColorMap(colorMap, dataType, 0);
+
+	return new MultiRunDataSource(dataArray,
+				      colorMap,
 				      titleString);
     }
 
@@ -379,11 +401,110 @@ public class MultiRunDataAnalyzer {
 
 	ProjectionsStatistics stats =
 	    new ProjectionsStatistics();
+	// **CW**
+	// we can get away with accumulating over dataTable only because
+	// we are using stacked graphs. If possible, should find a more
+	// general solution.
 	for (int run=0; run<numRuns; run++) {
 	    stats.accumulate(dataTable[dataType][run]);
 	}
 	return new MultiRunYAxis(MultiRunYAxis.TIME,
 				 title, 
 				 stats.getMax());
+    }
+
+    /**
+     *  convenience method for generating the appropriate data array
+     *  given a certain categorization display scheme.
+     *
+     *  The default scheme is to arrange the categories in the following
+     *  order (from bottom to top):
+     *  NO_CHANGE, INSIGNIFICANT, SIGNIFICANT, OVERHEAD
+     *
+     *  Only Insignificant EPs will be presented as a unified group
+     *  (they are usually zeros).
+     */
+    private void computeOutputArray(double data[][],int dataType,int scheme) {
+	// fill the appropriate parts of dataTable and extraTable into data
+	// this process is broken into a phase for each category.
+	int entry = 0;
+	// CAT_EP_NO_CHANGE
+	int numNoChange = categories[dataType][CAT_EP_NO_CHANGE].size();
+	for (int catIdx=0; catIdx<numNoChange; catIdx++) {
+	    int epIdx = 
+		((Integer)categories[dataType][CAT_EP_NO_CHANGE].elementAt(catIdx)).intValue();
+	    for (int run=0; run<numRuns; run++) {
+		data[run][entry] = dataTable[dataType][run][epIdx];
+	    }
+	    entry++;
+	}
+	// CAT_EP_INSIGNIFICANT
+	int numInsignificant = 
+	    categories[dataType][CAT_EP_INSIGNIFICANT].size();
+	for (int run=0; run<numRuns; run++) {
+	    for (int catIdx=0; catIdx<numInsignificant; catIdx++) {
+		int epIdx =
+		    ((Integer)categories[dataType][CAT_EP_INSIGNIFICANT].elementAt(catIdx)).intValue();
+		data[run][entry] += dataTable[dataType][run][epIdx];
+	    }
+	}
+	entry++;
+	// CAT_EP_CHANGE
+	int numChanged =
+	    categories[dataType][CAT_EP_CHANGE].size();
+	for (int catIdx=0; catIdx<numChanged; catIdx++) {
+	    int epIdx = 
+		((Integer)categories[dataType][CAT_EP_CHANGE].elementAt(catIdx)).intValue();
+	    for (int run=0; run<numRuns; run++) {
+		data[run][entry] = dataTable[dataType][run][epIdx];
+	    }
+	    entry++;
+	}
+	// CAT_OVERHEAD_IDLE
+	int numOverhead =
+	    categories[dataType][CAT_OVERHEAD_IDLE].size();
+	for (int catIdx=0; catIdx<numOverhead; catIdx++) {
+	    int entryIdx =
+		numEPs -
+		((Integer)categories[dataType][CAT_OVERHEAD_IDLE].elementAt(catIdx)).intValue();
+	    for (int run=0; run<numRuns; run++) {
+		data[run][entry] = extraTable[dataType][run][entryIdx];
+	    }
+	    entry++;
+	}
+    }
+
+    /**
+     *  convenience method for generating the appropriate color map
+     *  given a certain categorization display scheme.
+     *
+     *  The default scheme is to color Insignificant EPs gray, Overhead
+     *  white and leave every other EP colored (but kept in position).
+     */
+    private void computeColorMap(Color colorMap[], int dataType, int scheme) {
+	// Ask Analysis for a simple (for now) colormap.
+	// Then overwrite the slot for insignificant and overhead colors
+	int numColors = colorMap.length;
+
+	int numNoChange =
+	    categories[dataType][CAT_EP_NO_CHANGE].size();
+	int numChanged =
+	    categories[dataType][CAT_EP_CHANGE].size();
+	colorMap = Analysis.createColorMap(numColors);
+
+	// set insignificant category to gray
+	colorMap[numNoChange] = Color.gray;
+
+	// set the overhead colors
+	int numOverhead =
+	    categories[dataType][CAT_OVERHEAD_IDLE].size();
+	int offset =
+	    numNoChange + 1 + numChanged;
+	for (int catIdx=0; catIdx<numOverhead; catIdx++) {
+	    switch (catIdx) {
+	    case EXTR_OVERHEAD:
+		colorMap[offset+catIdx] = Color.white;
+	    }
+	}
     }
 }

@@ -115,7 +115,7 @@ public class GenericSumDetailReader
 	tokenizer.checkNextString("numEPs");
 	numEPs = (int)tokenizer.nextNumber("number of entry methods");
 	tokenizer.checkNextString("intervalSize");
-	double intervalSize = 
+	intervalSize = 
 	    tokenizer.nextScientific("processor usage sample interval"); 
 	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
 	    throw new IOException("extra garbage at end of header line");
@@ -254,6 +254,10 @@ public class GenericSumDetailReader
 
     public int getNumIntervals() {
 	return numIntervals;
+    }
+
+    public double getIntervalSize() {
+	return intervalSize;
     }
 
     public double[][] getData(int type) {

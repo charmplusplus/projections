@@ -53,6 +53,7 @@ public class AreaGraphPanel extends JPanel
 	    });
  	setBackground(BACKGROUND);
 	displayCanvas = graphPanel;
+	displayCanvas.setGraphType(Graph.AREA);
 	createLayout();
     }
     
@@ -195,6 +196,7 @@ public class AreaGraphPanel extends JPanel
 
     public void setData(DataSource dataSource, XAxis xAxis, YAxis yAxis) {
 	displayCanvas.setData(dataSource, xAxis, yAxis);
+	displayCanvas.setGraphType(Graph.AREA);
 	repaint();
     }
 

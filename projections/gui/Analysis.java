@@ -357,6 +357,11 @@ public class Analysis {
 				    summaryDetails[pe].getNumIntervals();
 			    }
 			}
+			System.out.println(sumDetailMaxNumIntervals + " " +
+					   summaryDetails[0].getIntervalSize());
+			sts.setTotalTime((long)(sumDetailMaxNumIntervals*
+						summaryDetails[0].getIntervalSize()*
+						1000000));
 		    } catch (IOException e) {
 			System.out.println(e.toString());
 		    }

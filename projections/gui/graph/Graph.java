@@ -221,7 +221,9 @@ public class Graph extends JPanel
 	  w = getSize().width;
      h = getSize().height;
 
+	  System.out.println("Before painting display");
 	  drawDisplay(g);
+	  System.out.println("After painting display");
    }
 
     public void print(Graphics pg)
@@ -300,11 +302,15 @@ public class Graph extends JPanel
 
 	  if((xAxis != null) && (yAxis != null))
 	  {
+	  System.out.println("Before painting Axes");
 	  	drawAxes(g);	
+	  System.out.println("After painting Axes");
     	  	if (GraphType == BAR) {
 		    drawBarGraph(g);
 	  	} else if (GraphType == AREA) {
+	  System.out.println("Before painting Area Graph");
 		    drawAreaGraph(g);
+	  System.out.println("After painting Area Graph");
 		} else {
 		    drawLineGraph(g);
 		}
@@ -327,43 +333,42 @@ public class Graph extends JPanel
  
       yLabel = new JLabel(temp);
 		
-	  originX = fm.getHeight()*4;
-	  //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
-																			// determine where to do draw the graph
-	   originY = h - (30 + 2 * fm.getHeight());				// i.e. find the left and the lower margins
+      originX = fm.getHeight()*4;
+      //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
+      originY = h - (30 + 2 * fm.getHeight());	// i.e. find the left and the lower margins
 
-	   g.setColor(labelColor);
-	   String title = xAxis.getTitle();							//+" ("+getBarGraphType()+")";
-	   
-		g.drawString(title,(w-fm.stringWidth(title))/2, h - 10);							// display xAxis title
+      g.setColor(labelColor);
+      String title = xAxis.getTitle();							//+" ("+getBarGraphType()+")";
+      
+      g.drawString(title,(w-fm.stringWidth(title))/2, h - 10);							// display xAxis title
+      
+      title = dataSource.getTitle();
+      g.drawString(title,(w-fm.stringWidth(title))/2, 10 + fm.getHeight());		// display Graph title
+      
+      title = yAxis.getTitle();
+      g.rotate(-PI/2);
+      g.drawString(title, -(h+fm.stringWidth(title))/2, 
+		   fm.getHeight());     																		// display yAxis title
+      g.rotate(PI/2);
+      g.setColor(FOREGROUND);	  
 
-	   title = dataSource.getTitle();
-	   g.drawString(title,(w-fm.stringWidth(title))/2, 10 + fm.getHeight());		// display Graph title
-
-	   title = yAxis.getTitle();
-	   g.rotate(-PI/2);
-	   g.drawString(title, -(h+fm.stringWidth(title))/2, 
-		fm.getHeight());     																		// display yAxis title
-	   g.rotate(PI/2);
-	   g.setColor(FOREGROUND);	  
-
-    	width = (int)((w-30-originX)*xscale);		      	// width available for drawing the graph
-	   int maxvalue = dataSource.getIndexCount();         // total number of x values
-	   int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
-	   tickincrementX = (int)Math.ceil(5/((double)(width)/maxvalue));
+      width = (int)((w-30-originX)*xscale);		      	// width available for drawing the graph
+      int maxvalue = dataSource.getIndexCount();         // total number of x values
+      int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
+      tickincrementX = (int)Math.ceil(5/((double)(width)/maxvalue));
       tickincrementX = Util.getBestIncrement(tickincrementX);
-
+      
       int numintervalsX = (int)Math.ceil((double)maxvalue/tickincrementX);
-	   pixelincrementX = (double)(width) / numintervalsX;
-
+      pixelincrementX = (double)(width) / numintervalsX;
+      
       int labelincrementX = (int)Math.ceil((sw + 20) / pixelincrementX);
       labelincrementX = Util.getBestIncrement(labelincrementX);
-
-	   g.drawLine(originX, originY, (int)width+originX, originY); 				// draw xAxis
-	   g.drawLine(originX, originY, originX , 30); 									// draw yAxis
-
-      	int mini = 0; 							//(int)Math.floor((hsbval - data.offset3)/pixelincrement);
-         int maxi = maxvalue;							// (int)Math.ceil((hsbval - data.offset3 + w)/pixelincrement);
+      
+      g.drawLine(originX, originY, (int)width+originX, originY); 				// draw xAxis
+      g.drawLine(originX, originY, originX , 30); 									// draw yAxis
+      
+      int mini = 0; 							//(int)Math.floor((hsbval - data.offset3)/pixelincrement);
+      int maxi = maxvalue;							// (int)Math.ceil((hsbval - data.offset3 + w)/pixelincrement);
          if(mini < 0) mini = 0;
          if(maxi > numintervalsX) maxi = numintervalsX;
 
@@ -407,7 +412,6 @@ public class Graph extends JPanel
          //for(int i=0; i<=maxvalueY; i++)			      			// drawing yAxis divisions
       	for(int i=0; i<=maxvalueY; i+=subincrement)			      // drawing yAxis divisions
          {
-
 // for each i from 0 to maxY (even if it is something like a million), we are checking for the cond below & displaying it
 // efficient of maxY is low (less than the height of the graph
 // erroneous behavior if maxY > height of the graph

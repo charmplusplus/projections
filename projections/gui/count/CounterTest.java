@@ -2,6 +2,7 @@ package projections.gui.count;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
 import javax.swing.*;
 
 import projections.gui.*;
@@ -19,10 +20,10 @@ public class CounterTest
     CounterFrame f = new CounterFrame();
     ProjectionsFileMgr fileMgr = null;
     try {
+      ProjectionsFileChooser fc = 
+	new ProjectionsFileChooser(f, "Performance Counter Analysis", 
+				   ProjectionsFileChooser.MULTIPLE_FILES);
       if (args.length==0) {
-	ProjectionsFileChooser fc = 
-	  new ProjectionsFileChooser(f, "Performance Counter Analysis", 
-				     ProjectionsFileChooser.MULTIPLE_FILES);
 	System.out.println("fc "+fc);
 	if (fc == null) { System.out.println("UH OH"); }
 	if (fc.showDialog()==JFileChooser.APPROVE_OPTION) {
@@ -33,13 +34,22 @@ public class CounterTest
 	  System.exit(0);
 	}
       }
-      else { fileMgr = new ProjectionsFileMgr(args); }
+      else { 
+	boolean test = false;
+	for (int i=0; i<args.length && !test; i++) {
+	  File file = new File(args[i]);
+	  if (file.isDirectory()) { test = true; }
+	}
+	if (test) { fc.getFiles(args); }
+	fileMgr = (test) ? 
+	  fc.getProjectionsFileMgr() : new ProjectionsFileMgr(args); 
+      }
       fileMgr.printSts();
       f.setFileMgr(fileMgr);
       f.setSize(800,600);
-      f.setVisible(true);
       f.loadFiles();
       f.sortByColumn(1);
+      f.setVisible(true);
 
       /*
       // try again (to test gui)

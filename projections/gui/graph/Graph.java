@@ -9,6 +9,7 @@ import javax.swing.*;
 public class Graph extends JPanel 
     implements MouseMotionListener
 {
+
     public static final int STACKED   = 0;  // type of the bar graph
     public static final int UNSTACKED = 1;  // single, multiple or stacked
     public static final int AREA      = 2;  // Area graph (stacked)
@@ -16,16 +17,11 @@ public class Graph extends JPanel
     public static final int BAR       = 4;  // Graph type, bar graph
     public static final int LINE      = 5;  // or line graph
     
-    // data variables
+    private int GraphType;
+    private int BarGraphType;
     private DataSource dataSource;
     private XAxis xAxis;
     private YAxis yAxis;
-
-    // graph type variables
-    private int GraphType;
-    private int BarGraphType;
-
-    // graph parameters
     private int originX;
     private int originY;
     private double xscale;
@@ -37,31 +33,38 @@ public class Graph extends JPanel
     
     private static final double PI = 3.142;
 
-    private FontMetrics fm;
-    private Color labelColor;
+
+   private FontMetrics fm;
+   private Color labelColor;
+   private Image offscreen; 
    
-    private int w,h;
+   private JLabel yLabel;	// to print y axis title vertically
+   private int w,h,tickincrementX,tickincrementY;
+   double pixelincrementX,pixelincrementY;
 
-    private int tickincrementX, tickincrementY;
-    double pixelincrementX,pixelincrementY;
+   private double[][] stackArray;
 
-    private double[][] stackArray;
+   private int maxSumY;
+	private int barWidth, width;
+	
+	private Bubble bubble;
 
-    private int maxSumY;
-    private int barWidth, width;
+   public Graph()
+   {
 
-    public Graph()
-    {
 	setSize(getPreferredSize());	
 	
-	GraphType = BAR;		 // default GraphType is BAR
-	BarGraphType = STACKED;   // default BarGraphType is STACKED
-	labelColor = Color.yellow;
+
+	GraphType = BAR;			// default GraphType is BAR
+	BarGraphType = STACKED;                 // default BarGraphType is STACKED
+//	labelColor = Color.yellow;
+	labelColor = FOREGROUND;
 	stackArray = null;
 	dataSource = null;
-	
+
 	xscale = 1.0;
 	hsbval = 0;
+	offscreen = null;
 	
 	addMouseMotionListener(this);
     }
@@ -76,8 +79,10 @@ public class Graph extends JPanel
 	dataSource = d;
 	createStackArray();
     }
+
    
     //Make sure we aren't made too tiny
+    public Dimension getMinimumSize() {return new Dimension(500,400);}
     public Dimension getPreferredSize() {return new Dimension(500,400);}
     
     // ***** API Interface to the control panel *****
@@ -98,45 +103,46 @@ public class Graph extends JPanel
     {
 	return GraphType;
     }
-    
+
     public void setBarGraphType(int type)
     {
-	switch (type) {
-	case STACKED: UNSTACKED: SINGLE:
+	if((type == STACKED) || (type == UNSTACKED) || (type == SINGLE))
 	    BarGraphType = type;
-	    break;
-	default:
-	    //unknown bar graph type.. do nothing ; draw STACKED bar graph
+	else
+		; //unknown bar graph type.. do nothing ; draw STACKED bar graph
+	
+	if(type == STACKED){
+//		createStackArray();
 	}
-    }
-    
+
+   }
+
+
     private String getBarGraphType()
     {
-	switch (BarGraphType) {
-	case SINGLE:
-	    return "avg";
-	case UNSTACKED:
-	    return "unstacked";
-	default:
-	    return "stacked";
-	}
-    }
+	if(BarGraphType == SINGLE)
+	    return("avg");
+	if(BarGraphType == UNSTACKED)
+	    return("unstacked");
+	return("stacked");
 
-    public void setData(DataSource d, XAxis x, YAxis  y)
-    {
+   }
+
+   public void setData(DataSource d, XAxis x, YAxis  y)
+   {
         xAxis = x;
         yAxis = y;
         dataSource = d;
-	createStackArray();
-    }
+		createStackArray();
+   }
 
-    public void setData(DataSource d)
-    {
+   public void setData(DataSource d)
+   {
         dataSource = d;
-	createStackArray();
-    }
+		createStackArray();
+   }
 
-    public void setLabelColor(Color c){
+   public void setLabelColor(Color c){
 	labelColor = c;
     }
 
@@ -148,75 +154,77 @@ public class Graph extends JPanel
 	xscale = val;
     }
 
-    private void createStackArray(){
-	if(dataSource != null){
-	    maxSumY = 0;
-	    int numY = dataSource.getValueCount();
-	    stackArray = new double[dataSource.getIndexCount()][];
-	    for(int k=0; k<dataSource.getIndexCount(); k++){
-		stackArray[k] = new double[numY];
-		
-		dataSource.getValues(k, stackArray[k]);
-		
-		for(int j=1; j<numY; j++)
-		    stackArray[k][j] += stackArray[k][j-1];
-		
-		if (maxSumY < stackArray[k][numY-1]) {
-		    // +1 to ensure maxSumY greater than all Y in stackArray
-		    maxSumY = (int) stackArray[k][numY-1] + 1;
-		}
-		// while still keeping maxSumy an int
-	    }
-	} else {
-	    stackArray = null;
-	}
-    }
 
-    // getXValue(x)
-    // 	returns the x value of the bar graph the mouse is currently over
-    // 	if the mouse is not over any bar data, then return -1
-    private int getXValue(int xPos){
+   private void createStackArray(){
+		if(dataSource != null){
+		 maxSumY = 0;
+		 int numY = dataSource.getValueCount();
+		 stackArray = new double[dataSource.getIndexCount()][];
+			for(int k=0; k<dataSource.getIndexCount(); k++){
+			 stackArray[k] = new double[numY];
+
+			 dataSource.getValues(k, stackArray[k]);
+
+			 for(int j=1; j<numY; j++)
+				 stackArray[k][j] += stackArray[k][j-1];
+
+			 if(maxSumY < stackArray[k][numY-1])
+				 maxSumY = (int) stackArray[k][numY-1] + 1;			// +1 to ensure maxSumY greater than all Y in stackArray
+				 																	// while still keeping maxSumy an int
+			}
+		}else{
+		 stackArray = null;
+		}
+   }
+
+	// getXValue(x)
+	// 	returns the x value of the bar graph the mouse is currently over
+	// 	if the mouse is not over any bar data, then return -1
+	private int getXValue(int xPos){
    	if( (xPos > originX) && (xPos < (int)width+originX)){
-	    int numX = dataSource.getIndexCount();
-	    int x1;
-	    for(int k=0; k<numX; k++){
-		x1 = originX + (int)(k*pixelincrementX) + (int)(pixelincrementX/2);
-		
-		if( (xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2)) )
-		    return k;
-	    }
-	}
-	return -1;
-    }
+			int numX = dataSource.getIndexCount();
+			int x1;
+			for(int k=0; k<numX; k++){
+				x1 = originX + (int)(k*pixelincrementX) + (int)(pixelincrementX/2);
+
+				if( (xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2)) )
+					 return k;
+			}
+		}
+				
+		return -1;
+   }
 	
-    private int getYValue(int xVal, int yPos){
-	if( (xVal >= 0) && (yPos < originY) && (yPos > 30) && 
-	    (stackArray != null)){
-	    int numY = dataSource.getValueCount();
-	    int y;
-	    for(int k=0; k<numY; k++){
-		y = (int) (originY - (int)stackArray[xVal][k]*pixelincrementY);
-		if(yPos > y )
-		    return k;
-	    }
-	}	
-	return -1;
-    }
+	private int getYValue(int xVal, int yPos){
+		if( (xVal >= 0) && (yPos < originY) && (yPos > 30) && (stackArray != null)){
+			int numY = dataSource.getValueCount();
+			int y;
+			for(int k=0; k<numY; k++){
+				y = (int) (originY - (int)stackArray[xVal][k]*pixelincrementY);
+				if(yPos > y )
+					return k;
+			}
+		
+		
+		}	
+	
+		return -1;
+	}
 
 
     // ***** Painting Routines *****
     
 
-    public void paintComponent(Graphics g)
-    {
-	super.paintComponent(g);
-	g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
-	
-	w = getSize().width;
-	h = getSize().height;
-	
-	drawDisplay(g);
-    }
+   public void paintComponent(Graphics g)
+   {
+	  super.paintComponent(g);
+	  g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
+
+	  w = getSize().width;
+     h = getSize().height;
+
+	  drawDisplay(g);
+   }
 
     public void print(Graphics pg)
     {
@@ -227,165 +235,165 @@ public class Graph extends JPanel
 	setForeground(FOREGROUND);
     }
   
-    public void mouseMoved(MouseEvent e) {
-	//System.out.println("Mouse moved"+ e);
-	int x = e.getX();
+   public void mouseMoved(MouseEvent e) {
+       //System.out.println("Mouse moved"+ e);
+		int x = e.getX();
     	int y = e.getY();
-	int index,valNo;
-	double value;
+		int index,valNo;
+		double value;
 
-	int xVal = getXValue(x);
-	int yVal = getYValue(xVal, y);
-	// System.out.println("(" + xVal +"," +yVal +")");
+		int xVal = getXValue(x);
+		int yVal = getYValue(xVal, y);
+		// System.out.println("(" + xVal +"," +yVal +")");
 		
-	showPopup(getPopup(xVal, yVal), x, y);
-    }
+		if((xVal > -1) && (yVal > -1))
+			showPopup(xVal, yVal, x, y);
+		else if( bubble != null){
+			//System.out.println("Bubble is not null");
+			bubble.setVisible(false);
+			bubble.dispose();
+			bubble = null;
+		}
+   }
 	
-    // This should be inherited if a popup is wanted
-    public String getPopup(int xVal, int yVal){
-	return null;
-    }
-	
-    public void showPopup(String text, int xPos, int yPos){
-	if(text == null)
-	    return;
-    }
-    
-    public void mouseDragged(MouseEvent e) {
-    }
-
-    private void drawDisplay(Graphics _g)
-    {
-	Graphics2D g = (Graphics2D)_g;
-	g.setBackground(BACKGROUND);
-	g.setColor(FOREGROUND);
-	
-	if (fm == null) {
-	    fm = g.getFontMetrics(g.getFont());
+	// This should be inherited if a popup is wanted
+	public String[] getPopup(int xVal, int yVal){
+		// System.out.println("graph.getPopup(xVal, yVal)");
+		return null;
 	}
-	w = getSize().width;
-	h = getSize().height;
 	
-	g.clearRect(0, 0, w, h);
-	g.translate(-hsbval, 0); 
-	
-	if ((xAxis != null) && (yAxis != null)) {
-	    drawAxes(g);	
-	    if (GraphType == BAR) {
-		drawBarGraph(g);
-	    } else if (GraphType == AREA) {
-		drawAreaGraph(g);
-	    } else {
-		drawLineGraph(g);
-	    }
-	}
+	public void showPopup(int xVal, int yVal, int xPos, int yPos){
+		// System.out.println("graph.showPopup()");
+		System.out.println(xVal +", " + yVal);
+		String text[] = getPopup(xVal, yVal);
+		if(text == null){
+			//System.out.println("Null text recieved");
+			return;
+		}
+		// else display ballon
+		int bX, bY;
+		// I'm doing these calculations, i probably should see if i can avoid it
+		if(bubble == null){
+			if(BarGraphType== STACKED){
+				bX = originX + (int)(xVal*pixelincrementX) + (int)(pixelincrementX/2) + barWidth + 10;
+				bY = (int) (originY - (int)(stackArray[xVal][yVal]*pixelincrementY) +15);	
+				bubble = new Bubble(this, text);
+				bubble.setLocation(bX, bY);
+				bubble.setVisible(true);		
+				// System.out.println(bX +", " + bY);	
+			}else{
+				System.out.println("not Stacked");
+			}
+		}
+		
+		
     }
-
-    /**
-     *  **CW** This method is not to be used for now. It will eventually
-     *  replace drawAxes(Graphics 2D g).
-     */
-    private void drawAxes(Graphics2D g, int dummy) {
 	
-	String title;
 
-	// set font
-	g.setFont(new Font("Times New Roman", Font.BOLD, FONT_SIZE));
-	fm = g.getFontMetrics(g.getFont());
+   public void mouseDragged(MouseEvent e) {
+   }
 
-	// set up parameters for drawing
-	double maxvalueY;  // **CW** NOTE: Assumes Y axis is always numeric!
-
-	if(((GraphType == BAR) && (BarGraphType == STACKED)) || 
-	   (GraphType == AREA)) {
-	    maxvalueY = maxSumY;
-	} else {
-	    maxvalueY = yAxis.getMax();                               
-	}
-
-	originX = 
-	    // space for y title
-	    fm.getHeight()*4 +
-	    // space for the largest possible y-axis label
-	    fm.stringWidth(String.valueOf(maxvalueY));
-	originY =
-	    // space for the title and space for the x labels
-	    fm.getHeight()*5;
-
-	// draw the graph's title
-	g.setColor(labelColor);
-	title = dataSource.getTitle();
-	g.drawString(title,
-		     (w-fm.stringWidth(title))/2, 
-		     fm.getHeight());
-	g.setColor(FOREGROUND);
-
-	// ********* draw the Y Axis **********
-	// draw title
-	g.setColor(labelColor);
-	g.rotate(-PI/2);
-	title = yAxis.getTitle();
-	g.drawString(title,
-		     -(h+fm.stringWidth(title))/2, 
-		     fm.getHeight());
-	g.rotate(PI/2);
-	g.setColor(FOREGROUND);
-
-	// determine scheme for ticks and labels
-	double pixelsPerYValue = h/(double)maxvalueY;
-
-	// ********** draw the X Axis **********
+    /* **CW** I believe this is messing up Swing's double buffering support.
+   public void setBounds(int x, int y, int w, int h)
+   { 
 	
-    }
+	 // make offscreen image
+          if(getSize().width != w || getSize().height != h)
+          {
+                 try
+                 {
+                        offscreen = createImage(w, h);
+                 }
+                 catch(OutOfMemoryError e)
+                 {
+                        System.out.println("NOT ENOUGH MEMORY!");
+                 }
+          }
+          super.setBounds(x, y, w, h);
+   }
+    */
+   private void drawDisplay(Graphics _g)
+   {
+       Graphics2D g = (Graphics2D)_g;
+       g.setBackground(BACKGROUND);
+       g.setColor(FOREGROUND);
+
+          if(fm == null)
+          {
+                 fm = g.getFontMetrics(g.getFont());
+          }
+          w = getSize().width;
+          h = getSize().height;
+
+          g.clearRect(0, 0, w, h);
+	  g.translate(-hsbval, 0); 
+
+	  if((xAxis != null) && (yAxis != null))
+	  {
+	  	drawAxes(g);	
+    	  	if (GraphType == BAR) {
+		    drawBarGraph(g);
+	  	} else if (GraphType == AREA) {
+		    drawAreaGraph(g);
+		} else {
+		    drawLineGraph(g);
+		}
+	  }
+   }
 
    private void drawAxes(Graphics2D g){
-       // set font
-       g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
-       fm = g.getFontMetrics(g.getFont()); 
+		// set font
+	   g.setFont(new Font("Times New Roman",Font.BOLD,FONT_SIZE));
+	   fm = g.getFontMetrics(g.getFont()); 
           
-       String yTitle = yAxis.getTitle();
-       String temp   = "";
-	
-       for(int i=0; i < yTitle.length(); i++)
-	   temp += yTitle.charAt(i)+"\n";
- 
-       originX = fm.getHeight()*4;
-       //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
-       originY = h - (30 + 2 * fm.getHeight());	// i.e. find the left and the lower margins
-       
-      g.setColor(labelColor);
-      String title = xAxis.getTitle();							//+" ("+getBarGraphType()+")";
-      
-      g.drawString(title,(w-fm.stringWidth(title))/2, h - 10);							// display xAxis title
-      
-      title = dataSource.getTitle();
-      g.drawString(title,(w-fm.stringWidth(title))/2, 10 + fm.getHeight());		// display Graph title
-      
-      title = yAxis.getTitle();
-      g.rotate(-PI/2);
-      g.drawString(title, -(h+fm.stringWidth(title))/2, 
-		   fm.getHeight());     																		// display yAxis title
-      g.rotate(PI/2);
-      g.setColor(FOREGROUND);	  
+	   w = getSize().width;
+      h = getSize().height;
 
-      width = (int)((w-30-originX)*xscale);		      	// width available for drawing the graph
-      int maxvalue = dataSource.getIndexCount();         // total number of x values
-      int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
-      tickincrementX = (int)Math.ceil(5/((double)(width)/maxvalue));
+	   String yTitle = yAxis.getTitle();
+	   String temp   = "";
+	
+	   for(int i=0; i < yTitle.length(); i++)
+			temp += yTitle.charAt(i)+"\n";
+ 
+      yLabel = new JLabel(temp);
+		
+	  originX = fm.getHeight()*4;
+	  //	  originX = (30 + fm.stringWidth(yAxis.getTitle())+ fm.stringWidth(""+yAxis.getMax()));			// determine where to do draw the graph
+																			// determine where to do draw the graph
+	   originY = h - (30 + 2 * fm.getHeight());				// i.e. find the left and the lower margins
+
+	   g.setColor(labelColor);
+	   String title = xAxis.getTitle();							//+" ("+getBarGraphType()+")";
+	   
+		g.drawString(title,(w-fm.stringWidth(title))/2, h - 10);							// display xAxis title
+
+	   title = dataSource.getTitle();
+	   g.drawString(title,(w-fm.stringWidth(title))/2, 10 + fm.getHeight());		// display Graph title
+
+	   title = yAxis.getTitle();
+	   g.rotate(-PI/2);
+	   g.drawString(title, -(h+fm.stringWidth(title))/2, 
+		fm.getHeight());     																		// display yAxis title
+	   g.rotate(PI/2);
+	   g.setColor(FOREGROUND);	  
+
+    	width = (int)((w-30-originX)*xscale);		      	// width available for drawing the graph
+	   int maxvalue = dataSource.getIndexCount();         // total number of x values
+	   int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
+	   tickincrementX = (int)Math.ceil(5/((double)(width)/maxvalue));
       tickincrementX = Util.getBestIncrement(tickincrementX);
-      
+
       int numintervalsX = (int)Math.ceil((double)maxvalue/tickincrementX);
-     // System.out.println("tickincrementX "+ tickincrementX + "numintervalsX"+numintervalsX +"\n");
-      pixelincrementX = (double)(width) / numintervalsX;
-      
+	   pixelincrementX = (double)(width) / numintervalsX;
+
       int labelincrementX = (int)Math.ceil((sw + 20) / pixelincrementX);
       labelincrementX = Util.getBestIncrement(labelincrementX);
-      
-      g.drawLine(originX, originY, (int)width+originX, originY); 				// draw xAxis
-      g.drawLine(originX, originY, originX , 30); 									// draw yAxis
-      
-      int mini = 0; 							//(int)Math.floor((hsbval - data.offset3)/pixelincrement);
-      int maxi = maxvalue;							// (int)Math.ceil((hsbval - data.offset3 + w)/pixelincrement);
+
+	   g.drawLine(originX, originY, (int)width+originX, originY); 				// draw xAxis
+	   g.drawLine(originX, originY, originX , 30); 									// draw yAxis
+
+      	int mini = 0; 							//(int)Math.floor((hsbval - data.offset3)/pixelincrement);
+         int maxi = maxvalue;							// (int)Math.ceil((hsbval - data.offset3 + w)/pixelincrement);
          if(mini < 0) mini = 0;
          if(maxi > numintervalsX) maxi = numintervalsX;
 
@@ -401,7 +409,7 @@ public class Graph extends JPanel
          if(i % labelincrementX == 0)
          {
          	g.drawLine(curx, originY+5, curx, originY-5);
-            s = "" + (int)xAxis.getIndex(i*tickincrementX);						// can set multiplier? 
+            s = "" + (int)xAxis.getIndex(i);						// can set multiplier? 
             g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + fm.getHeight());
          }
          else
@@ -411,18 +419,11 @@ public class Graph extends JPanel
 	   double maxvalueY;														// get max y Value
 	   if(((GraphType == BAR) && (BarGraphType == STACKED)) || (GraphType == AREA) ){
 	  		maxvalueY = maxSumY;
-			// System.out.println("max sum y is " + maxSumY);
 	   }else{
-	  		maxvalueY = yAxis.getMax();
-			// System.out.println("y axis max is " + yAxis.getMax());
-
+	  		maxvalueY = yAxis.getMax();                               
 	   }
 	   maxvalueY += (10 - maxvalueY%10);				  // adjust so that the max axis value is in the multiples of 10
-
-	 //   System.out.println("max value Y = " + maxvalueY);
-
 	   pixelincrementY = (double)(originY-30) / maxvalueY;
-	//   System.out.println("pixelincrementX "+pixelincrementX +" pixelincrementY "+ pixelincrementY +"\n");
 //    pixelincrementY = (int)pixelincrementY;
 	   sw = fm.getHeight();
       
@@ -436,6 +437,7 @@ public class Graph extends JPanel
          //for(int i=0; i<=maxvalueY; i++)			      			// drawing yAxis divisions
       	for(int i=0; i<=maxvalueY; i+=subincrement)			      // drawing yAxis divisions
          {
+
 // for each i from 0 to maxY (even if it is something like a million), we are checking for the cond below & displaying it
 // efficient of maxY is low (less than the height of the graph
 // erroneous behavior if maxY > height of the graph
@@ -458,7 +460,7 @@ public class Graph extends JPanel
    }
 
 
-	private void _drawBarGraph(Graphics2D g){
+	private void drawBarGraph(Graphics2D g){
 		int numX = dataSource.getIndexCount();
 		int numY = dataSource.getValueCount();
 		double [] data = new double[numY];
@@ -539,131 +541,83 @@ public class Graph extends JPanel
 	}
 
 	
-    private void drawBarGraph(Graphics2D g) {    	
+    private void old_drawBarGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount();  //no. of y values for each x
-	//System.out.println("drawBarGraph called "+xValues+"\n");
-	double [] data1 = new double[yValues];
 	double [] data = new double[yValues];
 	int x1,x2;
 	int y;
    barWidth  = (int)(pixelincrementX*(0.75)) ;
-        //if(barWidth<6) barWidth=6;         
-	  int numintervalsX = (int)Math.ceil((double)xValues/tickincrementX);
-	for(int i=0; i < numintervalsX; i++)
+        //if(barWidth<6) barWidth=6;
+          
+	for(int i=0; i < xValues; i++)
 	{
-
-	 
+	   dataSource.getValues(i,data);
 	   x1 = originX + (int)(i*pixelincrementX) + (int)(pixelincrementX/2);    //calculate x value
- 	  /*if(x1 > width){
-	  	System.err.println("x1 > width\n");
-	  }*/
-           if(BarGraphType == STACKED){
-	   	for(int j=0; j<yValues; j++){
-			data1[j] = 0.0;
+ 
+           if(BarGraphType == STACKED)
+		for(int j=0; j<yValues; j++)
+		{
+			y = (int) (originY - (int)(data[j]*pixelincrementY));
+			for(int k=0; k<j;k++)			// stacked: so subtract all the previous y values
+				y -= (int)(data[k]*pixelincrementY);
+
+			g.setColor(dataSource.getColor(j));
+			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(data[j]*pixelincrementY));
 		}
-		int m;
-		for(m=0; m < tickincrementX;m++){
-			if(i*tickincrementX+m >= xValues){
-				break;
-			}
-			dataSource.getValues(i*tickincrementX+m,data);
-			for(int j=0; j<yValues; j++)
-			{
-				data1[j] += data[j];
-				for(int k=0; k<j;k++)			// stacked: so subtract all the previous y values
-					data1[j] -= (data[k]);						
-			}
-		}
-		if(m != 0){
-			for(int j=0;j<yValues;j++){
-				data1[j] = (double)Math.round((double)data1[j]/m);
-				int ybar = originY - (int )(data1[j]*pixelincrementY);
-				g.setColor(dataSource.getColor(j));
-				g.fillRect(x1-(barWidth/2),ybar,barWidth,(int)(data1[j]*pixelincrementY));
-			}
-		}
-		
-	   }
 	   else if(BarGraphType == UNSTACKED)			// unstacked.. sort the values and then display them
 	   {
-
 		int maxIndex=0;
 		double maxValue=0;
 		double [][] temp = new double[yValues][2];      // one col to retain color (actual index) information
 								// and the other to hold the actual data
-		int m;				
-		for(int k=0;k<yValues;k++){
-			temp[k][0] = 0;
-			temp[k][1] = 0.0;
+		for(int k=0;k<yValues;k++)
+		{	
+		   temp[k][0] = k;
+		   temp[k][1] = data[k];
 		}
-		for(m=0;m<tickincrementX;m++){	
-			if(i*tickincrementX +m >= xValues){
-				break;
-			}
-			dataSource.getValues(i*tickincrementX+m,data);
-			for(int k=0;k<yValues;k++)
-			{	
-			   temp[k][0] = k;
-			   temp[k][1] += data[k];
-			}
+
+		for(int k=0; k<yValues; k++)
+		{
+		  maxValue = temp[k][1];
+		  maxIndex = k;
+
+		  for(int j=k;j<yValues;j++)
+		  {
+		    if(temp[j][1]>maxValue)
+		    {
+			maxIndex = j;
+			maxValue = temp[j][1];
+		    }
+		   }
+ 
+		  int t = (int)temp[k][0];
+		  double t2 = temp[k][1];
+
+		  temp[k][0] = temp[maxIndex][0];
+		  temp[k][1] = maxValue;		//swap the contents of maxValue with the ith value
+		  temp[maxIndex][0] = t;
+		  temp[maxIndex][1] = t2;
 		}
-		if(m != 0){
-			for(int k=0;k<yValues;k++){
-				temp[k][1] = (double )Math.round((double)temp[k][1]/m);
-			}
-			for(int k=0; k<yValues; k++)
-			{
-			  maxValue = temp[k][1];
-			  maxIndex = k;
-		
-			  for(int j=k;j<yValues;j++)
-			  {
-			    if(temp[j][1]>maxValue)
-			    {
-				maxIndex = j;
-				maxValue = temp[j][1];
-			    }
-			   }
- 	
-			  int t = (int)temp[k][0];
-			  double t2 = temp[k][1];
+		// now display the graph
 	
-			  temp[k][0] = temp[maxIndex][0];
-			  temp[k][1] = maxValue;		//swap the contents of maxValue with the ith value
-			  temp[maxIndex][0] = t;
-			  temp[maxIndex][1] = t2;
-			}
-			// now display the graph
-		
-		
-			for(int k=0; k<yValues; k++)
-			{
-				g.setColor(dataSource.getColor((int)temp[k][0]));
-				y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
-				g.fillRect(x1-(barWidth/2),y,barWidth,(int)(temp[k][1]*pixelincrementY));
-			}
+	
+		for(int k=0; k<yValues; k++)
+		{
+			g.setColor(dataSource.getColor((int)temp[k][0]));
+			y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
+			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(temp[k][1]*pixelincrementY));
 		}
+
 	   }
 	   else							// single.. display average value
 	   {
-
 		double sum=0;
-		int m;
-		for(m=0;m < tickincrementX;m++){
-			if(i*tickincrementX +m >= xValues){
-				break;
-			}
-			dataSource.getValues(i*tickincrementX+m,data);
-			for(int j=0; j<yValues; j++){
-				sum += data[j];
-			}
-		}
-		if(m!= 0){
-			sum /= (yValues*m);
-			y = (int) (originY - (int)(sum*pixelincrementY));
-			g.fillRect(x1-(barWidth/2),y,barWidth,(int)(sum*pixelincrementY));
-		}
+		for(int j=0; j<yValues; j++)
+			sum += data[j];
+		sum /= yValues;
+		y = (int) (originY - (int)(sum*pixelincrementY));
+		g.fillRect(x1-(barWidth/2),y,barWidth,(int)(sum*pixelincrementY));
 	   }
 	}
    }
@@ -684,27 +638,8 @@ public class Graph extends JPanel
 	    y1[i] = -1;
 	}
 	// do only till the window is reached 
-	int numintervalsX = (int)Math.ceil((double)xValues/tickincrementX);
-	double [] data1 = new double[yValues];
-	for (int i=0; i < numintervalsX; i++) {
-	    int m;
-	    for(int j=0;j<yValues;j++){
-	    	data1[j] = 0.0;
-	    }
-	    
-	    for(m=0;m<tickincrementX;m++){		
-		if(i*tickincrementX +m >= xValues){
-				break;
-		}
-		dataSource.getValues(i*tickincrementX+m,data);	    	    	
-		for(int j=0;j<yValues;j++){
-			data1[j] += data[j];
-		}
-	    }
-	    if(m != 0){    
-	    	for(int j=0;j<yValues;j++){
-			data[j] = Math.round((double)data1[j]/m);
-		}
+	for (int i=0; i < xValues; i++) {	
+	    dataSource.getValues(i,data);
 	    //calculate x value
 	    x2 = originX + (int)(i*pixelincrementX) + 
 		(int)(pixelincrementX/2);    
@@ -718,7 +653,6 @@ public class Graph extends JPanel
 		y1[j] = y2[j];		
 	    }
 	    x1 = x2;
-	    }
 	}
     }
 
@@ -729,7 +663,6 @@ public class Graph extends JPanel
 
 	Polygon polygon = new Polygon();
 
-	// System.out.println("num Y values = " + yValues);
 	// do only till the window is reached 
 	// layers have to be drawn in reverse (highest first).
 	for (int layer=yValues-1; layer>=0; layer--) {	
@@ -748,11 +681,6 @@ public class Graph extends JPanel
 		// Fix once I have the time.
 		dataSource.getValues(idx,data);
 
-		/*
-		System.out.println("y" + layer + ":r" + idx + " = " +
-				   data[layer]);
-		*/
-
 		//calculate x & y pixel values
 		xPixel = originX + (int)(idx*pixelincrementX) + 
 		    (int)(pixelincrementX/2);    
@@ -760,20 +688,7 @@ public class Graph extends JPanel
 		// recomputation of the prefix sum each time we go through
 		// the Y values.
 		prefixSum(data);
-
-		/*
-		System.out.println("y" + layer + ":r" + idx + " = " +
-				   data[layer]);
-		*/
-
 	    	yPixel = (int) (originY - (int)(data[layer]*pixelincrementY));
-
-		/*
-		System.out.println("xPixel = " + xPixel + " yPixel = " +
-				   yPixel + " pixelincrementX = " +
-				   pixelincrementX + " pixelincrementY = " +
-				   pixelincrementY);
-		*/
 
 		// if first point, add the baseline point before adding
 		// the first point.
@@ -793,9 +708,6 @@ public class Graph extends JPanel
 	    }
 	    // draw the filled polygon.
 	    g.setColor(dataSource.getColor(layer));
-
-	    // System.out.println("layer = " + layer + ": " + g.getColor());
-
 	    g.fill(polygon);
 	    // draw a black outline.
 	    g.setColor(Color.black);
@@ -825,6 +737,7 @@ public class Graph extends JPanel
 		maxValue = data[yValues-1];
 	    }
 	}
+
 	return maxValue;
     }
 

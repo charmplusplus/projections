@@ -94,6 +94,7 @@ SRC=\
     projections/gui/OrderedGraphDataList.java\
     projections/gui/OrderedIntList.java\
     projections/gui/OrderedUsageList.java\
+    projections/gui/PieChartWindow.java\
     projections/gui/ProfileAxisCanvas.java\
     projections/gui/ProfileColorWindow.java\
     projections/gui/ProfileData.java\

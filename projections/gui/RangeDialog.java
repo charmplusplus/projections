@@ -69,8 +69,9 @@ public class RangeDialog extends Dialog
 
     /**
      *  INHERITANCE NOTE:
-     *  The subclass should call super.actionPerformed to ensure the proper
-     *  behaviour of events with respect to parent class fields.
+     *  The subclass should call super.actionPerformed AFTER its own 
+     *  actionPerformed routine to ensure the proper behaviour of events 
+     *  with respect to parent class fields.
      */
     public void actionPerformed(ActionEvent evt)
     {
@@ -170,7 +171,7 @@ public class RangeDialog extends Dialog
      *
      *  INHERITANCE NOTE:
      *  This method should be OVERRIDDEN by the subclass if a different
-     *  layout format is desired.
+     *  layout format is desired. Otherwise, leave it alone.
      */
     public void displayDialog() {
     

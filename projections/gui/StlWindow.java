@@ -33,6 +33,7 @@ public class StlWindow extends Frame
 	  });
 	  
 	  setBackground(Color.black);
+	  setForeground(Color.lightGray);
 	  setTitle("Projections-- Overview");
 	  
 	  createMenus();
@@ -120,21 +121,21 @@ public class StlWindow extends Frame
         }, this));
 	setMenuBar(mbar);
    } 
-	public void mouseClicked(MouseEvent evt)
+   public void mouseClicked(MouseEvent evt)
 	  {}
-   	public void mouseEntered(MouseEvent evt)
+   public void mouseEntered(MouseEvent evt)
 	{
 		Object src=evt.getComponent();
 		if (src==hor) setStatus("Click or drag to set the horizontal zoom");
 		if (src==ver) setStatus("Click or drag to set the vertical zoom");
 	}
-	public void mouseExited(MouseEvent evt)
+   public void mouseExited(MouseEvent evt)
 	{
 		setStatus("");//Clear the old message
 	}
-	public void mousePressed(MouseEvent evt)
+   public void mousePressed(MouseEvent evt)
 	  {}
-	public void mouseReleased(MouseEvent evt)
+   public void mouseReleased(MouseEvent evt)
 	  {}
    public void setStatus(String msg) {
    	status.setText(msg);

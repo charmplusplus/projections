@@ -369,6 +369,42 @@ public class MainWindow extends JFrame
 
 
 		    double horSize, verSize;
+
+		    Runtime rt = Runtime.getRuntime();
+// 		    System.out.println("jvm free memory  = " + rt.freeMemory());
+// 		    System.out.println("jvm max memory   = " + rt.maxMemory());
+// 		    System.out.println("jvm total memory = " + rt.totalMemory());
+
+		    // 4 bytes per index, 500 indexs per processor
+		    int memUsage = 4 * 500 * Analysis.getNumProcessors();
+		    int maxMem = (int)(rt.totalMemory() * .01 );
+		    int interval = 1;
+
+		    while(memUsage/interval > maxMem){
+			interval++;
+		    }
+		    
+		    System.out.println("Showing every " + interval + " processor");
+		    
+
+		    if(interval > 1){
+			OrderedIntList tempPEs = validPEs.copyOf();
+			int element, tmp;
+			int count = 0;
+			validPEs.removeAll();
+			tempPEs.reset();
+
+			while((element = tempPEs.nextElement()) != -1){
+			    tmp = count / interval;
+			    tmp = count - tmp*interval;
+			    if(tmp == 0){
+				validPEs.insert(element);
+			    }
+			    count++;
+			}
+		    }
+			 
+
 		    if (validPEs == null) {
 			horSize=Analysis.getTotalTime();
 			verSize=Analysis.getNumProcessors();

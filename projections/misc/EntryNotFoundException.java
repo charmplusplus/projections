@@ -7,6 +7,4 @@ public EntryNotFoundException ()
 {
 	super ("no entries by that name on this processor");
 }
-
 }
-

@@ -13,28 +13,15 @@ String FileName;
 public LogLoadException ()
 {
 }
-
 public LogLoadException (String File)
 {
 	super ("ERROR:  couldn't process file.");
 	FileName = File;
 }
-
 public LogLoadException (String File, int Op)
 {
 	super ("ERROR:  couldn't process file.");
 	FileName = File;
 	Operation = Op;
 }
-
 }
-
-
-
-
-
-
-
-
-
-

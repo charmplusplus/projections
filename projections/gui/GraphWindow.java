@@ -86,7 +86,7 @@ public class GraphWindow extends Frame
 		 legendPanel.closeAttributesWindow();
 	  setVisible(false);
 	  dispose();
-	  mainWindow.CloseGraphWindow();
+	  mainWindow.closeChildWindow(this);
    }   
    private void CreateLayout()
    {   

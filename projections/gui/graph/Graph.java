@@ -302,6 +302,7 @@ public class Graph extends JPanel
 	} else {
 	    maxvalueY = yAxis.getMax();                               
 	}
+
 	originX = 
 	    // space for y title
 	    fm.getHeight()*4 +
@@ -409,10 +410,16 @@ public class Graph extends JPanel
 	   double maxvalueY;														// get max y Value
 	   if(((GraphType == BAR) && (BarGraphType == STACKED)) || (GraphType == AREA) ){
 	  		maxvalueY = maxSumY;
+			// System.out.println("max sum y is " + maxSumY);
 	   }else{
-	  		maxvalueY = yAxis.getMax();                               
+	  		maxvalueY = yAxis.getMax();
+			// System.out.println("y axis max is " + yAxis.getMax());
+
 	   }
 	   maxvalueY += (10 - maxvalueY%10);				  // adjust so that the max axis value is in the multiples of 10
+
+	   // System.out.println("max value Y = " + maxvalueY);
+
 	   pixelincrementY = (double)(originY-30) / maxvalueY;
 //    pixelincrementY = (int)pixelincrementY;
 	   sw = fm.getHeight();
@@ -652,6 +659,7 @@ public class Graph extends JPanel
 
 	Polygon polygon = new Polygon();
 
+	// System.out.println("num Y values = " + yValues);
 	// do only till the window is reached 
 	// layers have to be drawn in reverse (highest first).
 	for (int layer=yValues-1; layer>=0; layer--) {	
@@ -670,6 +678,11 @@ public class Graph extends JPanel
 		// Fix once I have the time.
 		dataSource.getValues(idx,data);
 
+		/*
+		System.out.println("y" + layer + ":r" + idx + " = " +
+				   data[layer]);
+		*/
+
 		//calculate x & y pixel values
 		xPixel = originX + (int)(idx*pixelincrementX) + 
 		    (int)(pixelincrementX/2);    
@@ -677,7 +690,20 @@ public class Graph extends JPanel
 		// recomputation of the prefix sum each time we go through
 		// the Y values.
 		prefixSum(data);
+
+		/*
+		System.out.println("y" + layer + ":r" + idx + " = " +
+				   data[layer]);
+		*/
+
 	    	yPixel = (int) (originY - (int)(data[layer]*pixelincrementY));
+
+		/*
+		System.out.println("xPixel = " + xPixel + " yPixel = " +
+				   yPixel + " pixelincrementX = " +
+				   pixelincrementX + " pixelincrementY = " +
+				   pixelincrementY);
+		*/
 
 		// if first point, add the baseline point before adding
 		// the first point.
@@ -697,6 +723,9 @@ public class Graph extends JPanel
 	    }
 	    // draw the filled polygon.
 	    g.setColor(dataSource.getColor(layer));
+
+	    // System.out.println("layer = " + layer + ": " + g.getColor());
+
 	    g.fill(polygon);
 	    // draw a black outline.
 	    g.setColor(Color.black);

@@ -16,6 +16,11 @@ import java.util.*;
  *  This is the new summary format that stores information by intervals.
  *  Phase information will probably be written in later.
  *
+ *  Updated
+ *  -------
+ *  3/18/2003 - changed to read and store data in a dense internal data
+ *              structure. This dense structure should be used up till
+ *              the time Graph is presented with the data for rendering.
  */
 
 public class GenericSumDetailReader

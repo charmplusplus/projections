@@ -349,7 +349,6 @@ public class MultiRunDataAnalyzer {
 	    numEPs - categories[dataType][CAT_EP_INSIGNIFICANT].size() + 1 +
 	    NUM_EXTR_ENTRIES;
 	dataArray = new double[numRuns][numYvalues];
-	colorMap = new Color[numYvalues];
 
 	String titleString = "";
 	switch (dataType) {
@@ -370,7 +369,13 @@ public class MultiRunDataAnalyzer {
 	// **CW** 0 will be replaced by an appropriate static
 	// constants.
 	computeOutputArray(dataArray, dataType, 0);
-	computeColorMap(colorMap, dataType, 0);
+	colorMap = computeColorMap(numYvalues, dataType, 0);
+
+	/*
+	for (int i=0; i<colorMap.length; i++) {
+	    System.out.println(colorMap[i]);
+	}
+	*/
 
 	return new MultiRunDataSource(dataArray,
 				      colorMap,
@@ -468,6 +473,8 @@ public class MultiRunDataAnalyzer {
 		numEPs -
 		((Integer)categories[dataType][CAT_OVERHEAD_IDLE].elementAt(catIdx)).intValue();
 	    for (int run=0; run<numRuns; run++) {
+		// testing.
+		// data[run][entry] = 0;
 		data[run][entry] = extraTable[dataType][run][entryIdx];
 	    }
 	    entry++;
@@ -481,10 +488,10 @@ public class MultiRunDataAnalyzer {
      *  The default scheme is to color Insignificant EPs gray, Overhead
      *  white and leave every other EP colored (but kept in position).
      */
-    private void computeColorMap(Color colorMap[], int dataType, int scheme) {
+    private Color[] computeColorMap(int numColors, int dataType, int scheme) {
 	// Ask Analysis for a simple (for now) colormap.
 	// Then overwrite the slot for insignificant and overhead colors
-	int numColors = colorMap.length;
+	Color colorMap[] = new Color[numColors];
 
 	int numNoChange =
 	    categories[dataType][CAT_EP_NO_CHANGE].size();
@@ -494,6 +501,12 @@ public class MultiRunDataAnalyzer {
 
 	// set insignificant category to gray
 	colorMap[numNoChange] = Color.gray;
+
+	/*
+	for (int i=0; i<colorMap.length; i++) {
+	    System.out.println(colorMap[i]);
+	}
+	*/
 
 	// set the overhead colors
 	int numOverhead =
@@ -506,5 +519,6 @@ public class MultiRunDataAnalyzer {
 		colorMap[offset+catIdx] = Color.white;
 	    }
 	}
+	return colorMap;
     }
 }

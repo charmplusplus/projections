@@ -46,7 +46,6 @@ public class AreaGraphPanel extends JPanel
 		{
 		    if (mainPanel != null)
                         {
-			    setAllBounds();
 			    displayCanvas.repaint();
                         }
 		}
@@ -121,9 +120,9 @@ public class AreaGraphPanel extends JPanel
 	mainPanel = new JPanel();
 	mainPanel.setLayout(gbl);
 	displayPanel = new JScrollPane(displayCanvas);
-	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,1, 0,0,0,0);
+	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,1);
 
-	Util.gblAdd(this, mainPanel,   gbc, 0,0, 2,1, 1,1, 10,10,10,10);
+	Util.gblAdd(this, mainPanel,   gbc, 0,0, 2,1, 1,1, 5,5,5,5);
 	Util.gblAdd(this, xScalePanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
 	Util.gblAdd(this, yScalePanel, gbc, 1,1, 1,1, 1,0, 2,2,2,2);
     }
@@ -164,34 +163,12 @@ public class AreaGraphPanel extends JPanel
 	}
 	displayCanvas.setScale((double)xScale); 
 	// **CW** for now, do nothing with the y scale.
-	setAllBounds();
 	displayCanvas.repaint();
     }
     
     public void adjustmentValueChanged(AdjustmentEvent evt)
     {
 	displayCanvas.repaint();
-    }
-
-    public void setAllBounds()
-    {
-	//// set the sizes
-	int mpw, mph, sbh, dcw, dch;
-	mpw = mainPanel.getSize().width;
-	mph = mainPanel.getSize().height;
-	if(mpw == 0 || mph == 0)
-	    return;
-	
-	sbh = 20;
-	
-	dcw = mpw-30;
-	dch = mph - 30 - sbh;
-	
-	// --> set the bounds
-	// must set the bounds for the axes before the display canvas so that
-	// the scales are set appropriately.
-	
-	displayCanvas.setBounds(30, 30, dcw, dch);
     }
 
     public void setData(DataSource dataSource, XAxis xAxis, YAxis yAxis) {

@@ -2,6 +2,8 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
+
 import projections.misc.*;
 import projections.analysis.*;
 
@@ -354,9 +356,8 @@ public class ProfileWindow extends Frame
 	    // colors?
 	    int numEPs = Analysis.getNumUserEntries();
 	  Color[] colors = new Color[numEPs+5];
-	  float H = (float)1.0;
-	  float S = (float)1.0;
-	  float B = (float)1.0;
+	  Color[] newUserColors = new Color[numEPs];
+
 	  for(int i=0; i<numEPs; i++)
 	  {
 	      // if the data is an entry method whose color is found in
@@ -389,6 +390,13 @@ public class ProfileWindow extends Frame
 
 		// Why +2 instead of +1?
 		int nEl=data.plist.size()+2;
+
+		// **CW** Hack for colors to work - Profile really should be cleanly rewritten.
+		// split the original loop:
+		// Phase 1a - compute average work
+		// Phase 1b - assign colors based on average work
+		// Phase 2 - create profile objects
+		/* **** OLD CODE ****
 		data.plist.reset();
 		while (data.plist.hasMoreElements())
 		{
@@ -403,6 +411,51 @@ public class ProfileWindow extends Frame
 			usage2po(cur,curPe,poNo++,colors);
 		}
 		bar.progress(poNo,nEl,"averaging");
+		*/
+		// *CW* *** New code ****
+		// Phase 1a
+		data.plist.reset();
+		while (data.plist.hasMoreElements()) {
+		    if (!bar.progress(poNo,nEl,poNo+" of "+nEl))
+			break;
+		    curPe = data.plist.currentElement();
+		    data.plist.nextElement();
+		    float cur[]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
+		    for (int i=0;i<avg.length && i<cur.length;i++) {
+			avg[i]+=(float)(cur[i]*avgScale);
+		    }
+		}
+		// Phase 1b
+		Vector sigElements = new Vector();
+		// we only wish to compute for EPs
+		for (int i=0; i<numEPs; i++) {
+		    // anything greater than 5% is "significant"
+		    if (avg[i] > 1.0) {
+			sigElements.add(new Integer(i));
+		    }
+		}
+		// copy to an array for Color assignment (maybe that should be
+		// a new interface for color assignment).
+		int sigIndices[] = new int[sigElements.size()];
+		for (int i=0; i<sigIndices.length; i++) {
+		    sigIndices[i] = ((Integer)sigElements.elementAt(i)).intValue();
+		}
+		newUserColors = Analysis.createColorMap(numEPs, sigIndices);
+		// copy the new Colors into our color array. (and let the system colors
+		// remain as they are)
+		for (int i=0; i<newUserColors.length; i++) {
+		    colors[i] = newUserColors[i];
+		}
+
+		// Phase 2
+		data.plist.reset();
+		while (data.plist.hasMoreElements())
+		{
+		    curPe = data.plist.currentElement();
+		    data.plist.nextElement();
+		    float cur[]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
+		    usage2po(cur,curPe,poNo++,colors);
+		}
 		usage2po(avg,-1,0,colors);
 		bar.done();
 

@@ -204,8 +204,12 @@ public class TimelineObject extends Component
    }   
    private void OpenMessageWindow()
    {
-	  if(msgwindow == null)
+          if(msgwindow == null) {
 		 msgwindow = new TimelineMessageWindow(this);
+		 Dimension d = msgwindow.getPreferredSize();
+		 msgwindow.setSize(480, d.width);
+	  }
+	  
 	  msgwindow.setVisible(true);
    }   
    public void paint(Graphics g)

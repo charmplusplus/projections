@@ -14,28 +14,28 @@ public class TimelineData
    int ath, abh;
    int sbw, sbh;
    int mpw, mph;
-   int tluh;
-   int barheight;
+  public int tluh;
+  public int barheight;
    int numPs;
    
    float scale;
-   
-   int offset;
+  public int   offset;
    
    OrderedIntList processorList;
    OrderedIntList oldplist;
-   String processorString;
-   String oldpstring;
+   String         processorString;
+   String         oldpstring;
    
-   double pixelIncrement;
-   int timeIncrement;
-   int labelIncrement;
-   int numIntervals;
+  public double         pixelIncrement;
+  public int            timeIncrement;
+   int            labelIncrement;
+   int            numIntervals;
    
-   int[] entries;
-   Color[] entryColor;
+   int[]          entries;
+   Color[]        entryColor;
    
    TimelineObject[][] tloArray;
+   UserEvent[][] userEventsArray = null;
    
    TimelineDisplayCanvas displayCanvas;
    
@@ -48,7 +48,7 @@ public class TimelineData
    float[] packUsage;
    OrderedUsageList[] entryUsageList;
    
-   long beginTime, endTime, totalTime;
+  public long beginTime, endTime, totalTime;
    long oldBT, oldET;
    
    boolean showPacks, showIdle, showMsgs;
@@ -115,8 +115,10 @@ public class TimelineData
    public void createTLOArray()
    {
 	  TimelineObject[][] oldtloArray = tloArray;
+	  UserEvent[][] oldUserEventsArray = userEventsArray;
 	  
 	  tloArray = new TimelineObject[processorList.size()][];
+	  userEventsArray = new UserEvent[processorList.size()][];
 	  
 	  if(oldtloArray != null && beginTime >= oldBT && endTime <= oldET)
 	  {
@@ -139,41 +141,60 @@ public class TimelineData
 			   break;
 			if(oldp == newp)
 			{
-			   if(beginTime == oldBT && endTime == oldET)
-				  tloArray[newpindex] = oldtloArray[oldpindex];
+			   if(beginTime == oldBT && endTime == oldET) {
+			     tloArray[newpindex] = oldtloArray[oldpindex];
+			     userEventsArray[newpindex] = oldUserEventsArray[oldpindex];
+			   }
 			   else
 			   {
-				  int oldnumitems = oldtloArray[oldpindex].length;
-				  int newnumitems = 0;
-				  int startindex  = 0;
-				  int endindex    = oldnumitems - 1;
+			     // copy timelineobjects from larger array into smaller array
+			     int n;
+			     int oldNumItems = oldtloArray[oldpindex].length;
+			     int newNumItems = 0;
+			     int startIndex  = 0;
+			     int endIndex    = oldNumItems - 1;
 				  
-				  for(int n=0; n<oldnumitems; n++)
-				  {
-					 if(oldtloArray[oldpindex][n].getEndTime() < beginTime)
-						startindex++;
-					 else
-						break;
-				  }
-				  
-				  for(int n=oldnumitems-1; n>=0; n--)
-				  {
-					 if(oldtloArray[oldpindex][n].getBeginTime() > endTime)
-						endindex--;
-					 else
-						break;
-				  }
-				  
-				  newnumitems = endindex - startindex + 1;
-				  
-				  tloArray[newpindex] = new TimelineObject[newnumitems];
-				  
-				  for(int n=0; n<newnumitems; n++)
-				  {
-					 tloArray[newpindex][n] = oldtloArray[oldpindex][n+startindex];
-					 tloArray[newpindex][n].setUsage();
-					 tloArray[newpindex][n].setPackUsage();
-				  }
+			     // calculate which part of the old array to copy
+			     for(n=0; n<oldNumItems; n++) {
+			       if(oldtloArray[oldpindex][n].getEndTime() < beginTime) { startIndex++; }
+			       else { break; }
+			     }
+			     for(n=oldNumItems-1; n>=0; n--) {
+			       if(oldtloArray[oldpindex][n].getBeginTime() > endTime) { endIndex--; }
+			       else { break; }
+			     }
+			     newNumItems = endIndex - startIndex + 1;
+
+			     // copy the array
+			     tloArray[newpindex] = new TimelineObject[newNumItems];
+			     for(n=0; n<newNumItems; n++) {
+			       tloArray[newpindex][n] = oldtloArray[oldpindex][n+startIndex];
+			       tloArray[newpindex][n].setUsage();
+			       tloArray[newpindex][n].setPackUsage();
+			     }
+
+			     // copy user events from larger array into smaller array
+			     oldNumItems = oldUserEventsArray[oldpindex].length;
+			     newNumItems = 0;
+			     startIndex = 0;
+			     endIndex = oldNumItems -1;
+			     
+			     // calculate which part of the old array to copy
+			     for (n=0; n<oldNumItems; n++) {
+			       if (oldUserEventsArray[oldpindex][n].EndTime < beginTime) { startIndex++; }
+			       else { break; }
+			     }
+			     for (n=oldNumItems-1; n>=0; n--) {
+			       if (oldUserEventsArray[oldpindex][n].BeginTime > endTime) { endIndex--; }
+			       else { break; }
+			     }
+			     newNumItems = endIndex - startIndex + 1;
+
+			     // copy the array
+			     userEventsArray[newpindex] = new UserEvent[newNumItems];
+			     for (n=0; n<newNumItems; n++) {
+			       userEventsArray[newpindex][n] = oldUserEventsArray[oldpindex][startIndex+n];
+			     }
 			   }
 			}                                       
 		 
@@ -181,6 +202,7 @@ public class TimelineData
 			newpindex++;
 		 }   
 		 oldtloArray = null;
+		 oldUserEventsArray = null;
 	  }
 	  
 	  int pnum;
@@ -188,8 +210,7 @@ public class TimelineData
 	  for(int p=0; p<processorList.size(); p++)
 	  {
 		 pnum = processorList.nextElement();
-		 if(tloArray[p] == null)
-			tloArray[p] = getData(pnum);
+		 if(tloArray[p] == null) { tloArray[p] = getData(pnum, p); }
 	  }
 	  
 	  for(int e=0; e<Analysis.getNumUserEntries(); e++)
@@ -233,7 +254,7 @@ public class TimelineData
 		 
 	  } 
    }   
-   private TimelineObject[] getData(int pnum)
+   private TimelineObject[] getData(int pnum, int index)  // index into userEventArray
    {
 	  Vector tl, msglist, packlist;
 	  TimelineEvent tle;
@@ -242,9 +263,21 @@ public class TimelineData
 	  long btime, etime;
 	  int entry, pSrc, numMsgs, numpacks, msglen;
 		
-	  tl = Analysis.createTL(pnum, beginTime, endTime);
-	  numItems = tl.size();   
+	  tl = new Vector();
+	  Vector userEvents = new Vector();
+	  Analysis.createTL(pnum, beginTime, endTime, tl, userEvents);
+	  // proc userEvents
+	  int numUserEvents = userEvents.size();
+	  if (numUserEvents > 0) {
+	    userEventsArray[index] = new UserEvent[numUserEvents];
+	    for (int i=0; i<numUserEvents; i++) {
+	      userEventsArray[index][i] = (UserEvent) userEvents.elementAt(i);
+	    }
+	  }
+	  else { userEventsArray[index] = null; } // probably already numm
 	  
+	  // proc timeline events
+	  numItems = tl.size();   
 	  TimelineObject[] tlo = new TimelineObject[numItems];
 	  for(int i=0; i<numItems; i++)
 	  {
@@ -277,9 +310,105 @@ public class TimelineData
 		 
 		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen);
 	  }
+
+	  /*
+          MY FIRST ATTEMPT TO ADD USER EVENTS TO TIMLINE PROVED FRUITLESS 
+          WELL NOT QUITE, BUT THE COMMENTED CODE HERE ENDED UP BEING
+	  USELESS.
+          THE PROBLEM WAS THAT THE USER EVENTS THAT OCCURED DURING EPS
+           SHOWED UP, BUT THOSE THAT OCCURED IN BETWEEN EPS DID NOT
+	  THIS HAS TO DO WITH THE "setBounds" AND THE FACT THAT THIS
+          IS A COMPONENT. 
+      
+          CHECKING THE CODE IN SO IN CASE NEEDED IN FUTURE.
+      
+          IF IT BOTHERS YOU TAKE IT OUT
+
+         -- JOSHUA
+  
+	  // add userEvents to the TimelineObject.  userEvents are not guaranteed to be 
+	  // in any order, so this is somewhat more compilicated than a linear algo
+	  if (userEventsArray != null && userEventsArray[index] != null) {
+	    int tloIndex = 0;  // timeline object index
+	    int ueaIndex = 0;  // user event index
+	    Vector userEventsForObject = new Vector();
+	    long beginTime;
+	    TimelineObject obj1 = null, obj2 = null;
+	    // i know this is a long if/else statement.  sorry, i'm just klugeing --JMU
+	    while (ueaIndex < userEventsArray[index].length && 
+		   tloIndex < tlo.length) 
+	    {
+	      beginTime = userEventsArray[index][ueaIndex].BeginTime;
+	      obj1 = tlo[tloIndex];
+	      // ***************************************************************
+	      // this userEvent falls AFTER current object
+	      if (beginTime > obj1.getBeginTime()) {
+		if (beginTime < obj1.getEndTime()) {
+		  // if userEvent beginTime within obj's time, add it to current object
+		  userEventsForObject.addElement(userEventsArray[index][ueaIndex]);
+		  ueaIndex++;
+		}
+		else if (tloIndex < tlo.length-1) {
+		  obj2 = tlo[tloIndex+1];
+		  if (beginTime < obj2.getBeginTime()) {
+		    // next object occurs AFTER user event, so just add to current object
+		    userEventsForObject.addElement(userEventsArray[index][ueaIndex]);
+		    ueaIndex++;
+		  }
+		  else {
+		    // current user event falls AFTER next object, so if any user events
+		    // for current object, add them, otherwise advance to next object
+		    if (userEventsForObject.size() > 0) {
+		      obj1.addUserEvents(userEventsForObject);
+		      userEventsForObject.removeAllElements();
+		    }
+		    tloIndex++;
+		  }
+		}
+		else if (tloIndex == tlo.length-1) {
+		  // this is the LAST object, add this event here anyway
+		  userEventsForObject.addElement(userEventsArray[index][ueaIndex]);
+		  ueaIndex++;
+		}
+	      }
+	      // ***************************************************************
+	      // this userEvent falls BEFORE current objects
+	      else {
+		if (tloIndex == 0) {
+		  // this is the first object, so add this event here anyway
+		  userEventsForObject.addElement(userEventsArray[index][ueaIndex]);
+		  ueaIndex++;
+		}
+		else {
+		  // add any user event for current object, and seek back to try to 
+		  // put in other objects
+		  tloIndex--;
+		  if (userEventsForObject.size() > 0) {
+		    obj1.addUserEvents(userEventsForObject);
+		    userEventsForObject.removeAllElements();
+		  }
+		}
+	      }
+	    }
+	    // fall out of the loop, so add objects if any
+	    if (userEventsForObject.size() > 0) {
+	      obj1.addUserEvents(userEventsForObject);
+	      userEventsForObject.removeAllElements();
+	    }
+	  }
+	  */
 	  
 	  return tlo;
    }   
+
+   public int getNumUserEvents() {
+     if (userEventsArray == null) { return 0; }
+     int num = 0;
+     for (int i=0; i<userEventsArray.length; i++) {
+       if (userEventsArray[i] != null) { num += userEventsArray[i].length; }
+     }
+     return num;
+   }
 }
 
 

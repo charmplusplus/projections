@@ -204,20 +204,23 @@ System.out.println(val+" "+tokenizer.nval);
 	// Read in the FIFTH line (maximum EP time)
 	// **CW** for now, ignore the labels. Check to see if it is a label.
 	// if yes, consume it. if not, push it back onto the stream.
-	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
-	    // do nothing. Label consumed.
-	} else {
-	    tokenizer.pushBack();
-	}
-	currentUserEntry = 0;
-	while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))
-	       && (numEPs>currentUserEntry)) {
-	    epData[currentUserEntry][MAX_TIME] = (int)tokenizer.nval;
-	    currentUserEntry++;
-	}
-	//Make sure we're at the end of the line
-	if (StreamTokenizer.TT_EOL!=tokenType) {
-	    throw new IOException("extra garbage at end of line 5");
+	// applies only in version 4.0 and above.
+	if (versionNum > 3.0) {
+	    if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+		// do nothing. Label consumed.
+	    } else {
+		tokenizer.pushBack();
+	    }
+	    currentUserEntry = 0;
+	    while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))
+		   && (numEPs>currentUserEntry)) {
+		epData[currentUserEntry][MAX_TIME] = (int)tokenizer.nval;
+		currentUserEntry++;
+	    }
+	    //Make sure we're at the end of the line
+	    if (StreamTokenizer.TT_EOL!=tokenType) {
+		throw new IOException("extra garbage at end of line 5");
+	    }
 	}
 	
 	// Read in the SIXTH line

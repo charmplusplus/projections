@@ -182,7 +182,7 @@ public class SumAnalyzer extends ProjDefs
 	// **CW** for now, ignore the labels. Check to see if it is a label.
 	// if yes, consume it. if not, push it back onto the stream.
 		// this line applies only to version 4.0 and above.
-		if (versionNum >= 4.0) {
+		if (versionNum > 3.0) {
 	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
 	    // do nothing. Label consumed.
 	    System.out.println(tokenizer.sval + " read.");

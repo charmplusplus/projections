@@ -60,7 +60,7 @@ public class GenericSummaryReader
     // private miscellaneous data
     private double version;
     private BufferedReader reader;
-    private StreamTokenizer tokenizer;
+    private ParseTokenizer tokenizer;
     private int tokenType;
 
     public GenericSummaryReader(String filename, double Nversion) 
@@ -83,7 +83,7 @@ public class GenericSummaryReader
 	throws IOException
     {
 	//Set up the tokenizer  **GLOBAL** yucks!
-	tokenizer=new StreamTokenizer(reader);
+	tokenizer=new ParseTokenizer(reader);
 	tokenizer.parseNumbers();
 	tokenizer.eolIsSignificant(true);
 	tokenizer.whitespaceChars('/','/'); 
@@ -94,20 +94,20 @@ public class GenericSummaryReader
 	tokenizer.wordChars('A','Z');
 
 	//Read the first line (Header information)
-	checkNextString("ver");
-	versionNum = (int)nextNumber("Version Number");
-	myPE = (int)nextNumber("processor number");
-	numPE = (int)nextNumber("number of processors");
-	checkNextString("count");
-	numIntervals = (int)nextNumber("count");
-	checkNextString("ep");
-	numEPs = (int)nextNumber("number of entry methods");
-	checkNextString("interval");
+	tokenizer.checkNextString("ver");
+	versionNum = (int)tokenizer.nextNumber("Version Number");
+	myPE = (int)tokenizer.nextNumber("processor number");
+	numPE = (int)tokenizer.nextNumber("number of processors");
+	tokenizer.checkNextString("count");
+	numIntervals = (int)tokenizer.nextNumber("count");
+	tokenizer.checkNextString("ep");
+	numEPs = (int)tokenizer.nextNumber("number of entry methods");
+	tokenizer.checkNextString("interval");
 	double intervalSize = 
-	    nextScientific("processor usage sample interval"); 
+	    tokenizer.nextScientific("processor usage sample interval"); 
 	if (versionNum > 2) {
-	    checkNextString("phases");
-	    numPhases = (int)nextNumber("phases");
+	    tokenizer.checkNextString("phases");
+	    numPhases = (int)tokenizer.nextNumber("phases");
 	} else {
 	    numPhases = 1;
 	}
@@ -155,11 +155,11 @@ public class GenericSummaryReader
 	
 	// Read in the FIFTH line
 	int numberofPairs;
-	numberofPairs = (int)nextNumber("Number of Marked Events");
+	numberofPairs = (int)tokenizer.nextNumber("Number of Marked Events");
 	// **CW** for some reason we are ignoring this
 	for (int g=0; g<numberofPairs; g++) {
-	    nextNumber("Number of Marked Events");
-	    nextNumber("Number of Marked Events");
+	    tokenizer.nextNumber("Number of Marked Events");
+	    tokenizer.nextNumber("Number of Marked Events");
 	}
 	// Make sure we're at the end of the line
 	if (StreamTokenizer.TT_EOL!=tokenType) {
@@ -203,52 +203,5 @@ public class GenericSummaryReader
 	    }
 	}
 	tokenizer = null;
-    }
-
-    private void checkNextString(String expected) 
-	throws IOException
-    {
-	String ret=nextString(expected);
-	if (!expected.equals(ret)) {
-	    throw new IOException("Expected "+expected+" got "+ret);
-	}
-    }
-
-    private double nextNumber(String description) 
-	throws IOException
-    {
-	if (StreamTokenizer.TT_NUMBER!=tokenizer.nextToken()) {
-	    throw new IOException("Couldn't read "+description);
-	}
-	return tokenizer.nval;
-    }
-
-    private double nextScientific(String description) 
-	throws IOException
-    {
-	double mantissa = nextNumber(description+" mantissa");
-	String expString = nextString(description+" exponent");
-	char expChar = expString.charAt(0);
-	if (expChar != 'e' && expChar != 'd' &&
-	    expChar != 'E' && expChar!='D') {
-	    throw new IOException("Couldn't find exponent in " + expString);
-	}
-	int exponent;
-	expString = expString.substring(1); //Clip off leading "e"
-	try {
-	    exponent = Integer.parseInt(expString);
-	} catch (NumberFormatException e) {
-	    throw new IOException("Couldn't parse exponent " + expString);
-	}
-	return mantissa*Math.pow(10.0,exponent);
-    }
-
-    private String nextString(String description) 
-	throws IOException
-    {
-	if (StreamTokenizer.TT_WORD!=tokenizer.nextToken()) {
-	    throw new IOException("Couldn't read string " + description);
-	}
-	return tokenizer.sval;
     }
 }

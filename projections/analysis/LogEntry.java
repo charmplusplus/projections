@@ -9,4 +9,5 @@ public int Replay, TransactionType, MsgType, Entry;
        int MsgLen;
        ObjectId id;
        long recvTime;
+       long sendTime;
 }

@@ -152,7 +152,7 @@ public class LogLoader extends ProjDefs
 				  return Timeline;                              
 			   case END_PROCESSING:
 			   default:
-				  System.out.println ("overlaid, end");
+			//	  System.out.println ("overlaid, end");
 				  Timeline.addElement(TE=new TimelineEvent(
 					  Begin - BeginTime,End   - BeginTime,
 					  LE.Entry,LE.Pe));
@@ -370,6 +370,9 @@ public class LogLoader extends ProjDefs
 			  Temp.MsgLen  = log.nextInt();
 			else
 			  Temp.MsgLen  = -1;
+			if(Analysis.getVersion() >= 5.0 && Temp.TransactionType == CREATION){
+				Temp.sendTime = log.nextLong();
+			}
 			return Temp;
 		 case ENQUEUE:
 		 case DEQUEUE:

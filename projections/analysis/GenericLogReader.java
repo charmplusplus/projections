@@ -86,6 +86,10 @@ public class GenericLogReader extends ProjDefs
 	    } else {
 		data.msglen = -1;
 	    }
+	    if(Analysis.getVersion() >= 5.0 && data.type == CREATION){
+				data.sendTime = reader.nextLong();
+	    }
+	    
 	    break;
 	case ENQUEUE: case DEQUEUE:
 	    data.mtype = reader.nextInt();

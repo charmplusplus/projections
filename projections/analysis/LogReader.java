@@ -296,6 +296,7 @@ public class LogReader extends ProjDefs
 				  msglen = log.nextInt();
 			 	else
 				  msglen = -1;
+				 
 			//System.out.println(type+" "+mtype+" "+entry+" "+time);
 				intervalCalc(type, mtype, entry, (time-progStartTime));
 				break;

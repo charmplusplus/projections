@@ -69,7 +69,7 @@ public class Bubble extends Window
 		w *= 8;	 
 		w += 8;
 		h = text.length * 15;
-		h+= 8;
+		h += 8;
 	  }
 	  
 	  return new Dimension(w, h);

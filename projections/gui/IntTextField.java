@@ -51,6 +51,18 @@ public class IntTextField extends TextField
 		 return 0;
 	  }
    }   
+
+    // public void setText(String text) - implemented by superclass
+
+    /**
+     *  Sets a value in the text box.
+     */
+    public void setValue(int num) {
+	lastValue = getText();
+	setText(String.valueOf(num));
+	checkValue();
+    }
+
    public void textValueChanged(TextEvent evt)
    {
 	  checkValue();

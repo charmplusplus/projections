@@ -97,7 +97,7 @@ public class SumAnalyzer extends ProjDefs
 		if (StreamTokenizer.TT_EOL!=tokenType)
 			throw new SummaryFormatException("extra garbage at end of line 2");
 		   
-		// Read in the THIRD line
+		// Read in the THIRD line (time spent by entries)
 		CurrentUserEntry = 0;
 		while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))&&(numEntry>CurrentUserEntry))
 			{
@@ -108,7 +108,7 @@ public class SumAnalyzer extends ProjDefs
 		if (StreamTokenizer.TT_EOL!=tokenType)
 			throw new SummaryFormatException("extra garbage at end of line 3");
 		
-		// Read in the FOURTH line
+		// Read in the FOURTH line (number of messages)
 		CurrentUserEntry = 0;
 		while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))&&(numEntry>CurrentUserEntry))
 			{
@@ -205,17 +205,19 @@ public class SumAnalyzer extends ProjDefs
 	 * Resample ProcessorUtilization data into SystemUsageData.
 	 */
 	public int[][] GetSystemUsageData(
-		int OutIntervals, long OutIntervalSize) 
+		int intervalStart, int intervalEnd, long OutIntervalSize) 
 		throws IOException,SummaryFormatException
 	{
+	    int intervalRange = intervalEnd - intervalStart + 1;
+
 	int NumProcessors=ProcessorUtilization.length;
-	int[][] ret = new int[NumProcessors][OutIntervals];
+	int[][] ret = new int[NumProcessors][intervalRange];
 	for (int p = 0; p < NumProcessors; p++)
 		{
 		int in = 0, out=0; //Indices into ProcessorUtilization[p] and ret[p]
 		int usage=0,nUsage=0; //Accumulated processor usage
 		int out_t=0; //Accumulated time in output array
-		while(out < OutIntervals)
+		while(out < intervalRange)
 			{
 			if (in <ProcessorUtilization[p].length)
 				usage += ProcessorUtilization[p][in];

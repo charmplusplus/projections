@@ -91,7 +91,7 @@ public class GraphXAxisCanvas extends Canvas
 			  s = "" + pe;
 			}
 			else
-			  s = "" + i*tickincrement;
+			  s = "" + (i*tickincrement+data.intervalStart);
 			
 			g.drawString(s, curx-fm.stringWidth(s)/2, 15 + fm.getHeight());
 		 

@@ -19,7 +19,8 @@ public class GraphData
    static final int LINE      = 20;
    static final int BAR       = 21;
    
-
+    protected int intervalStart;
+    protected int intervalEnd;
    protected int               numUserEntries;
    protected int               graphtype;
    protected int               xmode;     
@@ -50,8 +51,14 @@ public class GraphData
    // save the original processor list
    protected OrderedIntList    origProcList;
    
-   public GraphData(int numIs, long intsize, OrderedIntList procList)
+   public GraphData(int numIs, long intsize, 
+		    int NintervalStart, int NintervalEnd,
+		    OrderedIntList procList)
    {
+       // unsure of this hack
+       intervalStart = NintervalStart;
+       intervalEnd = NintervalEnd;
+
 	  yscale  = 1;
 	  wscale  = 1;
 	  offset  = 10;
@@ -167,7 +174,7 @@ public class GraphData
 	  initData(numIs, intsize);
    }   
 
-   public void initData(int numIs, long intsize)
+    public void initData(int numIs, long intsize)
 	{
 	scale       = (float)1.0;
 	 
@@ -176,7 +183,8 @@ public class GraphData
 	  interval.num  = numIs;
 	  interval.size = intsize;
 	  interval.list = new OrderedIntList();
-	  for(int i=0; i<interval.num; i++)
+	  //	  for(int i=0; i<interval.num; i++)
+	  for (int i=intervalStart; i<=intervalEnd; i++)
 		 interval.list.insert(i);
 	  interval.string   = interval.list.listToString();
 		 
@@ -235,9 +243,10 @@ public class GraphData
    {
 	  int element, count;
 	  int max = 0;
-	  for(int i=0; i<interval.num; i++)
+	  //	  for(int i=0; i<interval.num; i++)
+	  for (int i=intervalStart; i<=intervalEnd;i++)
 	  {
-	    item.curIData[i] = 0;
+	    item.curIData[i-intervalStart] = 0;
 	    // gzheng
 	    // need to check if the i is in interval.list
 	    if (!interval.list.contains(i)) continue;
@@ -250,14 +259,14 @@ public class GraphData
 		  // System.out.println("Warning: setCurIData no data for P="+element);
 		  continue;
 	    	}
-		item.curIData[i] += item.data[element][i];
+		item.curIData[i-intervalStart] += item.data[element][i-intervalStart];
 		count++;
 	    }
 	    if(item.ymode == BOTH) {
-		if (count != 0) item.curIData[i] /= count;
+		if (count != 0) item.curIData[i-intervalStart] /= count;
 	    }
 	    else
-		max = Math.max(item.curIData[i], max);     
+		max = Math.max(item.curIData[i-intervalStart], max);     
 	  }
 	  return max;
    }   
@@ -282,7 +291,7 @@ public class GraphData
 	    interval.list.reset();
 	    while((element = interval.list.nextElement()) >= 0)
 	    {
-		item.curPData[p] += item.data[p][element];
+		item.curPData[p] += item.data[p][element-intervalStart];
 		count++;
 	    }
 	    if(item.ymode == BOTH)
@@ -328,3 +337,5 @@ public class GraphData
 	  interval.maxMsgs  = maxMI;     
    }   
 }
+
+

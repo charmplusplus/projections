@@ -46,7 +46,7 @@ public class Analysis {
 	}
 	public static int[][] getAnimationData( int numPs, int intervalSize ) {
 		int nInt=(int)(sts.getTotalTime()/intervalSize);
-		LoadGraphData(nInt,intervalSize,false, null);
+		LoadGraphData(nInt,intervalSize,0,nInt-1,false, null);
 		int[][] animationdata = new int[ numPs ][ nInt ];
 		for( int p = 0;p < numPs; p++ ) {
 			for( int t = 0;t < nInt;t++ ) {
@@ -237,17 +237,23 @@ public class Analysis {
 			logLoader = new LogLoader( sts);
 		}
 	}
+
         /**
            replace LoadGraphData(), with one more parameter containing
            a list of processors to read.
+	   Two more parameters - intervalStart and intervalEnd added.
         */
 	public static void LoadGraphData(int numIntervals, long intervalSize, 
-                boolean byEntryPoint, OrderedIntList processorList) 
+					 int intervalStart, int intervalEnd,
+					 boolean byEntryPoint, 
+					 OrderedIntList processorList) 
 	{
 		status("LoadGraphData("+intervalSize+" us):");
 		if( sts.hasLogFiles()) { // .log files
 			LogReader logReader = new LogReader();
-			logReader.read(sts, sts.getTotalTime(), intervalSize, byEntryPoint, processorList );
+			logReader.read(sts, sts.getTotalTime(), intervalSize, 
+				       intervalStart, intervalEnd,
+				       byEntryPoint, processorList );
 			systemUsageData = logReader.getSystemUsageData();
 			systemMsgsData = logReader.getSystemMsgs();
 			userEntryData = logReader.getUserEntries();
@@ -260,7 +266,7 @@ public class Analysis {
 			// systemUsageData[2][][] -- idle times
 			try {
 				systemUsageData[ 1 ] = sumAnalyzer.GetSystemUsageData( 
-					numIntervals, intervalSize);
+					intervalStart, intervalEnd, intervalSize);
 			}
 			catch( SummaryFormatException E ) {
 				System.out.println( "Caught SummaryFormatException" );

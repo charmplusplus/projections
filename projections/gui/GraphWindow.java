@@ -16,11 +16,21 @@ public class GraphWindow extends Frame
    private GraphIntervalDialog    intervalDialog;
    
    private GraphData data;
-   private int  numintervals = -1;
+   private int numintervals = -1;
+
+   private int intervalStart = -1;
+   private int intervalEnd = -1;
+
+    private long startTime = -1;
+    private long endTime = -1;
+
+   private int intervalRangeSize;
+
    private long intervalsize;
    private OrderedIntList processorList;
    private String processorListString;
    private int w, h;
+
    private boolean firstTime = true;
    
    public GraphWindow(MainWindow mainWindow)
@@ -170,7 +180,7 @@ public class GraphWindow extends Frame
 			bw.write("intervals " + data.interval.string);
 		 bw.newLine();      
 		 bw.newLine();         
-		 bw.write("# Number of intervals = " + numintervals); bw.newLine();
+		 bw.write("# Number of intervals = " + intervalRangeSize); bw.newLine();
 		 bw.write("# Interval size = " + U.t(intervalsize)); bw.newLine();
 		 bw.write("# Number of Processors = " + Analysis.getNumProcessors());bw.newLine();
 		 bw.newLine();
@@ -232,7 +242,7 @@ public class GraphWindow extends Frame
 			
 		 if(data.xmode == GraphData.INTERVAL)
 		 {   
-			for(int i=0; i<numintervals; i++)
+			for(int i=intervalStart; i<=intervalEnd; i++)
 			{
 			   bw.write("" + i);
 			   for(int j=0; j<data.onGraph.length; j++)
@@ -312,6 +322,18 @@ public class GraphWindow extends Frame
    {
 	  intervalsize = x;
    }   
+    
+   public void setIntervalRange(int start, int end) {
+       intervalStart = start;
+       intervalEnd = end;
+       intervalRangeSize = intervalEnd - intervalStart + 1;
+   }
+
+    public void setTimes(long start, long end) {
+	startTime = start;
+	endTime = end;
+    }
+
    public void setNumIntervals(int x)
    {
 	  numintervals = x;
@@ -325,14 +347,26 @@ public class GraphWindow extends Frame
    {
 
 	  int oldIntervals = numintervals;
+	  int oldIntervalStart = intervalStart;
+	  int oldIntervalEnd = intervalEnd;
+	  long oldStartTime = startTime;
+	  long oldEndTime = endTime;
+
           OrderedIntList oldProcList = null;
           if (processorList!=null) oldProcList = processorList.copyOf();
 	  
-	  intervalDialog = new GraphIntervalDialog(this, numintervals, intervalsize, processorListString);
+	  intervalDialog = 
+	      new GraphIntervalDialog(this, numintervals, intervalsize, 
+				      intervalStart, intervalEnd,
+				      startTime, endTime,
+				      processorListString);
 	  intervalDialog.setVisible(true);
 	  intervalDialog = null;
-	  
-	  if(numintervals != oldIntervals || !oldProcList.equals(processorList))
+
+	  if(numintervals != oldIntervals || 
+	     !oldProcList.equals(processorList) ||
+	     intervalStart != oldIntervalStart ||
+	     intervalEnd != oldIntervalEnd)
 	  {
 		 setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		 Dialog d = new Dialog((Frame)this, "Loading data...", false);
@@ -343,11 +377,17 @@ public class GraphWindow extends Frame
 		 d.setLocation((w-d.getSize().width)/2, (h-d.getSize().height)/2);
 		 d.setVisible(true);
 	  
-		 Analysis.LoadGraphData(numintervals, intervalsize, true, processorList);
-		 if(data == null || !oldProcList.equals(processorList))
+		 Analysis.LoadGraphData(intervalRangeSize, intervalsize, 
+					intervalStart, intervalEnd,
+					true, processorList);
+		 if(data == null || !oldProcList.equals(processorList) ||
+		    intervalStart != oldIntervalStart ||
+		    intervalEnd != oldIntervalEnd)
 		 {
 			data = null;
-			data = new GraphData(numintervals, intervalsize, processorList);
+			data = new GraphData(intervalRangeSize, intervalsize, 
+					     intervalStart, intervalEnd,
+					     processorList);
 			setChildDatas();
 			/* also need to close and free legendPanel */
 			if (legendPanel!=null) 
@@ -355,8 +395,8 @@ public class GraphWindow extends Frame
 		 }   
 		 else {
 			// only can reuse the data when processor list
-                        // is unchanged.
-	                data.initData(numintervals, intervalsize);
+                        // and intervalRange is unchanged.
+	                data.initData(intervalRangeSize, intervalsize);
                  }
 	  
 		 controlPanel.setXMode(data.xmode);

@@ -167,7 +167,8 @@ public class GraphData
 	}
 	interval.string   = interval.list.listToString();
 		 
-	int numProcessors = Analysis.getNumProcessors();
+	int numProcessors = origProcList.size();
+	//	int numProcessors = Analysis.getNumProcessors();
 	// Initialize systemUsage data 
 	for (int a=0; a<3; a++) {
 	    if (null!=Analysis.getSystemUsageData(a)) {
@@ -222,14 +223,16 @@ public class GraphData
 	    }
 	    count = 0;
 	    processor.list.reset();
+	    int peIdx = 0;
 	    while ((element = processor.list.nextElement()) >= 0) {
 		// systemUsageData can be null
-	    	if (item.data[element]==null) {
+	    	if (item.data[peIdx]==null) {
 		    continue;
 	    	}
 		item.curIData[i-intervalStart] += 
-		    item.data[element][i-intervalStart];
+		    item.data[peIdx][i-intervalStart];
 		count++;
+		peIdx++;
 	    }
 	    if (item.ymode == BOTH) {
 		if (count != 0) {
@@ -245,7 +248,8 @@ public class GraphData
     private int setCurPData(ZItem item) {
 	int element, count;
 	int max = 0;
-	int numProcessors = Analysis.getNumProcessors();
+	int numProcessors = processor.list.size();
+	//	int numProcessors = Analysis.getNumProcessors();
 	for (int p=0; p<numProcessors; p++) {
 	    item.curPData[p] = 0;
 	    if (!processor.list.contains(p)) {

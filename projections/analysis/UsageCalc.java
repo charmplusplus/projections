@@ -71,8 +71,11 @@ public class UsageCalc extends ProjDefs
 	    break;
 	case CREATION:
 	    if(curEntry != -1){
-		data[1][curEntry] = data[1][curEntry] + (float )time;
+		data[1][curEntry] += (float)time;
 	    }
+	    break;
+	case CREATION_MULTICAST:
+	    // do nothing for now
 	    break;
 	case BEGIN_IDLE:
 	    startTime = time;
@@ -89,6 +92,10 @@ public class UsageCalc extends ProjDefs
 	    // in the profile window.
 	    packtime += time - packstarttime;
 	    data[0][numUserEntries] += (float )(time - packstarttime);
+	    /*
+	    System.out.println("pack time " + (float)(time-packstarttime) +
+			       " cumulative time " + data[0][numUserEntries]);
+	    */
 	    break;
 	case BEGIN_UNPACK:
 	    unpackstarttime = time;
@@ -221,15 +228,38 @@ public class UsageCalc extends ProjDefs
 			}
 			log.nextInt();  // event id
 			log.nextInt();  // pe id
-			if (version > 1.0)
+			if (version > 1.0) {
 			    log.nextInt();  // msg length
-			if(version > 4.9) {
+			}
+			if (version > 4.9) {
 			    sendTime = log.nextLong();  // send time
 			    // System.out.println("SendTime "+sendTime);
 			} else {
 			    sendTime = 0;
 			}
 			intervalCalc(data,type,0,sendTime);
+			break;
+		    case CREATION_MULTICAST:
+			if (Analysis.getVersion() >= 6.0) {
+			    System.out.println("Encountered multicast");
+			    log.nextInt();  // mtype
+			    log.nextInt();  // ep idx
+			    if (deltaEncoded) {
+				prevTime += log.nextLong();
+				time    = prevTime;
+			    } else {
+				time    = log.nextLong();
+			    }
+			    log.nextInt();  // event id
+			    log.nextInt();  // pe id
+			    log.nextInt();  // msg length
+			    sendTime = log.nextLong();
+			    int destPEs[] = new int[log.nextInt()];
+			    for (int i=0; i<destPEs.length; i++) {
+				destPEs[i] = log.nextInt();
+			    }
+			    // read but do nothing for now.
+			}
 			break;
 		    case USER_EVENT:
 		    case USER_EVENT_PAIR:
@@ -288,7 +318,7 @@ public class UsageCalc extends ProjDefs
 	    System.out.println("Exception while reading log file "+pnum); 
 	}
 	total = 0;
-	for (int j=0; j<(dataLen-1); j++) { //Scale times to percent
+	for (int j=0; j<dataLen; j++) { //Scale times to percent
 	    // System.out.println("Data " + data[0][j] + " Send Time " + 
 	    // data[1][j]);
 	    data[0][j] = data[0][j] - data[1][j];

@@ -46,7 +46,7 @@ public class LogReader
     private int currentEntry; //Currently executing entry method
     private int currentMtype; //Current message type
     private int interval;//Current interval number
-    private int curPe;//Current source processor #
+    private int curPeIdx;//Current source processor #
     private int numIntervals;//Total number of intervals
     private long intervalSize;//Length of an interval (us)
     private int intervalStart;// start of range of interesting intervals
@@ -54,6 +54,10 @@ public class LogReader
 
     private int processing;
     private boolean byEntryPoint;
+
+    // added for support of multicast information
+    private long sendTime;
+    private int destPEs[];
     
     // **CW** variables to support delta encoding
     private long prevTime = 0;
@@ -76,17 +80,18 @@ public class LogReader
 	    return;
 	}
 	if (currentEntry == IDLE_ENTRY) { //Idle time
-	    sysUsgData[SYS_IDLE][curPe][j-intervalStart] += 
+	    sysUsgData[SYS_IDLE][curPeIdx][j-intervalStart] += 
 		maxPercents?100:extra;
 	} else { //Processing an entry method
-	    sysUsgData[SYS_CPU][curPe][j-intervalStart] += 
+	    sysUsgData[SYS_CPU][curPeIdx][j-intervalStart] += 
 		maxPercents?100:extra;
 	    if (byEntryPoint) {
-		userEntries[currentEntry][TIME][curPe][j-intervalStart] += 
+		userEntries[currentEntry][TIME][curPeIdx][j-intervalStart] += 
 		    extra; 
 		int catIdx = mtypeToCategoryIdx(currentMtype); 
 		if (catIdx!=-1) {
-		    categorized[catIdx][TIME][curPe][j-intervalStart]+=extra;
+		    categorized[catIdx][TIME][curPeIdx][j-intervalStart] += 
+			extra;
 		}
 	    }
 	}
@@ -101,24 +106,26 @@ public class LogReader
 	if (!byEntryPoint) { 
 	    return;
 	}
-	if (userEntries[entry][TYPE][curPe]==null) {
-	    userEntries[entry][TYPE][curPe]=new int[numIntervals+1];
+	if (userEntries[entry][TYPE][curPeIdx]==null) {
+	    userEntries[entry][TYPE][curPeIdx]=new int[numIntervals+1];
 	}
 	if (TYPE==PROCESS && 
-	    userEntries[entry][TIME][curPe] == null) { //Add a time array, too
-	    userEntries[entry][TIME][curPe]=new int[numIntervals+1];
+	    userEntries[entry][TIME][curPeIdx] == null) { 
+	    //Add a time array, too
+	    userEntries[entry][TIME][curPeIdx]=new int[numIntervals+1];
 	}
-	userEntries[entry][TYPE][curPe][interval-intervalStart]++;
+	userEntries[entry][TYPE][curPeIdx][interval-intervalStart]++;
 	
 	int catIdx=mtypeToCategoryIdx(mtype);
 	if (catIdx!=-1) {
-	    if (categorized[catIdx][TYPE][curPe]==null) {
-		categorized[catIdx][TYPE][curPe]=new int[numIntervals+1];
+	    if (categorized[catIdx][TYPE][curPeIdx]==null) {
+		categorized[catIdx][TYPE][curPeIdx]=new int[numIntervals+1];
 		if (TYPE==PROCESS) { //Add a time array, too
-		    categorized[catIdx][TIME][curPe]=new int[numIntervals+1];
+		    categorized[catIdx][TIME][curPeIdx] =
+			new int[numIntervals+1];
 		}
 	    }
-	    categorized[catIdx][TYPE][curPe][interval-intervalStart]++;
+	    categorized[catIdx][TYPE][curPeIdx][interval-intervalStart]++;
 	}
     }
 
@@ -168,22 +175,25 @@ public class LogReader
 	case ENQUEUE:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
 		// Lengthen system queue
-		sysUsgData[SYS_Q][curPe][interval-intervalStart]++;
+		sysUsgData[SYS_Q][curPeIdx][interval-intervalStart]++;
 	    }
 	    break;
 	case CREATION:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
 		// Lengthen system queue
-		sysUsgData[SYS_Q][curPe][interval-intervalStart]++;
+		sysUsgData[SYS_Q][curPeIdx][interval-intervalStart]++;
 		count(mtype,entry,CREATE);
 	    }
+	    break;
+	case CREATION_MULTICAST:
+	    // do nothing for now.
 	    break;
 	case BEGIN_PROCESSING:
 	    processing++;
 	    startTime = time;
 	    if (interval >= intervalStart && interval <= intervalEnd) {
 		//Shorten system queue
-		sysUsgData[SYS_Q][curPe][interval-intervalStart]--;
+		sysUsgData[SYS_Q][curPeIdx][interval-intervalStart]--;
 		count(currentMtype = mtype,currentEntry = entry,PROCESS);
 	    }
 	    break;
@@ -285,15 +295,16 @@ public class LogReader
 	int seq = 0;
         processorList.reset();
 	int nPe=processorList.size();
- 	curPe = processorList.nextElement();
-	for (;curPe!=-1; curPe=processorList.nextElement())
+ 	int curPe = processorList.nextElement();
+	curPeIdx = 0;
+	for (;curPe!=-1; curPe=processorList.nextElement()) {
 	    try {
 		progressBar.setProgress(seq);
 		progressBar.setNote("Allocating Memory for PE " + curPe);
 		// gzheng: allocate sysUsgData only when needed.
-                sysUsgData[0][curPe] = new int [numIntervals+1];
-                sysUsgData[1][curPe] = new int [numIntervals+1];
-                sysUsgData[2][curPe] = new int [numIntervals+1];
+                sysUsgData[0][curPeIdx] = new int [numIntervals+1];
+                sysUsgData[1][curPeIdx] = new int [numIntervals+1];
+                sysUsgData[2][curPeIdx] = new int [numIntervals+1];
 		progressBar.setNote("Reading data for PE " + curPe);
 		if (progressBar.isCanceled()) {
 		    // clear all data and return
@@ -379,6 +390,28 @@ public class LogReader
 			    }
 			    intervalCalc(type, mtype, entry, 
 					 time);
+			    break;
+			case CREATION_MULTICAST:
+			    if (Analysis.getVersion() >= 6.0) {
+				mtype = log.nextInt();
+				entry   = log.nextInt();
+				if (deltaEncoded) {
+				    prevTime += log.nextLong();
+				    time    = prevTime;
+				} else {
+				    time    = log.nextLong();
+				}
+				event = log.nextInt();
+				pe = log.nextInt();
+				msglen  = log.nextInt();
+				sendTime = log.nextLong();
+				destPEs = new int[log.nextInt()];
+				for (int i=0; i<destPEs.length; i++) {
+				    destPEs[i] = log.nextInt();
+				}
+				// read but do nothing for now.
+			    }
+			    log.nextLine();  // ignore rest of this line
 			    break;
 			case BEGIN_PROCESSING: 
 			    /* Instead of ignoring the current begin
@@ -525,6 +558,8 @@ public class LogReader
 		System.out.println("Exception reading log file #"+curPe); 
 		return;
 	    }
+	    curPeIdx++;
+	} // for loop
 	progressBar.close();
     }
 
@@ -533,10 +568,10 @@ public class LogReader
 	if (j < intervalStart || j > intervalEnd) {
 	    return;
 	}
-	sysUsgData[SYS_CPU ][curPe][j-intervalStart] =
-	    (int)(sysUsgData[SYS_CPU ][curPe][j-intervalStart]*100/intervalSize);
-	sysUsgData[SYS_IDLE][curPe][j-intervalStart] =
-	    (int)(sysUsgData[SYS_IDLE][curPe][j-intervalStart]*100/intervalSize);
+	sysUsgData[SYS_CPU ][curPeIdx][j-intervalStart] =
+	    (int)(sysUsgData[SYS_CPU ][curPeIdx][j-intervalStart]*100/intervalSize);
+	sysUsgData[SYS_IDLE][curPeIdx][j-intervalStart] =
+	    (int)(sysUsgData[SYS_IDLE][curPeIdx][j-intervalStart]*100/intervalSize);
     }
 
 }

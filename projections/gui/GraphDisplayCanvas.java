@@ -22,11 +22,13 @@ public class GraphDisplayCanvas extends Canvas
 		// gzheng
 		// figure out the real processor number
 		data.origProcList.reset();
+		y = item.curPData[x];
+		/* we want non-contigious data support
                 int pe = data.origProcList.nextElement();
                 for (int j=0; j<x; j++)
                   pe = data.origProcList.nextElement();
-
 		 y = item.curPData[pe];
+		*/
 	  }
 	  else
 		 y = item.curIData[x];   

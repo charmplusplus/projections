@@ -42,6 +42,9 @@ public class EntrySelectionDialog extends ColorWindowFrame
     private boolean existsArray[][];
     private String entryNames[];
 
+    // flag
+    private boolean layoutComplete = false;
+
     public EntrySelectionDialog(String typeLabelStrings[],
 				boolean stateArray[][],
 				Color colorArray[][],
@@ -69,12 +72,16 @@ public class EntrySelectionDialog extends ColorWindowFrame
     }
     
     public void showDialog() {
-	setBackground(Color.lightGray);
-	setTitle("Select Display Items");
-	setLocation(0, 0);
+	if (layoutComplete) {
+	    setVisible(true);
+	} else {
+	    setBackground(Color.lightGray);
+	    setTitle("Select Display Items");
+	    setLocation(0, 0);
 	
-	createLayout();
-	pack();
+	    createLayout();
+	    pack();
+	}
     }
     
     public void actionPerformed(ActionEvent evt)
@@ -271,6 +278,8 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	gbc.fill = GridBagConstraints.BOTH;
 	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,0, 4,4,2,4);
 	Util.gblAdd(mainPanel, buttonPanel,  gbc, 0,1, 1,1, 1,0, 2,4,4,4);
+
+	layoutComplete = true;
     }  
 
     private boolean someExists(int epIdx) {

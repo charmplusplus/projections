@@ -1,6 +1,7 @@
 package projections.gui;
 
 import java.io.*;
+import java.util.*;
 
 /** Joshua Mostkoff Unger, unger1@uiuc.edu
  *  Parallel Programming Laboratory
@@ -21,6 +22,18 @@ public class ProjectionsFileMgr {
     for (int i=0; i<fileNames.length; i++) {
       stsFiles_[i] = new File(fileNames[i]);
       logFiles_[i] = findFiles(fileNames[i]);
+    }
+  }
+
+  /** Constructor. files is a Vector of "File". */
+  public ProjectionsFileMgr(Vector files) 
+    throws IOException 
+  { 
+    stsFiles_ = new File[files.size()];
+    logFiles_ = new File[files.size()][];
+    for (int i=0; i<files.size(); i++) {
+      stsFiles_[i] = (File) files.elementAt(i);
+      logFiles_[i] = findFiles(stsFiles_[i].getCanonicalPath());
     }
   }
 

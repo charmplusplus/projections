@@ -59,6 +59,16 @@ public class ProjectionsFileChooser
     thread_  = initThread();
   }
   
+  /** Given a bunch of strings, search for all sts files and set fileMgr.
+   *  Return number of files found. */
+  public int getFiles(String[] args) throws IOException {
+    File[] fileArray = new File[args.length];
+    for (int i=0; i<args.length; i++) { fileArray[i] = new File(args[i]); }
+    Vector files = filterFiles(fileArray, fChoose_.getFileFilter());
+    fileMgr_ = new ProjectionsFileMgr(files);
+    return fileMgr_.getNumFiles();
+  }
+
   /** Pop up first file chooser dialog, then the sts chooser dialog.
    *  Returns JFileChooser.APPROVE_OPTION if user chooses file, or
    *  JFileChooser.CANCEL_OPTION if user cancels or doesn't choose file */
@@ -80,16 +90,17 @@ public class ProjectionsFileChooser
    *  returns null */
   public ProjectionsFileMgr getProjectionsFileMgr() { return fileMgr_; }
 
-  /** Open a window to display exception and then exit when window closed. */
+  /** Open a window to display exception and then exit when window closed.
+   *  Can call with Frame == null, but it won't be modal */
   public static void handleException(Frame f, Exception exc) {
     JDialog excDialog = new JDialog(f, true);
     excDialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     excDialog.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) { System.exit(0); }
     });
-    excDialog.getContentPane().add(new JTextArea("Exception caught!\n"+
-						 exc.getMessage()));
-    System.out.println(exc.getMessage());
+    excDialog.getContentPane().add(new JTextArea(
+      "Exception caught!\n"+exc.getMessage()+"\nSee sterr for stack trace\n"));
+    exc.printStackTrace();
     excDialog.setSize(300, 200);
     excDialog.setVisible(true);
   }
@@ -136,7 +147,7 @@ public class ProjectionsFileChooser
       }
     });
     d.setTitle(title);
-    d.setSize(400, 400);
+    d.setSize(600, 480);
     d.getContentPane().add(new JTextArea(
       "All of the files below have been found\n"+
       "to match the file open filter in all of\n"+

@@ -134,9 +134,7 @@ public class LogLoader extends ProjDefs
 				  switch(LE.TransactionType)
 				  {
 					 case BEGIN_PROCESSING:
-						Timeline.addElement(TE=new TimelineEvent(
-								LE.Time - BeginTime,Long.MAX_VALUE,
-								LE.Entry,LE.Pe));
+						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe));
 						break;
 					 case END_PROCESSING:
 						if(TE!=null)

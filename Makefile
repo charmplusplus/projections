@@ -24,6 +24,7 @@ SRC=\
     projections/analysis/MRSummaryReader.java\
     projections/analysis/GenericLogReader.java\
     projections/analysis/GenericStsReader.java\
+    projections/analysis/GenericSummaryReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
     projections/gui/AnimationColorBarPanel.java\

@@ -316,7 +316,11 @@ public class TimelineObject extends Component
 		 
        }
    } 
-
+		
+	 public void clearCreationLine(){
+	 	creationLine = 0;
+		created_message = null;
+	 }
 
    public TimelineMessage searchMesg(Vector v,int eventid){
    	return binarySearch(v,eventid,0,v.size());

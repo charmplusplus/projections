@@ -1004,6 +1004,7 @@ public class TimelineWindow extends Frame
    }   
    private void setAllSizes()
    {
+		data.clearAllLines();
 	  data.mpw = mainPanel.getSize().width;
 	  data.mph = mainPanel.getSize().height;
 	  

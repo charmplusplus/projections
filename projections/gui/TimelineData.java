@@ -139,6 +139,7 @@ public class TimelineData
    }   
    public void createTLOArray()
    {
+	//	System.out.println("createTLOArray() called in TimelineData \n");
 	  TimelineObject[][] oldtloArray = tloArray;
 	  UserEvent[][] oldUserEventsArray = userEventsArray;
 	  mesgVector = new Vector[Analysis.getNumProcessors()];
@@ -290,6 +291,7 @@ public class TimelineData
    }   
    private TimelineObject[] getData(int pnum, int index)  // index into userEventArray
    {
+		//System.out.println("getData called in TimelineData \n");
 	  Vector tl, msglist, packlist;
 	  TimelineEvent tle;
 
@@ -298,7 +300,6 @@ public class TimelineData
 	  int entry, pSrc, numMsgs, numpacks, msglen;
 	  int EventID;
           ObjectId tid;
-		
 	  tl = new Vector();
 	  Vector userEvents = new Vector();
 	  mesgVector[pnum] = new Vector();
@@ -528,6 +529,20 @@ public class TimelineData
 	 }
 
    }
+
+	 public void clearAllLines(){
+	 	if(tloArray != null){
+			for(int i=0;i<tloArray.length;i++){
+				if(tloArray[i] != null)
+					for(int j=0;j<tloArray[i].length;j++){
+						if(tloArray[i][j]!= null){
+							tloArray[i][j].clearCreationLine();
+						}
+					}
+			}
+		}
+		mesgCreateExecVector.clear();
+	 }
 }
 
 

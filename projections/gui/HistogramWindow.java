@@ -8,7 +8,7 @@ import java.awt.event.*;
 import java.io.*;
 
 public class HistogramWindow extends ProjectionsWindow 
-   implements ActionListener
+   implements ActionListener,ItemListener
 {
    static final int NO_OF_BINS = 50;
    static final int FREQUENCY  = 100;	// ms?
@@ -21,7 +21,11 @@ public class HistogramWindow extends ProjectionsWindow
    private long startTime;
    private long endTime;
    private boolean stateArray[][];
-   private String [] entryNames;  
+   private String [] entryNames; 
+
+   private boolean recordEP;
+   private File fileEP;
+ 
    public HistogramWindow(MainWindow mainWindow)
    {
 	  this.mainWindow = mainWindow;
@@ -47,6 +51,9 @@ public class HistogramWindow extends ProjectionsWindow
 	  Analysis.getUserEntryNames();
        	  for(int i=0; i<noEPs ; i++)
 		entryNames[i] = names[i][0];
+
+	  recordEP = false;	// dont record longest EPs unless specified
+	  fileEP = null;
 	
 	  createMenus();
 	  createLayout();
@@ -56,6 +63,8 @@ public class HistogramWindow extends ProjectionsWindow
 	  showDialog();
 
    }   
+
+/* Show the RangeDialog to set processor numbers and interval times */
  
    void showDialog()
    {
@@ -64,6 +73,8 @@ public class HistogramWindow extends ProjectionsWindow
 	dialog.displayDialog();
 	refreshGraph();
    }
+
+/* Show the EntrySelectionDialog to select Entrypoints to be considered */
 
    void showEntryDialog()
    {
@@ -84,6 +95,8 @@ public class HistogramWindow extends ProjectionsWindow
 	entryDialog.showDialog();
 	refreshGraph();
    }
+
+/* functions for RangeDialog to work */
 
    public void setProcessorRange(OrderedIntList proc)
    {
@@ -112,7 +125,16 @@ public class HistogramWindow extends ProjectionsWindow
 		 else if(m.getLabel().equals("Close"))
 			close();
 	  }
-   }  
+   } 
+
+   public void itemStateChanged(ItemEvent evt)
+   {
+	recordEP = (evt.getStateChange()==1)?true:false;	// if the itemStateChanged is to 1, then it is selected
+	if(recordEP && (fileEP == null))
+			fileEP = new File(Analysis.getFilename()+".longestEPs.log");
+
+	refreshGraph();
+   }
  
    private void close()
    {
@@ -142,8 +164,10 @@ public class HistogramWindow extends ProjectionsWindow
 
    private int[] getCounts()
    {
+
 	  OrderedIntList tmpPEs = validPEs.copyOf();
 	  GenericLogReader r;
+	  FileWriter out = null;
 	  int maxdiff=0;
 	  int [] counts = new int[NO_OF_BINS];
 	  for(int i=0; i<NO_OF_BINS; i++)
@@ -152,7 +176,15 @@ public class HistogramWindow extends ProjectionsWindow
 	  LogEntryData logdata,logdata2;
 	  logdata = new LogEntryData();
 	  logdata2 = new LogEntryData();
-	  
+
+     try{	
+	if(fileEP!=null)  
+		out = new FileWriter(fileEP);
+     }catch(Exception e){
+	  System.out.println("Cannot record Entry Points in the specified file:\n "+e);
+	  fileEP = null;	// if unable to create file, forget abt it!
+     }
+
 	  while(tmpPEs.hasMoreElements()) 
 	  {
 		int pe = tmpPEs.nextElement();
@@ -166,7 +198,8 @@ public class HistogramWindow extends ProjectionsWindow
 				int diff = (int)((logdata2.time - logdata.time)/FREQUENCY);
 				if(diff >= NO_OF_BINS) 
 				{
-					//System.out.println("["+pe+"]: "+entryNames[logdata.entry]+" "+logdata.time+" "+logdata2.time+" "+(logdata2.time-logdata.time));
+					if(recordEP && (out!=null))
+						out.write("["+pe+"]: "+entryNames[logdata.entry]+" "+logdata.time+" "+logdata2.time+" "+(logdata2.time-logdata.time)+"\n");
 					maxdiff=(diff>maxdiff)?diff:maxdiff;
 					diff = NO_OF_BINS-1;
 				}
@@ -183,10 +216,9 @@ public class HistogramWindow extends ProjectionsWindow
 	     }
 
          }
-
 	  System.out.println("Entry Point with longest time difference: " + maxdiff);
+	  return(counts);
 
-	 return(counts);
    }
 
    private void createMenus()

@@ -27,7 +27,10 @@ public abstract class ProjectionsWindow
     extends Frame
 {
     RangeDialog dialog;
+    boolean isDialogCancelled = true;
+
     abstract void showDialog();
+    void dialogCancelled(boolean state){ isDialogCancelled = state;}
 
     public abstract void setProcessorRange(OrderedIntList validPEs);
     public abstract void setStartTime(long time);

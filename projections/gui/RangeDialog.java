@@ -86,6 +86,7 @@ public class RangeDialog extends Dialog
 		    return;
 		} else {
 		    setAllData();
+		    parentWindow.dialogCancelled(false);
 		}
 	    } else if (b == bUpdate) {
 		// update all text fields.
@@ -93,6 +94,8 @@ public class RangeDialog extends Dialog
 		updateData(startTimeField);
 		updateData(endTimeField);
 		return;
+	    }else if (b == bCancel){
+		parentWindow.dialogCancelled(true);
 	    }
 	    setVisible(false);
 	    dispose();
@@ -180,6 +183,7 @@ public class RangeDialog extends Dialog
 	    {
 		public void windowClosing(WindowEvent e)
 		{
+		    parentWindow.dialogCancelled(true);
 		    setVisible(false);
 		    dispose();
 		}

@@ -16,15 +16,20 @@ public class HistogramWindow extends ProjectionsWindow
    private MainWindow mainWindow;
    private GraphPanel graphPanel;
    private Graph graphCanvas;
-   private EntrySelectionDialog entryDialog;
+
+//variables to be set by RangeDialog 
    private OrderedIntList validPEs;
    private long startTime;
    private long endTime;
+
+//variables to be passed to EntrySelectionDialog
+   private EntrySelectionDialog entryDialog;
    private boolean stateArray[][];
+   private Color colorArray[][];
    private String [] entryNames; 
 
-   private boolean recordEP;
-   private File fileEP;
+   private boolean recordEP;			// should longest entrypoints be recorded & displayed as a table?
+   private EntryPointWindow epFrame;
  
    public HistogramWindow(MainWindow mainWindow)
    {
@@ -48,12 +53,15 @@ public class HistogramWindow extends ProjectionsWindow
 	  
           String names[][] = Analysis.getUserEntryNames();
 	  entryNames = new String[noEPs];
-	  Analysis.getUserEntryNames();
        	  for(int i=0; i<noEPs ; i++)
 		entryNames[i] = names[i][0];
 
+          colorArray = new Color[1][noEPs];
+          for(int i=0; i < noEPs; i++)
+                colorArray[0][i] = Analysis.getEntryColor(i);
+
 	  recordEP = false;	// dont record longest EPs unless specified
-	  fileEP = null;
+	  epFrame = null;
 	
 	  createMenus();
 	  createLayout();
@@ -71,7 +79,8 @@ public class HistogramWindow extends ProjectionsWindow
 	if(dialog == null)
 		 dialog = new RangeDialog(this,"Select Range");
 	dialog.displayDialog();
-	refreshGraph();
+	if(!isDialogCancelled)
+		refreshGraph();
    }
 
 /* Show the EntrySelectionDialog to select Entrypoints to be considered */
@@ -81,10 +90,10 @@ public class HistogramWindow extends ProjectionsWindow
 	int noEPs = Analysis.getUserEntryCount();
 	String typeLabelStrings[] = {"Entry Points"};
 
-        Color colorArray[][] = new Color[1][noEPs];
+/*      colorArray = new Color[1][noEPs];
 	for(int i=0; i < noEPs; i++)
 		colorArray[0][i] = Analysis.getEntryColor(i);
-
+*/
  
 	boolean existsArray[][] = new boolean[1][noEPs];
 	for(int i=0; i<noEPs; i++)
@@ -130,10 +139,10 @@ public class HistogramWindow extends ProjectionsWindow
    public void itemStateChanged(ItemEvent evt)
    {
 	recordEP = (evt.getStateChange()==1)?true:false;	// if the itemStateChanged is to 1, then it is selected
-	if(recordEP && (fileEP == null))
-			fileEP = new File(Analysis.getFilename()+".longestEPs.log");
-
-	refreshGraph();
+	if(recordEP)
+		refreshGraph();
+	else
+		epFrame.setVisible(false);
    }
  
    private void close()
@@ -167,8 +176,18 @@ public class HistogramWindow extends ProjectionsWindow
 
 	  OrderedIntList tmpPEs = validPEs.copyOf();
 	  GenericLogReader r;
-	  FileWriter out = null;
 	  int maxdiff=0;
+	  if(recordEP)
+	  {
+		//epFrame = new EPFrame();
+		if(epFrame == null){
+			epFrame = new EntryPointWindow();
+	  		epFrame.setSize(600,600);
+		}
+		else
+			epFrame.clearTableData();	// prepare table to enter new data in place of old
+	  }
+	 
 	  int [] counts = new int[NO_OF_BINS];
 	  for(int i=0; i<NO_OF_BINS; i++)
 		counts[i] = 0;
@@ -176,14 +195,6 @@ public class HistogramWindow extends ProjectionsWindow
 	  LogEntryData logdata,logdata2;
 	  logdata = new LogEntryData();
 	  logdata2 = new LogEntryData();
-
-     try{	
-	if(fileEP!=null)  
-		out = new FileWriter(fileEP);
-     }catch(Exception e){
-	  System.out.println("Cannot record Entry Points in the specified file:\n "+e);
-	  fileEP = null;	// if unable to create file, forget abt it!
-     }
 
 	  while(tmpPEs.hasMoreElements()) 
 	  {
@@ -198,8 +209,11 @@ public class HistogramWindow extends ProjectionsWindow
 				int diff = (int)((logdata2.time - logdata.time)/FREQUENCY);
 				if(diff >= NO_OF_BINS) 
 				{
-					if(recordEP && (out!=null))
-						out.write("["+pe+"]: "+entryNames[logdata.entry]+" "+logdata.time+" "+logdata2.time+" "+(logdata2.time-logdata.time)+"\n");
+		
+				// enter the data into the table
+				if(recordEP)
+				        epFrame.writeToTable(pe,entryNames[logdata.entry],logdata.time,logdata2.time,colorArray[0][logdata.entry]);
+
 					maxdiff=(diff>maxdiff)?diff:maxdiff;
 					diff = NO_OF_BINS-1;
 				}
@@ -216,6 +230,7 @@ public class HistogramWindow extends ProjectionsWindow
 	     }
 
          }
+	  if(recordEP)	epFrame.setVisible(true);
 	  System.out.println("Entry Point with longest time difference: " + maxdiff);
 	  return(counts);
 

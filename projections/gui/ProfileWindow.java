@@ -8,8 +8,10 @@ import projections.misc.*;
 import projections.analysis.*;
 
 public class ProfileWindow extends Frame
-   implements ActionListener, AdjustmentListener
+    implements ActionListener, AdjustmentListener, ColorSelectable
 { 
+    private static final int NUM_SYS_EPS = 3;
+
    private MainWindow             mainWindow;
 //   private TimelineWindow         timelineWindow;
    
@@ -27,17 +29,23 @@ public class ProfileWindow extends Frame
    private Button bDecreaseY, bIncreaseY, bResetY;
    private Button bColors;
    private Button bPieChart;
-   private Button bCommWindow;
-   private Color[] colors;
+
+    // a boolean variable that indicates if the colors have been set.
+    // If so, we simply want to preserve the old settings and allow the
+    // user to change them without forcing them back to the old values.
+    // Right now, still a very ugly hack.
+    private boolean colorsSet = false;
+   private Color[][] colors;
    private ProfileObject[][] poArray;
    private float xscale=1, yscale=1;
    private float[][] avg;
    private float thresh;
    private int avgSize;
-   private long begintime, endtime;
    
    private ProfileDialog2 dialog;
    private PieChartWindow pieChartWindow;
+
+    private EntrySelectionDialog entryDialog;
    
    class NoUpdatePanel extends Panel
    {
@@ -147,14 +155,46 @@ public class ProfileWindow extends Frame
 		 }
                  else if(b == bPieChart)
                  {
-                        System.out.println("bPieChart was clicked");
-						pieChartWindow = new PieChartWindow(mainWindow, avg[0], avg[0].length, thresh, colors);			
+		     pieChartWindow = 
+			 new PieChartWindow(mainWindow, avg[0], 
+					    avg[0].length, thresh, colors[0]);
                  }
-				 else if(b == bCommWindow)
-				 {
-				 	new CommWindow();
-				}
-		 
+		 else if (b == bColors) {
+		     int noEPs = Analysis.getNumUserEntries();
+		     if (entryDialog == null) {
+			 String typeLabelStrings[] = {"Entry Points"};
+			 
+			 boolean existsArray[][] = 
+			     new boolean[1][noEPs+NUM_SYS_EPS];
+			 for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+			     existsArray[0][i] = true;
+			 }
+			 
+			 boolean stateArray[][] =
+			     new boolean[1][noEPs+NUM_SYS_EPS];
+			 for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+			     stateArray[0][i] = true;
+			 }
+			 
+			 String entryNames[] =
+			     new String[noEPs+NUM_SYS_EPS];
+			 for (int i=0; i<noEPs; i++) {
+			     entryNames[i] =
+				 Analysis.getEntryName(i);
+			 }
+			 // cannot seem to avoid a hardcode
+			 entryNames[noEPs] = "Pack Time";
+			 entryNames[noEPs+1] = "Unpack Time";
+			 entryNames[noEPs+2] = "Idle Time";
+				  
+			 entryDialog = 
+			     new EntrySelectionDialog(this, this,
+						      typeLabelStrings,
+						      stateArray, colors,
+						      existsArray, entryNames);
+		     }
+		     entryDialog.showDialog();
+		 }
 		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));   
 	  }
 	  else if(evt.getSource() instanceof MenuItem)
@@ -193,6 +233,15 @@ public class ProfileWindow extends Frame
 		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));  
 	  }                  
    }   
+
+    /**
+     *  **CW** THIS IS A MAJOR CODE HACK!!!
+     *  ONLY Usage Profile uses callbacks for color selection so far.
+     */
+    public void applyDialogColors() {
+	MakePOArray(data.begintime, data.endtime);
+    }
+
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {
 	  Scrollbar sb = (Scrollbar)evt.getSource();
@@ -272,7 +321,6 @@ public class ProfileWindow extends Frame
 	  bIncreaseX   = new Button(">>");
 	  bResetX      = new Button("Reset");
 	  bPieChart    = new Button("Pie Chart");
-	  bCommWindow  = new Button("Comm Window");
 	  
 	  bColors.addActionListener(this);
 	  bDecreaseY.addActionListener(this);
@@ -281,11 +329,8 @@ public class ProfileWindow extends Frame
 	  bDecreaseX.addActionListener(this);
 	  bIncreaseX.addActionListener(this);
 	  bResetX.addActionListener(this);
-      bPieChart.addActionListener(this);
-	  bCommWindow.addActionListener(this);
+	  bPieChart.addActionListener(this);
 
-	
-	   
 	  Label lXScale = new Label("X-SCALE: ", Label.CENTER);
 	  xScaleField   = new FloatTextField(xscale, 5);
 	  xScaleField.addActionListener(this);
@@ -315,8 +360,7 @@ public class ProfileWindow extends Frame
 	  Util.gblAdd(buttonPanel, bIncreaseX,   gbc, 9,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bResetX,      gbc, 10,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bPieChart,    gbc, 11,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, bCommWindow,  gbc, 12,0, 1,1, 1,1);
-	  
+	  Util.gblAdd(buttonPanel, bColors,      gbc, 12,0, 1,1, 1,1);
 	  //// WINDOW
 	  
 	  Panel yLabelPanel = new Panel();
@@ -377,26 +421,28 @@ public class ProfileWindow extends Frame
    }   
 	public void MakePOArray(long bt, long et)
 	{
-	    // the reason for 5 extra colors is because they are non-ep
-	    // colors?
 	    int numEPs = Analysis.getNumUserEntries();
-	  colors = new Color[numEPs+5];
-	  Color[] newUserColors = new Color[numEPs];
 
-	  for(int i=0; i<numEPs; i++)
-	  {
-	      // if the data is an entry method whose color is found in
-	      // analysis, then use it.
-	      colors[i] = Analysis.getEntryColor(i);
-	  }   
-	  // Idle time is White and is placed at the top
-	  // Pack time is black (to see the first division between entry
-	  // data and non entry data).
-	  // Unpack time is orange (to provide the constrast).
-	  colors[numEPs] = Color.black;
-	  colors[numEPs+1] = Color.orange;
-	  colors[numEPs+2] = Color.white;
+	    // this block sets up the initial colors scheme (which will
+	    // later be changed based on the number of significant entry
+	    // methods.
+	    if (!colorsSet) {
+		colors = new Color[1][numEPs+NUM_SYS_EPS];
 		
+		for(int i=0; i<numEPs; i++)
+		    {
+			// if the data is an entry method whose color is 
+			// found in analysis, then use it.
+			colors[0][i] = Analysis.getEntryColor(i);
+		    }   
+		// Idle time is White and is placed at the top
+		// Pack time is black (to see the first division between entry
+		// data and non entry data).
+		// Unpack time is orange (to provide the constrast).
+		colors[0][numEPs] = Color.black;
+		colors[0][numEPs+1] = Color.orange;
+		colors[0][numEPs+2] = Color.white;
+	    }
 		displayCanvas.removeAll();
 
 		// extra column is that of the average data.
@@ -410,7 +456,7 @@ public class ProfileWindow extends Frame
 		// the first row is for entry method execution time the second is for 
 		//time spent sending messages in that entry method
 		
-		avg=new float[2][numUserEntries+4];
+		avg=new float[2][numUserEntries+NUM_SYS_EPS];
 		double avgScale=1.0/data.plist.size();
 
 		int poCount=1;
@@ -435,7 +481,7 @@ public class ProfileWindow extends Frame
 			for (int i=0;i<avg.length && i<cur.length;i++) {
 				avg[i]+=(float)(cur[i]*avgScale);
 			}
-			usage2po(cur,curPe,poNo++,colors);
+			usage2po(cur,curPe,poNo++,colors[0]);
 		}
 		bar.progress(poNo,nEl,"averaging");
 		*/
@@ -470,17 +516,23 @@ public class ProfileWindow extends Frame
 			sigElements.add(new Integer(i));
 		    }
 		}
+
 		// copy to an array for Color assignment (maybe that should be
 		// a new interface for color assignment).
 		int sigIndices[] = new int[sigElements.size()];
 		for (int i=0; i<sigIndices.length; i++) {
 		    sigIndices[i] = ((Integer)sigElements.elementAt(i)).intValue();
 		}
-		newUserColors = Analysis.createColorMap(numEPs, sigIndices);
-		// copy the new Colors into our color array. (and let the system colors
-		// remain as they are)
-		for (int i=0; i<newUserColors.length; i++) {
-		    colors[i] = newUserColors[i];
+		if (!colorsSet) {
+		    Color[] newUserColors = 
+			Analysis.createColorMap(numEPs, sigIndices);
+		    // copy the new Colors into our color array. 
+		    // (and let the system colors
+		    // remain as they are)
+		    for (int i=0; i<newUserColors.length; i++) {
+			colors[0][i] = newUserColors[i];
+		    }
+		    colorsSet = true;
 		}
 
 		// Phase 2
@@ -494,9 +546,9 @@ public class ProfileWindow extends Frame
 			break;
 		    data.plist.nextElement();
 		    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-		    usage2po(cur,curPe,poCount++,colors);
+		    usage2po(cur,curPe,poCount++,colors[0]);
 		}
-		usage2po(avg,-1,0,colors);
+		usage2po(avg,-1,0,colors[0]);
 		bar.done();
 
 		String sTitle = "Profile of Usage for Processor";
@@ -520,6 +572,7 @@ public class ProfileWindow extends Frame
 		labelCanvas2.invalidate();
 		mainPanel.validate();      		
 	}
+
    private void PrintProfile()
    {
 	   PrintJob pjob = getToolkit().getPrintJob(this, "Print Profile", null);
@@ -780,6 +833,7 @@ public class ProfileWindow extends Frame
 	  pg.dispose();   
 	  pjob.end();
    }   
+
    private void setScales()
    {
 	   data.dcw = (int)(xscale * data.vpw);
@@ -846,6 +900,7 @@ public class ProfileWindow extends Frame
 	  
 	  displayCanvas.makeNewImage();           
    }   
+
    private void setSizes()
    {
 	  int acw, lch, sbh, sbw, mpw, mph, lch2;

@@ -21,6 +21,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
    implements ActionListener
 {
     private ColorSelectWindow colorSelectWindow;
+    private ColorSelectable callbackTarget;
 
     // indexed by type followed by the entry point index
     private ColorPanel[][] entryPointColors;
@@ -44,13 +45,30 @@ public class EntrySelectionDialog extends ColorWindowFrame
     // flag
     private boolean layoutComplete = false;
 
-    public EntrySelectionDialog(Frame parent, String typeLabelStrings[],
+    /**
+     *  This is a wrapper constructor for a non-callback based dialog.
+     */
+    public EntrySelectionDialog(Frame parent,
+				String typeLabelStrings[],
+				boolean stateArray[][],
+				Color colorArray[][],
+				boolean existsArray[][],
+				String entryNames[])
+    {
+	this(parent, null, typeLabelStrings, stateArray, colorArray,
+	     existsArray, entryNames);
+    }
+
+    public EntrySelectionDialog(Frame parent, 
+				ColorSelectable callbackTarget,
+				String typeLabelStrings[],
 				boolean stateArray[][],
 				Color colorArray[][],
 				boolean existsArray[][],
 				String entryNames[])
     {
 	super(parent);
+	this.callbackTarget = callbackTarget;
 	this.numTypes = typeLabelStrings.length;
 	this.typeLabelStrings = typeLabelStrings;
 	this.numEPs = stateArray[numTypes-1].length;
@@ -135,17 +153,15 @@ public class EntrySelectionDialog extends ColorWindowFrame
 			}
 		    }
 		}
+		if (callbackTarget != null) {
+		    callbackTarget.applyDialogColors();
+		}
 		setVisible(false);
 		dispose();
 	    }
 	}           
     }   
 
-    public void applyNewColor(Color c)
-    {
-	selectedCP.setColor(c);
-    }   
-    
     private void closeDialog()
     {
 	// this is essentially a cancellation command.

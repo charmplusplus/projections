@@ -43,6 +43,7 @@ SRC=\
     projections/gui/Bubble.java\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
+    projections/gui/ColorSelectable.java\
     projections/gui/ColorWindowFrame.java\
     projections/gui/CommWindow.java\
     projections/gui/Converter.java\

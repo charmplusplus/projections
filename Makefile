@@ -60,7 +60,6 @@ SRC=\
     projections/gui/HelpWindow.java\
     projections/gui/HistogramWindow.java\
     projections/gui/IntervalRangeDialog.java\
-    projections/gui/IntervalWindow.java\
     projections/gui/IntTextField.java\
     projections/gui/InvalidFileDialog.java\
     projections/gui/JSelectTextField.java\

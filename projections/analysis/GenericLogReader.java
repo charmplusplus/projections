@@ -54,13 +54,15 @@ public class GenericLogReader extends ProjDefs
     {
 	data.type = reader.nextInt();
 	switch (data.type) {
-	case BEGIN_IDLE: case END_IDLE:
+	case BEGIN_IDLE: case END_IDLE: 
+	case BEGIN_PACK: case END_PACK:
+	case BEGIN_UNPACK: case END_UNPACK:
 	    data.time = reader.nextLong();
 	    data.pe = reader.nextInt();
 	    break;
 	case CREATION:
-	case BEGIN_PROCESSING:
-	case END_PROCESSING:
+	case BEGIN_PROCESSING: case END_PROCESSING:
+	case INSERT:
 	    data.mtype = reader.nextInt();
 	    data.entry = reader.nextInt();
 	    data.time = reader.nextLong();
@@ -72,13 +74,17 @@ public class GenericLogReader extends ProjDefs
 		data.msglen = -1;
 	    }
 	    break;
-	case ENQUEUE:
+	case ENQUEUE: case DEQUEUE:
 	    data.mtype = reader.nextInt();
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
 	    break;
-	case END_COMPUTATION:
+	case BEGIN_INTERRUPT: END_INTERRUPT:
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	case BEGIN_COMPUTATION: case END_COMPUTATION:
 	    data.time = reader.nextLong();
 	    break;
 	default:

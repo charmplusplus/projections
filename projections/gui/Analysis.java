@@ -399,7 +399,10 @@ public class Analysis {
 
     private static String dirFromFile(String filename) {
 	// pre condition - filename is a full path name
-	return filename.substring(0,filename.lastIndexOf(File.separator));
+	int index = filename.lastIndexOf(File.separator);
+	if(index != -1)
+		return filename.substring(0,index);
+	return(".");	//present directory
     }
 
     public static String getLogDirectory() {

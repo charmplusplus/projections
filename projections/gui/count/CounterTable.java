@@ -11,6 +11,7 @@ import javax.swing.event.*;
 
 import projections.analysis.*;
 import projections.gui.*;
+import projections.gui.graph.*;
 
 /** Joshua Mostkoff Unger, unger1@uiuc.edu
  *  Parallel Programming Laboratory
@@ -139,10 +140,32 @@ public class CounterTable extends AbstractTableModel
     else if (currSheet_ == null) { System.out.println("NO DATA IN TABLE"); }
     else {
       // allocate new info and sort it and pass it into the graph class
-      for (int i=0; i<selectedRows.length; i++) {
-	System.out.println(
-	  "  Graph for "+currSheet_.tableRows[selectedRows[i]].name);
+      // for (int i=0; i<selectedRows.length; i++) {
+      // System.out.println(
+      // "  Graph for "+currSheet_.tableRows[selectedRows[i]].name);
+      // }
+      int counterNum = 0;
+      Sheet s = currSheet_;
+      double[][] data = new double[s.numProcs][];
+      for (int i=0; i<s.numProcs; i++) {
+	data[i] = new double[selectedRows.length];
+	for (int j=0; j<selectedRows.length; j++) {
+	  DoubleCountData dData = (DoubleCountData) 
+	    s.data[i].cResults[counterNum].countData[CountData.AVG_COUNT];
+	  data[i][j] = dData.getValue(selectedRows[j]);
+	}
       }
+      DataSource2D source = new DataSource2D(currSheet_.fileName, data);
+      XAxis xAxis = new XAxisFixed("Processor", "#");
+      YAxis yAxis = 
+	new YAxisAuto(currSheet_.counters[0].counterCode, "#", source);
+      Graph g = new Graph();
+      g.setGraphType(Graph.LINE);
+      g.setData(source, xAxis, yAxis);
+      JFrame f = new JFrame();
+      f.getContentPane().add(g);
+      f.setSize(800,640);
+      f.setVisible(true);
     }
     System.out.println("endCreateGraph");
   }
@@ -162,6 +185,7 @@ public class CounterTable extends AbstractTableModel
     public int numRows  = 0;  // number of EPs in simulation
     public int numProcs = 0;  // number of processors for this simulation
 
+    public String           fileName  = null;  // just store name of file
     public GenericStsReader stsReader = null;  // to read and hold data for sts
     public Counter[]        counters  = null;  // stores name/description
     public EPValues[]       tableRows = null;  // store row data
@@ -171,6 +195,7 @@ public class CounterTable extends AbstractTableModel
       throws IOException 
     { 
       int i;
+      fileName = fileMgr.getStsFile(index).getCanonicalPath();
       // read sts file
       stsReader = new GenericStsReader(
 	fileMgr.getStsFile(index).getCanonicalPath(), 1.0);

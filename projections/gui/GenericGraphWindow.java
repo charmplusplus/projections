@@ -57,50 +57,66 @@ public abstract class GenericGraphWindow
 	  setJMenuBar(menuBar);
    }
 
-// create a standard layout which can be called from child class or overridden by it
-// returns a Main Panel with vertical box layout and graphPanel attached
-   protected JPanel getMainPanel(){
+    // create a standard layout which can be called from child class or 
+    // overridden by it
+    // returns a Main Panel with vertical box layout and graphPanel attached
+    protected JPanel getMainPanel(){
         JPanel mainPanel = new JPanel();
 	graphCanvas = new Graph();
         graphPanel = new GraphPanel(graphCanvas);
         mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
 	mainPanel.add(graphPanel);
 	return mainPanel;
-   }
+    }
 
-// set Graph Specific data
-   protected void setXAxis(String title,String units){
+    // set Graph Specific data
+    protected void setBarGraphType(int type) {
+	if (graphCanvas != null) {
+	    graphCanvas.setBarGraphType(type);
+	} else {
+	    // issue warning.
+	    System.err.println("Warning: The graph canvas has not yet been " +
+			       "initialized! Ignoring request.");
+	}
+    }
+
+    protected void setXAxis(String title,String units){
 	xAxis = new XAxisFixed(title,units);	
-   }
-   protected void setXAxis(String title, String units, double startValue, double multiplier){
+    }
+    
+    protected void setXAxis(String title, String units, double startValue, 
+			    double multiplier) {
 	xAxis = new XAxisFixed(title,units);	
 	xAxis.setLimits(startValue,multiplier);
-   }
+    }
 
-   protected void setYAxis(String title, String units){
+    protected void setYAxis(String title, String units){
 	if(dataSource != null)
-		yAxis = new YAxisAuto(title,units,dataSource);
+	    yAxis = new YAxisAuto(title,units,dataSource);
 	else
-		yAxis = new YAxisFixed(title,units,0);	// create a dummy YAxis storing the title and units
-   }
+	    // create a dummy YAxis storing the title and units
+	    yAxis = new YAxisFixed(title,units,0);	
+    }
 
-// whenever datasource changes, yaxis needs to be changed too
-   protected void setDataSource(String title, int [] data){
+    // whenever datasource changes, yaxis needs to be changed too
+    protected void setDataSource(String title, int [] data){
 	dataSource = new DataSource1D(title,data);
 	if(yAxis != null)
-		yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-   }
-   protected void setDataSource(String title, double [][] data){
+	    yAxis = 
+		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+    }
+
+    protected void setDataSource(String title, double [][] data){
 	dataSource = new DataSource2D(title,data);
 	if(yAxis != null)
-		yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-   }
-   
+	    yAxis = 
+		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+    }
 
-// refresh graph
-   protected void refreshGraph(){    
-          graphCanvas.setData(dataSource,xAxis,yAxis);
-          graphCanvas.repaint();
-   }
+    // refresh graph
+    protected void refreshGraph(){    
+	graphCanvas.setData(dataSource,xAxis,yAxis);
+	graphCanvas.repaint();
+    }
 }
 

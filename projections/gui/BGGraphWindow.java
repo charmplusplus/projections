@@ -46,8 +46,8 @@ public class BGGraphWindow extends GenericGraphWindow
 	   System.out.println("dialog is null, creating dialog");
 	   dialog = new RangeDialog(this,"Select Range");
        }
-       dialog.displayDialog();
-       if(dialog.dialogState == RangeDialog.DIALOG_OK)
+       int dialogStatus = dialog.showDialog();
+       if(dialogStatus == RangeDialog.DIALOG_OK)
 	   if(!startUp)
 	       refreshGraph();
    }

@@ -19,6 +19,7 @@ import java.util.*;
  */
 
 public class GenericSumDetailReader
+    extends ProjectionsReader
 {
     // private static meta-tags - used to allocate space in the data array
     // based on the number of tags.
@@ -28,6 +29,15 @@ public class GenericSumDetailReader
     // array.
     public static final int TOTAL_TIME = 0;
     public static final int NUM_MSGS = 1;
+
+    // **CW** ANOTHER LANGUAGE ABUSE HACK. I don't want to create a new
+    // class to hold 2 integer values for indices. Here are definitions
+    // for the supporting constants.
+    private static final int NUM_INDICES = 2;
+    private static final int IDX_EP = 0;
+    private static final int IDX_INTERVAL = 1;
+
+    private int indices[];
 
     // header values
     public int versionNum;
@@ -54,22 +64,35 @@ public class GenericSumDetailReader
     public GenericSumDetailReader(String filename, double Nversion) 
 	throws IOException
     {
+	super();
 	try {
 	    reader = new BufferedReader(new FileReader(filename));
 	    version = Nversion;
-	    read();
+	    readData();
 	    reader.close();
 	    reader = null;
 	} catch (IOException e) {
-	    throw new IOException("Error reading file " + filename);
+	    throw new IOException("Error reading file " + filename +
+				  ": " + e.toString());
 	}
     }
 
-    // Methods to parse the summary file
+    // Method to nullify data for garbage collection
+    protected void nullifyData() {
+	data = null;
+    }
 
-    public void read()
+    // Method to recognize the file type. For now, just say "yes".
+    protected boolean isAvailable() {
+	return true;
+    }
+
+    // Methods to parse the summary file
+    protected long read()
 	throws IOException
     {
+	long byteCount = 0;
+
 	//Set up the tokenizer  **GLOBAL** yucks!
 	tokenizer=new ParseTokenizer(reader);
 	tokenizer.parseNumbers();
@@ -84,13 +107,14 @@ public class GenericSumDetailReader
 	// Read the first line (Header information)
 	tokenizer.checkNextString("ver");
 	versionNum = (int)tokenizer.nextNumber("Version Number");
+	tokenizer.checkNextString("cpu");
 	myPE = (int)tokenizer.nextNumber("processor number");
 	numPE = (int)tokenizer.nextNumber("number of processors");
-	tokenizer.checkNextString("count");
-	numIntervals = (int)tokenizer.nextNumber("count");
-	tokenizer.checkNextString("ep");
+	tokenizer.checkNextString("numIntervals");
+	numIntervals = (int)tokenizer.nextNumber("numIntervals");
+	tokenizer.checkNextString("numEPs");
 	numEPs = (int)tokenizer.nextNumber("number of entry methods");
-	tokenizer.checkNextString("interval");
+	tokenizer.checkNextString("intervalSize");
 	double intervalSize = 
 	    tokenizer.nextScientific("processor usage sample interval"); 
 	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
@@ -128,6 +152,7 @@ public class GenericSumDetailReader
 		// immediately rendering this tool useless.
 	    }
 	}
+	return byteCount;
     }
 
     /**
@@ -137,8 +162,7 @@ public class GenericSumDetailReader
 	throws IOException
     {
 	// indices at which we are about to fill the next piece of data.
-	Integer nextInterval = new Integer(0);
-	Integer nextEP = new Integer(0);
+	indices = new int[NUM_INDICES];
 	while ((tokenType=tokenizer.nextToken())!=StreamTokenizer.TT_EOL) {
 	    if (tokenType == StreamTokenizer.TT_NUMBER) {
 		double value = (double)tokenizer.nval;
@@ -147,7 +171,7 @@ public class GenericSumDetailReader
 		    if ((tokenType=tokenizer.nextToken()) ==
 			StreamTokenizer.TT_NUMBER) {
 			int valueCount = (int)tokenizer.nval;
-			fillData(type,nextEP,nextInterval,valueCount,value);
+			fillData(type, indices, valueCount, value);
 		    } else {
 			// Bad RLE format
 			throw new IOException("Bad RLE encoding. Expected" +
@@ -156,19 +180,13 @@ public class GenericSumDetailReader
 		} else {
 		    // not RLE. Store the lone value and reset state-machine 
 		    // to expect the next value.
-		    fillData(type,nextEP,nextInterval,1,value);
+		    fillData(type, indices, 1, value);
 		    tokenizer.pushBack();
 		}
 	    } else {
 		throw new IOException("Expected a number at line labelled: " +
 				      label);
 	    }
-	}
-	// The data is corrupted if we encounter the end-of-line prematurely.
-	if ((nextInterval.intValue() < numIntervals) || 
-	    (nextEP.intValue() < numEPs)) {
-	    throw new IOException("Premature end of data at line labelled: "+
-				  label);
 	}
     }
 
@@ -182,26 +200,34 @@ public class GenericSumDetailReader
      *    using objects. The other uglier alternative would be to make
      *    fillData return a "pair" class.
      */
-    private void fillData(int type, Integer epIdx, Integer intervalIdx, 
+    private void fillData(int type, int indices[],
 			  int count, double value) 
 	throws IOException
     {
+	/*
+	System.out.println("Reading " + count + " entries with starting " +
+			   "ep index " + indices[IDX_EP] + " and interval " +
+			   "index " + indices[IDX_INTERVAL] + " of value " +
+			   value);
+	*/
 	long entriesLeft = 
-	    (numEPs-epIdx.intValue())*numIntervals - intervalIdx.intValue();
+	    (numEPs-indices[IDX_EP])*numIntervals - indices[IDX_INTERVAL];
 	if (entriesLeft < count) {
 	    throw new IOException("RLE counts do not match.");
 	}
 	int numDataRows = count/numIntervals;
 	int numDataRemainder = count%numIntervals;
-	int finalEPIdx = numDataRows+epIdx.intValue();
+	int finalEPIdx = numDataRows+indices[IDX_EP];
 	int finalIntervalIdx = 
-	    (numDataRemainder+intervalIdx.intValue())%numIntervals;
-	if (numDataRemainder+intervalIdx.intValue() >= numIntervals) {
+	    (numDataRemainder+indices[IDX_INTERVAL])%numIntervals;
+	if (numDataRemainder+indices[IDX_INTERVAL] >= numIntervals) {
 	    finalEPIdx++;
 	}
-	// fill data array
-	int ep = epIdx.intValue();
-	int interval = intervalIdx.intValue();
+	// fill data array. The may be an optimization where we avoid
+	// filling in the zeroes but it will have to assume that the
+	// data array is never reused.
+	int ep = indices[IDX_EP];
+	int interval = indices[IDX_INTERVAL];
 	for (int i=0; i<count; i++) {
 	    data[type][ep][interval] = value;
 	    // update indices
@@ -215,7 +241,26 @@ public class GenericSumDetailReader
 	    throw new IOException("Data counts computed do not match " +
 				  "number of data entries filled!");
 	}
-	epIdx = new Integer(finalEPIdx);
-	intervalIdx = new Integer(finalIntervalIdx);
+	indices[IDX_EP] = ep;
+	indices[IDX_INTERVAL] = interval;
+	/*
+	System.out.println("Completed read with final ep index " + 
+			   indices[IDX_EP] + " and interval index " +
+			   indices[IDX_INTERVAL]);
+	*/
     }
+
+    // accessor methods
+
+    public int getNumIntervals() {
+	return numIntervals;
+    }
+
+    public double[][] getData(int type) {
+	return data[type];
+    }
+
 }
+
+
+

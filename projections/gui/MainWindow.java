@@ -29,6 +29,10 @@ public class MainWindow extends JFrame
     private IntervalWindow 	intervalWindow;
     private EPCharWindow 	epCharWindow;
 
+    // GraphingWindow will eventually be renamed and will replace both
+    // GraphWindow and ProfileWindow.
+    private GraphingWindow       graphingWindow;
+
     private BGGraphWindow       bgWindow;
     private EPAnalysis           epAnalysis;
     
@@ -125,6 +129,8 @@ public class MainWindow extends JFrame
 	    showChildWindow(multiRunWindow, "MultiRunWindow");
 	} else if (item.equals("Performance Counters")) {
 	    showCounterWindow();
+	} else if (item.equals("General Graph")) {
+	    showChildWindow(graphingWindow, "GraphingWindow");
 	} else if (item.equals("Unified Summary Graph")) {
 	    // ?
 	} else if (item.equals("Interval Graph")) {

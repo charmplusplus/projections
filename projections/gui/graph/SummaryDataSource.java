@@ -11,7 +11,7 @@ public class SummaryDataSource extends DataSource
   public SummaryDataSource(double[] data) {
     dataValues = data;
     numIntervals = data.length;
-    System.out.println("SumDatSour "+numIntervals);
+    //    System.out.println("SumDatSour "+numIntervals);
   }
 
   public String getTitle() { return "Utilization Graph (Summary)"; }

@@ -58,6 +58,7 @@ public class MainMenuManager extends MenuManager
 		    true,  // Multirun Analysis
 		    false,  // separator
 		    true,   // Performance Counters
+		    false,  // General Graph
 		    false,  // Interval Graph
 		    false,  // Unified Summary Graph
 		    false,  // Generate EP Data
@@ -111,6 +112,7 @@ public class MainMenuManager extends MenuManager
 		"Multirun Analysis",
 		null,
 		"Performance Counters",
+		"General Graph",
 		"Interval Graph",
 		"Unified Summary Graph",
 		"Generate EP Data",
@@ -147,6 +149,7 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("View Log Files") ||
 		       arg.equals("Overview") ||
 		       arg.equals("Performance Counters") ||
+		       arg.equals("General Graph") ||
 		       arg.equals("Interval Graph") ||
 		       arg.equals("Unified Summary Graph") ||
 		       arg.equals("Entry Point Characteristics Graph") ||

@@ -33,6 +33,7 @@ SRC=\
     projections/analysis/GenericSumDetailReader.java\
     projections/analysis/GenericSummaryReader.java\
     projections/analysis/ObjectId.java\
+    projections/analysis/ProjectionsReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
     projections/gui/AnimationColorBarPanel.java\
@@ -61,6 +62,7 @@ SRC=\
     projections/gui/GraphTitleCanvas.java\
     projections/gui/GraphWAxisCanvas.java\
     projections/gui/GraphWindow.java\
+    projections/gui/GraphingWindow.java\
     projections/gui/GraphXAxisCanvas.java\
     projections/gui/GraphYAxisCanvas.java\
     projections/gui/GrayLWPanel.java\
@@ -160,6 +162,7 @@ SRC=\
     projections/misc/MultiRunTextRenderer.java\
     projections/misc/PrintUtils.java\
     projections/misc/ProgressDialog.java\
+    projections/misc/ProjectionsStatistics.java\
     projections/misc/SummaryFormatException.java\
     projections/gui/graph/DataSource.java\
     projections/gui/graph/DataSource1D.java\

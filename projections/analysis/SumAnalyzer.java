@@ -134,29 +134,10 @@ public class SumAnalyzer extends ProjDefs
 		ProcessorUtilization[p] = new int[IntervalCount + 20];
 		*/
 		ProcessorUtilization[p] = new int[IntervalCount];
-		System.out.println("Interval count = " + IntervalCount);
 
 		//Read the SECOND line (processor usage)
 		int nUsageRead=0;
 		boolean error = false;
-/*
-     OLD FORMAT === UNCOMPRESSED ==
-		while (StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) {
-		  try { ProcessorUtilization[p][nUsageRead++] = (int)tokenizer.nval; }
-		  catch (ArrayIndexOutOfBoundsException e) {
-		    if (!error) {
-		      System.out.println("  ArrayIndexOutOfBoundsException nUsageRead "+
-					 nUsageRead+" size "+ProcessorUtilization[p].length);
-		      error = true;
-		    }
-		  }
-		}
-		if (error) { System.out.println("  nUsageRead "+nUsageRead); }
-
-		//Make sure we're at the end of the line
-		if (StreamTokenizer.TT_EOL!=tokenType)
-			throw new SummaryFormatException("extra garbage at end of line 2");
-*/
 
         	while ((tokenType=tokenizer.nextToken()) != 
 		        StreamTokenizer.TT_EOL && nUsageRead < myCount) 
@@ -178,17 +159,17 @@ public class SumAnalyzer extends ProjDefs
                   else 
 	            System.out.println("extra garbage at end of line 2");
 	        }
-		System.out.println("Intervals read = " + nUsageRead);
-                if (myCount != nUsageRead) 
-                  System.out.println("numIntervals not agree" + IntervalCount + "v.s. " + nUsageRead+"!");
-		   
+                if (myCount != nUsageRead) {
+                  System.out.println("numIntervals not agree" + 
+				     IntervalCount + "v.s. " + nUsageRead+"!");
+		}
 		// Read in the THIRD line (time spent by entries)
 		CurrentUserEntry = 0;
 	// **CW** for now, ignore the labels. Check to see if it is a label.
 	// if yes, consume it. if not, push it back onto the stream.
 	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
 	    // do nothing. Label consumed.
-	    System.out.println(tokenizer.sval + " read.");
+	    // System.out.println(tokenizer.sval + " read.");
 	} else {
 	    tokenizer.pushBack();
 	}
@@ -206,7 +187,7 @@ public class SumAnalyzer extends ProjDefs
 	// if yes, consume it. if not, push it back onto the stream.
 	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
 	    // do nothing. Label consumed.
-	    System.out.println(tokenizer.sval + " read.");
+	    // System.out.println(tokenizer.sval + " read.");
 	} else {
 	    tokenizer.pushBack();
 	}
@@ -228,7 +209,7 @@ public class SumAnalyzer extends ProjDefs
 		if (versionNum > 3.0) {
 	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
 	    // do nothing. Label consumed.
-	    System.out.println(tokenizer.sval + " read.");
+	    // System.out.println(tokenizer.sval + " read.");
 	} else {
 	    tokenizer.pushBack();
 	}
@@ -249,12 +230,12 @@ public class SumAnalyzer extends ProjDefs
 	// if yes, consume it. if not, push it back onto the stream.
 	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
 	    // do nothing. Label consumed.
-	    System.out.println(tokenizer.sval + " read.");
+	    // System.out.println(tokenizer.sval + " read.");
 	} else {
 	    tokenizer.pushBack();
 	}
 		NumberofPairs = (int)nextNumber("Number of Marked Events");
-		System.out.println("num pairs is " + NumberofPairs);
+		// System.out.println("num pairs is " + NumberofPairs);
 		for (int g=0; g<NumberofPairs; g++)
 			{
 			nextNumber("Number of Marked Events");
@@ -304,7 +285,7 @@ public class SumAnalyzer extends ProjDefs
 			}
 		tokenizer = null;
 		file.close();
-		System.out.println("Finished reading in data for processor #"+p+"/"+nPe);
+		// System.out.println("Finished reading in data for processor #"+p+"/"+nPe);
 		}
 	sts.setTotalTime(TotalTime);
 	}

@@ -232,7 +232,7 @@ public class RangeDialog extends JDialog
      *  This method should be OVERRIDDEN by the subclass if a different
      *  layout format is desired. Otherwise, leave it alone.
      */
-    public void displayDialog() {
+    private void displayDialog() {
     
 	if (layoutComplete) {
 	    setVisible(true);

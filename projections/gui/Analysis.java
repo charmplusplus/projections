@@ -23,6 +23,9 @@ public class Analysis {
 	
 	private static SumAnalyzer sumAnalyzer; //Only for .sum files
     private static BGSummaryReader bgSumReader; // Only for basename.sum files
+
+    private static GenericSumDetailReader summaryDetails[]; // .sumd files
+    private static int sumDetailMaxNumIntervals = -1;
 	
 	/******************* Graphs ***************/
 	private static int[][][] systemUsageData;
@@ -161,8 +164,24 @@ public class Analysis {
 			return 0;
 	}
 
+    /**
+     *  By default, return the first available valid processor string
+     *  in the following preference order - log, summary, sumdetail.
+     */
     public static String getValidProcessorString() {
-	return logLoader.getValidProcessorString();
+	if (sts.hasLogFiles()) {
+	    return sts.getValidProcessorString(StsReader.LOG);
+	} else if (sts.hasSumFiles()) {
+	    return sts.getValidProcessorString(StsReader.SUMMARY);
+	} else if (sts.hasSumDetailFiles()) {
+	    return sts.getValidProcessorString(StsReader.SUMDETAIL);
+	} else {
+	    return "";
+	}
+    }
+
+    public static String getValidProcessorString(int type) {
+	return sts.getValidProcessorString(type);
     }
 
 	public static int getNumProcessors() {
@@ -318,15 +337,32 @@ public class Analysis {
 		    }
 		}
 		if( sts.hasSumFiles() ) { //.sum files
-			try {
-				sumAnalyzer = new SumAnalyzer( sts );
+		    try {
+			sumAnalyzer = new SumAnalyzer(sts);
+		    } catch (SummaryFormatException e) {
+			System.out.println(e.toString());
+		    }
+		}
+		if (sts.hasSumDetailFiles()) { // .sumd files
+		    try {
+			summaryDetails = 
+			    new GenericSumDetailReader[getNumProcessors()];
+			for (int pe=0; pe<summaryDetails.length; pe++) {
+			    summaryDetails[pe] = 
+				new GenericSumDetailReader(sts.getSumDetailName(pe),
+							   version);
+			    if (sumDetailMaxNumIntervals <
+				summaryDetails[pe].getNumIntervals()) {
+				sumDetailMaxNumIntervals =
+				    summaryDetails[pe].getNumIntervals();
+			    }
 			}
-			catch( SummaryFormatException E ) {
-			    System.out.println(E.toString());
-			}
+		    } catch (IOException e) {
+			System.out.println(e.toString());
+		    }
 		}
 		if ( sts.hasLogFiles() ) { //.log files
-			logLoader = new LogLoader( sts);
+		    logLoader = new LogLoader( sts);
 		}
 
 		// set up color maps for the entire toolkit.
@@ -528,23 +564,44 @@ public class Analysis {
 	return sts.hasSumFiles();
     }
 
-	public static long searchTimeline( int n, int p, int e ) throws EntryNotFoundException {
-		try {
-			return logLoader.searchtimeline( p, e, n );
-		}
-		catch( LogLoadException lle ) {
-			System.out.println( "LogLoadException" );
-			return -1;
-		}
-	}
-	private static void status(String msg) {
-		//For debugging/profiling:
-		//System.out.println("gui.Analysis> "+msg);
-	}
+    public static boolean hasLogData() {
+	return sts.hasLogFiles();
+    }
 
+    public static boolean hasSumDetailData() {
+	return sts.hasSumDetailFiles();
+    }
+
+    public static double[][] getSumDetailData(int pe, int type) {
+	return summaryDetails[pe].getData(type);
+    }
+
+    public static long searchTimeline( int n, int p, int e ) 
+	throws EntryNotFoundException 
+    {
+	try {
+	    return logLoader.searchtimeline( p, e, n );
+	}
+	catch( LogLoadException lle ) {
+	    System.out.println( "LogLoadException" );
+	    return -1;
+	}
+    }
+
+    private static void status(String msg) {
+	//For debugging/profiling:
+	//System.out.println("gui.Analysis> "+msg);
+    }
+    
     // this is a hack, people should not use this
     public static long getIntervalSize() {
 	return (long)(bgSumReader.intervalSize*1.0e6);
+    }
+
+    // another hack, all these "utility" methods should be refactored
+    // into some place else.
+    public static int getSumDetailNumIntervals() {
+	return sumDetailMaxNumIntervals;
     }
 
     private static String dirFromFile(String filename) {

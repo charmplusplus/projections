@@ -129,6 +129,8 @@ SRC=\
     projections/gui/Wait.java\
     projections/gui/WaitButton.java\
     projections/gui/ZItem.java\
+    projections/gui/CallBack.java \
+    projections/gui/CounterCallBack.java \
     projections/gui/count/ColorHeader.java\
     projections/gui/count/Counter.java\
     projections/gui/count/CounterFrame.java\

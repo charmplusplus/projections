@@ -17,7 +17,7 @@ public class YAxisFixed extends YAxis
   }
   
   public String getTitle() {return title;}
-
+  public String getUnits() {return units;}
   public double getMax() {return max;}
 
   public String getValueName(double value) {

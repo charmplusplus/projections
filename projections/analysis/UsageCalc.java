@@ -15,6 +15,7 @@ public class UsageCalc extends ProjDefs
 	private long unpacktime,unpackstarttime;
 	private int numUserEntries;
 	private double version;
+	private int countflag=0;
     
     // curEntry is global because it has to deal with the relationship
     // between BEGIN_PROCESSING and END_PROCESSING events within the
@@ -26,8 +27,25 @@ public class UsageCalc extends ProjDefs
 	private void intervalCalc(float[][] data,int type, int entry, long time)
 	{
 	if(type != CREATION){
-		if (time<beginTime) time=beginTime;
-		if (time>endTime) time=endTime;
+		if (!(time>beginTime+1)){
+		 time=beginTime;
+		 countflag = 0;
+		 }else{
+		 	if(countflag != 2)
+				countflag = 1;
+		}
+		if (time>endTime){
+		 time=endTime;
+		 countflag = 2;
+		}else{
+			if(countflag != 0){
+				countflag =1;
+			}
+		}
+	}else{
+		if(countflag != 1){
+			time = 0;
+		}
 	}
 
 	switch(type) {
@@ -157,7 +175,7 @@ public class UsageCalc extends ProjDefs
 	    {System.out.println("Exception while reading log file "+pnum); }
 	total = 0;
 	for(int j=0; j<(dataLen-1); j++){ //Scale times to percent
-		//System.out.println("Data " + data[0][j] + " Send Time "+ data[1][j]);
+		System.out.println("Data " + data[0][j] + " Send Time "+ data[1][j]);
 		data[0][j] = data[0][j] - data[1][j];
 		data[0][j] = (float )(100.0*data[0][j])/(float )(endTime-beginTime);
 		data[1][j] = (float )(100.0*data[1][j])/(float )(endTime-beginTime);

@@ -226,11 +226,11 @@ public class Analysis {
 	
 	The returned values are in percent CPU time spent. 
 	*/
-	public static float[] GetUsageData( int pnum, long begintime, long endtime, OrderedIntList phases ) {
+	public static float[][] GetUsageData( int pnum, long begintime, long endtime, OrderedIntList phases ) {
 		status("GetUsageData(pe "+pnum+"):");
 		if( sts.hasLogFiles()) { //.log files
 			UsageCalc u=new UsageCalc();
-			return u.usage(sts, pnum, begintime, endtime );
+			return u.usage(sts, pnum, begintime, endtime,version );
 		}
 		else /*The files are sum files*/ {
 			int temp,numUserEntries=sts.getEntryCount();
@@ -252,12 +252,14 @@ public class Analysis {
 			else {
 				data = sumAnalyzer.GetChareTime();
 			}
-			float ret[]=new float[numUserEntries+4];
+			float ret[][]=new float[2][numUserEntries+4];
 			//Convert to percent-- .sum entries are always over the 
 			// entire program run.
 			double scale=100.0/sts.getTotalTime();
-			for (int q=0;q<numUserEntries;q++)
-				ret[q]=(float)(scale*data[pnum][q]);
+			for (int q=0;q<numUserEntries;q++){
+				ret[0][q]=(float)(scale*data[pnum][q]);
+				ret[1][q] = (float )0.0; // dummy value for message send time at the moment .. summary file reader needs to be fixed first
+			}
 			return ret;
 		}
 	}

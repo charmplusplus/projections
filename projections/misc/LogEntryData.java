@@ -21,6 +21,7 @@ public class LogEntryData
     public int msglen;		// only for CREATION events
 
     public int userEventID;     // for USER_EVENT_PAIR events only
+    public long sendTime;	// sendTime 
 
     public LogEntryData() {
     }
@@ -35,6 +36,7 @@ public class LogEntryData
 	temp.event  = event;
 	temp.pe     = pe;
 	temp.msglen = msglen;
+	temp.sendTime = sendTime;
 	return temp;
     }   
 }

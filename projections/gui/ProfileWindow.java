@@ -382,7 +382,7 @@ public class ProfileWindow extends Frame
 
 		int curPe;
 		// why +4 now and not +5?
-		float avg[]=new float[numUserEntries+4];
+		float[][] avg=new float[2][numUserEntries+4];
 		double avgScale=1.0/data.plist.size();
 
 		int poNo=1;
@@ -415,22 +415,27 @@ public class ProfileWindow extends Frame
 		// *CW* *** New code ****
 		// Phase 1a
 		data.plist.reset();
+		for(int i =0;i<avg[0].length;i++){
+			avg[0][i] = 0.0f;
+			avg[1][i] = 0.0f;
+		}
 		while (data.plist.hasMoreElements()) {
 		    if (!bar.progress(poNo,nEl,poNo+" of "+nEl))
 			break;
 		    curPe = data.plist.currentElement();
 		    data.plist.nextElement();
-		    float cur[]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-		    for (int i=0;i<avg.length && i<cur.length;i++) {
-			avg[i]+=(float)(cur[i]*avgScale);
-		    }
+		    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
+		    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
+			avg[0][i]+=(float)(cur[0][i]*avgScale);
+			avg[1][i]+=(float)(cur[1][i]*avgScale);
+		    }		    
 		}
 		// Phase 1b
 		Vector sigElements = new Vector();
 		// we only wish to compute for EPs
 		for (int i=0; i<numEPs; i++) {
 		    // anything greater than 5% is "significant"
-		    if (avg[i] > 1.0) {
+		    if (avg[0][i]+avg[1][i] > 1.0) {
 			sigElements.add(new Integer(i));
 		    }
 		}
@@ -453,7 +458,7 @@ public class ProfileWindow extends Frame
 		{
 		    curPe = data.plist.currentElement();
 		    data.plist.nextElement();
-		    float cur[]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
+		    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
 		    usage2po(cur,curPe,poNo++,colors);
 		}
 		usage2po(avg,-1,0,colors);
@@ -870,17 +875,23 @@ public class ProfileWindow extends Frame
    }   
     */
 	//Convert a usage profile (0..numUserEntries+4-1) to a po
-	private void usage2po(float usg[],int curPe,int poNo,Color[] colors)
+	private void usage2po(float usg[][],int curPe,int poNo,Color[] colors)
 	{
 		int numUserEntries = Analysis.getNumUserEntries();
 		String[][] names = Analysis.getUserEntryNames();
 		int i,poindex=0,poLen=0;
 		float thresh=0.01f;//Percent below which to ignore
-		for(i=0;i<usg.length;i++) if (usg[i]>thresh) poLen++;
+		for(i=0;i<usg[0].length;i++){
+			if (usg[0][i]>thresh) 
+				poLen++;
+			if (usg[1][i]>thresh) 
+				poLen++;
+			
+		}
 		poArray[poNo]=new ProfileObject[poLen];
-		for(i=0; i<usg.length; i++)
+		for(i=0; i<usg[0].length; i++)
 		{
-			float usage = usg[i];
+			float usage = usg[0][i];
 			if (usage<=thresh) continue; //Skip this one-- it's tiny
 			int   entry = i;
 			String name;
@@ -892,6 +903,27 @@ public class ProfileWindow extends Frame
 				name = "PACKING";
 			else if(entry == numUserEntries+1)
 				name = "UNPACKING";
+			else 
+				break;
+			poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);
+			displayCanvas.add(poArray[poNo][poindex]);
+			poArray[poNo][poindex].setForeground(colors[entry]);
+			poindex++;
+		}
+		for(i=0; i<usg[1].length; i++)
+		{
+			float usage = usg[1][i];
+			if (usage<=thresh) continue; //Skip this one-- it's tiny
+			int   entry = i;
+			String name;
+			if(entry < numUserEntries)
+				name = "Message Send Time: "+names[entry][1] + "::" + names[entry][0];
+			else if(entry == numUserEntries+2)
+				name = "Message Send Time: "+"IDLE";
+			else if(entry == numUserEntries)
+				name = "Message Send Time: "+"PACKING";
+			else if(entry == numUserEntries+1)
+				name = "Message Send Time: "+"UNPACKING";
 			else 
 				break;
 			poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);

@@ -38,7 +38,9 @@ public class TimelineWindow extends Frame
     public MouseListener mouseListener = null;
     public TimelineDisplayCanvas canvas_;
     public TimelineAxisCanvas timeline_;
-    AxisMouseController(TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) {
+    AxisMouseController(
+      TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) 
+    {
       canvas_ = canvas;
       timeline_ = timeline;
       mouseMotionAdapter = new MouseMotionAdapter() {
@@ -62,20 +64,36 @@ public class TimelineWindow extends Frame
 	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.rubberBand.end(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.repaint();
+
 	  Rectangle rect = canvas_.rubberBand.bounds();
-	  double startTime = timeline_.canvasToTime(rect.x);
-	  double endTime = timeline_.canvasToTime(rect.x+rect.width);
-	  data.scale = 
-	    (float) ((data.endTime-data.beginTime)/(endTime-startTime));
-	  scaleField.setText("" + data.scale);
-	  setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	  setAllSizes();
-	  displayCanvas.makeNewImage();
-	  axisTopCanvas.makeNewImage();
-	  axisBotCanvas.makeNewImage();
-	  HSB.setValue(timeline_.calcHSBOffset(startTime));
-	  displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
-	  setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	  if ((e.getModifiers()&InputEvent.BUTTON3_MASK)==  
+	      InputEvent.BUTTON3_MASK) 
+	  {
+	    // is right mouse pressed?
+	    data.oldBT = data.beginTime;
+	    data.oldET = data.endTime;
+	    data.beginTime = (long) timeline_.canvasToTime(rect.x);
+	    data.endTime = (long) timeline_.canvasToTime(rect.x+rect.width);
+	    data.scale = (float) 1.0;
+	    if (data.processorList == null) { data.oldplist = null; }
+	    else { data.oldplist = data.processorList.copyOf(); }
+	    procRangeDialog();
+	  }
+	  else {
+	    double startTime = timeline_.canvasToTime(rect.x);
+	    double endTime = timeline_.canvasToTime(rect.x+rect.width);
+	    data.scale = 
+	      (float) ((data.endTime-data.beginTime)/(endTime-startTime));
+	    scaleField.setText("" + data.scale);
+	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    setAllSizes();
+	    displayCanvas.makeNewImage();
+	    axisTopCanvas.makeNewImage();
+	    axisBotCanvas.makeNewImage();
+	    HSB.setValue(timeline_.calcHSBOffset(startTime));
+	    displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	  }
 	}
 	public void mouseEntered(MouseEvent e) { }
 	public void mouseExited(MouseEvent e) { 
@@ -247,29 +265,31 @@ public class TimelineWindow extends Frame
 	  rangeDialog = null;
 
 	  setSize(640,480);
-	  if(data.beginTime != data.oldBT || data.endTime != data.oldET 
-		 || (data.processorList != null && !data.processorList.equals(data.oldplist)))
+	  if(data.beginTime != data.oldBT || data.endTime != data.oldET ||
+	     (data.processorList != null && 
+	      !data.processorList.equals(data.oldplist)))
 	  {
-		 setCursor(new Cursor(Cursor.WAIT_CURSOR));
-		 data.tlh = data.tluh * data.numPs;
-		 VSB.setMaximum(data.tlh);
+	    procRangeDialog();
+	  }
+   }
 
-		 displayCanvas.removeAll();
-		 
-		 data.createTLOArray();
-	  
-		 for(int p=0; p<data.numPs; p++)
-			for(int i=0; i<data.tloArray[p].length; i++)
-			   displayCanvas.add(data.tloArray[p][i]);    
-	  
-		 setAllSizes();
-		 labelCanvas.makeNewImage();
-		 axisTopCanvas.makeNewImage();
-		 axisBotCanvas.makeNewImage();
-		 displayCanvas.makeNewImage();
-		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	  }   
-   }   
+  private void procRangeDialog() {
+    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+    data.tlh = data.tluh * data.numPs;
+    VSB.setMaximum(data.tlh);
+    displayCanvas.removeAll();
+    data.createTLOArray();
+    for(int p=0; p<data.numPs; p++)
+      for(int i=0; i<data.tloArray[p].length; i++)
+	displayCanvas.add(data.tloArray[p][i]);    
+    
+    setAllSizes();
+    labelCanvas.makeNewImage();
+    axisTopCanvas.makeNewImage();
+    axisBotCanvas.makeNewImage();
+    displayCanvas.makeNewImage();
+    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+  }   
   
    private void CreateLayout()
    {

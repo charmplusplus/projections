@@ -25,6 +25,7 @@ public class BGSummaryReader
     public int myPE;
     public int numPE;
     public int numIntervals;
+    public int numTracedPEs;
     public int numEPs;  // bizzare ... already found in .sts file
     public double intervalSize;
     public int numPhases;
@@ -82,6 +83,8 @@ public class BGSummaryReader
 	tokenizer.checkNextString("interval");
 	intervalSize = 
 	    tokenizer.nextScientific("processor usage sample interval"); 
+	tokenizer.checkNextString("numTracedPE");
+	numTracedPEs = (int)tokenizer.nextNumber("number of traced PEs");
 
 	// Make sure we're at the end of the line
 	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {

@@ -23,7 +23,7 @@ public class ParseTokenizer extends StreamTokenizer {
     throws IOException
   {
     if (StreamTokenizer.TT_NUMBER!=super.nextToken()) {
-      throw new IOException("Couldn't read "+description);
+      throw new IOException("Couldn't read "+description+" got "+toString());
     }
     return super.nval;
   }
@@ -55,7 +55,8 @@ public class ParseTokenizer extends StreamTokenizer {
     throws IOException
   {
     if (StreamTokenizer.TT_WORD!=super.nextToken()) {
-      throw new IOException("Couldn't read string " + description);
+      throw new IOException(
+        "Couldn't read string " + description+" got "+toString());
     }
     return super.sval;
   }

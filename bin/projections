@@ -2,7 +2,7 @@
 
 jarpath="`dirname $0`/projections.jar"
 
-if test "$OSTYPE" = cygwin && test -x /usr/bin/cygpath 
+if test "`uname -o`" = "Cygwin" && test -x /usr/bin/cygpath 
 then
   jarpath=`/usr/bin/cygpath -w -a $jarpath`
 fi

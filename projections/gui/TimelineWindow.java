@@ -77,6 +77,7 @@ public class TimelineWindow extends Frame
 	    data.beginTime = (long)(startTime+0.5);
 	    data.endTime = (long)(endTime+0.5);
 	    data.scale = (float) 1.0;
+	    scaleField.setText(""+1.0);
 	    if (data.processorList == null) { data.oldplist = null; }
 	    else { data.oldplist = data.processorList.copyOf(); }
 	    procRangeDialog();

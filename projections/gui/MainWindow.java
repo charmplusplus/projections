@@ -563,9 +563,9 @@ public class MainWindow extends JFrame
 		i++;
 		BLUEGENE_SIZE[0] = Integer.parseInt(args[i]);
 		i++;
-		BLUEGENE_SIZE[1] = Integer.parseInt(args[i+1]);
+		BLUEGENE_SIZE[1] = Integer.parseInt(args[i]);
 		i++;
-		BLUEGENE_SIZE[2] = Integer.parseInt(args[i+2]);
+		BLUEGENE_SIZE[2] = Integer.parseInt(args[i]);
 	    } else /*unrecognized argument*/ {
 		loadSts=args[i];
 	    }

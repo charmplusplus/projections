@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import projections.misc.*;
@@ -296,12 +297,12 @@ public class MainWindow extends Frame
    public void ShowOpenFileDialog()
    {
 	  buttonPanel.disableButtons();
+	  /*  OLD awt-based FileDialog ... not quite powerful enough
 	  FileDialog d = new FileDialog((Frame)this, "Select .sts file to load", FileDialog.LOAD);
 
 	  d.setDirectory(".");
 	  d.setFilenameFilter(new FilenameFilter() {
 	    public boolean accept(File dir, String name) {
-	      //System.out.println("Asked to filter "+name);//Never gets called!
 	      return name.endsWith(".sts");
 	    }
 	  });
@@ -309,8 +310,18 @@ public class MainWindow extends Frame
 	  d.setVisible(true);
 	  String filename=d.getFile();
 	  if (filename==null) return;
-	  filename = d.getDirectory() + filename;
-	  openFile(filename);
+	  */
+
+	  // create a file chooser with current directory set to "."
+	  JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
+	  // in future when Multi-Run code is fully integrated into the scheme
+	  // of things, the following line should be enabled:
+	  //	  d.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+	  d.setFileFilter(new MainFileFilter());
+	  int returnval = d.showOpenDialog(this);
+	  if (returnval == JFileChooser.APPROVE_OPTION) {
+	      openFile(d.getSelectedFile().getAbsolutePath());
+	  }
    }
    private void openFile(String filename) {
 	  try

@@ -345,41 +345,44 @@ public class ProfileWindow extends Frame
    }   
 	public void MakePOArray(long bt, long et)
 	{
-	  Color[] colors = new Color[Analysis.getNumUserEntries()+5];
+	    // the reason for 5 extra colors is because they are non-ep
+	    // colors?
+	    int numEPs = Analysis.getNumUserEntries();
+	  Color[] colors = new Color[numEPs+5];
 	  float H = (float)1.0;
 	  float S = (float)1.0;
 	  float B = (float)1.0;
-	  for(int i=0; i<colors.length; i++)
+	  for(int i=0; i<numEPs; i++)
 	  {
-		 colors[i] = Color.getHSBColor(H, S, B);
-		 H -= 0.01;
-		 if(H < 0.0)
-		 {
-			H = (float)1.0;
-			S -= 0.2;
-			if(S < 0.0);
-			{
-			   S = (float)1.0;
-			   B -= 0.2;
-			   if(B < 0.0)
-				  B = (float)1.0;
-			}   
-		 }
+	      // if the data is an entry method whose color is found in
+	      // analysis, then use it.
+	      colors[i] = Analysis.getEntryColor(i);
 	  }   
+	  // Idle time is White and is placed at the top
+	  // Pack time is black (to see the first division between entry
+	  // data and non entry data).
+	  // Unpack time is orange (to provide the constrast).
+	  colors[numEPs] = Color.black;
+	  colors[numEPs+1] = Color.orange;
+	  colors[numEPs+2] = Color.white;
 		
 		displayCanvas.removeAll();
 
+		// extra column is that of the average data.
 		data.numPs = data.plist.size()+1;
 		poArray = new ProfileObject[data.numPs][];
 
 		int numUserEntries = Analysis.getNumUserEntries();
 
 		int curPe;
+		// why +4 now and not +5?
 		float avg[]=new float[numUserEntries+4];
 		double avgScale=1.0/data.plist.size();
 
 		int poNo=1;
 		ProgressDialog bar=new ProgressDialog("Computing entry point usage...");
+
+		// Why +2 instead of +1?
 		int nEl=data.plist.size()+2;
 		data.plist.reset();
 		while (data.plist.hasMoreElements())
@@ -820,18 +823,17 @@ public class ProfileWindow extends Frame
 			String name;
 			if(entry < numUserEntries)
 				name = names[entry][1] + "::" + names[entry][0];
-			else if(entry == numUserEntries)
-				name = "IDLE";
-			else if(entry == numUserEntries+1)
-				name = "PACKING";
 			else if(entry == numUserEntries+2)
+				name = "IDLE";
+			else if(entry == numUserEntries)
+				name = "PACKING";
+			else if(entry == numUserEntries+1)
 				name = "UNPACKING";
 			else 
 				break;
 			poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);
 			displayCanvas.add(poArray[poNo][poindex]);
-			// poArray[poNo][poindex].setForeground(colors[entry]);
-			poArray[poNo][poindex].setForeground(Analysis.getEntryColor(entry));
+			poArray[poNo][poindex].setForeground(colors[entry]);
 			poindex++;
 		}
 	}

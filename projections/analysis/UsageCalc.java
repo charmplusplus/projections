@@ -45,23 +45,28 @@ public class UsageCalc extends ProjDefs
 	    startTime = time;
 		break;
 	case END_IDLE:
-	    data[numUserEntries] += (int)(time - startTime);
+	    // +2 places Idle time at the top of the usage profile display
+	    data[numUserEntries+2] += (int)(time - startTime);
 		break;
 
 	case BEGIN_PACK:
 		packstarttime = time;
 		break;
 	case END_PACK:
+	    // Packing is the first non-entry data item to be displayed
+	    // in the profile window.
 		packtime += time - packstarttime;
-		data[numUserEntries+1] += (int)(time - packstarttime);
+		data[numUserEntries] += (int)(time - packstarttime);
 		break;
 
 	case BEGIN_UNPACK:
 	    unpackstarttime = time;
 		break;
 	case END_UNPACK:
+	    // Unpacking is the second non-entry data item to be displayed
+	    // in the profile window.
 		unpacktime += time - unpackstarttime;
-		data[numUserEntries+2] += (int)(time - unpackstarttime);
+		data[numUserEntries+1] += (int)(time - unpackstarttime);
 		break;
 	default:
 		/*ignore it*/

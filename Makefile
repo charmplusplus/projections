@@ -67,6 +67,7 @@ SRC=\
     projections/gui/LogFileViewerTextArea.java\
     projections/gui/LogFileViewerWindow.java\
     projections/gui/MainButtonPanel.java\
+    projections/gui/MainFileFilter.java\
     projections/gui/MainTitlePanel.java\
     projections/gui/MainWindow.java\
     projections/gui/MultiRunControlPanel.java\

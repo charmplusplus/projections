@@ -163,8 +163,6 @@ public class ColorSelectWindow extends Dialog
 	  Util.gblAdd(this, p2, gbc, 0,2, 1,1, 1,0, 2,2,2,2);
 	  
 	  pack();
-	  // should not do this since parent already does this
-	  //	  setVisible(true); 
    }   
    public void actionPerformed(ActionEvent evt)
    {
@@ -173,8 +171,7 @@ public class ColorSelectWindow extends Dialog
 	  {
 		 myParent.applyNewColor(currentColor);
 	  }   
-	  // dispose();  // does this destroy the window?
-	  setVisible(false);
+	  hide();
    }   
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {

@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 
 public class TimelineColorWindow extends ColorWindowFrame
    implements ActionListener
@@ -86,24 +87,34 @@ public class TimelineColorWindow extends ColorWindowFrame
 		 for(int e=0; e<Analysis.getNumUserEntries(); e++)
 			if(selectedCP == cpEntry[e])
 			   s = names[e][0];
-			   
+		 /*			   
 		 if(colorSelectWindow == null)
 		 {
 			colorSelectWindow = new ColorSelectWindow(this, selectedCP.getColor(), s);
-			colorSelectWindow.setVisible(true);
+			colorSelectWindow.show();
 		 }
 		 else
 		 {
 			colorSelectWindow.setColor(selectedCP.getColor());
 			colorSelectWindow.setString(s);
-			colorSelectWindow.setVisible(true);
-		 }      
+			colorSelectWindow.show();
+		 } 
+		 */
+		 JColorChooser colorWindow = new JColorChooser();
+		 Color returnColor =
+		     colorWindow.showDialog(this, s,
+					    selectedCP.getColor());
+		 if (returnColor != null) {
+		     selectedCP.setColor(returnColor);
+		 }
 	  } 
    }   
+    /* no longer needed
    public void applyNewColor(Color c)
    {
 	  selectedCP.setColor(c);
-   }   
+   }  
+    */ 
    private void Close()
    {
 	  setVisible(false);

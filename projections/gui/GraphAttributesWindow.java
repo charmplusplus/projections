@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import javax.swing.*;
 
 public class GraphAttributesWindow extends ColorWindowFrame
    implements ActionListener
@@ -49,7 +50,8 @@ public class GraphAttributesWindow extends ColorWindowFrame
 	  {   
 		 selectedCP = (ColorPanel)evt.getSource();
 		 String s = "TEST";
-		
+
+		 // construct name of dialog
 		 for(int a=0; a<3; a++)
 			if(selectedCP == cpSystemUsage[a])
 			   s = data.systemUsage[a].name;
@@ -69,8 +71,23 @@ public class GraphAttributesWindow extends ColorWindowFrame
 				  s = data.userEntry[a][t].name;
 				  s += data.userEntry[a][t].type;
 			   }   
-			   
-		 colorSelectWindow = new ColorSelectWindow(this, selectedCP.getColor(), s);
+		 /* Obsolete? Linux JVM does not like it.
+		 if (colorSelectWindow == null) {
+		     colorSelectWindow = new ColorSelectWindow(this, selectedCP.getColor(), s);
+		     colorSelectWindow.show();
+		 } else {
+		     colorSelectWindow.setColor(selectedCP.getColor());
+		     colorSelectWindow.setString(s);
+		     colorSelectWindow.show();
+		 }
+		 */
+		 JColorChooser colorWindow = new JColorChooser();
+		 Color returnColor =
+		     colorWindow.showDialog(this, s,
+					    selectedCP.getColor());
+		 if (returnColor != null) {
+		     selectedCP.setColor(returnColor);
+		 }
 	  }   
 	  else if(evt.getSource() instanceof Button)
 	  {
@@ -192,10 +209,12 @@ public class GraphAttributesWindow extends ColorWindowFrame
 		 }
 	  }           
    }   
+    /* no longer needed
    public void applyNewColor(Color c)
    {
 	  selectedCP.setColor(c);
    }   
+    */
    public void Close()
    {
 	  setVisible(false);

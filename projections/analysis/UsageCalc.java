@@ -13,7 +13,7 @@ public class UsageCalc extends ProjDefs
 	private int dataLen;
 	private long packtime,packstarttime;
 	private long unpacktime,unpackstarttime;
-	private int curEntry = -1;
+	private int curEntry = -1;		
 	private int numUserEntries;
 	
 	private void intervalCalc(float[] data,int type, int entry, long time)
@@ -29,8 +29,10 @@ public class UsageCalc extends ProjDefs
 		startTime = time;
 		break;
 	case END_PROCESSING:
-	    data[curEntry] += (int)((time - startTime) - packtime - unpacktime);
-		break;
+	// curEntry == -1 means that there was no corresponding BEGIN_PROCESSING event, if so ignore the entrypoint
+	    if(curEntry != -1)		
+	    	data[curEntry] += (int)((time - startTime) - packtime - unpacktime);
+	    break;
 
 	case BEGIN_IDLE:
 	    startTime = time;

@@ -66,6 +66,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // Animation
 		    false,  // Time Profile Graphs
 		    true,   // Multirun Analysis
+		    false   // Function Tools (temporary)
 		});
 	    break;
 	case OPENED_FILES :
@@ -118,7 +119,8 @@ public class MainMenuManager extends MenuManager
 		"Overview",
 		"Animation",
 		"Time Profile Graph",
-		"Multirun Analysis"
+		"Multirun Analysis",
+		"Function Tool"
 	    });
 	menubar.add(toolMenu);
 
@@ -158,6 +160,7 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("View Log Files") ||
 		       arg.equals("Animation") ||
 		       arg.equals("Time Profile Graph") ||
+		       arg.equals("Function Tool") ||
 		       arg.equals("Overview")) {
 		parent.menuToolSelected(arg);
 	    }

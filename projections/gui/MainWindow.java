@@ -16,7 +16,7 @@ import projections.misc.*;
 public class MainWindow extends JFrame
     implements ActionListener, ScalePanel.StatusDisplay
 {
-    protected static final int NUM_WINDOWS = 10;
+    protected static final int NUM_WINDOWS = 11;
 
     protected static final int GRAPH_WIN = 0;
     protected static final int MULTI_WIN = 1;
@@ -28,6 +28,7 @@ public class MainWindow extends JFrame
     protected static final int TIMELINE_WIN = 7;
     protected static final int OVERVIEW_WIN = 8;
     protected static final int TIME_PROF_WIN = 9;
+    protected static final int FUNCTION_WIN = 10;
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
@@ -60,6 +61,8 @@ public class MainWindow extends JFrame
     private MultiRunWindow       multiRunWindow;
     private AnimationWindow      animationWindow;
     private TimeProfileWindow    timeProfileWindow;
+    // FunctionTool is still very much temporary despite first-class treatment
+    private FunctionTool         functionWindow;
 
     // components associated with the main window
     private MainTitlePanel        titlePanel;
@@ -130,6 +133,7 @@ public class MainWindow extends JFrame
 	toolDescriptions[TIMELINE_WIN] = "Timeline";
 	toolDescriptions[OVERVIEW_WIN] = "Overview";
 	toolDescriptions[TIME_PROF_WIN] = "Time Profile Graph";
+	toolDescriptions[FUNCTION_WIN] = "AMPI Functions";
 
 	// cross-tool masks allow tools to decide if their parameter sets
 	// are compatible and hence may "cross over" from one tool to the
@@ -194,6 +198,8 @@ public class MainWindow extends JFrame
 			return "StlWindow";
 		} else if (index == TIME_PROF_WIN) {
 			return "TimeProfileWindow";
+		} else if (index == FUNCTION_WIN) {
+			return "FunctionTool";
 		} else {
 			return null;
 		}
@@ -221,6 +227,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("TimeProfileWindow", TIME_PROF_WIN);
 	} else if (item.equals("Multirun Analysis")) {
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
+	} else if (item.equals("Function Tool")) {
+	    showChildWindow("FunctionTool", FUNCTION_WIN);
 	}
     }
 

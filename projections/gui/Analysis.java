@@ -648,6 +648,10 @@ public class Analysis {
 	return functionColors[sts.getFunctionEventIndex(eventID)];
     }
 
+    public static Color[] getFunctionColors() {
+	return functionColors;
+    }
+
     public static String getFunctionName(int funcID) {
 	return sts.getFunctionEventDescriptor(funcID);
     }

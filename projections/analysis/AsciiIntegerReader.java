@@ -113,7 +113,7 @@ class AsciiIntegerReader {
 		ret.append(c);
 		while (!isSpace(last=c=nextChar())) 
 			ret.append(c);
-			return ret.toString();
+		return ret.toString();
 	}
 	final public int toDigit(char c) {
 		return ((int)c)-((int)'0');

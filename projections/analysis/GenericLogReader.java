@@ -158,6 +158,21 @@ public class GenericLogReader extends ProjectionsReader
 	    data.time = reader.nextLong();
 	    reader.nextLine(); // Skip over any garbage 
 	    break;
+	case BEGIN_FUNC:
+	    data.time = reader.nextLong();
+	    data.entry = reader.nextInt();
+	    data.lineNo = reader.nextInt();
+	    data.funcName = reader.nextString();
+	    // comment of interest, what "nextString" is doing in an
+	    // AsciiIntegerReader is beyond me, but I appreciate its
+	    // existance!
+	    reader.nextLine();
+	    break;
+	case END_FUNC:
+	    data.time = reader.nextLong();
+	    data.entry = reader.nextInt();
+	    reader.nextLine();
+	    break;
 	case MESSAGE_RECV:
 	    data.mtype = reader.nextInt();
 	    data.time = reader.nextLong();

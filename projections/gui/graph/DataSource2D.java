@@ -13,7 +13,7 @@ public class DataSource2D extends DataSource
     private String title;
     private double[][] data; /*The data to be graphed*/
     private int xValues;
-    private GenericGraphWindow parent;
+    private PopUpAble parent;
     
     public DataSource2D(String title_, double[][] data_) {
 	title=title_;
@@ -23,7 +23,7 @@ public class DataSource2D extends DataSource
     }
   
     public DataSource2D(String title_, double[][] data_, 
-			GenericGraphWindow parent_) {
+			PopUpAble parent_) {
 	title=title_;
 	data=data_;
 	parent=parent_;

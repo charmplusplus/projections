@@ -11,7 +11,6 @@ package projections.misc;
 
 public class LogEntryData 
 {
-    // bad - should use accessors, but what the heck 8)
     public int type;	 // type of the event eg: BEGIN_PROCESSING	
     public int mtype;	 // determines
     public long time;	 // timestamp
@@ -40,6 +39,11 @@ public class LogEntryData
 	// this is fixed (since it is based on a 3D tuple)
 	id = new int[3];
     }
+
+    // 9/14/2004 - added AMPI Function tracing support
+    // "entry" in the case of functions will be the function ID.
+    public int lineNo;          // line number of the function call.
+    public String funcName;     // the name of the function
     
     /* return the copy of the current object */ 
     public LogEntryData copyOf(){

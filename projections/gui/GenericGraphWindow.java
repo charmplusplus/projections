@@ -21,6 +21,7 @@ import javax.swing.*;
 
 public abstract class GenericGraphWindow 
     extends ProjectionsWindow 
+    implements PopUpAble
 {
     static final Color BACKGROUND = Analysis.background;
 

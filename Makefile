@@ -58,6 +58,7 @@ SRC=\
     projections/gui/EntryPointWindow.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
+    projections/gui/FunctionTool.java\
     projections/gui/GenericGraphWindow.java\
     projections/gui/GraphAttributesWindow.java\
     projections/gui/GraphControlPanel.java\
@@ -105,6 +106,7 @@ SRC=\
     projections/gui/OrderedIntList.java\
     projections/gui/OrderedUsageList.java\
     projections/gui/PieChartWindow.java\
+    projections/gui/PopUpAble.java\
     projections/gui/ProfileAxisCanvas.java\
     projections/gui/ProfileColorWindow.java\
     projections/gui/ProfileData.java\

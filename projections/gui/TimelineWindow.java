@@ -66,6 +66,7 @@ public class TimelineWindow extends Frame
 	  canvas_.repaint();
 
 	  Rectangle rect = canvas_.rubberBand.bounds();
+	  if (rect.width == 0) return;
 	  if ((e.getModifiers()&InputEvent.BUTTON3_MASK)==  
 	      InputEvent.BUTTON3_MASK) 
 	  {

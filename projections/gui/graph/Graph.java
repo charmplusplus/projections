@@ -1,10 +1,16 @@
 package projections.gui.graph;
 
 import projections.gui.*; 
-import java.awt.*;
+//import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.FontMetrics;
 import java.awt.event.*;
+import javax.swing.*;
  
-public class Graph extends Canvas implements MouseMotionListener
+public class Graph extends JPanel implements MouseMotionListener
 {
    public static final int STACKED    = 0;		// type of the bar graph
    public static final int UNSTACKED  = 1;		// single, multiple or stacked
@@ -37,7 +43,7 @@ public class Graph extends Canvas implements MouseMotionListener
 	setSize(getPreferredSize());	
 	
 	GraphType = BAR;			// default GraphType is BAR
-	BarGraphType = STACKED;                 // default BarGraphType is STACKED
+	BarGraphType = UNSTACKED;                 // default BarGraphType is UNSTACKED
 	labelColor = Color.yellow;
 	
 	xscale = 1.0;
@@ -127,8 +133,14 @@ public class Graph extends Canvas implements MouseMotionListener
 	xscale = val;
    }
 
-   public void paint(Graphics g)
+   public void paintComponent(Graphics g)
    {
+	  super.paintComponent(g);
+
+g.setColor(Color.black);
+g.fillRect(0, 0, getWidth(), getHeight());
+g.setColor(getForeground());
+
 	  w = getSize().width;
           h = getSize().height;
 	  
@@ -186,10 +198,10 @@ public class Graph extends Canvas implements MouseMotionListener
           super.setBounds(x, y, w, h);
    }
 
-   public void update(Graphics g)
+ /*  public void update(Graphics g)
    {
-          paint(g);
-   }
+          paintComponent(g);
+   }*/
 
    private void drawDisplay(Graphics g)
    {
@@ -313,9 +325,8 @@ public class Graph extends Canvas implements MouseMotionListener
 	double [] data = new double[yValues];
 	int x1,x2;
 	int y;
-        //int barWidth  = (int)(xscale*10) - 1;
         int barWidth  = (int)(pixelincrementX*(0.75)) ;
-        if(barWidth<6) barWidth=6;
+        //if(barWidth<6) barWidth=6;
           
 	for(int i=0; i < xValues; i++)
 	{
@@ -423,8 +434,8 @@ public class Graph extends Canvas implements MouseMotionListener
 
 
    public static void main(String [] args){
-	Frame f = new Frame();
-	Panel mainPanel = new Panel();
+	JFrame f = new JFrame();
+	JPanel mainPanel = new JPanel();
 	double data[][]={{2000,21,49,3},{25,34,8,10},{23,20,54,3},{20,27,4,40},{25,21,7,4},{20,21,8,10},{24,26,44,4},{22,26,20,5},{29,29,5,20},{20,21,8,7},{24,20,10,3},{21,25,6,8},{34,23,11,11},{20,20,20,20},{27,25,4,5},{21,20,5,7},{21,24,5,8},{26,22,5,3},{26,29,7,10},{29,20,8,6},{21,24,9,4}};
 
 	f.addWindowListener(new WindowAdapter()
@@ -443,7 +454,7 @@ public class Graph extends Canvas implements MouseMotionListener
 	g.setBarGraphType(Graph.UNSTACKED);
         g.setData(ds,xa,ya);
         mainPanel.add(g);
-	f.add(mainPanel);
+	f.getContentPane().add(mainPanel);
 	f.pack();
 	f.setSize(500,400);
         f.setTitle("Projections");

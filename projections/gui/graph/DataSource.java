@@ -36,7 +36,7 @@ public abstract class DataSource
   /**
    * Return the Color of this value.
    *  The valNo passed in is between 0 and getValueCount()-1, inclusive.
-   *  The default is to cycle through white, red, blue, and gray.
+   *  The default is to cycle through red, green, blue, and gray.
    *  Entry points should be colored with the standard entry point colors.
    */
   public Color getColor(int valNo) {

@@ -5,10 +5,10 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class GraphPanel extends Panel
+public class GraphPanel extends JPanel
    implements ActionListener, ItemListener, AdjustmentListener
 {
- 	private Panel mainPanel; 
+ 	private JPanel mainPanel; 
 	private Graph displayCanvas;
 	private Scrollbar HSB;
 
@@ -30,7 +30,7 @@ public class GraphPanel extends Panel
                         {
                            setAllBounds();
 			   displayCanvas.repaint();
-                           //UpdateDisplay();*/
+                           //UpdateDisplay();
                         }
                  }
           });
@@ -41,7 +41,7 @@ public class GraphPanel extends Panel
 	
 	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
  
-	  mainPanel = new Panel();
+	  mainPanel = new JPanel();
           mainPanel.setLayout(null);
           mainPanel.setBackground(Color.black);
           mainPanel.setForeground(Color.white);
@@ -80,7 +80,7 @@ public class GraphPanel extends Panel
           GridBagLayout gbl = new GridBagLayout();
           GridBagConstraints gbc = new GridBagConstraints();
  
-          Panel buttonPanel = new Panel();
+          JPanel buttonPanel = new JPanel();
           buttonPanel.setLayout(gbl);
  
           Util.gblAdd(buttonPanel, cbLineGraph, gbc, 0,0, 1,1, 1,0);
@@ -199,8 +199,8 @@ public class GraphPanel extends Panel
    }
 
    public static void main(String [] args){
-        Frame f = new Frame();
-        Panel mainPanel;  			//Panel();
+        JFrame f = new JFrame();
+        JPanel mainPanel;  			//Panel();
 	
         double data[][]={{20,2100,49,3},{25,34,8,10},{23,20,54,3},{2000,27,4,40},{25,21,7,4},{20,21,8,10},{24,26,44,4},{22,26,20,5},{29,29,5,20},{20,21,8,7},{24,20,10,3},{21,25,6,8},{34,23,11,11},{20,20,20,20},{27,25,4,5},{21,20,5,7},{21,24,5,8},{26,22,5,3},{26,29,7,10},{29,20,8,6},{21,24,9,4}};
  
@@ -220,7 +220,14 @@ public class GraphPanel extends Panel
         g.setBarGraphType(Graph.UNSTACKED);
         g.setData(ds,xa,ya);
         mainPanel = new GraphPanel(g);
-        f.add(mainPanel);
+	JMenuBar mbar = new JMenuBar();
+	f.setJMenuBar(mbar);
+	JMenu fileMenu = new JMenu("File");
+	mbar.add(fileMenu);
+	JMenuItem trialMenuItem = new JMenuItem("Trial Item");
+	fileMenu.add(trialMenuItem);
+
+        f.getContentPane().add(mainPanel);
         f.pack();
         f.setSize(800,600);
         f.setTitle("Projections");

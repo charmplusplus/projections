@@ -178,12 +178,10 @@ public class LogLoader extends ProjDefs
 		// a rogue begin event to have data dropped at the beginning.
 		if ((LE.TransactionType == BEGIN_PROCESSING) && 
 		    (LE.Entry != -1)) {
-		    isProcessing = true;
 		    Time       = LE.Time - BeginTime;
 		    Entry      = LE.Entry;
 		} else if ((LE.TransactionType == END_PROCESSING) &&
 			   (LE.Entry != -1)) {
-		    isProcessing = false;
 		    Time       = LE.Time - BeginTime;
 		    Entry      = LE.Entry;
 		} else if (LE.TransactionType == BEGIN_IDLE) {
@@ -250,7 +248,7 @@ public class LogLoader extends ProjDefs
 			break;
 		    case BEGIN_PROCESSING:
 			if (isProcessing) {
-			    // bad. We add a "pretend" end event to accomodate
+			    // We add a "pretend" end event to accomodate
 			    // the prior begin processing event.
 			    if (TE != null) {
 				TE.EndTime = LE.Time - BeginTime;
@@ -297,6 +295,7 @@ public class LogLoader extends ProjDefs
 			    }
 			}
 			TE = null;
+			isProcessing = false;
 			break;
 		    case CREATION:
 			tempte = false;
@@ -601,7 +600,6 @@ public class LogLoader extends ProjDefs
 		    }
 		}
 	    }
-	    isProcessing = true;
 	    log.nextLine();  // ignore rest of this line
 	    break;
 	case END_PROCESSING:
@@ -643,7 +641,6 @@ public class LogLoader extends ProjDefs
 		    }
 		}
 	    }
-	    isProcessing = false;
 	    log.nextLine();  // ignore rest of this line
 	    break;
 	case BEGIN_TRACE:

@@ -320,9 +320,17 @@ public class StsReader extends ProjDefs
 
     // *** function event accessors ***
     public int getNumFunctionEvents() {
+	// **FIXME**
+	// ** create a new function called getFunctionArraySize **
+	// ** getNumFunctionEvents does not semantically mean the same thing!
+	//
 	// the +1 is a silly hack because function id counts does not begin
 	// from 0. No easy solution is visible in the near-future.
-	return functionEvents.size()+1;
+	if (functionEvents.size() == 0) {
+	    return 0;
+	} else {
+	    return functionEvents.size()+1;
+	}
     }
 
     public int getFunctionEventIndex(int eventID) {

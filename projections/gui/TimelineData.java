@@ -76,7 +76,7 @@ public class TimelineData
 	  processorUsage = null;
 	  entryUsageList = null;
    
-	  processorString = "0";
+	  processorString = Analysis.getValidProcessorString();
 	  
 	  offset = 10;
 	  pixelIncrement = 5.0;

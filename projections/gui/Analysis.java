@@ -138,6 +138,11 @@ public class Analysis {
 		else
 			return 0;
 	}
+
+    public static String getValidProcessorString() {
+	return logLoader.getValidProcessorString();
+    }
+
 	public static int getNumProcessors() {
 		return sts.getProcessorCount();
 	}

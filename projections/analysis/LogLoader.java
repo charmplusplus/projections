@@ -15,6 +15,12 @@ public class LogLoader extends ProjDefs
 {
    private StsReader sts;
    private long    BeginTime, EndTime;
+    private String validPEString;
+
+    private int basePE, upperPE;
+    private boolean validPERange;
+    private StringBuffer validPEStringBuffer;
+	  
 
    public LogLoader (StsReader Nsts) throws LogLoadException
    {
@@ -25,9 +31,10 @@ public class LogLoader extends ProjDefs
 //	  long              Begin;
 	  long 	       back;
 	  String           Line;
+	  File testFile;
 	  RandomAccessFile InFile;
 	  StringTokenizer  st;
-	  
+
 	  sts=Nsts;
 	  ProgressDialog bar=new ProgressDialog("Finding end time...");
 
@@ -35,13 +42,35 @@ public class LogLoader extends ProjDefs
 	  BeginTime = 0;
 	  EndTime   = Integer.MIN_VALUE;
 	  int nPe=sts.getProcessorCount();
+
+	  validPEStringBuffer = new StringBuffer();
+	  validPERange = false;
+	  basePE = -1;
+	  upperPE = -1;
 	  for(I = 0; I<nPe; I++)
 	  {
 		  bar.progress(I,nPe,I+" of "+nPe);
 		 try
 		 {
-			InFile = new RandomAccessFile (sts.getLogName(I), "r");
-	    
+		     // test the file to see if it exists ...
+		     testFile = new File(sts.getLogName(I));
+		     if (testFile.exists() == false) {
+			 System.out.println(sts.getLogName(I) +
+					    " does not exist, ignoring.");
+			 updatePEStringBuffer();
+			 validPERange = false;
+		     } else {
+
+			InFile = new RandomAccessFile (testFile, "r");
+
+			// success, so register processor as valid.
+			registerPE(I);
+			/*
+			if (validPEStringBuffer.length() > 0) {
+			    validPEStringBuffer.append(",");
+			}
+			validPEStringBuffer.append(String.valueOf(I));
+			*/
 	    back = InFile.length()-80*3; //Seek to the end of the file
 	    if (back < 0) back = 0;
 			InFile.seek(back);
@@ -60,12 +89,16 @@ public class LogLoader extends ProjDefs
 			}
 			
 			InFile.close ();
+		     }
 		 }
 		 catch (IOException E)
 		 {
 			System.out.println ("Couldn't read log file " + sts.getLogName(I));
 		 }
 	  }
+	  updatePEStringBuffer();
+	  validPEString = validPEStringBuffer.toString();
+
 	  bar.done();
 	  sts.setTotalTime(EndTime-BeginTime);
    }            
@@ -406,4 +439,34 @@ public class LogLoader extends ProjDefs
 		
 	  return ret;
    }   
+
+    public String getValidProcessorString() {
+	return validPEString;
+    }
+
+    private void registerPE(int peIdx) {
+	if (validPERange == false) {
+	    basePE = peIdx;
+	}
+	upperPE = peIdx;
+	validPERange = true;
+    }
+
+    private void updatePEStringBuffer() {
+	if (!validPERange) {
+	    return;
+	}
+	if (validPEStringBuffer.length() > 0) {
+	    validPEStringBuffer.append(",");
+	}
+	if (upperPE > basePE) {
+	    validPEStringBuffer.append(String.valueOf(basePE));
+	    validPEStringBuffer.append("-");
+	    validPEStringBuffer.append(String.valueOf(upperPE));
+	} else if (upperPE == basePE) {
+	    validPEStringBuffer.append(String.valueOf(basePE));
+	} else {
+	    // error. Should never happen.
+	}
+    }
 }

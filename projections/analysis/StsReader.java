@@ -46,9 +46,6 @@ public class StsReader extends ProjDefs
 		    sumBaseName = baseName;
 		    hasSum = (new File(getSumName(0))).isFile();
 		}
-		// "if user selected a summary sts file, log files are
-		// always ignored"
-		hasLog=(new File(getLogName(0))).isFile();
 		totalTime=-1;
 	try
 	    {
@@ -146,6 +143,18 @@ public class StsReader extends ProjDefs
 			else if (s1.equals ("END"))
 			    break;
 		    }
+
+
+		// "if user selected a summary sts file, log files are
+		// always ignored"
+		// test to see if at least one log file exists
+		hasLog = false;
+		for (int i=0;i<NumPe;i++) {
+		    if ((new File(getLogName(i))).isFile()) {
+			hasLog = true;
+		    }
+		}
+
 		InFile.close();
 	    }
 	catch (FileNotFoundException E)

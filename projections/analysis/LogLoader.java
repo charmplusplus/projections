@@ -130,8 +130,11 @@ public class LogLoader extends ProjDefs
 	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
 	    // **CW** a hack to avoid parsing the string - simply count
 	    // the number of tokens.
-	    if (headerTokenizer.countTokens() > 1) {
+            int tokenExpected = 2;
+	    if (Analysis.getVersion() >= 6.0)  tokenExpected = 3;
+	    if (headerTokenizer.countTokens() >= tokenExpected) {
 		deltaEncoded = true;
+                System.out.println("DELTA format found.");
 	    } else {
 		deltaEncoded = false;
 	    }

@@ -12,6 +12,7 @@ public class TimelineObject extends Component
    private TimelineMessageWindow msgwindow;
    private long    beginTime, endTime;
    private int     entry;
+   private int     msglen;
    private boolean inside = false; 
    private int pCurrent, pCreation;
    private double  usage;
@@ -26,7 +27,7 @@ public class TimelineObject extends Component
 
    public TimelineObject(TimelineData data, long bt, long et, int n, 
 						 TimelineMessage[] msgs, PackTime[] packs,
-						 int p1, int p2)
+						 int p1, int p2, int mlen)
    {
 	  setBackground(Color.black);
 	  setForeground(Color.white);
@@ -40,13 +41,14 @@ public class TimelineObject extends Component
 	  pCurrent  = p1;
 	  pCreation = p2;
 	  f = (Frame)data.timelineWindow;
+          msglen = mlen;
 	  
 	  setUsage();
 	  setPackUsage();
 	  
 	  if(n != -1)
 	  {
-		 bubbletext  = new String[7];
+		 bubbletext  = new String[8];
 		 int ecount = Analysis.getUserEntryCount();
 		 if (n >= ecount) {
 		   System.out.println("Fatal error: invalid entry "+n+"!");
@@ -54,14 +56,15 @@ public class TimelineObject extends Component
 		 }
 		 bubbletext[0] = (Analysis.getUserEntryNames())[n][1] + "::" + 
 					  (Analysis.getUserEntryNames())[n][0]; 
-		 bubbletext[1] = "Begin Time: " + bt;
-		 bubbletext[2] = "End Time: " + et;
-		 bubbletext[3] = "Total Time: " + U.t(et-bt);
-		 bubbletext[4] = "Packing: " + U.t(packtime);
+		 bubbletext[1] = "Msg Len: " + msglen;
+		 bubbletext[2] = "Begin Time: " + bt;
+		 bubbletext[3] = "End Time: " + et;
+		 bubbletext[4] = "Total Time: " + U.t(et-bt);
+		 bubbletext[5] = "Packing: " + U.t(packtime);
 		 if (packtime>0)
 			bubbletext[4]+=" (" + (100*(float)packtime/(et-bt+1)) + "%)";
-		 bubbletext[5] = "Msgs created: " + msgs.length;
-		 bubbletext[6] = "Created by processor " + pCreation;
+		 bubbletext[6] = "Msgs created: " + msgs.length;
+		 bubbletext[7] = "Created by processor " + pCreation;
 	  }
 	  else
 	  {

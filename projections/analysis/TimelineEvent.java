@@ -7,17 +7,22 @@ public class TimelineEvent
 {
 
 public long BeginTime, EndTime;
-public int EntryPoint, SrcPe;
+public int EntryPoint, SrcPe, MsgLen;
 public Vector MsgsSent;  // of class TimelineMessage
 public Vector PackTimes; // of class PackTime
 
 public TimelineEvent ()
 {
 }
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
+{
+	BeginTime=bt; EndTime=et;
+	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
+}
 public TimelineEvent(long bt,long et, int ep,int pe)
 {
 	BeginTime=bt; EndTime=et;
-	EntryPoint=ep; SrcPe=pe;
+	EntryPoint=ep; SrcPe=pe; MsgLen=0;
 }
 public void addMessage(TimelineMessage m)
 {

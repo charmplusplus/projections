@@ -22,7 +22,8 @@ class AboutDialog extends Dialog
 	  p1.add(new Label("PROJECTIONS v2.1", Label.CENTER));
 	  p1.add(new Label("Performance analysis for Charm++ programs", Label.CENTER));
 	  p1.add(new Label("By Mike DeNardo, Sid Cammeresi, ", Label.CENTER));
-	  p1.add(new Label("Theckla Loucios, and Orion Lawlor", Label.CENTER));
+	  p1.add(new Label("Theckla Loucios, Orion Lawlor,", Label.CENTER));
+	  p1.add(new Label("and Gengbin Zheng", Label.CENTER));
 	  p1.add(new Label("Parallel Programming Lab", Label.CENTER));
 	  p1.add(new Label("University of Illinois at Urbana-Champaign", Label.CENTER));
 	  p1.add(new Label("http://charm.cs.uiuc.edu/", Label.CENTER));

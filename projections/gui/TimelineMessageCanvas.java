@@ -22,8 +22,8 @@ public class TimelineMessageCanvas extends Canvas
 	  msgs = obj.getMessages();
 	  names = Analysis.getUserEntryNames();
 
-	  sTitles = new String[18];
-	  width = new int[18];
+	  sTitles = new String[20];
+	  width = new int[20];
 	  
 	  int entry = obj.getEntry();
 	  
@@ -40,8 +40,9 @@ public class TimelineMessageCanvas extends Canvas
 	  sTitles[10]= "      EXECUTED ON: ";
 	  sTitles[11]= "Processor " + obj.getPCurrent();
 	  sTitles[12]= "MSG#";
-	  sTitles[13]= "TIME SENT";
-	  sTitles[14]= "TO ENTRY:";
+	  sTitles[13]= "MSG SIZE:";
+	  sTitles[14]= "TIME SENT";
+	  sTitles[15]= "TO ENTRY:";
 	  
 	  setBackground(Color.black);
 	  setForeground(Color.lightGray);
@@ -60,23 +61,26 @@ public class TimelineMessageCanvas extends Canvas
 			fm = g.getFontMetrics(g.getFont());
 			h = (fm.getHeight() + 5) * (6 + obj.getNumMsgs());
 	 
-			for(int i=0; i<=14; i++)
+			for(int i=0; i<=15; i++)
 			{
 			   width[i] = fm.stringWidth(sTitles[i]);
 			}
 
-			width[15] = 0;
 			width[16] = 0;
 			width[17] = 0;
+			width[18] = 0;
+			width[19] = 0;
 			for(int m=0; m<obj.getNumMsgs(); m++)
 			{
 			   int w1 = fm.stringWidth("" + m);
-			   int w2 = fm.stringWidth("" + msgs[m].Time);
-			   int w3 = fm.stringWidth(names[msgs[m].Entry][0]);
+			   int w2 = fm.stringWidth("" + msgs[m].MsgLen);
+			   int w3 = fm.stringWidth("" + msgs[m].Time);
+			   int w4 = fm.stringWidth(names[msgs[m].Entry][0]);
 			
-			   if(w1 > width[15]) width[15] = w1;
-			   if(w2 > width[16]) width[16] = w2;
-			   if(w3 > width[17]) width[17] = w3;
+			   if(w1 > width[16]) width[16] = w1;
+			   if(w2 > width[17]) width[17] = w2;
+			   if(w3 > width[18]) width[18] = w3;
+			   if(w4 > width[19]) width[19] = w4;
 			}
 			w = width[0] + width[1];
 			int wtmp = 0;
@@ -85,11 +89,11 @@ public class TimelineMessageCanvas extends Canvas
 			wtmp = 0;
 			for(int i=8; i<=11; i++) wtmp += width[i];
 			if(wtmp > w) w = wtmp;
-			wtmp = 20;
-			for(int i=12; i<=14; i++) wtmp += width[i];
+			wtmp = 18;
+			for(int i=12; i<=15; i++) wtmp += width[i];
 			if(wtmp > w) w = wtmp;
-			wtmp = 20;
-			for(int i=15; i<=17; i++) wtmp += width[i];
+			wtmp = 18;
+			for(int i=16; i<=19; i++) wtmp += width[i];
 			if(wtmp > w) w = wtmp;
 
 			g.dispose();
@@ -100,7 +104,7 @@ public class TimelineMessageCanvas extends Canvas
    }   
    public void paint(Graphics g)
    {
-	  int w1, w2, w3;
+	  int w1, w2, w3, w4;
 	  
 	  int wi = getSize().width;
 	  int ht = getSize().height;
@@ -108,16 +112,17 @@ public class TimelineMessageCanvas extends Canvas
 	  int space0 = (wi-width[0]-width[1])/2;
 	  int space1 = (wi-width[2]-width[3]-width[4]-width[5]-width[6]-width[7])/2;
 	  int space2 = (wi-width[8]-width[9]-width[10]-width[11])/2;
-	  int space3 = (wi-width[15]-width[16]-width[17])/4;
+	  int space3 = (wi-width[16]-width[17]-width[18]-width[19])/5;
 	  
 	  if(space0 < 0) space0 = 0;
 	  if(space1 < 0) space1 = 0;
 	  if(space2 < 0) space2 = 0;
 	  if(space3 < 0) space3 = 0;   
 
-	  w1 = width[15] + (int)(space3 * 1.5);
-	  w2 = width[16] + space3;
-	  w3 = width[17] + (int)(space3 * 1.5);
+	  w1 = width[16] + (int)(space3 * 1.3);
+	  w2 = width[17] + space3;
+	  w3 = width[18] + (int)(space3 * 1.3);
+	  w4 = width[19] + (int)(space3);
 	  
 	  int dy = fm.getHeight() + 5;
 	  int y  = dy;
@@ -151,17 +156,20 @@ public class TimelineMessageCanvas extends Canvas
 	  g.drawString(sTitles[12], (w1-width[12])/2,       y+=(2*dy));
 	  g.drawString(sTitles[13], (w2-width[13])/2+w1,    y);
 	  g.drawString(sTitles[14], (w3-width[14])/2+w1+w2, y); 
+	  g.drawString(sTitles[15], (w4-width[15])/2+w1+w2+w3, y); 
 	 
 	  g.setColor(Color.lightGray);
 	  for(int m=0; m<obj.getNumMsgs(); m++)
 	  {
 		 String sNum   = new String("" + m);
+		 String sMLen = new String("" + msgs[m].MsgLen);
 		 String sTime  = new String("" + msgs[m].Time);
 		 String sEntry = new String(names[msgs[m].Entry][0]);
 		 
 		 g.drawString(sNum,   (w1-fm.stringWidth(sNum  ))/2,       y+=dy);
-		 g.drawString(sTime,  (w2-fm.stringWidth(sTime ))/2+w1,    y);
-		 g.drawString(sEntry, (w3-fm.stringWidth(sEntry))/2+w1+w2, y);
+		 g.drawString(sMLen,  (w2-fm.stringWidth(sMLen ))/2+w1,    y);
+		 g.drawString(sTime,  (w3-fm.stringWidth(sTime ))/2+w1+w2,  y);
+		 g.drawString(sEntry, (w4-fm.stringWidth(sEntry))/2+w1+w2+w3, y);
 	  }     
    }   
    public void update(Graphics g)

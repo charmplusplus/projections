@@ -134,7 +134,7 @@ public class LogLoader extends ProjDefs
 				  switch(LE.TransactionType)
 				  {
 					 case BEGIN_PROCESSING:
-						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe));
+						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe,LE.MsgLen));
 						break;
 					 case END_PROCESSING:
 						if(TE!=null)
@@ -145,18 +145,17 @@ public class LogLoader extends ProjDefs
 					 case CREATION:
 						tempte = false;
 						if(TE==null) { //Start a new dummy event
-						   Timeline.addElement(TE=new TimelineEvent(LE.Time-BeginTime,LE.Time-BeginTime,Entry,LE.Pe));
+						   Timeline.addElement(TE=new TimelineEvent(LE.Time-BeginTime,LE.Time-BeginTime,Entry,LE.Pe,LE.MsgLen));
 						   tempte = true;
 						}
-						TE.addMessage (TM=new TimelineMessage (LE.Time - BeginTime,LE.Entry));
+						TE.addMessage (TM=new TimelineMessage (LE.Time - BeginTime,LE.Entry,LE.MsgLen));
 						if (tempte) TE=null;
 						break;
 					 case USER_EVENT:
 						if(TE==null) //Start a new dummy event
 						   Timeline.addElement(TE=new TimelineEvent(
 							   Time,Long.MAX_VALUE,Entry,LE.Pe));
-						TE.addMessage (TM=new TimelineMessage(
-							   LE.Time - BeginTime,-LE.MsgType));
+						TE.addMessage (TM=new TimelineMessage(LE.Time - BeginTime,-LE.MsgType,0));
 						break;
 
 					 case BEGIN_PACK:
@@ -294,6 +293,7 @@ public class LogLoader extends ProjDefs
 			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
+			Temp.MsgLen  = log.nextInt();
 			return Temp;
 		 case ENQUEUE:
 		 case DEQUEUE:

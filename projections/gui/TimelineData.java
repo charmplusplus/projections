@@ -238,7 +238,7 @@ public class TimelineData
 
 	  int numItems;
 	  long btime, etime;
-	  int entry, pSrc, numMsgs, numpacks;
+	  int entry, pSrc, numMsgs, numpacks, msglen;
 		
 	  tl = Analysis.createTL(pnum, beginTime, endTime);
 	  numItems = tl.size();   
@@ -251,6 +251,7 @@ public class TimelineData
 		 etime = tle.EndTime; 
 		 entry = tle.EntryPoint; 
 		 pSrc  = tle.SrcPe;
+		 msglen  = tle.MsgLen;
 			
 		 msglist = tle.MsgsSent;
 		 if(msglist == null)
@@ -272,7 +273,7 @@ public class TimelineData
 		 for(int p=0; p<numpacks; p++)
 			packs[p] = (PackTime)packlist.elementAt(p);
 		 
-		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc);
+		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen);
 	  }
 	  
 	  return tlo;

@@ -163,9 +163,10 @@ public class LogReader extends ProjDefs
 	int type;
 	int mtype;
 	long time;
-		int entry;
+	int entry;
 	int event;
 	int pe;
+	int msglen;
 	
 	numProcessors = sts.getProcessorCount();
 	numUserEntries = sts.getEntryCount();
@@ -210,13 +211,15 @@ public class LogReader extends ProjDefs
 				pe = log.nextInt();
 								intervalCalc(type, 0, 0, (time-progStartTime));
 				break;
-			case BEGIN_PROCESSING: case END_PROCESSING:
 			case CREATION:
+			case BEGIN_PROCESSING: 
+                        case END_PROCESSING:
 				mtype = log.nextInt();
 				entry = log.nextInt();
 				time = log.nextLong();
 				event = log.nextInt();
 				pe = log.nextInt();
+				msglen = log.nextInt();
 			//System.out.println(type+" "+mtype+" "+entry+" "+time);
 								intervalCalc(type, mtype, entry, (time-progStartTime));
 				break;

@@ -172,8 +172,17 @@ public class MultiRunData {
      *  sts filename.
      */
     private String getSumFilename(String stsFilename, int pe) {
-	return stsFilename.substring(0, stsFilename.lastIndexOf('.')) +
-	    "." + pe + ".sum";
+	String  withoutSts = 
+	    stsFilename.substring(0, stsFilename.lastIndexOf('.'));
+	// behavior depends on whether the sts file is a summary based one
+	// or a standard sts file.
+	if (withoutSts.substring(withoutSts.lastIndexOf('.'), 
+				 withoutSts.length()).equals(".sum")) {
+	    return withoutSts.substring(0, withoutSts.lastIndexOf('.')) +
+		"." + pe + ".sum";
+	} else {
+	    return withoutSts + "." + pe + ".sum";
+	}
 	
     }
 

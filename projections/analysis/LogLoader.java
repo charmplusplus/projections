@@ -20,6 +20,10 @@ public class LogLoader extends ProjDefs
     private int basePE, upperPE;
     private boolean validPERange;
     private StringBuffer validPEStringBuffer;
+
+    // **CW** register previous event timestamp to support delta encoding.
+    private long prevTime = 0;
+    private boolean deltaEncoded = false;
     
     public LogLoader() 
 	throws LogLoadException
@@ -105,13 +109,36 @@ public class LogLoader extends ProjDefs
 	PackTime          PT          = null;
 	boolean tempte;
 	
+	String logHeader;
+
 	System.gc ();
 
 	// open the file
 	try {
 	    log = 
 		new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
+
+	    /*
 	    log.nextLine(); //First line contains junk
+	    */
+
+	    // **CW** first line is no longer junk.
+	    // With the advent of the delta-encoding format, it should
+	    // contain an additional field which specifies if the log file
+	    // is a delta-encoded file.
+	    logHeader = log.readLine();
+	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
+	    // **CW** a hack to avoid parsing the string - simply count
+	    // the number of tokens.
+	    if (headerTokenizer.countTokens() > 1) {
+		deltaEncoded = true;
+	    } else {
+		deltaEncoded = false;
+	    }
+
+	    // **CW** each time we open the file, we need to reset the
+	    // previous event timestamp to 0 to support delta encoding.
+	    prevTime = 0;
 
 	    while (true) { //Seek to time Begin
 		LE = readlogentry(log);
@@ -327,6 +354,8 @@ public class LogLoader extends ProjDefs
     LogEntry readlogentry(AsciiIntegerReader log) 
 	throws IOException
     {   
+	// **CW** prevTime (object variable) holds the previous time-stamp. 
+
 	LogEntry Temp = new LogEntry();   
 	  
 	Temp.TransactionType = log.nextInt();
@@ -334,13 +363,23 @@ public class LogLoader extends ProjDefs
 	switch (Temp.TransactionType) {
 	case USER_EVENT:
 	    Temp.MsgType = log.nextInt();
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
 	    return Temp;
 	case USER_EVENT_PAIR:
 	    Temp.MsgType = log.nextInt();
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
 	    return Temp;
@@ -350,13 +389,23 @@ public class LogLoader extends ProjDefs
 	case END_PACK:
 	case BEGIN_UNPACK:
 	case END_UNPACK:
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.Pe      = log.nextInt();
 	    return Temp;
 	case BEGIN_PROCESSING:
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
 	    if (Analysis.getVersion() > 1.0) {
@@ -374,7 +423,12 @@ public class LogLoader extends ProjDefs
 	case END_PROCESSING:
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
 	    if (Analysis.getVersion() > 1.0) {
@@ -390,13 +444,18 @@ public class LogLoader extends ProjDefs
 	case ENQUEUE:
 	case DEQUEUE:
 	    Temp.MsgType = log.nextInt();
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
 	    return Temp;
 	case INSERT:
 	case FIND:
-	case DELETE:
+	case DELETE:  // **CW** no longer pertinent???
 	    Temp.MsgType = log.nextInt();
 	    Temp.Time    = log.nextLong();
 	    Temp.Time    = log.nextLong();
@@ -404,14 +463,24 @@ public class LogLoader extends ProjDefs
 	    return Temp;
 	case BEGIN_INTERRUPT:
 	case END_INTERRUPT:
-	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
 	    Temp.EventID = log.nextInt();
 	    Temp.Pe      = log.nextInt();
 	    return Temp;
 	case BEGIN_COMPUTATION:
+	    // begin computation's timestamp is not delta encoded.
 	    Temp.Time    = log.nextLong();
+	    if (deltaEncoded) {
+		prevTime += Temp.Time;
+	    }
 	    return Temp;
 	case END_COMPUTATION:
+	    // end computation's timestamp is not delta encoded.
 	    Temp.Time    = log.nextLong();
 	    return Temp;
 	default:
@@ -429,14 +498,37 @@ public class LogLoader extends ProjDefs
 	LogEntry       LE     = null;
 	AsciiIntegerReader log = null;
 
+	String logHeader;
+
 	System.out.println("looking through log for processor " + PeNum);
 	
 	// open the file
 	try {
 	    System.gc();
 	    log = new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
+
+	    /*
 	    log.nextLine(); //First line is junk
-	  
+	    */
+
+	    // **CW** first line is no longer junk.
+	    // With the advent of the delta-encoding format, it should
+	    // contain an additional field which specifies if the log file
+	    // is a delta-encoded file.
+	    logHeader = log.readLine();
+	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
+	    // **CW** a hack to avoid parsing the string - simply count
+	    // the number of tokens.
+	    if (headerTokenizer.countTokens() > 1) {
+		deltaEncoded = true;
+	    } else {
+		deltaEncoded = false;
+	    }
+
+	    // **CW** each time we open the file, we need to reset the
+	    // previous event timestamp to 0 to support delta encoding.
+	    prevTime = 0;
+
 	    //Throws EOFException at end of file
 	    while(true) {
 		LE = readlogentry (log);
@@ -471,10 +563,34 @@ public class LogLoader extends ProjDefs
 	Vector ret = null;
 	String         Line;
 
+	String logHeader;
+
 	try {	  
 	    ret = new Vector ();
 	    log = new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
+
+	    /*
 	    log.nextLine();//First line is junk
+	    */
+
+	    // **CW** first line is no longer junk.
+	    // With the advent of the delta-encoding format, it should
+	    // contain an additional field which specifies if the log file
+	    // is a delta-encoded file.
+	    logHeader = log.readLine();
+	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
+	    // **CW** a hack to avoid parsing the string - simply count
+	    // the number of tokens.
+	    if (headerTokenizer.countTokens() > 1) {
+		deltaEncoded = true;
+	    } else {
+		deltaEncoded = false;
+	    }
+
+	    // **CW** each time we open the file, we need to reset the
+	    // previous event timestamp to 0 to support delta encoding.
+	    prevTime = 0;
+
 	    //Throws EOFException at end of file
 	    while (true) {
 		VE = entrytotext(readlogentry(log));

@@ -70,11 +70,32 @@ class AsciiIntegerReader {
 		return buffer[idx++];
 	}
 	final public int nextInt() throws IOException {return (int)nextLong();}
+
 	//Read until the end-of-line is encountered
 	public void nextLine() throws IOException {
 		if (last=='\n') {last='\0';return;}
 		while (nextChar()!='\n') {}
 	}
+
+    public String readLine() 
+	throws IOException
+    {
+	char temp;
+	StringBuffer buffer = new StringBuffer();
+	if (last=='\n') {
+	    last = '\0';
+	    return "";
+	}
+	do {
+	    temp = nextChar();
+	    if (temp != '\n') {
+		buffer.append(temp);
+	    } else {
+		return buffer.toString();
+	    }
+	} while (true);
+    }
+
 	//Read a positive long from the current file 
 	final public long nextLong() throws IOException {
 		char c;
@@ -98,3 +119,4 @@ class AsciiIntegerReader {
 		return ((int)c)-((int)'0');
 	}
 }
+

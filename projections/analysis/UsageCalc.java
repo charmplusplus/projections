@@ -25,6 +25,10 @@ public class UsageCalc extends ProjDefs
     //
     // it needs, however, to be reset between the reading of two log files.
     private int curEntry = -1;
+
+    // **CW** support variables for delta encoding
+    private long prevTime = 0;
+    private boolean deltaEncoded = false;
     
     private void intervalCalc(float[][] data,int type, int entry, long time) {
 
@@ -114,6 +118,8 @@ public class UsageCalc extends ProjDefs
 	numUserEntries = Analysis.getNumUserEntries();
 	dataLen = numUserEntries + 4;
 
+	String logHeader;
+
 	float[][] data = new float[2][dataLen];
 	// initialization
 	for(int i=0;i<dataLen;i++){
@@ -126,9 +132,30 @@ public class UsageCalc extends ProjDefs
 	    AsciiIntegerReader log =
 		new AsciiIntegerReader(new BufferedReader(file));
 	    curEntry = -1;
+
+	    /*
 	    log.nextLine(); // The first line contains junk
-	    //The second line gives the program start time
+	    */
+
+	    // **CW** first line is no longer junk.
+	    // With the advent of the delta-encoding format, it should
+	    // contain an additional field which specifies if the log file
+	    // is a delta-encoded file.
+	    logHeader = log.readLine();
+	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
+	    // **CW** a hack to avoid parsing the string - simply count
+	    // the number of tokens.
+	    if (headerTokenizer.countTokens() > 1) {
+		deltaEncoded = true;
+	    } else {
+		deltaEncoded = false;
+	    }
+
+	    //The second line gives the program start time (begin computation)
 	    log.nextInt();
+	    // **CW** the previous timestamp is essentially begin
+	    // computation's timestamp.
+	    prevTime = log.nextLong();
 	
 	    startTime = 0;
 	    time=0;
@@ -140,19 +167,34 @@ public class UsageCalc extends ProjDefs
 		    case BEGIN_IDLE: case END_IDLE:
 		    case BEGIN_PACK: case END_PACK:
 		    case BEGIN_UNPACK: case END_UNPACK:
-			time = log.nextLong();
+			if (deltaEncoded) {
+			    prevTime += log.nextLong();
+			    time = prevTime;
+			} else {
+			    time = log.nextLong();
+			}
 			intervalCalc(data,type, 0, (time));
 			break;
 		    case BEGIN_PROCESSING: case END_PROCESSING:
 			log.nextInt(); //skip message type
 			entry = log.nextInt();
-			time = log.nextLong();
+			if (deltaEncoded) {
+			    prevTime += log.nextLong();
+			    time = prevTime;
+			} else {
+			    time = log.nextLong();
+			}
 			intervalCalc(data,type, entry, (time));
 			break;
 		    case CREATION:
 			log.nextInt();  // mtype
 			log.nextInt();  // ep idx
-			log.nextLong(); // time stamp
+			if (deltaEncoded) {
+			    prevTime += log.nextLong();
+			    time = prevTime;
+			} else {
+			    time = log.nextLong();
+			}
 			log.nextInt();  // event id
 			log.nextInt();  // pe id
 			if (version > 1.0)
@@ -165,8 +207,49 @@ public class UsageCalc extends ProjDefs
 			}
 			intervalCalc(data,type,0,sendTime);
 			break;
+		    case USER_EVENT:
+		    case USER_EVENT_PAIR:
+			// "uninteresting" events, "ignored"
+			if (deltaEncoded) {
+			    log.nextInt();  // user message id
+			    prevTime += log.nextLong();
+			}
+			break;
+		    case ENQUEUE:
+		    case DEQUEUE:
+			// "uninteresting" events, "ignored"
+			if (deltaEncoded) {
+			    log.nextInt(); // msg type
+			    prevTime += log.nextLong();
+			}
+			break;
+		    case BEGIN_INTERRUPT:
+		    case END_INTERRUPT:
+			// "uninteresting" events, "ignored"
+			if (deltaEncoded) {
+			    prevTime += log.nextLong();
+			}
+			break;
+		    case END_COMPUTATION:
+			// End computation is "uninteresting" but is
+			// completely ignored because it does not
+			// employ any delta encoding.
+			break;
+		    case INSERT:
+		    case FIND:
+		    case DELETE:
+			// **CW** added for completeness. They should not
+			// be pertinent anymore since the tracing code no
+			// longer generates such events.
+			// to be completely ignored.
+			break;
 		    default:
-				/*Ignore it.*/
+			// **CW** We can no longer ignore events we do not
+			// care about. Delta encoding requires that every
+			// event be processed.
+			System.out.println("Warning: Unknown Event! This " +
+					   "can mess up delta encoding!");
+			break;
 		    }
 		}
 	    } catch (EOFException e) {

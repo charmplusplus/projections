@@ -1,5 +1,12 @@
 #!/bin/sh
 
+jarpath="`dirname $0`/projections.jar"
+
+if test "$OSTYPE" = cygwin && test -x /usr/bin/cygpath 
+then
+  jarpath=`/usr/bin/cygpath -w -a $jarpath`
+fi
+
 java -ms60000000 -mx100000000 \
-  -classpath `dirname $0`/projections.jar \
+  -classpath $jarpath \
   projections.gui.MainWindow

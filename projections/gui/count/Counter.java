@@ -1,63 +1,64 @@
 package projections.gui.count;
 
 import java.awt.*;
+import java.util.Hashtable;
+import projections.gui.Analysis;
 
 public class Counter {
   public String counterCode = null;
   public String description = null;
   public String fileName = null;
   public Color  color = null;
+
+  private static final int NUM_COUNTERS = 32;
   private static final Color[] COLOR_LIST = 
-    { Color.blue, Color.cyan, Color.darkGray, Color.gray, Color.green, 
-      Color.lightGray, Color.magenta, Color.orange, Color.pink, Color.red, 
-      Color.white, Color.yellow };
-  private static int colorLoc = 0;
-  
-  public Counter(String code, String desc, String fileName) { 
+    Analysis.createColorMap(NUM_COUNTERS);
+  private static Hashtable CODE_TO_INDEX = null;
+
+  public Counter(String code, String desc, String fileName) throws Exception { 
+    if (CODE_TO_INDEX == null) { initHash(); }
     counterCode = code; 
     description = desc;
     this.fileName = fileName;
-    calcColor();
+    Integer index = (Integer) CODE_TO_INDEX.get(code);
+    if (index == null) { throw new Exception("Counter "+code+" unknown"); }
+    color = COLOR_LIST[index.intValue()%NUM_COUNTERS];  // shouldn't get to mod
   }
 
-  private void calcColor() {
-    String code = counterCode;
-    if      (code.equals("CYCLES0"))      { color = Color.yellow;       } // 0
-    else if (code.equals("INSTR"))        { color = Color.blue;         } // 1
-    else if (code.equals("LOAD"))         { color = Color.orange;       } // 2
-    else if (code.equals("STORE"))        { color = Color.magenta;      } // 3
-    else if (code.equals("STORE_COND"))   { color = new Color(90,90,0); } // 4
-    else if (code.equals("FAIL_COND"))    { color = new Color(90,90,0); } // 5
-    else if (code.equals("DECODE_BR"))    { color = new Color(90,90,0); } // 6
-    else if (code.equals("QUADWORDS2"))   { color = new Color(90,90,0); } // 7
-    else if (code.equals("CACHE_ER2"))    { color = new Color(90,90,0); } // 8
-    else if (code.equals("L1_IMISS"))     { color = new Color(90,90,0); } // 9
-    else if (code.equals("L2_IMISS"))     { color = new Color(90,90,0); } // 10
-    else if (code.equals("INSTRMISPR"))   { color = new Color(90,90,0); } // 11
-    else if (code.equals("EXT_INTERV"))   { color = new Color(90,90,0); } // 12
-    else if (code.equals("EXT_INVAL"))    { color = new Color(90,90,0); } // 13
-    else if (code.equals("VIRT_COHER"))   { color = new Color(90,90,0); } // 14
-    else if (code.equals("GR_INSTR15"))   { color = new Color(90,90,0); } // 15
-    else if (code.equals("CYCLES16"))     { color = new Color(90,90,0); } // 16
-    else if (code.equals("GR_INSTR17"))   { color = new Color(90,90,0); } // 17
-    else if (code.equals("GR_LOAD"))      { color = new Color(90,90,0); } // 18
-    else if (code.equals("GR_STORE"))     { color = new Color(90,90,0); } // 19
-    else if (code.equals("GR_ST_COND"))   { color = new Color(90,90,0); } // 20
-    else if (code.equals("GR_FLOPS"))     { color = Color.red;          } // 21
-    else if (code.equals("QUADWORDS1"))   { color = new Color(90,90,0); } // 22
-    else if (code.equals("TLB_MISS"))     { color = Color.pink;         } // 23
-    else if (code.equals("MIS_BR"))       { color = new Color(90,90,0); } // 24
-    else if (code.equals("L1_DMISS"))     { color = Color.cyan;         } // 25
-    else if (code.equals("L2_DMISS"))     { color = Color.green;        } // 26
-    else if (code.equals("DATA_MIS"))     { color = new Color(90,90,0); } // 27
-    else if (code.equals("EXT_INTERV2"))  { color = new Color(90,90,0); } // 28
-    else if (code.equals("EXT_INVAL2"))   { color = new Color(90,90,0); } // 29
-    else if (code.equals("CLEAN_ST_PRE")) { color = new Color(90,90,0); } // 30
-    else if (code.equals("SHARE_ST_PRE")) { color = new Color(90,90,0); } // 31
-    else {
-      color = COLOR_LIST[colorLoc % COLOR_LIST.length];
-      colorLoc++;
-    }
+  private void initHash() {
+    CODE_TO_INDEX = new Hashtable();
+    CODE_TO_INDEX.put("CYCLES0",      new Integer(0)); 
+    CODE_TO_INDEX.put("INSTR",        new Integer(1));       
+    CODE_TO_INDEX.put("LOAD",         new Integer(2));        
+    CODE_TO_INDEX.put("STORE",        new Integer(3));      
+    CODE_TO_INDEX.put("STORE_COND",   new Integer(4)); 
+    CODE_TO_INDEX.put("FAIL_COND",    new Integer(5));  
+    CODE_TO_INDEX.put("DECODE_BR",    new Integer(6));  
+    CODE_TO_INDEX.put("QUADWORDS2",   new Integer(7)); 
+    CODE_TO_INDEX.put("CACHE_ER2",    new Integer(8));  
+    CODE_TO_INDEX.put("L1_IMISS",     new Integer(9));   
+    CODE_TO_INDEX.put("L2_IMISS",     new Integer(10));   
+    CODE_TO_INDEX.put("INSTRMISPR",   new Integer(11)); 
+    CODE_TO_INDEX.put("EXT_INTERV",   new Integer(12)); 
+    CODE_TO_INDEX.put("EXT_INVAL",    new Integer(13));  
+    CODE_TO_INDEX.put("VIRT_COHER",   new Integer(14)); 
+    CODE_TO_INDEX.put("GR_INSTR15",   new Integer(15)); 
+    CODE_TO_INDEX.put("CYCLES16",     new Integer(16));   
+    CODE_TO_INDEX.put("GR_INSTR17",   new Integer(17)); 
+    CODE_TO_INDEX.put("GR_LOAD",      new Integer(18));    
+    CODE_TO_INDEX.put("GR_STORE",     new Integer(19));   
+    CODE_TO_INDEX.put("GR_ST_COND",   new Integer(20)); 
+    CODE_TO_INDEX.put("GR_FLOPS",     new Integer(21));   
+    CODE_TO_INDEX.put("QUADWORDS1",   new Integer(22)); 
+    CODE_TO_INDEX.put("TLB_MISS",     new Integer(23));   
+    CODE_TO_INDEX.put("MIS_BR",       new Integer(24));     
+    CODE_TO_INDEX.put("L1_DMISS",     new Integer(25));   
+    CODE_TO_INDEX.put("L2_DMISS",     new Integer(26));   
+    CODE_TO_INDEX.put("DATA_MIS",     new Integer(27));   
+    CODE_TO_INDEX.put("EXT_INTERV2",  new Integer(28));
+    CODE_TO_INDEX.put("EXT_INVAL2",   new Integer(29)); 
+    CODE_TO_INDEX.put("CLEAN_ST_PRE", new Integer(30));
+    CODE_TO_INDEX.put("SHARE_ST_PRE", new Integer(31));
   }
 };
 

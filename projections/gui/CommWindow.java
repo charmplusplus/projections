@@ -19,6 +19,7 @@ public class CommWindow extends GenericGraphWindow
     private double[][] 	receivedMsgCount;
     private double[][] 	receivedByteCount;
     private double[][]	exclusiveSent;
+    private double[][]	exclusiveBytesSent;
     private int[][]     hopCount;
     private double[][]  avgHopCount;
 
@@ -38,6 +39,7 @@ public class CommWindow extends GenericGraphWindow
     private Checkbox	receivedMsgs;
     private Checkbox    receivedBytes;
     private Checkbox	sentExclusive;
+    private Checkbox	sentExclusiveBytes;
     private Checkbox    hopCountCB;
 
     private CommWindow  thisWindow;
@@ -105,7 +107,13 @@ public class CommWindow extends GenericGraphWindow
 		setYAxis("Messages Sent Externally", "");
 		setXAxis("Processor", "");
 		super.refreshGraph();
-	    } else if (cb == hopCountCB) {
+	    } else if(cb == sentExclusiveBytes){
+		setDataSource("Communications", exclusiveBytesSent, this);
+		setPopupText("exclusiveBytesSent");
+		setYAxis("Bytes Sent Externally", "");
+		setXAxis("Processor", "");
+		super.refreshGraph();
+	    }else if (cb == hopCountCB) {
 		if (avgHopCount == null) {
 		    avgHopCount = averageHops(hopCount, receivedMsgCount);
 		}
@@ -152,6 +160,9 @@ public class CommWindow extends GenericGraphWindow
 	} else if(currentArrayName.equals("exclusiveSent")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + exclusiveSent[xVal][yVal];
+	} else if(currentArrayName.equals("exclusiveBytesSent")) {
+	    rString[0] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "Bytes = " + exclusiveBytesSent[xVal][yVal];
 	} else if (currentArrayName.equals("avgHopCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + avgHopCount[xVal][yVal];
@@ -176,6 +187,8 @@ public class CommWindow extends GenericGraphWindow
 	receivedMsgs = new Checkbox("Messages Received", cbg, false);
 	receivedBytes = new Checkbox("Bytes Received", cbg, false);
 	sentExclusive = new Checkbox("Messages Sent Externally", cbg, false);
+	sentExclusiveBytes = new Checkbox("Bytes Sent Externally", cbg, false);
+	
 	if (MainWindow.BLUEGENE) {
 	    hopCountCB = new Checkbox("Hop Count (BG only)", cbg, false);
 	}
@@ -186,6 +199,7 @@ public class CommWindow extends GenericGraphWindow
 	receivedMsgs.addItemListener(this);
 	receivedBytes.addItemListener(this);
 	sentExclusive.addItemListener(this);
+	sentExclusiveBytes.addItemListener(this);
 	if (MainWindow.BLUEGENE) {
 	    hopCountCB.addItemListener(this);
 	}
@@ -196,8 +210,9 @@ public class CommWindow extends GenericGraphWindow
 	Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 3,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 4,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 5,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentExclusiveBytes, gbc, 6,0, 1,1, 1,1);
 	if (MainWindow.BLUEGENE) {
-	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 6,0, 1,1, 1,1);
+	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 7,0, 1,1, 1,1);
 	}
 
 	Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
@@ -225,6 +240,7 @@ public class CommWindow extends GenericGraphWindow
 			receivedMsgCount = new double[validPEs.size()][];
 			receivedByteCount = new double[validPEs.size()][];
 			exclusiveSent = new double[validPEs.size()][];
+			exclusiveBytesSent = new double[validPEs.size()][];
 			if (MainWindow.BLUEGENE) {
 			    hopCount = new int[validPEs.size()][];
 			} else {
@@ -290,6 +306,7 @@ public class CommWindow extends GenericGraphWindow
 		receivedMsgCount[curPeArrayIndex] = new double[numEPs];
 		receivedByteCount[curPeArrayIndex] = new double[numEPs];
 		exclusiveSent[curPeArrayIndex] = new double[numEPs];
+		exclusiveBytesSent[curPeArrayIndex] = new double[numEPs];
 		if (MainWindow.BLUEGENE) {
 		    hopCount[curPeArrayIndex] = new int[numEPs];
 		}
@@ -318,6 +335,7 @@ public class CommWindow extends GenericGraphWindow
 			receivedByteCount[curPeArrayIndex][EPid] += logdata.msglen;
 			if (logdata.pe == pe) {
 			    exclusiveSent[curPeArrayIndex][EPid] ++;
+			    exclusiveBytesSent[curPeArrayIndex][EPid] += logdata.msglen;
 			}
 			if (MainWindow.BLUEGENE) {
 			    hopCount[curPeArrayIndex][EPid] +=
@@ -363,12 +381,15 @@ public class CommWindow extends GenericGraphWindow
 	for(int k=0; k<numPe; k++){
 	    for(int j=0; j<numEPs; j++){
 		exclusiveSent[k][j] = sentMsgCount[k][j] - exclusiveSent[k][j];
+		exclusiveBytesSent[k][j] = sentByteCount[k][j] - exclusiveBytesSent[k][j];
 
 		// Apurva - i'm doing this to prevent any negitive numbers
 		// from getting sent into the stack array because it messes up
 		// the drawing
 		if (exclusiveSent[k][j] < 0)
 		    exclusiveSent[k][j] = 0;
+		if (exclusiveBytesSent[k][j] < 0)
+		    exclusiveBytesSent[k][j] = 0;
 	    }
 	}
     }

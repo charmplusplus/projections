@@ -220,7 +220,7 @@ public class LogLoader extends ProjDefs
 					       LE.Entry, LE.Pe,
 					       LE.MsgLen, LE.recvTime, 
 					       LE.id,LE.EventID,
-					       LE.cpuTime);
+					       LE.cpuBegin, LE.cpuEnd);
 			Timeline.addElement(TE);
 			break;
 		    case END_PROCESSING:
@@ -228,7 +228,7 @@ public class LogLoader extends ProjDefs
 			// duplicated, which is the intended behavior.
 			if (TE != null) {
 			    TE.EndTime = LE.Time - BeginTime;
-			    TE.CPUTime = LE.cpuTime - TE.CPUTime;
+			    TE.cpuEnd = LE.cpuEnd;
 			}
 			TE = null;
 			break;
@@ -493,7 +493,7 @@ public class LogLoader extends ProjDefs
 				       log.nextInt());;
 	    }
 	    if (Analysis.getVersion() >= 6.5) {
-		Temp.cpuTime = log.nextLong();
+		Temp.cpuBegin = log.nextLong();
 	    }
 	    isProcessing = true;
 	    log.nextLine();  // ignore rest of this line
@@ -530,7 +530,7 @@ public class LogLoader extends ProjDefs
 		Temp.sendTime = log.nextLong();
 	    }
 	    if (Analysis.getVersion() >= 6.5) {
-		Temp.cpuTime = log.nextLong();
+		Temp.cpuEnd = log.nextLong();
 	    }
 	    isProcessing = false;
 	    log.nextLine();  // ignore rest of this line

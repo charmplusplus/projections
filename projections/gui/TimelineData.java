@@ -336,7 +336,8 @@ public class TimelineData
 	TimelineEvent tle;
 	
 	int numItems;
-	long btime, etime, rtime, cputime;
+	long btime, etime, rtime;
+	long cpubegin, cpuend;
 	int entry, pSrc, numMsgs, numpacks, msglen;
 	int EventID;
 	ObjectId tid;
@@ -364,7 +365,8 @@ public class TimelineData
 	    tle   = (TimelineEvent)tl.elementAt(i);
 	    btime = tle.BeginTime;
 	    etime = tle.EndTime; 
-	    cputime = tle.CPUTime;
+	    cpubegin = tle.cpuBegin;
+	    cpuend = tle.cpuEnd;
 	    entry = tle.EntryPoint; 
 	    pSrc  = tle.SrcPe;
 	    msglen  = tle.MsgLen;
@@ -395,7 +397,8 @@ public class TimelineData
 		packs[p] = (PackTime)packlist.elementAt(p);
 	    }
 	    //tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen, rtime, tid);
-	    tlo[i] = new TimelineObject(this, btime, etime, cputime, entry, 
+	    tlo[i] = new TimelineObject(this, btime, etime, cpubegin, cpuend,
+					entry, 
 					msgs, packs, pnum, pSrc, msglen, 
 					rtime, tid, EventID);
 	}

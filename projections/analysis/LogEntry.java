@@ -11,5 +11,5 @@ public int Replay, TransactionType, MsgType, Entry;
     long recvTime;
     long sendTime;
     int destPEs[];
-    long cpuTime;
+    long cpuBegin, cpuEnd;
 }

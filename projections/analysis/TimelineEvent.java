@@ -7,7 +7,7 @@ public class TimelineEvent
 {
  
 public long BeginTime, EndTime, RecvTime;
-    public long CPUTime;
+    public long cpuBegin, cpuEnd;
 public int EntryPoint, SrcPe, MsgLen;
 public int EventID; //seq no of processor
 public ObjectId id;
@@ -18,19 +18,21 @@ public TimelineEvent ()
 {
 }
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d, long cput)
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d, long cpubegin, long cpuend)
 {
 	BeginTime=bt; EndTime=et;
-	CPUTime = cput;
+	cpuBegin = cpubegin;
+	cpuEnd = cpuend;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 	id = new ObjectId(d);
 }
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d,int eventid, long cput)
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d,int eventid, long cpubegin, long cpuend)
 {
 	BeginTime=bt; EndTime=et;
-	CPUTime = cput;
+	cpuBegin = cpubegin;
+	cpuEnd = cpuend;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 	id = new ObjectId(d);

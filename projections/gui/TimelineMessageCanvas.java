@@ -13,6 +13,9 @@ public class TimelineMessageCanvas extends Canvas
    private TimelineMessage[] msgs;
    private String[][] names;
    private int w,h;
+   private int numTitles = 17; // index of sTitle with last actual title
+   private int numColumns = 5; // number of columns that will be drawn
+   private int[] maxColWidth = null;  // store max col width for each col
    
    public TimelineMessageCanvas(TimelineObject obj)
    {
@@ -22,8 +25,8 @@ public class TimelineMessageCanvas extends Canvas
 	  msgs = obj.getMessages();
 	  names = Analysis.getUserEntryNames();
 
-	  sTitles = new String[20];
-	  width = new int[20];
+          sTitles = new String[numTitles];
+	  width = new int[numTitles];
 	  
 	  int entry = obj.getEntry();
 	  
@@ -42,7 +45,8 @@ public class TimelineMessageCanvas extends Canvas
 	  sTitles[12]= "MSG#";
 	  sTitles[13]= "MSG SIZE:";
 	  sTitles[14]= "TIME SENT";
-	  sTitles[15]= "TO ENTRY:";
+	  sTitles[15]= "TIME SINCE LAST SEND";
+	  sTitles[16]= "TO ENTRY:";
 	  
 	  setBackground(Color.black);
 	  setForeground(Color.lightGray);
@@ -53,6 +57,7 @@ public class TimelineMessageCanvas extends Canvas
    }   
    public Dimension getPreferredSize()
    {
+          int i;
 	  if(fm == null)
 	  {
 		 Graphics g = getGraphics();
@@ -61,39 +66,46 @@ public class TimelineMessageCanvas extends Canvas
 			fm = g.getFontMetrics(g.getFont());
 			h = (fm.getHeight() + 5) * (6 + obj.getNumMsgs());
 	 
-			for(int i=0; i<=15; i++)
+			for(i=0; i<numTitles; i++)
 			{
 			   width[i] = fm.stringWidth(sTitles[i]);
 			}
 
-			width[16] = 0;
-			width[17] = 0;
-			width[18] = 0;
-			width[19] = 0;
+			// figure out the maximum width of each each column
+			if (maxColWidth==null) { 
+			    maxColWidth = new int[numColumns];
+			}
 			for(int m=0; m<obj.getNumMsgs(); m++)
 			{
 			   int w1 = fm.stringWidth("" + m);
 			   int w2 = fm.stringWidth("" + msgs[m].MsgLen);
 			   int w3 = fm.stringWidth("" + msgs[m].Time);
-			   int w4 = fm.stringWidth(names[msgs[m].Entry][0]);
-			
-			   if(w1 > width[16]) width[16] = w1;
-			   if(w2 > width[17]) width[17] = w2;
-			   if(w3 > width[18]) width[18] = w3;
-			   if(w4 > width[19]) width[19] = w4;
+			   int w4 = (m>0) ? 
+			       fm.stringWidth(""+(msgs[m].Time-msgs[m-1].Time)) : 0;
+			   int w5 = fm.stringWidth(names[msgs[m].Entry][0]);
+
+			   if(w1 > maxColWidth[0]) maxColWidth[0] = w1;
+			   if(w2 > maxColWidth[1]) maxColWidth[1] = w2;
+			   if(w3 > maxColWidth[2]) maxColWidth[2] = w3;
+			   if(w4 > maxColWidth[3]) maxColWidth[3] = w4;
+			   if(w5 > maxColWidth[4]) maxColWidth[4] = w5;
+			}
+			for (i=0; i<maxColWidth.length; i++) {
+			    if (width[12+i]>maxColWidth[i]) { maxColWidth[i] = width[12+i]; }
 			}
 			w = width[0] + width[1];
 			int wtmp = 0;
-			for(int i=2; i<=7; i++) wtmp += width[i];
+			for(i=2; i<=7; i++) wtmp += width[i];
 			if(wtmp > w) w = wtmp;
 			wtmp = 0;
-			for(int i=8; i<=11; i++) wtmp += width[i];
+			for(i=8; i<=11; i++) wtmp += width[i];
 			if(wtmp > w) w = wtmp;
 			wtmp = 18;
-			for(int i=12; i<=15; i++) wtmp += width[i];
+			for(i=12; i<numTitles; i++) wtmp += width[i];
 			if(wtmp > w) w = wtmp;
 			wtmp = 18;
-			for(int i=16; i<=19; i++) wtmp += width[i];
+			for(i=0; i<maxColWidth.length; i++) 
+			    wtmp += maxColWidth[i];
 			if(wtmp > w) w = wtmp;
 
 			g.dispose();
@@ -104,25 +116,35 @@ public class TimelineMessageCanvas extends Canvas
    }   
    public void paint(Graphics g)
    {
-	  int w1, w2, w3, w4;
-	  
+          int i;
 	  int wi = getSize().width;
 	  int ht = getSize().height;
 		 
 	  int space0 = (wi-width[0]-width[1])/2;
 	  int space1 = (wi-width[2]-width[3]-width[4]-width[5]-width[6]-width[7])/2;
 	  int space2 = (wi-width[8]-width[9]-width[10]-width[11])/2;
-	  int space3 = (wi-width[16]-width[17]-width[18]-width[19])/5;
+	  int totalColWidth = 0;
+	  for (i=0; i<maxColWidth.length; i++) { 
+	      totalColWidth += maxColWidth[i]; 
+	  }
+	  int space3 = (wi-totalColWidth)/(1+maxColWidth.length);
 	  
 	  if(space0 < 0) space0 = 0;
 	  if(space1 < 0) space1 = 0;
 	  if(space2 < 0) space2 = 0;
 	  if(space3 < 0) space3 = 0;   
 
-	  w1 = width[16] + (int)(space3 * 1.3);
-	  w2 = width[17] + space3;
-	  w3 = width[18] + (int)(space3 * 1.3);
-	  w4 = width[19] + (int)(space3);
+	  int[] colWidth = new int[numColumns];
+	  int[] colStart = new int[numColumns];
+	  colWidth[0] = maxColWidth[0] + (int)(space3 * 1.3);
+	  colWidth[1] = maxColWidth[1] + space3;
+	  colWidth[2] = maxColWidth[2] + (int)(space3 * 1.3);
+	  colWidth[3] = maxColWidth[3] + (int)(space3 * 1.3);
+	  colWidth[4] = maxColWidth[4] + space3;
+	  colStart[0] = 0;
+	  for (i=1; i<colStart.length; i++) {
+	      colStart[i] = colStart[i-1]+colWidth[i-1];
+	  }
 	  
 	  int dy = fm.getHeight() + 5;
 	  int y  = dy;
@@ -152,24 +174,28 @@ public class TimelineMessageCanvas extends Canvas
 	  g.drawString(sTitles[9] , wtmp=space2+width[8],     y);
 	  g.drawString(sTitles[11], wtmp+=width[9]+width[10], y);
 	  
+	  // draw headers for columns
+	  y+=dy;
 	  g.setColor(Color.white);
-	  g.drawString(sTitles[12], (w1-width[12])/2,       y+=(2*dy));
-	  g.drawString(sTitles[13], (w2-width[13])/2+w1,    y);
-	  g.drawString(sTitles[14], (w3-width[14])/2+w1+w2, y); 
-	  g.drawString(sTitles[15], (w4-width[15])/2+w1+w2+w3, y); 
-	 
+	  for (i=0; i<numColumns; i++) {
+	      g.drawString(sTitles[12+i], (colWidth[i]-width[12+i])/2+colStart[i], y);
+	  }
+
+	  // draw columns
 	  g.setColor(Color.lightGray);
+	  String[] s = new String[numColumns];
 	  for(int m=0; m<obj.getNumMsgs(); m++)
 	  {
-		 String sNum   = new String("" + m);
-		 String sMLen = new String("" + msgs[m].MsgLen);
-		 String sTime  = new String("" + msgs[m].Time);
-		 String sEntry = new String(names[msgs[m].Entry][0]);
+		s[0] = new String("" + m);
+		s[1] = new String("" + msgs[m].MsgLen);
+		s[2] = new String("" + msgs[m].Time);
+		s[3] = (m>0) ? new String("" + (int)(msgs[m].Time-msgs[m-1].Time)) : "-";
+		s[4] = new String(names[msgs[m].Entry][0]);
 		 
-		 g.drawString(sNum,   (w1-fm.stringWidth(sNum  ))/2,       y+=dy);
-		 g.drawString(sMLen,  (w2-fm.stringWidth(sMLen ))/2+w1,    y);
-		 g.drawString(sTime,  (w3-fm.stringWidth(sTime ))/2+w1+w2,  y);
-		 g.drawString(sEntry, (w4-fm.stringWidth(sEntry))/2+w1+w2+w3, y);
+		y+=dy;
+		for (i=0; i<numColumns; i++) {
+		    g.drawString(s[i], (colWidth[i]-fm.stringWidth(s[i]))/2+colStart[i], y);
+		}
 	  }     
    }   
    public void update(Graphics g)
@@ -177,3 +203,4 @@ public class TimelineMessageCanvas extends Canvas
 	  paint(g);
    }   
 }
+

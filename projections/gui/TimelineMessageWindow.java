@@ -53,4 +53,16 @@ public class TimelineMessageWindow extends Frame
 	  obj.CloseMessageWindow();
 	  dispose();
    }   
+   public Dimension getPreferredSize() {
+       if (canvas != null) { 
+	   Dimension d = canvas.getPreferredSize(); 
+	   d.width += 10;
+	   d.height += 30;
+	   return d;
+       }
+       return new Dimension(640, 480);
+   }
 }
+
+
+

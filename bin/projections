@@ -2,9 +2,12 @@
 
 jarpath="`dirname $0`/projections.jar"
 
-if test "`uname -o`" = "Cygwin" && test -x /usr/bin/cygpath 
-then
-  jarpath=`/usr/bin/cygpath -w -a $jarpath`
+if test -x /usr/bin/cygpath
+then 
+  if test "`uname -o`" = "Cygwin"
+  then
+    jarpath=`/usr/bin/cygpath -w -a $jarpath`
+  fi 
 fi
 
 java -ms100000000 -mx512000000 \

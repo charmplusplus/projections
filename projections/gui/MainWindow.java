@@ -287,10 +287,31 @@ public class MainWindow extends JFrame
 	    Analysis.loadSummaryData();
 	    if (Analysis.hasSummaryData()) {
 		double[] data = Analysis.getSummaryAverageData(); 
-		sumDataSource = new SummaryDataSource(data);
-		sumXAxis = 
-		    new SummaryXAxis(data.length,
-				     (long)(Analysis.getSummaryIntervalSize()));
+		//		System.out.println("Getting best size");
+		long bestSize = 
+		    (long)GraphUtil.getBestIntervalSize(Analysis.getSummaryIntervalSize(),
+							data.length);
+		//		System.out.println(bestSize);
+		/*
+		long bestSize = Analysis.getSummaryIntervalSize();
+		*/
+		if (bestSize != Analysis.getSummaryIntervalSize()) {
+		    // if there are changes
+		    //		    System.out.println("rebinning");
+		    double[] newdata =
+			GraphUtil.rebin(data,Analysis.getSummaryIntervalSize(),
+					(double)bestSize);
+		    //		    System.out.println("done rebinning");
+		    sumDataSource = new SummaryDataSource(newdata);
+		    sumXAxis =
+			new SummaryXAxis(newdata.length,
+					 (long)bestSize);
+		} else {
+		    sumDataSource = new SummaryDataSource(data);
+		    sumXAxis = 
+			new SummaryXAxis(data.length,
+					 (long)(Analysis.getSummaryIntervalSize()));
+		}
 		sumYAxis = new SummaryYAxis();
 		graphPanel = 
 		    new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));

@@ -62,6 +62,7 @@ SRC=\
     projections/gui/GraphIntervalDialog.java\
     projections/gui/GraphLegendPanel.java\
     projections/gui/GraphTitleCanvas.java\
+    projections/gui/GraphUtil.java\
     projections/gui/GraphWAxisCanvas.java\
     projections/gui/GraphWindow.java\
     projections/gui/GraphingWindow.java\

@@ -155,6 +155,7 @@ SRC=\
     projections/misc/ErrorDialog.java\
     projections/misc/LogEntryData.java\
     projections/misc/LogLoadException.java\
+    projections/misc/MiscUtil.java\
     projections/misc/MultiRunData.java\
     projections/misc/MultiRunTableModel.java\
     projections/misc/PrintUtils.java\

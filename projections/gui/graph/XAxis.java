@@ -22,7 +22,7 @@ public abstract class XAxis
     *   Not all indices will necessarily have their name displayed.
     * e.g., "7", "10-11ms"
     */
-   public abstract String getIndexName(int index);
+   public String getIndexName(int index) { return "" + getIndex(index); };
    public double getIndex(int index) { return index;};
    public double getMultiplier() { return 1;};
 }

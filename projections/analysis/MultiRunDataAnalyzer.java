@@ -232,30 +232,59 @@ public class MultiRunDataAnalyzer {
 	    // to run. The current implementation is extremely crude and may
 	    // form the basis for future automated performance analysis
 	    // research.
-	    //
-	    // For example, the current scheme is unable to realize that a
-	    // curve that is upward growing but tapers off is a good curve.
-	    // This requires runs to be ordered in some fashion.
-	    int incrementCount = 0;
-	    int decrementCount = 0;
-	    double avgDeviation = 0.0;
-	    double startValue = dataTable[dataType][0][ep];
-	    for (int run=1; run<numRuns; run++) {
-		avgDeviation +=
-		    Math.abs(dataTable[dataType][run][ep] - startValue);
-		if (dataTable[dataType][run][ep] > startValue) {
-		    incrementCount++;
-		} else if (dataTable[dataType][run][ep] < startValue) {
-		    decrementCount++;
-		}
+	    int consecutiveIncrements = 0;
+	    int consecutiveDecrements = 0;
+	    boolean lastIncremented = true;
+	    double avgChange = 0.0;
+	    double prevValue = dataTable[dataType][0][ep];
+	    if (dataTable[dataType][1][ep] > prevValue) {
+		consecutiveIncrements = 1;
+		avgChange += dataTable[dataType][1][ep] - prevValue;
+		lastIncremented = true;
+	    } else if (dataTable[dataType][1][ep] < prevValue) {
+		consecutiveDecrements = 1;
+		avgChange += prevValue - dataTable[dataType][1][ep];
+		lastIncremented = false;
 	    }
-	    avgDeviation /= numRuns-1;
-	    if (((incrementCount > numRuns*0.75) || 
-		 (decrementCount > numRuns*0.75)) &&
-		(avgDeviation > 0.05*epTimeMean[ep])) {
-		categories[dataType][CAT_EP_CHANGE].add(new Integer(ep));
-	    } else {
+	    prevValue = dataTable[dataType][1][ep];
+	    for (int run=2; run<numRuns; run++) {
+		if (dataTable[dataType][run][ep] > prevValue) {
+		    double change =
+			dataTable[dataType][run][ep] - prevValue;
+		    if (lastIncremented) {
+			avgChange = avgChange*consecutiveIncrements + change;
+			consecutiveIncrements++;
+			avgChange /= consecutiveIncrements;
+		    } else {
+			consecutiveIncrements = 1;
+			avgChange = change;
+		    }
+		    lastIncremented = true;
+		} else if (dataTable[dataType][run][ep] < prevValue) {
+		    double change =
+			prevValue - dataTable[dataType][run][ep];
+		    if (!lastIncremented) {
+			avgChange = avgChange*consecutiveDecrements + change;
+			consecutiveDecrements++;
+			avgChange /= consecutiveDecrements;
+		    } else {
+			consecutiveDecrements = 1;
+			avgChange = change;
+		    }
+		    lastIncremented = false;
+		}
+		prevValue = dataTable[dataType][run][ep];
+	    }
+	    if (numRuns == 1) {
 		categories[dataType][CAT_EP_NO_CHANGE].add(new Integer(ep));
+	    } else {		
+		if (((consecutiveIncrements > (numRuns-1)*0.5) || 
+		     (consecutiveDecrements > (numRuns-1)*0.5)) &&
+		    (avgChange > dataTable[dataType][0][ep]*0.1)) {
+		    categories[dataType][CAT_EP_CHANGE].add(new Integer(ep));
+		} else {
+		    categories[dataType][CAT_EP_NO_CHANGE].add(new Integer(ep));
+		}
 	    }
 	}
 	// then, add special (extra) EPs to the appropriate category

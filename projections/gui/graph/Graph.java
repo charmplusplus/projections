@@ -429,7 +429,7 @@ public class Graph extends JPanel
 	    if (i % labelincrementX == 0) {
          	g.drawLine(curx, originY+5, curx, originY-5);
 		// can set multiplier? 
-		s = "" + (int)xAxis.getIndex(i);
+		s = xAxis.getIndexName(i);
 		g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + 
 			     fm.getHeight());
 	    } else {

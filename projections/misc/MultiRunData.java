@@ -25,6 +25,10 @@ public class MultiRunData
     // sumReaders dim 1 - indexed by Run Log ID
     // sumReaders dim 2 - indexed by PE number
     private GenericSummaryReader sumReaders[][];
+    // stsReaders is unsorted by numPEs whilst the rest of this module has
+    // their data arrays sorted. Therefore, a mapping has to be maintained
+    // in the event that the stsReader has to be accessed.
+    private int sortedStsMap[];
     
     // Data entries computed from IO reader objects summed across all
     // PEs. The data should be accessed via accessor methods.
@@ -78,7 +82,7 @@ public class MultiRunData
     {
 	timeStats = new ProjectionsStatistics();
 	numCallsStats = new ProjectionsStatistics();
-	
+
 	try {
 	    numRuns = listOfStsFilenames.length;
 
@@ -89,20 +93,31 @@ public class MultiRunData
 	    }
 
 	    stsReaders = new StsReader[numRuns];
+	    int pesPerRun[] = new int[numRuns];
 	    sumReaders = new GenericSummaryReader[numRuns][];
+
+	    // The run sequence supplied by the sts file list is not
+	    // necessarily sorted  in order of number of PEs.
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
 		    new StsReader(listOfStsFilenames[run]);
-		int numPE = stsReaders[run].getProcessorCount();
+		pesPerRun[run] = stsReaders[run].getProcessorCount();
+	    }
+
+	    sortedStsMap = MiscUtil.sort(pesPerRun);
+
+	    for (int run=0; run<numRuns; run++) {
+		int numPE = pesPerRun[run];
 		sumReaders[run] =
 		    new GenericSummaryReader[numPE];
 		for (int pe=0; pe<numPE; pe++) {
 		    sumReaders[run][pe] =
-			new GenericSummaryReader(getSumFilename(listOfStsFilenames[run],
+			new GenericSummaryReader(getSumFilename(listOfStsFilenames[sortedStsMap[run]],
 								pe),
 						 Analysis.getVersion());
 		}
 	    }
+
 	    // there has to be at least one run and all sts files have to
 	    // agree on the number of entries (or we will be comparing
 	    // oranges with apples)
@@ -116,8 +131,9 @@ public class MultiRunData
 	    
 	    runNames = new String[numRuns];
 	    for (int run=0; run<numRuns; run++) {
-		runNames[run] = "(" + stsReaders[run].getProcessorCount() + 
-		    ")" + "[" + stsReaders[run].getMachineName() + "]";
+		runNames[run] = "(" + pesPerRun[run] + 
+		    ")" + "[" + 
+		    stsReaders[sortedStsMap[run]].getMachineName() + "]";
 	    }
 
 	    // begin computing information

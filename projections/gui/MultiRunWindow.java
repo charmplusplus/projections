@@ -94,6 +94,7 @@ public class MultiRunWindow extends JFrame
 	String stsFilenames[] = fc.userSelect_returnVal;
 	try {
 	    MultiRunData data = new MultiRunData(stsFilenames);
+	    System.out.println("data read done");
 	    analyzer = new MultiRunDataAnalyzer(data);
 
 	    // setting default data type

@@ -147,9 +147,6 @@ all: bin/projections.jar
 projections/gui/MainWindow.class: $(SRC)
 	@ echo "Compiling java sources:"
 	@ javac -d . -O $(SRC)
-	@ echo "NOTE: Deprecation warnings for ProjectionsFileChooser"
-	@ echo "      due to Thread.suspend() and Thread.resume()."
-	@ echo "      Please ignore. (JMU 06.24.2002)"
 	@ echo "Complete."
 
 bin/projections.jar: projections/gui/MainWindow.class $(SRC)

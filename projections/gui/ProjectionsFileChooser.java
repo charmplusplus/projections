@@ -159,7 +159,7 @@ public class ProjectionsFileChooser
       public void actionPerformed(ActionEvent ae) {
 	dialog_.setVisible(false);
 	wait_ = false;
-	thread_.resume();
+	thread_.notify();
       }
     });
     JPanel panel = new JPanel();
@@ -172,9 +172,12 @@ public class ProjectionsFileChooser
   /** Create a thread to allow blocking functions. */
   private Thread initThread() {
     return new Thread() {
-      public void run() {
+      public void run() 
+      {
 	while (wait_) {
-	  if (wait_) { this.suspend(); }
+	  if (wait_) { 
+	    try { this.wait(); } catch (InterruptedException ie) { }
+	  }
 	  else { return; }
 	}
       }

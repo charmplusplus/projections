@@ -9,6 +9,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 import projections.misc.*;
+import java.awt.Color;
+import projections.gui.Analysis;
 
 public class StsReader extends ProjDefs
 {
@@ -25,8 +27,19 @@ public class StsReader extends ProjDefs
 	private String Machine, ClassNames[];
 	private Chare ChareList[];
 	private long MsgTable[];
-	
-  
+        private Hashtable UserEvents = new Hashtable();  // index by Integer, return String name
+        private Hashtable UserEventColors = new Hashtable();
+
+  public Color getUserEventColor(int eventID) {
+    Integer key = new Integer(eventID);
+    return (Color) UserEventColors.get(key);
+  }
+
+  public String getUserEventName(int eventID) { 
+    Integer key = new Integer(eventID);
+    return (String) UserEvents.get(key);
+  }
+
 	/** Read in and decipher the .sts file.
 	 *  @exception LogLoadException if an error occurs while reading in the
 	 *      the state file
@@ -118,6 +131,16 @@ public class StsReader extends ProjDefs
 				int Size  = Integer.parseInt(st.nextToken());
 				MsgTable[ID] = Size;
 			    }
+			else if(s1.equals("EVENT")) {
+			  Integer key = new Integer(st.nextToken());
+			  if (!UserEvents.containsKey(key)) {
+			    String eventName = "";
+			    while (st.hasMoreTokens()) {
+			      eventName = eventName + st.nextToken() + " ";
+			    }
+			    UserEvents.put(key, eventName);
+			  }
+			}
 	/* No longer used-- OSL, 2/8/2001
 			else if(s1.equals("TOTAL_PSEUDOS"))
 			{
@@ -143,6 +166,17 @@ public class StsReader extends ProjDefs
 			else if (s1.equals ("END"))
 			    break;
 		    }
+
+		// set up UserEventColors
+		int numColors = UserEvents.size();
+		Color[] userEventColorMap = Analysis.createColorMap(numColors);
+		Enumeration keys = UserEvents.keys();
+		int colorIndex = 0;
+		while (keys.hasMoreElements()) {
+		  UserEventColors.put((Integer)keys.nextElement(), 
+				      userEventColorMap[colorIndex]);
+		  colorIndex++;
+		}
 
 
 		// "if user selected a summary sts file, log files are

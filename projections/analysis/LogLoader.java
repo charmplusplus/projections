@@ -211,6 +211,23 @@ public class LogLoader extends ProjDefs
 			    TE = null;
 			}
 			break;
+		    case CREATION_MULTICAST:
+			tempte = false;
+			if (TE == null) {
+			    TE = new TimelineEvent(LE.Time-BeginTime,
+						   LE.Time-BeginTime,
+						   Entry, LE.Pe, LE.MsgLen);
+			    Timeline.addElement(TE);
+			    tempte = true;
+			}
+			TM = new TimelineMessage(LE.Time - BeginTime,
+						 LE.Entry, LE.MsgLen,
+						 LE.EventID, LE.destPEs);
+			TE.addMessage(TM);
+			if (tempte) {
+			    TE = null;
+			}
+			break;
 		    case USER_EVENT:
 			// don't mess with TE, that's just for EPs
 			UserEvent event = new UserEvent(LE.Time-BeginTime,
@@ -439,6 +456,24 @@ public class LogLoader extends ProjDefs
 	    if (Analysis.getVersion() >= 5.0 && 
 		Temp.TransactionType == CREATION) {
 		Temp.sendTime = log.nextLong();
+	    }
+	    return Temp;
+	case CREATION_MULTICAST:
+	    Temp.MsgType = log.nextInt();
+	    Temp.Entry   = log.nextInt();
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time    = prevTime;
+	    } else {
+		Temp.Time    = log.nextLong();
+	    }
+	    Temp.EventID = log.nextInt();
+	    Temp.Pe      = log.nextInt();
+	    Temp.MsgLen  = log.nextInt();
+	    Temp.sendTime = log.nextLong();
+	    Temp.destPEs = new int[log.nextInt()];
+	    for (int i=0; i<Temp.destPEs.length; i++) {
+		Temp.destPEs[i] = log.nextInt();
 	    }
 	    return Temp;
 	case ENQUEUE:

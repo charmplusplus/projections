@@ -47,6 +47,7 @@ public class TimelineMessageCanvas extends Canvas
 	  sTitles[14]= "TIME SENT";
 	  sTitles[15]= "TIME SINCE LAST SEND";
 	  sTitles[16]= "TO ENTRY:";
+	  //	  sTitles[17]= "DEST PE:";
 	  
 	  setBackground(Color.black);
 	  setForeground(Color.lightGray);

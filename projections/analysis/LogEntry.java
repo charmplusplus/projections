@@ -10,4 +10,5 @@ public int Replay, TransactionType, MsgType, Entry;
        ObjectId id;
        long recvTime;
        long sendTime;
+    int destPEs[];
 }

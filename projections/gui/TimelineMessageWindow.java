@@ -8,7 +8,7 @@ public class TimelineMessageWindow extends Frame
    implements ActionListener
 {
    private TimelineObject obj;
-   private TimelineMessageCanvas canvas;
+   private TimelineMessagePanel canvas;
    private ScrollPane sp;
    
    public TimelineMessageWindow(TimelineObject obj)
@@ -28,7 +28,7 @@ public class TimelineMessageWindow extends Frame
  
 	  sp = new ScrollPane();
 	  
-	  canvas = new TimelineMessageCanvas(obj);
+	  canvas = new TimelineMessagePanel(obj);
 	  sp.add(canvas);
 	  
 	  Panel p = new Panel();

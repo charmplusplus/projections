@@ -543,6 +543,10 @@ public class Analysis {
 	return (sts.getEntryNames())[epIdx][0];
     }
 
+    public static String getEntryChareName(int epIdx) {
+	return (sts.getEntryNames())[epIdx][1];
+    }
+
     public static int getNumUserDefinedEvents() {
 	return sts.getNumUserDefinedEvents();
     }

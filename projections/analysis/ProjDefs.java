@@ -32,6 +32,9 @@ public static final int BEGIN_PACK               = 16;
 public static final int END_PACK                 = 17;
 public static final int BEGIN_UNPACK             = 18;
 public static final int END_UNPACK               = 19;
+
+public static final int CREATION_MULTICAST       = 21;
+
 public static final int USER_EVENT_PAIR          = 100;
 
 /* *** USER category *** */

@@ -76,6 +76,7 @@ SRC=\
     projections/gui/InvalidFileDialog.java\
     projections/gui/JSelectField.java\
     projections/gui/JTimeTextField.java\
+    projections/gui/LabelPanel.java\
     projections/gui/LWPanel.java\
     projections/gui/LogFileViewerDialog.java\
     projections/gui/LogFileViewerTextArea.java\
@@ -129,6 +130,7 @@ SRC=\
     projections/gui/TimelineDisplayCanvas.java\
     projections/gui/TimelineLabelCanvas.java\
     projections/gui/TimelineMessageCanvas.java\
+    projections/gui/TimelineMessagePanel.java\
     projections/gui/TimelineMessageWindow.java\
     projections/gui/TimelineObject.java\
     projections/gui/TimelineRangeDialog.java\

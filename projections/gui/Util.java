@@ -263,27 +263,31 @@ public class Util
      *	Changed color.map to a readable format
      *  Separate saved data for each graph view
      */
-    public static void saveColors(Color[] colors, String graphType) throws IOException {
+    public static void saveColors(Color[] colors, String graphType, String filePath) throws IOException {
 	
 	// **sharon** somehow Analysis.getLogDirectory() returns null
 	//File filename = new File(Analysis.getLogDirectory() +
 	//			 File.separator +
 	//			 "color.map");
 	
+	// loop twice: once to save to pathPath, once to save to color.map
+	
 	File filename = new File("bin/color.map");
+	int again;
+	if(filePath == null) {again = 0;}
+	else                {again = 1;}
+	
+	do{
+	
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 	String tempString = new String();
 	
 	//If more graphs are created put them here
-	int numOfGraph=6;
+	int numOfGraph=1;
 	String[] typeArray = new String[numOfGraph];
-	typeArray[0] = "Graph Graph";
-	typeArray[1] = "Timeline Graph";
-	typeArray[2] = "Usage Profile Graph";
-	typeArray[3] = "Animation Graph";
-	typeArray[4] = "Histogram Graph";
-	typeArray[5] = "Overview Graph";
+	typeArray[0] = "Timeline Graph";
+	
 	
 	if(!fileExists){
 		//Output graph names and default color
@@ -326,15 +330,29 @@ public class Util
 			}
 		}
 	}
+	
+	filename = new File(filePath);
+	again--;
+	
 	accessFile.close();
+	
+	}while(again < 0);
+	
+	
+	
     }
 
      /**
      *	Modified by Sharon Ma 03/01/03
      *	Changed color.map to a readable format
      */
-    public static void restoreColors(Color[] colors, String graphType) throws IOException{
-	File filename = new File("bin/color.map");
+    public static void restoreColors(Color[] colors, String graphType, String filePath) throws IOException{
+	File filename;
+	if(filePath == null){
+		filename = new File("bin/color.map");}
+	else{
+		filename = new File(filePath);}
+	
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 	String tempString = new String();
@@ -362,6 +380,10 @@ public class Util
 			colors[i] = Analysis.getEntryColor(i);
 	   	}
 	}
+	
+	// update the restored color setting to bin/color.map
+	saveColors(colors, graphType, null);
+	
 	accessFile.close();
     }
 }

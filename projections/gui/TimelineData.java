@@ -129,7 +129,7 @@ public class TimelineData
 	  //	       File.separator + "color.map").exists()) {
 	  if (new File("bin/color.map").exists()) {
 	      try {
-		  Util.restoreColors(entryColor, "Timeline Graph");
+		  Util.restoreColors(entryColor, "Timeline Graph", null);
 	      } catch (IOException e) {
 		  System.err.println("unable to load color.map");
 	      } 

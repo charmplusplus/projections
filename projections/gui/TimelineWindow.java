@@ -27,9 +27,10 @@ public class TimelineWindow extends Frame
    
    private FontMetrics fm;
    
-  // basic zoom controls  **sharon**
+  // basic zoom controls  
    private Button bSelectRange, bColors, bDecrease, bIncrease, bReset;
    private Button bZoomSelected, bLoadSelected;
+   // jump to graphs
    private Button bJumpAnimation, bJumpProfile, bJumpGraph, bJumpHistogram,
    		  bJumpComm, bJumpStl;
    private TextField highlightTime, selectionBeginTime, selectionEndTime, selectionDiff;
@@ -229,7 +230,6 @@ public class TimelineWindow extends Frame
     }
   }
 
-   // **sharon** finish this function, garbage deletion question
    public void jumpToGraph(String b) {
      Rectangle rect = displayCanvas.rubberBand.bounds();
      double jStart = axisBotCanvas.canvasToTime(rect.x);
@@ -269,7 +269,6 @@ public class TimelineWindow extends Frame
        else if (b == bColors)        { ShowColorWindow(); }
        else if (b == bZoomSelected)  { zoomSelected(); }
        else if (b == bLoadSelected) { loadSelected(); }
-       // **sharon** jump to graph
        else if(b == bJumpAnimation) { jumpToGraph("Animation"); }
        else if(b == bJumpProfile)   { jumpToGraph("Profile"); }
        else if(b == bJumpGraph)     { jumpToGraph("Graph"); }
@@ -320,20 +319,30 @@ public class TimelineWindow extends Frame
        else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
        */
        else if(arg.equals("Change Colors")) { ShowColorWindow(); }
+       // **** sharon **
        else if(arg.equals("Save Colors")) {
+	   saveColorFile();
+	   	   
+	   /*
 	   try {
 	       Util.saveColors(data.entryColor, "Timeline Graph");
 	   } catch (IOException e) {
 	       System.err.println("Attempt to write to color.map failed");
 	   }
+	   */
        }
        else if(arg.equals("Restore Colors")) {
+	   openColorFile();
+	   
+	   /*
 	   try {
 	       Util.restoreColors(data.entryColor, "Timeline Graph");
 	   } catch (IOException e) {
 	       System.err.println("Attempt to read from color.map failed");
 	   } 
+	   */
 	   data.displayCanvas.updateColors();
+	   
        }
        else if (arg.equals("Default Colors")) {
 	   for (int i=0; i<data.entryColor.length; i++) {
@@ -365,6 +374,40 @@ public class TimelineWindow extends Frame
        setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
      }                  
    }   
+   
+   //  **sharon**
+   public void openColorFile()
+   {
+   	JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
+	d.setFileFilter(new ColorFileFilter());
+	int returnVal = d.showOpenDialog(this);
+	if(returnVal == JFileChooser.APPROVE_OPTION) {
+		try {
+	       		Util.restoreColors(data.entryColor, "Timeline Graph",
+				d.getSelectedFile().getAbsolutePath());
+	        } catch (IOException e) {
+	       		System.err.println("Attempt to read from color.map failed");
+	   	} 
+	}
+   }
+   
+   
+  //  **sharon** change to .map files
+  public void saveColorFile()
+  {
+  	JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
+	d.setFileFilter(new ColorFileFilter());
+	int returnVal = d.showSaveDialog(this);
+	if(returnVal == JFileChooser.APPROVE_OPTION) {
+		try {
+	        	Util.saveColors(data.entryColor, "Timeline Graph",
+					d.getSelectedFile().getAbsolutePath());
+	   	} catch (IOException e) {
+	       		System.err.println("Attempt to write to color.map failed");
+	   	}
+	}
+  }
+   
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {
 	  Scrollbar sb = (Scrollbar)evt.getSource();
@@ -584,7 +627,6 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(zoomPanel, new Label("Selection Length", Label.CENTER), gbc, 5,1, 1,1, 1,1);
 
 	  // JUMP TO GRAPH	
-	  // **sharon** finish all the views
 	  bJumpAnimation = new Button("Animation");
 	  bJumpProfile = new Button("Usage Profile");
 	  bJumpGraph = new Button("Graph");

@@ -101,11 +101,7 @@ public class ProjectionsFileChooser
     return returnVal;
   }
 
-
-
   public int showDialog() {
-
-
     int returnVal = fChoose_.showDialog(null, "Open/Search");
 
     try {
@@ -122,31 +118,8 @@ public class ProjectionsFileChooser
     catch (Exception exc) {
     handleException(owner_, exc); }
 
-   
-
     return returnVal;
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   /** Returns ProjectionFileMgr for the files opened.  If no files opened,
    *  returns null */
@@ -292,8 +265,6 @@ public class ProjectionsFileChooser
     String[] filesStr = new String[files.size()];
     int[] selectAll = new int[files.size()];
 
-
-
     for (int i=0; i<filesStr.length; i++) {
       File file = (File) files.elementAt(i);
       try
@@ -306,7 +277,6 @@ public class ProjectionsFileChooser
       filesStr[i]="IOException index "+i; }
       selectAll[i] = i;
     }
-
 
     list_ = new JList(filesStr);
     listSize_ = filesStr.length;

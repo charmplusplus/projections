@@ -60,6 +60,31 @@ public class MultiRunData {
     }
 
     /**
+     * This should be the preferred way of initializing multirun data from
+     * now onwards.
+     */
+    public void initialize(String listOfStsFilenames[]) 
+	throws IOException
+    {
+	stsReaders = new GenericStsReader[listOfStsFilenames.length];
+	sumReaders = new GenericSummaryReader[listOfStsFilenames.length][];
+	for (int i=0; i<stsReaders.length; i++) {
+	    stsReaders[i] =
+		new GenericStsReader(listOfStsFilenames[i],
+				     Analysis.getVersion());
+	    sumReaders[i] =
+		new GenericSummaryReader[stsReaders[i].numPe];
+	    for (int j=0; j<sumReaders[i].length; j++) {
+		System.out.println(getSumFilename(listOfStsFilenames[i],j));
+		sumReaders[i][j] =
+		    new GenericSummaryReader(getSumFilename(listOfStsFilenames[i],
+							    j),
+					     Analysis.getVersion());
+	    }
+	}
+    }
+
+    /**
      *
      *  addDataSets adds additional log data sets to the one currently
      *  loaded into AccumulatedData. This allows scaling data to be
@@ -140,6 +165,16 @@ public class MultiRunData {
 	    NlogSetPathName += File.separator;
 	}
 	return NlogSetPathName + NbaseName + "." + pe + ".sum";
+    }
+
+    /**
+     *  This version of the method acquires the summary filename from the
+     *  sts filename.
+     */
+    private String getSumFilename(String stsFilename, int pe) {
+	return stsFilename.substring(0, stsFilename.lastIndexOf('.')) +
+	    "." + pe + ".sum";
+	
     }
 
     private File getSumFile(String NbaseName, String NlogSetPathName, int pe) 

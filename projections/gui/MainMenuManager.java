@@ -54,7 +54,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // View Log Files
 		    false,  // Histograms
 		    false,  // Overview
-		    false,  // Multirun Analysis
+		    true,  // Multirun Analysis
 		    false,  // separator
 		    true,   // Performance Counters
 		    false,  // Interval Graph

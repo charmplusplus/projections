@@ -42,36 +42,52 @@ public class MultiRunController
 	mainWindow = NmainWindow;
     }
 
+    /**
+     *  The preferred way
+     */
+    public void processUserInput(String stsFilenames[]) {
+	try {
+	    rawdata = new MultiRunData();
+	    rawdata.initialize(stsFilenames);
+	    analyzeRawData(rawdata);
+	} catch (IOException e) {
+	    System.err.println(e.toString());
+	}
+    }
+
     public void processUserInput(String basename,
 				 String dataSetPathnames[],
 				 boolean isDefaultRoot) {
-        try {
-            rawdata = new MultiRunData();
-            rawdata.initialize(basename, dataSetPathnames, 
+	try {
+	    rawdata = new MultiRunData();
+	    rawdata.initialize(basename, dataSetPathnames, 
 			       isDefaultRoot, SUMMARY);
-
-            // create analyzer object to look at data and generate output
-            analyzer = new MultiRunDataAnalyzer();
-            analyzer.analyzeData(rawdata);
-
-	    // by default, ep list will be presented in an order sorted
-	    // by the analyzer's significance rating. Non-zero EPs are
-	    // also filtered away as a default.
-	    //
-	    // we do, however, want the entire array to be passed to
-	    // legendPanel.
-	    currentMap = analyzer.getSignificanceMap();
-	    currentFilter = analyzer.getNonZeroFilter();
-	    legendPanel.setData(analyzer.getMRLegendData(null, null),
-				analyzer.getData(MultiRunDataAnalyzer.ANALYZE_SUM, 
-						 null, null).getColorMap(),
-				currentFilter,
-				currentMap);
-	} catch (java.io.IOException e) {
-            System.err.println(e.toString());
-        }
+	    analyzeRawData(rawdata);
+	} catch (IOException e) {
+	    System.err.println(e.toString());
+	}
     }
 
+    public void analyzeRawData(MultiRunData rawdata) {
+	// create analyzer object to look at data and generate output
+	analyzer = new MultiRunDataAnalyzer();
+	analyzer.analyzeData(rawdata);
+	
+	// by default, ep list will be presented in an order sorted
+	// by the analyzer's significance rating. Non-zero EPs are
+	// also filtered away as a default.
+	//
+	// we do, however, want the entire array to be passed to
+	// legendPanel.
+	currentMap = analyzer.getSignificanceMap();
+	currentFilter = analyzer.getNonZeroFilter();
+	legendPanel.setData(analyzer.getMRLegendData(null, null),
+			    analyzer.getData(MultiRunDataAnalyzer.ANALYZE_SUM, 
+					     null, null).getColorMap(),
+			    currentFilter,
+			    currentMap);
+    }
+    
     public void registerDisplay(MultiRunDisplayPanel NdisplayPanel) {
 	displayPanel = NdisplayPanel;
     }

@@ -84,6 +84,7 @@ public class MultiRunWindow extends Frame
 	// to specify more options than just the root directory for
 	// summary data sets.
 
+	/*
 	JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
 	MultiRunFileDialogControl accessory = new MultiRunFileDialogControl();
 	fc.setDialogTitle("Choose directories for summary data");
@@ -91,19 +92,39 @@ public class MultiRunWindow extends Frame
 	fc.setMultiSelectionEnabled(true);
 	fc.setAccessory(accessory);
 	int returnVal = fc.showDialog(this,"Choose");
+	*/
 
-	if (returnVal == JFileChooser.APPROVE_OPTION) {
-	    File inDirs[] = fc.getSelectedFiles();
-	    String inDirPathnames[] = new String[inDirs.length];
-	    for (int i=0;i<inDirs.length;i++) {
-		inDirPathnames[i] = inDirs[i].getAbsolutePath();
+	try {
+	    ProjectionsFileChooser fc = 
+		new ProjectionsFileChooser(this, "Multirun Analysis",
+					   ProjectionsFileChooser.MULTIPLE_FILES);
+	    MultiRunCallBack callback = new MultiRunCallBack(this, fc);
+	    int returnVal = fc.showDialog(callback);
+	    // the callback will decide what happens
+	    /*
+	    if (returnVal == JFileChooser.APPROVE_OPTION) {
+		File inDirs[] = fc.getSelectedFiles();
+		String inDirPathnames[] = new String[inDirs.length];
+		for (int i=0;i<inDirs.length;i++) {
+		    inDirPathnames[i] = inDirs[i].getAbsolutePath();
+		}
+		if (inDirs.length > 0) {
+		    controller.processUserInput(((MultiRunFileDialogControl)fc.getAccessory()).getBaseName(), 
+						inDirPathnames,
+						((MultiRunFileDialogControl)fc.getAccessory()).isDefault());
+		}
 	    }
-	    if (inDirs.length > 0) {
-		controller.processUserInput(((MultiRunFileDialogControl)fc.getAccessory()).getBaseName(), 
-					    inDirPathnames,
-					    ((MultiRunFileDialogControl)fc.getAccessory()).isDefault());
-	    }
+	    */
+	} catch (Exception e) {
+	    System.out.println("Filechooser error. Please fix");
+	    ProjectionsFileChooser.handleException(this, e);
 	}
+    }
+
+    public void beginAnalysis(ProjectionsFileChooser fc) {
+	// called by MultiRunCallBack
+	String inFilenames[] = fc.userSelect_returnVal;
+	controller.processUserInput(inFilenames);
     }
 
     private void CreateLayout()

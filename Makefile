@@ -83,6 +83,7 @@ SRC=\
     projections/gui/MainRunStatusPanel.java\
     projections/gui/MainSummaryGraphPanel.java\
     projections/gui/MenuManager.java\
+    projections/gui/MultiRunCallBack.java\
     projections/gui/MultiRunControlPanel.java\
     projections/gui/MultiRunDisplayPanel.java\
     projections/gui/MultiRunFileDialogControl.java\

@@ -11,6 +11,11 @@ import java.util.*;
 import java.awt.*;
 
 public class Analysis {
+	/******************* Version  ************/
+	private static double version;
+        public static double  getVersion() { return version; }
+        public static void setVersion(double v) { version = v; }
+
 	/******************* Initialization ************/
 	private static StsReader sts;
 	
@@ -41,7 +46,7 @@ public class Analysis {
 	}
 	public static int[][] getAnimationData( int numPs, int intervalSize ) {
 		int nInt=(int)(sts.getTotalTime()/intervalSize);
-		LoadGraphData(nInt,intervalSize,false);
+		LoadGraphData(nInt,intervalSize,false, null);
 		int[][] animationdata = new int[ numPs ][ nInt ];
 		for( int p = 0;p < numPs; p++ ) {
 			for( int t = 0;t < nInt;t++ ) {
@@ -225,13 +230,17 @@ public class Analysis {
 			logLoader = new LogLoader( sts);
 		}
 	}
-	public static void LoadGraphData(int numIntervals, 
-		long intervalSize, boolean byEntryPoint) 
+        /**
+           replace LoadGraphData(), with one more parameter containing
+           a list of processors to read.
+        */
+	public static void LoadGraphData(int numIntervals, long intervalSize, 
+                boolean byEntryPoint, OrderedIntList processorList) 
 	{
 		status("LoadGraphData("+intervalSize+" us):");
 		if( sts.hasLogFiles()) { // .log files
 			LogReader logReader = new LogReader();
-			logReader.read(sts, sts.getTotalTime(), intervalSize, byEntryPoint );
+			logReader.read(sts, sts.getTotalTime(), intervalSize, byEntryPoint, processorList );
 			systemUsageData = logReader.getSystemUsageData();
 			systemMsgsData = logReader.getSystemMsgs();
 			userEntryData = logReader.getUserEntries();

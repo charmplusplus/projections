@@ -102,7 +102,7 @@ all: bin/projections.jar
 	@ echo "See README or run bin/projections"
 
 projections/gui/MainWindow.class: $(SRC)
-	javac -O $(SRC)
+	javac -d . -O $(SRC)
 
 bin/projections.jar: projections/gui/MainWindow.class $(SRC)
 	@ echo "** Creating jar file"

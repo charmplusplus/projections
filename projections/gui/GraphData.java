@@ -2,6 +2,11 @@ package projections.gui;
 
 import java.awt.*;
 
+/**
+  GraphData holds the data for Graph
+  It doesn't have to hold all data for all processors, the processor.list
+  has the ordered list of all precoessors.
+*/
 public class GraphData
 {
    static final int PROCESSOR = 0;
@@ -41,8 +46,11 @@ public class GraphData
    protected GraphLegendPanel  legendPanel;
    protected GraphDisplayPanel displayPanel;
    protected GraphWindow       graphWindow;
+
+   // save the original processor list
+   protected OrderedIntList    origProcList;
    
-   public GraphData(int numIs, long intsize)
+   public GraphData(int numIs, long intsize, OrderedIntList procList)
    {
 	  yscale  = 1;
 	  wscale  = 1;
@@ -60,12 +68,17 @@ public class GraphData
 	  
 	  // Initialize processor info
 	  processor         = new BItem();
+/*  gzheng
+  GraphData doesn't neccessarily have all processors data any more
 	  processor.num     = Analysis.getNumProcessors();
 	  processor.list    = new OrderedIntList();
 	  for(int p=0; p<processor.num; p++)
 		 processor.list.insert(p);
+*/
+          origProcList      = procList;
+          processor.list    = procList;
 	  processor.string  = processor.list.listToString();   
-	  
+	  processor.num     = procList.size();
 	  
 	  // Initialize systemUsage data  
 	  String s1[] = {"Queue Size", "Processor Usage(%)", "Idle Time(%)"};
@@ -75,7 +88,7 @@ public class GraphData
 		 systemUsage[a]       = new ZItem();
 		 systemUsage[a].name  = s1[a];
 		 systemUsage[a].exists=(null!=Analysis.getSystemUsageData(a));
-	 float gray=(float)(1.0-a*0.3);
+	         float gray=(float)(1.0-a*0.3);
 		 systemUsage[a].color = new Color(gray,gray,gray);
 		 if (a==1) //Enable system CPU utilization by default
 			systemUsage[a].state = true;
@@ -153,6 +166,7 @@ public class GraphData
 	  
 	  initData(numIs, intsize);
    }   
+
    public void initData(int numIs, long intsize)
 	{
 	scale       = (float)1.0;
@@ -166,12 +180,14 @@ public class GraphData
 		 interval.list.insert(i);
 	  interval.string   = interval.list.listToString();
 		 
+	  int numProcessors = Analysis.getNumProcessors();
 	  // Initialize systemUsage data 
 	  for(int a=0; a<3; a++)
 	  if (null!=Analysis.getSystemUsageData(a))
 	  {
 		 systemUsage[a].data = Analysis.getSystemUsageData(a);
-		 systemUsage[a].curPData = new int[processor.num];
+//		 systemUsage[a].curPData = new int[processor.num];
+		 systemUsage[a].curPData = new int[numProcessors];
 		 systemUsage[a].curIData = new int[interval.num];
 	  }    
 	  
@@ -183,7 +199,8 @@ public class GraphData
 		      if (Analysis.hasSystemMsgsData(a,t))
 			  {
 			      systemMsgs[a][t].data = Analysis.getSystemMsgsData(a,t);
-			      systemMsgs[a][t].curPData = new int[processor.num];
+//			      systemMsgs[a][t].curPData = new int[processor.num];
+			      systemMsgs[a][t].curPData = new int[numProcessors];
 			      systemMsgs[a][t].curIData = new int[interval.num];
 			  }
 		  }  
@@ -195,13 +212,15 @@ public class GraphData
 		      if (Analysis.hasUserEntryData(a,t))
 			  {
 			      userEntry[a][t].data = Analysis.getUserEntryData(a,t);
-			      userEntry[a][t].curPData = new int[processor.num];
+//			      userEntry[a][t].curPData = new int[processor.num];
+			      userEntry[a][t].curPData = new int[numProcessors];
 			      userEntry[a][t].curIData = new int[interval.num];
 			  }
 		  } 
 	      
 	  setData();
    }   
+
    private Color nextColor()
    {
 	  Color tmp = Color.getHSBColor((float)((colorvalue*0.173)%1),
@@ -211,6 +230,7 @@ public class GraphData
 	  
 	  return tmp;
    }   
+
    private int setCurIData(ZItem item)
    {
 	  int element, count;
@@ -236,7 +256,8 @@ public class GraphData
    {
 	   int element, count;
 	  int max = 0;
-	  for(int p=0; p<processor.num; p++)
+//	  for(int p=0; p<processor.num; p++)
+	  for (int p=processor.list.nextElement(); p!=-1; p=processor.list.nextElement())
 	  {
 		 count = 0;
 		 item.curPData[p] = 0;
@@ -255,7 +276,7 @@ public class GraphData
    }   
    public void setData()
    {
-	   int maxMP = 0;
+	  int maxMP = 0;
 	  int maxTP = 0;
 	  int maxMI = 0;
 	  int maxTI = 0;

@@ -10,16 +10,19 @@ public class GraphIntervalDialog extends Dialog
    private GraphWindow graphWindow;
    private IntTextField numField;
    private TimeTextField sizeField;
+   private SelectField   processorsField;
    
    private long intervalSize, totalTime;
    private int numIntervals;
+   private OrderedIntList processorList;
+   private String processorString;
    private int oldnum;
    
    private Button bOK, bCancel;
 	  
    public GraphIntervalDialog(GraphWindow graphWindow, int nI)
    {
-	   super((Frame)graphWindow, "Set Interval Size", true);
+	  super((Frame)graphWindow, "Set Interval Size", true);
 		
 	  oldnum = nI;
 	  numIntervals = nI;
@@ -47,11 +50,14 @@ public class GraphIntervalDialog extends Dialog
 	  
 	  sizeField = new TimeTextField(intervalSize, 12);
 	  numField  = new IntTextField(numIntervals, 12);
+          processorsField = new SelectField(processorString, 12);
 	  
 	  sizeField.addTextListener(this);
 	  numField.addTextListener (this);
+          processorsField.addTextListener(this);
 	  sizeField.addActionListener(this);
 	  numField.addActionListener(this);
+          processorsField.addActionListener(this);
 	  
 	  Panel p1 = new Panel();
 	  Panel p2 = new Panel();
@@ -65,14 +71,29 @@ public class GraphIntervalDialog extends Dialog
 	  gbc.fill = GridBagConstraints.BOTH;
 	  gbc.insets = new Insets(5, 5, 5, 5);
 	  
-	  Util.gblAdd(p1, new Label("Total Time:", Label.RIGHT), gbc, 0, 0, 1, 1, 1, 1);
-	  Util.gblAdd(p1, new Label(U.t(totalTime), Label.RIGHT), gbc, 1, 0, 1, 1, 1, 1);
+          int numProcs = Analysis.getNumProcessors();
+
+          int row = 0;
+	  Util.gblAdd(p1, new Label("Total Time:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
+	  Util.gblAdd(p1, new Label(U.t(totalTime), Label.RIGHT), gbc, 1, row, 1, 1, 1, 1);
+	  row ++;
 	  
-	  Util.gblAdd(p1, new Label("Interval Size:", Label.RIGHT), gbc, 0, 1, 1, 1, 1, 1);
-	  Util.gblAdd(p1, sizeField,                                gbc, 1, 1, 1, 1, 1, 1);
+	  Util.gblAdd(p1, new Label("Total Processors:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
+	  Util.gblAdd(p1, new Label(Integer.toString(numProcs), Label.RIGHT), gbc, 1, row, 1, 1, 1, 1);
+	  row ++;
 	  
-	  Util.gblAdd(p1, new Label("# of Intervals:", Label.RIGHT), gbc, 0, 2, 1, 1, 1, 1);
-	  Util.gblAdd(p1, numField,                                  gbc, 1, 2, 1, 1, 1, 1); 
+	  Util.gblAdd(p1, new Label("Processors:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
+	  Util.gblAdd(p1, processorsField,                       gbc, 1, row, 1, 1, 1, 1);
+	  processorsField.setText("0-"+Integer.toString(numProcs-1));
+	  row ++;
+
+	  Util.gblAdd(p1, new Label("Interval Size:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
+	  Util.gblAdd(p1, sizeField,                                gbc, 1, row, 1, 1, 1, 1);
+	  row ++;
+	  
+	  Util.gblAdd(p1, new Label("# of Intervals:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
+	  Util.gblAdd(p1, numField,                                 gbc, 1, row, 1, 1, 1, 1); 
+	  row ++;
 	  
 	  bOK     = new Button("OK");
 	  bCancel = new Button("Cancel");
@@ -100,6 +121,8 @@ public class GraphIntervalDialog extends Dialog
 		 {
 			graphWindow.setIntervalSize(intervalSize);
 			graphWindow.setNumIntervals(numIntervals);
+                        processorList = processorsField.getValue(Analysis.getNumProcessors());
+			graphWindow.setProcessorRange(processorList);
 		 }
 		 setVisible(false);
 		 dispose();
@@ -108,6 +131,8 @@ public class GraphIntervalDialog extends Dialog
 	  {
 		 graphWindow.setIntervalSize(intervalSize);
 		 graphWindow.setNumIntervals(numIntervals);
+                 processorList = processorsField.getValue(Analysis.getNumProcessors());
+		 graphWindow.setProcessorRange(processorList);
 		 setVisible(false);
 		 dispose();
 	  }     

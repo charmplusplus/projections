@@ -112,7 +112,7 @@ public class StlPanel extends ScalePanel.Child
 	public void setData(int desiredIntervals) {
 		totalTime=Analysis.getTotalTime();
 		intervalSize=(int)(totalTime/desiredIntervals);
-		Analysis.LoadGraphData(desiredIntervals,intervalSize,false);
+		Analysis.LoadGraphData(desiredIntervals,intervalSize,false,null);
 		data=Analysis.getSystemUsageData(1);
 		nPe=data.length;
 		repaint();

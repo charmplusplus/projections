@@ -18,6 +18,8 @@ public class GraphWindow extends Frame
    private GraphData data;
    private int  numintervals = -1;
    private long intervalsize;
+   private OrderedIntList processorList;
+   private String processorListString;
    private int w, h;
    private boolean firstTime = true;
    
@@ -314,16 +316,23 @@ public class GraphWindow extends Frame
    {
 	  numintervals = x;
    }   
+   public void setProcessorRange(OrderedIntList x)
+   {
+	  processorList = x;
+          processorListString = x.listToString();
+   }   
    private void ShowIntervalDialog()
    {
 
 	  int oldIntervals = numintervals;
+          OrderedIntList oldProcList = null;
+          if (processorList!=null) oldProcList = processorList.copyOf();
 	  
 	  intervalDialog = new GraphIntervalDialog(this, numintervals);
 	  intervalDialog.setVisible(true);
 	  intervalDialog = null;
 	  
-	  if(numintervals != oldIntervals)
+	  if(numintervals != oldIntervals || !oldProcList.equals(processorList))
 	  {
 		 setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		 Dialog d = new Dialog((Frame)this, "Loading data...", false);
@@ -334,15 +343,18 @@ public class GraphWindow extends Frame
 		 d.setLocation((w-d.getSize().width)/2, (h-d.getSize().height)/2);
 		 d.setVisible(true);
 	  
-		 Analysis.LoadGraphData(numintervals, intervalsize, true);
-		 if(data == null)
+		 Analysis.LoadGraphData(numintervals, intervalsize, true, processorList);
+		 if(data == null || !oldProcList.equals(processorList))
 		 {
-			data = new GraphData(numintervals, intervalsize);
+			data = null;
+			data = new GraphData(numintervals, intervalsize, processorList);
 			setChildDatas();
 		 }   
-		 else
-	     data.initData(numintervals, intervalsize);
-
+		 else {
+			// only can reuse the data when processor list
+                        // is unchanged.
+	                data.initData(numintervals, intervalsize);
+                 }
 	  
 		 controlPanel.setXMode(data.xmode);
 		 controlPanel.setYMode(data.ymode);

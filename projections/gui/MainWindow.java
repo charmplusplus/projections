@@ -9,6 +9,7 @@ import projections.misc.*;
 public class MainWindow extends Frame
    implements ActionListener
 {
+   private static double 	CUR_VERSION = 2.0;
 
    private GraphWindow          graphWindow;
    private TimelineWindow       timelineWindow;
@@ -181,13 +182,44 @@ public class MainWindow extends Frame
 	  else
 		 return false;
    }   
+   public static void help()
+   {
+     System.out.println("-h:		show this page");
+     System.out.println("-V:		show Projections version");
+     System.out.println("-u <ver>:	use old version format");
+     System.exit(0);
+   }
    public static void main(String args[])
    {
-	  MainWindow f = new MainWindow();
-	  f.pack();
-	  f.setTitle("Projections");
-	  f.setResizable(false);
-	  f.setVisible(true);
+        // set current version
+	Analysis.setVersion(CUR_VERSION);
+        int i=0;
+        while (i < args.length) {
+	  if (args[i].equals("-h")) {
+	     help();
+	  }
+	  if (args[i].equals("-V")) {
+	     System.out.println("Projections version: "+Analysis.getVersion());
+	     System.exit(0);
+	  }
+	  if (args[i].equals("-u")) {
+	     i++;
+	     if (i==args.length) help();
+	     double useVersion = Double.parseDouble(args[i]);
+	     if (useVersion > CUR_VERSION) {
+	       System.out.println("Invalid (future) Projections version!");
+	       System.exit(1);
+	     }
+	     Analysis.setVersion(useVersion);
+	  }
+          i++;
+	}
+
+	MainWindow f = new MainWindow();
+	f.pack();
+	f.setTitle("Projections");
+	f.setResizable(false);
+	f.setVisible(true);
    }   
    public void paint(Graphics g)
    {

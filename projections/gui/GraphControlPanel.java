@@ -21,6 +21,8 @@ public class GraphControlPanel extends Panel
    private Label        lIterate;
    private Label        lSelect;
    private SelectField  rangeField;
+
+   private OrderedIntList  origProcList;    // original proc list
    
    public GraphControlPanel()
    {
@@ -129,10 +131,21 @@ public class GraphControlPanel extends Panel
 			}
 			else   
 			{
+			   // go through the saved origProcList instead
+			   // of data.processor.list because it is 
+			   // already changed to the current selection.
+			   if (delta < 0) delta += origProcList.size();
+			   x = origProcList.currentElement();
+			   for (int i=0; i<delta; i++) {
+			     x = origProcList.nextElement();
+			     if (x==-1) x = origProcList.nextElement();
+			   }
+/*  gzheng
 			   data.processor.list.reset();
 			   x = data.processor.list.currentElement();
 			   x = (x + delta) % data.processor.num;
 			   if(x < 0) x += data.processor.num;
+*/
 			}
 			rangeField.setText(x + "");         
 		 }
@@ -140,12 +153,15 @@ public class GraphControlPanel extends Panel
 		 {
 			int x = 0;
 			
-			if(data.xmode == GraphData.PROCESSOR)
+			if(data.xmode == GraphData.PROCESSOR) {
 			   x = data.interval.num - 1;
-			else   
-			   x = data.processor.num - 1;
+			   rangeField.setText("0-" + x);
+			}
+			else  {
+//			   x = data.processor.num - 1;
+			   rangeField.setText(origProcList.listToString());
+			}
 			
-			rangeField.setText("0-" + x);
 		 }   
 	  }
 	  if(data.xmode == GraphData.PROCESSOR) 
@@ -156,7 +172,8 @@ public class GraphControlPanel extends Panel
 	  }
 	  else
 	  {
-		 data.processor.list   = rangeField.getValue(data.processor.num);
+//		 data.processor.list   = rangeField.getValue(data.processor.num);
+		 data.processor.list   = rangeField.getValue(Analysis.getNumProcessors());
 		 data.processor.string = rangeField.getText(); 
 		 data.setData();
 	  }
@@ -192,6 +209,7 @@ public class GraphControlPanel extends Panel
    public void setGraphData(GraphData data)
    {
 	  this.data = data;
+	  this.origProcList = data.processor.list;
    }   
    public void setXMode(int mode)
    {
@@ -210,7 +228,7 @@ public class GraphControlPanel extends Panel
 	  {
 		 if(cbXInterval.getState() != true) cbXInterval.setState(true);
 		 lIterate.setText("ITERATE PROCESSORS");
-		 lSelect.setText ("SELECT PROCESSORS (0-" + (data.processor.num-1) +")");
+		 lSelect.setText ("SELECT PROCESSORS (" + origProcList.listToString() +")");
 		 rangeField.setText(data.processor.string);
 	  }
 	  data.displayPanel.setAllBounds();

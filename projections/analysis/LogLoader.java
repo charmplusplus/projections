@@ -9,6 +9,7 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 import projections.misc.*;
+import projections.gui.*;
 
 public class LogLoader extends ProjDefs
 {
@@ -293,7 +294,10 @@ public class LogLoader extends ProjDefs
 			Temp.Time    = log.nextLong();
 			Temp.EventID = log.nextInt();
 			Temp.Pe      = log.nextInt();
-			Temp.MsgLen  = log.nextInt();
+			if (Analysis.getVersion() > 1.0)
+			  Temp.MsgLen  = log.nextInt();
+			else
+			  Temp.MsgLen  = -1;
 			return Temp;
 		 case ENQUEUE:
 		 case DEQUEUE:

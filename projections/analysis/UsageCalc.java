@@ -104,6 +104,9 @@ public class UsageCalc extends ProjDefs
 		}} catch (EOFException e) {
 			log.close();
 		}
+		catch (IOException e) {
+			log.close();
+		}
 	}
 	catch (IOException e)
 	    {System.out.println("Exception while reading log file "+pnum); }

@@ -9,4 +9,4 @@ fi
 
 java -ms60000000 -mx100000000 \
   -classpath $jarpath \
-  projections.gui.MainWindow
+  projections.gui.MainWindow $*

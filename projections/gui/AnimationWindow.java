@@ -35,10 +35,11 @@ public class AnimationWindow extends Frame
 		 while(keepAnimating)
 		 {
 			long timeLeft=finish-System.currentTimeMillis();
-			if (timeLeft>0)
+			if (timeLeft>0) {
 			  try { //Give other threads a chance
 				sleep(timeLeft);
 			  } catch (InterruptedException E) {}
+			}
 			else
 			{ //Advance to next frame
 			   finish += redrawDelay;

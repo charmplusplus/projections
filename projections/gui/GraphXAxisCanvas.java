@@ -79,7 +79,19 @@ public class GraphXAxisCanvas extends Canvas
 		 if(i % labelincrement == 0)
 		 {
 			g.drawLine(curx, 0, curx, 10);
-			s = "" + i*tickincrement;
+			// gzheng
+			// now the processor can be any subset of processors
+			// not necessarily from minx to maxx
+	  		if(data.xmode == GraphData.PROCESSOR)
+			{
+			  data.origProcList.reset();
+			  int pe = data.origProcList.nextElement();
+			  for (int j=0; j<i; j++)
+			    pe = data.origProcList.nextElement();
+			  s = "" + pe;
+			}
+			else
+			  s = "" + i*tickincrement;
 			
 			g.drawString(s, curx-fm.stringWidth(s)/2, 15 + fm.getHeight());
 		 

@@ -18,8 +18,16 @@ public class GraphDisplayCanvas extends Canvas
 	  
 	  int element, count, y;
 	
-	  if(data.xmode == GraphData.PROCESSOR)
-		 y = item.curPData[x];
+	  if(data.xmode == GraphData.PROCESSOR) {
+		// gzheng
+		// figure out the real processor number
+		data.origProcList.reset();
+                int pe = data.origProcList.nextElement();
+                for (int j=0; j<x; j++)
+                  pe = data.origProcList.nextElement();
+
+		 y = item.curPData[pe];
+	  }
 	  else
 		 y = item.curIData[x];   
 								  
@@ -30,6 +38,7 @@ public class GraphDisplayCanvas extends Canvas
 						   
 	  graphDataList.insert(y, item.color);
    }   
+
    private void drawDisplay(Graphics g)
    {
 	  if(data == null)
@@ -120,8 +129,15 @@ public class GraphDisplayCanvas extends Canvas
 		 count = 0;
 		 x2 = data.offset3 + (int)(x * data.xscale);
 		
-		 if(data.xmode == GraphData.PROCESSOR)
-			y2 = item.curPData[x];
+		 if(data.xmode == GraphData.PROCESSOR) {
+		   // gzheng
+		   // figure out the real processor number
+		   data.origProcList.reset();
+                   int pe = data.origProcList.nextElement();
+                   for (int j=0; j<x; j++)
+                          pe = data.origProcList.nextElement();
+		   y2 = item.curPData[pe];
+		 }
 		 else
 			y2 = item.curIData[x];   
 					

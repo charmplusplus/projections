@@ -13,6 +13,7 @@ processor, and time interval.
 import java.lang.*;
 import java.io.*;
 import projections.misc.*;
+import projections.gui.*;
 import java.util.*;
 
 public class LogReader extends ProjDefs
@@ -58,28 +59,41 @@ public class LogReader extends ProjDefs
 	}
 	startTime+=extra;
 	}
-	//Add this entry point to the counts
+
+	/**
+           Add this entry point to the counts
+        */
 	final private void count(int mtype,int entry,int TYPE)
 	{
-		if (!byEntryPoint) return;
-	if (userEntries[entry][TYPE]==null) {
-		userEntries[entry][TYPE]=new int[numProcessors][numIntervals+1];
-		if (TYPE==PROCESS) //Add a time array, too
-			userEntries[entry][TIME]=new int[numProcessors][numIntervals+1];
-	}
-	userEntries[entry][TYPE][curPe][interval]++;
+	  if (!byEntryPoint) return;
+	  if (userEntries[entry][TYPE]==null) {
+	    userEntries[entry][TYPE]=new int[numProcessors][numIntervals+1];
+	    if (TYPE==PROCESS) //Add a time array, too
+	      userEntries[entry][TIME]=new int[numProcessors][numIntervals+1];
+	  }
+/*  gzheng to save memory, only allocate memory for those processors in the list
+	  if (userEntries[entry][TYPE][curPe]==null) {
+	    userEntries[entry][TYPE][curPe]=new int[numIntervals+1];
+	    if (TYPE==PROCESS) //Add a time array, too
+	      userEntries[entry][TIME][curPe]=new int[numIntervals+1];
+	  }
+*/
+	  userEntries[entry][TYPE][curPe][interval]++;
 	
-	int catIdx=mtypeToCategoryIdx(mtype);
-	if (catIdx!=-1) {
+	  int catIdx=mtypeToCategoryIdx(mtype);
+	  if (catIdx!=-1) {
 		if (categorized[catIdx][TYPE]==null) {
 			categorized[catIdx][TYPE]=new int[numProcessors][numIntervals+1];
 			if (TYPE==PROCESS) //Add a time array, too
 			  categorized[catIdx][TIME]=new int[numProcessors][numIntervals+1];
 		}
 		categorized[catIdx][TYPE][curPe][interval]++;
+	  }
 	}
-	}
-	//This is called when a log entry crosses a timing interval boundary
+
+	/**
+           This is called when a log entry crosses a timing interval boundary
+        */
 	private void fillToInterval(int newinterval)
 	{
 	if (interval>=newinterval) return; //Nothing to do in this case
@@ -103,6 +117,7 @@ public class LogReader extends ProjDefs
 	{ return sysUsgData; }
 	public int[][][][] getUserEntries()
 	{ return userEntries; }
+
 	private void intervalCalc(int type, int mtype, int entry, long time) throws IOException
 	{
 /*	if (entry < 0 || entry >= numUserEntries)
@@ -115,26 +130,26 @@ public class LogReader extends ProjDefs
 	case ENQUEUE:
 		sysUsgData[SYS_Q][curPe][interval]++;//Lengthen system queue
 		break;
-		case CREATION:
+	case CREATION:
 		sysUsgData[SYS_Q][curPe][interval]++;//Lengthen system queue
 		count(mtype,entry,CREATE);
 		break;
-		case BEGIN_PROCESSING:
+	case BEGIN_PROCESSING:
 		processing++;
 		startTime = time;
 		sysUsgData[SYS_Q][curPe][interval]--;//Shorten system queue
 		count(currentMtype = mtype,currentEntry = entry,PROCESS);
 		break;
-		case END_PROCESSING:
+	case END_PROCESSING:
 		addToInterval((int)(time-startTime),interval,false);
 		processing--;
 		break;
-		case BEGIN_IDLE:
+	case BEGIN_IDLE:
 		processing++;
 		startTime = time;
 		currentEntry = IDLE_ENTRY;
 		break;
-		case END_IDLE:
+	case END_IDLE:
 		addToInterval((int)(time-startTime),interval,false);
 		processing--;
 		break;
@@ -156,9 +171,13 @@ public class LogReader extends ProjDefs
 			return -1;
 		}
 	}
+        /**
+           read log file, with one more parameter containing 
+           a list of processors to read.
+        */
 	public void read(StsReader sts,
 		long totalTime, long reqIntervalSize,
-		boolean NbyEntryPoint)
+		boolean NbyEntryPoint, OrderedIntList processorList)
 	{
 	int type;
 	int mtype;
@@ -175,18 +194,32 @@ public class LogReader extends ProjDefs
         //System.out.println(numIntervals);
 	byEntryPoint=NbyEntryPoint;
 
+	// assume full range of processor if null
+        if (processorList == null) {
+          processorList = new OrderedIntList();
+          for (pe=0; pe<numProcessors; pe++)
+	    processorList.insert(pe);
+        }
+
 	ProgressDialog bar=new ProgressDialog("Reading log files...");
 	double allocEffort=0.5;//Number of logs the allocations are worth
 	double totalEffort=allocEffort+sts.getProcessorCount();
 	bar.progress(0,"allocating");
-	sysUsgData = new int[3][numProcessors][numIntervals+1];
+//	sysUsgData = new int[3][numProcessors][numIntervals+1];
+	sysUsgData = new int[3][numProcessors][];
 	if (byEntryPoint) {
+// gzheng		userEntries = new int[numUserEntries][3][numProcessors][];
 		userEntries = new int[numUserEntries][3][][];
 		categorized = new int[5][3][][];
 	}
-	int nPe=sts.getProcessorCount();
-	for (curPe = 0; curPe <nPe; curPe++)
-		try {
+        processorList.reset();
+	int nPe=processorList.size();
+ 	curPe = processorList.nextElement();
+	for (;curPe!=-1; curPe=processorList.nextElement())
+	  try {
+                sysUsgData[0][curPe] = new int [numIntervals+1];
+                sysUsgData[1][curPe] = new int [numIntervals+1];
+                sysUsgData[2][curPe] = new int [numIntervals+1];
 		processing = 0;
 	        interval = 0;
 	        currentEntry = -1;
@@ -209,7 +242,7 @@ public class LogReader extends ProjDefs
 			case BEGIN_IDLE: case END_IDLE:
 				time = log.nextLong();
 				pe = log.nextInt();
-								intervalCalc(type, 0, 0, (time-progStartTime));
+				intervalCalc(type, 0, 0, (time-progStartTime));
 				break;
 			case CREATION:
 			case BEGIN_PROCESSING: 
@@ -219,20 +252,23 @@ public class LogReader extends ProjDefs
 				time = log.nextLong();
 				event = log.nextInt();
 				pe = log.nextInt();
-				msglen = log.nextInt();
+				if (Analysis.getVersion() > 1.0)
+				  msglen = log.nextInt();
+			 	else
+				  msglen = -1;
 			//System.out.println(type+" "+mtype+" "+entry+" "+time);
-								intervalCalc(type, mtype, entry, (time-progStartTime));
+				intervalCalc(type, mtype, entry, (time-progStartTime));
 				break;
 			case ENQUEUE:
 				mtype = log.nextInt();
 				time = log.nextLong();
 				event = log.nextInt();
 				pe = log.nextInt();
-								intervalCalc(type, mtype, 0, (time-progStartTime));
+				intervalCalc(type, mtype, 0, (time-progStartTime));
 				break;
 			case END_COMPUTATION:
 				time = log.nextLong();
-								fillToInterval(numIntervals);
+				fillToInterval(numIntervals);
  				break;
  			default:
  				break;//Just skip this line
@@ -240,10 +276,13 @@ public class LogReader extends ProjDefs
 		}} catch (EOFException e) {
 			log.close();
 		}
+		catch (IOException e) {
+			log.close();
+		}
 	    }
-	catch (IOException e)
-	   { System.out.println("Exception reading log file #"+curPe); return;}
-	bar.done();
+	  catch (IOException e)
+	  { System.out.println("Exception reading log file #"+curPe); return;}
+	  bar.done();
 	}
 	//Convert system usage and idle time from us to percent of an interval
 	private void rescale(int j)

@@ -38,7 +38,7 @@ public class TimeBinDialog extends RangeDialog
 	super(mainWindow, titleString);
 	// default values
 	numBins = 100;
-	binSize = 10000;
+	binSize = 100;
 	minBinSize = 0;
     }
     

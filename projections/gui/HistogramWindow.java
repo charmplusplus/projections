@@ -30,7 +30,7 @@ public class HistogramWindow extends GenericGraphWindow
 
     void windowInit() {
 	numBins = 100;  // default to 100 bins
-	binSize = 1000; // 1ms default bin size
+	binSize = 100; // 1ms default bin size
 	minBinSize = 0; // default, look at all bins
 	// use GenericGraphWindow's method for the rest.
 	super.windowInit();
@@ -162,7 +162,7 @@ public class HistogramWindow extends GenericGraphWindow
 
     protected void setGraphSpecificData(){
 	setXAxis("Bin Interval Size (" + U.t(binSize) + ")", 
-		 "", minBinSize, 1.0);
+		 "", minBinSize, binSize);
 	setYAxis("Number of Occurrences", "");
     }
 

@@ -2,8 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-
-import projections.gui.*;
+import javax.swing.*;
 
 /**
  *  EntrySelectionDialog
@@ -96,9 +95,18 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	    selectTitle = entryNames[selectedCP.getIndex()];
 	    selectTitle += " : " + 
 		typeLabelStrings[selectedCP.getType()];
+	    /*
 	    colorSelectWindow = 
 		new ColorSelectWindow(this, selectedCP.getColor(),
 				      selectTitle);
+	    */
+	    JColorChooser colorWindow = new JColorChooser();
+	    Color returnColor =
+		colorWindow.showDialog(this, selectTitle,
+				       selectedCP.getColor());
+	    if (returnColor != null) {
+		selectedCP.setColor(returnColor);
+	    }
 	} else if(evt.getSource() instanceof Button) {
 	    Button b = (Button) evt.getSource();
 	  

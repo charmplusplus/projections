@@ -37,7 +37,8 @@ SRC=\
     projections/gui/Bubble.java\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
-    projections/gui/ColorSelectWindow.java\
+# No longer needed.
+#    projections/gui/ColorSelectWindow.java\
     projections/gui/ColorWindowFrame.java\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\

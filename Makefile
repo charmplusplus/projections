@@ -17,6 +17,7 @@ SRC=\
     projections/analysis/SumAnalyzer.java\
     projections/analysis/TimelineEvent.java\
     projections/analysis/TimelineMessage.java\
+    projections/analysis/UserEvent.java\
     projections/analysis/UsageCalc.java\
     projections/analysis/UsageInterval.java\
     projections/analysis/ViewerEvent.java\
@@ -38,6 +39,7 @@ SRC=\
     projections/gui/ColorWindowFrame.java\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\
+    projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
     projections/gui/GraphAttributesWindow.java\
     projections/gui/GraphControlPanel.java\
@@ -110,6 +112,7 @@ SRC=\
     projections/gui/TimelineWindow.java\
     projections/gui/U.java\
     projections/gui/Util.java\
+    projections/gui/UserEventWindow.java\
     projections/gui/Wait.java\
     projections/gui/WaitButton.java\
     projections/gui/ZItem.java\

@@ -88,6 +88,8 @@ public class AnimationWindow extends ProjectionsWindow
 			if (thisWindow.layoutComplete) {
 			    if (dialog.isModified()) {
 				displayPanel.setParameters();
+				slider.setValues(0, 1, 0,
+	displayPanel.getNumI());
 			    }
 			} else {
 			    createLayout();
@@ -171,6 +173,8 @@ public class AnimationWindow extends ProjectionsWindow
 
     private void createLayout()
     {
+
+
 	Panel mainPanel     = new Panel();
 	titlePanel    = new Panel();
 	statusPanel   = new Panel();
@@ -227,7 +231,9 @@ public class AnimationWindow extends ProjectionsWindow
 	mainPanel.setBackground(Color.gray);
 	mainPanel.setLayout(gbl);
           
-	Util.gblAdd(mainPanel, titlePanel,    gbc, 0,0, 1,1, 1,0);
+	Util.gblAdd(mainPanel,
+
+ titlePanel,    gbc, 0,0, 1,1, 1,0);
 	Util.gblAdd(mainPanel, displayPanel,  gbc, 0,1, 1,1, 1,1);
 	Util.gblAdd(mainPanel, colorbarPanel, gbc, 0,2, 1,1, 1,0);
 	Util.gblAdd(mainPanel, statusPanel,   gbc, 0,3, 1,1, 1,0);

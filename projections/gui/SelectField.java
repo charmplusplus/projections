@@ -18,7 +18,7 @@ public class SelectField extends TextField
 		 public void keyTyped(KeyEvent evt)
 		 {
 			char ch = evt.getKeyChar();
-			if(!(('0' <= ch && ch <= '9') || ch=='-' || ch==',' || Character.isISOControl(ch)))
+			if(!(('0' <= ch && ch <= '9') || ch=='-' || ch==',' || ch==':' || Character.isISOControl(ch)))
 			   evt.consume();
 			else
 			   lastCaretPosition = getCaretPosition();
@@ -45,7 +45,7 @@ public class SelectField extends TextField
 		 else
 		 {
 			char d = tmp.charAt(l-2);   
-			if(c=='-' || c==',')
+			if(c=='-' || c==',' || c==':')
 			{
 			   if(!(d >= '0' && d <= '9'))
 			   {
@@ -54,6 +54,12 @@ public class SelectField extends TextField
 			   }
 			   else if(c=='-' && 
 					  (tmp.substring(0,l-1).lastIndexOf("-") > tmp.substring(0,l-1).lastIndexOf(",")))
+			   {
+				  setText(lastValue);
+				  setCaretPosition(lastCaretPosition);
+			   }
+                           else if (c==':' && 
+					  (tmp.substring(0,l-1).lastIndexOf("-") < tmp.substring(0,l-1).lastIndexOf(",")))
 			   {
 				  setText(lastValue);
 				  setCaretPosition(lastCaretPosition);
@@ -72,7 +78,7 @@ public class SelectField extends TextField
 	  for(int i=0; i<len; i++)
 	  {
 		 c = old.charAt(i);
-		 if((c >= '0' && c <= '9') || c == '-' || c == ',')
+		 if((c >= '0' && c <= '9') || c == '-' || c == ',' || c == ':')
 			tmp += new String("" + c);
 	  }
 	  return tmp;
@@ -101,6 +107,7 @@ public class SelectField extends TextField
 		 int high = 0;
 		 int min = 0;
 		 int max = 0;
+                 int interval = 1;
    
 		 String result = "";
 	 
@@ -131,6 +138,15 @@ public class SelectField extends TextField
 				  i++;
 			   high = i;
 			   max = Integer.parseInt(tmp.substring(low, high));
+
+ 			   // get interval
+                           interval=1;
+                           if (i<tmp.length() && tmp.charAt(i)== ':') {
+		             i++;
+			     while(i < tmp.length() && tmp.charAt(i) >= '0' && tmp.charAt(i) <= '9')
+			       i++;
+			     interval = Integer.parseInt(tmp.substring(high+1, i));
+                           }
 			
 			   if(i == tmp.length())
 			   {
@@ -143,11 +159,9 @@ public class SelectField extends TextField
 			   }   
 			}
 			
-			if(min <= limit && max <= limit && min <= max)
-			{
-			   for(int j=min; j<=max; j++)
-				  tmpList.insert(j);
-			}               
+			for(int j=min; j<=max; j+=interval) {
+			  if(j <= limit) tmpList.insert(j);
+			}
 		 } 
 	  }
 	  catch(NumberFormatException e)

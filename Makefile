@@ -136,6 +136,7 @@ SRC=\
     projections/misc/SummaryFormatException.java\
     projections/gui/graph/DataSource.java\
     projections/gui/graph/DataSource1D.java\
+    projections/gui/graph/DataSource2D.java\
     projections/gui/graph/GraphPanel.java\
     projections/gui/graph/Graph.java\
     projections/gui/graph/Coordinate.java\

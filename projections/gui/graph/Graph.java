@@ -146,27 +146,39 @@ public class Graph extends JPanel
 	xscale = val;
 	repaint();
     }
-    
+     
+	 
     private void createStackArray() {
-	if (dataSource != null) {
-	    double tempMax = 0;
-	    int numY = dataSource.getValueCount();
-	    stackArray = new double[dataSource.getIndexCount()][];
-	    for (int k=0; k<dataSource.getIndexCount(); k++) {
-		stackArray[k] = new double[numY];
+		//System.out.println("=== start createStackArray ===");
+		if (dataSource != null) {
+	    	double tempMax = 0;
+	    	int numY = dataSource.getValueCount();
+	    	stackArray = new double[dataSource.getIndexCount()][];
+			//System.out.println("numY = " + numY);
+			//System.out.println("starting for loop");
+	    	for (int k=0; k<dataSource.getIndexCount(); k++) {
+				stackArray[k] = new double[numY];
 
-		dataSource.getValues(k, stackArray[k]);
-		for (int j=1; j<numY; j++) {
-		    stackArray[k][j] += stackArray[k][j-1];
+				dataSource.getValues(k, stackArray[k]);
+				//System.out.println("stackArray["+k +"][0] = " +stackArray[k][0]);
+				for (int j=1; j<numY; j++) {
+					//System.out.print("stackArray[" +k +"][" +j +"] = " +stackArray[k][j]);
+		    		stackArray[k][j] += stackArray[k][j-1];
+					//System.out.println("    |    " +stackArray[k][j]);
+				}
+//				System.out.println("done creating stackArray row " +k);
+//				System.out.println("current max is " + tempMax);
+//				System.out.println("this row's max is " + stackArray[k][numY-1]);
+				if (tempMax < stackArray[k][numY-1]) {
+//			 		System.out.println("tempMax is now updated");
+		    		tempMax = stackArray[k][numY-1];
+				}
+	    	}
+	    	maxSumY = (int)(Math.ceil(tempMax));
+		} else {
+	    	stackArray = null;
 		}
-		if (tempMax < stackArray[k][numY-1]) {
-		    tempMax = stackArray[k][numY-1];
-		}
-	    }
-	    maxSumY = (int)(Math.ceil(tempMax));
-	} else {
-	    stackArray = null;
-	}
+//		System.out.println("=== exit createStackArray ===");
     }
 
     // getXValue(x)
@@ -321,8 +333,10 @@ public class Graph extends JPanel
 	if (((GraphType == BAR) && (BarGraphType == STACKED)) || 
 	    (GraphType == AREA)) {
 	    maxvalueY = maxSumY;
+//		 System.out.println("Graph.java > drawAxes > maxvalueY = maxSumy = " + maxSumY);
 	} else {
 	    maxvalueY = yAxis.getMax();                               
+//		 System.out.println("Graph.java > drawAxes > maxvalueY = " + maxvalueY);
 	}
 
 	originX = fm.getHeight()*2 + fm.stringWidth(String.valueOf(maxvalueY));

@@ -32,12 +32,16 @@ public class CounterFrame extends JFrame
     JPanel panel = new JPanel(new FlowLayout());
     progress_.setBorderPainted(true);
     panel.add(progress_);
-    JButton createGraph = (JButton) panel.add(new JButton("Create Graph"));
+    JButton createGraph = (JButton) panel.add(new JButton("EP Proc Graph"));
     createGraph.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
 	int[] selectedRows = jTable_.getSelectedRows();
 	cTable_.createGraph(sorter_.mapRows(selectedRows));
       }
+    });
+    JButton calcMFlops = (JButton) panel.add(new JButton("Calc MFlops/s"));
+    calcMFlops.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) { cTable_.calcMFlops(); }
     });
     // create window
     super.getContentPane().setLayout(new BorderLayout());

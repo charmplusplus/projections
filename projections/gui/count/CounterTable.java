@@ -29,6 +29,8 @@ public class CounterTable extends AbstractTableModel
   // CLOSE READERS!!! (AND IN OTHER FILES)
   // CHECK VALIDITY OF SUM/MAX/MIN/STDEV
   // COLOR CODE THE COUNTER DATA
+  // CHECK FLOPS VS GR_FLOPS FOR MFLOPS RATING
+  // DIALOG BOXES FOR SYSTEM.OUT.PRINTLN()
 
   // http://java.sun.com/products/jdk/1.1/docs/api/packages.html
   // http://java.sun.com/products/jfc/swingdoc-api-1.1/index.html
@@ -57,16 +59,16 @@ public class CounterTable extends AbstractTableModel
     if (currSheet_ != null) {
       if (columnIndex == 0) { return "Entry Point"; }
       else {
-	int counter = (columnIndex-1) / EPValues.NUM_VALUES_PER_COUNTER;
+	int counter = (columnIndex-1) / EPValue.NUM_VALUES_PER_COUNTER;
 	String cStr = ":"+currSheet_.counters[counter].counterCode;
-	int pos = (columnIndex-1) % EPValues.NUM_VALUES_PER_COUNTER;
+	int pos = (columnIndex-1) % EPValue.NUM_VALUES_PER_COUNTER;
 	switch (pos) {
-	  case EPValues.AVG_CALLED: return EPValues.AVG_CALLED_STR+cStr;
-	  case EPValues.AVG_TIME:   return EPValues.AVG_TIME_STR+cStr;
-	  case EPValues.AVG_CVAL:   return EPValues.AVG_CVAL_STR+cStr;
-	  case EPValues.AVG_CSTDEV: return EPValues.AVG_CSTDEV_STR+cStr;
-	  case EPValues.MAX_CVAL:   return EPValues.MAX_CVAL_STR+cStr;
-	  case EPValues.MIN_CVAL:   return EPValues.MIN_CVAL_STR+cStr;
+	  case EPValue.AVG_CALLED: return EPValue.AVG_CALLED_STR+cStr;
+	  case EPValue.AVG_TIME:   return EPValue.AVG_TIME_STR+cStr;
+	  case EPValue.AVG_CVAL:   return EPValue.AVG_CVAL_STR+cStr;
+	  case EPValue.AVG_CSTDEV: return EPValue.AVG_CSTDEV_STR+cStr;
+	  case EPValue.MAX_CVAL:   return EPValue.MAX_CVAL_STR+cStr;
+	  case EPValue.MIN_CVAL:   return EPValue.MIN_CVAL_STR+cStr;
 	  default: return "ERROR";
 	}
       }
@@ -84,23 +86,23 @@ public class CounterTable extends AbstractTableModel
     if (currSheet_ != null) {
       if (col == 0) { return currSheet_.tableRows[row].name; }
       else {
-	int counter = (col-1) / EPValues.NUM_VALUES_PER_COUNTER;
-	EPValues.CounterSummary s = currSheet_.tableRows[row].summary[counter];
+	int counter = (col-1) / EPValue.NUM_VALUES_PER_COUNTER;
+	CounterSummary s = currSheet_.tableRows[row].summary[counter];
 
 
-	int pos = (col-1) % EPValues.NUM_VALUES_PER_COUNTER;
+	int pos = (col-1) % EPValue.NUM_VALUES_PER_COUNTER;
 	switch (pos) {
-	  case EPValues.AVG_CALLED: 
+	  case EPValue.AVG_CALLED: 
 	    return new FormattedNumber(s.avgNumCalled, doubleFormat_);
-	  case EPValues.AVG_TIME:   
+	  case EPValue.AVG_TIME:   
 	    return new FormattedNumber(s.avgTime, doubleFormat_);
-	  case EPValues.AVG_CVAL:   
+	  case EPValue.AVG_CVAL:   
 	    return new FormattedNumber(s.avgCount, doubleFormat_);
-	  case EPValues.AVG_CSTDEV: 
+	  case EPValue.AVG_CSTDEV: 
 	    return new FormattedNumber(s.stdevCount, doubleFormat_);
-	  case EPValues.MAX_CVAL:   
+	  case EPValue.MAX_CVAL:   
 	    return new FormattedNumber(s.maxCount, intFormat_);    
-	  case EPValues.MIN_CVAL:   
+	  case EPValue.MIN_CVAL:   
 	    return new FormattedNumber(s.minCount, intFormat_);    
 	  default: return new Integer(-1);            
 	}
@@ -133,7 +135,6 @@ public class CounterTable extends AbstractTableModel
   }
 
   public void createGraph(int[] selectedRows) {
-    System.out.println("createGraph");
     if (selectedRows.length == 0) {
       System.out.println("ERROR there are no selected rows");
     }
@@ -167,7 +168,75 @@ public class CounterTable extends AbstractTableModel
       f.setSize(800,640);
       f.setVisible(true);
     }
-    System.out.println("endCreateGraph");
+  }
+
+  public void calcMFlops() {
+    if (currSheet_ == null) { System.out.println("NO DATA IN TABLE"); }
+    else {
+      int i;
+      Sheet s = currSheet_;
+      // find the correct counter to use
+      boolean found = false;
+      int counterIndex = -1;
+      for (i=0; i<s.counters.length || !found; i++) {
+	if (s.counters[i].counterCode.equals("GR_FLOPS")) {
+	  found = true;
+	  counterIndex = i;
+	}
+      }
+      if (!found) { System.out.println("COULD NOT FIND FLOPS!!!");  return; }
+      // loop through EPs and find out which ones have been called (non-null)
+      Vector vector = new Vector();
+      for (i=0; i<s.tableRows.length; i++) {
+	if (s.tableRows[i].summary[counterIndex].avgNumCalled > 0) {
+	  vector.addElement(new Integer(i));
+	}
+      }
+      int numEPs = vector.size();
+      int[] indices = new int[numEPs];
+      for (i=0; i<numEPs; i++) {
+	indices[i] = ((Integer) vector.elementAt(i)).intValue();
+      }
+      vector.removeAllElements();
+      // now have correct indices for non-zero flops, so loop through 
+      // and calc total flops, prepare data for graph
+      double totalTime = 0.0;
+      double totalNumCalled = 0.0;
+      double totalAvgFlops = 0.0;
+      double[][] data = new double[numEPs][];
+      String[] xAxisLabels = new String[numEPs];
+      for (i=0; i<numEPs; i++) {
+	xAxisLabels[i] = (new Integer(indices[i])).toString();
+	System.out.println("Label "+i+"="+xAxisLabels[i]+" "+
+			   s.tableRows[indices[i]].name);
+	CounterSummary summary = s.tableRows[indices[i]].summary[counterIndex];
+	totalTime += summary.avgTime;
+	totalNumCalled += summary.avgNumCalled;
+	totalAvgFlops += summary.avgCount;
+	data[i] = new double[2];
+	data[i][0] = 
+	  summary.avgNumCalled*summary.avgCount*s.numProcs / summary.avgTime;
+	System.out.println("  time/proc="+summary.avgTime+
+			   " numCalled/proc="+summary.avgNumCalled+
+			   " Flops/proc="+summary.avgCount+
+			   " Flops/sec="+data[i][0]);
+      }
+      double totalMFlops = totalNumCalled*totalAvgFlops*s.numProcs / totalTime;
+      // for (i=0; i<numEPs; i++) { data[i][1] = totalMFlops; }
+      for (i=0; i<numEPs; i++) { data[i][1] = 0.0; }
+      // set up graph
+      DataSource2D source = new DataSource2D(
+	currSheet_.fileName+": Overall Flops/s = "+totalMFlops, data);
+      XAxis xAxis = new MultiRunXAxis(xAxisLabels);
+      YAxis yAxis = new YAxisAuto("Performance", "Flops/s", source);
+      Graph g = new Graph();
+      g.setGraphType(Graph.BAR);
+      g.setData(source, xAxis, yAxis);
+      JFrame f = new JFrame();
+      f.getContentPane().add(g);
+      f.setSize(800,640);
+      f.setVisible(true);
+    }
   }
 
   private Sheet[] sheet_     = null;
@@ -188,7 +257,7 @@ public class CounterTable extends AbstractTableModel
     public String           fileName  = null;  // just store name of file
     public GenericStsReader stsReader = null;  // to read and hold data for sts
     public Counter[]        counters  = null;  // stores name/description
-    public EPValues[]       tableRows = null;  // store row data
+    public EPValue[]       tableRows = null;  // store row data
     public LogData[]        data      = null;  // to store data for log files
     
     public Sheet(ProjectionsFileMgr fileMgr, int index) 
@@ -208,14 +277,14 @@ public class CounterTable extends AbstractTableModel
 	data[realIndex] = new LogData(logFiles[i], i, this, first);
 	first = false;
       }
-      // now initialize the EPValues by summarizing over all processors
-      tableRows = new EPValues[stsReader.entryCount];
+      // now initialize the EPValue by summarizing over all processors
+      tableRows = new EPValue[stsReader.entryCount];
       numRows = stsReader.entryCount;
       for (i=0; i<numRows; i++) {
 	tableRows[i] = 
-	  new EPValues(stsReader.entryList[i].name, i, data, counters.length);
+	  new EPValue(stsReader.entryList[i].name, i, data, counters.length);
       }
-      numCols = 1 + counters.length * EPValues.NUM_VALUES_PER_COUNTER;
+      numCols = 1 + counters.length * EPValue.NUM_VALUES_PER_COUNTER;
       numProcs = stsReader.numPe;
     }
 
@@ -233,7 +302,7 @@ public class CounterTable extends AbstractTableModel
   };
 
   /** Represents each row in the table. */
-  private class EPValues { 
+  private class EPValue { 
     public final static int NUM_VALUES_PER_COUNTER = 6;
 
     public final static int AVG_CALLED = 0;
@@ -253,7 +322,7 @@ public class CounterTable extends AbstractTableModel
     public String           name    = null;
     public CounterSummary[] summary = null;
 
-    public EPValues(String n, int index, LogData[] procData, int numCounters) 
+    public EPValue(String n, int index, LogData[] procData, int numCounters) 
     {
       int i, j;
       name = '['+(new Integer(index)).toString()+"] "+n;
@@ -278,16 +347,17 @@ public class CounterTable extends AbstractTableModel
       }
     }
 
-    private class CounterSummary {
-      public double avgNumCalled = 0;
-      public double avgTime      = 0;
-      public double avgCount     = 0.0;
-      public double stdevCount   = 0.0;
-      public int    maxCount     = Integer.MIN_VALUE;
-      public int    minCount     = Integer.MAX_VALUE;
+  }
 
-      public CounterSummary() { }
-    }
+  private class CounterSummary {
+    public double avgNumCalled = 0;
+    public double avgTime      = 0;
+    public double avgCount     = 0.0;
+    public double stdevCount   = 0.0;
+    public int    maxCount     = Integer.MIN_VALUE;
+    public int    minCount     = Integer.MAX_VALUE;
+    
+    public CounterSummary() { }
   }
 
   private class LogData { 

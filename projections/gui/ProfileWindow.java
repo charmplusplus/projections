@@ -55,6 +55,17 @@ public class ProfileWindow extends ProjectionsWindow
 	}
     }
 
+    void windowInit() {
+	// get new data object
+	data = new ProfileData(this);
+	
+	// acquire starting data from Analysis
+	data.plist = Analysis.getValidProcessorList();
+	data.pstring = Analysis.getValidProcessorString();
+	data.begintime = 0;
+	data.endtime = Analysis.getTotalTime();
+    }
+
     public ProfileWindow(MainWindow parentWindow, Integer myWindowID)
     {
 	super(parentWindow, myWindowID);
@@ -79,8 +90,6 @@ public class ProfileWindow extends ProjectionsWindow
 	    });
 	  
 	setBackground(Color.lightGray);
-	
-	data = new ProfileData(this);
 	
 	setTitle("Projections Usage Profile");
 	
@@ -169,7 +178,7 @@ public class ProfileWindow extends ProjectionsWindow
 	    String arg = ((MenuItem)evt.getSource()).getLabel();
 	    if (arg.equals("Close")) {
 		close();
-	    } else if(arg.equals("Select Range")) {
+	    } else if(arg.equals("Select Processors")) {
 		showDialog();
 	    }
 	} else if (evt.getSource() instanceof FloatTextField) {
@@ -329,7 +338,7 @@ public class ProfileWindow extends ProjectionsWindow
 	
 	mbar.add(Util.makeMenu("File", new Object[]
 	    {
-		"Select Range",
+		"Select Processors",
 		"Print Profile",
 		null,
 		"Close"

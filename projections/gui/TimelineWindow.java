@@ -116,6 +116,12 @@ public class TimelineWindow extends ProjectionsWindow
 	public void update(Graphics g) { paint(g); }
     }      
     
+    void windowInit() {
+	validPEs = Analysis.getValidProcessorList();
+	startTime = 0;
+	endTime = Analysis.getTotalTime();
+    }
+
     public TimelineWindow(MainWindow parentWindow, Integer myWindowID)
     {
 	super(parentWindow, myWindowID);

@@ -40,7 +40,7 @@ public abstract class ProjectionsWindow
     extends JFrame
     implements ActionListener
 {
-	private Button window[];
+    private Button window[];
 
     /**
      *  unique identifier to allow the main window to identify and
@@ -54,6 +54,18 @@ public abstract class ProjectionsWindow
 
     // NOTE: There NEED NOT be a dialog.
     protected RangeDialog dialog;
+
+    /**
+     *  All implementing classes MUST use windowInit() to set up
+     *  ProjectionWindow's default parameters. These values will
+     *  then be passed on to any dialog creation.
+     *
+     *  IMPLEMENTATION NOTE:
+     *  The implementing class can choose to either allow the parent
+     *  class to dictate default values or set it's own default
+     *  parameter values.
+     */
+    abstract void windowInit();
 
     /**
      *  Must implement code to show the dialog box and handle
@@ -120,62 +132,63 @@ public abstract class ProjectionsWindow
      *  Hence the wrapper constructor.
      */
     public ProjectionsWindow(MainWindow parentWindow, Integer myWindowID) {
-		this(parentWindow, myWindowID.intValue());
+	this(parentWindow, myWindowID.intValue());
     }
 
     public ProjectionsWindow(MainWindow parentWindow, int myWindowID) {
-		this.myWindowID = myWindowID;
-		this.parentWindow = parentWindow;
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e){
-				close();
-			}
+	this.myWindowID = myWindowID;
+	this.parentWindow = parentWindow;
+	addWindowListener(new WindowAdapter() {
+		public void windowClosing(WindowEvent e){
+		    close();
+		}
 	    });
+	windowInit();
     }
 
     public void setLayout(JPanel mainPanel) {
-		GridBagConstraints gbc = new GridBagConstraints();
-		GridBagLayout gbl = new GridBagLayout();
-
-		gbc.fill = GridBagConstraints.BOTH;
-		JPanel contentPane = (JPanel) getContentPane();
-		contentPane.setLayout(gbl);
-
-		Util.gblAdd(contentPane, mainPanel, gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(contentPane, getToolButtonPanel(), gbc, 0,2, 1,1, 0,0);
-		//getContentPane().add(mainPanel);
-		//getContentPane().add(getToolButtonPanel());
-	}
-
-    public JPanel getToolButtonPanel() {
-		//System.out.println("Start of ProjectionsWindow.getToolButtonPanel()");
-		JPanel appButtonPanel = new JPanel();
-		GridBagConstraints gbc = new GridBagConstraints();
-		GridBagLayout gbl = new GridBagLayout();
-
-		window = new Button[parentWindow.NUM_WINDOWS];
-
-		/*
-		 * Apurva
-		 * Note: currently using myWindowID to figure out which window I am
-		 * As long as myWindowID continues to correspond to
-		 * mainWindow.GRAPH_WIN .... mainWindow.TIME_PROF_WIN...
-		 * this should continually work
-		 */
-		for(int k=0; k<parentWindow.NUM_WINDOWS; k++) {
-			if (k != myWindowID) {
-				window[k] = new Button(parentWindow.toolDescriptions[k]);
-				window[k].addActionListener(this);
-				//System.out.println("Added button for "+ parentWindow.toolDescriptions[k]);
-				Util.gblAdd(appButtonPanel, window[k], gbc, k,0, 1,1, 1,1);
-
-			}
-		}
-
-		//System.out.println("End of ProjectionsWindow.getToolButtonPanel()");
-		return appButtonPanel;
+	GridBagConstraints gbc = new GridBagConstraints();
+	GridBagLayout gbl = new GridBagLayout();
+	
+	gbc.fill = GridBagConstraints.BOTH;
+	JPanel contentPane = (JPanel) getContentPane();
+	contentPane.setLayout(gbl);
+	
+	Util.gblAdd(contentPane, mainPanel, gbc, 0,1, 1,1, 1,1);
+	Util.gblAdd(contentPane, getToolButtonPanel(), gbc, 0,2, 1,1, 0,0);
+	//getContentPane().add(mainPanel);
+	//getContentPane().add(getToolButtonPanel());
     }
-
+    
+    public JPanel getToolButtonPanel() {
+	//System.out.println("Start of ProjectionsWindow.getToolButtonPanel()");
+	JPanel appButtonPanel = new JPanel();
+	GridBagConstraints gbc = new GridBagConstraints();
+	GridBagLayout gbl = new GridBagLayout();
+	
+	window = new Button[parentWindow.NUM_WINDOWS];
+	
+	/*
+	 * Apurva
+	 * Note: currently using myWindowID to figure out which window I am
+	 * As long as myWindowID continues to correspond to
+	 * mainWindow.GRAPH_WIN .... mainWindow.TIME_PROF_WIN...
+	 * this should continually work
+	 */
+	for(int k=0; k<parentWindow.NUM_WINDOWS; k++) {
+	    if (k != myWindowID) {
+		window[k] = new Button(parentWindow.toolDescriptions[k]);
+		window[k].addActionListener(this);
+		//System.out.println("Added button for "+ parentWindow.toolDescriptions[k]);
+		Util.gblAdd(appButtonPanel, window[k], gbc, k,0, 1,1, 1,1);
+		
+	    }
+	}
+	
+	//System.out.println("End of ProjectionsWindow.getToolButtonPanel()");
+	return appButtonPanel;
+    }
+    
     public void actionPerformed(ActionEvent ae){
 		//System.out.println("Start of ProjectionWindow.itemStateChanged()");
 		if (ae.getSource() instanceof Button) {
@@ -202,8 +215,8 @@ public abstract class ProjectionsWindow
 
     // close (and destroy all access) to the window
     public void close(){
-		dispose();
-		parentWindow.closeChildWindow(myWindowID);
+	dispose();
+	parentWindow.closeChildWindow(myWindowID);
     }
 }
 

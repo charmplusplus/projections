@@ -363,17 +363,6 @@ public class TimelineData
 	TimelineObject[] tlo = new TimelineObject[numItems];
 	for (int i=0; i<numItems; i++) {
 	    tle   = (TimelineEvent)tl.elementAt(i);
-	    btime = tle.BeginTime;
-	    etime = tle.EndTime; 
-	    cpubegin = tle.cpuBegin;
-	    cpuend = tle.cpuEnd;
-	    entry = tle.EntryPoint; 
-	    pSrc  = tle.SrcPe;
-	    msglen  = tle.MsgLen;
-	    tid   = tle.id;
-	    rtime = tle.RecvTime;
-	    EventID = tle.EventID;
-			
 	    msglist = tle.MsgsSent;
 	    if (msglist == null) {
 		numMsgs = 0;
@@ -396,12 +385,7 @@ public class TimelineData
 	    for (int p=0; p<numpacks; p++) {
 		packs[p] = (PackTime)packlist.elementAt(p);
 	    }
-	    //tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen, rtime, tid);
-	    tlo[i] = new TimelineObject(this, btime, etime, cpubegin, cpuend,
-					entry, 
-					msgs, packs, pnum, pSrc, msglen, 
-					rtime, tid, EventID, 
-					tle.numPapiCounts, tle.papiCounts);
+	    tlo[i] = new TimelineObject(this, tle, msgs, packs, pnum);
 	}
 	return tlo;
     }   

@@ -1,20 +1,23 @@
 package projections.analysis;
 
 import projections.misc.*;
-import java.util.Vector;
+import java.util.*;
 
 public class TimelineEvent
 {
  
 public long BeginTime, EndTime, RecvTime;
     public long cpuBegin, cpuEnd;
-public int EntryPoint, SrcPe, MsgLen;
-public int EventID; //seq no of processor
-public ObjectId id;
-public Vector MsgsSent;  // of class TimelineMessage
-public Vector PackTimes; // of class PackTime
+    public int EntryPoint, SrcPe, MsgLen;
+    public int EventID; //seq no of processor
+    public ObjectId id;
+    public Vector MsgsSent;  // of class TimelineMessage
+    public Vector PackTimes; // of class PackTime
     public int numPapiCounts = 0;
     public long papiCounts[];
+
+    public boolean isFunction = false;
+    public Stack callStack;
 
 public TimelineEvent ()
 {

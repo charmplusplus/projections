@@ -5,7 +5,9 @@
 
 SRC=\
     projections/analysis/AccumulatedSummaryReader.java\
+    projections/analysis/AmpiFunctionData.java\
     projections/analysis/AsciiIntegerReader.java\
+    projections/analysis/CallStackManager.java\
     projections/analysis/Chare.java\
     projections/analysis/ColorSaver.java\
     projections/analysis/Entry.java\
@@ -78,6 +80,7 @@ SRC=\
     projections/gui/IntTextField.java\
     projections/gui/InvalidFileDialog.java\
     projections/gui/JFloatTextField.java\
+    projections/gui/JIntTextField.java\
     projections/gui/JSelectField.java\
     projections/gui/JTimeTextField.java\
     projections/gui/LabelPanel.java\
@@ -122,10 +125,10 @@ SRC=\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\
     projections/gui/SelectField.java\
-    projections/gui/SimpleThresholdDialog.java\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
     projections/gui/SwingWorker.java\
+    projections/gui/TimeBinDialog.java\
     projections/gui/TimeProfileWindow.java\
     projections/gui/TimeTextField.java\
     projections/gui/TimelineAxisCanvas.java\

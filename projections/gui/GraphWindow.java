@@ -22,11 +22,10 @@ public class GraphWindow extends ProjectionsWindow
 
     private GraphWindow thisWindow;
 
-    private int intervalStart = -1;
-    private int intervalEnd = -1;
-    
-    private long startTime = -1;
-    private long endTime = -1;
+    private int intervalStart;
+    private int intervalEnd;
+    private long startTime;
+    private long endTime;
 
     private int intervalRangeSize;
     
@@ -51,6 +50,21 @@ public class GraphWindow extends ProjectionsWindow
 	setTitle("Projections Graph");
 	showDialog();
     }   
+
+    void windowInit() {
+	// acquire initial values from Analysis
+	startTime = 0;
+	endTime = Analysis.getTotalTime();
+
+	intervalsize = 1000; // default to 1ms
+	intervalStart = 0;
+	if (endTime%intervalsize == 0) {
+	    intervalEnd = (int)(endTime/intervalsize - 1);
+	} else {
+	    intervalEnd = (int)(endTime/intervalsize);
+	}
+	processorList = Analysis.getValidProcessorList();
+    }
 
     public void actionPerformed(ActionEvent evt)
     {

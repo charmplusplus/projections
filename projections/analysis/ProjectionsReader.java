@@ -10,9 +10,13 @@ import java.io.*;
  *  UNAVAILABLE indicates that the source either does not exist or is not
  *  readable.
  *
+ *  The use of ProjDefs as a superclass allows the reader to deal with 
+ *  event types.
+ *
+ *  Base Assumption
+ *  ---------------
  *  Each Reader is meant to be used for each file, typically a processor.
  *
- *  The inheritance of ProjDefs allows the reader to deal with event types.
  */
 public abstract class ProjectionsReader
     extends ProjDefs

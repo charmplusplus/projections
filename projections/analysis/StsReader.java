@@ -23,6 +23,7 @@ public class StsReader extends ProjDefs
     private String logDirectory;
 
     private boolean hasSum, hasSumDetail, hasSumAccumulated, hasLog;
+    private boolean hasPAPI = false;
 
     public static final int NUM_TYPES = 4;
     public static final int LOG = 0;
@@ -172,10 +173,12 @@ public class StsReader extends ProjDefs
 		    functionEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals ("TOTAL_PAPI_EVENTS")) {
+		    hasPAPI = true;
 		    numPapiEvents = Integer.parseInt(st.nextToken());
 		    papiEventNames =
 			new String[numPapiEvents];
 		} else if (s1.equals ("PAPI_EVENT")) {
+		    hasPAPI = true;
 		    papiEventNames[Integer.parseInt(st.nextToken())] =
 			st.nextToken();
 		} else if (s1.equals ("END")) {
@@ -304,7 +307,7 @@ public class StsReader extends ProjDefs
 
     public String getFunctionEventDescriptor(int eventID) {
 	Integer key = new Integer(eventID);
-	return (String)userEvents.get(key);
+	return (String)functionEvents.get(key);
     }
 
     public String[] getFunctionEventDescriptors() {
@@ -312,11 +315,23 @@ public class StsReader extends ProjDefs
     }
 
     public int getNumPerfCounts() {
-	return numPapiEvents;
+	if (hasPAPI) {
+	    return numPapiEvents;
+	} else {
+	    return 0;
+	}
     }
 
     public String[] getPerfCountNames() {
-	return papiEventNames;
+	if (hasPAPI) {
+	    return papiEventNames;
+	} else {
+	    return null;
+	}
+    }
+
+    public boolean hasPapi() {
+	return hasPAPI;
     }
 
     // *** Derived information accessor ***

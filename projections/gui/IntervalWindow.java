@@ -20,8 +20,8 @@ import javax.swing.*;
 */
 
 public class IntervalWindow extends GenericGraphWindow
-	implements ActionListener,ItemListener{
-
+    implements ActionListener,ItemListener{
+    
     // parameter variables in addition to superclass
     public long thresholdTime;	// to record EPs that cross this time
     public long intervalSize;
@@ -36,6 +36,11 @@ public class IntervalWindow extends GenericGraphWindow
     private final int STRETCHED_EP      = 0;
     private final int SEND_COUNT        = 1;
     private final int MSG_LEN_COUNT     = 2;
+
+    void windowInit() {
+	intervalSize = 1000; // 1 ms default
+	super.windowInit();
+    }
 
     public IntervalWindow(MainWindow mainWindow, Integer myWindowID)
     {

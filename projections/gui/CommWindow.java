@@ -34,17 +34,22 @@ public class CommWindow extends GenericGraphWindow
 
     private CommWindow  thisWindow;
 
+    void windowInit() {
+	// parameter initialization is completely handled by GenericGraphWindow
+	super.windowInit();
+    }
+
     public CommWindow(MainWindow mainWindow, Integer myWindowID) {
-		super("Projections Communications", mainWindow, myWindowID);
-		setGraphSpecificData();
-		mainPanel = new JPanel();
-		setLayout(mainPanel);
-		//getContentPane().add(mainPanel);
-		createLayout();
-		setPopupText("histArray");
-		pack();
-		thisWindow = this;
-		showDialog();
+	super("Projections Communications", mainWindow, myWindowID);
+	setGraphSpecificData();
+	mainPanel = new JPanel();
+	setLayout(mainPanel);
+	//getContentPane().add(mainPanel);
+	createLayout();
+	setPopupText("histArray");
+	pack();
+	thisWindow = this;
+	showDialog();
     }
 
     public void repaint() {
@@ -52,43 +57,43 @@ public class CommWindow extends GenericGraphWindow
     }
 
     public void itemStateChanged(ItemEvent ae){
-		if(ae.getSource() instanceof Checkbox){
-			setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			Checkbox cb = (Checkbox)ae.getSource();
-			if(cb == histogramCB) {
-			setDataSource("Histogram", histArray, this);
-			setPopupText("histArray");
-			setYAxis("Frequency", null);
-			setXAxis("Byte Size", "bytes");
-			super.refreshGraph();
-			} else if(cb == sentMssgs) {
-			setDataSource("Communications", msgCount, this);
-			setPopupText("msgCount");
-			setYAxis("Messages Sent", "");
-			setXAxis("Processor", "");
-			super.refreshGraph();
-			}else if(cb == sentBytes){
-			//System.out.println("bytes");
-			setDataSource("Communications", byteCount, this);
-			setPopupText("byteCount");
-			setYAxis("Bytes Sent", "bytes");
-			setXAxis("Processor", "");
-			super.refreshGraph();
-			}else if(cb == recivedMssgs){
-			setDataSource("Communications", recivedMsgCount, this);
-			setPopupText("recivedMsgCount");
-			setYAxis("Mssages Recived", "");
-			setXAxis("Processor", "");
-			super.refreshGraph();
-			}else if(cb == sentExclusive){
-			setDataSource("Communications", exclusiveSent, this);
-			setPopupText("exclusiveSent");
-			setYAxis("Messages Sent Externally", "");
-			setXAxis("Processor", "");
-			super.refreshGraph();
-			}
-			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		}
+	if(ae.getSource() instanceof Checkbox){
+	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    Checkbox cb = (Checkbox)ae.getSource();
+	    if(cb == histogramCB) {
+		setDataSource("Histogram", histArray, this);
+		setPopupText("histArray");
+		setYAxis("Frequency", null);
+		setXAxis("Byte Size", "bytes");
+		super.refreshGraph();
+	    } else if(cb == sentMssgs) {
+		setDataSource("Communications", msgCount, this);
+		setPopupText("msgCount");
+		setYAxis("Messages Sent", "");
+		setXAxis("Processor", "");
+		super.refreshGraph();
+	    }else if(cb == sentBytes){
+		//System.out.println("bytes");
+		setDataSource("Communications", byteCount, this);
+		setPopupText("byteCount");
+		setYAxis("Bytes Sent", "bytes");
+		setXAxis("Processor", "");
+		super.refreshGraph();
+	    }else if(cb == recivedMssgs){
+		setDataSource("Communications", recivedMsgCount, this);
+		setPopupText("recivedMsgCount");
+		setYAxis("Mssages Recived", "");
+		setXAxis("Processor", "");
+		super.refreshGraph();
+	    }else if(cb == sentExclusive){
+		setDataSource("Communications", exclusiveSent, this);
+		setPopupText("exclusiveSent");
+		setYAxis("Messages Sent Externally", "");
+		setXAxis("Processor", "");
+		super.refreshGraph();
+	    }
+	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	}
     }
 
     private void setPopupText(String input){

@@ -51,6 +51,20 @@ public class TimeProfileWindow extends GenericGraphWindow
     private double[][] outputData;
     private Color[] outColors;
 
+    void windowInit() {
+	// acquire data using parent class
+	super.windowInit();
+
+	intervalSize = 1000; // default 1ms 
+	startInterval = 0;
+	if (endTime%intervalSize == 0) {
+	    endInterval = (int)(endTime/intervalSize - 1);
+	} else {
+	    endInterval = (int)(endTime/intervalSize);
+	}
+	processorList = Analysis.getValidProcessorList();
+    }
+
     public TimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
 	super("Time Profile Tools", mainWindow, myWindowID);
 	setGraphSpecificData();

@@ -47,6 +47,13 @@ public class StlWindow extends ProjectionsWindow
     public long startTime;
     public long endTime;
 
+    void windowInit() {
+	// acquire default data from Analysis.
+	validPEs = Analysis.getValidProcessorList();
+	startTime = 0;
+	endTime = Analysis.getTotalTime();
+    }
+
     public StlWindow(MainWindow mainWindow, Integer myWindowID)
     {
 	super(mainWindow, myWindowID);

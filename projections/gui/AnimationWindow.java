@@ -13,7 +13,7 @@ public class AnimationWindow extends ProjectionsWindow
     
     private Button bPlusOne, bMinusOne, bAuto;
     private Button setRanges;
-    private TimeTextField delayField;
+    private JTimeTextField delayField;
     private Panel statusPanel;
     private Panel titlePanel; 
     
@@ -58,6 +58,14 @@ public class AnimationWindow extends ProjectionsWindow
 	    }
 	}  
     }       
+
+    void windowInit() {
+	// acquire data from Analysis
+	intervalSize = 1000; // default to 1ms
+	validPEs = Analysis.getValidProcessorList();
+        startTime = 0;
+        endTime = Analysis.getTotalTime();
+    }
   
     public AnimationWindow(MainWindow mainWindow, Integer myWindowID)
     {
@@ -192,7 +200,7 @@ public class AnimationWindow extends ProjectionsWindow
           
 	redrawDelay=500;  // default delay value
 	lDelay = new Label("Frame Refresh Delay:", Label.CENTER);
-	delayField = new TimeTextField("500 ms", 8);
+	delayField = new JTimeTextField("500 ms", 8);
 	delayField.addActionListener(this);
 	
 	//sharon implementing slider bar

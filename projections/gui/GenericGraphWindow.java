@@ -46,6 +46,12 @@ public abstract class GenericGraphWindow
     public long startTime;
     public long endTime;
 
+    void windowInit() {
+	validPEs = Analysis.getValidProcessorList();
+	startTime = 0;
+	endTime = Analysis.getTotalTime();
+    }
+
     // constructor 
     public GenericGraphWindow(String title, 
 			      MainWindow mainWindow, Integer myWindowID) {

@@ -21,7 +21,7 @@ public class GraphControlPanel extends Panel
    private GraphData    data; 
    private Label        lIterate;
    private Label        lSelect;
-   private SelectField  rangeField;
+   private JSelectField  rangeField;
 
    private ErrorDialog      errDlg;
    private OrderedIntList  origProcList;    // original proc list
@@ -95,7 +95,7 @@ public class GraphControlPanel extends Panel
 	  lSelect = new Label("",  Label.CENTER);
 	  String selectFormat = "Format: #,#-#,#,#,#-#,etc...";
 
-	  rangeField = new SelectField("", 12);
+	  rangeField = new JSelectField("", 12);
 	  Util.gblAdd(p3, lSelect,    gbc, 6, 0, 4, 1, 1, 1);
 	  Util.gblAdd(p3, rangeField, gbc, 6, 1, 4, 1, 1, 1); 
 	  Util.gblAdd(p3, bSelectAll, gbc, 6, 2, 2, 1, 1, 1); 

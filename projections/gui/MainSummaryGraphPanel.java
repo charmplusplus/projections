@@ -39,7 +39,7 @@ public class MainSummaryGraphPanel extends JTabbedPane {
     // overrides the multiple addition interface of JTabbedPane with
     // a simple add method that simply adds each projections run
     // to the end of the list of tabbed panels.
-    public void add(String title, JComponent panel, String tooltip) {
+    public void add(String title, Component panel, String tooltip) {
 	if (empty) {
 	    remove(0);
 	    empty = false;

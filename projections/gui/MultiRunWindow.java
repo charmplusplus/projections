@@ -49,6 +49,10 @@ public class MultiRunWindow extends ProjectionsWindow
 
     private int selectedDataType;
 
+    void windowInit() {
+	// do nothing. No initialization required.
+    }
+
     public MultiRunWindow(MainWindow parentWindow, Integer myWindowID) 
     {
 	super(parentWindow, myWindowID);

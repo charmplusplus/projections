@@ -7,52 +7,54 @@ public class LogFileViewerWindow extends ProjectionsWindow
    implements ActionListener
 {
     // LogFileViewerWindow is another tool that uses its own dialog.
-   private LogFileViewerDialog dialog;
-   private int logfilenum = -1;
-   private int oldlogfilenum = -1;
-   
-   private LogFileViewerTextArea textArea;
-   private Label lTitle;
-   private Button bOpen, bClose;
-   private Panel titlePanel;
-   
-   public LogFileViewerWindow(MainWindow parentWindow, Integer myWindowID)
-   {
-       super(parentWindow, myWindowID);
-
-       setBackground(Color.lightGray);
-       setTitle("Projections Log File Viewer");
+    private LogFileViewerDialog dialog;
+    private int logfilenum = -1;
+    private int oldlogfilenum = -1;
+    
+    private LogFileViewerTextArea textArea;
+    private Label lTitle;
+    private Button bOpen, bClose;
+    private Panel titlePanel;
+    
+    void windowInit() {
+	// do nothing, no parameters need to be set.
+    }
+    
+    public LogFileViewerWindow(MainWindow parentWindow, Integer myWindowID)
+    {
+	super(parentWindow, myWindowID);
+	
+	setBackground(Color.lightGray);
+	setTitle("Projections Log File Viewer");
 	  
-       CreateMenus();
-       CreateLayout();
-       
-       pack();
-       showDialog();
-       setVisible(true);
-   }   
-
-   public void actionPerformed(ActionEvent evt)
-   {
-	  if(evt.getSource() instanceof MenuItem)
-	  {
-		 MenuItem m = (MenuItem)evt.getSource();
-		 
-		 if(m.getLabel().equals("Open File"))
-			showDialog();
-		 else if(m.getLabel().equals("Close"))
-			close();
-	  }
-	  else if(evt.getSource() instanceof Button)
-	  {
-		 Button b = (Button)evt.getSource();
-		 
-		 if(b == bOpen)
-			showDialog();
-		 else if(b == bClose)
-			close();
-	  }
-   }   
-
+	CreateMenus();
+	CreateLayout();
+	
+	pack();
+	showDialog();
+	setVisible(true);
+    }   
+    
+    public void actionPerformed(ActionEvent evt)
+    {
+	if (evt.getSource() instanceof MenuItem) {
+	    MenuItem m = (MenuItem)evt.getSource();
+	    
+	    if (m.getLabel().equals("Open File")) {
+		showDialog();
+	    } else if(m.getLabel().equals("Close")) {
+		close();
+	    }
+	} else if(evt.getSource() instanceof Button) {
+	    Button b = (Button)evt.getSource();
+	    
+	    if(b == bOpen)
+		showDialog();
+	    else if(b == bClose)
+		close();
+	}
+    }   
+    
     public void CloseDialog()
     {
 	if(dialog != null)
@@ -125,19 +127,21 @@ public class LogFileViewerWindow extends ProjectionsWindow
 	  mbar.setHelpMenu(helpMenu);
 	  setMenuBar(mbar);             
    }   
+
    public void setLogFileNum(int p)
    {
-	  logfilenum = p;
-	  lTitle.setText("LOG FILE FOR PROCESSOR " + p);
-	  lTitle.invalidate();
-	  titlePanel.validate();
+       logfilenum = p;
+       lTitle.setText("LOG FILE FOR PROCESSOR " + p);
+       lTitle.invalidate();
+       titlePanel.validate();
    }   
     
    public void showDialog()
    {
        oldlogfilenum = logfilenum;
-       if(dialog == null)
+       if (dialog == null) {
 	   dialog = new LogFileViewerDialog(this);
+       }
        dialog.setVisible(true);
    }   
 

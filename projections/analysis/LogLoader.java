@@ -13,6 +13,7 @@ import javax.swing.*;
 
 import projections.gui.*;
 import projections.misc.*;
+import java.text.DecimalFormat;
 
 public class LogLoader extends ProjDefs
 {
@@ -29,6 +30,9 @@ public class LogLoader extends ProjDefs
     private int tokenExpected = 2;
 
     private boolean isProcessing = false; // **bloody hack**
+
+    // ***CW*** considered a hack.
+    boolean ampiTraceOn = false;
     
     public LogLoader() 
 	throws LogLoadException
@@ -106,7 +110,7 @@ public class LogLoader extends ProjDefs
 	progressBar.close();
 	Analysis.setTotalTime(EndTime-BeginTime);
     }    
-        
+
     public Vector createtimeline(int PeNum, long Begin, long End, 
 				 Vector Timeline, Vector userEventVector)
 	throws LogLoadException
@@ -122,7 +126,7 @@ public class LogLoader extends ProjDefs
 	TimelineMessage   TM          = null;
 	PackTime          PT          = null;
 	boolean tempte;
-	
+
 	String logHeader;
 
 	System.gc ();
@@ -131,6 +135,13 @@ public class LogLoader extends ProjDefs
 	try {
 	    log = 
 		new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
+
+	    // to ignore dummy thread EPs
+	    //  ***CW*** I consider this a hack. A more elegant way must
+	    // be found design-wise.
+	    if (Analysis.getNumFunctionEvents() > 0) {
+		ampiTraceOn = true;
+	    }
 
 	    /*
 	    log.nextLine(); //First line contains junk
@@ -202,12 +213,40 @@ public class LogLoader extends ProjDefs
 		}
 	    }
 	    //Throws EOFException at end of file; break if past endTime
+	    CallStackManager cstack = new CallStackManager();
+	    // **CW** this is definitely a hack. Enclosing dummy thread EPs
+	    // for functions need to be preserved to maintain thread IDs
+	    // because the functions do not trace them!
+	    //
+	    // this hack assumes functions will *always* be enclosed by
+	    // a dummy thread EP (which is not always true since we can
+	    // always choose a time that cuts out the preceeding dummy
+	    // thread EP while keeping the function).
+	    LogEntry enclosingDummy = null;
 	    while(true) {
 		if (LE.Entry != -1) {
 		    switch (LE.TransactionType) {
 		    case BEGIN_FUNC:
+			// this ugliness is the culmination of years of
+			// bad projections coding!
+			TE = new TimelineEvent();
+			TE.isFunction = true;
+			TE.BeginTime = LE.Time-BeginTime;
+			TE.EntryPoint = LE.FunctionID;
+			TE.id = enclosingDummy.id;
+			cstack.push(LE.ampiData, TE.id.id[0], 
+				    TE.id.id[1], TE.id.id[2]);
+			TE.callStack = 
+			    cstack.getStack(TE.id.id[0], TE.id.id[1], 
+					    TE.id.id[2]);
+			Timeline.addElement(TE);
 			break;
 		    case END_FUNC:
+			if (TE != null) {
+			    TE.EndTime = LE.Time - BeginTime;
+			    cstack.pop(TE.id.id[0], TE.id.id[1], TE.id.id[2]);
+			}
+			TE = null;
 			break;
 		    case BEGIN_PROCESSING:
 			if (isProcessing) {
@@ -217,6 +256,12 @@ public class LogLoader extends ProjDefs
 				TE.EndTime = LE.Time - BeginTime;
 			    }
 			    TE = null;
+			}
+			// **CW** ignore dummy thread EPs
+			if ((Analysis.getNumFunctionEvents() > 0) &&
+			    (LE.Entry == 0)) {
+			    enclosingDummy = LE;
+			    break;
 			}
 			isProcessing = true;
 			TE = new TimelineEvent(LE.Time-BeginTime, 
@@ -232,6 +277,17 @@ public class LogLoader extends ProjDefs
 		    case END_PROCESSING:
 			// this code automatically drops end events that
 			// duplicated, which is the intended behavior.
+
+			// **CW** this is REALLY stupid, but no choice
+			// for now ... any end processing event will
+			// drop the enclosingDummy entity for functions
+			// because we can NO LONGER TELL if the 
+			// "matching" TE is a Dummy Thread EP (no thanks
+			// to intervening function TEs).
+			if (Analysis.getNumFunctionEvents() > 0) {
+			    enclosingDummy = null;
+			    break;
+			}
 			if (TE != null) {
 			    TE.EndTime = LE.Time - BeginTime;
 			    TE.cpuEnd = LE.cpuEnd;
@@ -447,11 +503,12 @@ public class LogLoader extends ProjDefs
 		Temp.Time = log.nextLong();
 	    }
 	    Temp.FunctionID = log.nextInt();
-	    Temp.LineNo = log.nextInt();
+	    int LineNo = log.nextInt();
 	    // parse the function log because it has a stupid string at
 	    // the end for filename. Even better hack, since it is the only
 	    // thing ... use whatever is at the end to be the filename.
-	    Temp.sourceFileName = log.readLine();
+	    String sourceFileName = log.readLine();
+	    Temp.setAmpiData(Temp.FunctionID, LineNo, sourceFileName);
 	    break;
 	case END_FUNC:
 	    if (deltaEncoded) {
@@ -536,10 +593,12 @@ public class LogLoader extends ProjDefs
 		Temp.cpuBegin = log.nextLong();
 	    }
 	    if (Analysis.getVersion() >= 6.6) {
-		Temp.numPapiCounts = log.nextInt();
-		Temp.papiCounts = new long[Temp.numPapiCounts];
-		for (int i=0; i<Temp.numPapiCounts; i++) {
-		    Temp.papiCounts[i] = log.nextLong();
+		if (Analysis.hasPapi()) {
+		    Temp.numPapiCounts = log.nextInt();
+		    Temp.papiCounts = new long[Temp.numPapiCounts];
+		    for (int i=0; i<Temp.numPapiCounts; i++) {
+			Temp.papiCounts[i] = log.nextLong();
+		    }
 		}
 	    }
 	    isProcessing = true;
@@ -576,10 +635,12 @@ public class LogLoader extends ProjDefs
 		Temp.cpuEnd = log.nextLong();
 	    }
 	    if (Analysis.getVersion() >= 6.6) {
-		Temp.numPapiCounts = log.nextInt();
-		Temp.papiCounts = new long[Temp.numPapiCounts];
-		for (int i=0; i<Temp.numPapiCounts; i++) {
-		    Temp.papiCounts[i] = log.nextLong();
+		if (Analysis.hasPapi()) {
+		    Temp.numPapiCounts = log.nextInt();
+		    Temp.papiCounts = new long[Temp.numPapiCounts];
+		    for (int i=0; i<Temp.numPapiCounts; i++) {
+			Temp.papiCounts[i] = log.nextLong();
+		    }
 		}
 	    }
 	    isProcessing = false;

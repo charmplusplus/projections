@@ -78,6 +78,8 @@ public class Analysis {
     private static Color[] activeColorMap;
     private static Color[] activeUserColorMap;
     
+    private static Color[] functionColors;
+
     /****************** Jump from Timeline to graphs ******/
     // Used for storing user defined startTime and endTime when jumping from
     // TimelineWindow to other graphs
@@ -117,6 +119,7 @@ public class Analysis {
 		// create default color maps for entry methods as well as user
 		// events.
 		entryColors = createColorMap(sts.getEntryCount());
+		functionColors = createColorMap(sts.getNumFunctionEvents());
 	    }
 	    grayColors = createGrayscaleColorMap(sts.getEntryCount());
 	    userEventColors = createColorMap(sts.getNumUserDefinedEvents());
@@ -623,6 +626,22 @@ public class Analysis {
 	return sts.getPerfCountNames();
     }
 
+    public static int getNumFunctionEvents() {
+	return sts.getNumFunctionEvents();
+    }
+
+    public static Color getFunctionColor(int eventID) {
+	return functionColors[sts.getFunctionEventIndex(eventID)];
+    }
+
+    public static String getFunctionName(int funcID) {
+	return sts.getFunctionEventDescriptor(funcID);
+    }
+
+    public static String[] getFunctionNames() {
+	return sts.getFunctionEventDescriptors();
+    }
+    
     /**
      *  This applies to interval-based data. If none exists, an error
      *  should be generated.
@@ -737,7 +756,7 @@ public class Analysis {
     public static OrderedIntList getValidProcessorList(int type) {
 	return sts.getValidProcessorList(type);
     }
-    
+
     public static Color[] getColorMap() {
 	return activeColorMap;
     }
@@ -876,4 +895,9 @@ public class Analysis {
     public static long getJStart()                     { return jStartTime; }
     public static long getJEnd()                       { return jEndTime; }
     
+
+    public static boolean hasPapi() {
+	return sts.hasPapi();
+    }
+
 }

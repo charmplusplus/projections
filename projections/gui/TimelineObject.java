@@ -9,32 +9,34 @@ import java.text.DecimalFormat;
 public class TimelineObject extends Component
    implements MouseListener
 {
-   private String[]  bubbletext;
-   private Bubble  bubble;
-   private TimelineMessageWindow msgwindow;
-   private long    beginTime, endTime, recvTime;
+    private String[]  bubbletext;
+    private Bubble  bubble;
+    private TimelineMessageWindow msgwindow;
+    private long    beginTime, endTime, recvTime;
     private long cpuTime;
     private long cpuBegin, cpuEnd;
-   private int     entry;
-   private int     msglen;
-   private int EventID;
-   private ObjectId tid;
-   private boolean inside = false; 
-   private int pCurrent, pCreation;
-   private double  usage;
-   private float packusage;
-   private long packtime;
-   
-   private TimelineData data;
-   private Frame f;
-   
-   public TimelineMessage[] messages;
-   private PackTime[] packs;
-   // private UserEvent[] userEvents;
+    private int     entry;
+    private int     msglen;
+    private int EventID;
+    private ObjectId tid;
+    private boolean inside = false; 
+    private int pCurrent, pCreation;
+    private double  usage;
+    private float packusage;
+    private long packtime;
+    
+    private TimelineData data;
+    private Frame f;
+    
+    public TimelineMessage[] messages;
+    private PackTime[] packs;
+    // private UserEvent[] userEvents;
 
     private int numPapiCounts = 0;
     private long papiCounts[];
 
+    private boolean isFunction = false;
+    
   private static DecimalFormat format_ = new DecimalFormat();
   double scale;
   int left;
@@ -43,38 +45,9 @@ public class TimelineObject extends Component
   private int creationLine;
   
   private TimelineMessage created_message;
-/*
-   TAKE THIS OUT FOR NOW BECAUSE THEY DRAW THEMSELVES.
-   THIS IS BETTER BECAUSE TimelineObjects HAVE BOUNDS WHICH CUT OFF
-   SOME USEREVENTS
-  // this may be called multiple times, so resize array when it does
-  public void addUserEvents(Vector userEventVector) {
-    if (userEventVector == null) { return; }
-    int numEvents = userEventVector.size();
-    if (numEvents == 0) { return; }
-
-    int i;
-    if (userEvents == null) {
-      userEvents = new UserEvent[numEvents];
-      for (i=0; i<numEvents; i++) {
-	userEvents[i] = (UserEvent) userEventVector.elementAt(i);
-      }
-    }
-    else {
-      int numCurrEvents = userEvents.length;
-      UserEvent[] tmp = new UserEvent[numCurrEvents+numEvents];
-      for (i=0; i<numCurrEvents; i++) { tmp[i] = userEvents[i]; }
-      for (i=0; i<numEvents; i++) { 
-	tmp[numCurrEvents+i] = (UserEvent) userEventVector.elementAt(i); 
-      }
-    }
-  }
-*/
-
-    public TimelineObject(TimelineData data, long bt, long et, 
-			  long cpuBegin, long cpuEnd, int n, 
+    public TimelineObject(TimelineData data, TimelineEvent tle, 
 			  TimelineMessage[] msgs, PackTime[] packs,
-			  int p1, int p2, int mlen, long rt, ObjectId id)
+			  int p1)
     {
 	format_.setGroupingUsed(true);
 
@@ -82,122 +55,63 @@ public class TimelineObject extends Component
 	setForeground(Analysis.foreground);
 	
 	this.data = data;
-	beginTime = bt;
-	endTime   = et;
-	this.cpuBegin = cpuBegin;
-	this.cpuEnd = cpuEnd;
+	beginTime = tle.BeginTime;
+	endTime   = tle.EndTime;
+	cpuBegin  = tle.cpuBegin;
+	cpuEnd    = tle.cpuEnd;
 	cpuTime   = cpuEnd - cpuBegin;
-	entry     = n;
+	entry     = tle.EntryPoint;
 	messages  = msgs;
 	this.packs= packs;
 	pCurrent  = p1;
-	pCreation = p2;
+	pCreation = tle.SrcPe;
+	EventID = tle.EventID;
 	f = (Frame)data.timelineWindow;
-	msglen = mlen;
-	recvTime = rt;
-	creationLine = 0;
-	if (id != null) {
-	    tid = new ObjectId(id);
+	msglen = tle.MsgLen;
+	recvTime = tle.RecvTime;
+	if (tle.id != null) {
+	    tid = new ObjectId(tle.id);
 	} else {
 	    tid = new ObjectId();
 	}
+	numPapiCounts = tle.numPapiCounts;
+	papiCounts    = tle.papiCounts;
+
+	int n = tle.EntryPoint;
+	isFunction = tle.isFunction;
+
 	setUsage();
 	setPackUsage();
 	  
-	if (n != -1) {
+	// **CW** special treatment for functions. There really should
+	// be a general way of dealing with this.
+	if (isFunction) {
 	    int textIndex = 0;
-	    int textSize = 10;
-	    bubbletext  = new String[textSize+numPapiCounts];
-	    int ecount = Analysis.getNumUserEntries();
-	    if (n >= ecount) {
-		System.out.println("Fatal error: invalid entry "+n+"!");
-		System.exit(1) ;
-	    }
-	    bubbletext[textIndex++] = (Analysis.getEntryNames())[n][1] + "::" 
-		+ (Analysis.getEntryNames())[n][0]; 
-	    bubbletext[textIndex++] = "Msg Len: " + msglen;
-	    bubbletext[textIndex] = "Begin Time: " + format_.format(bt);
-	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += " (" + 
-		    format_.format(cpuBegin) + ")";
-	    } else {
-		textIndex++;
-	    }
-	    bubbletext[textIndex] = "End Time: " + format_.format(et);
-	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += " (" + 
-		    format_.format(cpuEnd) + ")";
-	    } else {
-		textIndex++;
-	    }
-	    bubbletext[textIndex] = "Total Time: " + U.t(et-bt);
-	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += " (" + 
-		    U.t(cpuTime) + ")";
-	    } else {
-		textIndex++;
-	    }
-	    bubbletext[textIndex] = "Packing: " + U.t(packtime);
-	    if (packtime > 0) {
-		bubbletext[textIndex++] += " (" + 
-		    (100*(float)packtime/(et-bt+1)) + "%)";
-	    } else {
-		textIndex++;
-	    }
-	    bubbletext[textIndex++] = "Msgs created: " + msgs.length;
-	    bubbletext[textIndex++] = "Created by processor " + pCreation;
-	    bubbletext[textIndex++] = "Id: " + tid.id[0]+":" + tid.id[1] + 
-		":" + tid.id[2];
-	    bubbletext[textIndex++] = "Recv Time: " + recvTime;
-	} else {
-	    int textIndex = 0;
-	    int textSize = 4;
+	    int textSize = 6+(tle.callStack.size()*2);
+
 	    bubbletext = new String[textSize];
-	    bubbletext[textIndex++] = "IDLE TIME";
-	    bubbletext[textIndex++] = "Begin Time: " + format_.format(bt);
-	    bubbletext[textIndex++] = "End Time: " + format_.format(et);
-	    bubbletext[textIndex++] = "Total Time: " + U.t(et-bt);
-	}
-	addMouseListener(this);
-    }   
+	    bubbletext[textIndex++] = "Function: " +
+		Analysis.getFunctionName(entry);
+	    bubbletext[textIndex++] = "Begin Time: " + 
+		format_.format(beginTime);
+	    bubbletext[textIndex++] = "End Time: " +
+		format_.format(endTime);
+	    bubbletext[textIndex++] = "Msgs created: " + msgs.length;
+	    bubbletext[textIndex++] = "Id: " + tid.id[0] + ":" + tid.id[1] + 
+		":" + tid.id[2];
+	    bubbletext[textIndex++] = "--------- Function Callstack --------";
 
-    public TimelineObject(TimelineData data, long bt, long et, 
-			  long cpuBegin, long cpuEnd,
-			  int n, TimelineMessage[] msgs, PackTime[] packs,
-			  int p1, int p2, int mlen, long rt, ObjectId id, 
-			  int eventid, int numPapiCounts, long papiCounts[])
-    {
-	format_.setGroupingUsed(true);
-
-	setBackground(Analysis.background);
-	setForeground(Analysis.foreground);
-	
-	this.data = data;
-	beginTime = bt;
-	endTime   = et;
-	this.cpuBegin = cpuBegin;
-	this.cpuEnd = cpuEnd;
-	cpuTime   = cpuEnd - cpuBegin;
-	entry     = n;
-	messages  = msgs;
-	this.packs= packs;
-	pCurrent  = p1;
-	pCreation = p2;
-	EventID = eventid;
-	f = (Frame)data.timelineWindow;
-	msglen = mlen;
-	recvTime = rt;
-	if (id != null) {
-	    tid = new ObjectId(id);
-	} else {
-	    tid = new ObjectId();
-	}
-	this.numPapiCounts = numPapiCounts;
-	this.papiCounts = papiCounts;
-	setUsage();
-	setPackUsage();
-	  
-	if (n != -1) {
+	    // consume the call stack
+	    while (!tle.callStack.empty()) {
+		AmpiFunctionData functionData = 
+		    (AmpiFunctionData)tle.callStack.pop();
+		bubbletext[textIndex++] = 
+		    "[Func]: " + Analysis.getFunctionName(functionData.FunctionID);
+		bubbletext[textIndex++] =
+		    "   line:" + functionData.LineNo + " file: " +
+		    functionData.sourceFileName;
+	    }
+	} else if (n != -1) {
 	    int textIndex = 0;
 	    int textSize = 10;
 	    if (numPapiCounts > 0) {
@@ -213,21 +127,21 @@ public class TimelineObject extends Component
 	    bubbletext[textIndex++] = (Analysis.getEntryNames())[n][1] + 
 		"::" + (Analysis.getEntryNames())[n][0]; 
 	    bubbletext[textIndex++] = "Msg Len: " + msglen;
-	    bubbletext[textIndex] = "Begin Time: " + format_.format(bt);
+	    bubbletext[textIndex] = "Begin Time: " + format_.format(beginTime);
 	    if (cpuTime > 0) {
 		bubbletext[textIndex++] += " (" + 
 		    format_.format(cpuBegin) + ")";
 	    } else {
 		textIndex++;
 	    }
-	    bubbletext[textIndex] = "End Time: " + format_.format(et);
+	    bubbletext[textIndex] = "End Time: " + format_.format(endTime);
 	    if (cpuTime > 0) {
 		bubbletext[textIndex++] += " (" + 
 		    format_.format(cpuEnd) + ")";
 	    } else {
 		textIndex++;
 	    }
-	    bubbletext[textIndex] = "Total Time: " + U.t(et-bt);
+	    bubbletext[textIndex] = "Total Time: " + U.t(endTime-beginTime);
 	    if (cpuTime > 0) {
 		bubbletext[textIndex++] += " (" + 
 		    U.t(cpuTime) + ")";
@@ -237,7 +151,7 @@ public class TimelineObject extends Component
 	    bubbletext[textIndex] = "Packing: " + U.t(packtime);
 	    if (packtime > 0) {
 		bubbletext[textIndex++] += " (" + 
-		    (100*(float)packtime/(et-bt+1)) + "%)";
+		    (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 	    } else {
 		textIndex++;
 	    }
@@ -258,14 +172,20 @@ public class TimelineObject extends Component
 			" = " + format_.format(papiCounts[i]);
 		    if (i == 0) {
 			// processor count
+			/*
 			bubbletext[textIndex++] += "   OPS = " + 
 			    format_.format((long)(papiCounts[i]/((et-bt)/1000000.0)));
+			*/
+			bubbletext[textIndex++] += "   FLOPS = " +
+			    format_.format((long)(papiCounts[i]/
+						  ((endTime-beginTime)/1000000.0)));
 		    }
 		    if (i == 1) {
 			// cache miss
-			bubbletext[textIndex++] += "   Cache ratio = " +
+			/*
 			    100*(float)(papiCounts[i]/(papiCounts[i-1]*1.0)) +
 			    "%";
+			*/
 		    }
 		}
 	    }
@@ -274,9 +194,10 @@ public class TimelineObject extends Component
 	    int textSize = 4;
 	    bubbletext = new String[textSize];
 	    bubbletext[textIndex++] = "IDLE TIME";
-	    bubbletext[textIndex++] = "Begin Time: " + format_.format(bt);
-	    bubbletext[textIndex++] = "End Time: " + format_.format(et);
-	    bubbletext[textIndex++] = "Total Time: " + U.t(et-bt);
+	    bubbletext[textIndex++] = "Begin Time: " + 
+		format_.format(beginTime);
+	    bubbletext[textIndex++] = "End Time: " + format_.format(endTime);
+	    bubbletext[textIndex++] = "Total Time: " + U.t(endTime-beginTime);
 	}
 	addMouseListener(this);
     } 
@@ -540,6 +461,9 @@ public class TimelineObject extends Component
 			c = getObjectColor(tid);
 		}else{
 			c = data.entryColor[entry];
+			if (isFunction) {
+			    c = Analysis.getFunctionColor(entry);
+			}
 		}	
 	  }
 	  // leave 5 pixels above and below
@@ -567,11 +491,18 @@ public class TimelineObject extends Component
 		 viewet = data.endTime;
 	  }
 		 
-	  g.setColor(c);
-	  
 	  int pixelwidth = right-left+1;
-	  g.fillRect(left, startY, pixelwidth, h);
-	  
+	  if (isFunction) {
+	      g.setColor(c);
+	      for (int x=0; x<w+h-2; x += 4) {
+		  g.drawLine(x, startY, x-h, startY+h);
+		  g.drawLine(x+1, startY, x-h+1, startY+h);
+	      }
+	  } else {
+	      g.setColor(c);
+	      g.fillRect(left, startY, pixelwidth, h);
+	  }
+
 	  if(entry == -1)
 	  {
 		 g.setColor(getBackground());

@@ -226,9 +226,9 @@ public class Analysis {
 		return userEntryData[ a ][ t ];
 	}
 
-    public static String getLogName(int peNum) {
+    	public static String getLogName(int peNum) {
 	return sts.getLogName(peNum);
-    }
+	}
 
 	public static String[][] getUserEntryNames() {
 		return sts.getEntryNames();

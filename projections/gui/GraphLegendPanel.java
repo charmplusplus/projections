@@ -6,6 +6,7 @@ import java.awt.event.*;
 public class GraphLegendPanel extends Panel
    implements ActionListener
 {
+   private Frame parent;
    private GridBagConstraints gbc;
    
    private Button       bSelect;
@@ -149,8 +150,9 @@ public class GraphLegendPanel extends Panel
 		 //sp.validate();
 	  }                    
    }           
-   public GraphLegendPanel()
+   public GraphLegendPanel(Frame parent)
    {
+	  this.parent = parent;
 	  setBackground(Color.lightGray);
 	  
 	  sp        = new ScrollPane();
@@ -182,7 +184,7 @@ public class GraphLegendPanel extends Panel
 	  if(b == bSelect)
 	  {
 		 if(attributesWindow == null)
-			attributesWindow = new GraphAttributesWindow(data);
+			attributesWindow = new GraphAttributesWindow(parent,data);
 		 attributesWindow.setVisible(true);
 	  }      
    }   

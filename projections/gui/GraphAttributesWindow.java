@@ -23,8 +23,9 @@ public class GraphAttributesWindow extends ColorWindowFrame
    
    private Button bAll, bClear, bApply, bClose;
    
-   public GraphAttributesWindow(GraphData data)
+   public GraphAttributesWindow(Frame parent, GraphData data)
    {
+	  super(parent);
 	  this.data = data;
 	  
 	  addWindowListener(new WindowAdapter()

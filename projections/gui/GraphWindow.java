@@ -96,7 +96,7 @@ public class GraphWindow extends Frame
 	  
 	  displayPanel = new GraphDisplayPanel();
 	  controlPanel = new GraphControlPanel();
-	  legendPanel  = new GraphLegendPanel ();
+	  legendPanel  = new GraphLegendPanel (this);
 	  
 	  GridBagLayout      gbl = new GridBagLayout();
 	  GridBagConstraints gbc = new GridBagConstraints();

@@ -18,7 +18,7 @@ import projections.gui.*;
  *  I favor for all toolkits in projections. That would involve changes to
  *  those toolkits (which is not desired now).
  */
-public class EntrySelectionDialog extends ColorWindowFrame
+public class EntrySelectionDialog extends ColorWindowFrame 
    implements ActionListener
 {
     private ColorSelectWindow colorSelectWindow;
@@ -45,12 +45,13 @@ public class EntrySelectionDialog extends ColorWindowFrame
     // flag
     private boolean layoutComplete = false;
 
-    public EntrySelectionDialog(String typeLabelStrings[],
+    public EntrySelectionDialog(Frame parent, String typeLabelStrings[],
 				boolean stateArray[][],
 				Color colorArray[][],
 				boolean existsArray[][],
 				String entryNames[])
     {
+	super(parent);
 	this.numTypes = typeLabelStrings.length;
 	this.typeLabelStrings = typeLabelStrings;
 	this.numEPs = stateArray[numTypes-1].length;
@@ -81,6 +82,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	
 	    createLayout();
 	    pack();
+	    setVisible(true);
 	}
     }
     
@@ -107,6 +109,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 			if (existsArray[type][ep]) {
 			    entryPointSelection[type][ep].setState(dest);
 			} else {
+			    System.out.println("exists array false for ep " + ep);
 			    entryPointSelection[type][ep].setState(false);
 			}
 		    }   
@@ -276,7 +279,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	buttonPanel.add(bCancel);
 	
 	gbc.fill = GridBagConstraints.BOTH;
-	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,0, 4,4,2,4);
+	Util.gblAdd(mainPanel, displayPanel, gbc, 0,0, 1,1, 1,1, 4,4,2,4);
 	Util.gblAdd(mainPanel, buttonPanel,  gbc, 0,1, 1,1, 1,0, 2,4,4,4);
 
 	layoutComplete = true;

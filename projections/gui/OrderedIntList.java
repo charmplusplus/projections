@@ -21,6 +21,7 @@ public class OrderedIntList
 	  while((e = nextElement()) != -1)
 		 listcopy.insert(e);
 	  
+	  listcopy.reset();
 	  return listcopy;
    }   
    public int currentElement()
@@ -226,6 +227,7 @@ public class OrderedIntList
 	  {
 		 System.out.println("" + nextElement());
 	  }
+	  reset();
    }   
    public void removeAll()
    { 

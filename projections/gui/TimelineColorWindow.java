@@ -27,8 +27,9 @@ public class TimelineColorWindow extends ColorWindowFrame
 		 super.paint(g);
 	  }   
    }   
-   public TimelineColorWindow(TimelineData data)
+   public TimelineColorWindow(Frame parent, TimelineData data)
    {
+	  super(parent);
 	  this.data = data;
 	  
 	  addWindowListener(new WindowAdapter()

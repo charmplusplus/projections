@@ -265,7 +265,7 @@ public class Graph extends Canvas implements MouseMotionListener
                  if(i % labelincrementX == 0)
                  {
                         g.drawLine(curx, originY+5, curx, originY-5);
-                        s = "" + i; 
+                        s = "" + i;						// can set multiplier? 
                         g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + fm.getHeight());
            	 }
            	else

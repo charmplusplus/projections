@@ -947,7 +947,7 @@ public class TimelineWindow extends Frame
    private void ShowColorWindow()
    {
 	  if(colorWindow == null)
-		 colorWindow = new TimelineColorWindow(data);
+		 colorWindow = new TimelineColorWindow(this,data);
 	  colorWindow.setVisible(true);
    }   
    private void ShowRangeDialog()

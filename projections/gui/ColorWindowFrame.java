@@ -2,7 +2,11 @@ package projections.gui;
 
 import java.awt.*;
 
-public abstract class ColorWindowFrame extends Frame
+public class ColorWindowFrame extends Dialog
 {
-   public abstract void applyNewColor(Color c);   
+   public ColorWindowFrame(Frame parent){
+	super(parent,true);		// Modal dialogbox
+   }
+
+   public void applyNewColor(Color c) {}   
 }

@@ -2,12 +2,14 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DecimalFormat;
 import javax.swing.*;
 
 /**
- *  TimeBinDialog
+ *  BinDialog
  *  by Chee Wai Lee
- *  2/20/2004
+ *  2/20/2004 (as TimeBinDialog)
+ *  2/23/2005 (renamed)
  * 
  *  This is the basic dialog abstraction to allow a user to specify
  *  a range of time in projections for which entities (events) are
@@ -16,7 +18,7 @@ import javax.swing.*;
  *
  *  The obvious use of this is for Histograms of any sort.
  */
-public class TimeBinDialog extends RangeDialog 
+public class BinDialog extends RangeDialog 
 {
     // GUI components
     protected JPanel binPanel;
@@ -26,20 +28,24 @@ public class TimeBinDialog extends RangeDialog
     protected JLabel binRangeLabel;
 
     protected JIntTextField numBinsField;
-    protected JTimeTextField binSizeField;
-    protected JTimeTextField minBinSizeField;
+    protected JLongTextField binSizeField;
+    protected JLongTextField minBinSizeField;
 
     protected int numBins;
     protected long binSize;
     protected long minBinSize;
 
-    public TimeBinDialog(ProjectionsWindow mainWindow,
+    private DecimalFormat _format;
+
+    public BinDialog(ProjectionsWindow mainWindow,
 			 String titleString) {
 	super(mainWindow, titleString);
 	// default values
 	numBins = 100;
 	binSize = 100;
 	minBinSize = 0;
+
+	_format = new DecimalFormat();
     }
     
     public void actionPerformed(ActionEvent evt) {
@@ -77,13 +83,14 @@ public class TimeBinDialog extends RangeDialog
 	numBinsField.addFocusListener(this);
 
 	binSizeLabel = new JLabel("Size of Bin:", JLabel.LEFT);
-	binSizeField = new JTimeTextField(binSize, 12);
+	binSizeField = new JLongTextField(binSize, 12);
 	binSizeField.addActionListener(this);
 	binSizeField.addKeyListener(this);
 	binSizeField.addFocusListener(this);
 
-	minBinSizeLabel = new JLabel("Starting Bin Size:", JLabel.LEFT);
-	minBinSizeField = new JTimeTextField(minBinSize, 12);
+	minBinSizeLabel = new JLabel("Starting Bin Size:", 
+				     JLabel.LEFT);
+	minBinSizeField = new JLongTextField(minBinSize, 12);
 	minBinSizeField.addActionListener(this);
 	minBinSizeField.addKeyListener(this);
 	minBinSizeField.addFocusListener(this);
@@ -114,7 +121,7 @@ public class TimeBinDialog extends RangeDialog
 		numBins = numBinsField.getValue();
 		setBinRangeText();
 	    }
-	} else if (field instanceof JTimeTextField) {
+	} else if (field instanceof JLongTextField) {
 	    if (field == binSizeField) {
 		binSize = binSizeField.getValue();
 	    } else if (field == minBinSizeField) {
@@ -149,11 +156,12 @@ public class TimeBinDialog extends RangeDialog
 
     void setBinRangeText() {
 	binRangeLabel.setText("Bin size ranges from : " +
-			      U.t(minBinSizeField.getValue()) +
-			      " to " + 
-			      U.t(minBinSizeField.getValue() +
-				  numBinsField.getValue() *
-				  binSizeField.getValue()));
+			      _format.format(minBinSizeField.getValue()) +
+			      " units to " + 
+			      _format.format(minBinSizeField.getValue() +
+					     numBinsField.getValue() *
+					     binSizeField.getValue()) +
+			      " units.");
     }
 
     // Accessor methods

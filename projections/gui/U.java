@@ -57,16 +57,47 @@ public class U
 		}
 		return ret.toString();
 	}
-	/*
-	Return a human-readable version of this time, 
-	given in microseconds.
-	*/
-	public static String t(long us)
-	{
-		if (us<0) return us+"us";
-		if (us==0) return "0";
-		if (us<1000) return "0."+printDecimals(us*0.001,3)+"ms";
-		if (us<1000*1000) return (int)(us/1000)+"."+printDecimals(us*0.001,3)+"ms";
-		return (int)(us/1000000)+"."+printDecimals(us*0.000001,3)+"s";
+
+    /*
+      Return a human-readable version of this time, 
+      given in microseconds. 02/23/2005 - **CW** added default
+      wrapper with 3 dec pl.
+    */
+    public static String t(long us) {
+	return t(us, 3);
+    }
+
+    public static String t(long us, int places)
+    {
+	if (us<0) return us+"us";
+	if (us==0) return "0";
+	if (us<1000) return "0."+printDecimals(us*0.001,places)+"ms";
+	if (us<1000*1000) return (int)(us/1000)+"."+
+			      printDecimals(us*0.001,places)+"ms";
+	return (int)(us/1000000)+"."+
+	    printDecimals(us*0.000001,places)+"s";
+    }
+
+    public static int bestNumPlaces(long start, long skip, int num) {
+	return 0;
+    }
+
+    public static int numUselessZeros(long number) {
+	int count = 0;
+	while (true) {
+	    if (number%10 > 0) {
+		break;
+	    } else {
+		count++;
+		number /= 10;
+	    }
 	}
+	return count;
+    }
+
+    public static void main(String args[]) {
+	System.out.println(numUselessZeros(2345800));
+	System.out.println(numUselessZeros(20034));
+	System.out.println(numUselessZeros(234580));
+    }
 }

@@ -45,6 +45,7 @@ SRC=\
     projections/gui/AnimationDisplayPanel.java\
     projections/gui/AnimationWindow.java\
     projections/gui/BackGroundImagePanel.java\
+    projections/gui/BinDialog.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
     projections/gui/ColorMap.java\
@@ -82,6 +83,7 @@ SRC=\
     projections/gui/InvalidFileDialog.java\
     projections/gui/JFloatTextField.java\
     projections/gui/JIntTextField.java\
+    projections/gui/JLongTextField.java\
     projections/gui/JSelectField.java\
     projections/gui/JTimeTextField.java\
     projections/gui/LabelPanel.java\
@@ -130,7 +132,6 @@ SRC=\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
     projections/gui/SwingWorker.java\
-    projections/gui/TimeBinDialog.java\
     projections/gui/TimeProfileWindow.java\
     projections/gui/TimeTextField.java\
     projections/gui/TimelineAxisCanvas.java\

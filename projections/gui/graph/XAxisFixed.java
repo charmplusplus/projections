@@ -28,8 +28,15 @@ public class XAxisFixed extends XAxis
   public String getUnits() {return units;}
 
   public String getIndexName(int index) {
-	double temp = (index * multiplier) + start;
-        return ""+temp+units;
+      double temp = (index * multiplier) + start;
+      // Fix to finally get a proper time-based x-axis
+      // it implies that if we pass time values, it must be in us.
+      if (units.equals("Time")) {
+	  // for the X-Axis, there is no need for too many dec places
+	  // MIGHT NEED FURTHER FINE-TUNING.
+	  return U.t((long)temp,2);
+      }
+      return ""+temp+units;
   }
 
   public double getIndex(int index) {

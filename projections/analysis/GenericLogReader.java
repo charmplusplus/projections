@@ -85,25 +85,78 @@ public class GenericLogReader extends ProjectionsReader
 	case BEGIN_UNPACK: case END_UNPACK:
 	    data.time = reader.nextLong();
 	    data.pe = reader.nextInt();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case CREATION:
-	case BEGIN_PROCESSING: case END_PROCESSING:
 	    data.mtype = reader.nextInt();
 	    data.entry = reader.nextInt();
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
-	    if (version > 1.0) {
+	    if (version >= 2.0) {
 		data.msglen = reader.nextInt();
 	    } else {
 		data.msglen = -1;
 	    }
-	    if(Analysis.getVersion() >= 5.0 && data.type == CREATION){
-				data.sendTime = reader.nextLong();
+	    if (version >= 5.0) {
+		data.sendTime = reader.nextLong();
 	    }
+	    break;
+	case BEGIN_PROCESSING: 
+	    data.mtype = reader.nextInt();
+	    data.entry = reader.nextInt();
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	    if (version >= 2.0) {
+		data.msglen = reader.nextInt();
+	    } else {
+		data.msglen = -1;
+	    }
+	    if (version >= 4.0) {
+		data.recvTime  = reader.nextLong();
+		data.id[0] = reader.nextInt();
+		data.id[1] = reader.nextInt();
+		data.id[2] = reader.nextInt();
+	    }
+	    if (version >= 6.5) {
+		data.cpuStartTime = reader.nextLong();
+	    }
+	    if (version >= 6.6) {
+		data.numPerfCounts = reader.nextInt();
+		data.perfCounts = new long[data.numPerfCounts];
+		for (int i=0; i<data.numPerfCounts; i++) {
+		    data.perfCounts[i] = reader.nextLong();
+		}
+	    }
+	    reader.nextLine(); // Skip over any garbage 
+	    break;
+	case END_PROCESSING:
+	    data.mtype = reader.nextInt();
+	    data.entry = reader.nextInt();
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	    if (version >= 2.0) {
+		data.msglen = reader.nextInt();
+	    } else {
+		data.msglen = -1;
+	    }
+	    if (version >= 6.5) {
+		data.cpuEndTime = reader.nextLong();
+	    }
+	    if (version >= 6.6) {
+		data.numPerfCounts = reader.nextInt();
+		data.perfCounts = new long[data.numPerfCounts];
+		for (int i=0; i<data.numPerfCounts; i++) {
+		    data.perfCounts[i] = reader.nextLong();
+		}
+	    }
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case BEGIN_TRACE: case END_TRACE:
 	    data.time = reader.nextLong();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case MESSAGE_RECV:
 	    data.mtype = reader.nextInt();
@@ -111,26 +164,31 @@ public class GenericLogReader extends ProjectionsReader
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
 	    data.msglen = reader.nextInt();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case ENQUEUE: case DEQUEUE:
 	    data.mtype = reader.nextInt();
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case BEGIN_INTERRUPT: case END_INTERRUPT:
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case BEGIN_COMPUTATION: case END_COMPUTATION:
 	    data.time = reader.nextLong();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	case USER_EVENT_PAIR:
 	    data.userEventID = reader.nextInt();
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
+	    reader.nextLine(); // Skip over any garbage 
 	    break;
 	default:
 	    data.type = -1;

@@ -12,20 +12,10 @@ public class RangeHistory
     private int numEntries;
     private Vector rangeSet;
 
-    public RangeHistory() 
+    public RangeHistory(String logDirectory) 
     {
-	this(null);
-    }
-
-    public RangeHistory(String filename) 
-    {
-	if (filename == null) {
-	    this.filename = "ranges.hst";
-	} else {
-	    this.filename = filename;
-	}
+	this.filename = logDirectory + "ranges.hst";
 	if (!(new File(this.filename)).exists()) {
-	    this.filename = "ranges.hst";
 	    noSource = true;
 	}
     }

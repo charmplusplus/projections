@@ -102,9 +102,22 @@ public class Analysis {
 
 	try {
 	    sts=new StsReader(filename);
-	    // create default color maps for entry methods as well as user
-	    // events.
-	    entryColors = createColorMap(sts.getEntryCount());
+	    // if I can find the saved color maps, then use it.
+	    String colorsaved = 
+		getLogDirectory() + File.separator + "savedcolors.prj";
+	    ColorSaver.setLocation(colorsaved);
+	    if ((new File(colorsaved)).exists()) {
+		try {
+		    entryColors = ColorSaver.loadColors();
+		} catch (IOException exception) {
+		    System.err.println("Failed to load colors!!!");
+		    entryColors = createColorMap(sts.getEntryCount());
+		}
+	    } else {
+		// create default color maps for entry methods as well as user
+		// events.
+		entryColors = createColorMap(sts.getEntryCount());
+	    }
 	    grayColors = createGrayscaleColorMap(sts.getEntryCount());
 	    userEventColors = createColorMap(sts.getNumUserDefinedEvents());
 	    grayUserEventColors = 
@@ -600,6 +613,14 @@ public class Analysis {
     
     public static String[] getUserEventNames() {
 	return sts.getUserEventNames();
+    }
+
+    public static int getNumPerfCounts() {
+	return sts.getNumPerfCounts();
+    }
+
+    public static String[] getPerfCountNames() {
+	return sts.getPerfCountNames();
     }
 
     /**

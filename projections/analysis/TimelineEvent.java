@@ -13,12 +13,16 @@ public int EventID; //seq no of processor
 public ObjectId id;
 public Vector MsgsSent;  // of class TimelineMessage
 public Vector PackTimes; // of class PackTime
+    public int numPapiCounts = 0;
+    public long papiCounts[];
 
 public TimelineEvent ()
 {
 }
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d, long cpubegin, long cpuend)
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
+		     ObjectId d, long cpubegin, long cpuend, 
+		     int numPapiCounts, long papiCounts[])
 {
 	BeginTime=bt; EndTime=et;
 	cpuBegin = cpubegin;
@@ -26,9 +30,13 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId 
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 	id = new ObjectId(d);
+	this.numPapiCounts = numPapiCounts;
+	this.papiCounts = papiCounts;
 }
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d,int eventid, long cpubegin, long cpuend)
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
+		     ObjectId d,int eventid, long cpubegin, long cpuend, 
+		     int numPapiCounts, long papiCounts[])
 {
 	BeginTime=bt; EndTime=et;
 	cpuBegin = cpubegin;
@@ -37,6 +45,8 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId 
         RecvTime = r;
 	id = new ObjectId(d);
 	EventID = eventid;
+	this.numPapiCounts = numPapiCounts;
+	this.papiCounts = papiCounts;
 }
 
 

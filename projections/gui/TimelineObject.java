@@ -32,6 +32,9 @@ public class TimelineObject extends Component
    private PackTime[] packs;
    // private UserEvent[] userEvents;
 
+    private int numPapiCounts = 0;
+    private long papiCounts[];
+
   private static DecimalFormat format_ = new DecimalFormat();
   double scale;
   int left;
@@ -104,7 +107,7 @@ public class TimelineObject extends Component
 	if (n != -1) {
 	    int textIndex = 0;
 	    int textSize = 10;
-	    bubbletext  = new String[textSize];
+	    bubbletext  = new String[textSize+numPapiCounts];
 	    int ecount = Analysis.getNumUserEntries();
 	    if (n >= ecount) {
 		System.out.println("Fatal error: invalid entry "+n+"!");
@@ -115,22 +118,22 @@ public class TimelineObject extends Component
 	    bubbletext[textIndex++] = "Msg Len: " + msglen;
 	    bubbletext[textIndex] = "Begin Time: " + format_.format(bt);
 	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += "[cpu:" + 
-		    format_.format(cpuBegin) + "]";
+		bubbletext[textIndex++] += " (" + 
+		    format_.format(cpuBegin) + ")";
 	    } else {
 		textIndex++;
 	    }
 	    bubbletext[textIndex] = "End Time: " + format_.format(et);
 	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += "[cpu:" + 
-		    format_.format(cpuEnd) + "]";
+		bubbletext[textIndex++] += " (" + 
+		    format_.format(cpuEnd) + ")";
 	    } else {
 		textIndex++;
 	    }
 	    bubbletext[textIndex] = "Total Time: " + U.t(et-bt);
 	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += "[cpu:" + 
-		    U.t(cpuTime) + "]";
+		bubbletext[textIndex++] += " (" + 
+		    U.t(cpuTime) + ")";
 	    } else {
 		textIndex++;
 	    }
@@ -162,7 +165,7 @@ public class TimelineObject extends Component
 			  long cpuBegin, long cpuEnd,
 			  int n, TimelineMessage[] msgs, PackTime[] packs,
 			  int p1, int p2, int mlen, long rt, ObjectId id, 
-			  int eventid)
+			  int eventid, int numPapiCounts, long papiCounts[])
     {
 	format_.setGroupingUsed(true);
 
@@ -189,13 +192,19 @@ public class TimelineObject extends Component
 	} else {
 	    tid = new ObjectId();
 	}
+	this.numPapiCounts = numPapiCounts;
+	this.papiCounts = papiCounts;
 	setUsage();
 	setPackUsage();
 	  
 	if (n != -1) {
 	    int textIndex = 0;
 	    int textSize = 10;
-	    bubbletext  = new String[textSize];
+	    if (numPapiCounts > 0) {
+		bubbletext = new String[textSize+numPapiCounts+1];
+	    } else {
+		bubbletext = new String[textSize];
+	    }
 	    int ecount = Analysis.getNumUserEntries();
 	    if (n >= ecount) {
 		System.out.println("Fatal error: invalid entry "+n+"!");
@@ -206,22 +215,22 @@ public class TimelineObject extends Component
 	    bubbletext[textIndex++] = "Msg Len: " + msglen;
 	    bubbletext[textIndex] = "Begin Time: " + format_.format(bt);
 	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += "[cpu:" + 
-		    format_.format(cpuBegin) + "]";
+		bubbletext[textIndex++] += " (" + 
+		    format_.format(cpuBegin) + ")";
 	    } else {
 		textIndex++;
 	    }
 	    bubbletext[textIndex] = "End Time: " + format_.format(et);
 	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += "[cpu:" + 
-		    format_.format(cpuEnd) + "]";
+		bubbletext[textIndex++] += " (" + 
+		    format_.format(cpuEnd) + ")";
 	    } else {
 		textIndex++;
 	    }
 	    bubbletext[textIndex] = "Total Time: " + U.t(et-bt);
 	    if (cpuTime > 0) {
-		bubbletext[textIndex++] += "[cpu:" + 
-		    U.t(cpuTime) + "]";
+		bubbletext[textIndex++] += " (" + 
+		    U.t(cpuTime) + ")";
 	    } else {
 		textIndex++;
 	    }
@@ -237,6 +246,29 @@ public class TimelineObject extends Component
 	    bubbletext[textIndex++] = "Id: " + tid.id[0] + ":" + tid.id[1] + 
 		":" + tid.id[2];
 	    bubbletext[textIndex++] = "Recv Time: " + recvTime;
+	    if (numPapiCounts > 0) {
+		bubbletext[textIndex++] = "*** PAPI counts ***";
+		for (int i=0; i<numPapiCounts; i++) {
+		    /*
+		    bubbletext[textIndex++] = Analysis.getPerfCountNames()[i] +
+			" = " + format_.format(papiCounts[i]);
+		    */
+		    // hack for now
+		    bubbletext[textIndex] = Analysis.getPerfCountNames()[i] +
+			" = " + format_.format(papiCounts[i]);
+		    if (i == 0) {
+			// processor count
+			bubbletext[textIndex++] += "   OPS = " + 
+			    format_.format((long)(papiCounts[i]/((et-bt)/1000000.0)));
+		    }
+		    if (i == 1) {
+			// cache miss
+			bubbletext[textIndex++] += "   Cache ratio = " +
+			    100*(float)(papiCounts[i]/(papiCounts[i-1]*1.0)) +
+			    "%";
+		    }
+		}
+	    }
 	} else {
 	    int textIndex = 0;
 	    int textSize = 4;

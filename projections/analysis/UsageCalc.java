@@ -247,7 +247,6 @@ public class UsageCalc extends ProjDefs
 			break;
 		    case CREATION_MULTICAST:
 			if (Analysis.getVersion() >= 6.0) {
-			    System.out.println("Encountered multicast");
 			    log.nextInt();  // mtype
 			    log.nextInt();  // ep idx
 			    if (deltaEncoded) {

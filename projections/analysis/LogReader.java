@@ -476,6 +476,11 @@ public class LogReader
 			    }
 			    isProcessing = false;
 			    break;
+			case BEGIN_FUNC:
+			    // ignore for now
+			case END_FUNC:
+			    // ignore for now
+			    break;
 			case BEGIN_TRACE:
 			    // ignore for now
 			    break;

@@ -7,6 +7,7 @@ SRC=\
     projections/analysis/AccumulatedSummaryReader.java\
     projections/analysis/AsciiIntegerReader.java\
     projections/analysis/Chare.java\
+    projections/analysis/ColorSaver.java\
     projections/analysis/Entry.java\
     projections/analysis/EPNamdDefs.java\
     projections/analysis/EPDataGenerator.java\
@@ -55,7 +56,6 @@ SRC=\
     projections/gui/EntryPointWindow.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
-    projections/gui/GeneralGraphWindow.java\
     projections/gui/GenericGraphWindow.java\
     projections/gui/GraphAttributesWindow.java\
     projections/gui/GraphControlPanel.java\
@@ -126,6 +126,7 @@ SRC=\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
     projections/gui/SwingWorker.java\
+    projections/gui/TimeProfileWindow.java\
     projections/gui/TimeTextField.java\
     projections/gui/TimelineAxisCanvas.java\
     projections/gui/TimelineColorWindow.java\

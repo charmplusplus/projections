@@ -26,7 +26,7 @@ public class MainWindow extends JFrame
     protected static final int HIST_WIN = 6;
     protected static final int TIMELINE_WIN = 7;
     protected static final int OVERVIEW_WIN = 8;
-    protected static final int GEN_GRAPH_WIN = 9;
+    protected static final int TIME_PROF_WIN = 9;
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
@@ -56,7 +56,7 @@ public class MainWindow extends JFrame
     private StlWindow            stlWindow;
     private MultiRunWindow       multiRunWindow;
     private AnimationWindow      animationWindow;
-    private GeneralGraphWindow   generalGraphWindow;
+    private TimeProfileWindow    timeProfileWindow;
 
     // components associated with the main window
     private MainTitlePanel        titlePanel;
@@ -119,7 +119,7 @@ public class MainWindow extends JFrame
 	toolDescriptions[ANIMATION_WIN] = "Animation";
 	toolDescriptions[TIMELINE_WIN] = "Timeline";
 	toolDescriptions[OVERVIEW_WIN] = "Overview";
-	toolDescriptions[GEN_GRAPH_WIN] = "General Graph";
+	toolDescriptions[TIME_PROF_WIN] = "Time Profile Graph";
 
 	// cross-tool masks allow tools to decide if their parameter sets
 	// are compatible and hence may "cross over" from one tool to the
@@ -182,8 +182,8 @@ public class MainWindow extends JFrame
 			return "TimelineWindow";
 		} else if (index == OVERVIEW_WIN) {
 			return "StlWindow";
-		} else if (index == GEN_GRAPH_WIN) {
-			return "GeneralGraphWindow";
+		} else if (index == TIME_PROF_WIN) {
+			return "TimeProfileWindow";
 		} else {
 			return null;
 		}
@@ -207,8 +207,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("LogFileViewerWindow", LOGVIEW_WIN);
 	} else if (item.equals("Overview")) {
 	    showChildWindow("StlWindow", OVERVIEW_WIN);
-	} else if (item.equals("General Graph")) {
-	    showChildWindow("GeneralGraphWindow", GEN_GRAPH_WIN);
+	} else if (item.equals("Time Profile Graph")) {
+	    showChildWindow("TimeProfileWindow", TIME_PROF_WIN);
 	} else if (item.equals("Multirun Analysis")) {
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
 	}
@@ -274,19 +274,20 @@ public class MainWindow extends JFrame
     public void showChildWindow(String childClass, int windowIndex)
     {
 	try {
-			if (childWindows[0][windowIndex] == null) {
-				// get the name of the class within the current package
-				// and create an instance of that class
-				String className =  getClass().getPackage().getName() + "." + childClass;
-				Class cls  = Class.forName(className);
-				Constructor ctr = cls.getConstructor(new Class[]{this.getClass(), Class.forName("java.lang.Integer")});
-				childWindows[0][windowIndex] = (ProjectionsWindow)(ctr.newInstance(new Object[] {this, new Integer(windowIndex)}));
-			} else {
-				if (childWindows[0][windowIndex] instanceof ProjectionsWindow) {
-					((ProjectionsWindow)childWindows[0][windowIndex]).showDialog();
-			} else {
-				childWindows[0][windowIndex].show();
-			}
+	    if (childWindows[0][windowIndex] == null) {
+		// get the name of the class within the current package
+		// and create an instance of that class
+		String className =  getClass().getPackage().getName() + 
+		    "." + childClass;
+		Class cls  = Class.forName(className);
+		Constructor ctr = cls.getConstructor(new Class[]{this.getClass(), Class.forName("java.lang.Integer")});
+		childWindows[0][windowIndex] = (ProjectionsWindow)(ctr.newInstance(new Object[] {this, new Integer(windowIndex)}));
+	    } else {
+		if (childWindows[0][windowIndex] instanceof ProjectionsWindow) {
+		    ((ProjectionsWindow)childWindows[0][windowIndex]).showDialog();
+		} else {
+		    childWindows[0][windowIndex].show();
+		}
 	    }
 	} catch(Exception e) {
 	    e.printStackTrace();

@@ -71,7 +71,6 @@ public abstract class ProjectionsWindow
     // blocking computation.
     abstract void showWindow();
 
-
     /**
      *  Must implement code to set parameter data to the window
      *  (more specifically the tool) via the dialog. Because of the
@@ -160,7 +159,7 @@ public abstract class ProjectionsWindow
 		 * Apurva
 		 * Note: currently using myWindowID to figure out which window I am
 		 * As long as myWindowID continues to correspond to
-		 * mainWindow.GRAPHWIN .... mainWindow.GEN_GRAPH_WIN...
+		 * mainWindow.GRAPH_WIN .... mainWindow.TIME_PROF_WIN...
 		 * this should continually work
 		 */
 		for(int k=0; k<parentWindow.NUM_WINDOWS; k++) {

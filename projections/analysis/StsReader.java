@@ -55,7 +55,16 @@ public class StsReader extends ProjDefs
     // index by Integer, return String name
     private Hashtable userEvents = new Hashtable();  
     private String userEventNames[];
+
+    // AMPI Functions tracing
+    private int functionEventIndex = 0;
+    private Hashtable functionEventIndices = new Hashtable();
+    private Hashtable functionEvents = new Hashtable();
+    private String functionEventNames[];
     
+    private int numPapiEvents;
+    private String papiEventNames[];
+
     /** 
      *  The StsReader constructor reads the .sts file indicated.
      *  @exception LogLoadException if an error occurs while reading in the
@@ -70,6 +79,7 @@ public class StsReader extends ProjDefs
 	    validPEs[i] = new OrderedIntList();
 	}
 	baseName = getBaseName(FileName);
+	logDirectory = dirFromFile(FileName);
 
 	try {
 	    BufferedReader InFile = 
@@ -128,6 +138,20 @@ public class StsReader extends ProjDefs
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
 		    MsgTable[ID] = Size;
+		} else if (s1.equals("FUNCTION")) {
+		    Integer key = new Integer(st.nextToken());
+		    if (!functionEvents.containsKey(key)) {
+			// Allow the presence of spaces in the descriptor.
+			String functionEventName = "";
+			while (st.hasMoreTokens()) {
+			    functionEventName += st.nextToken() + " ";
+			}
+			functionEvents.put(key, functionEventName);
+			functionEventNames[functionEventIndex] = 
+			    functionEventName;
+			functionEventIndices.put(key,
+						 new Integer(functionEventIndex++));
+		    }
 		} else if (s1.equals("EVENT")) {
 		    Integer key = new Integer(st.nextToken());
 		    if (!userEvents.containsKey(key)) {
@@ -144,6 +168,16 @@ public class StsReader extends ProjDefs
 		    // restored by Chee Wai - 7/29/2002
 		    userEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
+		} else if (s1.equals("TOTAL_FUNCTIONS")) {
+		    functionEventNames = 
+			new String[Integer.parseInt(st.nextToken())];
+		} else if (s1.equals ("TOTAL_PAPI_EVENTS")) {
+		    numPapiEvents = Integer.parseInt(st.nextToken());
+		    papiEventNames =
+			new String[numPapiEvents];
+		} else if (s1.equals ("PAPI_EVENT")) {
+		    papiEventNames[Integer.parseInt(st.nextToken())] =
+			st.nextToken();
 		} else if (s1.equals ("END")) {
 		    break;
 		}
@@ -256,6 +290,33 @@ public class StsReader extends ProjDefs
     public String[] getUserEventNames() {
 	// gets an array by logical (not user-given) index
 	return userEventNames;
+    }
+
+    // *** function event accessors ***
+    public int getNumFunctionEvents() {
+	return functionEvents.size();
+    }
+
+    public int getFunctionEventIndex(int eventID) {
+	Integer key = new Integer(eventID);
+	return ((Integer)functionEventIndices.get(key)).intValue();
+    }
+
+    public String getFunctionEventDescriptor(int eventID) {
+	Integer key = new Integer(eventID);
+	return (String)userEvents.get(key);
+    }
+
+    public String[] getFunctionEventDescriptors() {
+	return functionEventNames;
+    }
+
+    public int getNumPerfCounts() {
+	return numPapiEvents;
+    }
+
+    public String[] getPerfCountNames() {
+	return papiEventNames;
     }
 
     // *** Derived information accessor ***

@@ -34,6 +34,8 @@ public static final int BEGIN_UNPACK             = 18;
 public static final int END_UNPACK               = 19;
 
 public static final int CREATION_MULTICAST       = 21;
+public static final int BEGIN_FUNC               = 22;
+public static final int END_FUNC                 = 23;
 
 public static final int USER_EVENT_PAIR          = 100;
 

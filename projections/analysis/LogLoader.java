@@ -205,6 +205,10 @@ public class LogLoader extends ProjDefs
 	    while(true) {
 		if (LE.Entry != -1) {
 		    switch (LE.TransactionType) {
+		    case BEGIN_FUNC:
+			break;
+		    case END_FUNC:
+			break;
 		    case BEGIN_PROCESSING:
 			if (isProcessing) {
 			    // bad. We add a "pretend" end event to accomodate
@@ -220,7 +224,9 @@ public class LogLoader extends ProjDefs
 					       LE.Entry, LE.Pe,
 					       LE.MsgLen, LE.recvTime, 
 					       LE.id,LE.EventID,
-					       LE.cpuBegin, LE.cpuEnd);
+					       LE.cpuBegin, LE.cpuEnd,
+					       LE.numPapiCounts,
+					       LE.papiCounts);
 			Timeline.addElement(TE);
 			break;
 		    case END_PROCESSING:
@@ -229,6 +235,10 @@ public class LogLoader extends ProjDefs
 			if (TE != null) {
 			    TE.EndTime = LE.Time - BeginTime;
 			    TE.cpuEnd = LE.cpuEnd;
+			    for (int i=0; i<LE.numPapiCounts; i++) {
+				TE.papiCounts[i] = LE.papiCounts[i] -
+				    TE.papiCounts[i];
+			    }
 			}
 			TE = null;
 			break;
@@ -427,8 +437,32 @@ public class LogLoader extends ProjDefs
 	LogEntry Temp = new LogEntry();   
 	  
 	Temp.TransactionType = log.nextInt();
-   
+
 	switch (Temp.TransactionType) {
+	case BEGIN_FUNC:
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time = prevTime;
+	    } else {
+		Temp.Time = log.nextLong();
+	    }
+	    Temp.FunctionID = log.nextInt();
+	    Temp.LineNo = log.nextInt();
+	    // parse the function log because it has a stupid string at
+	    // the end for filename. Even better hack, since it is the only
+	    // thing ... use whatever is at the end to be the filename.
+	    Temp.sourceFileName = log.readLine();
+	    break;
+	case END_FUNC:
+	    if (deltaEncoded) {
+		prevTime += log.nextLong();
+		Temp.Time = prevTime;
+	    } else {
+		Temp.Time = log.nextLong();
+	    }
+	    Temp.FunctionID = log.nextInt();
+	    log.nextLine();  // ignore rest of this line
+	    break;
 	case USER_EVENT:
 	    Temp.MsgType = log.nextInt();
 	    if (deltaEncoded) {
@@ -501,6 +535,13 @@ public class LogLoader extends ProjDefs
 	    if (Analysis.getVersion() >= 6.5) {
 		Temp.cpuBegin = log.nextLong();
 	    }
+	    if (Analysis.getVersion() >= 6.6) {
+		Temp.numPapiCounts = log.nextInt();
+		Temp.papiCounts = new long[Temp.numPapiCounts];
+		for (int i=0; i<Temp.numPapiCounts; i++) {
+		    Temp.papiCounts[i] = log.nextLong();
+		}
+	    }
 	    isProcessing = true;
 	    log.nextLine();  // ignore rest of this line
 	    break;
@@ -531,12 +572,15 @@ public class LogLoader extends ProjDefs
 	    } else {
 		Temp.MsgLen  = -1;
 	    }
-	    if (Analysis.getVersion() >= 5.0 && 
-		Temp.TransactionType == CREATION) {
-		Temp.sendTime = log.nextLong();
-	    }
 	    if (Analysis.getVersion() >= 6.5) {
 		Temp.cpuEnd = log.nextLong();
+	    }
+	    if (Analysis.getVersion() >= 6.6) {
+		Temp.numPapiCounts = log.nextInt();
+		Temp.papiCounts = new long[Temp.numPapiCounts];
+		for (int i=0; i<Temp.numPapiCounts; i++) {
+		    Temp.papiCounts[i] = log.nextLong();
+		}
 	    }
 	    isProcessing = false;
 	    log.nextLine();  // ignore rest of this line
@@ -569,8 +613,7 @@ public class LogLoader extends ProjDefs
 	    } else {
 		Temp.MsgLen  = -1;
 	    }
-	    if (Analysis.getVersion() >= 5.0 && 
-		Temp.TransactionType == CREATION) {
+	    if (Analysis.getVersion() >= 5.0) { 
 		Temp.sendTime = log.nextLong();
 	    }
 	    log.nextLine();  // ignore rest of this line

@@ -1,5 +1,6 @@
 package projections.gui;
 
+import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -7,16 +8,16 @@ import javax.swing.*;
 import projections.analysis.*;
 
 /**
- *  GeneralGraphWindow
+ *  TimeProfileWindow
  *  by Chee Wai Lee
  *
  *  Will replace The old GraphWindow class once a framework for displaying
  *  Legends are in place (and probably replace the name)
  */
-public class GeneralGraphWindow extends GenericGraphWindow
+public class TimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    private GeneralGraphWindow thisWindow;
+    private TimeProfileWindow thisWindow;
 
     private EntrySelectionDialog entryDialog;
 
@@ -24,6 +25,10 @@ public class GeneralGraphWindow extends GenericGraphWindow
     private JPanel controlPanel;
     private JButton epSelection;
     private JButton setRanges;
+
+    // **CW** this really should be a default button with ProjectionsWindow
+    private JButton saveColors;
+    private JButton loadColors;
 
     // data used for intervalgraphdialog
     int startInterval;
@@ -46,8 +51,8 @@ public class GeneralGraphWindow extends GenericGraphWindow
     private double[][] outputData;
     private Color[] outColors;
 
-    public GeneralGraphWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("General Graph Tools", mainWindow, myWindowID);
+    public TimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
+	super("Time Profile Tools", mainWindow, myWindowID);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here
@@ -80,10 +85,16 @@ public class GeneralGraphWindow extends GenericGraphWindow
 	epSelection.addActionListener(this);
 	setRanges = new JButton("Select New Range");
 	setRanges.addActionListener(this);
+	saveColors = new JButton("Save Entry Colors");
+	saveColors.addActionListener(this);
+	loadColors = new JButton("Load Entry Colors");
+	loadColors.addActionListener(this);
 	controlPanel = new JPanel();
 	controlPanel.setLayout(gbl);
 	Util.gblAdd(controlPanel, epSelection, gbc, 0,0, 1,1, 0,0);
 	Util.gblAdd(controlPanel, setRanges,   gbc, 1,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, saveColors,  gbc, 2,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, loadColors,  gbc, 3,0, 1,1, 0,0);
 	
 	JPanel graphPanel = getMainPanel();
 	Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
@@ -202,7 +213,8 @@ public class GeneralGraphWindow extends GenericGraphWindow
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Entry point execution time", "us");
-	    setDataSource("General Graph", outputData, outColors, thisWindow);
+	    setDataSource("Time Profile Graph", outputData, 
+			  outColors, thisWindow);
 	    super.refreshGraph();
 	}
     }
@@ -215,19 +227,22 @@ public class GeneralGraphWindow extends GenericGraphWindow
 	// find the ep corresponding to the yVal
 	int count = 0;
 	String epName = "";
+	String epClassName = "";
 	for (int ep=0; ep<numEPs; ep++) {
 	    if (stateArray[0][ep]) {
 		if (count++ == yVal) {
 		    epName = Analysis.getEntryName(ep);
+		    epClassName = Analysis.getEntryChareName(ep);
 		    break;
 		}
 	    }
 	}
 
-	String[] rString = new String[2];
+	String[] rString = new String[3];
 	
-	rString[0] = "Entry Method: " + epName;
-	rString[1] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
+	rString[0] = "Chare Name: " + epClassName;
+	rString[1] = "Entry Method: " + epName;
+	rString[2] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
 	return rString;
     }	
 
@@ -245,6 +260,22 @@ public class GeneralGraphWindow extends GenericGraphWindow
 		entryDialog.showDialog();
 	    } else if (b == setRanges) {
 		showDialog();
+	    } else if (b == saveColors) {
+		// save all entry point colors to disk
+		try {
+		    ColorSaver.save(colorArray[0]);
+		} catch (IOException exception) {
+		    System.err.println("Failed to save colors!!");
+		}
+	    } else if (b == loadColors) {
+		// load all entry point colors from disk
+		try {
+		    colorArray[0] = ColorSaver.loadColors();
+		    // silly inefficiency
+		    setOutputGraphData();
+		} catch (IOException exception) {
+		    System.err.println("Failed to load colors!!");
+		}
 	    }
 	}
     }

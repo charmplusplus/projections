@@ -400,7 +400,8 @@ public class TimelineData
 	    tlo[i] = new TimelineObject(this, btime, etime, cpubegin, cpuend,
 					entry, 
 					msgs, packs, pnum, pSrc, msglen, 
-					rtime, tid, EventID);
+					rtime, tid, EventID, 
+					tle.numPapiCounts, tle.papiCounts);
 	}
 	return tlo;
     }   
@@ -514,18 +515,18 @@ public class TimelineData
 
    }
 
-	 public void clearAllLines(){
-	 	if(tloArray != null){
-			for(int i=0;i<tloArray.length;i++){
-				if(tloArray[i] != null)
-					for(int j=0;j<tloArray[i].length;j++){
-						if(tloArray[i][j]!= null){
-							tloArray[i][j].clearCreationLine();
-						}
-					}
-			}
-		}
-		mesgCreateExecVector.clear();
+	 public void clearAllLines() {
+	     if (tloArray != null) {
+		 for (int i=0;i<tloArray.length;i++) {
+		     if (tloArray[i] != null)
+			 for (int j=0;j<tloArray[i].length;j++) {
+			     if (tloArray[i][j]!= null) {
+				 tloArray[i][j].clearCreationLine();
+			     }
+			 }
+		 }
+	     }
+	     mesgCreateExecVector.clear();
 	 }
 
 

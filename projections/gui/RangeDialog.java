@@ -93,7 +93,8 @@ public class RangeDialog extends JDialog
 	totalTime = Analysis.getTotalTime();
 	totalValidTime = totalTime;
 
-	history = new RangeHistory();
+	history = new RangeHistory(Analysis.getLogDirectory() +
+				   File.separator);
 	try {
 	    // NOTE: historyVector is not a new copy of the vector stored in
 	    // history!!

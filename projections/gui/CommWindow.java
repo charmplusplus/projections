@@ -31,24 +31,15 @@ public class CommWindow extends GenericGraphWindow
     private Checkbox	recivedMssgs;
     private Checkbox	sentExclusive;
 
-    /**
-     *  **CW** STUPID mix of old and new ... will need to standardize soon.
-     *  ... if I ever get my butt to it
-     */
-    public CommWindow(MainWindow mainWindow) {
-	this();
-    }
-	
-    public CommWindow(){
-	super("Projections Communications");
+    public CommWindow(MainWindow mainWindow, Integer myWindowID) {
+	super("Projections Communications", mainWindow, myWindowID);
 	setGraphSpecificData();
 	mainPanel = new JPanel();
     	getContentPane().add(mainPanel);
 	setLayout();
-	showDialog();
 	setPopupText("histArray");
 	pack();
-	setVisible(true);
+	showDialog();
     }
     
     public void repaint() {
@@ -167,24 +158,32 @@ public class CommWindow extends GenericGraphWindow
 	setYAxis("Frequency", "");
     }
     
-    protected void showDialog(){
+    public void showDialog() {
 	if(dialog == null)
 	    dialog = new RangeDialog(this, "select Range");
-	int dialogstatus = dialog.showDialog();
-	
-	if(dialogstatus == RangeDialog.DIALOG_OK){
-	    dialog.setAllData();
+	dialog.displayDialog();
+	if (!dialog.isCancelled()){
+	    getDialogData();
+	    setVisible(true);
+	    msgCount = new double[validPEs.size()][];
+	    byteCount = new double[validPEs.size()][];
+	    recivedMsgCount = new double[validPEs.size()][];
+	    exclusiveSent = new double[validPEs.size()][];
+	    getData();
+	    setDataSource("Histogram", histArray, this);
+	    super.refreshGraph();
 	}
-	
-	msgCount = new double[validPEs.size()][];
-	byteCount = new double[validPEs.size()][];
-	recivedMsgCount = new double[validPEs.size()][];
-	exclusiveSent = new double[validPEs.size()][];
-	getData();
-	setDataSource("Histogram", histArray, this);
-	super.refreshGraph();
     }
-	
+
+    public void showWindow() {
+	// do nothing for now
+    }
+
+    // reuse generic graph window's method
+    public void getDialogData() {
+	super.getDialogData();
+    }
+
     protected void getData(){
 	GenericLogReader glr;
 	LogEntryData logdata = new LogEntryData();

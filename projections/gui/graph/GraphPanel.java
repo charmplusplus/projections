@@ -6,7 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 public class GraphPanel extends JPanel
-    implements ActionListener
+    implements ActionListener, ItemListener
 {
     private JPanel mainPanel; 
     private JScrollPane displayPanel;
@@ -54,6 +54,11 @@ public class GraphPanel extends JPanel
 	cbBarGraph.setActionCommand("bar");
 	cbAreaGraph = new JRadioButton("Area Graph");
 	cbAreaGraph.setActionCommand("area");
+
+	cbStacked = new JCheckBox("Stacked");
+	// **CW** need to find a way to make this consistent with Graph.java
+	cbStacked.setSelected(true);
+
 	cbgGraphType.add(cbLineGraph);
 	cbgGraphType.add(cbBarGraph);
 	cbgGraphType.add(cbAreaGraph);
@@ -62,9 +67,12 @@ public class GraphPanel extends JPanel
 	cbBarGraph.addActionListener(this);
 	cbAreaGraph.addActionListener(this);
 
+	cbStacked.addItemListener(this);
+
 	Util.gblAdd(graphTypePanel, cbLineGraph, gbc, 0,0, 1,1, 1,0);
 	Util.gblAdd(graphTypePanel, cbBarGraph,  gbc, 1,0, 1,1, 1,0);
 	Util.gblAdd(graphTypePanel, cbAreaGraph, gbc, 2,0, 1,1, 1,0);
+	Util.gblAdd(graphTypePanel, cbStacked,   gbc, 3,0, 1,1, 1,0);
 
 	// making sure the states are consistent
 	if (displayCanvas.getGraphType() == Graph.LINE) {
@@ -195,11 +203,29 @@ public class GraphPanel extends JPanel
 	} else if (evt.getSource() instanceof JRadioButton) {
 	    if (evt.getActionCommand().equals("line")) {
 		displayCanvas.setGraphType(Graph.LINE);
+		cbStacked.setEnabled(true);
 	    } else if (evt.getActionCommand().equals("bar")) {
 		displayCanvas.setGraphType(Graph.BAR);
+		cbStacked.setEnabled(true);
 	    } else if (evt.getActionCommand().equals("area")) {
 		// area graphs are automatically stacked.
+		cbStacked.setSelected(true);
+		displayCanvas.setStackGraph(true);
 		displayCanvas.setGraphType(Graph.AREA);
+		// disable the stack checkbox so that the user cannot
+		// change this property for now.
+		cbStacked.setEnabled(false);
+	    }
+	}
+    }
+
+    public void itemStateChanged(ItemEvent evt) {
+	Object source = evt.getItemSelectable();
+	if (source == cbStacked) {
+	    if (evt.getStateChange() == ItemEvent.SELECTED) {
+		displayCanvas.setStackGraph(true);
+	    } else {
+		displayCanvas.setStackGraph(false);
 	    }
 	}
     }
@@ -223,7 +249,7 @@ public class GraphPanel extends JPanel
         YAxis ya=new YAxisAuto("Count","",ds);
         Graph g=new Graph();
         g.setGraphType(Graph.LINE);
-        g.setBarGraphType(Graph.STACKED);
+        g.setStackGraph(true);
         g.setData(ds,xa,ya);
         mainPanel = new GraphPanel(g);
 	JMenuBar mbar = new JMenuBar();

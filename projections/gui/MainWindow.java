@@ -13,24 +13,33 @@ import projections.gui.graph.*;
 public class MainWindow extends JFrame
     implements ActionListener
 {
-    private static final int NUM_WINDOWS = 7;
+    private static final int NUM_WINDOWS = 9;
 
     private static final int GRAPH_WIN = 0;
     private static final int MULTI_WIN = 1;
     private static final int PROFILE_WIN = 2;
     private static final int COMM_WIN = 3;
-    private static final int GRAPHING_WIN = 4;
     private static final int LOGVIEW_WIN = 5;
     private static final int HIST_WIN = 6;
+    private static final int TIMELINE_WIN = 7;
+    private static final int OVERVIEW_WIN = 8;
 
-    public static double 	CUR_VERSION = 4.0;
+    private static final int DEFAULT_NUM_RUNS = 1;
 
-    private Object childWindows[];
+    public static double CUR_VERSION = 4.0;
+
+    // Indexed by number of runs (currently one) and tools available
+    // This should eventually be configurable for multiple runs,
+    // multiple languages with multiple user-level visualization tools.
+    private JFrame childWindows[][];
+    // Indexed by tools available
+    private String toolDescriptions[];
+    // Indexed by tools available on both dimensions
+    private boolean crossToolMask[][];
 
     // should be tables of objects dependent indexed by runs in the future.
     private GraphWindow          graphWindow;
     private TimelineWindow       timelineWindow;
-    private AnimationWindow      animationWindow;
     private ProfileWindow        profileWindow;
     private CommWindow           commWindow;
     private HelpWindow           helpWindow;
@@ -38,21 +47,13 @@ public class MainWindow extends JFrame
     private HistogramWindow      histogramWindow;
     private StlWindow            stlWindow;
     private MultiRunWindow       multiRunWindow;
-    private IntervalWindow 	intervalWindow;
-    private EPCharWindow 	epCharWindow;
 
-    // GraphingWindow will eventually be renamed and will replace both
-    // GraphWindow and ProfileWindow.
-    private GraphingWindow       graphingWindow;
-
-    private EPAnalysis           epAnalysis;
-    
     // components associated with the main window
-    private MainTitlePanel       titlePanel;
-    private MainWindowPanel      mainPanel;
-    private MainMenuManager      menuManager;
+    private MainTitlePanel        titlePanel;
+    private BackGroundImagePanel  background;
+    private MainMenuManager       menuManager;
     private MainSummaryGraphPanel summaryGraphPanel;
-    private MainRunStatusPanel   runStatusPanel;
+    private MainRunStatusPanel    runStatusPanel;
 
     // these should become arrays for future tabbed multirun functionality.
     private SummaryDataSource    sumDataSource;
@@ -77,7 +78,8 @@ public class MainWindow extends JFrame
 
 	setBackground(Color.lightGray);
 
-	childWindows = new Object[NUM_WINDOWS];
+	childWindows = new JFrame[DEFAULT_NUM_RUNS][NUM_WINDOWS];
+	initializeTools();
 	
 	menuManager = new MainMenuManager(this);
 	createLayout();
@@ -87,6 +89,32 @@ public class MainWindow extends JFrame
     {
     }
     
+    /**
+     *  Set up the tool descriptions and cross tool masks for this
+     *  particular run. It is intended to be flexible enough in the
+     *  future for user-defined tools to be dynamically added to
+     *  projections (in the form of registration calls).
+     */
+    private void initializeTools() {
+
+	// give the default tools descriptive names
+	toolDescriptions = new String[NUM_WINDOWS];
+	toolDescriptions[GRAPH_WIN] = "Graph";
+	toolDescriptions[MULTI_WIN] = "Multirun";
+	toolDescriptions[PROFILE_WIN] = "Usage Profile";
+	toolDescriptions[COMM_WIN] = "Communication";
+	toolDescriptions[LOGVIEW_WIN] = "View Logs";
+	toolDescriptions[HIST_WIN] = "Histograms";
+	toolDescriptions[TIMELINE_WIN] = "Timeline";
+	toolDescriptions[OVERVIEW_WIN] = "Overview";
+
+	// cross-tool masks allow tools to decide if their parameter sets
+	// are compatible and hence may "cross over" from one tool to the
+	// next with the same parameters used.
+	crossToolMask = new boolean[NUM_WINDOWS][NUM_WINDOWS];
+	
+    }
+
     private void createLayout()
     {
 	try {
@@ -94,28 +122,28 @@ public class MainWindow extends JFrame
 	    bgimage = Toolkit.getDefaultToolkit().getImage(imageURL);
 	    // mainPanel is used to draw the wall paper and serves as the
 	    // MainWindow's contentPane.
-	    mainPanel = new MainWindowPanel(bgimage);
+	    background = new BackGroundImagePanel(bgimage, true);
 	} catch (Exception E) {
 	    System.out.println("Error loading background image.  Continuing.");
-	    mainPanel = new MainWindowPanel(null);
+	    background = new BackGroundImagePanel(null);
 	}
 	
-	setContentPane(mainPanel);
+	setContentPane(background);
 
 	GridBagLayout      gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
 	gbc.fill = GridBagConstraints.BOTH;
-	mainPanel.setLayout(gbl);
+	background.setLayout(gbl);
 	
 	titlePanel  = new MainTitlePanel(this);
 	runStatusPanel = new MainRunStatusPanel();
 	summaryGraphPanel = new MainSummaryGraphPanel(this, runStatusPanel);
 
-	Util.gblAdd(mainPanel, titlePanel,        
+	Util.gblAdd(background, titlePanel,        
 		    gbc, 0,0, 1,1, 1,0, 0,0,0,0);
-	Util.gblAdd(mainPanel, runStatusPanel,
+	Util.gblAdd(background, runStatusPanel,
 		    gbc, 0,1, 1,1, 1,0, 0,20,0,20);
-	Util.gblAdd(mainPanel, summaryGraphPanel, 
+	Util.gblAdd(background, summaryGraphPanel, 
 		    gbc, 0,2, 1,1, 1,1, 0,20,20,20);
 
 	pack();
@@ -128,28 +156,19 @@ public class MainWindow extends JFrame
 	} else if (item.equals("Histograms")) {
 	    showChildWindow("HistogramWindow", HIST_WIN);
 	} else if (item.equals("Timelines")) {
-	    showTimelineWindow();
-	} else if (item.equals("Animations")) {
-	    showAnimationWindow();
+	    showChildWindow("TimelineWindow", TIMELINE_WIN);
 	} else if (item.equals("Usage Profile")) {
 	    showChildWindow("ProfileWindow", PROFILE_WIN);
 	} else if (item.equals("Communication Histogram")) {
-		showChildWindow("CommWindow", COMM_WIN);
+	    showChildWindow("CommWindow", COMM_WIN);
 	} else if (item.equals("View Log Files")) {
 	    showChildWindow("LogFileViewerWindow", LOGVIEW_WIN);
 	} else if (item.equals("Overview")) {
-	    showStlWindow();
+	    showChildWindow("StlWindow", OVERVIEW_WIN);
 	} else if (item.equals("Multirun Analysis")) {
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
 	} else if (item.equals("Performance Counters")) {
 	    showCounterWindow();
-	} else if (item.equals("General Graph")) {
-	    showChildWindow("GraphingWindow", GRAPHING_WIN);
-	} else if (item.equals("Interval Graph")) {
-	    // ?
-	} else if (item.equals("Entry Point Characteristics Graph")) {
-	    // ?
-	} else if (item.equals("Generate EP Data")) {
 	}
     }
 
@@ -183,8 +202,8 @@ public class MainWindow extends JFrame
     // repaints all windows to reflect global drawing changes.
     private void repaintAllWindows() {
 	for (int i=0; i<NUM_WINDOWS;i++) {
-	    if (childWindows[i] != null) {
-		((Frame)childWindows[i]).repaint();
+	    if (childWindows[0][i] != null) {
+		((Frame)childWindows[0][i]).repaint();
 	    }
 	}
 	if (timelineWindow != null) {
@@ -203,44 +222,28 @@ public class MainWindow extends JFrame
     public void showChildWindow(String childClass, int windowIndex)
     {
 	try {
-	    if(childWindows[windowIndex] == null) {
+	    if (childWindows[0][windowIndex] == null) {
 		// get the name of the class within the current package 
 		// and create an instance of that class
 		String className = 
 		    getClass().getPackage().getName() + "." + childClass;
 		Class cls  = Class.forName(className);
 		Constructor ctr = 
-		    cls.getConstructor(new Class[]{this.getClass()});
-		childWindows[windowIndex] = 
-		    ctr.newInstance(new Object[] {this});
+		    cls.getConstructor(new Class[]{this.getClass(), Class.forName("java.lang.Integer")});
+		childWindows[0][windowIndex] = 
+		    (ProjectionsWindow)(ctr.newInstance(new Object[] {this,
+		    new Integer(windowIndex)}));
+	    } else {
+		if (childWindows[0][windowIndex] instanceof ProjectionsWindow) {
+		    ((ProjectionsWindow)childWindows[0][windowIndex]).showDialog();
+		} else {
+		    childWindows[0][windowIndex].show();
+		}
 	    }
 	} catch(Exception e) {
 	    e.printStackTrace();
 	} 
     }
-
-    public void showTimelineWindow()
-    {
-	if (timelineWindow == null) {
-	    timelineWindow = new TimelineWindow(this);
-	    timelineWindow.setSize(640,480);
-	}
-    }   
-    
-    public void showAnimationWindow()
-    {
-	new Thread(new Runnable() {public void run() {
-	    animationWindow = new AnimationWindow();
-	    animationWindow.setVisible(true);
-	}}).start();
-    }
-      
-    public void showStlWindow()
-    {
-	new Thread(new Runnable() {public void run() {
-	    stlWindow = new StlWindow();
-	}}).start();
-    }                              
     
     public void showCounterWindow()
     {
@@ -260,12 +263,6 @@ public class MainWindow extends JFrame
 	}
     }
 
-    public void activateEPAnalysis()
-    {
-	if (epAnalysis == null)
-	    epAnalysis = new EPAnalysis(this);
-    }
-
     public void showOpenFileDialog()
     {
 	// create a file chooser with current directory set to "."
@@ -283,7 +280,8 @@ public class MainWindow extends JFrame
     
     private void openFile(String filename) {
 	try {
-	    Analysis.initAnalysis(filename);
+	    Analysis.initAnalysis(filename, this);
+	    setTitle("Projections - " + filename);
 	    Analysis.loadSummaryData();
 	    if (Analysis.hasSummaryData()) {
 		double[] data = Analysis.getSummaryAverageData(); 
@@ -332,18 +330,9 @@ public class MainWindow extends JFrame
     }
 
     /* called by the childWindows to remove references to themselves */
-    public void closeChildWindow(Object childWindow)
+    public void closeChildWindow(int childID)
     {
-	if(childWindow.equals(timelineWindow))
-	    timelineWindow = null;
-	else if(childWindow.equals(profileWindow))
-	    profileWindow = null;
-	else if(childWindow.equals(logFileViewerWindow))
-	    logFileViewerWindow = null;
-	else if(childWindow.equals(graphWindow))
-	    graphWindow = null;
-	else if(childWindow.equals(multiRunWindow))
-	    multiRunWindow = null;
+	childWindows[0][childID] = null;
     }
     
     public void shutdown() {
@@ -367,11 +356,6 @@ public class MainWindow extends JFrame
 	setTitle("Projections");
     }
 
-    public void CloseEPAnalysis()
-    {
-	epAnalysis = null;
-    }
-    
     public Color getGraphColor(int e)
     {
 	if(graphWindow != null)

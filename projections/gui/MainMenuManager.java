@@ -57,18 +57,14 @@ public class MainMenuManager extends MenuManager
 		    false,  // Graphs
 		    false,  // Timelines
 		    false,  // Usage Profile
-			false,  // Communication Histogram
-		    false,  // Animations
+		    false,  // Communication Histogram
 		    false,  // View Log Files
 		    false,  // Histograms
 		    false,  // Overview
-		    true,  // Multirun Analysis
+		    true,   // Multirun Analysis
 		    false,  // separator
 		    true,   // Performance Counters
-		    false,  // General Graph
 		    false,  // Interval Graph
-		    false,  // Generate EP Data
-		    false,  // Entry Point Characteristics Graph
 		});
 	    break;
 	case OPENED_FILES :
@@ -119,17 +115,13 @@ public class MainMenuManager extends MenuManager
 		"Timelines",
 		"Usage Profile",
 		"Communication Histogram",
-		"Animations",
 		"View Log Files",
 		"Histograms",
 		"Overview",
 		"Multirun Analysis",
 		null,
 		"Performance Counters",
-		"General Graph",
 		"Interval Graph",
-		"Generate EP Data",
-		"Entry Point Characteristics Graph"
 	    });
 	menubar.add(toolMenu);
 
@@ -160,16 +152,12 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("Histograms") ||
 		       arg.equals("Graphs") ||
 		       arg.equals("Timelines") ||
-		       arg.equals("Animations") ||
 		       arg.equals("Usage Profile") ||
-			   arg.equals("Communication Histogram") ||
+		       arg.equals("Communication Histogram") ||
 		       arg.equals("View Log Files") ||
 		       arg.equals("Overview") ||
 		       arg.equals("Performance Counters") ||
-		       arg.equals("General Graph") ||
-		       arg.equals("Interval Graph") ||
-		       arg.equals("Entry Point Characteristics Graph") ||
-		       arg.equals("Generate EP Data")) {
+		       arg.equals("Interval Graph")) {
 		parent.menuToolSelected(arg);
 	    }
 	}

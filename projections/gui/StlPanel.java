@@ -15,7 +15,6 @@ Orion Sky Lawlor, olawlor@acm.org, 2/12/2001
 import java.awt.*;
 import java.awt.image.*;
 
-import projections.misc.ProgressDialog;
 import projections.analysis.*;
 
 public class StlPanel extends ScalePanel.Child
@@ -41,6 +40,8 @@ public class StlPanel extends ScalePanel.Child
     private OrderedIntList validPEs;
     private long totalTime;//Length of run, in microseconds
     private long startTime,endTime;
+
+    private ColorMap colorMap;
 
     // default mode
     private int mode = StlWindow.MODE_UTILIZATION;
@@ -85,7 +86,7 @@ public class StlPanel extends ScalePanel.Child
 		    if (max > 0) {
 			return "Processor "+pe+": Usage = "+utiliz+"%"+
 			    " at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
-			" EP = " + Analysis.getEntryName(maxEP);
+			    " EP = " + Analysis.getEntryName(maxEP);
 		    } else {
 			return "Processor "+pe+": Usage = "+utiliz+"%"+
 			    " at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
@@ -93,11 +94,12 @@ public class StlPanel extends ScalePanel.Child
 		}
 	    }
 	} catch (Exception e) { 
+	    // do nothing
 	}
-	return "";		
+	return "";
     }
 
-    //Draw yourself into (0,0,w,h) in the given graphics,
+    // Draw yourself into (0,0,w,h) in the given graphics,
     // scaling your output coordinates via the given axes.
     public void paint(RepaintRequest req) {
 	double proc2pix=req.y(1)-req.y(0);//Pixels per processor
@@ -168,8 +170,9 @@ public class StlPanel extends ScalePanel.Child
 	req.g.fillRect(0,endy,req.w,req.h);//Bottom
     }
     
-    /*Render this row of data into the given offscreen buffer.
-     * We want dest[y*w+x]=src[slope*x+off] for all suitable x and y.
+    /** 
+     *  Render this row of data into the given offscreen buffer.
+     *  We want dest[y*w+x]=src[slope*x+off] for all suitable x and y.
      */
     private void renderRow(int[] src,double off,double slope,
 			   int[] dest,int w,
@@ -186,13 +189,10 @@ public class StlPanel extends ScalePanel.Child
 	    if(srcIndex < 0){
 		srcIndex = 0;
 	    } else {	
-		if(srcIndex >= src.length){
-		    // System.out.println("Index greater than data points \n");
+		if (srcIndex >= src.length) {
 		    iCur+=iSlope;
-		}else{
-		    //System.out.println("Number of elements in each row " + src.length);
+		} else {
 		    int val=src[srcIndex];
-				//	System.out.println("val = " + val);
 		    iCur+=iSlope;
 		    int loc=yLo*w+x;
 		    for (int y=yLo;y<yHi;y++,loc+=w)
@@ -201,11 +201,11 @@ public class StlPanel extends ScalePanel.Child
 		}
 	    }	
 	}
-	//System.out.println("Max srcIndex = " + srcIndex);
     }
 
-    private ColorMap colorMap;
-    public void setColorMap(ColorMap cm) {colorMap=cm;}
+    public void setColorMap(ColorMap cm) {
+	colorMap=cm;
+    }
 
     /**
      * Convert processor usage (0..100) to color values.
@@ -268,9 +268,7 @@ public class StlPanel extends ScalePanel.Child
 	if (mode == StlWindow.MODE_UTILIZATION) {
 	    applyColorMap(utilData);
 	} else if (mode == StlWindow.MODE_EP) {
-	    if (data == null) {
-		setData(validPEs, startTime, endTime);
-	    }
+	    setData(validPEs, startTime, endTime);
 	    applyColorMap(data);
 	}
 	repaint();
@@ -287,7 +285,7 @@ public class StlPanel extends ScalePanel.Child
 	// int desiredIntervals = 7000;
 	int desiredIntervals;
 	if (totalTime < 7000) {
-	    desiredIntervals = (int )(totalTime -1.0);
+	    desiredIntervals = (int )(totalTime - 1.0);
 	} else {
 	    desiredIntervals = 7000;
 	}
@@ -299,7 +297,6 @@ public class StlPanel extends ScalePanel.Child
 	}
 
 	intervalSize = (int )trialintervalSize;
-	int totalIntervals = (int )Analysis.getTotalTime()/intervalSize;
 	int startInterval = (int )startTime/intervalSize;
 	int endInterval = (int )endTime/intervalSize;
 

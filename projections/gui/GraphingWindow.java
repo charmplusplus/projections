@@ -43,7 +43,7 @@ public class GraphingWindow
     }
 
     protected void setGraphSpecificData() {
-	setBarGraphType(Graph.STACKED);
+	setStackGraph(false);
 	setXAxis("Intervals", "");
 	setDataSource("Time spent by EP", data);
 	dataSource.setColors(Analysis.getColorMap());

@@ -51,13 +51,14 @@ public class GraphData
     // save the original processor list
     protected OrderedIntList    origProcList;
     
-    public GraphData(int numIs, long intsize, 
+    public GraphData(long intsize, 
 		     int NintervalStart, int NintervalEnd,
 		     OrderedIntList procList)
     {
 	// unsure of this hack
 	intervalStart = NintervalStart;
 	intervalEnd = NintervalEnd;
+	int numIs = intervalEnd - intervalStart + 1;
 	
 	yscale  = 1;
 	wscale  = 1;
@@ -153,8 +154,9 @@ public class GraphData
     }   
 
     public void initData(int numIs, long intsize) {
+
 	scale       = (float)1.0;
-	 
+
 	// Initialize interval info
 	interval      = new BItem();
 	interval.num  = numIs;

@@ -4,6 +4,9 @@ import java.lang.*;
 import java.io.*;
 import java.util.*;
 
+import java.awt.event.*;
+import javax.swing.*;
+
 import projections.gui.*;
 import projections.misc.*;
 
@@ -49,7 +52,20 @@ public class SumAnalyzer extends ProjDefs
 	// **CW** Perform a first pass of the reading to avoid having to
 	// approximate the maximum number of intervals over all
 	// processors.
+	ProgressMonitor progressBar;
+	progressBar =
+	    new ProgressMonitor(Analysis.guiRoot, "Determining max intervals",
+				"", 0, nPe);
 	for (int p=0; p<nPe; p++) {
+            if (!progressBar.isCanceled()) {
+                progressBar.setNote(p + " of " + nPe);
+                progressBar.setProgress(p);
+            } else {
+                System.err.println("Fatal error - Projections cannot" +
+                                   " function without proper number of" +
+				   " summary intervals!");
+                System.exit(-1);
+            }
 	    FileReader file=new FileReader(Analysis.getSumName(p));
 	    BufferedReader b = new BufferedReader(file);
 	    tokenizer = new StreamTokenizer(b);
@@ -73,8 +89,19 @@ public class SumAnalyzer extends ProjDefs
 	    tokenizer = null;
 	    file.close();
 	}
+	progressBar.close();
 
+	// second pass
+	progressBar = 
+	    new ProgressMonitor(Analysis.guiRoot, "Reading summary data",
+				"", 0, nPe);
 	for (int p = 0; p <nPe; p++) {
+            if (!progressBar.isCanceled()) {
+                progressBar.setNote(p + " of " + nPe);
+                progressBar.setProgress(p);
+            } else {
+		return;
+            }
 	    FileReader file=new FileReader(Analysis.getSumName(p));
 	    BufferedReader b = new BufferedReader(file);
 	    tokenizer=new StreamTokenizer(b);
@@ -276,6 +303,7 @@ public class SumAnalyzer extends ProjDefs
 	    file.close();
 	    // System.out.println("Finished reading in data for processor #"+p+"/"+nPe);
 	}
+	progressBar.close();
 	Analysis.setTotalTime(TotalTime);
     }
 

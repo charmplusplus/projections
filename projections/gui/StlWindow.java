@@ -13,7 +13,6 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import projections.misc.ProgressDialog;
 
 public class StlWindow extends ProjectionsWindow
     implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
@@ -37,17 +36,16 @@ public class StlWindow extends ProjectionsWindow
     private JRadioButton utilizationMode;
     private JRadioButton epMode;
 
-    private long intervalSize;
+    private ColorMap utilColorMap;
 
-    public StlWindow()
+    // parameter variables
+    public OrderedIntList validPEs;
+    public long startTime;
+    public long endTime;
+
+    public StlWindow(MainWindow mainWindow, Integer myWindowID)
     {
-	addWindowListener(new WindowAdapter() {                    
-		public void windowClosing(WindowEvent e)
-		{
-		    dispose();
-		}
-	    });
-	  
+	super(mainWindow, myWindowID);
 	setBackground(Color.black);
 	setForeground(Color.lightGray);
 	setTitle("Projections-- Overview");
@@ -56,13 +54,7 @@ public class StlWindow extends ProjectionsWindow
 	createLayout();
 	pack();
 	showDialog();
-	if (okorcancelled) {
-	    setVisible(true);
-	} else {
-	    //close();
-	    dispose();
-	}
-    }     
+    }
     
     private void createLayout()
     {
@@ -113,41 +105,29 @@ public class StlWindow extends ProjectionsWindow
 	gbc.fill = GridBagConstraints.BOTH;
 	Util.gblAdd(windowPane, displayPanel, gbc, 0,0, 1,1, 1,1, 1,1,1,1);
 	Util.gblAdd(windowPane, modePanel,    gbc, 0,1, 1,1, 1,0, 1,1,1,1);
-	//	  windowPane.add(scalePanel,gbc);
 	scalePanel.setStatusDisplay(this);
-	setStlPanelData(1);
+
+	// Establishing the Utilization-only color map. 
+	// This never changes from the get-go, so there's no reason (like 
+	// in the previous code) to keep resetting it.
+	utilColorMap = new ColorMap();
+	utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0); //Blue to red
+	utilColorMap.addBreak(70,255, 0,0, 100,255, 255,255);//red to white
+	// Overflow-- green. Should not happen for utilization.
+	utilColorMap.addBreak(101,0, 255,0, 255,0, 255,0); 
+	stl.setColorMap(utilColorMap);
     }  
 
-    private void setStlPanelData(int n){
-
-	if(scalePanel == null)
-	    System.out.println("How  can it be ");
-	ColorMap cm=new ColorMap();
-	if (mode == MODE_UTILIZATION) {
-	    cm.addBreak( 0,  0,  0, 55,    70,255,  0,  0); //Blue to red
-	    cm.addBreak(70,255,  0,  0,   100,255,255,255); //red to white
-	    // Overflow-- green. Should not happen for utilization.
-	    cm.addBreak(101,0,255,0, 255,0,255,0); 
-	} else if (mode == MODE_EP) {
-	    // color to be broken up by EP.
-	    // Do not do anything here because the colors will be determined
-	    // by the significant EPs instead of the value.
-	}
-	stl.setColorMap(cm);
-	  
-	//if(n != 1)
-	//	stl.setData(7000);
-	// The problem of the window been large than the number of processors
-	// rises from this point 
+    private void setStlPanelData(){
 	double horSize, verSize;
-	if(validPEs == null) {
+	if (validPEs == null) {
 	    horSize=Analysis.getTotalTime();
 	    verSize=Analysis.getNumProcessors();
 	} else {	
 	    horSize = endTime-startTime;
 	    if(horSize <= 0)
 		horSize = Analysis.getTotalTime();
-	    verSize = (double )validPEs.size();
+	    verSize = (double)validPEs.size();
 	}	 
 	scalePanel.setScales(horSize,verSize);
 	
@@ -179,59 +159,41 @@ public class StlWindow extends ProjectionsWindow
 	setMenuBar(mbar);
     } 
 
-    /* Show the RangeDialog to set processor numbers and interval times */
-    void showDialog()
+    public void showDialog()
     {
 	try {
-	    if(dialog == null) {
+	    if (dialog == null) {
 		dialog = 
-		    new IntervalRangeDialog((ProjectionsWindow) this,
-					    "Select Range",false,false);
-	    } else {
-		dialog.dispose();
-		dialog 
-		    = new IntervalRangeDialog((ProjectionsWindow) this,
-					      "Select Range",false,false);
+		    new RangeDialog((ProjectionsWindow) this,
+				    "Select Range");
 	    }
-	    //dialog.displayDialog();
-	    
-	    int dialogStatus = dialog.showDialog();
-	    if (dialogStatus == RangeDialog.DIALOG_OK) {
-		// Range has been changed, so get new data while refreshing
-		//	setAllData();
-		
-		//validPEs.printList();
-		setStlPanelData(0);
+	    dialog.displayDialog();
+	    if (!dialog.isCancelled()) {
+		getDialogData();
+		setStlPanelData();
 		stl.setData(validPEs,startTime,endTime); 
-		//System.out.println("Button pressed \n");	
-		okorcancelled = true;
-	    }
-	    if(dialogStatus == RangeDialog.DIALOG_CANCELLED){
-		//dialog.setVisible(false);
-		//System.out.println("Someone cancelled \n");
-		okorcancelled = false;
+		setVisible(true);
+		repaint();
 	    }
 	} catch (Exception e) { 
 	    e.printStackTrace();
 	}
     }
    
+    public void showWindow() {
+	// do nothing for now
+    }
+
     public void actionPerformed(ActionEvent evt)
     {
 	if (evt.getSource() instanceof MenuItem) {
 	    MenuItem mi = (MenuItem)evt.getSource();
 	    String arg = mi.getLabel();
 	    if(arg.equals("Close"))  {
-	 	dispose();
+		close();
 	    }
 	    if (arg.equals("Set Range")) {
-		//	System.out.println(arg);
 		showDialog();
-		/*	
-		   setStlPanelData(0);
-		   stl.setData(validPEs,startTime,endTime); 
-		   repaint();
-		*/
 	    }
 	}
     }  
@@ -246,7 +208,6 @@ public class StlWindow extends ProjectionsWindow
 	    }
 	    // handle the effects of a mode change
 	    stl.setMode(mode);
-	    // set the data for the display.
 	}
     }
     
@@ -273,9 +234,9 @@ public class StlWindow extends ProjectionsWindow
    	status.setText(msg);
     }
    
-    public void setAllData() {
-	//super.setAllData();     Projections Window doesn't have setAllData
-	IntervalRangeDialog intervalDialog = (IntervalRangeDialog)dialog;
-	intervalSize = intervalDialog.getIntervalSize();
+    public void getDialogData() {
+	validPEs = dialog.getValidProcessors();
+	startTime = dialog.getStartTime();
+	endTime = dialog.getEndTime();
     }
 }

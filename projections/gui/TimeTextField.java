@@ -34,11 +34,11 @@ public class TimeTextField extends TextField
    }   
     
     public void setValue(long time) {
-	setText(String.valueOf(time));
+	setText(U.t(time));
     }
 
    public void setText(String text) {
-		super.setText(U.t(U.fromT(text)));
+       super.setText(U.t(U.fromT(text)));
    }   
    public void textValueChanged(TextEvent evt) {}   
 }

@@ -14,6 +14,8 @@ import java.lang.*;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.*;
+
 import projections.misc.*;
 import projections.gui.*;
 
@@ -266,10 +268,11 @@ public class LogReader
 	    numProcessors = processorList.size();
 	}
 
-	ProgressDialog bar=new ProgressDialog("Reading log files...");
-	double allocEffort=0.5;//Number of logs the allocations are worth
-	double totalEffort=allocEffort+numProcessors;
-	bar.progress(0,"allocating");
+	ProgressMonitor progressBar = 
+	    new ProgressMonitor(Analysis.guiRoot, "Reading log files",
+				"", 0, numProcessors);
+	progressBar.setNote("Allocating Global Memory");
+	progressBar.setProgress(0);
 	sysUsgData = new int[3][numProcessors][];
 	if (byEntryPoint) {
 	    userEntries = new 
@@ -282,10 +285,20 @@ public class LogReader
  	curPe = processorList.nextElement();
 	for (;curPe!=-1; curPe=processorList.nextElement())
 	    try {
+		progressBar.setProgress(seq);
+		progressBar.setNote("Allocating Memory for PE " + curPe);
 		// gzheng: allocate sysUsgData only when needed.
                 sysUsgData[0][curPe] = new int [numIntervals+1];
                 sysUsgData[1][curPe] = new int [numIntervals+1];
                 sysUsgData[2][curPe] = new int [numIntervals+1];
+		progressBar.setNote("Reading data for PE " + curPe);
+		if (progressBar.isCanceled()) {
+		    // clear all data and return
+		    userEntries = null;
+		    categorized = null;
+		    sysUsgData = null;
+		    return;
+		}
 		seq ++;
 		processing = 0;
 		interval = 0;
@@ -327,11 +340,6 @@ public class LogReader
 		}
 
 		int nLines=2;
-		if (!bar.progress(allocEffort+curPe, totalEffort,
-				  "Loading " + seq + " of " + nPe)) {
-		    //User cancelled load
-		    break;
-		}
 
 		boolean isProcessing = false;
 		try { 
@@ -489,7 +497,7 @@ public class LogReader
 		System.out.println("Exception reading log file #"+curPe); 
 		return;
 	    }
-	bar.done();
+	progressBar.close();
     }
 
     //Convert system usage and idle time from us to percent of an interval

@@ -24,11 +24,10 @@ import javax.swing.*;
  *
  */
 
-public class MultiRunWindow extends JFrame 
+public class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
     // Gui components
-    private MainWindow mainWindow;
     private MultiRunControlPanel controlPanel;
     private MultiRunTables tablesPanel;
     private AreaGraphPanel graphPanel;
@@ -49,27 +48,32 @@ public class MultiRunWindow extends JFrame
 
     private int selectedDataType;
 
-    public MultiRunWindow(MainWindow mainWindow) 
+    public MultiRunWindow(MainWindow parentWindow, Integer myWindowID) 
     {
-	this.mainWindow = mainWindow;
-
-	addWindowListener(new WindowAdapter()
-	    {
-		public void windowClosing(WindowEvent e)
-		{
-		    close();
-		}
-	    });
+	super(parentWindow, myWindowID);
 	setBackground(Color.lightGray);
+    }
 
+    /**
+     *  The MultiRunWindow is one of the special tools uses its own dialog.
+     */
+    public void showDialog() {
 	showFileDialog();
+    }
+
+    public void showWindow() {
+	showFileDialog();
+    }
+
+    public void getDialogData() {
+	// do nothing since it will not use dialog.
     }
 
     public void close()
     {
 	setVisible(false);
 	dispose();
-	mainWindow.closeChildWindow(this);
+	parentWindow.closeChildWindow(myWindowID);
     }
 
     public void showFileDialog() {

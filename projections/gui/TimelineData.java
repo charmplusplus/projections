@@ -3,9 +3,9 @@ package projections.gui;
 import java.util.Vector;
 import java.io.*;
 import java.awt.*;
+import javax.swing.*;
 
 import projections.analysis.*;
-import projections.misc.*;
 
 public class TimelineData
 {
@@ -31,9 +31,10 @@ public class TimelineData
    OrderedIntList oldplist;
    String         processorString;
    String         oldpstring;
-// boolean for testing if entries are to be colored by Object ID
-   
-  public boolean colorbyObjectId;
+
+    // boolean for testing if entries are to be colored by Object ID
+    // **CW** 12/12/2003 Obsolete?
+    public boolean colorbyObjectId;
    
 
   public double         pixelIncrement;
@@ -250,16 +251,22 @@ public class TimelineData
 	  int pnum;
 	  processorList.reset();
 	  int numPEs = processorList.size();
-	  ProgressDialog bar = new ProgressDialog("Reading timeline data");
+	  ProgressMonitor progressBar = 
+	      new ProgressMonitor(Analysis.guiRoot, "Reading timeline data",
+				  "", 0, numPEs);
+	  progressBar.setProgress(0);
 	  for(int p=0; p<numPEs; p++)
 	  {
-	      if (!bar.progress(p+1, numPEs, (p+1) + " of " + numPEs)) {
+	      if (!progressBar.isCanceled()) {
+		  progressBar.setNote(p + " of " + numPEs);
+		  progressBar.setProgress(p);
+	      } else {
 		  break;
 	      }
-		 pnum = processorList.nextElement();
-		 if(tloArray[p] == null) { tloArray[p] = getData(pnum, p); }
+	      pnum = processorList.nextElement();
+	      if(tloArray[p] == null) { tloArray[p] = getData(pnum, p); }
 	  }
-	  bar.done();
+	  progressBar.close();
 	  for(int e=0; e<Analysis.getNumUserEntries(); e++)
 		 entries[e] = 0;
 	  

@@ -7,17 +7,22 @@ import javax.swing.*;
  *  GenericGraphWindow
  *  written by Sindhura Bandhakavi
  *  8/2/2002
+ *  modified by Chee Wai Lee
+ *  12/15/2003 - to use the (hopefully) cleaner windows framework.
  *
  *  This class should be inherited by all projections tools that present
  *  some kind of main window and show a dialog box requiring the user to
  *  input a range of processors and a time interval.
+ *
+ *  NOTE that it is *still* an abstract class despite implementing a whole
+ *  lot more functionality.
  *
  */
 
 public abstract class GenericGraphWindow 
     extends ProjectionsWindow 
 {
-    static final Color BACKGROUND = Color.white;
+    static final Color BACKGROUND = Analysis.background;
 
     // inheritable GUI objects
     protected GraphPanel graphPanel;
@@ -36,9 +41,15 @@ public abstract class GenericGraphWindow
     protected JMenuBar menuBar  = new JMenuBar();
     protected JMenu    fileMenu = new JMenu("File");
     
+    // basic parameter variables consistent with RangeDialog
+    public OrderedIntList validPEs;
+    public long startTime;
+    public long endTime;
+
     // constructor 
-    public GenericGraphWindow(String title){
-	super();
+    public GenericGraphWindow(String title, 
+			      MainWindow mainWindow, Integer myWindowID) {
+	super(mainWindow, myWindowID);
 	setTitle(title);
 	setBackground(BACKGROUND);
 	menuBar.add(fileMenu);
@@ -56,7 +67,7 @@ public abstract class GenericGraphWindow
 				  null,
 				  this);
 	setJMenuBar(menuBar);
-   }
+    }
     
     public String[] getPopup(int xVal, int yVal){
 	//System.out.println("GenericGraphWindow.getPopup()");
@@ -76,14 +87,21 @@ public abstract class GenericGraphWindow
     }
 
     // set Graph Specific data
-    protected void setBarGraphType(int type) {
+    // **CW** 12/01/2003 - a more appropriate name
+    protected void setStackGraph(boolean isSet) {
 	if (graphCanvas != null) {
-	    graphCanvas.setBarGraphType(type);
+	    graphCanvas.setStackGraph(isSet);
 	} else {
 	    // issue warning.
 	    System.err.println("Warning: The graph canvas has not yet been " +
 			       "initialized! Ignoring request.");
 	}
+    }
+
+    protected void getDialogData() {
+	validPEs = dialog.getValidProcessors();
+	startTime = dialog.getStartTime();
+	endTime = dialog.getEndTime();
     }
 
     protected void setXAxis(String title,String units){

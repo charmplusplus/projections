@@ -9,147 +9,174 @@ import java.util.*;
 
 import java.text.*;
 
-public class TimelineWindow extends Frame
+public class TimelineWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener, ItemListener
 { 
-   MainWindow            mainWindow;
-
-   private NoUpdatePanel         mainPanel, displayPanel;
-   private TimelineLabelCanvas   labelCanvas;
-   private TimelineAxisCanvas    axisTopCanvas, axisBotCanvas;
-   public TimelineDisplayCanvas displayCanvas;
-   private TimelineRangeDialog   rangeDialog;
-   private TimelineColorWindow   colorWindow;
-   
-   private Scrollbar HSB, VSB;
-   
-   private TimelineData data;
-   
-   private FontMetrics fm;
-   
-  // basic zoom controls  
-   private Button bSelectRange, bColors, bDecrease, bIncrease, bReset;
-   private Button bZoomSelected, bLoadSelected;
-   // jump to graphs
-   private Button bJumpAnimation, bJumpProfile, bJumpGraph, bJumpHistogram,
-   		  bJumpComm, bJumpStl;
-   private TextField highlightTime, selectionBeginTime, selectionEndTime, selectionDiff;
-   private DecimalFormat format;
-   private FloatTextField scaleField;
-   private Checkbox cbPacks, cbMsgs, cbIdle, cbUser;
-//   public Checkbox colorbyObjectId;	
-   
-   private int maxLabelLen;
-   private long oldEndTime;
-   
-   private TimelineMessageWindow messageWindow;
-
-  private UserEventWindow userEventWindow;
-  // process MouseEvents here
-   private AxisMouseController mouseController;
-  private class AxisMouseController {
-    public MouseMotionAdapter mouseMotionAdapter = null;
-    public MouseListener mouseListener = null;
-    private TimelineDisplayCanvas canvas_;
-    private TimelineAxisCanvas timeline_;
-    private TimelineWindow window_;
-
-    public boolean selected_ = false;
-    AxisMouseController(
-      TimelineWindow window, TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) 
-    {
-      window_ = window;
-      canvas_ = canvas;
-      timeline_ = timeline;
-      mouseMotionAdapter = new MouseMotionAdapter() {
-	public void mouseDragged(MouseEvent e) {
-	  Point p = timeline_.screenToCanvas(e.getPoint());
-	  canvas_.rubberBand.stretch(p);
-	  window_.setHighlightTime(timeline_.canvasToTime(p.x));
-	  canvas_.repaint();
-	}
-	public void mouseMoved(MouseEvent e) {
-	  Point p = timeline_.screenToCanvas(e.getPoint());
-	  canvas_.rubberBand.highlight(p);
-	  window_.setHighlightTime(timeline_.canvasToTime(p.x));
-	  canvas_.repaint();
-	}
-      };
-      mouseListener = new MouseListener() {
-	public void mouseClicked(MouseEvent e) { }
-	public void mousePressed(MouseEvent e) { 
-	  canvas_.rubberBand.clearHighlight();
-	  window_.unsetHighlightTime();
-	  canvas_.rubberBand.anchor(timeline_.screenToCanvas(e.getPoint()));
-	  canvas_.repaint();
-	}
-	public void mouseReleased(MouseEvent e) { 
-	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
-	  // canvas_.rubberBand.end(timeline_.screenToCanvas(e.getPoint()));
-	  canvas_.repaint();
-	  selected_ = true;
-	  Rectangle rect = canvas_.rubberBand.bounds();
-	  double startTime = timeline_.canvasToTime(rect.x);
-	  double endTime = timeline_.canvasToTime(rect.x+rect.width);
-	  window_.setSelectedTime(startTime, endTime);
-	}
-	public void mouseEntered(MouseEvent e) { }
-	public void mouseExited(MouseEvent e) { 
-	  canvas_.rubberBand.clearHighlight();
-	  unsetHighlightTime();
-	  canvas_.repaint();
-	}
-      };
-    }
-  };
-
-  class NoUpdatePanel extends Panel
-  {
-      public void update(Graphics g) { paint(g); }
-  }      
+    private NoUpdatePanel         mainPanel, displayPanel;
+    private TimelineLabelCanvas   labelCanvas;
+    private TimelineAxisCanvas    axisTopCanvas, axisBotCanvas;
+    public TimelineDisplayCanvas displayCanvas;
+    private TimelineRangeDialog   rangeDialog;
+    private TimelineColorWindow   colorWindow;
     
-    public TimelineWindow(MainWindow mainWindow)
+    private Scrollbar HSB, VSB;
+   
+    private TimelineData data;
+   
+    private FontMetrics fm;
+   
+    // basic zoom controls  
+    private Button bSelectRange, bColors, bDecrease, bIncrease, bReset;
+    private Button bZoomSelected, bLoadSelected;
+    // jump to graphs
+    private Button bJumpProfile, 
+	bJumpGraph, bJumpHistogram, bJumpComm, bJumpStl;
+    private TextField highlightTime, selectionBeginTime, 
+	selectionEndTime, selectionDiff;
+    private DecimalFormat format;
+    private FloatTextField scaleField;
+    private Checkbox cbPacks, cbMsgs, cbIdle, cbUser;
+   
+    private int maxLabelLen;
+    private long oldEndTime;
+   
+    private TimelineMessageWindow messageWindow;
+
+    private UserEventWindow userEventWindow;
+ 
+    // public access parameter variables
+    public OrderedIntList validPEs;
+    public long startTime;
+    public long endTime;
+    
+    // process MouseEvents here
+    private AxisMouseController mouseController;
+    private class AxisMouseController {
+	public MouseMotionAdapter mouseMotionAdapter = null;
+	public MouseListener mouseListener = null;
+	private TimelineDisplayCanvas canvas_;
+	private TimelineAxisCanvas timeline_;
+	private TimelineWindow window_;
+	
+	public boolean selected_ = false;
+	AxisMouseController(TimelineWindow window, 
+			    TimelineDisplayCanvas canvas, 
+			    TimelineAxisCanvas timeline) 
+	{
+	    window_ = window;
+	    canvas_ = canvas;
+	    timeline_ = timeline;
+	    mouseMotionAdapter = new MouseMotionAdapter() {
+		    public void mouseDragged(MouseEvent e) {
+			Point p = timeline_.screenToCanvas(e.getPoint());
+			canvas_.rubberBand.stretch(p);
+			window_.setHighlightTime(timeline_.canvasToTime(p.x));
+			canvas_.repaint();
+		    }
+		    public void mouseMoved(MouseEvent e) {
+			Point p = timeline_.screenToCanvas(e.getPoint());
+			canvas_.rubberBand.highlight(p);
+			window_.setHighlightTime(timeline_.canvasToTime(p.x));
+			canvas_.repaint();
+		    }
+		};
+	    mouseListener = new MouseListener() {
+		    public void mouseClicked(MouseEvent e) { }
+		    public void mousePressed(MouseEvent e) { 
+			canvas_.rubberBand.clearHighlight();
+			window_.unsetHighlightTime();
+			canvas_.rubberBand.anchor(timeline_.screenToCanvas(e.getPoint()));
+			canvas_.repaint();
+		    }
+		    public void mouseReleased(MouseEvent e) { 
+			canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
+			canvas_.repaint();
+			selected_ = true;
+			Rectangle rect = canvas_.rubberBand.bounds();
+			double startTime = timeline_.canvasToTime(rect.x);
+			double endTime = 
+			    timeline_.canvasToTime(rect.x+rect.width);
+			window_.setSelectedTime(startTime, endTime);
+		    }
+		    public void mouseEntered(MouseEvent e) { }
+		    public void mouseExited(MouseEvent e) { 
+			canvas_.rubberBand.clearHighlight();
+			unsetHighlightTime();
+			canvas_.repaint();
+		    }
+		};
+	}
+    };
+    
+    class NoUpdatePanel extends Panel
     {
-	this.mainWindow = mainWindow;
-	  
-	  format = new DecimalFormat();
-	  format.setGroupingUsed(true);
-	  format.setMinimumFractionDigits(0);
-	  format.setMaximumFractionDigits(0);
-	  addWindowListener(new WindowAdapter()
-	  {                    
-		 public void windowClosing(WindowEvent e)
-		 {
-			Close();
-		 }
-	  });
-	  
-	  addComponentListener(new ComponentAdapter()
-	  {
-		 public void componentResized(ComponentEvent e)
-		 {
-			if(displayCanvas != null && axisTopCanvas != null && axisBotCanvas != null)
+	public void update(Graphics g) { paint(g); }
+    }      
+    
+    public TimelineWindow(MainWindow parentWindow, Integer myWindowID)
+    {
+	super(parentWindow, myWindowID);
+	
+	format = new DecimalFormat();
+	format.setGroupingUsed(true);
+	format.setMinimumFractionDigits(0);
+	format.setMaximumFractionDigits(0);
+
+	addComponentListener(new ComponentAdapter()
+	    {
+		public void componentResized(ComponentEvent e)
+		{
+		    if(displayCanvas != null && axisTopCanvas != null && axisBotCanvas != null)
 			{
-			   setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			   setAllSizes(false);
-			   displayCanvas.makeNewImage();
-			   axisTopCanvas.makeNewImage();
-			   axisBotCanvas.makeNewImage();
-			   setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			    setAllSizes(false);
+			    displayCanvas.makeNewImage();
+			    axisTopCanvas.makeNewImage();
+			    axisBotCanvas.makeNewImage();
+			    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			}   
-		 }
-	  });
-	  
-	  setBackground(Color.lightGray);
-	  
-	  data = new TimelineData(this);
-	  
-	  setTitle("Projections Timeline");
-	  CreateMenus();
-	  CreateLayout();
-	  pack();
-	  ShowRangeDialog();
-   }   
+		}
+	    });
+	
+	setBackground(Color.lightGray);
+	
+	data = new TimelineData(this);
+	
+	setTitle("Projections Timeline");
+	CreateMenus();
+	CreateLayout();
+	pack();
+	showDialog();
+    }   
+    
+    public void showDialog() {
+	if (dialog == null) {
+	    dialog = new RangeDialog(this,"Select Timeline Range");
+        } 
+	dialog.displayDialog();
+	if (!dialog.isCancelled()) {
+	    getDialogData();
+	    if (dialog.isModified()) {
+		data.beginTime = startTime;
+		data.endTime = endTime;
+		data.processorList = validPEs;
+		data.processorString = validPEs.listToString();
+		data.numPs = validPEs.size();
+		procRangeDialog(true);
+	    }
+	    setVisible(true);
+	}
+    }
+    
+    public void showWindow() {
+	// do nothing
+    }
+
+    public void getDialogData() {
+	validPEs = dialog.getValidProcessors();
+	startTime = dialog.getStartTime();
+	endTime = dialog.getEndTime();
+    }
 
   private double calcLeftTime(
     double leftTime, double rightTime, double oldScale, double newScale) 
@@ -230,509 +257,485 @@ public class TimelineWindow extends Frame
       procRangeDialog(true);
     }
   }
-
-   public void jumpToGraph(String b) {
-     Rectangle rect = displayCanvas.rubberBand.bounds();
-     double jStart = axisBotCanvas.canvasToTime(rect.x);
-     double jEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
-      	       
-     Analysis.setJTimeAvailable(true);
-     if (rect.width == 0) {
-	Analysis.setJTime((long)(0), Analysis.getTotalTime());
-     } else Analysis.setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
-	
-     if (b == "Animation") {
-     	AnimationWindow animationWindow = new AnimationWindow();
-     } else if (b == "Profile") {
-     	ProfileWindow profileWindow = new ProfileWindow(new MainWindow());
-     } else if (b == "Graph") {
-     	GraphWindow graphWindow = new GraphWindow(new MainWindow());
-     } else if (b == "Histogram") {
-     	HistogramWindow histogramWindow = new HistogramWindow(new MainWindow());
-     } else if (b == "Comm") {
-     	CommWindow commWindow = new CommWindow();
-     } else if (b == "Stl") {
-     	StlWindow stlWindow = new StlWindow();
-     }
-		
-     	     
-	
     
+    public void jumpToGraph(String b) {
+	Rectangle rect = displayCanvas.rubberBand.bounds();
+	double jStart = axisBotCanvas.canvasToTime(rect.x);
+	double jEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
+	
+	Analysis.setJTimeAvailable(true);
+	if (rect.width == 0) {
+	    Analysis.setJTime((long)(0), Analysis.getTotalTime());
+	} else {
+	    Analysis.setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
+	}
      
-     
-   }
+	// **CW** DELIBERATE BUG (adding 0 to window open), just to make
+	// it compile for now.
+	if (b == "Profile") {
+	    ProfileWindow profileWindow = 
+		new ProfileWindow(parentWindow, new Integer(0));
+	} else if (b == "Graph") {
+	    GraphWindow graphWindow = 
+		new GraphWindow(parentWindow, new Integer(0));
+	} else if (b == "Histogram") {
+	    HistogramWindow histogramWindow = 
+		new HistogramWindow(parentWindow, new Integer(0));
+	} else if (b == "Comm") {
+	    CommWindow commWindow = 
+		new CommWindow(parentWindow, new Integer(0));
+	} else if (b == "Stl") {
+	    StlWindow stlWindow = 
+		new StlWindow(parentWindow, new Integer(0));
+	}
+    }
    
-   public void actionPerformed(ActionEvent evt)
-   {
-     if (evt.getSource() instanceof Button) {
-       Button b = (Button)evt.getSource();
-       if (b == bSelectRange)        { ShowRangeDialog(); }
-       else if (b == bColors)        { ShowColorWindow(); }
-       else if (b == bZoomSelected)  { zoomSelected(); }
-       else if (b == bLoadSelected) { loadSelected(); }
-       else if(b == bJumpAnimation) { jumpToGraph("Animation"); }
-       else if(b == bJumpProfile)   { jumpToGraph("Profile"); }
-       else if(b == bJumpGraph)     { jumpToGraph("Graph"); }
-       else if(b == bJumpHistogram) { jumpToGraph("Histogram"); }
-       else if(b == bJumpComm)      { jumpToGraph("Comm"); }
-       else if(b == bJumpStl)       { jumpToGraph("Stl"); }
-       else {
-	 int leftVal = HSB.getValue();
-	 int rightVal = leftVal + data.vpw;
-	 double leftTime = axisBotCanvas.canvasToTime(leftVal);
-	 double rightTime = axisBotCanvas.canvasToTime(rightVal);
-	 double oldScale = data.scale;
-
-	 if (b == bDecrease) {
-	   data.scale = (float)((int)(data.scale * 4)-1)/4;
-	   if (data.scale < 1.0) { data.scale = (float)1.0; }
-	 }
-	 else if (b == bIncrease) {
-	   data.scale = (float)((int)(data.scale * 4)+1)/4;
-	 }
-	 else if (b == bReset) { data.scale = (float)1.0; }
-	 scaleField.setText("" + data.scale);
-	 double newLeftTime = 
-	   calcLeftTime(leftTime, rightTime, oldScale, data.scale);
-	 
-	 setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	 // setTLSizes();
-	 // setScales();
-	 // setTLBounds();
-	 setAllSizes(false);
-	 displayCanvas.makeNewImage();
-	 axisTopCanvas.makeNewImage();
-	 axisBotCanvas.makeNewImage();
-	 if (data.scale != 1.0) {
-	   HSB.setValue(axisBotCanvas.calcHSBOffset(newLeftTime));
-	   displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
-	 }
-	 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-       }   
-     }
-     else if(evt.getSource() instanceof MenuItem) {
-       String arg = ((MenuItem)evt.getSource()).getLabel();
-       if(arg.equals("Close")) Close();
-       else if(arg.equals("Modify Ranges")) ShowRangeDialog();
-       else if(arg.equals("Print Timeline")) PrintTimeline();   
-       /* Useless. To be removed.
-       else if(arg.equals("Index")) mainWindow.ShowHelpWindow();
-       else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
-       */
-       else if(arg.equals("Change Colors")) { ShowColorWindow(); }
-       // **** sharon **
-       else if(arg.equals("Save Colors")) {
-	   saveColorFile();
-	   	   
-	   /*
-	   try {
-	       Util.saveColors(data.entryColor, "Timeline Graph");
-	   } catch (IOException e) {
-	       System.err.println("Attempt to write to color.map failed");
-	   }
-	   */
-       }
-       else if(arg.equals("Restore Colors")) {
-	   openColorFile();
-	   
-	   /*
-	   try {
-	       Util.restoreColors(data.entryColor, "Timeline Graph");
-	   } catch (IOException e) {
-	       System.err.println("Attempt to read from color.map failed");
-	   } 
-	   */
-	   data.displayCanvas.updateColors();
-	   
-       }
-       else if (arg.equals("Default Colors")) {
-	   for (int i=0; i<data.entryColor.length; i++) {
-	       data.entryColor[i] = Analysis.getEntryColor(i);
-	   }
-	   data.displayCanvas.updateColors();
-       }
-     }
-     else {
-       int leftVal = HSB.getValue();
-       int rightVal = leftVal + data.vpw;
-       double leftTime = axisBotCanvas.canvasToTime(leftVal);
-       double rightTime = axisBotCanvas.canvasToTime(rightVal);
-       double oldScale = data.scale;
-       data.scale = scaleField.getValue();
-       if (data.scale < 1.0) { data.scale = (float)1.0; }
-       double newLeftTime = 
-	 calcLeftTime(leftTime, rightTime, oldScale, data.scale);
-	 
-       setCursor(new Cursor(Cursor.WAIT_CURSOR));
-       setAllSizes(true);
-       displayCanvas.makeNewImage();
-       axisTopCanvas.makeNewImage();
-       axisBotCanvas.makeNewImage();
-       if (data.scale != 1.0) {
-	 HSB.setValue(axisBotCanvas.calcHSBOffset(newLeftTime));
-	 displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
-       }
-       setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-     }                  
-   }   
-   
-   //  **sharon**
-   public void openColorFile()
-   {
+    public void actionPerformed(ActionEvent evt)
+    {
+	if (evt.getSource() instanceof Button) {
+	    Button b = (Button)evt.getSource();
+	    if (b == bSelectRange)        { showDialog(); }
+	    else if (b == bColors)        { ShowColorWindow(); }
+	    else if (b == bZoomSelected)  { zoomSelected(); }
+	    else if (b == bLoadSelected) { loadSelected(); }
+	    else if(b == bJumpProfile)   { jumpToGraph("Profile"); }
+	    else if(b == bJumpGraph)     { jumpToGraph("Graph"); }
+	    else if(b == bJumpHistogram) { jumpToGraph("Histogram"); }
+	    else if(b == bJumpComm)      { jumpToGraph("Comm"); }
+	    else if(b == bJumpStl)       { jumpToGraph("Stl"); }
+	    else {
+		int leftVal = HSB.getValue();
+		int rightVal = leftVal + data.vpw;
+		double leftTime = axisBotCanvas.canvasToTime(leftVal);
+		double rightTime = axisBotCanvas.canvasToTime(rightVal);
+		double oldScale = data.scale;
+		
+		if (b == bDecrease) {
+		    data.scale = (float)((int)(data.scale * 4)-1)/4;
+		    if (data.scale < 1.0) { data.scale = (float)1.0; }
+		}
+		else if (b == bIncrease) {
+		    data.scale = (float)((int)(data.scale * 4)+1)/4;
+		}
+		else if (b == bReset) { data.scale = (float)1.0; }
+		scaleField.setText("" + data.scale);
+		double newLeftTime = 
+		    calcLeftTime(leftTime, rightTime, oldScale, data.scale);
+		
+		setCursor(new Cursor(Cursor.WAIT_CURSOR));
+		// setTLSizes();
+		// setScales();
+		// setTLBounds();
+		setAllSizes(false);
+		displayCanvas.makeNewImage();
+		axisTopCanvas.makeNewImage();
+		axisBotCanvas.makeNewImage();
+		if (data.scale != 1.0) {
+		    HSB.setValue(axisBotCanvas.calcHSBOffset(newLeftTime));
+		    displayCanvas.setLocation(-HSB.getValue(),-VSB.getValue());
+		}
+		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	    }   
+	} else if(evt.getSource() instanceof MenuItem) {
+	    String arg = ((MenuItem)evt.getSource()).getLabel();
+	    if (arg.equals("Close")) close();
+	    else if(arg.equals("Modify Ranges")) showDialog();
+	    else if(arg.equals("Print Timeline")) PrintTimeline();   
+	    else if(arg.equals("Change Colors")) { ShowColorWindow(); }
+	    // **** sharon **
+	    else if(arg.equals("Save Colors")) {
+		saveColorFile();
+		/*
+		  try {
+		  Util.saveColors(data.entryColor, "Timeline Graph");
+		  } catch (IOException e) {
+		  System.err.println("Attempt to write to color.map failed");
+		  }
+		*/
+	    }
+	    else if(arg.equals("Restore Colors")) {
+		openColorFile();
+		/*
+		  try {
+		  Util.restoreColors(data.entryColor, "Timeline Graph");
+		  } catch (IOException e) {
+		  System.err.println("Attempt to read from color.map failed");
+		  } 
+		*/
+		data.displayCanvas.updateColors();
+		
+	    } else if (arg.equals("Default Colors")) {
+		for (int i=0; i<data.entryColor.length; i++) {
+		    data.entryColor[i] = Analysis.getEntryColor(i);
+		}
+		data.displayCanvas.updateColors();
+	    }
+	} else {
+	    int leftVal = HSB.getValue();
+	    int rightVal = leftVal + data.vpw;
+	    double leftTime = axisBotCanvas.canvasToTime(leftVal);
+	    double rightTime = axisBotCanvas.canvasToTime(rightVal);
+	    double oldScale = data.scale;
+	    data.scale = scaleField.getValue();
+	    if (data.scale < 1.0) { data.scale = (float)1.0; }
+	    double newLeftTime = 
+		calcLeftTime(leftTime, rightTime, oldScale, data.scale);
+	    
+	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	    setAllSizes(true);
+	    displayCanvas.makeNewImage();
+	    axisTopCanvas.makeNewImage();
+	    axisBotCanvas.makeNewImage();
+	    if (data.scale != 1.0) {
+		HSB.setValue(axisBotCanvas.calcHSBOffset(newLeftTime));
+		displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+	    }
+	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+	}                  
+    }   
+    
+    //  **sharon**
+    public void openColorFile()
+    {
    	JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
 	d.setFileFilter(new ColorFileFilter());
 	int returnVal = d.showOpenDialog(this);
 	if(returnVal == JFileChooser.APPROVE_OPTION) {
-		try {
-	       		Util.restoreColors(data.entryColor, "Timeline Graph",
-				d.getSelectedFile().getAbsolutePath());
-	        } catch (IOException e) {
-	       		System.err.println("Attempt to read from color.map failed");
-	   	} 
+	    try {
+		Util.restoreColors(data.entryColor, "Timeline Graph",
+				   d.getSelectedFile().getAbsolutePath());
+	    } catch (IOException e) {
+		System.err.println("Attempt to read from color.map failed");
+	    } 
 	}
-   }
+    }
+    
    
-   
-  //  **sharon** change to .map files
-  public void saveColorFile()
-  {
+    //  **sharon** change to .map files
+    public void saveColorFile()
+    {
   	JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
 	d.setFileFilter(new ColorFileFilter());
 	int returnVal = d.showSaveDialog(this);
 	if(returnVal == JFileChooser.APPROVE_OPTION) {
-		try {
-	        	Util.saveColors(data.entryColor, "Timeline Graph",
-					d.getSelectedFile().getAbsolutePath());
-	   	} catch (IOException e) {
-	       		System.err.println("Attempt to write to color.map failed");
-	   	}
+	    try {
+		Util.saveColors(data.entryColor, "Timeline Graph",
+				d.getSelectedFile().getAbsolutePath());
+	    } catch (IOException e) {
+		System.err.println("Attempt to write to color.map failed");
+	    }
 	}
-  }
-   
-   public void adjustmentValueChanged(AdjustmentEvent evt)
-   {
-	  Scrollbar sb = (Scrollbar)evt.getSource();
-	  displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
-			
-	  if(sb == HSB)
-	  {
-		 axisTopCanvas.repaint();
-		 axisBotCanvas.repaint();
-	  }
-	  else if(sb == VSB)
-	  {
-		 labelCanvas.repaint();
-	  }  
-   }   
-   private void Close()
-   {
-	  if(colorWindow != null)
-	  {
-		 colorWindow.dispose();
-		 colorWindow = null;
-	  }   
-	  setVisible(false);
-	  mainWindow.closeChildWindow(this);
-	  dispose();
-   }   
-   public void CloseColorWindow()
-   {
-	  colorWindow = null;
-   }   
-   public void CloseRangeDialog()
-   {
-	  rangeDialog.dispose();
-	  rangeDialog = null;
-
-	  if(data.beginTime != data.oldBT || data.endTime != data.oldET ||
-	     (data.processorList != null && 
-	      !data.processorList.equals(data.oldplist)))
-	  {
-	    procRangeDialog(true);
-	  }
-	  setVisible(true);
-	  
-   }
-	
-
-
-  public void procRangeDialog(boolean keeplines) {
-		//keeplines describes if the lines from message creation
-		// to execution are to be retained or not.
-    setCursor(new Cursor(Cursor.WAIT_CURSOR));
-    data.tlh = data.tluh * data.numPs;
-    VSB.setMaximum(data.tlh);
-    displayCanvas.removeAll();
-    data.createTLOArray();
-    for(int p=0; p<data.numPs; p++)
-      for(int i=0; i<data.tloArray[p].length; i++)
-	displayCanvas.add(data.tloArray[p][i]);    
-    if (data.userEventsArray != null)
-      for(int p=0; p<data.numPs; p++)
-	if (data.userEventsArray[p] != null)
-	  for(int i=0; i<data.userEventsArray[p].length; i++)
-	    displayCanvas.add(data.userEventsArray[p][i]);    
-    
-    setAllSizes(keeplines);
-    labelCanvas.makeNewImage();
-    axisTopCanvas.makeNewImage();
-    axisBotCanvas.makeNewImage();
-    displayCanvas.makeNewImage();
-    cbUser.setLabel("View User Events ("+data.getNumUserEvents()+")");
-    if (userEventWindow == null) {
-      userEventWindow = new UserEventWindow(cbUser);
     }
-    userEventWindow.setData(data);
-    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-  }   
+    
+    public void adjustmentValueChanged(AdjustmentEvent evt)
+    {
+	Scrollbar sb = (Scrollbar)evt.getSource();
+	displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+	
+	if (sb == HSB) {
+	    axisTopCanvas.repaint();
+	    axisBotCanvas.repaint();
+	} else if (sb == VSB) {
+	    labelCanvas.repaint();
+	}  
+    }   
+    
+    public void close()
+    {
+	if (colorWindow != null) {
+	    colorWindow.dispose();
+	    colorWindow = null;
+	}   
+	setVisible(false);
+	dispose();
+	parentWindow.closeChildWindow(myWindowID);
+    }   
+
+    public void CloseColorWindow()
+    {
+	colorWindow = null;
+    }   
+
+    /* **CW** Should no longer be required */
+    public void CloseRangeDialog()
+    {
+	rangeDialog.dispose();
+	rangeDialog = null;
+	
+	if(data.beginTime != data.oldBT || data.endTime != data.oldET ||
+	   (data.processorList != null && 
+	    !data.processorList.equals(data.oldplist))) {
+	    procRangeDialog(true);
+	}
+	setVisible(true);
+    }
+
+    public void procRangeDialog(boolean keeplines) {
+	//keeplines describes if the lines from message creation
+	// to execution are to be retained or not.
+	setCursor(new Cursor(Cursor.WAIT_CURSOR));
+	data.tlh = data.tluh * data.numPs;
+	VSB.setMaximum(data.tlh);
+	displayCanvas.removeAll();
+	data.createTLOArray();
+	for(int p=0; p<data.numPs; p++)
+	    for(int i=0; i<data.tloArray[p].length; i++)
+		displayCanvas.add(data.tloArray[p][i]);    
+	if (data.userEventsArray != null)
+	    for(int p=0; p<data.numPs; p++)
+		if (data.userEventsArray[p] != null)
+		    for(int i=0; i<data.userEventsArray[p].length; i++)
+			displayCanvas.add(data.userEventsArray[p][i]);    
+	
+	setAllSizes(keeplines);
+	labelCanvas.makeNewImage();
+	axisTopCanvas.makeNewImage();
+	axisBotCanvas.makeNewImage();
+	displayCanvas.makeNewImage();
+	cbUser.setLabel("View User Events ("+data.getNumUserEvents()+")");
+	if (userEventWindow == null) {
+	    userEventWindow = new UserEventWindow(cbUser);
+	}
+	userEventWindow.setData(data);
+	setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+    }   
   
-   private void CreateLayout()
-   {
-	  //// MAIN PANEL
-	  
-	  mainPanel    = new NoUpdatePanel();
-	  displayPanel = new NoUpdatePanel();
-	  
-	  labelCanvas   = new TimelineLabelCanvas(data);
-	  axisTopCanvas = new TimelineAxisCanvas(data, "top");
-	  axisBotCanvas = new TimelineAxisCanvas(data, "bot");
-	  displayCanvas = new TimelineDisplayCanvas(data); 
-	  data.displayCanvas = displayCanvas;   
-	  
-	  mouseController = new AxisMouseController(this, displayCanvas, axisBotCanvas);
+    private void CreateLayout()
+    {
+	//// MAIN PANEL
+	
+	mainPanel    = new NoUpdatePanel();
+	displayPanel = new NoUpdatePanel();
+	
+	labelCanvas   = new TimelineLabelCanvas(data);
+	axisTopCanvas = new TimelineAxisCanvas(data, "top");
+	axisBotCanvas = new TimelineAxisCanvas(data, "bot");
+	displayCanvas = new TimelineDisplayCanvas(data); 
+	data.displayCanvas = displayCanvas;   
+	
+	mouseController = 
+	    new AxisMouseController(this, displayCanvas, axisBotCanvas);
 
-	  axisTopCanvas.addMouseListener(mouseController.mouseListener);
-	  axisTopCanvas.addMouseMotionListener(
-	    mouseController.mouseMotionAdapter);
+	axisTopCanvas.addMouseListener(mouseController.mouseListener);
+	axisTopCanvas.addMouseMotionListener(mouseController.mouseMotionAdapter);
+	axisBotCanvas.addMouseListener(mouseController.mouseListener);
+	axisBotCanvas.addMouseMotionListener(mouseController.mouseMotionAdapter);
+	HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
+	VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
 	  
-	  axisBotCanvas.addMouseListener(mouseController.mouseListener);
-	  axisBotCanvas.addMouseMotionListener(
-	    mouseController.mouseMotionAdapter);
+	mainPanel.setLayout(null);
+	mainPanel.setBackground(Analysis.background);
+	mainPanel.add(labelCanvas);
+	mainPanel.add(axisTopCanvas);
+	mainPanel.add(axisBotCanvas);
+	mainPanel.add(displayPanel);
+	mainPanel.add(HSB);
+	mainPanel.add(VSB);
+	
+	displayPanel.setLayout(null);
+	displayPanel.add(displayCanvas);
+	
+	HSB.setBackground(Color.lightGray);
+	HSB.addAdjustmentListener(this);
+	
+	VSB.setBackground(Color.lightGray);
+	VSB.addAdjustmentListener(this);
+	
+	//// CHECKBOX PANEL
+	cbPacks = new Checkbox("Display Pack Times", data.showPacks);
+	cbMsgs  = new Checkbox("Display Message Sends", data.showMsgs);
+	cbIdle  = new Checkbox("Display Idle Time", data.showIdle);
+	cbUser  = new Checkbox("Display User Event Window", false);
+	//colorbyObjectId = new Checkbox("Color Entry methods by Object ID",false);
 	  
-	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
-	  VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
+	cbPacks.addItemListener(this);
+	cbMsgs.addItemListener(this);
+	cbIdle.addItemListener(this);
+	cbUser.addItemListener(this);
+	
+	GridBagLayout gbl = new GridBagLayout();
+	GridBagConstraints gbc = new GridBagConstraints();
+	
+	gbc.fill = GridBagConstraints.NONE;
+	gbc.anchor = GridBagConstraints.CENTER;
+	
+	Panel cbPanel = new Panel();
+	cbPanel.setLayout(gbl);
+	  
+	Util.gblAdd(cbPanel, cbPacks, gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(cbPanel, cbMsgs,  gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(cbPanel, cbIdle,  gbc, 2,0, 1,1, 1,1);
+	Util.gblAdd(cbPanel, cbUser,  gbc, 3,0, 1,1, 1,1);
+	//Util.gblAdd(cbPanel, colorbyObjectId, gbc, 4,0,1,1, 1,1); 	  
+	  
+	//// BUTTON PANEL
+	bSelectRange = new Button("Select Ranges");
+	bColors      = new Button("Change Colors");
+	bDecrease    = new Button("<<");
+	bIncrease    = new Button(">>");
+	bReset       = new Button("Reset");
+	
+	bSelectRange.addActionListener(this);
+	bColors.addActionListener(this);
+	bDecrease.addActionListener(this);
+	bIncrease.addActionListener(this);
+	bReset.addActionListener(this);
+	
+	Label lScale = new Label("SCALE: ", Label.CENTER);
+	scaleField   = new FloatTextField(data.scale, 5);
+	scaleField.addActionListener(this);
+	  
+	Panel buttonPanel = new Panel();
+	buttonPanel.setLayout(gbl);
+	
+	gbc.fill = GridBagConstraints.BOTH;
+	  
+	Util.gblAdd(buttonPanel, bSelectRange, gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bColors,      gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bDecrease,    gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, lScale,       gbc, 4,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, scaleField,   gbc, 5,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bIncrease,    gbc, 6,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bReset,       gbc, 7,0, 1,1, 1,1);
+	
+	// ZOOM PANEL
+	
+	bZoomSelected = new Button("Zoom Selected");
+	bLoadSelected = new Button("Load Selected");
+	
+	bZoomSelected.addActionListener(this);
+	bLoadSelected.addActionListener(this);
+	
+	highlightTime = new TextField("");
+	selectionBeginTime = new TextField("");
+	selectionEndTime = new TextField("");
+	selectionDiff = new TextField("");
+	highlightTime.setEditable(false);
+	selectionBeginTime.setEditable(false);
+	selectionEndTime.setEditable(false);
+	selectionDiff.setEditable(false);
+	
+	Panel zoomPanel = new Panel();
+	zoomPanel.setLayout(gbl);
+	gbc.fill = GridBagConstraints.BOTH;
+	
+	Util.gblAdd(zoomPanel, new Label(" "), gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, bZoomSelected,  gbc, 0,2, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, bLoadSelected,  gbc, 1,2, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, highlightTime,  gbc, 2,2, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, selectionBeginTime, gbc, 3,2, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, selectionEndTime,   gbc, 4,2, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, selectionDiff,   gbc, 5,2, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, new Label("Highlight Time", Label.CENTER), 
+		    gbc, 2,1, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, new Label("Slection Begin Time", Label.CENTER),
+		    gbc, 3,1, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, new Label("Selection End Time", Label.CENTER), 
+		    gbc, 4,1, 1,1, 1,1);
+	Util.gblAdd(zoomPanel, new Label("Selection Length", Label.CENTER), 
+		    gbc, 5,1, 1,1, 1,1);
+	
+	// JUMP TO GRAPH	
+	bJumpProfile = new Button("Usage Profile");
+	bJumpGraph = new Button("Graph");
+	bJumpHistogram = new Button("Histogram");
+	bJumpComm = new Button("Communication");
+	bJumpStl = new Button("Overview");
+	
+	bJumpProfile.addActionListener(this);
+	bJumpGraph.addActionListener(this);
+	bJumpHistogram.addActionListener(this);
+	bJumpComm.addActionListener(this);
+	bJumpStl.addActionListener(this);
+	
+	Panel jumpPanel = new Panel();
+	jumpPanel.setLayout(gbl);
+	gbc.fill = GridBagConstraints.BOTH;
+	
+	Util.gblAdd(jumpPanel, new Label(" "),  gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(jumpPanel, new Label("Jump to graph: ", Label.LEFT),   gbc, 1,1, 1,1, 1,1);
+	Util.gblAdd(jumpPanel, bJumpProfile,    gbc, 3,1, 1,1, 1,1);
+	Util.gblAdd(jumpPanel, bJumpGraph, 	  gbc, 4,1, 1,1, 1,1);
+	Util.gblAdd(jumpPanel, bJumpHistogram,  gbc, 5,1, 1,1, 1,1);
+	Util.gblAdd(jumpPanel, bJumpComm,       gbc, 6,1, 1,1, 1,1);
+	Util.gblAdd(jumpPanel, bJumpStl,        gbc, 7,1, 1,1, 1,1);
+	
+	//// WINDOW
+	
+	JPanel contentPanel = (JPanel)getContentPane();
+	contentPanel.setLayout(gbl);
+	Util.gblAdd(contentPanel, mainPanel,   gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(contentPanel, cbPanel,     gbc, 0,1, 1,1, 1,0);
+	Util.gblAdd(contentPanel, buttonPanel, gbc, 0,2, 1,1, 1,0);
+	Util.gblAdd(contentPanel, zoomPanel,   gbc, 0,3, 1,1, 1,0);
+	Util.gblAdd(contentPanel, jumpPanel,   gbc, 0,4, 1,1, 1,0);
+    }
 
-	  
-	  mainPanel.setLayout(null);
-	  mainPanel.setBackground(Analysis.background);
-	  mainPanel.add(labelCanvas);
-	  mainPanel.add(axisTopCanvas);
-	  mainPanel.add(axisBotCanvas);
-	  mainPanel.add(displayPanel);
-	  mainPanel.add(HSB);
-	  mainPanel.add(VSB);
+    private void CreateMenus()
+    {
+	MenuBar mbar = new MenuBar();
+	
+	mbar.add(Util.makeMenu("File", new Object[]
+	    {
+		"Print Timeline",
+		null,
+		"Close"
+	    },
+			       this));                   
+	mbar.add(Util.makeMenu("Tools", new Object[]
+	    {
+		"Modify Ranges",
+	    },
+			       this));
+	mbar.add(Util.makeMenu("Colors", new Object[]
+	    {
+		"Change Colors",
+		"Save Colors",
+		"Restore Colors",
+		"Default Colors"
+	    },
+			       this));
+	Menu helpMenu = new Menu("Help");
+	mbar.add(Util.makeMenu(helpMenu, new Object[]
+	    {
+		"Index",
+		"About"
+	    },
+			       this)); 
+	mbar.setHelpMenu(helpMenu);
+	setMenuBar(mbar);                                                     
+    }   
+    public long getBeginTime()
+    {
+	return data.beginTime;
+    }   
 
-	  displayPanel.setLayout(null);
-	  displayPanel.add(displayCanvas);
-	  
-	  HSB.setBackground(Color.lightGray);
-	  HSB.addAdjustmentListener(this);
-	  
-	  VSB.setBackground(Color.lightGray);
-	  VSB.addAdjustmentListener(this);
-	  
-	  //// CHECKBOX PANEL
-	  
-	  cbPacks = new Checkbox("Display Pack Times", data.showPacks);
-	  cbMsgs  = new Checkbox("Display Message Sends", data.showMsgs);
-	  cbIdle  = new Checkbox("Display Idle Time", data.showIdle);
-	  cbUser  = new Checkbox("Display User Event Window", false);
-	  //colorbyObjectId = new Checkbox("Color Entry methods by Object ID",false);
-
-	  
-	  cbPacks.addItemListener(this);
-	  cbMsgs.addItemListener(this);
-	  cbIdle.addItemListener(this);
-	  cbUser.addItemListener(this);
-	  
-
-	  GridBagLayout gbl = new GridBagLayout();
-	  GridBagConstraints gbc = new GridBagConstraints();
-	  
-	  gbc.fill = GridBagConstraints.NONE;
-	  gbc.anchor = GridBagConstraints.CENTER;
-	  
-	  Panel cbPanel = new Panel();
-	  cbPanel.setLayout(gbl);
-	  
-	  Util.gblAdd(cbPanel, cbPacks, gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(cbPanel, cbMsgs,  gbc, 1,0, 1,1, 1,1);
-	  Util.gblAdd(cbPanel, cbIdle,  gbc, 2,0, 1,1, 1,1);
-	  Util.gblAdd(cbPanel, cbUser,  gbc, 3,0, 1,1, 1,1);
-          //Util.gblAdd(cbPanel, colorbyObjectId, gbc, 4,0,1,1, 1,1); 	  
-	  
-
-	  //// BUTTON PANEL
-	  
-	  bSelectRange = new Button("Select Ranges");
-	  bColors      = new Button("Change Colors");
-	  bDecrease    = new Button("<<");
-	  bIncrease    = new Button(">>");
-	  bReset       = new Button("Reset");
-	  
-	  bSelectRange.addActionListener(this);
-	  bColors.addActionListener(this);
-	  bDecrease.addActionListener(this);
-	  bIncrease.addActionListener(this);
-	  bReset.addActionListener(this);
-	   
-	  Label lScale = new Label("SCALE: ", Label.CENTER);
-	  scaleField   = new FloatTextField(data.scale, 5);
-	  scaleField.addActionListener(this);
-	 
-	  
-	  Panel buttonPanel = new Panel();
-	  buttonPanel.setLayout(gbl);
-	  
-	  gbc.fill = GridBagConstraints.BOTH;
-	  
-	  Util.gblAdd(buttonPanel, bSelectRange, gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, bColors,      gbc, 1,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, bDecrease,    gbc, 3,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, lScale,       gbc, 4,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, scaleField,   gbc, 5,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, bIncrease,    gbc, 6,0, 1,1, 1,1);
-	  Util.gblAdd(buttonPanel, bReset,       gbc, 7,0, 1,1, 1,1);
-	  
-	  // ZOOM PANEL
-
-	  bZoomSelected = new Button("Zoom Selected");
-	  bLoadSelected = new Button("Load Selected");
-
-	  bZoomSelected.addActionListener(this);
-	  bLoadSelected.addActionListener(this);
-	  
-	  highlightTime = new TextField("");
-	  selectionBeginTime = new TextField("");
-	  selectionEndTime = new TextField("");
-	  selectionDiff = new TextField("");
-	  highlightTime.setEditable(false);
-	  selectionBeginTime.setEditable(false);
-	  selectionEndTime.setEditable(false);
-	  selectionDiff.setEditable(false);
-
-	  Panel zoomPanel = new Panel();
-	  zoomPanel.setLayout(gbl);
-	  gbc.fill = GridBagConstraints.BOTH;
-	  
-	  Util.gblAdd(zoomPanel, new Label(" "), gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, bZoomSelected,  gbc, 0,2, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, bLoadSelected,  gbc, 1,2, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, highlightTime,  gbc, 2,2, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, selectionBeginTime, gbc, 3,2, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, selectionEndTime,   gbc, 4,2, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, selectionDiff,   gbc, 5,2, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, new Label("Highlight Time", Label.CENTER), gbc, 2,1, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, new Label("Selection Begin Time", Label.CENTER),   gbc, 3,1, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, new Label("Selection End Time", Label.CENTER), gbc, 4,1, 1,1, 1,1);
-	  Util.gblAdd(zoomPanel, new Label("Selection Length", Label.CENTER), gbc, 5,1, 1,1, 1,1);
-
-	  // JUMP TO GRAPH	
-	  bJumpAnimation = new Button("Animation");
-	  bJumpProfile = new Button("Usage Profile");
-	  bJumpGraph = new Button("Graph");
-	  bJumpHistogram = new Button("Histogram");
-	  bJumpComm = new Button("Communication");
-	  bJumpStl = new Button("Overview");
-	  
-	  bJumpAnimation.addActionListener(this);
-	  bJumpProfile.addActionListener(this);
-	  bJumpGraph.addActionListener(this);
-	  bJumpHistogram.addActionListener(this);
-	  bJumpComm.addActionListener(this);
-	  bJumpStl.addActionListener(this);
-	  
-	  Panel jumpPanel = new Panel();
-	  jumpPanel.setLayout(gbl);
-	  gbc.fill = GridBagConstraints.BOTH;
-	  
-	  Util.gblAdd(jumpPanel, new Label(" "),  gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, new Label("Jump to graph: ", Label.LEFT),   gbc, 1,1, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, bJumpAnimation,  gbc, 2,1, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, bJumpProfile,    gbc, 3,1, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, bJumpGraph, 	  gbc, 4,1, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, bJumpHistogram,  gbc, 5,1, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, bJumpComm,       gbc, 6,1, 1,1, 1,1);
-	  Util.gblAdd(jumpPanel, bJumpStl,        gbc, 7,1, 1,1, 1,1);
-	  
-
-	  //// WINDOW
-	  
-	  setLayout(gbl);
-	  Util.gblAdd(this, mainPanel,   gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(this, cbPanel,     gbc, 0,1, 1,1, 1,0);
-	  Util.gblAdd(this, buttonPanel, gbc, 0,2, 1,1, 1,0);
-	  Util.gblAdd(this, zoomPanel,   gbc, 0,3, 1,1, 1,0);
-	  Util.gblAdd(this, jumpPanel,   gbc, 0,4, 1,1, 1,0);
-   }   
-   private void CreateMenus()
-   {
-	  MenuBar mbar = new MenuBar();
-	  
-	  mbar.add(Util.makeMenu("File", new Object[]
-	  {
-		 "Print Timeline",
-		 null,
-		 "Close"
-	  },
-	  this));                   
-		
-	  mbar.add(Util.makeMenu("Tools", new Object[]
-	  {
-		 "Modify Ranges",
-	  },
-	  this));
-	  
-	  mbar.add(Util.makeMenu("Colors", new Object[]
-	  {
-		 "Change Colors",
-		 "Save Colors",
-		 "Restore Colors",
-		 "Default Colors"
-	  },
-	  this));
-	  
-	  Menu helpMenu = new Menu("Help");
-	  mbar.add(Util.makeMenu(helpMenu, new Object[]
-	  {
-		 "Index",
-		 "About"
-	  },
-	  this)); 
-	  
-	  mbar.setHelpMenu(helpMenu);
-	  setMenuBar(mbar);                                                     
-   }   
-   public long getBeginTime()
-   {
-	  return data.beginTime;
-   }   
-   public long getEndTime()
-   {
-	  return data.endTime;
-   }   
-   public int[] getEntries()
-   {
-	  return data.entries;
-   }   
-   public Color[] getEntryColors()
-   {
-	  if(data == null)
-		 return null;
-	  else
-		 return data.entryColor;
-   }   
-   public OrderedUsageList[] getEntryUsageData()
-   {
-	  if(data == null)
-		 return null;
-	  else
-		 return data.entryUsageList;
-   }   
-   public Color getGraphColor(int e)
-   {
-	  return mainWindow.getGraphColor(e);
-   }   
+    public long getEndTime()
+    {
+	return data.endTime;
+    }   
+    public int[] getEntries()
+    {
+	return data.entries;
+    }   
+    public Color[] getEntryColors()
+    {
+	if(data == null)
+	    return null;
+	else
+	    return data.entryColor;
+    }   
+    public OrderedUsageList[] getEntryUsageData()
+    {
+	if(data == null)
+	    return null;
+	else
+	    return data.entryUsageList;
+    }   
+    public Color getGraphColor(int e)
+    {
+	return parentWindow.getGraphColor(e);
+    }   
    public int getHSBValue()
    {
 	  return HSB.getValue();
@@ -764,7 +767,7 @@ public class TimelineWindow extends Frame
    }   
    public boolean GraphExists()
    {
-	  return mainWindow.GraphExists();
+	  return parentWindow.GraphExists();
    }   
    public void itemStateChanged(ItemEvent evt)
    {

@@ -5,6 +5,7 @@ import projections.analysis.*;
 import projections.misc.*;
 import java.util.*;
 import java.awt.*;
+import javax.swing.*;
 
 /**
  *  Analysis
@@ -38,6 +39,8 @@ public class Analysis {
     public static Color foreground = Color.white;
     
     /******************* Initialization ************/
+    public static Component guiRoot;
+
     private static StsReader sts;
     
     private static LogLoader logLoader;  //Only for .log files
@@ -87,9 +90,11 @@ public class Analysis {
      *  3) total time of the run should be known.
      *
      */    
-    public static void initAnalysis(String filename) 
+    public static void initAnalysis(String filename, Component rootComponent) 
 	throws IOException 
     {
+	guiRoot = rootComponent;
+
 	try {
 	    sts=new StsReader(filename);
 	    // create default color maps for entry methods as well as user
@@ -660,6 +665,18 @@ public class Analysis {
 	    return sts.getValidProcessorString(StsReader.SUMDETAIL);
 	} else {
 	    return "";
+	}
+    }
+
+    public static OrderedIntList getValidProcessorList() {
+	if (sts.hasLogFiles()) {
+	    return sts.getValidProcessorList(StsReader.LOG);
+	} else if (sts.hasSumFiles()) {
+	    return sts.getValidProcessorList(StsReader.SUMMARY);
+	} else if (sts.hasSumDetailFiles()) {
+	    return sts.getValidProcessorList(StsReader.SUMDETAIL);
+	} else {
+	    return null;
 	}
     }
 

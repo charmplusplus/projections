@@ -9,6 +9,8 @@ import java.io.*;
 import java.util.*;
 import java.lang.*;
 
+import javax.swing.*;
+
 import projections.gui.*;
 import projections.misc.*;
 
@@ -40,19 +42,28 @@ public class LogLoader extends ProjDefs
 	RandomAccessFile InFile;
 	StringTokenizer  st;
 
-	ProgressDialog bar=new ProgressDialog("Finding end time...");
-
 	//Find the begin and end time across the parallel machine
 	BeginTime = 0;
 	EndTime   = Integer.MIN_VALUE;
 	int nPe=Analysis.getNumProcessors();
+
+	ProgressMonitor progressBar =
+	    new ProgressMonitor(Analysis.guiRoot, "Determining end time",
+				"", 0, nPe);
 
 	validPEStringBuffer = new StringBuffer();
 	validPERange = false;
 	basePE = -1;
 	upperPE = -1;
 	for (int i=0; i<nPe; i++) {
-	    bar.progress(i, nPe, i + " of " + nPe);
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote(i + " of " + nPe);
+		progressBar.setProgress(i);
+	    } else {
+		System.err.println("Fatal error - Projections cannot" +
+				   " function without proper end time!");
+		System.exit(-1);
+	    }
 	    try {
 		// test the file to see if it exists ...
 		testFile = new File(Analysis.getLogName(i));
@@ -92,7 +103,7 @@ public class LogLoader extends ProjDefs
 	updatePEStringBuffer();
 	validPEString = validPEStringBuffer.toString();
 	
-	bar.done();
+	progressBar.close();
 	Analysis.setTotalTime(EndTime-BeginTime);
     }    
         

@@ -74,6 +74,7 @@ public class JSelectField extends JTextField
 	  }
 	  return tmp;
    }   
+
    public OrderedIntList getValue(int limit)
    {  
 	  limit--;

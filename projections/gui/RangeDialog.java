@@ -32,13 +32,13 @@ public class RangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
     // Constant variables
-    public static final int DIALOG_OK = 0;
-    public static final int DIALOG_CANCELLED = 1;
+    private static final int DIALOG_OK = 0;
+    private static final int DIALOG_CANCELLED = 1;
   
     ProjectionsWindow parentWindow;
 
     // inheritable GUI objects
-    JPanel mainPanel, buttonPanel;
+    JPanel mainPanel, historyPanel, buttonPanel;
 
     JSelectField processorsField;
     JTimeTextField startTimeField;
@@ -55,21 +55,26 @@ public class RangeDialog extends JDialog
 	processorTextLabel;
     private JLabel totalTimeLabel, validTimeRangeLabel, validProcessorsLabel;
 
-    // Data definitions
+    // Dialog state monitoring variables. These are based directly on the
+    // field's stored data.
+    // (inherited for the purposes of validation checks)
     protected long totalTime;
-    protected long startTime;
-    protected long endTime;
+    protected long totalValidTime;
+    protected int numProcessors;
 
-    long totalValidTime;
-    String validProcessors;
-    int numProcessors;
+    // inheritable old state preserving data items
+    protected OrderedIntList validProcessors = new OrderedIntList();
+    protected long startTime = -1;
+    protected long endTime = -1;
 
+    // history variables
     RangeHistory history;
     Vector historyVector;
     Vector historyStringVector;
+
     // flags
-    boolean layoutComplete = false;
-    int dialogState = DIALOG_CANCELLED;	// default state
+    private boolean layoutComplete = false;
+    private int dialogState;
 
     /**
      *  Constructor. Creation of the dialog object should be separate from
@@ -81,17 +86,12 @@ public class RangeDialog extends JDialog
     {
 	super((JFrame)parentWindow, titleString, true);
 	this.parentWindow = parentWindow;
-	if(Analysis.checkJTimeAvailable() == true) { 
-		startTime = Analysis.getJStart();
-		endTime = Analysis.getJEnd();
-		Analysis.setJTimeAvailable(false);}
-	else {
-		startTime = 0;
-		endTime = Analysis.getTotalTime();}
-	totalValidTime = Analysis.getTotalTime();
-	validProcessors = Analysis.getValidProcessorString();
+
+	// the only purpose of numProcessors is to determine the limit
+	// of the processor list.
 	numProcessors = Analysis.getNumProcessors();
-	totalTime = endTime - startTime;
+	totalTime = Analysis.getTotalTime();
+	totalValidTime = totalTime;
 
 	history = new RangeHistory();
 	try {
@@ -109,6 +109,9 @@ public class RangeDialog extends JDialog
 	} catch (IOException e) {
 	    System.err.println("Error: " + e.toString());
 	}
+
+	this.setModal(true);
+	dialogState = DIALOG_CANCELLED; // default state
     }   
 
     /**
@@ -119,9 +122,9 @@ public class RangeDialog extends JDialog
      */
     public void actionPerformed(ActionEvent evt)
     {
-	if(evt.getSource() instanceof JButton) {
+	if (evt.getSource() instanceof JButton) {
 	    JButton b = (JButton) evt.getSource();
-	  
+	    
 	    if(b == bOK) {
 		// point user to an inconsistent field.
 		JTextField someField = checkConsistent();
@@ -131,8 +134,6 @@ public class RangeDialog extends JDialog
 		    return;
 		} else {
 		   dialogState = DIALOG_OK;	// set local variable state 
-		   /* setAllData();
-		    parentWindow.dialogCancelled(false);*/
 		}
 		setVisible(false);
 	    } else if (b == bUpdate) {
@@ -142,8 +143,8 @@ public class RangeDialog extends JDialog
 		updateData(endTimeField);
 		return;	// CHECK this return
 	    }else if (b == bCancel){
-	    	setVisible(false);
 		dialogState = DIALOG_CANCELLED;
+		setVisible(false);
 	    } else if (b == bAddToHistory) {
 		long start = startTimeField.getValue();
 		long end = endTimeField.getValue();
@@ -177,6 +178,7 @@ public class RangeDialog extends JDialog
     public void focusGained(FocusEvent evt) {
 	// do nothing
     }
+
     public void focusLost(FocusEvent evt) {
 	// when keyboard focus is lost from a text field, it is assumed
 	// that the user has confirmed the data. Hence, perform an update and
@@ -237,34 +239,31 @@ public class RangeDialog extends JDialog
      *  This method should be OVERRIDDEN by the subclass if a different
      *  layout format is desired. Otherwise, leave it alone.
      */
-    private void displayDialog() {
-    
-	if (layoutComplete) {
-	    setVisible(true);
-	    return;
-	}
-
-	addWindowListener(new WindowAdapter()
-	    {
-		public void windowClosing(WindowEvent e)
+    public void displayDialog() {
+	// only layout the dialog once in its lifetime.
+	if (!layoutComplete) {
+	    addWindowListener(new WindowAdapter()
 		{
-		    dialogState = DIALOG_CANCELLED;
-//		    parentWindow.dialogCancelled(true);
-		    setVisible(false);
-//		    dispose();		// should it be able to dispose itself??
-		}
-	    });
-	
-	mainPanel = createMainLayout();
-	buttonPanel = createButtonLayout();
-
-	this.getContentPane().setLayout(new BorderLayout());
-	this.getContentPane().add(mainPanel, BorderLayout.CENTER);
-	this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-	layoutComplete = true;
-	
-	pack();
-	setResizable(false);
+		    public void windowClosing(WindowEvent e)
+		    {
+			dialogState = DIALOG_CANCELLED;
+			setVisible(false);
+		    }
+		});
+	    mainPanel = createMainLayout();
+	    historyPanel = createHistoryLayout();
+	    buttonPanel = createButtonLayout();
+	    
+	    this.getContentPane().setLayout(new BorderLayout());
+	    this.getContentPane().add(mainPanel, BorderLayout.NORTH);
+	    this.getContentPane().add(historyPanel, BorderLayout.CENTER);
+	    this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+	    layoutComplete = true;
+	    pack();
+	    setResizable(false);
+	} else {
+	    preserveState();
+	}
 	setVisible(true);
     }
 
@@ -297,9 +296,11 @@ public class RangeDialog extends JDialog
 	processorsPanel = new JPanel();
 	processorsPanel.setLayout(gbl);
 	validProcessorsLabel = new JLabel("Valid Processors = " + 
-					 validProcessors, JLabel.LEFT);
+					  Analysis.getValidProcessorString(),
+					  JLabel.LEFT);
 	processorTextLabel = new JLabel("Processors :", JLabel.LEFT);
-	processorsField = new JSelectField(validProcessors, 12);
+	processorsField = new JSelectField(Analysis.getValidProcessorString(),
+					   12);
 	// set listeners
 	processorsField.addActionListener(this);
 	// layout
@@ -314,14 +315,15 @@ public class RangeDialog extends JDialog
 	timePanel = new JPanel();
 	timePanel.setLayout(gbl);
 	validTimeRangeLabel = new JLabel("Valid Time Range = " +
-					U.t(startTime) + " to " +
-					U.t(endTime), JLabel.LEFT);
+					 U.t(0) + " to " +
+					 U.t(Analysis.getTotalTime()), 
+					 JLabel.LEFT);
 	startTextLabel = new JLabel("Start Time :", JLabel.LEFT);
-	startTimeField = new JTimeTextField(startTime, 12);
+	startTimeField = new JTimeTextField(0, 12);
 	endTextLabel = new JLabel("End Time :", JLabel.LEFT);
-	endTimeField = new JTimeTextField(endTime, 12);
+	endTimeField = new JTimeTextField(Analysis.getTotalTime(), 12);
 	totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
-	totalTimeLabel = new JLabel(U.t(totalTime), JLabel.LEFT);
+	totalTimeLabel = new JLabel(U.t(Analysis.getTotalTime()), JLabel.LEFT);
 	// set listeners
 	startTimeField.addActionListener(this);
 	endTimeField.addActionListener(this);
@@ -345,37 +347,12 @@ public class RangeDialog extends JDialog
 	Util.gblAdd(timePanel, totalTimeLabel,
 		    gbc, 1,2, 3,1, 1,1);
 
-	// Default history layout
-	JPanel historyPanel = new JPanel();
-	historyPanel.setLayout(gbl);
-	historyList = new JComboBox(historyStringVector);
-	historyList.setEditable(false);
-	historyList.setMaximumRowCount(5);
-	if (historyList.getItemCount() > 0) {
-	    historyList.setSelectedIndex(0);
-	}
-	bAddToHistory = new JButton("Add to History List");
-	bSaveHistory = new JButton("Save History to Disk");
-	// set listeners
-	historyList.addActionListener(this);
-	bAddToHistory.addActionListener(this);
-	bSaveHistory.addActionListener(this);
-	// layout
-	Util.gblAdd(historyPanel, historyList,
-		    gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(historyPanel, bAddToHistory,
-		    gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(historyPanel, bSaveHistory,
-		    gbc, 1,1, 1,1, 1,1);
-
 	// general layout
 	inputPanel.setLayout(gbl);
 	Util.gblAdd(inputPanel, processorsPanel,
 		    gbc, 0,0, 1,1, 1,1);
 	Util.gblAdd(inputPanel, timePanel,
 		    gbc, 0,1, 1,1, 1,1);
-	Util.gblAdd(inputPanel, historyPanel, 
-		    gbc, 0,2, 1,1, 1,1);
 	
 	return inputPanel;
     }
@@ -413,6 +390,42 @@ public class RangeDialog extends JDialog
     }
 
     /**
+     *  createHistoryLayout is not intended to be inherited by subclasses.
+     */
+    private JPanel createHistoryLayout() {
+	// Standard Layout behavior for all subcomponents
+	GridBagLayout      gbl = new GridBagLayout();
+	GridBagConstraints gbc = new GridBagConstraints();
+	gbc.fill = GridBagConstraints.BOTH;
+	gbc.insets = new Insets(2, 2, 2, 2);
+	  
+	// Default history layout
+	JPanel historyPanel = new JPanel();
+	historyPanel.setLayout(gbl);
+	historyList = new JComboBox(historyStringVector);
+	historyList.setEditable(false);
+	historyList.setMaximumRowCount(5);
+	if (historyList.getItemCount() > 0) {
+	    historyList.setSelectedIndex(0);
+	}
+	bAddToHistory = new JButton("Add to History List");
+	bSaveHistory = new JButton("Save History to Disk");
+	// set listeners
+	historyList.addActionListener(this);
+	bAddToHistory.addActionListener(this);
+	bSaveHistory.addActionListener(this);
+	// layout
+	Util.gblAdd(historyPanel, historyList,
+		    gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(historyPanel, bAddToHistory,
+		    gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(historyPanel, bSaveHistory,
+		    gbc, 1,1, 1,1, 1,1);
+
+	return historyPanel;
+    }
+
+    /**
      *  updateData stores the data values from text into the variables.
      *  It also attempts to make the various data fields consistent by
      *  updating the values of other data items which are dependent on 
@@ -425,24 +438,32 @@ public class RangeDialog extends JDialog
     void updateData(JTextField field) {
 	if (field instanceof JTimeTextField) {
 	    // if the field is a time-based field
-	    if (field == startTimeField) {
-		startTime = startTimeField.getValue();
-		totalTime = endTime - startTime;
-		totalTimeLabel.setText(U.t(totalTime));
-	    } else if (field == endTimeField) {
-		endTime = endTimeField.getValue();
-		totalTime = endTime - startTime;
+	    if ((field == startTimeField) ||
+		(field == endTimeField)) {
+		totalTime = endTimeField.getValue()-startTimeField.getValue();
 		totalTimeLabel.setText(U.t(totalTime));
 	    }
 	} else if (field instanceof JSelectField) {
 	    // if the field is a range selection field
 	    if (field == processorsField) {
-		// if the data is okay, keep it. Otherwise, replace it
-		// with the old data.
-
-		// do nothing for now.
+		// nothing to do
 	    }
 	}
+    }
+
+    /**
+     *  preserveState stores the current data of all fields into the
+     *  old state variables. This is to facilitate the isModified()
+     *  check.
+     *
+     *  INHERITANCE NOTE:
+     *  Inheriting subclasses should make a superclass call after
+     *  preserving its own state.
+     */
+    void preserveState() {
+	startTime = startTimeField.getValue();
+	endTime = endTimeField.getValue();
+	validProcessors = getValidProcessors();
     }
 
     /**
@@ -455,56 +476,84 @@ public class RangeDialog extends JDialog
      */
     JTextField checkConsistent() {
 	// start time cannot be greater or equal to end time
-	if (startTime >= endTime) {
+	if (startTimeField.getValue() >= endTimeField.getValue()) {
 	    return startTimeField;
 	}
 	// starting time cannot be less than zero
-	if (startTime < 0) {
+	if (startTimeField.getValue() < 0) {
 	    return startTimeField;
 	}
 	// ending time cannot be greater than total time
-	if (endTime > totalValidTime) {
+	if (endTimeField.getValue() > totalValidTime) {
 	    return endTimeField;
 	}
 	return null;
     }
 
     /**
-     *  setAllData sets the data fields via API provided in the parent
-     *  window. 
-     *
-     *  INHERITANCE NOTE:
-     *  Inheriting subclasses should make a superclass call
-     *  after doing its own API calls.
+     *  The API for asking the dialog box (after either the OK or the
+     *  CANCELLED). No other way should be allowed.
      */
-    void setAllData() {
-	parentWindow.setProcessorRange(processorsField.getValue(numProcessors));
-	parentWindow.setStartTime(startTime);
-	parentWindow.setEndTime(endTime);
+    public boolean isCancelled() {
+	return (dialogState == DIALOG_CANCELLED);
     }
 
     /**
-     *  write accessor functions for private data instead of coupling with the parent window
+     *  isModified returns true if any of the text fields have values
+     *  that differ from the stored old values. This can be used by
+     *  tools that optimize for values that remain the same.
+     *
+     *  INHERITANCE NOTE: isModified of the subclass should perform
+     *  an OR operation with the superclass's isModified method.
      */
-     OrderedIntList getProcessorRange(){
-	return processorsField.getValue(numProcessors);
-     }
-	
-     long getStartTime(){
-	return startTime;
-     }
-     long getEndTime(){
-	return endTime;
-     }
+    public boolean isModified() {
+	return ((startTime != startTimeField.getValue()) ||
+		(endTime != endTimeField.getValue()) ||
+		(!validProcessors.equals(getValidProcessors())));
+    }
 
-     /**
-      *  show the dialog and return the status
-      */
-     int showDialog(){
-	// make sure that the dialog is modal
-	this.setModal(true);
-	this.displayDialog();
-	return dialogState;	// return if the dialog is cancelled or if OK is pressed
-     }
+    /**
+     *  Accessors for Start Time
+     */
+    public long getStartTime() {
+	return startTimeField.getValue();
+    }
+
+    public void setStartTime(long startTime) {
+	startTimeField.setValue(startTime);
+    }
+
+    /**
+     *  Accessors for End Time
+     */
+    public long getEndTime() {
+	return endTimeField.getValue();
+    }
+
+    public void setEndTime(long endTime) {
+	endTimeField.setValue(endTime);
+    }
+
+    /**
+     *   Accessors for validProcessors (since it is more complex than
+     *   a mere primitive). Both a String and OrderedIntList interface
+     *   is provided. **CW** in the future, this should be standardized
+     *   to use the OrderedIntList interface.
+     */
+    public OrderedIntList getValidProcessors() {
+	return processorsField.getValue(numProcessors);
+    }
+
+    public String getValidProcessorString() {
+	return processorsField.getText();
+    }
+
+    public void setValidProcessors(OrderedIntList validPEs) {
+	processorsField.setText(validPEs.listToString());
+    }
+
+    public void setValidProcessors(String validPEString) {
+	processorsField.setText(validPEString);
+    }
 }
 

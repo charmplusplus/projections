@@ -20,7 +20,7 @@ public class Graph extends JPanel
     public static final int Y_AXIS = 1;
     
     private int GraphType;
-    private int BarGraphType;
+    private boolean GraphStacked;
     private DataSource dataSource;
     private XAxis xAxis;
     private YAxis yAxis;
@@ -30,7 +30,7 @@ public class Graph extends JPanel
     
     private static final int FONT_SIZE = 12;   
     
-    private static final double PI = 3.142;
+    private static final double PI = Math.PI;
 
     private Font font = null;
     private FontMetrics fm = null;
@@ -57,6 +57,10 @@ public class Graph extends JPanel
     private int w,h;
 
     private int baseWidth = -1;
+    private int baseHeight = -1;
+    
+    private double maxvalueX;
+    private double maxvalueY;
 
     private Bubble bubble;
     private int bubbleXVal;
@@ -67,11 +71,12 @@ public class Graph extends JPanel
 	setPreferredSize(new Dimension(400,300));	
 	
 	GraphType = BAR;	   // default GraphType is BAR
-	BarGraphType = STACKED;    // default BarGraphType is STACKED
+	GraphStacked = true;    // default GraphType is STACKED
 	stackArray = null;
 	dataSource = null;
 	
 	xscale = 1.0;
+	yscale = 1.0;
 	
 	addMouseMotionListener(this);
     }
@@ -111,23 +116,10 @@ public class Graph extends JPanel
 	return GraphType;
     }
 
-    public void setBarGraphType(int type)
+    public void setStackGraph(boolean isSet)
     {
-	if ((type == STACKED) || (type == UNSTACKED) || (type == SINGLE)) {
-	    BarGraphType = type;
-	} else {
-	    ; //unknown bar graph type.. do nothing ; draw STACKED bar graph
-	}
+	GraphStacked = isSet;
 	repaint();
-    }
-
-    private String getBarGraphType()
-    {
-	if(BarGraphType == SINGLE)
-	    return("avg");
-	if(BarGraphType == UNSTACKED)
-	    return("unstacked");
-	return("stacked");
     }
 
     public void setData(DataSource d, XAxis x, YAxis  y)
@@ -148,14 +140,16 @@ public class Graph extends JPanel
 
     public void setScaleX(double val) {
 	xscale = val;
-	setPreferredSize(new Dimension((int)(baseWidth*xscale),getHeight()));
+	setPreferredSize(new Dimension((int)(baseWidth*xscale),
+				       (int)(baseHeight*yscale)));
 	revalidate();
 	repaint();
     }
 
     public void setScaleY(double val) {
 	yscale = val;
-	setPreferredSize(new Dimension((int)(baseWidth*xscale),getHeight()));
+	setPreferredSize(new Dimension((int)(baseWidth*xscale),
+				       (int)(baseHeight*yscale)));
 	revalidate();
 	repaint();
     }
@@ -281,7 +275,7 @@ public class Graph extends JPanel
 	}
 	
 	if (bubble == null) {
-	    if (BarGraphType== STACKED) {
+	    if (GraphStacked) {
 		bubble = new Bubble(this, text);
 		bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
 		bubble.setVisible(true);
@@ -308,8 +302,54 @@ public class Graph extends JPanel
 	h = getHeight();
 	g.clearRect(0, 0, w, h);
 	
+	// xOffset and yOffsets are determined by the scrollbars that *may*
+	// be asked to control this drawing component.
+	// **CW** not active as of now.
+	int xOffset = 0;
+	int yOffset = 0;
+
+	// baseWidth is whatever the width of the parent window at the time.
+	// xscale will control just how much more of the graph one can see.
+	baseWidth = getParent().getWidth();
+	baseHeight = getParent().getHeight();
+
+	String title = xAxis.getTitle();
+	g.drawString(title,
+		     (w-fm.stringWidth(title))/2 + xOffset, 
+		     h - 10 + yOffset);
+
+	// display Graph title
+	title = dataSource.getTitle();
+	g.drawString(title,
+		     (w-fm.stringWidth(title))/2 + xOffset, 
+		     10 + fm.getHeight() + yOffset);
+
+	// display yAxis title
+	title = yAxis.getTitle();
+	g.rotate(-PI/2);
+	g.drawString(title, 
+		     -(h+fm.stringWidth(title))/2 + yOffset, 
+		     fm.getHeight() + xOffset);
+	g.rotate(PI/2);
+
+	// total number of x values
+	maxvalueX = dataSource.getIndexCount();
+	// get max y Value
+	if (((GraphType == BAR) && GraphStacked) || 
+	    ((GraphType == LINE) && GraphStacked) || 
+	    (GraphType == AREA)) {
+	    maxvalueY = maxSumY;
+	} else {
+	    maxvalueY = yAxis.getMax();                               
+	}
+
+	originX = fm.getHeight()*2 + 
+	    fm.stringWidth(yAxis.getValueName(maxvalueY));
+	originY = h - (30 + fm.getHeight()*2);
+
 	if ((xAxis != null) && (yAxis != null)) {
-	    drawAxes(g);	
+	    drawXAxis(g);
+	    drawYAxis(g);
 	    if (GraphType == BAR) {
 		drawBarGraph(g);
 	    } else if (GraphType == AREA) {
@@ -320,65 +360,26 @@ public class Graph extends JPanel
 	}
     }
 
-    private void drawAxes(Graphics2D g) {
-
+    private void drawXAxis(Graphics2D g) {
 	// if there's nothing to draw, don't draw anything!!!
 	if (dataSource == null) {
 	    return;
 	}
 
-	// get max y Value
-	double maxvalueY;
-	if (((GraphType == BAR) && (BarGraphType == STACKED)) || 
-	    (GraphType == AREA)) {
-	    maxvalueY = maxSumY;
-	} else {
-	    maxvalueY = yAxis.getMax();                               
-	}
-
-	// baseWidth is whatever the width of the parent window at the time.
-	// xscale will control just how much more of the graph one can see.
-	baseWidth = getParent().getWidth();
-
-	originX = fm.getHeight()*2 + fm.stringWidth(String.valueOf(maxvalueY));
-	originY = h - (30 + fm.getHeight()*2);
-
-	// i.e. find the left and the lower margins
-	String title = xAxis.getTitle();
-	//+" ("+getBarGraphType()+")";
-	   
-	// display xAxis title
-	g.drawString(title,(w-fm.stringWidth(title))/2, h - 10);
-	title = dataSource.getTitle();
-	// display Graph title
-	g.drawString(title,(w-fm.stringWidth(title))/2, 10 + fm.getHeight());
-	title = yAxis.getTitle();
-	g.rotate(-PI/2);
-	// display yAxis title
-	g.drawString(title, -(h+fm.stringWidth(title))/2, 
-		     fm.getHeight());
-	g.rotate(PI/2);
-
 	// width available for drawing the graph
     	width = (int)((baseWidth-30-originX)*xscale);
 
-	// total number of x values
-	int maxvalue = dataSource.getIndexCount();
-	int sw = fm.stringWidth("" + (maxvalue*xAxis.getMultiplier()));
-
 	// *NOTE* pixelincrementX = # pixels per value.
-	pixelincrementX = ((double)width)/maxvalue;
-	setBestIncrements(X_AXIS, pixelincrementX, maxvalue);
+	pixelincrementX = ((double)width)/maxvalueX;
+	setBestIncrements(X_AXIS, pixelincrementX, (int)maxvalueX);
 
 	// draw xAxis
 	g.drawLine(originX, originY, (int)width+originX, originY);
-	// draw yAxis
-	g.drawLine(originX, originY, originX , 30);
-	
-      	int mini = 0;
-	int maxi = maxvalue;
 
-	int curx, cury;
+      	int mini = 0;
+	int maxi = (int)maxvalueX;
+
+	int curx;
 	String s;
 
 	// drawing xAxis divisions
@@ -398,6 +399,23 @@ public class Graph extends JPanel
          	g.drawLine(curx, originY+2, curx, originY-2);
 	    }
 	}
+
+	
+    }
+
+    private void drawYAxis(Graphics2D g) {
+
+	// if there's nothing to draw, don't draw anything!!!
+	if (dataSource == null) {
+	    return;
+	}
+
+	// draw yAxis
+	g.drawLine(originX, originY, originX , 30);
+	
+	int cury;
+	String s;
+	int sw = fm.stringWidth("" + (maxvalueX*xAxis.getMultiplier()));
 
 	// adjust so that the max axis value is in the multiples of 10
 	maxvalueY += (10 - maxvalueY%10);
@@ -444,7 +462,7 @@ public class Graph extends JPanel
 	// NO OPTIMIZATION simple draw. Every value gets drawn on screen.
 	for (int i=0; i<numX; i++) {
 	    dataSource.getValues(i, data);
-	    if (BarGraphType == STACKED) {
+	    if (GraphStacked) {
 		int y = 0;
 		for (int k=0; k<numY; k++) {
 		    // calculating lowerbound of box, which StackArray
@@ -466,7 +484,7 @@ public class Graph extends JPanel
 				   (int)(data[k]*pixelincrementY));
 		    }
 		}
-	    } else if (BarGraphType == UNSTACKED) {
+	    } else {
 		// unstacked.. sort the values and then display them
 		int maxIndex=0;
 		int y = 0;
@@ -513,6 +531,9 @@ public class Graph extends JPanel
 				   (int)(temp[k][1]*pixelincrementY));
 		    }
 		}
+	    }
+		/*  ** UNUSED for now **
+		    whether it is single should be orthogonal to stacking.
 	    } else {
 		// single.. display average value
 		double sum=0;
@@ -527,6 +548,7 @@ public class Graph extends JPanel
 			   (int)(i*pixelincrementX),
 			   (int)(sum*pixelincrementY));
 	    }		
+		*/
 	}
     }
 	
@@ -668,10 +690,15 @@ public class Graph extends JPanel
 	long labelValue = getNextLabelValue(index);
 	long tickValue = getNextTickValue(index++);
 
+	int labelWidth = 0;
 	while (true) {
+	    if (axis == X_AXIS) {
+		labelWidth = fm.stringWidth(xAxis.getIndexName((int)maxValue));
+	    } else {
+		labelWidth = fm.getHeight();
+	    }
 	    // is the number of pixels to display a label too small?
-	    if (fm.stringWidth(String.valueOf(maxValue)) >
-		(pixelsPerValue*labelValue*0.8)) {
+	    if (labelWidth > (pixelsPerValue*labelValue*0.8)) {
 		labelValue = getNextLabelValue(index);
 		tickValue = getNextTickValue(index++);
 		continue;
@@ -742,11 +769,11 @@ public class Graph extends JPanel
  	Graph g=new Graph();
 	/* **TESTCASE - UNSTACKED BAR** 
 	g.setGraphType(Graph.BAR);
-	g.setBarGraphType(Graph.UNSTACKED);
+	g.setStackGraph(false);
 	*/
 	/* **TESTCASE - STACKED BAR**
 	g.setGraphType(Graph.BAR);
-	g.setBarGraphType(Graph.STACKED);
+	g.setStackGraph(true);
 	*/
 	/* **TESTCASE - AREA (STACKED)** */
 	g.setGraphType(Graph.AREA);

@@ -325,8 +325,7 @@ public class MainWindow extends JFrame
 	sumXAxis = null;
 	sumYAxis = null;
 	graphPanel = null;
-	//ScalePanel scalePanel = null;
-	//StlPanel stl = null;
+
 	hor = null;
 	ver = null;
 	final SwingWorker worker = new SwingWorker() {
@@ -343,103 +342,135 @@ public class MainWindow extends JFrame
 			    new InvalidFileDialog(thisWindow);
 			ifd.setVisible(true);
 		    }
-		    
 
-		    status = new Label("");
-		    status.setBackground(Color.black);
-		    status.setForeground(Color.lightGray);
-		    hor=new ScaleSlider(Scrollbar.HORIZONTAL);
-	
-		    ver=new ScaleSlider(Scrollbar.VERTICAL);
+		    if (Analysis.hasSummaryData()) {
+			// see "finished()"
+		    } else if (Analysis.hasLogData()) {
+			status = new Label("");
+			status.setBackground(Color.black);
+			status.setForeground(Color.lightGray);
 
-		    stl = new StlPanel();
-		    scalePanel=new ScalePanel(hor,ver,stl);
-		    scalePanel.setStatusDisplay(thisWindow);
+			hor=new ScaleSlider(Scrollbar.HORIZONTAL);
+			ver=new ScaleSlider(Scrollbar.VERTICAL);
 
-		    OrderedIntList validPEs = Analysis.getValidProcessorList();
-		    long startTime = 0;
-		    long endTime = Analysis.getTotalTime();
+			stl = new StlPanel();
+			scalePanel=new ScalePanel(hor,ver,stl);
+			scalePanel.setStatusDisplay(thisWindow);
+			
+			OrderedIntList validPEs = 
+			    Analysis.getValidProcessorList();
+			long startTime = 0;
+			long endTime = Analysis.getTotalTime();
+			
+			ColorMap utilColorMap = new ColorMap();
+			utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0);
+			utilColorMap.addBreak(70,255, 0,0, 100,255, 255,255);
+			// Overflow-- green. Should not happen for utilization.
+			utilColorMap.addBreak(101,0, 255,0, 255,0, 255,0); 
+			stl.setColorMap(utilColorMap);
 
-		    ColorMap utilColorMap = new ColorMap();
-		    utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0); //Blue to red
-		    utilColorMap.addBreak(70,255, 0,0, 100,255, 255,255);//red to white
-		    // Overflow-- green. Should not happen for utilization.
-		    utilColorMap.addBreak(101,0, 255,0, 255,0, 255,0); 
-		    stl.setColorMap(utilColorMap);
+			double horSize, verSize;
 
+			Runtime rt = Runtime.getRuntime();
+			// 4 bytes per index, 500 indexs per processor
+			int memUsage = 4 * 500 * Analysis.getNumProcessors();
+			int maxMem = (int)(rt.totalMemory() * .01 );
+			int interval = 1;
 
-		    double horSize, verSize;
-
-		    Runtime rt = Runtime.getRuntime();
-// 		    System.out.println("jvm free memory  = " + rt.freeMemory());
-// 		    System.out.println("jvm max memory   = " + rt.maxMemory());
-// 		    System.out.println("jvm total memory = " + rt.totalMemory());
-
-		    // 4 bytes per index, 500 indexs per processor
-		    int memUsage = 4 * 500 * Analysis.getNumProcessors();
-		    int maxMem = (int)(rt.totalMemory() * .01 );
-		    int interval = 1;
-
-		    while(memUsage/interval > maxMem){
-			interval++;
-		    }
-		    
-		    System.out.println("Showing every " + interval + " processor");
-		    
-
-		    if(interval > 1){
-			OrderedIntList tempPEs = validPEs.copyOf();
-			int element, tmp;
-			int count = 0;
-			validPEs.removeAll();
-			tempPEs.reset();
-
-			while((element = tempPEs.nextElement()) != -1){
-			    tmp = count / interval;
-			    tmp = count - tmp*interval;
-			    if(tmp == 0){
-				validPEs.insert(element);
-			    }
-			    count++;
+			while (memUsage/interval > maxMem) {
+			    interval++;
 			}
-		    }
-			 
+			/*
+			System.out.println("Showing every " + interval + 
+					   " processor");
+			*/
+			if (interval > 1) {
+			    OrderedIntList tempPEs = validPEs.copyOf();
+			    int element, tmp;
+			    int count = 0;
+			    validPEs.removeAll();
+			    tempPEs.reset();
+			    
+			    while((element = tempPEs.nextElement()) != -1){
+				tmp = count / interval;
+				tmp = count - tmp*interval;
+				if(tmp == 0){
+				    validPEs.insert(element);
+				}
+				count++;
+			    }
+			}
 
-		    if (validPEs == null) {
-			horSize=Analysis.getTotalTime();
-			verSize=Analysis.getNumProcessors();
-		    } else {	
-			horSize = endTime-startTime;
-			if(horSize <= 0)
-			    horSize = Analysis.getTotalTime();
-			verSize = (double)validPEs.size();
-		    }	 
-		    scalePanel.setScales(horSize,verSize);
-	
-		    double hMin=scalePanel.toSlider(1.0/horSize);
-		    double hMax=scalePanel.toSlider(0.01);//0.1ms fills screen
-		    hor.setMin(hMin); hor.setMax(hMax);
-		    hor.setValue(hMin);
-		    hor.setTicks(Math.floor(hMin),1);
-	
-		    double vMin=scalePanel.toSlider(1.0/verSize);
-		    double vMax=scalePanel.toSlider(1.0);//One processor fills screen
-		    ver.setMin(vMin); ver.setMax(vMax);
-		    ver.setValue(vMin);
-		    ver.setTicks(Math.floor(vMin),1);
-
-		    stl.setData(validPEs,startTime,endTime);
-
+			if (validPEs == null) {
+			    horSize=Analysis.getTotalTime();
+			    verSize=Analysis.getNumProcessors();
+			} else {	
+			    horSize = endTime-startTime;
+			    if(horSize <= 0)
+				horSize = Analysis.getTotalTime();
+			    verSize = (double)validPEs.size();
+			}	 
+			scalePanel.setScales(horSize,verSize);
+			
+			double hMin=scalePanel.toSlider(1.0/horSize);
+			//0.1ms fills screen
+			double hMax=scalePanel.toSlider(0.01);
+			hor.setMin(hMin); hor.setMax(hMax);
+			hor.setValue(hMin);
+			hor.setTicks(Math.floor(hMin),1);
+			
+			double vMin=scalePanel.toSlider(1.0/verSize);
+			//One processor fills screen
+			double vMax=scalePanel.toSlider(1.0);
+			ver.setMin(vMin); ver.setMax(vMax);
+			ver.setValue(vMin);
+			ver.setTicks(Math.floor(vMin),1);
+			
+			stl.setData(validPEs,startTime,endTime);
+		    }			
 		    return null;
 		}
+
 		public void finished() {
 		    setTitle("Projections - " + newfile);
-		    
-		    summaryGraphPanel.add("data", scalePanel, "overview");
- 		    Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
- 		    Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
-		    Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
-
+		    if (Analysis.hasSummaryData()) {
+			Analysis.loadSummaryData();	  
+			double[] data = Analysis.getSummaryAverageData();
+			long originalSize = Analysis.getSummaryIntervalSize();
+			long bestSize =    
+			    (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);	 
+			if (bestSize != originalSize) {
+			    // if there are changes    
+			    // transform the data into absolute time first.
+			    IntervalUtils.utilToTime(data,	  
+						     (double)originalSize);
+			    double[] newdata =	       
+				IntervalUtils.rebin(data, originalSize,	 
+						    (double)bestSize);
+			    // transform the re-binned data to utilization.
+			    IntervalUtils.timeToUtil(newdata,	 
+						     (double)bestSize);	 
+			    sumDataSource = new SummaryDataSource(newdata);
+			    sumXAxis =	    
+				new SummaryXAxis(newdata.length,	 
+						 (long)bestSize);	  
+			} else {		   
+			    sumDataSource = new SummaryDataSource(data);
+			    sumXAxis =	    
+				new SummaryXAxis(data.length,	 
+						 (long)(Analysis.getSummaryIntervalSize()));
+			}			   
+			sumYAxis = new SummaryYAxis();	 
+			graphPanel =
+			    new GraphPanel(new Graph(sumDataSource, 
+						     sumXAxis, sumYAxis));
+			summaryGraphPanel.add("data", graphPanel, "run data");
+		    } else {
+			summaryGraphPanel.add("data", scalePanel, "overview");
+			Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
+			Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
+			Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
+		    }
 		    menuManager.fileOpened();
 		}
 

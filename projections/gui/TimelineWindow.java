@@ -413,7 +413,7 @@ public class TimelineWindow extends Frame
 	  //// CHECKBOX PANEL
 	  
 	  cbPacks = new Checkbox("Display Pack Times", data.showPacks);
-	  cbMsgs  = new Checkbox("Display Message Creations", data.showMsgs);
+	  cbMsgs  = new Checkbox("Display Message Sends", data.showMsgs);
 	  cbIdle  = new Checkbox("Display Idle Time", data.showIdle);
 	  cbUser  = new Checkbox("Display User Event Window", false);
 	  

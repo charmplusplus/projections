@@ -220,6 +220,7 @@ public class MainWindow extends JFrame
 	d.setFileFilter(new MainFileFilter());
 	int returnval = d.showOpenDialog(this);
 	if (returnval == JFileChooser.APPROVE_OPTION) {
+	    setTitle("Projections -" + d.getSelectedFile());
 	    openFile(d.getSelectedFile().getAbsolutePath());
 	}
     }
@@ -283,6 +284,7 @@ public class MainWindow extends JFrame
     public void closeAll() {
 	summaryGraphPanel.removeAll();
 	menuManager.lastFileClosed();
+	setTitle("Projections");
     }
 
     public void CloseEPAnalysis()

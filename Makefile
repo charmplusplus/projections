@@ -19,6 +19,9 @@ SRC=\
     projections/analysis/UsageCalc.java\
     projections/analysis/UsageInterval.java\
     projections/analysis/ViewerEvent.java\
+    projections/analysis/DataAnalyzer.java\
+    projections/analysis/MRStsReader.java\
+    projections/analysis/MRSummaryReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
     projections/gui/AnimationColorBarPanel.java\
@@ -88,6 +91,8 @@ SRC=\
     projections/gui/TimelineObject.java\
     projections/gui/TimelineRangeDialog.java\
     projections/gui/TimelineWindow.java\
+    projections/gui/MultiRunControlPanel.java\
+    projections/gui/MultiRunWindow.java\
     projections/gui/U.java\
     projections/gui/Util.java\
     projections/gui/ZItem.java\
@@ -95,7 +100,11 @@ SRC=\
     projections/misc/LogLoadException.java\
     projections/misc/SummaryFormatException.java\
     projections/misc/ProgressDialog.java	\
-    projections/misc/ErrorDialog.java
+    projections/misc/ErrorDialog.java\
+    projections/misc/AccumulatedData.java\
+    projections/misc/ChareData.java\
+    projections/misc/EntryTypeData.java\
+    projections/misc/CommandLineException.java
 
 
 all: bin/projections.jar

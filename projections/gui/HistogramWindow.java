@@ -6,6 +6,7 @@ import projections.analysis.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import javax.swing.*;
 
 public class HistogramWindow extends ProjectionsWindow 
    implements ActionListener,ItemListener
@@ -28,6 +29,7 @@ public class HistogramWindow extends ProjectionsWindow
    private Color colorArray[][];
    private String [] entryNames; 
 
+   private JTextArea statusArea;		// displays the number of EPs in each bin as an ordered pair
    private boolean recordEP;			// should longest entrypoints be recorded & displayed as a table?
    private EntryPointWindow epFrame;
  
@@ -62,7 +64,8 @@ public class HistogramWindow extends ProjectionsWindow
 
 	  recordEP = false;	// dont record longest EPs unless specified
 	  epFrame = null;
-	
+
+	  statusArea = new JTextArea(4,2);	
 	  createMenus();
 	  createLayout();
 	  pack();
@@ -154,9 +157,14 @@ public class HistogramWindow extends ProjectionsWindow
   
   private void createLayout()
   {
+	  JPanel mainPanel = new JPanel(); 
  	  graphCanvas = new Graph();
 	  graphPanel = new GraphPanel(graphCanvas);	
-	  add(graphPanel);
+	  mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
+	  mainPanel.add(graphPanel);
+          mainPanel.add(Box.createRigidArea(new Dimension(0,6)));
+	  mainPanel.add(new JScrollPane(statusArea,ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+	  add(mainPanel);
   }  
 
    private void refreshGraph()
@@ -169,6 +177,19 @@ public class HistogramWindow extends ProjectionsWindow
 	  
 	  graphCanvas.setData(ds,xa,ya);
 	  graphCanvas.repaint();
+
+	  String firstRow="bin\t", secondRow="EPs\t";	
+	  for(int i=0; i<counts.length; i++)
+		if(counts[i]!=0)
+		{
+			firstRow = firstRow + i + "\t";
+			secondRow = secondRow + counts[i] +"\t";
+		}
+
+	   // clear the text area and enter new set
+	   statusArea.setText("");	
+	   statusArea.append(firstRow+"\n");
+	   statusArea.append(secondRow);
    }
 
    private int[] getCounts()

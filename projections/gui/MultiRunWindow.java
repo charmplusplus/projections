@@ -60,7 +60,7 @@ public class MultiRunWindow extends Frame
     {
 	setVisible(false);
 	dispose();
-	mainWindow.CloseMultiRunWindow();
+	mainWindow.closeChildWindow(this);
     }
 
     /**

@@ -342,6 +342,40 @@ public class Util
 	
     }
 
+    /**
+     *  New color map routines are a little messed up. Old routines
+     *  restored by Chee Wai 3/3/2005
+     */
+    public static void saveColors(Color[] colors, String Useless) 
+	throws IOException 
+    {
+        FileOutputStream fileStream = 
+            new FileOutputStream(Analysis.getLogDirectory() +
+                                 File.separator +
+                                 "color.map");
+        ObjectOutputStream objStream =
+            new ObjectOutputStream(fileStream);
+        for (int i=0; i<colors.length; i++) {
+            objStream.writeObject(colors[i]);
+        }
+        objStream.close();
+    }
+
+    public static void restoreColors(Color[] colors, String Useless)
+        throws IOException, ClassNotFoundException
+    {
+        FileInputStream fileStream =
+            new FileInputStream(Analysis.getLogDirectory() +
+                                File.separator +
+                                "color.map");
+        ObjectInputStream objStream =
+            new ObjectInputStream(fileStream);
+        for (int i=0; i<colors.length; i++) {
+            colors[i] = (Color)objStream.readObject();
+        }
+        objStream.close();
+    }
+
      /**
      *	Modified by Sharon Ma 03/01/03
      *	Changed color.map to a readable format

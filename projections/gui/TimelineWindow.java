@@ -373,24 +373,20 @@ public class TimelineWindow extends ProjectionsWindow
 	    else if(arg.equals("Change Colors")) { ShowColorWindow(); }
 	    // **** sharon **
 	    else if(arg.equals("Save Colors")) {
-		saveColorFile();
-		/*
-		  try {
-		  Util.saveColors(data.entryColor, "Timeline Graph");
-		  } catch (IOException e) {
-		  System.err.println("Attempt to write to color.map failed");
-		  }
-		*/
+		//		saveColorFile();
+		try {
+		    Util.saveColors(data.entryColor, "Timeline Graph");
+		} catch (IOException e) {
+		    System.err.println("Attempt to write to color.map failed");
+		}
 	    }
 	    else if(arg.equals("Restore Colors")) {
-		openColorFile();
-		/*
-		  try {
-		  Util.restoreColors(data.entryColor, "Timeline Graph");
-		  } catch (IOException e) {
-		  System.err.println("Attempt to read from color.map failed");
-		  } 
-		*/
+		//		openColorFile();
+		try {
+		    Util.restoreColors(data.entryColor, "Timeline Graph");
+		} catch (Exception e) {
+		    System.err.println("Attempt to read from color.map failed");
+		} 
 		data.displayCanvas.updateColors();
 		
 	    } else if (arg.equals("Default Colors")) {

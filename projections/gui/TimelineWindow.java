@@ -22,34 +22,46 @@ public class TimelineWindow extends Frame
    
    private FontMetrics fm;
    
+  // basic zoom controls
    private Button bSelectRange, bColors, bDecrease, bIncrease, bReset;
+   private Button bZoomSelected, bLoadSelected;
+   private TextField highlightTime, selectionBeginTime, selectionEndTime, selectionDiff;
+   private DecimalFormat format;
    private FloatTextField scaleField;
-   private Checkbox cbPacks, cbMsgs, cbIdle;
+   private Checkbox cbPacks, cbMsgs, cbIdle, cbUser;
    
    private int maxLabelLen;
    private long oldEndTime;
    
    private TimelineMessageWindow messageWindow;
-   
-   private AxisMouseController mouseController;
 
+  private UserEventWindow userEventWindow;
+  // process MouseEvents here
+   private AxisMouseController mouseController;
   private class AxisMouseController {
     public MouseMotionAdapter mouseMotionAdapter = null;
     public MouseListener mouseListener = null;
-    public TimelineDisplayCanvas canvas_;
-    public TimelineAxisCanvas timeline_;
+    private TimelineDisplayCanvas canvas_;
+    private TimelineAxisCanvas timeline_;
+    private TimelineWindow window_;
+    public boolean selected_ = false;
     AxisMouseController(
-      TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) 
+      TimelineWindow window, TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) 
     {
+      window_ = window;
       canvas_ = canvas;
       timeline_ = timeline;
       mouseMotionAdapter = new MouseMotionAdapter() {
 	public void mouseDragged(MouseEvent e) {
-	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
+	  Point p = timeline_.screenToCanvas(e.getPoint());
+	  canvas_.rubberBand.stretch(p);
+	  window_.setHighlightTime(timeline_.canvasToTime(p.x));
 	  canvas_.repaint();
 	}
 	public void mouseMoved(MouseEvent e) {
-	  canvas_.rubberBand.highlight(timeline_.screenToCanvas(e.getPoint()));
+	  Point p = timeline_.screenToCanvas(e.getPoint());
+	  canvas_.rubberBand.highlight(p);
+	  window_.setHighlightTime(timeline_.canvasToTime(p.x));
 	  canvas_.repaint();
 	}
       };
@@ -57,51 +69,24 @@ public class TimelineWindow extends Frame
 	public void mouseClicked(MouseEvent e) { }
 	public void mousePressed(MouseEvent e) { 
 	  canvas_.rubberBand.clearHighlight();
+	  window_.unsetHighlightTime();
 	  canvas_.rubberBand.anchor(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.repaint();
 	}
 	public void mouseReleased(MouseEvent e) { 
 	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
-	  canvas_.rubberBand.end(timeline_.screenToCanvas(e.getPoint()));
+	  // canvas_.rubberBand.end(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.repaint();
-
+	  selected_ = true;
 	  Rectangle rect = canvas_.rubberBand.bounds();
-	  if (rect.width == 0) return;
-	  if ((e.getModifiers()&InputEvent.BUTTON3_MASK)==  
-	      InputEvent.BUTTON3_MASK) 
-	  {
-	    // is right mouse pressed?
-	    double startTime = timeline_.canvasToTime(rect.x);
-	    double endTime = timeline_.canvasToTime(rect.x+rect.width);
-	    data.oldBT = data.beginTime;
-	    data.oldET = data.endTime;
-	    data.beginTime = (long)(startTime+0.5);
-	    data.endTime = (long)(endTime+0.5);
-	    data.scale = (float) 1.0;
-	    scaleField.setText(""+1.0);
-	    if (data.processorList == null) { data.oldplist = null; }
-	    else { data.oldplist = data.processorList.copyOf(); }
-	    procRangeDialog();
-	  }
-	  else {
-	    double startTime = timeline_.canvasToTime(rect.x);
-	    double endTime = timeline_.canvasToTime(rect.x+rect.width);
-	    data.scale = 
-	      (float) ((data.endTime-data.beginTime)/(endTime-startTime));
-	    scaleField.setText("" + data.scale);
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	    setAllSizes();
-	    displayCanvas.makeNewImage();
-	    axisTopCanvas.makeNewImage();
-	    axisBotCanvas.makeNewImage();
-	    HSB.setValue(timeline_.calcHSBOffset(startTime));
-	    displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	  }
+	  double startTime = timeline_.canvasToTime(rect.x);
+	  double endTime = timeline_.canvasToTime(rect.x+rect.width);
+	  window_.setSelectedTime(startTime, endTime);
 	}
 	public void mouseEntered(MouseEvent e) { }
 	public void mouseExited(MouseEvent e) { 
 	  canvas_.rubberBand.clearHighlight();
+	  unsetHighlightTime();
 	  canvas_.repaint();
 	}
       };
@@ -116,6 +101,10 @@ public class TimelineWindow extends Frame
    {
 	  this.mainWindow = mainWindow;
 	  
+	  format = new DecimalFormat();
+	  format.setGroupingUsed(true);
+	  format.setMinimumFractionDigits(0);
+	  format.setMaximumFractionDigits(0);
 	  addWindowListener(new WindowAdapter()
 	  {                    
 		 public void windowClosing(WindowEvent e)
@@ -160,12 +149,85 @@ public class TimelineWindow extends Frame
     else { return leftTime + timeDiff/2; }
   }
 
+  public void setHighlightTime(double time) { 
+    // System.out.println(time);
+    highlightTime.setText(format.format(time)); 
+  }
+  public void unsetHighlightTime() { highlightTime.setText(""); }
+  public void setSelectedTime(double time1, double time2) {
+    // System.out.println(time1+" "+time2);
+    selectionBeginTime.setText(format.format(time1));
+    selectionEndTime.setText(format.format(time2));
+    format.setMinimumFractionDigits(3);
+    format.setMaximumFractionDigits(3);
+    selectionDiff.setText(format.format((time2-time1)/1000)+" ms");
+    format.setMinimumFractionDigits(0);
+    format.setMaximumFractionDigits(0);
+  }
+  public void unsetSelectedTime() {
+    selectionBeginTime.setText("");
+    selectionEndTime.setText("");
+    selectionDiff.setText("");
+  }
+
+  public void setZoom(double startTime, double endTime) {
+    data.scale = 
+      (float) ((data.endTime-data.beginTime)/(endTime-startTime));
+    scaleField.setText("" + data.scale);
+    setCursor(new Cursor(Cursor.WAIT_CURSOR));
+    setAllSizes();
+    displayCanvas.makeNewImage();
+    axisTopCanvas.makeNewImage();
+    axisBotCanvas.makeNewImage();
+    if (data.scale != 1.0) {
+      HSB.setValue(axisBotCanvas.calcHSBOffset(startTime));
+      displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
+    }
+    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+  }
+
+  public void zoomSelected() { 
+    if (mouseController.selected_) {
+      Rectangle rect = displayCanvas.rubberBand.bounds();
+      mouseController.selected_ = false;
+      unsetSelectedTime();
+      if (rect.width == 0) { return; }
+      double currentZoomStart = axisBotCanvas.canvasToTime(rect.x);
+      double currentZoomEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
+      setZoom(currentZoomStart, currentZoomEnd);
+    }
+  }
+
+  public void loadSelected() { 
+    if (mouseController.selected_) {
+      Rectangle rect = displayCanvas.rubberBand.bounds();
+      mouseController.selected_ = false;
+      unsetSelectedTime();
+      if (rect.width == 0) { return; }
+      double startTime = axisBotCanvas.canvasToTime(rect.x);
+      double endTime = axisBotCanvas.canvasToTime(rect.x+rect.width);
+      if (startTime < data.beginTime) { startTime = data.beginTime; }
+      if (endTime > data.endTime) { endTime = data.endTime; }
+      data.oldBT = data.beginTime;
+      data.oldET = data.endTime;
+      data.beginTime = (long)(startTime+0.5);
+      data.endTime = (long)(endTime+0.5);
+      data.scale = (float) 1.0;
+      scaleField.setText(""+1.0);
+      if (data.processorList == null) { data.oldplist = null; }
+      else { data.oldplist = data.processorList.copyOf(); }
+      procRangeDialog();
+    }
+  }
+
    public void actionPerformed(ActionEvent evt)
    {
      if (evt.getSource() instanceof Button) {
        Button b = (Button)evt.getSource();
        if(b == bSelectRange) { ShowRangeDialog(); }
        else if(b == bColors) { ShowColorWindow(); }
+       else if(b == bZoomSelected) { zoomSelected(); }
+       else if (b == bLoadSelected) { loadSelected(); }
        else {
 	 int leftVal = HSB.getValue();
 	 int rightVal = leftVal + data.vpw;
@@ -285,12 +347,22 @@ public class TimelineWindow extends Frame
     for(int p=0; p<data.numPs; p++)
       for(int i=0; i<data.tloArray[p].length; i++)
 	displayCanvas.add(data.tloArray[p][i]);    
+    if (data.userEventsArray != null)
+      for(int p=0; p<data.numPs; p++)
+	if (data.userEventsArray[p] != null)
+	  for(int i=0; i<data.userEventsArray[p].length; i++)
+	    displayCanvas.add(data.userEventsArray[p][i]);    
     
     setAllSizes();
     labelCanvas.makeNewImage();
     axisTopCanvas.makeNewImage();
     axisBotCanvas.makeNewImage();
     displayCanvas.makeNewImage();
+    cbUser.setLabel("View User Events ("+data.getNumUserEvents()+")");
+    if (userEventWindow == null) {
+      userEventWindow = new UserEventWindow(cbUser);
+    }
+    userEventWindow.setData(data);
     setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
   }   
   
@@ -307,7 +379,7 @@ public class TimelineWindow extends Frame
 	  displayCanvas = new TimelineDisplayCanvas(data); 
 	  data.displayCanvas = displayCanvas;   
 	  
-	  mouseController = new AxisMouseController(displayCanvas, axisTopCanvas);
+	  mouseController = new AxisMouseController(this, displayCanvas, axisBotCanvas);
 
 	  axisTopCanvas.addMouseListener(mouseController.mouseListener);
 	  axisTopCanvas.addMouseMotionListener(
@@ -343,10 +415,12 @@ public class TimelineWindow extends Frame
 	  cbPacks = new Checkbox("Display Pack Times", data.showPacks);
 	  cbMsgs  = new Checkbox("Display Message Creations", data.showMsgs);
 	  cbIdle  = new Checkbox("Display Idle Time", data.showIdle);
+	  cbUser  = new Checkbox("Display User Event Window", false);
 	  
 	  cbPacks.addItemListener(this);
 	  cbMsgs.addItemListener(this);
 	  cbIdle.addItemListener(this);
+	  cbUser.addItemListener(this);
 	  
 
 	  GridBagLayout gbl = new GridBagLayout();
@@ -361,6 +435,7 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(cbPanel, cbPacks, gbc, 0,0, 1,1, 1,1);
 	  Util.gblAdd(cbPanel, cbMsgs,  gbc, 1,0, 1,1, 1,1);
 	  Util.gblAdd(cbPanel, cbIdle,  gbc, 2,0, 1,1, 1,1);
+	  Util.gblAdd(cbPanel, cbUser,  gbc, 3,0, 1,1, 1,1);
 	  
 	  
 
@@ -396,12 +471,46 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(buttonPanel, bIncrease,    gbc, 6,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bReset,       gbc, 7,0, 1,1, 1,1);
 	  
+	  // ZOOM PANEL
+
+	  bZoomSelected = new Button("Zoom Selected");
+	  bLoadSelected = new Button("Load Selected");
+
+	  bZoomSelected.addActionListener(this);
+	  bLoadSelected.addActionListener(this);
+	  
+	  highlightTime = new TextField("");
+	  selectionBeginTime = new TextField("");
+	  selectionEndTime = new TextField("");
+	  selectionDiff = new TextField("");
+	  highlightTime.setEditable(false);
+	  selectionBeginTime.setEditable(false);
+	  selectionEndTime.setEditable(false);
+	  selectionDiff.setEditable(false);
+
+	  Panel zoomPanel = new Panel();
+	  zoomPanel.setLayout(gbl);
+	  gbc.fill = GridBagConstraints.BOTH;
+	  
+	  Util.gblAdd(zoomPanel, new Label(" "), gbc, 0,0, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, bZoomSelected,  gbc, 0,2, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, bLoadSelected,  gbc, 1,2, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, highlightTime,  gbc, 2,2, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, selectionBeginTime, gbc, 3,2, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, selectionEndTime,   gbc, 4,2, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, selectionDiff,   gbc, 5,2, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, new Label("Highlight Time", Label.CENTER), gbc, 2,1, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, new Label("Selection Begin Time", Label.CENTER),   gbc, 3,1, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, new Label("Selection End Time", Label.CENTER), gbc, 4,1, 1,1, 1,1);
+	  Util.gblAdd(zoomPanel, new Label("Selection Length", Label.CENTER), gbc, 5,1, 1,1, 1,1);
+
 	  //// WINDOW
 	  
 	  setLayout(gbl);
 	  Util.gblAdd(this, mainPanel,   gbc, 0,0, 1,1, 1,1);
 	  Util.gblAdd(this, cbPanel,     gbc, 0,1, 1,1, 1,0);
 	  Util.gblAdd(this, buttonPanel, gbc, 0,2, 1,1, 1,0);
+	  Util.gblAdd(this, zoomPanel,   gbc, 0,3, 1,1, 1,0);
    }   
    private void CreateMenus()
    {
@@ -509,6 +618,14 @@ public class TimelineWindow extends Frame
 		 data.showMsgs = cbMsgs.getState();
 	  else if(c == cbIdle)
 		 data.showIdle = cbIdle.getState();
+	  else if (c == cbUser) {
+	    if (cbUser.getState()) {
+	      // pop up window
+	      userEventWindow.setVisible(true);
+	      userEventWindow.show();
+	    }
+	    else { userEventWindow.setVisible(false); }
+	  }
 	  
 	  setCursor(new Cursor(Cursor.WAIT_CURSOR));
 	  displayCanvas.makeNewImage();
@@ -931,10 +1048,16 @@ public class TimelineWindow extends Frame
 	  displayCanvas.setBounds(0,0,data.tlw, data.tlh);
 	  
 	  if(data.tloArray != null)
-		 for(int p=0; p<data.numPs; p++)
-			if(data.tloArray[p] != null)
-			   for(int i=0; i<data.tloArray[p].length; i++)
-				  data.tloArray[p][i].setBounds(p);     
+	    for(int p=0; p<data.numPs; p++)
+	      if(data.tloArray[p] != null)
+		for(int i=0; i<data.tloArray[p].length; i++)
+		  data.tloArray[p][i].setBounds(p);     
+	  
+	  if (data.userEventsArray != null) 
+	    for(int p=0; p<data.numPs; p++)
+	      if(data.userEventsArray[p] != null)
+		for(int i=0; i<data.userEventsArray[p].length; i++)
+		  data.userEventsArray[p][i].setBounds(p, data);     
    }   
    private void setTLSizes()
    {

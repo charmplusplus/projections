@@ -257,13 +257,17 @@ public class GraphData
    }   
    private int setCurPData(ZItem item)
    {
-	   int element, count;
+	  int element, count;
 	  int max = 0;
-	  for(int p=0; p<processor.num; p++)
+	  int numProcessors = Analysis.getNumProcessors();
+	  for(int p=0; p<numProcessors; p++)
 	  {
 //  for (int p=processor.list.nextElement(); p!=-1; p=processor.list.nextElement())
 	    item.curPData[p] = 0;
-	    if (!processor.list.contains(p)) continue;
+	    if (!processor.list.contains(p)) {
+//		System.out.println("Warning: Proc: "+p+" is not in the list.");
+		continue;
+	    }
 	    count = 0;
 	    interval.list.reset();
 	    while((element = interval.list.nextElement()) >= 0)

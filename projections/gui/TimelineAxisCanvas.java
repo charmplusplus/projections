@@ -2,17 +2,19 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.text.DecimalFormat;
 
 public class TimelineAxisCanvas extends Canvas
 {
-   private TimelineData data;
-   private int axispos, textpos;
-   private String type;
-   private FontMetrics fm;
-   private Image offscreen;
-   private Component component_;
-   private long beginCoord_;
-   private long endCoord_;
+   private TimelineData  data;
+   private int           axispos, textpos;
+   private String        type;
+   private FontMetrics   fm;
+   private Image         offscreen;
+   private Component     component_;
+   private long          beginCoord_;
+   private long          endCoord_;
+   private DecimalFormat format_= new DecimalFormat();
    
    public TimelineAxisCanvas(TimelineData data, String type)
    {
@@ -29,6 +31,7 @@ public class TimelineAxisCanvas extends Canvas
 		component_.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	      }
 	  });
+	  format_.setGroupingUsed(true);
    }   
   // given a coordinate in coordinates from beginning of TimelineAxisCanvas, 
   // return the time in us
@@ -106,7 +109,7 @@ public class TimelineAxisCanvas extends Canvas
 			   
 			   if(x % data.labelIncrement == 0)
 			   {  
-				  tmp = "" + (long)(data.beginTime + (long)labeloffset + (long)x*data.timeIncrement);
+				  tmp = format_.format((long)(data.beginTime + (long)labeloffset + (long)x*data.timeIncrement));
 				  og.drawLine(curx, axispos-5, curx, axispos + 5);
 				  og.drawString(tmp, curx - fm.stringWidth(tmp)/2, textpos);
 			   }

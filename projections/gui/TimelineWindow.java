@@ -70,10 +70,12 @@ public class TimelineWindow extends Frame
 	      InputEvent.BUTTON3_MASK) 
 	  {
 	    // is right mouse pressed?
+	    double startTime = timeline_.canvasToTime(rect.x);
+	    double endTime = timeline_.canvasToTime(rect.x+rect.width);
 	    data.oldBT = data.beginTime;
 	    data.oldET = data.endTime;
-	    data.beginTime = (long) timeline_.canvasToTime(rect.x);
-	    data.endTime = (long) timeline_.canvasToTime(rect.x+rect.width);
+	    data.beginTime = (long)(startTime+0.5);
+	    data.endTime = (long)(endTime+0.5);
 	    data.scale = (float) 1.0;
 	    if (data.processorList == null) { data.oldplist = null; }
 	    else { data.oldplist = data.processorList.copyOf(); }

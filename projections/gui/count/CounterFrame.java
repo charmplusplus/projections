@@ -54,6 +54,19 @@ public class CounterFrame extends JFrame
     calcMFlops.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) { cTable_.calcMFlops(); }
     });
+    JButton calcCacheMiss = 
+      (JButton) panel.add(new JButton("Calc Cache Miss"));
+    calcCacheMiss.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) { cTable_.calcCacheMiss(); }
+    });
+    JButton multiRunAnalysis = 
+      (JButton) panel.add(new JButton("Multi Run Analysis"));
+    multiRunAnalysis.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent ae) { 
+	int[] selectedRows = jTable_.getSelectedRows();
+	cTable_.multiRunAnalysis(sorter_.mapRows(selectedRows)); 
+      }
+    });
     // create window
     super.getContentPane().setLayout(new BorderLayout());
     super.getContentPane().add(createMenu(), BorderLayout.NORTH);

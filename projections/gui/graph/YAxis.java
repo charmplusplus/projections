@@ -16,6 +16,7 @@ public abstract class YAxis
    *  e.g., "CPU Utilization(%)", or "Queue Length"
    */
   public abstract String getTitle();
+  public String getUnits() { return "";}
 
   /**
    * Return the minimum value on this axis.  This should almost

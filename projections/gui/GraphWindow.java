@@ -349,6 +349,9 @@ public class GraphWindow extends Frame
 			data = null;
 			data = new GraphData(numintervals, intervalsize, processorList);
 			setChildDatas();
+			/* also need to close and free legendPanel */
+			if (legendPanel!=null) 
+			  legendPanel.closeAttributesWindow();
 		 }   
 		 else {
 			// only can reuse the data when processor list

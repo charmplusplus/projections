@@ -244,9 +244,11 @@ will be active.
 
 5. Animations:
 --------------
-   This window was supposed to animate the processor usage by displaying
-   different colors for different amount of usage during intervals.  Right now
-   it just randomly generates data to use.
+   This window animates the processor usage by displaying
+   different colors for different amount of usage.
+
+   The left box allows you to select the real time between frames;
+   the right box the processor time between frames.
    
 
 6. View Log Files:
@@ -259,6 +261,3 @@ will be active.
    - a line number (starting at 0)
    - the time the event occurred at
    - a description of what happened.
-
-
-

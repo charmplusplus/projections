@@ -50,6 +50,8 @@ public class Graph extends JPanel
     private boolean fitToScreen = false;
 	
     private Bubble bubble;
+	 private int bubbleXVal;
+	 private int bubbleYVal;
 
     public Graph()
     {
@@ -248,14 +250,14 @@ public class Graph extends JPanel
 
     public void mouseMoved(MouseEvent e) {
 	//System.out.println("Mouse moved"+ e);
-	int x = e.getX();
+		int x = e.getX();
     	int y = e.getY();
 
-	int index,valNo;
-	double value;
+		int index,valNo;
+		double value;
 	
-	int xVal = getXValue(x);
-	int yVal = getYValue(xVal, y);
+		int xVal = getXValue(x);
+		int yVal = getYValue(xVal, y);
 	// System.out.println("(" + xVal +"," +yVal +")");
 	
 	if((xVal > -1) && (yVal > -1)) {
@@ -269,30 +271,40 @@ public class Graph extends JPanel
     }
 
     public void showPopup(int xVal, int yVal, int xPos, int yPos){
-	//System.out.println("graph.showPopup()");
-	//System.out.println(xVal +", " + yVal);
-	String text[] = dataSource.getPopup(xVal, yVal);
-	if (text == null) {
-	    return;
-	}
-	// else display ballon
-	int bX, bY;
-	// I'm doing these calculations, i probably should see if I
-	// can avoid it
-	if (bubble == null) {
-	    if (BarGraphType== STACKED) {
-		// bX = originX + (int)(xVal*pixelincrementX) + 
-		// (int)(pixelincrementX/2) + barWidth + 10;
-		// bY = (int) (originY - 
-		// (int)(stackArray[xVal][yVal]*pixelincrementY) +15);	
-		bubble = new Bubble(this, text);
-		bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
-		bubble.setVisible(true);
-		System.out.println(xPos +", " + yPos);	
-	    } else {
-		System.out.println("not Stacked");
-	    }
-	}
+		//System.out.println("graph.showPopup()");
+		//System.out.println(xVal +", " + yVal);
+		String text[] = dataSource.getPopup(xVal, yVal);
+		if (text == null) {
+		    return;
+		}
+		// else display ballon
+		int bX, bY;
+		// I'm doing these calculations, i probably should see if I
+		// can avoid it
+		
+		// old popup still exists, but mouse has moved over a new section that has its own popup
+		if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
+			bubble.setVisible(false);
+			bubble.dispose();
+			bubble = null;
+		}
+		
+		if (bubble == null) {
+	   	if (BarGraphType== STACKED) {
+				// bX = originX + (int)(xVal*pixelincrementX) + 
+				// (int)(pixelincrementX/2) + barWidth + 10;
+				// bY = (int) (originY - 
+				// (int)(stackArray[xVal][yVal]*pixelincrementY) +15);	
+				bubble = new Bubble(this, text);
+				bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
+				bubble.setVisible(true);
+				bubbleXVal = xVal;
+				bubbleYVal = yVal;
+				//System.out.println(bubbleXVal +", " + bubbleYVal);	
+	    	} else {
+				//System.out.println("not Stacked");
+	    	}
+		}
     }	
 
     public void mouseDragged(MouseEvent e) {

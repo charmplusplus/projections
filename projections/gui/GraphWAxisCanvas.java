@@ -75,13 +75,13 @@ public class GraphWAxisCanvas extends Canvas
    }   
    public void print(Graphics pg)
    {
-	  setBackground(Color.white);
+	  ((Graphics2D)pg).setBackground(Color.white);
 	  setForeground(Color.black);
 	  int w = getSize().width;
 	  int h = getSize().height;
 	  pg.clearRect(0, 0, w, h);
 	  paint(pg);
-	  setBackground(Color.black);
+	  ((Graphics2D)pg).setBackground(Color.black);
 	  setForeground(Color.white);
    }   
    public void setBounds(int x, int y, int w, int h)

@@ -2,7 +2,10 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.print.*;
 import java.io.*;
+
+import projections.misc.*;
 
 public class GraphWindow extends Frame
    implements ActionListener
@@ -290,8 +293,10 @@ public class GraphWindow extends Frame
    {
 	  super.paint(g);
    }   
+
    private void PrintGraph()
    {
+       /*
 	  PrintJob pjob = getToolkit().getPrintJob(this, "Print Graph", null);
 	  
 	  if(pjob != null)
@@ -306,7 +311,22 @@ public class GraphWindow extends Frame
 		 
 		 pjob.end();
 	  }
+       */
+       PrinterJob pjob = PrinterJob.getPrinterJob();
+       PageFormat format = new PageFormat();
+       format = pjob.pageDialog(format);
+       pjob.setPrintable(new PrintUtils(displayPanel), format);
+       if (pjob.printDialog() == false) {
+	   // user cancelled.
+	   return;
+       }
+       try {
+	   pjob.print();
+       } catch (PrinterException e) {
+	   System.err.println("Printer failure.");
+       }
    }   
+
    private void setChildDatas()
    {
 	   controlPanel.setGraphData(data);

@@ -152,6 +152,7 @@ public class GraphDisplayCanvas extends Canvas
 		 y1 = y2;    
 	  }    
    }   
+
    public void paint(Graphics g)
    {
 	  if(offscreen == null)
@@ -164,14 +165,15 @@ public class GraphDisplayCanvas extends Canvas
 	  int w = getSize().width;
 	  int h = getSize().height;
 	  g.drawImage(offscreen, 0,0,w,h, 0,0,w,h, null);                  
-   }   
+   }
+
    public void print(Graphics pg)
    {
-	  setBackground(Color.white);
-	  setForeground(Color.black);
-	  drawDisplay(pg);
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+       ((Graphics2D)pg).setBackground(Color.white);
+       setForeground(Color.black);
+       drawDisplay(pg);
+       ((Graphics2D)pg).setBackground(Color.black);
+       setForeground(Color.white);
    }   
    public void setBounds(int x, int y, int w, int h)
    {     

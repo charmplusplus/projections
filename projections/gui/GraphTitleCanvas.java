@@ -59,13 +59,13 @@ public class GraphTitleCanvas extends Canvas
    }   
    public void print(Graphics pg)
    {
-	  setBackground(Color.white);
+	  ((Graphics2D)pg).setBackground(Color.white);
 	  setForeground(Color.black);
 	  int w = getSize().width;
 	  int h = getSize().height;
 	  pg.clearRect(0, 0, w, h);
 	  paint(pg);
-	  setBackground(Color.black);
+	  ((Graphics2D)pg).setBackground(Color.black);
 	  setForeground(Color.white);
    }   
    public void setData(GraphData data)

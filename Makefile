@@ -112,6 +112,7 @@ SRC=\
     projections/misc/MultiRunData.java\
     projections/misc/MultiRunController.java\
     projections/misc/MultiRunTextRenderer.java\
+    projections/misc/PrintUtils.java\
     projections/misc/ProgressDialog.java\
     projections/misc/SummaryFormatException.java\
     projections/gui/graph/DataSource.java\

@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.print.*;
 
 public class GraphDisplayPanel extends Container
    implements ActionListener, ItemListener, AdjustmentListener
@@ -181,13 +182,21 @@ public class GraphDisplayPanel extends Container
    }   
    public void paint(Graphics g)
    {
-	  g.setColor(Color.lightGray);
-	  g.fillRect(0, 0, getSize().width, getSize().height);
-	  g.setColor(Color.black);
-	  g.drawRect(0, 0, getSize().width-1, getSize().height-1);
-	  
-	  super.paint(g);
+       // silly hack
+       if (g instanceof PrinterGraphics) {
+	   mainPanel.setBackground(Color.white);
+       } else {
+	   mainPanel.setBackground(Color.black);
+       }
+       g.setColor(Color.lightGray);
+       g.fillRect(0, 0, getSize().width, getSize().height);
+       g.setColor(Color.black);
+       g.drawRect(0, 0, getSize().width-1, getSize().height-1);
+       
+       super.paint(g);
    }   
+
+    // ***** no longer in use *****
    public void PrintGraph(Graphics pg, PrintJob pjob)
    {
 	  Dimension oldSize = mainPanel.getSize();
@@ -221,6 +230,7 @@ public class GraphDisplayPanel extends Container
 	  setAllBounds();
 	  mainPanel.setBackground(Color.black);
    }   
+
    public void setAllBounds()
    {
 	  if(data == null)

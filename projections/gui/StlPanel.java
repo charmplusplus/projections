@@ -20,12 +20,23 @@ import projections.analysis.*;
 
 public class StlPanel extends ScalePanel.Child
 {
+    // data (for entry-point based visualization)
     // dimension 0 - indexed by EP (including the overall average util)
     // dimension 1 - indexed by processor index
     // dimension 2 - indexed by interval index
-    private int[][][] data;//incoming util data per processor per interval
+    private int[][][] data;
+
+    // utilData (for utilization based visualization)
+    // dimension 0 - indexed by processor index
+    // dimension 1 - indexed by interval index
+    private int[][] utilData;
+
     private int[][] colors; //The color per processor per interval
     private int intervalSize;//Length of an interval, in microseconds
+
+    // **CW** These reflect the last known values. Hence, if the viewing
+    // mode is changed, the equivalent data can be re-loaded using the
+    // same parameters.
     private int nPe;//Number of processors
     private OrderedIntList validPEs;
     private long totalTime;//Length of run, in microseconds
@@ -52,14 +63,33 @@ public class StlPanel extends ScalePanel.Child
 		    pe = validPEs.nextElement();
 		    count++;
 		}
+		int numEP = Analysis.getNumUserEntries();
+		int interval = (int)(t/intervalSize);
+		int utiliz=utilData[pe][interval];
+		long  timedisplay = t+(long)startTime;
 		if (mode == StlWindow.MODE_UTILIZATION) {
-		    int utiliz=data[0][pe][(int)(t/intervalSize)];
-		    long  timedisplay = t+(long)startTime;
 		    return "Processor "+pe+": Usage = "+utiliz+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
 		} else {
-		    // **CW** nothing for now.
-		    return "";
+		    // **CW** most significant EP information at this point
+		    // is not preserved (maybe it should be), hence we will
+		    // reconstruct the information.
+		    int maxEP = 0;
+		    int max = 0;
+		    for (int ep=0; ep<numEP; ep++) {
+			if (data[ep][pe][interval] >= max) {
+			    max = data[ep][pe][interval];
+			    maxEP = ep;
+			}
+		    }
+		    if (max > 0) {
+			return "Processor "+pe+": Usage = "+utiliz+"%"+
+			    " at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
+			" EP = " + Analysis.getEntryName(maxEP);
+		    } else {
+			return "Processor "+pe+": Usage = "+utiliz+"%"+
+			    " at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
+		    }
 		}
 	    }
 	} catch (Exception e) { 
@@ -183,8 +213,17 @@ public class StlPanel extends ScalePanel.Child
 	for (int p=0;p<nPE;p++) {
 	    int n=data[p].length;
 	    colors[p] = new int[n];
-	    for (int i=0;i<n;i++) 
+	    for (int i=0;i<n;i++) {
+		if ((data[p][i] > 127) || (data[p][i] < 0)) {
+		    // This happens when there are data-based bugs, but
+		    // we want to be able to deal with it here without
+		    // breaking overview. So, set to 127 (maps to green,
+		    // an anomalous color).
+		    // Why not 255? Because Bloody byte in Java is signed!
+		    data[p][i] = 127;
+		}
 		colors[p][i]=colorMap.apply((byte)data[p][i]);
+	    }
 	}
     }
 
@@ -194,7 +233,7 @@ public class StlPanel extends ScalePanel.Child
      */
     private void applyColorMap(int [][][]data) {
 	int numEP = data.length;
-	int numPE = data[numEP-1].length; // ignore average util
+	int numPE = data[numEP-1].length;
 	colors = new int[numPE][];
 	for (int pe=0;pe<numPE;pe++) {
 	    int n=data[numEP-1][pe].length;
@@ -203,13 +242,19 @@ public class StlPanel extends ScalePanel.Child
 		// find max ep
 		int maxEP = 0;
 		int max = 0;
-		for (int ep=0; ep<numEP-1; ep++) {
+		for (int ep=0; ep<numEP; ep++) {
 		    if (data[ep][pe][interval] >= max) {
 			max = data[ep][pe][interval];
 			maxEP = ep;
 		    }
 		}
-		colors[pe][interval]=Analysis.getEntryColor(maxEP).getRGB();
+		if (max > 0) {
+		    colors[pe][interval] =
+			Analysis.getEntryColor(maxEP).getRGB();
+		} else {
+		    colors[pe][interval] =
+			Color.black.getRGB();
+		}
 	    }
 	}
     }
@@ -218,107 +263,64 @@ public class StlPanel extends ScalePanel.Child
 	this.mode = mode;
 	int numEPs = Analysis.getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
-	    applyColorMap(data[numEPs]);
+	    applyColorMap(utilData);
 	} else if (mode == StlWindow.MODE_EP) {
+	    if (data == null) {
+		setData(validPEs, startTime, endTime);
+	    }
 	    applyColorMap(data);
 	}
 	repaint();
     }
 
-    public void setData(int desiredIntervals) {
-	totalTime=Analysis.getTotalTime();
-	intervalSize=(int)(totalTime/desiredIntervals);
-	/*
-	  Analysis.LoadGraphData(intervalSize,
-	  0, desiredIntervals-1,false,null);
-	*/
-	// **CW** now, there's the possibility we want entry-point
-	// based data.
-	Analysis.LoadGraphData(intervalSize,
-			       0, desiredIntervals-1,true,null);
-	int numEPs = Analysis.getNumUserEntries();
-	data = new int[numEPs+1][][];
-	/* **CW** we now compute the utilization instead of taking it
-	   from analysis.
-	*/
-	// data=Analysis.getSystemUsageData(1);
-	computeUtilizationData();
-	if (mode == StlWindow.MODE_UTILIZATION) {
-	    applyColorMap(data[numEPs]);
-	} else if (mode == StlWindow.MODE_EP) {
-	    applyColorMap(data);
-	}
-	nPe=data[numEPs].length;
-	repaint();
-    }
-    
     public void setData(OrderedIntList validPEs, long startTime, long endTime)
     {
 	this.validPEs = validPEs;
 	totalTime = endTime - startTime;
 	this.startTime = startTime;
 	this.endTime = endTime;
-	//necessary for t < 7000
-	//int desiredIntervals = 7000;
+
+	// necessary for t < 7000
+	// int desiredIntervals = 7000;
 	int desiredIntervals;
-	if(totalTime < 7000)
+	if (totalTime < 7000) {
 	    desiredIntervals = (int )(totalTime -1.0);
-	else	
+	} else {
 	    desiredIntervals = 7000;
-	
+	}
+
 	double trialintervalSize = (totalTime/desiredIntervals);
 	if (trialintervalSize < 5 ){
 	    desiredIntervals = desiredIntervals/(5);
 	    trialintervalSize = (totalTime/desiredIntervals);
 	}
+
 	intervalSize = (int )trialintervalSize;
-	//System.out.println("desiredIntervals : " + desiredIntervals + " intervalSize " + intervalSize);
 	int totalIntervals = (int )Analysis.getTotalTime()/intervalSize;
 	int startInterval = (int )startTime/intervalSize;
 	int endInterval = (int )endTime/intervalSize;
-	/*
-	  Analysis.LoadGraphData(intervalSize,
-	  startInterval, endInterval,false,validPEs);
-	*/
-	// **CW** now, there's the possibility we want entry-point
-	// based data.
-	Analysis.LoadGraphData(intervalSize,
-			       startInterval, endInterval,true,validPEs);
-	System.out.println(Analysis.hasUserEntryData(0,LogReader.TIME));
+
+	nPe=validPEs.size();
 	int numEPs = Analysis.getNumUserEntries();
-	data = new int[numEPs+1][][];
-	computeUtilizationData();
 	if (mode == StlWindow.MODE_UTILIZATION) {
-	    applyColorMap(data[numEPs]);
+	    // we want to avoid loading the 4-D array if possible.
+	    Analysis.LoadGraphData(intervalSize,
+				   startInterval, endInterval,false,validPEs);
+	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
+	    applyColorMap(utilData);
 	} else if (mode == StlWindow.MODE_EP) {
+	    Analysis.LoadGraphData(intervalSize,
+				   startInterval, endInterval,true,validPEs);
+	    data = new int[numEPs][][];
+	    for (int ep=0; ep<numEPs; ep++) {
+		data[ep] = Analysis.getUserEntryData(ep, LogReader.TIME);
+	    }
+	    // Utilization data has already been computed by LoadGraphData
+	    // in Analysis.java. Might as well use it.
+	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
 	    applyColorMap(data);
 	}
-	nPe=data[numEPs].length;
 	validPEs.reset();
 	repaint();
-    }
-
-    private void computeUtilizationData() {
-	int numEPs = data.length-1;
-
-	for (int ep=0; ep<numEPs; ep++) {
-	    // wierd, java does not allow me to simply "append" an array
-	    // to another.
-	    int temp[][] = Analysis.getUserEntryData(ep, LogReader.TIME);
-	    int numPEs = temp.length;
-	    data[ep] = new int[numPEs][];
-	    System.out.println("length = " + numPEs);
-	    for (int pe=0; pe<numPEs; pe++) {
-		int numIntervals = temp[pe].length;
-		data[ep][pe] = new int[numIntervals];
-		for (int interval=0; interval<numIntervals; interval++) {
-		    // average utilization entry
-		    data[ep][pe][interval] = temp[pe][interval];
-		    data[numEPs][pe][interval] += data[ep][pe][interval];
-		}
-	    }
-	}
-	// there's no need to compute the % utilization as it will be done
-	// later when rendering takes place. Wierd place to do it though.
     }
 }

@@ -268,7 +268,8 @@ public class LogReader
 	bar.progress(0,"allocating");
 	sysUsgData = new int[3][numProcessors][];
 	if (byEntryPoint) {
-	    userEntries = new int[numUserEntries][3][numProcessors][];
+	    userEntries = new 
+		int[numUserEntries][3][numProcessors][numIntervals];
 	    categorized = new int[5][3][numProcessors][];
 	}
 	int seq = 0;

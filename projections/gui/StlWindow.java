@@ -119,18 +119,20 @@ public class StlWindow extends ProjectionsWindow
     }  
 
     private void setStlPanelData(int n){
+
 	if(scalePanel == null)
 	    System.out.println("How  can it be ");
 	ColorMap cm=new ColorMap();
 	if (mode == MODE_UTILIZATION) {
 	    cm.addBreak( 0,  0,  0, 55,    70,255,  0,  0); //Blue to red
 	    cm.addBreak(70,255,  0,  0,   100,255,255,255); //red to white
-	    //cm.addBreak(51,0,255,  0,   100,255, 55,30); //red to green (POOR FOR COLORBLIND PEOPLE)
-	    cm.addBreak(101,0,255,0, 255,0,255,0); //Overflow-- green
+	    // Overflow-- green. Should not happen for utilization.
+	    cm.addBreak(101,0,255,0, 255,0,255,0); 
 	} else if (mode == MODE_EP) {
 	    // color to be broken up by EP.
+	    // Do not do anything here because the colors will be determined
+	    // by the significant EPs instead of the value.
 	}
-	  
 	stl.setColorMap(cm);
 	  
 	//if(n != 1)

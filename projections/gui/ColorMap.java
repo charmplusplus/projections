@@ -39,9 +39,12 @@ class ColorMap {
 	/**
 	 * Map this color index into an actual color, suitable
 	 * for use in a regular "int" Java image.
+	 *
+	 * **CW** The only reason we cannot use unsigned bytes is
+	 * because bloody Java will not support them.
 	 */
 	public int apply(byte v) {
-		return (0xff<<24)|(red[v]<<16)|(green[v]<<8)|(blue[v]<<0);
+	    return (0xff<<24)|(red[v]<<16)|(green[v]<<8)|(blue[v]<<0);
 	}
 
 	public ColorModel getColorModel()

@@ -235,12 +235,21 @@ public class Analysis {
 	    return 0;
     }
 
-    public static int[][] getSystemMsgsData( int a, int t ) {
-	return systemMsgsData[ a ][ t ];
+    /**
+     *  categoryIdx (see LogReader) refers to the category of system messages
+     *  that are logged. type refers to the time of data (eg. time) logged.
+     *  note that "type" here is different from "type" in getSystemUsageData.
+     */
+    public static int[][] getSystemMsgsData(int categoryIdx, int type) {
+	return systemMsgsData[categoryIdx][type];
     }
 
-    public static int[][] getSystemUsageData( int a ) {
-	return systemUsageData[ a ];
+    /**
+     *  "type" here refers to the type of usage data (ie. Idle, System Queue
+     *  length or CPU usage).
+     */
+    public static int[][] getSystemUsageData(int type) {
+	return systemUsageData[type];
     }
 
     public static long getTotalTime() {
@@ -372,7 +381,7 @@ public class Analysis {
 	    LogReader logReader = new LogReader();
 	    logReader.read(intervalSize, 
 			   intervalStart, intervalEnd,
-			   byEntryPoint, processorList );
+			   byEntryPoint, processorList);
 	    systemUsageData = logReader.getSystemUsageData();
 	    systemMsgsData = logReader.getSystemMsgs();
 	    userEntryData = logReader.getUserEntries();
@@ -505,6 +514,10 @@ public class Analysis {
 
     public static String[][] getEntryNames() {
 	return sts.getEntryNames();
+    }
+
+    public static String getEntryName(int epIdx) {
+	return (sts.getEntryNames())[epIdx][0];
     }
 
     public static int getNumUserDefinedEvents() {

@@ -26,7 +26,7 @@ import java.awt.*;
 public abstract class ProjectionsWindow 
     extends Frame
 {
-    private RangeDialog dialog;
+    RangeDialog dialog;
 
     abstract void showDialog();
 

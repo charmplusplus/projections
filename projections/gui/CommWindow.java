@@ -21,9 +21,6 @@ public class CommWindow extends GenericGraphWindow
 	private double[][]	exclusiveSent;
 	private ArrayList		histogram;
 	private int[]			histArray;
-	private String[][]	histText;
-	private String[][]	msgText;
-	private String[][]	byteText;
 	private String 		currentArrayName;
 	private String[][]	popupText;
 	private String[][]	EPNames;
@@ -62,17 +59,14 @@ public class CommWindow extends GenericGraphWindow
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));			
 			Checkbox cb = (Checkbox)ae.getSource();
 			 if(cb == histogramCB){
-				//System.out.println("HistogramView");
 				setDataSource("Histogram", histArray, this);
 				setPopupText("histArray");
 				setYAxis("Frequency", null);
 				setXAxis("Byte Size", "bytes");
 				super.refreshGraph();
 			}else if(cb == sentMssgs){
-				//System.out.println("mssgs");
 				setDataSource("Communications", msgCount, this);
 				setPopupText("msgCount");
-				//setPopupText(msgText);
 				setYAxis("Messages Sent", "");
 				setXAxis("Processor", null);
 				super.refreshGraph();
@@ -104,10 +98,6 @@ public class CommWindow extends GenericGraphWindow
 		currentArrayName = input;
 	}
 	
-	private void setPopupText(String[][] input){
-		popupText = input;
-	}
-	
 	 public String[] getPopup(int xVal, int yVal){
 	 	 //System.out.println("CommWindow.getPopup()");
 		 //System.out.println(xVal +", " +yVal);
@@ -135,32 +125,9 @@ public class CommWindow extends GenericGraphWindow
 		 	rString[0] = "EPid: " + EPNames[yVal][0];
 			rString[1] = "Count = " + exclusiveSent[xVal][yVal];
 		 }
-
-/*		
-		 if(popupText != histText){
-			 rString[0] = "EPid: " + EPNames[yVal][0];
-			 rString[1] = popupText[xVal][yVal];
-		}else{
-			rString[0] = popupText[xVal][0];
-			rString[1] = popupText[xVal][1];
-			//System.out.println("==> " + rString[0]);
-			//System.out.println("==> " + rString[1]);
-		}			
-		
-*/
-		//System.out.println("==> " + rString);
 		return rString;
 	 }	
 	
-/*	protected JPanel getMainPanel(){
-		JPanel mainPanel = new JPanel();
-		graphCanvas = new MyGraph();
-      graphPanel = new GraphPanel(graphCanvas);
-      mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
-		mainPanel.add(graphPanel);
-		return mainPanel;
-   }
-*/	
 	protected void setLayout(){
 		GridBagConstraints gbc = new GridBagConstraints();
 		GridBagLayout gbl = new GridBagLayout();
@@ -212,8 +179,6 @@ public class CommWindow extends GenericGraphWindow
 		byteCount = new double[validPEs.size()][];
 		recivedMsgCount = new double[validPEs.size()][];
 		exclusiveSent = new double[validPEs.size()][];
-		msgText = new String[validPEs.size()][];
-		byteText = new String[validPEs.size()][];
 		getData();
 		setDataSource("Histogram", histArray, this);
 		super.refreshGraph();
@@ -238,8 +203,6 @@ public class CommWindow extends GenericGraphWindow
 				byteCount[pe] = new double[numEPs];
 				recivedMsgCount[pe] = new double[numEPs];
 				exclusiveSent[pe] = new double[numEPs];
-				msgText[pe] = new String[numEPs];
-				byteText[pe] = new String[numEPs];
 				int EPid;
 				
 				glr.nextEventOnOrAfter(startTime, logdata);
@@ -249,9 +212,7 @@ public class CommWindow extends GenericGraphWindow
 					if(logdata.type == ProjDefs.CREATION){
 						EPid = logdata.entry;
 						msgCount[pe][EPid] ++;
-						msgText[pe][EPid] = "Count = " + msgCount[pe][EPid];		// need to get rid of this
 						byteCount[pe][EPid] += logdata.msglen;
-						byteText[pe][EPid] = "Bytes: " + byteCount[pe][EPid];  	// and this too
 						histogram.add(new MyArray(logdata.msglen));
 					} else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
 						EPid = logdata.entry;
@@ -268,53 +229,6 @@ public class CommWindow extends GenericGraphWindow
 			}
 		}
 		
-		
-		/*while(peList.hasMoreElements()){
-			int pe = peList.nextElement();
-			glr = new GenericLogReader(Analysis.getLogName(pe), Analysis.getVersion());
-			
-			try{
-				msgCount[pe] = new double[numEPs +1];
-				byteCount[pe] = new double[numEPs +1];
-				msgText[pe] = new String[numEPs +1];
-				byteText[pe] = new String[numEPs +1];
-				double tempMC, tempBC;
-				glr.nextEventOnOrAfter(startTime, logdata);
-				
-				
-				while(true){
-					glr.nextEventOfType(ProjDefs.BEGIN_PROCESSING, logdata);
-					int EPid = logdata.entry;
-					// System.out.println(EPid);
-					// tempMC = 0;
-					// tempBC = 0;
-					//int count = 0;
-					while(true){						
-						glr.nextEvent(logdata);
-						if(logdata.type == ProjDefs.CREATION){
-							msgCount[pe][EPid] ++;
-							msgText[pe][EPid] = "Count = " + msgCount[pe][EPid];
-							byteCount[pe][EPid] += logdata.msglen;
-							byteText[pe][EPid] = "Bytes: " + byteCount[pe][EPid];
-							//count++;
-							//System.out.print(histogram.size() + " ... ");
-							// System.out.println("histogram-> " +histogram.get(logdata.msglen));
-							histogram.add(new MyArray(logdata.msglen));
-							//histogram.add(temp);
-							//System.out.println(logdata.msglen + " ... " + histogram.size());							
-						}else if(logdata.type == ProjDefs.END_PROCESSING){
-							break;
-						}						
-					}			
-				}
-			}catch(java.io.EOFException e){
-			}catch(Exception e){
-				System.out.println("Exception: " +e);
-				e.printStackTrace();
-			}
-			
-		}
-		*/
 
 		int max = ((MyArray)histogram.get(0)).index;
 		int min = ((MyArray)histogram.get(0)).index;
@@ -327,27 +241,21 @@ public class CommWindow extends GenericGraphWindow
 		}
 
 		histArray = new int[max+1];
-		histText = new String[max+1][];
 		for(int k=0; k<Array.getLength(histArray); k++){
 			histArray[k] = 0;
-			histText[k] = new String[2];
-			histText[k][0] = "";
-			histText[k][1] = "";
 		}
 
 		int index;
 		for(int k=0; k<histogram.size(); k++){
 			index = ((MyArray)histogram.get(k)).index;
 			histArray[index] += 1;
-			histText[index][0] = index + " bytes";
-			histText[index][1] = "Count = " + histArray[index];
 		}
 		
 		for(int k=0; k<numPe; k++){
 			for(int j=0; j<numEPs; j++){
 				exclusiveSent[k][j] = msgCount[k][j] - exclusiveSent[k][j];
 				
-				// AJ - i'm doing this to prevent any negitive numbers from 
+				// Apurva - i'm doing this to prevent any negitive numbers from 
 				// getting sent into the stack array because it messes up
 				// the drawing				
 				if(exclusiveSent[k][j] < 0)

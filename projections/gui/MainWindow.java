@@ -23,6 +23,8 @@ public class MainWindow extends Frame
    private MultiRunWindow       multiRunWindow;
    private IntervalWindow 	intervalWindow;
 
+    private EPAnalysis           epAnalysis;
+
    private AboutDialog          aboutDialog;
 
    private MainTitlePanel       titlePanel;
@@ -96,6 +98,8 @@ public class MainWindow extends Frame
 			   ShowHistogramWindow();
 			else if(arg.equals("Overview"))
 			   ShowStlWindow();
+			else if(arg.equals("Generate EP Data"))
+			    activateEPAnalysis();
 		 }
 	  }
    }
@@ -103,6 +107,10 @@ public class MainWindow extends Frame
    {
        multiRunWindow = null;
    }
+    public void CloseEPAnalysis()
+    {
+	epAnalysis = null;
+    }
    public void CloseGraphWindow()
    {
 	  graphWindow = null;
@@ -176,6 +184,7 @@ public class MainWindow extends Frame
 	  mbar.add(Util.makeMenu("Tools", new Object[]
 	  {
 	         "Multirun Analysis",
+		 "Generate EP Data",
 		 "Graphs",
 		 "Timelines",
 		 "Usage Profile",
@@ -285,6 +294,11 @@ public class MainWindow extends Frame
 	   if(multiRunWindow == null)
 		 multiRunWindow = new MultiRunWindow(this);
    } 
+    public void activateEPAnalysis()
+    {
+	if (epAnalysis == null)
+	    epAnalysis = new EPAnalysis(this);
+    }
    public void ShowIntervalWindow()
    {
 	   if(intervalWindow == null)

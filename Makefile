@@ -7,6 +7,8 @@ SRC=\
     projections/analysis/AsciiIntegerReader.java\
     projections/analysis/Chare.java\
     projections/analysis/Entry.java\
+    projections/analysis/EPNamdDefs.java\
+    projections/analysis/EPDataGenerator.java\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\
@@ -40,6 +42,7 @@ SRC=\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\
     projections/gui/EntryPointWindow.java\
+    projections/gui/EPAnalysis.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
     projections/gui/GraphAttributesWindow.java\

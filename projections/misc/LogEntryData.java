@@ -20,6 +20,8 @@ public class LogEntryData
     public int pe;		// processor number where the event occurred
     public int msglen;		// only for CREATION events
 
+    public int userEventID;     // for USER_EVENT_PAIR events only
+
     public LogEntryData() {
     }
 

@@ -36,6 +36,10 @@ public class Analysis {
     else { return null; }
   }
 
+    public static String[] getUserEventNames() {
+	return sts.getUserEventNames();
+    }
+
   public static Color getUserEventColor(int eventID) {
     if (sts != null) { return sts.getUserEventColor(eventID); }
     else { return null; }
@@ -162,6 +166,14 @@ public class Analysis {
 	public static int getNumUserEntries() {
 		return sts.getEntryCount();
 	}
+    public static int getNumUserDefinedEvents() {
+	return sts.getNumUserDefinedEvents();
+    }
+
+    public static int getUserDefinedEventIndex(int eventID) {
+	return sts.getUserEventIndex(eventID);
+    }
+
 	public static int[][] getSystemMsgsData( int a, int t ) {
 		return systemMsgsData[ a ][ t ];
 	}

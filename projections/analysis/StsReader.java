@@ -27,8 +27,20 @@ public class StsReader extends ProjDefs
 	private String Machine, ClassNames[];
 	private Chare ChareList[];
 	private long MsgTable[];
+    private int userEventIndex = 0;
+    private Hashtable UserEventIndices = new Hashtable();
         private Hashtable UserEvents = new Hashtable();  // index by Integer, return String name
         private Hashtable UserEventColors = new Hashtable();
+    private String UserEventNames[];
+
+    public int getNumUserDefinedEvents() {
+	return UserEvents.size();
+    }
+
+    public int getUserEventIndex(int eventID) {
+	Integer key = new Integer(eventID);
+	return ((Integer)UserEventIndices.get(key)).intValue();
+    }
 
   public Color getUserEventColor(int eventID) {
     Integer key = new Integer(eventID);
@@ -40,6 +52,10 @@ public class StsReader extends ProjDefs
     return (String) UserEvents.get(key);
   }
 
+    public String[] getUserEventNames() {
+	// gets an array by logical (not user-given) index
+	return UserEventNames;
+    }
 	/** Read in and decipher the .sts file.
 	 *  @exception LogLoadException if an error occurs while reading in the
 	 *      the state file
@@ -139,6 +155,9 @@ public class StsReader extends ProjDefs
 			      eventName = eventName + st.nextToken() + " ";
 			    }
 			    UserEvents.put(key, eventName);
+			    UserEventNames[userEventIndex] = eventName;
+			    UserEventIndices.put(key, 
+						 new Integer(userEventIndex++));
 			  }
 			}
 	/* No longer used-- OSL, 2/8/2001
@@ -147,10 +166,14 @@ public class StsReader extends ProjDefs
 			   Prog.TotalPseudos = Integer.parseInt (st.nextToken());
 			   Prog.PseudoTable  = new Pseudo [Prog.TotalPseudos];
 			}
+	*/
+			// restored by Chee Wai - 7/29/2002
 			else if(s1.equals("TOTAL_EVENTS"))
 			{
-			   Prog.TotalEvents = Integer.parseInt(st.nextToken());
+			    UserEventNames = 
+				new String[Integer.parseInt(st.nextToken())];
 			}
+	/* No longer used-- OSL, 2/8/2001
 			else if(s1.equals("PSEUDO"))
 			{
 			   PseudoIndex = Integer.parseInt(st.nextToken());

@@ -101,6 +101,12 @@ public class GenericLogReader extends ProjDefs
 	case BEGIN_COMPUTATION: case END_COMPUTATION:
 	    data.time = reader.nextLong();
 	    break;
+	case USER_EVENT_PAIR:
+	    data.userEventID = reader.nextInt();
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	    break;
 	default:
 	    data.type = -1;
 	    reader.nextLine(); // Skip over any garbage 

@@ -197,21 +197,11 @@ public class TimelineObject extends Component
 	  addMouseListener(this);
    } 
 
-
-
-
-
-
-
-
-
-
-
-
    public void CloseMessageWindow()
    {
 	  msgwindow = null;
    }   
+
    private void drawLeftArrow(Graphics g, Color c, int startY, int h)
    {
 	  int[] xpts = {5, 0, 5};
@@ -226,6 +216,7 @@ public class TimelineObject extends Component
 	  g.setColor(c.darker());
 	  g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);   
    }   
+
    private void drawRightArrow(Graphics g, Color c, int startY, int h, int w)
    {
 	  int[] xpts = {w-6, w, w-6};
@@ -240,30 +231,37 @@ public class TimelineObject extends Component
 	  g.setColor(c.darker());
 	  g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);
    }   
+
    public long getBeginTime()
    {
 	  return beginTime;
    }   
+
    public long getEndTime()
    {
 	  return endTime;
    }   
+
    public int getEntry()
    {
 	  return entry;
    }   
+
    public TimelineMessage[] getMessages()
    {
 	  return messages;
    }   
+
    public Dimension getMinimumSize()
    {
 	  return new Dimension(getSize().width, getSize().height);
    }   
+
    public float getNetUsage()
    {
 	  return (float)usage - packusage;
    }   
+
    public int getNumMsgs()
    {
 	  if(messages == null)
@@ -271,26 +269,32 @@ public class TimelineObject extends Component
 	  else
 		 return messages.length;
    }   
+
    public float getPackUsage()
    {
 	  return packusage;
    }   
+
    public int getPCreation()
    {
 	  return pCreation;
    }   
+
    public int getPCurrent()
    {
 	  return pCurrent;
    }   
+
    public Dimension getPreferredSize()
    {
 	  return new Dimension(getSize().width, getSize().height);
    }   
+
    public float getUsage()
    {
 	  return (float)usage;
    }   
+
    public void mouseClicked(MouseEvent evt)
    {
        if(entry >= 0){
@@ -328,10 +332,10 @@ public class TimelineObject extends Component
        }
    } 
 		
-	 public void clearCreationLine(){
-	 	creationLine = 0;
-		created_message = null;
-	 }
+    public void clearCreationLine() {
+	creationLine = 0;
+	created_message = null;
+    }
 
    public TimelineMessage searchMesg(Vector v,int eventid){
    	return binarySearch(v,eventid,0,v.size());
@@ -353,7 +357,6 @@ public class TimelineObject extends Component
 	}
    }
 
-   
    public void mouseEntered(MouseEvent evt)
    {
 	  if(entry == -1 && data.showIdle == false)
@@ -372,6 +375,7 @@ public class TimelineObject extends Component
 		 bubble.setVisible(true);
 	  }     
    }   
+
    public void mouseExited(MouseEvent evt)
    {
 	  if(inside)
@@ -384,12 +388,15 @@ public class TimelineObject extends Component
 		 inside = false;
 	  }      
    }   
+
    public void mousePressed(MouseEvent evt)
    {
    }   
+
    public void mouseReleased(MouseEvent evt)
    {
    }   
+
    private void OpenMessageWindow()
    {
           if(msgwindow == null) {
@@ -401,7 +408,6 @@ public class TimelineObject extends Component
 	  msgwindow.setVisible(true);
    } 
 	
-
    private Color getObjectColor(ObjectId tid){
    	int r;
 	int g;
@@ -524,6 +530,7 @@ public class TimelineObject extends Component
 	  }               
 
    }   
+
    public void print(Graphics pg, long minx, long maxx, double pixelIncrement, int timeIncrement)
    {
 	  if(entry == -1 && data.showIdle == false)
@@ -634,6 +641,7 @@ public class TimelineObject extends Component
 
 	  pg.setClip(r);               
    }   
+
    public void setBounds(int ylocation)
    {
 	  long LEN, BT, ET;
@@ -662,6 +670,7 @@ public class TimelineObject extends Component
 	  super.setBounds(BTS,  data.tluh/2 + ylocation*data.tluh - data.barheight/2,
 					  LENS, data.barheight + 5);
    }   
+
    public void setPackUsage()
    {
 	  packtime = 0;
@@ -669,27 +678,43 @@ public class TimelineObject extends Component
 	  {   
 		 for(int p=0; p<packs.length; p++)
 		 {
-			packtime += packs[p].EndTime - packs[p].BeginTime + 1;  
+		     // packtime += packs[p].EndTime - packs[p].BeginTime + 1;
+			packtime += packs[p].EndTime - packs[p].BeginTime;
 			if(packs[p].BeginTime < data.beginTime)
-			   packtime -= (data.beginTime - packs[p].BeginTime);
+			    packtime -= (data.beginTime - packs[p].BeginTime);
 			if(packs[p].EndTime > data.endTime)
 			   packtime -= (packs[p].EndTime - data.endTime);
 		 }
 		 packusage = packtime * 100;
-		 packusage /= (data.endTime - data.beginTime + 1);
+		 packusage /= (data.endTime - data.beginTime);
 	  }
    }   
+
    public void setUsage()
    {
-	  usage = endTime - beginTime + 1;
-	  if(beginTime < data.beginTime)
-		 usage -= (data.beginTime - beginTime);
-	  if(endTime   > data.endTime)
-		 usage -= (endTime - data.endTime);
+       //       System.out.println(beginTime + " " + endTime + " " +
+       //			  data.beginTime + " " + data.endTime);
+			  
+			  
+	  usage = endTime - beginTime;
+	  //	  usage = endTime - beginTime + 1;
+
+	  //	  System.out.println("Raw usage : " + usage);
+
+	  if (beginTime < data.beginTime) {
+	      usage -= (data.beginTime - beginTime);
+	  }
+	  if (endTime > data.endTime) {
+	      usage -= (endTime - data.endTime);
+	  }
+	  //	  System.out.println("Final usage : " + usage);
+	  //	  System.out.println();
 	
-	  usage /= (data.endTime - data.beginTime + 1);
+	  usage /= (data.endTime - data.beginTime);
 	  usage *= 100;
+	  // System.out.println(usage);
    }   
+
    public void update(Graphics g)
    {
 	  paint(g);

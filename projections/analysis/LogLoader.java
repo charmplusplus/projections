@@ -163,8 +163,16 @@ public class LogLoader extends ProjDefs
 		if (LE.Entry == -1) {
 		    continue;
 		}
+		// This is still not ideal. There are cases which may cause
+		// a rogue begin event to have data dropped at the beginning.
 		if ((LE.TransactionType == BEGIN_PROCESSING) && 
 		    (LE.Entry != -1)) {
+		    isProcessing = true;
+		    Time       = LE.Time - BeginTime;
+		    Entry      = LE.Entry;
+		} else if ((LE.TransactionType == END_PROCESSING) &&
+			   (LE.Entry != -1)) {
+		    isProcessing = false;
 		    Time       = LE.Time - BeginTime;
 		    Entry      = LE.Entry;
 		} else if (LE.TransactionType == BEGIN_IDLE) {
@@ -198,6 +206,15 @@ public class LogLoader extends ProjDefs
 		if (LE.Entry != -1) {
 		    switch (LE.TransactionType) {
 		    case BEGIN_PROCESSING:
+			if (isProcessing) {
+			    // bad. We add a "pretend" end event to accomodate
+			    // the prior begin processing event.
+			    if (TE != null) {
+				TE.EndTime = LE.Time - BeginTime;
+			    }
+			    TE = null;
+			}
+			isProcessing = true;
 			TE = new TimelineEvent(LE.Time-BeginTime, 
 					       LE.Time-BeginTime,
 					       LE.Entry, LE.Pe,
@@ -206,6 +223,8 @@ public class LogLoader extends ProjDefs
 			Timeline.addElement(TE);
 			break;
 		    case END_PROCESSING:
+			// this code automatically drops end events that
+			// duplicated, which is the intended behavior.
 			if (TE!=null) {
 			    TE.EndTime = LE.Time - BeginTime;
 			}
@@ -442,11 +461,15 @@ public class LogLoader extends ProjDefs
 	    log.nextLine();  // ignore rest of this line
 	    break;
 	case BEGIN_PROCESSING:
+	    /* We no longer ignore lines at the reading level. 
+	     * The calling method will have
+	     * to process this and act accordingly.
 	    if (isProcessing) {
 		// bad, ignore and clear rest of line.
 		log.nextLine();  // ignore rest of this line
 		break;
 	    }
+	    */
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
 	    if (deltaEncoded) {
@@ -471,11 +494,17 @@ public class LogLoader extends ProjDefs
 	    log.nextLine();  // ignore rest of this line
 	    break;
 	case END_PROCESSING:
+	    /* We no longer ignore lines at the reading level.
+	     * The calling method will have to process this and act
+	     * accordingly.
 	    if (!isProcessing) {
+		// **CW** This is still a hack. A sequence number check is
+		// actually the correct thing to do.
 		// bad, ignore and clear rest of line.
 		log.nextLine();  // ignore rest of this line
 		break;
 	    }
+	    */
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
 	    if (deltaEncoded) {

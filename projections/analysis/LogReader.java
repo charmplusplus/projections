@@ -128,7 +128,7 @@ public class LogReader
     private void fillToInterval(int newinterval)
     {
 	if (interval>=newinterval) {
-	    return; //Nothing to do in this case
+	    return; //Nothing to do in this case, we're already past!
 	}
 	
 	//Finish off the current interval
@@ -188,6 +188,10 @@ public class LogReader
 	    }
 	    break;
 	case END_PROCESSING:
+	    if (mtype == -5) {
+		// the "ignore" flag
+		break;
+	    }
 	    if (interval >= intervalStart && interval <= intervalEnd) {
 		addToInterval((int)(time-startTime),interval,false);
 	    }
@@ -322,8 +326,10 @@ public class LogReader
 		} else {
 		    deltaEncoded = false;
 		}
+		
+		/* STUPID - first line already read using readLine() !!!!!
 		log.nextLine(); // clear the rest of the first line.
-
+		*/
 		// The Begin Computation line (for now) is useless unless
 		// delta-encoding (which also seems to be useless) is
 		// employed.
@@ -331,7 +337,9 @@ public class LogReader
 		    log.nextInt();
 		    prevTime = log.nextLong();
 		} else {
-		    log.nextLine(); // ignore second line.
+		    // the computation line will be junked by
+		    // the log.nextLine() in the loop.
+		    // log.nextLine(); // ignore second line.
 		}
 
 		int nLines=2;
@@ -373,10 +381,14 @@ public class LogReader
 					 time);
 			    break;
 			case BEGIN_PROCESSING: 
+			    /* Instead of ignoring the current begin
+			       processing event, we should add a "pretend"
+			       end processing event.
 			    if (isProcessing) {
 				// bad, ignore.
 				break;
 			    }
+			    */
 			    mtype = log.nextInt();
 			    entry = log.nextInt();
 			    if (deltaEncoded) {
@@ -391,16 +403,19 @@ public class LogReader
 				msglen = log.nextInt();
 			    } else {
 				msglen = -1;
+			    }
+			    if (isProcessing) {
+				// add a pretend end processing event.
+				intervalCalc(END_PROCESSING, mtype, entry,
+					     time);
+				// not necessarily needed.
+				isProcessing = false;
 			    }
 			    intervalCalc(type, mtype, entry, 
 					 time);
 			    isProcessing = true;
 			    break;
                         case END_PROCESSING:
-			    if (!isProcessing) {
-				// bad, ignore.
-				break;
-			    }
 			    mtype = log.nextInt();
 			    entry = log.nextInt();
 			    if (deltaEncoded) {
@@ -416,8 +431,17 @@ public class LogReader
 			    } else {
 				msglen = -1;
 			    }
-			    intervalCalc(type, mtype, entry, 
-					 time);
+			    if (!isProcessing) {
+				// bad, ignore. (the safe thing to do)
+				// HAVE to add a dummy end event.
+				// **HACK** use -5 as mtype number to
+				// indicate the data is to be dropped.
+				// (fillToIntervals still needs to make
+				// progress though)
+				intervalCalc(type, -5, entry, time);
+			    } else {
+				intervalCalc(type, mtype, entry, time);
+			    }
 			    isProcessing = false;
 			    break;
 			case ENQUEUE:
@@ -436,6 +460,13 @@ public class LogReader
 			    // end computation uses absolute timestamps.
 			    time = log.nextLong();
 			    fillToInterval(numIntervals);
+			    break;
+			case BEGIN_COMPUTATION:
+			    // just ignore it.
+			    // **CW** For some wierd reason, user events
+			    // occur before the begin computation event
+			    // in NAMD logs. Causing projections to throw
+			    // "warnings".
 			    break;
 			case USER_EVENT:
 			case USER_EVENT_PAIR:

@@ -30,7 +30,7 @@ public class ProfileWindow extends Frame
    private Color[] colors;
    private ProfileObject[][] poArray;
    private float xscale=1, yscale=1;
-   private float[] avg;
+   private float[][] avg;
    private float thresh;
    private int avgSize;
    private long begintime, endtime;
@@ -147,7 +147,7 @@ public class ProfileWindow extends Frame
                  else if(b == bPieChart)
                  {
                         System.out.println("bPieChart was clicked");
-			pieChartWindow = new PieChartWindow(mainWindow, avg, avgSize, thresh, colors);			
+						pieChartWindow = new PieChartWindow(mainWindow, avg[0], avg[0].length, thresh, colors);			
                  }
 		 
 		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));   
@@ -401,7 +401,7 @@ public class ProfileWindow extends Frame
 		// the first row is for entry method execution time the second is for 
 		//time spent sending messages in that entry method
 		
-		float[][] avg=new float[2][numUserEntries+4];
+		avg=new float[2][numUserEntries+4];
 		double avgScale=1.0/data.plist.size();
 
 		int poNo=1;

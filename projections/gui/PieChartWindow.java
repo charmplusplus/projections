@@ -45,7 +45,7 @@ public class PieChartWindow extends Frame{
 	*/
 	
     public PieChartWindow(MainWindow mainWindow, float[] data, int dataLen, float thresh, Color[] colors){
-        this.mainWindow = mainWindow;
+		this.mainWindow = mainWindow;
         this.data = data;
         this.dataLen = dataLen;
         this.thresh = thresh;
@@ -140,7 +140,7 @@ public class PieChartWindow extends Frame{
             int count = 0;
 
             for(int k=0; k<dataLen-1; k++){
-                if(data[k] > thresh)
+                if(data[k] >= thresh)
                     numArcs++;
             }
 

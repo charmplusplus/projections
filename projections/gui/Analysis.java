@@ -31,11 +31,21 @@ public class Analysis {
     /*****************Color Maps 6/27/2002 *************/
     private static Color[] entryColors;
 
+  public static String getUserEventName(int eventID) {
+    if (sts != null) { return sts.getUserEventName(eventID); }
+    else { return null; }
+  }
+
+  public static Color getUserEventColor(int eventID) {
+    if (sts != null) { return sts.getUserEventColor(eventID); }
+    else { return null; }
+  }
+
 	/****************** Timeline ******************/
-	public static Vector createTL( int p, long bt, long et ) {
+	public static Vector createTL( int p, long bt, long et, Vector timelineEvents, Vector userEvents ) {
 		try {
 			if( logLoader != null ) {
-				return logLoader.createtimeline( p, bt, et );
+				return logLoader.createtimeline( p, bt, et, timelineEvents, userEvents );
 			}
 			else {
                                 System.out.println("createTL: logLoader is null!");
@@ -269,19 +279,22 @@ public class Analysis {
 		}
 
 		// set up color maps for the entire toolkit.
-		entryColors = new Color[sts.getEntryCount()];
-		float H = (float)1.0;
-		float S = (float)1.0;
-		float B = (float)1.0;
-		float delta = (float)(1.0/sts.getEntryCount());
-		for(int i=0; i<sts.getEntryCount(); i++)
-		    {
-			entryColors[i] = Color.getHSBColor(H, S, B);
-			H -= delta;
-			if(H < 0.0)
-			    H = (float)1.0;
-		    }
+		entryColors = createColorMap(sts.getEntryCount());
 	}
+
+  public static Color[] createColorMap(int numColors) {
+    Color[] colors = new Color[numColors];
+    float H = (float)1.0;
+    float S = (float)1.0;
+    float B = (float)1.0;
+    float delta = (float)(1.0/numColors);
+    for(int i=0; i<numColors; i++) {
+      colors[i] = Color.getHSBColor(H, S, B);
+      H -= delta;
+      if(H < 0.0) { H = (float)1.0; }
+    }
+    return colors;
+  }
 
         /**
            replace LoadGraphData(), with one more parameter containing

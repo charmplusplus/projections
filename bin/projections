@@ -1,0 +1,5 @@
+#!/bin/sh
+
+java -ms60000000 -mx100000000 \
+  -classpath `dirname $0`/projections.jar \
+  projections.gui.MainWindow

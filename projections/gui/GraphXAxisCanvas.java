@@ -58,7 +58,7 @@ public class GraphXAxisCanvas extends Canvas
 	  if(data.xmode == GraphData.PROCESSOR)
 		 label = "Processor";          
 	  else  
-		 label = "Interval (length = " + U.t(data.interval.size)+")"; 
+		 label = "Time (in s)"; 
 	  
 	  int x = hsbval + (w - fm.stringWidth(label))/2;
 	  int y = h - 5;
@@ -90,8 +90,10 @@ public class GraphXAxisCanvas extends Canvas
 			    pe = data.origProcList.nextElement();
 			  s = "" + pe;
 			}
-			else
-			  s = "" + (i*tickincrement+data.intervalStart);
+			else{
+			  double tickVal = ((double )(i*tickincrement+data.intervalStart)*data.interval.size)/(double )1000000;
+			  s = "" + tickVal;
+			 }
 			
 			g.drawString(s, curx-fm.stringWidth(s)/2, 15 + fm.getHeight());
 		 

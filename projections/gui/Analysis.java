@@ -118,9 +118,18 @@ public class Analysis {
 	    // LogLoadException is a silly exception in the first place!
 	    throw new IOException(e.toString());
 	}
+
 	// Summary Files are handled orthogonally with the current scheme
 	// which should just have 2 types of data - interval data and point
 	// data.
+
+	// Read the super summarized data where available.
+	if (sts.hasSumAccumulatedFile()) { // SINGLE <stsname>.sum file
+	    // clear memory first ...
+	    sumAnalyzer = null;
+	    sumAnalyzer = new SumAnalyzer(sts, SumAnalyzer.ACC_MODE);
+	    setTotalTime(sumAnalyzer.GetTotalTime());
+	}
 	if( sts.hasSumFiles() ) { //.sum files
 	    try {
 		// clear memory first ...
@@ -169,20 +178,15 @@ public class Analysis {
 	}
     }
 
-    public static int[][] getAnimationData(int intervalSize, long startTime, long endTime, OrderedIntList validPEs) {
-	// **CW** Hideous programming ... make sure it is cleaned up later
-	// on.
-	
-	if ((long)intervalSize >= endTime-startTime) {
-	    intervalSize = (int)(endTime)-(int)(startTime);
+    public static int[][] getAnimationData(long intervalSize, 
+					   long startTime, long endTime, 
+					   OrderedIntList validPEs) {
+	if (intervalSize >= endTime-startTime) {
+	    intervalSize = endTime-startTime;
 	}
-	int startI = (int)startTime/intervalSize;
-	int endI = (int)endTime/intervalSize;
+	int startI = (int)(startTime/intervalSize);
+	int endI = (int)(endTime/intervalSize);
 	int numPs = validPEs.size();
-	
-	//if (endTime % intervalSize == 0 )
-	//	endI--;
-	
 	
 	LoadGraphData(intervalSize,startI,endI-1,false, null);
 	int[][] animationdata = new int[ numPs ][ endI-startI ];
@@ -478,12 +482,14 @@ public class Analysis {
      *  even more intervals than the 180k seen in current NAMD logs may
      *  require dynamic rebinning on read.
      */
-    public static void loadSummaryData(int numIntervalsLimit) {
+    public static void loadSummaryData() {
 	if (sts.hasSumFiles()) { 
 	    long sizeInt = sumAnalyzer.getIntervalSize();
 	    int nInt=(int)(getTotalTime()/sizeInt);
 	    
 	    loadSummaryData(sizeInt, 0, nInt-1);
+	} else if (sts.hasSumAccumulatedFile()) {
+	    // do nothing **HACK** - action taken later.
 	}
     }
 
@@ -524,7 +530,7 @@ public class Analysis {
 
     // *** Data File-related accessors (from sts reader) ***
     public static boolean hasSummaryData() {
-	return sts.hasSumFiles();
+	return (sts.hasSumFiles() || sts.hasSumAccumulatedFile());
     }
 
     public static boolean hasLogData() {

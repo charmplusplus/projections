@@ -71,11 +71,9 @@ public class SumDetailReader extends ProjectionsReader
 	return sourceFile.canRead();
     }
 
-    public long readStaticData() 
+    protected void readStaticData() 
 	throws IOException
     {
-	long byteCount = 0;
-
 	reader = new BufferedReader(new FileReader(sourceString));
 	// Set up the tokenizer  
 	tokenizer=new ParseTokenizer(reader);
@@ -91,7 +89,7 @@ public class SumDetailReader extends ProjectionsReader
 
 	// Read the first line (Header information)
 	tokenizer.checkNextString("ver");
-	versionNum = tokenizer.nextScientific("Version Number");
+	versionNum = tokenizer.nextNumber("Version Number");
 	if (versionNum != Double.parseDouble(expectedVersion)) {
 	    throw new ProjectionsFormatException(expectedVersion,
 						 "File version [" + 
@@ -116,16 +114,11 @@ public class SumDetailReader extends ProjectionsReader
 
 	reader.close();
 	reader = null;
-	// **CW** until tokenizer reports the correct bytecount, we'll just
-	// throw a small fake value (characteristic of a header).
-	return 1000;  
     }
 
-    protected long read() 
+    protected void read() 
 	throws IOException
     {
-	long byteCount = 0;
-
 	reader = new BufferedReader(new FileReader(sourceString));
 
 	// Set up the tokenizer  
@@ -175,8 +168,6 @@ public class SumDetailReader extends ProjectionsReader
 	}
 	reader.close();
 	reader = null;
-	
-	return byteCount;
     }
 
     public void reset() {

@@ -4,6 +4,7 @@
 #
 
 SRC=\
+    projections/analysis/AccumulatedSummaryReader.java\
     projections/analysis/AsciiIntegerReader.java\
     projections/analysis/Chare.java\
     projections/analysis/Entry.java\
@@ -21,6 +22,7 @@ SRC=\
     projections/analysis/StsReader.java\
     projections/analysis/SumAnalyzer.java\
     projections/analysis/SumDetailReader.java\
+    projections/analysis/SummaryFileReader.java\
     projections/analysis/TimelineEvent.java\
     projections/analysis/TimelineMessage.java\
     projections/analysis/UserEvent.java\
@@ -36,6 +38,9 @@ SRC=\
     projections/analysis/ProjectionsReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
+    projections/gui/AnimationColorBarPanel.java\
+    projections/gui/AnimationDisplayPanel.java\
+    projections/gui/AnimationWindow.java\
     projections/gui/BackGroundImagePanel.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
@@ -58,7 +63,6 @@ SRC=\
     projections/gui/GraphDisplayPanel.java\
     projections/gui/GraphLegendPanel.java\
     projections/gui/GraphTitleCanvas.java\
-    projections/gui/GraphUtil.java\
     projections/gui/GraphWAxisCanvas.java\
     projections/gui/GraphWindow.java\
     projections/gui/GraphXAxisCanvas.java\

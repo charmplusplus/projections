@@ -56,10 +56,9 @@ public class GenericLogReader extends ProjectionsReader
 	return sourceFile.canRead();
     }
 
-    public long readStaticData() {
+    public void readStaticData() {
 	// do nothing for now (since the original code ignored the header)
 	// **CW** must change later (for versioning control) of course ...
-	return 0;
     }
 
     /**

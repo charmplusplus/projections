@@ -15,6 +15,12 @@ import projections.misc.*;
 
 public class SumAnalyzer extends ProjDefs
 {
+    // Summary modes (so that SumAnalyzer, as a data manager, can make use
+    // of one or more data modes).
+    public static final int NUM_MODES = 2;
+    public static final int ACC_MODE = 0;
+    public static final int NORMAL_MODE = 1;
+
     private int[][][][] dataArray;
     private StreamTokenizer tokenizer;
     // Holds the total time (in microseconds) spent executing messages
@@ -34,6 +40,22 @@ public class SumAnalyzer extends ProjDefs
     private int[][][] PhaseNumEntryMsgs;
     //Holds the second line of summary data
     private int[][] ProcessorUtilization; 
+
+    private int mode = NORMAL_MODE;
+
+    private AccumulatedSummaryReader accumulatedReader;
+
+    // For now, the way to do the reading of super-summary files. It will
+    // be incorporated into a better framework later.
+    public SumAnalyzer(StsReader stsReader, int mode) {
+	this.mode = mode;
+	accumulatedReader =
+	    new AccumulatedSummaryReader(stsReader.getSumAccumulatedName(),
+					 "5.0");
+	TotalTime = (long)accumulatedReader.totalTime;
+	IntervalCount = (int)accumulatedReader.numIntervals;
+	IntervalSize = (long)accumulatedReader.intervalSize;
+    }
 
     /********************** State Variables *******************/
     public SumAnalyzer()
@@ -157,9 +179,6 @@ public class SumAnalyzer extends ProjDefs
 		NumEntryMsgs = new int [nPe][numEntry];
 		MaxEntryTime = new int [nPe][numEntry];
 	    }
-	    /** **CW** DON'T BE STUPID!!!!
-		ProcessorUtilization[p] = new int[IntervalCount + 20];
-	    */
 	    ProcessorUtilization[p] = new int[IntervalCount];
 	    
 	    //Read the SECOND line (processor usage)
@@ -376,19 +395,34 @@ public class SumAnalyzer extends ProjDefs
 	return ret;
     }
 
-    // get data averaged across all intervals
+    /**
+     *
+     */
     public double[] getSummaryAverageData() {
-	int numProcessors = ProcessorUtilization.length;
-	double[] ret = new double[IntervalCount];
-	for (int p=0; p<numProcessors; p++) {
-	    for (int interval=0; interval<IntervalCount; interval++) {
-		ret[interval] += ProcessorUtilization[p][interval];
+	if (mode == NORMAL_MODE) {
+	    int numProcessors = ProcessorUtilization.length;
+	    double[] ret = new double[IntervalCount];
+	    for (int p=0; p<numProcessors; p++) {
+		for (int interval=0; interval<IntervalCount; interval++) {
+		    ret[interval] += ProcessorUtilization[p][interval];
+		}
 	    }
+	    for (int interval=0; interval<IntervalCount; interval++) {
+		ret[interval] /= numProcessors*1.0;
+	    }
+	    return ret;
+	} else if (mode == ACC_MODE) {
+	    double[] ret;
+	    try {
+		accumulatedReader.loadIntervalData(0, IntervalCount-1);
+	    } catch (IOException e) {
+		System.err.println("Exception caught!");
+		System.exit(-1);
+	    }
+	    ret = accumulatedReader.getUtilData();
+	    return ret;
 	}
-	for (int interval=0; interval<IntervalCount; interval++) {
-	    ret[interval] /= numProcessors*1.0;
-	}
-	return ret;
+	return null;
     }
 
     public long GetTotalTime() 

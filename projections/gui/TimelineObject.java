@@ -72,8 +72,8 @@ public class TimelineObject extends Component
    {
           format_.setGroupingUsed(true);
 
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
 	  
 	  this.data = data;
 	  beginTime = bt;
@@ -138,8 +138,8 @@ public class TimelineObject extends Component
    {
           format_.setGroupingUsed(true);
 
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
 	  
 	  this.data = data;
 	  beginTime = bt;

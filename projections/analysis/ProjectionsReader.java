@@ -20,7 +20,6 @@ public abstract class ProjectionsReader
     private boolean available;
     protected String expectedVersion = null;
 
-    protected long bytesRead;
     // this can be any identifying string - full path name (default),
     // network address, URL etc ...
     protected String sourceString;
@@ -36,25 +35,22 @@ public abstract class ProjectionsReader
      *  only perform the necessary checks.
      */
     public ProjectionsReader(String sourceString, String versionOverride) {
-	bytesRead = 0;
 	expectedVersion = versionOverride;
 	this.sourceString = sourceString;
 	available = checkAvailable();
 	if (available) {
 	    try {
-		bytesRead += readStaticData();
+		readStaticData();
 	    } catch (ProjectionsFormatException e) {
 		System.err.println("Format Exception when reading from " +
 				   "source [" + sourceString + "]");
 		System.err.println(e.toString());
 		System.err.println("Data is now marked as unavailable.");
-		bytesRead = 0;
 		available = false;
 	    } catch (IOException e) {
 		System.err.println("Unexpected IO error when reading from " +
 				   "source [" + sourceString + "]");
 		System.err.println("Data is now marked as unavailable.");
-		bytesRead = 0;
 		available = false;
 	    }
 	}
@@ -95,11 +91,19 @@ public abstract class ProjectionsReader
     }
 
     /**
+     *  This accessor can be used by the inheriting class to mark
+     *  the file unavailable in response to more specialized conditions.
+     */
+    protected final void markUnavailable() {
+	available = false;
+    }
+
+    /**
      *  INHERITANCE NOTE: Implementing classes should override this 
      *  method for the reading of static data stored in the target
      *  file. This method MUST return the number of bytes read. 
      */
-    protected abstract long readStaticData() throws IOException;
+    protected abstract void readStaticData() throws IOException;
 
     /**
      *  INHERITANCE NOTE: This is a public method that implementing

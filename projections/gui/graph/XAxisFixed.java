@@ -26,6 +26,7 @@ public class XAxisFixed extends XAxis
 
   public String getTitle() {return title;}
   public String getUnits() {return units;}
+
   public String getIndexName(int index) {
 	double temp = (index * multiplier) + start;
         return ""+temp+units;

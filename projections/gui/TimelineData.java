@@ -542,7 +542,7 @@ public class TimelineData
    public void drawAllLines(){
    	Graphics g = displayCanvas.getGraphics();
    	if(!mesgCreateExecVector.isEmpty()){
-		 	g.setColor(new Color(100,100,255));
+		 	g.setColor(Analysis.foreground);
 
 			Dimension dim = displayCanvas.getSize();
 			double calc_xscale = (double )(pixelIncrement/timeIncrement);

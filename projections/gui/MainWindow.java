@@ -7,7 +7,9 @@ import javax.swing.*;
 import java.io.*;
 import java.net.*;
 
-import projections.gui.count.*;
+//import projections.gui.count.*;
+
+import projections.analysis.*;
 import projections.gui.graph.*;
 
 public class MainWindow extends JFrame
@@ -19,6 +21,7 @@ public class MainWindow extends JFrame
     private static final int MULTI_WIN = 1;
     private static final int PROFILE_WIN = 2;
     private static final int COMM_WIN = 3;
+    private static final int ANIMATION_WIN = 4;
     private static final int LOGVIEW_WIN = 5;
     private static final int HIST_WIN = 6;
     private static final int TIMELINE_WIN = 7;
@@ -50,6 +53,7 @@ public class MainWindow extends JFrame
     private HistogramWindow      histogramWindow;
     private StlWindow            stlWindow;
     private MultiRunWindow       multiRunWindow;
+    private AnimationWindow      animationWindow;
 
     // components associated with the main window
     private MainTitlePanel        titlePanel;
@@ -165,6 +169,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("ProfileWindow", PROFILE_WIN);
 	} else if (item.equals("Communication Histogram")) {
 	    showChildWindow("CommWindow", COMM_WIN);
+	} else if (item.equals("Animation")) {
+	    showChildWindow("AnimationWindow", ANIMATION_WIN);
 	} else if (item.equals("View Log Files")) {
 	    showChildWindow("LogFileViewerWindow", LOGVIEW_WIN);
 	} else if (item.equals("Overview")) {
@@ -299,21 +305,22 @@ public class MainWindow extends JFrame
 		public void finished() {
 		    setTitle("Projections - " + newfile);
 		    if (Analysis.hasSummaryData()) {
-			Analysis.loadSummaryData(1000);		  
+			Analysis.loadSummaryData();		  
 			double[] data = Analysis.getSummaryAverageData(); 
 			long originalSize = Analysis.getSummaryIntervalSize();
 			long bestSize = 
-			    (long)GraphUtil.getBestIntervalSize(originalSize,
-								data.length);
+			    (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);
 			if (bestSize != originalSize) {
 			    // if there are changes
 			    // transform the data into absolute time first.
-			    GraphUtil.utilToTime(data, (double)originalSize);
+			    IntervalUtils.utilToTime(data, 
+						     (double)originalSize);
 			    double[] newdata =
-				GraphUtil.rebin(data, originalSize,
-						(double)bestSize);
+				IntervalUtils.rebin(data, originalSize,
+						    (double)bestSize);
 			    // transform the re-binned data to utilization.
-			    GraphUtil.timeToUtil(newdata, (double)bestSize);
+			    IntervalUtils.timeToUtil(newdata, 
+						     (double)bestSize);
 			    sumDataSource = new SummaryDataSource(newdata);
 			    sumXAxis =
 				new SummaryXAxis(newdata.length,

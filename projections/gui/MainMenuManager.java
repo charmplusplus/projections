@@ -63,6 +63,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // View Log Files
 		    false,  // Histograms
 		    false,  // Overview
+		    false,  // Animation
 		    true,   // Multirun Analysis
 		});
 	    break;
@@ -114,6 +115,7 @@ public class MainMenuManager extends MenuManager
 		"View Log Files",
 		"Histograms",
 		"Overview",
+		"Animation",
 		"Multirun Analysis"
 	    });
 	menubar.add(toolMenu);
@@ -152,6 +154,7 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("Usage Profile") ||
 		       arg.equals("Communication Histogram") ||
 		       arg.equals("View Log Files") ||
+		       arg.equals("Animation") ||
 		       arg.equals("Overview")) {
 		parent.menuToolSelected(arg);
 	    }

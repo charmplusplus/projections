@@ -22,7 +22,7 @@ public class StsReader extends ProjDefs
     private String baseName;
     private String logDirectory;
 
-    private boolean hasSum, hasSumDetail, hasLog;
+    private boolean hasSum, hasSumDetail, hasSumAccumulated, hasLog;
 
     public static final int NUM_TYPES = 4;
     public static final int LOG = 0;
@@ -157,6 +157,7 @@ public class StsReader extends ProjDefs
 	    hasLog = false;
 	    hasSum = false;
 	    hasSumDetail = false;
+	    hasSumAccumulated = false;
 	    for (int i=0;i<NumPe;i++) {
 		if ((new File(getSumName(i))).isFile()) {
 		    hasSum = true;
@@ -170,6 +171,9 @@ public class StsReader extends ProjDefs
 		    hasLog = true;
 		    validPEs[LOG].insert(i);
 		}
+	    }
+	    if ((new File(getSumAccumulatedName())).isFile()) {
+		hasSumAccumulated = true;
 	    }
 	    InFile.close();
 	} catch (FileNotFoundException e) {
@@ -305,6 +309,10 @@ public class StsReader extends ProjDefs
 	return hasSum;
     }
    
+    public boolean hasSumAccumulatedFile() {
+	return hasSumAccumulated;
+    }
+
     public boolean hasSumDetailFiles() {
 	return hasSumDetail;
     }
@@ -325,6 +333,10 @@ public class StsReader extends ProjDefs
 	return baseName+"."+pnum+".sum";
     }   
     
+    public String getSumAccumulatedName() {
+	return baseName+".sum";
+    }
+
     public String getSumDetailName(int pnum) {
 	return baseName + "." + pnum + ".sumd";
     }

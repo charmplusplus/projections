@@ -24,8 +24,6 @@ public class CounterTest
 	new ProjectionsFileChooser(f, "Performance Counter Analysis", 
 				   ProjectionsFileChooser.MULTIPLE_FILES);
       if (args.length==0) {
-	System.out.println("fc "+fc);
-	if (fc == null) { System.out.println("UH OH"); }
 	if (fc.showDialog()==JFileChooser.APPROVE_OPTION) {
 	  fileMgr = fc.getProjectionsFileMgr();
 	}
@@ -39,6 +37,11 @@ public class CounterTest
 	for (int i=0; i<args.length && !test; i++) {
 	  File file = new File(args[i]);
 	  if (file.isDirectory()) { test = true; }
+	  else if (!args[i].startsWith("./") ||
+		   !args[i].startsWith("/") ||
+		   !args[i].startsWith("../")) {
+	    args[i] = "./"+args[i];
+	  }
 	}
 	if (test) { fc.getFiles(args); }
 	fileMgr = (test) ? 

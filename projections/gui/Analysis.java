@@ -140,18 +140,35 @@ public class Analysis {
 	}
     }
 
-    public static int[][] getAnimationData( int numPs, int intervalSize ) {
-	if (intervalSize > getTotalTime()) {
-	    intervalSize = (int)(getTotalTime());
+    public static int[][] getAnimationData(int intervalSize, long startTime, long endTime, OrderedIntList validPEs) {
+	// **CW** Hideous programming ... make sure it is cleaned up later
+	// on.
+	
+	if ((long)intervalSize >= endTime-startTime) {
+	    intervalSize = (int)(endTime)-(int)(startTime);
 	}
-	int nInt=(int)(getTotalTime()/intervalSize);
-	LoadGraphData(intervalSize,0,nInt-1,false, null);
-	int[][] animationdata = new int[ numPs ][ nInt ];
-	for( int p = 0;p < numPs; p++ ) {
-	    for( int t = 0;t < nInt;t++ ) {
-		animationdata[ p ][ t ] = getSystemUsageData(1)[p][t];
+	int startI = (int)startTime/intervalSize;
+	int endI = (int)endTime/intervalSize;
+	int numPs = validPEs.size();
+	
+	//if (endTime % intervalSize == 0 )
+	//	endI--;
+	
+	
+	LoadGraphData(intervalSize,startI,endI-1,false, null);
+	int[][] animationdata = new int[ numPs ][ endI-startI ];
+	
+	int pInfo = validPEs.nextElement();
+	int p = 0;
+	
+	while(pInfo != -1){
+	    for( int t = 0; t <(endI-startI); t++ ){
+		animationdata[ p ][ t ] = getSystemUsageData(1)[ pInfo ][ t ];
 	    }
+	    pInfo = validPEs.nextElement();
+	    p++;
 	}
+	
 	return animationdata;
     }
 

@@ -34,11 +34,47 @@ public class AnimationDisplayPanel extends Panel
    
    private AnimationWindow animationWindow;
    
+   private AnimationRangeDialog rangeDialog;
+   
+   public class AnimationRangeDialog extends ProjectionsWindow
+   {
+		private IntervalRangeDialog dialog;
+		
+		public AnimationRangeDialog()
+		{
+			super();  
+			setTitle("Animation Range Dialog");
+			
+		}
+		
+		void showDialog()
+		{
+			if(dialog == null)
+				dialog = new IntervalRangeDialog(this, "Select Range");
+			int status = dialog.showDialog();
+			if (status == IntervalRangeDialog.DIALOG_OK)
+			{
+				dialog.setAllData();
+			}
+		}
+		
+		OrderedIntList getProcessorRange()	{return validPEs;}
+		int getNumOfPEs()	{return validPEs.size();}
+		long getStartTime()	{return startTime;}
+		long getEndTime() 	{return endTime;}
+		int getIntervalSize()	{return (int)dialog.getIntervalSize();}
+		long getThresholdTime()	{return dialog.getThresholdTime();}
+   } 
+  
    public AnimationDisplayPanel(AnimationWindow animationWindow)
    {
+	  rangeDialog = new AnimationRangeDialog();
+	  rangeDialog.showDialog();
+	  
 	  this.animationWindow = animationWindow;
 	  setBackground(Color.black);
-	  setNumPsIsize(Analysis.getNumProcessors(), 100*1000);
+	  
+	  setNumPsIsize(rangeDialog.getNumOfPEs(), rangeDialog.getIntervalSize());
 	  
 	  addComponentListener(new ComponentAdapter()
 	  {
@@ -91,6 +127,18 @@ public class AnimationDisplayPanel extends Panel
    {
 	  return Isize;
    }   
+   public long getDelay()
+   {
+   	  return rangeDialog.getThresholdTime();
+   }
+   public long getStartTime()
+   {
+   	  return rangeDialog.getStartTime();
+   }
+   public long getEndTime()
+   {
+   	  return rangeDialog.getEndTime();
+   }
    //Make sure we aren't made too tiny
    public Dimension getMinimumSize() {return new Dimension(150,100);}   
    public int getNumIs()
@@ -193,7 +241,11 @@ public class AnimationDisplayPanel extends Panel
 	  {
 		 numPs = p;
 		 Isize = i;
-		 data = Analysis.getAnimationData(numPs, Isize);
+	       
+		 data = Analysis.getAnimationData(Isize,
+		 rangeDialog.getStartTime(), rangeDialog.getEndTime(),
+		 rangeDialog.getProcessorRange());
+		 
 		 numIs = data[0].length;
 		 if (numIs > 0) {
 		     curI = 0;

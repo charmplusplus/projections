@@ -15,13 +15,14 @@ public class AnimationWindow extends Frame
    private Panel statusPanel;
    private Panel titlePanel; 
    
-   private Label lTitle, lStatus;
+   //private Label lTitle, lStatus;
+   private Label lTitle, lStatus, lInterval, lDelay;
    
    private int redrawDelay; //Real time between frames (ms)
    private int curInterval = 0; //Frame number
    private boolean keepAnimating;
    private AnimateThread thread;
-   
+     
    class AnimateThread extends Thread
    {
 	  public AnimateThread()
@@ -71,11 +72,14 @@ public class AnimationWindow extends Frame
 	  pack();
 	  
 	  setVisible(true);
+	  
    }   
+
    public void actionPerformed(ActionEvent evt)
    {
 	  if(evt.getSource()==delayField)
 	  {
+	      System.out.println("event on delay field");
 		 redrawDelay=(int)(delayField.getValue()/1000); //Get redraw in milliseconds
 	  }
 	  else if(evt.getSource()==intervalField)
@@ -138,17 +142,25 @@ public class AnimationWindow extends Frame
 	  bAuto.addActionListener(this);
 	  
 	  redrawDelay=500;
+	  lDelay = new Label("Delay:", Label.CENTER);
 	  delayField = new TimeTextField("500 ms", 8);
-	  intervalField = new TimeTextField("100 ms",8);
+	  lInterval = new Label("Interval:", Label.CENTER);
+	  intervalField = new TimeTextField("100 ms",4);
 	  
 	  delayField.addActionListener(this);
 	  intervalField.addActionListener(this);
+	  
+	  int iSize = displayPanel.getIsize();
+   	  long startTime = displayPanel.getStartTime();
+   	  int startI = (int)startTime/iSize;
 	  
 	  titlePanel.setBackground(Color.black);
 	  titlePanel.setForeground(Color.white);
 	  displayPanel.setBackground(Color.black);
 	  Font titleFont = new Font("SansSerif", Font.BOLD, 16);
-	  lTitle = new Label("Processor Usage at 0s ", Label.CENTER);
+	  //**need to be changed
+	  //lTitle = new Label("Processor Usage at 0s ", Label.CENTER);
+	  lTitle = new Label("Processor Usage at " + U.t(iSize*startI), Label.CENTER);
 	  lTitle.setFont(titleFont);
 	  titlePanel.add(lTitle);
 	  
@@ -161,11 +173,13 @@ public class AnimationWindow extends Frame
 	  gbc.fill = GridBagConstraints.BOTH;
 	  
 	  controlPanel.setLayout(gbl);
-	  Util.gblAdd(controlPanel, bMinusOne, gbc, 0,0, 1,1, 1,1);
-	  Util.gblAdd(controlPanel, bPlusOne,  gbc, 1,0, 1,1, 1,1);
-	  Util.gblAdd(controlPanel, bAuto,     gbc, 2,0, 1,1, 1,1);
-	  Util.gblAdd(controlPanel, delayField, gbc, 3,0, 1,1, 1,1);
-	  Util.gblAdd(controlPanel, intervalField, gbc, 4,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, bMinusOne,  gbc, 0,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, bPlusOne,   gbc, 1,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, bAuto,      gbc, 2,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, lDelay,     gbc, 3,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, delayField, gbc, 4,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, lInterval,  gbc, 5,0, 1,1, 1,1);
+	  Util.gblAdd(controlPanel, intervalField, gbc, 6,0, 1,1, 1,1);
 	  
 	  mainPanel.setBackground(Color.gray);
 	  mainPanel.setLayout(gbl);
@@ -186,15 +200,25 @@ public class AnimationWindow extends Frame
 	  String status;
 	  if(p < 0)
 		 status = "";
-	  else   
-		 status = "Processor " + p + ": Usage = " + u + "% at " + U.t(displayPanel.getIsize()*i);
+	  else  {
+	  	 int iSize = displayPanel.getIsize();
+   		 long startTime = displayPanel.getStartTime();
+   		 int startI = (int)startTime/iSize;
+   
+		 status = "Processor " + p + ": Usage = " + u + "% at " + U.t(iSize*(i+startI));
+	  }
 	  lStatus.setText(status);
 	  lStatus.invalidate();
 	  statusPanel.validate();
    }   
    public void setTitleInfo(int i)
    {
-	  String title = "Processor Usage at " + U.t(displayPanel.getIsize()*i);
+	  int iSize = displayPanel.getIsize();
+   	  long startTime = displayPanel.getStartTime();
+   	  int startI = (int)startTime/iSize;
+   
+	  
+	  String title = "Processor Usage at " + U.t(iSize*(i+startI));
 	  lTitle.setText(title);
 	  lTitle.invalidate();
 	  titlePanel.validate();

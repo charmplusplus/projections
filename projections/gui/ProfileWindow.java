@@ -383,6 +383,9 @@ public class ProfileWindow extends Frame
 
 		int curPe;
 		// why +4 now and not +5?
+		// the first row is for entry method execution time the second is for 
+		//time spent sending messages in that entry method
+		
 		float[][] avg=new float[2][numUserEntries+4];
 		double avgScale=1.0/data.plist.size();
 
@@ -425,6 +428,8 @@ public class ProfileWindow extends Frame
 			break;
 		    curPe = data.plist.currentElement();
 		    data.plist.nextElement();
+		// the first row is for entry method execution time the second is for 
+		//time spent sending messages in that entry method
 		    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
 		    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
 			avg[0][i]+=(float)(cur[0][i]*avgScale);
@@ -889,6 +894,7 @@ public class ProfileWindow extends Frame
 				poLen++;
 			
 		}
+		//Drawing the entry point execution time
 		poArray[poNo]=new ProfileObject[poLen];
 		for(i=0; i<usg[0].length; i++)
 		{
@@ -911,6 +917,7 @@ public class ProfileWindow extends Frame
 			poArray[poNo][poindex].setForeground(colors[entry]);
 			poindex++;
 		}
+		//Drawing the entry point message sendTime
 		for(i=0; i<usg[1].length; i++)
 		{
 			float usage = usg[1][i];

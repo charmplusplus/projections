@@ -84,6 +84,7 @@ public class GenericLogReader extends ProjDefs
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();
+	    break;
 	case BEGIN_COMPUTATION: case END_COMPUTATION:
 	    data.time = reader.nextLong();
 	    break;

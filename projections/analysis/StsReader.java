@@ -12,7 +12,7 @@ import projections.misc.*;
 
 public class StsReader extends ProjDefs
 {
-	private String baseName;
+	private String baseName, sumBaseName;
 	private boolean hasSum, hasLog;
 	
 	private long totalTime;
@@ -30,17 +30,30 @@ public class StsReader extends ProjDefs
 	/** Read in and decipher the .sts file.
 	 *  @exception LogLoadException if an error occurs while reading in the
 	 *      the state file
+	 *  FileName is the full filename.
 	 */
 	public StsReader(String FileName) throws LogLoadException   
-	{
-		baseName=FileName;
+        {
+	        // "I think my basename can be found by stripping .sts"
+		baseName = getBaseName(FileName);
+	        // "I believe my summary base name should be before .sum.sts"
+		sumBaseName = getSumBaseName(FileName);
+
+		// "if user selected a summary sts file ..."
 		hasSum=(new File(getSumName(0))).isFile();
+		// "No summary?!? Maybe user selected a normal sts file ..."
+		if (!hasSum) {
+		    sumBaseName = baseName;
+		    hasSum = (new File(getSumName(0))).isFile();
+		}
+		// "if user selected a summary sts file, log files are
+		// always ignored"
 		hasLog=(new File(getLogName(0))).isFile();
 		totalTime=-1;
 	try
 	    {
 		BufferedReader InFile = new BufferedReader(
-			new InputStreamReader(new FileInputStream(FileName + ".sts")));
+			new InputStreamReader(new FileInputStream(FileName)));
 		
 		int ID,ChareID,MsgID;
 		String Line,Type,Name;
@@ -137,11 +150,11 @@ public class StsReader extends ProjDefs
 	    }
 	catch (FileNotFoundException E)
 	    {
-		throw new LogLoadException (FileName + ".sts", LogLoadException.OPEN);
+		throw new LogLoadException (FileName, LogLoadException.OPEN);
 	    }
 	catch (IOException E)
 	    {
-		throw new LogLoadException (FileName + ".sts", LogLoadException.READ);
+		throw new LogLoadException (FileName, LogLoadException.READ);
 	    }
 	}
    public int getEntryCount() { return EntryCount;}   
@@ -158,9 +171,20 @@ public class StsReader extends ProjDefs
    public String getFilename() {return baseName;}   
    public String getLogName(int pnum) {return baseName+"."+pnum+".log";}   
    public int getProcessorCount() {return NumPe;}   
-   public String getSumName(int pnum) {return baseName+"."+pnum+".sum";}   
+   public String getSumName(int pnum) {return sumBaseName+"."+pnum+".sum";}   
    public long getTotalTime() {return totalTime;}   
    public boolean hasLogFiles() {return hasLog;}   
    public boolean hasSumFiles() {return hasSum;}   
    public void setTotalTime(long t) {totalTime=t;}   
+
+
+    // assume .sts
+    private String getBaseName(String filename) {
+	return filename.substring(0, filename.length()-4); 
+    }
+
+    // assume .sum.sts
+    private String getSumBaseName(String filename) {
+	return filename.substring(0, filename.length()-8); 
+    }
 }

@@ -317,7 +317,6 @@ public class MainWindow extends Frame
    private void openFile(String filename) {
 	  try
 	  {
-		 filename = filename.substring(0, filename.length()-4);
 		 Analysis.initAnalysis(filename);
 		 toolsEnabled = true;
 		 buttonPanel.enableButtons();

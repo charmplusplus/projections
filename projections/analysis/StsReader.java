@@ -84,7 +84,18 @@ public class StsReader extends ProjDefs
 			    {
 				Type    = st.nextToken();
 				ID      = Integer.parseInt(st.nextToken());
-				Name    = st.nextToken();
+				StringBuffer nameBuf=new StringBuffer(st.nextToken());
+				Name = nameBuf.toString();
+				if (-1!=Name.indexOf('(') && -1==Name.indexOf(')'))
+				  //Parse strings until we find the close-paren
+				  while (true) {
+					String tmp=st.nextToken();
+					nameBuf.append(" ");
+					nameBuf.append(tmp);
+					if (tmp.endsWith(")"))
+						break;
+				  }
+				Name    = nameBuf.toString();
 				ChareID = Integer.parseInt(st.nextToken());
 				MsgID   = Integer.parseInt(st.nextToken());
 				

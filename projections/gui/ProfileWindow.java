@@ -26,11 +26,17 @@ public class ProfileWindow extends Frame
    private Button bDecreaseX, bIncreaseX, bResetX;
    private Button bDecreaseY, bIncreaseY, bResetY;
    private Button bColors;
+   private Button bPieChart;
+   private Color[] colors;
    private ProfileObject[][] poArray;
    private float xscale=1, yscale=1;
+   private float[] avg;
+   private float thresh;
+   private int avgSize;
    private long begintime, endtime;
    
    private ProfileDialog2 dialog;
+   private PieChartWindow pieChartWindow;
    
    class NoUpdatePanel extends Panel
    {
@@ -60,7 +66,7 @@ public class ProfileWindow extends Frame
 	  {
 		 public void componentResized(ComponentEvent e)
 		 {
-			if(displayCanvas != null)
+ 			if(displayCanvas != null)
 			{
 			   setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			   setSizes();
@@ -138,6 +144,11 @@ public class ProfileWindow extends Frame
 			setScales(); 
 			axisCanvas.makeNewImage(); 
 		 }
+                 else if(b == bPieChart)
+                 {
+                        System.out.println("bPieChart was clicked");
+			pieChartWindow = new PieChartWindow(mainWindow, avg, avgSize, thresh, colors);			
+                 }
 		 
 		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));   
 	  }
@@ -255,6 +266,7 @@ public class ProfileWindow extends Frame
 	  bDecreaseX   = new Button("<<");
 	  bIncreaseX   = new Button(">>");
 	  bResetX      = new Button("Reset");
+	  bPieChart    = new Button("Pie Chart");
 	  
 	  bColors.addActionListener(this);
 	  bDecreaseY.addActionListener(this);
@@ -263,6 +275,8 @@ public class ProfileWindow extends Frame
 	  bDecreaseX.addActionListener(this);
 	  bIncreaseX.addActionListener(this);
 	  bResetX.addActionListener(this);
+          bPieChart.addActionListener(this);
+	
 	   
 	  Label lXScale = new Label("X-SCALE: ", Label.CENTER);
 	  xScaleField   = new FloatTextField(xscale, 5);
@@ -292,6 +306,7 @@ public class ProfileWindow extends Frame
 	  Util.gblAdd(buttonPanel, xScaleField, gbc, 8,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bIncreaseX,   gbc, 9,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bResetX,      gbc, 10,0, 1,1, 1,1);
+	  Util.gblAdd(buttonPanel, bPieChart,    gbc, 11,0, 1,1, 1,1);
 	  
 	  //// WINDOW
 	  
@@ -356,7 +371,7 @@ public class ProfileWindow extends Frame
 	    // the reason for 5 extra colors is because they are non-ep
 	    // colors?
 	    int numEPs = Analysis.getNumUserEntries();
-	  Color[] colors = new Color[numEPs+5];
+	  colors = new Color[numEPs+5];
 	  Color[] newUserColors = new Color[numEPs];
 
 	  for(int i=0; i<numEPs; i++)
@@ -886,6 +901,7 @@ public class ProfileWindow extends Frame
 		int numUserEntries = Analysis.getNumUserEntries();
 		String[][] names = Analysis.getUserEntryNames();
 		int i,poindex=0,poLen=0;
+
 		float thresh=0.01f;//Percent below which to ignore
 		for(i=0;i<usg[0].length;i++){
 			if (usg[0][i]>thresh) 

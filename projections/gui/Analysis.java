@@ -196,6 +196,9 @@ public class Analysis {
 	public static String[][] getUserEntryNames() {
 		return sts.getEntryNames();
 	}
+	public static int getUserEntryCount() {
+		return sts.getEntryCount();
+	}
 	public static boolean hasSystemMsgsData( int a, int t ) {
 		if (systemMsgsData==null) return false;
 		return null!=systemMsgsData[a][t];

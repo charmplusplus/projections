@@ -47,6 +47,11 @@ public class TimelineObject extends Component
 	  if(n != -1)
 	  {
 		 bubbletext  = new String[7];
+		 int ecount = Analysis.getUserEntryCount();
+		 if (n >= ecount) {
+		   System.out.println("Fatal error: invalid entry "+n+"!");
+		   System.exit(1) ;
+		 }
 		 bubbletext[0] = (Analysis.getUserEntryNames())[n][1] + "::" + 
 					  (Analysis.getUserEntryNames())[n][0]; 
 		 bubbletext[1] = "Begin Time: " + bt;

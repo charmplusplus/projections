@@ -44,6 +44,7 @@ SRC=\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
     projections/gui/ColorSelectable.java\
+    projections/gui/ColorSelectWindow.java\
     projections/gui/ColorWindowFrame.java\
     projections/gui/CommWindow.java\
     projections/gui/Converter.java\
@@ -52,6 +53,7 @@ SRC=\
     projections/gui/EPAnalysis.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
+    projections/gui/GenericGraphWindow.java\
     projections/gui/GraphAttributesWindow.java\
     projections/gui/GraphControlPanel.java\
     projections/gui/GraphData.java\
@@ -191,7 +193,7 @@ all: bin/projections.jar
 
 projections/gui/MainWindow.class: $(SRC)
 	@ echo "Compiling java sources:"
-	@ javac -d . -deprecation -O $(SRC)
+	@ javac -sourcepath . -d . -deprecation -O $(SRC)
 	@ echo "Complete."
 
 bin/projections.jar: projections/gui/MainWindow.class $(SRC)

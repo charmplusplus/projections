@@ -180,8 +180,8 @@ public class HistogramWindow extends GenericGraphWindow
 	bubbleText[0] = Analysis.getEntryName(yVal);
 	//	bubbleText[0] = "Entry: " + entryNames[yVal];
 	bubbleText[1] = "Count: " + counts[xVal][yVal];
-	bubbleText[2] = "Bin: " + U.t(xVal*binSize) +
-	    " to " + U.t((xVal+1)*binSize);
+	bubbleText[2] = "Bin: " + U.t(xVal*binSize+minBinSize) +
+	    " to " + U.t((xVal+1)*binSize+minBinSize);
 
 	return bubbleText;
     }
@@ -220,14 +220,18 @@ public class HistogramWindow extends GenericGraphWindow
 		while(true){
 		    r.nextEventOfType(ProjDefs.BEGIN_PROCESSING,logdata);
 		    r.nextEventOfType(ProjDefs.END_PROCESSING,logdata2);
-		    // if the entry method is selected, count it
+
 		    long executionTime = (logdata2.time - logdata.time);
-		    
-		    int targetBin = (int)(executionTime/binSize);
-		    if (targetBin >= numBins) {
-			targetBin = numBins;
+		    long adjustedTime = executionTime - minBinSize;
+
+		    // respect the user threshold.
+		    if (adjustedTime >= 0) {
+			int targetBin = (int)(adjustedTime/binSize);
+			if (targetBin >= numBins) {
+			    targetBin = numBins;
+			}
+			countData[targetBin][logdata.entry]+=1.0;
 		    }
-		    countData[targetBin][logdata.entry]+=1.0;
 		    if (logdata2.time > endTime) {
 			break;
 		    }

@@ -162,6 +162,8 @@ public class CounterTable extends AbstractTableModel
       column.setPreferredWidth(110);
       column.setHeaderRenderer(getCounterHeader(i));
     }
+    // table.tableChanged(new TableModelEvent(
+    // this, 0, currSheet_.numRows-1, TableModelEvent.ALL_COLUMNS));
   }
 
   private ColorHeader getCounterHeader(int col) {
@@ -241,7 +243,7 @@ public class CounterTable extends AbstractTableModel
       if (!found) { System.out.println("COULD NOT FIND FLOPS!!!");  return; }
       // loop through EPs and find out which ones have been called (non-null)
       Vector vector = new Vector();
-      for (i=0; i<s.tableRows.length; i++) {
+      for (i=0; i<s.tableRows.length-1; i++) {
 	if (s.tableRows[i].summary[counterIndex].avgNumCalled > 0) {
 	  vector.addElement(new Integer(i));
 	}
@@ -254,37 +256,36 @@ public class CounterTable extends AbstractTableModel
       vector.removeAllElements();
       // now have correct indices for non-zero flops, so loop through 
       // and calc total flops, prepare data for graph
-      double totalTime = 0.0;
-      double totalNumCalled = 0.0;
-      double totalAvgFlops = 0.0;
       double[][] data = new double[numEPs][];
       String[] xAxisLabels = new String[numEPs];
+      double totalFlops = 0;
+      double totalCalled = 0;
       for (i=0; i<numEPs; i++) {
 	xAxisLabels[i] = (new Integer(indices[i])).toString();
-	System.out.println("Label "+i+"="+xAxisLabels[i]+" "+
-			   s.tableRows[indices[i]].name);
+	String name = s.tableRows[indices[i]].name;
 	CounterSummary summary = s.tableRows[indices[i]].summary[counterIndex];
-	totalTime += summary.avgTime;
-	totalNumCalled += summary.avgNumCalled;
-	totalAvgFlops += summary.avgCount;
 	data[i] = new double[2];
 	data[i][0] = 
-	  summary.avgNumCalled*summary.avgCount*s.numProcs / summary.avgTime;
+	  summary.avgNumCalled*summary.avgCount*s.numProcs/summary.avgTime*1e6;
+	totalFlops += data[i][0]*summary.avgNumCalled;
+	totalCalled += summary.avgNumCalled;
+	System.out.print("Label "+i+"="+xAxisLabels[i]+" "+
+			 name.substring(1,Math.min(name.length(),25)));
 	System.out.println("  time/proc="+summary.avgTime+
 			   " numCalled/proc="+summary.avgNumCalled+
 			   " Flops/proc="+summary.avgCount+
 			   " Flops/sec="+data[i][0]);
       }
-      double totalMFlops = totalNumCalled*totalAvgFlops*s.numProcs / totalTime;
-      // for (i=0; i<numEPs; i++) { data[i][1] = totalMFlops; }
-      for (i=0; i<numEPs; i++) { data[i][1] = 0.0; }
+      double calcMFlops = totalFlops / totalCalled;
+      System.out.println("OVERALL FLOPS="+calcMFlops);
+      for (i=0; i<numEPs; i++) { data[i][1] = calcMFlops; }
       // set up graph
       DataSource2D source = new DataSource2D(
-	currSheet_.fileName+": Overall Flops/s = "+totalMFlops, data);
+	currSheet_.fileName+": Overall Flops/s = "+calcMFlops, data);
       XAxis xAxis = new MultiRunXAxis(xAxisLabels);
       YAxis yAxis = new YAxisAuto("Performance", "Flops/s", source);
       Graph g = new Graph();
-      g.setGraphType(Graph.BAR);
+      g.setGraphType(Graph.LINE);
       g.setData(source, xAxis, yAxis);
       JFrame f = new JFrame();
       f.getContentPane().add(g);
@@ -319,7 +320,7 @@ public class CounterTable extends AbstractTableModel
     public Sheet(ProjectionsFileMgr fileMgr, int index) 
       throws IOException 
     { 
-      int i;
+      int i, j;
       fileName = fileMgr.getStsFile(index).getCanonicalPath();
       // read sts file
       stsReader = new GenericStsReader(
@@ -334,14 +335,27 @@ public class CounterTable extends AbstractTableModel
 	first = false;
       }
       // now initialize the EPValue by summarizing over all processors
-      tableRows = new EPValue[stsReader.entryCount];
-      numRows = stsReader.entryCount;
-      for (i=0; i<numRows; i++) {
+      tableRows = new EPValue[stsReader.entryCount+1];
+      numRows = stsReader.entryCount+1;
+      for (i=0; i<numRows-1; i++) {
 	tableRows[i] = 
 	  new EPValue(stsReader.entryList[i].name, i, data, counters.length);
       }
       numCols = 1 + counters.length * EPValue.NUM_VALUES_PER_COUNTER;
       numProcs = stsReader.numPe;
+      // sum up the rows
+      int totalIndex = numRows-1;
+      tableRows[totalIndex] = new EPValue("TOTAL", counters.length);
+      for (i=0; i<totalIndex; i++) {
+	for (j=0; j<counters.length; j++) {
+	  tableRows[totalIndex].summary[j].avgNumCalled += 
+	    tableRows[i].summary[j].avgNumCalled;
+	  tableRows[totalIndex].summary[j].avgTime += 
+	    tableRows[i].summary[j].avgTime;
+	  tableRows[totalIndex].summary[j].avgCount +=
+	    tableRows[i].summary[j].avgCount;
+	}
+      }
     }
 
     private int getProcIndex(File file, int foo) { return foo; }
@@ -360,7 +374,7 @@ public class CounterTable extends AbstractTableModel
     public final static int MIN_CVAL   = 5;
     
     public final static String AVG_CALLED_STR = "numCalled per proc (avg)";
-    public final static String AVG_TIME_STR   = "totTime(s) per proc (avg)";
+    public final static String AVG_TIME_STR   = "totTime(us) per proc (avg)";
     public final static String AVG_CVAL_STR   = "per EP (avg over all procs)";
     public final static String AVG_CSTDEV_STR = "stDev per EP (avg over all procs)";
     public final static String MAX_CVAL_STR   = "maxCount over all procs";
@@ -368,6 +382,12 @@ public class CounterTable extends AbstractTableModel
 
     public String           name    = null;
     public CounterSummary[] summary = null;
+
+    public EPValue(String n, int size) {
+      name = n;
+      summary = new CounterSummary[size];
+      for (int i=0; i<size; i++) { summary[i] = new CounterSummary(); }
+    }
 
     public EPValue(String n, int index, LogData[] procData, int numCounters) 
     {
@@ -537,7 +557,7 @@ public class CounterTable extends AbstractTableModel
 	String typeStr = null;
 	switch (type) {
           case NUM_CALLED: typeStr = "num_called";     break;
-          case TOTAL_TIME: typeStr = "total_time(s)";  break;
+          case TOTAL_TIME: typeStr = "total_time(us)";  break;
           case MAX_VALUE:  typeStr = "max_value";      break;
           case MIN_VALUE:  typeStr = "min_value";      break;
           case AVG_COUNT:  typeStr = "avg_count";      break;

@@ -34,6 +34,7 @@ public class CounterFrame extends JFrame
       public void stateChanged(ChangeEvent e) {
 	cTable_.setSheet(tabbedPane_.getSelectedIndex(), jTable_);
 	// sorter_.tableChanged(new TableModelEvent(sorter_));
+	sortByColumn(1);
       }
     });
     mainPanel.add(tabbedPane_, BorderLayout.NORTH);

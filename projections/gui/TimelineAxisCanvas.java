@@ -69,7 +69,7 @@ public class TimelineAxisCanvas extends Canvas
 			   
 			   if(x % data.labelIncrement == 0)
 			   {  
-				  tmp = "" + (data.beginTime + labeloffset + x*data.timeIncrement);
+				  tmp = "" + (long)(data.beginTime + (long)labeloffset + (long)x*data.timeIncrement);
 				  og.drawLine(curx, axispos-5, curx, axispos + 5);
 				  og.drawString(tmp, curx - fm.stringWidth(tmp)/2, textpos);
 			   }

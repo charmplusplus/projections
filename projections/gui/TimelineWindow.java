@@ -33,6 +33,7 @@ public class TimelineWindow extends Frame
    private DecimalFormat format;
    private FloatTextField scaleField;
    private Checkbox cbPacks, cbMsgs, cbIdle, cbUser;
+//   public Checkbox colorbyObjectId;	
    
    private int maxLabelLen;
    private long oldEndTime;
@@ -48,6 +49,7 @@ public class TimelineWindow extends Frame
     private TimelineDisplayCanvas canvas_;
     private TimelineAxisCanvas timeline_;
     private TimelineWindow window_;
+
     public boolean selected_ = false;
     AxisMouseController(
       TimelineWindow window, TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) 
@@ -418,6 +420,7 @@ public class TimelineWindow extends Frame
 	  
 	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
 	  VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
+
 	  
 	  mainPanel.setLayout(null);
 	  mainPanel.setBackground(Color.black);
@@ -443,6 +446,8 @@ public class TimelineWindow extends Frame
 	  cbMsgs  = new Checkbox("Display Message Sends", data.showMsgs);
 	  cbIdle  = new Checkbox("Display Idle Time", data.showIdle);
 	  cbUser  = new Checkbox("Display User Event Window", false);
+	  //colorbyObjectId = new Checkbox("Color Entry methods by Object ID",false);
+
 	  
 	  cbPacks.addItemListener(this);
 	  cbMsgs.addItemListener(this);
@@ -463,7 +468,7 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(cbPanel, cbMsgs,  gbc, 1,0, 1,1, 1,1);
 	  Util.gblAdd(cbPanel, cbIdle,  gbc, 2,0, 1,1, 1,1);
 	  Util.gblAdd(cbPanel, cbUser,  gbc, 3,0, 1,1, 1,1);
-	  
+          //Util.gblAdd(cbPanel, colorbyObjectId, gbc, 4,0,1,1, 1,1); 	  
 	  
 
 	  //// BUTTON PANEL

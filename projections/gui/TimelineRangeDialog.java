@@ -13,6 +13,7 @@ public class TimelineRangeDialog extends Dialog
    private TimeTextField endField;
    private TimeTextField lengthField;
    private SelectField   processorField;
+   private Checkbox colorbyObjectId;
    
    private long beginTime;
    private long endTime;
@@ -154,12 +155,17 @@ public class TimelineRangeDialog extends Dialog
 	  Util.gblAdd(p2, bSearch, gbc, 0,4, 4,1, 0,1, 2,8,2,8);
 	  gbc.fill = GridBagConstraints.BOTH;
 	  Util.gblAdd(p2, msgArea, gbc, 0,5, 4,1, 1,1, 2,8,8,8); 
+	  
+
+
+	  colorbyObjectId = new Checkbox("Color by Object Id ",false);
 
 	  Panel p3 = new Panel();
 	  p3.setLayout(new FlowLayout());
 	  p3.add(bFullRange);
 	  p3.add(bOK);
 	  p3.add(bCancel);
+	  p3.add(colorbyObjectId);
 	  Util.gblAdd(p1, p3, gbc, 0,4, 5,1, 1,1, 0,4,4,4);
 	  
 	  Panel p4 = new Panel();
@@ -176,6 +182,7 @@ public class TimelineRangeDialog extends Dialog
    public void actionPerformed(ActionEvent evt)
    {
 	  Object s = evt.getSource();
+	 // System.out.println("data.colorbyObjectId set to " + colorbyObjectId.getState());
 	  
 	  if((s instanceof Button && (Button)s == bOK) || s instanceof TimeTextField || s instanceof SelectField)
 	  {
@@ -189,6 +196,8 @@ public class TimelineRangeDialog extends Dialog
 			data.beginTime = beginField.getValue();
 			data.endTime   = endField.getValue();
 			data.timelineWindow.CloseRangeDialog();
+		//	System.out.println("data.colorbyObjectId set to " + colorbyObjectId.getState());
+			data.colorbyObjectId = colorbyObjectId.getState();
 		 }
 		 else
 		 {

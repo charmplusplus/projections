@@ -92,7 +92,7 @@ public class TimelineObject extends Component
 	  
 	  if(n != -1)
 	  {
-		 bubbletext  = new String[10];
+		 bubbletext  = new String[11];
 		 int ecount = Analysis.getUserEntryCount();
 		 if (n >= ecount) {
 		   System.out.println("Fatal error: invalid entry "+n+"!");
@@ -111,6 +111,7 @@ public class TimelineObject extends Component
 		 bubbletext[7] = "Created by processor " + pCreation;
 		 bubbletext[8] = "Id: " + tid.id[0]+":"+tid.id[1]+":"+tid.id[2];
 		 bubbletext[9] = "Recv Time: " + recvTime;
+		 
 	  }
 	  else
 	  {
@@ -289,16 +290,16 @@ public class TimelineObject extends Component
    	TimelineMessage created_message;
        if(entry >= 0){
 		 OpenMessageWindow();
-		  System.out.println("This method is created by "+ pCreation + "Event id is " + EventID);
+		  //System.out.println("This method is created by "+ pCreation + "Event id is " + EventID);
 		 if(data.mesgVector[pCreation] == null || data.mesgVector[pCreation].isEmpty()){
-		 	System.out.println("Processor Out of range");
+		 	//System.out.println("Processor Out of range");
 		 }else{
 		 	created_message= searchMesg(data.mesgVector[pCreation],EventID);
 			if(created_message == null){
-				System.out.println("Time out of range ");
+				//System.out.println("Time out of range ");
 			}else{
-				System.out.println("Mesg " + created_message.EventID +" created at " + created_message.Time);
-				System.out.println("xscale within = " + scale + "left =" + left);
+				//System.out.println("Mesg " + created_message.EventID +" created at " + created_message.Time);
+				//System.out.println("xscale within = " + scale + "left =" + left);
 				data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,scale);			
 			}
 		 }
@@ -373,7 +374,22 @@ public class TimelineObject extends Component
 	  }
 	  
 	  msgwindow.setVisible(true);
-   }   
+   } 
+	
+
+   private Color getObjectColor(ObjectId tid){
+   	int r;
+	int g;
+	int b;
+	int nPE = data.processorList.size();
+	int d = (int )(255/(double )nPE);
+	r = ((tid.id[0])*d) % 255;
+	g = ((tid.id[1])*23) % 255;
+	b = 255-g;
+	//b = 56;
+	return new Color(r, g,b );
+   };
+   
    public void paint(Graphics g)
    {     
 	  if(entry == -1 && data.showIdle == false)
@@ -381,11 +397,18 @@ public class TimelineObject extends Component
 
 	  Color c;
 	  
-	  if(entry == -1)
+	  if(entry == -1){
 		 c = getForeground();
-	  else
-		 c = data.entryColor[entry];
-
+		// System.out.println("entry is -1 ");
+	  }	 
+	  else{
+		if(data.colorbyObjectId){
+			//System.out.println("Should be colored by ObjectId");
+			c = getObjectColor(tid);
+		}else{
+			c = data.entryColor[entry];
+		}	
+	  }
 	  // leave 5 pixels above and below
 	  int startY = 5;
 	  int w      = getSize().width;

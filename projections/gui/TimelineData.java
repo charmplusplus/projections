@@ -26,12 +26,17 @@ public class TimelineData
    OrderedIntList oldplist;
    String         processorString;
    String         oldpstring;
+// boolean for testing if entries are to be colored by Object ID
    
+  public boolean colorbyObjectId;
+   
+
   public double         pixelIncrement;
   public int            timeIncrement;
    int            labelIncrement;
    int            numIntervals;
    
+
    int[]          entries;
    Color[]        entryColor;
    
@@ -456,7 +461,7 @@ public class TimelineData
 	calc_xscale = calc_xscale * 0.98;
 	long time = endTime-beginTime+1;
 	int mywidth=dim.width;
-	System.out.println("xscale in Data " + calc_xscale+" time is " + time + " width "+ mywidth);
+	//System.out.println("xscale in Data " + calc_xscale+" time is " + time + " width "+ mywidth);
 	
 	
 	processorList.reset();
@@ -479,7 +484,7 @@ public class TimelineData
 	int y1 = (int )(yscale * (double )startpe_position + 20);
 	int y2 = (int )(yscale * (double )endpe_position + 20);
 
-	System.out.println("start "+x1+" execution co-rdinate " + x2);
+	//System.out.println("start "+x1+" execution co-rdinate " + x2);
 	g.setColor(new Color(100,100,255));
 	g.drawLine(x1,y1,x2,y2);
    }

@@ -5,19 +5,26 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import projections.gui.count.*;
 
 /** Joshua Mostkoff Unger, unger1@uiuc.edu
  *  Parallel Programming Laboratory
- * 
- *  ProjectionsFileChooser lets the user pick a directory or files, and 
+ *
+ *  ProjectionsFileChooser lets the user pick a directory or files, and
  *  then lets the user pick from all the sts files found in all the subdirs. */
 public class ProjectionsFileChooser
 {
   /** Allow file chooser to select multiple files */
-  public static final int MULTIPLE_FILES = 1;  
+  public static final int MULTIPLE_FILES = 1;
   /** Restrict file chooser to just single file */
   public static final int SINGLE_FILE    = 2;
+  // File Name returned by userSubSelect
+  public String[] userSelect_returnVal;
+  //Selected File indices in UserSubSelect
+  // Had to do this because these are set in the ActionListener for JButton in dialog_
+  public int [] userSelect_selected;
 
+   public CallBack callback;
   // http://java.sun.com/products/jdk/1.1/docs/api/packages.html
   // http://java.sun.com/products/jfc/swingdoc-api-1.1/index.html
   // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
@@ -35,18 +42,18 @@ public class ProjectionsFileChooser
   // MAKE HANDLE EXCEPTION CAUGHT IN PROJECTIONS!
 
   /** Default constructor */
-  public ProjectionsFileChooser(Frame owner) 
+  public ProjectionsFileChooser(Frame owner)
     throws Exception
-  { 
-    this(owner, "ProjectionsFileChooser", MULTIPLE_FILES); 
+  {
+    this(owner, "ProjectionsFileChooser", MULTIPLE_FILES);
   }
 
   /** Constructor.  Specify title of file chooser window.
    *  <type> should be ProjectionFileChooser.MULTIPLE_FILES or
    *                ProjectionFileChooser.SINGLE_FILE. */
-  public ProjectionsFileChooser(Frame owner, String title, int type) 
+  public ProjectionsFileChooser(Frame owner, String title, int type)
     throws Exception
-  { 
+  {
     if (!(type == MULTIPLE_FILES || type == SINGLE_FILE)) {
       throw new Exception("ProjectionFileChooser must init with:\n"+
 			  "  ProjectionFileChooser.MULTIPLE_FILES or\n"+
@@ -58,7 +65,7 @@ public class ProjectionsFileChooser
     fChoose_ = initFileChooser(title_+": File(s) Open");
     dialog_  = initFileDialog(title_+": Choose Files");
   }
-  
+
   /** Given a bunch of strings, search for all sts files and set fileMgr.
    *  Return number of files found. */
   public int getFiles(String[] args) throws IOException {
@@ -72,19 +79,74 @@ public class ProjectionsFileChooser
   /** Pop up first file chooser dialog, then the sts chooser dialog.
    *  Returns JFileChooser.APPROVE_OPTION if user chooses file, or
    *  JFileChooser.CANCEL_OPTION if user cancels or doesn't choose file */
-  public int showDialog() {
+  public int showDialog(CallBack callback) {
+   this.callback = callback;
+
     int returnVal = fChoose_.showDialog(null, "Open/Search");
+
     try {
       if (returnVal==JFileChooser.APPROVE_OPTION) {
 	Vector files = filterFiles(
 	  fChoose_.getSelectedFiles(), fChoose_.getFileFilter());
+
 	// ask user to subselect all files found
-	fileMgr_ = new ProjectionsFileMgr(userSubselect(files));
+	userSubselect(files);
+
+	//fileMgr_ = new ProjectionsFileMgr(userSubselect(files));
       }
     }
-    catch (Exception exc) { handleException(owner_, exc); }
+    catch (Exception exc) {
+    handleException(owner_, exc); }
+
     return returnVal;
   }
+
+
+
+  public int showDialog() {
+
+
+    int returnVal = fChoose_.showDialog(null, "Open/Search");
+
+    try {
+      if (returnVal==JFileChooser.APPROVE_OPTION) {
+	Vector files = filterFiles(
+	  fChoose_.getSelectedFiles(), fChoose_.getFileFilter());
+
+	// ask user to subselect all files found
+	userSubselect(files);
+
+	//fileMgr_ = new ProjectionsFileMgr(userSubselect(files));
+      }
+    }
+    catch (Exception exc) {
+    handleException(owner_, exc); }
+
+   
+
+    return returnVal;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /** Returns ProjectionFileMgr for the files opened.  If no files opened,
    *  returns null */
@@ -144,8 +206,8 @@ public class ProjectionsFileChooser
     d.getContentPane().setLayout(new BorderLayout());
     d.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     d.addWindowListener(new WindowAdapter() {
-      public void windowClosing(WindowEvent e) { 
-	dialog_.setVisible(false); 
+      public void windowClosing(WindowEvent e) {
+	dialog_.setVisible(false);
       }
     });
     d.setTitle(title);
@@ -168,18 +230,35 @@ public class ProjectionsFileChooser
 	list_.setSelectedIndices(selectAll);
       }
     });
-    JButton button2 = new WaitButton("OK", wait_);
+    //JButton button2 = new WaitButton("OK", wait_);
+    JButton button2 = new JButton("OK");
+    button2.addActionListener( new ActionListener() {
+    	public void actionPerformed(ActionEvent ae){
+		 userSelect_selected = list_.getSelectedIndices();
+   		 userSelect_returnVal = new String[userSelect_selected.length];
+    		 for (int j=0; j<userSelect_selected.length; j++) {
+      			userSelect_returnVal[j] = (String) list_.getModel().getElementAt(userSelect_selected[j]);
+    		}
+		try{
+			fileMgr_ = new ProjectionsFileMgr(userSelect_returnVal);
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+		dialog_.setVisible(false);
+		callback.callBack();
+	}
+    });
     JPanel panel = new JPanel();
     panel.add(button1);
     panel.add(button2);
     d.getContentPane().add(panel, BorderLayout.SOUTH);
     return d;
   }
-  
+
   /** Recursively search through all the subdirectories and finds those
    *  files specified by the filter */
   private Vector filterFiles(
-    File[] files, javax.swing.filechooser.FileFilter filter) 
+    File[] files, javax.swing.filechooser.FileFilter filter)
   {
     Vector fileVector = new Vector();
     Vector fileList = new Vector(files.length);
@@ -190,8 +269,8 @@ public class ProjectionsFileChooser
 
   /** Given a list of files in fileList, expand the directories and filter
    *  for "sts" files */
-  private void recurseFilterFiles(Vector fileList, Vector fileVector, 
-				  javax.swing.filechooser.FileFilter filter) 
+  private void recurseFilterFiles(Vector fileList, Vector fileVector,
+				  javax.swing.filechooser.FileFilter filter)
   {
     for (int i=0; i<fileList.size(); i++) {
       File file = (File) fileList.elementAt(i);
@@ -207,34 +286,50 @@ public class ProjectionsFileChooser
     }
   }
 
-  /** From the filtered files, now ask the user to pick which ones they 
+  /** From the filtered files, now ask the user to pick which ones they
    *  really want. */
   private String[] userSubselect(Vector files) {
     String[] filesStr = new String[files.size()];
     int[] selectAll = new int[files.size()];
+
+
+
     for (int i=0; i<filesStr.length; i++) {
       File file = (File) files.elementAt(i);
-      try { filesStr[i]=file.getCanonicalPath(); }
-      catch (IOException e) { filesStr[i]="IOException index "+i; }
+      try
+      {
+       filesStr[i]=file.getCanonicalPath();
+
+      }
+      catch (IOException e) {
+      System.out.println("exception in USersubselect");
+      filesStr[i]="IOException index "+i; }
       selectAll[i] = i;
     }
+
+
     list_ = new JList(filesStr);
     listSize_ = filesStr.length;
     list_.setSelectedIndices(selectAll);
+
     dialog_.getContentPane().add(new JScrollPane(list_), BorderLayout.CENTER);
+
     dialog_.setVisible(true);
-    wait_.setValue(true);
-    Thread thread = 
+
+    /*wait_.setValue(true);
+    Thread thread =
       new Thread() { public void run() { wait_.waitFor(false); } };
     thread.run();
-    dialog_.setVisible(false);
+
+    dialog_.setVisible(false);*/
+
     // thread waits for user's input, and only stops when user finished
-    int[] selected = list_.getSelectedIndices();
-    String[] returnVal = new String[selected.length];
+    /*userSelect_selected = list_.getSelectedIndices();
+    userSelect_returnVal = new String[selected.length];
     for (int j=0; j<selected.length; j++) {
-      returnVal[j] = (String) list_.getModel().getElementAt(selected[j]);
-    }
-    return returnVal;
+      userSelect_returnVal[j] = (String) list_.getModel().getElementAt(selected[j]);
+    }*/
+    return userSelect_returnVal;
   }
 
   private Frame        owner_    = null;   // for making things modal

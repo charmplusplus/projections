@@ -38,12 +38,12 @@ public class ProjectionsFileMgr {
   }
 
   /** Print out the files that were set. */
-  public void printSts() throws IOException { 
+  public void printSts() throws IOException {
     for (int i=0; i<stsFiles_.length; i++) { 
-      System.out.println(stsFiles_[i].getCanonicalPath());
+      //System.out.println(stsFiles_[i].getCanonicalPath());
       for (int j=0; j<logFiles_[i].length; j++) {
 	if (logFiles_[i] != null) {
-	  System.out.println("  "+logFiles_[i][j].getCanonicalPath());
+	  //System.out.println("  "+logFiles_[i][j].getCanonicalPath());
 	}
       }
     }
@@ -56,21 +56,21 @@ public class ProjectionsFileMgr {
   }
 
   /** Return the number of sts files or 0 if no files. */
-  public int getNumFiles() { 
+  public int getNumFiles() {
     if (stsFiles_ != null) { return stsFiles_.length; }
     else { return 0; }
   }
 
-  /** Return pointer to files that are associated with the stsFile at 
+  /** Return pointer to files that are associated with the stsFile at
    *  index <idx>.  Can return null.  */
   public File[] getLogFiles(int idx) {
     if (logFiles_ != null) { return logFiles_[idx]; }
     else { return null; }
   }
 
-  /** Filter files in the directory and only get those logs associated with 
+  /** Filter files in the directory and only get those logs associated with
    *  the STS file. */
-  private File[] findFiles(String stsPathName) 
+  private File[] findFiles(String stsPathName)
     throws IOException
   {
     File stsFile = new File(stsPathName);
@@ -80,31 +80,36 @@ public class ProjectionsFileMgr {
     String stsFileName = stsFile.getName();
     int lastDotIndex = stsFileName.lastIndexOf(".");
     int nextDotIndex = stsFileName.lastIndexOf(".", lastDotIndex-1);
-    base_ = stsFileName.substring(0, nextDotIndex);
-    if (stsPathName.endsWith(".sts")) { 
+    if(nextDotIndex != -1){
+    	base_ = stsFileName.substring(0, nextDotIndex);
+	    if (stsPathName.endsWith(".sts")) {
       // given that the sts has name like: "namd2.count.sts", find
       // all files of the name "namd2.x.count"
-      extention_ = stsFileName.substring(nextDotIndex+1, lastDotIndex);
-    }
-    else {
+      	extention_ = stsFileName.substring(nextDotIndex+1, lastDotIndex);
+    	}
+    	else {
       // assuming that the sts has name like: "namd2.sts.count", find
       // all files of the name "namd2.x.count"
-      extention_ = stsFileName.substring(lastDotIndex+1, stsFileName.length());
+      	extention_ = stsFileName.substring(lastDotIndex+1, stsFileName.length());
+    	}
+    }else{
+    	base_ = stsFileName.substring(0,lastDotIndex-1);
+	extention_ = ".log";
     }
     String[] logFiles = stsDir.list(new FilenameFilter() {
       public boolean accept(File dir, String name) {
-	return name.startsWith(base_) && 
-	       name.endsWith(extention_) && 
+	return name.startsWith(base_) &&
+	       name.endsWith(extention_) &&
 	       name.indexOf(".sts") == -1;  // doesn't contain ".sts"
       }
     });
     File[] returnVal = new File[logFiles.length];
-    for (int i=0; i<returnVal.length; i++) { 
+    for (int i=0; i<returnVal.length; i++) {
       returnVal[i] = new File(stsDir, logFiles[i]);
     }
     return returnVal;
   }
-  
+
   private File[]   stsFiles_ = null;  // array of sts files (passed in)
   private File[][] logFiles_ = null;  // for each sts file, the associated logs
 

@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import projections.misc.*;
+import projections.gui.count.*;
 
 public class MainWindow extends Frame
    implements ActionListener
@@ -70,7 +71,7 @@ public class MainWindow extends Frame
 	  {
 		 MenuItem mi = (MenuItem)evt.getSource();
 		 String arg = mi.getLabel();
-		 
+
 		 if(arg.equals("Open..."))
 			ShowOpenFileDialog();
 		 else if(arg.equals("Quit"))
@@ -88,6 +89,8 @@ public class MainWindow extends Frame
 		        showChildWindow(histogramWindow,"HistogramWindow");
 		 else if(arg.equals("Entry Point Characteristics Graph"))
 		        showChildWindow(epCharWindow,"EPCharWindow");
+		 else if(arg.equals("Counter"))
+				ShowCounterWindow();
 
 		 else if(toolsEnabled)
 		 {
@@ -109,11 +112,12 @@ public class MainWindow extends Frame
 			   ShowStlWindow();
 			else if(arg.equals("Generate EP Data"))
 			    activateEPAnalysis();
+
 		 }
 	  }
    }
 
-	
+
 /* called by the childWindows to remove references to themselves */
    public void closeChildWindow(Object childWindow)
    {
@@ -190,7 +194,8 @@ public class MainWindow extends Frame
 		 "Histograms",
 		 "Interval Graph",
 		 "Entry Point Characteristics Graph",
-		 "Overview"
+		 "Overview",
+		 "Counter"
 	  },
 	  this));
 
@@ -212,14 +217,14 @@ public class MainWindow extends Frame
 		 return graphWindow.getGraphColor(e);
 	  else
 		 return null;
-   }   
+   }
    public boolean GraphExists()
    {
 	  if(graphWindow != null)
 		 return true;
 	  else
 		 return false;
-   }   
+   }
    public static void help()
    {
      System.out.println("-h:		show this page");
@@ -309,7 +314,7 @@ public class MainWindow extends Frame
 
 /* show the child window
 *  if the childWindow has not been created yet, then create an object of type childClass
-*  by invoking the corresponding constructor 
+*  by invoking the corresponding constructor
 *  see http://developer.java.sun.com/developer/technicalArticles/ALT/Reflection/ for example use of Java Reflection
 */
    public void showChildWindow(Object childWindow, String childClass)
@@ -408,9 +413,29 @@ public class MainWindow extends Frame
 	   timelineWindow = new TimelineWindow(this);
 	   timelineWindow.setSize(640,480);
        }
-   }   
+   }
+
+   public void ShowCounterWindow()
+   {
+
+    CounterFrame f = new CounterFrame();
+    ProjectionsFileMgr fileMgr = null;
+    try {
+      ProjectionsFileChooser fc =
+	new ProjectionsFileChooser(f, "Performance Counter Analysis",
+				   ProjectionsFileChooser.MULTIPLE_FILES);
+	
+	CounterCallBack callback = new CounterCallBack(f,fc);
+	int retval = fc.showDialog(callback);
+    }
+    catch(Exception exc) { 
+    System.out.println("something got screwed");
+    ProjectionsFileChooser.handleException(f, exc); }
+   }
+
+
    public void update(Graphics g)
    {
 	  paint(g);
-   }   
+   }
 }

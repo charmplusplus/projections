@@ -331,12 +331,12 @@ public class Util
 		}
 	}
 	
-	filename = new File(filePath);
+	if (filePath != null) { filename = new File(filePath); }
 	again--;
 	
 	accessFile.close();
 	
-	}while(again < 0);
+	}while(again >= 0);
 	
 	
 	

@@ -104,7 +104,14 @@ SRC=\
     projections/misc/AccumulatedData.java\
     projections/misc/ChareData.java\
     projections/misc/EntryTypeData.java\
-    projections/misc/CommandLineException.java
+    projections/misc/CommandLineException.java\
+    projections/gui/graph/XAxis.java\
+    projections/gui/graph/XAxisFixed.java\
+    projections/gui/graph/YAxis.java\
+    projections/gui/graph/YAxisFixed.java\
+    projections/gui/graph/YAxisAuto.java\
+    projections/gui/graph/DataSource.java\
+    projections/gui/graph/DataSource1D.java
 
 
 all: bin/projections.jar
@@ -112,14 +119,20 @@ all: bin/projections.jar
 	@ echo "See README or run bin/projections"
 
 projections/gui/MainWindow.class: $(SRC)
-	javac -d . -O $(SRC)
+	@ echo "Compiling java sources:"
+	@ javac -d . -O $(SRC)
+	@ echo "Complete."
 
 bin/projections.jar: projections/gui/MainWindow.class $(SRC)
 	@ echo "** Creating jar file"
 	jar -cfm0 bin/projections.jar \
 		projections/images/manifest \
 		projections/images/bgimage\
-		projections/*/*.class
+		projections/*/*.class \
+		projections/*/*/*.class
+
+run: bin/projections.jar
+	bin/projections test/hello.sts
 
 clean:
 	@ echo "** Removing temporary files"

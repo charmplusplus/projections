@@ -145,10 +145,12 @@ public class StlPanel extends ScalePanel.Child
 			    int y_max=(int)Math.floor(req.y(p+1));
 			    if (y_min<starty) y_min=starty;
 			    if (y_max>endy) y_max=endy;
-			    renderRow(colors[p],x2t_off,x2t_slope,offBuf,
-				      wid,
-				      y_min-starty,y_max-starty,
-				      startx-startx,endx-startx);
+			    if(p < colors.length){
+					 renderRow(colors[p],x2t_off,x2t_slope,offBuf,
+					      wid,
+					      y_min-starty,y_max-starty,
+					      startx-startx,endx-startx);
+				 }
 			    p++;
 			}
 		    }
@@ -300,6 +302,7 @@ public class StlPanel extends ScalePanel.Child
 	int numEPs = Analysis.getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
 	    // we want to avoid loading the 4-D array if possible.
+		 //System.out.println("intervalSize("+intervalSize+") startInterval("+startInterval+") endInterval("+endInterval+")");
 	    Analysis.LoadGraphData(intervalSize,
 				   startInterval, endInterval,false,validPEs);
 	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);

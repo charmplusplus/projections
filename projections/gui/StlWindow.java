@@ -180,6 +180,7 @@ public class StlWindow extends ProjectionsWindow
 		getDialogData();
 		final SwingWorker worker = new SwingWorker() {
 			public Object construct() {
+			    thisWindow.setVisible(false);
 			    thisWindow.setStlPanelData();
 			    stl.setData(validPEs,startTime,endTime); 
 			    return null;

@@ -65,6 +65,8 @@ public class IntervalRangeDialog extends RangeDialog
 	Label sizeLabel = new Label("Interval Size :", Label.LEFT);
 	sizeField = new TimeTextField(intervalSize, 12);
 	sizeField.addActionListener(this);
+	sizeField.addKeyListener(this);
+	sizeField.addFocusListener(this);
 	Util.gblAdd(sizePanel, sizeLabel, gbc, 0,0, 1,1, 1,1);
 	Util.gblAdd(sizePanel, sizeField, gbc, 1,0, 1,1, 1,1);
 
@@ -74,6 +76,8 @@ public class IntervalRangeDialog extends RangeDialog
 	Label thresholdLabel = new Label("EP threshold :", Label.LEFT);
 	thresholdField = new TimeTextField(threshold, 12);
 	thresholdField.addActionListener(this);
+	thresholdField.addKeyListener(this);
+	thresholdField.addFocusListener(this);
 	Util.gblAdd(thresholdPanel, thresholdLabel, gbc, 0,0, 1,1, 1,1);
 	Util.gblAdd(thresholdPanel, thresholdField, gbc, 1,0, 1,1, 1,1);
 

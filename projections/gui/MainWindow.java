@@ -9,7 +9,8 @@ import projections.misc.*;
 public class MainWindow extends Frame
    implements ActionListener
 {
-   private static double 	CUR_VERSION = 2.0;
+    // changed to public access by Chee Wai - 4/24/2002
+   public static double 	CUR_VERSION = 2.0;
 
    private GraphWindow          graphWindow;
    private TimelineWindow       timelineWindow;
@@ -29,8 +30,14 @@ public class MainWindow extends Frame
    private Image paper;
 
    private Image bgimage;
+
+    private ScreenInfo screenInfo;
+
    public MainWindow()
    {
+       // acquire current machine's screen information
+       screenInfo = new ScreenInfo();
+
 	  addWindowListener(new WindowAdapter()
 	  {
 		 public void windowClosing(WindowEvent e)

@@ -1,6 +1,7 @@
 package projections.misc;
 
 import projections.analysis.*;
+import projections.gui.*;
 
 import java.io.*;
 
@@ -11,22 +12,15 @@ import java.io.*;
  *
  *  MultiRunData is the main class encapsulating raw data read from multiple
  *  summary or log files.
- *  It performs the various tasks:
- *
- *  1) generating the required input streams of raw log file data.
- *  2) feeding the streams into appropriate Reader objects that will 
- *     update Data objects.
- *  3) interacting with analysis/filter objects to produce higher-level
- *     information.
  */
 
 public class MultiRunData {
 
     // IO reader objects
-    public MRStsReader stsReaders[];
+    public GenericStsReader stsReaders[];
     // sumReaders dim 1 - indexed by set ID
     // sumReaders dim 2 - indexed by processor index
-    public MRSummaryReader sumReaders[][];
+    public GenericSummaryReader sumReaders[][];
 
     public MultiRunData() {
     }
@@ -45,20 +39,21 @@ public class MultiRunData {
 	    NdataSetPathnames = getSubDirectories(NdataSetPathnames[0]);
 	}
 	if (NlogType == MultiRunController.SUMMARY) {
-	    stsReaders = new MRStsReader[NdataSetPathnames.length];
-	    sumReaders = new MRSummaryReader[NdataSetPathnames.length][];
+	    stsReaders = new GenericStsReader[NdataSetPathnames.length];
+	    sumReaders = new GenericSummaryReader[NdataSetPathnames.length][];
 
 	    for (int i=0; i<stsReaders.length; i++) {
-		File sumStsFile = getSumStsFile(NbaseName, 
-						NdataSetPathnames[i]);
-		stsReaders[i] = new MRStsReader();
-		stsReaders[i].read(new BufferedReader(new FileReader(sumStsFile)));
-		sumReaders[i] = new MRSummaryReader[stsReaders[i].numPe];
+		stsReaders[i] = 
+		    new GenericStsReader(getSumStsFilename(NbaseName,
+							   NdataSetPathnames[i]),
+					 MainWindow.CUR_VERSION);
+		sumReaders[i] = new GenericSummaryReader[stsReaders[i].numPe];
 		for (int j=0; j<sumReaders[i].length; j++) {
-		    File sumFile = getSumFile(NbaseName,
-					      NdataSetPathnames[i], j);
-		    sumReaders[i][j] = new MRSummaryReader();
-		    sumReaders[i][j].read(new BufferedReader(new FileReader(sumFile)));
+		    sumReaders[i][j] = 
+			new GenericSummaryReader(getSumFilename(NbaseName,
+								NdataSetPathnames[i],
+								j),
+						 MainWindow.CUR_VERSION);
 		}
 	    }
 	}
@@ -118,33 +113,43 @@ public class MultiRunData {
 	return retPathNames;
     }
 
-    private File getSumStsFile(String NbaseName, String NlogSetPathName) 
-	throws IOException
+    private String getSumStsFilename(String NbaseName, String NlogSetPathName)
     {
 	if (!NlogSetPathName.endsWith(File.separator)) {
 	    NlogSetPathName += File.separator;
 	}
-	String sumStsPathName = NlogSetPathName + NbaseName + ".sum.sts";
+	return NlogSetPathName + NbaseName + ".sum.sts";
+    }
+
+    private File getSumStsFile(String NbaseName, String NlogSetPathName) 
+	throws IOException
+    {
+	String sumStsPathName = getSumStsFilename(NbaseName, NlogSetPathName);
 	File sumStsFile = new File(sumStsPathName);
 	if (!sumStsFile.isFile()) {
 	    throw new IOException("Invalid sts file - " +
-					  sumStsPathName);
+				  sumStsPathName);
 	}
 	return sumStsFile;
+    }
+
+    private String getSumFilename(String NbaseName, String NlogSetPathName,
+				  int pe) 
+    {
+	if (!NlogSetPathName.endsWith(File.separator)) {
+	    NlogSetPathName += File.separator;
+	}
+	return NlogSetPathName + NbaseName + "." + pe + ".sum";
     }
 
     private File getSumFile(String NbaseName, String NlogSetPathName, int pe) 
 	throws IOException
     {
-	if (!NlogSetPathName.endsWith(File.separator)) {
-	    NlogSetPathName += File.separator;
-	}
-	String sumPathName = NlogSetPathName + NbaseName + "." + 
-	    pe + ".sum";
+	String sumPathName = getSumFilename(NbaseName, NlogSetPathName, pe);
 	File sumFile = new File(sumPathName);
 	if (!sumFile.isFile()) {
 	    throw new IOException("Invalid summary file - " +
-					  sumPathName);
+				  sumPathName);
 	}
 	return sumFile;
     }

@@ -1,6 +1,7 @@
 package projections.analysis;
 
 import projections.gui.graph.*;
+import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
@@ -22,13 +23,30 @@ import java.io.*;
 
 public class MultiRunDataAnalyzer {
 
-    // analysis count + types
-    public static final int TOTAL_ANALYSIS_TAGS = 2;
+    // analysis count + types (starts from zero and contigious)
+    public static final int TOTAL_ANALYSIS_TAGS = 4;
     public static final int ANALYZE_SUM = 0;
     public static final int ANALYZE_AVG = 1;
+    public static final int ANALYZE_MIN = 2;
+    public static final int ANALYZE_MAX = 3;
+
+    // private tags 
+    private static final int TOTAL_EP_SUMMARY_TAGS = 4;
+    private static final int TOTAL_CONFIG_SUMMARY_TAGS = 1;
+
+    // ep summary tags (starts from zero and contigious)
+    private static final int EP_GROWTH_PERCENT = 0;
+    private static final int EP_SUM = 1;  // used to check for zero EPs
+    private static final int EP_AVG_PERCENT = 2;
+    private static final int EP_SIGNIFICANCE = 3;
+
+    // config summary tags (starts from zero and contigious)
+    private static final int CONFIG_SUM = 0;
 
     private int numEPs;
     private int numSets;
+
+    private int significanceMap[];
 
     private String epNamesList[];
     private String configList[];
@@ -38,6 +56,22 @@ public class MultiRunDataAnalyzer {
     // analyzedDataTable dim 3 - indexed by entry point ID
     private double analyzedDataTable[][][];
 
+    // ****************************************************************
+    // analysis data that is either output-type dependent or is to be used
+    // for internal analyzer purposes (like computing the significance
+    // mapping). These are computed "as-is-convenient" when computing other
+    // data.
+    
+    // summary data for the same EP across all runs
+    // epSummaryData dim 1 - indexed by summary tag type
+    // epSummaryData dim 2 - indexed by entry point ID
+    private double epSummaryData[][];
+
+    // summary data for the same configuration across all EPs
+    // configSummaryData dim 1 - indexed by summary tag type
+    // configSummaryData dim 2 - indexed by the log set ID
+    private double configSummaryData[][];
+
     public MultiRunDataAnalyzer() {
     }
 
@@ -45,6 +79,10 @@ public class MultiRunDataAnalyzer {
 
 	numEPs = originalData.stsReaders[0].entryCount;
 	numSets = originalData.stsReaders.length;
+
+	// setup summary data
+	epSummaryData = new double[TOTAL_EP_SUMMARY_TAGS][numEPs];
+	configSummaryData = new double[TOTAL_CONFIG_SUMMARY_TAGS][numSets];
 
 	analyzedDataTable = 
 	    new double[TOTAL_ANALYSIS_TAGS][numSets][numEPs];
@@ -71,26 +109,45 @@ public class MultiRunDataAnalyzer {
 	// computeStdDeviation();
 
 	// data analysis for configurations
-	// computeSumAcrossEPs(originalData);
+	// computeSumAcrossEPs(); // tagged with computeSum
 
 	// data analysis for EP
-	// computePercentGrowth(originalData);
+	// computeSumAcrossConfigs();  // tagged with computeSum
+	computeAvgPercentGrowth();
+	computeAvgPercentContribution();
 	
 	// significance analysis for EP
-	// computeSignificance();
+	computeSignificanceMap();
     }
 
     public void computeSum(MultiRunData originalData) {
 	// processing a data set
 	for (int i=0; i<numSets; i++) {
+	    configSummaryData[CONFIG_SUM][i] = 0;
 	    // processing each EP in the dataset
 	    for (int j=0; j<numEPs; j++) {
 		analyzedDataTable[ANALYZE_SUM][i][j] = 0;
 		// taking each processor data point for a set
+		double min = Double.MAX_VALUE;
+		double max = Double.MIN_VALUE;
 		for (int k=0; k<originalData.stsReaders[i].numPe; k++) {
+		    double value =
+			originalData.sumReaders[i][k].epData[j][GenericSummaryReader.TOTAL_TIME];
 		    analyzedDataTable[ANALYZE_SUM][i][j] +=
-			originalData.sumReaders[i][k].epData[j][MRSummaryReader.TOTAL_TIME];
+			value;
+		    if (value > max) {
+			max = value;
+		    }
+		    if (value < min) {
+			min = value;
+		    }
 		}
+		analyzedDataTable[ANALYZE_MIN][i][j] = min;
+		analyzedDataTable[ANALYZE_MAX][i][j] = max;
+		configSummaryData[CONFIG_SUM][i] +=
+		    analyzedDataTable[ANALYZE_SUM][i][j];
+		epSummaryData[EP_SUM][j] +=
+		    analyzedDataTable[ANALYZE_SUM][i][j];
 	    }
 	}
     }
@@ -114,7 +171,8 @@ public class MultiRunDataAnalyzer {
      *   on behalf of the GUI.
      *  
      */
-    public MultiRunDataSource getData(int dataType, boolean filterTable[]) {
+    public MultiRunDataSource getData(int dataType, boolean filterTable[],
+				      int sortMap[]) {
 	String titleString = "";
 	switch (dataType) {
 	case ANALYZE_SUM:
@@ -123,9 +181,17 @@ public class MultiRunDataAnalyzer {
 	case ANALYZE_AVG:
 	    titleString = "Average";
 	    break;
+	case ANALYZE_MIN:
+	    titleString = "Min";
+	    break;
+	case ANALYZE_MAX:
+	    titleString = "Max";
+	    break;
 	}
-	return new MultiRunDataSource(filter(analyzedDataTable[dataType],
-					     filterTable),
+	return new MultiRunDataSource(filter(Util.applyMap(analyzedDataTable[dataType],
+							   sortMap),
+					     Util.applyMap(filterTable,
+							   sortMap)),
 				      null,
 				      titleString);
     }
@@ -147,8 +213,109 @@ public class MultiRunDataAnalyzer {
 					       filterTable)));
     }
 
-    public String[] getMRLegendData(boolean filterTable[]) {
-	return filter(epNamesList, filterTable);
+    public String[] getMRLegendData(boolean filterTable[],
+				    int sortMap[]) {
+	return filter(Util.applyMap(epNamesList, sortMap),
+		      Util.applyMap(filterTable, sortMap));
+    }
+
+    /**
+     *  This function must be called *after* the sum data is computed.
+     *  Otherwise, it is meaningless.
+     *
+     */
+    public boolean[] getNonZeroFilter() {
+	boolean filter[] = new boolean[epNamesList.length];
+	for (int i=0; i<filter.length; i++) {
+	    if (epSummaryData[EP_SUM][i] == 0.0) {
+		filter[i] = false;
+	    } else {
+		filter[i] = true;
+	    }
+	}
+	return filter;
+    }
+
+    /**
+     *  Returns a index-to-index map (for re-sorting) that allows
+     *  data to be displayed in a different order.
+     *
+     *  May provide parameters in the future to fine-tune significance
+     *  analysis.
+     *
+     *  returns a copy of the internal map.
+     */
+    public int[] getSignificanceMap() {
+	int significance[] = new int[epNamesList.length];
+
+	// default to a direct map
+	if (significanceMap == null) {
+	    for (int i=0; i<significance.length; i++) {
+		significance[i] = i;
+	    }
+	} else {
+	    for (int i=0; i<significanceMap.length; i++) {
+		significance[i] = significanceMap[i];
+	    }
+	}
+	
+	return significance;
+    }
+
+    public int[] getGrowthMap() {
+	int growth[] = new int[epNamesList.length];
+	return Sorter.sort(epSummaryData[EP_GROWTH_PERCENT]);
+    }
+
+    public int[] getSizeMap() {
+	int epSize[] = new int[epNamesList.length];
+	return Sorter.sort(epSummaryData[EP_AVG_PERCENT]);
+    }
+
+    /**
+     *  Computes the average total time growth percentage of EPs across 
+     *  all runs.
+     *  Useful to see if the EP scales well.
+     *  Assumes that the summation data has already been computed in
+     *  analyzedDataTable.
+     */
+    private void computeAvgPercentGrowth() {
+	for (int ep=0; ep<numEPs; ep++) {
+	    double growthPercent = 0;
+	    for (int config=1; config<numSets; config++) {
+		double previous = analyzedDataTable[ANALYZE_SUM][config-1][ep];
+		double current = analyzedDataTable[ANALYZE_SUM][config][ep];
+		growthPercent += (previous - current)/previous;
+	    }
+	    epSummaryData[EP_GROWTH_PERCENT][ep] = growthPercent/(numEPs-1);
+	}
+    }
+
+    private void computeAvgPercentContribution() {
+	for (int ep=0; ep<numEPs; ep++) {
+	    double percentContrib = 0;
+	    for (int config=0; config<numSets; config++) {
+		percentContrib +=
+		    analyzedDataTable[ANALYZE_SUM][config][ep] /
+		    configSummaryData[CONFIG_SUM][config];
+	    }
+	    epSummaryData[EP_AVG_PERCENT][ep] = percentContrib/numEPs;
+	}
+    }
+
+    private void computeSignificanceMap() {
+
+	significanceMap = new int[epNamesList.length];
+
+	// the rate of growth contributes 20% and EP time percentage
+	// contributes 80%
+	for (int i=0; i<epNamesList.length; i++) {
+	    epSummaryData[EP_SIGNIFICANCE][i] =
+		epSummaryData[EP_GROWTH_PERCENT][i]*0.2 +
+		epSummaryData[EP_AVG_PERCENT][i]*0.8;
+	}
+
+	significanceMap = Sorter.sort(epSummaryData[EP_SIGNIFICANCE]);
     }
 
     private double getMax(double[][] inTable) {

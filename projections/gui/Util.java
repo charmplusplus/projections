@@ -110,4 +110,85 @@ public class Util
 			g.drawImage(image, r, c, component);
 	  }
    }   
+
+    /**
+     *  Added by Chee Wai Lee
+     *  4/24/2002
+     *  
+     *  For the purpose of applying sorting maps to various types of arrays.
+     */
+    public static boolean[] applyMap(boolean[] dataArray, int[] map) {
+	if (map == null) {
+	    return dataArray;
+	} else {
+	    boolean returnArray[] = new boolean[dataArray.length];
+	    for (int i=0; i<returnArray.length; i++) {
+		returnArray[i] = dataArray[map[i]];
+	    }
+	    return returnArray;
+	}
+    }
+
+    public static Color[] applyMap(Color[] dataArray, int[] map) {
+	if (map == null) {
+	    return dataArray;
+	} else {
+	    Color returnArray[] = new Color[dataArray.length];
+	    for (int i=0; i<returnArray.length; i++) {
+		returnArray[i] = dataArray[map[i]];
+	    }
+	    return returnArray;
+	}
+    }
+
+    public static String[] applyMap(String[] dataArray, int[] map) {
+	if (map == null) {
+	    return dataArray;
+	} else {
+	    String returnArray[] = new String[dataArray.length];
+	    for (int i=0; i<returnArray.length; i++) {
+		returnArray[i] = dataArray[map[i]];
+	    }
+	    return returnArray;
+	}
+    }
+
+    public static double[][] applyMap(double[][] dataArray, int[] map) {
+	if (map == null) {
+	    return dataArray;
+	} else {
+	    double returnArray[][] = new double[dataArray.length][];
+	    for (int config=0; config<returnArray.length; config++) {
+		returnArray[config] = new double[dataArray[config].length];
+		for (int ep=0; ep<returnArray[config].length; ep++) {
+		    returnArray[config][ep] = dataArray[config][map[ep]];
+		}
+	    }
+	    return returnArray;
+	}
+    }
+
+    /**
+     *   pre-condition: filter1 and filter2 are of the same length
+     */
+    public static boolean[] orFilters(boolean[] filter1, boolean[] filter2) {
+	boolean newFilter[] = new boolean[filter1.length];
+
+	for (int i=0; i<newFilter.length; i++) {
+	    newFilter[i] = (filter1[i] || filter2[i]);
+	}
+	return newFilter;
+    }
+
+    /**
+     *   pre-condition: filter1 and filter2 are of the same length
+     */
+    public static boolean[] andFilters(boolean[] filter1, boolean[] filter2) {
+	boolean newFilter[] = new boolean[filter1.length];
+
+	for (int i=0; i<newFilter.length; i++) {
+	    newFilter[i] = (filter1[i] && filter2[i]);
+	}
+	return newFilter;
+    }
 }

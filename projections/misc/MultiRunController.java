@@ -32,8 +32,11 @@ public class MultiRunController
     private boolean textmode = true;
 
     // analysis model objects
-    private static MultiRunData rawdata;  // all data
-    private static MultiRunDataAnalyzer analyzer;
+    private MultiRunData rawdata;  // all data
+    private MultiRunDataAnalyzer analyzer;
+
+    int currentMap[] = null;
+    boolean currentFilter[] = null;
 
     public MultiRunController(MultiRunWindow NmainWindow) {
 	mainWindow = NmainWindow;
@@ -50,8 +53,20 @@ public class MultiRunController
             // create analyzer object to look at data and generate output
             analyzer = new MultiRunDataAnalyzer();
             analyzer.analyzeData(rawdata);
-	    legendPanel.setData(analyzer.getMRLegendData(null),
-				analyzer.getData(MultiRunDataAnalyzer.ANALYZE_SUM, null).getColorMap());
+
+	    // by default, ep list will be presented in an order sorted
+	    // by the analyzer's significance rating. Non-zero EPs are
+	    // also filtered away as a default.
+	    //
+	    // we do, however, want the entire array to be passed to
+	    // legendPanel.
+	    currentMap = analyzer.getSignificanceMap();
+	    currentFilter = analyzer.getNonZeroFilter();
+	    legendPanel.setData(analyzer.getMRLegendData(null, null),
+				analyzer.getData(MultiRunDataAnalyzer.ANALYZE_SUM, 
+						 null, null).getColorMap(),
+				currentFilter,
+				currentMap);
 	} catch (java.io.IOException e) {
             System.err.println(e.toString());
         }
@@ -81,34 +96,7 @@ public class MultiRunController
 	if (actionCommand.equals(CLOSE_WINDOW)) {
 	    mainWindow.Close();
 	} else if (actionCommand.equals(DISPLAY_DATA)) {
-	    boolean filter[];
-
-	    filter = legendPanel.getSelection();
-
-	    int numDataTypes = 0;
-	    for (int i=0; i<MultiRunDataAnalyzer.TOTAL_ANALYSIS_TAGS; i++) {
-		if (dataTypes[i].getState()) {
-		    numDataTypes++;
-		}
-	    }
-	    MultiRunDataSource sources[];
-	    MultiRunYAxis yAxes[];
-	    sources = new MultiRunDataSource[numDataTypes];
-	    yAxes = new MultiRunYAxis[numDataTypes];
-	    int typeIdx = 0;
-	    for (int i=0; i<MultiRunDataAnalyzer.TOTAL_ANALYSIS_TAGS;i++) {
-		if (dataTypes[i].getState()) {
-		    sources[typeIdx] = analyzer.getData(i, filter);
-		    yAxes[typeIdx] = analyzer.getMRYAxisData(i, filter);
-		    typeIdx++;
-		}
-	    }
-
-	    displayPanel.setData(sources,
-				 analyzer.getMRXAxisData(null),
-				 yAxes,
-				 analyzer.getMRLegendData(filter),
-				 textmode);
+	    displayData();
 	}
     }
 
@@ -123,8 +111,59 @@ public class MultiRunController
 	    } else if (itemLabel.equals("graph")) {
 		textmode = false;
 		displayPanel.setDisplayMode(textmode);
+	    } else if (itemLabel.equals("unsorted")) {
+		legendPanel.setSort(null);
+		displayData();
+	    } else if (itemLabel.equals("sorted by significance")) {
+		legendPanel.setSort(analyzer.getSignificanceMap());
+		displayData();
+	    } else if (itemLabel.equals("sorted by % growth")) {
+		legendPanel.setSort(analyzer.getGrowthMap());
+		displayData();
+	    } else if (itemLabel.equals("sorted by size")) {
+		legendPanel.setSort(analyzer.getSizeMap());
+		displayData();
+	    } else if (itemLabel.equals("no filter")) {
+		legendPanel.setFilter(null);
+		displayData();
+	    } else if (itemLabel.equals("non zero EPs")) {
+		legendPanel.setFilter(analyzer.getNonZeroFilter());
+		displayData();
 	    }
 	}
+    }
+
+    private void displayData() {
+	boolean filter[];
+	int map[];
+	
+	filter = legendPanel.getSelection();
+	map = legendPanel.getLegendSort();
+	
+	int numDataTypes = 0;
+	for (int i=0; i<MultiRunDataAnalyzer.TOTAL_ANALYSIS_TAGS; i++) {
+	    if (dataTypes[i].getState()) {
+		numDataTypes++;
+	    }
+	}
+	MultiRunDataSource sources[];
+	MultiRunYAxis yAxes[];
+	sources = new MultiRunDataSource[numDataTypes];
+	yAxes = new MultiRunYAxis[numDataTypes];
+	int typeIdx = 0;
+	for (int i=0; i<MultiRunDataAnalyzer.TOTAL_ANALYSIS_TAGS;i++) {
+	    if (dataTypes[i].getState()) {
+		sources[typeIdx] = analyzer.getData(i, filter, map);
+		yAxes[typeIdx] = analyzer.getMRYAxisData(i, filter);
+		typeIdx++;
+	    }
+	}
+	
+	displayPanel.setData(sources,
+			     analyzer.getMRXAxisData(null),
+			     yAxes,
+			     analyzer.getMRLegendData(filter, map),
+			     textmode);
     }
 }
 

@@ -17,6 +17,7 @@ import java.io.*;
  *
  */
 public class MultiRunDisplayPanel extends Container 
+    implements ComponentListener
 {
     boolean hasData = false;
     boolean currentTextmode;
@@ -30,6 +31,9 @@ public class MultiRunDisplayPanel extends Container
 
     private Panel textPanel;
     private TextArea displayArea;
+
+    private int textHeight;
+    private int textWidth;
 
     private GraphPanel graphPanel;
     private Panel graphComponent;
@@ -54,19 +58,29 @@ public class MultiRunDisplayPanel extends Container
 
 	setBackground(Color.lightGray);
 
-	textPanel = new Panel();
-	displayArea = new TextArea("",40,120,TextArea.SCROLLBARS_BOTH);
+	// acquiring best text size for screen
 	// use a fixed width font
-	displayArea.setFont(Font.decode("monospaced"));
+	Font f = Font.decode("monospaced");
+	FontMetrics fm = getFontMetrics(f);
+	textHeight = fm.getHeight();
+	textWidth = fm.charWidth('A'); // monospaced, so don't care
+	textPanel = new Panel();
+	// mapping: text uses (row,col) hence => (height, width)
+	displayArea = new TextArea("",
+				   (ScreenInfo.screenHeight/textHeight)/2,
+				   (ScreenInfo.screenWidth/textWidth)/2,
+				   TextArea.SCROLLBARS_BOTH);
+	displayArea.setFont(f);
 	textPanel.add(displayArea);
+
+	// a hack to make the textarea resize itself
+	textPanel.addComponentListener(this);
 
 	emptyGraphCanvas = new Canvas();
 	emptyGraphCanvas.setBackground(Color.black);
-	// make initial empty graph canvas the same size as the text area
-	emptyGraphCanvas.setSize(displayArea.getSize());
+	emptyGraphCanvas.setForeground(Color.white);
 	graphComponent = new Panel();
 	graphComponent.add(emptyGraphCanvas);
-	graphComponent.setSize(displayArea.getSize());
 
 	graphCanvas = new Graph();
 	graphPanel = new GraphPanel(graphCanvas);
@@ -153,5 +167,34 @@ public class MultiRunDisplayPanel extends Container
     // ***CURRENT IMP*** not implemented yet
     public void displayData(Writer writer) 
     {
+    }
+
+    // component listener methods
+    public void componentHidden(ComponentEvent evt) {
+	// do nothing
+    }
+
+    public void componentMoved(ComponentEvent evt) {
+	// do nothing
+    }
+
+    public void componentResized(ComponentEvent evt) {
+	if (evt.getComponent() == textPanel) {
+	    // HORRIBLE HACK ****ARRRGGGGGGHHHH****
+	    // need to resize the text display area accordingly
+	    int maxCol = textPanel.getWidth()/textWidth;
+	    int maxRow = textPanel.getHeight()/textHeight;
+	    // provide a 4 row/2 col buffer space
+	    if (maxCol > 1) {
+		displayArea.setColumns(textPanel.getWidth()/textWidth-2);
+	    }
+	    if (maxRow > 3) {
+		displayArea.setRows(textPanel.getHeight()/textHeight-4);
+	    }
+	}
+    }
+
+    public void componentShown(ComponentEvent evt) {
+	// do nothing
     }
 }

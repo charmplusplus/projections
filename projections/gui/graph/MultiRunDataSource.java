@@ -98,7 +98,7 @@ public class MultiRunDataSource extends DataSource
 	    return colorMap;
 	}
     }
-  
+
     /**
      * Return the values associated with this index.
      *  The index passed in is between 0 and getIndexCount()-1, inclusive.
@@ -112,11 +112,11 @@ public class MultiRunDataSource extends DataSource
      * (FIXME: might want a "getStacked()" method instead)
      */
     public void getValues(int index, double[] values) {
-	for (int j=0;j<getValueCount();j++) {
+	for (int j=0; j<getValueCount(); j++) {
 	    values[j] = dataValues[index][j];
 	}
     }
-  
+
     // public String[] getPopup(int index,int valNo,double value) 
     //    - implemented in superclass for now
 
@@ -133,4 +133,3 @@ public class MultiRunDataSource extends DataSource
 	colorMap = NcolorMap;
     }
 }
-

@@ -20,10 +20,9 @@ import javax.swing.*;
  */
 
 public class MultiRunWindow extends Frame 
-    implements ActionListener
 {
     // Controller object
-    private static MultiRunController controller;
+    private MultiRunController controller;
 
     // Gui components
     private MainWindow mainWindow;
@@ -55,10 +54,6 @@ public class MultiRunWindow extends Frame
 	setTitle("Multi-Run Analysis");
 	setVisible(true);
 	showFileDialog();
-    }
-
-    public void actionPerformed(ActionEvent evt)
-    {
     }
 
     public void Close()

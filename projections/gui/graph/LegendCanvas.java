@@ -6,12 +6,15 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class LegendCanvas extends Canvas
-    implements MouseListener
+    implements MouseListener, ActionListener
 {
     private String labels[] = null;
     private Color colorMap[] = null;
 
+    private int sortMap[] = null;
+    private int reverseMap[] = null;
     private boolean selection[];
+    private boolean showFilter[] = null;
 
     private FontMetrics fm;
     private int textheight;
@@ -45,11 +48,18 @@ public class LegendCanvas extends Canvas
 	posx = 10;
 	posy = 10;
 
+	int linecount = 0;
 	for (int i=0; i<labels.length; i++) {
-	    if (selection[i]) {
-		paintSelected(g, labels[i], colorMap[i]);
-	    } else {
-		paintLabel(g, labels[i], colorMap[i]);
+	    if (showFilter[sortMap[i]] == true) {
+		reverseMap[linecount] = sortMap[i];
+		linecount++;
+		if (selection[sortMap[i]]) {
+		    paintSelected(g, labels[sortMap[i]], 
+				  colorMap[sortMap[i]]);
+		} else {
+		    paintLabel(g, labels[sortMap[i]], 
+			       colorMap[sortMap[i]]);
+		}
 	    }
 	}
 	setSize(new Dimension(maxTextWidth, posy));
@@ -60,25 +70,70 @@ public class LegendCanvas extends Canvas
 	repaint();
     }
 
-    public void setData(String Nlabels[], Color NcolorMap[]) {
+    /**
+     *  This method must be called on an existing display. Otherwise,
+     *  bad things happen.
+     */
+    public void setFilter(boolean NshowFilter[]) {
+	showFilter = NshowFilter;
+	if (showFilter == null) {
+	    defaultShowFilter(labels.length);
+	}
+	// reverseMap is automatically adjusted at repaint time, so no
+	// problems.
+	repaint();
+    }
+
+    /**
+     *  This method must be called on an existing display. Otherwise,
+     *  bad things happen.
+     */
+    public void setSort(int NsortMap[]) {
+	sortMap = NsortMap;
+	if (sortMap == null) {
+	    defaultSortMap(labels.length);
+	}
+	// reverseMap is automatically adjusted at repaint time, so no
+	// problems.
+	repaint();
+    }
+
+    public void setData(String Nlabels[], Color NcolorMap[],
+			boolean NshowFilter[], int NsortMap[]) {
 	labels = Nlabels;
 	selection = new boolean[labels.length];
+	reverseMap = new int[labels.length];
 	colorMap = NcolorMap;
+	if (NshowFilter == null) {
+	    defaultShowFilter(labels.length);
+	} else {
+	    showFilter = NshowFilter;
+	}
+	if (NsortMap == null) {
+	    defaultSortMap(labels.length);
+	} else {
+	    sortMap = NsortMap;
+	}
 	repaint();
     }
 
     public boolean[] getSelection() {
 	// must construct a new copy because this one is being continually
 	// used.
-	boolean returnSelection[];
+	//
+	// The selection returned is the UNSORTED selection. The calling
+	// method must use the same sortMap to acquire sorted data from
+	// the analyzed data object.
+	//
+	// returns only visible selections to be displayed in graph.
 
-	returnSelection = new boolean[selection.length];
-	for (int i=0; i<selection.length; i++) {
-	    returnSelection[i] = selection[i];
-	}
-	return returnSelection;
+	return Util.andFilters(selection, showFilter);
     }
 
+    public int[] getSort() {
+	return sortMap;
+    }
+    
     public Dimension getMinimumSize() {
 	return new Dimension(100, 200);
     }
@@ -135,16 +190,70 @@ public class LegendCanvas extends Canvas
 	}
     }
 
+    /**
+     *  For a new show filter
+     */
+    private void defaultShowFilter(int length) {
+	showFilter = new boolean[length];
+	for (int i=0; i<length; i++) {
+	    showFilter[i] = true;
+	}
+    }
+
+    /**
+     *  For an existing show filter. Avoids creating a new object.
+     */
+    private void defaultShowFilter() {
+	for (int i=0; i<showFilter.length; i++) {
+	    showFilter[i] = true;
+	}
+    }
+
+    /**
+     *  For a new sort map
+     */
+    private void defaultSortMap(int length) {
+	sortMap = new int[length];
+	for (int i=0; i<length; i++) {
+	    sortMap[i] = i;
+	}
+    }
+
+    /**
+     *  For an existing sort map. Avoids the creation of a new object.
+     */
+    private void defaultSortMap() {
+	for (int i=0; i<sortMap.length; i++) {
+	    sortMap[i] = i;
+	}
+    }
+
     // listener functions
+    public void actionPerformed(ActionEvent evt) {
+	String actionCommand = evt.getActionCommand();
+
+	if (actionCommand.equals("select")) {
+	    for (int i=0; i<selection.length; i++) {
+		selection[i] = true;
+	    }
+	    repaint();
+	} else if (actionCommand.equals("unselect")) {
+	    for (int i=0; i<selection.length; i++) {
+		selection[i] = false;
+	    }
+	    repaint();
+	}
+    }
+
     public void mouseClicked(MouseEvent evt) {
 	int lineNumber = yPixelToLineNum(evt.getY());
 
 	if (lineNumber != -1) {
 	    // toggle the selection
-	    if (selection[lineNumber]) {
-		selection[lineNumber] = false;
+	    if (selection[reverseMap[lineNumber]]) {
+		selection[reverseMap[lineNumber]] = false;
 	    } else {
-		selection[lineNumber] = true;
+		selection[reverseMap[lineNumber]] = true;
 	    }
 	    repaint();
 	}

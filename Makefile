@@ -12,6 +12,7 @@ SRC=\
     projections/analysis/LogReader.java\
     projections/analysis/PackTime.java\
     projections/analysis/ProjDefs.java\
+    projections/analysis/Sorter.java\
     projections/analysis/StsReader.java\
     projections/analysis/SumAnalyzer.java\
     projections/analysis/TimelineEvent.java\
@@ -20,8 +21,6 @@ SRC=\
     projections/analysis/UsageInterval.java\
     projections/analysis/ViewerEvent.java\
     projections/analysis/MultiRunDataAnalyzer.java\
-    projections/analysis/MRStsReader.java\
-    projections/analysis/MRSummaryReader.java\
     projections/analysis/GenericLogReader.java\
     projections/analysis/GenericStsReader.java\
     projections/analysis/GenericSummaryReader.java\
@@ -63,6 +62,11 @@ SRC=\
     projections/gui/MainButtonPanel.java\
     projections/gui/MainTitlePanel.java\
     projections/gui/MainWindow.java\
+    projections/gui/MultiRunControlPanel.java\
+    projections/gui/MultiRunDisplayPanel.java\
+    projections/gui/MultiRunFileDialogControl.java\
+    projections/gui/MultiRunTextAreaWriter.java\
+    projections/gui/MultiRunWindow.java\
     projections/gui/MyButton.java\
     projections/gui/OrderedGraphDataList.java\
     projections/gui/OrderedIntList.java\
@@ -80,6 +84,7 @@ SRC=\
     projections/gui/ProfileYLabelCanvas.java\
     projections/gui/ScalePanel.java\
     projections/gui/ScaleSlider.java\
+    projections/gui/ScreenInfo.java\
     projections/gui/SelectField.java\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
@@ -94,40 +99,35 @@ SRC=\
     projections/gui/TimelineObject.java\
     projections/gui/TimelineRangeDialog.java\
     projections/gui/TimelineWindow.java\
-    projections/gui/MultiRunControlPanel.java\
-    projections/gui/MultiRunDisplayPanel.java\
-    projections/gui/MultiRunTextAreaWriter.java\
-    projections/gui/MultiRunFileDialogControl.java\
-    projections/gui/MultiRunWindow.java\
     projections/gui/U.java\
     projections/gui/Util.java\
     projections/gui/ZItem.java\
+    projections/misc/ChareData.java\
+    projections/misc/CommandLineException.java\
+    projections/misc/EntryTypeData.java\
     projections/misc/EntryNotFoundException.java\
-    projections/misc/LogLoadException.java\
-    projections/misc/SummaryFormatException.java\
-    projections/misc/ProgressDialog.java	\
     projections/misc/ErrorDialog.java\
+    projections/misc/LogEntryData.java\
+    projections/misc/LogLoadException.java\
     projections/misc/MultiRunData.java\
     projections/misc/MultiRunController.java\
     projections/misc/MultiRunTextRenderer.java\
-    projections/misc/ChareData.java\
-    projections/misc/EntryTypeData.java\
-    projections/misc/LogEntryData.java\
-    projections/misc/CommandLineException.java\
+    projections/misc/ProgressDialog.java\
+    projections/misc/SummaryFormatException.java\
+    projections/gui/graph/DataSource.java\
+    projections/gui/graph/DataSource1D.java\
+    projections/gui/graph/GraphPanel.java\
+    projections/gui/graph/Graph.java\
+    projections/gui/graph/LegendPanel.java\
+    projections/gui/graph/LegendCanvas.java\
+    projections/gui/graph/MultiRunDataSource.java\
+    projections/gui/graph/MultiRunXAxis.java\
+    projections/gui/graph/MultiRunYAxis.java\
     projections/gui/graph/XAxis.java\
     projections/gui/graph/XAxisFixed.java\
     projections/gui/graph/YAxis.java\
     projections/gui/graph/YAxisFixed.java\
-    projections/gui/graph/YAxisAuto.java\
-    projections/gui/graph/DataSource.java\
-    projections/gui/graph/DataSource1D.java\
-    projections/gui/graph/LegendPanel.java\
-    projections/gui/graph/LegendCanvas.java\
-    projections/gui/graph/GraphPanel.java\
-    projections/gui/graph/Graph.java\
-    projections/gui/graph/MultiRunDataSource.java\
-    projections/gui/graph/MultiRunXAxis.java\
-    projections/gui/graph/MultiRunYAxis.java
+    projections/gui/graph/YAxisAuto.java
 
 
 all: bin/projections.jar

@@ -150,7 +150,9 @@ public class MultiRunTextRenderer {
 	// render column labels
 	writer.write("|" + pad(rowLabelColumnWidth, ' ') + "|");
 	for (int col=0; col<numCols; col++) {
-	    writer.write(colLabels[col] + "|");
+	    writer.write(colLabels[col] + 
+			 pad(ppTable[col][0]-colLabels[col].length(),' ') +
+			 "|");
 	}
 	writer.write(System.getProperty("line.separator"));
 	renderLine();
@@ -182,7 +184,7 @@ public class MultiRunTextRenderer {
     }
 
     private String pad(int length, char inChar) {
-	if (length == 0) {
+	if (length <= 0) {
 	    return "";
 	}
 	char padding[] = new char[length];

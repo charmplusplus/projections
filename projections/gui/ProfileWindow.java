@@ -9,7 +9,7 @@ public class ProfileWindow extends Frame
    implements ActionListener, AdjustmentListener
 { 
    private MainWindow             mainWindow;
-   private TimelineWindow         timelineWindow;
+//   private TimelineWindow         timelineWindow;
    
    private NoUpdatePanel        mainPanel, displayPanel;
    private Panel                labelCanvas2, titlePanel;
@@ -36,11 +36,14 @@ public class ProfileWindow extends Frame
 		 paint(g);
 	  }
    }
-   public ProfileWindow(MainWindow mainWindow, TimelineWindow timelineWindow)
+
+// since anyway timelineWindow variable is not being used, removing it
+//   public ProfileWindow(MainWindow mainWindow, TimelineWindow timelineWindow)
+   public ProfileWindow(MainWindow mainWindow)
    {
 
 	  this.mainWindow = mainWindow;
-	  this.timelineWindow = timelineWindow;
+//	  this.timelineWindow = timelineWindow;
 	  
 	  addWindowListener(new WindowAdapter()
 	  {                    

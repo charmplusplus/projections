@@ -39,6 +39,7 @@ SRC=\
     projections/gui/ColorWindowFrame.java\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\
+    projections/gui/EntryPointWindow.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
     projections/gui/GraphAttributesWindow.java\

@@ -65,26 +65,26 @@ public class CommWindow extends GenericGraphWindow
 		setDataSource("Communications", msgCount, this);
 		setPopupText("msgCount");
 		setYAxis("Messages Sent", "");
-		setXAxis("Processor", null);
+		setXAxis("Processor", "");
 		super.refreshGraph();
 	    }else if(cb == sentBytes){
 		//System.out.println("bytes");
 		setDataSource("Communications", byteCount, this);
 		setPopupText("byteCount");
 		setYAxis("Bytes Sent", "bytes");
-		setXAxis("Processor", null);
+		setXAxis("Processor", "");
 		super.refreshGraph();
 	    }else if(cb == recivedMssgs){
 		setDataSource("Communications", recivedMsgCount, this);
 		setPopupText("recivedMsgCount");
 		setYAxis("Mssages Recived", "");
-		setXAxis("Processor", null);
+		setXAxis("Processor", "");
 		super.refreshGraph();
 	    }else if(cb == sentExclusive){
 		setDataSource("Communications", exclusiveSent, this);
 		setPopupText("exclusiveSent");
 		setYAxis("Messages Sent Externally", "");
-		setXAxis("Processor", null);
+		setXAxis("Processor", "");
 		super.refreshGraph();
 	    }
 	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));

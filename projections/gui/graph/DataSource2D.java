@@ -57,4 +57,3 @@ public class DataSource2D extends DataSource
 	    values[j]=(double)data[index][j];
     }
 }
-

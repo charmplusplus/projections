@@ -6,13 +6,22 @@ public class ProjectionsFormatException
     extends IOException
 {
     private String expectedVersion;
+    private String reason;
 
-    public ProjectionsFormatException(String expectedVersion, String message) {
-	super("[ver:" + expectedVersion + "] " + message);
+    public ProjectionsFormatException(String expectedVersion, String reason) {
 	this.expectedVersion = expectedVersion;
+	this.reason = reason;
     }
 
     public String getExpectedVersion() {
 	return expectedVersion;
+    }
+
+    public String getReason() {
+	return reason;
+    }
+
+    public String toString() {
+	return "[ver:" + expectedVersion + "] - " + reason;
     }
 }

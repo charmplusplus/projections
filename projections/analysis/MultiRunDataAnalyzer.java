@@ -402,7 +402,9 @@ public class MultiRunDataAnalyzer {
 	computeOutputArray(outputData, dataType, 0);
 	colorMap = computeColorMap(numYvalues, dataType, 0);
 	
-	return new MultiRunDataSource(outputData,
+	return new MultiRunDataSource(this,
+				      outputData,
+				      dataType,
 				      colorMap,
 				      titleString);
     }
@@ -443,6 +445,61 @@ public class MultiRunDataAnalyzer {
 	return new MultiRunYAxis(outAxisType,
 				 title, 
 				 stats.getMax());
+    }
+
+    public String[] getPopup(int xVal, int yVal, int dataType) {
+	String returnStrings[];
+
+	returnStrings = new String[4];
+	returnStrings[0] = runNames[xVal];
+
+	// returning category names
+	int numNoChange = categories[dataType][CAT_EP_NO_CHANGE].size();
+	int numInsignificant = 
+	    categories[dataType][CAT_EP_INSIGNIFICANT].size();
+	int numChanged =
+	    categories[dataType][CAT_EP_CHANGE].size();
+	int numOverhead =
+	    categories[dataType][CAT_OVERHEAD_IDLE].size();
+	int category = 0;
+	if (yVal < numNoChange) {
+	    category = CAT_EP_NO_CHANGE;
+	    int catIdx = yVal;
+	    int epIdx = 
+		((Integer)categories[dataType][category].elementAt(catIdx)).intValue();
+	    returnStrings[2] = "Entry Point: " + epNames[epIdx];
+	} else if (yVal < numNoChange + 1) {
+	    category = CAT_EP_INSIGNIFICANT;
+	    returnStrings[2] = "Bunch of EPs";
+	} else if (yVal < numNoChange + 1 + numChanged) {
+	    category = CAT_EP_CHANGE;
+	    int catIdx = yVal-1-numNoChange;
+	    int epIdx = 
+		((Integer)categories[dataType][category].elementAt(catIdx)).intValue();
+	    returnStrings[2] = "Entry Point: " + epNames[epIdx];
+	} else {
+	    category = CAT_OVERHEAD_IDLE;
+	    returnStrings[2] = "";
+	}
+	returnStrings[1] = catNames[category];
+
+	// returning values
+	switch (dataType) {
+	case MultiRunData.TYPE_TIME:
+	    returnStrings[3] = "Exec Time: " + 
+		U.t((long)outputData[xVal][yVal]);
+	    break;
+	case MultiRunData.TYPE_TIMES_CALLED:
+	    returnStrings[3] = "Times called: " + (long)outputData[xVal][yVal];
+	    break;
+	case MultiRunData.TYPE_NUM_MSG_SENT:
+	    returnStrings[3] = "Msgs Sent: " + (long)outputData[xVal][yVal];
+	    break;
+	case MultiRunData.TYPE_SIZE_MSG:
+	    returnStrings[3] = "Msg Volume: " + (long)outputData[xVal][yVal];
+	    break;
+	}
+	return returnStrings;
     }
 
     /**

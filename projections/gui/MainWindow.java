@@ -201,6 +201,16 @@ public class MainWindow extends JFrame
 	}
     }
 
+    public void setGrayscale() {
+	Analysis.setGrayscale();
+	repaintAllWindows();
+    }
+
+    public void setFullColor() {
+	Analysis.setFullColor();
+	repaintAllWindows();
+    }
+
     // repaints all windows to reflect global drawing changes.
     private void repaintAllWindows() {
 	for (int i=0; i<NUM_WINDOWS;i++) {
@@ -274,7 +284,6 @@ public class MainWindow extends JFrame
 		public Object construct() {
 		    try {
 			Analysis.initAnalysis(newfile, thisWindow);
-			Analysis.loadSummaryData();		  
 		    } catch(IOException e) {
 			InvalidFileDialog ifd = 
 			    new InvalidFileDialog(thisWindow);
@@ -290,6 +299,7 @@ public class MainWindow extends JFrame
 		public void finished() {
 		    setTitle("Projections - " + newfile);
 		    if (Analysis.hasSummaryData()) {
+			Analysis.loadSummaryData(1000);		  
 			double[] data = Analysis.getSummaryAverageData(); 
 			long originalSize = Analysis.getSummaryIntervalSize();
 			long bestSize = 

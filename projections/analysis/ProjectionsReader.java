@@ -12,10 +12,13 @@ import java.io.*;
  *
  *  Each Reader is meant to be used for each file, typically a processor.
  *
+ *  The inheritance of ProjDefs allows the reader to deal with event types.
  */
 public abstract class ProjectionsReader
+    extends ProjDefs
 {
     private boolean available;
+    protected String expectedVersion = null;
 
     protected long bytesRead;
     // this can be any identifying string - full path name (default),
@@ -32,10 +35,41 @@ public abstract class ProjectionsReader
      *  by the subclass' constructor. The default constructor will
      *  only perform the necessary checks.
      */
-    public ProjectionsReader(String sourceString) {
+    public ProjectionsReader(String sourceString, String versionOverride) {
 	bytesRead = 0;
+	expectedVersion = versionOverride;
 	this.sourceString = sourceString;
 	available = checkAvailable();
+	if (available) {
+	    try {
+		bytesRead += readStaticData();
+	    } catch (ProjectionsFormatException e) {
+		System.err.println("Format Exception when reading from " +
+				   "source [" + sourceString + "]");
+		System.err.println(e.toString());
+		System.err.println("Data is now marked as unavailable.");
+		bytesRead = 0;
+		available = false;
+	    } catch (IOException e) {
+		System.err.println("Unexpected IO error when reading from " +
+				   "source [" + sourceString + "]");
+		System.err.println("Data is now marked as unavailable.");
+		bytesRead = 0;
+		available = false;
+	    }
+	}
+    }
+
+    /**
+     *  Wrapper constructor that sets the expectedVersion variable for data
+     *  files that have no self-identifying version data (as with many of
+     *  the older versions of projections logs).
+     *
+     *  If the implementing reader encounters a file that identifies itself
+     *  otherwise, a ProjectionsFormatException is thrown.
+     */
+    public ProjectionsReader(String sourceString) {
+	this(sourceString, null);
     }
 
     /**
@@ -61,37 +95,16 @@ public abstract class ProjectionsReader
     }
 
     /**
-     *  This is the public interface for getting the reader to load
-     *  data into its structures.
-     *  The calling tool can choose to ignore IO exceptions
-     *  and continue to work in the absense of useful data.
+     *  INHERITANCE NOTE: Implementing classes should override this 
+     *  method for the reading of static data stored in the target
+     *  file. This method MUST return the number of bytes read. 
      */
-    public final void readData()
-	throws IOException
-    {
-	if (!isAvailable()) {
-	    throw new IOException("Data from source [" + sourceString + 
-				  "] unavailable. Read Attempt failed!");
-	} else {
-	    try {
-		bytesRead = read();
-	    } catch (ProjectionsFormatException e) {
-		// data was found to be corrupt, hence unavailable.
-		bytesRead = -1;
-		available = false;
-		throw new IOException("[" + sourceString + "] : " + 
-				      e.toString());
-	    }
-	}
-    }
+    protected abstract long readStaticData() throws IOException;
 
     /**
-     *  Every subclass of ProjectionsReader must have a read
-     *  method to load data into the reader on a JIT manner.
-     *
-     *  The read method is expected to return a byte count on
-     *  the amount of data read. A -1 is to be returned if 
-     *  the attempt to read resulted in an exception.
+     *  INHERITANCE NOTE: This is a public method that implementing
+     *  classes should use to bring the reader to a state where all
+     *  NON-STATIC data is unread.
      */
-    protected abstract long read() throws IOException;
+    public abstract void reset() throws IOException;
 }

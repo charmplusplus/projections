@@ -18,11 +18,11 @@ import java.util.*;
  *
  */
 
-public class GenericLogReader extends ProjDefs
+public class GenericLogReader extends ProjectionsReader
+    implements PointCapableReader
 {
     private static final long INITIAL_STEP = 1024; // reasonable jump size
 
-    private String streamFilename;
     private AsciiIntegerReader reader;
     private double version;
 
@@ -30,26 +30,36 @@ public class GenericLogReader extends ProjDefs
     private Vector intervalData[];
 
     public GenericLogReader(String filename, double Nversion) {
-	streamFilename = filename;
+	super(filename, String.valueOf(Nversion));
 	try {
 	    reader = new AsciiIntegerReader(new FileReader(filename));
 	    version = Nversion;
-	    reader.nextLine(); // skip over the useless header
+	    reader.nextLine(); // skip over the header (already read)
 	} catch (IOException e) {
 	    System.err.println("Error reading file " + filename);
 	}
     }
 
     public GenericLogReader(int peNum, double Nversion) {
-	String filename = Analysis.getLogName(peNum);
-	streamFilename = filename;
+	super(Analysis.getLogName(peNum), String.valueOf(Nversion));
 	try {
-	    reader = new AsciiIntegerReader(new FileReader(filename));
+	    reader = new AsciiIntegerReader(new FileReader(sourceString));
 	    version = Nversion;
-	    reader.nextLine(); // skip over the useless header
+	    reader.nextLine(); // skip over the header (already read)
 	} catch (IOException e) {
-	    System.err.println("Error reading file " + filename);
+	    System.err.println("Error reading file " + sourceString);
 	}
+    }
+
+    protected boolean checkAvailable() {
+	File sourceFile = new File(sourceString);
+	return sourceFile.canRead();
+    }
+
+    public long readStaticData() {
+	// do nothing for now (since the original code ignored the header)
+	// **CW** must change later (for versioning control) of course ...
+	return 0;
     }
 
     /**
@@ -60,7 +70,7 @@ public class GenericLogReader extends ProjDefs
 	throws IOException
     {
 	reader.close();
-	reader = new AsciiIntegerReader(new FileReader(streamFilename));
+	reader = new AsciiIntegerReader(new FileReader(sourceString));
 	reader.nextLine();
     }
 
@@ -196,10 +206,15 @@ public class GenericLogReader extends ProjDefs
 	}
     }
 
-    /**
-     *  
-     */
-    public Vector[] loadIntervalData() {
-	return null;
+    public void nextEventOfTypeOnOrAfter(int eventType, long timestamp,
+					 LogEntryData data)
+	throws IOException, EOFException
+    {
+	while (true) {
+	    nextEventOnOrAfter(timestamp, data);
+	    if (data.type == eventType) {
+		return;
+	    }
+	}
     }
 }

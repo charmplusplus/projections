@@ -180,19 +180,26 @@ public class Graph extends JPanel
      *  getXValue
      *	returns the x value of the bar graph the mouse is currently over
      * 	if the mouse is not over any bar data, then return -1.
+     *  It is not supposed to work with line data of any sort. It will
+     *  work for bar graphs and area graphs, though the effects are less
+     *  than ideal for the latter.
      */
     private int getXValue(int xPos) {
    	if( (xPos > originX) && (xPos < (int)width+originX)) {
 	    // get the expected value
 	    int displacement = xPos - originX;
 	    int expectedValue = (int)(displacement/pixelincrementX);
-	    // now find out if it the mouse actually falls onto the drawn bar
 	    int x1; 
 	    x1 = originX + (int)(expectedValue*pixelincrementX) +
 		(int)(pixelincrementX/2);
-	    if ((xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2))) {
-		return expectedValue;
-	    }
+	    if ((GraphType == BAR) ||
+		(GraphType == AREA)) {
+		// now find out if it the mouse actually falls 
+		// onto the drawn bar
+		if ((xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2))) {
+		    return expectedValue;
+		}
+	    } 
 	}
 	return -1;
     }
@@ -213,7 +220,7 @@ public class Graph extends JPanel
 	    int numY = dataSource.getValueCount();
 	    int y;
 	    for (int k=0; k<numY; k++) {
-		y = (int) (originY - (int)stackArray[xVal][k]*pixelincrementY);
+		y = originY - (int)(stackArray[xVal][k]*pixelincrementY);
 		if (yPos > y) {
 		    return k;
 		}
@@ -259,7 +266,7 @@ public class Graph extends JPanel
 	
 	int xVal = getXValue(x);
 	int yVal = getYValue(xVal, y);
-	
+
 	if((xVal > -1) && (yVal > -1)) {
 	    showPopup(xVal, yVal, x, y);
 	} else if (bubble != null) {
@@ -269,7 +276,32 @@ public class Graph extends JPanel
 	}
     }
 
+    /**
+     *  This is for the benefit of the bubble text placement. 
+     *  We need to figure out the location of the graph's origin with
+     *  respect to the screen (from which the bubble Window will attempt
+     *  to set its location).
+     *
+     *  The algorithm will go through each parent of the graph and cumulate
+     *  the offsets, finally tacking on the offset of the frame to the screen.
+     */
+    private Point getBubbleOffset() {
+	Component c = this;
+	int xOffset = c.getLocation().x;
+	int yOffset = c.getLocation().y;
+
+	while ((c = c.getParent()) != null) {
+	    xOffset += c.getLocation().x;
+	    yOffset += c.getLocation().y;
+	}
+
+	return new Point(xOffset,yOffset);
+    }
+
     public void showPopup(int xVal, int yVal, int xPos, int yPos){
+
+	Point offset = getBubbleOffset();
+
 	String text[] = dataSource.getPopup(xVal, yVal);
 	if (text == null) {
 	    return;
@@ -290,7 +322,7 @@ public class Graph extends JPanel
 	if (bubble == null) {
 	    if (GraphStacked) {
 		bubble = new Bubble(this, text);
-		bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
+		bubble.setLocation(xPos+offset.x, yPos+offset.y);
 		bubble.setVisible(true);
 		bubbleXVal = xVal;
 		bubbleYVal = yVal;

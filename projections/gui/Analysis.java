@@ -71,7 +71,12 @@ public class Analysis {
     // moved from StsReader because it does not belong there.
     // Indexed by userevent index (which can be derived from the user
     // event ID).
+    private static Color[] grayColors;
     private static Color[] userEventColors;
+    private static Color[] grayUserEventColors;
+
+    private static Color[] activeColorMap;
+    private static Color[] activeUserColorMap;
     
     /****************** Jump from Timeline to graphs ******/
     // Used for storing user defined startTime and endTime when jumping from
@@ -100,7 +105,13 @@ public class Analysis {
 	    // create default color maps for entry methods as well as user
 	    // events.
 	    entryColors = createColorMap(sts.getEntryCount());
+	    grayColors = createGrayscaleColorMap(sts.getEntryCount());
 	    userEventColors = createColorMap(sts.getNumUserDefinedEvents());
+	    grayUserEventColors = 
+		createGrayscaleColorMap(sts.getNumUserDefinedEvents());
+	    // default to full colors
+	    activeColorMap = entryColors;
+	    activeUserColorMap = userEventColors;
 	} catch (LogLoadException e) {
 	    // if sts reader could not be created because of a log load
 	    // exception, forward the error as an IOException.
@@ -311,7 +322,7 @@ public class Analysis {
 
     public static Color getEntryColor(int entryIdx) {
 	if (entryIdx < sts.getEntryCount()) {
-	    return entryColors[entryIdx];
+	    return activeColorMap[entryIdx];
 	} else {
 	    return null;
 	}
@@ -319,15 +330,11 @@ public class Analysis {
 
     public static void setEntryColor(int entryIdx, Color color) {
 	if (entryIdx < sts.getEntryCount()) {
-	    entryColors[entryIdx] = color;
+	    activeColorMap[entryIdx] = color;
 	} else {
 	    System.err.println("Warning: entry point index " + entryIdx +
 			       " not found. Cannot set color");
 	}
-    }
-
-    public static void setEntryColors(Color[] _entryColors) {
-	entryColors = _entryColors;
     }
 
     /** ***************** Usage Profile ******************
@@ -435,11 +442,17 @@ public class Analysis {
 	}
     }
     
+    /**
+     *  **CW** Time to stop being stupid and use the new summary reader
+     *  and gain more control over the reading process.
+     */
     public static void loadSummaryData(long intervalSize,
 				       int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
 	try {
 	    // clear memory first
+
+	    // the trick is to know when some 
 	    systemUsageData[1] = null;
 	    systemUsageData[1] = 
 		sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
@@ -457,9 +470,15 @@ public class Analysis {
 			intervalEnd);
     }
 
-    // wrapper method for default summary load (used by main window)
-    public static void loadSummaryData() {
-	// check has to be conducted here because of the use of sumAnalyzer
+    /**
+     *  wrapper method for default summary load (used by main window)
+     *  This has a "control" value to limit the number of intervals used.
+     *  GenericSummaryReader will then be used to independently read
+     *  and rebin each file (which will work for now) - summary files with
+     *  even more intervals than the 180k seen in current NAMD logs may
+     *  require dynamic rebinning on read.
+     */
+    public static void loadSummaryData(int numIntervalsLimit) {
 	if (sts.hasSumFiles()) { 
 	    long sizeInt = sumAnalyzer.getIntervalSize();
 	    int nInt=(int)(getTotalTime()/sizeInt);
@@ -693,7 +712,34 @@ public class Analysis {
     }
     
     public static Color[] getColorMap() {
-	return entryColors;
+	return activeColorMap;
+    }
+
+    public static void setFullColor() {
+	activeColorMap = entryColors;
+	activeUserColorMap = userEventColors;
+    }
+
+    public static void setGrayscale() {
+	activeColorMap = grayColors;
+	activeUserColorMap = grayUserEventColors;
+    }
+
+    public static Color[] createGrayscaleColorMap(int numColors) {
+	Color[] colors = new Color[numColors];
+	float H = (float)1.0;
+	float S = (float)0.0;
+	float B = (float)0.9; // initial white value would be bad.
+	float delta = (float)(0.8/numColors); // extreme black is also avoided
+	// as long as S==0, H does not matter, so scale according to B
+	for (int i=0; i<numColors; i++) {
+	    colors[i] = Color.getHSBColor(H, S, B);
+	    B -= delta;
+	    if (B < 0.1) {
+		B = (float)0.1;
+	    }
+	}
+	return colors;
     }
 
     public static Color[] createColorMap(int numColors) {

@@ -1,6 +1,8 @@
 package projections.gui.graph;
 
 import projections.gui.*;
+import projections.analysis.*;
+
 import java.awt.Color;
 
 /**
@@ -16,18 +18,24 @@ public class MultiRunDataSource extends DataSource
 {
     // actual data definitions
     double dataValues[][];
+    int dataType;                // type of associated multirun data
     Color colorMap[]=null;       // colors associated with each value
     String title;
-    
+    MultiRunDataAnalyzer parent;
+
     /**
      *  Constructor. Ndata and NcolorMap are expected to be allocated
      *  by the creating object and not to be modified.
      *  MultiRunDataSource is also guaranteed not to modify the data.
      */
-    public MultiRunDataSource(double Ndata[][], 
+    public MultiRunDataSource(MultiRunDataAnalyzer parent,
+			      double Ndata[][], 
+			      int dataType,
 			      Color NcolorMap[],
 			      String Ntitle) {
+	this.parent = parent;
 	dataValues = Ndata;
+	this.dataType = dataType;
 	colorMap = NcolorMap;
 	title = Ntitle;
     }
@@ -117,8 +125,12 @@ public class MultiRunDataSource extends DataSource
 	}
     }
 
-    // public String[] getPopup(int index,int valNo,double value) 
-    //    - implemented in superclass for now
+    public String[] getPopup(int xVal, int yVal) {
+	if (parent == null) {
+	    return null;	
+	} 
+	return parent.getPopup(xVal, yVal, dataType);
+    }
 
     // public void mouseClicked(int index,int valNo,double value,
     //                          java.awt.event.MouseEvent evt)
@@ -132,8 +144,4 @@ public class MultiRunDataSource extends DataSource
     public void setColors(Color NcolorMap[]) {
 	colorMap = NcolorMap;
     }
-	 
-	 public String[]getPopup(int xVal, int yVal){
-	 	return null;
-	 }
 }

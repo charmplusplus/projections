@@ -23,8 +23,8 @@ import java.util.*;
  *              the time Graph is presented with the data for rendering.
  */
 
-public class SumDetailReader
-    extends ProjectionsReader
+public class SumDetailReader extends ProjectionsReader
+    implements IntervalCapableReader
 {
     // public static meta-tags - used to allocate space in the data array
     // based on the number of tags.
@@ -36,7 +36,7 @@ public class SumDetailReader
     public static final int NUM_MSGS = 1;
 
     // header values
-    public int versionNum;
+    public double versionNum;
     public int myPE;
     public int numPE;
     public int numIntervals;
@@ -59,12 +59,7 @@ public class SumDetailReader
     public SumDetailReader(String filename, double Nversion) 
 	throws IOException
     {
-	super(filename);
-	reader = new BufferedReader(new FileReader(filename));
-	version = Nversion;
-	readData();  // readData() calls read() in superclass
-	reader.close();
-	reader = null;
+	super(filename, String.valueOf(Nversion));
     }
 
     /**
@@ -76,11 +71,12 @@ public class SumDetailReader
 	return sourceFile.canRead();
     }
 
-    protected long read() 
+    public long readStaticData() 
 	throws IOException
     {
 	long byteCount = 0;
 
+	reader = new BufferedReader(new FileReader(sourceString));
 	// Set up the tokenizer  
 	tokenizer=new ParseTokenizer(reader);
 	tokenizer.parseNumbers();
@@ -95,7 +91,13 @@ public class SumDetailReader
 
 	// Read the first line (Header information)
 	tokenizer.checkNextString("ver");
-	versionNum = (int)tokenizer.nextNumber("Version Number");
+	versionNum = tokenizer.nextScientific("Version Number");
+	if (versionNum != Double.parseDouble(expectedVersion)) {
+	    throw new ProjectionsFormatException(expectedVersion,
+						 "File version [" + 
+						 versionNum + "conflicts " +
+						 "with expected version.");
+	}
 	tokenizer.checkNextString("cpu");
 	myPE = (int)tokenizer.nextNumber("processor number");
 	numPE = (int)tokenizer.nextNumber("number of processors");
@@ -107,8 +109,39 @@ public class SumDetailReader
 	intervalSize = 
 	    tokenizer.nextScientific("processor usage sample interval"); 
 	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
-	    throw new IOException("extra garbage at end of header line");
+	    throw new ProjectionsFormatException(expectedVersion, 
+						 "extra garbage at end of " +
+						 "header line");
 	}
+
+	reader.close();
+	reader = null;
+	// **CW** until tokenizer reports the correct bytecount, we'll just
+	// throw a small fake value (characteristic of a header).
+	return 1000;  
+    }
+
+    protected long read() 
+	throws IOException
+    {
+	long byteCount = 0;
+
+	reader = new BufferedReader(new FileReader(sourceString));
+
+	// Set up the tokenizer  
+	tokenizer=new ParseTokenizer(reader);
+	tokenizer.parseNumbers();
+	tokenizer.eolIsSignificant(true);
+	tokenizer.whitespaceChars('/','/'); 
+	tokenizer.whitespaceChars(':',':');
+	tokenizer.whitespaceChars('[','[');
+	tokenizer.whitespaceChars(']',']');
+	tokenizer.wordChars('a','z');
+	tokenizer.wordChars('A','Z');
+	tokenizer.wordChars('+','+');
+
+	// ignore the first line -> header
+	tokenizer.skipLine();
 
 	// prepare to store summary data into arrays
 	rawData = new Vector[NUM_TAGS][numEPs];
@@ -140,7 +173,14 @@ public class SumDetailReader
 		// immediately rendering this tool useless.
 	    }
 	}
+	reader.close();
+	reader = null;
+	
 	return byteCount;
+    }
+
+    public void reset() {
+	// stupid, but do it for doing it's sake.
     }
 
     private void buildTable(int type) 
@@ -202,14 +242,27 @@ public class SumDetailReader
 	}
     }
 
+    public double getIntervalSize() {
+	return intervalSize;
+    }
+
+    public void loadIntervalData(double intervalSize, long startInterval,
+				 long endInterval) 
+	throws IOException
+    {
+	
+    }
+
+    public void loadIntervalData(long startInterval, long endInterval) 
+	throws IOException
+    {
+	
+    }
+
     // These accessor methods should be used exclusively by IntervalData.java
 
     public int getNumIntervals() {
 	return numIntervals;
-    }
-
-    public double getIntervalSize() {
-	return intervalSize;
     }
 
     public Vector[] getData(int type) {

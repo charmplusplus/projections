@@ -49,7 +49,9 @@ public class MainMenuManager extends MenuManager
 		       new boolean[]
 		{
 		    true,  // change background
-		    true   // change foreground
+		    true,  // change foreground
+		    false, // use a default grayscale color set instead.
+		    false  // use a full set of colors.
 		});
 	    setEnabled(toolMenu,
 		       new boolean[]
@@ -74,6 +76,7 @@ public class MainMenuManager extends MenuManager
 		    false,
 		    true
 		});
+	    setAllTo(preferencesMenu, true);
 	    setAllTo(toolMenu, true);
 	    break;
 	}
@@ -95,7 +98,9 @@ public class MainMenuManager extends MenuManager
 				    new Object[]
 	    {
 		"Change Background Color",
-		"Change Foreground Color"
+		"Change Foreground Color",
+		"Use Default Grayscale Colors",
+		"Use Standard Colors"
 	    });
 	menubar.add(preferencesMenu);
 
@@ -136,6 +141,10 @@ public class MainMenuManager extends MenuManager
 		parent.changeBackground();
 	    } else if (arg.equals("Change Foreground Color")) {
 		parent.changeForeground();
+	    } else if (arg.equals("Use Default Grayscale Colors")) {
+		parent.setGrayscale();
+	    } else if (arg.equals("Use Standard Colors")) {
+		parent.setFullColor();
 	    } else if (arg.equals("Multirun Analysis") ||
 		       arg.equals("Histograms") ||
 		       arg.equals("Graphs") ||

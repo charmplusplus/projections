@@ -60,4 +60,14 @@ public class ParseTokenizer extends StreamTokenizer {
     }
     return super.sval;
   }
+
+    /**
+     *  Skips a line of data. Added by Chee Wai Lee 1/23/2004
+     */
+    public void skipLine()
+	throws IOException
+    {
+	while (StreamTokenizer.TT_EOL != nextToken()) {
+	}
+    }
 }

@@ -124,12 +124,10 @@ public class TimelineData
 	  if (new File(Analysis.getLogDirectory() +
 		       File.separator + "color.map").exists()) {
 	      try {
-		  Util.restoreColors(entryColor);
+		  Util.restoreColors(entryColor, "Timeline Graph");
 	      } catch (IOException e) {
 		  System.err.println("unable to load color.map");
-	      } catch (ClassNotFoundException e) {
-		  System.err.println("Color class not found??");
-	      }
+	      } 
 	  } else {
 	      for(int i=0; i<Analysis.getNumUserEntries(); i++)
 		  {

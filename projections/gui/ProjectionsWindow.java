@@ -49,9 +49,15 @@ public abstract class ProjectionsWindow
     // NOTE: There NEED NOT be a dialog.
     protected RangeDialog dialog;
 
-    // Must implement code to show the dialog box and handle
-    // the return values. There NEED NOT be a dialog.
-    // The dialog blocks until the user hits OK or CANCEL.
+    /**
+     *  Must implement code to show the dialog box and handle
+     *  the return values. There NEED NOT be a dialog.
+     *  The dialog blocks until the user hits OK or CANCEL.
+     *
+     *  Depending on the kind of behavior required, developers of
+     *  ProjectionsWindows should decide whether or not they wish
+     *  to call setDialogData();
+     */
     abstract void showDialog();
 
     // Must implement code to display the window. This
@@ -78,6 +84,25 @@ public abstract class ProjectionsWindow
      *           }
      */
     abstract void getDialogData();
+
+    /**
+     *  Subclasses of ProjectionsWindow are *expected* to set the
+     *  dialog's parameter variables by either (or both):
+     *
+     *  1) using the dialog's accessors.
+     *  2) directly setting the dialog's public parameter variables.
+     *
+     *  The exact manner this is done will depend on how the dialog
+     *  is actually implemented.  
+     *
+     *  This should be done before calling super.setDialogData();
+     *
+     */
+    protected void setDialogData() {
+	if (dialog != null) {
+	    dialog.updateFields();
+	}
+    }
 
     /**
      *  constructor - Wierdness. For Reflection to work on this class,

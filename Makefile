@@ -122,6 +122,7 @@ SRC=\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\
     projections/gui/SelectField.java\
+    projections/gui/SimpleThresholdDialog.java\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
     projections/gui/SwingWorker.java\

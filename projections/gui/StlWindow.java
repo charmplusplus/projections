@@ -172,6 +172,8 @@ public class StlWindow extends ProjectionsWindow
 		dialog = 
 		    new RangeDialog((ProjectionsWindow) this,
 				    "Select Range");
+	    } else {
+		setDialogData();
 	    }
 	    dialog.displayDialog();
 	    if (!dialog.isCancelled()) {
@@ -252,5 +254,12 @@ public class StlWindow extends ProjectionsWindow
 	validPEs = dialog.getValidProcessors();
 	startTime = dialog.getStartTime();
 	endTime = dialog.getEndTime();
+    }
+
+    public void setDialogData() {
+	dialog.setValidProcessors(validPEs);
+	dialog.setStartTime(startTime);
+	dialog.setEndTime(endTime);
+	super.setDialogData();
     }
 }

@@ -163,8 +163,11 @@ public class CommWindow extends GenericGraphWindow
     }
     
     public void showDialog() {
-	if (dialog == null)
+	if (dialog == null) {
 	    dialog = new RangeDialog(this, "select Range");
+	} else {
+	    setDialogData();
+	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
 	    getDialogData();
@@ -194,6 +197,11 @@ public class CommWindow extends GenericGraphWindow
     // reuse generic graph window's method
     public void getDialogData() {
 	super.getDialogData();
+    }
+
+    // reuse generic graph window's method
+    public void setDialogData() {
+	super.setDialogData();
     }
 
     public void getData(){

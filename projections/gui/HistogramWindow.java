@@ -11,12 +11,8 @@ import javax.swing.*;
 public class HistogramWindow extends GenericGraphWindow 
     implements ActionListener,ItemListener
 {
-    static final int NO_OF_BINS = 25;
-    static final int FREQUENCY  = 100;
-
-    // variables (in addition to those in the super class) 
-    // to be set by RangeDialog 
-    // NONE
+    static final int NO_OF_BINS = 300;
+    static final int FREQUENCY  = 1000;
 
     // sum total of the execution times of all the entry points selected
     private long totalExecutionTime;	
@@ -38,12 +34,19 @@ public class HistogramWindow extends GenericGraphWindow
     // show both range dialog & epdialog during startup
     private boolean startUp;
 
+    // variables (in addition to those in the super class) 
+    // to be set by SimpleThresholdDialog 
+    public double threshold;
+
     private HistogramWindow thisWindow;
     
     public HistogramWindow(MainWindow mainWindow, Integer myWindowID)
     {
 	super("Projections Histograms", mainWindow, myWindowID);
 	thisWindow = this;
+
+	// **Temporary threshold setting (should be read from dialog later)
+	threshold = 1000; // 1ms
 
 	setTitle("Projections Histograms");
 	setGraphSpecificData();
@@ -64,8 +67,8 @@ public class HistogramWindow extends GenericGraphWindow
 	
 	recordEP = true;	// record longest EPs by default
 	epFrame = null;
-	statusArea = new JTextArea(6,2);	// to display the no. of EPs vs bins as text	
-	//   	  progressBar = new ProgressDialog("Counting EntryPoints...");
+	// to display the no. of EPs vs bins as text	
+	statusArea = new JTextArea(6,2);	
 	startUp = true;
 	
 	createMenus();
@@ -84,11 +87,18 @@ public class HistogramWindow extends GenericGraphWindow
 	super.close();
     }
 
-    /* Show the RangeDialog to set processor numbers and interval times */
+    /* 
+     *  Show the SimpleThresholdDialog 
+     */
     public void showDialog()
     {
-	if (dialog == null)
-	    dialog = new RangeDialog(this,"Select Histogram Time Range");
+	if (dialog == null) {
+	    dialog = new SimpleThresholdDialog(this,
+					       "Select Histogram Time Range",
+					       SimpleThresholdDialog.TIME);
+	} else {
+	    setDialogData();
+	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
@@ -113,9 +123,17 @@ public class HistogramWindow extends GenericGraphWindow
 	// do nothing for now
     }
 
-    // reuse generic graph window's getdialogdata method.
     public void getDialogData() {
+	SimpleThresholdDialog dialog = (SimpleThresholdDialog)this.dialog;
+	threshold = dialog.getThreshold();
+	// use GenericGraphWindow's method for the rest.
 	super.getDialogData();
+    }
+
+    public void setDialogData() {
+	SimpleThresholdDialog dialog = (SimpleThresholdDialog)this.dialog;
+	dialog.setThreshold(threshold);
+	super.setDialogData();
     }
 
     /* Show the EntrySelectionDialog to select Entrypoints to be considered */

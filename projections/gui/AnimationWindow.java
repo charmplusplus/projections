@@ -74,8 +74,11 @@ public class AnimationWindow extends ProjectionsWindow
     }
 
     public void showDialog() {
-	if (dialog == null)
+	if (dialog == null) {
             dialog = new IntervalRangeDialog(this, "Select Animation Range");
+	} else {
+	    setDialogData();
+	}
         dialog.displayDialog();
         if (!dialog.isCancelled()){
             getDialogData();
@@ -109,6 +112,15 @@ public class AnimationWindow extends ProjectionsWindow
 	validPEs = dialog.getValidProcessors();
         startTime = dialog.getStartTime();
         endTime = dialog.getEndTime();
+    }
+
+    public void setDialogData() {
+	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
+	dialog.setIntervalSize(intervalSize);
+	dialog.setValidProcessors(validPEs);
+	dialog.setStartTime(startTime);
+	dialog.setEndTime(endTime);
+	super.setDialogData();
     }
 
     public void actionPerformed(ActionEvent evt)

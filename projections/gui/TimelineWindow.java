@@ -156,7 +156,9 @@ public class TimelineWindow extends ProjectionsWindow
     public void showDialog() {
 	if (dialog == null) {
 	    dialog = new RangeDialog(this,"Select Timeline Range");
-        } 
+        } else {
+	    setDialogData();
+	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
@@ -166,7 +168,6 @@ public class TimelineWindow extends ProjectionsWindow
 			    data.beginTime = startTime;
 			    data.endTime = endTime;
 			    data.processorList = validPEs;
-			    data.processorString = validPEs.listToString();
 			    data.numPs = validPEs.size();
 			    procRangeDialog(true);
 			    return null;
@@ -191,6 +192,13 @@ public class TimelineWindow extends ProjectionsWindow
 	validPEs = dialog.getValidProcessors();
 	startTime = dialog.getStartTime();
 	endTime = dialog.getEndTime();
+    }
+
+    public void setDialogData() {
+	dialog.setValidProcessors(validPEs);
+	dialog.setStartTime(startTime);
+	dialog.setEndTime(endTime);
+	super.setDialogData();
     }
 
   private double calcLeftTime(
@@ -257,8 +265,8 @@ public class TimelineWindow extends ProjectionsWindow
       mouseController.selected_ = false;
       unsetSelectedTime();
       if (rect.width == 0) { return; }
-      double startTime = axisBotCanvas.canvasToTime(rect.x);
-      double endTime = axisBotCanvas.canvasToTime(rect.x+rect.width);
+      startTime = (long)axisBotCanvas.canvasToTime(rect.x);
+      endTime = (long)axisBotCanvas.canvasToTime(rect.x+rect.width);
       if (startTime < data.beginTime) { startTime = data.beginTime; }
       if (endTime > data.endTime) { endTime = data.endTime; }
       data.oldBT = data.beginTime;

@@ -101,6 +101,13 @@ public abstract class GenericGraphWindow
 	endTime = dialog.getEndTime();
     }
 
+    protected void setDialogData() {
+	dialog.setValidProcessors(validPEs);
+	dialog.setStartTime(startTime);
+	dialog.setEndTime(endTime);
+	super.setDialogData();
+    }
+
     protected void setXAxis(String title,String units){
 	xAxis = new XAxisFixed(title,units);	
     }

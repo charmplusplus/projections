@@ -262,7 +262,7 @@ public class RangeDialog extends JDialog
 	    pack();
 	    setResizable(false);
 	} else {
-	    preserveState();
+	    setParameters();
 	}
 	setVisible(true);
     }
@@ -452,7 +452,7 @@ public class RangeDialog extends JDialog
     }
 
     /**
-     *  preserveState stores the current data of all fields into the
+     *  setParameters stores the current data of all fields into the
      *  old state variables. This is to facilitate the isModified()
      *  check.
      *
@@ -460,10 +460,35 @@ public class RangeDialog extends JDialog
      *  Inheriting subclasses should make a superclass call after
      *  preserving its own state.
      */
-    void preserveState() {
+    void setParameters() {
 	startTime = startTimeField.getValue();
 	endTime = endTimeField.getValue();
 	validProcessors = getValidProcessors();
+    }
+
+    /**
+     *  updateFields is essentialy the "reverse" of setParameters. It
+     *  takes whatever is stored in the parameter variables and updates
+     *  the appropriate fields. This is intended to be used immediately
+     *  after a ProjectionsWindows subclass has updated this dialog's
+     *  parameter variables.
+     *  
+     *  INHERITANCE NOTE:
+     *  Inheriting subclasses should make a superclass call after
+     *  updating its own fields.
+     */
+    void updateFields() {
+	startTimeField.setValue(startTime);
+	endTimeField.setValue(endTime);
+	processorsField.setText(validProcessors.listToString());
+	// this is required for the necessary derived information to be 
+	// updated based on the new field information.
+	updateDerived();
+    }
+
+    void updateDerived() {
+	totalTime = endTimeField.getValue()-startTimeField.getValue();
+	totalTimeLabel.setText(U.t(totalTime));
     }
 
     /**
@@ -520,7 +545,7 @@ public class RangeDialog extends JDialog
     }
 
     public void setStartTime(long startTime) {
-	startTimeField.setValue(startTime);
+	this.startTime = startTime;
     }
 
     /**
@@ -531,7 +556,7 @@ public class RangeDialog extends JDialog
     }
 
     public void setEndTime(long endTime) {
-	endTimeField.setValue(endTime);
+	this.endTime = endTime;
     }
 
     /**
@@ -549,11 +574,12 @@ public class RangeDialog extends JDialog
     }
 
     public void setValidProcessors(OrderedIntList validPEs) {
-	processorsField.setText(validPEs.listToString());
+	this.validProcessors = validPEs;
     }
 
     public void setValidProcessors(String validPEString) {
 	processorsField.setText(validPEString);
+	this.validProcessors = processorsField.getValue(numProcessors);
     }
 }
 

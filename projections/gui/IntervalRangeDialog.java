@@ -18,10 +18,10 @@ public class IntervalRangeDialog extends RangeDialog
     JLabel startIntervalLabel;
     JLabel endIntervalLabel;
 
-    // old state variables
+    // dialog parameter variables
     protected long intervalSize = -1;
 
-    // additional state variables
+    // additional state variables (not intended as parameters)
     private long numIntervals;
     private long validIntervals;
     private long startInterval;
@@ -155,9 +155,32 @@ public class IntervalRangeDialog extends RangeDialog
 	return ((intervalSize != sizeField.getValue()) || super.isModified());
     }
 
-    void preserveState() {
+    void setParameters() {
 	intervalSize = sizeField.getValue();
-	super.preserveState();
+	super.setParameters();
+    }
+
+    void updateFields() {
+	sizeField.setValue(intervalSize);
+	super.updateFields();
+	updateDerived();
+    }
+
+    void updateDerived() {
+	long temp = sizeField.getValue();
+	long startInterval = startTimeField.getValue()/temp;
+	long endInterval = endTimeField.getValue()/temp;
+	long validIntervals = totalValidTime/temp;
+	if (totalValidTime%temp != 0) {
+	    validIntervals++;
+	}
+	validIntervalsLabel.setText("Total Valid Number of " +
+				    "Intervals : " +
+				    validIntervals);
+	numIntervalsLabel.setText("Selected Number of Intervals : " +
+				  (endInterval - startInterval + 1));
+	startIntervalLabel.setText("Start Interval : "+startInterval);
+	endIntervalLabel.setText("End Interval : " + endInterval);
     }
 
     // Accessor methods (including convenience accessors for startInterval
@@ -168,7 +191,7 @@ public class IntervalRangeDialog extends RangeDialog
     }
 
     public void setIntervalSize(long size) {
-	sizeField.setValue(size);
+	this.intervalSize = size;
     }
 
     public long getStartInterval() {

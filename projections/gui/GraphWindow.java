@@ -161,6 +161,9 @@ public class GraphWindow extends ProjectionsWindow
     {
 	if (dialog == null) {
 	    dialog = new IntervalRangeDialog(this, "Graph Window");
+	} else {
+	    // we are guaranteed a set of parameters stored in dialog.
+	    setDialogData();
 	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
@@ -218,5 +221,12 @@ public class GraphWindow extends ProjectionsWindow
 	intervalStart = (int)dialog.getStartInterval();
 	intervalEnd = (int)dialog.getEndInterval();
 	processorList = dialog.getValidProcessors();
+    }
+
+    public void setDialogData() {
+	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
+	dialog.setIntervalSize(intervalsize);
+	dialog.setValidProcessors(processorList);
+	super.setDialogData();
     }
 }

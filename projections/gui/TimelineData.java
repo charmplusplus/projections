@@ -29,7 +29,6 @@ public class TimelineData
    
   public OrderedIntList processorList;
    OrderedIntList oldplist;
-   String         processorString;
    String         oldpstring;
 
     // boolean for testing if entries are to be colored by Object ID
@@ -98,8 +97,6 @@ public class TimelineData
 	  processorUsage = null;
 	  entryUsageList = null;
    
-	  processorString = Analysis.getValidProcessorString();
-	  
 	  offset = 10;
 	  pixelIncrement = 5.0;
 	  timeIncrement  = 100;
@@ -530,7 +527,7 @@ public class TimelineData
 	 	oldplist = processorList.copyOf();
 	 	processorList.insert(pCreation);
 		numPs = processorList.size();
-		processorString = processorList.listToString();
+		timelineWindow.validPEs = processorList;
 		timelineWindow.procRangeDialog(false);
 	 }
 }

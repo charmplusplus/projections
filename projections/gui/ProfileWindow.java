@@ -620,8 +620,11 @@ public class ProfileWindow extends ProjectionsWindow
 
     public void showDialog()
     {
-	if (dialog == null)
+	if (dialog == null) {
 	    dialog = new RangeDialog(this, "Usage Profile");
+	} else {
+	    setDialogData();
+	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
@@ -648,6 +651,13 @@ public class ProfileWindow extends ProjectionsWindow
 	data.pstring = dialog.getValidProcessorString();
 	data.begintime = dialog.getStartTime();
 	data.endtime = dialog.getEndTime();
+    }
+
+    public void setDialogData() {
+	dialog.setValidProcessors(data.plist);
+	dialog.setStartTime(data.begintime);
+	dialog.setEndTime(data.endtime);
+	super.setDialogData();
     }
 
     //Convert a usage profile (0..numUserEntries+4-1) to a po

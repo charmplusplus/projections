@@ -96,8 +96,11 @@ public class GeneralGraphWindow extends GenericGraphWindow
     }
 
     public void showDialog() {
-	if (dialog == null)
+	if (dialog == null) {
 	    dialog = new IntervalRangeDialog(this, "Select Range");
+	} else {
+	    setDialogData();
+	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
 	    getDialogData();
@@ -127,6 +130,13 @@ public class GeneralGraphWindow extends GenericGraphWindow
 	startInterval = (int)dialog.getStartInterval();
 	endInterval = (int)dialog.getEndInterval();
 	processorList = dialog.getValidProcessors();
+    }
+
+    public void setDialogData() {
+	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
+	dialog.setIntervalSize(intervalSize);
+	dialog.setValidProcessors(processorList);
+	super.setDialogData();
     }
 
     public void showWindow() {

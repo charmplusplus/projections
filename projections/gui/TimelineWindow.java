@@ -29,7 +29,7 @@ public class TimelineWindow extends Frame
    
   // basic zoom controls
    private Button bSelectRange, bColors, bDecrease, bIncrease, bReset;
-   private Button bZoomSelected, bLoadSelected;
+   private Button bZoomSelected, bLoadSelected, bJumpAnimation;
    private TextField highlightTime, selectionBeginTime, selectionEndTime, selectionDiff;
    private DecimalFormat format;
    private FloatTextField scaleField;
@@ -227,6 +227,30 @@ public class TimelineWindow extends Frame
     }
   }
 
+   // **sharon** finish this function
+   public void jumpToGraph(String b) {
+     if (b == "Animation")
+     	{
+	   if (mouseController.selected_) {
+      	     Rectangle rect = displayCanvas.rubberBand.bounds();
+             mouseController.selected_ = false;
+             if (rect.width == 0) { return; }
+             double jStart = axisBotCanvas.canvasToTime(rect.x);
+             double jEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
+      	       
+	     Analysis.setJTimeAvailable(true);
+	   
+	     Analysis.setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
+	     new Thread(new Runnable() {public void run() {
+	      AnimationWindow animationWindow = new AnimationWindow();
+	      animationWindow.setVisible(true);
+	      }}).start();
+	   }
+	}
+     
+     
+   }
+   
    public void actionPerformed(ActionEvent evt)
    {
      if (evt.getSource() instanceof Button) {
@@ -234,6 +258,8 @@ public class TimelineWindow extends Frame
        if(b == bSelectRange) { ShowRangeDialog(); }
        else if(b == bColors) { ShowColorWindow(); }
        else if(b == bZoomSelected) { zoomSelected(); }
+       // **sharon** jump to graph
+       else if(b == bJumpAnimation) { jumpToGraph("Animation"); }
        else if (b == bLoadSelected) { loadSelected(); }
        else {
 	 int leftVal = HSB.getValue();
@@ -542,6 +568,20 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(zoomPanel, new Label("Selection End Time", Label.CENTER), gbc, 4,1, 1,1, 1,1);
 	  Util.gblAdd(zoomPanel, new Label("Selection Length", Label.CENTER), gbc, 5,1, 1,1, 1,1);
 
+	  // JUMP TO GRAPH	
+	  
+	  bJumpAnimation = new Button("Animation");
+	  bJumpAnimation.addActionListener(this);
+	  
+	  Panel jumpPanel = new Panel();
+	  jumpPanel.setLayout(gbl);
+	  gbc.fill = GridBagConstraints.BOTH;
+	  
+	  Util.gblAdd(jumpPanel, new Label(" "), gbc, 0,0, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, new Label("Jump to graph: ", Label.CENTER),   gbc, 1,1, 1,1, 1,1);
+	  Util.gblAdd(jumpPanel, bJumpAnimation,  gbc, 2,1, 1,1, 1,1);
+	  
+
 	  //// WINDOW
 	  
 	  setLayout(gbl);
@@ -549,6 +589,7 @@ public class TimelineWindow extends Frame
 	  Util.gblAdd(this, cbPanel,     gbc, 0,1, 1,1, 1,0);
 	  Util.gblAdd(this, buttonPanel, gbc, 0,2, 1,1, 1,0);
 	  Util.gblAdd(this, zoomPanel,   gbc, 0,3, 1,1, 1,0);
+	  Util.gblAdd(this, jumpPanel,   gbc, 0,4, 1,1, 1,0);
    }   
    private void CreateMenus()
    {

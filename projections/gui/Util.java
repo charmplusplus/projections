@@ -265,9 +265,12 @@ public class Util
      */
     public static void saveColors(Color[] colors, String graphType) throws IOException {
 	
-	File filename = new File(Analysis.getLogDirectory() +
-				 File.separator +
-				 "color.map");
+	// **sharon** somehow Analysis.getLogDirectory() returns null
+	//File filename = new File(Analysis.getLogDirectory() +
+	//			 File.separator +
+	//			 "color.map");
+	
+	File filename = new File("bin/color.map");
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 	String tempString = new String();
@@ -331,9 +334,7 @@ public class Util
      *	Changed color.map to a readable format
      */
     public static void restoreColors(Color[] colors, String graphType) throws IOException{
-	File filename = new File(Analysis.getLogDirectory() +
-				 File.separator +
-				 "color.map");
+	File filename = new File("bin/color.map");
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 	String tempString = new String();

@@ -64,6 +64,12 @@ public class Analysis {
     // Indexed by userevent index (which can be derived from the user
     // event ID).
     private static Color[] userEventColors;
+    
+    /****************** Jump from Timeline to graphs ******/
+    // Used for storing user defined startTime and endTime when jumping from
+    // TimelineWindow to other graphs
+    private static long jStartTime, jEndTime;
+    private static boolean jTimeAvailable;
 
     /**
      *  initAnalysis can be considered as Analysis's "constructor".
@@ -755,5 +761,16 @@ public class Analysis {
 	}
 	return colors;
     }
+    
+    /** jTimeAvailable(), getJStartTime(), getJEndTime()
+     *  Used for storing user defined startTime and endTime 
+     *	when jumping from TimelineWindow to other graphs
+     */
+    public static void setJTimeAvailable(boolean jBoo) { jTimeAvailable = jBoo; }
+    public static boolean checkJTimeAvailable()        { return jTimeAvailable; }
+    public static void setJTime(long start, long end)  { jStartTime = start;
+    							 jEndTime = end; }
+    public static long getJStart()                     { return jStartTime; }
+    public static long getJEnd()                       { return jEndTime; }
     
 }

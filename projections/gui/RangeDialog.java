@@ -81,9 +81,14 @@ public class RangeDialog extends JDialog
     {
 	super((JFrame)parentWindow, titleString, true);
 	this.parentWindow = parentWindow;
-	startTime = 0;
-	endTime = Analysis.getTotalTime();
-	totalValidTime = endTime;
+	if(Analysis.checkJTimeAvailable() == true) { 
+		startTime = Analysis.getJStart();
+		endTime = Analysis.getJEnd();
+		Analysis.setJTimeAvailable(false);}
+	else {
+		startTime = 0;
+		endTime = Analysis.getTotalTime();}
+	totalValidTime = Analysis.getTotalTime();
 	validProcessors = Analysis.getValidProcessorString();
 	numProcessors = Analysis.getNumProcessors();
 	totalTime = endTime - startTime;

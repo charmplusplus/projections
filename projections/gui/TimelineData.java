@@ -124,8 +124,10 @@ public class TimelineData
 	  float S = (float)1.0;
 	  float B = (float)1.0;
 	  float delta = (float)(1.0/Analysis.getNumUserEntries());
-	  if (new File(Analysis.getLogDirectory() +
-		       File.separator + "color.map").exists()) {
+	  // **sharon** somehow getLogDirectory() returns null
+	  //if (new File(Analysis.getLogDirectory() +
+	  //	       File.separator + "color.map").exists()) {
+	  if (new File("bin/color.map").exists()) {
 	      try {
 		  Util.restoreColors(entryColor, "Timeline Graph");
 	      } catch (IOException e) {

@@ -44,11 +44,13 @@ public class AnimationDisplayPanel extends Panel
 		{
 			super();  
 			setTitle("Animation Range Dialog");
-			
-		}
-		
+		}  
+				  
 		void showDialog()
 		{
+			System.out.println("startTime " + startTime);
+						
+			
 			if(dialog == null)
 				dialog = new IntervalRangeDialog(this, "Select Range");
 			int status = dialog.showDialog();
@@ -60,10 +62,12 @@ public class AnimationDisplayPanel extends Panel
 		
 		OrderedIntList getProcessorRange()	{return validPEs;}
 		int getNumOfPEs()	{return validPEs.size();}
-		long getStartTime()	{return startTime;}
-		long getEndTime() 	{return endTime;}
 		int getIntervalSize()	{return (int)dialog.getIntervalSize();}
 		long getThresholdTime()	{return dialog.getThresholdTime();}
+		long getStartTime() { return startTime; }
+		long getEndTime() { return endTime; }
+		
+
    } 
   
    public AnimationDisplayPanel(AnimationWindow animationWindow)
@@ -137,7 +141,7 @@ public class AnimationDisplayPanel extends Panel
    }
    public long getEndTime()
    {
-   	  return rangeDialog.getEndTime();
+	  return rangeDialog.getEndTime();
    }
    //Make sure we aren't made too tiny
    public Dimension getMinimumSize() {return new Dimension(150,100);}   
@@ -243,7 +247,7 @@ public class AnimationDisplayPanel extends Panel
 		 Isize = i;
 	       
 		 data = Analysis.getAnimationData(Isize,
-		 rangeDialog.getStartTime(), rangeDialog.getEndTime(),
+		 getStartTime(), getEndTime(),
 		 rangeDialog.getProcessorRange());
 		 
 		 numIs = data[0].length;

@@ -84,14 +84,25 @@ public class SumAnalyzer extends ProjDefs
 			throw new SummaryFormatException("extra garbage at end of line 1");
 		if (p==0)
 		{
-			ProcessorUtilization = new int[nPe][IntervalCount+20];
+			ProcessorUtilization = new int[nPe][];
 			ChareTime= new long [nPe][numEntry];
 			NumEntryMsgs = new int [nPe][numEntry];
 		}
+		ProcessorUtilization[p] = new int[IntervalCount + 20];
 		//Read the SECOND line (processor usage)
 		int nUsageRead=0;
-		while (StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))
-			ProcessorUtilization[p][nUsageRead++] = (int)tokenizer.nval;
+		boolean error = false;
+		while (StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) {
+		  try { ProcessorUtilization[p][nUsageRead++] = (int)tokenizer.nval; }
+		  catch (ArrayIndexOutOfBoundsException e) {
+		    if (!error) {
+		      System.out.println("  ArrayIndexOutOfBoundsException nUsageRead "+
+					 nUsageRead+" size "+ProcessorUtilization[p].length);
+		      error = true;
+		    }
+		  }
+		}
+		if (error) { System.out.println("  nUsageRead "+nUsageRead); }
 
 		//Make sure we're at the end of the line
 		if (StreamTokenizer.TT_EOL!=tokenType)
@@ -171,7 +182,7 @@ public class SumAnalyzer extends ProjDefs
 			}
 		tokenizer = null;
 		file.close();
-		System.out.println("Finished reading in data for processor #"+p);
+		System.out.println("Finished reading in data for processor #"+p+"/"+nPe);
 		}
 	sts.setTotalTime(TotalTime);
 	}

@@ -170,11 +170,10 @@ public class MainWindow extends JFrame
     
     public void showAnimationWindow()
     {
-	if(animationWindow == null)
-	    new Thread(new Runnable() {public void run() {
-		animationWindow = new AnimationWindow();
-		animationWindow.setVisible(true);
-	    }}).start();
+	new Thread(new Runnable() {public void run() {
+	    animationWindow = new AnimationWindow();
+	    animationWindow.setVisible(true);
+	}}).start();
     }
       
     public void showStlWindow()

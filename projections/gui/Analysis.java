@@ -147,6 +147,9 @@ public class Analysis {
     }
 
     public static int[][] getAnimationData( int numPs, int intervalSize ) {
+	if (intervalSize > getTotalTime()) {
+	    intervalSize = (int)(getTotalTime());
+	}
 	int nInt=(int)(getTotalTime()/intervalSize);
 	LoadGraphData(intervalSize,0,nInt-1,false, null);
 	int[][] animationdata = new int[ numPs ][ nInt ];

@@ -19,8 +19,10 @@ public class AnimationDisplayPanel extends Panel
    private int hoffset;
    private int voffset;
    private float psize = (float)0.75;
-   
-   private int curI = 0;
+
+    // -1 is an initial "invalid" value. Once a valid is set by someone,
+    // this -1 value goes away forever.
+   private int curI = -1;  
    private int curP = -1;
    private int Isize = 0; //Interval length, microseconds
    private int[][] data;
@@ -147,7 +149,7 @@ public class AnimationDisplayPanel extends Panel
 	  if(curP != pold)
 	  {
 		 pold = curP;
-		 if(curP >= 0)
+		 if ((curP >= 0) && (curI != -1))
 			animationWindow.setStatusInfo(curP, curI, data[curP][curI]);
 		 else
 			animationWindow.setStatusInfo(-1, -1, -1);   
@@ -161,8 +163,9 @@ public class AnimationDisplayPanel extends Panel
    {
 	  if(offscreen == null)
 		 return;
-		 
-	  makeNextImage(offscreen.getGraphics(), curI);
+	  if (curI != -1) {
+	      makeNextImage(offscreen.getGraphics(), curI);
+	  }
 	  g.drawImage(offscreen, 0, 0, null);
    }   
    public void setCurI(int i)
@@ -192,6 +195,9 @@ public class AnimationDisplayPanel extends Panel
 		 Isize = i;
 		 data = Analysis.getAnimationData(numPs, Isize);
 		 numIs = data[0].length;
+		 if (numIs > 0) {
+		     curI = 0;
+		 }
 		  
 		 w = getSize().width;
 		 h = getSize().height;

@@ -90,7 +90,11 @@ public class StsReader extends ProjDefs
 		    {
 			StringTokenizer st = new StringTokenizer(Line);
 			String s1 = st.nextToken();
-			if(s1.equals("MACHINE"))
+			if(s1.equals("VERSION")) {
+			  double ver = Double.parseDouble(st.nextToken());
+			  Analysis.setVersion(ver);
+ 			}
+			else if(s1.equals("MACHINE"))
 			    Machine = st.nextToken();
 			else if(s1.equals("PROCESSORS"))
 			    {

@@ -12,9 +12,10 @@ public class TimelineObject extends Component
    private String[]  bubbletext;
    private Bubble  bubble;
    private TimelineMessageWindow msgwindow;
-   private long    beginTime, endTime;
+   private long    beginTime, endTime, recvTime;
    private int     entry;
    private int     msglen;
+   private ObjectId tid;
    private boolean inside = false; 
    private int pCurrent, pCreation;
    private double  usage;
@@ -60,7 +61,7 @@ public class TimelineObject extends Component
 
    public TimelineObject(TimelineData data, long bt, long et, int n, 
 						 TimelineMessage[] msgs, PackTime[] packs,
-						 int p1, int p2, int mlen)
+						 int p1, int p2, int mlen, long rt, ObjectId id)
    {
           format_.setGroupingUsed(true);
 
@@ -77,13 +78,19 @@ public class TimelineObject extends Component
 	  pCreation = p2;
 	  f = (Frame)data.timelineWindow;
           msglen = mlen;
+	  recvTime = rt;
+	  if (id != null) {
+	    tid = new ObjectId(id);
+	  }
+	  else 
+	    tid = new ObjectId();
 	  
 	  setUsage();
 	  setPackUsage();
 	  
 	  if(n != -1)
 	  {
-		 bubbletext  = new String[8];
+		 bubbletext  = new String[10];
 		 int ecount = Analysis.getUserEntryCount();
 		 if (n >= ecount) {
 		   System.out.println("Fatal error: invalid entry "+n+"!");
@@ -100,6 +107,8 @@ public class TimelineObject extends Component
 			bubbletext[4]+=" (" + (100*(float)packtime/(et-bt+1)) + "%)";
 		 bubbletext[6] = "Msgs created: " + msgs.length;
 		 bubbletext[7] = "Created by processor " + pCreation;
+		 bubbletext[8] = "Id: " + tid.id[0]+":"+tid.id[1]+":"+tid.id[2];
+		 bubbletext[9] = "Recv Time: " + recvTime;
 	  }
 	  else
 	  {

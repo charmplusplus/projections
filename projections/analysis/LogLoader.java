@@ -168,7 +168,7 @@ public class LogLoader extends ProjDefs
 				  switch(LE.TransactionType)
 				  {
 					 case BEGIN_PROCESSING:
-						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe,LE.MsgLen));
+						Timeline.addElement(TE=new TimelineEvent(LE.Time - BeginTime,LE.Time - BeginTime,LE.Entry,LE.Pe,LE.MsgLen, LE.recvTime, LE.id));
 						break;
 					 case END_PROCESSING:
 						if(TE!=null)
@@ -342,8 +342,22 @@ public class LogLoader extends ProjDefs
 			Temp.Time    = log.nextLong();
 			Temp.Pe      = log.nextInt();
 			return Temp;
-		 case CREATION:
 		 case BEGIN_PROCESSING:
+			Temp.MsgType = log.nextInt();
+			Temp.Entry   = log.nextInt();
+			Temp.Time    = log.nextLong();
+			Temp.EventID = log.nextInt();
+			Temp.Pe      = log.nextInt();
+			if (Analysis.getVersion() > 1.0)
+			  Temp.MsgLen  = log.nextInt();
+			else
+			  Temp.MsgLen  = -1;
+			if (Analysis.getVersion() >= 4.0) {
+			  Temp.recvTime  = log.nextLong();
+			  Temp.id = new ObjectId(log.nextInt(), log.nextInt(), log.nextInt());;
+                        }
+			return Temp;
+		 case CREATION:
 		 case END_PROCESSING:
 			Temp.MsgType = log.nextInt();
 			Temp.Entry   = log.nextInt();

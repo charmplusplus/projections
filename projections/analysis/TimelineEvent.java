@@ -6,13 +6,21 @@ import java.util.Vector;
 public class TimelineEvent
 {
 
-public long BeginTime, EndTime;
+public long BeginTime, EndTime, RecvTime;
 public int EntryPoint, SrcPe, MsgLen;
+public ObjectId id;
 public Vector MsgsSent;  // of class TimelineMessage
 public Vector PackTimes; // of class PackTime
 
 public TimelineEvent ()
 {
+}
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d)
+{
+	BeginTime=bt; EndTime=et;
+	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
+        RecvTime = r;
+	id = new ObjectId(d);
 }
 public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 {

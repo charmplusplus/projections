@@ -271,8 +271,9 @@ public class TimelineData
 	  TimelineEvent tle;
 
 	  int numItems;
-	  long btime, etime;
+	  long btime, etime, rtime;
 	  int entry, pSrc, numMsgs, numpacks, msglen;
+          ObjectId tid;
 		
 	  tl = new Vector();
 	  Vector userEvents = new Vector();
@@ -298,6 +299,8 @@ public class TimelineData
 		 entry = tle.EntryPoint; 
 		 pSrc  = tle.SrcPe;
 		 msglen  = tle.MsgLen;
+ 		 tid   = tle.id;
+		 rtime = tle.RecvTime;
 			
 		 msglist = tle.MsgsSent;
 		 if(msglist == null)
@@ -319,7 +322,7 @@ public class TimelineData
 		 for(int p=0; p<numpacks; p++)
 			packs[p] = (PackTime)packlist.elementAt(p);
 		 
-		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen);
+		 tlo[i] = new TimelineObject(this, btime, etime, entry, msgs, packs, pnum, pSrc, msglen, rtime, tid);
 	  }
 
 	  /*

@@ -11,7 +11,7 @@ import projections.misc.*;
 public class MainWindow extends Frame
    implements ActionListener
 {
-   private static double 	CUR_VERSION = 2.0;
+   private static double 	CUR_VERSION = 4.0;
 
    private GraphWindow          graphWindow;
    private TimelineWindow       timelineWindow;
@@ -231,7 +231,7 @@ public class MainWindow extends Frame
    {
         int i=0;
 	String loadSts=null;
-	Analysis.setVersion(3.0);
+	Analysis.setVersion(CUR_VERSION);
         while (i < args.length) {
 	  if (args[i].equals("-h")) {
 	     help();

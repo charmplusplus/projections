@@ -7,48 +7,57 @@ import javax.swing.*;
 
 public class Util 
 {
-   public static void gblAdd(Container target, Component c, GridBagConstraints gbc, 
-	  int x, int y, int dx, int dy, int wx, int wy)
-   {
-	  gbc.gridx = x;
-	  gbc.gridy = y;
-	  gbc.gridwidth = dx;
-	  gbc.gridheight = dy;
-	  gbc.weightx = wx;
-	  gbc.weighty = wy;
-	  target.add(c, gbc);
-   }   
-   public static void gblAdd(Container target, Component c, GridBagConstraints gbc, 
-	  int x, int y, int dx, int dy, int wx, int wy, int I1, int I2, int I3, int I4)
-   {
-	  Insets oldInsets = gbc.insets;
-	  gbc.gridx = x;
-	  gbc.gridy = y;
-	  gbc.gridwidth = dx;
-	  gbc.gridheight = dy;
-	  gbc.weightx = wx;
-	  gbc.weighty = wy;
-	  gbc.insets = new Insets(I1, I2, I3, I4);
-	  target.add(c, gbc);
-	  gbc.insets = oldInsets;
-   }   
-   public static int getBestIncrement(int initialIncrement)
-   {
-	  int[] indices = {1, 2, 5, 25};
-	  int best = -1;
-	  for(int i=0; i<indices.length; i++)
-	  {
-		 int t=0;
-		 int sum=0;
-		 while((sum = (int)(indices[i] * Math.pow(10,t))) < initialIncrement)
-			t++;
-		 if((sum-initialIncrement) < (best-initialIncrement) || best < 0)
-			best = sum;
-	  }
-	  return best;
-   }   
-   public static Menu makeMenu(Object parent, Object[] items, Object target)
-   {  
+    public static void gblAdd(Container target, Component c, 
+			      GridBagConstraints gbc, 
+			      int x, int y, int dx, int dy, int wx, int wy)
+    {
+	gbc.gridx = x;
+	gbc.gridy = y;
+	gbc.gridwidth = dx;
+	gbc.gridheight = dy;
+	gbc.weightx = wx;
+	gbc.weighty = wy;
+	target.add(c, gbc);
+    }   
+
+    public static void gblAdd(Container target, Component c, 
+			      GridBagConstraints gbc, 
+			      int x, int y, int dx, int dy, int wx, int wy, 
+			      int I1, int I2, int I3, int I4)
+    {
+	Insets oldInsets = gbc.insets;
+	gbc.gridx = x;
+	gbc.gridy = y;
+	gbc.gridwidth = dx;
+	gbc.gridheight = dy;
+	gbc.weightx = wx;
+	gbc.weighty = wy;
+	gbc.insets = new Insets(I1, I2, I3, I4);
+	target.add(c, gbc);
+	gbc.insets = oldInsets;
+    }   
+
+    public static int getBestIncrement(int initialIncrement)
+    {
+	int[] indices = {1, 2, 5, 25};
+	int best = -1;
+	for (int i=0; i<indices.length; i++) {
+	    int t=0;
+	    int sum=0;
+	    while ((sum = (int)(indices[i] * Math.pow(10,t))) 
+		   < initialIncrement)
+		t++;
+	    if((sum-initialIncrement) < (best-initialIncrement) || best < 0)
+		best = sum;
+	}
+	return best;
+    }   
+
+    // do not remove yet - still being used by various windows
+    // remove only after the whole of projections is converted to swing.
+    // Chee Wai - 10/29/2002
+    public static Menu makeMenu(Object parent, Object[] items, Object target)
+    {  
 	  Menu m = null;
 	  if (parent instanceof Menu)
 		 m = (Menu)parent;
@@ -86,55 +95,56 @@ public class Util
 	  return m;
    }
 
-/* Swing version of the above function */   
-   public static JMenu makeJMenu(Object parent, Object[] items, Object target)
-   {  
-	  JMenu m = null;
-	  if (parent instanceof JMenu)
-		 m = (JMenu)parent;
-	  else if (parent instanceof String)
-		 m = new JMenu((String)parent);
-	  else
-		 return null;
-
-	  for (int i = 0; i < items.length; i++)
-	  {  
-		 if (items[i] instanceof String)
-		 {  
+    /* Swing version of the above function */   
+    public static JMenu makeJMenu(Object parent, Object[] items, 
+				  boolean[] enabled, Object target)
+    {  
+	JMenu m = null;
+	if (parent instanceof JMenu)
+	    m = (JMenu)parent;
+	else if (parent instanceof String)
+	    m = new JMenu((String)parent);
+	else
+	    return null;
+	
+	for (int i = 0; i < items.length; i++)
+	    {  
+		if (items[i] instanceof String)
+		    {  
 			JMenuItem mi = new JMenuItem((String)items[i]);
 			if (target instanceof ActionListener)
-			{
-			   mi.addActionListener((ActionListener)target);
-			}
+			    {
+				mi.addActionListener((ActionListener)target);
+			    }
 			m.add(mi);
-		 }
-		 else if (items[i] instanceof JCheckBoxMenuItem && target instanceof ItemListener)
-		 {  
+		    }
+		else if (items[i] instanceof JCheckBoxMenuItem && target instanceof ItemListener)
+		    {  
 			JCheckBoxMenuItem cmi = (JCheckBoxMenuItem)items[i];
 			cmi.addItemListener((ItemListener)target);
 			m.add(cmi);
-		 }
-		 else if (items[i] instanceof JRadioButtonMenuItem)
-		 {  
+		    }
+		else if (items[i] instanceof JRadioButtonMenuItem)
+		    {  
 			JRadioButtonMenuItem cmi = (JRadioButtonMenuItem)items[i];
 			cmi.addActionListener((ActionListener)target);
 			m.add(cmi);
-		 }
-		 else if (items[i] instanceof JMenuItem)
-		 {  
+		    }
+		else if (items[i] instanceof JMenuItem)
+		    {  
 			JMenuItem mi = (JMenuItem)items[i];
 			if (target instanceof ActionListener)
-			   mi.addActionListener((ActionListener)target);
+			    mi.addActionListener((ActionListener)target);
 			m.add(mi);
-		 }
-		 else if (items[i] == null)
-		 {
+		    }
+		else if (items[i] == null)
+		    {
 			m.addSeparator();
-		 }
-	  }
-
-	  return m;
-   }   
+		    }
+	    }
+	
+	return m;
+    }   
 
    public static void waitForImage(Component component, Image image) 
    {

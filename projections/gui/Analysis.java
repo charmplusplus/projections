@@ -189,6 +189,14 @@ public class Analysis {
 		return sts.getTotalTime();
 	}
 
+    public static double[] getSummaryAverageData() {
+	return sumAnalyzer.getSummaryAverageData();
+    }
+
+    public static long getSummaryIntervalSize() {
+	return sumAnalyzer.getIntervalSize();
+    }
+
     public static Color getEntryColor(int entryIdx) {
 	if (entryIdx < sts.getEntryCount()) {
 	    return entryColors[entryIdx];
@@ -361,24 +369,51 @@ public class Analysis {
 			systemMsgsData = logReader.getSystemMsgs();
 			userEntryData = logReader.getUserEntries();
 			logReader=null;
-		}
-		else { // .sum files
-			systemUsageData = new int[ 3 ][][];
-			// systemUsageData[0][][] -- queue size
-			// systemUsageData[1][][] -- processor utilization
-			// systemUsageData[2][][] -- idle times
-			try {
-				systemUsageData[ 1 ] = sumAnalyzer.GetSystemUsageData( 
-					intervalStart, intervalEnd, intervalSize);
-			}
-			catch( SummaryFormatException E ) {
-				System.out.println( "Caught SummaryFormatException" );
-			}
-			catch( IOException e ) {
-				System.out.println( "Caught IOExcpetion" );
-			}
+		} else { // no log files, so load .sum files
+		    loadSummaryData(intervalSize, intervalStart,
+				    intervalEnd);
 		}
 	}
+
+    public static void loadSummaryData(long intervalSize,
+				       int intervalStart, int intervalEnd) {
+	// works only if summary file exists
+	if (sts.hasSumFiles()) {
+	    systemUsageData = new int[ 3 ][][];
+	    // systemUsageData[0][][] -- queue size
+	    // systemUsageData[1][][] -- processor utilization
+	    // systemUsageData[2][][] -- idle times
+	    try {
+		systemUsageData[ 1 ] = 
+		    sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
+						   intervalSize);
+	    }
+	    catch( SummaryFormatException E ) {
+		System.out.println( "Caught SummaryFormatException" );
+	    }
+	    catch( IOException e ) {
+		System.out.println( "Caught IOExcpetion" );
+	    }
+	}
+    }
+
+    // wrapper method for default interval size.
+    public static void loadSummaryData(int intervalStart, int intervalEnd) {
+	loadSummaryData(sumAnalyzer.getIntervalSize(), intervalStart,
+			intervalEnd);
+    }
+
+    // wrapper method for default summary load (used by main window)
+    public static void loadSummaryData() {
+	// check has to be conducted here because of the use of sumAnalyzer
+	if (sts.hasSumFiles()) { 
+	    long sizeInt = sumAnalyzer.getIntervalSize();
+	    int nInt=(int)(sts.getTotalTime()/sizeInt);
+	    
+	    loadSummaryData(sizeInt, 0, nInt-1);
+	}
+    }
+
 	public static long searchTimeline( int n, int p, int e ) throws EntryNotFoundException {
 		try {
 			return logLoader.searchtimeline( p, e, n );

@@ -30,7 +30,7 @@ public class Graph extends JPanel implements MouseMotionListener
    private double xscale;
    private int hsbval;
 
-   private static final int FONT_SIZE = 25;   
+   private static final int FONT_SIZE = 12;   
    private static final Color BACKGROUND = Color.white;
    private static final Color FOREGROUND = Color.black;
 
@@ -82,8 +82,8 @@ public class Graph extends JPanel implements MouseMotionListener
    }
 
    //Make sure we aren't made too tiny
-   public Dimension getMinimumSize() {return new Dimension(150,100);}
-   public Dimension getPreferredSize() {return new Dimension(450,350);}
+   public Dimension getMinimumSize() {return new Dimension(300,200);}
+   public Dimension getPreferredSize() {return new Dimension(300,200);}
 
    public void setGraphType(int type)
    {

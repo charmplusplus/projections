@@ -147,10 +147,12 @@ public class ProfileWindow extends Frame
 			ShowDialog();
 		 else if(arg.equals("Print Profile"))
 			PrintProfile();   
+		 /* Useless, should remove.
 		 else if(arg.equals("Index"))
 			ShowHelpWindow();
 		 else if(arg.equals("About"))
 			ShowAboutDialog();       
+		 */
 	  }
 	  else if(evt.getSource() instanceof FloatTextField)
 	  {
@@ -794,10 +796,12 @@ public class ProfileWindow extends Frame
 	  VSB.setBounds          (mpw-sbw, 0,       sbw, data.vph);
 	  HSB.setBounds          (acw,     mph-sbh, data.vpw, sbh);
    }   
+    /* deprecated. To be removed.
    private void ShowAboutDialog()
    {
 	  mainWindow.ShowAboutDialog((Frame)this);   
-   }   
+   }  
+    */ 
    private void ShowDialog()
    {
 	  if(dialog == null)
@@ -805,10 +809,13 @@ public class ProfileWindow extends Frame
 	  dialog.setVisible(true);
 
    }   
+
+    /* deprecated. To be removed.
    private void ShowHelpWindow()
    {
 	  mainWindow.ShowHelpWindow();   
    }   
+    */
 	//Convert a usage profile (0..numUserEntries+4-1) to a po
 	private void usage2po(float usg[],int curPe,int poNo,Color[] colors)
 	{

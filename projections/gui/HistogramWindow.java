@@ -251,16 +251,21 @@ public class HistogramWindow extends GenericGraphWindow
 // then call super class' createMenus() to add the menuBar to the Window
    protected void createMenus()
    {
-	  fileMenu = Util.makeJMenu(fileMenu,new Object[]
-	  {
-		"Select Entry Points"
-	  },this);
+	  fileMenu = Util.makeJMenu(fileMenu,
+				    new Object[]
+	      {
+		  "Select Entry Points"
+	      },
+				    null,
+				    this);
 
-          menuBar.add(Util.makeJMenu("View", new Object[]
-          {
-                 new JCheckBoxMenuItem("Show Longest EPs",true)
-          },
-          this));
+          menuBar.add(Util.makeJMenu("View", 
+				     new Object[]
+	      {
+		  new JCheckBoxMenuItem("Show Longest EPs",true)
+		      },
+				     null,
+				     this));
 
 	  super.createMenus();
     }

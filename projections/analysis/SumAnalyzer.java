@@ -11,7 +11,6 @@ import java.util.*;
 public class SumAnalyzer extends ProjDefs
 {
 	private StsReader sts;
-	private int 	  NumIntervals;
 	private int[][][][] dataArray;
 	private StreamTokenizer tokenizer;
 	private long[][] ChareTime;   // Holds the total time (in microseconds) spent executing messages
@@ -219,6 +218,11 @@ public class SumAnalyzer extends ProjDefs
 	if (!expected.equals(ret))
 		throw new SummaryFormatException("Expected "+expected+" got "+ret);
 	}
+
+    public long getIntervalSize() {
+	return IntervalSize;
+    }
+
 	public long[][] GetChareTime()
 	{
 	return ChareTime;
@@ -272,6 +276,22 @@ public class SumAnalyzer extends ProjDefs
 		}
 	return ret;
 	}
+
+    // get data averaged across all intervals
+    public double[] getSummaryAverageData() {
+	int numProcessors = ProcessorUtilization.length;
+	double[] ret = new double[IntervalCount];
+	for (int p=0; p<numProcessors; p++) {
+	    for (int interval=0; interval<IntervalCount; interval++) {
+		ret[interval] += ProcessorUtilization[p][interval];
+	    }
+	}
+	for (int interval=0; interval<IntervalCount; interval++) {
+	    ret[interval] /= numProcessors*1.0;
+	}
+	return ret;
+    }
+
 	public long GetTotalTime() 
 	{
 		return TotalTime;

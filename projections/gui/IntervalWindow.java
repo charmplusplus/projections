@@ -138,19 +138,23 @@ public class IntervalWindow extends GenericGraphWindow
           JMenuBar mbar = new JMenuBar();
           setJMenuBar(mbar);
 
-          mbar.add(Util.makeJMenu("File", new Object[]
-          {
-                 "Set Range",
-                 "Close"
-          },
-          this));
+          mbar.add(Util.makeJMenu("File", 
+				  new Object[]
+	      {
+		  "Set Range",
+		  "Close"
+	      },
+				  null,
+				  this));
 
-	  mbar.add(Util.makeJMenu("Options",new Object[]
-	  {
-		countGraphButton,
-		byteGraphButton	
-	  },
-	  this)); 
+	  mbar.add(Util.makeJMenu("Options",
+				  new Object[]
+	      {
+		  countGraphButton,
+		  byteGraphButton	
+	      },
+				  null,
+				  this)); 
 
     }
 

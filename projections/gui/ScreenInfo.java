@@ -18,12 +18,12 @@ public class ScreenInfo
     public static int screenHeight;
     public static int screenWidth;
 
-    private GraphicsEnvironment ge;
-    private GraphicsDevice gd;
-    private GraphicsConfiguration gc;
-    private Rectangle bounds;
+    private static GraphicsEnvironment ge;
+    private static GraphicsDevice gd;
+    private static GraphicsConfiguration gc;
+    private static Rectangle bounds;
 
-    public ScreenInfo() {
+    public static void init() {
 	ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 	gd = ge.getDefaultScreenDevice();
 	gc = gd.getDefaultConfiguration();

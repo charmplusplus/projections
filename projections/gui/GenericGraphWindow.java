@@ -46,11 +46,14 @@ public abstract class GenericGraphWindow
 // create a standard fileMenu to be inherited by subclasses
 // make it return menuBar instead of being void
     protected void createMenus(){
-	  fileMenu = Util.makeJMenu(fileMenu, new Object[]
-          {
-                 "Set Range",
-                 "Close"
-          },this);
+	  fileMenu = Util.makeJMenu(fileMenu, 
+				    new Object[]
+	      {
+		  "Set Range",
+		  "Close"
+	      },
+				    null,
+				    this);
 	  setJMenuBar(menuBar);
    }
 

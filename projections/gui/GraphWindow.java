@@ -73,11 +73,13 @@ public class GraphWindow extends Frame
 		 else if(arg.equals("Set Interval Size"))
 			ShowIntervalDialog();
 		 else if(arg.equals("Timeline"))
-			mainWindow.ShowTimelineWindow();
+			mainWindow.showTimelineWindow();
+		 /* useless, to be removed.
 		 else if(arg.equals("Index"))
 			mainWindow.ShowHelpWindow();
 		 else if(arg.equals("About"))
 			mainWindow.ShowAboutDialog((Frame) this);       
+		 */
 	  }
    }   
    private void Close()

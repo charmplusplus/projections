@@ -65,8 +65,10 @@ public class HelpWindow extends Frame
 		 String arg = mi.getLabel();
 		 if(arg.equals("Close"))
 			dispose();
+		 /* don't keep this anymore
 		 else if(arg.equals("About"))
 			mainWindow.ShowAboutDialog((Frame) this);       
+		 */
 	  }
    }   
 }

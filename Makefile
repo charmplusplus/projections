@@ -75,10 +75,14 @@ SRC=\
     projections/gui/LogFileViewerDialog.java\
     projections/gui/LogFileViewerTextArea.java\
     projections/gui/LogFileViewerWindow.java\
-    projections/gui/MainButtonPanel.java\
     projections/gui/MainFileFilter.java\
+    projections/gui/MainMenuManager.java\
     projections/gui/MainTitlePanel.java\
     projections/gui/MainWindow.java\
+    projections/gui/MainWindowPanel.java\
+    projections/gui/MainRunStatusPanel.java\
+    projections/gui/MainSummaryGraphPanel.java\
+    projections/gui/MenuManager.java\
     projections/gui/MultiRunControlPanel.java\
     projections/gui/MultiRunDisplayPanel.java\
     projections/gui/MultiRunFileDialogControl.java\
@@ -163,6 +167,9 @@ SRC=\
     projections/gui/graph/MultiRunDataSource.java\
     projections/gui/graph/MultiRunXAxis.java\
     projections/gui/graph/MultiRunYAxis.java\
+    projections/gui/graph/SummaryDataSource.java\
+    projections/gui/graph/SummaryXAxis.java\
+    projections/gui/graph/SummaryYAxis.java\
     projections/gui/graph/XAxis.java\
     projections/gui/graph/XAxisFixed.java\
     projections/gui/graph/YAxis.java\

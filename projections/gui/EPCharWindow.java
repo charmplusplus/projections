@@ -168,30 +168,23 @@ public class EPCharWindow extends ProjectionsWindow
 	  JCheckBoxMenuItem pieChartMenuItem = new JCheckBoxMenuItem("Show Pie Chart");
 	  pieChartMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, ActionEvent.ALT_MASK));
 
-          mbar.add(Util.makeJMenu("File", new Object[]
-          {
-                 "Set Range",
-		 "Select Entry Points",
-                 "Close"
-          },
-          this));
+          mbar.add(Util.makeJMenu("File", 
+				  new Object[]
+	      {
+		  "Set Range",
+		  "Select Entry Points",
+		  "Close"
+	      },
+				  null,
+				  this));
 
-	  mbar.add(Util.makeJMenu("View",new Object[]
-	  {
-		pieChartMenuItem	
-	  },
-	  this)); 
-
-// setHelpMenu is not yet implemented for JMenuBar
-         /* JMenu helpMenu = new JMenu("Help");
-          mbar.add(Util.makeJMenu(helpMenu, new Object[]      {
-                 "Index",
-                 "About"
-          },
-          this));
- 
-          mbar.setHelpMenu(helpMenu);*/
-
+	  mbar.add(Util.makeJMenu("View",
+				  new Object[]
+	      {
+		  pieChartMenuItem	
+	      },
+				  null,
+				  this)); 
     }
 
    private void refreshGraph()

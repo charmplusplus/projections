@@ -8,434 +8,334 @@ import java.io.*;
 import java.net.*;
 import projections.misc.*;
 import projections.gui.count.*;
+import projections.gui.graph.*;
 
-public class MainWindow extends Frame
-   implements ActionListener
+public class MainWindow extends JFrame
+    implements ActionListener
 {
-   private static double 	CUR_VERSION = 4.0;
+    private static double 	CUR_VERSION = 4.0;
 
-   private GraphWindow          graphWindow;
-   private TimelineWindow       timelineWindow;
-   private AnimationWindow      animationWindow;
-   private ProfileWindow        profileWindow;
-   private HelpWindow           helpWindow;
-   private LogFileViewerWindow  logFileViewerWindow;
-   private HistogramWindow      histogramWindow;
-   private StlWindow            stlWindow;
-   private MultiRunWindow       multiRunWindow;
-   private IntervalWindow 	intervalWindow;
-   private EPCharWindow 	epCharWindow;
+    // should be tables of objects dependent indexed by runs in the future.
+    private GraphWindow          graphWindow;
+    private TimelineWindow       timelineWindow;
+    private AnimationWindow      animationWindow;
+    private ProfileWindow        profileWindow;
+    private HelpWindow           helpWindow;
+    private LogFileViewerWindow  logFileViewerWindow;
+    private HistogramWindow      histogramWindow;
+    private StlWindow            stlWindow;
+    private MultiRunWindow       multiRunWindow;
+    private IntervalWindow 	intervalWindow;
+    private EPCharWindow 	epCharWindow;
 
     private BGGraphWindow       bgWindow;
     private EPAnalysis           epAnalysis;
-
-   private AboutDialog          aboutDialog;
     
-   private MainTitlePanel       titlePanel;
-   private MainButtonPanel      buttonPanel;
-   private boolean toolsEnabled = false;
-   private Image paper;
+    // components associated with the main window
+    private MainTitlePanel       titlePanel;
+    private MainWindowPanel      mainPanel;
+    private MainMenuManager      menuManager;
+    private MainSummaryGraphPanel summaryGraphPanel;
+    private MainRunStatusPanel   runStatusPanel;
 
-   private Image bgimage;
+    // these should become arrays for future tabbed multirun functionality.
+    private SummaryDataSource    sumDataSource;
+    private SummaryXAxis         sumXAxis;
+    private SummaryYAxis         sumYAxis;
+    private GraphPanel           graphPanel;
 
-    private ScreenInfo screenInfo;
-
-   public MainWindow()
-   {
-       // acquire current machine's screen information
-       screenInfo = new ScreenInfo();
-
-	  addWindowListener(new WindowAdapter()
-	  {
-		 public void windowClosing(WindowEvent e)
-		 {
-			System.exit(0);
-		 }
-	  });
-
-	  setBackground(Color.lightGray);
-
-	  CreateMenus();
-	  CreateLayout();
-
-	  // Font allFonts[] = 
-	  // GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
-	  // for (int i=0; i<allFonts.length; i++) {
-	  //     System.out.println(allFonts[i].getFontName());
-	  // }
-	  // System.out.println(Font.decode("Courier 10 Pitch").getFontName());
-   }                              
-   public void actionPerformed(ActionEvent evt)
-   {
-	  if(evt.getSource() instanceof MenuItem)
-	  {
-		 MenuItem mi = (MenuItem)evt.getSource();
-		 String arg = mi.getLabel();
-
-		 if(arg.equals("Open..."))
-			ShowOpenFileDialog();
-		 else if(arg.equals("Quit"))
-			System.exit(0);
-		 else if(arg.equals("Index"))
-			ShowHelpWindow();
-		 else if(arg.equals("About"))
-			ShowAboutDialog(this);
-		 // does not depend on tools being enabled
-		 else if(arg.equals("Multirun Analysis"))
-		        showChildWindow(multiRunWindow,"MultiRunWindow");
-		 else if(arg.equals("Interval Graph"))
-		        showChildWindow(intervalWindow,"IntervalWindow");
-		 else if(arg.equals("Histograms"))
-		        showChildWindow(histogramWindow,"HistogramWindow");
-		 else if(arg.equals("Entry Point Characteristics Graph"))
-		        showChildWindow(epCharWindow,"EPCharWindow");
-		 else if(arg.equals("Counter"))
-				ShowCounterWindow();
-
-		 else if(toolsEnabled)
-		 {
-			if(arg.equals("Graphs"))
-			   showChildWindow(graphWindow,"GraphWindow");
-			if(arg.equals("Unified Summary Graph"))
-			   showChildWindow(bgWindow,"BGGraphWindow");
-			else if(arg.equals("Timelines"))
-			   showChildWindow(timelineWindow,"TimelineWindow");
-			else if(arg.equals("Animations"))
-			   ShowAnimationWindow();
-			else if(arg.equals("Usage Profile"))
-			   showChildWindow(profileWindow,"ProfileWindow");
-			else if(arg.equals("View Log Files"))
-			   showChildWindow(logFileViewerWindow,"LogFileViewerWindow");
-			else if(arg.equals("Histograms"))
-			   showChildWindow(histogramWindow,"HistogramWindow");
-			else if(arg.equals("Overview"))
-			   ShowStlWindow();
-			else if(arg.equals("Generate EP Data"))
-			    activateEPAnalysis();
-
-		 }
-	  }
-   }
-
-
-/* called by the childWindows to remove references to themselves */
-   public void closeChildWindow(Object childWindow)
-   {
-	if(childWindow.equals(timelineWindow))
-		timelineWindow = null;
-	else if(childWindow.equals(profileWindow))
-		profileWindow = null;
-	else if(childWindow.equals(logFileViewerWindow))
-		logFileViewerWindow = null;
-	else if(childWindow.equals(graphWindow))
-		graphWindow = null;
-	else if(childWindow.equals(multiRunWindow))
-		multiRunWindow = null;
-    }
-
-    public void CloseEPAnalysis()
+    private Image bgimage;
+    
+    public MainWindow()
     {
-	epAnalysis = null;
+	// static screen information.
+	ScreenInfo.init();
+
+	addWindowListener(new WindowAdapter()
+	    {
+		public void windowClosing(WindowEvent e)
+		{
+		    System.exit(0);
+		}
+	    });
+	
+	setBackground(Color.lightGray);
+	
+	menuManager = new MainMenuManager(this);
+	createLayout();
+    }                              
+    
+    public void actionPerformed(ActionEvent evt)
+    {
+    }
+    
+    private void createLayout()
+    {
+	try {
+	    URL imageURL = ((Object)this).getClass().getResource("/projections/images/bgimage");
+	    bgimage = Toolkit.getDefaultToolkit().getImage(imageURL);
+	    // mainPanel is used to draw the wall paper and serves as the
+	    // MainWindow's contentPane.
+	    mainPanel = new MainWindowPanel(bgimage);
+	} catch (Exception E) {
+	    System.out.println("Error loading background image.  Continuing.");
+	}
+	
+	setContentPane(mainPanel);
+
+	GridBagLayout      gbl = new GridBagLayout();
+	GridBagConstraints gbc = new GridBagConstraints();
+	gbc.fill = GridBagConstraints.BOTH;
+	mainPanel.setLayout(gbl);
+	
+	titlePanel  = new MainTitlePanel(this);
+	runStatusPanel = new MainRunStatusPanel();
+	summaryGraphPanel = new MainSummaryGraphPanel(runStatusPanel);
+
+	Util.gblAdd(mainPanel, titlePanel,        
+		    gbc, 0,0, 1,1, 1,0, 0,0,0,0);
+	Util.gblAdd(mainPanel, runStatusPanel,
+		    gbc, 0,1, 1,1, 1,0, 0,20,0,20);
+	Util.gblAdd(mainPanel, summaryGraphPanel, 
+		    gbc, 0,2, 1,1, 1,1, 0,20,20,20);
+
+	pack();
+    }    
+
+    // interface with the menu manager
+    public void menuToolSelected(String item) {	
+	if (item.equals("Graphs")) {
+	    showChildWindow(graphWindow, "GraphWindow");
+	} else if (item.equals("Histograms")) {
+	    showChildWindow(histogramWindow, "HistogramWindow");
+	} else if (item.equals("Timelines")) {
+	    showTimelineWindow();
+	} else if (item.equals("Animations")) {
+	    showAnimationWindow();
+	} else if (item.equals("Usage Profile")) {
+	    showChildWindow(profileWindow, "ProfileWindow");
+	} else if (item.equals("View Log Files")) {
+	    showChildWindow(logFileViewerWindow, "LogFileViewerWindow");
+	} else if (item.equals("Overview")) {
+	    showStlWindow();
+	} else if (item.equals("Multirun Analysis")) {
+	    showChildWindow(multiRunWindow, "MultiRunWindow");
+	} else if (item.equals("Performance Counters")) {
+	    showCounterWindow();
+	} else if (item.equals("Unified Summary Graph")) {
+	    // ?
+	} else if (item.equals("Interval Graph")) {
+	    // ?
+	} else if (item.equals("Entry Point Characteristics Graph")) {
+	    // ?
+	} else if (item.equals("Generate EP Data")) {
+	}
+    }
+     
+    /* show the child window
+     *  if the childWindow has not been created yet, then create an object of type childClass
+     *  by invoking the corresponding constructor 
+     *  see http://developer.java.sun.com/developer/technicalArticles/ALT/Reflection/ for example use of Java Reflection
+     */
+    public void showChildWindow(Object childWindow, String childClass)
+    {
+	try {
+	    if(childWindow == null) {
+		// get the name of the class within the current package and create an instance of that class
+		String className = getClass().getPackage().getName() + "." + childClass;
+		Class cls  = Class.forName(className);
+		Constructor ctr = cls.getConstructor(new Class[]{this.getClass()});
+		childWindow = ctr.newInstance(new Object[] {this});
+		//	childWindow.setVisible(true); ?? NEEDED??
+	    }
+	} catch(Exception e) {
+	    e.printStackTrace();
+	} 
     }
 
-   private void CreateLayout()
-   {
-	  try {
-		URL imageURL = ((Object)this).getClass().getResource("/projections/images/bgimage");
-	  	bgimage = Toolkit.getDefaultToolkit().getImage(imageURL);
-	  	Util.waitForImage(this, bgimage);
-	  } catch (Exception E) {
-		System.out.println("Error loading background image.  Continuing.");
-	  }
-   
-	  GridBagLayout      gbl = new GridBagLayout();
-	  GridBagConstraints gbc = new GridBagConstraints();
-	  gbc.fill = GridBagConstraints.BOTH;
-
-	  setLayout(gbl);
-
-	  titlePanel  = new MainTitlePanel(this);
-	  buttonPanel = new MainButtonPanel(this);
-
-	  Util.gblAdd(this, titlePanel,  gbc, 0,0, 1,1, 1,1,  0, 0, 0, 0);
-	  Util.gblAdd(this, buttonPanel, gbc, 0,1, 1,1, 1,0, 10,10,10,10);
-
-	  pack();
-   }         
-   private void CreateMenus()
-   {
-	  MenuBar mbar = new MenuBar();
-
-	  mbar.add(Util.makeMenu("File", new Object[]
-	  {
-		 "Open...",
-		 null,
-		 "Quit"
-	  },
-	  this));
-
-	  mbar.add(Util.makeMenu("View", new Object[]
-	  {
-		 new CheckboxMenuItem("WindowShade")
-	  },
-	  this));
-
-
-	  mbar.add(Util.makeMenu("Tools", new Object[]
-	  {
-	      "Unified Summary Graph",
-	         "Multirun Analysis",
-		 "Generate EP Data",
-		 "Graphs",
-		 "Timelines",
-		 "Usage Profile",
-		 "Animations",
-		 "View Log Files",
-		 "Histograms",
-		 "Interval Graph",
-		 "Entry Point Characteristics Graph",
-		 "Overview",
-		 "Counter"
-	  },
-	  this));
-
-
-	  Menu helpMenu;
-	  mbar.add(helpMenu = Util.makeMenu("Help", new Object[]
-	  {
-		 "Index",
-		 "About"
-	  },
-	  this));
-
-	  mbar.setHelpMenu(helpMenu);
-	  setMenuBar(mbar);
-   }   
-   public Color getGraphColor(int e)
-   {
-	  if(graphWindow != null)
-		 return graphWindow.getGraphColor(e);
-	  else
-		 return null;
-   }
-   public boolean GraphExists()
-   {
-	  if(graphWindow != null)
-		 return true;
-	  else
-		 return false;
-   }
-   public static void help()
-   {
-     System.out.println("-h:		show this page");
-     System.out.println("-V:		show Projections version");
-     System.out.println("-u <ver>:	use old version format");
-     System.exit(0);
-   }
-   public static void main(String args[])
-   {
-        int i=0;
-	String loadSts=null;
-	Analysis.setVersion(CUR_VERSION);
-        while (i < args.length) {
-	  if (args[i].equals("-h")) {
-	     help();
-	  }
-	  else if (args[i].equals("-V")) {
-	     System.out.println("Projections version: "+Analysis.getVersion());
-	     System.exit(0);
-	  }
-	  else if (args[i].equals("-u")) {
-	     i++;
-	     if (i==args.length) help();
-	     double useVersion = Double.parseDouble(args[i]);
-	     if (useVersion > CUR_VERSION) {
-	       System.out.println("Invalid (future) Projections version!");
-	       System.exit(1);
-	     }
-	     Analysis.setVersion(useVersion);
-	  }
-	  else /*unrecognized argument*/
-	     loadSts=args[i];
-          i++;
+    public void showTimelineWindow()
+    {
+	if(timelineWindow == null) {
+	    timelineWindow = new TimelineWindow(this);
+	    timelineWindow.setSize(640,480);
 	}
-
-	MainWindow f = new MainWindow();
-	f.pack();
-	f.setTitle("Projections");
-	f.setResizable(false);
-	f.setVisible(true);
-	if (loadSts!=null) { f.openFile(loadSts); }
-   }   
-   public void paint(Graphics g)
-   {
-	  if (bgimage!=null) Util.wallPaper(this, g, bgimage);
-	  super.paint(g);
-   }            
-   public void ShowAboutDialog(Frame parent)
-   {
-	  if(aboutDialog == null)
-		 aboutDialog = new AboutDialog(parent);
-	  aboutDialog.setVisible(true);
-   }   
-
-   public void ShowAnimationWindow()
-   {
-	  if(animationWindow == null)
-		new Thread(new Runnable() {public void run() {
-			animationWindow = new AnimationWindow();
-			animationWindow.setVisible(true);
-	 	}}).start();
-		 
-   }
+    }   
+    
+    public void showAnimationWindow()
+    {
+	if(animationWindow == null)
+	    new Thread(new Runnable() {public void run() {
+		animationWindow = new AnimationWindow();
+		animationWindow.setVisible(true);
+	    }}).start();
+    }
       
-   public void ShowHistogramWindow()
-   {
-	   if(histogramWindow == null)
-		 histogramWindow = new HistogramWindow(this);
-   }   
+    public void showStlWindow()
+    {
+	new Thread(new Runnable() {public void run() {
+	    stlWindow = new StlWindow();
+	}}).start();
+    }                              
+    
+    public void showCounterWindow()
+    {
+	CounterFrame f = new CounterFrame();
+	ProjectionsFileMgr fileMgr = null;
+	try {
+	    ProjectionsFileChooser fc =
+		new ProjectionsFileChooser(f, "Performance Counter Analysis",
+					   ProjectionsFileChooser.MULTIPLE_FILES);
+	    
+	    CounterCallBack callback = new CounterCallBack(f,fc);
+	    int retval = fc.showDialog(callback);
+	}
+	catch(Exception exc) { 
+	    System.out.println("something got screwed");
+	    ProjectionsFileChooser.handleException(f, exc); 
+	}
+    }
 
-   public void ShowGraphWindow()
-   {
-	   if(graphWindow == null)
-		 graphWindow = new GraphWindow(this);
-   }   
-   public void ShowMultiRunWindow()
-   {
-	   if(multiRunWindow == null)
-		 multiRunWindow = new MultiRunWindow(this);
-   }
- 
     public void activateEPAnalysis()
     {
 	if (epAnalysis == null)
 	    epAnalysis = new EPAnalysis(this);
     }
 
-/* show the child window
-*  if the childWindow has not been created yet, then create an object of type childClass
-*  by invoking the corresponding constructor
-*  see http://developer.java.sun.com/developer/technicalArticles/ALT/Reflection/ for example use of Java Reflection
-*/
-   public void showChildWindow(Object childWindow, String childClass)
-   {
-	try{
-	   if(childWindow == null){
-		// get the name of the class within the current package and create an instance of that class
-			String className = getClass().getPackage().getName() + "." + childClass;
-			Class cls  = Class.forName(className);
-			Constructor ctr = cls.getConstructor(new Class[]{this.getClass()});
-			childWindow = ctr.newInstance(new Object[] {this});
-		//	childWindow.setVisible(true); ?? NEEDED??
-	   }
-	}catch(Exception e){
-		e.printStackTrace();
-	} 
+    public void showOpenFileDialog()
+    {
+	// create a file chooser with current directory set to "."
+	JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
+	// in future when Multi-Run code is fully integrated into the scheme
+	// of things, the following line should be enabled:
+	//	  d.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+	d.setFileFilter(new MainFileFilter());
+	int returnval = d.showOpenDialog(this);
+	if (returnval == JFileChooser.APPROVE_OPTION) {
+	    openFile(d.getSelectedFile().getAbsolutePath());
+	}
+    }
+    
+    private void openFile(String filename) {
+	try {
+	    Analysis.initAnalysis(filename);
+	    Analysis.loadSummaryData();
+	    double[] data = Analysis.getSummaryAverageData(); 
+	    sumDataSource = new SummaryDataSource(data);
+	    sumXAxis = 
+		new SummaryXAxis(data.length,
+				 (long)(Analysis.getSummaryIntervalSize()));
+	    sumYAxis = new SummaryYAxis();
+	    graphPanel = 
+		new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
+	    summaryGraphPanel.add("data", graphPanel, "run data");
+	    menuManager.fileOpened();
+	} catch(IOException e) {
+	    InvalidFileDialog ifd = new InvalidFileDialog(this);
+	    ifd.setVisible(true);
+	} catch(StringIndexOutOfBoundsException e) {
+	    e.printStackTrace();
+	    InvalidFileDialog ifd = new InvalidFileDialog(this);
+	    ifd.setVisible(true);
+	}
     }
 
-   public void ShowHelpWindow()
-   {
-	  if(helpWindow == null)
-		 helpWindow = new HelpWindow(this);
-	  helpWindow.setVisible(true);
-   }   
+    /* called by the childWindows to remove references to themselves */
+    public void closeChildWindow(Object childWindow)
+    {
+	if(childWindow.equals(timelineWindow))
+	    timelineWindow = null;
+	else if(childWindow.equals(profileWindow))
+	    profileWindow = null;
+	else if(childWindow.equals(logFileViewerWindow))
+	    logFileViewerWindow = null;
+	else if(childWindow.equals(graphWindow))
+	    graphWindow = null;
+	else if(childWindow.equals(multiRunWindow))
+	    multiRunWindow = null;
+    }
+    
+    public void shutdown() {
+	// in future, some cleanup action might be required.
+	System.exit(0);
+    }
 
-   public void ShowLogFileViewerWindow()
-   {
-	  if(logFileViewerWindow == null)
-		 logFileViewerWindow = new LogFileViewerWindow(this);
-	  logFileViewerWindow.setVisible(true);
-   }   
-   public void ShowOpenFileDialog()
-   {
-	  buttonPanel.disableButtons();
-	  /*  OLD awt-based FileDialog ... not quite powerful enough
-	  FileDialog d = new FileDialog((Frame)this, "Select .sts file to load", FileDialog.LOAD);
+    public void closeCurrent() {
+	// temporary implementation given multi run is not supported yet
+	// should also close all run-associated tool windows
+	//	summaryGraphPanel.removeCurrent();
+	//      if (summaryGraphPanel.isEmpty()) {
+	//          menuManager.lastFileClosed();
+	//      }
+	closeAll();
+    }
 
-	  d.setDirectory(".");
-	  d.setFilenameFilter(new FilenameFilter() {
-	    public boolean accept(File dir, String name) {
-	      return name.endsWith(".sts");
+    public void closeAll() {
+	summaryGraphPanel.removeAll();
+	menuManager.lastFileClosed();
+    }
+
+    public void CloseEPAnalysis()
+    {
+	epAnalysis = null;
+    }
+    
+    public Color getGraphColor(int e)
+    {
+	if(graphWindow != null)
+	    return graphWindow.getGraphColor(e);
+	else
+	    return null;
+    }
+   
+    public boolean GraphExists()
+    {
+	if(graphWindow != null)
+	    return true;
+	else
+	    return false;
+    }   
+    
+    public static void help()
+    {
+	System.out.println("-h:		show this page");
+	System.out.println("-V:		show Projections version");
+	System.out.println("-u <ver>:	use old version format");
+	System.exit(0);
+    }
+    
+    public static void main(String args[])
+    {
+        int i=0;
+	String loadSts=null;
+	Analysis.setVersion(CUR_VERSION);
+        while (i < args.length) {
+	    if (args[i].equals("-h")) {
+		help();
 	    }
-	  });
-	  d.setFile("pgm.sts");
-	  d.setVisible(true);
-	  String filename=d.getFile();
-	  if (filename==null) return;
-	  */
-
-	  // create a file chooser with current directory set to "."
-	  JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
-	  // in future when Multi-Run code is fully integrated into the scheme
-	  // of things, the following line should be enabled:
-	  //	  d.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-	  d.setFileFilter(new MainFileFilter());
-	  int returnval = d.showOpenDialog(this);
-	  if (returnval == JFileChooser.APPROVE_OPTION) {
-	      openFile(d.getSelectedFile().getAbsolutePath());
-	  }
-   }
-   private void openFile(String filename) {
-	  try
-	  {
-		 Analysis.initAnalysis(filename);
-		 toolsEnabled = true;
-		 buttonPanel.enableButtons();
-	  }
-	  catch(IOException e)
-	  {
-		 InvalidFileDialog ifd = new InvalidFileDialog(this);
-		 ifd.setVisible(true);
-	  }
-	  catch(StringIndexOutOfBoundsException e)
-	  {
-		 e.printStackTrace();
-		 InvalidFileDialog ifd = new InvalidFileDialog(this);
-		 ifd.setVisible(true);
-	  }
-   }                     
-   public void ShowProfileWindow()
-   {
-	  if(profileWindow == null)
-	  	profileWindow = new ProfileWindow(this);
-	  //	profileWindow = new ProfileWindow(this, null);
-	  profileWindow.setVisible(true);
-   }               
-   public void ShowStlWindow()
-   {
-	  new Thread(new Runnable() {public void run() {
-	  	stlWindow = new StlWindow();
-	  }}).start();
-   }                              
-   public void ShowTimelineWindow()
-   {
-       if(timelineWindow == null) {
-	   timelineWindow = new TimelineWindow(this);
-	   timelineWindow.setSize(640,480);
-       }
-   }
-
-   public void ShowCounterWindow()
-   {
-
-    CounterFrame f = new CounterFrame();
-    ProjectionsFileMgr fileMgr = null;
-    try {
-      ProjectionsFileChooser fc =
-	new ProjectionsFileChooser(f, "Performance Counter Analysis",
-				   ProjectionsFileChooser.MULTIPLE_FILES);
+	    else if (args[i].equals("-V")) {
+		System.out.println("Projections version: "+Analysis.getVersion());
+		System.exit(0);
+	    }
+	    else if (args[i].equals("-u")) {
+		i++;
+		if (i==args.length) help();
+		double useVersion = Double.parseDouble(args[i]);
+		if (useVersion > CUR_VERSION) {
+		    System.out.println("Invalid (future) Projections version!");
+		    System.exit(1);
+		}
+		Analysis.setVersion(useVersion);
+	    }
+	    else /*unrecognized argument*/
+		loadSts=args[i];
+	    i++;
+	}
 	
-	CounterCallBack callback = new CounterCallBack(f,fc);
-	int retval = fc.showDialog(callback);
-    }
-    catch(Exception exc) { 
-    System.out.println("something got screwed");
-    ProjectionsFileChooser.handleException(f, exc); }
-   }
-
-
-   public void update(Graphics g)
-   {
-	  paint(g);
-   }
+	MainWindow f = new MainWindow();
+	f.pack();
+	f.setTitle("Projections");
+	f.setVisible(true);
+	if (loadSts!=null) { f.openFile(loadSts); }
+    }   
+    
 }

@@ -274,8 +274,10 @@ public class TimelineWindow extends Frame
        if(arg.equals("Close")) Close();
        else if(arg.equals("Modify Ranges")) ShowRangeDialog();
        else if(arg.equals("Print Timeline")) PrintTimeline();   
+       /* Useless. To be removed.
        else if(arg.equals("Index")) mainWindow.ShowHelpWindow();
        else if(arg.equals("About")) mainWindow.ShowAboutDialog((Frame) this);
+       */
        else if(arg.equals("Save Colors")) {
 	   try {
 	       Util.saveColors(data.entryColor);

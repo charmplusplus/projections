@@ -7,6 +7,7 @@ public class TimelineEvent
 {
  
 public long BeginTime, EndTime, RecvTime;
+    public long CPUTime;
 public int EntryPoint, SrcPe, MsgLen;
 public int EventID; //seq no of processor
 public ObjectId id;
@@ -16,17 +17,20 @@ public Vector PackTimes; // of class PackTime
 public TimelineEvent ()
 {
 }
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d)
+
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d, long cput)
 {
 	BeginTime=bt; EndTime=et;
+	CPUTime = cput;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 	id = new ObjectId(d);
 }
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d,int eventid)
+public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, ObjectId d,int eventid, long cput)
 {
 	BeginTime=bt; EndTime=et;
+	CPUTime = cput;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 	id = new ObjectId(d);

@@ -219,16 +219,18 @@ public class LogLoader extends ProjDefs
 					       LE.Time-BeginTime,
 					       LE.Entry, LE.Pe,
 					       LE.MsgLen, LE.recvTime, 
-					       LE.id,LE.EventID);
+					       LE.id,LE.EventID,
+					       LE.cpuTime);
 			Timeline.addElement(TE);
 			break;
 		    case END_PROCESSING:
 			// this code automatically drops end events that
 			// duplicated, which is the intended behavior.
-			if (TE!=null) {
+			if (TE != null) {
 			    TE.EndTime = LE.Time - BeginTime;
+			    TE.CPUTime = LE.cpuTime - TE.CPUTime;
 			}
-			TE=null;
+			TE = null;
 			break;
 		    case CREATION:
 			tempte = false;
@@ -490,6 +492,9 @@ public class LogLoader extends ProjDefs
 		Temp.id = new ObjectId(log.nextInt(), log.nextInt(), 
 				       log.nextInt());;
 	    }
+	    if (Analysis.getVersion() >= 6.5) {
+		Temp.cpuTime = log.nextLong();
+	    }
 	    isProcessing = true;
 	    log.nextLine();  // ignore rest of this line
 	    break;
@@ -523,6 +528,9 @@ public class LogLoader extends ProjDefs
 	    if (Analysis.getVersion() >= 5.0 && 
 		Temp.TransactionType == CREATION) {
 		Temp.sendTime = log.nextLong();
+	    }
+	    if (Analysis.getVersion() >= 6.5) {
+		Temp.cpuTime = log.nextLong();
 	    }
 	    isProcessing = false;
 	    log.nextLine();  // ignore rest of this line

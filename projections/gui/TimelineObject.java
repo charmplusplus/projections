@@ -13,6 +13,7 @@ public class TimelineObject extends Component
    private Bubble  bubble;
    private TimelineMessageWindow msgwindow;
    private long    beginTime, endTime, recvTime;
+    private long cpuTime;
    private int     entry;
    private int     msglen;
    private int EventID;
@@ -66,75 +67,79 @@ public class TimelineObject extends Component
   }
 */
 
-   public TimelineObject(TimelineData data, long bt, long et, int n, 
-						 TimelineMessage[] msgs, PackTime[] packs,
-						 int p1, int p2, int mlen, long rt, ObjectId id)
-   {
-          format_.setGroupingUsed(true);
+    public TimelineObject(TimelineData data, long bt, long et, 
+			  long cputime, int n, 
+			  TimelineMessage[] msgs, PackTime[] packs,
+			  int p1, int p2, int mlen, long rt, ObjectId id)
+    {
+	format_.setGroupingUsed(true);
 
-	  setBackground(Analysis.background);
-	  setForeground(Analysis.foreground);
-	  
-	  this.data = data;
-	  beginTime = bt;
-	  endTime   = et;
-	  entry     = n;
-	  messages  = msgs;
-	  this.packs= packs;
-	  pCurrent  = p1;
-	  pCreation = p2;
-	  f = (Frame)data.timelineWindow;
-          msglen = mlen;
-	  recvTime = rt;
-	  creationLine = 0;
-	  if (id != null) {
+	setBackground(Analysis.background);
+	setForeground(Analysis.foreground);
+	
+	this.data = data;
+	beginTime = bt;
+	endTime   = et;
+	cpuTime   = cputime;
+	entry     = n;
+	messages  = msgs;
+	this.packs= packs;
+	pCurrent  = p1;
+	pCreation = p2;
+	f = (Frame)data.timelineWindow;
+	msglen = mlen;
+	recvTime = rt;
+	creationLine = 0;
+	if (id != null) {
 	    tid = new ObjectId(id);
-	  }
-	  else 
+	} else {
 	    tid = new ObjectId();
+	}
+	setUsage();
+	setPackUsage();
 	  
-	  setUsage();
-	  setPackUsage();
-	  
-	  if(n != -1)
-	  {
-		 bubbletext  = new String[11];
-		 int ecount = Analysis.getNumUserEntries();
-		 if (n >= ecount) {
-		   System.out.println("Fatal error: invalid entry "+n+"!");
-		   System.exit(1) ;
-		 }
-		 bubbletext[0] = (Analysis.getEntryNames())[n][1] + "::" + 
-					  (Analysis.getEntryNames())[n][0]; 
-		 bubbletext[1] = "Msg Len: " + msglen;
-		 bubbletext[2] = "Begin Time: " + format_.format(bt);
-		 bubbletext[3] = "End Time: " + format_.format(et);
-		 bubbletext[4] = "Total Time: " + U.t(et-bt);
-		 bubbletext[5] = "Packing: " + U.t(packtime);
-		 if (packtime>0)
-			bubbletext[4]+=" (" + (100*(float)packtime/(et-bt+1)) + "%)";
-		 bubbletext[6] = "Msgs created: " + msgs.length;
-		 bubbletext[7] = "Created by processor " + pCreation;
-		 bubbletext[8] = "Id: " + tid.id[0]+":"+tid.id[1]+":"+tid.id[2];
-		 bubbletext[9] = "Recv Time: " + recvTime;
-		 
-	  }
-	  else
-	  {
-		 bubbletext = new String[4];
-		 bubbletext[0] = "IDLE TIME";
-		 bubbletext[1] = "Begin Time: " + format_.format(bt);
-		 bubbletext[2] = "End Time: " + format_.format(et);
-		 bubbletext[3] = "Total Time: " + U.t(et-bt);
-	  }
-	  
-	  
-	  addMouseListener(this);
-   }   
-
-   public TimelineObject(TimelineData data, long bt, long et, int n, 
-						 TimelineMessage[] msgs, PackTime[] packs,
-						 int p1, int p2, int mlen, long rt, ObjectId id, int eventid)
+	if (n != -1) {
+	    if (cpuTime > 0) {
+		bubbletext  = new String[12];
+	    } else {
+		bubbletext  = new String[11];
+	    }
+	    int ecount = Analysis.getNumUserEntries();
+	    if (n >= ecount) {
+		System.out.println("Fatal error: invalid entry "+n+"!");
+		System.exit(1) ;
+	    }
+	    bubbletext[0] = (Analysis.getEntryNames())[n][1] + "::" + 
+		(Analysis.getEntryNames())[n][0]; 
+	    bubbletext[1] = "Msg Len: " + msglen;
+	    bubbletext[2] = "Begin Time: " + format_.format(bt);
+	    bubbletext[3] = "End Time: " + format_.format(et);
+	    bubbletext[4] = "Total Time: " + U.t(et-bt);
+	    bubbletext[5] = "Packing: " + U.t(packtime);
+	    if (packtime>0)
+		bubbletext[4]+=" (" + (100*(float)packtime/(et-bt+1)) + "%)";
+	    bubbletext[6] = "Msgs created: " + msgs.length;
+	    bubbletext[7] = "Created by processor " + pCreation;
+	    bubbletext[8] = "Id: " + tid.id[0]+":"+tid.id[1]+":"+tid.id[2];
+	    bubbletext[9] = "Recv Time: " + recvTime;
+	    if (cpuTime > 0) {
+		bubbletext[10] = "CPU Time: " + U.t(cpuTime);
+	    }
+	} else {
+	    bubbletext = new String[4];
+	    bubbletext[0] = "IDLE TIME";
+	    bubbletext[1] = "Begin Time: " + format_.format(bt);
+	    bubbletext[2] = "End Time: " + format_.format(et);
+	    bubbletext[3] = "Total Time: " + U.t(et-bt);
+	}
+	addMouseListener(this);
+    }   
+    
+   public TimelineObject(TimelineData data, long bt, long et, long cputime,
+			 int n, 
+			 TimelineMessage[] msgs, PackTime[] packs,
+			 int p1, int p2, int mlen, long rt, ObjectId id, 
+			 int eventid)
    {
           format_.setGroupingUsed(true);
 
@@ -144,6 +149,7 @@ public class TimelineObject extends Component
 	  this.data = data;
 	  beginTime = bt;
 	  endTime   = et;
+	  cpuTime   = cputime;
 	  entry     = n;
 	  messages  = msgs;
 	  this.packs= packs;
@@ -164,7 +170,11 @@ public class TimelineObject extends Component
 	  
 	  if(n != -1)
 	  {
+	      if (cpuTime > 0) {
+		  bubbletext = new String[11];
+	      } else {
 		 bubbletext  = new String[10];
+	      }
 		 int ecount = Analysis.getNumUserEntries();
 		 if (n >= ecount) {
 		   System.out.println("Fatal error: invalid entry "+n+"!");
@@ -183,6 +193,9 @@ public class TimelineObject extends Component
 		 bubbletext[7] = "Created by processor " + pCreation;
 		 bubbletext[8] = "Id: " + tid.id[0]+":"+tid.id[1]+":"+tid.id[2];
 		 bubbletext[9] = "Recv Time: " + recvTime;
+		 if (cpuTime > 0) {
+		     bubbletext[10] = "CPU Time: " + U.t(cpuTime);
+		 }
 	  }
 	  else
 	  {
@@ -192,8 +205,6 @@ public class TimelineObject extends Component
 		 bubbletext[2] = "End Time: " + format_.format(et);
 		 bubbletext[3] = "Total Time: " + U.t(et-bt);
 	  }
-	  
-	  
 	  addMouseListener(this);
    } 
 

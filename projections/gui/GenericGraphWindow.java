@@ -19,49 +19,50 @@ public abstract class GenericGraphWindow
 {
     static final Color BACKGROUND = Color.white;
 
-// inheritable GUI objects
-   protected GraphPanel graphPanel;
-   protected Graph graphCanvas;
+    // inheritable GUI objects
+    protected GraphPanel graphPanel;
+    protected Graph graphCanvas;
 
-// all child classes should implement this function and call it to initialize the graph data
-   protected abstract void setGraphSpecificData();
+    // all child classes should implement this function and 
+    // call it to initialize the graph data
+    protected abstract void setGraphSpecificData();
 
-// Graph specific data, so that implementation can be changed if required
-   protected DataSource dataSource;
-   protected XAxisFixed xAxis;
-   protected YAxis yAxis;
-
-// assuming all projections graph windows need a menu bar and a file menu
+    // Graph specific data, so that implementation can be changed if required
+    protected DataSource dataSource;
+    protected XAxisFixed xAxis;
+    protected YAxis yAxis;
+    
+    // assuming all projections graph windows need a menu bar and a file menu
     protected JMenuBar menuBar  = new JMenuBar();
     protected JMenu    fileMenu = new JMenu("File");
-
-// constructor 
+    
+    // constructor 
     public GenericGraphWindow(String title){
-	  super();
-	  setTitle(title);
-	  setBackground(BACKGROUND);
-	  menuBar.add(fileMenu);
+	super();
+	setTitle(title);
+	setBackground(BACKGROUND);
+	menuBar.add(fileMenu);
     }
 
-// create a standard fileMenu to be inherited by subclasses
-// make it return menuBar instead of being void
+    // create a standard fileMenu to be inherited by subclasses
+    // make it return menuBar instead of being void
     protected void createMenus(){
-	  fileMenu = Util.makeJMenu(fileMenu, 
-				    new Object[]
-	      {
-		  "Set Range",
-		  "Close"
-	      },
-				    null,
-				    this);
-	  setJMenuBar(menuBar);
+	fileMenu = Util.makeJMenu(fileMenu, 
+				  new Object[]
+	    {
+		"Set Range",
+		"Close"
+	    },
+				  null,
+				  this);
+	setJMenuBar(menuBar);
    }
-	
-	public String[] getPopup(int xVal, int yVal){
-		//System.out.println("GenericGraphWindow.getPopup()");
-		return null;
-	};
-
+    
+    public String[] getPopup(int xVal, int yVal){
+	//System.out.println("GenericGraphWindow.getPopup()");
+	return null;
+    };
+    
     // create a standard layout which can be called from child class or 
     // overridden by it
     // returns a Main Panel with vertical box layout and graphPanel attached

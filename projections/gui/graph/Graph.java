@@ -33,17 +33,24 @@ public class Graph extends JPanel
     private FontMetrics fm = null;
     private Color labelColor;
     
-    private JLabel yLabel;	// to print y axis title vertically
+    // to print y axis title vertically
+    private JLabel yLabel;	
+
+    // number of pixels per value
     double pixelincrementX, pixelincrementY;
-    // number of pixels per tick and labels
+    // number of pixels per tick
     double tickIncrementX, tickIncrementY;
 
+    // "best" values to be derived from pixelincrements
     long valuesPerTick, valuesPerLabel;
 
-    private double[][] stackArray;
+    private double barWidth;
 
+    // for stacked data
+    private double[][] stackArray;
     private int maxSumY;
-    private int barWidth, width;
+
+    private int width;
     private int w,h;
 
     private int baseWidth = -1;
@@ -148,39 +155,27 @@ public class Graph extends JPanel
 	repaint();
 	revalidate();
     }
-     
-	 
-    private void createStackArray() {
-		//System.out.println("=== start createStackArray ===");
-		if (dataSource != null) {
-	    	double tempMax = 0;
-	    	int numY = dataSource.getValueCount();
-	    	stackArray = new double[dataSource.getIndexCount()][];
-			//System.out.println("numY = " + numY);
-			//System.out.println("starting for loop");
-	    	for (int k=0; k<dataSource.getIndexCount(); k++) {
-				stackArray[k] = new double[numY];
 
-				dataSource.getValues(k, stackArray[k]);
-				//System.out.println("stackArray["+k +"][0] = " +stackArray[k][0]);
-				for (int j=1; j<numY; j++) {
-					//System.out.print("stackArray[" +k +"][" +j +"] = " +stackArray[k][j]);
-		    		stackArray[k][j] += stackArray[k][j-1];
-					//System.out.println("    |    " +stackArray[k][j]);
-				}
-//				System.out.println("done creating stackArray row " +k);
-//				System.out.println("current max is " + tempMax);
-//				System.out.println("this row's max is " + stackArray[k][numY-1]);
-				if (tempMax < stackArray[k][numY-1]) {
-//			 		System.out.println("tempMax is now updated");
-		    		tempMax = stackArray[k][numY-1];
-				}
-	    	}
-	    	maxSumY = (int)(Math.ceil(tempMax));
-		} else {
-	    	stackArray = null;
+    private void createStackArray() {
+	if (dataSource != null) {
+	    double tempMax = 0;
+	    int numY = dataSource.getValueCount();
+	    stackArray = new double[dataSource.getIndexCount()][];
+	    for (int k=0; k<dataSource.getIndexCount(); k++) {
+		stackArray[k] = new double[numY];
+		
+		dataSource.getValues(k, stackArray[k]);
+		for (int j=1; j<numY; j++) {
+		    stackArray[k][j] += stackArray[k][j-1];
 		}
-//		System.out.println("=== exit createStackArray ===");
+		if (tempMax < stackArray[k][numY-1]) {
+		    tempMax = stackArray[k][numY-1];
+		}
+	    }
+	    maxSumY = (int)(Math.ceil(tempMax));
+	} else {
+	    stackArray = null;
+	}
     }
 
     // getXValue(x)
@@ -243,21 +238,18 @@ public class Graph extends JPanel
     }
 
     public void mouseMoved(MouseEvent e) {
-	//System.out.println("Mouse moved"+ e);
-		int x = e.getX();
+	int x = e.getX();
     	int y = e.getY();
-
-		int index,valNo;
-		double value;
 	
-		int xVal = getXValue(x);
-		int yVal = getYValue(xVal, y);
-	// System.out.println("(" + xVal +"," +yVal +")");
+	int index,valNo;
+	double value;
+	
+	int xVal = getXValue(x);
+	int yVal = getYValue(xVal, y);
 	
 	if((xVal > -1) && (yVal > -1)) {
 	    showPopup(xVal, yVal, x, y);
 	} else if (bubble != null) {
-	    //System.out.println("Bubble is not null");
 	    bubble.setVisible(false);
 	    bubble.dispose();
 	    bubble = null;
@@ -265,40 +257,35 @@ public class Graph extends JPanel
     }
 
     public void showPopup(int xVal, int yVal, int xPos, int yPos){
-		//System.out.println("graph.showPopup()");
-		//System.out.println(xVal +", " + yVal);
-		String text[] = dataSource.getPopup(xVal, yVal);
-		if (text == null) {
-		    return;
-		}
-		// else display ballon
-		int bX, bY;
-		// I'm doing these calculations, i probably should see if I
-		// can avoid it
+	String text[] = dataSource.getPopup(xVal, yVal);
+	if (text == null) {
+	    return;
+	}
+	// else display ballon
+	int bX, bY;
+	// I'm doing these calculations, i probably should see if I
+	// can avoid it
 		
-		// old popup still exists, but mouse has moved over a new section that has its own popup
-		if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
-			bubble.setVisible(false);
-			bubble.dispose();
-			bubble = null;
-		}
-		
-		if (bubble == null) {
-	   	if (BarGraphType== STACKED) {
-				// bX = originX + (int)(xVal*pixelincrementX) + 
-				// (int)(pixelincrementX/2) + barWidth + 10;
-				// bY = (int) (originY - 
-				// (int)(stackArray[xVal][yVal]*pixelincrementY) +15);	
-				bubble = new Bubble(this, text);
-				bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
-				bubble.setVisible(true);
-				bubbleXVal = xVal;
-				bubbleYVal = yVal;
-				//System.out.println(bubbleXVal +", " + bubbleYVal);	
-	    	} else {
-				//System.out.println("not Stacked");
-	    	}
-		}
+	// old popup still exists, but mouse has moved over a new 
+	// section that has its own popup
+	if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
+	    bubble.setVisible(false);
+	    bubble.dispose();
+	    bubble = null;
+	}
+	
+	if (bubble == null) {
+	    if (BarGraphType== STACKED) {
+		bubble = new Bubble(this, text);
+		bubble.setLocation(xPos+20, yPos+20);//(bX, bY);
+		bubble.setVisible(true);
+		bubbleXVal = xVal;
+		bubbleYVal = yVal;
+		//System.out.println(bubbleXVal +", " + bubbleYVal);	
+	    } else {
+		//System.out.println("not Stacked");
+	    }
+	}
     }	
 
     public void mouseDragged(MouseEvent e) {
@@ -341,16 +328,14 @@ public class Graph extends JPanel
 	    temp += yTitle.charAt(i)+"\n";
 	}
 	yLabel = new JLabel(temp);
-		
+	
 	// get max y Value
 	double maxvalueY;
 	if (((GraphType == BAR) && (BarGraphType == STACKED)) || 
 	    (GraphType == AREA)) {
 	    maxvalueY = maxSumY;
-//		 System.out.println("Graph.java > drawAxes > maxvalueY = maxSumy = " + maxSumY);
 	} else {
 	    maxvalueY = yAxis.getMax();                               
-//		 System.out.println("Graph.java > drawAxes > maxvalueY = " + maxvalueY);
 	}
 
 	// baseWidth is whatever the width of the parent window at the time.
@@ -450,6 +435,16 @@ public class Graph extends JPanel
 	int numY = dataSource.getValueCount();
 	double [] data = new double[numY];
 
+	// Determine barWidth from tickIncrementX. If each value can be
+	// represented by each tick AND there is enough pixel resolution
+	// for each bar, we set the width of the visual bar to be 80% of
+	// the tick distance.
+	if ((valuesPerTick == 1) && (tickIncrementX >= 5.0)) {
+	    barWidth = 0.8*tickIncrementX;
+	} else {
+	    barWidth = 1.0;
+	}
+
 	// NO OPTIMIZATION simple draw. Every value gets drawn on screen.
 	for (int i=0; i<numX; i++) {
 	    dataSource.getValues(i, data);
@@ -460,11 +455,20 @@ public class Graph extends JPanel
 		    // allready contains
 		    y = originY - (int)(stackArray[i][k]*pixelincrementY);
 		    g.setColor(dataSource.getColor(k));
-		    // using data[i] to get the heigh of this bar
-		    g.fillRect(originX + (int)(i*pixelincrementX), y, 
-			       (int)((i+1)*pixelincrementX) - 
-			       (int)(i*pixelincrementX), 
-			       (int)(data[k]*pixelincrementY));
+		    // using data[i] to get the height of this bar
+		    if (valuesPerTick == 1) {
+			g.fillRect(originX + (int)(i*pixelincrementX +
+						   tickIncrementX/2 -
+						   barWidth/2), y,
+				   (int)barWidth,
+				   (int)(data[k]*pixelincrementY));
+				   
+		    } else {
+			g.fillRect(originX + (int)(i*pixelincrementX), y, 
+				   (int)((i+1)*pixelincrementX) - 
+				   (int)(i*pixelincrementX), 
+				   (int)(data[k]*pixelincrementY));
+		    }
 		}
 	    } else if (BarGraphType == UNSTACKED) {
 		// unstacked.. sort the values and then display them
@@ -500,10 +504,18 @@ public class Graph extends JPanel
 		for(int k=0; k<numY; k++) {
 		    g.setColor(dataSource.getColor((int)temp[k][0]));
 		    y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
-		    g.fillRect(originX + (int)(i*pixelincrementX), y,
-			       (int)((i+1)*pixelincrementX) -
-			       (int)(i*pixelincrementX),
-			       (int)(temp[k][1]*pixelincrementY));
+		    if (valuesPerTick == 1) {
+			g.fillRect(originX + (int)(i*pixelincrementX +
+						   tickIncrementX/2 -
+						   barWidth/2), y,
+				   (int)barWidth,
+				   (int)(temp[k][1]*pixelincrementY));
+		    } else {				   
+			g.fillRect(originX + (int)(i*pixelincrementX), y,
+				   (int)((i+1)*pixelincrementX) -
+				   (int)(i*pixelincrementX),
+				   (int)(temp[k][1]*pixelincrementY));
+		    }
 		}
 	    } else {
 		// single.. display average value
@@ -641,6 +653,9 @@ public class Graph extends JPanel
     }
 
     /**
+     *  Determines "best" values for tickIncrements and valuesPerTick and
+     *  valuesPerLabel.
+     *
      *  Sets global (yucks!) variables to reflect the "best" number of pixels
      *  for Labels (5, 10, 50, 100, 500, 1000 etc ...) and the number of pixels
      *  for each tick (1, 10, 100, 1000 etc ...) based on the "best" label

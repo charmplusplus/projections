@@ -175,7 +175,7 @@ public class UsageCalc extends ProjDefs
 	    {System.out.println("Exception while reading log file "+pnum); }
 	total = 0;
 	for(int j=0; j<(dataLen-1); j++){ //Scale times to percent
-		System.out.println("Data " + data[0][j] + " Send Time "+ data[1][j]);
+		//System.out.println("Data " + data[0][j] + " Send Time "+ data[1][j]);
 		data[0][j] = data[0][j] - data[1][j];
 		data[0][j] = (float )(100.0*data[0][j])/(float )(endTime-beginTime);
 		data[1][j] = (float )(100.0*data[1][j])/(float )(endTime-beginTime);

@@ -23,6 +23,7 @@ public class ProjectionsFileChooser
   // http://java.sun.com/docs/books/tutorial/uiswing/components/table.html
   // http://java.sun.com/docs/books/tutorial/2d/index.html
 
+  // MAKE JDIALOG MODAL!
   // CHECK TO SEE IF THIS IS A SINGLE FILE LOAD
   // CHECK TO SEE IF THE FILE SELECTED IS JUST A FILE
   // CHECK TO SEE IF THERE IS ONLY ONE FILE???
@@ -56,7 +57,6 @@ public class ProjectionsFileChooser
     type_    = type;
     fChoose_ = initFileChooser(title_+": File(s) Open");
     dialog_  = initFileDialog(title_+": Choose Files");
-    thread_  = initThread();
   }
   
   /** Given a bunch of strings, search for all sts files and set fileMgr.
@@ -98,8 +98,8 @@ public class ProjectionsFileChooser
     excDialog.addWindowListener(new WindowAdapter() {
       public void windowClosing(WindowEvent e) { System.exit(0); }
     });
-    excDialog.getContentPane().add(new JTextArea(
-      "Exception caught!\n"+exc.getMessage()+"\nSee sterr for stack trace\n"));
+    excDialog.getContentPane().add(new JScrollPane(new JTextArea(
+      "Exception caught!\n"+exc.getMessage()+"\nSee sterr for stack trace\n")));
     exc.printStackTrace();
     excDialog.setSize(300, 200);
     excDialog.setVisible(true);
@@ -114,7 +114,7 @@ public class ProjectionsFileChooser
     if (currDirStr != null) {
       fc.setCurrentDirectory(new File(currDirStr));
     }
-    fc.setAccessory(new JTextArea(
+    JTextArea instructions = new JTextArea(
       "INSTRUCTIONS:\n"+
       "* Use the list to the left to choose\n"+
       "  either directories (to search) or sts files.\n"+
@@ -128,7 +128,9 @@ public class ProjectionsFileChooser
       "  stored in several directories, just choose\n"+
       "  the parent directory and all the\n"+
       "  simulations will be found.\n"+
-      "* NOTE: Use shift/control keys to select!"));
+      "* NOTE: Use shift/control keys to select!");
+    instructions.setEditable(false);
+    fc.setAccessory(instructions);
     fc.setMultiSelectionEnabled(true);
     fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     fc.addChoosableFileFilter(
@@ -138,7 +140,7 @@ public class ProjectionsFileChooser
 
   /** Set up the dialog for sts file chooser and return it. */
   private JDialog initFileDialog(String title) {
-    JDialog d = new JDialog(owner_, true);
+    JDialog d = new JDialog(owner_, false);
     d.getContentPane().setLayout(new BorderLayout());
     d.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     d.addWindowListener(new WindowAdapter() {
@@ -148,15 +150,16 @@ public class ProjectionsFileChooser
     });
     d.setTitle(title);
     d.setSize(600, 480);
-    d.getContentPane().add(new JTextArea(
+    JTextArea instructions = new JTextArea(
       "All of the files below have been found\n"+
       "to match the file open filter in all of\n"+
       "the subdirectories searched.  Highlighted\n"+
       "files will be opened by Projections, so\n"+
       "further subselect only the files that are\n"+
       "desired.  NOTE: Can use control/shift keys\n"+
-      "to subselect.\n"),
-      BorderLayout.NORTH);
+      "to subselect.\n");
+    instructions.setEditable(false);
+    d.getContentPane().add(instructions, BorderLayout.NORTH);
     JButton button1 = new JButton("Select All");
     button1.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent ae) {
@@ -165,13 +168,7 @@ public class ProjectionsFileChooser
 	list_.setSelectedIndices(selectAll);
       }
     });
-    JButton button2 = new JButton("OK");
-    button2.addActionListener(new ActionListener() {
-      public void actionPerformed(ActionEvent ae) {
-	dialog_.setVisible(false);
-	wait_.setValue(false);
-      }
-    });
+    JButton button2 = new WaitButton("OK", wait_);
     JPanel panel = new JPanel();
     panel.add(button1);
     panel.add(button2);
@@ -179,13 +176,6 @@ public class ProjectionsFileChooser
     return d;
   }
   
-  /** Create a thread to allow blocking functions. */
-  private Thread initThread() {
-    return new Thread() {
-      public void run() { wait_.waitFalse(); }
-    };
-  }
-
   /** Recursively search through all the subdirectories and finds those
    *  files specified by the filter */
   private Vector filterFiles(
@@ -234,7 +224,10 @@ public class ProjectionsFileChooser
     dialog_.getContentPane().add(new JScrollPane(list_), BorderLayout.CENTER);
     dialog_.setVisible(true);
     wait_.setValue(true);
-    thread_.run();
+    Thread thread = 
+      new Thread() { public void run() { wait_.waitFor(false); } };
+    thread.run();
+    dialog_.setVisible(false);
     // thread waits for user's input, and only stops when user finished
     int[] selected = list_.getSelectedIndices();
     String[] returnVal = new String[selected.length];
@@ -251,22 +244,8 @@ public class ProjectionsFileChooser
   private JDialog      dialog_   = null;   // user picks files to use
   private JList        list_     = null;   // stores found files
   private int          listSize_ = 0;      // size of list_
-  private Wait         wait_     = new Wait(); // true if dialog waiting
-  private Thread       thread_   = null;   // to allow block function
+  private Wait         wait_     = new Wait(true); // true if dialog waiting
   private ProjectionsFileMgr fileMgr_ = null; // based on sts, get helper files
 
-  private class Wait {
-    public Wait() { }
-    public synchronized void waitFalse() {
-      while (wait_) {
-	if (wait_) { try { wait(); } catch (InterruptedException ie) { } }
-	else { return; }
-      }
-    }
-    public synchronized void setValue(boolean val) {
-      wait_ = val;
-      notifyAll();
-    }
-    private boolean wait_ = true;
-  }
 }
+

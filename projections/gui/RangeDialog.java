@@ -2,7 +2,6 @@ package projections.gui;
 
 import javax.swing.*;
 import javax.swing.text.*;
-//import java.awt.*;
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;

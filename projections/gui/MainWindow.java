@@ -9,8 +9,7 @@ import projections.misc.*;
 public class MainWindow extends Frame
    implements ActionListener
 {
-    // changed to public access by Chee Wai - 4/24/2002
-   public static double 	CUR_VERSION = 2.0;
+   private static double 	CUR_VERSION = 2.0;
 
    private GraphWindow          graphWindow;
    private TimelineWindow       timelineWindow;
@@ -213,8 +212,6 @@ public class MainWindow extends Frame
    }
    public static void main(String args[])
    {
-        // set current version
-	Analysis.setVersion(CUR_VERSION);
         int i=0;
 	String loadSts=null;
         while (i < args.length) {

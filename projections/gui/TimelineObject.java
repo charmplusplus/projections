@@ -336,12 +336,15 @@ public class TimelineObject extends Component
 	creationLine = 0;
 	created_message = null;
     }
-
-   public TimelineMessage searchMesg(Vector v,int eventid){
-   	return binarySearch(v,eventid,0,v.size());
-   }
-   
-   public TimelineMessage binarySearch(Vector v,int eventid,int start,int end){
+    
+    public TimelineMessage searchMesg(Vector v,int eventid){
+	// the binary search should deal with indices and not absolute
+	// values, hence size-1.
+	return binarySearch(v,eventid,0,v.size()-1);
+    }
+    
+    public TimelineMessage binarySearch(Vector v,int eventid,
+					int start,int end) {
    	int mid = (start + end)/2;
 	TimelineMessage middle = (TimelineMessage)v.elementAt(mid);
 	if(middle.EventID == eventid){

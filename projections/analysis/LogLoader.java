@@ -395,9 +395,9 @@ public class LogLoader extends ProjDefs
 	case USER_EVENT:
 	case USER_EVENT_PAIR:
 	case DEQUEUE:
-	case INSERT:
-	case FIND:
-	case DELETE:
+	case BEGIN_TRACE:
+	case END_TRACE:
+	case MESSAGE_RECV:
 	case BEGIN_INTERRUPT:
 	case END_INTERRUPT:
 	default:
@@ -527,6 +527,18 @@ public class LogLoader extends ProjDefs
 	    isProcessing = false;
 	    log.nextLine();  // ignore rest of this line
 	    break;
+	case BEGIN_TRACE:
+	    // ignore for now
+	    log.nextLine();
+	    break;
+	case END_TRACE:
+	    // ignore for now
+	    log.nextLine();
+	    break;
+	case MESSAGE_RECV:
+	    // ignore for now
+	    log.nextLine();
+	    break;
 	case CREATION:
 	    Temp.MsgType = log.nextInt();
 	    Temp.Entry   = log.nextInt();
@@ -578,15 +590,6 @@ public class LogLoader extends ProjDefs
 		Temp.Time    = log.nextLong();
 	    }
 	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case INSERT:
-	case FIND:
-	case DELETE:  // **CW** no longer pertinent???
-	    Temp.MsgType = log.nextInt();
-	    Temp.Time    = log.nextLong();
-	    Temp.Time    = log.nextLong();
 	    Temp.Pe      = log.nextInt();
 	    log.nextLine();  // ignore rest of this line
 	    break;

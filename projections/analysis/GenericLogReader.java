@@ -88,7 +88,6 @@ public class GenericLogReader extends ProjectionsReader
 	    break;
 	case CREATION:
 	case BEGIN_PROCESSING: case END_PROCESSING:
-	case INSERT:
 	    data.mtype = reader.nextInt();
 	    data.entry = reader.nextInt();
 	    data.time = reader.nextLong();
@@ -102,6 +101,16 @@ public class GenericLogReader extends ProjectionsReader
 	    if(Analysis.getVersion() >= 5.0 && data.type == CREATION){
 				data.sendTime = reader.nextLong();
 	    }
+	    break;
+	case BEGIN_TRACE: case END_TRACE:
+	    data.time = reader.nextLong();
+	    break;
+	case MESSAGE_RECV:
+	    data.mtype = reader.nextInt();
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	    data.msglen = reader.nextInt();
 	    break;
 	case ENQUEUE: case DEQUEUE:
 	    data.mtype = reader.nextInt();

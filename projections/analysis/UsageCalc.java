@@ -217,6 +217,12 @@ public class UsageCalc extends ProjDefs
 			intervalCalc(data,type, entry, (time));
 			isProcessing = false;
 			break;
+		    case BEGIN_TRACE:
+			break;
+		    case END_TRACE:
+			break;
+		    case MESSAGE_RECV:
+			break;
 		    case CREATION:
 			log.nextInt();  // mtype
 			log.nextInt();  // ep idx
@@ -288,14 +294,6 @@ public class UsageCalc extends ProjDefs
 			// End computation is "uninteresting" but is
 			// completely ignored because it does not
 			// employ any delta encoding.
-			break;
-		    case INSERT:
-		    case FIND:
-		    case DELETE:
-			// **CW** added for completeness. They should not
-			// be pertinent anymore since the tracing code no
-			// longer generates such events.
-			// to be completely ignored.
 			break;
 		    default:
 			// **CW** We can no longer ignore events we do not

@@ -89,7 +89,8 @@ public abstract class GenericGraphWindow
    }
    protected void setDataSource(String title, double [][] data){
 	dataSource = new DataSource2D(title,data);
-
+	if(yAxis != null)
+		yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
    }
    
 

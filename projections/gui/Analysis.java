@@ -414,6 +414,10 @@ public class Analysis {
 	}
     }
 
+    public static boolean hasSummaryData() {
+	return sts.hasSumFiles();
+    }
+
 	public static long searchTimeline( int n, int p, int e ) throws EntryNotFoundException {
 		try {
 			return logLoader.searchtimeline( p, e, n );

@@ -219,15 +219,17 @@ public class MainWindow extends JFrame
 	try {
 	    Analysis.initAnalysis(filename);
 	    Analysis.loadSummaryData();
-	    double[] data = Analysis.getSummaryAverageData(); 
-	    sumDataSource = new SummaryDataSource(data);
-	    sumXAxis = 
-		new SummaryXAxis(data.length,
-				 (long)(Analysis.getSummaryIntervalSize()));
-	    sumYAxis = new SummaryYAxis();
-	    graphPanel = 
-		new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
-	    summaryGraphPanel.add("data", graphPanel, "run data");
+	    if (Analysis.hasSummaryData()) {
+		double[] data = Analysis.getSummaryAverageData(); 
+		sumDataSource = new SummaryDataSource(data);
+		sumXAxis = 
+		    new SummaryXAxis(data.length,
+				     (long)(Analysis.getSummaryIntervalSize()));
+		sumYAxis = new SummaryYAxis();
+		graphPanel = 
+		    new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
+		summaryGraphPanel.add("data", graphPanel, "run data");
+	    }
 	    menuManager.fileOpened();
 	} catch(IOException e) {
 	    InvalidFileDialog ifd = new InvalidFileDialog(this);

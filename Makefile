@@ -9,8 +9,8 @@ SRC=\
     projections/analysis/Entry.java\
     projections/analysis/EPNamdDefs.java\
     projections/analysis/EPDataGenerator.java\
-    projections/analysis/Interval.java\
     projections/analysis/IntervalData.java\
+    projections/analysis/IntervalUtils.java\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\
@@ -35,10 +35,8 @@ SRC=\
     projections/analysis/ProjectionsReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
-    projections/gui/AnimationColorBarPanel.java\
-    projections/gui/AnimationDisplayPanel.java\
-    projections/gui/AnimationWindow.java\
     projections/gui/AreaGraphPanel.java\
+    projections/gui/BackGroundImagePanel.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
     projections/gui/ColorMap.java\
@@ -50,7 +48,6 @@ SRC=\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\
     projections/gui/EntryPointWindow.java\
-    projections/gui/EPAnalysis.java\
     projections/gui/FormattedNumber.java\
     projections/gui/FloatTextField.java\
     projections/gui/GenericGraphWindow.java\
@@ -59,13 +56,11 @@ SRC=\
     projections/gui/GraphData.java\
     projections/gui/GraphDisplayCanvas.java\
     projections/gui/GraphDisplayPanel.java\
-    projections/gui/GraphIntervalDialog.java\
     projections/gui/GraphLegendPanel.java\
     projections/gui/GraphTitleCanvas.java\
     projections/gui/GraphUtil.java\
     projections/gui/GraphWAxisCanvas.java\
     projections/gui/GraphWindow.java\
-    projections/gui/GraphingWindow.java\
     projections/gui/GraphXAxisCanvas.java\
     projections/gui/GraphYAxisCanvas.java\
     projections/gui/GrayLWPanel.java\
@@ -89,7 +84,6 @@ SRC=\
     projections/gui/MainMenuManager.java\
     projections/gui/MainTitlePanel.java\
     projections/gui/MainWindow.java\
-    projections/gui/MainWindowPanel.java\
     projections/gui/MainRunStatusPanel.java\
     projections/gui/MainSummaryGraphPanel.java\
     projections/gui/MenuManager.java\
@@ -107,7 +101,6 @@ SRC=\
     projections/gui/ProfileAxisCanvas.java\
     projections/gui/ProfileColorWindow.java\
     projections/gui/ProfileData.java\
-    projections/gui/ProfileDialog2.java\
     projections/gui/ProfileDisplayCanvas.java\
     projections/gui/ProfileLabelCanvas.java\
     projections/gui/ProfileLabelCanvas2.java\
@@ -125,6 +118,7 @@ SRC=\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\
     projections/gui/SelectField.java\
+    projections/gui/SplitScrollPanel.java\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
     projections/gui/TimeTextField.java\
@@ -165,7 +159,6 @@ SRC=\
     projections/misc/MultiRunData.java\
     projections/misc/MultiRunTableModel.java\
     projections/misc/PrintUtils.java\
-    projections/misc/ProgressDialog.java\
     projections/misc/ProjectionsStatistics.java\
     projections/misc/SummaryFormatException.java\
     projections/gui/graph/DataSource.java\

@@ -34,19 +34,31 @@ public class TimelineWindow extends Frame
    private AxisMouseController mouseController;
 
   private class AxisMouseController {
-    public MouseAdapter mouseAdapter = null;
     public MouseMotionAdapter mouseMotionAdapter = null;
+    public MouseListener mouseListener = null;
     public TimelineDisplayCanvas canvas_;
     public TimelineAxisCanvas timeline_;
     AxisMouseController(TimelineDisplayCanvas canvas, TimelineAxisCanvas timeline) {
       canvas_ = canvas;
       timeline_ = timeline;
-      mouseAdapter = new MouseAdapter() {
-	public void mousePressed(MouseEvent e) {
+      mouseMotionAdapter = new MouseMotionAdapter() {
+	public void mouseDragged(MouseEvent e) {
+	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
+	  canvas_.repaint();
+	}
+	public void mouseMoved(MouseEvent e) {
+	  canvas_.rubberBand.highlight(timeline_.screenToCanvas(e.getPoint()));
+	  canvas_.repaint();
+	}
+      };
+      mouseListener = new MouseListener() {
+	public void mouseClicked(MouseEvent e) { }
+	public void mousePressed(MouseEvent e) { 
+	  canvas_.rubberBand.clearHighlight();
 	  canvas_.rubberBand.anchor(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.repaint();
 	}
-	public void mouseReleased(MouseEvent e) {
+	public void mouseReleased(MouseEvent e) { 
 	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.rubberBand.end(timeline_.screenToCanvas(e.getPoint()));
 	  canvas_.repaint();
@@ -65,10 +77,9 @@ public class TimelineWindow extends Frame
 	  displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
 	  setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	}
-      };
-      mouseMotionAdapter = new MouseMotionAdapter() {
-	public void mouseDragged(MouseEvent e) {
-	  canvas_.rubberBand.stretch(timeline_.screenToCanvas(e.getPoint()));
+	public void mouseEntered(MouseEvent e) { }
+	public void mouseExited(MouseEvent e) { 
+	  canvas_.rubberBand.clearHighlight();
 	  canvas_.repaint();
 	}
       };
@@ -275,10 +286,11 @@ public class TimelineWindow extends Frame
 	  
 	  mouseController = new AxisMouseController(displayCanvas, axisTopCanvas);
 
-	  axisTopCanvas.addMouseListener(mouseController.mouseAdapter);
+	  axisTopCanvas.addMouseListener(mouseController.mouseListener);
 	  axisTopCanvas.addMouseMotionListener(
 	    mouseController.mouseMotionAdapter);
-	  axisBotCanvas.addMouseListener(mouseController.mouseAdapter);
+	  
+	  axisBotCanvas.addMouseListener(mouseController.mouseListener);
 	  axisBotCanvas.addMouseMotionListener(
 	    mouseController.mouseMotionAdapter);
 	  

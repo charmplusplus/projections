@@ -25,93 +25,100 @@ import java.awt.*;
  *
  */
 abstract public class Rubberband {
-    protected Point anchor    = new Point(0,0); 
-    protected Point stretched = new Point(0,0);
-    protected Point last      = new Point(0,0); 
-    protected Point end       = new Point(0,0);
-
-    private Component component = null;
-    private Image     image = null;
-    private boolean   firstStretch = true;
-    private Graphics  graphics = null ;
-
-    abstract public void drawLast(Graphics g);
-    abstract public void drawNext(Graphics g);
-
-    public Rubberband(Component component) {
-        this.component = component;
+  protected Point anchor    = new Point(0,0); 
+  protected Point stretched = new Point(0,0);
+  protected Point last      = new Point(0,0); 
+  protected Point end       = new Point(0,0);
+  protected Point highlight = new Point(0,0);
+  
+  private Component component = null;
+  private Image     image = null;
+  private boolean   firstStretch = true;
+  private boolean   firstHighlight = true;
+  private Graphics  graphics = null ;
+  
+  abstract public void drawLast(Graphics g);
+  abstract public void drawNext(Graphics g);
+  abstract public void drawHighlight(Graphics g);
+  abstract public void clearHighlight(Graphics g);
+  
+  public Rubberband(Component component) {
+    this.component = component;
+  }
+  public Rubberband(Image image) {
+    this.image = image;
+  }
+  public Point getAnchor   () { return anchor;    }
+  public Point getStretched() { return stretched; }
+  public Point getLast     () { return last;      }
+  public Point getEnd      () { return end;       }
+  public boolean getFirstStretch() { return firstStretch;       }
+  
+  public void highlight(Point p) {
+    setGraphics();
+    if (!firstHighlight) { clearHighlight(graphics); }
+    highlight.x = p.x;
+    highlight.y = p.y;
+    if (graphics != null) { drawHighlight(graphics); }
+    firstHighlight = false;
+  }
+  public void clearHighlight() {
+    if (setGraphics() != null) { clearHighlight(graphics); }
+    firstHighlight = true;
+  }
+  public void anchor(Point p) {
+    firstStretch = true;
+    anchor.x = p.x;
+    anchor.y = p.y;
+    
+    stretched.x = last.x = anchor.x;
+    stretched.y = last.y = anchor.y;
+  }
+  public void stretch(Point p) {
+    last.x      = stretched.x;
+    last.y      = stretched.y;
+    stretched.x = p.x;
+    stretched.y = p.y;
+    
+    if(setGraphics() != null) {
+      if(firstStretch == true) firstStretch = false;
+      else                     drawLast(graphics);
+      drawNext(graphics);
     }
-    public Rubberband(Image image) {
-      this.image = image;
+  }
+  public void end(Point p) {
+    last.x = end.x = p.x;
+    last.y = end.y = p.y;
+    if (setGraphics() != null) { drawLast(graphics); }
+  }
+  public Rectangle bounds() {
+    return new Rectangle(stretched.x < anchor.x ? 
+			 stretched.x : anchor.x,
+			 stretched.y < anchor.y ? 
+			 stretched.y : anchor.y,
+			 Math.abs(stretched.x - anchor.x),
+			 Math.abs(stretched.y - anchor.y));
+  }
+  
+  public Rectangle lastBounds() {
+    return new Rectangle(last.x < anchor.x ? last.x : anchor.x,
+			 last.y < anchor.y ? last.y : anchor.y,
+			 Math.abs(last.x - anchor.x),
+			 Math.abs(last.y - anchor.y));
+  }
+  private Graphics setGraphics() {
+    Color color = Color.black;
+    if (component != null) { 
+      if (graphics == null) { graphics = component.getGraphics(); }
+      color = component.getBackground();
     }
-    public Point getAnchor   () { return anchor;    }
-    public Point getStretched() { return stretched; }
-    public Point getLast     () { return last;      }
-    public Point getEnd      () { return end;       }
-    public boolean getFirstStretch() { return firstStretch;       }
-
-    public void anchor(Point p) {
-        firstStretch = true;
-        anchor.x = p.x;
-        anchor.y = p.y;
-
-        stretched.x = last.x = anchor.x;
-        stretched.y = last.y = anchor.y;
+    else if (image != null) {
+      if (graphics == null) { graphics = image.getGraphics(); }
     }
-    public void stretch(Point p) {
-        last.x      = stretched.x;
-        last.y      = stretched.y;
-        stretched.x = p.x;
-        stretched.y = p.y;
-
-	Color color = Color.black;
-	if (component != null) { 
-	  if (graphics == null) { graphics = component.getGraphics(); }
-	  color = component.getBackground();
-	}
-	else if (image != null) {
-	  if (graphics == null) { graphics = image.getGraphics(); }
-	}
-        if(graphics != null) {
-            graphics.setXORMode(color);
-
-            if(firstStretch == true) firstStretch = false;
-            else                     drawLast(graphics);
-
-            drawNext(graphics);
-        }
+    if(graphics != null) {
+      graphics.setXORMode(color);
     }
-    public void end(Point p) {
-        last.x = end.x = p.x;
-        last.y = end.y = p.y;
-
-	Color color = Color.black;
-	if (component != null) { 
-	  if (graphics == null) { graphics = component.getGraphics(); }
-	  color = component.getBackground();
-	}
-	else if (image != null) {
-	  if (graphics == null) { graphics = image.getGraphics(); }
-	}
-        if(graphics != null) {
-            graphics.setXORMode(color);
-            drawLast(graphics);
-        }
-    }
-    public Rectangle bounds() {
-      return new Rectangle(stretched.x < anchor.x ? 
-                           stretched.x : anchor.x,
-                           stretched.y < anchor.y ? 
-                           stretched.y : anchor.y,
-                           Math.abs(stretched.x - anchor.x),
-                           Math.abs(stretched.y - anchor.y));
-    }
-
-    public Rectangle lastBounds() {
-      return new Rectangle(
-                  last.x < anchor.x ? last.x : anchor.x,
-                  last.y < anchor.y ? last.y : anchor.y,
-                  Math.abs(last.x - anchor.x),
-                  Math.abs(last.y - anchor.y));
-    }
+    return graphics;
+  }
 }
+

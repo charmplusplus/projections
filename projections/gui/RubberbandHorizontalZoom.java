@@ -26,5 +26,12 @@ public class RubberbandHorizontalZoom extends Rubberband {
     graphics.setColor(Color.yellow);
     graphics.drawRect(rect.x, -1, rect.width, height+1);
   }
+  public void drawHighlight(Graphics graphics) {
+    graphics.setColor(Color.white);
+    graphics.drawLine(highlight.x, -1, highlight.x, height+1);
+  }
+  public void clearHighlight(Graphics graphics) {
+    graphics.drawLine(highlight.x, -1, highlight.x, height+1);
+  }
 }
      

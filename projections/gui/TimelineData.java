@@ -9,7 +9,10 @@ public class TimelineData
 {
   // IF YOU MAKE A STUPID NAME FOR A VARIABLE AT LEAST COMMENT IT
   // SHEESH!!!  --JMU
+  // what do these mean for God's sake ? -- sayantan
+
    int vpw, vph;
+   // is this timeline width and height ?
    int tlw, tlh;
    int lcw;
    int ath, abh;
@@ -63,6 +66,10 @@ public class TimelineData
 
    public TimelineWindow timelineWindow;
    
+   // points for line joining the creation of a message and its beginning of execution
+  public Vector mesgCreateExecVector;
+
+   
    public TimelineData(TimelineWindow timelineWindow)
    {
 	  showPacks = false;
@@ -103,6 +110,8 @@ public class TimelineData
 	  xmaxtime = 1;
 	  xminpixel = 0;
 	  xmaxpixel = 1;
+	  
+	  mesgCreateExecVector = new Vector();
 	  
 	  tloArray = null;
 	  mesgVector = null;
@@ -448,26 +457,42 @@ public class TimelineData
    }
 
 
-   public void drawConnectingLine(int pCreation,long creationtime,int pCurrent,long executiontime,double xscale){
-   	Graphics g = displayCanvas.getGraphics();
+   public void drawConnectingLine(int pCreation,long creationtime,int pCurrent,long executiontime,int h,int startY,int drawordelete){
 	double yscale;
 	
 	int startpe_position,endpe_position;
 	
 	
 	Dimension dim = displayCanvas.getSize();
-	//double calc_xscale = (pixelIncrement/timeIncrement);
-	double calc_xscale = (double )(dim.width-65)/(double )(endTime-beginTime+1);
-	calc_xscale = calc_xscale * 0.98;
+	double calc_xscale = (double )(pixelIncrement/timeIncrement);
 	long time = endTime-beginTime+1;
 	int mywidth=dim.width;
-	//System.out.println("xscale in Data " + calc_xscale+" time is " + time + " width "+ mywidth);
-	
+	int maxx = offset + (int)((endTime-beginTime)*pixelIncrement/timeIncrement);
 	
 	processorList.reset();
 	startpe_position = 0;
 	endpe_position = 0;
 	int count =0;
+	TimelineLine line;
+	
+	if(drawordelete == 2){
+		int flag  = 0;
+		int i;
+		for (i=0;i<mesgCreateExecVector.size();i++){
+			line = (TimelineLine ) mesgCreateExecVector.elementAt(i);
+			if(line.pCurrent == pCurrent && line.executiontime == executiontime){
+				flag = 1;
+				break;
+			}
+		}
+		if(flag == 1){
+			mesgCreateExecVector.remove(i);
+		}
+		displayCanvas.repaint();
+		
+		return;
+	}
+	
 	for(int i =0;i < processorList.size();i++){
 		int pe = processorList.nextElement();
 		if(pe == pCreation)
@@ -479,14 +504,31 @@ public class TimelineData
 	processorList.reset();
 	yscale = (double )dim.height/(double )(processorList.size());
 	
-	int x1 = (int )((double )(creationtime - beginTime)*calc_xscale+30);
-	int x2 = (int )((double )(executiontime - beginTime)*calc_xscale+30);
-	int y1 = (int )(yscale * (double )startpe_position + 20);
-	int y2 = (int )(yscale * (double )endpe_position + 20);
+	int x1 = (int )((double )(creationtime - beginTime)*calc_xscale+offset);
+	int x2 = (int )((double )(executiontime - beginTime)*calc_xscale+offset);
+	int y1 = (int )(yscale * (double )startpe_position + h+startY+5+5);
+	int y2 = (int )(yscale * (double )endpe_position + h);
+	
 
-	//System.out.println("start "+x1+" execution co-rdinate " + x2);
-	g.setColor(new Color(100,100,255));
-	g.drawLine(x1,y1,x2,y2);
+	//g.setColor(new Color(100,100,255));
+	//g.drawLine(x1,y1,x2,y2);
+	line = new TimelineLine(x1,y1,x2,y2,pCurrent,executiontime);
+	mesgCreateExecVector.add(line);
+	displayCanvas.repaint();
+	//g.drawLine(offset,0,offset,tlh);
+	//g.drawLine(maxx,0,maxx,tlh);
+   }
+
+   public void drawAllLines(){
+   	Graphics g = displayCanvas.getGraphics();
+   	if(!mesgCreateExecVector.isEmpty()){
+		 	g.setColor(new Color(100,100,255));
+			for(int i=0;i<mesgCreateExecVector.size();i++){
+				TimelineLine lineElement = (TimelineLine )mesgCreateExecVector.elementAt(i);
+				g.drawLine(lineElement.x1,lineElement.y1,lineElement.x2,lineElement.y2);
+			}
+	 }
+
    }
 }
 

@@ -5,6 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import java.io.*;
+import java.util.*;
 
 import java.text.*;
 
@@ -1114,6 +1115,7 @@ public class TimelineWindow extends Frame
    {
 	  data.oldBT = data.beginTime;
 	  data.oldET = data.endTime;
+	  data.mesgCreateExecVector = new Vector();
 	  if(data.processorList == null)
 		 data.oldplist = null;
 	  else

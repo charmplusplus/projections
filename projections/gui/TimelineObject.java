@@ -33,6 +33,11 @@ public class TimelineObject extends Component
   private static DecimalFormat format_ = new DecimalFormat();
   double scale;
   int left;
+  int h,startY;
+  // if line from message creation already exists
+  private int creationLine;
+  
+  private TimelineMessage created_message;
 /*
    TAKE THIS OUT FOR NOW BECAUSE THEY DRAW THEMSELVES.
    THIS IS BETTER BECAUSE TimelineObjects HAVE BOUNDS WHICH CUT OFF
@@ -81,6 +86,7 @@ public class TimelineObject extends Component
 	  f = (Frame)data.timelineWindow;
           msglen = mlen;
 	  recvTime = rt;
+	  creationLine = 0;
 	  if (id != null) {
 	    tid = new ObjectId(id);
 	  }
@@ -287,29 +293,33 @@ public class TimelineObject extends Component
    }   
    public void mouseClicked(MouseEvent evt)
    {
-   	TimelineMessage created_message;
        if(entry >= 0){
-		 OpenMessageWindow();
-		  //System.out.println("This method is created by "+ pCreation + "Event id is " + EventID);
-		 if(data.mesgVector[pCreation] == null || data.mesgVector[pCreation].isEmpty()){
-		 	//System.out.println("Processor Out of range");
-		 }else{
-		 	created_message= searchMesg(data.mesgVector[pCreation],EventID);
-			if(created_message == null){
-				//System.out.println("Time out of range ");
+       		if(evt.getModifiers()==MouseEvent.BUTTON1_MASK){
+			 OpenMessageWindow();
+		}else{	
+			if(creationLine<2){
+			 	if(data.mesgVector[pCreation] == null || data.mesgVector[pCreation].isEmpty()){
+			 	 }else{
+				 	if(creationLine == 0)
+					 	created_message= searchMesg(data.mesgVector[pCreation],EventID);
+					if(created_message != null){
+						data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,h,startY,creationLine);			
+						creationLine = 2;
+					}
+		 		}
+				
 			}else{
-				//System.out.println("Mesg " + created_message.EventID +" created at " + created_message.Time);
-				//System.out.println("xscale within = " + scale + "left =" + left);
-				data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,scale);			
+				data.drawConnectingLine(pCreation,created_message.Time,pCurrent,beginTime,h,startY,creationLine);
+				creationLine = 1;
 			}
-		 }
+		}	
 		 
        }
    } 
 
 
    public TimelineMessage searchMesg(Vector v,int eventid){
-   	return binarySearch(v,eventid,1,v.size());
+   	return binarySearch(v,eventid,0,v.size());
    }
    
    public TimelineMessage binarySearch(Vector v,int eventid,int start,int end){
@@ -410,9 +420,9 @@ public class TimelineObject extends Component
 		}	
 	  }
 	  // leave 5 pixels above and below
-	  int startY = 5;
+	  startY = 5;
 	  int w      = getSize().width;
-	  int h      = getSize().height - 10;
+	  h      = getSize().height - 10;
 	  
 	  left  = 0;
 	  int right = w-1;

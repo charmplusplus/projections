@@ -59,7 +59,8 @@ public class TimelineDisplayCanvas extends Container
 		 int y = data.timelineWindow.getVSBValue();
 	  
 		 g.drawImage(offscreen, x,y, x + data.vpw, y + data.vph, 
-								x,y, x + data.vpw, y + data.vph, null);
+							x,y, x + data.vpw, y + data.vph, null);
+		 data.drawAllLines();						
 	  }                          
    }   
   public void update(Graphics g)

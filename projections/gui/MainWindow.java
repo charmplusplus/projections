@@ -31,6 +31,7 @@ public class MainWindow extends JFrame
     private static final int DEFAULT_NUM_RUNS = 1;
 
     public static double CUR_VERSION = 4.0;
+    public static boolean IGNORE_IDLE = false;
 
     // for SwingWorker to work
     private MainWindow thisWindow;
@@ -444,6 +445,8 @@ public class MainWindow extends JFrame
 		    System.exit(1);
 		}
 		CUR_VERSION = useVersion;
+	    } else if (args[i].equals("-idle")) {
+		IGNORE_IDLE = true;
 	    }
 	    else /*unrecognized argument*/
 		loadSts=args[i];

@@ -425,8 +425,10 @@ public class TimelineObject extends Component
 
    public void mouseEntered(MouseEvent evt)
    {
-	  if(entry == -1 && data.showIdle == false)
+	  if ((entry == -1 && data.showIdle == false) ||
+	      (entry == -1 && MainWindow.IGNORE_IDLE)) {
 		 return;
+	  }
 
 	  if(!inside)
 	  {
@@ -489,8 +491,10 @@ public class TimelineObject extends Component
    
    public void paint(Graphics g)
    {     
-	  if(entry == -1 && data.showIdle == false)
+	  if ((entry == -1 && data.showIdle == false) ||
+	      (entry == -1 && MainWindow.IGNORE_IDLE)) {
 		 return;
+	  }
 
 	  Color c;
 	  
@@ -599,8 +603,10 @@ public class TimelineObject extends Component
 
    public void print(Graphics pg, long minx, long maxx, double pixelIncrement, int timeIncrement)
    {
-	  if(entry == -1 && data.showIdle == false)
+	  if ((entry == -1 && data.showIdle == false) ||
+	      (entry == -1 && MainWindow.IGNORE_IDLE)) {
 		 return;
+	  }
 
 	  Color c;
 	  

@@ -344,8 +344,10 @@ public class MainWindow extends Frame
    }                              
    public void ShowTimelineWindow()
    {
-	  if(timelineWindow == null)
-		 timelineWindow = new TimelineWindow(this);
+       if(timelineWindow == null) {
+	   timelineWindow = new TimelineWindow(this);
+	   timelineWindow.setSize(640,480);
+       }
    }   
    public void update(Graphics g)
    {

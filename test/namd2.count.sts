@@ -1,0 +1,265 @@
+MACHINE origin2000
+PROCESSORS 4
+TOTAL_CHARES 48
+TOTAL_EPS 160
+TOTAL_MSGS 49
+TOTAL_PSEUDOS 0
+TOTAL_EVENTS 0
+CHARE 0 null
+CHARE 1 Chare
+CHARE 2 Group
+CHARE 3 FutureBOC
+CHARE 4 FutureMain
+CHARE 5 CkGroupInitCallback
+CHARE 6 CkGroupReadyCallback
+CHARE 7 CkReductionMgr
+CHARE 8 CkLocMgr
+CHARE 9 CkArrayMap
+CHARE 10 RRMap
+CHARE 11 PropMap
+CHARE 12 CkMapsInit
+CHARE 13 CkArray
+CHARE 14 CkVerboseListenerCreator
+CHARE 15 ArrayElement
+CHARE 16 ckcallback_main
+CHARE 17 ckcallback_group
+CHARE 18 TempoChare
+CHARE 19 TempoGroup
+CHARE 20 TempoArray
+CHARE 21 waitqd_QDChare
+CHARE 22 BaseLB
+CHARE 23 NullLB
+CHARE 24 LBDBInit
+CHARE 25 LBDatabase
+CHARE 26 NborBaseLB
+CHARE 27 NeighborLB
+CHARE 28 main
+CHARE 29 WorkDistrib
+CHARE 30 ReductionMgr
+CHARE 31 PatchMgr
+CHARE 32 ProxyMgr
+CHARE 33 Node
+CHARE 34 CentralLB
+CHARE 35 NamdCentLB
+CHARE 36 NamdNborLB
+CHARE 37 LdbCoordinator
+CHARE 38 ComputeMgr
+CHARE 39 ComputePmeMgr
+CHARE 40 ComputeExtMgr
+CHARE 41 CollectionMgr
+CHARE 42 CollectionMaster
+CHARE 43 BroadcastMgr
+CHARE 44 Sync
+CHARE 45 dummy_thread_chare
+CHARE 46 dummy_pack_chare
+CHARE 47 dummy_unpack_chare
+ENTRY CHARE 0 null 0 0
+ENTRY CHARE 1 FutureBOC(FutureInitMsg* impl_msg) 3 2
+ENTRY CHARE 2 SetFuture(FutureInitMsg* impl_msg) 3 2
+ENTRY CHARE 3 SetSema(FutureInitMsg* impl_msg) 3 2
+ENTRY CHARE 4 FutureMain(CkArgMsg* impl_msg) 4 0
+ENTRY CHARE 5 CkGroupInitCallback(void) 5 0
+ENTRY CHARE 6 callMeBack(CkGroupCallbackMsg* impl_msg) 5 3
+ENTRY CHARE 7 CkGroupReadyCallback(void) 6 0
+ENTRY CHARE 8 callMeBack(CkGroupCallbackMsg* impl_msg) 6 3
+ENTRY CHARE 9 CkReductionMgr(void) 7 0
+ENTRY CHARE 10 ReductionStarting(CkReductionNumberMsg* impl_msg) 7 5
+ENTRY CHARE 11 RecvMsg(CkReductionMsg* impl_msg) 7 4
+ENTRY CHARE 12 LateMigrantMsg(CkReductionMsg* impl_msg) 7 4
+ENTRY CHARE 13 MigrantDied(CkReductionNumberMsg* impl_msg) 7 5
+ENTRY CHARE 14 CkLocMgr(const CkGroupID &map, const CkGroupID &lbdb, int numInitial) 8 6
+ENTRY CHARE 15 deliver(CkMessage* impl_msg) 8 -1
+ENTRY CHARE 16 migrateIncoming(CkArrayElementMigrateMessage* impl_msg) 8 7
+ENTRY CHARE 17 updateLocation(const CkArrayIndexMax &idx, int nowOnPe) 8 6
+ENTRY CHARE 18 reclaimRemote(const CkArrayIndexMax &idx, int deletedOnPe) 8 6
+ENTRY CHARE 19 dummyAtSync(void) 8 0
+ENTRY CHARE 20 RRMap(void) 10 0
+ENTRY CHARE 21 PropMap(void) 11 0
+ENTRY CHARE 22 CkMapsInit(CkArgMsg* impl_msg) 12 0
+ENTRY CHARE 23 CkArray(const CkArrayOptions &i, const CkMarshalledMessage &ctorMsg) 13 6
+ENTRY CHARE 24 insertElement(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 25 remoteDoneInserting(void) 13 0
+ENTRY CHARE 26 deliver(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 27 deliverViaQueue(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 28 sendBroadcast(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 29 recvBroadcast(CkMessage* impl_msg) 13 -1
+ENTRY CHARE 30 CkVerboseListenerCreator(void) 14 0
+ENTRY CHARE 31 ArrayElement(CkMigrateMessage* impl_msg) 15 0
+ENTRY CHARE 32 ArrayElement(void) 15 0
+ENTRY CHARE 33 ckDestroy(void) 15 0
+ENTRY CHARE 34 ckcallback_main(CkArgMsg* impl_msg) 16 0
+ENTRY CHARE 35 ckcallback_group(void) 17 0
+ENTRY CHARE 36 call(const CkCallback &c, const CkMarshalledMessage &msg) 17 6
+ENTRY CHARE 37 TempoChare(void) 18 0
+ENTRY CHARE 38 tempoGeneric(TempoMessage* impl_msg) 18 8
+ENTRY CHARE 39 TempoGroup(void) 19 0
+ENTRY CHARE 40 tempoGeneric(TempoMessage* impl_msg) 19 8
+ENTRY CHARE 41 TempoArray(CkMigrateMessage* impl_msg) 20 0
+ENTRY CHARE 42 TempoArray(void) 20 0
+ENTRY CHARE 43 tempoGeneric(TempoMessage* impl_msg) 20 8
+ENTRY CHARE 44 waitqd_QDChare(CkArgMsg* impl_msg) 21 0
+ENTRY CHARE 45 waitQD(void) 21 0
+ENTRY CHARE 46 onQD(CkQdMsg* impl_msg) 21 1
+ENTRY CHARE 47 BaseLB(void) 22 0
+ENTRY CHARE 48 unregister(void) 22 0
+ENTRY CHARE 49 NullLB(void) 23 0
+ENTRY CHARE 50 migrationsDone(void) 23 0
+ENTRY CHARE 51 LBDBInit(CkArgMsg* impl_msg) 24 0
+ENTRY CHARE 52 LBDatabase(void) 25 0
+ENTRY CHARE 53 NborBaseLB(void) 26 0
+ENTRY CHARE 54 ReceiveStats(NLBStatsMsg* impl_msg) 26 10
+ENTRY CHARE 55 ResumeClients(void) 26 0
+ENTRY CHARE 56 ReceiveMigration(LBMigrateMsg* impl_msg) 26 9
+ENTRY CHARE 57 NeighborLB(void) 27 0
+ENTRY CHARE 58 main(CkArgMsg* impl_msg) 28 0
+ENTRY CHARE 59 WorkDistrib(void) 29 0
+ENTRY CHARE 60 saveMaps(MapDistribMsg* impl_msg) 29 13
+ENTRY CHARE 61 recvComputeMapChanges(ComputeMapChangeMsg* impl_msg) 29 12
+ENTRY CHARE 62 doneSaveComputeMap(void) 29 0
+ENTRY CHARE 63 enqueueWork(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 64 enqueueBonds(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 65 enqueueAngles(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 66 enqueueDihedrals(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 67 enqueueImpropers(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 68 enqueuePme(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 69 enqueueSelfA(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 70 enqueueSelfB(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 71 enqueueWorkA(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 72 enqueueWorkB(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 73 enqueueWorkC(LocalWorkMsg* impl_msg) 29 11
+ENTRY CHARE 74 ReductionMgr(void) 30 0
+ENTRY CHARE 75 remoteRegister(ReductionRegisterMsg* impl_msg) 30 14
+ENTRY CHARE 76 remoteUnregister(ReductionRegisterMsg* impl_msg) 30 14
+ENTRY CHARE 77 remoteSubmit(ReductionSubmitMsg* impl_msg) 30 15
+ENTRY CHARE 78 PatchMgr(void) 31 0
+ENTRY CHARE 79 recvMovePatches(MovePatchesMsg* impl_msg) 31 16
+ENTRY CHARE 80 recvAtoms(MovePatchesMsg* impl_msg) 31 16
+ENTRY CHARE 81 recvMigrateAtoms(MigrateAtomsMsg* impl_msg) 31 17
+ENTRY CHARE 82 recvMigrateAtomsCombined(MigrateAtomsCombinedMsg* impl_msg) 31 18
+ENTRY CHARE 83 moveAtom(MoveAtomMsg* impl_msg) 31 19
+ENTRY CHARE 84 ProxyMgr(void) 32 0
+ENTRY CHARE 85 recvRegisterProxy(RegisterProxyMsg* impl_msg) 32 20
+ENTRY CHARE 86 recvUnregisterProxy(UnregisterProxyMsg* impl_msg) 32 21
+ENTRY CHARE 87 recvProxyData(ProxyDataMsg* impl_msg) 32 23
+ENTRY CHARE 88 recvProxyAll(ProxyAllMsg* impl_msg) 32 24
+ENTRY CHARE 89 recvResults(ProxyResultMsg* impl_msg) 32 25
+ENTRY CHARE 90 recvResults(ProxyCombinedResultMsg* impl_msg) 32 27
+ENTRY CHARE 91 recvSpanningTree(ProxySpanningTreeMsg* impl_msg) 32 26
+ENTRY CHARE 92 Node(GroupInitMsg* impl_msg) 33 28
+ENTRY CHARE 93 startUp(CkQdMsg* impl_msg) 33 1
+ENTRY CHARE 94 startup(void) 33 0
+ENTRY CHARE 95 run(void) 33 0
+ENTRY CHARE 96 scriptBarrier(CkQdMsg* impl_msg) 33 1
+ENTRY CHARE 97 scriptParam(ScriptParamMsg* impl_msg) 33 29
+ENTRY CHARE 98 recvEnableExitScheduler(CkQdMsg* impl_msg) 33 1
+ENTRY CHARE 99 exitScheduler(CkQdMsg* impl_msg) 33 1
+ENTRY CHARE 100 recvEnableEarlyExit(CkQdMsg* impl_msg) 33 1
+ENTRY CHARE 101 earlyExit(CkQdMsg* impl_msg) 33 1
+ENTRY CHARE 102 CentralLB(void) 34 0
+ENTRY CHARE 103 ProcessAtSync(void) 34 0
+ENTRY CHARE 104 ReceiveStats(CLBStatsMsg* impl_msg) 34 30
+ENTRY CHARE 105 ResumeClients(void) 34 0
+ENTRY CHARE 106 ReceiveMigration(LBMigrateMsg* impl_msg) 34 9
+ENTRY CHARE 107 NamdCentLB(void) 35 0
+ENTRY CHARE 108 NamdNborLB(void) 36 0
+ENTRY CHARE 109 LdbCoordinator(void) 37 0
+ENTRY CHARE 110 nodeDone(void) 37 0
+ENTRY CHARE 111 resume(void) 37 0
+ENTRY CHARE 112 resumeReady(CkQdMsg* impl_msg) 37 1
+ENTRY CHARE 113 resume2(void) 37 0
+ENTRY CHARE 114 RecvMigrate(LdbMigrateMsg* impl_msg) 37 31
+ENTRY CHARE 115 ProcessMigrate(LdbMigrateMsg* impl_msg) 37 31
+ENTRY CHARE 116 ExpectMigrate(LdbMigrateMsg* impl_msg) 37 31
+ENTRY CHARE 117 updateComputesReady(void) 37 0
+ENTRY CHARE 118 ComputeMgr(void) 38 0
+ENTRY CHARE 119 updateComputes2(CkQdMsg* impl_msg) 38 1
+ENTRY CHARE 120 updateComputes3(void) 38 0
+ENTRY CHARE 121 updateLocalComputes(void) 38 0
+ENTRY CHARE 122 updateLocalComputes2(CkQdMsg* impl_msg) 38 1
+ENTRY CHARE 123 updateLocalComputes3(void) 38 0
+ENTRY CHARE 124 updateLocalComputes4(CkQdMsg* impl_msg) 38 1
+ENTRY CHARE 125 updateLocalComputes5(void) 38 0
+ENTRY CHARE 126 doneUpdateLocalComputes(void) 38 0
+ENTRY CHARE 127 recvComputeGlobalConfig(ComputeGlobalConfigMsg* impl_msg) 38 32
+ENTRY CHARE 128 recvComputeGlobalData(ComputeGlobalDataMsg* impl_msg) 38 33
+ENTRY CHARE 129 recvComputeGlobalResults(ComputeGlobalResultsMsg* impl_msg) 38 34
+ENTRY CHARE 130 recvComputeDPMEData(ComputeDPMEDataMsg* impl_msg) 38 35
+ENTRY CHARE 131 recvComputeDPMEResults(ComputeDPMEResultsMsg* impl_msg) 38 36
+ENTRY CHARE 132 ComputePmeMgr(void) 39 0
+ENTRY CHARE 133 initialize(CkQdMsg* impl_msg) 39 1
+ENTRY CHARE 134 sendGrid(void) 39 0
+ENTRY CHARE 135 recvGrid(PmeGridMsg* impl_msg) 39 37
+ENTRY CHARE 136 gridCalc1(void) 39 0
+ENTRY CHARE 137 sendTrans(void) 39 0
+ENTRY CHARE 138 recvTrans(PmeTransMsg* impl_msg) 39 38
+ENTRY CHARE 139 gridCalc2(void) 39 0
+ENTRY CHARE 140 sendUntrans(void) 39 0
+ENTRY CHARE 141 recvUntrans(PmeUntransMsg* impl_msg) 39 39
+ENTRY CHARE 142 gridCalc3(void) 39 0
+ENTRY CHARE 143 sendUngrid(void) 39 0
+ENTRY CHARE 144 recvUngrid(PmeGridMsg* impl_msg) 39 37
+ENTRY CHARE 145 ungridCalc(void) 39 0
+ENTRY CHARE 146 ComputeExtMgr(void) 40 0
+ENTRY CHARE 147 recvCoord(ExtCoordMsg* impl_msg) 40 40
+ENTRY CHARE 148 recvForce(ExtForceMsg* impl_msg) 40 41
+ENTRY CHARE 149 CollectionMgr(SlaveInitMsg* impl_msg) 41 42
+ENTRY CHARE 150 CollectionMaster(void) 42 0
+ENTRY CHARE 151 receivePositions(CollectVectorMsg* impl_msg) 42 43
+ENTRY CHARE 152 receiveVelocities(CollectVectorMsg* impl_msg) 42 43
+ENTRY CHARE 153 receiveDataStream(DataStreamMsg* impl_msg) 42 44
+ENTRY CHARE 154 BroadcastMgr(void) 43 0
+ENTRY CHARE 155 recvBroadcast(BroadcastMsg* impl_msg) 43 45
+ENTRY CHARE 156 Sync(void) 44 0
+ENTRY CHARE 157 dummy_thread_ep 45 46
+ENTRY CHARE 158 dummy_pack_ep 46 47
+ENTRY CHARE 159 dummy_unpack_ep 47 48
+MESSAGE 0 4
+MESSAGE 1 1
+MESSAGE 2 8
+MESSAGE 3 24
+MESSAGE 4 96
+MESSAGE 5 8
+MESSAGE 6 16
+MESSAGE 7 16
+MESSAGE 8 24
+MESSAGE 9 32
+MESSAGE 10 104
+MESSAGE 11 16
+MESSAGE 12 16
+MESSAGE 13 24
+MESSAGE 14 12
+MESSAGE 15 32
+MESSAGE 16 32
+MESSAGE 17 32
+MESSAGE 18 80
+MESSAGE 19 40
+MESSAGE 20 12
+MESSAGE 21 12
+MESSAGE 22 24
+MESSAGE 23 256
+MESSAGE 24 256
+MESSAGE 25 64
+MESSAGE 26 32
+MESSAGE 27 72
+MESSAGE 28 100
+MESSAGE 29 257
+MESSAGE 30 104
+MESSAGE 31 80
+MESSAGE 32 40
+MESSAGE 33 56
+MESSAGE 34 96
+MESSAGE 35 24
+MESSAGE 36 24
+MESSAGE 37 1080
+MESSAGE 38 208
+MESSAGE 39 872
+MESSAGE 40 208
+MESSAGE 41 96
+MESSAGE 42 24
+MESSAGE 43 56
+MESSAGE 44 24
+MESSAGE 45 92
+MESSAGE 46 0
+MESSAGE 47 0
+MESSAGE 48 0
+END

@@ -27,6 +27,7 @@ public class ProfileWindow extends Frame
    private Button bDecreaseY, bIncreaseY, bResetY;
    private Button bColors;
    private Button bPieChart;
+   private Button bCommWindow;
    private Color[] colors;
    private ProfileObject[][] poArray;
    private float xscale=1, yscale=1;
@@ -149,6 +150,10 @@ public class ProfileWindow extends Frame
                         System.out.println("bPieChart was clicked");
 						pieChartWindow = new PieChartWindow(mainWindow, avg[0], avg[0].length, thresh, colors);			
                  }
+				 else if(b == bCommWindow)
+				 {
+				 	new CommWindow();
+				}
 		 
 		 setCursor(new Cursor(Cursor.DEFAULT_CURSOR));   
 	  }
@@ -267,6 +272,7 @@ public class ProfileWindow extends Frame
 	  bIncreaseX   = new Button(">>");
 	  bResetX      = new Button("Reset");
 	  bPieChart    = new Button("Pie Chart");
+	  bCommWindow  = new Button("Comm Window");
 	  
 	  bColors.addActionListener(this);
 	  bDecreaseY.addActionListener(this);
@@ -275,7 +281,9 @@ public class ProfileWindow extends Frame
 	  bDecreaseX.addActionListener(this);
 	  bIncreaseX.addActionListener(this);
 	  bResetX.addActionListener(this);
-          bPieChart.addActionListener(this);
+      bPieChart.addActionListener(this);
+	  bCommWindow.addActionListener(this);
+
 	
 	   
 	  Label lXScale = new Label("X-SCALE: ", Label.CENTER);
@@ -307,6 +315,7 @@ public class ProfileWindow extends Frame
 	  Util.gblAdd(buttonPanel, bIncreaseX,   gbc, 9,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bResetX,      gbc, 10,0, 1,1, 1,1);
 	  Util.gblAdd(buttonPanel, bPieChart,    gbc, 11,0, 1,1, 1,1);
+	  Util.gblAdd(buttonPanel, bCommWindow,  gbc, 12,0, 1,1, 1,1);
 	  
 	  //// WINDOW
 	  

@@ -98,7 +98,7 @@ public abstract class GenericGraphWindow
    
 
 // refresh graph
-   protected void refreshGraph(){
+   protected void refreshGraph(){    
           graphCanvas.setData(dataSource,xAxis,yAxis);
           graphCanvas.repaint();
    }

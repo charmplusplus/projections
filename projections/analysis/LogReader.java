@@ -85,10 +85,17 @@ public class LogReader extends ProjDefs
 	
 	  int catIdx=mtypeToCategoryIdx(mtype);
 	  if (catIdx!=-1) {
+/*  gzheng to save memory, only allocate memory for those processors in the list
 		if (categorized[catIdx][TYPE]==null) {
 			categorized[catIdx][TYPE]=new int[numProcessors][numIntervals+1];
 			if (TYPE==PROCESS) //Add a time array, too
 			  categorized[catIdx][TIME]=new int[numProcessors][numIntervals+1];
+		}
+*/
+		if (categorized[catIdx][TYPE][curPe]==null) {
+			categorized[catIdx][TYPE][curPe]=new int[numIntervals+1];
+			if (TYPE==PROCESS) //Add a time array, too
+			  categorized[catIdx][TIME][curPe]=new int[numIntervals+1];
 		}
 		categorized[catIdx][TYPE][curPe][interval]++;
 	  }
@@ -217,7 +224,8 @@ public class LogReader extends ProjDefs
 	if (byEntryPoint) {
 		userEntries = new int[numUserEntries][3][numProcessors][];
 //		userEntries = new int[numUserEntries][3][][];
-		categorized = new int[5][3][][];
+//		categorized = new int[5][3][][];
+		categorized = new int[5][3][numProcessors][];
 	}
 	int seq = 0;
         processorList.reset();

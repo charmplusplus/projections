@@ -6,6 +6,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import javax.swing.*;
+
 import projections.analysis.*;
 import projections.gui.graph.*;
 import projections.misc.LogEntryData;
@@ -31,19 +32,23 @@ public class CommWindow extends GenericGraphWindow
     private Checkbox	recivedMssgs;
     private Checkbox	sentExclusive;
 
+    // uncomfirmed stupid hacks
+    private CommWindow  thisWindow;
+
     public CommWindow(MainWindow mainWindow, Integer myWindowID) {
 	super("Projections Communications", mainWindow, myWindowID);
 	setGraphSpecificData();
 	mainPanel = new JPanel();
     	getContentPane().add(mainPanel);
-	setLayout();
+	createLayout();
 	setPopupText("histArray");
 	pack();
+	thisWindow = this;
 	showDialog();
     }
     
     public void repaint() {
-	refreshGraph();
+	super.refreshGraph();
     }
 	
     public void itemStateChanged(ItemEvent ae){
@@ -120,7 +125,7 @@ public class CommWindow extends GenericGraphWindow
 	return rString;
     }	
     
-    protected void setLayout() {
+    protected void createLayout() {
 	GridBagConstraints gbc = new GridBagConstraints();
 	GridBagLayout gbl = new GridBagLayout();
 	
@@ -159,19 +164,27 @@ public class CommWindow extends GenericGraphWindow
     }
     
     public void showDialog() {
-	if(dialog == null)
+	if (dialog == null)
 	    dialog = new RangeDialog(this, "select Range");
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
 	    getDialogData();
-	    setVisible(true);
-	    msgCount = new double[validPEs.size()][];
-	    byteCount = new double[validPEs.size()][];
-	    recivedMsgCount = new double[validPEs.size()][];
-	    exclusiveSent = new double[validPEs.size()][];
-	    getData();
-	    setDataSource("Histogram", histArray, this);
-	    super.refreshGraph();
+	    final SwingWorker worker =  new SwingWorker() {
+		    public Object construct() {
+			msgCount = new double[validPEs.size()][];
+			byteCount = new double[validPEs.size()][];
+			recivedMsgCount = new double[validPEs.size()][];
+			exclusiveSent = new double[validPEs.size()][];
+			getData();
+			return null;
+		    }
+		    public void finished() {
+			setDataSource("Histogram", histArray, thisWindow);
+			thisWindow.setVisible(true);
+			thisWindow.repaint();
+		    }
+		};
+	    worker.start();
 	}
     }
 
@@ -184,7 +197,7 @@ public class CommWindow extends GenericGraphWindow
 	super.getDialogData();
     }
 
-    protected void getData(){
+    public void getData(){
 	GenericLogReader glr;
 	LogEntryData logdata = new LogEntryData();
 	
@@ -194,16 +207,28 @@ public class CommWindow extends GenericGraphWindow
 	int numEPs = Analysis.getNumUserEntries();
 	histogram = new ArrayList();
 		
-	while(peList.hasMoreElements()){
+	int curPeArrayIndex = 0;
+	
+	ProgressMonitor progressBar = 
+	    new ProgressMonitor(this, "Reading log files",
+				"", 0, numPe);
+	while (peList.hasMoreElements()) {
 	    int pe = peList.nextElement();
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote("Reading data for PE " + pe);
+		progressBar.setProgress(curPeArrayIndex+1);
+		validate();
+	    } else {
+		progressBar.close();
+		return;
+	    }
 	    glr = new GenericLogReader(Analysis.getLogName(pe), 
 				       Analysis.getVersion());
-	    
-	    try{
-		msgCount[pe] = new double[numEPs];
-		byteCount[pe] = new double[numEPs];
-		recivedMsgCount[pe] = new double[numEPs];
-		exclusiveSent[pe] = new double[numEPs];
+	    try {
+		msgCount[curPeArrayIndex] = new double[numEPs];
+		byteCount[curPeArrayIndex] = new double[numEPs];
+		recivedMsgCount[curPeArrayIndex] = new double[numEPs];
+		exclusiveSent[curPeArrayIndex] = new double[numEPs];
 		int EPid;
 		
 		glr.nextEventOnOrAfter(startTime, logdata);
@@ -211,34 +236,39 @@ public class CommWindow extends GenericGraphWindow
 		// this loop :)
 		while (true) { 		
 		    glr.nextEvent(logdata);
-		    if(logdata.type == ProjDefs.CREATION){
+		    if (logdata.type == ProjDefs.CREATION) {
 			EPid = logdata.entry;
-			msgCount[pe][EPid] ++;
-			byteCount[pe][EPid] += logdata.msglen;
-			histogram.add(new MyArray(logdata.msglen));
+			msgCount[curPeArrayIndex][EPid]++;
+			byteCount[curPeArrayIndex][EPid] += logdata.msglen;
+			histogram.add(new Integer(logdata.msglen));
 		    } else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
 			EPid = logdata.entry;
-			recivedMsgCount[pe][EPid] ++;
-			if(logdata.pe == pe)
-			    exclusiveSent[pe][EPid] ++;
+			recivedMsgCount[curPeArrayIndex][EPid]++;
+			if (logdata.pe == pe) {
+			    exclusiveSent[curPeArrayIndex][EPid] ++;
+			}
 		    }
 		}
-		
-	    }catch (java.io.EOFException e){
-	    }catch (Exception e){
-		System.out.println("Exception: " +e);
-		e.printStackTrace();
+	    } catch (java.io.EOFException e) {
+		// used to break out of inner while(true) loop
+	    } catch (java.io.IOException e) {
+                System.out.println("Exception: " +e);
+                e.printStackTrace();
 	    }
+	    curPeArrayIndex++;
 	}
-	
-	int max = ((MyArray)histogram.get(0)).index;
-	int min = ((MyArray)histogram.get(0)).index;
+	progressBar.close();
+
+	// **CW** Highly inefficient ... needs to be re-written as a 
+	// bin-based solution instead.
+	int max = ((Integer)histogram.get(0)).intValue();
+	int min = ((Integer)histogram.get(0)).intValue();
 	
 	for(int k=1; k<histogram.size(); k++){
-	    if(((MyArray)histogram.get(k)).index < min)
-		min = ((MyArray)histogram.get(k)).index;
-	    if(((MyArray)histogram.get(k)).index > max)
-		max = ((MyArray)histogram.get(k)).index;
+	    if(((Integer)histogram.get(k)).intValue() < min)
+		min = ((Integer)histogram.get(k)).intValue();
+	    if(((Integer)histogram.get(k)).intValue() > max)
+		max = ((Integer)histogram.get(k)).intValue();
 	}
 	
 	histArray = new int[max+1];
@@ -248,7 +278,7 @@ public class CommWindow extends GenericGraphWindow
 	
 	int index;
 	for(int k=0; k<histogram.size(); k++){
-	    index = ((MyArray)histogram.get(k)).index;
+	    index = ((Integer)histogram.get(k)).intValue();
 	    histArray[index] += 1;
 	}
 	
@@ -256,22 +286,13 @@ public class CommWindow extends GenericGraphWindow
 	    for(int j=0; j<numEPs; j++){
 		exclusiveSent[k][j] = msgCount[k][j] - exclusiveSent[k][j];
 		
-		// Apurva - i'm doing this to prevent any negitive numbers from 
-		// getting sent into the stack array because it messes up
+		// Apurva - i'm doing this to prevent any negitive numbers 
+		// from getting sent into the stack array because it messes up
 		// the drawing				
-		if(exclusiveSent[k][j] < 0)
+		if (exclusiveSent[k][j] < 0)
 		    exclusiveSent[k][j] = 0;
 	    }
 	}
-    }
-	 
-    // Needed for Communications Histogram since it is currently being
-    // implemented via ArrayList which iwll not allow the use of a int array
-    private class MyArray {
-	public int index;	
-	public MyArray(int setIndex){
-	    index = setIndex;
-	}	
     }
 }
 

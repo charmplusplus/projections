@@ -1,6 +1,5 @@
 package projections.gui;
 import projections.misc.LogEntryData;
-//import projections.misc.ProgressDialog;
 import projections.analysis.*;
 
 import java.awt.Color;
@@ -38,10 +37,14 @@ public class HistogramWindow extends GenericGraphWindow
 
     // show both range dialog & epdialog during startup
     private boolean startUp;
+
+    private HistogramWindow thisWindow;
     
     public HistogramWindow(MainWindow mainWindow, Integer myWindowID)
     {
 	super("Projections Histograms", mainWindow, myWindowID);
+	thisWindow = this;
+
 	setTitle("Projections Histograms");
 	setGraphSpecificData();
 	  
@@ -89,12 +92,20 @@ public class HistogramWindow extends GenericGraphWindow
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
-	    if (!startUp) {
-		refreshGraph();
-	    } else {
-		showEntryDialog();
-	    }
-	    setVisible(true);
+	    final SwingWorker worker = new SwingWorker() {
+		    public Object construct() {
+			if (!startUp) {
+			    thisWindow.refreshGraph();
+			} else {
+			    thisWindow.showEntryDialog();
+			}
+			return null;
+		    }
+		    public void finished() {
+			thisWindow.setVisible(true);
+		    }
+		};
+	    worker.start();
 	}
     }
 
@@ -108,9 +119,11 @@ public class HistogramWindow extends GenericGraphWindow
     }
 
     /* Show the EntrySelectionDialog to select Entrypoints to be considered */
+    // **CW** 1/12/2004 this should really be the legend panel. Will be fixed
+    // once the generic legend panel gets written.
     void showEntryDialog()
     {
-	if(startUp) startUp = false;
+	if (startUp) startUp = false;
 	
 	int noEPs = Analysis.getNumUserEntries();
 	String typeLabelStrings[] = {"Entry Points"};
@@ -166,18 +179,17 @@ public class HistogramWindow extends GenericGraphWindow
 	int [] counts = getCounts();
 	setDataSource("",counts);
 	super.refreshGraph();
-	
 	String firstRow  ="Bin  ", secondRow="EPs  ";	
-	String  thirdRow = "Total Execution Time: " + String.valueOf(totalExecutionTime)+ " us";
-	String fourthRow = "Longest Entry Point Execution Time: " + longestExecutionTime +" us";
-	
-	for(int i=0; i<counts.length; i++)
-	    if(counts[i]!=0)
-		{
-		    firstRow = firstRow + i + "\t";
-		    secondRow = secondRow + counts[i] +"\t";
-		}
-	
+	String  thirdRow = "Total Execution Time: " + 
+	    String.valueOf(totalExecutionTime)+ " us";
+	String fourthRow = "Longest Entry Point Execution Time: " +
+	    longestExecutionTime +" us";
+	for (int i=0; i<counts.length; i++) {
+	    if (counts[i]!=0) {
+		firstRow = firstRow + i + "\t";
+		secondRow = secondRow + counts[i] +"\t";
+	    }
+	}
 	// clear the text area and enter new set
 	statusArea.setText("");	
 	statusArea.append(firstRow+"\n");
@@ -213,8 +225,19 @@ public class HistogramWindow extends GenericGraphWindow
 	logdata = new LogEntryData();
 	logdata2 = new LogEntryData();
 	
+	ProgressMonitor progressBar = 
+	    new ProgressMonitor(this, "Reading log files",
+				"", 0, tmpPEs.size());
+	int curPeCount = 0;
 	while (tmpPEs.hasMoreElements()) {
 	    int pe = tmpPEs.nextElement();
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote("Reading data for PE " + pe);
+		progressBar.setProgress(curPeCount);
+	    } else {
+		progressBar.close();
+	    }
+	    curPeCount++;
 	    r = new GenericLogReader(Analysis.getLogName(pe),Analysis.getVersion());
 	    try {
 		r.nextEventOnOrAfter(startTime,logdata);
@@ -249,6 +272,7 @@ public class HistogramWindow extends GenericGraphWindow
 		e.printStackTrace();
 	    }
 	}
+	progressBar.close();
 	if (recordEP)	
 	    epFrame.setVisible(true);
 	return(counts);

@@ -75,107 +75,102 @@ public class JSelectField extends JTextField
 	  return tmp;
    }   
 
-   public OrderedIntList getValue(int limit)
-   {  
-	  limit--;
+    public OrderedIntList getValue(int limit)
+    {  
+	limit--;
 
-	  OrderedIntList tmpList = new OrderedIntList();
+	OrderedIntList tmpList = new OrderedIntList();
 
-	  String tmp = cleanItUp(getText());
+	String tmp = cleanItUp(getText());
 	  
-	  if(tmp.length()==0) tmp ="0";
-	  
-	  try
-	  {
-		 char c = tmp.charAt(tmp.length()-1);
-		 while(!(c >= '0' && c <= '9'))
-		 {
-			tmp = tmp.substring(0, tmp.length()-1);
-			c = tmp.charAt(tmp.length()-1);
-		 }   
-	  
-		 int i = 0;
-		 int low = 0;
-		 int high = 0;
-		 int min = 0;
-		 int max = 0;
-                 int interval = 1;
+	if (tmp.length()==0) 
+	    tmp ="0";
+	try {
+	    char c = tmp.charAt(tmp.length()-1);
+	    while (!(c >= '0' && c <= '9')) {
+		tmp = tmp.substring(0, tmp.length()-1);
+		c = tmp.charAt(tmp.length()-1);
+	    }   
+	    int i = 0;
+	    int low = 0;
+	    int high = 0;
+	    int min = 0;
+	    int max = 0;
+	    int interval = 1;
    
-		 String result = "";
-	 
-		 boolean OK = true;
-		 while(OK)
-		 {
-			while(i < tmp.length() && tmp.charAt(i) >= '0' && tmp.charAt(i) <= '9')
-			   i++;
+	    boolean notDone = true;
+	    while (notDone) {
+		while (i < tmp.length() && 
+		       tmp.charAt(i) >= '0' && 
+		       tmp.charAt(i) <= '9')
+		    i++;
+		high = i;
+		min = Integer.parseInt(tmp.substring(low, high));
+		if (i == tmp.length()) {
+		    interval = 1;
+		    max = min;
+		    notDone = false;
+		} else if (tmp.charAt(i) == ',') {
+		    interval = 1;
+		    max = min;
+		    i++;
+		    low = i;
+		} else if (tmp.charAt(i) == '-') {
+		    i++;
+		    low = i;
+		    while (i < tmp.length() && 
+			   tmp.charAt(i) >= '0' && 
+			   tmp.charAt(i) <= '9')
+			i++;
+		    high = i;
+		    max = Integer.parseInt(tmp.substring(low, high));
+
+		    // get interval (skip factor)
+		    interval=1;
+		    if (i<tmp.length() && tmp.charAt(i)== ':') {
+			i++;
+			low = i;
+			while (i < tmp.length() && 
+			       tmp.charAt(i) >= '0' && 
+			       tmp.charAt(i) <= '9')
+			    i++;
 			high = i;
-			min = Integer.parseInt(tmp.substring(low, high));
-		 
-			if(i == tmp.length())
-			{
-			   max = min;
-			   OK = false;
-			}
-			else if(tmp.charAt(i) == ',')
-			{
-			   max = min;
-			   i++;
-			   low = i;
-			}
-			else if(tmp.charAt(i) == '-')
-			{
-			   i++;
-			   low = i;
-			   while(i < tmp.length() && tmp.charAt(i) >= '0' && tmp.charAt(i) <= '9')
-				  i++;
-			   high = i;
-			   max = Integer.parseInt(tmp.substring(low, high));
-
- 			   // get interval
-                           interval=1;
-                           if (i<tmp.length() && tmp.charAt(i)== ':') {
-		             i++;
-			     while(i < tmp.length() && tmp.charAt(i) >= '0' && tmp.charAt(i) <= '9')
-			       i++;
-			     interval = Integer.parseInt(tmp.substring(high+1, i));
-                           }
-			
-			   if(i == tmp.length())
-			   {
-				  OK = false;
-			   }
-			   else
-			   {
-				  i++;
-				  low = i; 
-			   }   
-			}
-			
-			for(int j=min; j<=max; j+=interval) {
-			  if(j <= limit) tmpList.insert(j);
-			}
-		 } 
-	  }
-	  catch(NumberFormatException e)
-	  {
-		 tmpList.removeAll();
-		 tmpList.insert(0);
-	  }
-	  catch(StringIndexOutOfBoundsException e)
-	  {
-		 tmpList.removeAll();
-		 tmpList.insert(0);
-	  }   
-	  if(tmpList.size()==0)
-		 tmpList.insert(0);
+			interval = Integer.parseInt(tmp.substring(low, high));
+		    }
+		    if (i == tmp.length()) {
+			notDone = false;
+		    } else if (tmp.charAt(i) == ',') {
+			i++;
+			low = i; 
+		    } else {
+			System.err.println("Badly formed pelist - should " +
+					   "not happen! Please contact " +
+					   "projections developers!");
+			System.exit(-1);
+		    }
+		}
+		for (int j=min; j<=max; j+=interval) {
+		    if (j <= limit) 
+			tmpList.insert(j);
+		}
+	    } 
+	} catch(NumberFormatException e) {
+	    tmpList.removeAll();
+	    tmpList.insert(0);
+	} catch(StringIndexOutOfBoundsException e) {
+	    tmpList.removeAll();
+	    tmpList.insert(0);
+	}   
+	if (tmpList.size()==0)
+	    tmpList.insert(0);
 	  
-	  lastValue = tmpList.listToString();
-	  setText(lastValue); 
-	  
-	  return tmpList;
-   }   
+	lastValue = tmpList.listToString();
+	setText(lastValue); 
 
-/* verify if the input characters are valid or not */
+	return tmpList;
+    }   
+
+    /* verify if the input characters are valid or not */
 
    class RangeVerifier extends InputVerifier {
      public boolean verify(JComponent input) {

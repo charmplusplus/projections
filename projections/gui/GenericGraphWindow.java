@@ -125,6 +125,7 @@ public abstract class GenericGraphWindow
     // whenever datasource changes, yaxis needs to be changed too
     protected void setDataSource(String title, int [] data){
 	dataSource = new DataSource1D(title,data);
+	dataSource.setColors(Analysis.getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
@@ -132,6 +133,7 @@ public abstract class GenericGraphWindow
 
     protected void setDataSource(String title, double [][] data){
 	dataSource = new DataSource2D(title,data);
+	dataSource.setColors(Analysis.getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
@@ -139,6 +141,7 @@ public abstract class GenericGraphWindow
 
     protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
 	dataSource = new DataSource1D(title,data,parent);
+	dataSource.setColors(Analysis.getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
@@ -146,6 +149,7 @@ public abstract class GenericGraphWindow
 
     protected void setDataSource(String title, double [][] data, GenericGraphWindow parent){
 	dataSource = new DataSource2D(title,data, parent);
+	dataSource.setColors(Analysis.getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);

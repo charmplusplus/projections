@@ -120,6 +120,7 @@ SRC=\
     projections/gui/SelectField.java\
     projections/gui/StlPanel.java\
     projections/gui/StlWindow.java\
+    projections/gui/SwingWorker.java\
     projections/gui/TimeTextField.java\
     projections/gui/TimelineAxisCanvas.java\
     projections/gui/TimelineColorWindow.java\
@@ -130,7 +131,6 @@ SRC=\
     projections/gui/TimelineMessagePanel.java\
     projections/gui/TimelineMessageWindow.java\
     projections/gui/TimelineObject.java\
-    projections/gui/TimelineRangeDialog.java\
     projections/gui/TimelineWindow.java\
     projections/gui/TimelineLine.java\
     projections/gui/U.java\

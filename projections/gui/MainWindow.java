@@ -6,7 +6,7 @@ import java.lang.reflect.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
-import projections.misc.*;
+
 import projections.gui.count.*;
 import projections.gui.graph.*;
 
@@ -27,6 +27,9 @@ public class MainWindow extends JFrame
     private static final int DEFAULT_NUM_RUNS = 1;
 
     public static double CUR_VERSION = 4.0;
+
+    // for SwingWorker to work
+    private MainWindow thisWindow;
 
     // Indexed by number of runs (currently one) and tools available
     // This should eventually be configurable for multiple runs,
@@ -65,6 +68,7 @@ public class MainWindow extends JFrame
     
     public MainWindow()
     {
+	thisWindow = this;
 	// static screen information.
 	ScreenInfo.init();
 
@@ -279,60 +283,67 @@ public class MainWindow extends JFrame
     }
     
     private void openFile(String filename) {
-	try {
-	    // clear the old summary data away, otherwise chance of 
-	    // running out of memory is great.
-	    sumDataSource = null;
-	    sumXAxis = null;
-	    sumYAxis = null;
-	    graphPanel = null;
-	    Analysis.initAnalysis(filename, this);
-	    setTitle("Projections - " + filename);
-	    Analysis.loadSummaryData();
-	    if (Analysis.hasSummaryData()) {
-		double[] data = Analysis.getSummaryAverageData(); 
-		long originalSize = Analysis.getSummaryIntervalSize();
-		//		System.out.println("Getting best size");
-		long bestSize = 
-		    (long)GraphUtil.getBestIntervalSize(originalSize,
-							data.length);
-		//		System.out.println(bestSize);
-		if (bestSize != originalSize) {
-		    // if there are changes
-		    //		    System.out.println("rebinning");
-		    // transform the data into absolute time first.
-		    GraphUtil.utilToTime(data, (double)originalSize);
-		    double[] newdata =
-			GraphUtil.rebin(data, originalSize,
-					(double)bestSize);
-		    //		    System.out.println("done rebinning");
-		    // transform the re-binned data to utilization.
-		    GraphUtil.timeToUtil(newdata, (double)bestSize);
-		    sumDataSource = new SummaryDataSource(newdata);
-		    sumXAxis =
-			new SummaryXAxis(newdata.length,
-					 (long)bestSize);
-		} else {
-		    sumDataSource = new SummaryDataSource(data);
-		    sumXAxis = 
-			new SummaryXAxis(data.length,
-					 (long)(Analysis.getSummaryIntervalSize()));
+	// clear the old summary data away, otherwise chance of 
+	// running out of memory is great.
+	final String newfile = filename;
+	sumDataSource = null;
+	sumXAxis = null;
+	sumYAxis = null;
+	graphPanel = null;
+	final SwingWorker worker = new SwingWorker() {
+		public Object construct() {
+		    try {
+			Analysis.initAnalysis(newfile, thisWindow);
+			Analysis.loadSummaryData();		  
+		    } catch(IOException e) {
+			InvalidFileDialog ifd = 
+			    new InvalidFileDialog(thisWindow);
+			ifd.setVisible(true);
+		    } catch(StringIndexOutOfBoundsException e) {
+			e.printStackTrace();
+			InvalidFileDialog ifd = 
+			    new InvalidFileDialog(thisWindow);
+			ifd.setVisible(true);
+		    }
+		    return null;
 		}
-		sumYAxis = new SummaryYAxis();
-		graphPanel = 
-		    new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
-		summaryGraphPanel.add("data", graphPanel, "run data");
-		
-	    }
-	    menuManager.fileOpened();
-	} catch(IOException e) {
-	    InvalidFileDialog ifd = new InvalidFileDialog(this);
-	    ifd.setVisible(true);
-	} catch(StringIndexOutOfBoundsException e) {
-	    e.printStackTrace();
-	    InvalidFileDialog ifd = new InvalidFileDialog(this);
-	    ifd.setVisible(true);
-	}
+		public void finished() {
+		    setTitle("Projections - " + newfile);
+		    if (Analysis.hasSummaryData()) {
+			double[] data = Analysis.getSummaryAverageData(); 
+			long originalSize = Analysis.getSummaryIntervalSize();
+			long bestSize = 
+			    (long)GraphUtil.getBestIntervalSize(originalSize,
+								data.length);
+			if (bestSize != originalSize) {
+			    // if there are changes
+			    // transform the data into absolute time first.
+			    GraphUtil.utilToTime(data, (double)originalSize);
+			    double[] newdata =
+				GraphUtil.rebin(data, originalSize,
+						(double)bestSize);
+			    // transform the re-binned data to utilization.
+			    GraphUtil.timeToUtil(newdata, (double)bestSize);
+			    sumDataSource = new SummaryDataSource(newdata);
+			    sumXAxis =
+				new SummaryXAxis(newdata.length,
+						 (long)bestSize);
+			} else {
+			    sumDataSource = new SummaryDataSource(data);
+			    sumXAxis = 
+				new SummaryXAxis(data.length,
+						 (long)(Analysis.getSummaryIntervalSize()));
+			}
+			sumYAxis = new SummaryYAxis();
+			graphPanel = 
+			    new GraphPanel(new Graph(sumDataSource, sumXAxis, sumYAxis));
+			summaryGraphPanel.add("data", graphPanel, "run data");
+			
+		    }
+		    menuManager.fileOpened();
+		}
+	    };
+	    worker.start();
     }
 
     /* called by the childWindows to remove references to themselves */

@@ -14,6 +14,8 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
+import projections.misc.*;
+
 public class StlWindow extends ProjectionsWindow
     implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
 	       ItemListener
@@ -38,6 +40,8 @@ public class StlWindow extends ProjectionsWindow
 
     private ColorMap utilColorMap;
 
+    private StlWindow thisWindow;
+
     // parameter variables
     public OrderedIntList validPEs;
     public long startTime;
@@ -46,6 +50,8 @@ public class StlWindow extends ProjectionsWindow
     public StlWindow(MainWindow mainWindow, Integer myWindowID)
     {
 	super(mainWindow, myWindowID);
+	thisWindow = this;
+
 	setBackground(Color.black);
 	setForeground(Color.lightGray);
 	setTitle("Projections-- Overview");
@@ -170,10 +176,18 @@ public class StlWindow extends ProjectionsWindow
 	    dialog.displayDialog();
 	    if (!dialog.isCancelled()) {
 		getDialogData();
-		setStlPanelData();
-		stl.setData(validPEs,startTime,endTime); 
-		setVisible(true);
-		repaint();
+		final SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+			    thisWindow.setStlPanelData();
+			    stl.setData(validPEs,startTime,endTime); 
+			    return null;
+			}
+			public void finished() {
+			    thisWindow.setVisible(true);
+			    thisWindow.repaint();
+			}
+		    };
+		worker.start();
 	    }
 	} catch (Exception e) { 
 	    e.printStackTrace();

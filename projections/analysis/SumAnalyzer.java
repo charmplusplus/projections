@@ -100,6 +100,7 @@ public class SumAnalyzer extends ProjDefs
                 progressBar.setNote(p + " of " + nPe);
                 progressBar.setProgress(p);
             } else {
+		progressBar.close();
 		return;
             }
 	    FileReader file=new FileReader(Analysis.getSumName(p));

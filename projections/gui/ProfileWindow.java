@@ -7,6 +7,7 @@ import javax.swing.*;
 import java.util.*;
 
 import projections.analysis.*;
+import projections.misc.*;
 
 public class ProfileWindow extends ProjectionsWindow
     implements ActionListener, AdjustmentListener, ColorSelectable
@@ -27,6 +28,8 @@ public class ProfileWindow extends ProjectionsWindow
     private Button bDecreaseY, bIncreaseY, bResetY;
     private Button bColors;
     private Button bPieChart;
+
+    private ProfileWindow thisWindow;
 
     // a boolean variable that indicates if the colors have been set.
     // If so, we simply want to preserve the old settings and allow the
@@ -55,7 +58,8 @@ public class ProfileWindow extends ProjectionsWindow
     public ProfileWindow(MainWindow parentWindow, Integer myWindowID)
     {
 	super(parentWindow, myWindowID);
-	
+	thisWindow = this;
+
 	addComponentListener(new ComponentAdapter()
 	    {
 		public void componentResized(ComponentEvent e)
@@ -618,9 +622,17 @@ public class ProfileWindow extends ProjectionsWindow
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
 	    getDialogData();
-	    // **CW** another major code hack!!
-	    MakePOArray(data.begintime, data.endtime);
-	    setVisible(true);
+	    final SwingWorker worker = new SwingWorker() {
+		    public Object construct() {
+			// **CW** another major code hack!!
+			thisWindow.MakePOArray(data.begintime, data.endtime);
+			return null;
+		    }
+		    public void finished() {
+			thisWindow.setVisible(true);
+		    }
+		};
+	    worker.start();
 	}
     }   
     

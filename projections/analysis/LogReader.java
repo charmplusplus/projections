@@ -40,7 +40,6 @@ public class LogReader
     private int[][][] sysUsgData;
     private int[][][][] userEntries;
     private int[][][][] categorized;
-    private long progStartTime;
     private int numProcessors;
     private int numUserEntries; //Number of user entry points
     private long startTime; //Time the current entry method started
@@ -308,10 +307,6 @@ public class LogReader
 		AsciiIntegerReader log = 
 		    new AsciiIntegerReader(new BufferedReader(file));
 
-		/*
-		log.nextLine(); // The first line contains junk
-		*/
-
 		// **CW** first line is no longer junk.
 		// With the advent of the delta-encoding format, it should
 		// contain an additional field which specifies if the log file
@@ -327,16 +322,16 @@ public class LogReader
 		} else {
 		    deltaEncoded = false;
 		}
+		log.nextLine(); // clear the rest of the first line.
 
-		//The second line gives the program start time
-		// **CW** there is no need to be concerned about delta
-		// encoding here since begin computation takes the
-		// absolute timestamp.
-		log.nextInt();
-		progStartTime = 0;//log.nextLong();
-		// **CW** set prevTime based on begin computation time.
+		// The Begin Computation line (for now) is useless unless
+		// delta-encoding (which also seems to be useless) is
+		// employed.
 		if (deltaEncoded) {
+		    log.nextInt();
 		    prevTime = log.nextLong();
+		} else {
+		    log.nextLine(); // ignore second line.
 		}
 
 		int nLines=2;
@@ -356,7 +351,7 @@ public class LogReader
 				time = log.nextLong();
 			    }
 			    pe = log.nextInt();
-			    intervalCalc(type, 0, 0, (time-progStartTime));
+			    intervalCalc(type, 0, 0, time);
 			    break;
 			case CREATION:
 			    mtype = log.nextInt();
@@ -375,7 +370,7 @@ public class LogReader
 				msglen = -1;
 			    }
 			    intervalCalc(type, mtype, entry, 
-					 (time-progStartTime));
+					 time);
 			    break;
 			case BEGIN_PROCESSING: 
 			    if (isProcessing) {
@@ -398,7 +393,7 @@ public class LogReader
 				msglen = -1;
 			    }
 			    intervalCalc(type, mtype, entry, 
-					 (time-progStartTime));
+					 time);
 			    isProcessing = true;
 			    break;
                         case END_PROCESSING:
@@ -422,7 +417,7 @@ public class LogReader
 				msglen = -1;
 			    }
 			    intervalCalc(type, mtype, entry, 
-					 (time-progStartTime));
+					 time);
 			    isProcessing = false;
 			    break;
 			case ENQUEUE:
@@ -435,7 +430,7 @@ public class LogReader
 			    }
 			    event = log.nextInt();
 			    pe = log.nextInt();
-			    intervalCalc(type, mtype, 0, (time-progStartTime));
+			    intervalCalc(type, mtype, 0, time);
 			    break;
 			case END_COMPUTATION:
 			    // end computation uses absolute timestamps.
@@ -483,7 +478,9 @@ public class LogReader
 			    // ignore unknown events. All events have to
 			    // be processed (at least up to the timestamp)
 			    // so that the timestamps can add up right.
-			    System.out.println("Warning: Unknown Event! " +
+			    System.out.println("Warning: Unknown Event " + 
+					       type +
+					       "! " +
 					       "May mess delta encoding!");
 			    break;//Just skip this line
  			}

@@ -9,6 +9,8 @@ import java.util.*;
 
 import java.text.*;
 
+import projections.misc.*;
+
 public class TimelineWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener, ItemListener
 { 
@@ -16,8 +18,9 @@ public class TimelineWindow extends ProjectionsWindow
     private TimelineLabelCanvas   labelCanvas;
     private TimelineAxisCanvas    axisTopCanvas, axisBotCanvas;
     public TimelineDisplayCanvas displayCanvas;
-    private TimelineRangeDialog   rangeDialog;
     private TimelineColorWindow   colorWindow;
+
+    private TimelineWindow thisWindow;
     
     private Scrollbar HSB, VSB;
    
@@ -117,6 +120,8 @@ public class TimelineWindow extends ProjectionsWindow
     {
 	super(parentWindow, myWindowID);
 	
+	thisWindow = this;
+
 	format = new DecimalFormat();
 	format.setGroupingUsed(true);
 	format.setMinimumFractionDigits(0);
@@ -157,14 +162,24 @@ public class TimelineWindow extends ProjectionsWindow
 	if (!dialog.isCancelled()) {
 	    getDialogData();
 	    if (dialog.isModified()) {
-		data.beginTime = startTime;
-		data.endTime = endTime;
-		data.processorList = validPEs;
-		data.processorString = validPEs.listToString();
-		data.numPs = validPEs.size();
-		procRangeDialog(true);
+		final SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+			    data.beginTime = startTime;
+			    data.endTime = endTime;
+			    data.processorList = validPEs;
+			    data.processorString = validPEs.listToString();
+			    data.numPs = validPEs.size();
+			    procRangeDialog(true);
+			    return null;
+			}
+			public void finished() {
+			    thisWindow.setVisible(true);
+			}
+		    };
+		worker.start();
+	    } else {
+		setVisible(true);
 	    }
-	    setVisible(true);
 	}
     }
     
@@ -455,20 +470,6 @@ public class TimelineWindow extends ProjectionsWindow
     {
 	colorWindow = null;
     }   
-
-    /* **CW** Should no longer be required */
-    public void CloseRangeDialog()
-    {
-	rangeDialog.dispose();
-	rangeDialog = null;
-	
-	if(data.beginTime != data.oldBT || data.endTime != data.oldET ||
-	   (data.processorList != null && 
-	    !data.processorList.equals(data.oldplist))) {
-	    procRangeDialog(true);
-	}
-	setVisible(true);
-    }
 
     public void procRangeDialog(boolean keeplines) {
 	//keeplines describes if the lines from message creation
@@ -1249,20 +1250,5 @@ public class TimelineWindow extends ProjectionsWindow
 	  if(colorWindow == null)
 		 colorWindow = new TimelineColorWindow(this,data);
 	  colorWindow.setVisible(true);
-   }   
-
-   private void ShowRangeDialog()
-   {
-	  data.oldBT = data.beginTime;
-	  data.oldET = data.endTime;
-	  data.mesgCreateExecVector = new Vector();
-	  if(data.processorList == null)
-		 data.oldplist = null;
-	  else
-		 data.oldplist = data.processorList.copyOf();
-	  
-	  if(rangeDialog == null)
-		 rangeDialog = new TimelineRangeDialog(this, data);
-	  rangeDialog.setVisible(true);
    }   
 }

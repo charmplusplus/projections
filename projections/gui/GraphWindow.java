@@ -20,6 +20,8 @@ public class GraphWindow extends ProjectionsWindow
     
     private GraphData data;
 
+    private GraphWindow thisWindow;
+
     private int intervalStart = -1;
     private int intervalEnd = -1;
     
@@ -39,6 +41,7 @@ public class GraphWindow extends ProjectionsWindow
     {
 	super(parentWindow, myWindowID);
 
+	thisWindow = this;
 	setBackground(Color.lightGray);
 	
 	createLayout();
@@ -164,36 +167,47 @@ public class GraphWindow extends ProjectionsWindow
 	    getDialogData();
 	    if (dialog.isModified()) {
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
-		Analysis.LoadGraphData(intervalsize, 
-				       intervalStart, intervalEnd,
-				       true, processorList);
-		// got rid of the old optimization that new data is only
-		// created if the start and end points of the range is
-		// modified. This will, of course, have to be restored,
-		// but in a far more elegant way than currently allowed.
-		data = new GraphData(intervalsize, 
-				     intervalStart, intervalEnd,
-				     processorList);
-		setChildDatas();
-		/* also need to close and free legendPanel */
-		if (legendPanel!=null) 
-		    legendPanel.closeAttributesWindow();
-		
-		controlPanel.setXMode(data.xmode);
-		controlPanel.setYMode(data.ymode);
-		
-		legendPanel.UpdateLegend();
-		displayPanel.setAllBounds();
-		displayPanel.UpdateDisplay(); 
-		
-		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		final SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+			    Analysis.LoadGraphData(intervalsize, 
+						   intervalStart, intervalEnd,
+						   true, processorList);
+			    // got rid of the old optimization that new data 
+			    // is only created if the start and end points of 
+			    // the range is modified. This will, of course, 
+			    // have to be restored, but in a far more elegant 
+			    // way than currently allowed.
+			    data = new GraphData(intervalsize, 
+						 intervalStart, intervalEnd,
+						 processorList);
+			    return null;
+			}
+			public void finished() {
+			    thisWindow.setChildDatas();
+			    /* also need to close and free legendPanel */
+			    if (legendPanel!=null) 
+				legendPanel.closeAttributesWindow();
+			    
+			    controlPanel.setXMode(data.xmode);
+			    controlPanel.setYMode(data.ymode);
+			    
+			    legendPanel.UpdateLegend();
+			    displayPanel.setAllBounds();
+			    displayPanel.UpdateDisplay(); 
+			    
+			    thisWindow.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			    thisWindow.setVisible(true);
+			}
+		    };
+		worker.start();
+	    } else {
+		setVisible(true);
 	    }
-	    setVisible(true);
 	} else {
 	    return;
 	}
     }
-
+    
     public void showWindow() {
 	// do nothing for now
     }

@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.lang.reflect.*;
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
@@ -22,6 +23,7 @@ public class MainWindow extends Frame
    private StlWindow            stlWindow;
    private MultiRunWindow       multiRunWindow;
    private IntervalWindow 	intervalWindow;
+   private EPCharWindow 	epCharWindow;
 
     private EPAnalysis           epAnalysis;
 
@@ -78,24 +80,28 @@ public class MainWindow extends Frame
 			ShowAboutDialog(this);
 		 // does not depend on tools being enabled
 		 else if(arg.equals("Multirun Analysis"))
-		        ShowMultiRunWindow();
+		        showChildWindow(multiRunWindow,"MultiRunWindow");
 		 else if(arg.equals("Interval Graph"))
-		        ShowIntervalWindow();
+		        showChildWindow(intervalWindow,"IntervalWindow");
+		 else if(arg.equals("Histograms"))
+		        showChildWindow(histogramWindow,"HistogramWindow");
+		 else if(arg.equals("Entry Point Characteristics Graph"))
+		        showChildWindow(epCharWindow,"EPCharWindow");
 
 		 else if(toolsEnabled)
 		 {
 			if(arg.equals("Graphs"))
-			   ShowGraphWindow();
+			   showChildWindow(graphWindow,"GraphWindow");
 			else if(arg.equals("Timelines"))
-			   ShowTimelineWindow();
+			   showChildWindow(timelineWindow,"TimelineWindow");
 			else if(arg.equals("Animations"))
 			   ShowAnimationWindow();
 			else if(arg.equals("Usage Profile"))
-			   ShowProfileWindow();
+			   showChildWindow(profileWindow,"ProfileWindow");
 			else if(arg.equals("View Log Files"))
-			   ShowLogFileViewerWindow();
+			   showChildWindow(logFileViewerWindow,"LogFileViewerWindow");
 			else if(arg.equals("Histograms"))
-			   ShowHistogramWindow();
+			   showChildWindow(histogramWindow,"HistogramWindow");
 			else if(arg.equals("Overview"))
 			   ShowStlWindow();
 			else if(arg.equals("Generate EP Data"))
@@ -103,40 +109,27 @@ public class MainWindow extends Frame
 		 }
 	  }
    }
-   public void CloseMultiRunWindow()
+
+	
+/* called by the childWindows to remove references to themselves */
+   public void closeChildWindow(Object childWindow)
    {
-       multiRunWindow = null;
-   }
+	if(childWindow.equals(timelineWindow))
+		timelineWindow = null;
+	else if(childWindow.equals(profileWindow))
+		profileWindow = null;
+	else if(childWindow.equals(logFileViewerWindow))
+		logFileViewerWindow = null;
+	else if(childWindow.equals(graphWindow))
+		graphWindow = null;
+	else if(childWindow.equals(multiRunWindow))
+		multiRunWindow = null;
+    }
+
     public void CloseEPAnalysis()
     {
 	epAnalysis = null;
     }
-   public void CloseGraphWindow()
-   {
-	  graphWindow = null;
-   }   
-   public void CloseHistogramWindow()
-   {
-	  if(histogramWindow != null)
-		 histogramWindow = null;
-   }   
-   public void CloseLogFileViewerWindow()
-   {
-	  if(logFileViewerWindow != null)
-		 logFileViewerWindow = null;
-   }   
-   public void CloseProfileWindow()
-   {
-	  profileWindow = null;
-   }   
-   public void CloseTimelineWindow()
-   {
-	  timelineWindow = null;
-   }   
-   public void closeIntervalWindow()
-   {
-	intervalWindow = null;
-   }
 
    private void CreateLayout()
    {
@@ -192,6 +185,7 @@ public class MainWindow extends Frame
 		 "View Log Files",
 		 "Histograms",
 		 "Interval Graph",
+		 "Entry Point Characteristics Graph",
 		 "Overview"
 	  },
 	  this));
@@ -275,6 +269,7 @@ public class MainWindow extends Frame
 		 aboutDialog = new AboutDialog(parent);
 	  aboutDialog.setVisible(true);
    }   
+
    public void ShowAnimationWindow()
    {
 	  if(animationWindow == null)
@@ -283,7 +278,14 @@ public class MainWindow extends Frame
 			animationWindow.setVisible(true);
 	 	}}).start();
 		 
-   }      
+   }
+      
+   public void ShowHistogramWindow()
+   {
+	   if(histogramWindow == null)
+		 histogramWindow = new HistogramWindow(this);
+   }   
+
    public void ShowGraphWindow()
    {
 	   if(graphWindow == null)
@@ -293,30 +295,42 @@ public class MainWindow extends Frame
    {
 	   if(multiRunWindow == null)
 		 multiRunWindow = new MultiRunWindow(this);
-   } 
+   }
+ 
     public void activateEPAnalysis()
     {
 	if (epAnalysis == null)
 	    epAnalysis = new EPAnalysis(this);
     }
-   public void ShowIntervalWindow()
+
+/* show the child window
+*  if the childWindow has not been created yet, then create an object of type childClass
+*  by invoking the corresponding constructor 
+*  see http://developer.java.sun.com/developer/technicalArticles/ALT/Reflection/ for example use of Java Reflection
+*/
+   public void showChildWindow(Object childWindow, String childClass)
    {
-	   if(intervalWindow == null)
-		 intervalWindow = new IntervalWindow(this);
-   }
-   
+	try{
+	   if(childWindow == null){
+		// get the name of the class within the current package and create an instance of that class
+			String className = getClass().getPackage().getName() + "." + childClass;
+			Class cls  = Class.forName(className);
+			Constructor ctr = cls.getConstructor(new Class[]{this.getClass()});
+			childWindow = ctr.newInstance(new Object[] {this});
+		//	childWindow.setVisible(true); ?? NEEDED??
+	   }
+	}catch(Exception e){
+		e.printStackTrace();
+	} 
+    }
+
    public void ShowHelpWindow()
    {
 	  if(helpWindow == null)
 		 helpWindow = new HelpWindow(this);
 	  helpWindow.setVisible(true);
    }   
-   public void ShowHistogramWindow()
-   {
-	  if(histogramWindow == null)
-		 histogramWindow = new HistogramWindow(this);
-	  histogramWindow.setVisible(true);
-   }   
+
    public void ShowLogFileViewerWindow()
    {
 	  if(logFileViewerWindow == null)
@@ -373,7 +387,8 @@ public class MainWindow extends Frame
    public void ShowProfileWindow()
    {
 	  if(profileWindow == null)
-	  	profileWindow = new ProfileWindow(this, null);
+	  	profileWindow = new ProfileWindow(this);
+	  //	profileWindow = new ProfileWindow(this, null);
 	  profileWindow.setVisible(true);
    }               
    public void ShowStlWindow()

@@ -1,5 +1,7 @@
 package projections.gui;
 
+import projections.misc.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
@@ -15,10 +17,16 @@ public class MultiRunControlPanel extends Panel
     private TextField cmdLine;
 
     private MultiRunWindow mainWindow;
+    private MultiRunController controller;
 
-    public MultiRunControlPanel(MultiRunWindow NmainWindow)
+    public MultiRunControlPanel(MultiRunWindow NmainWindow,
+				MultiRunController Ncontroller)
     {
 	mainWindow = NmainWindow;
+	controller = Ncontroller;
+
+	controller.registerControl(this);
+
 	setBackground(Color.lightGray);
 
 	processCL = new Button("Process Command Line");
@@ -36,24 +44,13 @@ public class MultiRunControlPanel extends Panel
 	
 	gbc.fill = GridBagConstraints.BOTH;
 
-	Util.gblAdd(this, cmdLineLabel, gbc, 0, 0, 1, 1, 1, 1);
-	Util.gblAdd(this, cmdLine,      gbc, 0, 1, 1, 1, 1, 1);
-	Util.gblAdd(this, processCL,    gbc, 0, 2, 1, 1, 1, 1);
 	Util.gblAdd(this, done,         gbc, 1, 2, 1, 1, 1, 1);
     }
 
     public void actionPerformed(ActionEvent evt) {
 	if (evt.getSource() instanceof Button) {
 	    Button b = (Button) evt.getSource();
-
-	    if (b == processCL) {
-		StringTokenizer st = new StringTokenizer(cmdLine.getText());
-		String args[] = new String[st.countTokens()];
-		for (int i=0; i<args.length; i++) {
-		    args[i] = st.nextToken();
-		}
-		mainWindow.processCommandLine(args);
-	    } else if (b == done) {
+	    if (b == done) {
 		mainWindow.Close();
 	    }
 	}

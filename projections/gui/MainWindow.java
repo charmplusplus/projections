@@ -43,7 +43,13 @@ public class MainWindow extends Frame
 
 	  CreateMenus();
 	  CreateLayout();
-	  
+
+	  // Font allFonts[] = 
+	  // GraphicsEnvironment.getLocalGraphicsEnvironment().getAllFonts();
+	  // for (int i=0; i<allFonts.length; i++) {
+	  //     System.out.println(allFonts[i].getFontName());
+	  // }
+	  // System.out.println(Font.decode("Courier 10 Pitch").getFontName());
    }                              
    public void actionPerformed(ActionEvent evt)
    {

@@ -19,7 +19,7 @@ SRC=\
     projections/analysis/UsageCalc.java\
     projections/analysis/UsageInterval.java\
     projections/analysis/ViewerEvent.java\
-    projections/analysis/DataAnalyzer.java\
+    projections/analysis/MultiRunDataAnalyzer.java\
     projections/analysis/MRStsReader.java\
     projections/analysis/MRSummaryReader.java\
     projections/analysis/GenericLogReader.java\
@@ -95,6 +95,8 @@ SRC=\
     projections/gui/TimelineRangeDialog.java\
     projections/gui/TimelineWindow.java\
     projections/gui/MultiRunControlPanel.java\
+    projections/gui/MultiRunDisplayPanel.java\
+    projections/gui/MultiRunTextAreaWriter.java\
     projections/gui/MultiRunWindow.java\
     projections/gui/U.java\
     projections/gui/Util.java\
@@ -104,7 +106,9 @@ SRC=\
     projections/misc/SummaryFormatException.java\
     projections/misc/ProgressDialog.java	\
     projections/misc/ErrorDialog.java\
-    projections/misc/AccumulatedData.java\
+    projections/misc/MultiRunData.java\
+    projections/misc/MultiRunController.java\
+    projections/misc/MultiRunTextRenderer.java\
     projections/misc/ChareData.java\
     projections/misc/EntryTypeData.java\
     projections/misc/LogEntryData.java\
@@ -114,6 +118,9 @@ SRC=\
     projections/gui/graph/YAxis.java\
     projections/gui/graph/YAxisFixed.java\
     projections/gui/graph/YAxisAuto.java\
+    projections/gui/graph/MultiRunDataSource.java\
+    projections/gui/graph/MultiRunXAxis.java\
+    projections/gui/graph/MultiRunYAxis.java\
     projections/gui/graph/DataSource.java\
     projections/gui/graph/DataSource1D.java
 
@@ -142,6 +149,7 @@ clean:
 	@ echo "** Removing temporary files"
 	- rm bin/*.jar
 	- rm projections/*/*.class
+	- rm projections/*/*/*.class
 
 
 

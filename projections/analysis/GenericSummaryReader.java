@@ -13,18 +13,25 @@ import java.util.*;
  *
  *  The GenericSummaryReader reads .sum files to produce data to be consumed by
  *  the analyzer.
+ *
+ *  ***NOTE*** current summary data is labelled. GenericSummaryReader should
+ *  employ a more general way of reading its data that is flexible to new
+ *  pieces of information without having to rely on version numbers.
+ * 
+ *  For now, I am hacking it to just read the labels.
  */
 
 public class GenericSummaryReader
 {
     // private static meta-tags - used to allocate space in the data array
     // based on the number of tags.
-    private static final int NUM_TAGS = 2;
+    private static final int NUM_TAGS = 3;
 
     // public static tags - used to access the appropriate part of the
     // array.
     public static final int TOTAL_TIME = 0;
     public static final int NUM_MSGS = 1;
+    public static final int MAX_TIME = 2;
 
     // header values
     public int versionNum;
@@ -158,6 +165,13 @@ System.out.println(val+" "+tokenizer.nval);
 
 	// Read in the THIRD line (time spent by entries)
 	int currentUserEntry = 0;
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	} else {
+	    tokenizer.pushBack();
+	}
 	while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))
 	       && (numEPs>currentUserEntry)) {
 	    epData[currentUserEntry][TOTAL_TIME] = (int)tokenizer.nval;
@@ -169,6 +183,13 @@ System.out.println(val+" "+tokenizer.nval);
 	}
 
 	// Read in the FOURTH line (number of messages)
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	} else {
+	    tokenizer.pushBack();
+	}
 	currentUserEntry = 0;
 	while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))
 	       && (numEPs>currentUserEntry)) {
@@ -180,17 +201,39 @@ System.out.println(val+" "+tokenizer.nval);
 	    throw new IOException("extra garbage at end of line 4");
 	}
 	
-	// Read in the FIFTH line
+	// Read in the FIFTH line (maximum EP time)
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	} else {
+	    tokenizer.pushBack();
+	}
+	currentUserEntry = 0;
+	while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))
+	       && (numEPs>currentUserEntry)) {
+	    epData[currentUserEntry][MAX_TIME] = (int)tokenizer.nval;
+	    currentUserEntry++;
+	}
+	//Make sure we're at the end of the line
+	if (StreamTokenizer.TT_EOL!=tokenType) {
+	    throw new IOException("extra garbage at end of line 5");
+	}
+	
+	// Read in the SIXTH line
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	} else {
+	    tokenizer.pushBack();
+	}
 	int numberofPairs;
 	numberofPairs = (int)tokenizer.nextNumber("Number of Marked Events");
 	// **CW** for some reason we are ignoring this
 	for (int g=0; g<numberofPairs; g++) {
 	    tokenizer.nextNumber("Number of Marked Events");
 	    tokenizer.nextNumber("Number of Marked Events");
-	}
-	// Make sure we're at the end of the line
-	if (StreamTokenizer.TT_EOL!=tokenType) {
-	    throw new IOException("extra garbage at end of line 5");
 	}
 	
 	// Dealing with the phases

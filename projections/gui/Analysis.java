@@ -322,7 +322,7 @@ public class Analysis {
 				sumAnalyzer = new SumAnalyzer( sts );
 			}
 			catch( SummaryFormatException E ) {
-				System.out.println( "Caught SummaryFormatException" );
+			    System.out.println(E.toString());
 			}
 		}
 		if ( sts.hasLogFiles() ) { //.log files

@@ -16,6 +16,7 @@ public class SumAnalyzer extends ProjDefs
 	private long[][] ChareTime;   // Holds the total time (in microseconds) spent executing messages
 								// directed to each entry method during the entire program run	(3rd line of sum file)
 	private int[][] NumEntryMsgs; // Holds the total number of messages sent to each entry method during
+    private int[][] MaxEntryTime; // Holds the maximum time each EP spent (line 5)
 								// the entire program run (4th line of the sum file)
 	private int PhaseCount;
 	private long IntervalSize;//Length of interval, microseconds
@@ -86,8 +87,11 @@ public class SumAnalyzer extends ProjDefs
 			ProcessorUtilization = new int[nPe][];
 			ChareTime= new long [nPe][numEntry];
 			NumEntryMsgs = new int [nPe][numEntry];
+			MaxEntryTime = new int [nPe][numEntry];
 		}
 		ProcessorUtilization[p] = new int[IntervalCount + 20];
+
+		System.out.println("Interval count = " + IntervalCount);
 
 		//Read the SECOND line (processor usage)
 		int nUsageRead=0;
@@ -131,11 +135,20 @@ public class SumAnalyzer extends ProjDefs
                   else 
 	            System.out.println("extra garbage at end of line 2");
 	        }
+		System.out.println("Intervals read = " + nUsageRead);
                 if (myCount != nUsageRead) 
                   System.out.println("numIntervals not agree" + IntervalCount + "v.s. " + nUsageRead+"!");
 		   
 		// Read in the THIRD line (time spent by entries)
 		CurrentUserEntry = 0;
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	    System.out.println(tokenizer.sval + " read.");
+	} else {
+	    tokenizer.pushBack();
+	}
 		while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))&&(numEntry>CurrentUserEntry))
 			{
 			ChareTime[p][CurrentUserEntry] = (int)tokenizer.nval;
@@ -146,6 +159,14 @@ public class SumAnalyzer extends ProjDefs
 			throw new SummaryFormatException("extra garbage at end of line 3");
 		
 		// Read in the FOURTH line (number of messages)
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	    System.out.println(tokenizer.sval + " read.");
+	} else {
+	    tokenizer.pushBack();
+	}
 		CurrentUserEntry = 0;
 		while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))&&(numEntry>CurrentUserEntry))
 			{
@@ -157,19 +178,51 @@ public class SumAnalyzer extends ProjDefs
 		if (StreamTokenizer.TT_EOL!=tokenType)
 			throw new SummaryFormatException("extra garbage at end of line 4");
 		
+		// Read in the FIFTH line (Maximum EP Time)
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+		// this line applies only to version 4.0 and above.
+		if (versionNum >= 4.0) {
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	    System.out.println(tokenizer.sval + " read.");
+	} else {
+	    tokenizer.pushBack();
+	}
+		CurrentUserEntry = 0;
+		while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken()))&&(numEntry>CurrentUserEntry))
+			{
+			MaxEntryTime[p][CurrentUserEntry] = (int)tokenizer.nval;
+			CurrentUserEntry++;
+			}
 		
-		// Read in the FIFTH line
+		//Make sure we're at the end of the line
+		if (StreamTokenizer.TT_EOL!=tokenType)
+			throw new SummaryFormatException("extra garbage at end of line 5");
+		}
+		// Read in the SIXTH line (phase pairs)
 		int NumberofPairs;
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // do nothing. Label consumed.
+	    System.out.println(tokenizer.sval + " read.");
+	} else {
+	    tokenizer.pushBack();
+	}
 		NumberofPairs = (int)nextNumber("Number of Marked Events");
+		System.out.println("num pairs is " + NumberofPairs);
 		for (int g=0; g<NumberofPairs; g++)
 			{
 			nextNumber("Number of Marked Events");
 			nextNumber("Number of Marked Events");
 			}
 		//Make sure we're at the end of the line
+		/* **CW** No need for that. Unlike the previous code where we
+		   use a while loop, here we know exactly what we want.
 		if (StreamTokenizer.TT_EOL!=tokenType)
-			throw new SummaryFormatException("extra garbage at end of line 5");
-		
+			throw new SummaryFormatException("extra garbage at end of line 6");
+		*/
 		if (PhaseCount > 1)
 			{				
 			if (p == 0)

@@ -104,7 +104,8 @@ public class GraphAttributesWindow extends ColorWindowFrame
 			{   
 			   data.systemUsage[a].state = cbSystemUsage[a].getState();
 			   data.systemUsage[a].color = cpSystemUsage[a].getColor();
-			   if(data.systemUsage[a].state == true)
+			   if(data.systemUsage[a].state == true &&
+				data.systemUsage[a].exists == true)
 				  numOnGraph++;
 			}   
 			for(int a=0; a<5; a++)
@@ -125,7 +126,8 @@ public class GraphAttributesWindow extends ColorWindowFrame
 						data.systemMsgs[a][2].state = false;   
 					 data.systemMsgs[a][2].color = data.systemMsgs[a][0].color;
 				  }   
-				  if(data.systemMsgs[a][t].state == true)
+				  if(data.systemMsgs[a][t].state == true &&
+					data.systemMsgs[a][t].exists == true)
 					 numOnGraph++;
 			   }      
 			}
@@ -147,7 +149,8 @@ public class GraphAttributesWindow extends ColorWindowFrame
 						data.userEntry[a][2].state = false;   
 					 data.userEntry[a][2].color = data.userEntry[a][0].color;
 				  }
-				  if(data.userEntry[a][t].state == true)
+				  if(data.userEntry[a][t].state == true &&
+					data.userEntry[a][t].exists == true)
 					 numOnGraph++;
 			   }         
 			}

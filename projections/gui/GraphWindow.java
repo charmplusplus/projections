@@ -328,7 +328,7 @@ public class GraphWindow extends Frame
           OrderedIntList oldProcList = null;
           if (processorList!=null) oldProcList = processorList.copyOf();
 	  
-	  intervalDialog = new GraphIntervalDialog(this, numintervals);
+	  intervalDialog = new GraphIntervalDialog(this, numintervals, processorListString);
 	  intervalDialog.setVisible(true);
 	  intervalDialog = null;
 	  

@@ -94,7 +94,8 @@ SRC=\
     projections/misc/EntryNotFoundException.java\
     projections/misc/LogLoadException.java\
     projections/misc/SummaryFormatException.java\
-    projections/misc/ProgressDialog.java
+    projections/misc/ProgressDialog.java	\
+    projections/misc/ErrorDialog.java
 
 
 all: bin/projections.jar

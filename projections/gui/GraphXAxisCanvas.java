@@ -86,7 +86,7 @@ public class GraphXAxisCanvas extends Canvas
 			{
 			  data.origProcList.reset();
 			  int pe = data.origProcList.nextElement();
-			  for (int j=0; j<i; j++)
+			  for (int j=0; j<i*tickincrement; j++)
 			    pe = data.origProcList.nextElement();
 			  s = "" + pe;
 			}

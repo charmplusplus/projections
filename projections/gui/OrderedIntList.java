@@ -55,6 +55,37 @@ public class OrderedIntList
    {
 	  return nextLink() != null;
    }   
+
+   /**
+      return true if this list contain otherlist
+   */
+   public boolean contains(OrderedIntList otherlist)
+   {
+	if (otherlist == null) return true;
+	if (otherlist.size() > size()) return false;
+	reset();
+	otherlist.reset();
+	int e, me;
+	while((e = otherlist.nextElement()) != -1)
+	{
+	  while (e != (me = nextElement())) 
+	    if (me == -1) return false;
+	}
+	return true;
+   }
+   /**
+      return true if this list has ele
+   */
+   public boolean contains(int ele)
+   {
+	int me;
+	reset();
+	while((me = nextElement()) != -1)
+	{
+	    if (me == ele) return true;
+	}
+	return false;
+   }
    public void insert(int n)
    {
 	  Link newLink;

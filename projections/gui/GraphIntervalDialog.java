@@ -20,7 +20,7 @@ public class GraphIntervalDialog extends Dialog
    
    private Button bOK, bCancel;
 	  
-   public GraphIntervalDialog(GraphWindow graphWindow, int nI)
+   public GraphIntervalDialog(GraphWindow graphWindow, int nI, String pStr)
    {
 	  super((Frame)graphWindow, "Set Interval Size", true);
 		
@@ -48,6 +48,12 @@ public class GraphIntervalDialog extends Dialog
 	  intervalSize=U.makeEven(intervalSize);
 	  numIntervals=(int)(totalTime/intervalSize+1);
 	  
+          int numProcs = Analysis.getNumProcessors();
+	  if (pStr == null)
+		processorString = "0-"+Integer.toString(numProcs-1);
+	  else
+		processorString = pStr;
+
 	  sizeField = new TimeTextField(intervalSize, 12);
 	  numField  = new IntTextField(numIntervals, 12);
           processorsField = new SelectField(processorString, 12);
@@ -71,8 +77,6 @@ public class GraphIntervalDialog extends Dialog
 	  gbc.fill = GridBagConstraints.BOTH;
 	  gbc.insets = new Insets(5, 5, 5, 5);
 	  
-          int numProcs = Analysis.getNumProcessors();
-
           int row = 0;
 	  Util.gblAdd(p1, new Label("Total Time:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
 	  Util.gblAdd(p1, new Label(U.t(totalTime), Label.RIGHT), gbc, 1, row, 1, 1, 1, 1);
@@ -84,7 +88,6 @@ public class GraphIntervalDialog extends Dialog
 	  
 	  Util.gblAdd(p1, new Label("Processors:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
 	  Util.gblAdd(p1, processorsField,                       gbc, 1, row, 1, 1, 1, 1);
-	  processorsField.setText("0-"+Integer.toString(numProcs-1));
 	  row ++;
 
 	  Util.gblAdd(p1, new Label("Interval Size:", Label.RIGHT), gbc, 0, row, 1, 1, 1, 1);
@@ -122,6 +125,7 @@ public class GraphIntervalDialog extends Dialog
 			graphWindow.setIntervalSize(intervalSize);
 			graphWindow.setNumIntervals(numIntervals);
                         processorList = processorsField.getValue(Analysis.getNumProcessors());
+			processorString = processorList.listToString();
 			graphWindow.setProcessorRange(processorList);
 		 }
 		 setVisible(false);
@@ -132,6 +136,7 @@ public class GraphIntervalDialog extends Dialog
 		 graphWindow.setIntervalSize(intervalSize);
 		 graphWindow.setNumIntervals(numIntervals);
                  processorList = processorsField.getValue(Analysis.getNumProcessors());
+		 processorString = processorList.listToString();
 		 graphWindow.setProcessorRange(processorList);
 		 setVisible(false);
 		 dispose();

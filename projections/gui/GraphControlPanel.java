@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import projections.misc.*;
 
 public class GraphControlPanel extends Panel
    implements ActionListener, ItemListener
@@ -22,6 +23,7 @@ public class GraphControlPanel extends Panel
    private Label        lSelect;
    private SelectField  rangeField;
 
+   private ErrorDialog      errDlg;
    private OrderedIntList  origProcList;    // original proc list
    
    public GraphControlPanel()
@@ -101,6 +103,7 @@ public class GraphControlPanel extends Panel
 		 
 	  rangeField.setText(selectFormat);
 	  rangeField.addActionListener(this);
+
    }   
    public void actionPerformed(ActionEvent evt)
    {
@@ -174,6 +177,15 @@ public class GraphControlPanel extends Panel
 	  {
 //		 data.processor.list   = rangeField.getValue(data.processor.num);
 		 data.processor.list   = rangeField.getValue(Analysis.getNumProcessors());
+		 if (!origProcList.contains(data.processor.list)) {
+		   System.out.println("Invalid processor range. ");
+	  	   // create a error dialog
+		   if (errDlg == null)
+          	     errDlg = new ErrorDialog(data.graphWindow,"Processors Range Beyond Scope!");
+		   if (!errDlg.isShowing()) errDlg.show();
+		   rangeField.setText(origProcList.listToString());
+		   return;
+		 }
 		 data.processor.string = rangeField.getText(); 
 		 data.setData();
 	  }
@@ -250,3 +262,4 @@ public class GraphControlPanel extends Panel
 	  data.legendPanel.UpdateLegend();
    }   
 }
+

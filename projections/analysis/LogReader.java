@@ -42,7 +42,9 @@ public class LogReader extends ProjDefs
 	private int processing;
 	private boolean byEntryPoint;
 	
-	//Add the given amount of time to the current entry for interval j
+	/**
+          Add the given amount of time to the current entry for interval j
+        */
 	final private void addToInterval(int extra,int j,boolean maxPercents)
 	{
 	if (processing<=0) return; //Not processing at all
@@ -52,7 +54,7 @@ public class LogReader extends ProjDefs
 	//System.out.println("Adding "+extra+"us for #"+curPe+":"+j);
 		sysUsgData[SYS_CPU][curPe][j] += maxPercents?100:extra;
 		if (byEntryPoint) {
-			userEntries[currentEntry][2][curPe][j] += extra; 
+			userEntries[currentEntry][TIME][curPe][j] += extra; 
 			int catIdx=mtypeToCategoryIdx(currentMtype); 
 			if (catIdx!=-1) categorized[catIdx][TIME][curPe][j]+=extra;
 		}
@@ -74,7 +76,8 @@ public class LogReader extends ProjDefs
 /*  gzheng to save memory, only allocate memory for those processors in the list
 	  if (userEntries[entry][TYPE][curPe]==null) {
 	    userEntries[entry][TYPE][curPe]=new int[numIntervals+1];
-	    if (TYPE==PROCESS) //Add a time array, too
+	  }
+	  if (TYPE==PROCESS && userEntries[entry][TIME][curPe] == null) { //Add a time array, too
 	      userEntries[entry][TIME][curPe]=new int[numIntervals+1];
 	  }
 */
@@ -158,7 +161,10 @@ public class LogReader extends ProjDefs
 		break;
 	}
 	}
-//Maps a message type to a categorized system message number
+
+        /**
+           Maps a message type to a categorized system message number
+        */
 	final private int mtypeToCategoryIdx(int mtype) {
 		switch(mtype) {
 		case NEW_CHARE_MSG: return 0;
@@ -171,6 +177,7 @@ public class LogReader extends ProjDefs
 			return -1;
 		}
 	}
+
         /**
            read log file, with one more parameter containing 
            a list of processors to read.
@@ -212,6 +219,7 @@ public class LogReader extends ProjDefs
 		userEntries = new int[numUserEntries][3][][];
 		categorized = new int[5][3][][];
 	}
+	int seq = 0;
         processorList.reset();
 	int nPe=processorList.size();
  	curPe = processorList.nextElement();
@@ -220,6 +228,7 @@ public class LogReader extends ProjDefs
                 sysUsgData[0][curPe] = new int [numIntervals+1];
                 sysUsgData[1][curPe] = new int [numIntervals+1];
                 sysUsgData[2][curPe] = new int [numIntervals+1];
+		seq ++;
 		processing = 0;
 	        interval = 0;
 	        currentEntry = -1;
@@ -231,7 +240,7 @@ public class LogReader extends ProjDefs
 		log.nextInt();
 		progStartTime = 0;//log.nextLong();
 		int nLines=2;
-		if (!bar.progress(allocEffort+curPe,totalEffort,"Loading "+(curPe+1)+" of "+nPe))
+		if (!bar.progress(allocEffort+curPe,totalEffort,"Loading "+seq+" of "+nPe))
 			break;//User cancelled load
 		
 		try { while (true) { //EOFException will terminate loop

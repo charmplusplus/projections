@@ -7,6 +7,6 @@ then
   jarpath=`/usr/bin/cygpath -w -a $jarpath`
 fi
 
-java -ms60000000 -mx100000000 \
+java -ms60000000 -mx256000000 \
   -classpath $jarpath \
   projections.gui.MainWindow $*

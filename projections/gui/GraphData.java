@@ -237,18 +237,21 @@ public class GraphData
 	  int max = 0;
 	  for(int i=0; i<interval.num; i++)
 	  {
-		 count = 0;
-		 item.curIData[i] = 0;
-		 processor.list.reset();
-		 while((element = processor.list.nextElement()) >= 0)
-		 {
-			item.curIData[i] += item.data[element][i];
-			count++;
-		 }
-		 if(item.ymode == BOTH)
-			item.curIData[i] /= count;
-		 else
-			max = Math.max(item.curIData[i], max);     
+	    item.curIData[i] = 0;
+	    // gzheng
+	    // need to check if these i is in interval.list
+	    if (!interval.list.contains(i)) continue;
+	    count = 0;
+	    processor.list.reset();
+	    while((element = processor.list.nextElement()) >= 0)
+	    {
+		item.curIData[i] += item.data[element][i];
+		count++;
+	    }
+	    if(item.ymode == BOTH)
+		item.curIData[i] /= count;
+	    else
+		max = Math.max(item.curIData[i], max);     
 	  }
 	  return max;
    }   
@@ -256,21 +259,22 @@ public class GraphData
    {
 	   int element, count;
 	  int max = 0;
-//	  for(int p=0; p<processor.num; p++)
-	  for (int p=processor.list.nextElement(); p!=-1; p=processor.list.nextElement())
+	  for(int p=0; p<processor.num; p++)
 	  {
-		 count = 0;
-		 item.curPData[p] = 0;
-		 interval.list.reset();
-		 while((element = interval.list.nextElement()) >= 0)
-		 {
-			item.curPData[p] += item.data[p][element];
-			count++;
-		 }
-		 if(item.ymode == BOTH)
-			item.curPData[p] /= count;
-		 else
-			max = Math.max(item.curPData[p], max);   
+//  for (int p=processor.list.nextElement(); p!=-1; p=processor.list.nextElement())
+	    item.curPData[p] = 0;
+	    if (!processor.list.contains(p)) continue;
+	    count = 0;
+	    interval.list.reset();
+	    while((element = interval.list.nextElement()) >= 0)
+	    {
+		item.curPData[p] += item.data[p][element];
+		count++;
+	    }
+	    if(item.ymode == BOTH)
+		item.curPData[p] /= count;
+	    else
+		max = Math.max(item.curPData[p], max);   
 	  }
 	  return max;
    }   
@@ -283,6 +287,10 @@ public class GraphData
 	  
 	  for(int a=0; a<onGraph.length; a++)
 	  {
+		 if (onGraph[a] == null) {
+		   System.out.println("onGraph["+a+"/"+onGraph.length+"]==null");
+		   continue;
+		 }
 		 if(onGraph[a].ymode == BOTH)
 		 {
 			setCurPData(onGraph[a]);

@@ -22,6 +22,8 @@ public class HistogramWindow extends ProjectionsWindow
    private OrderedIntList validPEs;
    private long startTime;
    private long endTime;
+   private long totalExecutionTime;	// sum total of the execution times of all the entry points selected
+   private long longestExecutionTime;	// longest EntryPoint execution time
 
 //variables to be passed to EntrySelectionDialog
    private EntrySelectionDialog entryDialog;
@@ -32,6 +34,8 @@ public class HistogramWindow extends ProjectionsWindow
    private JTextArea statusArea;		// displays the number of EPs in each bin as an ordered pair
    private boolean recordEP;			// should longest entrypoints be recorded & displayed as a table?
    private EntryPointWindow epFrame;
+
+   private boolean startUp;			// show both range dialog & epdialog during startup
  
    public HistogramWindow(MainWindow mainWindow)
    {
@@ -64,15 +68,15 @@ public class HistogramWindow extends ProjectionsWindow
 
 	  recordEP = false;	// dont record longest EPs unless specified
 	  epFrame = null;
+	  statusArea = new JTextArea(6,2);	// to display the no. of EPs vs bins as text	
+	  startUp = true;
 
-	  statusArea = new JTextArea(4,2);	
 	  createMenus();
 	  createLayout();
 	  pack();
 	  setVisible(true);
 		
 	  showDialog();
-
    }   
 
 /* Show the RangeDialog to set processor numbers and interval times */
@@ -83,21 +87,21 @@ public class HistogramWindow extends ProjectionsWindow
 		 dialog = new RangeDialog(this,"Select Range");
 	dialog.displayDialog();
 	if(!isDialogCancelled)
-		refreshGraph();
+		if(!startUp)
+			refreshGraph();
+		else
+			showEntryDialog();
    }
 
 /* Show the EntrySelectionDialog to select Entrypoints to be considered */
 
    void showEntryDialog()
    {
+	if(startUp) startUp = false;
+
 	int noEPs = Analysis.getUserEntryCount();
 	String typeLabelStrings[] = {"Entry Points"};
 
-/*      colorArray = new Color[1][noEPs];
-	for(int i=0; i < noEPs; i++)
-		colorArray[0][i] = Analysis.getEntryColor(i);
-*/
- 
 	boolean existsArray[][] = new boolean[1][noEPs];
 	for(int i=0; i<noEPs; i++)
 		existsArray[0][i] = true;
@@ -163,7 +167,7 @@ public class HistogramWindow extends ProjectionsWindow
 	  mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
 	  mainPanel.add(graphPanel);
           mainPanel.add(Box.createRigidArea(new Dimension(0,6)));
-	  mainPanel.add(new JScrollPane(statusArea,ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+	  mainPanel.add(new JScrollPane(statusArea,ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED));
 	  add(mainPanel);
   }  
 
@@ -173,12 +177,15 @@ public class HistogramWindow extends ProjectionsWindow
 	  int [] counts = getCounts();
 	  DataSource ds=new DataSource1D("Histogram (Granularity = 100us)",counts);
 	  XAxis xa=new XAxisFixed("Entry Point Execution Time","");
-	  YAxis ya=new YAxisAuto("Number of Entry Points","",ds);
+	  YAxis ya=new YAxisAuto("Entry Points#","",ds);
 	  
 	  graphCanvas.setData(ds,xa,ya);
 	  graphCanvas.repaint();
 
-	  String firstRow="bin\t", secondRow="EPs\t";	
+	  String firstRow  ="Bin  ", secondRow="EPs  ";	
+	  String  thirdRow = "Total Execution Time: " + String.valueOf(totalExecutionTime)+ " us";
+	  String fourthRow = "Longest Entry Point Execution Time: " + longestExecutionTime +" us";
+
 	  for(int i=0; i<counts.length; i++)
 		if(counts[i]!=0)
 		{
@@ -189,15 +196,19 @@ public class HistogramWindow extends ProjectionsWindow
 	   // clear the text area and enter new set
 	   statusArea.setText("");	
 	   statusArea.append(firstRow+"\n");
-	   statusArea.append(secondRow);
+	   statusArea.append(secondRow+"\n\n");
+	   statusArea.append(thirdRow+"\n");
+	   statusArea.append(fourthRow);
    }
 
    private int[] getCounts()
    {
 
+	  totalExecutionTime = 0;
+	  longestExecutionTime=0;
+
 	  OrderedIntList tmpPEs = validPEs.copyOf();
 	  GenericLogReader r;
-	  int maxdiff=0;
 	  if(recordEP)
 	  {
 		//epFrame = new EPFrame();
@@ -227,15 +238,17 @@ public class HistogramWindow extends ProjectionsWindow
 			r.nextEventOfType(ProjDefs.BEGIN_PROCESSING,logdata);
 			r.nextEventOfType(ProjDefs.END_PROCESSING,logdata2);
 			if(stateArray[0][logdata.entry]){			// if the entry method is selected, count it
-				int diff = (int)((logdata2.time - logdata.time)/FREQUENCY);
+				long executionTime = (logdata2.time - logdata.time);
+				totalExecutionTime += executionTime;
+
+				int diff = (int)(executionTime/FREQUENCY);
 				if(diff >= NO_OF_BINS) 
 				{
-		
 				// enter the data into the table
 				if(recordEP)
 				        epFrame.writeToTable(pe,entryNames[logdata.entry],logdata.time,logdata2.time,colorArray[0][logdata.entry]);
 
-					maxdiff=(diff>maxdiff)?diff:maxdiff;
+					longestExecutionTime=(executionTime>longestExecutionTime)?executionTime:longestExecutionTime;
 					diff = NO_OF_BINS-1;
 				}
 				counts[diff]++;
@@ -252,7 +265,6 @@ public class HistogramWindow extends ProjectionsWindow
 
          }
 	  if(recordEP)	epFrame.setVisible(true);
-	  System.out.println("Entry Point with longest time difference: " + maxdiff);
 	  return(counts);
 
    }
@@ -271,7 +283,7 @@ public class HistogramWindow extends ProjectionsWindow
 
           mbar.add(Util.makeMenu("View", new Object[]
           {
-                 new CheckboxMenuItem("Record Longest EPs")
+                 new CheckboxMenuItem("Show Longest EPs")
           },
           this));
 

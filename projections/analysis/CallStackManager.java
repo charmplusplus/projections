@@ -3,8 +3,8 @@ package projections.analysis;
 import java.util.*;
 
 /**
- *  CallStackManager is essentially an interface to projections to conveniently
- *  handle function calls from multiple array elements.
+ *  CallStackManager is essentially an interface to projections to 
+ *  conveniently handle function calls from multiple array elements.
  */
 public class CallStackManager extends Hashtable {
 
@@ -71,6 +71,9 @@ public class CallStackManager extends Hashtable {
 	return newkey;
     }
 
+    /**
+     *   Simple testing routines.
+     */
     public static void main(String args[]) {
 	CallStackManager cs = new CallStackManager();
 	Stack stack1, stack2;

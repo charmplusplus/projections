@@ -1,11 +1,14 @@
 package projections.gui;
 
-import java.io.*;
-import projections.analysis.*;
-import projections.misc.*;
-import java.util.*;
 import java.awt.*;
 import javax.swing.*;
+
+import java.io.*;
+import java.util.*;
+
+import projections.analysis.*;
+import projections.misc.*;
+import projections.guiUtils.*;
 
 /**
  *  Analysis
@@ -50,6 +53,8 @@ public class Analysis {
     private static SumDetailReader summaryDetails[]; // .sumd files
 	
     private static IntervalData intervalData; // interval-based data
+    public static ActivityManager      activityManager;
+
 
     /******************* Graphs ***************/
     private static int[][][] systemUsageData;
@@ -101,9 +106,10 @@ public class Analysis {
 	throws IOException 
     {
 	guiRoot = rootComponent;
-
+	activityManager = new ActivityManager();
 	try {
 	    sts=new StsReader(filename);
+	    //	    activityManager.registrationDone();
 	    // if I can find the saved color maps, then use it.
 	    String colorsaved = 
 		getLogDirectory() + File.separator + "savedcolors.prj";
@@ -111,6 +117,12 @@ public class Analysis {
 	    if ((new File(colorsaved)).exists()) {
 		try {
 		    entryColors = ColorSaver.loadColors();
+
+		    // ORTHOGONAL SYSTEM OF COLORS - FOR NOW
+		    // SPECIAL NOTE: This assumes the colors were
+		    // saved using the new color system. otherwise,
+		    // bad things can be expected to happen.
+		    //		    activityManager.setColors(entryColors);
 		} catch (IOException exception) {
 		    System.err.println("Failed to load colors!!!");
 		    entryColors = createColorMap(sts.getEntryCount());
@@ -474,6 +486,8 @@ public class Analysis {
 
 	    // the trick is to know when some 
 	    systemUsageData[1] = null;
+	    System.out.println(intervalStart + " " + intervalEnd + " " +
+			       intervalSize);
 	    systemUsageData[1] = 
 		sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
 					       intervalSize);

@@ -69,26 +69,6 @@ public class StlWindow extends ProjectionsWindow
 	showDialog();
     }
    
-//     public void basicOverview(){
-// 	try{
-// 	    thisWindow = this;
-
-// 	    setBackground(Color.black);
-// 	    setForeground(Color.lightGray);
-	
-// 	    createMenus();
-// 	    createLayout();
-// 	    pack();
-
-// 	    OrderedIntList vpe = Analysis.getValidProcessorsList();
-// 	    thisWindow.setStlPanelData();
-// 	    stl.setData(vpe, 0, Analysis.getTotalTime());
-// 	} catch (Exception e){
-// 	    System.err.println("StlWindow->basicOverview: exception occured\n");
-// 	    e.printStackTrace();
-// 	}
-//     } 
-    
     private void createLayout()
     {
 	GridBagLayout      gbl = new GridBagLayout();

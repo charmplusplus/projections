@@ -33,6 +33,8 @@ public class MainWindow extends JFrame
 
     public static double CUR_VERSION = 4.0;
     public static boolean IGNORE_IDLE = false;
+    public static boolean BLUEGENE = false; // hack to support BG hop count
+    public static int BLUEGENE_SIZE[] = {16, 8, 8};
 
     // for SwingWorker to work
     private MainWindow thisWindow;
@@ -346,6 +348,7 @@ public class MainWindow extends JFrame
 		    if (Analysis.hasSummaryData()) {
 			// see "finished()"
 		    } else if (Analysis.hasLogData()) {
+			/* (need to deal with visualization bug)
 			status = new Label("");
 			status.setBackground(Color.black);
 			status.setForeground(Color.lightGray);
@@ -380,10 +383,6 @@ public class MainWindow extends JFrame
 			while (memUsage/interval > maxMem) {
 			    interval++;
 			}
-			/*
-			System.out.println("Showing every " + interval + 
-					   " processor");
-			*/
 			if (interval > 1) {
 			    OrderedIntList tempPEs = validPEs.copyOf();
 			    int element, tmp;
@@ -427,6 +426,7 @@ public class MainWindow extends JFrame
 			ver.setTicks(Math.floor(vMin),1);
 			
 			stl.setData(validPEs,startTime,endTime);
+			*/
 		    }			
 		    return null;
 		}
@@ -466,11 +466,14 @@ public class MainWindow extends JFrame
 						     sumXAxis, sumYAxis));
 			summaryGraphPanel.add("data", graphPanel, "run data");
 		    } else {
+		    /* (bypass the visualization problem for now)
 			summaryGraphPanel.add("data", scalePanel, "overview");
 			Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
 			Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
 			Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
+		    */
 		    }
+		    
 		    menuManager.fileOpened();
 		}
 
@@ -526,6 +529,8 @@ public class MainWindow extends JFrame
 	System.out.println("-h:		show this page");
 	System.out.println("-V:		show Projections version");
 	System.out.println("-u <ver>:	use old version format");
+	System.out.println("-bg:        use hop count info for BG machines");
+	System.out.println("-bgsize <x> <y> <z>");
 	System.exit(0);
     }
 
@@ -552,9 +557,18 @@ public class MainWindow extends JFrame
 		CUR_VERSION = useVersion;
 	    } else if (args[i].equals("-idle")) {
 		IGNORE_IDLE = true;
-	    }
-	    else /*unrecognized argument*/
+	    } else if (args[i].equals("-bg")) {
+		BLUEGENE = true;
+	    } else if (args[i].equals("-bgsize")) {
+		i++;
+		BLUEGENE_SIZE[0] = Integer.parseInt(args[i]);
+		i++;
+		BLUEGENE_SIZE[1] = Integer.parseInt(args[i+1]);
+		i++;
+		BLUEGENE_SIZE[2] = Integer.parseInt(args[i+2]);
+	    } else /*unrecognized argument*/ {
 		loadSts=args[i];
+	    }
 	    i++;
 	}
 

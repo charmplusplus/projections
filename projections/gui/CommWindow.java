@@ -18,19 +18,25 @@ public class CommWindow extends GenericGraphWindow
     private double[][] 	byteCount;		// rename to sentBytCount
     private double[][] 	recivedMsgCount;
     private double[][]	exclusiveSent;
+    private int[][]     hopCount;
+    private double[][]  avgHopCount;
+
     private ArrayList	histogram;
     private int[]	histArray;
     private String 	currentArrayName;
     private String[][]	popupText;
     private String[][]	EPNames;
+
     private JPanel	mainPanel;
     private JPanel	graphPanel;
     private JPanel	checkBoxPanel;
+
     private Checkbox    sentMssgs;
     private Checkbox	sentBytes;
     private Checkbox    histogramCB;
     private Checkbox	recivedMssgs;
     private Checkbox	sentExclusive;
+    private Checkbox    hopCountCB;
 
     private CommWindow  thisWindow;
 
@@ -91,6 +97,15 @@ public class CommWindow extends GenericGraphWindow
 		setYAxis("Messages Sent Externally", "");
 		setXAxis("Processor", "");
 		super.refreshGraph();
+	    } else if (cb == hopCountCB) {
+		if (avgHopCount == null) {
+		    avgHopCount = averageHops(hopCount, recivedMsgCount);
+		}
+		setDataSource("Communications", avgHopCount, this);
+		setPopupText("avgHopCount");
+		setYAxis("Average Message Hop Counts", "");
+		setXAxis("Processor", "");
+		super.refreshGraph();
 	    }
 	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	}
@@ -126,6 +141,9 @@ public class CommWindow extends GenericGraphWindow
 	} else if(currentArrayName.equals("exclusiveSent")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + exclusiveSent[xVal][yVal];
+	} else if (currentArrayName.equals("avgHopCount")) {
+	    rString[0] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "Count = " + avgHopCount[xVal][yVal];
 	}
 	return rString;
     }
@@ -146,18 +164,27 @@ public class CommWindow extends GenericGraphWindow
 	sentBytes = new Checkbox("Messages Sent (bytes)", cbg, false);
 	recivedMssgs = new Checkbox("Messages Recived", cbg, false);
 	sentExclusive = new Checkbox("Messages Sent Externally", cbg, false);
+	if (MainWindow.BLUEGENE) {
+	    hopCountCB = new Checkbox("Hop Count (BG only)", cbg, false);
+	}
 
 	histogramCB.addItemListener(this);
 	sentMssgs.addItemListener(this);
 	sentBytes.addItemListener(this);
 	recivedMssgs.addItemListener(this);
 	sentExclusive.addItemListener(this);
+	if (MainWindow.BLUEGENE) {
+	    hopCountCB.addItemListener(this);
+	}
 
 	Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, sentMssgs, gbc, 1,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, sentBytes, gbc, 2,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, recivedMssgs, gbc, 3,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 4,0, 1,1, 1,1);
+	if (MainWindow.BLUEGENE) {
+	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 5,0, 1,1, 1,1);
+	}
 
 	Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 	Util.gblAdd(mainPanel, checkBoxPanel, gbc, 0,2, 1,1, 0,0);
@@ -183,6 +210,11 @@ public class CommWindow extends GenericGraphWindow
 			byteCount = new double[validPEs.size()][];
 			recivedMsgCount = new double[validPEs.size()][];
 			exclusiveSent = new double[validPEs.size()][];
+			if (MainWindow.BLUEGENE) {
+			    hopCount = new int[validPEs.size()][];
+			} else {
+			    hopCount = null;
+			}
 			getData();
 			return null;
 		    }
@@ -242,6 +274,9 @@ public class CommWindow extends GenericGraphWindow
 		byteCount[curPeArrayIndex] = new double[numEPs];
 		recivedMsgCount[curPeArrayIndex] = new double[numEPs];
 		exclusiveSent[curPeArrayIndex] = new double[numEPs];
+		if (MainWindow.BLUEGENE) {
+		    hopCount[curPeArrayIndex] = new int[numEPs];
+		}
 		int EPid;
 
 		glr.nextEventOnOrAfter(startTime, logdata);
@@ -259,6 +294,11 @@ public class CommWindow extends GenericGraphWindow
 			recivedMsgCount[curPeArrayIndex][EPid]++;
 			if (logdata.pe == pe) {
 			    exclusiveSent[curPeArrayIndex][EPid] ++;
+			}
+			if (MainWindow.BLUEGENE) {
+			    hopCount[curPeArrayIndex][EPid] +=
+				manhattenDistance(curPeArrayIndex,
+						  logdata.pe);
 			}
 		    }
 		}
@@ -307,6 +347,58 @@ public class CommWindow extends GenericGraphWindow
 		    exclusiveSent[k][j] = 0;
 	    }
 	}
+    }
+
+    private int manhattenDistance(int destPe, int srcPe) {
+	int distance = 0;
+
+	int destTriple[] = peToTriple(destPe);
+	int srcTriple[] = peToTriple(srcPe);
+
+	for (int dim=0; dim<3; dim++) {
+	    if (destTriple[dim] < srcTriple[dim]) {
+		distance += srcTriple[dim] - destTriple[dim];
+	    } else {
+		distance += destTriple[dim] - srcTriple[dim];
+	    }
+	}
+
+	return distance;
+    }
+
+    private int[] peToTriple(int pe) {
+	int returnTriple[] = new int[3];
+
+	// z - slowest changer
+	returnTriple[2] = pe/(MainWindow.BLUEGENE_SIZE[1]*
+			      MainWindow.BLUEGENE_SIZE[0]);
+	// y 
+	returnTriple[1] = pe/MainWindow.BLUEGENE_SIZE[0];
+	// x - fastest changer
+	returnTriple[0] = pe%MainWindow.BLUEGENE_SIZE[0];
+
+	return returnTriple;
+    }
+
+    // stupid hack ... don't really want to do the code for
+    // manhatten distance using doubles.
+    private double[][] averageHops(int hopArray[][], 
+				   double msgReceived[][]) {
+	double returnValue[][] = 
+	    new double[hopArray.length][hopArray[0].length];
+
+	for (int i=0; i<hopArray.length; i++) {
+	    for (int j=0; j<hopArray[i].length; j++) {
+		if (msgReceived[i][j] > 0) {
+		    returnValue[i][j] = 
+			(double)hopArray[i][j] /
+			msgReceived[i][j];
+		} else {
+		    returnValue[i][j] = 0.0;
+		}
+	    }
+	}
+	return returnValue;
     }
 }
 

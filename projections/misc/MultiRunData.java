@@ -92,9 +92,14 @@ public class MultiRunData
 	    // For now, this will have to suffice. Perhaps in future
 	    // we'd be able to find a flexible (and meaningful) way to 
 	    // deal with arbitrary sets of data.
+	    //
+	    // **NOTE** - 7/31/2004. A hack to deal with ActivityManagers
+	    // by using a boolean flag to tell StsReader that it is being
+	    // invoked by Multirun (which does not understand the concept
+	    // of the Analysis static object).
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
-		    new StsReader(listOfStsFilenames[run]);
+		    new StsReader(listOfStsFilenames[run], true);
 		pesPerRun[run] = stsReaders[run].getProcessorCount();
 	    }
 	    // ensure that both the stsReaders array and pesPerRun array

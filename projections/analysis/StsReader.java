@@ -66,13 +66,24 @@ public class StsReader extends ProjDefs
     private int numPapiEvents;
     private String papiEventNames[];
 
+    /**
+     *  Basically a hack to allow multirun tool to bypass the 
+     *  ActivityManager and it's use of Analysis. Hence this
+     *  wrapper is used for normal tools.
+     */
+    public StsReader(String FileName) 
+	throws LogLoadException
+    {
+	this(FileName, false);
+    }
+
     /** 
      *  The StsReader constructor reads the .sts file indicated.
      *  @exception LogLoadException if an error occurs while reading in the
      *      the state file
      *  Pre-condition: FileName is the full pathname of the sts file.
      */
-    public StsReader(String FileName) 
+    public StsReader(String FileName, boolean isMultirun) 
 	throws LogLoadException   
     {
 	validPEs = new OrderedIntList[NUM_TYPES];
@@ -135,6 +146,12 @@ public class StsReader extends ProjDefs
 		    
 		    EntryNames[ID][0] = Name;
 		    EntryNames[ID][1] = ClassNames [ChareID];
+
+		    // NEW and ORTHOGONAL (for now) -
+		    // create entries in ActivityManager.
+		    if (!isMultirun) {
+			Analysis.activityManager.registerActivity("Entry Method", ID, EntryNames[ID][0]);
+		    }
 		} else if (s1.equals("MESSAGE")) {
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
@@ -151,7 +168,13 @@ public class StsReader extends ProjDefs
 			functionEventNames[functionEventIndex] = 
 			    functionEventName;
 			functionEventIndices.put(key,
-						 new Integer(functionEventIndex++));
+						 new Integer(functionEventIndex));
+			// NEW and ORTHOGONAL (for now) -
+			// create entries in ActivityManager
+			if (!isMultirun) {
+			    Analysis.activityManager.registerActivity("Function", functionEventIndex, functionEventName);
+			}
+			functionEventIndex++;
 		    }
 		} else if (s1.equals("EVENT")) {
 		    Integer key = new Integer(st.nextToken());

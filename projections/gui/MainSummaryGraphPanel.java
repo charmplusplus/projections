@@ -84,11 +84,5 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	return new Dimension(ScreenInfo.screenWidth/3, 
 			     ScreenInfo.screenHeight/3);
     }
-    /*
-    // setting it's preferred size requirments
-    public Dimension getPreferredSize() {
-	return new Dimension(ScreenInfo.screenWidth/3, 
-			     ScreenInfo.screenHeight/3);
-    }
-    */
+
 }

@@ -9,259 +9,260 @@ import projections.analysis.*;
 
 public class TimelineData
 {
-  // IF YOU MAKE A STUPID NAME FOR A VARIABLE AT LEAST COMMENT IT
-  // SHEESH!!!  --JMU
-  // what do these mean for God's sake ? -- sayantan
-
-   int vpw, vph;
-   // is this timeline width and height ?
-   int tlw, tlh;
-   int lcw;
-   int ath, abh;
-   int sbw, sbh;
-   int mpw, mph;
-  public int tluh;
-  public int barheight;
-   int numPs;
-   
-   float scale;
-  public int   offset;
-   
-  public OrderedIntList processorList;
-   OrderedIntList oldplist;
-   String         oldpstring;
-
+    // IF YOU MAKE A STUPID NAME FOR A VARIABLE AT LEAST COMMENT IT
+    // SHEESH!!!  --JMU
+    // what do these mean for God's sake ? -- sayantan
+    
+    int vpw, vph;
+    // is this timeline width and height ?
+    int tlw, tlh;
+    int lcw;
+    int ath, abh;
+    int sbw, sbh;
+    int mpw, mph;
+    public int tluh;
+    public int barheight;
+    int numPs;
+    
+    float scale;
+    public int   offset;
+    
+    public OrderedIntList processorList;
+    OrderedIntList oldplist;
+    String         oldpstring;
+    
     // boolean for testing if entries are to be colored by Object ID
     // **CW** 12/12/2003 Obsolete?
     public boolean colorbyObjectId;
-   
+    
 
-  public double         pixelIncrement;
-  public int            timeIncrement;
-   int            labelIncrement;
-   int            numIntervals;
-   
+    public double         pixelIncrement;
+    public int            timeIncrement;
+    int            labelIncrement;
+    int            numIntervals;
+    
 
-   int[]          entries;
-   Color[]        entryColor;
+    int[]          entries;
+    Color[]        entryColor;
+    
+    public TimelineObject[][] tloArray;
+    public Vector [] mesgVector;	  
+    public Vector [] oldmesgVector;
+    
+    UserEvent[][] userEventsArray = null;
+    
+    TimelineDisplayCanvas displayCanvas;
+    
+    int xmin, xmax;
+    long xmintime, xmaxtime;
+    int  xminpixel, xmaxpixel;
+    
+    float[] processorUsage;
+    float[] idleUsage;
+    float[] packUsage;
+    OrderedUsageList[] entryUsageList;
+    
+    public long beginTime, endTime, totalTime;
+    long oldBT, oldET;
+    
+    boolean showPacks, showIdle, showMsgs;
+    
+    public TimelineWindow timelineWindow;
    
-   public TimelineObject[][] tloArray;
-   public Vector [] mesgVector;	  
-	 public Vector [] oldmesgVector;
+    // points for line joining the creation of a message 
+    // and its beginning of execution
+    public Vector mesgCreateExecVector;
+
+   
+    public TimelineData(TimelineWindow timelineWindow)
+    {
+	showPacks = false;
+	showMsgs  = true;
+	showIdle  = false;
 	
-   UserEvent[][] userEventsArray = null;
-   
-   TimelineDisplayCanvas displayCanvas;
-   
-   int xmin, xmax;
-   long xmintime, xmaxtime;
-   int  xminpixel, xmaxpixel;
-   
-   float[] processorUsage;
-   float[] idleUsage;
-   float[] packUsage;
-   OrderedUsageList[] entryUsageList;
-   
-  public long beginTime, endTime, totalTime;
-   long oldBT, oldET;
-   
-   boolean showPacks, showIdle, showMsgs;
-
-   public TimelineWindow timelineWindow;
-   
-   // points for line joining the creation of a message and its beginning of execution
-  public Vector mesgCreateExecVector;
-
-   
-   public TimelineData(TimelineWindow timelineWindow)
-   {
-	  showPacks = false;
-	  showMsgs  = true;
-	  showIdle  = false;
-
-	  oldBT = -1;
-	  oldET = -1;
-	  oldplist = null;
-	  oldpstring = null;
-	  
-	  this.timelineWindow = timelineWindow;
-	  displayCanvas = timelineWindow.displayCanvas;
-	  lcw = 100;
-	  sbw = 20;
-	  sbh = 20;   
-	  barheight = 20;
-	  tluh = barheight + 20;
-	  numPs = 0;
-	  ath = 50;
-	  scale = 1;
-	  processorUsage = null;
-	  entryUsageList = null;
-   
-	  offset = 10;
-	  pixelIncrement = 5.0;
-	  timeIncrement  = 100;
-	  labelIncrement = 5;
-	  numIntervals = 1;
-	  beginTime = 0;
-	  totalTime = Analysis.getTotalTime();
-	  endTime = totalTime;
-	  xmin = 0;
-	  xmax = numIntervals;
-	  xmintime = 0;
-	  xmaxtime = 1;
-	  xminpixel = 0;
-	  xmaxpixel = 1;
-	  
-	  mesgCreateExecVector = new Vector();
-	  
-	  tloArray = null;
-	  mesgVector = null;
-	  entries = new int[Analysis.getNumUserEntries()];
-	  entryColor = new Color[Analysis.getNumUserEntries()];
-	  float H = (float)1.0;
-	  float S = (float)1.0;
-	  float B = (float)1.0;
-	  float delta = (float)(1.0/Analysis.getNumUserEntries());
-	  // **sharon** somehow getLogDirectory() returns null
-	  //if (new File(Analysis.getLogDirectory() +
-	  //	       File.separator + "color.map").exists()) {
-	  if (new File("bin/color.map").exists()) {
-	      try {
-		  Util.restoreColors(entryColor, "Timeline Graph", null);
-	      } catch (IOException e) {
-		  System.err.println("unable to load color.map");
-	      } 
-	  } else {
-	      for(int i=0; i<Analysis.getNumUserEntries(); i++)
-		  {
-		      entries[i] = 0;
-		      entryColor[i] = Analysis.getEntryColor(i);
-		  }   
-	  }
-		 
-   }   
-
-   public void createTLOArray()
-   {
+	oldBT = -1;
+	oldET = -1;
+	oldplist = null;
+	oldpstring = null;
+	
+	this.timelineWindow = timelineWindow;
+	displayCanvas = timelineWindow.displayCanvas;
+	lcw = 100;
+	sbw = 20;
+	sbh = 20;   
+	barheight = 20;
+	tluh = barheight + 20;
+	numPs = 0;
+	ath = 50;
+	scale = 1;
+	processorUsage = null;
+	entryUsageList = null;
+	
+	offset = 10;
+	pixelIncrement = 5.0;
+	timeIncrement  = 100;
+	labelIncrement = 5;
+	numIntervals = 1;
+	beginTime = 0;
+	totalTime = Analysis.getTotalTime();
+	endTime = totalTime;
+	xmin = 0;
+	xmax = numIntervals;
+	xmintime = 0;
+	xmaxtime = 1;
+	xminpixel = 0;
+	xmaxpixel = 1;
+	
+	mesgCreateExecVector = new Vector();
+	
+	tloArray = null;
+	mesgVector = null;
+	entries = new int[Analysis.getNumUserEntries()];
+	entryColor = new Color[Analysis.getNumUserEntries()];
+	float H = (float)1.0;
+	float S = (float)1.0;
+	float B = (float)1.0;
+	float delta = (float)(1.0/Analysis.getNumUserEntries());
+	// **sharon** somehow getLogDirectory() returns null
+	//if (new File(Analysis.getLogDirectory() +
+	//	       File.separator + "color.map").exists()) {
+	if (new File("bin/color.map").exists()) {
+	    try {
+		Util.restoreColors(entryColor, "Timeline Graph", null);
+	    } catch (IOException e) {
+		System.err.println("unable to load color.map");
+	    } 
+	} else {
+	    for(int i=0; i<Analysis.getNumUserEntries(); i++)
+		{
+		    entries[i] = 0;
+		    entryColor[i] = Analysis.getEntryColor(i);
+		}   
+	}
+	
+    }   
+    
+    public void createTLOArray()
+    {
 	//  System.out.println("createTLOArray() called in TimelineData \n");
-       TimelineObject[][] oldtloArray = tloArray;
-       UserEvent[][] oldUserEventsArray = userEventsArray;
-       oldmesgVector = mesgVector;
-       mesgVector = new Vector[Analysis.getNumProcessors()];
-       for(int i=0;i < Analysis.getNumProcessors();i++){
-	   mesgVector[i] = null;
-       }
-	  
-       tloArray = new TimelineObject[processorList.size()][];
-       userEventsArray = new UserEvent[processorList.size()][];
-	  
-       if (oldtloArray != null && beginTime >= oldBT && endTime <= oldET) {
-	   int oldp, newp;
-	   int oldpindex=0, newpindex=0;
-	   
-	   processorList.reset();
-	   oldplist.reset();
-
-	   newp = processorList.nextElement();
-	   oldp = oldplist.nextElement();
-	   while (newp != -1) {
-	       while (oldp != -1 && oldp < newp) {
-		   oldp = oldplist.nextElement();
-		   oldpindex++;
-	       }   
-	       if (oldp == -1)
-		   break;
-	       if (oldp == newp) {
-		   if (beginTime == oldBT && endTime == oldET) {
-		       tloArray[newpindex] = oldtloArray[oldpindex];
-		       userEventsArray[newpindex] = 
-			   oldUserEventsArray[oldpindex];
-		       mesgVector[oldp] = oldmesgVector[newp];
-		   } else {
-		       // copy timelineobjects from larger array into 
-		       // smaller array
-		       int n;
-		       int oldNumItems = oldtloArray[oldpindex].length;
-		       int newNumItems = 0;
-		       int startIndex  = 0;
-		       int endIndex    = oldNumItems - 1;
-				  
-		       // calculate which part of the old array to copy
-		       for (n=0; n<oldNumItems; n++) {
-			   if (oldtloArray[oldpindex][n].getEndTime() < 
-			       beginTime) { 
-			       startIndex++; 
-			   } else { 
-			       break; 
-			   }
-		       }
-		       for (n=oldNumItems-1; n>=0; n--) {
-			   if (oldtloArray[oldpindex][n].getBeginTime() > 
-			       endTime) { 
-			       endIndex--; 
-			   } else { 
-			       break; 
-			   }
-		       }
-		       newNumItems = endIndex - startIndex + 1;
-
-		       // copy the array
-		       tloArray[newpindex] = new TimelineObject[newNumItems];
-		       mesgVector[newp] = new Vector();
-		       for (n=0; n<newNumItems; n++) {
-			   tloArray[newpindex][n] = 
-			       oldtloArray[oldpindex][n+startIndex];
-			   tloArray[newpindex][n].setUsage();
-			   tloArray[newpindex][n].setPackUsage();
-			   for (int j=0;
-				j<tloArray[newpindex][n].messages.length;j++) {
-			       mesgVector[newp].addElement((TimelineMessage)tloArray[newpindex][n].messages[j]);
-			   }
-		       }
-		       // copy user events from larger array into smaller array
-		       if (oldUserEventsArray != null && 
-			   oldUserEventsArray[oldpindex] != null) {
-			   oldNumItems = oldUserEventsArray[oldpindex].length;
-			   newNumItems = 0;
-			   startIndex = 0;
-			   endIndex = oldNumItems -1;
-			       
-			   // calculate which part of the old array to copy
-			   for (n=0; n<oldNumItems; n++) {
-			       if (oldUserEventsArray[oldpindex][n].EndTime < 
-				   beginTime) { 
-				   startIndex++; 
-			       } else { 
-				   break; 
-			       }
-			   }
-			   for (n=oldNumItems-1; n>=0; n--) {
-			       if (oldUserEventsArray[oldpindex][n].BeginTime >
-				   endTime) { 
-				   endIndex--; 
-			       } else { 
-				   break; 
-			       }
-			   }
-			   newNumItems = endIndex - startIndex + 1;
-			       
-			   // copy the array
-			   userEventsArray[newpindex] = 
-			       new UserEvent[newNumItems];
-			   for (n=0; n<newNumItems; n++) {
-			       userEventsArray[newpindex][n] = 
-				   oldUserEventsArray[oldpindex][startIndex+n];
-			   }
-		       }
-		   }
-	       }                                       
-	       newp = processorList.nextElement();
-	       newpindex++;
-	   }   
-	   oldtloArray = null;
-	   oldUserEventsArray = null;
-       }
-	  
+	TimelineObject[][] oldtloArray = tloArray;
+	UserEvent[][] oldUserEventsArray = userEventsArray;
+	oldmesgVector = mesgVector;
+	mesgVector = new Vector[Analysis.getNumProcessors()];
+	for(int i=0;i < Analysis.getNumProcessors();i++){
+	    mesgVector[i] = null;
+	}
+	
+	tloArray = new TimelineObject[processorList.size()][];
+	userEventsArray = new UserEvent[processorList.size()][];
+	
+	if (oldtloArray != null && beginTime >= oldBT && endTime <= oldET) {
+	    int oldp, newp;
+	    int oldpindex=0, newpindex=0;
+	    
+	    processorList.reset();
+	    oldplist.reset();
+	    
+	    newp = processorList.nextElement();
+	    oldp = oldplist.nextElement();
+	    while (newp != -1) {
+		while (oldp != -1 && oldp < newp) {
+		    oldp = oldplist.nextElement();
+		    oldpindex++;
+		}   
+		if (oldp == -1)
+		    break;
+		if (oldp == newp) {
+		    if (beginTime == oldBT && endTime == oldET) {
+			tloArray[newpindex] = oldtloArray[oldpindex];
+			userEventsArray[newpindex] = 
+			    oldUserEventsArray[oldpindex];
+			mesgVector[oldp] = oldmesgVector[newp];
+		    } else {
+			// copy timelineobjects from larger array into 
+			// smaller array
+			int n;
+			int oldNumItems = oldtloArray[oldpindex].length;
+			int newNumItems = 0;
+			int startIndex  = 0;
+			int endIndex    = oldNumItems - 1;
+			
+			// calculate which part of the old array to copy
+			for (n=0; n<oldNumItems; n++) {
+			    if (oldtloArray[oldpindex][n].getEndTime() < 
+				beginTime) { 
+				startIndex++; 
+			    } else { 
+				break; 
+			    }
+			}
+			for (n=oldNumItems-1; n>=0; n--) {
+			    if (oldtloArray[oldpindex][n].getBeginTime() > 
+				endTime) { 
+				endIndex--; 
+			    } else { 
+				break; 
+			    }
+			}
+			newNumItems = endIndex - startIndex + 1;
+			
+			// copy the array
+			tloArray[newpindex] = new TimelineObject[newNumItems];
+			mesgVector[newp] = new Vector();
+			for (n=0; n<newNumItems; n++) {
+			    tloArray[newpindex][n] = 
+				oldtloArray[oldpindex][n+startIndex];
+			    tloArray[newpindex][n].setUsage();
+			    tloArray[newpindex][n].setPackUsage();
+			    for (int j=0;
+				 j<tloArray[newpindex][n].messages.length;j++) {
+				mesgVector[newp].addElement((TimelineMessage)tloArray[newpindex][n].messages[j]);
+			    }
+			}
+			// copy user events from larger array into smaller array
+			if (oldUserEventsArray != null && 
+			    oldUserEventsArray[oldpindex] != null) {
+			    oldNumItems = oldUserEventsArray[oldpindex].length;
+			    newNumItems = 0;
+			    startIndex = 0;
+			    endIndex = oldNumItems -1;
+			    
+			    // calculate which part of the old array to copy
+			    for (n=0; n<oldNumItems; n++) {
+				if (oldUserEventsArray[oldpindex][n].EndTime < 
+				    beginTime) { 
+				    startIndex++; 
+				} else { 
+				    break; 
+				}
+			    }
+			    for (n=oldNumItems-1; n>=0; n--) {
+				if (oldUserEventsArray[oldpindex][n].BeginTime >
+				    endTime) { 
+				    endIndex--; 
+				} else { 
+				    break; 
+				}
+			    }
+			    newNumItems = endIndex - startIndex + 1;
+			    
+			    // copy the array
+			    userEventsArray[newpindex] = 
+				new UserEvent[newNumItems];
+			    for (n=0; n<newNumItems; n++) {
+				userEventsArray[newpindex][n] = 
+				    oldUserEventsArray[oldpindex][startIndex+n];
+			    }
+			}
+		    }
+		}                                       
+		newp = processorList.nextElement();
+		newpindex++;
+	    }   
+	    oldtloArray = null;
+	    oldUserEventsArray = null;
+	}
+	
        int pnum;
        processorList.reset();
        int numPEs = processorList.size();

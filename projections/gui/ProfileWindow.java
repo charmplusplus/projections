@@ -29,6 +29,7 @@ public class ProfileWindow extends Frame
    private ProfileObject[][] poArray;
    private float xscale=1, yscale=1;
    private long begintime, endtime;
+   
    private ProfileDialog2 dialog;
    
    class NoUpdatePanel extends Panel

@@ -30,6 +30,7 @@ SRC=\
     projections/analysis/ParseTokenizer.java\
     projections/analysis/GenericLogReader.java\
     projections/analysis/GenericStsReader.java\
+    projections/analysis/GenericSumDetailReader.java\
     projections/analysis/GenericSummaryReader.java\
     projections/analysis/ObjectId.java\
     projections/gui/AboutDialog.java\

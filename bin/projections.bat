@@ -1,1 +1,1 @@
-java -ms60000000 -mx256000000 -cp projections.jar projections.gui.MainWindow
+java -ms60000000 -mx512000000 -cp projections.jar projections.gui.MainWindow

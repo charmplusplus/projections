@@ -41,6 +41,35 @@ public class SumAnalyzer extends ProjDefs
 	TotalTime=0;
 	//ChareTime= new long [NumProcessors][NumUserEntries];			
 	//NumEntryMsgs = new int [NumProcessors][NumUserEntries];
+
+	// **CW** Perform a first pass of the reading to avoid having to
+	// approximate the maximum number of intervals over all
+	// processors.
+	for (int p=0; p<nPe; p++) {
+	    FileReader file=new FileReader(sts.getSumName(p));
+	    BufferedReader b = new BufferedReader(file);
+	    tokenizer = new StreamTokenizer(b);
+	    //Set up the tokenizer
+	    tokenizer.parseNumbers();
+	    tokenizer.eolIsSignificant(true);
+	    tokenizer.whitespaceChars('/','/');
+	    tokenizer.whitespaceChars(':',':');
+	    tokenizer.whitespaceChars('[','[');
+	    tokenizer.whitespaceChars(']',']');
+	    tokenizer.wordChars('a','z');
+	    tokenizer.wordChars('A','Z');
+	    //Read the first line (descriptive information)
+	    checkNextString("ver");
+	    versionNum = (int)nextNumber("Version Number");
+	    int myProcessor=(int)nextNumber("processor number");
+	    nPe=(int)nextNumber("number of processors");
+	    checkNextString("count");
+	    int myCount= (int)nextNumber("count");
+	    if (IntervalCount<myCount) IntervalCount=myCount;
+	    tokenizer = null;
+	    file.close();
+	}
+
 	for (int p = 0; p <nPe; p++)
 		{
 
@@ -62,16 +91,28 @@ public class SumAnalyzer extends ProjDefs
 		int myProcessor=(int)nextNumber("processor number");
 		nPe=(int)nextNumber("number of processors");
 		checkNextString("count");
-		int myCount = (int)nextNumber("count");
-		if (IntervalCount<myCount) IntervalCount=myCount;
+		int myCount= (int)nextNumber("count");
+		/** **CW** No longer done because the approximations
+		 *  are failing for extremely large interval counts.
+		 if (IntervalCount<myCount) IntervalCount=myCount;
+		*/
 		checkNextString("ep");
 		numEntry=(int)nextNumber("number of entry methods");
 		checkNextString("interval");
 		double interval=nextScientific("processor usage sample interval"); 
 		IntervalSize = (long)Math.floor(interval*1000000);
+		/** **CW** 
+		 *  The IntervalCount may be known now, but the IntervalSize
+		 *  may still vary. In this case, TotalTime computed the
+		 *  old way is no longer valid. Instead TotalTime should be
+		 *  computed using the current summary file's interval
+		 *  count (myCount) multiplied by the current IntervalSize.
 		if (TotalTime < IntervalCount*IntervalSize)
 			TotalTime = IntervalCount*IntervalSize;
-		
+		*/
+		if (TotalTime < myCount*IntervalSize) {
+		    TotalTime = myCount*IntervalSize;
+		}
 		if (versionNum > 2)
 			{
 			checkNextString("phases");
@@ -89,8 +130,10 @@ public class SumAnalyzer extends ProjDefs
 			NumEntryMsgs = new int [nPe][numEntry];
 			MaxEntryTime = new int [nPe][numEntry];
 		}
+		/** **CW** DON'T BE STUPID!!!!
 		ProcessorUtilization[p] = new int[IntervalCount + 20];
-
+		*/
+		ProcessorUtilization[p] = new int[IntervalCount];
 		System.out.println("Interval count = " + IntervalCount);
 
 		//Read the SECOND line (processor usage)

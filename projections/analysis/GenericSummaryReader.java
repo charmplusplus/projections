@@ -80,7 +80,8 @@ public class GenericSummaryReader
 	    reader.close();
 	    reader = null;
 	} catch (IOException e) {
-	    throw new IOException("Error reading file " + filename);
+	    throw new IOException("Error reading file " + filename + " : " +
+				  e.toString());
 	}
     }
 
@@ -138,6 +139,8 @@ public class GenericSummaryReader
 	}
 */
 	int nUsageRead=0;
+
+	/* **CW** *** OLD UNCOMPRESSED FORMAT ***
         while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
           if (tokenType == StreamTokenizer.TT_NUMBER) {
             processorUtil[nUsageRead++] = (int)tokenizer.nval;
@@ -160,6 +163,29 @@ System.out.println(val+" "+tokenizer.nval);
           else 
 	    throw new IOException("extra garbage at end of line 2");
 	}
+	*/
+
+	while ((tokenType=tokenizer.nextToken()) !=
+	       StreamTokenizer.TT_EOL && nUsageRead < numIntervals)
+	    {
+		if (tokenType == StreamTokenizer.TT_NUMBER) {
+                    int val =  (int)tokenizer.nval;
+                    processorUtil[nUsageRead++] = val;
+                    if ((tokenType=tokenizer.nextToken()) == '+')
+			{
+			    tokenType=tokenizer.nextToken();
+			    if (tokenType !=  StreamTokenizer.TT_NUMBER)
+				System.out.println("Unrecorgnized syntax at end of li\ne 2");
+			    for (int i=1; i<(int)tokenizer.nval; i++)
+				processorUtil[nUsageRead++] = val;
+			}
+                    else
+			tokenizer.pushBack();
+		}
+                  else
+		      System.out.println("extra garbage at end of line 2");
+	    }
+
         if (numIntervals != nUsageRead) 
             throw new IOException("numIntervals not agree!");
 

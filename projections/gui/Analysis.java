@@ -30,6 +30,7 @@ public class Analysis {
 				return logLoader.createtimeline( p, bt, et );
 			}
 			else {
+                                System.out.println("createTL: logLoader is null!");
 				return null;
 			}
 		}
@@ -220,7 +221,7 @@ public class Analysis {
 				System.out.println( "Caught SummaryFormatException" );
 			}
 		}
-		else { //.log files
+		if ( sts.hasLogFiles() ) { //.log files
 			logLoader = new LogLoader( sts);
 		}
 	}

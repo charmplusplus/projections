@@ -299,6 +299,13 @@ public class CommWindow extends GenericGraphWindow
 		// we'll just use the EOFException to break us out of
 		// this loop :)
 		while (true) {
+		    if (logdata.time > endTime) {
+			if ((logdata.type == ProjDefs.CREATION) ||
+			    (logdata.type == ProjDefs.BEGIN_PROCESSING)) {
+			    // past endtime. no more to do.
+			    break;
+			}
+		    }
 		    glr.nextEvent(logdata);
 		    if (logdata.type == ProjDefs.CREATION) {
 			EPid = logdata.entry;

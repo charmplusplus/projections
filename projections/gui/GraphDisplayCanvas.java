@@ -49,7 +49,6 @@ public class GraphDisplayCanvas extends Canvas
 	 
 	  g.setColor(Analysis.background);
 	  g.fillRect(0, 0, w, h);
-   
 	  g.setColor(Analysis.foreground);
 	  g.translate(-data.displayPanel.getHSBValue(), 0);
 	  
@@ -162,7 +161,6 @@ public class GraphDisplayCanvas extends Canvas
    {
 	  if(offscreen == null)
 		 return;
-	  
 	  Graphics og = offscreen.getGraphics();
 	   
 	  drawDisplay(og);

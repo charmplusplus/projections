@@ -19,43 +19,29 @@ import javax.swing.*;
 */
 
 public class IntervalWindow extends ProjectionsWindow
-	implements ActionListener{
+	implements ActionListener,ItemListener{
 
-   private MainWindow mainWindow;
    private GraphPanel graphPanel;
    private Graph graphCanvas;
 
-//variables to be set by RangeDialog
-   private OrderedIntList validPEs;
-   private long startTime;
-   private long endTime;
+//variables (other than those set by super class) to be set by RangeDialog
    private long thresholdTime;	// to record EPs that cross this time
    private long intervalSize;
 
    private double [][] dataSource;	// to store the data
    private boolean countSends = true;	// default: draw Sends vs Eps graph
-   private boolean getNewData = true;	// default: refresh graph always calculates new data before display
+   private boolean getNewData = false;	// default: refresh graph is false 
 					// if false, refresh graph just sets the graph to a new data source
-
 // constants 
    private final int NO_OF_DATASOURCES = 3;
-   private final int STRETCHED_EP      = 0;	
-   private final int SEND_COUNT	       = 1;		
-   private final int MSG_LEN_COUNT     = 2;		
+   private final int STRETCHED_EP      = 0;
+   private final int SEND_COUNT        = 1;
+   private final int MSG_LEN_COUNT     = 2;
 
+//later replace this with IntervalWindow()
    public IntervalWindow(MainWindow mainWindow)
    {
-          this.mainWindow = mainWindow;
- 
-          addWindowListener(new WindowAdapter()
-          {
-                 public void windowClosing(WindowEvent e)
-                 {
-                        close();
-                 }
-          });
- 
-          setBackground(Color.black);
+          super();
           setTitle("Projections Interval Graph");
 
           createLayout();
@@ -81,7 +67,7 @@ public class IntervalWindow extends ProjectionsWindow
    }
 
 /* functions for RangeDialog to work */
-   public void setProcessorRange(OrderedIntList proc)
+/*   public void setProcessorRange(OrderedIntList proc)
    {
         validPEs = proc;
    }
@@ -95,7 +81,7 @@ public class IntervalWindow extends ProjectionsWindow
    {
         endTime = time;
    }
-
+*/
    public void setIntervalSize(long size)
    {
 	intervalSize = size;
@@ -133,13 +119,15 @@ public class IntervalWindow extends ProjectionsWindow
           }
    }
 
-/* close the window */ 
-   private void close()
-   {
-          setVisible(false);
-          mainWindow.closeIntervalWindow();
-          dispose();
-  }
+    public void itemStateChanged(ItemEvent e) {
+        JMenuItem source = (JMenuItem)(e.getSource());
+        String s = "Item event detected."
+                   + " \n   Event source: " + source.getText()
+                   + "\n    New state: "
+                   + ((e.getStateChange() == ItemEvent.SELECTED) ?
+                     "selected":"unselected");
+        System.out.println(s);
+    }
 
 /* add graphPanel to the window */
   private void createLayout()
@@ -151,10 +139,13 @@ public class IntervalWindow extends ProjectionsWindow
   }
 
 /* create the menu bar */
-   private void createMenus()
+   protected void createMenus()
    {
 	  JRadioButtonMenuItem countGraphButton = new JRadioButtonMenuItem("Send Count vs Stretched EntryPoints",true);
+	  countGraphButton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, ActionEvent.ALT_MASK));
 	  JRadioButtonMenuItem byteGraphButton  = new JRadioButtonMenuItem("Bytes Sent vs Stretched EntryPoints",false);	
+	  byteGraphButton.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, ActionEvent.ALT_MASK));
+
 	  ButtonGroup graphChoiceButton = new ButtonGroup();
 	  graphChoiceButton.add(countGraphButton);
 	  graphChoiceButton.add(byteGraphButton);
@@ -195,31 +186,36 @@ public class IntervalWindow extends ProjectionsWindow
 	  if(getNewData)
           	getNewData();
 	  
-	  // if countSends is true, draw the "send vs Eps" graph, else draw "bytes vs Eps"
-	  int mode;
-	  String titleString;
-	  if(countSends){
-		titleString = "Stretched EntryPoints vs Send Messages";
-		mode  	    = SEND_COUNT;	
-	  }else{
-		titleString = "Stretched EntryPoints vs Bytes Sent";
-		mode 	    = MSG_LEN_COUNT;
-	  }
+	  if(dataSource != null){
 
-	  double[][] data = new double[dataSource.length][2];		// show two values at a time  
-	  for(int i=0; i<dataSource.length; i++)
-	  {
-		data[i][0] = dataSource[i][STRETCHED_EP];
-		data[i][1] = dataSource[i][mode];
-	  }
+		  // if countSends is true, draw the "send vs Eps" graph, else draw "bytes vs Eps"
+		int mode;
+	  	String titleString;
+		if(countSends){
+			titleString = "Stretched EntryPoints vs Send Messages";
+			mode  	    = SEND_COUNT;	
+		}else{
+			titleString = "Stretched EntryPoints vs Bytes Sent";
+			mode 	    = MSG_LEN_COUNT;
+		}
 
-	  // set values and draw the graph
-          DataSource ds=new DataSource2D(titleString,data);
-          XAxis xa=new XAxisFixed("Time Interval","");
-          YAxis ya=new YAxisAuto("#","",ds);
+	  	double[][] data = new double[dataSource.length][2];		// show two values at a time  
+	  	for(int i=0; i<dataSource.length; i++)
+	  	{
+			data[i][0] = dataSource[i][STRETCHED_EP];
+			data[i][1] = dataSource[i][mode];
+	  	}
+
+	  	// set values and draw the graph
+          	DataSource ds     = new DataSource2D(titleString,data);
+          	XAxisFixed xa     = new XAxisFixed("Time Interval ("+U.t(startTime)+" - "+U.t(endTime) + ")","");
+	  	double multiplier = (double)(endTime-startTime)/(dataSource.length-1);	// in us
+	  	xa.setLimits(startTime/1000,multiplier/1000);			// to display in ms
+          	YAxis ya=new YAxisAuto("#","",ds);
  
-          graphCanvas.setData(ds,xa,ya);
-          graphCanvas.repaint();	
+          	graphCanvas.setData(ds,xa,ya);
+         	graphCanvas.repaint();
+	  }	
    }
 
    private void getNewData()

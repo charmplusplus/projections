@@ -165,30 +165,26 @@ public class TimelineObject extends Component
 	    if (numPapiCounts > 0) {
 		bubbletext[textIndex++] = "*** PAPI counts ***";
 		for (int i=0; i<numPapiCounts; i++) {
-		    /*
 		    bubbletext[textIndex++] = Analysis.getPerfCountNames()[i] +
 			" = " + format_.format(papiCounts[i]);
-		    */
+		    /* Dropping the hack - some more general way of
+		       intelligently performing derived analysis of raw
+		       counters should be developed
 		    // hack for now
 		    bubbletext[textIndex] = Analysis.getPerfCountNames()[i] +
 			" = " + format_.format(papiCounts[i]);
 		    if (i == 0) {
 			// processor count
-			/*
-			bubbletext[textIndex++] += "   OPS = " + 
-			    format_.format((long)(papiCounts[i]/((et-bt)/1000000.0)));
-			*/
 			bubbletext[textIndex++] += "   FLOPS = " +
 			    format_.format((long)(papiCounts[i]/
 						  ((endTime-beginTime)/1000000.0)));
 		    }
 		    if (i == 1) {
 			// cache miss
-			/*
-			    100*(float)(papiCounts[i]/(papiCounts[i-1]*1.0)) +
-			    "%";
-			*/
+			100*(float)(papiCounts[i]/(papiCounts[i-1]*1.0)) +
+			"%";
 		    }
+		    */
 		}
 	    }
 	} else {

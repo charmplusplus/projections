@@ -71,9 +71,10 @@ public class SumAnalyzer extends ProjDefs
 	//ChareTime= new long [NumProcessors][NumUserEntries];			
 	//NumEntryMsgs = new int [NumProcessors][NumUserEntries];
 
-	// **CW** Perform a first pass of the reading to avoid having to
+	// Perform a first pass of the reading to avoid having to
 	// approximate the maximum number of intervals over all
-	// processors.
+	// processors. We must also present a unified interval
+	// size for the whole system.
 	ProgressMonitor progressBar;
 	progressBar =
 	    new ProgressMonitor(Analysis.guiRoot, "Determining max intervals",
@@ -107,7 +108,33 @@ public class SumAnalyzer extends ProjDefs
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
 	    int myCount= (int)nextNumber("count");
-	    if (IntervalCount<myCount) IntervalCount=myCount;
+	    checkNextString("ep");
+	    int numEPs = (int)nextNumber("ep"); // do nothing with this.
+	    checkNextString("interval");
+	    double interval=nextScientific("intervalsize"); 
+	    long myIntervalSize = (long)Math.floor(interval*1000000);
+	    // determine base interval size, the finer the better.
+	    double factor = 1.0;
+	    if (myIntervalSize != IntervalSize) {
+		if (IntervalSize == 0) {
+		    IntervalSize = myIntervalSize;
+		} else {
+		    factor = myIntervalSize/(IntervalSize*1.0);
+		    if (myIntervalSize < IntervalSize) {
+			IntervalSize = myIntervalSize;
+		    }
+		}
+	    }
+	    // if a finer size was determined by this pe info, expand
+	    // the number of previous counts by the factor.
+	    if (factor < 1.0) {
+		IntervalCount = (int)(IntervalCount/factor);
+	    }
+	    // compare previous interval counts with my current count
+	    // multiplied by my factor
+	    if (IntervalCount<(myCount*factor)) {
+		IntervalCount=(int)(myCount*factor);
+	    }
 	    tokenizer = null;
 	    file.close();
 	}
@@ -144,27 +171,15 @@ public class SumAnalyzer extends ProjDefs
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
 	    int myCount= (int)nextNumber("count");
-	    /** **CW** No longer done because the approximations
-	     *  are failing for extremely large interval counts.
-	     if (IntervalCount<myCount) IntervalCount=myCount;
-	    */
 	    checkNextString("ep");
 	    numEntry=(int)nextNumber("number of entry methods");
 	    checkNextString("interval");
 	    double interval=nextScientific("processor usage sample interval"); 
-	    IntervalSize = (long)Math.floor(interval*1000000);
-	    /** **CW** 
-	     *  The IntervalCount may be known now, but the IntervalSize
-	     *  may still vary. In this case, TotalTime computed the
-	     *  old way is no longer valid. Instead TotalTime should be
-	     *  computed using the current summary file's interval
-	     *  count (myCount) multiplied by the current IntervalSize.
-	     if (TotalTime < IntervalCount*IntervalSize)
-	     TotalTime = IntervalCount*IntervalSize;
-	    */
-	    if (TotalTime < myCount*IntervalSize) {
-		TotalTime = myCount*IntervalSize;
+	    long myIntervalSize = (long)Math.floor(interval*1000000);
+	    if (TotalTime < myCount*myIntervalSize) {
+		TotalTime = myCount*myIntervalSize;
 	    }
+	    int factor = (int)(myIntervalSize/IntervalSize);
 	    if (versionNum > 2) {
 		checkNextString("phases");
 		PhaseCount = (int)nextNumber("phases");
@@ -185,17 +200,26 @@ public class SumAnalyzer extends ProjDefs
 	    int nUsageRead=0;
 	    boolean error = false;
 	    
+	    // we perform on-the-fly expansion of larger interval sized
+	    // data (ie. myIntervalSize > IntervalSize).
 	    while ((tokenType=tokenizer.nextToken()) != 
-		   StreamTokenizer.TT_EOL && nUsageRead < myCount) {
+		   StreamTokenizer.TT_EOL && nUsageRead < (myCount*factor)) {
 		if (tokenType == StreamTokenizer.TT_NUMBER) {
                     int val =  (int)tokenizer.nval;
-            	    ProcessorUtilization[p][nUsageRead++] = val;
+		    for (int f=0; f<factor; f++) {
+			ProcessorUtilization[p][nUsageRead++] = val;
+		    }
                     if ((tokenType=tokenizer.nextToken()) == '+') {
                         tokenType=tokenizer.nextToken();
-                        if (tokenType !=  StreamTokenizer.TT_NUMBER)
-			    System.out.println("Unrecorgnized syntax at end of line 2");
-                        for (int i=1; i<(int)tokenizer.nval; i++)
-			    ProcessorUtilization[p][nUsageRead++] = val;
+                        if (tokenType !=  StreamTokenizer.TT_NUMBER) {
+			    System.out.println("Unrecorgnized syntax at " +
+					       "end of line 2");
+			}
+                        for (int i=1; i<(int)tokenizer.nval; i++) {
+			    for (int f=0; f<factor; f++) {
+				ProcessorUtilization[p][nUsageRead++] = val;
+			    }
+			}
                     } else {
 			tokenizer.pushBack();
 		    }
@@ -203,24 +227,26 @@ public class SumAnalyzer extends ProjDefs
 	            System.out.println("extra garbage at end of line 2");
 		}
 	    }
-	    if (myCount != nUsageRead) {
+	    if ((myCount*factor) != nUsageRead) {
 		System.out.println("numIntervals not agree" + 
-				   IntervalCount + "v.s. " + nUsageRead+"!");
+				   (myCount*factor) + "v.s. "+nUsageRead+"!");
 	    }
 	    // Read in the THIRD line (time spent by entries)
 	    CurrentUserEntry = 0;
-	    // **CW** for now, ignore the labels. Check to see if it is a label
-	    // if yes, consume it. if not, push it back onto the stream.
-	    if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+	    // **CW** for now, ignore the labels. Check to see if it is a 
+	    // label. if yes, consume it. if not, push it back onto the 
+	    // stream.
+	    if ((StreamTokenizer.TT_WORD==
+		 (tokenType=tokenizer.nextToken()))) {
 		// do nothing. Label consumed.
 		// System.out.println(tokenizer.sval + " read.");
 	    } else {
 		tokenizer.pushBack();
 	    }
-	    while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) &&
+	    while ((StreamTokenizer.TT_NUMBER==
+		    (tokenType=tokenizer.nextToken())) &&
 		   (numEntry>CurrentUserEntry)) {
-		ChareTime[p][CurrentUserEntry] = (int)tokenizer.nval;
-		CurrentUserEntry++;
+		ChareTime[p][CurrentUserEntry++] = (int)tokenizer.nval;
 	    }
 	    // Make sure we're at the end of the line
 	    if (StreamTokenizer.TT_EOL!=tokenType)

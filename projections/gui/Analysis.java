@@ -508,12 +508,6 @@ public class Analysis {
 				       int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
 	try {
-	    // clear memory first
-
-	    // the trick is to know when some 
-	    systemUsageData[1] = null;
-	    System.out.println(intervalStart + " " + intervalEnd + " " +
-			       intervalSize);
 	    systemUsageData[1] = 
 		sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
 					       intervalSize);

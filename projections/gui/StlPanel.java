@@ -328,7 +328,11 @@ public class StlPanel extends ScalePanel.Child
 			// representation. However, we want non-idle
 			// scenarios to remain "black".
 			if (idleData[i][j] > 0) {
-			    mergedData[i][j] = 101 + idleData[i][j]; 
+			    /* Idle data is broken for some reason
+			     * Dis-abling until a fix can be acquired
+			    mergedData[i][j] = 101 + idleData[i][j];
+			    */
+			    mergedData[i][j] = 0;
 			} else {
 			    mergedData[i][j] = 0;
 			}

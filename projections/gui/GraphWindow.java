@@ -51,6 +51,15 @@ public class GraphWindow extends ProjectionsWindow
 	showDialog();
     }   
 
+    public void refreshDisplay() {
+	if (displayPanel != null) {
+	    displayPanel.refreshDisplay();
+	}
+	if (legendPanel != null) {
+	    legendPanel.repaint();
+	}
+    }
+
     void windowInit() {
 	// acquire initial values from Analysis
 	startTime = 0;

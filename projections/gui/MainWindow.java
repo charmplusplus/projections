@@ -178,32 +178,32 @@ public class MainWindow extends JFrame
 
     // get child window name by number
     public String getChildName(int index) {
-		if(index == GRAPH_WIN) {
-			return "GraphWindow";
-		} else if (index == MULTI_WIN) {
-			return "MultiRunWindow";
-		} else if (index == PROFILE_WIN) {
-			return "ProfileWindow";
-		} else if (index == COMM_WIN) {
-			return "CommWindow";
-		} else if (index == ANIMATION_WIN) {
-			return "AnimationWindow";
-		} else if (index == LOGVIEW_WIN) {
-			return "LogFileViewerWindow";
-		} else if (index == HIST_WIN) {
-			return "HistogramWindow";
-		} else if (index == TIMELINE_WIN) {
-			return "TimelineWindow";
-		} else if (index == OVERVIEW_WIN) {
-			return "StlWindow";
-		} else if (index == TIME_PROF_WIN) {
-			return "TimeProfileWindow";
-		} else if (index == FUNCTION_WIN) {
-			return "FunctionTool";
-		} else {
-			return null;
-		}
+	if (index == GRAPH_WIN) {
+	    return "GraphWindow";
+	} else if (index == MULTI_WIN) {
+	    return "MultiRunWindow";
+	} else if (index == PROFILE_WIN) {
+	    return "ProfileWindow";
+	} else if (index == COMM_WIN) {
+	    return "CommWindow";
+	} else if (index == ANIMATION_WIN) {
+	    return "AnimationWindow";
+	} else if (index == LOGVIEW_WIN) {
+	    return "LogFileViewerWindow";
+	} else if (index == HIST_WIN) {
+	    return "HistogramWindow";
+	} else if (index == TIMELINE_WIN) {
+	    return "TimelineWindow";
+	} else if (index == OVERVIEW_WIN) {
+	    return "StlWindow";
+	} else if (index == TIME_PROF_WIN) {
+	    return "TimeProfileWindow";
+	} else if (index == FUNCTION_WIN) {
+	    return "FunctionTool";
+	} else {
+	    return null;
 	}
+    }
 
     // interface with the menu manager
     public void menuToolSelected(String item) {
@@ -273,11 +273,14 @@ public class MainWindow extends JFrame
     private void repaintAllWindows() {
 	for (int i=0; i<NUM_WINDOWS;i++) {
 	    if (childWindows[0][i] != null) {
-		((Frame)childWindows[0][i]).repaint();
+		if (childWindows[0][i] instanceof GraphWindow) {
+		    ((GraphWindow)childWindows[0][i]).refreshDisplay();
+		} else if (childWindows[0][i] instanceof TimelineWindow) {
+		    ((TimelineWindow)childWindows[0][i]).refreshDisplay();
+		} else {  // default
+		    ((Frame)childWindows[0][i]).repaint();
+		}
 	    }
-	}
-	if (timelineWindow != null) {
-	    timelineWindow.validate();
 	}
 	this.repaint();
     }

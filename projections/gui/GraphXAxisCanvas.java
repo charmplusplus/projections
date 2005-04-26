@@ -26,7 +26,8 @@ public class GraphXAxisCanvas extends Canvas
 	  int w  = getSize().width;
 	  int h  = getSize().height;
 	  
-	  g.clearRect(0, 0, w, h);
+	  g.setColor(Analysis.background);
+	  g.fillRect(0, 0, w, h);
 	
 	  int hsbval = data.displayPanel.getHSBValue();
 	  g.translate(-hsbval, 0);
@@ -48,7 +49,7 @@ public class GraphXAxisCanvas extends Canvas
 	  if(data.graphtype == GraphData.BAR)
 		 linemax += (int)pixelincrement;
 
-	  g.setColor(getForeground());
+	  g.setColor(Analysis.foreground);
 	  g.drawLine(linemin, 5, linemax, 5); 
 	  
 	  if(fm == null)

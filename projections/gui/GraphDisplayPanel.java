@@ -182,19 +182,29 @@ public class GraphDisplayPanel extends Container
    }   
    public void paint(Graphics g)
    {
-       // silly hack for printing
        if (g instanceof PrinterGraphics) {
 	   mainPanel.setBackground(Color.white);
        } else {
-	   mainPanel.setBackground(Color.black);
+	   mainPanel.setBackground(Analysis.background);
        }
-       g.setColor(Color.lightGray);
+       /*
+       g.setColor(Analysis.background);
        g.fillRect(0, 0, getSize().width, getSize().height);
        g.setColor(Color.black);
        g.drawRect(0, 0, getSize().width-1, getSize().height-1);
-       
+       */
        super.paint(g);
    }   
+
+    public void refreshDisplay() {
+	titleCanvas.repaint();
+	yAxisCanvas.repaint();
+	xAxisCanvas.repaint();
+	wAxisCanvas.repaint();
+	displayCanvas.repaint();
+	mainPanel.setBackground(Analysis.background);
+	mainPanel.repaint();
+    }
 
     // ***** no longer in use *****
    public void PrintGraph(Graphics pg, PrintJob pjob)

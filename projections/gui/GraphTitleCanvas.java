@@ -9,8 +9,8 @@ public class GraphTitleCanvas extends Canvas
    
    public GraphTitleCanvas()
    {
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
    }   
    public int getPreferredHeight()
    {
@@ -54,7 +54,10 @@ public class GraphTitleCanvas extends Canvas
 	  
 	  int x = (getSize().width - fm.stringWidth(title))/2;
 	  int y = (getSize().height + fm.getHeight())/2;
-	  g.setColor(getForeground());
+
+	  g.setColor(Analysis.background);
+	  g.fillRect(0, 0, getSize().width, getSize().height);
+	  g.setColor(Analysis.foreground);
 	  g.drawString(title, x, y);    
    }   
    public void print(Graphics pg)

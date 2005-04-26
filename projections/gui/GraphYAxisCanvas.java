@@ -80,7 +80,9 @@ public class GraphYAxisCanvas extends Canvas
 		 fm = g.getFontMetrics(g.getFont());
 	  
 	 
-	  g.setColor(getForeground());
+	  g.setColor(Analysis.background);
+	  g.fillRect(0, 0, getSize().width, getSize().height);
+	  g.setColor(Analysis.foreground);
 	  String s;
 	  int y = h / 2;
 	  if(data.ymode == GraphData.TIME)

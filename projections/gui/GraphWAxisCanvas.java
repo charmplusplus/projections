@@ -18,8 +18,8 @@ public class GraphWAxisCanvas extends Canvas
 	  labelwidth = 0;
 	  deltay = 0;
 	  labelincrement = 0;
-	  setBackground(Color.black);
-	  setForeground(Color.white);
+	  setBackground(Analysis.background);
+	  setForeground(Analysis.foreground);
    }   
    public int getPreferredWidth()
    {
@@ -44,6 +44,9 @@ public class GraphWAxisCanvas extends Canvas
 	  int w = getSize().width;
 	  int h = getSize().height - data.offset2;
 
+	  g.setColor(Analysis.background);
+	  g.fillRect(0, 0, getSize().width, getSize().height);
+
 	  if(textheight == 0)
 	  {
 		 FontMetrics fm = g.getFontMetrics(g.getFont());
@@ -51,7 +54,7 @@ public class GraphWAxisCanvas extends Canvas
 		 labelwidth = fm.stringWidth("%");
 	  }   
 	 
-	  g.setColor(getForeground());
+	  g.setColor(Analysis.foreground);
 	  
 	  g.drawString("%", w - 5 - labelwidth, h/2);
 	  g.drawLine(5, data.offset, 5, h-1); 

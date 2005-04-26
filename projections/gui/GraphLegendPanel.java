@@ -117,6 +117,9 @@ public class GraphLegendPanel extends Panel
 		 
 	    height = textheight;
 	    width = 0;
+
+	    g.setColor(Analysis.background);
+	    g.fillRect(0, 0, getSize().width, getSize().height);
 	    
 	    for (int a=0; a<data.onGraph.length; a++) {
 		if ((data.ymode == GraphData.MSGS && 

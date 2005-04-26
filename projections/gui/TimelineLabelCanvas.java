@@ -31,7 +31,8 @@ public class TimelineLabelCanvas extends Canvas
 	    
 	    Color oldColor = og.getColor();
 	    og.setColor(Analysis.background);
-	    og.fillRect(0, 0, data.lcw, data.tlh);
+	    og.fillRect(0, 0, getSize().width, getSize().height);
+	    //og.fillRect(0, 0, data.lcw, data.tlh);
 	    og.setColor(oldColor);
 	    
 	    if (fm == null) {
@@ -41,17 +42,13 @@ public class TimelineLabelCanvas extends Canvas
 	    }
 	    
 	    og.setColor(Analysis.foreground);
-	    
 	    data.processorList.reset();
 	    NumberFormat df = NumberFormat.getInstance();
 	    df.setMinimumFractionDigits(1);
 	    df.setMaximumFractionDigits(1);
 	    for (int p=0; p<data.numPs; p++) {
-		og.setColor(Analysis.foreground);
 		String tmp = "PE "+data.processorList.nextElement();
 		og.drawString(tmp, 10, data.tluh/2 + p*data.tluh);
-		
-		og.setColor(Analysis.foreground);
 		tmp = "(" + df.format(data.processorUsage[p]) + "%)";
 		og.drawString(tmp, 15, data.tluh/2 + p*data.tluh + 
 			      fm.getHeight() + 2);

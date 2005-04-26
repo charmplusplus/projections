@@ -116,6 +116,19 @@ public class TimelineWindow extends ProjectionsWindow
 	public void update(Graphics g) { paint(g); }
     }      
     
+    public void refreshDisplay() {
+	labelCanvas.makeNewImage();
+	labelCanvas.repaint();
+	axisTopCanvas.makeNewImage();
+	axisTopCanvas.repaint();
+	axisBotCanvas.makeNewImage();
+	axisBotCanvas.repaint();
+	displayCanvas.makeNewImage();
+	displayCanvas.repaint();
+	displayPanel.setBackground(Analysis.background);
+	displayPanel.repaint();
+    }
+
     void windowInit() {
 	validPEs = Analysis.getValidProcessorList();
 	startTime = 0;

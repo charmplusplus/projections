@@ -201,7 +201,7 @@ public class SummaryFileReader extends ProjectionsReader
 	double originalIntervalSize = this.intervalSize;
 
 	double newStartTime = intervalSize*startInterval;
-	double newEndTime = endInterval*intervalSize;
+	double newEndTime = intervalSize*endInterval;
 	
 	long interval = 0;
 	double delta = Double.MIN_VALUE; // to throw off exact values **HACK**
@@ -225,11 +225,16 @@ public class SummaryFileReader extends ProjectionsReader
 		    }
 		    // convert to a time value for redestribution to a new
 		    // array.
-		    IntervalUtils.fillIntervals(utilization, intervalSize,
-						(int)startInterval, 
-						interval*originalIntervalSize,
-						(interval+numInBlock)*originalIntervalSize-delta,
-						numInBlock*originalIntervalSize*(valueRead/100),
+		    IntervalUtils.fillIntervals(utilization, 
+						(long)intervalSize,
+						startInterval, 
+						(long)(interval * 
+						       originalIntervalSize),
+						(long)((interval+numInBlock)*
+						       originalIntervalSize),
+						numInBlock *
+						originalIntervalSize * 
+						(valueRead/100),
 						false);
 		    interval += numInBlock;
 		    // decide whether to stop
@@ -252,11 +257,15 @@ public class SummaryFileReader extends ProjectionsReader
 		    interval++;
 		} else {
 		    double valueRead = tokenizer.nval;
-		    IntervalUtils.fillIntervals(utilization, intervalSize,
-						(int)startInterval,
-						interval*originalIntervalSize,
-						(interval+1)*originalIntervalSize-delta,
-						originalIntervalSize*(valueRead/100),
+		    IntervalUtils.fillIntervals(utilization, 
+						(long)intervalSize,
+						startInterval,
+						(long)(interval *
+						       originalIntervalSize),
+						(long)((interval+1) * 
+						       originalIntervalSize),
+						originalIntervalSize * 
+						(valueRead/100),
 						false);
 		    interval++;
 		    // decide whether to stop

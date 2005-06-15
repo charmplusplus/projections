@@ -19,7 +19,7 @@ public class ProfileWindow extends ProjectionsWindow
     private ProfileLabelCanvas   labelCanvas;
     private ProfileAxisCanvas    axisCanvas;
     private ProfileDisplayCanvas displayCanvas;
-    private ProfileColorWindow   colorWindow;
+    // private ProfileColorWindow   colorWindow;
     private Label lTitle, lTitle2;
     private Scrollbar HSB, VSB;
     private ProfileData data;

@@ -215,7 +215,7 @@ public class MainWindow extends JFrame
 	    showChildWindow("TimelineWindow", TIMELINE_WIN);
 	} else if (item.equals("Usage Profile")) {
 	    showChildWindow("ProfileWindow", PROFILE_WIN);
-	} else if (item.equals("Communication Histogram")) {
+	} else if (item.equals("Communication")) {
 	    showChildWindow("CommWindow", COMM_WIN);
 	} else if (item.equals("Animation")) {
 	    showChildWindow("AnimationWindow", ANIMATION_WIN);

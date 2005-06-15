@@ -7,9 +7,32 @@ package projections.analysis;
 public class IntervalUtils {
 
     /**
+     *  Wrapper for discrete (integer and long) based data. Kind of a hack
+     *  for older projections tools.
+
+    public static void fillIntervals(int destData[], long destSize,
+				     long destOffset,
+				     long sourceStartTime,
+				     long sourceEndTime,
+				     long sourceValue) {
+	double tempData[] = new double[destData.length];
+	fillIntervals(tempData, (double)destSize, destOffset,
+		      (double)sourceStartTime, (double)sourceEndTime,
+		      (double)sourceValue, false);
+	for (int i=0; i<destData.length; i++) {
+	    destData[i] = (int)tempData[i];
+	}
+    }
+    */
+
+    /**
      *  A time-based utility for placing a SINGLE time-range of data into 
      *  a bunch of bins. This utility can be used by reading tools for
      *  "on-the-fly" binning of interval data.
+     *
+     *  |--|--|--|--|--|--|--|--|--|--|--|--| == destData
+     *         ^
+     *         | destOffset
      *
      *  discretize controls the distribution of discrete sourceValues,
      *  ensuring that only discrete values get placed if a source range
@@ -20,7 +43,7 @@ public class IntervalUtils {
      *    for an interval depends on its interval size). Conversion 
      *    (eg. into absolute time) is hence required for data of that 
      *    sort prior to the use of this method.
-     */
+
     public static void fillIntervals(double destData[], double destSize,
 				     int destOffset,
 				     double sourceStartTime, 
@@ -74,6 +97,150 @@ public class IntervalUtils {
 	    }
 	    for (int i=destStartBin+1; i<=destEndBin-1; i++) {
 		destData[i] += intervalValue;
+	    }
+	}
+    }
+    */
+
+    private static int getDestIndex(long sourceTime, long startInterval,
+				   long destSize, boolean isStart) {
+	// if we are dealing with an end-point time, we should treat
+	// it as belonging to the previous index.
+	if (!isStart && (sourceTime%destSize == 0)) {
+	    return (int)(sourceTime/destSize - startInterval -1);
+	}
+	return (int)(sourceTime/destSize - startInterval);
+    }
+
+    public static void fillIntervals(double destData[], long destSize,
+				     long destStartInterval,
+				     long sourceStartTime, 
+				     long sourceEndTime, 
+				     double sourceTotalValue, 
+				     boolean discrete) {
+	long destEndInterval = destStartInterval + destData.length - 1;
+	long destStartTime = destStartInterval*destSize;
+	long destEndTime = (destEndInterval+1)*destSize;
+	long sourceTotalTime = sourceEndTime-sourceStartTime;
+
+	// temporary variables for use in trimming and boundary cases
+	double adjustedValue = 0.0;
+	double fractionFromStart = 0.0;
+	double fractionFromEnd = 0.0;
+	double contribution = 0.0;
+
+	// CASE 1: source data outside target range, ignore
+	if ((sourceEndTime <= destStartTime) ||
+	    (sourceStartTime >= destEndTime)) {
+	    return;
+	}
+	
+	// Trim source data to fit destination range
+	if (sourceStartTime < destStartTime) {
+	    fractionFromStart =
+		(destStartTime-sourceStartTime)/(double)sourceTotalTime;
+	    sourceStartTime = destStartTime;
+	}
+	if (sourceEndTime > destEndTime) {
+	    fractionFromEnd =
+		(sourceEndTime-destEndTime)/(double)sourceTotalTime;
+	    sourceEndTime = destEndTime;
+	}
+	sourceTotalTime = sourceEndTime - sourceStartTime;
+
+	/* DEBUG
+	System.out.println("---------- Trimming -------------");
+	System.out.println(fractionFromStart + " " + fractionFromEnd);
+	System.out.println(sourceTotalTime);
+	System.out.println(sourceTotalValue);
+	*/
+
+	adjustedValue = sourceTotalValue *
+	    (1 - fractionFromStart - fractionFromEnd);
+	    
+	if (discrete) {
+	    sourceTotalValue = Math.rint(adjustedValue);
+	} else {
+	    sourceTotalValue = adjustedValue;
+	}
+
+	/* DEBUG
+	System.out.println(sourceTotalValue);
+
+	System.out.println("------------- Placement --------------");
+	*/
+
+	// CASE 2: source fits into target range. Handle various boundary
+	//         conditions.
+	int startIndex = 
+	    getDestIndex(sourceStartTime, destStartInterval, destSize, true);
+	int endIndex = 
+	    getDestIndex(sourceEndTime, destStartInterval, destSize, false);
+	
+	/* DEBUG	    
+	System.out.println(sourceStartTime + " " + sourceEndTime);
+	System.out.println(startIndex + " " + endIndex);
+	System.out.println((startIndex+destStartInterval) + " " + 
+			   (endIndex+destStartInterval));
+	*/
+
+	// handle special case where the source fits into one destination
+	// interval.
+	if (startIndex == endIndex) {
+	    destData[startIndex] += sourceTotalValue;
+	    return;
+	}
+
+	// now, handle general case with at least 2 destination intervals.
+	fractionFromStart = 
+	    ((startIndex+destStartInterval+1)*destSize - sourceStartTime)/
+	    (double)sourceTotalTime;
+	fractionFromEnd =
+	    (sourceEndTime - ((endIndex+destStartInterval)*destSize))/
+	    (double)sourceTotalTime;
+
+	/* DEBUG
+	System.out.println(fractionFromStart + " " + fractionFromEnd);
+	*/
+
+	if (!discrete) {
+	    // start boundary contributions
+	    contribution += fractionFromStart*sourceTotalValue;
+	    destData[startIndex] += fractionFromStart*sourceTotalValue;
+	    // end boundary contributions
+	    contribution += fractionFromEnd*sourceTotalValue;
+	    destData[endIndex] += fractionFromEnd*sourceTotalValue;
+	    // main section contributions
+	    sourceTotalValue -= contribution;
+	    int remainingIntervals = endIndex-startIndex-1;
+	    for (int i=startIndex+1; i<endIndex; i++) {
+		// **CW** assuming no errors from floating point
+		//        computations. May need to be fixed later.
+		destData[i] += sourceTotalValue/remainingIntervals;
+	    }
+	} else {
+	    double mainSectionValue = 
+		Math.rint(sourceTotalValue*
+			  (1-fractionFromStart-fractionFromEnd));
+	    double startBoundaryValue = 
+		Math.rint((sourceTotalValue - mainSectionValue)*
+			  fractionFromStart);
+	    double endBoundaryValue =
+		sourceTotalValue - mainSectionValue - startBoundaryValue;
+	    destData[startIndex] += startBoundaryValue;
+	    destData[endIndex] += endBoundaryValue;
+	    double offset = 0.0;
+	    // **CW** assuming no errors from floating point computations.
+	    //        May need to be fixed later.
+	    contribution = mainSectionValue/(endIndex-startIndex-1);
+	    for (int i=startIndex+1; i<endIndex; i++) {
+		offset += contribution;
+		destData[i] += Math.floor(offset);
+		offset -= Math.floor(offset);
+		// handle floating point error at the end of the array.
+		if (i == endIndex-1) {
+		    destData[i] += Math.rint(offset);
+		}
 	    }
 	}
     }
@@ -244,20 +411,41 @@ public class IntervalUtils {
     }
 
     public static void main(String args[]) {
-	double data[] = new double[10];
-	double dataSize = 5.0;
-	double startTime = 15.2;
-	double endTime = 45.2;
+	double data[];
+	long dataSize = 100;
+	long startTime = 150;
+	long endTime = 450;
+	/*
+	*/
+	data = new double[10];
 	fillIntervals(data, dataSize, 0, startTime, endTime, 
 		      endTime-startTime, false);
 	printArray(data);
 	data = new double[10];
-	fillIntervals(data, dataSize, 2, startTime, endTime, 
+	fillIntervals(data, dataSize, 10, startTime, endTime, 
 		      endTime-startTime, false);
 	printArray(data);
 	data = new double[10];
-	fillIntervals(data, dataSize, 5, startTime, endTime, 
+	fillIntervals(data, dataSize, 14, startTime, endTime, 
 		      endTime-startTime, false);
 	printArray(data);
+	data = new double[10];
+	fillIntervals(data, dataSize, 15, startTime, endTime, 
+		      endTime-startTime, false);
+	printArray(data);
+	data = new double[10];
+	fillIntervals(data, dataSize, 40, startTime, endTime, 
+		      endTime-startTime, false);
+	printArray(data);
+	data = new double[10];
+	fillIntervals(data, dataSize, 44, startTime, endTime, 
+		      endTime-startTime, false);
+	printArray(data);
+	data = new double[10];
+	fillIntervals(data, dataSize, 45, startTime, endTime, 
+		      endTime-startTime, false);
+	printArray(data);
+	/*
+	*/
     }
 }

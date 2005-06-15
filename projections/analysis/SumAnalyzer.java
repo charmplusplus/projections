@@ -144,7 +144,7 @@ public class SumAnalyzer extends ProjDefs
 	progressBar = 
 	    new ProgressMonitor(Analysis.guiRoot, "Reading summary data",
 				"", 0, nPe);
-	for (int p = 0; p <nPe; p++) {
+	for (int p = 0; p<nPe; p++) {
             if (!progressBar.isCanceled()) {
                 progressBar.setNote(p + " of " + nPe);
                 progressBar.setProgress(p);
@@ -397,12 +397,65 @@ public class SumAnalyzer extends ProjDefs
 				      long OutIntervalSize) 
 	throws IOException,SummaryFormatException
     {
+	int numProcessors=ProcessorUtilization.length;
+	int intervalRange = intervalEnd - intervalStart + 1;
+	int [][]ret = new int[numProcessors][intervalRange];
+
+	// **CW** optimization, if OutIntervalSize == IntervalSize, just
+	// copy the appropriate parts of the internal array!
+	if (OutIntervalSize == IntervalSize) {
+	    for (int p=0; p<numProcessors; p++) {
+		for (int i=intervalStart; i<intervalEnd; i++) {
+		    ret[p][i-intervalStart] = 
+			ProcessorUtilization[p][i];
+		}
+	    }
+	    return ret;
+	}
+
+	int sourceStartInterval = 
+	    (int)((intervalStart*OutIntervalSize)/IntervalSize);
+	double [][]tempData = new double[numProcessors][intervalRange];
+	for (int p=0; p<numProcessors; p++) {
+	    int interval = sourceStartInterval;
+	    while ((interval < ProcessorUtilization[p].length) ||
+		   (interval < sourceStartInterval+intervalRange)){
+		// **CW** optimization, if there's nothing to spread, then
+		// don't spread it!
+		if (ProcessorUtilization[p][interval] > 0) {
+		    IntervalUtils.fillIntervals(tempData[p],
+						OutIntervalSize,
+						(long)intervalStart,
+						interval*IntervalSize,
+						(interval+1)*IntervalSize,
+						IntervalUtils.utilToTime(ProcessorUtilization[p][interval],
+									 IntervalSize),
+						false);
+		}
+		interval++;
+	    }
+	}
+	for (int p=0; p<tempData.length; p++) {
+	    for (int i=0; i<tempData[p].length; i++) {
+		tempData[p][i] = 
+		    IntervalUtils.timeToUtil(tempData[p][i],
+					     (double)OutIntervalSize);
+		ret[p][i] = (int)tempData[p][i];
+	    }
+	}
+	return ret;
+
+	/* 
+	 *  WHAT A LOAD OF CRAP **CW** 6/9/2005
+
 	int intervalRange = intervalEnd - intervalStart + 1;
 	
 	int NumProcessors=ProcessorUtilization.length;
 	int[][] ret = new int[NumProcessors][intervalRange];
+
 	for (int p = 0; p < NumProcessors; p++) {
-	    int in = 0, out=0; //Indices into ProcessorUtilization[p] and ret[p]
+	    int in = 0, 
+		out=0; //Indices into ProcessorUtilization[p] and ret[p]
 	    int usage=0,nUsage=0; //Accumulated processor usage
 	    int out_t=0; //Accumulated time in output array
 	    while(out < intervalRange) {
@@ -418,7 +471,9 @@ public class SumAnalyzer extends ProjDefs
 		}
 	    }
 	}
+
 	return ret;
+	*/
     }
 
     /**

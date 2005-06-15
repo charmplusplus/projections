@@ -534,9 +534,8 @@ public class Analysis {
      */
     public static void loadSummaryData() {
 	if (sts.hasSumFiles()) { 
-	    long sizeInt = sumAnalyzer.getIntervalSize();
+	    int sizeInt=(int)(sumAnalyzer.getIntervalSize());
 	    int nInt=(int)(getTotalTime()/sizeInt);
-	    
 	    loadSummaryData(sizeInt, 0, nInt-1);
 	} else if (sts.hasSumAccumulatedFile()) {
 	    // do nothing **HACK** - action taken later.

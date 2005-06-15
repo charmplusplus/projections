@@ -165,11 +165,15 @@ public class AccumulatedSummaryReader extends ProjectionsReader
 		interval++;
 	    } else {
 		double valueRead = tokenizer.nval;
-		IntervalUtils.fillIntervals(utilization, intervalSize,
-					    (int)startInterval,
-					    interval*originalIntervalSize,
-					    (interval+1)*originalIntervalSize-delta,
-					    originalIntervalSize*(valueRead/100),
+		IntervalUtils.fillIntervals(utilization, 
+					    (long)intervalSize,
+					    startInterval,
+					    (long)(interval *
+						   originalIntervalSize),
+					    (long)((interval+1) *
+						   originalIntervalSize),
+					    originalIntervalSize *
+					    (valueRead/100),
 					    false);
 		interval++;
 		// decide whether to stop

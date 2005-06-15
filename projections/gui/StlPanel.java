@@ -316,6 +316,12 @@ public class StlPanel extends ScalePanel.Child
 				   startInterval, endInterval,false,validPEs);
 	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
 	    idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
+	    // **CW** Silly hack because Analysis.getSystemUsageData returns
+	    // null when LogReader.SYS_IDLE is not available. Create an
+	    // empty array - do a proper fix if this becomes a memory issue.
+	    if (idleData == null) {
+		idleData = new int[utilData.length][utilData[0].length];
+	    }
 	    mergedData = 
 		new int[utilData.length][utilData[0].length];
 	    // merge the two data into utilData

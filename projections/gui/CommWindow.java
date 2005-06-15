@@ -56,7 +56,7 @@ public class CommWindow extends GenericGraphWindow
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);
 	createLayout();
-	setPopupText("histArray");
+	// setPopupText("histArray");
 	pack();
 	thisWindow = this;
 	showDialog();
@@ -181,8 +181,8 @@ public class CommWindow extends GenericGraphWindow
 	checkBoxPanel = new JPanel();
 
 	CheckboxGroup cbg = new CheckboxGroup();
-	histogramCB = new Checkbox("Histogram", cbg, true);
-	sentMsgs = new Checkbox("Messages Sent", cbg, false);
+	//	histogramCB = new Checkbox("Histogram", cbg, true);
+	sentMsgs = new Checkbox("Messages Sent", cbg, true);
 	sentBytes = new Checkbox("Bytes Sent", cbg, false);
 	receivedMsgs = new Checkbox("Messages Received", cbg, false);
 	receivedBytes = new Checkbox("Bytes Received", cbg, false);
@@ -193,7 +193,7 @@ public class CommWindow extends GenericGraphWindow
 	    hopCountCB = new Checkbox("Hop Count (BG only)", cbg, false);
 	}
 
-	histogramCB.addItemListener(this);
+	//	histogramCB.addItemListener(this);
 	sentMsgs.addItemListener(this);
 	sentBytes.addItemListener(this);
 	receivedMsgs.addItemListener(this);
@@ -204,15 +204,15 @@ public class CommWindow extends GenericGraphWindow
 	    hopCountCB.addItemListener(this);
 	}
 
-	Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentBytes, gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 4,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 5,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentExclusiveBytes, gbc, 6,0, 1,1, 1,1);
+	//	Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 4,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, sentExclusiveBytes, gbc, 5,0, 1,1, 1,1);
 	if (MainWindow.BLUEGENE) {
-	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 7,0, 1,1, 1,1);
+	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 6,0, 1,1, 1,1);
 	}
 
 	Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
@@ -250,7 +250,12 @@ public class CommWindow extends GenericGraphWindow
 			return null;
 		    }
 		    public void finished() {
-			setDataSource("Histogram", histArray, thisWindow);
+			// setDataSource("Histogram", histArray, thisWindow);
+			setDataSource("Communications", sentMsgCount, 
+				      thisWindow);
+			setPopupText("sentMsgCount");
+			setYAxis("Messages Sent", "");
+			setXAxis("Processor", "");
 			thisWindow.setVisible(true);
 			thisWindow.repaint();
 		    }

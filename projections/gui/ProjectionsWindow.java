@@ -155,7 +155,7 @@ public abstract class ProjectionsWindow
 	contentPane.setLayout(gbl);
 	
 	Util.gblAdd(contentPane, mainPanel, gbc, 0,1, 1,1, 1,1);
-	Util.gblAdd(contentPane, getToolButtonPanel(), gbc, 0,2, 1,1, 0,0);
+	//	Util.gblAdd(contentPane, getToolButtonPanel(), gbc, 0,2, 1,1, 0,0);
 	//getContentPane().add(mainPanel);
 	//getContentPane().add(getToolButtonPanel());
     }

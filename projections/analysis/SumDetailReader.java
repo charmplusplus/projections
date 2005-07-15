@@ -153,7 +153,7 @@ public class SumDetailReader extends ProjectionsReader
 	// EPs, so an EP ID count has to be maintained for each line.
 	while (StreamTokenizer.TT_EOF!=tokenizer.nextToken()) {
 	    if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
-		throw new IOException("Bad Sumdetail format - label expected");
+		throw new IOException("Bad Sumdetail format-label expected");
 	    }
 	    String label = tokenizer.sval;
 	    if (label.equals("ExeTimePerEPperInterval")) {

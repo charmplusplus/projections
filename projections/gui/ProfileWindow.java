@@ -371,8 +371,11 @@ public class ProfileWindow extends ProjectionsWindow
 
 	// this block sets up the initial colors scheme (which will
 	// later be changed based on the number of significant entry
-	// methods.
+	// methods).
 	if (!colorsSet) {
+	    /* testing
+	    colors[0][numEPs+2] = Color.white;
+	    */
 	    colors = new Color[1][numEPs+NUM_SYS_EPS];
 	    
 	    for (int i=0; i<numEPs; i++) {
@@ -385,8 +388,7 @@ public class ProfileWindow extends ProjectionsWindow
 	    // data and non entry data).
 	    // Unpack time is orange (to provide the constrast).
 	    colors[0][numEPs] = Color.black;
-	    colors[0][numEPs+1] = Color.orange;
-	    colors[0][numEPs+2] = Color.white;
+	    colors[0][numEPs+1] = Color.white;
 	}
 	displayCanvas.removeAll();
 

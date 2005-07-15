@@ -337,15 +337,17 @@ public class CommWindow extends GenericGraphWindow
 		    } else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
 			EPid = logdata.entry;
 			receivedMsgCount[curPeArrayIndex][EPid]++;
-			receivedByteCount[curPeArrayIndex][EPid] += logdata.msglen;
-			if (logdata.pe == pe) {
-			    exclusiveSent[curPeArrayIndex][EPid] ++;
-			    exclusiveBytesSent[curPeArrayIndex][EPid] += logdata.msglen;
-			}
-			if (MainWindow.BLUEGENE) {
-			    hopCount[curPeArrayIndex][EPid] +=
-				manhattenDistance(curPeArrayIndex,
-						  logdata.pe);
+			receivedByteCount[curPeArrayIndex][EPid] += 
+			    logdata.msglen;
+			// testing if the send was from outside the processor
+			if (logdata.pe != pe) {
+			    exclusiveSent[curPeArrayIndex][EPid]++;
+			    exclusiveBytesSent[curPeArrayIndex][EPid] += 
+				logdata.msglen;
+			    if (MainWindow.BLUEGENE) {
+				hopCount[curPeArrayIndex][EPid] +=
+				    manhattenDistance(pe,logdata.pe);
+			    }
 			}
 		    }
 		}
@@ -382,21 +384,6 @@ public class CommWindow extends GenericGraphWindow
 	    //System.out.println("index = "+ index);
 	    histArray[index] += 1;
 	}
-
-	for(int k=0; k<numPe; k++){
-	    for(int j=0; j<numEPs; j++){
-		exclusiveSent[k][j] = sentMsgCount[k][j] - exclusiveSent[k][j];
-		exclusiveBytesSent[k][j] = sentByteCount[k][j] - exclusiveBytesSent[k][j];
-
-		// Apurva - i'm doing this to prevent any negitive numbers
-		// from getting sent into the stack array because it messes up
-		// the drawing
-		if (exclusiveSent[k][j] < 0)
-		    exclusiveSent[k][j] = 0;
-		if (exclusiveBytesSent[k][j] < 0)
-		    exclusiveBytesSent[k][j] = 0;
-	    }
-	}
     }
 
     private int manhattenDistance(int destPe, int srcPe) {
@@ -419,12 +406,19 @@ public class CommWindow extends GenericGraphWindow
     private int[] peToTriple(int pe) {
 	int returnTriple[] = new int[3];
 
+	// **CW** Crisis of academic faith "Help! I can't do math anymore!"
+	// pe = x + y*Nx + z*Nx*Ny
+
 	// z - slowest changer
+	// = pe/Nx*Ny
 	returnTriple[2] = pe/(MainWindow.BLUEGENE_SIZE[1]*
 			      MainWindow.BLUEGENE_SIZE[0]);
-	// y 
-	returnTriple[1] = pe/MainWindow.BLUEGENE_SIZE[0];
+	// y
+	// = pe/Nx - z*Ny
+	returnTriple[1] = pe/MainWindow.BLUEGENE_SIZE[0] -
+	    returnTriple[2]*MainWindow.BLUEGENE_SIZE[0];
 	// x - fastest changer
+	// this is an alternative to pe - y*Nx - z*Nx*Ny
 	returnTriple[0] = pe%MainWindow.BLUEGENE_SIZE[0];
 
 	return returnTriple;
@@ -441,8 +435,7 @@ public class CommWindow extends GenericGraphWindow
 	    for (int j=0; j<hopArray[i].length; j++) {
 		if (msgReceived[i][j] > 0) {
 		    returnValue[i][j] = 
-			(double)hopArray[i][j] /
-			msgReceived[i][j];
+			hopArray[i][j]/msgReceived[i][j];
 		} else {
 		    returnValue[i][j] = 0.0;
 		}

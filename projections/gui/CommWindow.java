@@ -18,10 +18,11 @@ public class CommWindow extends GenericGraphWindow
     private double[][] 	sentByteCount;
     private double[][] 	receivedMsgCount;
     private double[][] 	receivedByteCount;
-    private double[][]	exclusiveSent;
-    private double[][]	exclusiveBytesSent;
+    private double[][]	exclusiveRecv;
+    private double[][]	exclusiveBytesRecv;
     private int[][]     hopCount;
     private double[][]  avgHopCount;
+    private double[][]  avgPeHopCount;
 
     private ArrayList	histogram;
     private int[]	histArray;
@@ -32,17 +33,21 @@ public class CommWindow extends GenericGraphWindow
     private JPanel	mainPanel;
     private JPanel	graphPanel;
     private JPanel	checkBoxPanel;
+    private JPanel      blueGenePanel;
 
     private Checkbox    sentMsgs;
     private Checkbox	sentBytes;
     private Checkbox    histogramCB;
     private Checkbox	receivedMsgs;
     private Checkbox    receivedBytes;
-    private Checkbox	sentExclusive;
-    private Checkbox	sentExclusiveBytes;
+    private Checkbox	recvExclusive;
+    private Checkbox	recvExclusiveBytes;
     private Checkbox    hopCountCB;
+    private Checkbox    peHopCountCB;
 
     private CommWindow  thisWindow;
+
+    private OrderedIntList peList;
 
     void windowInit() {
 	// parameter initialization is completely handled by GenericGraphWindow
@@ -51,7 +56,6 @@ public class CommWindow extends GenericGraphWindow
 
     public CommWindow(MainWindow mainWindow, Integer myWindowID) {
 	super("Projections Communications", mainWindow, myWindowID);
-	setGraphSpecificData();
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);
@@ -70,57 +74,65 @@ public class CommWindow extends GenericGraphWindow
 	if(ae.getSource() instanceof Checkbox){
 	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
 	    Checkbox cb = (Checkbox)ae.getSource();
-	    if(cb == histogramCB) {
-		setDataSource("Histogram", histArray, this);
-		setPopupText("histArray");
-		setYAxis("Frequency", null);
-		setXAxis("Byte Size", "bytes");
-		super.refreshGraph();
-	    } else if(cb == sentMsgs) {
-		setDataSource("Communications", sentMsgCount, this);
+	    if (cb == sentMsgs) {
+		setDataSource("Total #Msgs Sent", sentMsgCount, this);
 		setPopupText("sentMsgCount");
 		setYAxis("Messages Sent", "");
-		setXAxis("Processor", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
 	    }else if(cb == sentBytes){
 		//System.out.println("bytes");
-		setDataSource("Communications", sentByteCount, this);
+		setDataSource("Total Bytes Sent", sentByteCount, this);
 		setPopupText("sentByteCount");
 		setYAxis("Bytes Sent", "bytes");
-		setXAxis("Processor", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
 	    }else if(cb == receivedMsgs){
-		setDataSource("Communications", receivedMsgCount, this);
+		setDataSource("Total #Msgs Received", receivedMsgCount, this);
 		setPopupText("receivedMsgCount");
 		setYAxis("Messages Received", "");
-		setXAxis("Processor", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
 	    }else if(cb == receivedBytes){
-		setDataSource("Communications", receivedByteCount, this);
+		setDataSource("Total Bytes Received", 
+			      receivedByteCount, this);
 		setPopupText("receivedByteCount");
 		setYAxis("Bytes Received", "");
-		setXAxis("Processor", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
-	    }else if(cb == sentExclusive){
-		setDataSource("Communications", exclusiveSent, this);
-		setPopupText("exclusiveSent");
-		setYAxis("Messages Sent Externally", "");
-		setXAxis("Processor", "");
+	    }else if(cb == recvExclusive){
+		setDataSource("#Msgs Received Externally", 
+			      exclusiveRecv, this);
+		setPopupText("exclusiveRecv");
+		setYAxis("Messages Received Externally", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
-	    } else if(cb == sentExclusiveBytes){
-		setDataSource("Communications", exclusiveBytesSent, this);
-		setPopupText("exclusiveBytesSent");
-		setYAxis("Bytes Sent Externally", "");
-		setXAxis("Processor", "");
+	    } else if(cb == recvExclusiveBytes){
+		setDataSource("Bytes Received Externally", 
+			      exclusiveBytesRecv, this);
+		setPopupText("exclusiveBytesRecv");
+		setYAxis("Bytes Received Externally", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
 	    }else if (cb == hopCountCB) {
 		if (avgHopCount == null) {
 		    avgHopCount = averageHops(hopCount, receivedMsgCount);
 		}
-		setDataSource("Communications", avgHopCount, this);
+		setDataSource("Average Hop Counts by Entry Point", 
+			      avgHopCount, this);
 		setPopupText("avgHopCount");
 		setYAxis("Average Message Hop Counts", "");
-		setXAxis("Processor", "");
+		setXAxis("Processor", peList);
+		super.refreshGraph();
+	    }else if (cb == peHopCountCB) {
+		if (avgPeHopCount == null) {
+		    avgPeHopCount = averagePEHops(hopCount, receivedMsgCount);
+		}
+		setDataSource("Average Hop Counts by Processor", 
+			      avgPeHopCount, this);
+		setPopupText("avgPeHopCount");
+		setYAxis("Average Message Hop Counts (by PE)", "");
+		setXAxis("Processor", peList);
 		super.refreshGraph();
 	    }
 	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -140,32 +152,40 @@ public class CommWindow extends GenericGraphWindow
 	if(EPNames == null)
 	    EPNames = Analysis.getEntryNames();
 
-	String[] rString = new String[2];
+	String[] rString = new String[3];
 
-	if (currentArrayName.equals("histArray")) {
-	    rString[0] = xVal + " bytes";
-	    rString[1] = "Count = " +  histArray[xVal];
-	} else if(currentArrayName.equals("sentMsgCount")) {
+	if(currentArrayName.equals("sentMsgCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + sentMsgCount[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("sentByteCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Bytes = " + sentByteCount[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("receivedMsgCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + receivedMsgCount[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("receivedByteCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + receivedByteCount[xVal][yVal];
-	} else if(currentArrayName.equals("exclusiveSent")) {
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	} else if(currentArrayName.equals("exclusiveRecv")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + exclusiveSent[xVal][yVal];
-	} else if(currentArrayName.equals("exclusiveBytesSent")) {
+	    rString[1] = "Count = " + exclusiveRecv[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	} else if(currentArrayName.equals("exclusiveBytesRecv")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Bytes = " + exclusiveBytesSent[xVal][yVal];
+	    rString[1] = "Bytes = " + exclusiveBytesRecv[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if (currentArrayName.equals("avgHopCount")) {
 	    rString[0] = "EPid: " + EPNames[yVal][0];
 	    rString[1] = "Count = " + avgHopCount[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	} else if (currentArrayName.equals("avgPeHopCount")) {
+	    rString[0] = "Count = " + avgPeHopCount[xVal][yVal];
+	    rString[1] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[2] = "";
 	}
 	return rString;
     }
@@ -179,6 +199,9 @@ public class CommWindow extends GenericGraphWindow
 
 	graphPanel = getMainPanel();
 	checkBoxPanel = new JPanel();
+	if (MainWindow.BLUEGENE) {
+	    blueGenePanel = new JPanel();
+	}
 
 	CheckboxGroup cbg = new CheckboxGroup();
 	//	histogramCB = new Checkbox("Histogram", cbg, true);
@@ -186,11 +209,12 @@ public class CommWindow extends GenericGraphWindow
 	sentBytes = new Checkbox("Bytes Sent", cbg, false);
 	receivedMsgs = new Checkbox("Messages Received", cbg, false);
 	receivedBytes = new Checkbox("Bytes Received", cbg, false);
-	sentExclusive = new Checkbox("Messages Sent Externally", cbg, false);
-	sentExclusiveBytes = new Checkbox("Bytes Sent Externally", cbg, false);
+	recvExclusive = new Checkbox("Messages Recv Externally", cbg, false);
+	recvExclusiveBytes = new Checkbox("Bytes Recv Externally", cbg, false);
 	
 	if (MainWindow.BLUEGENE) {
-	    hopCountCB = new Checkbox("Hop Count (BG only)", cbg, false);
+	    hopCountCB = new Checkbox("Avg Hop Count (EP)", cbg, false);
+	    peHopCountCB = new Checkbox("Avg Hop Count (procs)", cbg, false);
 	}
 
 	//	histogramCB.addItemListener(this);
@@ -198,10 +222,11 @@ public class CommWindow extends GenericGraphWindow
 	sentBytes.addItemListener(this);
 	receivedMsgs.addItemListener(this);
 	receivedBytes.addItemListener(this);
-	sentExclusive.addItemListener(this);
-	sentExclusiveBytes.addItemListener(this);
+	recvExclusive.addItemListener(this);
+	recvExclusiveBytes.addItemListener(this);
 	if (MainWindow.BLUEGENE) {
 	    hopCountCB.addItemListener(this);
+	    peHopCountCB.addItemListener(this);
 	}
 
 	//	Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
@@ -209,19 +234,25 @@ public class CommWindow extends GenericGraphWindow
 	Util.gblAdd(checkBoxPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
 	Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentExclusive, gbc, 4,0, 1,1, 1,1);
-	Util.gblAdd(checkBoxPanel, sentExclusiveBytes, gbc, 5,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, recvExclusive, gbc, 4,0, 1,1, 1,1);
+	Util.gblAdd(checkBoxPanel, recvExclusiveBytes, gbc, 5,0, 1,1, 1,1);
+
 	if (MainWindow.BLUEGENE) {
-	    Util.gblAdd(checkBoxPanel, hopCountCB, gbc, 6,0, 1,1, 1,1);
+	    Util.gblAdd(blueGenePanel, hopCountCB, gbc, 0,0, 1,1, 1,1);
+	    Util.gblAdd(blueGenePanel, peHopCountCB, gbc, 1,0, 1,1, 1,1);
 	}
 
 	Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 	Util.gblAdd(mainPanel, checkBoxPanel, gbc, 0,2, 1,1, 0,0);
+	
+	if (MainWindow.BLUEGENE) {
+	    Util.gblAdd(mainPanel, blueGenePanel, gbc, 0,3, 1,1, 0,0);
+	}
     }
 
-    protected void setGraphSpecificData(){
-	setXAxis("Byte Size", "");
-	setYAxis("Frequency", "");
+    public void setGraphSpecificData() {
+	// do nothing. **CW** Reconsider such an interface requirement
+	// for GenericGraphWindow.
     }
 
     public void showDialog() {
@@ -239,8 +270,8 @@ public class CommWindow extends GenericGraphWindow
 			sentByteCount = new double[validPEs.size()][];
 			receivedMsgCount = new double[validPEs.size()][];
 			receivedByteCount = new double[validPEs.size()][];
-			exclusiveSent = new double[validPEs.size()][];
-			exclusiveBytesSent = new double[validPEs.size()][];
+			exclusiveRecv = new double[validPEs.size()][];
+			exclusiveBytesRecv = new double[validPEs.size()][];
 			if (MainWindow.BLUEGENE) {
 			    hopCount = new int[validPEs.size()][];
 			} else {
@@ -255,7 +286,7 @@ public class CommWindow extends GenericGraphWindow
 				      thisWindow);
 			setPopupText("sentMsgCount");
 			setYAxis("Messages Sent", "");
-			setXAxis("Processor", "");
+			setXAxis("Processor", peList);
 			thisWindow.setVisible(true);
 			thisWindow.repaint();
 		    }
@@ -282,7 +313,7 @@ public class CommWindow extends GenericGraphWindow
 	GenericLogReader glr;
 	LogEntryData logdata = new LogEntryData();
 
-	OrderedIntList peList = validPEs.copyOf();
+	peList = validPEs.copyOf();
 
 	int numPe = peList.size();
 	int numEPs = Analysis.getNumUserEntries();
@@ -310,8 +341,8 @@ public class CommWindow extends GenericGraphWindow
 		sentByteCount[curPeArrayIndex] = new double[numEPs];
 		receivedMsgCount[curPeArrayIndex] = new double[numEPs];
 		receivedByteCount[curPeArrayIndex] = new double[numEPs];
-		exclusiveSent[curPeArrayIndex] = new double[numEPs];
-		exclusiveBytesSent[curPeArrayIndex] = new double[numEPs];
+		exclusiveRecv[curPeArrayIndex] = new double[numEPs];
+		exclusiveBytesRecv[curPeArrayIndex] = new double[numEPs];
 		if (MainWindow.BLUEGENE) {
 		    hopCount[curPeArrayIndex] = new int[numEPs];
 		}
@@ -341,8 +372,8 @@ public class CommWindow extends GenericGraphWindow
 			    logdata.msglen;
 			// testing if the send was from outside the processor
 			if (logdata.pe != pe) {
-			    exclusiveSent[curPeArrayIndex][EPid]++;
-			    exclusiveBytesSent[curPeArrayIndex][EPid] += 
+			    exclusiveRecv[curPeArrayIndex][EPid]++;
+			    exclusiveBytesRecv[curPeArrayIndex][EPid] += 
 				logdata.msglen;
 			    if (MainWindow.BLUEGENE) {
 				hopCount[curPeArrayIndex][EPid] +=
@@ -386,18 +417,25 @@ public class CommWindow extends GenericGraphWindow
 	}
     }
 
+    // NOTE: This is a torus-based manhatten distance computation!
     private int manhattenDistance(int destPe, int srcPe) {
 	int distance = 0;
+	int dimDistance = 0;
 
 	int destTriple[] = peToTriple(destPe);
 	int srcTriple[] = peToTriple(srcPe);
 
 	for (int dim=0; dim<3; dim++) {
 	    if (destTriple[dim] < srcTriple[dim]) {
-		distance += srcTriple[dim] - destTriple[dim];
+		dimDistance = srcTriple[dim] - destTriple[dim];
 	    } else {
-		distance += destTriple[dim] - srcTriple[dim];
+		dimDistance = destTriple[dim] - srcTriple[dim];
 	    }
+	    // apply torus factor
+	    if (dimDistance > MainWindow.BLUEGENE_SIZE[dim]/2.0) {
+		dimDistance = MainWindow.BLUEGENE_SIZE[dim] - dimDistance;
+	    }
+	    distance += dimDistance;
 	}
 
 	return distance;
@@ -424,8 +462,6 @@ public class CommWindow extends GenericGraphWindow
 	return returnTriple;
     }
 
-    // stupid hack ... don't really want to do the code for
-    // manhatten distance using doubles.
     private double[][] averageHops(int hopArray[][], 
 				   double msgReceived[][]) {
 	double returnValue[][] = 
@@ -442,6 +478,112 @@ public class CommWindow extends GenericGraphWindow
 	    }
 	}
 	return returnValue;
+    }
+
+    private double[][] averagePEHops(int hopArray[][],
+				     double msgReceived[][]) {
+	double returnValue[][] =
+	    new double[hopArray.length][1];
+	double totalRecv[] = new double[hopArray.length];
+
+	for (int pe=0; pe<hopArray.length; pe++) {
+	    for (int ep=0; ep<hopArray[pe].length; ep++) {
+		totalRecv[pe] += msgReceived[pe][ep];
+		returnValue[pe][0] += hopArray[pe][ep];
+	    }
+	    if (totalRecv[pe] > 0) {
+		returnValue[pe][0] /= totalRecv[pe];
+	    }
+	}
+	return returnValue;
+    }
+
+    public static int[] peToTripleA(int pe) {
+        int returnTriple[] = new int[3];
+	int BG[] = {8, 8, 16};
+
+	System.out.println("BG triplet = " + BG[0] + " " + BG[1] + " " +
+			   BG[2]);
+
+        // **CW** Crisis of academic faith "Help! I can't do math anymore!"
+        // pe = x + y*Nx + z*Nx*Ny
+
+        // z - slowest changer
+        // = pe/Nx*Ny
+        returnTriple[2] = pe/(BG[0]*BG[1]);
+
+        // y
+        // = pe/Nx - z*Ny
+        returnTriple[1] = pe/BG[0] -
+            returnTriple[2]*BG[0];
+        // x - fastest changer
+        // this is an alternative to pe - y*Nx - z*Nx*Ny
+        returnTriple[0] = pe%BG[0];
+
+        return returnTriple;
+    }
+
+    public static int manhattenDistanceA(int srcPe, int destPe) {
+        int distance = 0;
+        int dimDistance = 0;
+	int BG[] = {8, 8, 16};
+
+        int destTriple[] = peToTripleA(destPe);
+        int srcTriple[] = peToTripleA(srcPe);
+
+	System.out.println("Source triple = " + srcTriple[0] +
+			   " " + srcTriple[1] + " " + srcTriple[2]);
+	System.out.println("Dest triple = " + destTriple[0] +
+			   " " + destTriple[1] + " " + destTriple[2]);
+
+        for (int dim=0; dim<3; dim++) {
+            if (destTriple[dim] < srcTriple[dim]) {
+                dimDistance = srcTriple[dim] - destTriple[dim];
+            } else {
+                dimDistance = destTriple[dim] - srcTriple[dim];
+            }
+            // apply torus factor
+            if (dimDistance > BG[dim]/2.0) {
+                dimDistance =  BG[dim] - dimDistance;
+            }
+            distance += dimDistance;
+        }
+
+        return distance;
+    }
+
+    public static void main(String args[]) {
+	int distance;
+
+	// (2,7,15) to (7,7,15) wrap-around expected
+	// result should be 3
+	distance = manhattenDistanceA(1018, 1023);
+	System.out.println(distance);
+
+	// (2,7,15) to (4,7,15) no wrap-around
+	// result should be 2
+	distance = manhattenDistanceA(1018, 1020);
+	System.out.println(distance);
+
+	// (2,7,15) to (4,1,15) no wrap-around on x, wrap around on y
+	// result should be 2+2 = 4
+	distance = manhattenDistanceA(1018, 972);
+	System.out.println(distance);
+
+	// (2,7,15) to (4,4,15) no wrap-around on x, no wrap around on y
+	// result should be 2+3 = 5
+	distance = manhattenDistanceA(1018, 996);
+	System.out.println(distance);
+
+	// (2,7,6) to (7,2,10) wrap on x, wrap on y, no wrap on z
+	// result should be 3+3+4 = 10
+	distance = manhattenDistanceA(442, 663);
+	System.out.println(distance);
+
+	// (2,7,15) to (4,0,5) no wrap on x, wrap on y, wrap on z
+	// result should be 2+1+6 = 9
+	distance = manhattenDistanceA(1018, 324);
+	System.out.println(distance);
     }
 }
 

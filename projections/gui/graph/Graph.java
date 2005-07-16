@@ -392,7 +392,11 @@ public class Graph extends JPanel
 	}
 
 	originX = fm.getHeight()*2 + 
+	    fm.stringWidth(""+(long)maxvalueY);
+	/*  This is silly, we never wanna draw non-marked y values.
+	originX = fm.getHeight()*2 + 
 	    fm.stringWidth(yAxis.getValueName(maxvalueY));
+	*/
 	originY = h - (30 + fm.getHeight()*2);
 
 	if ((xAxis != null) && (yAxis != null)) {
@@ -443,8 +447,6 @@ public class Graph extends JPanel
          	g.drawLine(curx, originY+2, curx, originY-2);
 	    }
 	}
-
-	
     }
 
     private void drawYAxis(Graphics2D g) {

@@ -35,7 +35,7 @@ public abstract class GenericGraphWindow
 
     // Graph specific data, so that implementation can be changed if required
     protected DataSource dataSource;
-    protected XAxisFixed xAxis;
+    protected XAxis xAxis;
     protected YAxis yAxis;
     
     // assuming all projections graph windows need a menu bar and a file menu
@@ -118,11 +118,16 @@ public abstract class GenericGraphWindow
     protected void setXAxis(String title,String units){
 	xAxis = new XAxisFixed(title,units);	
     }
+
+    //  This is used for an X Axis that has discrete, non-contigious values.
+    protected void setXAxis(String title,OrderedIntList discreteList){
+	xAxis = new XAxisDiscrete(title,discreteList);	
+    }
     
     protected void setXAxis(String title, String units, double startValue, 
 			    double multiplier) {
 	xAxis = new XAxisFixed(title,units);	
-	xAxis.setLimits(startValue,multiplier);
+	((XAxisFixed)xAxis).setLimits(startValue,multiplier);
     }
 
     protected void setYAxis(String title, String units){

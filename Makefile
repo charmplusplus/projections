@@ -180,6 +180,7 @@ SRC=\
     projections/gui/graph/SummaryXAxis.java\
     projections/gui/graph/SummaryYAxis.java\
     projections/gui/graph/XAxis.java\
+    projections/gui/graph/XAxisDiscrete.java\
     projections/gui/graph/XAxisFixed.java\
     projections/gui/graph/YAxis.java\
     projections/gui/graph/YAxisFixed.java\

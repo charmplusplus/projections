@@ -67,7 +67,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 				boolean existsArray[][],
 				String entryNames[])
     {
-	super(parent);
+	super(parent, true);
 	this.callbackTarget = callbackTarget;
 	this.numTypes = typeLabelStrings.length;
 	this.typeLabelStrings = typeLabelStrings;

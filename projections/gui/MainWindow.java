@@ -16,19 +16,20 @@ import projections.misc.*;
 public class MainWindow extends JFrame
     implements ActionListener, ScalePanel.StatusDisplay
 {
-    protected static final int NUM_WINDOWS = 11;
+    protected static final int NUM_WINDOWS = 12;
 
     protected static final int GRAPH_WIN = 0;
     protected static final int MULTI_WIN = 1;
     protected static final int PROFILE_WIN = 2;
     protected static final int COMM_WIN = 3;
-    protected static final int ANIMATION_WIN = 4;
-    protected static final int LOGVIEW_WIN = 5;
-    protected static final int HIST_WIN = 6;
-    protected static final int TIMELINE_WIN = 7;
-    protected static final int OVERVIEW_WIN = 8;
-    protected static final int TIME_PROF_WIN = 9;
-    protected static final int FUNCTION_WIN = 10;
+    protected static final int CALL_GRAPH_WIN = 4;
+    protected static final int ANIMATION_WIN = 5;
+    protected static final int LOGVIEW_WIN = 6;
+    protected static final int HIST_WIN = 7;
+    protected static final int TIMELINE_WIN = 8;
+    protected static final int OVERVIEW_WIN = 9;
+    protected static final int TIME_PROF_WIN = 10;
+    protected static final int FUNCTION_WIN = 11;
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
@@ -54,6 +55,7 @@ public class MainWindow extends JFrame
     private TimelineWindow       timelineWindow;
     private ProfileWindow        profileWindow;
     private CommWindow           commWindow;
+    private CallGraphWindow      callGraphWindow;
     private HelpWindow           helpWindow;
     private LogFileViewerWindow  logFileViewerWindow;
     private HistogramWindow      histogramWindow;
@@ -127,6 +129,7 @@ public class MainWindow extends JFrame
 	toolDescriptions[MULTI_WIN] = "Multirun";
 	toolDescriptions[PROFILE_WIN] = "Usage Profile";
 	toolDescriptions[COMM_WIN] = "Communication";
+	toolDescriptions[CALL_GRAPH_WIN] = "Call Graph";
 	toolDescriptions[LOGVIEW_WIN] = "View Logs";
 	toolDescriptions[HIST_WIN] = "Histograms";
 	toolDescriptions[ANIMATION_WIN] = "Animation";
@@ -186,6 +189,8 @@ public class MainWindow extends JFrame
 	    return "ProfileWindow";
 	} else if (index == COMM_WIN) {
 	    return "CommWindow";
+	} else if (index == CALL_GRAPH_WIN) {
+	    return "CallGraphWindow";
 	} else if (index == ANIMATION_WIN) {
 	    return "AnimationWindow";
 	} else if (index == LOGVIEW_WIN) {
@@ -217,6 +222,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("ProfileWindow", PROFILE_WIN);
 	} else if (item.equals("Communication")) {
 	    showChildWindow("CommWindow", COMM_WIN);
+	} else if (item.equals("Call Graph")) {
+	    showChildWindow("CallGraphWindow", CALL_GRAPH_WIN);
 	} else if (item.equals("Animation")) {
 	    showChildWindow("AnimationWindow", ANIMATION_WIN);
 	} else if (item.equals("View Log Files")) {

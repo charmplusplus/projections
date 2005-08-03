@@ -8,6 +8,7 @@ SRC=\
     projections/analysis/AmpiFunctionData.java\
     projections/analysis/AsciiIntegerReader.java\
     projections/analysis/CallGraph.java\
+    projections/analysis/CallTable.java\
     projections/analysis/CallStackManager.java\
     projections/analysis/Chare.java\
     projections/analysis/ColorSaver.java\
@@ -50,6 +51,8 @@ SRC=\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
     projections/gui/CallGraphWindow.java\
+    projections/gui/CallTableTextArea.java\
+    projections/gui/CallTableWindow.java\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
     projections/gui/ColorSelectable.java\

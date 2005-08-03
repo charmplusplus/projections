@@ -50,6 +50,9 @@ public class TimeProfileWindow extends GenericGraphWindow
     // output arrays
     private double[][] outputData;
     private Color[] outColors;
+    
+    // flag signifying callgraph has just begun
+    private boolean	   startFlag;
 
     void windowInit() {
 	// acquire data using parent class
@@ -84,6 +87,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	createLayout();
 	pack();
 	thisWindow = this;
+	startFlag = true;
 	showDialog();
     }
 
@@ -184,14 +188,19 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    }
 	    // set the exists array to accept non-zero entries only
 	    // have initial state also display all existing data.
-	    for (int interval=0; interval<numIntervals; interval++) {
-		if (graphData[interval][ep] > 0) {
-		    existsArray[0][ep] = true;
-		    stateArray[0][ep] = true;
-		    break;
-		}
+	    // only do this once in the beginning
+	    if (startFlag) {
+	        for (int interval=0; interval<numIntervals; interval++) {
+		    if (graphData[interval][ep] > 0) {
+		        existsArray[0][ep] = true;
+		        stateArray[0][ep] = true;
+		        break;
+		    }
+	        }
 	    }
 	}
+	if (startFlag)
+	    startFlag = false;
     }
 
     public void applyDialogColors() {

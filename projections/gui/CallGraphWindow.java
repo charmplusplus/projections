@@ -6,6 +6,7 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import javax.swing.*;
+import java.text.*;
 
 import projections.analysis.*;
 import projections.gui.graph.*;
@@ -78,6 +79,9 @@ public class CallGraphWindow extends GenericGraphWindow
 
     // flag signifying callgraph has just begun
     private boolean	   startFlag;
+    
+    // format for output
+    private DecimalFormat  _format;
             
     void windowInit() {
         // acquire data using parent class
@@ -110,6 +114,7 @@ public class CallGraphWindow extends GenericGraphWindow
 	    entryNames[ep] = Analysis.getEntryName(ep);
 	}
 	mainPanel = new JPanel();
+        _format = new DecimalFormat("###,###.###");
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);
 	createLayout();
@@ -427,32 +432,38 @@ public class CallGraphWindow extends GenericGraphWindow
 	// find the ep corresponding to the yVal
 	int count = 0;
 	String epName = "";
+	String epClassName = "";
 	for (int ep=0; ep<numEPs; ep++) {
 	    if (stateArray[0][ep]) {
 		if (count++ == yVal) {
 		    epName = Analysis.getEntryName(ep);
+		    epClassName = Analysis.getEntryChareName(ep);
 		    break;
 		}
 	    }
 	}
 
-	String[] rString = new String[2];
+	String[] rString = new String[3];
 	
 	if (currentArrayName.equals("sentMsgCount")) {
-	    rString[0] = "Dest. EPid: " + epName;
-	    rString[1] = "Count = " + sentMsgOutput[xVal][yVal];    	
+	    rString[0] = "Dest. Chare: " + epClassName;
+	    rString[1] = "Dest. EPid: " + epName;
+	    rString[2] = "Count = " + _format.format(sentMsgOutput[xVal][yVal]);    	
 	}
 	else if(currentArrayName.equals("sentByteCount")) {
-	    rString[0] = "Dest. EPid: " + epName;	    
-	    rString[1] = "Bytes = " + sentByteOutput[xVal][yVal];
+	    rString[0] = "Dest. Chare: " + epClassName;
+	    rString[1] = "Dest. EPid: " + epName;	    
+	    rString[2] = "Bytes = " + _format.format(sentByteOutput[xVal][yVal]);
 	}
 	else if(currentArrayName.equals("receivedMsgCount")) {
-	    rString[0] = "Dest. EPid: " + epName;	    
-	    rString[1] = "Count = " + receivedMsgOutput[xVal][yVal];
+	    rString[0] = "Dest. Chare: " + epClassName;
+	    rString[1] = "Dest. EPid: " + epName;	    
+	    rString[2] = "Count = " + _format.format(receivedMsgOutput[xVal][yVal]);
 	}
 	else if(currentArrayName.equals("receivedByteCount")) {
-	    rString[0] = "Dest. EPid: " + epName;	    
-	    rString[1] = "Bytes = " + receivedByteOutput[xVal][yVal];
+	    rString[0] = "Dest. Chare: " + epClassName;
+	    rString[1] = "Dest. EPid: " + epName;	    
+	    rString[2] = "Bytes = " + _format.format(receivedByteOutput[xVal][yVal]);
 	}
 /*
 	else if (currentArrayName.equals("sentExternalMsgCount")) {
@@ -467,12 +478,14 @@ public class CallGraphWindow extends GenericGraphWindow
 	}
 */
 	else if(currentArrayName.equals("receivedExternalMsgCount")) {
-	    rString[0] = "Dest. EPid: " + epName;	    
-	    rString[1] = "Count = " + receivedExternalMsgOutput[xVal][yVal];
+	    rString[0] = "Dest. Chare: " + epClassName;
+	    rString[1] = "Dest. EPid: " + epName;	    
+	    rString[2] = "Count = " + _format.format(receivedExternalMsgOutput[xVal][yVal]);
 	}
 	else if(currentArrayName.equals("receivedExternalByteCount")) {
-	    rString[0] = "Dest. EPid: " + epName;	    
-	    rString[1] = "Bytes = " + receivedExternalByteOutput[xVal][yVal];
+	    rString[0] = "Dest. Chare: " + epClassName;
+	    rString[1] = "Dest. EPid: " + epName;	    
+	    rString[2] = "Bytes = " + _format.format(receivedExternalByteOutput[xVal][yVal]);
 	}
 	return rString;
     }

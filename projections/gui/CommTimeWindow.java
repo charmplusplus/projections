@@ -11,12 +11,12 @@ import java.text.*;
 import projections.analysis.*;
 import projections.gui.graph.*;
 
-public class CallGraphWindow extends GenericGraphWindow
+public class CommTimeWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, ColorSelectable
 {
     // Sent External code commented out and may be implemented later
 
-    private CallGraphWindow      thisWindow;    
+    private CommTimeWindow      thisWindow;    
 
     private EntrySelectionDialog entryDialog;
         
@@ -77,7 +77,7 @@ public class CallGraphWindow extends GenericGraphWindow
     private double[][]     receivedExternalMsgOutput;
     private double[][]     receivedExternalByteOutput;
 
-    // flag signifying callgraph has just begun
+    // flag signifying the tool has just begun
     private boolean	   startFlag;
     
     // format for output
@@ -99,8 +99,8 @@ public class CallGraphWindow extends GenericGraphWindow
 	processorList = Analysis.getValidProcessorList();
     }
 
-    public CallGraphWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Call Graph", mainWindow, myWindowID);
+    public CommTimeWindow(MainWindow mainWindow, Integer myWindowID) {
+	super("Communication vs Time Graph", mainWindow, myWindowID);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here
@@ -193,7 +193,8 @@ public class CallGraphWindow extends GenericGraphWindow
     
     public void setCheckboxData(Checkbox cb) {
 	if(cb == sentMsgs) {
-	    setDataSource("Call Graph", sentMsgOutput, outColors, this);
+	    setDataSource("Communication vs Time", sentMsgOutput, 
+			  outColors, this);
 	    setPopupText("sentMsgCount");
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
@@ -201,7 +202,8 @@ public class CallGraphWindow extends GenericGraphWindow
 	    super.refreshGraph();
 	}
 	else if(cb == sentBytes){
-	    setDataSource("Call Graph", sentByteOutput, outColors, this);
+	    setDataSource("Communication vs Time", sentByteOutput, 
+			  outColors, this);
 	    setPopupText("sentByteCount");
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
@@ -209,7 +211,8 @@ public class CallGraphWindow extends GenericGraphWindow
 	    super.refreshGraph();
 	}
 	else if(cb == receivedMsgs){
-	    setDataSource("Call Graph", receivedMsgOutput, outColors, this);
+	    setDataSource("Communication vs Time", receivedMsgOutput, 
+			  outColors, this);
 	    setPopupText("receivedMsgCount");
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
@@ -217,7 +220,8 @@ public class CallGraphWindow extends GenericGraphWindow
 	    super.refreshGraph();
 	}
 	else if(cb == receivedBytes){
-	    setDataSource("Call Graph", receivedByteOutput, outColors, this);
+	    setDataSource("Communication vs Time", receivedByteOutput, 
+			  outColors, this);
 	    setPopupText("receivedByteCount");
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
@@ -243,7 +247,8 @@ public class CallGraphWindow extends GenericGraphWindow
         }
 */
 	else if(cb == receivedExternalMsgs){
-	    setDataSource("Call Graph", receivedExternalMsgOutput, outColors, this);
+	    setDataSource("Communication vs Time", receivedExternalMsgOutput,
+			  outColors, this);
 	    setPopupText("receivedExternalMsgCount");
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
@@ -251,7 +256,8 @@ public class CallGraphWindow extends GenericGraphWindow
 	    super.refreshGraph();
 	}
 	else if(cb == receivedExternalBytes){
-	    setDataSource("Call Graph", receivedExternalByteOutput, outColors, this);
+	    setDataSource("Communication vs Time", receivedExternalByteOutput,
+			  outColors, this);
 	    setPopupText("receivedExternalByteCount");
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);

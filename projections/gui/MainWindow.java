@@ -23,7 +23,7 @@ public class MainWindow extends JFrame
     protected static final int PROFILE_WIN = 2;
     protected static final int TIME_PROF_WIN = 3;
     protected static final int COMM_WIN = 4;
-    protected static final int CALL_GRAPH_WIN = 5;
+    protected static final int COMM_TIME_WIN = 5;
     protected static final int CALL_TABLE_WIN = 6;
     protected static final int ANIMATION_WIN = 7;
     protected static final int LOGVIEW_WIN = 8;
@@ -56,7 +56,7 @@ public class MainWindow extends JFrame
     private TimelineWindow       timelineWindow;
     private ProfileWindow        profileWindow;
     private CommWindow           commWindow;
-    private CallGraphWindow      callGraphWindow;
+    private CommTimeWindow       commTimeWindow;
     private CallTableWindow	 callTableWindow;
     private HelpWindow           helpWindow;
     private LogFileViewerWindow  logFileViewerWindow;
@@ -131,7 +131,7 @@ public class MainWindow extends JFrame
 	toolDescriptions[MULTI_WIN] = "Multirun";
 	toolDescriptions[PROFILE_WIN] = "Usage Profile";
 	toolDescriptions[COMM_WIN] = "Communication";
-	toolDescriptions[CALL_GRAPH_WIN] = "Call Graph";
+	toolDescriptions[COMM_TIME_WIN] = "Communication vs Time";
 	toolDescriptions[CALL_TABLE_WIN] = "Call Table";
 	toolDescriptions[LOGVIEW_WIN] = "View Logs";
 	toolDescriptions[HIST_WIN] = "Histograms";
@@ -192,8 +192,8 @@ public class MainWindow extends JFrame
 	    return "ProfileWindow";
 	} else if (index == COMM_WIN) {
 	    return "CommWindow";
-	} else if (index == CALL_GRAPH_WIN) {
-	    return "CallGraphWindow";
+	} else if (index == COMM_TIME_WIN) {
+	    return "CommTimeWindow";
 	} else if (index == CALL_TABLE_WIN) {
 	    return "CallTableWindow";
 	} else if (index == ANIMATION_WIN) {
@@ -227,8 +227,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("ProfileWindow", PROFILE_WIN);
 	} else if (item.equals("Communication")) {
 	    showChildWindow("CommWindow", COMM_WIN);
-	} else if (item.equals("Call Graph")) {
-	    showChildWindow("CallGraphWindow", CALL_GRAPH_WIN);
+	} else if (item.equals("Communication vs Time")) {
+	    showChildWindow("CommTimeWindow", COMM_TIME_WIN);
 	} else if (item.equals("Call Table")) {
 	    showChildWindow("CallTableWindow", CALL_TABLE_WIN);
 	} else if (item.equals("Animation")) {

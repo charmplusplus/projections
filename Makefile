@@ -50,7 +50,6 @@ SRC=\
     projections/gui/BinDialog.java\
     projections/gui/BItem.java\
     projections/gui/Bubble.java\
-    projections/gui/CallGraphWindow.java\
     projections/gui/CallTableTextArea.java\
     projections/gui/CallTableWindow.java\
     projections/gui/ColorMap.java\
@@ -58,6 +57,7 @@ SRC=\
     projections/gui/ColorSelectable.java\
     projections/gui/ColorSelectWindow.java\
     projections/gui/ColorWindowFrame.java\
+    projections/gui/CommTimeWindow.java\
     projections/gui/CommWindow.java\
     projections/gui/Converter.java\
     projections/gui/EntrySelectionDialog.java\

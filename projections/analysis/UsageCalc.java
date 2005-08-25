@@ -113,11 +113,6 @@ public class UsageCalc extends ProjDefs
 
     public float[][] usage(int procnum, long begintime, 
 			   long endtime, double v) {
-	long time;
-	long sendTime;
-	int type;
-	int entry;
-	int len;
 	float total;
 	version = v;
 	beginTime = begintime;
@@ -126,7 +121,8 @@ public class UsageCalc extends ProjDefs
 	numUserEntries = Analysis.getNumUserEntries();
 	dataLen = numUserEntries + 4;
 
-	String logHeader;
+	GenericLogReader reader;
+	LogEntryData logEntry;
 
 	float[][] data = new float[2][dataLen];
 	// initialization
@@ -135,184 +131,88 @@ public class UsageCalc extends ProjDefs
 	    data[1][i] = (float )0.0;
 	}
 
-	try {
-	    FileReader file = new FileReader(Analysis.getLogName(pnum));
-	    AsciiIntegerReader log =
-		new AsciiIntegerReader(new BufferedReader(file));
-	    curEntry = -1;
-
-	    /*
-	    log.nextLine(); // The first line contains junk
-	    */
-
-	    // **CW** first line is no longer junk.
-	    // With the advent of the delta-encoding format, it should
-	    // contain an additional field which specifies if the log file
-	    // is a delta-encoded file.
-	    logHeader = log.readLine();
-	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
-	    // **CW** a hack to avoid parsing the string - simply count
-	    // the number of tokens.
-	    if (Analysis.getVersion() >= 6.0) tokenExpected = 3;
-	    if (headerTokenizer.countTokens() > tokenExpected) {
-		deltaEncoded = true;
-	    } else {
-		deltaEncoded = false;
-	    }
-
-	    //The second line gives the program start time (begin computation)
-	    log.nextInt();
-	    // **CW** the previous timestamp is essentially begin
-	    // computation's timestamp.
-	    prevTime = log.nextLong();
+	reader = new GenericLogReader(procnum, version);
+	logEntry = new LogEntryData();
+	curEntry = -1;
 	
-	    startTime = 0;
-	    time=0;
-	    boolean isProcessing = false;
-	    try { 
-		while (time<endTime) { //EOF exception terminates loop
-		    log.nextLine();//Skip old junk at end of line
-		    type=log.nextInt();
-		    switch(type) {
-		    case BEGIN_IDLE: case END_IDLE:
-		    case BEGIN_PACK: case END_PACK:
-		    case BEGIN_UNPACK: case END_UNPACK:
-			if (deltaEncoded) {
-			    prevTime += log.nextLong();
-			    time = prevTime;
-			} else {
-			    time = log.nextLong();
-			}
-			intervalCalc(data,type, 0, (time));
-			break;
-		    case BEGIN_PROCESSING: 
-			if (isProcessing) {
-			    // bad, ignore.
-			    break;
-			}
-			log.nextInt(); //skip message type
-			entry = log.nextInt();
-			if (deltaEncoded) {
-			    prevTime += log.nextLong();
-			    time = prevTime;
-			} else {
-			    time = log.nextLong();
-			}
-			intervalCalc(data,type, entry, (time));
-			isProcessing = true;
-			break;
-		    case END_PROCESSING:
-			if (!isProcessing) {
-			    // bad, ignore.
-			    break;
-			}
-			log.nextInt(); //skip message type
-			entry = log.nextInt();
-			if (deltaEncoded) {
-			    prevTime += log.nextLong();
-			    time = prevTime;
-			} else {
-			    time = log.nextLong();
-			}
-			intervalCalc(data,type, entry, (time));
-			isProcessing = false;
-			break;
-		    case BEGIN_TRACE:
-			break;
-		    case END_TRACE:
-			break;
-		    case MESSAGE_RECV:
-			break;
-		    case CREATION:
-			log.nextInt();  // mtype
-			log.nextInt();  // ep idx
-			if (deltaEncoded) {
-			    prevTime += log.nextLong();
-			    time = prevTime;
-			} else {
-			    time = log.nextLong();
-			}
-			log.nextInt();  // event id
-			log.nextInt();  // pe id
-			if (version > 1.0) {
-			    log.nextInt();  // msg length
-			}
-			if (version > 4.9) {
-			    sendTime = log.nextLong();  // send time
-			    // System.out.println("SendTime "+sendTime);
-			} else {
-			    sendTime = 0;
-			}
-			intervalCalc(data,type,0,sendTime);
-			break;
-		    case CREATION_MULTICAST:
-			if (Analysis.getVersion() >= 6.0) {
-			    log.nextInt();  // mtype
-			    log.nextInt();  // ep idx
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-				time    = prevTime;
-			    } else {
-				time    = log.nextLong();
-			    }
-			    log.nextInt();  // event id
-			    log.nextInt();  // pe id
-			    log.nextInt();  // msg length
-			    sendTime = log.nextLong();
-			    int destPEs[] = new int[log.nextInt()];
-			    for (int i=0; i<destPEs.length; i++) {
-				destPEs[i] = log.nextInt();
-			    }
-			    // read but do nothing for now.
-			}
-			break;
-		    case USER_EVENT:
-		    case USER_EVENT_PAIR:
-			// "uninteresting" events, "ignored"
-			if (deltaEncoded) {
-			    log.nextInt();  // user message id
-			    prevTime += log.nextLong();
-			}
-			break;
-		    case ENQUEUE:
-		    case DEQUEUE:
-			// "uninteresting" events, "ignored"
-			if (deltaEncoded) {
-			    log.nextInt(); // msg type
-			    prevTime += log.nextLong();
-			}
-			break;
-		    case BEGIN_INTERRUPT:
-		    case END_INTERRUPT:
-			// "uninteresting" events, "ignored"
-			if (deltaEncoded) {
-			    prevTime += log.nextLong();
-			}
-			break;
-		    case END_COMPUTATION:
-			// End computation is "uninteresting" but is
-			// completely ignored because it does not
-			// employ any delta encoding.
-			break;
-		    default:
-			// **CW** We can no longer ignore events we do not
-			// care about. Delta encoding requires that every
-			// event be processed.
-			if (deltaEncoded) {
-			    System.out.println("Warning: Unknown Event! " +
-					       "This " +
-					       "can mess up delta encoding!");
-			}
+	startTime = 0;
+	long time=0;
+	boolean isProcessing = false;
+	try { 
+	    while (time<endTime) { //EOF exception terminates loop
+		reader.nextEvent(logEntry);
+		time = logEntry.time;
+		switch(logEntry.type) {
+		case BEGIN_IDLE: case END_IDLE:
+		case BEGIN_PACK: case END_PACK:
+		case BEGIN_UNPACK: case END_UNPACK:
+		    intervalCalc(data, logEntry.type, 0, time);
+		    break;
+		case BEGIN_PROCESSING: 
+		    if (isProcessing) {
+			// bad, ignore.
 			break;
 		    }
-		}
-	    } catch (EOFException e) {
-		log.close();
-	    } catch (IOException e) {
-		log.close();
+		    intervalCalc(data, logEntry.type, 
+				 logEntry.entry, time);
+		    isProcessing = true;
+		    break;
+		case END_PROCESSING:
+		    if (!isProcessing) {
+			// bad, ignore.
+			break;
+		    }
+		    intervalCalc(data, logEntry.type, 
+				 logEntry.entry, time);
+		    isProcessing = false;
+		    break;
+		case BEGIN_TRACE:
+		    break;
+		case END_TRACE:
+		    break;
+		case MESSAGE_RECV:
+		    break;
+		case CREATION:
+		    intervalCalc(data, logEntry.type, 0,
+				 logEntry.sendTime);
+		    break;
+		case CREATION_MULTICAST:
+		    // read but do nothing for now.
+		    break;
+		case USER_EVENT:
+		case USER_EVENT_PAIR:
+		    // "uninteresting" events, "ignored"
+		    break;
+		case ENQUEUE:
+		case DEQUEUE:
+		    // "uninteresting" events, "ignored"
+		    break;
+		case BEGIN_INTERRUPT:
+		case END_INTERRUPT:
+		    // "uninteresting" events, "ignored"
+		    break;
+		case END_COMPUTATION:
+		    // End computation is "uninteresting" but is
+		    // completely ignored because it does not
+		    // employ any delta encoding.
+		    break;
+		default:
+		    // **CW** We can no longer ignore events we do not
+		    // care about. Delta encoding requires that every
+		    // event be processed.
+		    if (deltaEncoded) {
+			System.out.println("Warning: Unknown Event! " +
+					   "This " +
+					   "can mess up delta encoding!");
+		    }
+		    break;
+		    }
 	    }
+	} catch (EOFException e) {
+	    // do nothing
 	} catch (IOException e) {
-	    System.out.println("Exception while reading log file "+pnum); 
+	    System.out.println("Exception while reading log file " +
+			       pnum); 
 	}
 	total = 0;
 	for (int j=0; j<dataLen; j++) { //Scale times to percent

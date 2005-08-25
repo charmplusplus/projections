@@ -116,7 +116,6 @@ public class LogLoader extends ProjDefs
 	int               Entry       = 0;
 	long              Time        = Long.MIN_VALUE;
 	boolean		LogMsgs     = true;
-	AsciiIntegerReader log        = null;
 	LogEntry          LE          = null;
 	TimelineEvent     TE          = null;
 	Hashtable         userEvents  = new Hashtable();  // store unfinished userEvents
@@ -125,37 +124,20 @@ public class LogLoader extends ProjDefs
 	PackTime          PT          = null;
 	boolean tempte;
 
-	String logHeader;
+	GenericLogReader reader;
+	LogEntryData data;
 
 	System.gc ();
 
 	// open the file
 	try {
-	    log = 
-		new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
-
+	    reader = new GenericLogReader(PeNum,Analysis.getVersion());
+	    data = new LogEntryData();
 	    // to treat dummy thread EPs as a special-case EP
 	    //  **CW** I consider this a hack. A more elegant way must
 	    // be found design-wise.
 	    if (Analysis.getNumFunctionEvents() > 0) {
 		ampiTraceOn = true;
-	    }
-
-	    // **CW** first line is no longer junk.
-	    // With the advent of the delta-encoding format, it should
-	    // contain an additional field which specifies if the log file
-	    // is a delta-encoded file.
-	    logHeader = log.readLine();
-	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
-	    // **CW** a hack to avoid parsing the string - simply count
-	    // the number of tokens.
-	    if (Analysis.getVersion() >= 6.0)  
-		tokenExpected = 3;
-	    if (headerTokenizer.countTokens() >= tokenExpected) {
-		deltaEncoded = true;
-                System.out.println("DELTA format found.");
-	    } else {
-		deltaEncoded = false;
 	    }
 
 	    // Each time we open the file, we need to reset the
@@ -164,7 +146,8 @@ public class LogLoader extends ProjDefs
 
 	    isProcessing = false; 
 	    while (true) { //Seek to time Begin
-		LE = readlogentry(log);
+		reader.nextEvent(data);
+		LE = LogEntry.adapt(data);
 		if (LE.Entry == -1) {
 		    continue;
 		}
@@ -192,14 +175,12 @@ public class LogLoader extends ProjDefs
 		switch (LE.TransactionType) {
 		case BEGIN_PROCESSING:
 		    System.out.println("finished empty timeline for " + PeNum);
-		    log.close();
 		    return Timeline;                              
 		case END_PROCESSING:
 		default:
 		    Timeline.addElement(TE=new TimelineEvent(Begin-BeginTime,
 							     End-BeginTime,
 							     LE.Entry,LE.Pe));
-		    log.close();
 		    return Timeline;
 		}
 	    }
@@ -485,7 +466,8 @@ public class LogLoader extends ProjDefs
 			break;
 		    }
 		}
-		LE = readlogentry(log);
+		reader.nextEvent(data);
+		LE = LogEntry.adapt(data);
 		// this will still eventually end because of the 
 		// END COMPUTATION event.
 		if (LE.Entry != -1) {
@@ -504,9 +486,9 @@ public class LogLoader extends ProjDefs
 			TE=null;
 		    }
 		}
-		LE = readlogentry (log);
+		reader.nextEvent(data);
+		LE = LogEntry.adapt(data);
 	    }
-	    log.close ();
 	} catch (EOFException e) { 
 	    /*ignore*/ 
 	} catch (FileNotFoundException E) {
@@ -561,303 +543,20 @@ public class LogLoader extends ProjDefs
 	}
     }   
 
-    /** Read in one event from the currently open log, create an instance of
-     *  LogEntry to hold it, and fill in the fields appropriate to the type of
-     *  event that is indicated by Temp.TransactionType.
-     *  @return a reference to the entry read in
-     *  @exception EOFException if it encounters the end of the file
-     */
-    LogEntry readlogentry(AsciiIntegerReader log) 
-	throws IOException
-    {   
-	// **CW** prevTime (object variable) holds the previous time-stamp. 
-
-	LogEntry Temp = new LogEntry();   
-	  
-	Temp.TransactionType = log.nextInt();
-
-	switch (Temp.TransactionType) {
-	case BEGIN_FUNC:
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time = prevTime;
-	    } else {
-		Temp.Time = log.nextLong();
-	    }
-	    Temp.FunctionID = log.nextInt();
-	    int LineNo = log.nextInt();
-	    // parse the function log because it has a stupid string at
-	    // the end for filename. Even better hack, since it is the only
-	    // thing ... use whatever is at the end to be the filename.
-	    String sourceFileName = log.readLine();
-	    Temp.setAmpiData(Temp.FunctionID, LineNo, sourceFileName);
-	    break;
-	case END_FUNC:
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time = prevTime;
-	    } else {
-		Temp.Time = log.nextLong();
-	    }
-	    Temp.FunctionID = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case USER_EVENT:
-	    Temp.MsgType = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case USER_EVENT_PAIR:
-	    Temp.MsgType = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case BEGIN_IDLE:
-	case END_IDLE:
-	case BEGIN_PACK:
-	case END_PACK:
-	case BEGIN_UNPACK:
-	case END_UNPACK:
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.Pe      = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case BEGIN_PROCESSING:
-	    /* We no longer ignore lines at the reading level. 
-	     * The calling method will have
-	     * to process this and act accordingly.
-	    if (isProcessing) {
-		// bad, ignore and clear rest of line.
-		log.nextLine();  // ignore rest of this line
-		break;
-	    }
-	    */
-	    Temp.MsgType = log.nextInt();
-	    Temp.Entry   = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    if (Analysis.getVersion() > 1.0) {
-		Temp.MsgLen  = log.nextInt();
-	    } else {
-		Temp.MsgLen  = -1;
-	    }
-	    if (Analysis.getVersion() >= 4.0) {
-		Temp.recvTime  = log.nextLong();
-		Temp.id = new ObjectId(log.nextInt(), log.nextInt(), 
-				       log.nextInt());;
-	    }
-	    if (Analysis.getVersion() >= 6.5) {
-		Temp.cpuBegin = log.nextLong();
-	    }
-	    if (Analysis.getVersion() >= 6.6) {
-		if (Analysis.hasPapi()) {
-		    Temp.numPapiCounts = log.nextInt();
-		    Temp.papiCounts = new long[Temp.numPapiCounts];
-		    for (int i=0; i<Temp.numPapiCounts; i++) {
-			Temp.papiCounts[i] = log.nextLong();
-		    }
-		}
-	    }
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case END_PROCESSING:
-	    /* We no longer ignore lines at the reading level.
-	     * The calling method will have to process this and act
-	     * accordingly.
-	    if (!isProcessing) {
-		// **CW** This is still a hack. A sequence number check is
-		// actually the correct thing to do.
-		// bad, ignore and clear rest of line.
-		log.nextLine();  // ignore rest of this line
-		break;
-	    }
-	    */
-	    Temp.MsgType = log.nextInt();
-	    Temp.Entry   = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    if (Analysis.getVersion() > 1.0) {
-		Temp.MsgLen  = log.nextInt();
-	    } else {
-		Temp.MsgLen  = -1;
-	    }
-	    if (Analysis.getVersion() >= 6.5) {
-		Temp.cpuEnd = log.nextLong();
-	    }
-	    if (Analysis.getVersion() >= 6.6) {
-		if (Analysis.hasPapi()) {
-		    Temp.numPapiCounts = log.nextInt();
-		    Temp.papiCounts = new long[Temp.numPapiCounts];
-		    for (int i=0; i<Temp.numPapiCounts; i++) {
-			Temp.papiCounts[i] = log.nextLong();
-		    }
-		}
-	    }
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case BEGIN_TRACE:
-	    // ignore for now
-	    log.nextLine();
-	    break;
-	case END_TRACE:
-	    // ignore for now
-	    log.nextLine();
-	    break;
-	case MESSAGE_RECV:
-	    // ignore for now
-	    log.nextLine();
-	    break;
-	case CREATION:
-	    Temp.MsgType = log.nextInt();
-	    Temp.Entry   = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    if (Analysis.getVersion() > 1.0) {
-		Temp.MsgLen  = log.nextInt();
-	    } else {
-		Temp.MsgLen  = -1;
-	    }
-	    if (Analysis.getVersion() >= 5.0) { 
-		Temp.sendTime = log.nextLong();
-	    }
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case CREATION_MULTICAST:
-	    Temp.MsgType = log.nextInt();
-	    Temp.Entry   = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    Temp.MsgLen  = log.nextInt();
-	    Temp.sendTime = log.nextLong();
-	    Temp.destPEs = new int[log.nextInt()];
-	    for (int i=0; i<Temp.destPEs.length; i++) {
-		Temp.destPEs[i] = log.nextInt();
-	    }
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case ENQUEUE:
-	case DEQUEUE:
-	    Temp.MsgType = log.nextInt();
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case BEGIN_INTERRUPT:
-	case END_INTERRUPT:
-	    if (deltaEncoded) {
-		prevTime += log.nextLong();
-		Temp.Time    = prevTime;
-	    } else {
-		Temp.Time    = log.nextLong();
-	    }
-	    Temp.EventID = log.nextInt();
-	    Temp.Pe      = log.nextInt();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case BEGIN_COMPUTATION:
-	    // begin computation's timestamp is not delta encoded.
-	    Temp.Time    = log.nextLong();
-	    if (deltaEncoded) {
-		prevTime += Temp.Time;
-	    }
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	case END_COMPUTATION:
-	    // end computation's timestamp is not delta encoded.
-	    Temp.Time    = log.nextLong();
-	    log.nextLine();  // ignore rest of this line
-	    break;
-	default:
-	    System.out.println ("ERROR: weird event type " + 
-				Temp.TransactionType);
-	    log.nextLine();  // ignore rest of this line
-	}
-	return Temp;
-    }   
-    
     public long searchtimeline(int PeNum, int Entry, int Num)
 	throws LogLoadException, EntryNotFoundException
     {
 	long           Count = 0;
 	LogEntry       LE     = null;
-	AsciiIntegerReader log = null;
 
-	String logHeader;
-
-	System.out.println("looking through log for processor " + PeNum);
+	GenericLogReader reader;
+	LogEntryData data;
 	
 	// open the file
 	try {
 	    System.gc();
-	    log = new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
-
-	    /*
-	    log.nextLine(); //First line is junk
-	    */
-
-	    // **CW** first line is no longer junk.
-	    // With the advent of the delta-encoding format, it should
-	    // contain an additional field which specifies if the log file
-	    // is a delta-encoded file.
-	    logHeader = log.readLine();
-	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
-	    // **CW** a hack to avoid parsing the string - simply count
-	    // the number of tokens.
-	    if (Analysis.getVersion() >= 6.0) tokenExpected = 3;
-	    if (headerTokenizer.countTokens() > tokenExpected) {
-		deltaEncoded = true;
-	    } else {
-		deltaEncoded = false;
-	    }
+	    reader = new GenericLogReader(PeNum, Analysis.getVersion());
+	    data = new LogEntryData();
 
 	    // **CW** each time we open the file, we need to reset the
 	    // previous event timestamp to 0 to support delta encoding.
@@ -865,7 +564,8 @@ public class LogLoader extends ProjDefs
 
 	    //Throws EOFException at end of file
 	    while(true) {
-		LE = readlogentry (log);
+		reader.nextEvent(data);
+		LE = LogEntry.adapt(data);
 		if (LE.Entry == -1) {
 		    continue;
 		}
@@ -892,35 +592,17 @@ public class LogLoader extends ProjDefs
     public Vector view(int PeNum) 
 	throws LogLoadException
     {
-	AsciiIntegerReader log = null;
 	ViewerEvent    VE;
 	Vector ret = null;
 	String         Line;
 
-	String logHeader;
+	GenericLogReader reader;
+	LogEntryData data;
 
 	try {	  
 	    ret = new Vector ();
-	    log = new AsciiIntegerReader(new BufferedReader(new FileReader(Analysis.getLogName(PeNum))));
-
-	    /*
-	    log.nextLine();//First line is junk
-	    */
-
-	    // **CW** first line is no longer junk.
-	    // With the advent of the delta-encoding format, it should
-	    // contain an additional field which specifies if the log file
-	    // is a delta-encoded file.
-	    logHeader = log.readLine();
-	    StringTokenizer headerTokenizer = new StringTokenizer(logHeader);
-	    // **CW** a hack to avoid parsing the string - simply count
-	    // the number of tokens.
-	    if (Analysis.getVersion() >= 6.0)  tokenExpected = 3;
-	    if (headerTokenizer.countTokens() > tokenExpected) {
-		deltaEncoded = true;
-	    } else {
-		deltaEncoded = false;
-	    }
+	    reader = new GenericLogReader(PeNum, Analysis.getVersion());
+	    data = new LogEntryData();
 
 	    // **CW** each time we open the file, we need to reset the
 	    // previous event timestamp to 0 to support delta encoding.
@@ -928,7 +610,8 @@ public class LogLoader extends ProjDefs
 
 	    //Throws EOFException at end of file
 	    while (true) {
-		VE = entrytotext(readlogentry(log));
+		reader.nextEvent(data);
+		VE = entrytotext(LogEntry.adapt(data));
 		if (VE != null) {
 		    ret.addElement (VE);
 		}

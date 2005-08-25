@@ -46,7 +46,8 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	}
 	insertTab(title, null, panel, tooltip, getTabCount());
 	setForegroundAt(0, Color.black);
-	parent.pack();
+	((JComponent)panel).revalidate();
+	parent.validate();
     }
 
     public void removeCurrent() {
@@ -76,7 +77,8 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	// make this an obvious warning color
 	setForegroundAt(0, Color.red);
 	setSelectedIndex(0);
-	parent.pack();
+	fillerPanel.revalidate();
+	parent.validate();
     }
 
     // setting it's minimum size requirments 1/3 of screen width & height

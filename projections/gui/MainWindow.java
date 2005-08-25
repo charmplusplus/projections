@@ -179,6 +179,8 @@ public class MainWindow extends JFrame
 	Util.gblAdd(background, summaryGraphPanel,
 		    gbc, 0,2, 1,1, 1,1, 0,20,20,20);
 
+	background.setPreferredSize(new Dimension(ScreenInfo.screenWidth,
+						  ScreenInfo.screenHeight));
 	pack();
     }
 

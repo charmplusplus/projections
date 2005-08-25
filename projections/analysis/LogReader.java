@@ -55,6 +55,10 @@ public class LogReader
     private int processing;
     private boolean byEntryPoint;
 
+    // **CW** 8/23/2005 Make LogReader use GenericLogReader instead
+    private LogEntryData curData;
+    private GenericLogReader reader;
+
     // added for support of multicast information
     private long sendTime;
     private int destPEs[];
@@ -68,6 +72,12 @@ public class LogReader
 	return intervalSize;
     }
 	
+    public LogReader() {
+	curData = new LogEntryData();
+	// The GenericLogReaders for each pe should be created only
+	// at read time.
+    }
+
     /**
        Add the given amount of time to the current entry for interval j
     */
@@ -252,16 +262,6 @@ public class LogReader
 		     int NintervalStart, int NintervalEnd,
 		     boolean NbyEntryPoint, OrderedIntList processorList)
     {
-	int type;
-	int mtype;
-	long time;
-	int entry;
-	int event;
-	int pe;
-	int msglen;
-	
-	String logHeader;
-
 	numProcessors = Analysis.getNumProcessors();
 	numUserEntries = Analysis.getNumUserEntries();
 	intervalSize = reqIntervalSize;
@@ -273,7 +273,7 @@ public class LogReader
 	// assume full range of processor if null
         if (processorList == null) {
 	    processorList = new OrderedIntList();
-	    for (pe=0; pe<numProcessors; pe++) {
+	    for (int pe=0; pe<numProcessors; pe++) {
 		processorList.insert(pe);
 	    }
         } else {
@@ -292,279 +292,87 @@ public class LogReader
 		int[numUserEntries][3][numProcessors][numIntervals];
 	    categorized = new int[5][3][numProcessors][];
 	}
-	int seq = 0;
         processorList.reset();
  	int curPe = processorList.nextElement();
 	curPeIdx = 0;
 	for (;curPe!=-1; curPe=processorList.nextElement()) {
-	    try {
-		progressBar.setProgress(seq);
-		progressBar.setNote("Allocating Memory for PE " + curPe);
-		// gzheng: allocate sysUsgData only when needed.
-                sysUsgData[0][curPeIdx] = new int [numIntervals+1];
-                sysUsgData[1][curPeIdx] = new int [numIntervals+1];
-                sysUsgData[2][curPeIdx] = new int [numIntervals+1];
-		progressBar.setNote("Reading data for PE " + curPe);
-		if (progressBar.isCanceled()) {
-		    // clear all data and return
-		    userEntries = null;
-		    categorized = null;
-		    sysUsgData = null;
-		    return;
-		}
-		seq ++;
-		processing = 0;
-		interval = 0;
-	        currentEntry = -1;
-	        startTime =0;
-		FileReader file = new FileReader(Analysis.getLogName(curPe));
-		AsciiIntegerReader log = 
-		    new AsciiIntegerReader(new BufferedReader(file));
-
-		// **CW** first line is no longer junk.
-		// With the advent of the delta-encoding format, it should
-		// contain an additional field which specifies if the log file
-		// is a delta-encoded file.
-		logHeader = log.readLine();
-		StringTokenizer headerTokenizer = 
-		    new StringTokenizer(logHeader);
-		// **CW** a hack to avoid parsing the string - simply count
-		// the number of tokens.
-		if (Analysis.getVersion() >= 6.0)  tokenExpected = 3;
-		if (headerTokenizer.countTokens() > tokenExpected) {
-		    deltaEncoded = true;
-		} else {
-		    deltaEncoded = false;
-		}
-		
-		/* STUPID - first line already read using readLine() !!!!!
-		log.nextLine(); // clear the rest of the first line.
-		*/
-		// The Begin Computation line (for now) is useless unless
-		// delta-encoding (which also seems to be useless) is
-		// employed.
-		if (deltaEncoded) {
-		    log.nextInt();
-		    prevTime = log.nextLong();
-		} else {
-		    // the computation line will be junked by
-		    // the log.nextLine() in the loop.
-		    // log.nextLine(); // ignore second line.
-		}
-
-		int nLines=2;
-
-		boolean isProcessing = false;
-		try { 
-		    while (true) { //EOFException will terminate loop
-			log.nextLine();//Skip any junk from previous line
-			type = log.nextInt();
-		  	nLines++;
-			switch (type) {
-			case BEGIN_IDLE: case END_IDLE:
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-				time = prevTime;
-			    } else {
-				time = log.nextLong();
-			    }
-			    pe = log.nextInt();
-			    intervalCalc(type, 0, 0, time);
-			    break;
-			case CREATION:
-			    mtype = log.nextInt();
-			    entry = log.nextInt();
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-				time = prevTime;
-			    } else {
-				time = log.nextLong();
-			    }
-			    event = log.nextInt();
-			    pe = log.nextInt();
-			    if (Analysis.getVersion() > 1.0) {
-				msglen = log.nextInt();
-			    } else {
-				msglen = -1;
-			    }
-			    intervalCalc(type, mtype, entry, 
-					 time);
-			    break;
-			case CREATION_MULTICAST:
-			    if (Analysis.getVersion() >= 6.0) {
-				mtype = log.nextInt();
-				entry   = log.nextInt();
-				if (deltaEncoded) {
-				    prevTime += log.nextLong();
-				    time    = prevTime;
-				} else {
-				    time    = log.nextLong();
-				}
-				event = log.nextInt();
-				pe = log.nextInt();
-				msglen  = log.nextInt();
-				sendTime = log.nextLong();
-				destPEs = new int[log.nextInt()];
-				for (int i=0; i<destPEs.length; i++) {
-				    destPEs[i] = log.nextInt();
-				}
-				// read but do nothing for now.
-			    }
-			    log.nextLine();  // ignore rest of this line
-			    break;
-			case BEGIN_PROCESSING: 
-			    /* Instead of ignoring the current begin
-			       processing event, we should add a "pretend"
-			       end processing event.
-			    if (isProcessing) {
-				// bad, ignore.
-				break;
-			    }
-			    */
-			    mtype = log.nextInt();
-			    entry = log.nextInt();
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-				time = prevTime;
-			    } else {
-				time = log.nextLong();
-			    }
-			    event = log.nextInt();
-			    pe = log.nextInt();
-			    if (Analysis.getVersion() > 1.0) {
-				msglen = log.nextInt();
-			    } else {
-				msglen = -1;
-			    }
-			    if (isProcessing) {
-				// add a pretend end processing event.
-				intervalCalc(END_PROCESSING, mtype, entry,
-					     time);
-				// not necessarily needed.
-				isProcessing = false;
-			    }
-			    intervalCalc(type, mtype, entry, 
-					 time);
-			    isProcessing = true;
-			    break;
-                        case END_PROCESSING:
-			    mtype = log.nextInt();
-			    entry = log.nextInt();
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-				time = prevTime;
-			    } else {
-				time = log.nextLong();
-			    }
-			    event = log.nextInt();
-			    pe = log.nextInt();
-			    if (Analysis.getVersion() > 1.0) {
-				msglen = log.nextInt();
-			    } else {
-				msglen = -1;
-			    }
-			    if (!isProcessing) {
-				// bad, ignore. (the safe thing to do)
-				// HAVE to add a dummy end event.
-				// **HACK** use -5 as mtype number to
-				// indicate the data is to be dropped.
-				// (fillToIntervals still needs to make
-				// progress though)
-				intervalCalc(type, -5, entry, time);
-			    } else {
-				intervalCalc(type, mtype, entry, time);
-			    }
-			    isProcessing = false;
-			    break;
-			case BEGIN_FUNC:
-			    // ignore for now
-			case END_FUNC:
-			    // ignore for now
-			    break;
-			case BEGIN_TRACE:
-			    // ignore for now
-			    break;
-			case END_TRACE:
-			    // ignore for now
-			    break;
-			case MESSAGE_RECV:
-			    // unclear what to do with this for now
-			    // ignore
-			    break;
-			case ENQUEUE:
-			    mtype = log.nextInt();
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-				time = prevTime;
-			    } else {
-				time = log.nextLong();
-			    }
-			    event = log.nextInt();
-			    pe = log.nextInt();
-			    intervalCalc(type, mtype, 0, time);
-			    break;
-			case END_COMPUTATION:
-			    // end computation uses absolute timestamps.
-			    time = log.nextLong();
-			    fillToInterval(numIntervals);
-			    break;
-			case BEGIN_COMPUTATION:
-			    // just ignore it.
-			    // **CW** For some wierd reason, user events
-			    // occur before the begin computation event
-			    // in NAMD logs. Causing projections to throw
-			    // "warnings".
-			    break;
-			case USER_EVENT:
-			case USER_EVENT_PAIR:
-			    // get time stamp and ignore the rest
-			    if (deltaEncoded) {
-				// first field is user message id
-				log.nextInt();
-				prevTime += log.nextLong();
-			    }
-			    break;
-			case DEQUEUE:
-			    // get time stamp and ignore the rest
-			    if (deltaEncoded) {
-				// first field is message type
-				// this case is separated from USER*
-				// for readability.
-				log.nextInt();
-				prevTime += log.nextLong();
-			    }
-			    break;
-			case BEGIN_PACK:
-			case END_PACK:
-			case BEGIN_UNPACK:
-			case END_UNPACK:
-			case BEGIN_INTERRUPT:
-			case END_INTERRUPT:
-			    // get time stamp and ignore the rest
-			    if (deltaEncoded) {
-				prevTime += log.nextLong();
-			    }
-			    break;
- 			default:
-			    // **CW** For delta encoding, we cannot simply
-			    // ignore unknown events. All events have to
-			    // be processed (at least up to the timestamp)
-			    // so that the timestamps can add up right.
-			    System.out.println("Warning: Unknown Event " + 
-					       type +
-					       "! " +
-					       "May mess delta encoding!");
-			    break;//Just skip this line
- 			}
-		    }
-		} catch (EOFException e) {
-		    log.close();
-		} catch (IOException e) {
-		    log.close();
-		}
-	    } catch (IOException e) { 
-		System.out.println("Exception reading log file #"+curPe); 
+	    progressBar.setProgress(curPeIdx);
+	    progressBar.setNote("Allocating Memory for PE " + curPe);
+	    // gzheng: allocate sysUsgData only when needed.
+	    sysUsgData[0][curPeIdx] = new int [numIntervals+1];
+	    sysUsgData[1][curPeIdx] = new int [numIntervals+1];
+	    sysUsgData[2][curPeIdx] = new int [numIntervals+1];
+	    progressBar.setNote("Reading data for PE " + curPe);
+	    if (progressBar.isCanceled()) {
+		// clear all data and return
+		userEntries = null;
+		categorized = null;
+		sysUsgData = null;
 		return;
+	    }
+	    processing = 0;
+	    interval = 0;
+	    currentEntry = -1;
+	    startTime =0;
+	    
+	    int nLines = 2;
+	    
+	    reader = new GenericLogReader(curPe, Analysis.getVersion());
+	    boolean isProcessing = false;
+	    try { 
+		while (true) { //EOFException will terminate loop
+		    reader.nextEvent(curData);
+		    nLines++;
+		    switch (curData.type) {
+		    case BEGIN_IDLE: case END_IDLE:
+			intervalCalc(curData.type, 0, 0, curData.time);
+			break;
+		    case CREATION:
+			intervalCalc(curData.type, curData.mtype, 
+				     curData.entry, curData.time);
+			break;
+		    case BEGIN_PROCESSING: 
+			if (isProcessing) {
+			    // add a pretend end processing event.
+			    intervalCalc(END_PROCESSING, 
+					 curData.mtype, curData.entry,
+					 curData.time);
+			    // not necessarily needed.
+			    isProcessing = false;
+			}
+			intervalCalc(curData.type, curData.mtype, 
+				     curData.entry, curData.time);
+			isProcessing = true;
+			break;
+		    case END_PROCESSING:
+			if (!isProcessing) {
+			    // bad, ignore. (the safe thing to do)
+			    // HAVE to add a dummy end event.
+			    // **HACK** use -5 as mtype number to
+			    // indicate the data is to be dropped.
+			    // (fillToIntervals still needs to make
+			    // progress though)
+			    intervalCalc(curData.type, -5, 
+					 curData.entry, curData.time);
+			} else {
+			    intervalCalc(curData.type, curData.mtype, 
+					 curData.entry, curData.time);
+			}
+			isProcessing = false;
+			break;
+		    case ENQUEUE:
+			intervalCalc(curData.type, curData.mtype, 
+				     0, curData.time);
+			break;
+		    case END_COMPUTATION:
+			fillToInterval(numIntervals);
+			break;
+		    }
+		}
+	    } catch (EOFException e) {
+		// Do nothing
+	    } catch (IOException e) {
+		// Do nothing
 	    }
 	    curPeIdx++;
 	} // for loop

@@ -35,6 +35,8 @@ public class LogEntryData
     public int numPerfCounts;   // number of performance counters
     public long perfCounts[];   // the array of performance counts
 
+    public int destPEs[];       // list of multicast destination processors
+
     public LogEntryData() {
 	// this is fixed (since it is based on a 3D tuple)
 	id = new int[3];
@@ -67,6 +69,8 @@ public class LogEntryData
 	for (int i=0; i<numPerfCounts; i++) {
 	    temp.perfCounts[i] = perfCounts[i];
 	}
+	temp.lineNo = lineNo;
+	temp.funcName = new String(funcName);
 
 	return temp;
     }   

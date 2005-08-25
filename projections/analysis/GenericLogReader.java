@@ -102,6 +102,25 @@ public class GenericLogReader extends ProjectionsReader
 		data.sendTime = reader.nextLong();
 	    }
 	    break;
+	case CREATION_MULTICAST:
+	    data.mtype = reader.nextInt();
+	    data.entry = reader.nextInt();
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	    if (version >= 2.0) {
+		data.msglen = reader.nextInt();
+	    } else {
+		data.msglen = -1;
+	    }
+	    if (version >= 5.0) {
+		data.sendTime = reader.nextLong();
+	    }
+	    data.destPEs = new int[reader.nextInt()];
+	    for (int i=0;i<data.destPEs.length;i++) {
+		data.destPEs[i] = reader.nextInt();
+	    }
+	    break;
 	case BEGIN_PROCESSING: 
 	    data.mtype = reader.nextInt();
 	    data.entry = reader.nextInt();

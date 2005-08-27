@@ -43,33 +43,33 @@ public class ProfileObject extends Component
    }   
    public void mouseClicked(MouseEvent evt)
    {}   
-   public void mouseEntered(MouseEvent evt)
-   {
-	  if(!inside)
-	  {
-		 inside = true;
-		 ProfileObject po = ProfileObject.this;
-		 Point scrnloc = po.getLocationOnScreen();
-		 Dimension size = getSize();
+
+    public void mouseEntered(MouseEvent evt)
+    {
+	if (!inside) {
+	    inside = true;
+	    ProfileObject po = ProfileObject.this;
+	    Point scrnloc = po.getLocationOnScreen();
+	    Dimension size = getSize();
 	  
-		 if(bubble == null)
-			bubble = new Bubble(this, bubbletext);
+	    if (bubble == null)
+		bubble = new Bubble(this, bubbletext);
 	  
-		 bubble.setLocation(scrnloc.x + size.width+5, scrnloc.y + evt.getY());
-		 bubble.setVisible(true);
-	  }     
-   }   
-   public void mouseExited(MouseEvent evt)
-   {
-	  if(inside)
-	  {
-		 if(bubble != null)
-		 {
-			bubble.dispose();
-		 }   
-		 inside = false;
-	  }      
-   }   
+	    bubble.setLocation(scrnloc.x + evt.getX(), 
+			       scrnloc.y + evt.getY() + 2);
+	    bubble.setVisible(true);
+	}     
+    }   
+   
+    public void mouseExited(MouseEvent evt) {
+	if (inside) {
+	    if (bubble != null) {
+		bubble.dispose();
+	    }   
+	    inside = false;
+	}      
+    }   
+
    public void mousePressed(MouseEvent evt)
    {}   
    public void mouseReleased(MouseEvent evt)

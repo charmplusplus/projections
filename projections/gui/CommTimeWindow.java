@@ -134,21 +134,21 @@ public class CommTimeWindow extends GenericGraphWindow
 
 	// checkbox panel items
 	cbg = new CheckboxGroup();
-	sentMsgs = new Checkbox("Messages Sent", cbg, true);
+	sentMsgs = new Checkbox("Msgs Sent To", cbg, true);
 	sentMsgs.addItemListener(this);
-	sentBytes = new Checkbox("Bytes Sent", cbg, false);
+	sentBytes = new Checkbox("Bytes Sent To", cbg, false);
 	sentBytes.addItemListener(this);
-	receivedMsgs = new Checkbox("Messages Received", cbg, false);
+	receivedMsgs = new Checkbox("Msgs Recv By", cbg, false);
 	receivedMsgs.addItemListener(this);
-	receivedBytes = new Checkbox("Bytes Received", cbg, false);
+	receivedBytes = new Checkbox("Bytes Recv By", cbg, false);
 	receivedBytes.addItemListener(this);
-	//sentExternalMsgs = new Checkbox("Messages Sent Externally", cbg, false);
+	//sentExternalMsgs = new Checkbox("External Msgs Sent To", cbg, false);
 	//sentExternalMsgs.addItemListener(this);
-	//sentExternalBytes = new Checkbox("Bytes Sent Externally", cbg, false);
+	//sentExternalBytes = new Checkbox("External Bytes Sent To", cbg, false);
 	//sentExternalBytes.addItemListener(this);
-	receivedExternalMsgs = new Checkbox("Messages Received Externally", cbg, false);
+	receivedExternalMsgs = new Checkbox("External Msgs Recv By", cbg, false);
 	receivedExternalMsgs.addItemListener(this);
-	receivedExternalBytes = new Checkbox("Bytes Received Externally", cbg, false);
+	receivedExternalBytes = new Checkbox("External Bytes Recv By", cbg, false);
 	receivedExternalBytes.addItemListener(this);
 	checkBoxPanel = new JPanel();
 	Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);

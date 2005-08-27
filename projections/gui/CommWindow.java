@@ -205,13 +205,13 @@ public class CommWindow extends GenericGraphWindow
 
 	CheckboxGroup cbg = new CheckboxGroup();
 	//	histogramCB = new Checkbox("Histogram", cbg, true);
-	sentMsgs = new Checkbox("Messages Sent To", cbg, true);
+	sentMsgs = new Checkbox("Msgs Sent To", cbg, true);
 	sentBytes = new Checkbox("Bytes Sent To", cbg, false);
-	receivedMsgs = new Checkbox("Messages Received By", cbg, false);
-	receivedBytes = new Checkbox("Bytes Received By", cbg, false);
-	recvExclusive = new Checkbox("Messages Recv Externally By", cbg, 
+	receivedMsgs = new Checkbox("Msgs Recv By", cbg, false);
+	receivedBytes = new Checkbox("Bytes Recv By", cbg, false);
+	recvExclusive = new Checkbox("External Msgs Recv By", cbg, 
 				     false);
-	recvExclusiveBytes = new Checkbox("Bytes Recv Externally By", cbg, 
+	recvExclusiveBytes = new Checkbox("External Bytes Recv By", cbg, 
 					  false);
 	
 	if (MainWindow.BLUEGENE) {

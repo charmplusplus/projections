@@ -402,27 +402,38 @@ public class LogLoader extends ProjDefs
 			userEventVector.addElement(event);
 			break;
 		    case USER_EVENT_PAIR:
-			Integer key = new Integer(LE.Entry);
-			userEvent = (UserEvent)userEvents.get(key);
-			if (userEvent != null) {
-			    // the next is a bit confusing
-			    // basically there is a CharmEventID and 
-			    // an UserEventID (the id of the userEvent)
-			    // but the log entry calls the CharmEventID 
-			    // just EventID and the UserEventID
-			    if (userEvent.CharmEventID != LE.EventID || 
-				userEvent.UserEventID != LE.Entry) {
-				System.out.println("WARN: LogLoader.createtimeline() USER_EVENT_PAIR does not match same EventID");
-			    }
-			    userEvent.EndTime = LE.Time-BeginTime;
-			    userEvents.remove(key);
-			    userEventVector.addElement(userEvent);
-			} else { 
-			    userEvent = 
-				new UserEvent(LE.Time-BeginTime,
-					      LE.Entry, LE.EventID,
-					      UserEvent.PAIR); 
-			    userEvents.put(key, userEvent);
+			// **CW** UserEventPairs come in a two-line block
+			// because of the way the tracing code is currently
+			// written.
+			userEvent = new UserEvent(LE.Time-BeginTime,
+						  LE.Entry, LE.EventID,
+						  UserEvent.PAIR); 
+			// assume the end time to be the end of range
+			// in case the ending userevent gets cut off.
+			userEvent.EndTime = End;
+
+			// Now, expect to read the second entry and handle
+			// errors if necessary.
+			reader.nextEvent(data);
+			LE = LogEntry.adapt(data);
+
+			if (LE.TransactionType != USER_EVENT_PAIR) {
+			    // DANGLING - throw away the old event
+			    // just pass the read data to the next
+			    // loop iteration.
+			    userEvent = null;
+			    continue;
+			}
+			// MISMATCHED EVENT PAIRS - again, nullify
+			// the first read event and pass the newly
+			// read entry back through the loop
+			if (userEvent.CharmEventID != LE.EventID || 
+			    userEvent.UserEventID != LE.Entry) {
+			    userEvent = null;
+			    continue;
+			} else {
+                            userEvent.EndTime = LE.Time-BeginTime;
+                            userEventVector.addElement(userEvent);
 			}
 			break;
 		    case BEGIN_PACK:

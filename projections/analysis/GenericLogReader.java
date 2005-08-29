@@ -217,8 +217,17 @@ public class GenericLogReader extends ProjectionsReader
 	    data.time = reader.nextLong();
 	    reader.nextLine(); // Skip over any garbage 
 	    break;
+	case USER_EVENT:
+	    data.userEventID = reader.nextInt();
+	    data.entry = data.userEventID; // tentative hack for compatibility
+	    data.time = reader.nextLong();
+	    data.event = reader.nextInt();
+	    data.pe = reader.nextInt();
+	    reader.nextLine(); // Skip over any garbage 
+	    break;
 	case USER_EVENT_PAIR:
 	    data.userEventID = reader.nextInt();
+	    data.entry = data.userEventID; // tentative hack for compatibility
 	    data.time = reader.nextLong();
 	    data.event = reader.nextInt();
 	    data.pe = reader.nextInt();

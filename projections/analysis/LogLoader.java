@@ -365,7 +365,7 @@ public class LogLoader extends ProjDefs
 			if (TE == null) { 
 			    TE = new TimelineEvent(LE.Time-BeginTime,
 						   LE.Time-BeginTime,
-						   Entry,LE.Pe,LE.MsgLen);
+						   -1,LE.Pe,LE.MsgLen);
 			    Timeline.addElement(TE);
 			    tempte = true;
 			}
@@ -382,7 +382,7 @@ public class LogLoader extends ProjDefs
 			if (TE == null) {
 			    TE = new TimelineEvent(LE.Time-BeginTime,
 						   LE.Time-BeginTime,
-						   Entry, LE.Pe, LE.MsgLen);
+						   -1, LE.Pe, LE.MsgLen);
 			    Timeline.addElement(TE);
 			    tempte = true;
 			}
@@ -397,12 +397,12 @@ public class LogLoader extends ProjDefs
 		    case USER_EVENT:
 			// don't mess with TE, that's just for EPs
 			UserEvent event = new UserEvent(LE.Time-BeginTime,
-							LE.MsgType, LE.EventID,
+							LE.Entry, LE.EventID,
 							UserEvent.SINGLE);
 			userEventVector.addElement(event);
 			break;
 		    case USER_EVENT_PAIR:
-			Integer key = new Integer(LE.EventID);
+			Integer key = new Integer(LE.Entry);
 			userEvent = (UserEvent)userEvents.get(key);
 			if (userEvent != null) {
 			    // the next is a bit confusing
@@ -411,7 +411,7 @@ public class LogLoader extends ProjDefs
 			    // but the log entry calls the CharmEventID 
 			    // just EventID and the UserEventID
 			    if (userEvent.CharmEventID != LE.EventID || 
-				userEvent.UserEventID != LE.MsgType) {
+				userEvent.UserEventID != LE.Entry) {
 				System.out.println("WARN: LogLoader.createtimeline() USER_EVENT_PAIR does not match same EventID");
 			    }
 			    userEvent.EndTime = LE.Time-BeginTime;
@@ -420,7 +420,7 @@ public class LogLoader extends ProjDefs
 			} else { 
 			    userEvent = 
 				new UserEvent(LE.Time-BeginTime,
-					      LE.MsgType,LE.EventID,
+					      LE.Entry, LE.EventID,
 					      UserEvent.PAIR); 
 			    userEvents.put(key, userEvent);
 			}

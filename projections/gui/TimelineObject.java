@@ -113,7 +113,7 @@ public class TimelineObject extends Component
 		    "   line:" + functionData.LineNo + " file: " +
 		    functionData.sourceFileName;
 	    }
-	} else if (n != -1) {
+	} else if (n >= 0) {
 	    int textIndex = 0;
 	    int textSize = 10;
 	    if (numPapiCounts > 0) {
@@ -187,7 +187,7 @@ public class TimelineObject extends Component
 		    */
 		}
 	    }
-	} else {
+	} else if (n == -1) {
 	    int textIndex = 0;
 	    int textSize = 4;
 	    bubbletext = new String[textSize];
@@ -196,6 +196,40 @@ public class TimelineObject extends Component
 		format_.format(beginTime);
 	    bubbletext[textIndex++] = "End Time: " + format_.format(endTime);
 	    bubbletext[textIndex++] = "Total Time: " + U.t(endTime-beginTime);
+	} else if (n == -2) {
+	    int textIndex = 0;
+	    int textSize = 6;
+	    bubbletext = new String[textSize];
+	    bubbletext[textIndex++] = "Unaccounted Time";
+	    bubbletext[textIndex] = "Begin Time: " + format_.format(beginTime);
+	    if (cpuTime > 0) {
+		bubbletext[textIndex++] += " (" + 
+		    format_.format(cpuBegin) + ")";
+	    } else {
+		textIndex++;
+	    }
+	    bubbletext[textIndex] = "End Time: " + format_.format(endTime);
+	    if (cpuTime > 0) {
+		bubbletext[textIndex++] += " (" + 
+		    format_.format(cpuEnd) + ")";
+	    } else {
+		textIndex++;
+	    }
+	    bubbletext[textIndex] = "Total Time: " + U.t(endTime-beginTime);
+	    if (cpuTime > 0) {
+		bubbletext[textIndex++] += " (" + 
+		    U.t(cpuTime) + ")";
+	    } else {
+		textIndex++;
+	    }
+	    bubbletext[textIndex] = "Packing: " + U.t(packtime);
+	    if (packtime > 0) {
+		bubbletext[textIndex++] += " (" + 
+		    (100*(float)packtime/(endTime-beginTime+1)) + "%)";
+	    } else {
+		textIndex++;
+	    }
+	    bubbletext[textIndex++] = "Msgs created: " + msgs.length;
 	}
 	addMouseListener(this);
     } 
@@ -458,11 +492,13 @@ public class TimelineObject extends Component
 
 	  Color c;
 	  
-	  if(entry == -1){
-		 c = getForeground();
-		// System.out.println("entry is -1 ");
-	  }	 
-	  else{
+	  if (entry == -1) {
+	      c = Color.white;
+	      // c = getForeground();
+	      // System.out.println("entry is -1 ");
+	  } else if (entry == -2) { // unknown domain
+	      c = getBackground();
+	  }  else {
 		if(data.colorbyObjectId){
 			//System.out.println("Should be colored by ObjectId");
 			c = getObjectColor(tid);
@@ -515,6 +551,7 @@ public class TimelineObject extends Component
 	  g.setColor(c);
 	  g.fillRect(left, startY, pixelwidth, h);
 
+	  /*
 	  if(entry == -1)
 	  {
 		 g.setColor(getBackground());
@@ -524,6 +561,7 @@ public class TimelineObject extends Component
 			g.drawLine(x+1, startY, x-h+1, startY+h);
 		 }
 	  }
+	  */
 
 	  if(w > 2)
 	  {
@@ -741,7 +779,11 @@ public class TimelineObject extends Component
    {
        //       System.out.println(beginTime + " " + endTime + " " +
        //			  data.beginTime + " " + data.endTime);
-			  
+       if (entry < 0) {
+	   // if I am not a standard entry method, I do not contribute
+	   // to the usage
+	   return;
+       }
 			  
 	  usage = endTime - beginTime;
 	  //	  usage = endTime - beginTime + 1;

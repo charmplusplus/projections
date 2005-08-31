@@ -365,7 +365,7 @@ public class LogLoader extends ProjDefs
 			if (TE == null) { 
 			    TE = new TimelineEvent(LE.Time-BeginTime,
 						   LE.Time-BeginTime,
-						   -1,LE.Pe,LE.MsgLen);
+						   -2,LE.Pe,LE.MsgLen);
 			    Timeline.addElement(TE);
 			    tempte = true;
 			}
@@ -382,7 +382,7 @@ public class LogLoader extends ProjDefs
 			if (TE == null) {
 			    TE = new TimelineEvent(LE.Time-BeginTime,
 						   LE.Time-BeginTime,
-						   -1, LE.Pe, LE.MsgLen);
+						   -2, LE.Pe, LE.MsgLen);
 			    Timeline.addElement(TE);
 			    tempte = true;
 			}
@@ -440,7 +440,7 @@ public class LogLoader extends ProjDefs
 			// Start a new dummy event
 			if (TE == null) {
 			    TE = new TimelineEvent(LE.Time-BeginTime,
-						   LE.Time-BeginTime,-1,
+						   LE.Time-BeginTime,-2,
 						   LE.Pe);
 			    Timeline.addElement(TE);
 			}
@@ -452,7 +452,7 @@ public class LogLoader extends ProjDefs
 			}
 			PT=null;
 			if (TE != null) {
-			    if (TE.EntryPoint == -1) {
+			    if (TE.EntryPoint == -2) {
 				TE=null;
 			    }
 			}

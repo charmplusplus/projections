@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.io.*;
 import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  *  HistogramWindow
@@ -18,6 +19,7 @@ import javax.swing.*;
 public class HistogramWindow extends GenericGraphWindow 
     implements ActionListener
 {
+    private static final int NUM_TYPES = 2;
     private static final int TYPE_TIME = 0;
     private static final int TYPE_MSG_SIZE = 1;
 
@@ -30,15 +32,19 @@ public class HistogramWindow extends GenericGraphWindow
     ButtonGroup binTypeGroup;
 
     // Data maintained by HistogramWindow
-    // countData is indexed by bin index followed by ep id.
-    private double[][] counts;
+    // countData is indexed by type, then by bin index followed by ep id.
+    // NOTE: bin indices need not be of the same size
+    private double[][][] counts;
     private int binType;
     
     // variables (in addition to those in the super class) 
     // to be set by BinDialog.
-    public int numBins;
-    public long binSize;
-    public long minBinSize;
+    public int timeNumBins;
+    public long timeBinSize;
+    public long timeMinBinSize;
+    public int msgNumBins;
+    public long msgBinSize;
+    public long msgMinBinSize;
 
     private HistogramWindow thisWindow;
 
@@ -46,9 +52,12 @@ public class HistogramWindow extends GenericGraphWindow
     private DecimalFormat _format;
 
     void windowInit() {
-	numBins = 100;  // default to 100 bins
-	binSize = 100; // 1ms default bin size
-	minBinSize = 0; // default, look at all bins
+	timeNumBins = 100;  // default to 100 bins
+	timeBinSize = 1000; // 1ms default bin size
+	timeMinBinSize = 0; // default, look at all bins
+	msgNumBins = 200;   // default to 200 bins
+	msgBinSize = 100;  // 100 bytes default bin size
+	msgMinBinSize = 0; // default, look at all bins
 	// use GenericGraphWindow's method for the rest.
 	super.windowInit();
     }
@@ -62,13 +71,12 @@ public class HistogramWindow extends GenericGraphWindow
 	_format = new DecimalFormat();
 
 	setTitle("Projections Histograms");
-	setGraphSpecificData();
 
 	createMenus();
 	getContentPane().add(getMainPanel());
-	
+
 	pack();
-	showDialog();
+	showDialog(); 
     }   
     
     public void close(){
@@ -102,7 +110,6 @@ public class HistogramWindow extends GenericGraphWindow
 		    }
 		    public void finished() {
 			setGraphSpecificData();
-			setDataSource("Histogram", counts, thisWindow);
 			refreshGraph();
 			thisWindow.setVisible(true);
 		    }
@@ -117,18 +124,24 @@ public class HistogramWindow extends GenericGraphWindow
 
     public void getDialogData() {
 	BinDialog dialog = (BinDialog)this.dialog;
-	numBins = dialog.getNumBins();
-	binSize = dialog.getBinSize();
-	minBinSize = dialog.getMinBinSize();
+	timeNumBins = dialog.getTimeNumBins();
+	timeBinSize = dialog.getTimeBinSize();
+	timeMinBinSize = dialog.getTimeMinBinSize();
+	msgNumBins = dialog.getMsgNumBins();
+	msgBinSize = dialog.getMsgBinSize();
+	msgMinBinSize = dialog.getMsgMinBinSize();
 	// use GenericGraphWindow's method for the rest.
 	super.getDialogData();
     }
 
     public void setDialogData() {
 	BinDialog dialog = (BinDialog)this.dialog;
-	dialog.setBinSize(binSize);
-	dialog.setNumBins(numBins);
-	dialog.setMinBinSize(minBinSize);
+	dialog.setTimeBinSize(timeBinSize);
+	dialog.setTimeNumBins(timeNumBins);
+	dialog.setTimeMinBinSize(timeMinBinSize);
+	dialog.setMsgBinSize(msgBinSize);
+	dialog.setMsgNumBins(msgNumBins);
+	dialog.setMsgMinBinSize(msgMinBinSize);
 	super.setDialogData();
     }
 
@@ -195,7 +208,8 @@ public class HistogramWindow extends GenericGraphWindow
 	JPanel graphPanel = super.getMainPanel(); 
 
 	JPanel buttonPanel = new JPanel();
-	buttonPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Histogram Controls"));
+	buttonPanel.setBorder(new TitledBorder(new LineBorder(Color.black), 
+					       "Histogram Controls"));
 
 	entrySelectionButton = new JButton("Select Entries");
 	entrySelectionButton.addActionListener(this);
@@ -224,22 +238,23 @@ public class HistogramWindow extends GenericGraphWindow
 
     protected void setGraphSpecificData(){
 	if (binType == TYPE_TIME) {
-	    setXAxis("Bin Interval Size (" + U.t(binSize) + ")", 
-		     "Time", minBinSize, binSize);
+	    setXAxis("Bin Interval Size (" + U.t(timeBinSize) + ")", 
+		     "Time", timeMinBinSize, timeBinSize);
 	    setYAxis("Number of Occurrences", "");
+	    setDataSource("Histogram", counts[TYPE_TIME], 
+			  thisWindow);
 	} else if (binType == TYPE_MSG_SIZE) {
 	    setXAxis("Bin Interval Size (" + 
-		     _format.format(binSize) + " bytes)", 
-		     "", minBinSize, binSize);
+		     _format.format(msgBinSize) + " bytes)", 
+		     "", msgMinBinSize, msgBinSize);
 	    setYAxis("Number of Occurrences", "");
+	    setDataSource("Histogram", counts[TYPE_MSG_SIZE], 
+			  thisWindow);
 	}
     }
 
     protected void refreshGraph()
     {
-	// get new counts and redraw the graph
-	counts = getCounts();
-	setDataSource("Histogram", counts, thisWindow);
 	super.refreshGraph();
     }
 
@@ -256,12 +271,13 @@ public class HistogramWindow extends GenericGraphWindow
 	String bubbleText[] = new String[3];
 
 	bubbleText[0] = Analysis.getEntryName(yVal);
-	bubbleText[1] = "Count: " + counts[xVal][yVal];
-	if (xVal < numBins) {
-	    bubbleText[2] = "Bin: " + U.t(xVal*binSize+minBinSize) +
-		" to " + U.t((xVal+1)*binSize+minBinSize);
+	bubbleText[1] = "Count: " + counts[TYPE_TIME][xVal][yVal];
+	if (xVal < timeNumBins) {
+	    bubbleText[2] = "Bin: " + U.t(xVal*timeBinSize+timeMinBinSize) +
+		" to " + U.t((xVal+1)*timeBinSize+timeMinBinSize);
 	} else {
-	    bubbleText[2] = "Bin: > " + U.t(numBins*binSize+minBinSize);
+	    bubbleText[2] = "Bin: > " + U.t(timeNumBins*timeBinSize+
+					    timeMinBinSize);
 	}
 	return bubbleText;
     }
@@ -270,45 +286,56 @@ public class HistogramWindow extends GenericGraphWindow
 	String bubbleText[] = new String[3];
 
 	bubbleText[0] = Analysis.getEntryName(yVal);
-	bubbleText[1] = "Count: " + counts[xVal][yVal];
-	if (xVal < numBins) {
+	bubbleText[1] = "Count: " + counts[TYPE_MSG_SIZE][xVal][yVal];
+	if (xVal < msgNumBins) {
 	    bubbleText[2] = "Bin: " + 
-		_format.format(xVal*binSize+minBinSize) +
-		" bytes to " + _format.format((xVal+1)*binSize+minBinSize) +
+		_format.format(xVal*msgBinSize+msgMinBinSize) +
+		" bytes to " + _format.format((xVal+1)*msgBinSize+
+					      msgMinBinSize) +
 		" bytes";
 	} else {
 	    bubbleText[2] = "Bin: > " + 
-		_format.format(numBins*binSize+minBinSize) + " bytes";
+		_format.format(msgNumBins*msgBinSize+msgMinBinSize)+" bytes";
 	}
 	return bubbleText;
     }
 
-    private double[][] getCounts() {
-	if (binType == TYPE_TIME) {
-	    return getTimeCounts();
-	} else if (binType == TYPE_MSG_SIZE) {
-	    return getMsgSizeCounts();
-	}
-	return null;
-    }
-
-    private double[][] getTimeCounts()
+    private double[][][] getCounts()
     {
+	// Variables for use with the analysis
+	long executionTime;
+	long adjustedTime;
+	long adjustedSize;
+
 	int numEPs = Analysis.getNumUserEntries();
 
 	OrderedIntList tmpPEs = validPEs.copyOf();
 	GenericLogReader r;
-	// we create an extra bin to hold overflows.
-        double [][] countData = new double[numBins+1][numEPs];
+        double[][][] countData = new double[NUM_TYPES][][];
 
-	LogEntryData logdata,logdata2;
+	// we create an extra bin to hold overflows.
+	countData[TYPE_TIME] = new double[timeNumBins+1][numEPs];
+	countData[TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
+
+	LogEntryData logdata;
 	logdata = new LogEntryData();
-	logdata2 = new LogEntryData();
-	
+
+	LogEntryData tmpLogPtr; // temp pointer for swapping only
+
+	// for maintaining "begin" entries for the data type we
+	// wish to monitor.
+	LogEntryData[] typeLogs
+	    = new LogEntryData[NUM_TYPES];
+	for (int i=0; i<NUM_TYPES; i++) {
+	    typeLogs[i] = new LogEntryData();
+	}
+	// for maintaining interval-based events 
+	boolean[] isActive
+	    = new boolean[NUM_TYPES];
+
 	ProgressMonitor progressBar = 
 	    new ProgressMonitor(this, "Reading log files",
 				"", 0, tmpPEs.size());
-	
 	int curPeCount = 0;
 	while (tmpPEs.hasMoreElements()) {
 	    int pe = tmpPEs.nextElement();
@@ -322,24 +349,78 @@ public class HistogramWindow extends GenericGraphWindow
 	    r = new GenericLogReader(Analysis.getLogName(pe),
 				     Analysis.getVersion());
 	    try {
-		r.nextEventOnOrAfter(startTime,logdata);
-		while(true){
-		    r.nextEventOfType(ProjDefs.BEGIN_PROCESSING,logdata);
-		    r.nextEventOfType(ProjDefs.END_PROCESSING,logdata2);
-
-		    long executionTime = (logdata2.time - logdata.time);
-		    long adjustedTime = executionTime - minBinSize;
-
-		    // respect the user threshold.
-		    if (adjustedTime >= 0) {
-			int targetBin = (int)(adjustedTime/binSize);
-			if (targetBin >= numBins) {
-			    targetBin = numBins;
+		r.nextEventOnOrAfter(startTime, logdata);
+		boolean done = false;
+		while (!done) {
+		    switch (logdata.type) {
+		    case ProjDefs.BEGIN_PROCESSING:
+			// NOTE: If prior BEGIN never got terminated,
+			// simply drop the data given current tracing
+			// scheme (ie. do nothing)
+			if (logdata.time > endTime) {
+			    done = true;
+			} else {
+			    // swap logdata (ie. note the BEGIN event)
+			    tmpLogPtr = logdata;
+			    logdata = typeLogs[TYPE_TIME];
+			    typeLogs[TYPE_TIME] = tmpLogPtr;
+			    isActive[TYPE_TIME] = true;
 			}
-			countData[targetBin][logdata.entry]+=1.0;
-		    }
-		    if (logdata2.time > endTime) {
 			break;
+		    case ProjDefs.END_PROCESSING:
+			if (!isActive[TYPE_TIME]) {
+			    // NOTE: No corresponding BEGIN, so this
+			    // instance of END must be ignored given
+			    // current tracing scheme.
+			    if (logdata.time > endTime) {
+				done = true;
+			    }
+			    break;
+			} else {
+			    if (logdata.event != typeLogs[TYPE_TIME].event) {
+				// The events are mismatched! Clear all.
+				// Possible under current tracing scheme.
+				isActive[TYPE_TIME] = false;
+				break;
+			    }
+			    // NOTE: Even if the END event happens past 
+			    // the range, it is recorded as the proper 
+			    // execution time of the event.
+			    executionTime = 
+				logdata.time - typeLogs[TYPE_TIME].time;
+			    adjustedTime = executionTime - timeMinBinSize;
+			    // respect user threshold
+			    if (adjustedTime >= 0) {
+				int targetBin = 
+				    (int)(adjustedTime/timeBinSize);
+				if (targetBin >= timeNumBins) {
+				    targetBin = timeNumBins;
+				}
+				countData[TYPE_TIME][targetBin][logdata.entry]
+				    += 1.0;
+			    }
+			    isActive[TYPE_TIME] = false;
+			}
+			break;
+		    case ProjDefs.CREATION:
+			if (logdata.time > endTime) {
+			    break;
+			}
+			// respect the user threshold.
+			adjustedSize =
+			    logdata.msglen - msgMinBinSize;
+			if (adjustedSize >= 0) {
+			    int targetBin = (int)(adjustedSize/msgBinSize);
+			    if (targetBin >= msgNumBins) {
+				targetBin = msgNumBins;
+			    }
+			    countData[TYPE_MSG_SIZE][targetBin]
+				[logdata.entry]+=1.0;
+			}
+			break;
+		    }
+		    if (!done) {
+			r.nextEvent(logdata);
 		    }
 		}
 	    } catch(EOFException e) {
@@ -347,66 +428,13 @@ public class HistogramWindow extends GenericGraphWindow
 	    } catch(Exception e) {
 		System.out.println("Exception " + e);
 		e.printStackTrace();
+		System.exit(-1);
 	    }
 	}
 	progressBar.close();
 	return countData;
     }
     
-    private double[][] getMsgSizeCounts() {
-	int numEPs = Analysis.getNumUserEntries();
-
-	OrderedIntList tmpPEs = validPEs.copyOf();
-	GenericLogReader r;
-	// we create an extra bin to hold overflows.
-        double [][] countData = new double[numBins+1][numEPs];
-
-	LogEntryData logdata;
-	logdata = new LogEntryData();
-
-	ProgressMonitor progressBar = 
-	    new ProgressMonitor(this, "Reading log files",
-				"", 0, tmpPEs.size());
-	
-	int curPeCount = 0;
-	while (tmpPEs.hasMoreElements()) {
-	    int pe = tmpPEs.nextElement();
-	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("Reading data for PE " + pe);
-		progressBar.setProgress(curPeCount);
-	    } else {
-		progressBar.close();
-	    }
-	    curPeCount++;
-	    r = new GenericLogReader(Analysis.getLogName(pe),
-				     Analysis.getVersion());
-	    try {
-		r.nextEventOnOrAfter(startTime,logdata);
-		while(true){
-		    r.nextEventOfType(ProjDefs.CREATION,logdata);
-		    if (logdata.time > endTime) {
-			break;
-		    }
-		    // respect the user threshold.
-		    if (logdata.msglen >= minBinSize) {
-			int targetBin = (int)(logdata.msglen/binSize);
-			if (targetBin >= numBins) {
-			    targetBin = numBins;
-			}
-			countData[targetBin][logdata.entry]+=1.0;
-		    }
-		}
-	    } catch(EOFException e) {
-	     	// do nothing just reached end-of-file
-	    } catch(Exception e) {
-		System.out.println("Exception " + e);
-		e.printStackTrace();
-	    }
-	}
-	progressBar.close();
-	return countData;
-    }
-
     // override the super class' createMenus(), add any menu items in 
     // fileMenu if needed, add any new menus to the menuBar
     // then call super class' createMenus() to add the menuBar to the Window

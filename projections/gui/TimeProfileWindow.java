@@ -136,11 +136,55 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    final SwingWorker worker =  new SwingWorker() {
 		    public Object construct() {
 			if (dialog.isModified()) {
-			    Analysis.LoadGraphData(intervalSize,
-						   startInterval,
-						   endInterval,
-						   true, processorList);
-			    fillGraphData();
+			    int nextPe = 0;
+			    int count = 0;
+			    ProgressMonitor progressBar =
+				new ProgressMonitor(Analysis.guiRoot, 
+						    "Reading log files",
+						    "", 0,
+						    processorList.size());
+			    progressBar.setNote("Reading");
+			    progressBar.setProgress(0);
+			    while (processorList.hasMoreElements()) {
+				nextPe = processorList.nextElement();
+				progressBar.setProgress(count);
+				progressBar.setNote("Reading PE " + nextPe);
+				if (progressBar.isCanceled()) {
+				    return null;
+				}
+				// inefficient, but temporary workaround
+				OrderedIntList tempList = 
+				    new OrderedIntList();
+				tempList.insert(nextPe);
+				Analysis.LoadGraphData(intervalSize,
+						       startInterval,
+						       endInterval,
+						       true, tempList);
+				fillGraphData();
+				count++;
+			    }
+			    progressBar.close();
+			    // set the exists array to accept non-zero 
+			    // entries only have initial state also 
+			    // display all existing data. Only do this 
+			    // once in the beginning
+			    if (startFlag) {
+				for (int interval=0; 
+				     interval<graphData.length; 
+				     interval++) {
+				    for (int ep=0; 
+					 ep<graphData[interval].length; 
+					 ep++) {
+					if (graphData[interval][ep] > 0) {
+					    existsArray[0][ep] = true;
+					    stateArray[0][ep] = true;
+					    break;
+					}
+				    }
+				}
+			    }
+			    if (startFlag)
+				startFlag = false;
 			}
 			return null;
 		    }
@@ -178,7 +222,9 @@ public class TimeProfileWindow extends GenericGraphWindow
 	// Any current attempts to fix this will cause GraphWindow to fail
 	// when partial data is actually read.
 	int numIntervals = endInterval-startInterval+1;
-	graphData = new double[numIntervals][numEPs];
+	if (graphData == null) {
+	    graphData = new double[numIntervals][numEPs];
+	}
 	for (int ep=0; ep<numEPs; ep++) {
 	    int[][] entryData = Analysis.getUserEntryData(ep, LogReader.TIME);
 	    for (int pe=0; pe<entryData.length; pe++) {
@@ -186,21 +232,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 		    graphData[interval][ep] += entryData[pe][interval];
 		}
 	    }
-	    // set the exists array to accept non-zero entries only
-	    // have initial state also display all existing data.
-	    // only do this once in the beginning
-	    if (startFlag) {
-	        for (int interval=0; interval<numIntervals; interval++) {
-		    if (graphData[interval][ep] > 0) {
-		        existsArray[0][ep] = true;
-		        stateArray[0][ep] = true;
-		        break;
-		    }
-	        }
-	    }
 	}
-	if (startFlag)
-	    startFlag = false;
     }
 
     public void applyDialogColors() {

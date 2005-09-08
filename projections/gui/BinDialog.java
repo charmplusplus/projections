@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.text.DecimalFormat;
 import javax.swing.*;
+import javax.swing.border.*;
 
 /**
  *  BinDialog
@@ -21,29 +22,56 @@ import javax.swing.*;
 public class BinDialog extends RangeDialog 
 {
     // GUI components
-    protected JPanel binPanel;
-    protected JLabel numBinsLabel;
-    protected JLabel binSizeLabel;
-    protected JLabel minBinSizeLabel;
-    protected JLabel binRangeLabel;
+    protected JTabbedPane binPanel;
+    protected JPanel timeBinPanel;
+    protected JPanel msgBinPanel;
 
-    protected JIntTextField numBinsField;
-    protected JLongTextField binSizeField;
-    protected JLongTextField minBinSizeField;
+    // Time-based bins
+    protected JLabel timeNumBinsLabel;
+    protected JLabel timeBinSizeLabel;
+    protected JLabel timeMinBinSizeLabel;
+    protected JLabel timeBinRangeLabel;
 
-    protected int numBins;
-    protected long binSize;
-    protected long minBinSize;
+    protected JIntTextField timeNumBinsField;
+    protected JTimeTextField timeBinSizeField;
+    protected JTimeTextField timeMinBinSizeField;
 
+    // Message-based bins
+    protected JLabel msgNumBinsLabel;
+    protected JLabel msgBinSizeLabel;
+    protected JLabel msgMinBinSizeLabel;
+    protected JLabel msgBinRangeLabel;
+
+    protected JIntTextField msgNumBinsField;
+    protected JLongTextField msgBinSizeField;
+    protected JLongTextField msgMinBinSizeField;
+
+    // Dialog attributes
+    protected int timeNumBins;
+    protected long timeBinSize;
+    protected long timeMinBinSize;
+
+    protected int msgNumBins;
+    protected long msgBinSize;
+    protected long msgMinBinSize;
+
+    private static final int NUM_TYPES = 2;
+    private static final int TIME_DATA = 0;
+    private static final int BYTES_DATA = 1;
     private DecimalFormat _format;
 
     public BinDialog(ProjectionsWindow mainWindow,
 			 String titleString) {
 	super(mainWindow, titleString);
-	// default values
-	numBins = 100;
-	binSize = 100;
-	minBinSize = 0;
+	// default values for time 1ms to 100ms
+	timeNumBins = 100;
+	timeBinSize = 1000;
+	timeMinBinSize = 0;
+
+	// default values for messages 100 bytes to 2k
+	msgNumBins = 200;
+	msgBinSize = 100;
+	msgMinBinSize = 0;
 
 	_format = new DecimalFormat();
     }
@@ -60,7 +88,8 @@ public class BinDialog extends RangeDialog
 		    return;
 		} 
 	    } else if (b == bUpdate) {
-		setBinRangeText();
+		setBinRangeText(TIME_DATA);
+		setBinRangeText(BYTES_DATA);
 	    }
 	}
 	// let superclass handle its own action routines.
@@ -76,37 +105,81 @@ public class BinDialog extends RangeDialog
 	gbc.fill = GridBagConstraints.BOTH;
 	gbc.insets = new Insets(2,2,2,2);
 
-	numBinsLabel = new JLabel("Number of Bins:", JLabel.LEFT);
-	numBinsField = new JIntTextField(numBins, 5);
-	numBinsField.addActionListener(this);
-	numBinsField.addKeyListener(this);
-	numBinsField.addFocusListener(this);
+	// Time Panel
+	timeBinPanel = new JPanel();
+	timeBinPanel.setLayout(gbl);
+	timeBinPanel.setBorder(new TitledBorder(new LineBorder(Color.black),
+						"TIME-BASED BINS"));
 
-	binSizeLabel = new JLabel("Size of Bin:", JLabel.LEFT);
-	binSizeField = new JLongTextField(binSize, 12);
-	binSizeField.addActionListener(this);
-	binSizeField.addKeyListener(this);
-	binSizeField.addFocusListener(this);
+	timeNumBinsLabel = new JLabel("# of Time Bins:", JLabel.LEFT);
+	timeNumBinsField = new JIntTextField(timeNumBins, 5);
+	timeNumBinsField.addActionListener(this);
+	timeNumBinsField.addKeyListener(this);
+	timeNumBinsField.addFocusListener(this);
 
-	minBinSizeLabel = new JLabel("Starting Bin Size:", 
-				     JLabel.LEFT);
-	minBinSizeField = new JLongTextField(minBinSize, 12);
-	minBinSizeField.addActionListener(this);
-	minBinSizeField.addKeyListener(this);
-	minBinSizeField.addFocusListener(this);
+	timeBinSizeLabel = new JLabel("Time Bin Size:", JLabel.LEFT);
+	timeBinSizeField = new JTimeTextField(timeBinSize, 12);
+	timeBinSizeField.addActionListener(this);
+	timeBinSizeField.addKeyListener(this);
+	timeBinSizeField.addFocusListener(this);
 
-	binRangeLabel = new JLabel("", JLabel.LEFT);
-	setBinRangeText();
+	timeMinBinSizeLabel = new JLabel("Starting Bin Size:", 
+					 JLabel.LEFT);
+	timeMinBinSizeField = new JTimeTextField(timeMinBinSize, 12);
+	timeMinBinSizeField.addActionListener(this);
+	timeMinBinSizeField.addKeyListener(this);
+	timeMinBinSizeField.addFocusListener(this);
 
-	binPanel = new JPanel();
-	binPanel.setLayout(gbl);
-	Util.gblAdd(binPanel, numBinsLabel,    gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, numBinsField,    gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, binSizeLabel,    gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, binSizeField,    gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(binPanel, minBinSizeLabel, gbc, 0,1, 2,1, 1,1);
-	Util.gblAdd(binPanel, minBinSizeField, gbc, 1,1, 2,1, 1,1);
-	Util.gblAdd(binPanel, binRangeLabel,   gbc, 0,2, 4,1, 1,1);
+	timeBinRangeLabel = new JLabel("", JLabel.LEFT);
+	setBinRangeText(TIME_DATA);
+
+	Util.gblAdd(timeBinPanel, timeNumBinsLabel,    gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(timeBinPanel, timeNumBinsField,    gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(timeBinPanel, timeBinSizeLabel,    gbc, 2,0, 1,1, 1,1);
+	Util.gblAdd(timeBinPanel, timeBinSizeField,    gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(timeBinPanel, timeMinBinSizeLabel, gbc, 0,1, 2,1, 1,1);
+	Util.gblAdd(timeBinPanel, timeMinBinSizeField, gbc, 1,1, 2,1, 1,1);
+	Util.gblAdd(timeBinPanel, timeBinRangeLabel,   gbc, 0,2, 4,1, 1,1);
+
+	// Messages Panel
+	msgBinPanel = new JPanel();
+	msgBinPanel.setLayout(gbl);
+	msgBinPanel.setBorder(new TitledBorder(new LineBorder(Color.black),
+					       "MESSAGE-BASED BINS"));
+
+	msgNumBinsLabel = new JLabel("# of Msg Bins:", JLabel.LEFT);
+	msgNumBinsField = new JIntTextField(msgNumBins, 5);
+	msgNumBinsField.addActionListener(this);
+	msgNumBinsField.addKeyListener(this);
+	msgNumBinsField.addFocusListener(this);
+
+	msgBinSizeLabel = new JLabel("Bin Size (bytes):", JLabel.LEFT);
+	msgBinSizeField = new JLongTextField(msgBinSize, 12);
+	msgBinSizeField.addActionListener(this);
+	msgBinSizeField.addKeyListener(this);
+	msgBinSizeField.addFocusListener(this);
+
+	msgMinBinSizeLabel = new JLabel("Starting Bin Size:", 
+					JLabel.LEFT);
+	msgMinBinSizeField = new JLongTextField(msgMinBinSize, 12);
+	msgMinBinSizeField.addActionListener(this);
+	msgMinBinSizeField.addKeyListener(this);
+	msgMinBinSizeField.addFocusListener(this);
+
+	msgBinRangeLabel = new JLabel("", JLabel.LEFT);
+	setBinRangeText(BYTES_DATA);
+
+	Util.gblAdd(msgBinPanel, msgNumBinsLabel,    gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(msgBinPanel, msgNumBinsField,    gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(msgBinPanel, msgBinSizeLabel,    gbc, 2,0, 1,1, 1,1);
+	Util.gblAdd(msgBinPanel, msgBinSizeField,    gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(msgBinPanel, msgMinBinSizeLabel, gbc, 0,1, 2,1, 1,1);
+	Util.gblAdd(msgBinPanel, msgMinBinSizeField, gbc, 1,1, 2,1, 1,1);
+	Util.gblAdd(msgBinPanel, msgBinRangeLabel,   gbc, 0,2, 4,1, 1,1);
+
+	binPanel = new JTabbedPane();
+	binPanel.addTab("Time", null, timeBinPanel, "Time-based bins");
+	binPanel.addTab("Msgs", null, msgBinPanel, "Message Sizes");
 
 	inputPanel.setLayout(gbl);
 	Util.gblAdd(inputPanel, baseMainPanel,  gbc, 0,0, 1,1, 1,1);
@@ -117,17 +190,27 @@ public class BinDialog extends RangeDialog
 
     void updateData(JTextField field) {
 	if (field instanceof JIntTextField) {
-	    if (field == numBinsField) {
-		numBins = numBinsField.getValue();
-		setBinRangeText();
+	    if (field == timeNumBinsField) {
+		timeNumBins = timeNumBinsField.getValue();
+		setBinRangeText(TIME_DATA);
+	    } else if (field == msgNumBinsField) {
+		msgNumBins = msgNumBinsField.getValue();
+		setBinRangeText(BYTES_DATA);
 	    }
 	} else if (field instanceof JLongTextField) {
-	    if (field == binSizeField) {
-		binSize = binSizeField.getValue();
-	    } else if (field == minBinSizeField) {
-		minBinSize = minBinSizeField.getValue();
+	    if (field == msgBinSizeField) {
+		msgBinSize = msgBinSizeField.getValue();
+	    } else if (field == msgMinBinSizeField) {
+		msgMinBinSize = msgMinBinSizeField.getValue();
 	    }
-	    setBinRangeText();
+	    setBinRangeText(BYTES_DATA);
+	} else if (field instanceof JTimeTextField) {
+	    if (field == timeBinSizeField) {
+		timeBinSize = timeBinSizeField.getValue();
+	    } else if (field == timeMinBinSizeField) {
+		timeMinBinSize = timeMinBinSizeField.getValue();
+	    }
+	    setBinRangeText(TIME_DATA);
 	}
 	super.updateData(field);
     }
@@ -154,39 +237,76 @@ public class BinDialog extends RangeDialog
 	// this method is included for completeness.
     }
 
-    void setBinRangeText() {
-	binRangeLabel.setText("Bin size ranges from : " +
-			      _format.format(minBinSizeField.getValue()) +
-			      " units to " + 
-			      _format.format(minBinSizeField.getValue() +
-					     numBinsField.getValue() *
-					     binSizeField.getValue()) +
-			      " units.");
+    void setBinRangeText(int datatype) {
+	switch (datatype) {
+	case TIME_DATA:
+	    timeBinRangeLabel.setText("Bin size ranges from : " +
+				      U.t(timeMinBinSizeField.getValue()) +
+				      " to " +
+				      U.t(timeMinBinSizeField.getValue() +
+					  timeNumBinsField.getValue() *
+					  timeBinSizeField.getValue()));
+	    break;
+	case BYTES_DATA:
+	    msgBinRangeLabel.setText("Bin size ranges from : " +
+				     _format.format(msgMinBinSizeField.getValue()) +
+				     " bytes to " + 
+				     _format.format(msgMinBinSizeField.getValue() +
+						    msgNumBinsField.getValue() *
+						    msgBinSizeField.getValue()) +
+				     " bytes.");
+	    break;
+	}
     }
 
     // Accessor methods
-
-    public int getNumBins() {
-	return numBins;
+    // Time
+    public int getTimeNumBins() {
+	return timeNumBins;
     }
 
-    public void setNumBins(int numBins) {
-	this.numBins = numBins;
+    public void setTimeNumBins(int numBins) {
+	this.timeNumBins = numBins;
     }
 
-    public long getBinSize() {
-	return binSize;
+    public long getTimeBinSize() {
+	return timeBinSize;
     }
 
-    public void setBinSize(long binSize) {
-	this.binSize = binSize;
+    public void setTimeBinSize(long binSize) {
+	this.timeBinSize = binSize;
     }
 
-    public long getMinBinSize() {
-	return minBinSize;
+    public long getTimeMinBinSize() {
+	return timeMinBinSize;
     }
 
-    public void setMinBinSize(long size) {
-	this.minBinSize = size;
+    public void setTimeMinBinSize(long size) {
+	this.timeMinBinSize = size;
+    }
+
+    // Messages
+    public int getMsgNumBins() {
+	return msgNumBins;
+    }
+
+    public void setMsgNumBins(int numBins) {
+	this.msgNumBins = numBins;
+    }
+
+    public long getMsgBinSize() {
+	return msgBinSize;
+    }
+
+    public void setMsgBinSize(long binSize) {
+	this.msgBinSize = binSize;
+    }
+
+    public long getMsgMinBinSize() {
+	return msgMinBinSize;
+    }
+
+    public void setMsgMinBinSize(long size) {
+	this.msgMinBinSize = size;
     }
 }

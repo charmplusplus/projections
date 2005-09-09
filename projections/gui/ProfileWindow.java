@@ -433,7 +433,8 @@ public class ProfileWindow extends ProjectionsWindow
 	while (data.plist.hasMoreElements()) {
 	    curPe = data.plist.currentElement();
 	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("Computing Average : " + curPe);
+		progressBar.setNote("[PE: " + curPe + 
+				    " ] Computing Average.");
 		progressBar.setProgress(progressCount);
 	    } else {
 		break;
@@ -488,8 +489,8 @@ public class ProfileWindow extends ProjectionsWindow
 	while (data.plist.hasMoreElements()) {
 	    curPe = data.plist.currentElement();
 	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("Reading Entry Point Usage : " +
-				    curPe);
+		progressBar.setNote("[PE: " + curPe +
+				    " ] Reading Entry Point Usage.");
 		progressBar.setProgress(progressCount);
 	    } else {
 		break;

@@ -329,7 +329,7 @@ public class CommWindow extends GenericGraphWindow
 	while (peList.hasMoreElements()) {
 	    int pe = peList.nextElement();
 	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("Reading data for PE " + pe);
+		progressBar.setNote("[PE: " + pe + " ] Reading data.");
 		progressBar.setProgress(curPeArrayIndex+1);
 		validate();
 	    } else {

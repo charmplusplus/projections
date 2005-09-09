@@ -180,8 +180,8 @@ public class MultiRunData
 		    while (validPEs.hasMoreElements()) {
 			int pe = validPEs.nextElement();
 			if (!progressBar.isCanceled()) {
-			    progressBar.setNote("Reading Processor " +
-						 pe + " data.");
+			    progressBar.setNote("[PE: " + pe +
+						" ] Reading Processor data.");
 			    progressBar.setProgress(count);
 			} else {
 			    // not the best thing to do, but will suffice

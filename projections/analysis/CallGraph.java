@@ -66,7 +66,7 @@ public class CallGraph extends ProjDefs
 	while (peList.hasMoreElements()) {
 	    currPe = peList.nextElement();
 	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("Reading data for PE " + currPe);
+		progressBar.setNote("[PE: " + currPe + "] Reading data.");
 		progressBar.setProgress(currPeArrayIndex+1);
 	    }
 	    else {

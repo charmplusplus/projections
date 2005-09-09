@@ -340,7 +340,7 @@ public class HistogramWindow extends GenericGraphWindow
 	while (tmpPEs.hasMoreElements()) {
 	    int pe = tmpPEs.nextElement();
 	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("Reading data for PE " + pe);
+		progressBar.setNote("[PE: " + pe + " ] Reading data.");
 		progressBar.setProgress(curPeCount);
 	    } else {
 		progressBar.close();

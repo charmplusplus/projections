@@ -150,7 +150,7 @@ public class FunctionTool extends GenericGraphWindow
 	    pe = validPEs.nextElement();
 	    try {
 		if (!progressBar.isCanceled()) {
-		    progressBar.setNote("Reading data for PE " + pe);
+		    progressBar.setNote("[PE: " + pe + " ] Reading data");
 		    progressBar.setProgress(curPeArrayIndex+1);
 		    validate();
 		} else {

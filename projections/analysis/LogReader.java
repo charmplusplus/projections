@@ -297,12 +297,13 @@ public class LogReader
 	curPeIdx = 0;
 	for (;curPe!=-1; curPe=processorList.nextElement()) {
 	    progressBar.setProgress(curPeIdx);
-	    progressBar.setNote("Allocating Memory for PE " + curPe);
+	    progressBar.setNote("[PE: " + curPe + " ] Allocating Memory.");
+
 	    // gzheng: allocate sysUsgData only when needed.
 	    sysUsgData[0][curPeIdx] = new int [numIntervals+1];
 	    sysUsgData[1][curPeIdx] = new int [numIntervals+1];
 	    sysUsgData[2][curPeIdx] = new int [numIntervals+1];
-	    progressBar.setNote("Reading data for PE " + curPe);
+	    progressBar.setNote("[PE: " + curPe + " ] Reading data.");
 	    if (progressBar.isCanceled()) {
 		// clear all data and return
 		userEntries = null;

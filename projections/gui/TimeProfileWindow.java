@@ -148,7 +148,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    while (processorList.hasMoreElements()) {
 				nextPe = processorList.nextElement();
 				progressBar.setProgress(count);
-				progressBar.setNote("Reading PE " + nextPe);
+				progressBar.setNote("[PE: " + nextPe +
+						    " ] Reading Data.");
 				if (progressBar.isCanceled()) {
 				    return null;
 				}
@@ -169,12 +170,10 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    // display all existing data. Only do this 
 			    // once in the beginning
 			    if (startFlag) {
-				for (int interval=0; 
-				     interval<graphData.length; 
-				     interval++) {
-				    for (int ep=0; 
-					 ep<graphData[interval].length; 
-					 ep++) {
+				for (int ep=0; ep<numEPs; ep++) {
+				    for (int interval=0; 
+					 interval<endInterval-startInterval+1;
+					 interval++) {
 					if (graphData[interval][ep] > 0) {
 					    existsArray[0][ep] = true;
 					    stateArray[0][ep] = true;

@@ -133,10 +133,12 @@ public class IntervalRangeDialog extends RangeDialog
 		startIntervalLabel.setText("Start Interval : "+startInterval);
 		numIntervalsLabel.setText("Selected Number of Intervals : " +
 					  (endInterval - startInterval + 1));
+		startTime = startTimeField.getValue();
 	    } else if (field == endTimeField) {
 		endIntervalLabel.setText("End Interval : " + endInterval);
 		numIntervalsLabel.setText("Selected Number of Intervals : " +
 					  (endInterval - startInterval + 1));
+		endTime = endTimeField.getValue();
 	    }
 	} 
 	super.updateData(field);

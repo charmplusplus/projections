@@ -202,6 +202,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	startInterval = (int)dialog.getStartInterval();
 	endInterval = (int)dialog.getEndInterval();
 	processorList = dialog.getValidProcessors();
+	super.getDialogData();
     }
 
     public void setDialogData() {

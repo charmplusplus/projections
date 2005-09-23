@@ -305,8 +305,8 @@ public class StlPanel extends ScalePanel.Child
 	}
 
 	intervalSize = (int )trialintervalSize;
-	int startInterval = (int )startTime/intervalSize;
-	int endInterval = (int )endTime/intervalSize;
+	int startInterval = (int)(startTime/intervalSize);
+	int endInterval = (int)(endTime/intervalSize);
 
 	nPe=validPEs.size();
 	int numEPs = Analysis.getNumUserEntries();

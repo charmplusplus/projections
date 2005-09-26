@@ -418,7 +418,7 @@ public class SumAnalyzer extends ProjDefs
 	double [][]tempData = new double[numProcessors][intervalRange];
 	for (int p=0; p<numProcessors; p++) {
 	    int interval = sourceStartInterval;
-	    while ((interval < ProcessorUtilization[p].length) ||
+	    while ((interval < ProcessorUtilization[p].length) &&
 		   (interval < sourceStartInterval+intervalRange)){
 		// **CW** optimization, if there's nothing to spread, then
 		// don't spread it!

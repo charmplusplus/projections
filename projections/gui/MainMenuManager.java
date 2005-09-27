@@ -22,8 +22,10 @@ public class MainMenuManager extends MenuManager
     private JMenu toolMenu;
     private JMenu counterMenu;
 
+    private static final int NUM_STATES = 3;
     private static final int NO_DATA = 0;
     private static final int OPENED_FILES = 1;
+    private static final int OPENED_SUMMARY = 2;
 
     private MainWindow parent;
 
@@ -66,6 +68,42 @@ public class MainMenuManager extends MenuManager
 		    false,  // Histograms
 		    false,  // Overview
 		    false,  // Animation
+		    false,  // Time Profile Graphs
+		    true,   // Multirun Analysis
+		    false   // Function Tools (temporary)
+		});
+	    break;
+	case OPENED_SUMMARY:
+	    setEnabled(fileMenu,
+		       new boolean[]
+		{
+		    true,
+		    true,
+		    true,
+		    false,
+		    true
+		});
+	    setEnabled(preferencesMenu,
+		       new boolean[]
+		{
+		    true,  // change background
+		    true,  // change foreground
+		    false, // use a default grayscale color set.
+		    false  // use a full set of colors.
+		});
+	    setEnabled(toolMenu,
+		       new boolean[]
+		{
+		    true,  // Graphs
+		    false,  // Timelines
+		    true,  // Usage Profile
+		    false,  // Communication
+		    false,  // Communication vs Time
+		    false,  // Call Table
+		    false,  // View Log Files
+		    false,  // Histograms
+		    true,  // Overview
+		    true,  // Animation
 		    false,  // Time Profile Graphs
 		    true,   // Multirun Analysis
 		    false   // Function Tools (temporary)
@@ -183,5 +221,9 @@ public class MainMenuManager extends MenuManager
 
     public void lastFileClosed() {
 	stateChanged(NO_DATA);
+    }
+
+    public void summaryOnly() {
+	stateChanged(OPENED_SUMMARY);
     }
 }

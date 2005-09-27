@@ -500,8 +500,11 @@ public class MainWindow extends JFrame
 			Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
 		    */
 		    }
-		    
-		    menuManager.fileOpened();
+		    if (Analysis.hasSummaryData() && !Analysis.hasLogData()) {
+			menuManager.summaryOnly();
+		    } else {
+			menuManager.fileOpened();
+		    }
 		}
 
 	    };

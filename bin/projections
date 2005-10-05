@@ -2,6 +2,8 @@
 
 jarpath="`dirname $0`/projections.jar"
 
+# jarpath="~skymusic/projections.jar"
+
 if test -x /usr/bin/cygpath
 then 
   if test "`uname -o`" = "Cygwin"

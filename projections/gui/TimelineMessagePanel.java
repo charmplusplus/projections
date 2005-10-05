@@ -75,10 +75,10 @@ public class TimelineMessagePanel extends JPanel {
 			     Analysis.getEntryName(obj.getEntry()),
 			     JLabel.CENTER);
 	beginTimeField = new LabelPanel("BEGIN TIME:",
-					new JTimeTextField(obj.getBeginTime(),
+					new JLongTextField(obj.getBeginTime(),
 							   10));
 	endTimeField = new LabelPanel("END TIME:",
-				      new JTimeTextField(obj.getEndTime(),
+				      new JLongTextField(obj.getEndTime(),
 							 10));
 	numMsgsField = new LabelPanel("MSGS:",
 				      new JTextField("" + 

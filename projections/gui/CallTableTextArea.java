@@ -81,7 +81,7 @@ public class CallTableTextArea extends Panel
 		     else if (str[8] != ' ')  //line is destEP
 		         g.setColor(Color.yellow);
 		     else  //line is stats
-		         g.setColor(Color.red);
+		         g.setColor(Color.white);
 		 }
 		 else
 		     g.setColor(Color.white);

@@ -166,7 +166,7 @@ public class TimelineWindow extends ProjectionsWindow
 	
 	data = new TimelineData(this);
 	
-	setTitle("Projections Timeline");
+	setTitle("Projections Timelines - " + Analysis.getFilename() + ".sts");
 	CreateMenus();
 	CreateLayout();
 	showDialog();

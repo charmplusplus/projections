@@ -70,7 +70,7 @@ public class HistogramWindow extends GenericGraphWindow
 	binType = TYPE_TIME;
 	_format = new DecimalFormat();
 
-	setTitle("Projections Histograms");
+	setTitle("Projections Histograms - " + Analysis.getFilename() + ".sts");
 
 	createMenus();
 	getContentPane().add(getMainPanel());

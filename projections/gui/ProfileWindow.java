@@ -91,7 +91,7 @@ public class ProfileWindow extends ProjectionsWindow
 	  
 	setBackground(Color.lightGray);
 	
-	setTitle("Projections Usage Profile");
+	setTitle("Projections Usage Profile - " + Analysis.getFilename() + ".sts");
 	
 	CreateMenus();
 	CreateLayout();

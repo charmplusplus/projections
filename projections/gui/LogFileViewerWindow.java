@@ -25,7 +25,7 @@ public class LogFileViewerWindow extends ProjectionsWindow
 	super(parentWindow, myWindowID);
 	
 	setBackground(Color.lightGray);
-	setTitle("Projections Log File Viewer");
+	setTitle("Projections Log File Viewer - " + Analysis.getFilename() + ".sts");
 	  
 	CreateMenus();
 	CreateLayout();

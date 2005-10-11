@@ -55,7 +55,7 @@ public class CommWindow extends GenericGraphWindow
     }
 
     public CommWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Communications", mainWindow, myWindowID);
+	super("Projections Communication - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);

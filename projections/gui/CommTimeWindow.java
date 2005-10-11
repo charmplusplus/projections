@@ -100,7 +100,7 @@ public class CommTimeWindow extends GenericGraphWindow
     }
 
     public CommTimeWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Communication vs Time Graph", mainWindow, myWindowID);
+	super("Projections Communication vs Time Graph - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here

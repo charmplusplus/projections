@@ -71,7 +71,7 @@ public class AnimationWindow extends ProjectionsWindow
     {
 	super(mainWindow, myWindowID);
 	setBackground(Analysis.background);
-	setTitle("Animation");
+	setTitle("Projections Animation - " + Analysis.getFilename() + ".sts");
           
 	createMenus();
 	thisWindow = this;

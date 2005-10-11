@@ -47,7 +47,7 @@ public class GraphWindow extends ProjectionsWindow
 	createMenus();
 	pack();
 	  
-	setTitle("Projections Graph");
+	setTitle("Projections Graph - " + Analysis.getFilename() + ".sts");
 	showDialog();
     }   
 

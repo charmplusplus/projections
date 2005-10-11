@@ -69,7 +69,7 @@ public class TimeProfileWindow extends GenericGraphWindow
     }
 
     public TimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Time Profile Tools", mainWindow, myWindowID);
+	super("Projections Time Profile Graph - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here

@@ -52,7 +52,7 @@ public class CallTableWindow extends ProjectionsWindow
 	thisWindow = this;
 	
 	setBackground(Color.lightGray);
-	setTitle("Projections Call Table Viewer");
+	setTitle("Projections Call Table - " + Analysis.getFilename() + ".sts");
 	
 	mainPanel = new JPanel();
 	epDetailToggle = false;
@@ -110,8 +110,7 @@ public class CallTableWindow extends ProjectionsWindow
 	  
 	  titlePanel = new Panel();
 	  titlePanel.setBackground(Color.black);
-	  lTitle = new Label("CALL TABLE FOR " + Analysis.getFilename() + ".sts",
-	                     Label.CENTER);
+	  lTitle = new Label("CALL TABLE", Label.CENTER);
 	  lTitle.setForeground(Color.white);
 	  lTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
 	  titlePanel.add(lTitle);

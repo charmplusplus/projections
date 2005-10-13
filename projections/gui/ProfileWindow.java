@@ -290,17 +290,17 @@ public class ProfileWindow extends ProjectionsWindow
 	Panel buttonPanel = new Panel();
 	buttonPanel.setLayout(gbl);
 	  
-	Util.gblAdd(buttonPanel, bDecreaseY,   gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, lYScale,      gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, yScaleField,  gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bIncreaseY,   gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bResetY,      gbc, 4,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bDecreaseX,   gbc, 0,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, lXScale,      gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, xScaleField,  gbc, 2,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bIncreaseX,   gbc, 3,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bResetX,      gbc, 4,0, 1,1, 1,1);
 	Util.gblAdd(buttonPanel, new Label("  "), gbc, 5,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bDecreaseX,   gbc, 6,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, lXScale,      gbc, 7,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, xScaleField, gbc, 8,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bIncreaseX,   gbc, 9,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bResetX,      gbc, 10,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bDecreaseY,   gbc, 6,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, lYScale,      gbc, 7,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, yScaleField, gbc, 8,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bIncreaseY,   gbc, 9,0, 1,1, 1,1);
+	Util.gblAdd(buttonPanel, bResetY,      gbc, 10,0, 1,1, 1,1);
 	Util.gblAdd(buttonPanel, bPieChart,    gbc, 11,0, 1,1, 1,1);
 	Util.gblAdd(buttonPanel, bColors,      gbc, 12,0, 1,1, 1,1);
 

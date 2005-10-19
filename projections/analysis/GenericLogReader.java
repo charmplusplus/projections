@@ -326,4 +326,12 @@ public class GenericLogReader extends ProjectionsReader
 	    }
 	}
     }
+
+    public void close()
+        throws IOException
+    {
+        if (reader != null) {
+            reader.close();
+        }
+    }
 }

@@ -375,6 +375,12 @@ public class LogReader
 	    } catch (IOException e) {
 		// Do nothing
 	    }
+            try {
+                reader.close();
+            } catch (IOException e) {
+                System.err.println("Error! Failed to close reader!");
+                System.exit(-1);
+            }
 	    curPeIdx++;
 	} // for loop
 	progressBar.close();

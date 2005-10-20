@@ -61,7 +61,7 @@ public class StlWindow extends ProjectionsWindow
 
 	setBackground(Color.black);
 	setForeground(Color.lightGray);
-	setTitle("Projections-- Overview");
+	setTitle("Projections Overview - " + Analysis.getFilename() + ".sts");
 	
 	createMenus();
 	createLayout();

@@ -383,9 +383,9 @@ public class TimelineWindow extends ProjectionsWindow
 	    if (arg.equals("Close")) close();
 	    else if(arg.equals("Modify Ranges")) showDialog();
 	    else if(arg.equals("Print Timeline")) PrintTimeline();   
-	    else if(arg.equals("Change Colors")) { ShowColorWindow(); }
+	    else if(arg.equals("Change Entry Point Colors")) { ShowColorWindow(); }
 	    // **** sharon **
-	    else if(arg.equals("Save Colors")) {
+	    else if(arg.equals("Save Entry Point Colors")) {
 		//		saveColorFile();
 		try {
 		    Util.saveColors(data.entryColor, "Timeline Graph");
@@ -393,7 +393,7 @@ public class TimelineWindow extends ProjectionsWindow
 		    System.err.println("Attempt to write to color.map failed");
 		}
 	    }
-	    else if(arg.equals("Restore Colors")) {
+	    else if(arg.equals("Restore Entry Point Colors")) {
 		//		openColorFile();
 		try {
 		    Util.restoreColors(data.entryColor, "Timeline Graph");
@@ -402,7 +402,7 @@ public class TimelineWindow extends ProjectionsWindow
 		} 
 		data.displayCanvas.updateColors();
 		
-	    } else if (arg.equals("Default Colors")) {
+	    } else if (arg.equals("Default Entry Point Colors")) {
 		for (int i=0; i<data.entryColor.length; i++) {
 		    data.entryColor[i] = Analysis.getEntryColor(i);
 		}
@@ -594,7 +594,7 @@ public class TimelineWindow extends ProjectionsWindow
 	  
 	//// BUTTON PANEL
 	bSelectRange = new Button("Select Ranges");
-	bColors      = new Button("Change Colors");
+	bColors      = new Button("Change Entry Point Colors");
 	bDecrease    = new Button("<<");
 	bIncrease    = new Button(">>");
 	bReset       = new Button("Reset");
@@ -652,7 +652,7 @@ public class TimelineWindow extends ProjectionsWindow
 	Util.gblAdd(zoomPanel, selectionDiff,   gbc, 5,2, 1,1, 1,1);
 	Util.gblAdd(zoomPanel, new Label("Highlight Time", Label.CENTER), 
 		    gbc, 2,1, 1,1, 1,1);
-	Util.gblAdd(zoomPanel, new Label("Slection Begin Time", Label.CENTER),
+	Util.gblAdd(zoomPanel, new Label("Selection Begin Time", Label.CENTER),
 		    gbc, 3,1, 1,1, 1,1);
 	Util.gblAdd(zoomPanel, new Label("Selection End Time", Label.CENTER), 
 		    gbc, 4,1, 1,1, 1,1);
@@ -713,10 +713,10 @@ public class TimelineWindow extends ProjectionsWindow
 			       this));
 	mbar.add(Util.makeMenu("Colors", new Object[]
 	    {
-		"Change Colors",
-		"Save Colors",
-		"Restore Colors",
-		"Default Colors"
+		"Change Entry Point Colors",
+		"Save Entry Point Colors",
+		"Restore Entry Point Colors",
+		"Default Entry Point Colors"
 	    },
 			       this));
 	Menu helpMenu = new Menu("Help");

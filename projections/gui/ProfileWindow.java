@@ -5,6 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import java.util.*;
+import java.text.*;
 
 import projections.analysis.*;
 import projections.misc.*;
@@ -688,21 +689,56 @@ public class ProfileWindow extends ProjectionsWindow
 	}
 	//Drawing the entry point execution time
 	poArray[poNo]=new ProfileObject[poLen];
+
+	// **CW** stdout workaround for figuring out exact usage
+	// numbers for cpaimd
+	DecimalFormat format_ = new DecimalFormat();
+	format_.setMaximumFractionDigits(5);
+	format_.setMinimumFractionDigits(5);
 	for (i=0; i<usg[0].length; i++) {
 	    float usage = usg[0][i];
 	    if (usage<=thresh) continue; //Skip this one-- it's tiny
 	    int   entry = i;
 	    String name;
-	    if(entry < numUserEntries)
+	    if (entry < numUserEntries) {
 		name = names[entry][1] + "::" + names[entry][0];
-	    else if(entry == numUserEntries+2)
+		// **CW** stdout workaround for figuring out exact usage
+		// numbers for cpaimd.
+		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
+		    System.out.println(curPe + " " + entry + " " + 
+				       format_.format(usage) + 
+				       " " + name);
+		}
+	    } else if (entry == numUserEntries+2) {
 		name = "IDLE";
-	    else if(entry == numUserEntries)
+		// **CW** stdout workaround for figuring out exact usage
+		// numbers for cpaimd.
+		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
+		    System.out.println(curPe + " " + entry + " " + 
+				       format_.format(usage) + 
+				       " " + name);
+		}
+	    } else if (entry == numUserEntries) {
 		name = "PACKING";
-	    else if(entry == numUserEntries+1)
+		// **CW** stdout workaround for figuring out exact usage
+		// numbers for cpaimd.
+		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
+		    System.out.println(curPe + " " + entry + " " + 
+				       format_.format(usage) + 
+				       " " + name);
+		}
+	    } else if (entry == numUserEntries+1) {
 		name = "UNPACKING";
-	    else 
+		// **CW** stdout workaround for figuring out exact usage
+		// numbers for cpaimd.
+		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
+		    System.out.println(curPe + " " + entry + " " + 
+				       format_.format(usage) + 
+				       " " + name);
+		}
+	    } else {
 		break;
+	    }
 	    poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);
 	    displayCanvas.add(poArray[poNo][poindex]);
 	    poArray[poNo][poindex].setForeground(colors[entry]);
@@ -718,6 +754,13 @@ public class ProfileWindow extends ProjectionsWindow
 		if (entry < numUserEntries) {
 		    name = "Message Send Time: " + names[entry][1] + 
 			"::" + names[entry][0];
+		    // **CW** stdout workaround for figuring out exact usage
+		    // numbers for cpaimd.
+		    if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
+			System.out.println(curPe + " " + entry + " " + 
+					   format_.format(usage) + 
+					   " " + name);
+		    }
 		} else if (entry == numUserEntries+2) {
 		    name = "Message Send Time: "+"IDLE";
 		} else if (entry == numUserEntries) {

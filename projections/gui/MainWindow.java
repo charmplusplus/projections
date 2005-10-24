@@ -39,6 +39,10 @@ public class MainWindow extends JFrame
     public static boolean BLUEGENE = false; // hack to support BG hop count
     public static int BLUEGENE_SIZE[] = {16, 8, 8};
 
+    // **CW** workaround to print details on system usage where too many
+    // entry methods prevent proper analysis (like in cpaimd).
+    public static boolean PRINT_USAGE = false;
+
     // for SwingWorker to work
     private MainWindow thisWindow;
 
@@ -596,6 +600,8 @@ public class MainWindow extends JFrame
 		BLUEGENE_SIZE[1] = Integer.parseInt(args[i]);
 		i++;
 		BLUEGENE_SIZE[2] = Integer.parseInt(args[i]);
+	    } else if (args[i].equals("-print_usage")) {
+		PRINT_USAGE = true;
 	    } else /*unrecognized argument*/ {
 		loadSts=args[i];
 	    }

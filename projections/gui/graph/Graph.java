@@ -435,8 +435,12 @@ public class Graph extends JPanel
 	// iterations is finite since the number of pixels per tick will
 	// never be allowed to be too small.
 	for (int i=mini;i<maxi; i+=valuesPerTickX) {
-	    curx = originX + (int)(i*pixelincrementX) + 
-		(int)(tickIncrementX / 2);
+	    curx = originX + (int)(i*pixelincrementX);
+	    // don't attempt to adjust the tick positions midway unless we're
+	    // on a one-to-one mapping.
+	    if (valuesPerTickX == 1) {
+		curx += (int)(tickIncrementX / 2);
+	    }
 	    // labels have higher lines.
 	    if (i % valuesPerLabelX == 0) {
          	g.drawLine(curx, originY+5, curx, originY-5);

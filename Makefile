@@ -28,7 +28,6 @@ SRC=\
     projections/analysis/StsReader.java\
     projections/analysis/SumAnalyzer.java\
     projections/analysis/SumDetailReader.java\
-    projections/analysis/SummaryFileReader.java\
     projections/analysis/TimelineEvent.java\
     projections/analysis/TimelineMessage.java\
     projections/analysis/UserEvent.java\

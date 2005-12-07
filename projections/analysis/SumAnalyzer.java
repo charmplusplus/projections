@@ -50,7 +50,7 @@ public class SumAnalyzer extends ProjDefs
     public SumAnalyzer(StsReader stsReader, int mode) {
 	this.mode = mode;
 	accumulatedReader =
-	    new AccumulatedSummaryReader(stsReader.getSumAccumulatedName(),
+	    new AccumulatedSummaryReader(Analysis.getSumAccumulatedName(),
 					 "5.0");
 	TotalTime = (long)accumulatedReader.totalTime;
 	IntervalCount = (int)accumulatedReader.numIntervals;

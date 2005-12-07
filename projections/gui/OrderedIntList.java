@@ -30,6 +30,10 @@ public class OrderedIntList
 	    data = d; next = n;
 	}
     }  
+
+    public boolean isEmpty() {
+	return (len == 0);
+    }
     
     public OrderedIntList copyOf()
     {

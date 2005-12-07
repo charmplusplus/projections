@@ -16,7 +16,7 @@ import projections.misc.*;
 public class MainWindow extends JFrame
     implements ActionListener, ScalePanel.StatusDisplay
 {
-    protected static final int NUM_WINDOWS = 13;
+    protected static final int NUM_WINDOWS = 14;
 
     protected static final int GRAPH_WIN = 0;
     protected static final int MULTI_WIN = 1;
@@ -31,13 +31,21 @@ public class MainWindow extends JFrame
     protected static final int TIMELINE_WIN = 10;
     protected static final int OVERVIEW_WIN = 11;
     protected static final int FUNCTION_WIN = 12;
+    protected static final int POSE_WIN = 13;
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
+    public static final int NUM_RUN_MODES = 3;
+    public static final int MODE_HIGH_MEM = 0; // tools favor logs (default)
+    public static final int MODE_LOW_MEM = 1;  // tools favor summary
+    public static final int MODE_MEDIUM = 2;   // tools favor sum detail
+
+    // Runtime flags
     public static double CUR_VERSION = 4.0;
     public static boolean IGNORE_IDLE = false;
     public static boolean BLUEGENE = false; // hack to support BG hop count
     public static int BLUEGENE_SIZE[] = {16, 8, 8};
+    public static int CUR_MODE = MODE_HIGH_MEM;
 
     // **CW** workaround to print details on system usage where too many
     // entry methods prevent proper analysis (like in cpaimd).
@@ -71,6 +79,10 @@ public class MainWindow extends JFrame
     private TimeProfileWindow    timeProfileWindow;
     // FunctionTool is still very much temporary despite first-class treatment
     private FunctionTool         functionWindow;
+    // This is a tool specifically activated by the presence of additional
+    // POSE data. Could form the basis for generalization to a flexible 
+    // implementation of the projector multi-lingual analysis idea.
+    private PoseAnalysisWindow   poseAnalysisWindow;
 
     // components associated with the main window
     private MainTitlePanel        titlePanel;
@@ -216,6 +228,8 @@ public class MainWindow extends JFrame
 	    return "TimeProfileWindow";
 	} else if (index == FUNCTION_WIN) {
 	    return "FunctionTool";
+	} else if (index == POSE_WIN) {
+	    return "PoseAnalysisWindow";
 	} else {
 	    return null;
 	}
@@ -249,6 +263,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
 	} else if (item.equals("Function Tool")) {
 	    showChildWindow("FunctionTool", FUNCTION_WIN);
+	} else if (item.equals("POSE Analysis")) {
+	    showChildWindow("PoseAnalysisWindow", POSE_WIN);
 	}
     }
 
@@ -504,13 +520,15 @@ public class MainWindow extends JFrame
 			Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
 		    */
 		    }
-		    if (Analysis.hasSummaryData() && !Analysis.hasLogData()) {
-			menuManager.summaryOnly();
-		    } else {
+		    if (Analysis.hasLogData()) {
 			menuManager.fileOpened();
+		    } else if (Analysis.hasSummaryData()) {
+			menuManager.summaryOnly();
+		    }
+		    if (Analysis.hasPoseDopData()) {
+			menuManager.addPose();
 		    }
 		}
-
 	    };
 	    worker.start();
     }
@@ -565,6 +583,11 @@ public class MainWindow extends JFrame
 	System.out.println("-u <ver>:	use old version format");
 	System.out.println("-bg:        use hop count info for BG machines");
 	System.out.println("-bgsize <x> <y> <z>");
+	System.out.println("-print_usage: details written to stdout when " +
+			   "viewing usage profiles.");
+	System.out.println("-memory_mode <high|medium|low> " +
+			   "Projections favors appropriate log granularity " +
+			   "if available.");
 	System.exit(0);
     }
 
@@ -602,6 +625,18 @@ public class MainWindow extends JFrame
 		BLUEGENE_SIZE[2] = Integer.parseInt(args[i]);
 	    } else if (args[i].equals("-print_usage")) {
 		PRINT_USAGE = true;
+	    } else if (args[i].equals("-memory_mode")) {
+		i++;
+		if (i==args.length) help();
+		if (args[i].equals("high")) {
+		    CUR_MODE = MODE_HIGH_MEM;
+		} else if (args[i].equals("medium")) {
+		    CUR_MODE = MODE_MEDIUM;
+		} else if (args[i].equals("low")) {
+		    CUR_MODE = MODE_LOW_MEM;
+		} else {
+		    help();
+		}
 	    } else /*unrecognized argument*/ {
 		loadSts=args[i];
 	    }
@@ -614,7 +649,6 @@ public class MainWindow extends JFrame
 	f.setVisible(true);
 	if (loadSts!=null) { f.openFile(loadSts); }
     }
-
 
     public void setStatus(String msg) {
    	status.setText(msg);

@@ -99,7 +99,7 @@ public class MultiRunData
 	    // of the Analysis static object).
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
-		    new StsReader(listOfStsFilenames[run], true);
+		    new StsReader(listOfStsFilenames[run],true);
 		pesPerRun[run] = stsReaders[run].getProcessorCount();
 	    }
 	    // ensure that both the stsReaders array and pesPerRun array
@@ -113,11 +113,17 @@ public class MultiRunData
 	    // else read log files. This must be uniformly true for all
 	    // runs. The PE file set need not be complete ... we'll work
 	    // with whatever information we have and approximate from there.
+	    OrderedIntList[][] validPESets =
+		new OrderedIntList[numRuns][];
 	    boolean hasSummary = true;
 	    boolean hasLog = true;
 	    for (int run=0; run<numRuns; run++) {
-		hasSummary = (hasSummary && stsReaders[run].hasSumFiles());
-		hasLog = (hasLog && stsReaders[run].hasLogFiles());
+		validPESets[run] = detectFiles(stsReaders[run]);
+		hasSummary = 
+		    (hasSummary && 
+		     !(validPESets[run][Analysis.SUMMARY].isEmpty()));
+		hasLog = (hasLog && 
+			  !(validPESets[run][Analysis.LOG].isEmpty()));
 	    }
 
 	    // there has to be at least one run and all sts files have to
@@ -162,7 +168,7 @@ public class MultiRunData
 		for (int run=0; run<numRuns; run++) {
 		    int numPE = pesPerRun[run];
 		    validPEs = 
-			stsReaders[run].getValidProcessorList(StsReader.SUMMARY);
+			validPESets[run][Analysis.SUMMARY];
 		    validPEs.reset();
 		    // approximates any incomplete data by scaling the values
 		    // actually read by a scale factor.
@@ -192,7 +198,7 @@ public class MultiRunData
 			    System.exit(-1);
 			}
 			reader = 
-			    new GenericSummaryReader(stsReaders[run].getSumName(pe),
+			    new GenericSummaryReader(Analysis.getSumName(pe),
 						     Analysis.getVersion());
 			for (int ep=0; ep<numEPs; ep++) {
 			    dataTable[TYPE_TIME][run][ep] += 
@@ -302,6 +308,30 @@ public class MultiRunData
      */
     public static String getTypeName(int dataType) {
 	return typeNames[dataType];
+    }
+
+    private static OrderedIntList[] detectFiles(StsReader sts) {
+	// determine if any of the desired data files exist for each
+	// sts file. This is copied from Analysis.java just because
+	// Multirun cannot understand that silly static Class.
+
+	OrderedIntList[] validPEs = new OrderedIntList[Analysis.NUM_TYPES];
+	for (int i=0; i<Analysis.NUM_TYPES; i++) {
+	    validPEs[i] = new OrderedIntList();
+	}
+
+	for (int i=0;i<sts.getProcessorCount();i++) {
+	    if ((new File(Analysis.getSumName(i))).isFile()) {
+		validPEs[Analysis.SUMMARY].insert(i);
+	    }
+	    if ((new File(Analysis.getSumDetailName(i))).isFile()) {
+		validPEs[Analysis.SUMDETAIL].insert(i);
+	    }
+	    if ((new File(Analysis.getLogName(i))).isFile()) {
+		validPEs[Analysis.LOG].insert(i);
+	    }
+	}
+	return validPEs;
     }
 }
 

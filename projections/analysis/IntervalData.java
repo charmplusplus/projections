@@ -58,7 +58,7 @@ public class IntervalData
 	    summaryDetails = new SumDetailReader[numPEs];
 	    rawData = new Vector[SumDetailReader.NUM_TAGS][numPEs][];
 	    OrderedIntList availablePEs = 
-		Analysis.getValidProcessorList(StsReader.SUMDETAIL);
+		Analysis.getValidProcessorList(Analysis.SUMDETAIL);
 	    availablePEs.reset();
 	    while (availablePEs.hasMoreElements()) {
 		int pe = availablePEs.nextElement();

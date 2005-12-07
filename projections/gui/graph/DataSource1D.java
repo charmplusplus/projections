@@ -13,6 +13,10 @@ public class DataSource1D extends DataSource
   private GenericGraphWindow parent;
   private int[] data; /*The data to be graphed*/
   
+    // **CW** why oh why do I hack like this ...
+    private boolean usePopUpAbleParent = false;
+    private PopUpAble popParent;
+
   public DataSource1D(String title_,int[] data_) {
     title=title_;
     data=data_;
@@ -24,6 +28,15 @@ public class DataSource1D extends DataSource
     data=data_;
 	 parent=parent_;
   }
+
+    // **CW** Hack-a-di-doo-doo
+    public DataSource1D(String title, int[] data, PopUpAble parent) {
+	this.title = title;
+	this.data = data;
+	popParent = parent;
+	usePopUpAbleParent = true;
+    }
+
   public String getTitle() {return title;}
 
   public int getIndexCount() {return data.length;}
@@ -35,6 +48,10 @@ public class DataSource1D extends DataSource
   }
   
   public String[] getPopup(int xVal, int yVal){
+      // **CW** sqwark!
+      if (usePopUpAbleParent) {
+	  return popParent.getPopup(xVal, yVal);
+      }
     if(parent == null){
 	 	return null;	
 	 } 

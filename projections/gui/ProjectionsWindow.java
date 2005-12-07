@@ -131,13 +131,20 @@ public abstract class ProjectionsWindow
      *
      *  Hence the wrapper constructor.
      */
-    public ProjectionsWindow(MainWindow parentWindow, Integer myWindowID) {
-	this(parentWindow, myWindowID.intValue());
+    public ProjectionsWindow(String title, MainWindow parentWindow, 
+			     Integer myWindowID) {
+	this(title, parentWindow, myWindowID.intValue());
     }
 
-    public ProjectionsWindow(MainWindow parentWindow, int myWindowID) {
+    public ProjectionsWindow(MainWindow parentWindow, Integer myWindowID) {
+	this("", parentWindow, myWindowID.intValue());
+    }
+
+    public ProjectionsWindow(String title, MainWindow parentWindow, 
+			     int myWindowID) {
 	this.myWindowID = myWindowID;
 	this.parentWindow = parentWindow;
+	setTitle(title);
 	addWindowListener(new WindowAdapter() {
 		public void windowClosing(WindowEvent e){
 		    close();

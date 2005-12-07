@@ -22,10 +22,11 @@ public class MainMenuManager extends MenuManager
     private JMenu toolMenu;
     private JMenu counterMenu;
 
-    private static final int NUM_STATES = 3;
+    private static final int NUM_STATES = 4;
     private static final int NO_DATA = 0;
     private static final int OPENED_FILES = 1;
     private static final int OPENED_SUMMARY = 2;
+    private static final int ADD_POSE = 3;
 
     private MainWindow parent;
 
@@ -70,7 +71,8 @@ public class MainMenuManager extends MenuManager
 		    false,  // Animation
 		    false,  // Time Profile Graphs
 		    true,   // Multirun Analysis
-		    false   // Function Tools (temporary)
+		    false,   // Function Tools (temporary)
+		    false   // POSE Analysis
 		});
 	    break;
 	case OPENED_SUMMARY:
@@ -106,7 +108,8 @@ public class MainMenuManager extends MenuManager
 		    true,  // Animation
 		    false,  // Time Profile Graphs
 		    true,   // Multirun Analysis
-		    false   // Function Tools (temporary)
+		    false,   // Function Tools (temporary)
+		    false,  // POSE Analysis
 		});
 	    break;
 	case OPENED_FILES :
@@ -119,8 +122,36 @@ public class MainMenuManager extends MenuManager
 		    false,
 		    true
 		});
-	    setAllTo(preferencesMenu, true);
-	    setAllTo(toolMenu, true);
+	    setEnabled(preferencesMenu,
+		       new boolean[]
+		{
+		    true,  // change background
+		    true,  // change foreground
+		    false, // use a default grayscale color set.
+		    false  // use a full set of colors.
+		});
+	    setEnabled(toolMenu,
+		       new boolean[]
+		{
+		    true,  // Graphs
+		    true,  // Timelines
+		    true,  // Usage Profile
+		    true,  // Communication
+		    true,  // Communication vs Time
+		    true,  // Call Table
+		    true,  // View Log Files
+		    true,  // Histograms
+		    true,  // Overview
+		    true,  // Animation
+		    true,  // Time Profile Graphs
+		    true,   // Multirun Analysis
+		    true,   // Function Tools (temporary)
+		    false   // POSE Analysis
+		});
+	    break;
+	case ADD_POSE:
+	    setEnabled(toolMenu, 13, // POSE Analysis
+		       true);
 	    break;
 	}
     }
@@ -162,7 +193,8 @@ public class MainMenuManager extends MenuManager
 		"Overview",
 		"Animation",
 		"Multirun Analysis",
-		"Function Tool"
+		"Function Tool",
+		"POSE Analysis"
 	    });
 	menubar.add(toolMenu);
 
@@ -205,7 +237,8 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("Animation") ||
 		       arg.equals("Time Profile Graph") ||
 		       arg.equals("Function Tool") ||
-		       arg.equals("Overview")) {
+		       arg.equals("Overview") ||
+		       arg.equals("POSE Analysis")) {
 		parent.menuToolSelected(arg);
 	    }
 	}
@@ -225,5 +258,9 @@ public class MainMenuManager extends MenuManager
 
     public void summaryOnly() {
 	stateChanged(OPENED_SUMMARY);
+    }
+
+    public void addPose() {
+	stateChanged(ADD_POSE);
     }
 }

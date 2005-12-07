@@ -21,6 +21,7 @@ SRC=\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\
     projections/analysis/PackTime.java\
+    projections/analysis/PoseDopReader.java\
     projections/analysis/ProjDefs.java\
     projections/analysis/RangeHistory.java\
     projections/analysis/Sorter.java\
@@ -40,6 +41,7 @@ SRC=\
     projections/analysis/GenericSummaryReader.java\
     projections/analysis/ObjectId.java\
     projections/analysis/ProjectionsFormatException.java\
+    projections/analysis/ProjectionsConfigurationReader.java\
     projections/analysis/ProjectionsReader.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
@@ -114,6 +116,10 @@ SRC=\
     projections/gui/OrderedUsageList.java\
     projections/gui/PieChartWindow.java\
     projections/gui/PopUpAble.java\
+    projections/gui/PoseAnalysisWindow.java\
+    projections/gui/PoseRTDopDisplayPanel.java\
+    projections/gui/PoseVTDopDisplayPanel.java\
+    projections/gui/PoseRangeDialog.java\
     projections/gui/ProfileAxisCanvas.java\
     projections/gui/ProfileColorWindow.java\
     projections/gui/ProfileData.java\

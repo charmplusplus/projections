@@ -30,6 +30,21 @@ public class DataSource2D extends DataSource
 	xValues = data.length;
     }
   
+    public DataSource2D(String title_, int[][] data_) {
+	title=title_;
+	data=intToDouble(data_);
+	xValues = data.length;
+	parent = null;
+    }
+  
+    public DataSource2D(String title_, int[][] data_,
+			PopUpAble parent_) {
+	title=title_;
+	data=intToDouble(data_);
+	parent=parent_;
+	xValues = data.length;
+    }
+
     public String[] getPopup(int xVal, int yVal) {
 	if (parent == null) {
 	    return null;	
@@ -55,5 +70,19 @@ public class DataSource2D extends DataSource
     {
 	for(int j=0;j<data[index].length;j++)
 	    values[j]=(double)data[index][j];
+    }
+
+    private double[][] intToDouble(int[][] data) {
+	double[][] retVal;
+
+	retVal = new double[data.length][];
+	for (int i=0;i<data.length; i++) {
+	    retVal[i] = new double[data[i].length];
+	    for (int j=0;j<data[i].length;j++) {
+		retVal[i][j] = (double)data[i][j];
+	    }
+	}
+
+	return retVal;
     }
 }

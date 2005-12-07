@@ -56,8 +56,7 @@ public abstract class GenericGraphWindow
     // constructor 
     public GenericGraphWindow(String title, 
 			      MainWindow mainWindow, Integer myWindowID) {
-	super(mainWindow, myWindowID);
-	setTitle(title);
+	super(title, mainWindow, myWindowID);
 	setBackground(BACKGROUND);
 	menuBar.add(fileMenu);
     }

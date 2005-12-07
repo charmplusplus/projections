@@ -11,6 +11,8 @@ import projections.misc.*;
  *  StsReader
  *  Modified by Chee Wai Lee.
  *  4/7/2003
+ *  10/26/2005 - moved the functionality for various pre-processing 
+ *               analysis of data files to Analysis.java
  *
  *  StsReader provides the necessary abstractions to reason about a
  *  projections .sts file and its associated data files (eg. .log, .sum
@@ -19,20 +21,7 @@ import projections.misc.*;
  */
 public class StsReader extends ProjDefs
 {
-    private String baseName;
-    private String logDirectory;
-
-    private boolean hasSum, hasSumDetail, hasSumAccumulated, hasLog;
     private boolean hasPAPI = false;
-
-    public static final int NUM_TYPES = 4;
-    public static final int LOG = 0;
-    public static final int SUMMARY = 1;
-    public static final int COUNTER = 2;
-    public static final int SUMDETAIL = 3;
-
-    private OrderedIntList validPEs[];
-    private StringBuffer validPEStringBuffers[];
 	
     // Sts header information
     private double version;
@@ -86,13 +75,6 @@ public class StsReader extends ProjDefs
     public StsReader(String FileName, boolean isMultirun) 
 	throws LogLoadException   
     {
-	validPEs = new OrderedIntList[NUM_TYPES];
-	for (int i=0; i<NUM_TYPES; i++) {
-	    validPEs[i] = new OrderedIntList();
-	}
-	baseName = getBaseName(FileName);
-	logDirectory = dirFromFile(FileName);
-
 	try {
 	    BufferedReader InFile = 
 		new BufferedReader(new InputStreamReader(new FileInputStream(FileName)));
@@ -209,32 +191,6 @@ public class StsReader extends ProjDefs
 		}
 	    }
 		
-	    // determine if any of the data files exist.
-	    // We assume they are automatically valid and this is reflected
-	    // in the validPEs. In future, whether or not the
-	    // values are valid should be defered to after the data file has
-	    // been successfullly read.
-	    hasLog = false;
-	    hasSum = false;
-	    hasSumDetail = false;
-	    hasSumAccumulated = false;
-	    for (int i=0;i<NumPe;i++) {
-		if ((new File(getSumName(i))).isFile()) {
-		    hasSum = true;
-		    validPEs[SUMMARY].insert(i);
-		}
-		if ((new File(getSumDetailName(i))).isFile()) {
-		    hasSumDetail = true;
-		    validPEs[SUMDETAIL].insert(i);
-		}
-		if ((new File(getLogName(i))).isFile()) {
-		    hasLog = true;
-		    validPEs[LOG].insert(i);
-		}
-	    }
-	    if ((new File(getSumAccumulatedName())).isFile()) {
-		hasSumAccumulated = true;
-	    }
 	    InFile.close();
 	} catch (FileNotFoundException e) {
 	    throw new LogLoadException (FileName, LogLoadException.OPEN);
@@ -245,29 +201,6 @@ public class StsReader extends ProjDefs
 
     /** ************** Private working/util Methods ************** */
     
-    private String getBaseName(String filename) {
-	String baseName = null;
-	if (filename.endsWith(".sum.sts")) {
-	    baseName = filename.substring(0, filename.length()-8);
-	} else if (filename.endsWith(".sts")) {
-	    baseName = filename.substring(0, filename.length()-4); 
-	} else {
-	    System.err.println("Invalid sts filename. Catastrophic " +
-			       "error. Exiting.");
-	    System.exit(-1);
-	}
-	return baseName;
-    }
-
-    private String dirFromFile(String filename) {
-	// pre condition - filename is a full path name
-	int index = filename.lastIndexOf(File.separator);
-	if (index != -1) {
-	    return filename.substring(0,index);
-	}
-	return(".");	// present directory
-    }
-
     /** ****************** Accessor Methods ******************* */
 
     // *** Data accessors ***
@@ -365,89 +298,6 @@ public class StsReader extends ProjDefs
 
     public boolean hasPapi() {
 	return hasPAPI;
-    }
-
-    // *** Derived information accessor ***
-    public String getValidProcessorString(int type) {
-	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
-	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
-	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
-	    break;
-	}
-	return validPEs[type].listToString();
-    }
-
-    public OrderedIntList getValidProcessorList(int type) {
-	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
-	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
-	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
-	    break;
-	}
-	return validPEs[type];
-    }
-
-    public boolean hasLogFiles() {
-	return hasLog;
-    }   
-
-    public boolean hasSumFiles() {
-	return hasSum;
-    }
-   
-    public boolean hasSumAccumulatedFile() {
-	return hasSumAccumulated;
-    }
-
-    public boolean hasSumDetailFiles() {
-	return hasSumDetail;
-    }
-
-    public String getLogPathname() {
-	return logDirectory;
-    }
-
-    public String getFilename() { 
-	return baseName;
-    }   
-    
-    public String getLogName(int pnum) {
-	return baseName+"."+pnum+".log";
-    }   
-
-    public String getSumName(int pnum) {
-	return baseName+"."+pnum+".sum";
-    }   
-    
-    public String getSumAccumulatedName() {
-	return baseName+".sum";
-    }
-
-    public String getSumDetailName(int pnum) {
-	return baseName + "." + pnum + ".sumd";
     }
 }
 

@@ -96,6 +96,19 @@ public abstract class MenuManager
 	}
     }
 
+    void setEnabled(JMenu menu, int index, boolean enable) {
+	Component menuEntry;
+	if (menu.getItemCount() > index) {
+	    menuEntry = menu.getItem(index);
+	    if (menuEntry instanceof JMenuItem) {
+		((JMenuItem)menuEntry).setEnabled(enable);
+	    }
+	} else {
+	    System.err.println("Projections Error: Menu items inconsistent!");
+	    System.exit(-1);
+	}
+    }
+
     // convenience method for setting everything to one of the boolean values.
     void setAllTo(JMenu menu, boolean setTo) {
 	Component menuEntry;

@@ -14,6 +14,8 @@ import projections.guiUtils.*;
  *  Analysis
  *  Modified by Chee Wai Lee
  *  7/4/2003
+ *  10/26/2005 - moved file manipulation abstraction from StsReader to
+ *               this poor over-burdened Class.
  *
  *  Analysis is a static class used as an interface for GUI objects to talk 
  *  to the various Readers employed. Sts-related information is initialized 
@@ -43,6 +45,7 @@ public class Analysis {
     
     /******************* Initialization ************/
     public static Component guiRoot;
+    public static ProjectionsConfigurationReader rcReader;
 
     private static StsReader sts;
     
@@ -52,9 +55,34 @@ public class Analysis {
 
     private static SumDetailReader summaryDetails[]; // .sumd files
 	
+    private static PoseDopReader dopReader; //Only for .poselog files
+
     private static IntervalData intervalData; // interval-based data
     public static ActivityManager      activityManager;
 
+    public static final int NUM_TYPES = 5;
+    public static final int LOG = 0;
+    public static final int SUMMARY = 1;
+    public static final int COUNTER = 2;
+    public static final int SUMDETAIL = 3;
+    public static final int DOP = 4;
+
+    private static String baseName;
+    private static String logDirectory;
+
+    private static boolean hasSum;
+    private static boolean hasSumDetail;
+    private static boolean hasSumAccumulated;
+    private static boolean hasLog;
+    private static boolean hasPoseDop;    
+
+    private static OrderedIntList validPEs[];
+    private static String validPEStrings[];
+
+    // The total time (maxed) of a run across all processors.
+    private static long totalTime = 0;
+    private static long poseTotalTime = 0;
+    private static long poseTotalVirtualTime = 0;
 
     /******************* Graphs ***************/
     private static int[][][] systemUsageData;
@@ -66,11 +94,6 @@ public class Analysis {
     // maintained inside Analysis.
     private static long logReaderIntervalSize = -1;
 
-    // The total time (maxed) of a run across all processors.
-    // This has been extracted from StsReader because it does not make sense
-    // for the latter to hold this information.
-    private static long totalTime = 0;
-    
     /** *************** Color Maps 6/27/2002 ************ */
     private static Color[] entryColors;
     // moved from StsReader because it does not belong there.
@@ -126,7 +149,14 @@ public class Analysis {
 	guiRoot = rootComponent;
 	activityManager = new ActivityManager();
 	try {
+	    baseName = getBaseName(filename);
+	    logDirectory = dirFromFile(filename);
 	    sts=new StsReader(filename);
+	    rcReader = 
+		new ProjectionsConfigurationReader(getFilename(),
+						   getLogDirectory());
+	    detectFiles();
+
 	    //	    activityManager.registrationDone();
 	    // if I can find the saved color maps, then use it.
 	    String colorsaved = 
@@ -178,13 +208,13 @@ public class Analysis {
 	// data.
 
 	// Read the super summarized data where available.
-	if (sts.hasSumAccumulatedFile()) { // SINGLE <stsname>.sum file
+	if (hasSumAccumulatedFile()) { // SINGLE <stsname>.sum file
 	    // clear memory first ...
 	    sumAnalyzer = null;
 	    sumAnalyzer = new SumAnalyzer(sts, SumAnalyzer.ACC_MODE);
 	    setTotalTime(sumAnalyzer.GetTotalTime());
 	}
-	if( sts.hasSumFiles() ) { //.sum files
+	if( hasSumFiles() ) { //.sum files
 	    try {
 		// clear memory first ...
 		sumAnalyzer = null;
@@ -195,7 +225,7 @@ public class Analysis {
 	    }
 	}
 	// setting up interval-based data
-	if (sts.hasSumDetailFiles() || sts.hasLogFiles()) {
+	if (hasSumDetailFiles() || hasLogFiles()) {
 	    if (intervalData == null) {
 		intervalData = new IntervalData();
 	    }
@@ -207,8 +237,24 @@ public class Analysis {
 	// **CW** for backward compatibility - initialize the log files
 	// by creating the log reader so that the timing information is
 	// available to the older tools.
-	if (sts.hasLogFiles()) {
+	if (hasLogFiles()) {
 	    logLoader = new LogLoader();
+	}
+	// if pose data exists, compute the end times
+	if (hasPoseDopFiles()) {
+	    dopReader = new PoseDopReader();
+	    final SwingWorker worker =  new SwingWorker() {
+		    public Object construct() {
+			poseTotalTime = dopReader.getTotalRealTime();
+			poseTotalVirtualTime = 
+			    dopReader.getTotalVirtualTime();
+			return null;
+		    }
+		    public void finished() {
+			// nothing to do
+		    }
+		};
+	    worker.start();
 	}
     }
     
@@ -216,7 +262,7 @@ public class Analysis {
     public static Vector createTL(int p, long bt, long et, 
 				  Vector timelineEvents, Vector userEvents) {
 	try {
-	    if (sts.hasLogFiles()) {
+	    if (hasLogFiles()) {
 		if (logLoader == null) {
 		    logLoader = new LogLoader();
 		}
@@ -234,25 +280,25 @@ public class Analysis {
 
     public static int[][] getAnimationData(long intervalSize, 
 					   long startTime, long endTime, 
-					   OrderedIntList validPEs) {
+					   OrderedIntList desiredPEs) {
 	if (intervalSize >= endTime-startTime) {
 	    intervalSize = endTime-startTime;
 	}
 	int startI = (int)(startTime/intervalSize);
 	int endI = (int)(endTime/intervalSize);
-	int numPs = validPEs.size();
+	int numPs = desiredPEs.size();
 	
 	LoadGraphData(intervalSize,startI,endI-1,false, null);
 	int[][] animationdata = new int[ numPs ][ endI-startI ];
 	
-	int pInfo = validPEs.nextElement();
+	int pInfo = desiredPEs.nextElement();
 	int p = 0;
 	
 	while(pInfo != -1){
 	    for( int t = 0; t <(endI-startI); t++ ){
 		animationdata[ p ][ t ] = getSystemUsageData(1)[ pInfo ][ t ];
 	    }
-	    pInfo = validPEs.nextElement();
+	    pInfo = desiredPEs.nextElement();
 	    p++;
 	}
 	
@@ -261,7 +307,7 @@ public class Analysis {
 
     /**************** Utility/Access *************/
     public static String[][] getLogFileText( int num ) {
-	if (!(sts.hasLogFiles())) {
+	if (!(hasLogFiles())) {
 	    return null;
 	} else {
 	    Vector v = null;
@@ -364,6 +410,18 @@ public class Analysis {
 	totalTime = time;
     }
 
+    public static long getPoseTotalTime() {
+	return poseTotalTime;
+    }
+
+    public static long getPoseTotalVirtualTime() {
+	return poseTotalVirtualTime;
+    }
+
+    public static PoseDopReader getPoseDopReader() {
+	return dopReader;
+    }
+
     // yet another interval size hack. When am I ever going to end up
     // finding the time to fix all these ...
     public static long getLogReaderIntervalSize() {
@@ -405,7 +463,7 @@ public class Analysis {
     */
     public static float[][] GetUsageData(int pnum, long begintime, 
 					 long endtime, OrderedIntList phases) {
-	if( sts.hasLogFiles()) { //.log files
+	if( hasLogFiles()) { //.log files
 	    UsageCalc u=new UsageCalc();
 	    return u.usage(pnum, begintime, endtime, getVersion() );
 	} else /*The files are sum files*/ {
@@ -477,7 +535,7 @@ public class Analysis {
 				     boolean byEntryPoint, 
 				     OrderedIntList processorList) 
     {
-	if( sts.hasLogFiles()) { // .log files
+	if( hasLogFiles()) { // .log files
 	    LogReader logReader = new LogReader();
 	    logReader.read(intervalSize, 
 			   intervalStart, intervalEnd,
@@ -487,13 +545,13 @@ public class Analysis {
 	    userEntryData = logReader.getUserEntries();
 	    logReaderIntervalSize = logReader.getIntervalSize();
 	    logReader=null;
-	} else if (sts.hasSumDetailFiles()) {
+	} else if (hasSumDetailFiles()) {
 	    // **CW**
 	    // sum detail not truly available yet, so use summary for now.
-	    if (sts.hasSumFiles()) {
+	    if (hasSumFiles()) {
 		loadSummaryData(intervalSize, intervalStart, intervalEnd);
 	    }
-	} else if (sts.hasSumFiles()) { // no log files, so load .sum files
+	} else if (hasSumFiles()) { // no log files, so load .sum files
 	    loadSummaryData(intervalSize, intervalStart, intervalEnd);
 	} else {
 	    System.err.println("Error: No data Files found!!");
@@ -533,11 +591,11 @@ public class Analysis {
      *  require dynamic rebinning on read.
      */
     public static void loadSummaryData() {
-	if (sts.hasSumFiles()) { 
+	if (hasSumFiles()) { 
 	    int sizeInt=(int)(sumAnalyzer.getIntervalSize());
 	    int nInt=(int)(getTotalTime()/sizeInt);
 	    loadSummaryData(sizeInt, 0, nInt-1);
-	} else if (sts.hasSumAccumulatedFile()) {
+	} else if (hasSumAccumulatedFile()) {
 	    // do nothing **HACK** - action taken later.
 	}
     }
@@ -550,7 +608,7 @@ public class Analysis {
 	throws EntryNotFoundException 
     {
 	try {
-	    if (sts.hasLogFiles()) {
+	    if (hasLogFiles()) {
 		if (logLoader == null) {
 		    logLoader = new LogLoader();
 		}
@@ -579,39 +637,47 @@ public class Analysis {
 
     // *** Data File-related accessors (from sts reader) ***
     public static boolean hasSummaryData() {
-	return (sts.hasSumFiles() || sts.hasSumAccumulatedFile());
+	return (hasSumFiles() || hasSumAccumulatedFile());
     }
 
     public static boolean hasLogData() {
-	return sts.hasLogFiles();
+	return hasLogFiles();
     }
 
     public static boolean hasSumDetailData() {
-	return sts.hasSumDetailFiles();
+	return hasSumDetailFiles();
+    }
+
+    public static boolean hasPoseDopData() {
+	return hasPoseDopFiles();
     }
 
     public static String getLogDirectory() {
-	if (sts != null) {
-	    return sts.getLogPathname();
-	} else {
-	    return null;
-	}
+	return logDirectory;
     }
 
-    public static String getFilename() {
-	return sts.getFilename();
+    public static String getFilename() { 
+	return baseName;
+    }   
+    
+    public static String getLogName(int pnum) {
+	return baseName+"."+pnum+".log";
+    }   
+
+    public static String getSumName(int pnum) {
+	return baseName+"."+pnum+".sum";
+    }   
+    
+    public static String getSumAccumulatedName() {
+	return baseName+".sum";
     }
 
-    public static String getLogName(int peNum) {
-	return sts.getLogName(peNum);
+    public static String getSumDetailName(int pnum) {
+	return baseName + "." + pnum + ".sumd";
     }
 
-    public static String getSumName(int peNum) {
-	return sts.getSumName(peNum);
-    }
-
-    public static String getSumDetailName(int peNum) {
-	return sts.getSumDetailName(peNum);
+    public static String getPoseDopName(int pnum) {
+	return baseName + "." + pnum + ".poselog";
     }
 
     // *** Run Data accessors (from sts reader) ***
@@ -763,35 +829,83 @@ public class Analysis {
      *  one set of valid files.
      */
     public static String getValidProcessorString() {
-	if (sts.hasLogFiles()) {
-	    return sts.getValidProcessorString(StsReader.LOG);
-	} else if (sts.hasSumFiles()) {
-	    return sts.getValidProcessorString(StsReader.SUMMARY);
-	} else if (sts.hasSumDetailFiles()) {
-	    return sts.getValidProcessorString(StsReader.SUMDETAIL);
+	if (hasLogFiles()) {
+	    return getValidProcessorString(LOG);
+	} else if (hasSumFiles()) {
+	    return getValidProcessorString(SUMMARY);
+	} else if (hasSumDetailFiles()) {
+	    return getValidProcessorString(SUMDETAIL);
+	} else if (hasPoseDopFiles()) {
+	    return getValidProcessorString(DOP);
 	} else {
 	    return "";
 	}
     }
 
     public static OrderedIntList getValidProcessorList() {
-	if (sts.hasLogFiles()) {
-	    return sts.getValidProcessorList(StsReader.LOG);
-	} else if (sts.hasSumFiles()) {
-	    return sts.getValidProcessorList(StsReader.SUMMARY);
-	} else if (sts.hasSumDetailFiles()) {
-	    return sts.getValidProcessorList(StsReader.SUMDETAIL);
+	if (hasLogFiles()) {
+	    return getValidProcessorList(LOG);
+	} else if (hasSumFiles()) {
+	    return getValidProcessorList(SUMMARY);
+	} else if (hasSumDetailFiles()) {
+	    return getValidProcessorList(SUMDETAIL);
+	} else if (hasPoseDopFiles()) {
+	    return getValidProcessorList(DOP);
 	} else {
 	    return null;
 	}
     }
 
     public static String getValidProcessorString(int type) {
-	return sts.getValidProcessorString(type);
+	switch (type) {
+	case LOG:
+	    if (!hasLog) {
+		System.err.println("Warning: No log files.");
+	    }
+	    break;
+	case SUMMARY:
+	    if (!hasSum) {
+		System.err.println("Warning: No summary files.");
+	    }
+	    break;
+	case SUMDETAIL:
+	    if (!hasSumDetail) {
+		System.err.println("Warning: No summary detail files.");
+	    }
+	    break;
+	case DOP:
+	    if (!hasPoseDop) {
+		System.err.println("Warning: No poselog files found.");
+	    }
+	    break;
+	}
+	return validPEStrings[type];
     }
 
     public static OrderedIntList getValidProcessorList(int type) {
-	return sts.getValidProcessorList(type);
+	switch (type) {
+	case LOG:
+	    if (!hasLog) {
+		System.err.println("Warning: No log files.");
+	    }
+	    break;
+	case SUMMARY:
+	    if (!hasSum) {
+		System.err.println("Warning: No summary files.");
+	    }
+	    break;
+	case SUMDETAIL:
+	    if (!hasSumDetail) {
+		System.err.println("Warning: No summary detail files.");
+	    }
+	    break;
+	case DOP:
+	    if (!hasPoseDop) {
+		System.err.println("Warning: No poselog files found.");
+	    }
+	    break;
+	}
+	return validPEs[type];
     }
 
     public static Color[] getColorMap() {
@@ -935,6 +1049,97 @@ public class Analysis {
 
     public static boolean hasPapi() {
 	return sts.hasPapi();
+    }
+
+    /**
+     *  Internal Data file(s) management routines
+     */
+    private static void detectFiles() {
+	// determine if any of the data files exist.
+	// We assume they are automatically valid and this is reflected
+	// in the validPEs. 
+	// **FIXME** This is expensive with large numbers of processors!
+	//           Use rc-type information to do this once per dataset
+	//           lifetime.
+
+	hasLog = false;
+	hasSum = false;
+	hasSumDetail = false;
+	hasSumAccumulated = false;
+	hasPoseDop = false;
+
+	validPEs = new OrderedIntList[NUM_TYPES];
+	validPEStrings = new String[NUM_TYPES];
+	for (int i=0; i<NUM_TYPES; i++) {
+	    validPEs[i] = new OrderedIntList();
+	}
+
+	for (int i=0;i<sts.getProcessorCount();i++) {
+	    if ((new File(getSumName(i))).isFile()) {
+		hasSum = true;
+		validPEs[SUMMARY].insert(i);
+	    }
+	    if ((new File(getSumDetailName(i))).isFile()) {
+		hasSumDetail = true;
+		validPEs[SUMDETAIL].insert(i);
+	    }
+	    if ((new File(getLogName(i))).isFile()) {
+		hasLog = true;
+		validPEs[LOG].insert(i);
+	    }
+	    if ((new File(getPoseDopName(i))).isFile()) {
+		hasPoseDop = true;
+		validPEs[DOP].insert(i);
+	    }
+	}
+	for (int type=0; type<NUM_TYPES; type++) {
+	    validPEStrings[type] = validPEs[type].listToString();
+	}
+	if ((new File(getSumAccumulatedName())).isFile()) {
+	    hasSumAccumulated = true;
+	}
+    }
+    
+    private static boolean hasLogFiles() {
+	return hasLog;
+    }   
+
+    private static boolean hasSumFiles() {
+	return hasSum;
+    }
+   
+    private static boolean hasSumAccumulatedFile() {
+	return hasSumAccumulated;
+    }
+
+    private static boolean hasSumDetailFiles() {
+	return hasSumDetail;
+    }
+
+    private static boolean hasPoseDopFiles() {
+	return hasPoseDop;
+    }
+
+    private static String getBaseName(String filename) {
+	String baseName = null;
+	if (filename.endsWith(".sum.sts")) {
+	    baseName = filename.substring(0, filename.length()-8);
+	} else if (filename.endsWith(".sts")) {
+	    baseName = filename.substring(0, filename.length()-4); 
+	} else {
+	    System.err.println("Invalid sts filename! Exiting ...");
+	    System.exit(-1);
+	}
+	return baseName;
+    }
+
+    private static String dirFromFile(String filename) {
+	// pre condition - filename is a full path name
+	int index = filename.lastIndexOf(File.separator);
+	if (index != -1) {
+	    return filename.substring(0,index);
+	}
+	return(".");	// present directory
     }
 
 }

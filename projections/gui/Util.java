@@ -99,6 +99,7 @@ public class Util
    }
 
     /* Swing version of the above function */
+    /* Modified by Chao Mei for adding support for sublevel menus */
     public static JMenu makeJMenu(Object parent, Object[] items,
 				  boolean[] enabled, Object target)
     {
@@ -140,6 +141,21 @@ public class Util
 			    mi.addActionListener((ActionListener)target);
 			m.add(mi);
 		    }
+                /* Support for sub-level menu */
+                else if (items[i] instanceof String []) {
+                    String[] subMenuStr = (String [])items[i];
+                    JMenu subMenu = new JMenu(subMenuStr[0]);
+                    m.add(subMenu);
+
+                    for(int index=1; index<subMenuStr.length; index++){
+                        JMenuItem mi = new JMenuItem(subMenuStr[index]);
+			if (target instanceof ActionListener)
+			    {
+				mi.addActionListener((ActionListener)target);
+			    }
+			subMenu.add(mi);
+                    }
+                }
 		else if (items[i] == null)
 		    {
 			m.addSeparator();

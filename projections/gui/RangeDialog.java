@@ -265,6 +265,10 @@ public class RangeDialog extends JDialog
 	} else {
 	    setParameters();
 	}
+        //added by Chao Mei, set the the Dialog center on the screen.
+        //The method is only available since Sun Java JDK 1.4
+        setLocationRelativeTo(parentWindow);
+
 	setVisible(true);
     }
 

@@ -120,7 +120,7 @@ implements MouseListener
 	  g.setColor(getForeground());
 	  
 	  for(int i=0; i<text.length; i++)
-		 g.drawString(text[i], 10, (i+1)*sh );    
+		 g.drawString(text[i], 4, (i+1)*sh );    
    }   
    public void setBubbleText(String[] s)
    {

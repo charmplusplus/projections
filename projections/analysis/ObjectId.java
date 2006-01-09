@@ -19,4 +19,8 @@ public ObjectId(int d0, int d1, int d2) {
      	 id = new int[3];
 	 id[0] = d0; id[1] = d1; id[2] = d2;
        }
+public boolean compare(ObjectId comp) {
+    return (id[0]==comp.id[0]) && (id[1]==comp.id[1]) && (id[2]==comp.id[2]); 
 }
+}
+

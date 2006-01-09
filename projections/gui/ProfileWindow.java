@@ -2,64 +2,89 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.*;
-
-import java.util.*;
+import java.sql.Time;
 import java.text.*;
+import java.util.*;
+
+import javax.swing.*;
+import javax.swing.event.*;
+
+import org.apache.xpath.operations.And;
 
 import projections.analysis.*;
+import projections.gui.graph.*;
 import projections.misc.*;
 
 public class ProfileWindow extends ProjectionsWindow
-    implements ActionListener, AdjustmentListener, ColorSelectable
-{ 
+    implements ActionListener, ColorSelectable, ChangeListener
+{
     private static final int NUM_SYS_EPS = 3;
-    
-    private NoUpdatePanel        mainPanel, displayPanel;
-    private Panel                labelCanvas2, titlePanel;
-    private ProfileLabelCanvas   labelCanvas;
-    private ProfileAxisCanvas    axisCanvas;
-    private ProfileDisplayCanvas displayCanvas;
-    // private ProfileColorWindow   colorWindow;
-    private Label lTitle, lTitle2;
-    private Scrollbar HSB, VSB;
-    private ProfileData data;
-    private FloatTextField xScaleField, yScaleField;
-    private Button bDecreaseX, bIncreaseX, bResetX;
-    private Button bDecreaseY, bIncreaseY, bResetY;
-    private Button bColors;
-    private Button bPieChart;
 
     private ProfileWindow thisWindow;
 
-    // a boolean variable that indicates if the colors have been set.
-    // If so, we simply want to preserve the old settings and allow the
-    // user to change them without forcing them back to the old values.
-    // Right now, still a very ugly hack.
-    private boolean colorsSet = false;
-    private Color[][] colors;
-    private ProfileObject[][] poArray;
-    private float xscale=1, yscale=1;
-    private float[][] avg;
+    private ProfileData data;
+    private boolean colorsSet;
+    private Color[] colors; //every color corresponds to an entry point
+
+    //related with data model of ProfileGraph
+    private float[][] dataSource = null;
+    private int[][] colorMap = null;
+    private String[][] nameMap = null;
+    private String [] procNames = null;
+    //temporary data for every single processor
+    private float[] sDataSrc = null;
+    private int[] sColorMap = null;
+    private String[] sNameMap = null;
+
+    //Following varibles are related with responding to user events
+    private JTabbedPane tabPane;
+    //private Graph displayCanvas;
+    private ProfileGraph displayCanvas;
+    private JScrollPane displayPanel;
+    private int displayPanelTabIndex;
+    private ProfileGraph ampiDisplayCanvas;
+    private JScrollPane ampiDisplayPanel;
+    private int ampiDisplayPanelTabIndex;
+
+
+    private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY;
+    private JFloatTextField txtScaleX, txtScaleY;
+
+    //usage greater than "thresh" will be displayed!
     private float thresh;
-    private int avgSize;
-    
+
     private PieChartWindow pieChartWindow;
+    private float[][] avgData;
 
     private EntrySelectionDialog entryDialog;
-   
-    class NoUpdatePanel extends Panel
-    {
-	public void update(Graphics g)
-	{
-	    paint(g);
-	}
+
+    private boolean ampiTraceOn = false;
+
+    public ProfileWindow(MainWindow parentWindow, Integer myWindowID){
+        super(parentWindow, myWindowID);
+	thisWindow = this;
+        colorsSet = false;
+        colors = null;
+
+        thresh = 0.01f;
+
+        if(Analysis.getNumFunctionEvents() > 0)
+            ampiTraceOn = true;
+
+	setBackground(Color.lightGray);
+	setTitle("Projections Usage Profile - " + Analysis.getFilename() + ".sts");
+	CreateMenus();
+	CreateLayout();
+	pack();
+	showDialog();
+        setLocationRelativeTo(parentWindow);
+        setVisible(true);
     }
 
     void windowInit() {
 	// get new data object
 	data = new ProfileData(this);
-	
+
 	// acquire starting data from Analysis
 	data.plist = Analysis.getValidProcessorList();
 	data.pstring = Analysis.getValidProcessorString();
@@ -67,598 +92,155 @@ public class ProfileWindow extends ProjectionsWindow
 	data.endtime = Analysis.getTotalTime();
     }
 
-    public ProfileWindow(MainWindow parentWindow, Integer myWindowID)
-    {
-	super(parentWindow, myWindowID);
-	thisWindow = this;
+    private void CreateMenus(){
+	JMenuBar mbar = new JMenuBar();
+	mbar.add(Util.makeJMenu("File", new Object[]
+                                {
+                                    "Select Processors",
+                                    "Print Profile",
+                                    null,
+                                    "Close"
+                                },
+                                null, this));
+        if(ampiTraceOn){
+            mbar.add(Util.makeJMenu("Tools", new Object[]
+                                {
+                                    "Pie Chart",
+                                    "Change Colors",
+                                    "Usage Table",
+                                    new String[] {"AMPI", "Usage Profile"}
+                                },
+                                null, this));
+        } else{
+            mbar.add(Util.makeJMenu("Tools", new Object[]
+                                {
+                                    "Pie Chart",
+                                    "Change Colors",
+                                    "Usage Table"
+                                },
+                                null, this));
+        }
 
-	addComponentListener(new ComponentAdapter()
-	    {
-		public void componentResized(ComponentEvent e)
-		{
-		    if(displayCanvas != null)
-			{
-			    setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			    setSizes();
-			    setScales();
-			    labelCanvas.makeNewImage();
-			    axisCanvas.makeNewImage();
-			    labelCanvas2.invalidate();
-			    mainPanel.validate();
-			    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			}   
-		}
-	    });
-	  
-	setBackground(Color.lightGray);
-	
-	setTitle("Projections Usage Profile - " + Analysis.getFilename() + ".sts");
-	
-	CreateMenus();
-	CreateLayout();
-	  
-	pack();
-	showDialog(); 
-    }   
-
-    public void actionPerformed(ActionEvent evt)
-    {
-	if (evt.getSource() instanceof Button) {
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	    
-	    Button b = (Button)evt.getSource();
-	    
-	    if (b == bDecreaseX || b == bIncreaseX || b == bResetX) {
-		if (b == bDecreaseX) {
-		    xscale = (float)((int)(xscale * 4)-1)/4;
-		    if(xscale < 1.0)
-			xscale = (float)1.0;
-		} else if (b == bIncreaseX) {
-		    xscale = (float)((int)(xscale * 4)+1)/4;
-		} else if (b == bResetX) {
-		    xscale = (float)1.0;
-		}
-		xScaleField.setText("" + xscale);
-		setScales();
-		labelCanvas.makeNewImage();
-	    } else if (b == bDecreaseY || b == bIncreaseY || b == bResetY) {
-		if (b == bDecreaseY) {
-		    yscale = (float)((int)(yscale * 4)-1)/4;
-		    if (yscale < 1.0)
-			yscale = (float)1.0;
-		} else if (b == bIncreaseY) {
-		    yscale = (float)((int)(yscale * 4)+1)/4;
-		} else if (b == bResetY) {
-		    yscale = (float)1.0;
-		}
-		yScaleField.setText("" + yscale);
-		setScales(); 
-		axisCanvas.makeNewImage(); 
-	    } else if (b == bPieChart) {
-		pieChartWindow = 
-		    new PieChartWindow(parentWindow, avg[0], 
-				       avg[0].length, thresh, colors[0]);
-	    } else if (b == bColors) {
-		int noEPs = Analysis.getNumUserEntries();
-		if (entryDialog == null) {
-		    String typeLabelStrings[] = {"Entry Points"};
-		    
-		    boolean existsArray[][] = 
-			new boolean[1][noEPs+NUM_SYS_EPS];
-		    for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
-			existsArray[0][i] = true;
-		    }
-		    
-		    boolean stateArray[][] =
-			new boolean[1][noEPs+NUM_SYS_EPS];
-		    for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
-			stateArray[0][i] = true;
-		    }
-		    
-		    String entryNames[] =
-			new String[noEPs+NUM_SYS_EPS];
-		    for (int i=0; i<noEPs; i++) {
-			entryNames[i] =
-			    Analysis.getEntryName(i);
-		    }
-		    // cannot seem to avoid a hardcode
-		    entryNames[noEPs] = "Pack Time";
-		    entryNames[noEPs+1] = "Unpack Time";
-		    entryNames[noEPs+2] = "Idle Time";
-		    
-		    entryDialog = 
-			new EntrySelectionDialog(this, this,
-						 typeLabelStrings,
-						 stateArray, colors,
-						 existsArray, entryNames);
-		}
-		entryDialog.showDialog();
-	    }
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));   
-	} else if (evt.getSource() instanceof MenuItem) {
-	    String arg = ((MenuItem)evt.getSource()).getLabel();
-	    if (arg.equals("Close")) {
-		close();
-	    } else if(arg.equals("Select Processors")) {
-		showDialog();
-	    }
-	} else if (evt.getSource() instanceof FloatTextField) {
-	    setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	    FloatTextField ftf = (FloatTextField)evt.getSource();
-	    
-	    if (ftf == xScaleField) {
-		xscale = xScaleField.getValue();
-		setScales();
-		labelCanvas.makeNewImage();
-	    } else if(ftf == yScaleField) {
-		yscale = yScaleField.getValue();
-		setScales();
-		axisCanvas.makeNewImage();
-	    } 
-	    setCursor(new Cursor(Cursor.DEFAULT_CURSOR));  
-	}                  
-    }   
-
-    /**
-     *  **CW** THIS IS A MAJOR CODE HACK!!!
-     *  ONLY Usage Profile uses callbacks for color selection so far.
-     */
-    public void applyDialogColors() {
-	MakePOArray(data.begintime, data.endtime);
-    }
-    
-    public void adjustmentValueChanged(AdjustmentEvent evt)
-    {
-	Scrollbar sb = (Scrollbar)evt.getSource();
-	displayCanvas.setLocation(-HSB.getValue(), -VSB.getValue());
-	
-	if (sb == HSB) {
-	    labelCanvas.repaint();
-	} else if (sb == VSB) {
-	    axisCanvas.repaint();
-	}  
-    }   
-    
-    private void CreateLayout()
-    {
-	//// MAIN PANEL
-	
-	mainPanel    = new NoUpdatePanel();
-	displayPanel = new NoUpdatePanel();
-	
-	labelCanvas    = new ProfileLabelCanvas(data);
-	labelCanvas2   = new NoUpdatePanel();
-	axisCanvas     = new ProfileAxisCanvas(data);
-	displayCanvas  = new ProfileDisplayCanvas(data);
-	
-	HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
-	VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
-
-	mainPanel.setLayout(null);
-	mainPanel.setBackground(Color.black);
-	mainPanel.add(labelCanvas);
-	mainPanel.add(labelCanvas2);
-	mainPanel.add(axisCanvas);
-	mainPanel.add(displayPanel);
-	mainPanel.add(HSB);
-	mainPanel.add(VSB);
-
-	// tentative hack to make the canvas at least show up.
-	mainPanel.setSize(new Dimension(600,400));
-	  
-	displayPanel.setLayout(null);
-	displayPanel.add(displayCanvas);
-	
-	HSB.setBackground(Color.lightGray);
-	HSB.addAdjustmentListener(this);
-	
-	VSB.setBackground(Color.lightGray);
-	VSB.addAdjustmentListener(this);
-	
-	//// BUTTON PANEL
-	  
-	bColors   = new Button("Change Colors");
-	bDecreaseY   = new Button("<<");
-	bIncreaseY   = new Button(">>");
-	bResetY      = new Button("Reset");
-	bDecreaseX   = new Button("<<");
-	bIncreaseX   = new Button(">>");
-	bResetX      = new Button("Reset");
-	bPieChart    = new Button("Pie Chart");
-	
-	bColors.addActionListener(this);
-	bDecreaseY.addActionListener(this);
-	bIncreaseY.addActionListener(this);
-	bResetY.addActionListener(this);
-	bDecreaseX.addActionListener(this);
-	bIncreaseX.addActionListener(this);
-	bResetX.addActionListener(this);
-	bPieChart.addActionListener(this);
-	  
-	Label lXScale = new Label("X-SCALE: ", Label.CENTER);
-	xScaleField   = new FloatTextField(xscale, 5);
-	xScaleField.addActionListener(this);
-	
-	Label lYScale = new Label("Y-SCALE: ", Label.CENTER);
-	yScaleField   = new FloatTextField(yscale, 5);
-	yScaleField.addActionListener(this);
-	
-	GridBagLayout gbl = new GridBagLayout();
-	GridBagConstraints gbc = new GridBagConstraints();
-	
-	gbc.fill = GridBagConstraints.BOTH;
-	
-	Panel buttonPanel = new Panel();
-	buttonPanel.setLayout(gbl);
-	  
-	Util.gblAdd(buttonPanel, bDecreaseX,   gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, lXScale,      gbc, 1,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, xScaleField,  gbc, 2,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bIncreaseX,   gbc, 3,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bResetX,      gbc, 4,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, new Label("  "), gbc, 5,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bDecreaseY,   gbc, 6,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, lYScale,      gbc, 7,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, yScaleField, gbc, 8,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bIncreaseY,   gbc, 9,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bResetY,      gbc, 10,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bPieChart,    gbc, 11,0, 1,1, 1,1);
-	Util.gblAdd(buttonPanel, bColors,      gbc, 12,0, 1,1, 1,1);
-
-	//// WINDOW
-	Panel yLabelPanel = new Panel();
-	yLabelPanel.setBackground(Color.black);
-	yLabelPanel.setForeground(Color.white);
-	Label yLabel = new Label("%", Label.CENTER);
-	yLabelPanel.setLayout(gbl);
-	Util.gblAdd(yLabelPanel, yLabel, gbc, 0,0, 1,1, 1,1);
-	
-	titlePanel = new Panel();
-	titlePanel.setBackground(Color.black);
-	titlePanel.setForeground(Color.white);
-	lTitle = new Label("", Label.CENTER);
-	lTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
-	lTitle2 = new Label("", Label.CENTER);
-	lTitle2.setFont(new Font("SansSerif", Font.BOLD, 16));
-	titlePanel.setLayout(gbl);
-	Util.gblAdd(titlePanel, lTitle, gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(titlePanel, lTitle2, gbc, 0,1, 1,1, 1,1);
-	
-	JPanel p = new JPanel();
-	getContentPane().add(p);
-	p.setLayout(gbl);
-	Util.gblAdd(p, yLabelPanel, gbc, 0,0, 1,2, 0,1);
-	Util.gblAdd(p, titlePanel,  gbc, 1,0, 1,1, 1,0);
-	Util.gblAdd(p, mainPanel,   gbc, 1,1, 1,1, 1,1);
-	Util.gblAdd(p, buttonPanel, gbc, 0,2, 2,1, 1,0);
-    }   
-
-    private void CreateMenus()
-    {
-	MenuBar mbar = new MenuBar();
-	
-	mbar.add(Util.makeMenu("File", new Object[]
-	    {
-		"Select Processors",
-		"Print Profile",
-		null,
-		"Close"
-	    },
-			       this));                   
-	Menu helpMenu = new Menu("Help");
-	mbar.add(Util.makeMenu(helpMenu, new Object[]
-	    {
-		"Index",
-		"About"
-	    },
-			       this)); 
-	mbar.setHelpMenu(helpMenu);
-	setMenuBar(mbar);                                                     
-    }   
-
-    public int getHSBValue()
-    {
-	return HSB.getValue();
-    }   
-
-    public int getVSBValue()
-    {
-	return VSB.getValue();
-    }   
-
-    public void MakePOArray(long bt, long et)
-    {
-	int numEPs = Analysis.getNumUserEntries();
-
-	// this block sets up the initial colors scheme (which will
-	// later be changed based on the number of significant entry
-	// methods).
-	if (!colorsSet) {
-	    /* testing
-	    colors[0][numEPs+2] = Color.white;
-	    */
-	    colors = new Color[1][numEPs+NUM_SYS_EPS];
-	    
-	    for (int i=0; i<numEPs; i++) {
-		// if the data is an entry method whose color is 
-		// found in analysis, then use it.
-		colors[0][i] = Analysis.getEntryColor(i);
-	    }   
-	    // Idle time is White and is placed at the top
-	    // Pack time is black (to see the first division between entry
-	    // data and non entry data).
-	    // Unpack time is orange (to provide the constrast).
-	    colors[0][numEPs] = Color.black;
-	    colors[0][numEPs+1] = Color.white;
-	}
-	displayCanvas.removeAll();
-
-	// extra column is that of the average data.
-	data.numPs = data.plist.size()+1;
-	poArray = new ProfileObject[data.numPs][];
-	
-	int numUserEntries = Analysis.getNumUserEntries();
-	
-	int curPe;
-	// why +4 now and not +5?
-	// the first row is for entry method execution time the second is for 
-	//time spent sending messages in that entry method
-	
-	avg=new float[2][numUserEntries+NUM_SYS_EPS];
-	double avgScale=1.0/data.plist.size();
-	
-	int poCount=1;
-	int progressCount = 0;
-	int nEl=data.plist.size();
-	
-	ProgressMonitor progressBar;
-	progressBar = 
-	    new ProgressMonitor(Analysis.guiRoot, 
-				"Computing Usage Values",
-				"", 0, nEl*2);
-	progressBar.setProgress(0);
-	// **CW** Hack for colors to work - 
-	// Profile really should be cleanly rewritten.
-	// split the original loop:
-	// Phase 1a - compute average work
-	// Phase 1b - assign colors based on average work
-	// Phase 2 - create profile objects
-	
-	// *CW* *** New code ****
-	// Phase 1a
-	data.plist.reset();
-	for (int i =0;i<avg[0].length;i++) {
-	    avg[0][i] = 0.0f;
-	    avg[1][i] = 0.0f;
-	}
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.currentElement();
-	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("[PE: " + curPe + 
-				    " ] Computing Average.");
-		progressBar.setProgress(progressCount);
-	    } else {
-		break;
-	    }
-	    
-	    data.plist.nextElement();
-	    
-	    // the first row is for entry method execution time 
-	    // the second is for time spent sending messages in 
-	    // that entry method
-	    float cur[][] =
-		Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-	    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
-		avg[0][i]+=(float)(cur[0][i]*avgScale);
-		avg[1][i]+=(float)(cur[1][i]*avgScale);
-	    }
-	    progressCount++;
-	}
-	
-	// Phase 1b
-	progressBar.setNote("Assigning Colors");
-	progressBar.setProgress(progressCount);
-	Vector sigElements = new Vector();
-	// we only wish to compute for EPs
-	for (int i=0; i<numEPs; i++) {
-	    // anything greater than 5% is "significant"
-	    if (avg[0][i]+avg[1][i] > 1.0) {
-		sigElements.add(new Integer(i));
-	    }
-	}
-	
-	// copy to an array for Color assignment (maybe that should be
-	// a new interface for color assignment).
-	int sigIndices[] = new int[sigElements.size()];
-	for (int i=0; i<sigIndices.length; i++) {
-	    sigIndices[i] = ((Integer)sigElements.elementAt(i)).intValue();
-	}
-	if (!colorsSet) {
-	    Color[] newUserColors = 
-		Analysis.createColorMap(numEPs, sigIndices);
-	    // copy the new Colors into our color array. 
-	    // (and let the system colors
-	    // remain as they are)
-	    for (int i=0; i<newUserColors.length; i++) {
-		colors[0][i] = newUserColors[i];
-	    }
-	    colorsSet = true;
-	}
-	
-	// Phase 2
-	data.plist.reset();
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.currentElement();
-	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("[PE: " + curPe +
-				    " ] Reading Entry Point Usage.");
-		progressBar.setProgress(progressCount);
-	    } else {
-		break;
-	    }
-	    data.plist.nextElement();
-	    float cur[][]=Analysis.GetUsageData(curPe,bt,et,data.phaselist);
-	    usage2po(cur,curPe,poCount++,colors[0]);
-	    progressCount++;
-	}
-	usage2po(avg,-1,0,colors[0]);
-	progressBar.close();
-	
-	String sTitle = "Profile of Usage for Processor";
-	if(data.plist.size() > 1)
-	    sTitle += "s";
-	
-	sTitle += " " + data.plist.listToString();
-	lTitle.setText(sTitle);
-	lTitle.invalidate();
-	
-	sTitle = "(Time " + U.t(bt) + " - " + U.t(et) + ")";
-	lTitle2.setText(sTitle);
-	lTitle2.invalidate();
-	
-	titlePanel.validate();
-	
-	setSizes();
-	setScales();
-	labelCanvas.makeNewImage();
-	axisCanvas.makeNewImage();
-	labelCanvas2.invalidate();
-	mainPanel.validate();      		
+	mbar.add(Util.makeJMenu("Help", new Object[]
+                                {
+                                    "Index",
+                                    "About"
+                                },
+                                null, this));
+	setJMenuBar(mbar);
     }
 
-    private void setScales()
-    {
-	data.dcw = (int)(xscale * data.vpw);
-	data.dch = (int)(yscale * data.vph);
-	
-	if(xscale > 1)
-	    HSB.setVisible(true);
-	else
-	    HSB.setVisible(false);
-	
-	if(yscale > 1)
-	    VSB.setVisible(true);
-	else
-	    VSB.setVisible(false);
-	
-	HSB.setMaximum(data.dcw);
-	VSB.setMaximum(data.dch);  
-	HSB.setVisibleAmount(data.vpw);
-	VSB.setVisibleAmount(data.vph); 
-	HSB.setBlockIncrement(data.vpw);
-	VSB.setBlockIncrement(data.vph);
-	
-	displayCanvas.setBounds(0, 0, data.dcw, data.dch);
-	
-	double hscale = (double)(data.dch - data.offset)/100;
-	float width   = (float)(data.dcw - 2*data.offset)/data.numPs;
-	int w = (int)(Math.ceil(0.75*width));
-	int ow = (int)((width - w)/2);
-	  
-	if (poArray != null) {
-	    for (int p=0; p<data.numPs; p++) {
-		int h = data.dch;
-		double rem = 0.0;
-		if (poArray[p] != null) {
-		    for (int i=0; i<poArray[p].length; i++) {
-			if (poArray[p][i] != null) {
-			    double objhtD = (hscale*poArray[p][i].getUsage());
-			    objhtD += rem;
-			    
-			    int   objht;
-			    if(objhtD - (int)objhtD >= 0.5)
-				objht = (int)objhtD + 1;
-			    else
-				objht = (int)objhtD;
-			    rem = objhtD - objht;      
-			    
-			    poArray[p][i].setBounds((int)(width*p+
-							  data.offset+ow), 
-						    h - objht, w, objht);   
-			    h -= objht;
-			} else {
-			    System.out.println("POARRAY[" + p + 
-					       "][" + i + "} IS NULL");
-			}      
-		    }
-		}
-	    }
-	} 
-	displayCanvas.makeNewImage();           
-    }   
+    private void CreateLayout(){
 
-    private void setSizes()
-    {
-	int acw, lch, sbh, sbw, mpw, mph, lch2;
-	
-	mpw = mainPanel.getSize().width;
-	mph = mainPanel.getSize().height;
-	
-	acw  = 50;
-	lch  = 30;
-	lch2 = 30;
-	sbh  = 20;
-	sbw  = 20;
-	  
-	data.vpw = mpw - acw - sbw;
-	data.vph = mph - lch - lch2 - sbh;
-	
-	data.dcw = (int)(xscale * data.vpw);
-	data.dch = (int)(yscale * data.vph);
-	  
-	if(xscale > 1)
-	    HSB.setVisible(true);
-	else
-	    HSB.setVisible(false);
-	  
-	if(yscale > 1)
-	    VSB.setVisible(true);
-	else
-	    VSB.setVisible(false);
-		 
-	HSB.setMaximum(data.dcw);
-	VSB.setMaximum(data.dch);   
-	HSB.setBlockIncrement(data.vpw);
-	VSB.setBlockIncrement(data.vph);            
-	
-	axisCanvas.setBounds   (0,       0,       acw, data.vph);
-	displayPanel.setBounds (acw,     0,       data.vpw, data.vph);
-	displayCanvas.setBounds(0, 0, data.dcw, data.dch);
-	labelCanvas.setBounds  (acw,     data.vph,     data.vpw, lch);
-	labelCanvas2.setBounds (acw, data.vph+lch,     data.vpw, lch2);
-	
-	VSB.setBounds          (mpw-sbw, 0,       sbw, data.vph);
-	HSB.setBounds          (acw,     mph-sbh, data.vpw, sbh);
-    }   
+        JPanel wholePanel = new JPanel();
 
-    public void showDialog()
-    {
+        GridBagLayout gbl = new GridBagLayout();
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+
+        //create display canvas
+	//Analysis.foreground = Color.black;
+	//Analysis.background = Color.white;
+        //displayCanvas = new Graph();
+        displayCanvas = new ProfileGraph();
+        // this encapsulating panel is required to apply BoxLayout
+	// to the scroll pane so that it works correctly.
+	//JPanel p = new JPanel();
+	//p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+	displayPanel = new JScrollPane(displayCanvas);
+	//p.add(displayPanel);
+
+        if(ampiTraceOn){
+            ampiDisplayCanvas = new ProfileGraph();
+            //JPanel ampiP = new JPanel();
+            //ampiP.setLayout(new BoxLayout(ampiP, BoxLayout.X_AXIS));
+    	ampiDisplayPanel = new JScrollPane(ampiDisplayCanvas);
+    	//ampiP.add(ampiDisplayPanel);
+
+            tabPane = new JTabbedPane();
+            tabPane.add("Entry Points",displayPanel);
+            tabPane.add("AMPI Functions", ampiDisplayPanel);
+            displayPanelTabIndex = tabPane.indexOfComponent(displayPanel);
+            ampiDisplayPanelTabIndex = tabPane.indexOfComponent(ampiDisplayPanel);
+            tabPane.addChangeListener(this);
+        }
+
+        //create x-y scale panel
+        JPanel xScalePanel = new JPanel();
+	xScalePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "x-scale"));
+        xScalePanel.setLayout(gbl);
+
+        btnDecX = new JButton("<<");
+	JLabel lScaleX  = new JLabel("X-Axis Scale: ", SwingConstants.CENTER);
+        txtScaleX = new JFloatTextField(1, 5);
+        btnIncX = new JButton(">>");
+        btnResX = new JButton("Reset");
+        btnDecX.addActionListener(this);
+        txtScaleX.addActionListener(this);
+        btnIncX.addActionListener(this);
+        btnResX.addActionListener(this);
+
+        Util.gblAdd(xScalePanel, btnDecX,  gbc, 0,0, 1,1, 0,0);
+	Util.gblAdd(xScalePanel, lScaleX,     gbc, 1,0, 1,1, 0,0);
+	Util.gblAdd(xScalePanel, txtScaleX, gbc, 2,0, 1,1, 1,0);
+	Util.gblAdd(xScalePanel, btnIncX,  gbc, 3,0, 1,1, 0,0);
+	Util.gblAdd(xScalePanel, btnResX,     gbc, 4,0, 1,1, 0,0);
+
+        JPanel yScalePanel = new JPanel();
+        yScalePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "y-scale"));
+        yScalePanel.setLayout(gbl);
+
+        btnDecY = new JButton("<<");
+        JLabel lScaleY  = new JLabel("Y-Axis Scale: ", SwingConstants.CENTER);
+        txtScaleY = new JFloatTextField(1, 5);
+        btnIncY = new JButton(">>");
+        btnResY = new JButton("Reset");
+        btnDecY.addActionListener(this);
+        txtScaleY.addActionListener(this);
+        btnIncY.addActionListener(this);
+        btnResY.addActionListener(this);
+
+        Util.gblAdd(yScalePanel, btnDecY,  gbc, 0,0, 1,1, 0,0);
+        Util.gblAdd(yScalePanel, lScaleY,     gbc, 1,0, 1,1, 0,0);
+        Util.gblAdd(yScalePanel, txtScaleY, gbc, 2,0, 1,1, 1,0);
+        Util.gblAdd(yScalePanel, btnIncY,  gbc, 3,0, 1,1, 0,0);
+        Util.gblAdd(yScalePanel, btnResY,     gbc, 4,0, 1,1, 0,0);
+
+        //add dispalyPanel and x-y scale panel to the window
+        Container wholeContainer = getContentPane();
+        wholeContainer.setLayout(gbl);
+        if(ampiTraceOn){
+            Util.gblAdd(wholeContainer, tabPane, gbc, 0,0, 2,1, 1,1, 5,5,5,5);
+        } else {
+            Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 2,1, 1,1, 5,5,5,5);
+        }
+
+        Util.gblAdd(wholeContainer, xScalePanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer, yScalePanel, gbc, 1,1, 1,1, 1,0, 2,2,2,2);
+    }
+
+    public void showDialog(){
 	if (dialog == null) {
 	    dialog = new RangeDialog(this, "Usage Profile");
 	} else {
 	    setDialogData();
 	}
+
 	dialog.displayDialog();
-	if (!dialog.isCancelled()) {
+        if (!dialog.isCancelled()) {
 	    getDialogData();
-	    final SwingWorker worker = new SwingWorker() {
-		    public Object construct() {
-			// **CW** another major code hack!!
-			thisWindow.MakePOArray(data.begintime, data.endtime);
-			return null;
-		    }
-		    public void finished() {
-			thisWindow.setVisible(true);
-		    }
+	    final Thread t = new Thread() {
+                    public void run() {
+                        setDisplayProfileData();
+                        if(ampiTraceOn)
+                            setAmpiDisplayProfileData();
+                        setVisible(true);
+                    }
 		};
-	    worker.start();
+	    t.start();
 	}
-    }   
-    
-    public void showWindow() {
-	// do nothing for now
     }
-    
+
     public void getDialogData() {
 	data.plist = dialog.getValidProcessors();
 	data.pstring = dialog.getValidProcessorString();
@@ -673,108 +255,642 @@ public class ProfileWindow extends ProjectionsWindow
 	super.setDialogData();
     }
 
-    //Convert a usage profile (0..numUserEntries+4-1) to a po
-    private void usage2po(float usg[][],int curPe,int poNo,Color[] colors)
-    {
-	int numUserEntries = Analysis.getNumUserEntries();
-	String[][] names = Analysis.getEntryNames();
-	int i,poindex=0,poLen=0;
-	
-	float thresh=0.01f;//Percent below which to ignore
-	for(i=0;i<usg[0].length;i++){
-	    if (usg[0][i]>thresh) 
-		poLen++;
-	    if (usg[1][i]>thresh) 
-		poLen++;
-	}
-	//Drawing the entry point execution time
-	poArray[poNo]=new ProfileObject[poLen];
+    public void showWindow() {
+	// do nothing for now
+    }
 
-	// **CW** stdout workaround for figuring out exact usage
-	// numbers for cpaimd
-	DecimalFormat format_ = new DecimalFormat();
-	format_.setMaximumFractionDigits(5);
-	format_.setMinimumFractionDigits(5);
-	for (i=0; i<usg[0].length; i++) {
-	    float usage = usg[0][i];
-	    if (usage<=thresh) continue; //Skip this one-- it's tiny
-	    int   entry = i;
-	    String name;
-	    if (entry < numUserEntries) {
-		name = names[entry][1] + "::" + names[entry][0];
-		// **CW** stdout workaround for figuring out exact usage
-		// numbers for cpaimd.
-		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
-		    System.out.println(curPe + " " + entry + " " + 
-				       format_.format(usage) + 
-				       " " + name);
-		}
-	    } else if (entry == numUserEntries+2) {
-		name = "IDLE";
-		// **CW** stdout workaround for figuring out exact usage
-		// numbers for cpaimd.
-		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
-		    System.out.println(curPe + " " + entry + " " + 
-				       format_.format(usage) + 
-				       " " + name);
-		}
-	    } else if (entry == numUserEntries) {
-		name = "PACKING";
-		// **CW** stdout workaround for figuring out exact usage
-		// numbers for cpaimd.
-		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
-		    System.out.println(curPe + " " + entry + " " + 
-				       format_.format(usage) + 
-				       " " + name);
-		}
-	    } else if (entry == numUserEntries+1) {
-		name = "UNPACKING";
-		// **CW** stdout workaround for figuring out exact usage
-		// numbers for cpaimd.
-		if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
-		    System.out.println(curPe + " " + entry + " " + 
-				       format_.format(usage) + 
-				       " " + name);
-		}
+
+    public void actionPerformed(ActionEvent evt){
+        // get recorded values
+	float oldScaleX = txtScaleX.getValue();
+	float oldScaleY = txtScaleY.getValue();
+	// clean current slate
+	float scaleX = 0;
+	float scaleY = 0;
+
+	if (evt.getSource() instanceof JButton) {
+	    JButton b = (JButton) evt.getSource();
+ 	    if (b == btnDecX) {
+		scaleX = (float)((int)(oldScaleX * 4)-1)/4;
+		if (scaleX < 1.0)
+		    scaleX = (float)1.0;
+	    } else if (b == btnIncX) {
+		scaleX = (float)((int)(oldScaleX * 4)+1)/4;
+	    } else if (b == btnResX) {
+		scaleX = (float)1.0;
+	    } else if (b == btnDecY) {
+		scaleY = (float)((int)(oldScaleY * 4)-1)/4;
+		if (scaleY < 1.0)
+		    scaleY = (float)1.0;
+	    } else if (b == btnIncY) {
+		scaleY = (float)((int)(oldScaleY * 4)+1)/4;
+	    } else if (b == btnResY) {
+		scaleY = (float)1.0;
+	    }
+	    // minimum value is 1.0, this is used to test if
+	    // the which flag was set.
+	    if ((scaleX != oldScaleX) && (scaleX > 0.0)) {
+		txtScaleX.setText("" + scaleX);
+                if(ampiTraceOn){
+                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
+                        displayCanvas.setScaleX((double)scaleX);
+                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
+                        ampiDisplayCanvas.setScaleX((double)scaleX);
+                    }
+                } else {
+                    displayCanvas.setScaleX((double)scaleX);
+                }
+	    }
+	    if ((scaleY != oldScaleY) && (scaleY > 0.0)) {
+		txtScaleY.setText("" + scaleY);
+                if(ampiTraceOn){
+                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
+                        displayCanvas.setScaleY((double)scaleY);
+                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
+                        ampiDisplayCanvas.setScaleY((double)scaleY);
+                    }
+                } else {
+                    displayCanvas.setScaleY((double)scaleY);
+                }
+	    }
+	} else if (evt.getSource() instanceof JFloatTextField) {
+	    JFloatTextField field = (JFloatTextField)evt.getSource();
+	    // we really won't know if the value has changed or not,
+	    // hence the conservative approach.
+	    if (field == txtScaleX) {
+		scaleX = oldScaleX;
+		if(ampiTraceOn){
+                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
+                        displayCanvas.setScaleX((double)scaleX);
+                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
+                        ampiDisplayCanvas.setScaleX((double)scaleX);
+                    }
+                } else {
+                    displayCanvas.setScaleX((double)scaleX);
+                }
+	    } else if (field == txtScaleY) {
+		scaleY = oldScaleY;
+		if(ampiTraceOn){
+                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
+                        displayCanvas.setScaleY((double)scaleY);
+                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
+                        ampiDisplayCanvas.setScaleY((double)scaleY);
+                    }
+                } else {
+                    displayCanvas.setScaleY((double)scaleY);
+                }
+	    }
+	} else if(evt.getSource() instanceof JMenuItem) {
+            String arg = ((JMenuItem)evt.getSource()).getText();
+	    if (arg.equals("Close")) {
+		close();
+	    } else if(arg.equals("Select Processors")) {
+		showDialog();
+	    } else if(arg.equals("Pie Chart")){
+                pieChartWindow =
+		    new PieChartWindow(parentWindow, avgData[0],
+				       avgData[0].length, thresh, colors);
+
+            } else if(arg.equals("Change Colors")) {
+                showChangeColorDialog();
+            } else if (arg.equals("Usage Table")){
+                showUsageTable();
+            } else if (arg.equals("Usage Profile")) {
+                showAMPIUsageProfile();
+            }
+        }
+
+    }
+
+    public void stateChanged(ChangeEvent e){
+        if(e.getSource() == tabPane){
+            if(tabPane.getSelectedIndex() == displayPanelTabIndex){
+                txtScaleX.setText(displayCanvas.getScaleX()+"");
+                txtScaleY.setText(displayCanvas.getScaleY()+"");
+            } else if(tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex){
+                txtScaleX.setText(ampiDisplayCanvas.getScaleX()+"");
+                txtScaleY.setText(ampiDisplayCanvas.getScaleY()+"");
+            }
+        }
+    }
+
+
+    public void applyDialogColors() {
+        //Color[][] newColors = entryDialog.getColorArray();
+        //colorMap = newColors[i];
+        int eps = Analysis.getNumUserEntries();
+
+        System.out.println(colors[eps+2]);
+        displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
+        displayCanvas.repaint();
+    }
+
+    public void showChangeColorDialog() {
+        int noEPs = Analysis.getNumUserEntries();
+        if (entryDialog == null) {
+            String typeLabelStrings[] = {"Entry Points"};
+
+            boolean existsArray[][] =
+                new boolean[1][noEPs+NUM_SYS_EPS];
+            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+                existsArray[0][i] = true;
+            }
+
+            boolean stateArray[][] =
+                new boolean[1][noEPs+NUM_SYS_EPS];
+            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+                stateArray[0][i] = true;
+            }
+
+            String entryNames[] =
+                new String[noEPs+NUM_SYS_EPS];
+            for (int i=0; i<noEPs; i++) {
+                entryNames[i] =
+                    Analysis.getEntryName(i);
+            }
+            // cannot seem to avoid a hardcode
+            entryNames[noEPs] = "Pack Time";
+            entryNames[noEPs+1] = "Unpack Time";
+            entryNames[noEPs+2] = "Idle Time";
+
+            /**
+             * Reason why I need create a 2D new color array:
+             * 1. EntrySelectionDialog's constructor needs a 2D color array (I don't know the reason
+             * as I haven't read the source code for this class)
+             * 2. The 1D length is set to 1 because of in the original ProfileWindow version, this is
+             * set to 1. The reason is not stated in the original version. And I haven't figure out the
+             * exact reason for this. I really doubt it is for compatibility of the EntrySelectionDialog
+             * class or other old classes.
+             */
+            Color[][] newColors = new Color[1][];
+            newColors[0] = colors;
+
+            entryDialog = new EntrySelectionDialog(this, this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
+        }
+        entryDialog.showDialog();
+    }
+
+    private void showUsageTable(){
+        if(dataSource==null) return;
+
+        JFrame usageFrame = new JFrame();
+        usageFrame.setTitle("Entry Points Usage Percent Table");
+        usageFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        String[] tHeading ={"Proc#","Entry Name","Usage Percent (%)"};
+        int totalEntry=0;
+        //skip column "0" as it is for average usage
+        for(int i=1; i<dataSource.length; i++)
+            totalEntry += dataSource[i].length;
+        Object[][] tData = new Object[totalEntry][];
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(3);
+        //fill up tData
+        int entryCnt=0;
+        for(int i=1; i<dataSource.length; i++){
+            for(int j=0; j<dataSource[i].length; j++){
+                tData[entryCnt] = new Object[3];
+                tData[entryCnt][0] = procNames[i];
+                tData[entryCnt][1] = nameMap[i][j];
+                tData[entryCnt][2] = df.format(dataSource[i][j])+"%";
+                entryCnt++;
+            }
+        }
+
+        JTable t = new JTable(tData, tHeading);
+        //t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        JScrollPane sp = new JScrollPane(t);
+
+        /*
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+        p.add(sp);*/
+        usageFrame.getContentPane().add(sp);
+
+        usageFrame.setLocationRelativeTo(parentWindow);
+        usageFrame.setSize(500,250);
+        //usageFrame.pack();
+        usageFrame.setVisible(true);
+    }
+
+    private void showAMPIUsageProfile(){
+        /* Console version
+        int curPe = -1;
+        data.plist.reset();
+        Vector ampiProcessVec = new Vector();
+        while(data.plist.hasMoreElements()){
+            curPe = data.plist.nextElement();
+            ampiProcessVec.clear();
+            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec);
+            System.out.println("Processor: "+curPe+":: ampiProcess#"+ampiProcessVec.size());
+            for(int i=0; i<ampiProcessVec.size(); i++){
+                AmpiProcessProfile p = (AmpiProcessProfile)ampiProcessVec.get(i);
+                System.out.println("Processing total execution time: "+p.getAccExecTime());
+                Stack stk = p.getFinalCallFuncStack();
+                for(Enumeration e=stk.elements(); e.hasMoreElements();){
+                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
+                    System.out.println(d+"::"+Analysis.getFunctionName(d.FunctionID));
+                }
+            }
+        }*/
+
+        JFrame profileFrame = new JFrame();
+        profileFrame.setTitle("AMPI Function Profile Table");
+        profileFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+        String[] tHeading ={"Processor#","Function Name","Source File Name","Line#","%/Total","%/Process"};
+
+        /**
+         * Fisrt get whole data for displaying. It is inefficient considering the case when there are huge
+         * content to display. The better way is to displaying the data on the table at the same time analyzing
+         * the data. This could be later implemented!
+         */
+        int curPe = -1;
+        data.plist.reset();
+        Vector[] ampiProcessVec = new Vector[data.plist.size()];
+        int pCnt=0;
+        int totalLine=0;
+        while(data.plist.hasMoreElements()){
+            curPe = data.plist.nextElement();
+            ampiProcessVec[pCnt] = new Vector();
+            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
+            Vector v = ampiProcessVec[pCnt];
+            for(int i=0; i<v.size(); i++){
+                AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
+                totalLine += p.getFinalCallFuncStack().size();
+            }
+            pCnt++;
+        }
+
+        //formating data to display
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(3);
+        long totalExecTime = data.endtime - data.begintime;
+        Object[][] tData = new Object[totalLine][];
+        curPe = -1;
+        data.plist.reset();
+        pCnt=0;
+        int lineCnt=0;
+        while(data.plist.hasMoreElements()){
+            curPe = data.plist.nextElement();
+            Vector v = ampiProcessVec[pCnt++];
+            for(int i=0; i<v.size(); i++){
+                AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
+                long processTotalExecTime = p.getAccExecTime();
+                Stack stk = p.getFinalCallFuncStack();
+                for(Enumeration e=stk.elements(); e.hasMoreElements();){
+                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
+                    tData[lineCnt] = new Object[tHeading.length];
+                    tData[lineCnt][0] = ""+curPe;
+                    tData[lineCnt][1] = Analysis.getFunctionName(d.FunctionID);
+                    tData[lineCnt][2] = d.sourceFileName;
+                    tData[lineCnt][3] = ""+d.LineNo;
+                    tData[lineCnt][4] = df.format(d.getAccExecTime()/(double)totalExecTime*100)+"%";
+                    tData[lineCnt][5] = df.format(d.getAccExecTime()/(double)processTotalExecTime*100)+"%";
+                    lineCnt++;
+                }
+            }
+        }
+
+        JTable t = new JTable(tData, tHeading);
+        //t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        JScrollPane sp = new JScrollPane(t);
+
+        profileFrame.getContentPane().add(sp);
+
+        profileFrame.setLocationRelativeTo(this);
+        profileFrame.setSize(500,250);
+        profileFrame.setVisible(true);
+
+    }
+
+    private void setAmpiDisplayProfileData(){
+
+        String[] xNames = new String[data.plist.size()];
+
+        int curPe = -1;
+        data.plist.reset();
+        Vector ampiProcess = null;
+        int pCnt=0;
+
+        float[][] ampiDataSrc = new float[data.plist.size()][];
+        String[][] ampiFuncNameMap = new String[data.plist.size()][];
+
+        long totalExecTime = data.endtime - data.begintime;
+
+        //firstly, create the usage percent and every sections' name
+        while(data.plist.hasMoreElements()){
+            curPe = data.plist.nextElement();
+            ampiProcess = new Vector();
+            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcess);
+            int total = 0;
+            for(int i=0; i<ampiProcess.size(); i++){
+                AmpiProcessProfile p = (AmpiProcessProfile)ampiProcess.get(i);
+                total += p.getFinalCallFuncStack().size();
+            }
+
+            ampiDataSrc[pCnt] = new float[total];
+            ampiFuncNameMap[pCnt] = new String[total];
+            total = 0;
+            for(int i=0; i<ampiProcess.size(); i++){
+                AmpiProcessProfile p = (AmpiProcessProfile)ampiProcess.get(i);
+                Stack stk = p.getFinalCallFuncStack();
+                for(Enumeration e=stk.elements(); e.hasMoreElements();){
+                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
+                    ampiFuncNameMap[pCnt][total] = Analysis.getFunctionName(d.FunctionID)+"@"+
+                        d.sourceFileName+"("+d.LineNo+")";
+                    ampiDataSrc[pCnt][total] = d.getAccExecTime()/(float)totalExecTime*100;
+                    total++;
+                }
+            }
+            xNames[pCnt] = curPe+"";
+            pCnt++;
+        }
+
+        //secondly, create the color map (using the easiest color mapping creation)
+        int colorNum = 0;
+        for(int i=0; i<ampiDataSrc.length; i++)
+            colorNum += ampiDataSrc[i].length;
+
+        Color[] ampiFuncColors = Analysis.createColorMap(colorNum);
+        int[][] ampiFuncColorMap = new int [ampiDataSrc.length][];
+        colorNum = 0;
+        for(int i=0; i<ampiDataSrc.length; i++){
+            ampiFuncColorMap[i] = new int[ampiDataSrc[i].length];
+            for(int j=0; j<ampiDataSrc[i].length; j++)
+                ampiFuncColorMap[i][j] = colorNum++;
+        }
+
+
+        //set ampi's profile graph parameters!
+
+        String[] gTitles = new String[2];
+        gTitles[0] = "Profile of Usage for Functions in AMPI programs "+data.pstring;
+        gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
+        ampiDisplayCanvas.setGraphTiltes(gTitles);
+
+        ampiDisplayCanvas.setXAxis("","",xNames);
+        ampiDisplayCanvas.setYAxis("Usage Percent % (over processor)");
+        ampiDisplayCanvas.setDisplayDataSource(ampiDataSrc, ampiFuncColorMap, ampiFuncColors, ampiFuncNameMap);
+        ampiDisplayCanvas.repaint();
+    }
+
+    private void setDisplayProfileData(){
+        createDisplayDataSource();
+
+        //testing the data sources
+        /*
+        for(int x=0; x<dataSource.length; x++){
+            System.out.println("Processor "+x);
+            for(int y=0; y<dataSource[x].length; y++){
+                System.out.println("#"+y+nameMap[x][y]+": "+dataSource[x][y]+"%");
+            }
+            System.out.println();
+        }*/
+
+
+        String[] gTitles = new String[2];
+        gTitles[0] = "Profile of Usage for Processors "+data.pstring;
+        gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
+        displayCanvas.setGraphTiltes(gTitles);
+
+        String[] xNames = new String[data.plist.size()+1];
+        xNames[0] = "Avg";
+        data.plist.reset();
+        int cnt=1;
+        while(data.plist.hasMoreElements()){
+            xNames[cnt++] = ""+data.plist.nextElement();
+        }
+
+        procNames = xNames; //store this in order for the usage of usage table
+
+        displayCanvas.setXAxis("","",xNames);
+        displayCanvas.setYAxis("Usage Percent %");
+        displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
+        displayCanvas.repaint();
+    }
+
+    private void createDisplayDataSource(){
+        // extra column is that of the average data.
+        int procCnt = data.plist.size()+1;
+	data.numPs = procCnt;
+
+        dataSource = new float[procCnt][];
+        colorMap = new int[procCnt][];
+        nameMap = new String[procCnt][];
+
+        int numEPs = Analysis.getNumUserEntries();
+	// the first row is for entry method execution time the second is for
+	//time spent sending messages in that entry method
+	float[][] avg=new float[2][numEPs+NUM_SYS_EPS];
+        for (int i =0;i<numEPs+NUM_SYS_EPS;i++) {
+	    avg[0][i] = 0.0f;
+	    avg[1][i] = 0.0f;
+	}
+
+        avgData = avg; //set instance's avg data
+
+	double avgScale=1.0/data.plist.size();
+
+
+	int progressCount = 0;
+        int curPe = -1;
+	ProgressMonitor progressBar;
+
+	// Profile really should be cleanly rewritten.
+	// split the original loop:
+	// Phase 1a - compute average work
+	// Phase 1b - assign colors based on average work
+	// Phase 2 - create display data sources
+
+
+	// Phase 1a: compute average work
+        progressBar =
+	    new ProgressMonitor(this,
+				"Computing Usage Values",
+				"", 0, data.numPs);
+	data.plist.reset();
+	while (data.plist.hasMoreElements()) {
+	    curPe = data.plist.nextElement();
+	    if (!progressBar.isCanceled()) {
+                progressBar.setNote("[PE: " + curPe + " ] Computing Average.");
+		progressBar.setProgress(progressCount);
 	    } else {
 		break;
 	    }
-	    poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);
-	    displayCanvas.add(poArray[poNo][poindex]);
-	    poArray[poNo][poindex].setForeground(colors[entry]);
-	    poindex++;
+
+	    // the first row is for entry method execution time
+	    // the second is for time spent sending messages in
+	    // that entry method
+	    float cur[][] =
+		Analysis.GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
+	    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
+		avg[0][i]+=(float)(cur[0][i]*avgScale);
+		avg[1][i]+=(float)(cur[1][i]*avgScale);
+	    }
+	    progressCount++;
 	}
-	if (Analysis.getVersion() > 4.9) {
-	    //Drawing the entry point message sendTime
-	    for (i=0; i<usg[1].length; i++) {
-		float usage = usg[1][i];
-		if (usage<=thresh) continue; //Skip this one-- it's tiny
-		int   entry = i;
-		String name;
-		if (entry < numUserEntries) {
-		    name = "Message Send Time: " + names[entry][1] + 
-			"::" + names[entry][0];
-		    // **CW** stdout workaround for figuring out exact usage
-		    // numbers for cpaimd.
-		    if ((curPe >= 0) && MainWindow.PRINT_USAGE) {
-			System.out.println(curPe + " " + entry + " " + 
-					   format_.format(usage) + 
-					   " " + name);
-		    }
-		} else if (entry == numUserEntries+2) {
-		    name = "Message Send Time: "+"IDLE";
-		} else if (entry == numUserEntries) {
-		    name = "Message Send Time: "+"PACKING";
-		} else if(entry == numUserEntries+1) {
-		    name = "Message Send Time: "+"UNPACKING";
-		} else {
-		    break;
-		}
-		poArray[poNo][poindex] = new ProfileObject(usage, name, curPe);
-		displayCanvas.add(poArray[poNo][poindex]);
-		poArray[poNo][poindex].setForeground(colors[entry]);
-		poindex++;
+
+	// Phase1b: Assigning colors based on the average usage}
+        Vector sigElements = new Vector();
+	// we only wish to compute for EPs
+	for (int i=0; i<numEPs; i++) {
+	    // anything greater than 5% is "significant"
+	    if (avg[0][i]+avg[1][i] > 1.0) {
+		sigElements.add(new Integer(i));
 	    }
 	}
+	// copy to an array for Color assignment (maybe that should be
+	// a new interface for color assignment).
+	int sigIndices[] = new int[sigElements.size()];
+	for (int i=0; i<sigIndices.length; i++) {
+	    sigIndices[i] = ((Integer)sigElements.elementAt(i)).intValue();
+	}
+	if (!colorsSet) {
+            //also create colors for "PACKING, UNPACKING, IDLE"
+	    Color[] entryColors = Analysis.createColorMap(numEPs, sigIndices);
+            colors = new Color[numEPs+NUM_SYS_EPS];
+            for(int i=0; i<numEPs; i++)
+                colors[i] = entryColors[i];
+            colors[numEPs] = Color.black; //PACKING
+            colors[numEPs+1] = Color.orange; //UNPACKING
+            colors[numEPs+2] = Color.white; //IDLE
+            colorsSet = true;
+	}
+
+	// Phase 2: create display data source
+        //first create average one
+        createSingleProcSource(avg,-1);
+        dataSource[0] = sDataSrc;
+        colorMap[0] = sColorMap;
+        nameMap[0] = sNameMap;
+
+        progressCount = 0;
+	data.plist.reset();
+	while (data.plist.hasMoreElements()) {
+	    curPe = data.plist.nextElement();
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote("[PE: " + curPe +
+				    " ] Reading Entry Point Usage.");
+		progressBar.setProgress(progressCount);
+	    } else {
+		break;
+	    }
+	    float rawData[][]=Analysis.GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
+
+            createSingleProcSource(rawData, curPe);
+
+            //The 0 column is left for the average one
+            progressCount++;
+            dataSource[progressCount] = sDataSrc;
+            colorMap[progressCount] = sColorMap;
+            nameMap[progressCount] = sNameMap;
+
+	}
+	progressBar.close();
+    }
+
+    public void createSingleProcSource(float[][] rawData, int procNum){
+        //fisrt compute number of significant sections
+        int numSigSections = 0;
+        for(int i=0; i<rawData[0].length; i++){
+            if(rawData[0][i]>thresh)
+                numSigSections++;
+            if(rawData[1][i]>thresh)
+                numSigSections++;
+        }
+        float[] dSrc = new float[numSigSections];
+        int[] cMap = new int[numSigSections];
+        String[] nMap = new String[numSigSections];
+
+        sDataSrc = dSrc;
+        sColorMap = cMap;
+        sNameMap = nMap;
+
+        DecimalFormat format_ = new DecimalFormat();
+	format_.setMaximumFractionDigits(5);
+	format_.setMinimumFractionDigits(5);
+
+        int sigCnt=-1;
+        int epIndex;
+        float usage;
+        int numUserEntries = Analysis.getNumUserEntries();
+        String[][] epNames = Analysis.getEntryNames();
+        for(epIndex=0; epIndex<rawData[0].length; epIndex++){
+            usage = rawData[0][epIndex];
+            if(usage<=thresh) continue;
+            sigCnt++;
+            dSrc[sigCnt] = usage;
+            cMap[sigCnt] = epIndex;
+            if(epIndex==numUserEntries){
+                nMap[sigCnt] = "PACKING";
+            } else if(epIndex==numUserEntries+1) {
+                nMap[sigCnt] = "UNPACKING";
+            } else if(epIndex==numUserEntries+2) {
+                nMap[sigCnt] = "IDLE";
+            } else {
+                nMap[sigCnt] = epNames[epIndex][1]+"::"+ epNames[epIndex][0];
+            }
+
+            //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
+            //This is especially important for CPAIMD!!! Here we ignore
+            if ((procNum >= 0) && MainWindow.PRINT_USAGE) {
+		 System.out.println(procNum + " " + epIndex + " " +
+				       format_.format(usage) +
+				       " " + nMap[sigCnt]);
+            }
+        }
+
+	if (Analysis.getVersion() > 4.9) {
+            //Computing the entry point message sendTime
+            String prefix = "Message Send Time: ";
+            for(epIndex=0; epIndex<rawData[1].length; epIndex++){
+                usage = rawData[1][epIndex];
+                if(usage<=thresh) continue;
+                sigCnt++;
+                dSrc[sigCnt] = usage;
+                cMap[sigCnt] = epIndex;
+                if(epIndex==numUserEntries){
+                    nMap[sigCnt] = prefix+"PACKING";
+                } else if(epIndex==numUserEntries+1) {
+                    nMap[sigCnt] = prefix+"UNPACKING";
+                } else if(epIndex==numUserEntries+2) {
+                    nMap[sigCnt] = prefix+"IDLE";
+                } else {
+                    nMap[sigCnt] = prefix+epNames[epIndex][1]+"::"+ epNames[epIndex][0];
+                }
+
+                //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
+                //This is especially important for CPAIMD!!! Here we ignore
+                if ((procNum >= 0) && MainWindow.PRINT_USAGE) {
+    		 System.out.println(procNum + " " + epIndex + " " +
+    				       format_.format(usage) +
+    				       " " + nMap[sigCnt]);
+                }
+            }
+
+        }
+    }
+
+    public void MakePOArray(long bt, long et)
+    {
+    }
+
+    private void setScales()
+    {
+    }
+
+    private void setSizes()
+    {
+    }
+
+    public int getHSBValue()
+    {
+        return 0;
+    }
+
+    public int getVSBValue()
+    {
+        return 0;
     }
 }

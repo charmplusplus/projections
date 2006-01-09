@@ -1,14 +1,15 @@
 package projections.gui;
 
 import java.awt.*;
-import javax.swing.*;
-
 import java.io.*;
+import java.sql.Time;
 import java.util.*;
 
+import javax.swing.*;
+
 import projections.analysis.*;
-import projections.misc.*;
 import projections.guiUtils.*;
+import projections.misc.*;
 
 /**
  *  Analysis
@@ -277,6 +278,43 @@ public class Analysis {
 	    return null;
 	}
     }
+
+    /**
+     * Creating AMPI usage profile
+     */
+    public static void createAMPIUsage(int procId, long beginTime, long endTime, Vector procThdVec){
+        try {
+	    if (hasLogFiles()) {
+		if (logLoader == null) {
+		    logLoader = new LogLoader();
+		}
+		logLoader.createAMPIUsageProfile(procId,beginTime,endTime,procThdVec);
+	    } else {
+		System.err.println("createAMPIUsage: No log files available!");
+	    }
+	} catch (LogLoadException e) {
+	    System.err.println("LOG LOAD EXCEPTION");	    
+	}
+    }
+
+    /**
+     * Create AMPI Functions' Time profile
+     */
+    public static void createAMPITimeProfile(int procId, long beginTime, long endTime, Vector procThdVec){
+        try {
+	    if (hasLogFiles()) {
+		if (logLoader == null) {
+		    logLoader = new LogLoader();
+		}
+		logLoader.createAMPIFuncTimeProfile(procId,beginTime,endTime,procThdVec);
+	    } else {
+		System.err.println("createAMPIUsage: No log files available!");
+	    }
+	} catch (LogLoadException e) {
+	    System.err.println("LOG LOAD EXCEPTION");	    
+	}
+    }
+
 
     public static int[][] getAnimationData(long intervalSize, 
 					   long startTime, long endTime, 

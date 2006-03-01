@@ -35,6 +35,9 @@ public class GraphWindow extends ProjectionsWindow
     private int w, h;
     
     private boolean firstTime = true;
+
+    public static boolean dumpNow = false;
+    public static int dumpCount = 0;
     
     public GraphWindow(MainWindow parentWindow, Integer myWindowID)
     {
@@ -86,6 +89,24 @@ public class GraphWindow extends ProjectionsWindow
 		PrintGraph();   
 	    else if(arg.equals("Set Interval Size"))
 		showDialog();
+	    else if(arg.equals("Dump Raw Data")) {
+		try {
+		    File dumpFile = new File("GraphDump."+dumpCount+".out");
+		    while (dumpFile.exists()) {
+			dumpCount++;
+			dumpFile = 
+			    new File("GraphDump."+dumpCount+".out");
+		    }
+		    MainWindow.dataDump = 
+			new PrintWriter(new FileWriter(dumpFile));
+		    dumpNow = true;
+		    refreshDisplay();
+		} catch (IOException e) {
+		    System.err.println("Failure to handle dump data " +
+				       "GraphDump."+dumpCount+".out");
+		    System.exit(-1);
+		}
+	    }
 	}
     }   
 
@@ -124,6 +145,7 @@ public class GraphWindow extends ProjectionsWindow
 	mbar.add(Util.makeMenu("Tools", new Object[]
 	    {
 		"Set Interval Size",
+		"Dump Raw Data",
 		"Timeline"
 	    },
 			       this));

@@ -8,8 +8,6 @@ public class GraphDisplayCanvas extends Canvas
    private OrderedGraphDataList graphDataList;
    private Image offscreen;
 
-    private boolean dataDumped = false;
-   
    public GraphDisplayCanvas()
    {
 	  setBackground(Analysis.background);
@@ -23,7 +21,9 @@ public class GraphDisplayCanvas extends Canvas
 	  if (data.xmode == GraphData.PROCESSOR) {
 	      y = item.curPData[x];
 	      if (MainWindow.dataDump != null) {
-		  MainWindow.dataDump.println(y);
+		  if (GraphWindow.dumpNow) {
+		      MainWindow.dataDump.println(y);
+		  }
 	      }
 	      /* we want non-contigious data support
 	      // gzheng
@@ -36,7 +36,9 @@ public class GraphDisplayCanvas extends Canvas
 	  } else {
 	      y = item.curIData[x];   
 	      if (MainWindow.dataDump != null) {
-		  MainWindow.dataDump.println(y);
+		  if (GraphWindow.dumpNow) {
+		      MainWindow.dataDump.println(y);
+		  }
 	      }
 	  }
 	  if (item.ymode == GraphData.BOTH) {
@@ -61,10 +63,12 @@ public class GraphDisplayCanvas extends Canvas
        g.translate(-data.displayPanel.getHSBValue(), 0);
        
        if (MainWindow.dataDump != null) {
-	   if (data.xmode == GraphData.PROCESSOR) {
-	       MainWindow.dataDump.println("--- Graph PE ---");
-	   } else {
-	       MainWindow.dataDump.println("--- Graph INT ---");
+	   if (GraphWindow.dumpNow) {
+	       if (data.xmode == GraphData.PROCESSOR) {
+		   MainWindow.dataDump.println("--- Graph PE ---");
+	       } else {
+		   MainWindow.dataDump.println("--- Graph INT ---");
+	       }
 	   }
        }
        
@@ -101,7 +105,10 @@ public class GraphDisplayCanvas extends Canvas
 	   }
        }
        if (MainWindow.dataDump != null) {
-	   MainWindow.dataDump.flush();
+	   if (GraphWindow.dumpNow) {
+	       MainWindow.dataDump.flush();
+	       GraphWindow.dumpNow = false;
+	   }
        }
    }   
     

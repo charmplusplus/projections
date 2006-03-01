@@ -501,12 +501,18 @@ public class MainWindow extends JFrame
 			    // transform the re-binned data to utilization.
 			    IntervalUtils.timeToUtil(newdata,	 
 						     (double)bestSize);	 
-			    if (dataDump != null) {
+			    try {
+				dataDump = 
+				    new PrintWriter(new FileWriter("SummaryDump.out"));
 				dataDump.println("--- Summary Graph ---");
 				for (int i=0; i<newdata.length; i++) {
 				    dataDump.println(newdata[i]);
 				}
 				dataDump.flush();
+			    } catch (IOException e) {
+				System.err.println("Failed to handle dump " +
+						   "file SummaryDump.out");
+				System.exit(-1);
 			    }
 			    sumDataSource = new SummaryDataSource(newdata);
 			    sumXAxis =	    
@@ -647,16 +653,6 @@ public class MainWindow extends JFrame
 		    CUR_MODE = MODE_LOW_MEM;
 		} else {
 		    help();
-		}
-	    } else if (args[i].equals("-dump_raw_data")) {
-		i++;
-		if (i==args.length) help();
-		try {
-		    dataDump = new PrintWriter(new FileWriter(args[i]));
-		} catch (IOException e) {
-		    System.err.println("Failed to open data dump file " +
-				       args[i]);
-		    System.exit(-1);
 		}
 	    } else /*unrecognized argument*/ {
 		loadSts=args[i];

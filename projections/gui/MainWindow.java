@@ -51,6 +51,10 @@ public class MainWindow extends JFrame
     // entry methods prevent proper analysis (like in cpaimd).
     public static boolean PRINT_USAGE = false;
 
+    // **CW** a semi-permanent hack to provide a file onto which raw data
+    // dumps may be written for further processing by other graphing tools.
+    public static PrintWriter dataDump = null;
+
     // for SwingWorker to work
     private MainWindow thisWindow;
 
@@ -497,6 +501,13 @@ public class MainWindow extends JFrame
 			    // transform the re-binned data to utilization.
 			    IntervalUtils.timeToUtil(newdata,	 
 						     (double)bestSize);	 
+			    if (dataDump != null) {
+				dataDump.println("--- Summary Graph ---");
+				for (int i=0; i<newdata.length; i++) {
+				    dataDump.println(newdata[i]);
+				}
+				dataDump.flush();
+			    }
 			    sumDataSource = new SummaryDataSource(newdata);
 			    sumXAxis =	    
 				new SummaryXAxis(newdata.length,	 
@@ -636,6 +647,16 @@ public class MainWindow extends JFrame
 		    CUR_MODE = MODE_LOW_MEM;
 		} else {
 		    help();
+		}
+	    } else if (args[i].equals("-dump_raw_data")) {
+		i++;
+		if (i==args.length) help();
+		try {
+		    dataDump = new PrintWriter(new FileWriter(args[i]));
+		} catch (IOException e) {
+		    System.err.println("Failed to open data dump file " +
+				       args[i]);
+		    System.exit(-1);
 		}
 	    } else /*unrecognized argument*/ {
 		loadSts=args[i];

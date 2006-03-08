@@ -52,7 +52,9 @@ public class ProfileGraph extends JPanel
     private String xTitle;
     private String xUnit;
     private String[] xNames;
-    private double pixelIncX;
+    private double pixelIncX; //for label
+    private double tickIncX; //for every tick
+    private int valPerTickX, valPerLabelX;
 
     //About Y-Axis settings
     private int yHeight;
@@ -356,6 +358,56 @@ public class ProfileGraph extends JPanel
         
     }
 
+    /* The following methods are very similar to the corresponding methods
+     * in Graph.java
+     */
+    private void setBestIncrementX(double pixelsPerValue, int maxValue){
+        int index = 0;
+        int labelValue = getNextLabelValue(index);
+        int tickValue = getNextTickValue(index++);
+
+        int labelWidth = 0;
+        while(true){
+            labelWidth = fm.stringWidth(xNames[maxValue-1]);
+
+            //is the number of pixels to display a label too small?
+            if(labelWidth > (pixelsPerValue*labelValue*0.8)){
+                labelValue = getNextLabelValue(index);
+                tickValue = getNextTickValue(index++);
+                continue;
+            } else {
+                //will my component ticks be too small?
+                 if ((pixelsPerValue*tickValue) < 2.0) {
+                    labelValue = getNextLabelValue(index);
+                    tickValue = getNextTickValue(index++);
+                    continue;
+                } else {
+                    // everything is A OK. Set the global variables.                  
+                    tickIncX = tickValue*pixelsPerValue;
+                    valPerTickX = tickValue;
+                    valPerLabelX = labelValue;
+                  
+                    return;
+                }
+            }
+        }
+    }
+
+    private int getNextLabelValue(int prevIndex){
+        if(prevIndex == 0)
+            return 1;
+        if(prevIndex%2 == 0)
+            return (int)java.lang.Math.pow(10, prevIndex/2);
+        else
+            return (int)(java.lang.Math.pow(10, (prevIndex+1)/2))/2;
+    }
+
+    private int getNextTickValue(int prevIndex){
+        if(prevIndex == 0)
+            return 1;
+        return (int)java.lang.Math.pow(10, (prevIndex-1)/2);
+    }
+
     private void drawXAxis(Graphics2D g) {
 
 	// width available for drawing the graph
@@ -365,17 +417,26 @@ public class ProfileGraph extends JPanel
         int barCnt = dataSource.length;
 	pixelIncX = ((double)canvasWidth)/barCnt;
 
-	//setBestIncrements(X_AXIS, pixelincrementX, (int)maxvalueX);
+	setBestIncrementX(pixelIncX, barCnt);
 
 	// draw xAxis
 	g.drawLine(originX, originY, canvasWidth+originX, originY);
 
         // drawing xAxis divisions
         int curx = originX + (int)pixelIncX/2;
-	for(int i=0; i<barCnt; i++){
-            String s = xNames[i];
-            g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + fm.getHeight());
-            curx += (int)pixelIncX;
+	for(int i=0; i<barCnt; i+=valPerTickX){
+            curx = originX + (int)(i*pixelIncX);
+            if(valPerTickX == 1){
+                curx += (int)(tickIncX/2);
+            }
+
+            if(i%valPerLabelX==0){
+                g.drawLine(curx, originY+5, curx, originY-5);
+                String s = xNames[i];
+                g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + fm.getHeight());
+            } else {
+                g.drawLine(curx, originY+2, curx, originY-2);
+            }
         }
     }
 
@@ -408,13 +469,22 @@ public class ProfileGraph extends JPanel
         double barStartX = originX+pixelIncX/8;
         barWidth = pixelIncX*3/4;
         for(int i=0;i<dataSource.length;i++) {            
-            double barStartY = originY;         
-            for(int j=0; j<dataSource[i].length; j++) {
+            double barStartY = originY;            
+            for(int j=0; j<dataSource[i].length; j++) {                
                 g.setColor(colorsPool[colorsMap[i][j]]);
                 double sH = dataSource[i][j]*pixelIncY;
-                int intSH = ((int)sH)==0?1:(int)sH;             
-                g.fillRect((int)barStartX, (int)(barStartY-intSH), (int)barWidth, intSH);
-                barStartY -= sH;
+                int intSH = ((int)sH)==0?1:(int)sH;
+                //sometimes the presenting data will be overflow due to the error in input
+                //so cut the overflow part, keep a bit higher than 100%
+                if(barStartY - intSH>gTitleH-5){                
+                    g.fillRect((int)barStartX, (int)(barStartY-intSH), (int)barWidth, intSH);
+                }
+                else{                    
+                    g.fillRect((int)barStartX, gTitleH-5, (int)barWidth, (int)barStartY-gTitleH+5);
+                    break;
+                }
+                       
+                barStartY -= intSH;
             }
             barStartX += pixelIncX;            
         }

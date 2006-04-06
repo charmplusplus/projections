@@ -232,8 +232,13 @@ public class StlPanel extends ScalePanel.Child
 		if (data[p][i] > 255 || data[p][i] < 0) {
 		    // apply the "wrong" green color.
 		    colors[p][i]=colorMap.apply(255);
+		    System.err.println("[" + p + "] Warning: Invalid " +
+				       "value " + data[p][i] + " being " +
+				       "applied to the color map " +
+				       "at time interval " + i + "!");
+		} else {
+		    colors[p][i]=colorMap.apply(data[p][i]);
 		}
-		colors[p][i]=colorMap.apply(data[p][i]);
 	    }
 	}
     }

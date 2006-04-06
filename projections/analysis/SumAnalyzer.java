@@ -199,13 +199,14 @@ public class SumAnalyzer extends ProjDefs
 	    //Read the SECOND line (processor usage)
 	    int nUsageRead=0;
 	    boolean error = false;
-	    
 	    // we perform on-the-fly expansion of larger interval sized
 	    // data (ie. myIntervalSize > IntervalSize).
+	    int val = 0;
+	    int extraCount = 0;
 	    while ((tokenType=tokenizer.nextToken()) != 
-		   StreamTokenizer.TT_EOL && nUsageRead < (myCount*factor)) {
+		   StreamTokenizer.TT_EOL) {
 		if (tokenType == StreamTokenizer.TT_NUMBER) {
-                    int val =  (int)tokenizer.nval;
+                    val =  (int)tokenizer.nval;
 		    for (int f=0; f<factor; f++) {
 			ProcessorUtilization[p][nUsageRead++] = val;
 		    }
@@ -215,7 +216,16 @@ public class SumAnalyzer extends ProjDefs
 			    System.out.println("Unrecorgnized syntax at " +
 					       "end of line 2");
 			}
-                        for (int i=1; i<(int)tokenizer.nval; i++) {
+			extraCount = (int)tokenizer.nval;
+			if (extraCount > myCount) {
+			    System.err.println("[" + p + "] Token read = [" +
+					       val + "+" + extraCount +
+					       "] is impossible as the " +
+					       "count is larger than the " +
+					       "total count of " + myCount);
+			    System.exit(-1);
+			}
+                        for (int i=1; i<extraCount; i++) {
 			    for (int f=0; f<factor; f++) {
 				ProcessorUtilization[p][nUsageRead++] = val;
 			    }
@@ -223,12 +233,23 @@ public class SumAnalyzer extends ProjDefs
                     } else {
 			tokenizer.pushBack();
 		    }
-		} else {
-	            System.out.println("extra garbage at end of line 2");
+		}
+		if (nUsageRead > (myCount*factor)) {
+		    System.err.println("[" + p + "] Corrupted data: " +
+				       "Number of datapoints read exceeds " +
+				       "file recorded value of " + myCount +
+				       "adjusted by factor " + factor);
+		    System.err.print("The violating token is [" + val);
+		    if (extraCount > 1) {
+			System.err.println("+" + extraCount + "]");
+		    } else {
+			System.err.println("]");
+		    }
+		    System.exit(-1);
 		}
 	    }
 	    if ((myCount*factor) != nUsageRead) {
-		System.out.println("numIntervals not agree" + 
+		System.err.println("numIntervals not agree" + 
 				   (myCount*factor) + "v.s. "+nUsageRead+"!");
 	    }
 	    // Read in the THIRD line (time spent by entries)

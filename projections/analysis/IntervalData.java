@@ -66,6 +66,7 @@ public class IntervalData
 		    summaryDetails[pe] = 
 			new SumDetailReader(Analysis.getSumDetailName(pe),
 					    Analysis.getVersion());
+		    summaryDetails[pe].read();
 		    for (int type=0; type<SumDetailReader.NUM_TAGS; type++) {
 			rawData[type][pe] = summaryDetails[pe].getData(type);
 		    }

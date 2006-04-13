@@ -75,6 +75,19 @@ public class RangeDialog extends JDialog
     // flags
     private boolean layoutComplete = false;
     private int dialogState;
+    private boolean disableRange = false;
+
+    /**
+     *  Wrapper Constructor. For disabling parts of the dialog.
+     *  (eg. Usage Profile with only summary logs has to use full
+     *   time range).
+     */
+    public RangeDialog(ProjectionsWindow parentWindow,
+		       String titleString,
+		       boolean disableRange) {
+	this(parentWindow, titleString);
+	this.disableRange = disableRange;
+    }
 
     /**
      *  Constructor. Creation of the dialog object should be separate from
@@ -329,13 +342,20 @@ public class RangeDialog extends JDialog
 	endTimeField = new JTimeTextField(Analysis.getTotalTime(), 12);
 	totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
 	totalTimeLabel = new JLabel(U.t(Analysis.getTotalTime()), JLabel.LEFT);
-	// set listeners
-	startTimeField.addActionListener(this);
-	endTimeField.addActionListener(this);
-	startTimeField.addKeyListener(this);
-	endTimeField.addKeyListener(this);
-	startTimeField.addFocusListener(this);
-	endTimeField.addFocusListener(this);
+
+	if (disableRange) {
+	    startTimeField.setEnabled(false);	    
+	    endTimeField.setEnabled(false);
+	} else {
+	    // set listeners
+	    startTimeField.addActionListener(this);
+	    endTimeField.addActionListener(this);
+	    startTimeField.addKeyListener(this);
+	    endTimeField.addKeyListener(this);
+	    startTimeField.addFocusListener(this);
+	    endTimeField.addFocusListener(this);
+	}
+
 	// layout
 	Util.gblAdd(timePanel, validTimeRangeLabel,
 		    gbc, 0,0, 4,1, 1,1);
@@ -351,6 +371,11 @@ public class RangeDialog extends JDialog
 		    gbc, 0,2, 1,1, 1,1);
 	Util.gblAdd(timePanel, totalTimeLabel,
 		    gbc, 1,2, 3,1, 1,1);
+	if (disableRange) {
+	    Util.gblAdd(timePanel, new JLabel("Summary data compatible only " +
+					      "with full time range."),
+			gbc, 0,3, 4,1, 1,1);
+	}
 
 	// general layout
 	inputPanel.setLayout(gbl);
@@ -415,10 +440,18 @@ public class RangeDialog extends JDialog
 	}
 	bAddToHistory = new JButton("Add to History List");
 	bSaveHistory = new JButton("Save History to Disk");
-	// set listeners
-	historyList.addActionListener(this);
-	bAddToHistory.addActionListener(this);
-	bSaveHistory.addActionListener(this);
+
+	if (disableRange) {
+	    historyList.setEnabled(false);
+	    bAddToHistory.setEnabled(false);
+	    bSaveHistory.setEnabled(false);
+	} else {
+	    // set listeners
+	    historyList.addActionListener(this);
+	    bAddToHistory.addActionListener(this);
+	    bSaveHistory.addActionListener(this);
+	}
+
 	// layout
 	Util.gblAdd(historyPanel, historyList,
 		    gbc, 0,0, 1,1, 1,1);

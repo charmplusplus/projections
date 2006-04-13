@@ -77,8 +77,6 @@ public class ProfileWindow extends ProjectionsWindow
 	CreateLayout();
 	pack();
 	showDialog();
-        setLocationRelativeTo(parentWindow);
-        setVisible(true);
     }
 
     void windowInit() {
@@ -221,7 +219,11 @@ public class ProfileWindow extends ProjectionsWindow
 
     public void showDialog(){
 	if (dialog == null) {
-	    dialog = new RangeDialog(this, "Usage Profile");
+	    if ((!Analysis.hasLogData()) && (!Analysis.hasSumDetailData())) {
+		dialog = new RangeDialog(this, "Usage Profile", true);
+	    } else {
+		dialog = new RangeDialog(this, "Usage Profile");
+	    }
 	} else {
 	    setDialogData();
 	}
@@ -232,8 +234,10 @@ public class ProfileWindow extends ProjectionsWindow
 	    final Thread t = new Thread() {
                     public void run() {
                         setDisplayProfileData();
-                        if(ampiTraceOn)
+                        if (ampiTraceOn) {
                             setAmpiDisplayProfileData();
+			}
+			setLocationRelativeTo(parentWindow);
                         setVisible(true);
                     }
 		};

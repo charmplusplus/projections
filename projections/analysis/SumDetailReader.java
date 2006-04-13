@@ -90,12 +90,17 @@ public class SumDetailReader extends ProjectionsReader
 	// Read the first line (Header information)
 	tokenizer.checkNextString("ver");
 	versionNum = tokenizer.nextNumber("Version Number");
+	/* **CW** It is still unclear how we should handle versioning
+	 *	  in projections. This feature is tentatively dropped.
+	 */
+	/*
 	if (versionNum != Double.parseDouble(expectedVersion)) {
 	    throw new ProjectionsFormatException(expectedVersion,
 						 "File version [" + 
-						 versionNum + "conflicts " +
+						 versionNum + "] conflicts " +
 						 "with expected version.");
 	}
+	*/
 	tokenizer.checkNextString("cpu");
 	myPE = (int)tokenizer.nextNumber("processor number");
 	numPE = (int)tokenizer.nextNumber("number of processors");

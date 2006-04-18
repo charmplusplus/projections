@@ -68,6 +68,13 @@ public class LogLoader extends ProjDefs
 				   " function without proper end time!");
 		System.exit(-1);
 	    }
+	    // Throws EOFException at end of file
+	    // 4/16/2006 - Unless we have to fake the end time.
+	    // A Cleaner fake mechanism is probably required.
+	    long lastRecordedTime = 0;
+	    int dummyInt = 0;
+	    long dummyLong = 0;
+	    int type = 0;
 	    try {
 		// test the file to see if it exists ...
 		testFile = new File(Analysis.getLogName(i));
@@ -84,23 +91,71 @@ public class LogLoader extends ProjDefs
 		    back = InFile.length()-80*3; //Seek to the end of the file
 		    if (back < 0) back = 0;
 		    InFile.seek(back);
-		    while(InFile.readByte() != '\n');
-		    //Throws EOFException at end of file
+		    while (InFile.readByte() != '\n');
 		    while (true) {
 			Line = InFile.readLine();
-			st   = new StringTokenizer(Line);
-			if (Integer.parseInt(st.nextToken()) == 
+			// incomplete files can end on a proper previous
+			// line but not on END_COMPUTATION. This statement
+			// takes care of that.
+			if (Line == null) {
+			    throw new EOFException();
+			}
+			st = new StringTokenizer(Line);
+			if ((type=Integer.parseInt(st.nextToken())) == 
 			    END_COMPUTATION) {
 			    Time = Long.parseLong(st.nextToken());
 			    if (Time > EndTime)
 				EndTime = Time;
-			    break;
-			}   
+			    break; // while loop
+			} else {
+			    switch (type) {
+			    case CREATION:
+			    case CREATION_MULTICAST:
+			    case BEGIN_PROCESSING:
+			    case END_PROCESSING:
+				dummyInt = 
+				    Integer.parseInt(st.nextToken());
+				dummyInt = 
+				    Integer.parseInt(st.nextToken());
+				break;
+			    case USER_EVENT:
+			    case USER_EVENT_PAIR:
+			    case MESSAGE_RECV: 
+			    case ENQUEUE: 
+			    case DEQUEUE:
+				dummyInt = 
+				    Integer.parseInt(st.nextToken());
+				break;
+			    case BEGIN_IDLE:
+			    case END_IDLE:
+			    case BEGIN_PACK: 
+			    case END_PACK:
+			    case BEGIN_UNPACK: 
+			    case END_UNPACK:
+			    case BEGIN_TRACE: 
+			    case END_TRACE:
+			    case BEGIN_COMPUTATION:
+			    case BEGIN_FUNC:
+			    case END_FUNC:
+			    case BEGIN_INTERRUPT: 
+			    case END_INTERRUPT:
+				break;
+			    }
+			    lastRecordedTime = Long.parseLong(st.nextToken());
+			}
 		    }
 		    InFile.close ();
 		}
+	    } catch (EOFException e) {
+		System.err.println("[" + i + "] " +
+				   "WARNING: Partial Log: Faking End " +
+				   "Time determination at last recorded " +
+				   "time of " + lastRecordedTime);
+		if (lastRecordedTime > EndTime) {
+		    EndTime = lastRecordedTime;
+		}
 	    } catch (IOException E) {
-		System.out.println("Couldn't read log file " + 
+		System.err.println("Couldn't read log file " + 
 				   Analysis.getLogName(i));
 	    }
 	}

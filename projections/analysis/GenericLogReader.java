@@ -26,6 +26,19 @@ public class GenericLogReader extends ProjectionsReader
     private AsciiIntegerReader reader;
     private double version;
 
+    // This flag is to handle truncated partial projections logs.
+    // The flag is raised whenever Projections is forced to fake an
+    // END_COMPUTATION event as a result of an unexpected EOF
+    // exception. When this flag is detected again the next time
+    // it is read, Projections will raise the exception as usual for
+    // the calling routines to operate on transparently.
+    //
+    // Technically, lastRecordedTime is not required, but because this
+    // class cannot control what client modules do to the "data" object
+    // passed in, it is much safer to record the lastRecordedTime locally.
+    private boolean fakedEndComputation = false;
+    private long lastRecordedTime = 0;
+
     // indexed by EP with a Vector of run length encoding blocks.
     private Vector intervalData[];
 
@@ -78,165 +91,187 @@ public class GenericLogReader extends ProjectionsReader
     public void nextEvent(LogEntryData data) 
 	throws IOException, EOFException
     {
-	data.type = reader.nextInt();
-	switch (data.type) {
-	case BEGIN_IDLE: case END_IDLE: 
-	case BEGIN_PACK: case END_PACK:
-	case BEGIN_UNPACK: case END_UNPACK:
-	    data.time = reader.nextLong();
-	    data.pe = reader.nextInt();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case CREATION:
-	    data.mtype = reader.nextInt();
-	    data.entry = reader.nextInt();
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    if (version >= 2.0) {
-		data.msglen = reader.nextInt();
-	    } else {
-		data.msglen = -1;
-	    }
-	    if (version >= 5.0) {
-		data.sendTime = reader.nextLong();
-	    }
-	    break;
-	case CREATION_MULTICAST:
-	    data.mtype = reader.nextInt();
-	    data.entry = reader.nextInt();
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    if (version >= 2.0) {
-		data.msglen = reader.nextInt();
-	    } else {
-		data.msglen = -1;
-	    }
-	    if (version >= 5.0) {
-		data.sendTime = reader.nextLong();
-	    }
-	    data.destPEs = new int[reader.nextInt()];
-	    for (int i=0;i<data.destPEs.length;i++) {
-		data.destPEs[i] = reader.nextInt();
-	    }
-	    break;
-	case BEGIN_PROCESSING: 
-	    data.mtype = reader.nextInt();
-	    data.entry = reader.nextInt();
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    if (version >= 2.0) {
-		data.msglen = reader.nextInt();
-	    } else {
-		data.msglen = -1;
-	    }
-	    if (version >= 4.0) {
-		data.recvTime  = reader.nextLong();
-		data.id[0] = reader.nextInt();
-		data.id[1] = reader.nextInt();
-		data.id[2] = reader.nextInt();
-	    }
-	    if (version >= 6.5) {
-		data.cpuStartTime = reader.nextLong();
-	    }
-	    if (version >= 6.6) {
-		data.numPerfCounts = reader.nextInt();
-		data.perfCounts = new long[data.numPerfCounts];
-		for (int i=0; i<data.numPerfCounts; i++) {
-		    data.perfCounts[i] = reader.nextLong();
+	try {
+	    data.type = reader.nextInt();
+	    switch (data.type) {
+	    case BEGIN_IDLE: case END_IDLE: 
+	    case BEGIN_PACK: case END_PACK:
+	    case BEGIN_UNPACK: case END_UNPACK:
+		data.time = reader.nextLong();
+		data.pe = reader.nextInt();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case CREATION:
+		data.mtype = reader.nextInt();
+		data.entry = reader.nextInt();
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		if (version >= 2.0) {
+		    data.msglen = reader.nextInt();
+		} else {
+		    data.msglen = -1;
 		}
-	    }
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case END_PROCESSING:
-	    data.mtype = reader.nextInt();
-	    data.entry = reader.nextInt();
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    if (version >= 2.0) {
-		data.msglen = reader.nextInt();
-	    } else {
-		data.msglen = -1;
-	    }
-	    if (version >= 6.5) {
-		data.cpuEndTime = reader.nextLong();
-	    }
-	    if (version >= 6.6) {
-		data.numPerfCounts = reader.nextInt();
-		data.perfCounts = new long[data.numPerfCounts];
-		for (int i=0; i<data.numPerfCounts; i++) {
-		    data.perfCounts[i] = reader.nextLong();
+		if (version >= 5.0) {
+		    data.sendTime = reader.nextLong();
 		}
+		break;
+	    case CREATION_MULTICAST:
+		data.mtype = reader.nextInt();
+		data.entry = reader.nextInt();
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		if (version >= 2.0) {
+		    data.msglen = reader.nextInt();
+		} else {
+		    data.msglen = -1;
+		}
+		if (version >= 5.0) {
+		    data.sendTime = reader.nextLong();
+		}
+		data.destPEs = new int[reader.nextInt()];
+		for (int i=0;i<data.destPEs.length;i++) {
+		    data.destPEs[i] = reader.nextInt();
+		}
+		break;
+	    case BEGIN_PROCESSING: 
+		data.mtype = reader.nextInt();
+		data.entry = reader.nextInt();
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		if (version >= 2.0) {
+		    data.msglen = reader.nextInt();
+		} else {
+		    data.msglen = -1;
+		}
+		if (version >= 4.0) {
+		    data.recvTime  = reader.nextLong();
+		    data.id[0] = reader.nextInt();
+		    data.id[1] = reader.nextInt();
+		    data.id[2] = reader.nextInt();
+		}
+		if (version >= 6.5) {
+		    data.cpuStartTime = reader.nextLong();
+		}
+		if (version >= 6.6) {
+		    data.numPerfCounts = reader.nextInt();
+		    data.perfCounts = new long[data.numPerfCounts];
+		    for (int i=0; i<data.numPerfCounts; i++) {
+			data.perfCounts[i] = reader.nextLong();
+		    }
+		}
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case END_PROCESSING:
+		data.mtype = reader.nextInt();
+		data.entry = reader.nextInt();
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		if (version >= 2.0) {
+		    data.msglen = reader.nextInt();
+		} else {
+		    data.msglen = -1;
+		}
+		if (version >= 6.5) {
+		    data.cpuEndTime = reader.nextLong();
+		}
+		if (version >= 6.6) {
+		    data.numPerfCounts = reader.nextInt();
+		    data.perfCounts = new long[data.numPerfCounts];
+		    for (int i=0; i<data.numPerfCounts; i++) {
+			data.perfCounts[i] = reader.nextLong();
+		    }
+		}
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case BEGIN_TRACE: case END_TRACE:
+		data.time = reader.nextLong();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case BEGIN_FUNC:
+		data.time = reader.nextLong();
+		data.entry = reader.nextInt();
+		data.lineNo = reader.nextInt();
+		data.funcName = reader.nextString();
+		// comment of interest, what "nextString" is doing in an
+		// AsciiIntegerReader is beyond me, but I appreciate its
+		// existance!
+		reader.nextLine();
+		break;
+	    case END_FUNC:
+		data.time = reader.nextLong();
+		data.entry = reader.nextInt();
+		reader.nextLine();
+		break;
+	    case MESSAGE_RECV:
+		data.mtype = reader.nextInt();
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		data.msglen = reader.nextInt();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case ENQUEUE: case DEQUEUE:
+		data.mtype = reader.nextInt();
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case BEGIN_INTERRUPT: case END_INTERRUPT:
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case BEGIN_COMPUTATION: case END_COMPUTATION:
+		data.time = reader.nextLong();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case USER_EVENT:
+		data.userEventID = reader.nextInt();
+		// tentative hack for compatibility
+		data.entry = data.userEventID; 
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case USER_EVENT_PAIR:
+		data.userEventID = reader.nextInt();
+		// tentative hack for compatibility
+		data.entry = data.userEventID;
+		data.time = reader.nextLong();
+		data.event = reader.nextInt();
+		data.pe = reader.nextInt();
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    default:
+		data.type = -1;
+		reader.nextLine(); // Skip over any garbage 
+		break;
 	    }
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case BEGIN_TRACE: case END_TRACE:
-	    data.time = reader.nextLong();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case BEGIN_FUNC:
-	    data.time = reader.nextLong();
-	    data.entry = reader.nextInt();
-	    data.lineNo = reader.nextInt();
-	    data.funcName = reader.nextString();
-	    // comment of interest, what "nextString" is doing in an
-	    // AsciiIntegerReader is beyond me, but I appreciate its
-	    // existance!
-	    reader.nextLine();
-	    break;
-	case END_FUNC:
-	    data.time = reader.nextLong();
-	    data.entry = reader.nextInt();
-	    reader.nextLine();
-	    break;
-	case MESSAGE_RECV:
-	    data.mtype = reader.nextInt();
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    data.msglen = reader.nextInt();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case ENQUEUE: case DEQUEUE:
-	    data.mtype = reader.nextInt();
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case BEGIN_INTERRUPT: case END_INTERRUPT:
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case BEGIN_COMPUTATION: case END_COMPUTATION:
-	    data.time = reader.nextLong();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case USER_EVENT:
-	    data.userEventID = reader.nextInt();
-	    data.entry = data.userEventID; // tentative hack for compatibility
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	case USER_EVENT_PAIR:
-	    data.userEventID = reader.nextInt();
-	    data.entry = data.userEventID; // tentative hack for compatibility
-	    data.time = reader.nextLong();
-	    data.event = reader.nextInt();
-	    data.pe = reader.nextInt();
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
-	default:
-	    data.type = -1;
-	    reader.nextLine(); // Skip over any garbage 
-	    break;
+	    lastRecordedTime = data.time;
+	} catch (EOFException e) {
+	    if (fakedEndComputation || (data.type == END_COMPUTATION)) {
+		// throw the exception as if this were a proper EOF
+		throw e;
+	    } else {
+		// This is to deal with partial truncated projections logs.
+		// Fake an END_COMPUTATION event. This should *NEVER* be
+		// silent!!! A Warning *MUST* be sounded.
+		fakedEndComputation = true;
+		data.type = END_COMPUTATION;
+		data.time = lastRecordedTime;
+		System.err.println("[" + sourceString + "] " +
+				   "WARNING: Partial or Corrupted " +
+				   "Projections log. Faked END_COMPUTATION " +
+				   "entry added for last recorded time of " +
+				   data.time);
+	    }
 	}
     }
 

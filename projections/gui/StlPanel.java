@@ -19,11 +19,7 @@ import projections.analysis.*;
 
 public class StlPanel extends ScalePanel.Child
 {
-    // data (for entry-point based visualization)
-    // dimension 0 - indexed by EP (including the overall average util)
-    // dimension 1 - indexed by processor index
-    // dimension 2 - indexed by interval index
-    private int[][][] data;
+    private int[][] entryData;   // [pe][interval]
 
     // utilData (for utilization based visualization)
     // dimension 0 - indexed by processor index
@@ -45,6 +41,11 @@ public class StlPanel extends ScalePanel.Child
     private OrderedIntList validPEs;
     private long totalTime;//Length of run, in microseconds
     private long startTime,endTime;
+
+    // Optimization to prevent the reloading of expensive EP-based data.
+    private OrderedIntList oldPEList = new OrderedIntList();
+    private long prevStartTime = -1;
+    private long prevEndTime = -1;
 
     private ColorMap colorMap;
 
@@ -78,22 +79,15 @@ public class StlPanel extends ScalePanel.Child
 		    " IDLE = " + idleData[p][interval]+"%" +
 		    " at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
 	    } else {
-		// **CW** most significant EP information at this point
-		// is not preserved (maybe it should be), hence we will
-		// reconstruct the information.
-		int maxEP = 0;
-		int max = 0;
-		for (int ep=0; ep<numEP; ep++) {
-		    if (data[ep][p][interval] >= max) {
-			max = data[ep][p][interval];
-			maxEP = ep;
-		    }
+		if (interval >= entryData[p].length) {
+		    return ""; // strange bug.
 		}
-		if (max > 0) {
+		if (entryData[p][interval] > 0) {
 		    return "Processor "+pe+": Usage = "+
 			utilData[p][interval]+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
-			" EP = " + Analysis.getEntryName(maxEP);
+			" EP = " + 
+			Analysis.getEntryName(entryData[p][interval]);
 		} else {
 		    return "Processor "+pe+": Usage = "+
 			utilData[p][interval]+"%"+
@@ -214,75 +208,59 @@ public class StlPanel extends ScalePanel.Child
 	colorMap=cm;
     }
 
-    /**
-     * Convert processor usage (0..100) to color values.
-     * 12/9/04 - and idle "usage" (101..201) to a blue-scale.
-     */
-    private void applyColorMap(int [][]data) {
-	int nPE=data.length;
-	colors = new int[nPE][];
-	for (int p=0;p<nPE;p++) {
-	    int n=data[p].length;
-	    colors[p] = new int[n];
-	    for (int i=0;i<n;i++) {
-		// old constraints on byte removed. we only need
-		// to make sure the index is between 0 and 255.
-		// (so the array on the colorMap side will not
-		//  be busted).
-		if (data[p][i] > 255 || data[p][i] < 0) {
-		    // apply the "wrong" green color.
-		    colors[p][i]=colorMap.apply(255);
-		    System.err.println("[" + p + "] Warning: Invalid " +
-				       "value " + data[p][i] + " being " +
-				       "applied to the color map " +
-				       "at time interval " + i + "!");
-		} else {
-		    colors[p][i]=colorMap.apply(data[p][i]);
+    private void applyColorMap(int [][]data, boolean entryBased) {
+	if (!entryBased) {
+	    /**
+	     * Convert processor usage (0..100) to color values.
+	     * 12/9/04 - and idle "usage" (101..201) to a blue-scale.
+	     */
+	    int nPE=data.length;
+	    colors = new int[nPE][];
+	    for (int p=0;p<nPE;p++) {
+		int n=data[p].length;
+		colors[p] = new int[n];
+		for (int i=0;i<n;i++) {
+		    // old constraints on byte removed. we only need
+		    // to make sure the index is between 0 and 255.
+		    // (so the array on the colorMap side will not
+		    //  be busted).
+		    if (data[p][i] > 255 || data[p][i] < 0) {
+			// apply the "wrong" green color.
+			colors[p][i]=colorMap.apply(255);
+			System.err.println("[" + p + "] Warning: Invalid " +
+					   "value " + data[p][i] + " being " +
+					   "applied to the color map " +
+					   "at time interval " + i + "!");
+		    } else {
+			colors[p][i]=colorMap.apply(data[p][i]);
+		    }
+		}
+	    }
+	} else {
+	    int numPE = data.length;
+	    int numIntervals = data[numPE-1].length;
+	    colors = new int[numPE][numIntervals];
+	    for (int pe=0;pe<numPE;pe++) {
+		for (int interval=0; interval<numIntervals; interval++) {
+		    if (data[pe][interval] > 0) {
+			colors[pe][interval] =
+			    Analysis.getEntryColor(data[pe][interval]).getRGB();
+		    } else {
+			colors[pe][interval] =
+			    Color.black.getRGB();
+		    }
 		}
 	    }
 	}
     }
     
-    /**
-     *  colors should not have to be re-created here. Will have to re-work
-     *  this to make it more efficient some time soon.
-     */
-    private void applyColorMap(int [][][]data) {
-	int numEP = data.length;
-	int numPE = data[numEP-1].length;
-	colors = new int[numPE][];
-	for (int pe=0;pe<numPE;pe++) {
-	    int n=data[numEP-1][pe].length;
-	    colors[pe] = new int[n];
-	    for (int interval=0; interval<n; interval++) {
-		// find max ep
-		int maxEP = 0;
-		int max = 0;
-		for (int ep=0; ep<numEP; ep++) {
-		    if (data[ep][pe][interval] >= max) {
-			max = data[ep][pe][interval];
-			maxEP = ep;
-		    }
-		}
-		if (max > 0) {
-		    colors[pe][interval] =
-			Analysis.getEntryColor(maxEP).getRGB();
-		} else {
-		    colors[pe][interval] =
-			Color.black.getRGB();
-		}
-	    }
-	}
-    }
-
     public void setMode(int mode) {
 	this.mode = mode;
 	int numEPs = Analysis.getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
-	    applyColorMap(mergedData);
+	    applyColorMap(mergedData, false);
 	} else if (mode == StlWindow.MODE_EP) {
-	    setData(validPEs, startTime, endTime);
-	    applyColorMap(data);
+	    applyColorMap(entryData, true);
 	}
 	repaint();
     }
@@ -315,59 +293,108 @@ public class StlPanel extends ScalePanel.Child
 
 	nPe=validPEs.size();
 	int numEPs = Analysis.getNumUserEntries();
-	if (mode == StlWindow.MODE_UTILIZATION) {
-	    // we want to avoid loading the 4-D array if possible.
+
+	// Now that we no longer load 4D data, It becomes important that
+	// the data is reloaded each time a setData request is made.
+	if ((startTime == prevStartTime) &&
+	    (endTime == prevEndTime) &&
+	    (oldPEList.equals(validPEs))) {
+	    // do nothing. Data already loaded.
+	    return;
+	}
+	
+	// feeling very unnatural now, but
+	// I don't have the time to look at it
+	this.prevStartTime = startTime; 
+	this.prevEndTime = endTime;   
+	// **CW** Another optimization. Don't copy the list if it has not
+	// changed.
+	if (!oldPEList.equals(validPEs)) {
+	    oldPEList = validPEs.copyOf();
+	}
+
+	/**
+	 *  **CW** This is pretty much a stop-gap measure to reduce
+	 *  the unnecessary memory foot print of using EP-based
+	 *  visualization for Overview. One of these days ...
+	 */
+	OrderedIntList curPEList = new OrderedIntList();
+	int[][] temp = new int[validPEs.size()][]; // [pe][interval]
+	int[][] max = 
+	    new int[validPEs.size()][desiredIntervals];  // [pe][interval]
+	entryData =
+	    new int[validPEs.size()][desiredIntervals];
+	int curPeIdx = 0;
+	validPEs.reset();
+	while (validPEs.hasMoreElements()) {
+	    curPEList.insert(validPEs.nextElement());
 	    Analysis.LoadGraphData(intervalSize,
-				   startInterval, endInterval,false,validPEs);
-	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
-	    idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
-	    // **CW** Silly hack because Analysis.getSystemUsageData returns
-	    // null when LogReader.SYS_IDLE is not available. Create an
-	    // empty array - do a proper fix if this becomes a memory issue.
-	    if (idleData == null) {
-		idleData = new int[utilData.length][utilData[0].length];
-	    }
-	    mergedData = 
-		new int[utilData.length][utilData[0].length];
-	    // merge the two data into utilData
-	    for (int i=0; i<utilData.length; i++) {
-		for (int j=0; j<utilData[i].length; j++) {
-		    // I only wish to see idle data if there is no
-		    // utilization data.
-		    if (utilData[i][j] == 0) {
-			// 101 is the starting range for idle color
-			// representation. However, we want non-idle
-			// scenarios to remain "black".
-			if (idleData[i][j] > 0) {
-			    /* Idle data is broken for some reason
-			     * Dis-abling until a fix can be acquired
-			    mergedData[i][j] = 101 + idleData[i][j];
-			    */
-			    mergedData[i][j] = 0;
-			} else {
-			    mergedData[i][j] = 0;
-			}
-		    } else {
-			mergedData[i][j] = utilData[i][j]; 
+				   startInterval, endInterval, true,
+				   curPEList);
+	    for (int ep=0; ep<numEPs; ep++) {
+		temp[curPeIdx] = 
+		    Analysis.getUserEntryData(ep, LogReader.TIME)[0];
+		// find max so far for each valid interval
+		for (int i=0; 
+		     (i<temp[curPeIdx].length) && (i<desiredIntervals); 
+		     i++) {
+		    if (temp[curPeIdx][i] > max[curPeIdx][i]) {
+			max[curPeIdx][i] = temp[curPeIdx][i];
+			entryData[curPeIdx][i] = ep;
 		    }
 		}
 	    }
-	    applyColorMap(mergedData);
-	} else if (mode == StlWindow.MODE_EP) {
-	    Analysis.LoadGraphData(intervalSize,
-				   startInterval, endInterval,true,validPEs);
-	    data = new int[numEPs][][];
-	    for (int ep=0; ep<numEPs; ep++) {
-		data[ep] = Analysis.getUserEntryData(ep, LogReader.TIME);
+	    curPEList.removeAll();
+	    curPeIdx++;
+	}
+	// Unlike in previous versions, where we loaded *all*
+	// information, we've loaded the information one processor
+	// at a time. Hence, the need to reload everything (but
+	// without the need for "byEntryPoint" information.
+	validPEs.reset();
+	Analysis.LoadGraphData(intervalSize,
+			       startInterval, endInterval, false,
+			       validPEs);
+	utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
+	idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
+	
+	// **CW** Silly hack because Analysis.getSystemUsageData returns
+	// null when LogReader.SYS_IDLE is not available. Create an
+	// empty array - do a proper fix if this becomes a memory issue.
+	if (idleData == null) {
+	    idleData = new int[utilData.length][utilData[0].length];
+	}
+	mergedData = 
+	    new int[utilData.length][utilData[0].length];
+	// merge the two data into utilData
+	for (int i=0; i<utilData.length; i++) {
+	    for (int j=0; j<utilData[i].length; j++) {
+		// I only wish to see idle data if there is no
+		// utilization data.
+		if (utilData[i][j] == 0) {
+		    // 101 is the starting range for idle color
+		    // representation. However, we want non-idle
+		    // scenarios to remain "black".
+		    if (idleData[i][j] > 0) {
+			/* Idle data is broken for some reason
+			 * Dis-abling until a fix can be acquired
+			 mergedData[i][j] = 101 + idleData[i][j];
+			*/
+			mergedData[i][j] = 0;
+		    } else {
+			mergedData[i][j] = 0;
+		    }
+		} else {
+		    mergedData[i][j] = utilData[i][j]; 
+		}
 	    }
-	    // Utilization & Idle data has already been computed by 
-	    // LoadGraphData in Analysis.java. Might as well use it.
-	    utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
-	    idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
-	    applyColorMap(data);
+	}
+	if (mode == StlWindow.MODE_UTILIZATION) {
+	    applyColorMap(mergedData, false);
+	} else if (mode == StlWindow.MODE_EP) {
+	    applyColorMap(entryData, true);
 	}
 	validPEs.reset();
 	repaint();
     }
-
 }

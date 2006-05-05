@@ -110,6 +110,10 @@ public class StlWindow extends ProjectionsWindow
 	epMode.addItemListener(this);
 	modeGroup.add(utilizationMode);
 	modeGroup.add(epMode);
+
+	if (!Analysis.hasLogData()) {
+	    epMode.setEnabled(false);
+	}
 	  
 	gbc.fill = GridBagConstraints.HORIZONTAL;
 	Util.gblAdd(modePanel, utilizationMode, gbc, 0,0, 1,1, 1,1, 1,1,1,1);

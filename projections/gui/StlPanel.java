@@ -318,34 +318,36 @@ public class StlPanel extends ScalePanel.Child
 	 *  the unnecessary memory foot print of using EP-based
 	 *  visualization for Overview. One of these days ...
 	 */
-	OrderedIntList curPEList = new OrderedIntList();
-	int[][] temp = new int[validPEs.size()][]; // [pe][interval]
-	int[][] max = 
-	    new int[validPEs.size()][desiredIntervals];  // [pe][interval]
-	entryData =
-	    new int[validPEs.size()][desiredIntervals];
-	int curPeIdx = 0;
-	validPEs.reset();
-	while (validPEs.hasMoreElements()) {
-	    curPEList.insert(validPEs.nextElement());
-	    Analysis.LoadGraphData(intervalSize,
-				   startInterval, endInterval, true,
-				   curPEList);
-	    for (int ep=0; ep<numEPs; ep++) {
-		temp[curPeIdx] = 
-		    Analysis.getUserEntryData(ep, LogReader.TIME)[0];
-		// find max so far for each valid interval
-		for (int i=0; 
-		     (i<temp[curPeIdx].length) && (i<desiredIntervals); 
-		     i++) {
-		    if (temp[curPeIdx][i] > max[curPeIdx][i]) {
-			max[curPeIdx][i] = temp[curPeIdx][i];
-			entryData[curPeIdx][i] = ep;
+	if (Analysis.hasLogData()) {
+	    OrderedIntList curPEList = new OrderedIntList();
+	    int[][] temp = new int[validPEs.size()][]; // [pe][interval]
+	    int[][] max = 
+		new int[validPEs.size()][desiredIntervals];  // [pe][interval]
+	    entryData =
+		new int[validPEs.size()][desiredIntervals];
+	    int curPeIdx = 0;
+	    validPEs.reset();
+	    while (validPEs.hasMoreElements()) {
+		curPEList.insert(validPEs.nextElement());
+		Analysis.LoadGraphData(intervalSize,
+				       startInterval, endInterval, true,
+				       curPEList);
+		for (int ep=0; ep<numEPs; ep++) {
+		    temp[curPeIdx] = 
+			Analysis.getUserEntryData(ep, LogReader.TIME)[0];
+		    // find max so far for each valid interval
+		    for (int i=0; 
+			 (i<temp[curPeIdx].length) && (i<desiredIntervals); 
+			 i++) {
+			if (temp[curPeIdx][i] > max[curPeIdx][i]) {
+			    max[curPeIdx][i] = temp[curPeIdx][i];
+			    entryData[curPeIdx][i] = ep;
+			}
 		    }
 		}
+		curPEList.removeAll();
+		curPeIdx++;
 	    }
-	    curPEList.removeAll();
-	    curPeIdx++;
 	}
 	// Unlike in previous versions, where we loaded *all*
 	// information, we've loaded the information one processor

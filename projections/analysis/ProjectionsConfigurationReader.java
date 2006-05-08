@@ -74,8 +74,9 @@ public class ProjectionsConfigurationReader
 		File newRc = new File(configurationName);
 		newRc.createNewFile();
 	    } catch (IOException ioException) {
+		System.err.println("WARNING: Unable to write to rc file [" +
+				   configurationName + "]. Reason: ");
 		System.err.println(ioException.toString());
-		System.exit(-1);
 	    }
 	} catch (IOException e) {
 	    throw new LogLoadException (configurationName, 

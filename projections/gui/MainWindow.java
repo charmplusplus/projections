@@ -503,16 +503,19 @@ public class MainWindow extends JFrame
 						     (double)bestSize);	 
 			    try {
 				dataDump = 
-				    new PrintWriter(new FileWriter("SummaryDump.out"));
+				    new PrintWriter(new FileWriter(Analysis.getLogDirectory() + File.separator +
+								   "SummaryDump.out"));
 				dataDump.println("--- Summary Graph ---");
 				for (int i=0; i<newdata.length; i++) {
 				    dataDump.println(newdata[i]);
 				}
 				dataDump.flush();
 			    } catch (IOException e) {
-				System.err.println("Failed to handle dump " +
-						   "file SummaryDump.out");
-				System.exit(-1);
+				System.err.println("WARNING: " +
+						   "Failed to handle dump " +
+						   "file SummaryDump.out. " +
+						   "Reason: ");
+				System.err.println(e);
 			    }
 			    sumDataSource = new SummaryDataSource(newdata);
 			    sumXAxis =	    

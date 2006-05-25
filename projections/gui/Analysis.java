@@ -226,7 +226,7 @@ public class Analysis {
 	    }
 	}
 	// setting up interval-based data
-	if (hasSumDetailFiles() || hasLogFiles()) {
+	if (hasSumDetailFiles()) {
 	    if (intervalData == null) {
 		intervalData = new IntervalData();
 	    }
@@ -612,7 +612,7 @@ public class Analysis {
 	} catch (SummaryFormatException E) {
 	    System.err.println("Caught SummaryFormatException");
 	} catch (IOException e) {
-	    System.err.println("Caught IOExcpetion");
+	    System.err.println("Caught IOException");
 	}
     }
 

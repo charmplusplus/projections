@@ -426,7 +426,9 @@ public class SumAnalyzer extends ProjDefs
 	// copy the appropriate parts of the internal array!
 	if (OutIntervalSize == IntervalSize) {
 	    for (int p=0; p<numProcessors; p++) {
-		for (int i=intervalStart; i<intervalEnd; i++) {
+		for (int i=intervalStart; 
+		     (i<intervalEnd) && (i<ProcessorUtilization[p].length); 
+		     i++) {
 		    ret[p][i-intervalStart] = 
 			ProcessorUtilization[p][i];
 		}

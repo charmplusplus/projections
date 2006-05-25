@@ -6,24 +6,15 @@ package projections.analysis;
  */
 public class IntervalUtils {
 
-    /**
-     *  Wrapper for discrete (integer and long) based data. Kind of a hack
-     *  for older projections tools.
-
-    public static void fillIntervals(int destData[], long destSize,
-				     long destOffset,
-				     long sourceStartTime,
-				     long sourceEndTime,
-				     long sourceValue) {
-	double tempData[] = new double[destData.length];
-	fillIntervals(tempData, (double)destSize, destOffset,
-		      (double)sourceStartTime, (double)sourceEndTime,
-		      (double)sourceValue, false);
-	for (int i=0; i<destData.length; i++) {
-	    destData[i] = (int)tempData[i];
+    private static int getDestIndex(long sourceTime, long startInterval,
+				   long destSize, boolean isStart) {
+	// if we are dealing with an end-point time, we should treat
+	// it as belonging to the previous index.
+	if (!isStart && (sourceTime%destSize == 0)) {
+	    return (int)(sourceTime/destSize - startInterval -1);
 	}
+	return (int)(sourceTime/destSize - startInterval);
     }
-    */
 
     /**
      *  A time-based utility for placing a SINGLE time-range of data into 
@@ -43,75 +34,7 @@ public class IntervalUtils {
      *    for an interval depends on its interval size). Conversion 
      *    (eg. into absolute time) is hence required for data of that 
      *    sort prior to the use of this method.
-
-    public static void fillIntervals(double destData[], double destSize,
-				     int destOffset,
-				     double sourceStartTime, 
-				     double sourceEndTime, 
-				     double sourceValue, 
-				     boolean discretize) {
-	int absStartBin = (int)(sourceStartTime/destSize);
-	int absEndBin = (int)(sourceEndTime/destSize);
-	int destStartBin = absStartBin - destOffset;
-	int destEndBin = absEndBin - destOffset;
-
-	// optimize away conditions with no actions to take
-	if ((destStartBin >= destData.length) ||
-	    (destEndBin < 0)) {
-	    return;
-	}
-
-	// boundary values. Regardless of alignment, these always stay the
-	// same given the parameters IFF the start and end times DO NOT fall
-	// into the same interval.
-	double startPercent = 
-	    (1 - (sourceStartTime - absStartBin*destSize)/destSize) * 100.0;
-	double endPercent = 
-	    ((sourceEndTime - absEndBin*destSize)/destSize) * 100.0;
-	
-	if (absStartBin == absEndBin) {
-	    if ((destStartBin >= 0) && (destEndBin < destData.length)) {
-		destData[destStartBin] += sourceValue;
-		return;
-	    }
-	} else {
-	    // consider adjustments
-	    int interveningBins = absEndBin - absStartBin - 1;
-	    double fullRangePercent = startPercent + endPercent +
-		interveningBins*100.0;
-	    double startValue = (startPercent/fullRangePercent)*sourceValue;
-	    double endValue = (endPercent/fullRangePercent)*sourceValue;
-	    double intervalValue = (100/fullRangePercent)*sourceValue;
-	
-	    if (destStartBin < 0) {
-		destStartBin = 0;
-		destData[destStartBin] += intervalValue;
-	    } else {
-		destData[destStartBin] += startValue;
-	    }
-	    if (destEndBin >= destData.length) {
-		destEndBin = destData.length-1;
-		destData[destEndBin] += intervalValue;
-	    } else {
-		destData[destEndBin] += endValue;
-	    }
-	    for (int i=destStartBin+1; i<=destEndBin-1; i++) {
-		destData[i] += intervalValue;
-	    }
-	}
-    }
-    */
-
-    private static int getDestIndex(long sourceTime, long startInterval,
-				   long destSize, boolean isStart) {
-	// if we are dealing with an end-point time, we should treat
-	// it as belonging to the previous index.
-	if (!isStart && (sourceTime%destSize == 0)) {
-	    return (int)(sourceTime/destSize - startInterval -1);
-	}
-	return (int)(sourceTime/destSize - startInterval);
-    }
-
+     */
     public static void fillIntervals(double destData[], long destSize,
 				     long destStartInterval,
 				     long sourceStartTime, 
@@ -287,46 +210,33 @@ public class IntervalUtils {
      */
     public static double getBestIntervalSize(double intervalSize, 
 					     int numIntervals) {
-	double lower = 1.0;
-	double upper = 10.0;
-	double bestSize = 1.0; // initial best size
-	int newNumIntervals = 0;
+	double bestSize = 1.0;
+	int numSlices = 1;
 
 	// find the next larger size
-	while (true) {
-	    if ((intervalSize > lower) && (intervalSize <= upper)) {
-		// good, set the bestSize and determine the new number
-		// of intervals
-		bestSize = upper;
-		newNumIntervals = 
-		    (int)java.lang.Math.ceil((intervalSize*numIntervals)/bestSize);
-		break;
-	    } else {
-		// set a new size and try again.
-		lower *= 10;
-		upper *= 10;
-	    }
-	}
-
+	bestSize = 
+	    Math.pow(10.0,Math.ceil(Math.log(intervalSize)/Math.log(10.0)));
+	numSlices = 
+	    (int)Math.ceil((intervalSize*numIntervals)/bestSize);
+	
 	while (true) {
 	    // now that we've decided the "best" power 10 size
-	    if ((newNumIntervals > 10) && (newNumIntervals <= 1000)) {
+	    if ((numSlices > 10) && (numSlices <= 1000)) {
 		// good, accept
 		break;
-	    } else if ((newNumIntervals <= 10) && (bestSize == 1.0)) {
+	    } else if ((numSlices <= 10) && (bestSize == 1.0)) {
 		// too big, but we cannot go below the 1 microsecond
 		// resolution. Also accept.
 		break;
 	    } else {
 		// too big or too small
-		if (newNumIntervals <= 10) {
+		if (numSlices <= 10) {
 		    // shrink interval size
-		    newNumIntervals *= 10;
+		    numSlices *= 10;
 		    bestSize /= 10;
 		} else {
 		    // expand interval size
-		    newNumIntervals =
-			(int)java.lang.Math.ceil(newNumIntervals/10.0);
+		    numSlices /= 10;
 		    bestSize *= 10;
 		}
 	    }

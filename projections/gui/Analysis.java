@@ -584,11 +584,13 @@ public class Analysis {
 	    logReaderIntervalSize = logReader.getIntervalSize();
 	    logReader=null;
 	} else if (hasSumDetailFiles()) {
-	    // **CW**
-	    // sum detail not truly available yet, so use summary for now.
-	    if (hasSumFiles()) {
-		loadSummaryData(intervalSize, intervalStart, intervalEnd);
-	    }
+	    IntervalData intervalData = new IntervalData();
+	    intervalData.loadIntervalData(intervalSize, intervalStart,
+					  intervalEnd, byEntryPoint,
+					  processorList);
+	    systemUsageData = intervalData.getSystemUsageData();
+	    systemMsgsData = intervalData.getSystemMsgs();
+	    userEntryData = intervalData.getUserEntries();
 	} else if (hasSumFiles()) { // no log files, so load .sum files
 	    loadSummaryData(intervalSize, intervalStart, intervalEnd);
 	} else {

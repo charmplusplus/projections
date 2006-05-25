@@ -14,6 +14,7 @@ Orion Sky Lawlor, olawlor@acm.org, 2/12/2001
 */
 import java.awt.*;
 import java.awt.image.*;
+import javax.swing.*;
 
 import projections.analysis.*;
 
@@ -319,6 +320,12 @@ public class StlPanel extends ScalePanel.Child
 	 *  visualization for Overview. One of these days ...
 	 */
 	if (Analysis.hasLogData()) {
+	    ProgressMonitor progressBar =
+		new ProgressMonitor(Analysis.guiRoot, "Building EP Data",
+				    "", 0, validPEs.size());
+	    progressBar.setNote("Building EP Data");
+	    progressBar.setProgress(0);
+
 	    OrderedIntList curPEList = new OrderedIntList();
 	    int[][] temp = new int[validPEs.size()][]; // [pe][interval]
 	    int[][] max = 
@@ -326,9 +333,15 @@ public class StlPanel extends ScalePanel.Child
 	    entryData =
 		new int[validPEs.size()][desiredIntervals];
 	    int curPeIdx = 0;
+	    int curPE = 0;
 	    validPEs.reset();
 	    while (validPEs.hasMoreElements()) {
-		curPEList.insert(validPEs.nextElement());
+		curPE = validPEs.nextElement();
+		curPEList.insert(curPE);
+		progressBar.setProgress(curPeIdx);
+		progressBar.setNote("[PE: " + curPE + " ( " +
+				    curPeIdx + " of " +
+				    validPEs.size()+") ] Acummulating Data");
 		Analysis.LoadGraphData(intervalSize,
 				       startInterval, endInterval, true,
 				       curPEList);
@@ -348,6 +361,7 @@ public class StlPanel extends ScalePanel.Child
 		curPEList.removeAll();
 		curPeIdx++;
 	    }
+	    progressBar.close();
 	}
 	// Unlike in previous versions, where we loaded *all*
 	// information, we've loaded the information one processor

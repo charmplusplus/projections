@@ -36,6 +36,12 @@ public class IntervalData
     //                 but good enough.
     private Vector rawData[][][];
 
+    // Uncompressed Data (the old way of doing things) for supporting
+    // old tools.
+    private int systemUsageData[][][] = null;
+    private int systemMsgsData[][][][] = null;
+    private int userEntryData [][][][] = null;
+
     private int numEPs = 0;
     private int numPEs = 0;
     // numIntervals and intervalSize represents the canonical number of
@@ -89,32 +95,77 @@ public class IntervalData
 	    }
 	}
     }
-
+    
     /**
-     *  loadData is a internal method for loading log data. Interval size
-     *  is an input parameter that, if different from the current supported
-     *  value, would result in the reading of log files (if smaller) or a 
-     *  re-binning (if larger) of the raw data.
+     *  This is a method for use with the older way of doing things only.
+     *  Regretably, it's needed to get things working for now.
+     *
+     *  The method fills 3 arrays - systemUsageData, systemMsgsData
+     *                              and userEntryData
+     *  given time-range specifications.
      */
-    private void loadData(int type, int pe, int ep, 
-			  int startInterval, int endInterval,
-			  double intervalSize) {
-	// either a re-bin or re-read of logs is required.
-	if (intervalSize < this.intervalSize) {
-	    if (Analysis.hasLogData()) {
-		// log files exist - get more detailed info from log files.
-	    } else {
-		// no log files exist - the only way to provide the information
-		// is to do a reverse approximate re-bin.
+    public void loadIntervalData(long intervalSize, int intervalStart,
+				 int intervalEnd, boolean byEntryPoint,
+				 OrderedIntList processorList) {
+	int numIntervals = intervalEnd - intervalStart + 1;
+	systemUsageData = new int[3][processorList.size()][numIntervals];
+	systemMsgsData = new int[5][3][processorList.size()][numIntervals];
+	if (byEntryPoint) {
+	    userEntryData = 
+		new int[numEPs][3][processorList.size()][numIntervals];
+	}
+	double tempData[][] = null;
+	int processorCount = 0;
+	int curPe = 0;
+	processorList.reset();
+	while (processorList.hasMoreElements()) {
+	    curPe = processorList.nextElement();
+	    // get standard data
+	    tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart,
+			       intervalEnd-intervalStart+1);
+	    // copy into userEntryData, if byEntryPoint is true,
+	    // accumulate into systemUsageData.
+	    for (int i=0; i<numIntervals; i++) {
+		for (int ep=0; ep<numEPs; ep++) {
+		    if (byEntryPoint) {
+			userEntryData[ep][2][processorCount][i] =
+			    (int)tempData[ep][i];
+		    }
+		    systemUsageData[1][processorCount][i] +=
+			(int)tempData[ep][i];
+		}
+		// after accumulation for systemUsageData, convert to %util
+		systemUsageData[1][processorCount][i] =
+		    (int)IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i],
+						  intervalSize);
 	    }
-	} else if (intervalSize > this.intervalSize) {
-	    // simply re-bin by expanding bin-size (no loss of information)
-	} else {
-	    // same interval size as the currently supported one, nothing
-	    // needs to be done.
+
+	    // get message data
+	    tempData = getData(curPe, TYPE_NUM_MSGS, intervalSize,
+			       intervalStart, intervalEnd-intervalStart+1);
+	    // accumulate into systemMsgsData
+	    for (int i=0; i<numIntervals; i++) {
+		for (int ep=0; ep<numEPs; ep++) {
+		    systemMsgsData[1][2][processorCount][i] +=
+			(int)tempData[ep][i];
+		}
+	    }
+
+	    processorCount++;
 	}
     }
-			  
+
+    public int[][][] getSystemUsageData() {
+	return systemUsageData;
+    }
+
+    public int[][][][] getSystemMsgs() {
+	return systemMsgsData;
+    }
+
+    public int[][][][] getUserEntries() {
+	return userEntryData;
+    }
 
     /**
      *  This is an old API for tools that require the data in expanded
@@ -131,6 +182,56 @@ public class IntervalData
 		    returnData[ep][curInterval+offset] = nextBlock.value;
 		}
 		curInterval += nextBlock.count;
+	    }
+	}
+	return returnData;
+    }
+
+    /**
+     *  This is a general method that offers flexibility in choosing
+     *  interval bin sizes and time ranges.
+     */
+    public double[][] getData(int pe, int type, long destIntervalSize,
+			      int destIntervalStart, int numDestIntervals) {
+
+	// No interval size differences. Either use whatever is returned
+	// by getData() or copy a part of the whole array.
+	double tempData[][] = getData(pe, type);
+	double returnData[][] = null;
+	if (destIntervalSize == intervalSize) {
+	    if ((destIntervalStart == 0) && 
+		(numDestIntervals == numIntervals)) {
+		return tempData;
+	    } else {
+		returnData = new double[numEPs][numDestIntervals];
+		for (int ep=0; ep<tempData.length; ep++) {
+		    for (int interval=destIntervalStart; 
+			 interval<destIntervalStart+numDestIntervals;
+			 interval++) {
+			returnData[ep][interval-destIntervalStart] =
+			    tempData[ep][interval];
+		    }
+		}
+		return returnData;
+	    }
+	}
+
+	// Interval size different, rebinning and interpolation of
+	// data required.
+	returnData = new double[numEPs][numDestIntervals];
+	boolean discrete = false;
+
+	if (type == TYPE_NUM_MSGS) {
+	    discrete = true;
+	}
+	for (int ep=0; ep<tempData.length; ep++) {
+	    for (int srcInt=0; srcInt<tempData[ep].length; srcInt++) {
+		IntervalUtils.fillIntervals(returnData[ep], destIntervalSize,
+					    destIntervalStart,
+					    (long)(srcInt*intervalSize),
+					    (long)((srcInt+1)*intervalSize-1),
+					    tempData[ep][srcInt],
+					    discrete);
 	    }
 	}
 	return returnData;

@@ -90,7 +90,7 @@ public class StlWindow extends ProjectionsWindow
 	ver=new ScaleSlider(Scrollbar.VERTICAL);
 	ver.addMouseListener(this);
 	
-	stl=new StlPanel();
+	stl=new StlPanel(thisWindow);
 	scalePanel=new ScalePanel(hor,ver,stl);
 
 	gbc.fill = GridBagConstraints.BOTH;
@@ -207,6 +207,8 @@ public class StlWindow extends ProjectionsWindow
 			public Object construct() {
 			    thisWindow.setVisible(false);
 			    thisWindow.setStlPanelData();
+			    stl.resetMode();
+			    utilizationMode.setSelected(true);
 			    stl.setData(validPEs,startTime,endTime); 
 			    return null;
 			}

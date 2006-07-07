@@ -52,7 +52,15 @@ public class StlPanel extends ScalePanel.Child
 
     // default mode
     private int mode = StlWindow.MODE_UTILIZATION;
+
+    private boolean newEPData = true;
+
+    private StlWindow parentWindow = null;
     
+    public StlPanel(StlWindow parentWindow) {
+	this.parentWindow = parentWindow;
+    }
+
     //Return a string describing the given panel location
     public String getPointInfo(double time,double procs)
     {
@@ -260,10 +268,33 @@ public class StlPanel extends ScalePanel.Child
 	int numEPs = Analysis.getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
 	    applyColorMap(mergedData, false);
+	    repaint();
 	} else if (mode == StlWindow.MODE_EP) {
-	    applyColorMap(entryData, true);
+	    if (newEPData) {
+		parentWindow.setVisible(false);
+		final SwingWorker worker = new SwingWorker() {
+			public Object construct() {
+			    setEPData();
+			    newEPData = false;
+			    return null;
+			}
+			public void finished() {
+			    parentWindow.setVisible(true);
+			    applyColorMap(entryData, true);
+			    repaint();
+			}
+		    };
+		worker.start();
+	    } else {
+		applyColorMap(entryData, true);
+		repaint();
+	    }
 	}
-	repaint();
+    }
+
+    public void resetMode() {
+	this.mode = StlWindow.MODE_UTILIZATION;
+	newEPData = true; // for now. setData will ultimately decide this.
     }
 
     public void setData(OrderedIntList validPEs, long startTime, long endTime)
@@ -301,6 +332,8 @@ public class StlPanel extends ScalePanel.Child
 	    (endTime == prevEndTime) &&
 	    (oldPEList.equals(validPEs))) {
 	    // do nothing. Data already loaded.
+	    // set to false, so setEPData does not have to care about this.
+	    newEPData = false; 
 	    return;
 	}
 	
@@ -313,6 +346,72 @@ public class StlPanel extends ScalePanel.Child
 	if (!oldPEList.equals(validPEs)) {
 	    oldPEList = validPEs.copyOf();
 	}
+
+	validPEs.reset();
+	Analysis.LoadGraphData(intervalSize,
+			       startInterval, endInterval, false,
+			       validPEs);
+	utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
+	idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
+	
+	// **CW** Silly hack because Analysis.getSystemUsageData returns
+	// null when LogReader.SYS_IDLE is not available. Create an
+	// empty array - do a proper fix if this becomes a memory issue.
+	if (idleData == null) {
+	    idleData = new int[utilData.length][utilData[0].length];
+	}
+	mergedData = 
+	    new int[utilData.length][utilData[0].length];
+	// merge the two data into utilData
+	for (int i=0; i<utilData.length; i++) {
+	    for (int j=0; j<utilData[i].length; j++) {
+		// I only wish to see idle data if there is no
+		// utilization data.
+		if (utilData[i][j] == 0) {
+		    // 101 is the starting range for idle color
+		    // representation. However, we want non-idle
+		    // scenarios to remain "black".
+		    if (idleData[i][j] > 0) {
+			/* Idle data is broken for some reason
+			 * Dis-abling until a fix can be acquired
+			 mergedData[i][j] = 101 + idleData[i][j];
+			*/
+			mergedData[i][j] = 0;
+		    } else {
+			mergedData[i][j] = 0;
+		    }
+		} else {
+		    mergedData[i][j] = utilData[i][j]; 
+		}
+	    }
+	}
+	applyColorMap(mergedData, false);
+	validPEs.reset();
+	repaint();
+    }
+
+    public void setEPData() {
+        // necessary for t < 7000
+        // int desiredIntervals = 7000;
+        int desiredIntervals;
+        if (totalTime < 7000) {
+            desiredIntervals = (int )(totalTime - 1.0);
+        } else {
+            desiredIntervals = 7000;
+        }
+
+        double trialintervalSize = (totalTime/desiredIntervals);
+        if (trialintervalSize < 5 ){
+            desiredIntervals = desiredIntervals/(5);
+            trialintervalSize = (totalTime/desiredIntervals);
+        }
+
+        intervalSize = (int )trialintervalSize;
+        int startInterval = (int)(startTime/intervalSize);
+        int endInterval = (int)(endTime/intervalSize);
+
+        nPe=validPEs.size();
+        int numEPs = Analysis.getNumUserEntries();
 
 	/**
 	 *  **CW** This is pretty much a stop-gap measure to reduce
@@ -363,54 +462,5 @@ public class StlPanel extends ScalePanel.Child
 	    }
 	    progressBar.close();
 	}
-	// Unlike in previous versions, where we loaded *all*
-	// information, we've loaded the information one processor
-	// at a time. Hence, the need to reload everything (but
-	// without the need for "byEntryPoint" information.
-	validPEs.reset();
-	Analysis.LoadGraphData(intervalSize,
-			       startInterval, endInterval, false,
-			       validPEs);
-	utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
-	idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
-	
-	// **CW** Silly hack because Analysis.getSystemUsageData returns
-	// null when LogReader.SYS_IDLE is not available. Create an
-	// empty array - do a proper fix if this becomes a memory issue.
-	if (idleData == null) {
-	    idleData = new int[utilData.length][utilData[0].length];
-	}
-	mergedData = 
-	    new int[utilData.length][utilData[0].length];
-	// merge the two data into utilData
-	for (int i=0; i<utilData.length; i++) {
-	    for (int j=0; j<utilData[i].length; j++) {
-		// I only wish to see idle data if there is no
-		// utilization data.
-		if (utilData[i][j] == 0) {
-		    // 101 is the starting range for idle color
-		    // representation. However, we want non-idle
-		    // scenarios to remain "black".
-		    if (idleData[i][j] > 0) {
-			/* Idle data is broken for some reason
-			 * Dis-abling until a fix can be acquired
-			 mergedData[i][j] = 101 + idleData[i][j];
-			*/
-			mergedData[i][j] = 0;
-		    } else {
-			mergedData[i][j] = 0;
-		    }
-		} else {
-		    mergedData[i][j] = utilData[i][j]; 
-		}
-	    }
-	}
-	if (mode == StlWindow.MODE_UTILIZATION) {
-	    applyColorMap(mergedData, false);
-	} else if (mode == StlWindow.MODE_EP) {
-	    applyColorMap(entryData, true);
-	}
-	validPEs.reset();
-	repaint();
     }
 }

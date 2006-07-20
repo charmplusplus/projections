@@ -643,6 +643,7 @@ public class MainWindow extends JFrame
 		BLUEGENE_SIZE[1] = Integer.parseInt(args[i]);
 		i++;
 		BLUEGENE_SIZE[2] = Integer.parseInt(args[i]);
+		BLUEGENE = true;  // duh!
 	    } else if (args[i].equals("-print_usage")) {
 		PRINT_USAGE = true;
 	    } else if (args[i].equals("-memory_mode")) {

@@ -475,7 +475,20 @@ public class CommWindow extends GenericGraphWindow
 	    }
 	    distance += dimDistance;
 	}
-
+	// Sanity Check
+	if (distance < 0) {
+	    System.err.println("Internal Error: Negative Manhatten " +
+			       "distance " +
+			       distance + " Destination PE [" + destPe +
+			       "], Source PE [" + srcPe +"]");
+	    System.err.println("["+destTriple[0]+"]["+destTriple[1]+"]["+
+			       destTriple[2]+"] by ["+srcTriple[0]+"]["+
+			       srcTriple[1]+"]["+srcTriple[2]+"] on a ["+
+			       MainWindow.BLUEGENE_SIZE[0]+"]["+
+			       MainWindow.BLUEGENE_SIZE[1]+"]["+
+			       MainWindow.BLUEGENE_SIZE[2]+"] BG Torus");
+	    System.exit(-1);
+	}
 	return distance;
     }
 
@@ -492,10 +505,18 @@ public class CommWindow extends GenericGraphWindow
 	// y
 	// = pe/Nx - z*Ny
 	returnTriple[1] = pe/MainWindow.BLUEGENE_SIZE[0] -
-	    returnTriple[2]*MainWindow.BLUEGENE_SIZE[0];
+	    returnTriple[2]*MainWindow.BLUEGENE_SIZE[1];
 	// x - fastest changer
 	// this is an alternative to pe - y*Nx - z*Nx*Ny
 	returnTriple[0] = pe%MainWindow.BLUEGENE_SIZE[0];
+
+	if (returnTriple[0] < 0 || returnTriple[1] < 0 
+	    || returnTriple[2] < 0) {
+	    System.err.println("Internal Error: Triple [" + returnTriple[0] +
+			       "][" + returnTriple[1] + "][" +
+			       returnTriple[2] + "]");
+	    System.exit(-1);
+	}
 
 	return returnTriple;
     }

@@ -117,12 +117,36 @@ public class CommTimeWindow extends GenericGraphWindow
         _format = new DecimalFormat("###,###.###");
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);
+	createMenus();
 	createLayout();
 	pack();
 	thisWindow = this;
 	startFlag = true;
 	
 	showDialog();
+    }
+
+    protected void createMenus(){
+        JMenuBar mbar = new JMenuBar();
+        mbar.add(Util.makeJMenu("File", new Object[]
+                                {
+                                    "Select Processors",
+                                    null,
+                                    "Close"
+                                },
+                                null, this));
+	mbar.add(Util.makeJMenu("Tools", new Object[]
+	                        {
+		                    "Change Colors",
+	                        },
+                                null, this));
+        mbar.add(Util.makeJMenu("Help", new Object[]
+                                {
+                                    "Index",
+                                    "About"
+                                },
+                                null, this));
+        setJMenuBar(mbar);
     }
 
     protected void createLayout() {
@@ -534,6 +558,13 @@ public class CommTimeWindow extends GenericGraphWindow
 		catch (IOException exception) {
 		    System.err.println("Failed to load colors!!");
 		}
+	    }
+	} else if (e.getSource() instanceof JMenuItem) {
+	    String arg = ((JMenuItem)e.getSource()).getText();
+	    if (arg.equals("Close")) {
+		close();
+	    } else if(arg.equals("Select Processors")) {
+		showDialog();
 	    }
 	}
     }

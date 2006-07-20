@@ -122,7 +122,8 @@ public class Util
 			    }
 			m.add(mi);
 		    }
-		else if (items[i] instanceof JCheckBoxMenuItem && target instanceof ItemListener)
+		else if (items[i] instanceof JCheckBoxMenuItem && 
+			 target instanceof ItemListener)
 		    {
 			JCheckBoxMenuItem cmi = (JCheckBoxMenuItem)items[i];
 			cmi.addItemListener((ItemListener)target);

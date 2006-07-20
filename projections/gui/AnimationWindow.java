@@ -11,6 +11,8 @@ public class AnimationWindow extends ProjectionsWindow
     private AnimationDisplayPanel  displayPanel;
     private AnimationWindow thisWindow;
     
+    JMenuBar mbar = new JMenuBar();
+
     private Button bPlusOne, bMinusOne, bAuto;
     private Button setRanges;
     private JTimeTextField delayField;
@@ -73,7 +75,6 @@ public class AnimationWindow extends ProjectionsWindow
 	setBackground(Analysis.background);
 	setTitle("Projections Animation - " + Analysis.getFilename() + ".sts");
           
-	createMenus();
 	thisWindow = this;
 	showDialog();
     }   
@@ -97,9 +98,10 @@ public class AnimationWindow extends ProjectionsWindow
 			    if (dialog.isModified()) {
 				displayPanel.setParameters();
 				slider.setValues(0, 1, 0,
-	displayPanel.getNumI());
+						 displayPanel.getNumI());
 			    }
 			} else {
+			    createMenus();
 			    createLayout();
 			}
                         return null;
@@ -163,7 +165,14 @@ public class AnimationWindow extends ProjectionsWindow
 	    } else if (b == setRanges) {
 		showDialog();
 	    }
-	}                        
+        } else if (evt.getSource() instanceof JMenuItem) {
+            String arg = ((JMenuItem)evt.getSource()).getText();
+            if (arg.equals("Close")) {
+                close();
+            } else if(arg.equals("Select Processors")) {
+                showDialog();
+            }
+        }
     }   
     
     public void adjustmentValueChanged(AdjustmentEvent e){
@@ -179,10 +188,30 @@ public class AnimationWindow extends ProjectionsWindow
 	slider.setValue(i);
     }   
 
+    protected void createMenus(){
+        mbar.add(Util.makeJMenu("File", new Object[]
+            {
+                "Select Processors",
+                null,
+		"Close"
+            },
+                                null, this));
+        mbar.add(Util.makeJMenu("Tools", new Object[]
+            {
+                "Change Colors",
+            },
+                                null, this));
+        mbar.add(Util.makeJMenu("Help", new Object[]
+            {
+                "Index",
+		"About"
+            },
+                                null, this));
+        setJMenuBar(mbar);
+    }
+
     private void createLayout()
     {
-
-
 	Panel mainPanel     = new Panel();
 	titlePanel    = new Panel();
 	statusPanel   = new Panel();
@@ -249,10 +278,6 @@ public class AnimationWindow extends ProjectionsWindow
           
 	getContentPane().add(mainPanel,"Center");
 	layoutComplete = true;
-    }   
-
-    private void createMenus()
-    {
     }   
 
     public void setStatusInfo(int p, int i, int u)

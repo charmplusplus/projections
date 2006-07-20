@@ -58,20 +58,28 @@ public class CallTableWindow extends ProjectionsWindow
 	epDetailToggle = false;
 	statsToggle = false;
 	setLayout(mainPanel);
+	createMenus();
 	CreateLayout();
 	pack();
 	showDialog();
 	setVisible(true);
     }
 
-    public void actionPerformed(ActionEvent evt)
+    public void actionPerformed(ActionEvent e)
     {
-	if(evt.getSource() instanceof JButton) {
-	    JButton b = (JButton)evt.getSource();
+	if(e.getSource() instanceof JButton) {
+	    JButton b = (JButton)e.getSource();
 	    
 	    if(b == setRanges)
 		showDialog();
-	}
+        } else if (e.getSource() instanceof JMenuItem) {
+            String arg = ((JMenuItem)e.getSource()).getText();
+            if (arg.equals("Close")) {
+                close();
+            } else if(arg.equals("Select Processors")) {
+                showDialog();
+            }
+        }
     }   
     
     public void showDialog() {
@@ -98,6 +106,29 @@ public class CallTableWindow extends ProjectionsWindow
 	}
     }
     
+    protected void createMenus(){
+        JMenuBar mbar = new JMenuBar();
+        mbar.add(Util.makeJMenu("File", new Object[]
+            {
+                "Select Processors",
+                null,
+                                    "Close"
+            },
+                                null, this));
+        mbar.add(Util.makeJMenu("Tools", new Object[]
+            {
+                "Change Colors",
+            },
+                                null, this));
+        mbar.add(Util.makeJMenu("Help", new Object[]
+            {
+                "Index",
+                                    "About"
+            },
+                                null, this));
+        setJMenuBar(mbar);
+    }
+
     private void CreateLayout()
     {  
 	  GridBagLayout gbl = new GridBagLayout();

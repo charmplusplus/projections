@@ -12,7 +12,7 @@ import projections.gui.graph.*;
 import projections.misc.LogEntryData;
 
 public class CommWindow extends GenericGraphWindow
-    implements ItemListener
+    implements ItemListener, ActionListener
 {
     private double[][] 	sentMsgCount;
     private double[][] 	sentByteCount;
@@ -59,6 +59,7 @@ public class CommWindow extends GenericGraphWindow
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);
+	createMenus();
 	createLayout();
 	// setPopupText("histArray");
 	pack();
@@ -68,6 +69,17 @@ public class CommWindow extends GenericGraphWindow
 
     public void repaint() {
 	super.refreshGraph();
+    }
+
+    public void actionPerformed(ActionEvent e) {
+	if (e.getSource() instanceof JMenuItem) {
+	    String arg = ((JMenuItem)e.getSource()).getText();
+	    if (arg.equals("Close")) {
+		close();
+	    } else if(arg.equals("Select Processors")) {
+		showDialog();
+	    }
+	}
     }
 
     public void itemStateChanged(ItemEvent ae){
@@ -188,6 +200,29 @@ public class CommWindow extends GenericGraphWindow
 	    rString[2] = "";
 	}
 	return rString;
+    }
+
+    protected void createMenus(){
+        JMenuBar mbar = new JMenuBar();
+        mbar.add(Util.makeJMenu("File", new Object[]
+	    {
+		"Select Processors",
+		null,
+                                    "Close"
+	    },
+                                null, this));
+        mbar.add(Util.makeJMenu("Tools", new Object[]
+	    {
+		"Change Colors",
+	    },
+                                null, this));
+        mbar.add(Util.makeJMenu("Help", new Object[]
+	    {
+		"Index",
+                                    "About"
+	    },
+                                null, this));
+        setJMenuBar(mbar);
     }
 
     protected void createLayout() {

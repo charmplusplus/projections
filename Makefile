@@ -42,6 +42,7 @@ SRC=\
     projections/analysis/ProjectionsFormatException.java\
     projections/analysis/ProjectionsConfigurationReader.java\
     projections/analysis/ProjectionsReader.java\
+    projections/analysis/ProjMain.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
     projections/gui/AnimationColorBarPanel.java\
@@ -201,12 +202,12 @@ all: bin/projections.jar
 	@ echo "Compilation complete!"  
 	@ echo "See README or run bin/projections"
 
-projections/gui/MainWindow.class: $(SRC)
+projections/analysis/ProjMain.class: $(SRC)
 	@ echo "Compiling java sources:"
 	@ javac -sourcepath . -d . -deprecation -O $(SRC)
 	@ echo "Complete."
 
-bin/projections.jar: projections/gui/MainWindow.class $(SRC)
+bin/projections.jar: projections/analysis/ProjMain.class $(SRC)
 	@ echo "** Creating jar file"
 	jar -cfm0 bin/projections.jar \
 		projections/images/manifest \
@@ -222,16 +223,3 @@ clean:
 	- rm -f bin/*.jar
 	- rm -f projections/*/*.class
 	- rm -f projections/*/*/*.class
-
-
-
-
-
-
-
-
-
-
-
-
-

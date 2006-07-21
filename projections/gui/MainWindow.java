@@ -35,21 +35,14 @@ public class MainWindow extends JFrame
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
-    public static final int NUM_RUN_MODES = 3;
-    public static final int MODE_HIGH_MEM = 0; // tools favor logs (default)
-    public static final int MODE_LOW_MEM = 1;  // tools favor summary
-    public static final int MODE_MEDIUM = 2;   // tools favor sum detail
-
-    // Runtime flags
-    public static double CUR_VERSION = 4.0;
-    public static boolean IGNORE_IDLE = false;
-    public static boolean BLUEGENE = false; // hack to support BG hop count
-    public static int BLUEGENE_SIZE[] = {16, 8, 8};
-    public static int CUR_MODE = MODE_HIGH_MEM;
-
-    // **CW** workaround to print details on system usage where too many
-    // entry methods prevent proper analysis (like in cpaimd).
-    public static boolean PRINT_USAGE = false;
+    // Runtime flags -
+    // **CW** Note: These are now tentatively mirrored from ProjMain
+    // until the new interface can be cleanly handled by other tools.
+    public static double CUR_VERSION;
+    public static boolean IGNORE_IDLE;
+    public static boolean BLUEGENE;
+    public static int BLUEGENE_SIZE[];
+    public static boolean PRINT_USAGE;
 
     // **CW** a semi-permanent hack to provide a file onto which raw data
     // dumps may be written for further processing by other graphing tools.
@@ -113,6 +106,14 @@ public class MainWindow extends JFrame
     public MainWindow()
     {
 	thisWindow = this;
+
+	// Get information from ProjMain
+	CUR_VERSION = ProjMain.CUR_VERSION;
+	IGNORE_IDLE = ProjMain.IGNORE_IDLE;
+	BLUEGENE = ProjMain.BLUEGENE;
+	BLUEGENE_SIZE = ProjMain.BLUEGENE_SIZE;
+	PRINT_USAGE = ProjMain.PRINT_USAGE;
+
 	// static screen information.
 	ScreenInfo.init();
 
@@ -126,7 +127,7 @@ public class MainWindow extends JFrame
 
 	setBackground(Color.lightGray);
 
-	childWindows = new JFrame[DEFAULT_NUM_RUNS][NUM_WINDOWS];
+	childWindows = new JFrame[NUM_WINDOWS][DEFAULT_NUM_RUNS];
 	initializeTools();
 
 	menuManager = new MainMenuManager(this);
@@ -312,13 +313,13 @@ public class MainWindow extends JFrame
     // repaints all windows to reflect global drawing changes.
     private void repaintAllWindows() {
 	for (int i=0; i<NUM_WINDOWS;i++) {
-	    if (childWindows[0][i] != null) {
-		if (childWindows[0][i] instanceof GraphWindow) {
-		    ((GraphWindow)childWindows[0][i]).refreshDisplay();
-		} else if (childWindows[0][i] instanceof TimelineWindow) {
-		    ((TimelineWindow)childWindows[0][i]).refreshDisplay();
+	    if (childWindows[i][0] != null) {
+		if (childWindows[i][0] instanceof GraphWindow) {
+		    ((GraphWindow)childWindows[i][0]).refreshDisplay();
+		} else if (childWindows[i][0] instanceof TimelineWindow) {
+		    ((TimelineWindow)childWindows[i][0]).refreshDisplay();
 		} else {  // default
-		    ((Frame)childWindows[0][i]).repaint();
+		    ((Frame)childWindows[i][0]).repaint();
 		}
 	    }
 	}
@@ -335,19 +336,19 @@ public class MainWindow extends JFrame
     public void showChildWindow(String childClass, int windowIndex)
     {
 	try {
-	    if (childWindows[0][windowIndex] == null) {
+	    if (childWindows[windowIndex][0] == null) {
 		// get the name of the class within the current package
 		// and create an instance of that class
 		String className =  getClass().getPackage().getName() + 
 		    "." + childClass;
 		Class cls  = Class.forName(className);
 		Constructor ctr = cls.getConstructor(new Class[]{this.getClass(), Class.forName("java.lang.Integer")});
-		childWindows[0][windowIndex] = (ProjectionsWindow)(ctr.newInstance(new Object[] {this, new Integer(windowIndex)}));
+		childWindows[windowIndex][0] = (ProjectionsWindow)(ctr.newInstance(new Object[] {this, new Integer(windowIndex)}));
 	    } else {
-		if (childWindows[0][windowIndex] instanceof ProjectionsWindow) {
-		    ((ProjectionsWindow)childWindows[0][windowIndex]).showDialog();
+		if (childWindows[windowIndex][0] instanceof ProjectionsWindow) {
+		    ((ProjectionsWindow)childWindows[windowIndex][0]).showDialog();
 		} else {
-		    childWindows[0][windowIndex].show();
+		    childWindows[windowIndex][0].show();
 		}
 	    }
 	} catch(Exception e) {
@@ -370,7 +371,7 @@ public class MainWindow extends JFrame
 	}
     }
 
-    private void openFile(String filename) {
+    public void openFile(String filename) {
 	// clear the old summary data away, otherwise chance of
 	// running out of memory is great.
 	final String newfile = filename;
@@ -556,7 +557,7 @@ public class MainWindow extends JFrame
     /* called by the childWindows to remove references to themselves */
     public void closeChildWindow(int childID)
     {
-	childWindows[0][childID] = null;
+	childWindows[childID][0] = null;
     }
 
     public void shutdown() {
@@ -594,81 +595,6 @@ public class MainWindow extends JFrame
 	    return true;
 	else  
 	    return false;
-    }
-
-    public static void help()
-    {
-	System.out.println("-h:		show this page");
-	System.out.println("-V:		show Projections version");
-	System.out.println("-u <ver>:	use old version format");
-	System.out.println("-bg:        use hop count info for BG machines");
-	System.out.println("-bgsize <x> <y> <z>");
-	System.out.println("-print_usage: details written to stdout when " +
-			   "viewing usage profiles.");
-	System.out.println("-memory_mode <high|medium|low> " +
-			   "Projections favors appropriate log granularity " +
-			   "if available.");
-	System.exit(0);
-    }
-
-    public static void main(String args[])
-    {
-        int i=0;
-	String loadSts=null;
-        while (i < args.length) {
-	    if (args[i].equals("-h")) {
-		help();
-	    }
-	    else if (args[i].equals("-V")) {
-		System.out.println("Projections version: "+Analysis.getVersion());
-		System.exit(0);
-	    }
-	    else if (args[i].equals("-u")) {
-		i++;
-		if (i==args.length) help();
-		double useVersion = Double.parseDouble(args[i]);
-		if (useVersion > CUR_VERSION) {
-		    System.out.println("Invalid (future) Projections version!");
-		    System.exit(1);
-		}
-		CUR_VERSION = useVersion;
-	    } else if (args[i].equals("-idle")) {
-		IGNORE_IDLE = true;
-	    } else if (args[i].equals("-bg")) {
-		BLUEGENE = true;
-	    } else if (args[i].equals("-bgsize")) {
-		i++;
-		BLUEGENE_SIZE[0] = Integer.parseInt(args[i]);
-		i++;
-		BLUEGENE_SIZE[1] = Integer.parseInt(args[i]);
-		i++;
-		BLUEGENE_SIZE[2] = Integer.parseInt(args[i]);
-		BLUEGENE = true;  // duh!
-	    } else if (args[i].equals("-print_usage")) {
-		PRINT_USAGE = true;
-	    } else if (args[i].equals("-memory_mode")) {
-		i++;
-		if (i==args.length) help();
-		if (args[i].equals("high")) {
-		    CUR_MODE = MODE_HIGH_MEM;
-		} else if (args[i].equals("medium")) {
-		    CUR_MODE = MODE_MEDIUM;
-		} else if (args[i].equals("low")) {
-		    CUR_MODE = MODE_LOW_MEM;
-		} else {
-		    help();
-		}
-	    } else /*unrecognized argument*/ {
-		loadSts=args[i];
-	    }
-	    i++;
-	}
-
-	MainWindow f = new MainWindow();
-	f.pack();
-	f.setTitle("Projections");
-	f.setVisible(true);
-	if (loadSts!=null) { f.openFile(loadSts); }
     }
 
     public void setStatus(String msg) {

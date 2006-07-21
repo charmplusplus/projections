@@ -45,8 +45,8 @@ public class Analysis {
     public static Color foreground = Color.white;
     
     /******************* Initialization ************/
-    public static Component guiRoot;
     public static ProjectionsConfigurationReader rcReader;
+    public static Component guiRoot;
 
     private static StsReader sts;
     

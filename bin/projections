@@ -2,8 +2,6 @@
 
 jarpath="`dirname $0`/projections.jar"
 
-# jarpath="~skymusic/projections.jar"
-
 if test -x /usr/bin/cygpath
 then 
   if test "`uname -o`" = "Cygwin"
@@ -14,4 +12,4 @@ fi
 
 java -ms256000000 -mx1000000000 \
   -classpath $jarpath \
-  projections.gui.MainWindow $*
+  projections.analysis.ProjMain $*

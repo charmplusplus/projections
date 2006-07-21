@@ -33,12 +33,6 @@ import projections.misc.*;
  */
 public class Analysis {
 
-    // static definitions for filetypes
-    public static final int NUM_FILETYPES = 3;
-    public static final int FTYPE_SUMMARY = 0;
-    public static final int FTYPE_SUMDETAIL = 1;
-    public static final int FTYPE_LOG = 2;
-
     // allows user definitions for foreground and background colors of
     // gui tools.
     public static Color background = Color.black;
@@ -70,15 +64,6 @@ public class Analysis {
 
     private static String baseName;
     private static String logDirectory;
-
-    private static boolean hasSum;
-    private static boolean hasSumDetail;
-    private static boolean hasSumAccumulated;
-    private static boolean hasLog;
-    private static boolean hasPoseDop;    
-
-    private static OrderedIntList validPEs[];
-    private static String validPEStrings[];
 
     // The total time (maxed) of a run across all processors.
     private static long totalTime = 0;
@@ -156,7 +141,7 @@ public class Analysis {
 	    rcReader = 
 		new ProjectionsConfigurationReader(getFilename(),
 						   getLogDirectory());
-	    detectFiles();
+	    FileUtils.detectFiles(sts, baseName);
 
 	    //	    activityManager.registrationDone();
 	    // if I can find the saved color maps, then use it.
@@ -700,26 +685,6 @@ public class Analysis {
 	return baseName;
     }   
     
-    public static String getLogName(int pnum) {
-	return baseName+"."+pnum+".log";
-    }   
-
-    public static String getSumName(int pnum) {
-	return baseName+"."+pnum+".sum";
-    }   
-    
-    public static String getSumAccumulatedName() {
-	return baseName+".sum";
-    }
-
-    public static String getSumDetailName(int pnum) {
-	return baseName + "." + pnum + ".sumd";
-    }
-
-    public static String getPoseDopName(int pnum) {
-	return baseName + "." + pnum + ".poselog";
-    }
-
     // *** Run Data accessors (from sts reader) ***
     public static int getNumProcessors() {
 	return sts.getProcessorCount();
@@ -860,92 +825,6 @@ public class Analysis {
 							  startInterval,
 							  endInterval,
 							  eps);
-    }
-
-    /**
-     *  By default, return the first available valid processor string
-     *  in the following preference order - log, summary, sumdetail.
-     *  This is to support legacy codes that assume there is only
-     *  one set of valid files.
-     */
-    public static String getValidProcessorString() {
-	if (hasLogFiles()) {
-	    return getValidProcessorString(LOG);
-	} else if (hasSumFiles()) {
-	    return getValidProcessorString(SUMMARY);
-	} else if (hasSumDetailFiles()) {
-	    return getValidProcessorString(SUMDETAIL);
-	} else if (hasPoseDopFiles()) {
-	    return getValidProcessorString(DOP);
-	} else {
-	    return "";
-	}
-    }
-
-    public static OrderedIntList getValidProcessorList() {
-	if (hasLogFiles()) {
-	    return getValidProcessorList(LOG);
-	} else if (hasSumFiles()) {
-	    return getValidProcessorList(SUMMARY);
-	} else if (hasSumDetailFiles()) {
-	    return getValidProcessorList(SUMDETAIL);
-	} else if (hasPoseDopFiles()) {
-	    return getValidProcessorList(DOP);
-	} else {
-	    return null;
-	}
-    }
-
-    public static String getValidProcessorString(int type) {
-	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
-	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
-	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
-	    break;
-	case DOP:
-	    if (!hasPoseDop) {
-		System.err.println("Warning: No poselog files found.");
-	    }
-	    break;
-	}
-	return validPEStrings[type];
-    }
-
-    public static OrderedIntList getValidProcessorList(int type) {
-	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
-	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
-	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
-	    break;
-	case DOP:
-	    if (!hasPoseDop) {
-		System.err.println("Warning: No poselog files found.");
-	    }
-	    break;
-	}
-	return validPEs[type];
     }
 
     public static Color[] getColorMap() {
@@ -1091,95 +970,97 @@ public class Analysis {
 	return sts.hasPapi();
     }
 
+    // ************** Public Accessors to File Information *************
+    public static String getValidProcessorString(int type) {
+	return FileUtils.getValidProcessorString(type);
+    }
+
+    public static OrderedIntList getValidProcessorList(int type) {
+	return FileUtils.getValidProcessorList(type);
+    }
+
     /**
-     *  Internal Data file(s) management routines
+     *  By default, return the first available valid processor string
+     *  in the following preference order - log, summary, sumdetail.
+     *  This is to support legacy codes that assume there is only
+     *  one set of valid files.
      */
-    private static void detectFiles() {
-	// determine if any of the data files exist.
-	// We assume they are automatically valid and this is reflected
-	// in the validPEs. 
-	// **FIXME** This is expensive with large numbers of processors!
-	//           Use rc-type information to do this once per dataset
-	//           lifetime.
-
-	hasLog = false;
-	hasSum = false;
-	hasSumDetail = false;
-	hasSumAccumulated = false;
-	hasPoseDop = false;
-
-	validPEs = new OrderedIntList[NUM_TYPES];
-	validPEStrings = new String[NUM_TYPES];
-	for (int i=0; i<NUM_TYPES; i++) {
-	    validPEs[i] = new OrderedIntList();
-	}
-
-	for (int i=0;i<sts.getProcessorCount();i++) {
-	    if ((new File(getSumName(i))).isFile()) {
-		hasSum = true;
-		validPEs[SUMMARY].insert(i);
-	    }
-	    if ((new File(getSumDetailName(i))).isFile()) {
-		hasSumDetail = true;
-		validPEs[SUMDETAIL].insert(i);
-	    }
-	    if ((new File(getLogName(i))).isFile()) {
-		hasLog = true;
-		validPEs[LOG].insert(i);
-	    }
-	    if ((new File(getPoseDopName(i))).isFile()) {
-		hasPoseDop = true;
-		validPEs[DOP].insert(i);
-	    }
-	}
-	for (int type=0; type<NUM_TYPES; type++) {
-	    validPEStrings[type] = validPEs[type].listToString();
-	}
-	if ((new File(getSumAccumulatedName())).isFile()) {
-	    hasSumAccumulated = true;
+    public static String getValidProcessorString() {
+	if (hasLogFiles()) {
+	    return getValidProcessorString(LOG);
+	} else if (hasSumFiles()) {
+	    return getValidProcessorString(SUMMARY);
+	} else if (hasSumDetailFiles()) {
+	    return getValidProcessorString(SUMDETAIL);
+	} else if (hasPoseDopFiles()) {
+	    return getValidProcessorString(DOP);
+	} else {
+	    return "";
 	}
     }
+
+    public static OrderedIntList getValidProcessorList() {
+	if (hasLogFiles()) {
+	    return getValidProcessorList(LOG);
+	} else if (hasSumFiles()) {
+	    return getValidProcessorList(SUMMARY);
+	} else if (hasSumDetailFiles()) {
+	    return getValidProcessorList(SUMDETAIL);
+	} else if (hasPoseDopFiles()) {
+	    return getValidProcessorList(DOP);
+	} else {
+	    return null;
+	}
+    }
+
+    public static String getLogName(int pnum) {
+	return FileUtils.getLogName(baseName, pnum);
+    }   
+
+    public static String getSumName(int pnum) {
+	return FileUtils.getSumName(baseName, pnum);
+    }   
     
+    public static String getSumAccumulatedName() {
+	return FileUtils.getSumAccumulatedName(baseName);
+    }
+
+    public static String getSumDetailName(int pnum) {
+	return FileUtils.getSumDetailName(baseName, pnum);
+    }
+
+    public static String getPoseDopName(int pnum) {
+	return FileUtils.getPoseDopName(baseName, pnum);
+    }
+
+    // ************** Internal Data file(s) management routines ********
+
     private static boolean hasLogFiles() {
-	return hasLog;
+	return FileUtils.hasLogFiles();
     }   
 
     private static boolean hasSumFiles() {
-	return hasSum;
+	return FileUtils.hasSumFiles();
     }
    
     private static boolean hasSumAccumulatedFile() {
-	return hasSumAccumulated;
+	return FileUtils.hasSumAccumulatedFile();
     }
 
     private static boolean hasSumDetailFiles() {
-	return hasSumDetail;
+	return FileUtils.hasSumDetailFiles();
     }
 
     private static boolean hasPoseDopFiles() {
-	return hasPoseDop;
+	return FileUtils.hasPoseDopFiles();
     }
 
     private static String getBaseName(String filename) {
-	String baseName = null;
-	if (filename.endsWith(".sum.sts")) {
-	    baseName = filename.substring(0, filename.length()-8);
-	} else if (filename.endsWith(".sts")) {
-	    baseName = filename.substring(0, filename.length()-4); 
-	} else {
-	    System.err.println("Invalid sts filename! Exiting ...");
-	    System.exit(-1);
-	}
-	return baseName;
+	return FileUtils.getBaseName(filename);
     }
 
     private static String dirFromFile(String filename) {
-	// pre condition - filename is a full path name
-	int index = filename.lastIndexOf(File.separator);
-	if (index != -1) {
-	    return filename.substring(0,index);
-	}
-	return(".");	// present directory
+	return FileUtils.dirFromFile(filename);
     }
 
 }

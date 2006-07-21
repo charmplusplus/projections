@@ -168,6 +168,7 @@ SRC=\
     projections/misc/CommandLineException.java\
     projections/misc/EntryNotFoundException.java\
     projections/misc/ErrorDialog.java\
+    projections/misc/FileUtils.java\
     projections/misc/LogEntryData.java\
     projections/misc/LogLoadException.java\
     projections/misc/MiscUtil.java\

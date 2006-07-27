@@ -83,10 +83,10 @@ public class TimeProfileWindow extends GenericGraphWindow
 	numEPs = Analysis.getNumUserEntries();
 	stateArray = new boolean[1][numEPs];
 	existsArray = new boolean[1][numEPs];
-	colorArray = new Color[1][numEPs];
+	colorArray = new Color[1][];
+	colorArray[0] = Analysis.getColorMap();
 	entryNames = new String[numEPs];
 	for (int ep=0; ep<numEPs; ep++) {
-	    colorArray[0][ep] = Analysis.getEntryColor(ep);
 	    entryNames[ep] = Analysis.getEntryName(ep);
 	}
 	mainPanel = new JPanel();

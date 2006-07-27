@@ -112,6 +112,8 @@ public class TimelineData
 	tloArray = null;
 	mesgVector = null;
 	entries = new int[Analysis.getNumUserEntries()];
+	entryColor = Analysis.getColorMap();
+	/*
 	entryColor = new Color[Analysis.getNumUserEntries()];
 	float H = (float)1.0;
 	float S = (float)1.0;
@@ -129,7 +131,7 @@ public class TimelineData
 		entryColor[i] = Analysis.getEntryColor(i);
 	    }   
 	}
-	
+	*/
     }   
     
     public void createTLOArray()

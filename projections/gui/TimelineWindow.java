@@ -10,6 +10,7 @@ import java.util.*;
 import java.text.*;
 
 import projections.misc.*;
+import projections.analysis.*;
 
 public class TimelineWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener, ItemListener
@@ -384,14 +385,21 @@ public class TimelineWindow extends ProjectionsWindow
 	    else if(arg.equals("Modify Ranges")) showDialog();
 	    else if(arg.equals("Print Timeline")) PrintTimeline();   
 	    else if(arg.equals("Change Entry Point Colors")) { ShowColorWindow(); }
-	    // **** sharon **
 	    else if(arg.equals("Save Entry Point Colors")) {
+                // save all entry point colors to disk
+                try {
+                    ColorSaver.save(data.entryColor);
+                } catch (IOException exception) {
+                    System.err.println("Failed to save colors!!");
+                }
+
+		// **** sharon **
 		//		saveColorFile();
-		try {
-		    Util.saveColors(data.entryColor, "Timeline Graph");
-		} catch (IOException e) {
-		    System.err.println("Attempt to write to color.map failed");
-		}
+		// try {
+		//    Util.saveColors(data.entryColor, "Timeline Graph");
+		// } catch (IOException e) {
+		//     System.err.println("Attempt to write to color.map failed");
+		// }
 	    }
 	    else if(arg.equals("Restore Entry Point Colors")) {
 		//		openColorFile();
@@ -758,7 +766,8 @@ public class TimelineWindow extends ProjectionsWindow
     }   
     public Color getGraphColor(int e)
     {
-	return parentWindow.getGraphColor(e);
+	return Analysis.getEntryColor(e);
+	// return parentWindow.getGraphColor(e);
     }   
    public int getHSBValue()
    {

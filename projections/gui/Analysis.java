@@ -62,6 +62,12 @@ public class Analysis {
     public static final int SUMDETAIL = 3;
     public static final int DOP = 4;
 
+    public static final int NUM_ACTIVITIES = 4;
+    public static final int ACTIVITY_PROJECTIONS = 0;
+    public static final int ACTIVITY_USER_EVENTS = 1;
+    public static final int ACTIVITY_FUNCTIONS = 2;
+    public static final int ACTIVITY_POSE_DOP = 3;
+
     private static String baseName;
     private static String logDirectory;
 
@@ -82,18 +88,21 @@ public class Analysis {
 
     /** *************** Color Maps 6/27/2002 ************ */
     private static Color[] entryColors;
+    private static Color[] userEventColors;
+    private static Color[] functionColors;
+    private static Color[][] activityColors =
+	new Color[NUM_ACTIVITIES][];
+
+
     // moved from StsReader because it does not belong there.
     // Indexed by userevent index (which can be derived from the user
     // event ID).
     private static Color[] grayColors;
-    private static Color[] userEventColors;
     private static Color[] grayUserEventColors;
 
     private static Color[] activeColorMap;
     private static Color[] activeUserColorMap;
     
-    private static Color[] functionColors;
-
     // *CW* Major hack - make functions and entry methods share the same 
     // color set.
     private static Color[] universalColors;

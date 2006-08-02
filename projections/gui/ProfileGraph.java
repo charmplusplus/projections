@@ -112,7 +112,8 @@ public class ProfileGraph extends JPanel
 
 
     // ***** API Interface to the control panel *****
-    public void setDisplayDataSource(float[][] d, int[][] cMap, Color[] c, String[][] n){
+    public void setDisplayDataSource(float[][] d, int[][] cMap, 
+				     Color[] c, String[][] n){
         dataSource = d;
         colorsMap = cMap;
         colorsPool = c;

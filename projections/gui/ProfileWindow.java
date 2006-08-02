@@ -38,7 +38,6 @@ public class ProfileWindow extends ProjectionsWindow
 
     //Following varibles are related with responding to user events
     private JTabbedPane tabPane;
-    //private Graph displayCanvas;
     private ProfileGraph displayCanvas;
     private JScrollPane displayPanel;
     private int displayPanelTabIndex;
@@ -137,10 +136,8 @@ public class ProfileWindow extends ProjectionsWindow
         gbc.fill = GridBagConstraints.BOTH;
 
         //create display canvas
-	//Analysis.foreground = Color.black;
-	//Analysis.background = Color.white;
-        //displayCanvas = new Graph();
         displayCanvas = new ProfileGraph();
+
         // this encapsulating panel is required to apply BoxLayout
 	// to the scroll pane so that it works correctly.
 	//JPanel p = new JPanel();
@@ -380,8 +377,6 @@ public class ProfileWindow extends ProjectionsWindow
 
 
     public void applyDialogColors() {
-        //Color[][] newColors = entryDialog.getColorArray();
-        //colorMap = newColors[i];
         int eps = Analysis.getNumUserEntries();
 
         System.out.println(colors[eps+2]);
@@ -752,7 +747,7 @@ public class ProfileWindow extends ProjectionsWindow
 	}
 	if (!colorsSet) {
             //also create colors for "PACKING, UNPACKING, IDLE"
-	    Color[] entryColors = Analysis.createColorMap(numEPs, sigIndices);
+	    Color[] entryColors = Analysis.getColorMap();
             colors = new Color[numEPs+NUM_SYS_EPS];
             for(int i=0; i<numEPs; i++)
                 colors[i] = entryColors[i];

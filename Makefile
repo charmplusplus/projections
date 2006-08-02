@@ -123,7 +123,6 @@ SRC=\
     projections/gui/ProfileAxisCanvas.java\
     projections/gui/ProfileColorWindow.java\
     projections/gui/ProfileData.java\
-    projections/gui/ProfileDisplayCanvas.java\
     projections/gui/ProfileLabelCanvas.java\
     projections/gui/ProfileLabelCanvas2.java\
     projections/gui/ProfileObject.java\

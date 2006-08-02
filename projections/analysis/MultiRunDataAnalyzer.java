@@ -581,7 +581,7 @@ public class MultiRunDataAnalyzer {
 	    categories[dataType][CAT_EP_NO_CHANGE].size();
 	int numChanged =
 	    categories[dataType][CAT_EP_CHANGE].size();
-	colorMap = Analysis.createColorMap(numColors);
+	colorMap = ColorManager.createColorMap(numColors);
 
 	// set insignificant category to gray
 	colorMap[numNoChange] = Color.gray;

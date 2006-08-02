@@ -33,11 +33,23 @@ import projections.misc.*;
  */
 public class Analysis {
 
-    // allows user definitions for foreground and background colors of
-    // gui tools.
-    public static Color background = Color.black;
-    public static Color foreground = Color.white;
-    
+    // Analysis-specific global constants
+    public static final int NUM_TYPES = 5;
+    public static final int LOG = 0;
+    public static final int SUMMARY = 1;
+    public static final int COUNTER = 2;
+    public static final int SUMDETAIL = 3;
+    public static final int DOP = 4;
+
+    public static final int NUM_ACTIVITIES = 4;
+    public static final int ACTIVITY_PROJECTIONS = 0;
+    public static final int ACTIVITY_USER_EVENTS = 1;
+    public static final int ACTIVITY_FUNCTIONS = 2;
+    public static final int ACTIVITY_POSE_DOP = 3;
+    public static final String ACTIVITY_NAMES[] = 
+    {"ACTIVITY_PROJECTIONS", "ACTIVITY_USER_EVENTS",
+     "ACTIVITY_FUNCTIONS", "ACTIVITY_POSE_DOP"};
+
     /******************* Initialization ************/
     public static ProjectionsConfigurationReader rcReader;
     public static Component guiRoot;
@@ -54,19 +66,6 @@ public class Analysis {
 
     private static IntervalData intervalData; // interval-based data
     public static ActivityManager      activityManager;
-
-    public static final int NUM_TYPES = 5;
-    public static final int LOG = 0;
-    public static final int SUMMARY = 1;
-    public static final int COUNTER = 2;
-    public static final int SUMDETAIL = 3;
-    public static final int DOP = 4;
-
-    public static final int NUM_ACTIVITIES = 4;
-    public static final int ACTIVITY_PROJECTIONS = 0;
-    public static final int ACTIVITY_USER_EVENTS = 1;
-    public static final int ACTIVITY_FUNCTIONS = 2;
-    public static final int ACTIVITY_POSE_DOP = 3;
 
     private static String baseName;
     private static String logDirectory;
@@ -86,46 +85,30 @@ public class Analysis {
     // maintained inside Analysis.
     private static long logReaderIntervalSize = -1;
 
-    /** *************** Color Maps 6/27/2002 ************ */
-    private static Color[] entryColors;
-    private static Color[] userEventColors;
-    private static Color[] functionColors;
-    private static Color[][] activityColors =
-	new Color[NUM_ACTIVITIES][];
-
-
-    // moved from StsReader because it does not belong there.
-    // Indexed by userevent index (which can be derived from the user
-    // event ID).
-    private static Color[] grayColors;
-    private static Color[] grayUserEventColors;
-
-    private static Color[] activeColorMap;
-    private static Color[] activeUserColorMap;
-    
-    // *CW* Major hack - make functions and entry methods share the same 
-    // color set.
-    private static Color[] universalColors;
-
     /****************** Jump from Timeline to graphs ******/
     // Used for storing user defined startTime and endTime when jumping from
     // TimelineWindow to other graphs
     private static long jStartTime, jEndTime;
     private static boolean jTimeAvailable;
 
-    // **CW** Hack - potentially expensive.
-    private static void splitUniversalColors() {
-	int numEntries = sts.getEntryCount();
-	entryColors = new Color[numEntries];
-	for (int i=0; i<numEntries; i++) {
-	    entryColors[i] = universalColors[i];
-	}
-	int numFunc = sts.getNumFunctionEvents();
-	functionColors = new Color[numFunc];
-	for (int i=0; i<numFunc; i++) {
-	    functionColors[i] = universalColors[i+numEntries];
-	}
-    }
+    /** *************** Color Maps 6/27/2002 ************ */
+
+    public static Color background = Color.black;
+    public static Color foreground = Color.white;
+    
+    private static Color[] entryColors;
+    private static Color[] userEventColors;
+    private static Color[] functionColors;
+    private static Color[][] activityColors =
+	new Color[NUM_ACTIVITIES][];
+
+    private static Color[] grayColors;
+    private static Color[] grayUserEventColors;
+
+    private static Color[] activeColorMap;
+    private static Color[] activeUserColorMap;
+    
+    /** ************** Methods ********************** */
 
     /**
      *  initAnalysis can be considered as Analysis's "constructor".
@@ -156,38 +139,23 @@ public class Analysis {
 	    // if I can find the saved color maps, then use it.
 	    String colorsaved = 
 		getLogDirectory() + File.separator + "savedcolors.prj";
-	    ColorSaver.setLocation(colorsaved);
+	    ColorManager.setDefaultLocation(colorsaved);
 	    if ((new File(colorsaved)).exists()) {
-		try {
-		    universalColors = ColorSaver.loadColors();
-		    splitUniversalColors();
-
-		    // ORTHOGONAL SYSTEM OF COLORS - FOR NOW
-		    // SPECIAL NOTE: This assumes the colors were
-		    // saved using the new color system. otherwise,
-		    // bad things can be expected to happen.
-		    //		    activityManager.setColors(entryColors);
-		} catch (IOException exception) {
-		    System.err.println("Failed to load colors!!!");
-		    universalColors = 
-			createColorMap(sts.getEntryCount()+
-				       sts.getNumFunctionEvents());
-		    splitUniversalColors();
+		activityColors = ColorManager.initializeColors(colorsaved);
+		// fall back on error
+		if (activityColors == null) {
+		    activityColors = ColorManager.initializeColors();
 		}
 	    } else {
-		// create default color maps for entry methods as well as user
-		// events.
-		// entryColors = createColorMap(sts.getEntryCount());
-		// functionColors = createColorMap(sts.getNumFunctionEvents());
-		universalColors = 
-		    createColorMap(sts.getEntryCount()+
-				   sts.getNumFunctionEvents());
-		splitUniversalColors();
+		activityColors = ColorManager.initializeColors();
 	    }
-	    grayColors = createGrayscaleColorMap(sts.getEntryCount());
-	    userEventColors = createColorMap(sts.getNumUserDefinedEvents());
+	    entryColors = activityColors[ACTIVITY_PROJECTIONS];
+	    userEventColors = activityColors[ACTIVITY_USER_EVENTS];
+	    functionColors = activityColors[ACTIVITY_FUNCTIONS];
+	    grayColors = 
+		ColorManager.createGrayscaleColorMap(sts.getEntryCount());
 	    grayUserEventColors = 
-		createGrayscaleColorMap(sts.getNumUserDefinedEvents());
+		ColorManager.createGrayscaleColorMap(sts.getNumUserDefinedEvents());
 	    // default to full colors
 	    activeColorMap = entryColors;
 	    activeUserColorMap = userEventColors;
@@ -694,7 +662,36 @@ public class Analysis {
 	return baseName;
     }   
     
+    // *** Activity Management *** */
+
+    public static int stringToActivity(String name) {
+	if (name.equals("ACTIVITY_PROJECTIONS")) {
+	    return ACTIVITY_PROJECTIONS;
+	} else if (name.equals("ACTIVITY_USER_EVENTS")) {
+	    return ACTIVITY_USER_EVENTS;
+	} else if (name.equals("ACTIVITY_FUNCTIONS")) {
+	    return ACTIVITY_FUNCTIONS;
+	} else if (name.equals("ACTIVITY_POSE_DOP")) {
+	    return ACTIVITY_POSE_DOP;
+	} else {
+	    return -1;  // error condition
+	}
+    }
+
+    public static int getNumActivity(int type) {
+	switch (type) {
+	case ACTIVITY_PROJECTIONS:
+	    return getNumUserEntries();
+	case ACTIVITY_USER_EVENTS:
+	    return getNumUserDefinedEvents();
+	case ACTIVITY_FUNCTIONS:
+	    return getNumFunctionEvents();
+	}
+	return 0;
+    }
+
     // *** Run Data accessors (from sts reader) ***
+
     public static int getNumProcessors() {
 	return sts.getProcessorCount();
     }
@@ -749,6 +746,10 @@ public class Analysis {
 
     public static Color[] getFunctionColors() {
 	return functionColors;
+    }
+
+    public static void saveColors() {
+	ColorManager.saveColors(activityColors);
     }
 
     public static String getFunctionName(int funcID) {
@@ -850,119 +851,6 @@ public class Analysis {
 	activeUserColorMap = grayUserEventColors;
     }
 
-    public static Color[] createGrayscaleColorMap(int numColors) {
-	Color[] colors = new Color[numColors];
-	float H = (float)1.0;
-	float S = (float)0.0;
-	float B = (float)0.9; // initial white value would be bad.
-	float delta = (float)(0.8/numColors); // extreme black is also avoided
-	// as long as S==0, H does not matter, so scale according to B
-	for (int i=0; i<numColors; i++) {
-	    colors[i] = Color.getHSBColor(H, S, B);
-	    B -= delta;
-	    if (B < 0.1) {
-		B = (float)0.1;
-	    }
-	}
-	return colors;
-    }
-
-    public static Color[] createColorMap(int numColors) {
-	Color[] colors = new Color[numColors];
-	float H = (float)1.0;
-	float S = (float)1.0;
-	float B = (float)1.0;
-	float delta = (float)(1.0/numColors);
-	for(int i=0; i<numColors; i++) {
-	    colors[i] = Color.getHSBColor(H, S, B);
-	    H -= delta;
-	    if(H < 0.0) { H = (float)1.0; }
-	}
-	return colors;
-    }
-
-    /**
-     *  Wrapper version for using a default weight assignment.
-     */
-    public static Color[] createColorMap(int numEPs, int epMap[]) {
-	int numSignificant = epMap.length;
-	int[] weights = new int[numSignificant];
-	
-	if (numSignificant > 0) {
-	    // default assignment of weights using an accelerating increment
-	    // method (acceleration = 2; initial value = 5)
-	    int acceleration = 2;
-	    int increment = 7;
-	    weights[numSignificant-1] = 5;
-	    for (int ep=numSignificant-2; ep>=0; ep--) {
-		weights[ep] = weights[ep+1] + increment;
-		increment += acceleration;
-	    }
-	}
-	return createColorMap(numEPs, epMap, weights);
-    }
-
-    /**
-     *  A more advanced version of color assignment that takes a map
-     *  of significant entry methods in sorted order and assigns more
-     *  distinctly different (hue) colors to more significant entry
-     *  methods. Significance is assigned by the tool requesting the
-     *  color map. This scheme is still arbitrary.
-     *
-     *  numEPs give a total of color assignments required.
-     */
-    public static Color[] createColorMap(int numEPs, int epMap[], 
-					 int weights[]) {
-	Color[] colors = new Color[numEPs];
-
-	int numSignificant = epMap.length;
-	// no significant values, so return uniform color map
-	if (numSignificant == 0) {
-	    return createColorMap(numEPs);
-	}
-	int total = 0;
-	for (int ep=0; ep<numSignificant; ep++) {
-	    total += weights[ep];
-	}
-	// a linear distribution segment of the remaining color space should 
-	// not be larger than the smallest final hue segment assigned to a
-	// significant ep. Formula: x >= 1.0/kc+1.0 where x is the hue space
-	// allocated to significant eps, k is the % weight assigned to the
-	// smallest significant ep and c is the number of insignificant eps.
-	// x should be at least 66% of the hue space or it wouldn't make a
-	// difference (when a small number of significant elements are
-	// presented).
-	double k = weights[numSignificant-1]/(double)total;
-	int c = numEPs-numSignificant;
-	double x = 1.0/(k*c + 1.0);
-	if (x < 0.67) {
-	    x = 0.67;
-	}
-
-	double currentHue = 1.0;
-	double saturation = 1.0;
-	double brightness = 1.0;
-	// assign colors to significant eps
-	for (int ep=0; ep<numSignificant; ep++) {
-	    colors[epMap[ep]] = Color.getHSBColor((float)currentHue, 
-						  (float)saturation,
-						  (float)brightness);
-	    currentHue -= (weights[ep]/(double)total)*x;
-	}
-	// assign colors to all other eps
-	double delta = currentHue/c;
-	for (int ep=0; ep<numEPs; ep++) {
-	    // needs assignment
-	    if (colors[ep] == null) {
-		colors[ep] = Color.getHSBColor((float)currentHue, 
-					       (float)saturation,
-					       (float)brightness);
-		currentHue -= delta;
-	    }
-	}
-	return colors;
-    }
-    
     /** jTimeAvailable(), getJStartTime(), getJEndTime()
      *  Used for storing user defined startTime and endTime 
      *	when jumping from TimelineWindow to other graphs

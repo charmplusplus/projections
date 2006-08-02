@@ -611,7 +611,7 @@ public class ProfileWindow extends ProjectionsWindow
         for(int i=0; i<ampiDataSrc.length; i++)
             colorNum += ampiDataSrc[i].length;
 
-        Color[] ampiFuncColors = Analysis.createColorMap(colorNum);
+        Color[] ampiFuncColors = ColorManager.createColorMap(colorNum);
         int[][] ampiFuncColorMap = new int [ampiDataSrc.length][];
         colorNum = 0;
         for(int i=0; i<ampiDataSrc.length; i++){

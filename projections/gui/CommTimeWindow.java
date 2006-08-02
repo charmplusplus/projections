@@ -541,17 +541,13 @@ public class CommTimeWindow extends GenericGraphWindow
 	    }
 	    else if (b == saveColors) {
 		// save all entry point colors to disk
-		try {
-		    ColorSaver.save(colorArray[0]);
-		}
-		catch (IOException exception) {
-		    System.err.println("Failed to save colors!!");
-		}
+		Analysis.saveColors();
 	    }
 	    else if (b == loadColors) {
 		// load all entry point colors from disk
 		try {
-		    colorArray[0] = ColorSaver.loadColors();
+		    colorArray[0] = 
+			ColorManager.loadActivityColors(Analysis.ACTIVITY_PROJECTIONS);
 		    // silly inefficiency
 		    setOutputGraphData();
 		} 

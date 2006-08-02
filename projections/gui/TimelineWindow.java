@@ -387,19 +387,7 @@ public class TimelineWindow extends ProjectionsWindow
 	    else if(arg.equals("Change Entry Point Colors")) { ShowColorWindow(); }
 	    else if(arg.equals("Save Entry Point Colors")) {
                 // save all entry point colors to disk
-                try {
-                    ColorSaver.save(data.entryColor);
-                } catch (IOException exception) {
-                    System.err.println("Failed to save colors!!");
-                }
-
-		// **** sharon **
-		//		saveColorFile();
-		// try {
-		//    Util.saveColors(data.entryColor, "Timeline Graph");
-		// } catch (IOException e) {
-		//     System.err.println("Attempt to write to color.map failed");
-		// }
+		Analysis.saveColors();
 	    }
 	    else if(arg.equals("Restore Entry Point Colors")) {
 		//		openColorFile();

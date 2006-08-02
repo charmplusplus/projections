@@ -106,7 +106,7 @@ public class ActivityManager {
 
     public void resetColors() {
 	Color tmpColors[] =
-	    Analysis.createColorMap(activityNames.size());
+	    ColorManager.createColorMap(activityNames.size());
 	for (int i=0; i<activityNames.size(); i++) {
 	    activityColors.set(i, tmpColors[i]);
 	}

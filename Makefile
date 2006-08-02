@@ -11,7 +11,6 @@ SRC=\
     projections/analysis/CallTable.java\
     projections/analysis/CallStackManager.java\
     projections/analysis/Chare.java\
-    projections/analysis/ColorSaver.java\
     projections/analysis/Entry.java\
     projections/analysis/EPNamdDefs.java\
     projections/analysis/EPDataGenerator.java\
@@ -45,6 +44,7 @@ SRC=\
     projections/analysis/ProjMain.java\
     projections/gui/AboutDialog.java\
     projections/gui/Analysis.java\
+    projections/gui/AmpiTimeProfileWindow.java\
     projections/gui/AnimationColorBarPanel.java\
     projections/gui/AnimationDisplayPanel.java\
     projections/gui/AnimationWindow.java\
@@ -54,6 +54,7 @@ SRC=\
     projections/gui/Bubble.java\
     projections/gui/CallTableTextArea.java\
     projections/gui/CallTableWindow.java\
+    projections/gui/ColorManager.java\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
     projections/gui/ColorSelectable.java\

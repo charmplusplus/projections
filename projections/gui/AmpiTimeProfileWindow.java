@@ -183,7 +183,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         }
 
         numFunctions = funcCnt;
-        outColors = Analysis.createColorMap(funcCnt);
+        outColors = ColorManager.createColorMap(funcCnt);
         funcNames = new String[funcCnt];
         colorArray = new Color[1][funcCnt];        
         //initialize the stateArray that all functions will be displayed. Values
@@ -332,15 +332,12 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
                 setOutputGraphData(true);
 	    } else if (b == saveColors) {
 		// save all entry point colors to disk
-		try {
-                    ColorSaver.save(colorArray[0]);
-		} catch (IOException exception) {
-		    System.err.println("Failed to save colors!!");
-		}
+		Analysis.saveColors();
 	    } else if (b == loadColors) {
 		//load all entry point colors from disk
 		try {
-		    colorArray[0] = ColorSaver.loadColors();
+		    colorArray[0] = 
+			ColorManager.loadActivityColors(Analysis.ACTIVITY_PROJECTIONS);
 		    // silly inefficiency
 		    setOutputGraphData(false);
 		} catch (IOException exception) {

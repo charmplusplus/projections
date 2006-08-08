@@ -16,7 +16,7 @@ import projections.misc.*;
 public class MainWindow extends JFrame
     implements ActionListener, ScalePanel.StatusDisplay
 {
-    protected static final int NUM_WINDOWS = 14;
+    protected static final int NUM_WINDOWS = 15;
 
     protected static final int GRAPH_WIN = 0;
     protected static final int MULTI_WIN = 1;
@@ -32,6 +32,7 @@ public class MainWindow extends JFrame
     protected static final int OVERVIEW_WIN = 11;
     protected static final int FUNCTION_WIN = 12;
     protected static final int POSE_WIN = 13;
+    protected static final int USER_EVENTS_WIN = 14;
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
@@ -264,6 +265,8 @@ public class MainWindow extends JFrame
 	    showChildWindow("StlWindow", OVERVIEW_WIN);
 	} else if (item.equals("Time Profile Graph")) {
 	    showChildWindow("TimeProfileWindow", TIME_PROF_WIN);
+	} else if (item.equals("User Events")) {
+	    showChildWindow("UserEventsWindow", USER_EVENTS_WIN);
 	} else if (item.equals("Multirun Analysis")) {
 	    showChildWindow("MultiRunWindow", MULTI_WIN);
 	} else if (item.equals("Function Tool")) {

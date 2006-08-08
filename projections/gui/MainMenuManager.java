@@ -70,6 +70,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // Overview
 		    false,  // Animation
 		    false,  // Time Profile Graphs
+		    false,  // User Events
 		    true,   // Multirun Analysis
 		    false,   // Function Tools (temporary)
 		    false   // POSE Analysis
@@ -107,6 +108,7 @@ public class MainMenuManager extends MenuManager
 		    true,  // Overview
 		    true,  // Animation
 		    false,  // Time Profile Graphs
+		    false,  // User Events
 		    true,   // Multirun Analysis
 		    false,   // Function Tools (temporary)
 		    false,  // POSE Analysis
@@ -144,6 +146,7 @@ public class MainMenuManager extends MenuManager
 		    true,  // Overview
 		    true,  // Animation
 		    true,  // Time Profile Graphs
+		    true,  // User Events
 		    true,   // Multirun Analysis
 		    true,   // Function Tools (temporary)
 		    false   // POSE Analysis
@@ -192,6 +195,7 @@ public class MainMenuManager extends MenuManager
 		"Histograms",
 		"Overview",
 		"Animation",
+		"User Events",
 		"Multirun Analysis",
 		"Function Tool",
 		"POSE Analysis"
@@ -236,6 +240,7 @@ public class MainMenuManager extends MenuManager
 		       arg.equals("View Log Files") ||
 		       arg.equals("Animation") ||
 		       arg.equals("Time Profile Graph") ||
+		       arg.equals("User Events") ||
 		       arg.equals("Function Tool") ||
 		       arg.equals("Overview") ||
 		       arg.equals("POSE Analysis")) {

@@ -158,6 +158,7 @@ SRC=\
     projections/gui/TimelineLine.java\
     projections/gui/U.java\
     projections/gui/Util.java\
+    projections/gui/UserEventsWindow.java\
     projections/gui/UserEventWindow.java\
     projections/gui/Wait.java\
     projections/gui/WaitButton.java\

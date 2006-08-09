@@ -9,6 +9,7 @@ import javax.swing.*;
 import java.text.*;
 
 import projections.analysis.*;
+import projections.guiUtils.*;
 import projections.gui.graph.*;
 
 public class CommTimeWindow extends GenericGraphWindow
@@ -547,7 +548,7 @@ public class CommTimeWindow extends GenericGraphWindow
 		// load all entry point colors from disk
 		try {
 		    colorArray[0] = 
-			ColorManager.loadActivityColors(Analysis.ACTIVITY_PROJECTIONS);
+			ColorManager.loadActivityColors(ActivityManager.PROJECTIONS);
 		    // silly inefficiency
 		    setOutputGraphData();
 		} 

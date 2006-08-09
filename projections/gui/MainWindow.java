@@ -14,8 +14,9 @@ import projections.gui.graph.*;
 import projections.misc.*;
 
 public class MainWindow extends JFrame
-    implements ActionListener, ScalePanel.StatusDisplay
+    implements ScalePanel.StatusDisplay
 {
+    /* **** Static setup data for windows ***** */
     protected static final int NUM_WINDOWS = 15;
 
     protected static final int GRAPH_WIN = 0;
@@ -33,6 +34,52 @@ public class MainWindow extends JFrame
     protected static final int FUNCTION_WIN = 12;
     protected static final int POSE_WIN = 13;
     protected static final int USER_EVENTS_WIN = 14;
+
+    public static final String[] windowMenuNames =
+    {
+	"Graphs",
+	"Multirun Analysis",
+	"Usage Profile",
+	"Time Profile Graph",
+	"Communication",
+	"Communication vs Time",
+	"Call Table",
+	"Animation",
+	"View Log Files",
+	"Histograms",
+	"Timelines",
+	"Overview",
+	"Function Tool",
+	"POSE Analysis",
+	"User Events"
+    };
+
+    public static final String[] windowClassNames =
+    { 
+	"GraphWindow",
+	"MultiRunWindow",
+	"ProfileWindow",
+	"TimeProfileWindow",
+	"CommWindow",
+	"CommTimeWindow",
+	"CallTableWindow",
+	"AnimationWindow",
+	"LogFileViewerWindow",
+	"HistogramWindow",
+	"TimelineWindow",
+	"StlWindow",
+	"FunctionTool",
+	"PoseAnalysisWindow",
+	"UserEventsWindow"
+    };
+
+    public static final boolean[][] menuDataStates =
+    {
+	{
+	},
+	{
+	},
+    };
 
     private static final int DEFAULT_NUM_RUNS = 1;
 
@@ -56,31 +103,9 @@ public class MainWindow extends JFrame
     // This should eventually be configurable for multiple runs,
     // multiple languages with multiple user-level visualization tools.
     protected JFrame childWindows[][];
-    // Indexed by tools available
-    protected String toolDescriptions[];
-    // Indexed by tools available on both dimensions
-    private boolean crossToolMask[][];
 
     // should be tables of objects dependent indexed by runs in the future.
     private GraphWindow          graphWindow;
-    private TimelineWindow       timelineWindow;
-    private ProfileWindow        profileWindow;
-    private CommWindow           commWindow;
-    private CommTimeWindow       commTimeWindow;
-    private CallTableWindow	 callTableWindow;
-    private HelpWindow           helpWindow;
-    private LogFileViewerWindow  logFileViewerWindow;
-    private HistogramWindow      histogramWindow;
-    private StlWindow            stlWindow;
-    private MultiRunWindow       multiRunWindow;
-    private AnimationWindow      animationWindow;
-    private TimeProfileWindow    timeProfileWindow;
-    // FunctionTool is still very much temporary despite first-class treatment
-    private FunctionTool         functionWindow;
-    // This is a tool specifically activated by the presence of additional
-    // POSE data. Could form the basis for generalization to a flexible 
-    // implementation of the projector multi-lingual analysis idea.
-    private PoseAnalysisWindow   poseAnalysisWindow;
 
     // components associated with the main window
     private MainTitlePanel        titlePanel;
@@ -129,45 +154,9 @@ public class MainWindow extends JFrame
 	setBackground(Color.lightGray);
 
 	childWindows = new JFrame[NUM_WINDOWS][DEFAULT_NUM_RUNS];
-	initializeTools();
 
 	menuManager = new MainMenuManager(this);
 	createLayout();
-    }
-
-    public void actionPerformed(ActionEvent evt)
-    {
-    }
-
-    /**
-     *  Set up the tool descriptions and cross tool masks for this
-     *  particular run. It is intended to be flexible enough in the
-     *  future for user-defined tools to be dynamically added to
-     *  projections (in the form of registration calls).
-     */
-    private void initializeTools() {
-
-	// give the default tools descriptive names
-	toolDescriptions = new String[NUM_WINDOWS];
-	toolDescriptions[GRAPH_WIN] = "Graph";
-	toolDescriptions[MULTI_WIN] = "Multirun";
-	toolDescriptions[PROFILE_WIN] = "Usage Profile";
-	toolDescriptions[COMM_WIN] = "Communication";
-	toolDescriptions[COMM_TIME_WIN] = "Communication vs Time";
-	toolDescriptions[CALL_TABLE_WIN] = "Call Table";
-	toolDescriptions[LOGVIEW_WIN] = "View Logs";
-	toolDescriptions[HIST_WIN] = "Histograms";
-	toolDescriptions[ANIMATION_WIN] = "Animation";
-	toolDescriptions[TIMELINE_WIN] = "Timeline";
-	toolDescriptions[OVERVIEW_WIN] = "Overview";
-	toolDescriptions[TIME_PROF_WIN] = "Time Profile Graph";
-	toolDescriptions[FUNCTION_WIN] = "AMPI Functions";
-
-	// cross-tool masks allow tools to decide if their parameter sets
-	// are compatible and hence may "cross over" from one tool to the
-	// next with the same parameters used.
-	crossToolMask = new boolean[NUM_WINDOWS][NUM_WINDOWS];
-
     }
 
     private void createLayout()
@@ -204,76 +193,6 @@ public class MainWindow extends JFrame
 	background.setPreferredSize(new Dimension(ScreenInfo.screenWidth,
 						  ScreenInfo.screenHeight));
 	pack();
-    }
-
-    // get child window name by number
-    public String getChildName(int index) {
-	if (index == GRAPH_WIN) {
-	    return "GraphWindow";
-	} else if (index == MULTI_WIN) {
-	    return "MultiRunWindow";
-	} else if (index == PROFILE_WIN) {
-	    return "ProfileWindow";
-	} else if (index == COMM_WIN) {
-	    return "CommWindow";
-	} else if (index == COMM_TIME_WIN) {
-	    return "CommTimeWindow";
-	} else if (index == CALL_TABLE_WIN) {
-	    return "CallTableWindow";
-	} else if (index == ANIMATION_WIN) {
-	    return "AnimationWindow";
-	} else if (index == LOGVIEW_WIN) {
-	    return "LogFileViewerWindow";
-	} else if (index == HIST_WIN) {
-	    return "HistogramWindow";
-	} else if (index == TIMELINE_WIN) {
-	    return "TimelineWindow";
-	} else if (index == OVERVIEW_WIN) {
-	    return "StlWindow";
-	} else if (index == TIME_PROF_WIN) {
-	    return "TimeProfileWindow";
-	} else if (index == FUNCTION_WIN) {
-	    return "FunctionTool";
-	} else if (index == POSE_WIN) {
-	    return "PoseAnalysisWindow";
-	} else {
-	    return null;
-	}
-    }
-
-    // interface with the menu manager
-    public void menuToolSelected(String item) {
-	if (item.equals("Graphs")) {
-	    showChildWindow("GraphWindow", GRAPH_WIN);
-	} else if (item.equals("Histograms")) {
-	    showChildWindow("HistogramWindow", HIST_WIN);
-	} else if (item.equals("Timelines")) {
-	    showChildWindow("TimelineWindow", TIMELINE_WIN);
-	} else if (item.equals("Usage Profile")) {
-	    showChildWindow("ProfileWindow", PROFILE_WIN);
-	} else if (item.equals("Communication")) {
-	    showChildWindow("CommWindow", COMM_WIN);
-	} else if (item.equals("Communication vs Time")) {
-	    showChildWindow("CommTimeWindow", COMM_TIME_WIN);
-	} else if (item.equals("Call Table")) {
-	    showChildWindow("CallTableWindow", CALL_TABLE_WIN);
-	} else if (item.equals("Animation")) {
-	    showChildWindow("AnimationWindow", ANIMATION_WIN);
-	} else if (item.equals("View Log Files")) {
-	    showChildWindow("LogFileViewerWindow", LOGVIEW_WIN);
-	} else if (item.equals("Overview")) {
-	    showChildWindow("StlWindow", OVERVIEW_WIN);
-	} else if (item.equals("Time Profile Graph")) {
-	    showChildWindow("TimeProfileWindow", TIME_PROF_WIN);
-	} else if (item.equals("User Events")) {
-	    showChildWindow("UserEventsWindow", USER_EVENTS_WIN);
-	} else if (item.equals("Multirun Analysis")) {
-	    showChildWindow("MultiRunWindow", MULTI_WIN);
-	} else if (item.equals("Function Tool")) {
-	    showChildWindow("FunctionTool", FUNCTION_WIN);
-	} else if (item.equals("POSE Analysis")) {
-	    showChildWindow("PoseAnalysisWindow", POSE_WIN);
-	}
     }
 
     /**

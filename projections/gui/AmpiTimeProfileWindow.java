@@ -9,7 +9,7 @@ import java.util.Vector;
 import javax.swing.*;
 
 import projections.analysis.*;
-
+import projections.guiUtils.*;
 /**
  *  AmpiTimeProfileWindow
  *  by Chao Mei
@@ -337,7 +337,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 		//load all entry point colors from disk
 		try {
 		    colorArray[0] = 
-			ColorManager.loadActivityColors(Analysis.ACTIVITY_PROJECTIONS);
+			ColorManager.loadActivityColors(ActivityManager.PROJECTIONS);
 		    // silly inefficiency
 		    setOutputGraphData(false);
 		} catch (IOException exception) {

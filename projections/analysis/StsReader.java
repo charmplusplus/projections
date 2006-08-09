@@ -128,12 +128,6 @@ public class StsReader extends ProjDefs
 		    
 		    EntryNames[ID][0] = Name;
 		    EntryNames[ID][1] = ClassNames [ChareID];
-
-		    // NEW and ORTHOGONAL (for now) -
-		    // create entries in ActivityManager.
-		    if (!isMultirun) {
-			Analysis.activityManager.registerActivity("Entry Method", ID, EntryNames[ID][0]);
-		    }
 		} else if (s1.equals("MESSAGE")) {
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
@@ -151,13 +145,8 @@ public class StsReader extends ProjDefs
 			    functionEventName;
 			functionEventIndices.put(key,
 						 new Integer(functionEventIndex));
-			// NEW and ORTHOGONAL (for now) -
-			// create entries in ActivityManager
-			if (!isMultirun) {
-			    Analysis.activityManager.registerActivity("Function", functionEventIndex, functionEventName);
-			}
-			functionEventIndex++;
 		    }
+		    functionEventIndex++;
 		} else if (s1.equals("EVENT")) {
 		    Integer key = new Integer(st.nextToken());
 		    if (!userEvents.containsKey(key)) {

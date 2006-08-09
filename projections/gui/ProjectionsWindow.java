@@ -29,11 +29,6 @@ import java.awt.*;
  *       public long startTime;
  *       public long endTime;
  *
- *  ProjectionsWindow also implements a cross-tool button panel that
- *  developers can choose to use by getToolButtonPanel(). Classes which
- *  extend ProjectionsWindow now must call setLayout() funciton which
- *	shall be defined here.
- *
  */
 
 public abstract class ProjectionsWindow
@@ -162,68 +157,22 @@ public abstract class ProjectionsWindow
 	contentPane.setLayout(gbl);
 	
 	Util.gblAdd(contentPane, mainPanel, gbc, 0,1, 1,1, 1,1);
-	//	Util.gblAdd(contentPane, getToolButtonPanel(), gbc, 0,2, 1,1, 0,0);
-	//getContentPane().add(mainPanel);
-	//getContentPane().add(getToolButtonPanel());
-    }
-    
-    public JPanel getToolButtonPanel() {
-	//System.out.println("Start of ProjectionsWindow.getToolButtonPanel()");
-	JPanel appButtonPanel = new JPanel();
-	GridBagConstraints gbc = new GridBagConstraints();
-	GridBagLayout gbl = new GridBagLayout();
-	
-	window = new Button[parentWindow.NUM_WINDOWS];
-	
-	/*
-	 * Apurva
-	 * Note: currently using myWindowID to figure out which window I am
-	 * As long as myWindowID continues to correspond to
-	 * mainWindow.GRAPH_WIN .... mainWindow.TIME_PROF_WIN...
-	 * this should continually work
-	 */
-	for(int k=0; k<parentWindow.NUM_WINDOWS; k++) {
-	    if (k != myWindowID) {
-		window[k] = new Button(parentWindow.toolDescriptions[k]);
-		window[k].addActionListener(this);
-		//System.out.println("Added button for "+ parentWindow.toolDescriptions[k]);
-		Util.gblAdd(appButtonPanel, window[k], gbc, k,0, 1,1, 1,1);
-		
-	    }
-	}
-	
-	//System.out.println("End of ProjectionsWindow.getToolButtonPanel()");
-	return appButtonPanel;
     }
     
     public void actionPerformed(ActionEvent ae){
-		//System.out.println("Start of ProjectionWindow.itemStateChanged()");
-		if (ae.getSource() instanceof Button) {
-			Button b = (Button)ae.getSource();
-			for(int k=0; k < parentWindow.NUM_WINDOWS;k++) {
-				if (b == window[k]) {
-					//System.out.println(parentWindow.getChildName(k)  +"'s button was pressed");
-					//parentWindow.showChildWindow(parentWindow.getChildName(k), k);
-
-					/* Apurva
-					 *
-					 * For now, we are not going to do anything until
-					 * CW has implemented the ProjectionWindowEvent
-					 *
-					 */
-
-					break;
-				}
-			}
+	if (ae.getSource() instanceof Button) {
+	    Button b = (Button)ae.getSource();
+	    for(int k=0; k < parentWindow.NUM_WINDOWS;k++) {
+		if (b == window[k]) {
+		    break;
 		}
-
-		//System.out.println("End of ProjectionsWindow.itemStateChanged()");
+	    }
 	}
-
+    }
+    
     // close (and destroy all access) to the window
     public void close(){
 	dispose();
 	parentWindow.closeChildWindow(myWindowID);
     }
 }
-

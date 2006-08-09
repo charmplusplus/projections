@@ -181,25 +181,7 @@ public class MainMenuManager extends MenuManager
 	    });
 	menubar.add(preferencesMenu);
 
-	toolMenu = makeJMenu("Tools", 
-			     new Object[]
-	    {
-		"Graphs",
-		"Timelines",
-		"Usage Profile",
-		"Time Profile Graph",
-		"Communication",
-		"Communication vs Time",
-		"Call Table",
-		"View Log Files",
-		"Histograms",
-		"Overview",
-		"Animation",
-		"User Events",
-		"Multirun Analysis",
-		"Function Tool",
-		"POSE Analysis"
-	    });
+	toolMenu = makeJMenu("Tools", parent.windowMenuNames);
 	menubar.add(toolMenu);
 
 	stateChanged(NO_DATA);
@@ -229,22 +211,14 @@ public class MainMenuManager extends MenuManager
 		parent.setGrayscale();
 	    } else if (arg.equals("Use Standard Colors")) {
 		parent.setFullColor();
-	    } else if (arg.equals("Multirun Analysis") ||
-		       arg.equals("Histograms") ||
-		       arg.equals("Graphs") ||
-		       arg.equals("Timelines") ||
-		       arg.equals("Usage Profile") ||
-		       arg.equals("Communication") ||
-		       arg.equals("Communication vs Time") ||
-		       arg.equals("Call Table") ||
-		       arg.equals("View Log Files") ||
-		       arg.equals("Animation") ||
-		       arg.equals("Time Profile Graph") ||
-		       arg.equals("User Events") ||
-		       arg.equals("Function Tool") ||
-		       arg.equals("Overview") ||
-		       arg.equals("POSE Analysis")) {
-		parent.menuToolSelected(arg);
+	    } else {
+		// assume that anything else is a tool selection
+		for (int i=0; i<parent.NUM_WINDOWS; i++) {
+		    if (parent.windowMenuNames[i].equals(arg)) {
+			parent.showChildWindow(parent.windowClassNames[i],i);
+			break;
+		    }
+		}
 	    }
 	}
     }

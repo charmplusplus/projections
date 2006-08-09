@@ -4,6 +4,8 @@ import java.io.*;
 import java.util.*;
 import java.awt.*;
 
+import projections.guiUtils.*;
+
 /**
  *  ColorManager.java
  *  8/2/2006 - replaces ColorSaver.java in analysis directory
@@ -22,7 +24,7 @@ public class ColorManager
     }
 
     public static Color[][] initializeColors() {
-	Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];
+	Color retColors[][] = new Color[ActivityManager.NUM_ACTIVITIES][];
 	for (int i=0; i<retColors.length; i++) {
 	    retColors[i] = 
 		createColorMap(Analysis.getNumActivity(i));
@@ -35,7 +37,7 @@ public class ColorManager
     {
 	ObjectInputStream in =
 	    new ObjectInputStream(new FileInputStream(filename));
-	Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];
+	Color retColors[][] = new Color[ActivityManager.NUM_ACTIVITIES][];
 	String names[] = null;
 	Color tempColors[][] = null;
 	int index = 0;
@@ -65,8 +67,8 @@ public class ColorManager
 	    // single array format, so back-off to load that instead whilst
 	    // constructing the rest of the array from scratch.
 	    in.close();
-	    retColors[Analysis.ACTIVITY_PROJECTIONS] = 
-		loadActivityColors(Analysis.ACTIVITY_PROJECTIONS);
+	    retColors[ActivityManager.PROJECTIONS] = 
+		loadActivityColors(ActivityManager.PROJECTIONS);
 	    for (int i=0; i<retColors.length; i++) {
 		if (retColors[i] == null) {
 		    retColors[i] = 

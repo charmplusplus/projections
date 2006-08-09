@@ -6,7 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import projections.analysis.*;
-
+import projections.guiUtils.*;
 /**
  *  TimeProfileWindow
  *  by Chee Wai Lee
@@ -393,7 +393,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 		// load all entry point colors from disk
 		try {
 		    colorArray[0] = 
-			ColorManager.loadActivityColors(Analysis.ACTIVITY_PROJECTIONS);
+			ColorManager.loadActivityColors(ActivityManager.PROJECTIONS);
 		    // silly inefficiency
 		    setOutputGraphData();
 		} catch (IOException exception) {

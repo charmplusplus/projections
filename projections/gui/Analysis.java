@@ -41,15 +41,6 @@ public class Analysis {
     public static final int SUMDETAIL = 3;
     public static final int DOP = 4;
 
-    public static final int NUM_ACTIVITIES = 4;
-    public static final int ACTIVITY_PROJECTIONS = 0;
-    public static final int ACTIVITY_USER_EVENTS = 1;
-    public static final int ACTIVITY_FUNCTIONS = 2;
-    public static final int ACTIVITY_POSE_DOP = 3;
-    public static final String ACTIVITY_NAMES[] = 
-    {"ACTIVITY_PROJECTIONS", "ACTIVITY_USER_EVENTS",
-     "ACTIVITY_FUNCTIONS", "ACTIVITY_POSE_DOP"};
-
     /******************* Initialization ************/
     public static ProjectionsConfigurationReader rcReader;
     public static Component guiRoot;
@@ -65,7 +56,6 @@ public class Analysis {
     private static PoseDopReader dopReader; //Only for .poselog files
 
     private static IntervalData intervalData; // interval-based data
-    public static ActivityManager      activityManager;
 
     private static String baseName;
     private static String logDirectory;
@@ -100,7 +90,7 @@ public class Analysis {
     private static Color[] userEventColors;
     private static Color[] functionColors;
     private static Color[][] activityColors =
-	new Color[NUM_ACTIVITIES][];
+	new Color[ActivityManager.NUM_ACTIVITIES][];
 
     private static Color[] grayColors;
     private static Color[] grayUserEventColors;
@@ -125,7 +115,6 @@ public class Analysis {
 	throws IOException 
     {
 	guiRoot = rootComponent;
-	activityManager = new ActivityManager();
 	try {
 	    baseName = getBaseName(filename);
 	    logDirectory = dirFromFile(filename);
@@ -135,7 +124,6 @@ public class Analysis {
 						   getLogDirectory());
 	    FileUtils.detectFiles(sts, baseName);
 
-	    //	    activityManager.registrationDone();
 	    // if I can find the saved color maps, then use it.
 	    String colorsaved = 
 		getLogDirectory() + File.separator + "savedcolors.prj";
@@ -149,9 +137,9 @@ public class Analysis {
 	    } else {
 		activityColors = ColorManager.initializeColors();
 	    }
-	    entryColors = activityColors[ACTIVITY_PROJECTIONS];
-	    userEventColors = activityColors[ACTIVITY_USER_EVENTS];
-	    functionColors = activityColors[ACTIVITY_FUNCTIONS];
+	    entryColors = activityColors[ActivityManager.PROJECTIONS];
+	    userEventColors = activityColors[ActivityManager.USER_EVENTS];
+	    functionColors = activityColors[ActivityManager.FUNCTIONS];
 	    grayColors = 
 		ColorManager.createGrayscaleColorMap(sts.getEntryCount());
 	    grayUserEventColors = 
@@ -665,14 +653,14 @@ public class Analysis {
     // *** Activity Management *** */
 
     public static int stringToActivity(String name) {
-	if (name.equals("ACTIVITY_PROJECTIONS")) {
-	    return ACTIVITY_PROJECTIONS;
-	} else if (name.equals("ACTIVITY_USER_EVENTS")) {
-	    return ACTIVITY_USER_EVENTS;
-	} else if (name.equals("ACTIVITY_FUNCTIONS")) {
-	    return ACTIVITY_FUNCTIONS;
-	} else if (name.equals("ACTIVITY_POSE_DOP")) {
-	    return ACTIVITY_POSE_DOP;
+	if (name.equals("PROJECTIONS")) {
+	    return ActivityManager.PROJECTIONS;
+	} else if (name.equals("USER_EVENTS")) {
+	    return ActivityManager.USER_EVENTS;
+	} else if (name.equals("FUNCTIONS")) {
+	    return ActivityManager.FUNCTIONS;
+	} else if (name.equals("POSE_DOP")) {
+	    return ActivityManager.POSE_DOP;
 	} else {
 	    return -1;  // error condition
 	}
@@ -680,11 +668,11 @@ public class Analysis {
 
     public static int getNumActivity(int type) {
 	switch (type) {
-	case ACTIVITY_PROJECTIONS:
+	case ActivityManager.PROJECTIONS:
 	    return getNumUserEntries();
-	case ACTIVITY_USER_EVENTS:
+	case ActivityManager.USER_EVENTS:
 	    return getNumUserDefinedEvents();
-	case ACTIVITY_FUNCTIONS:
+	case ActivityManager.FUNCTIONS:
 	    return getNumFunctionEvents();
 	}
 	return 0;

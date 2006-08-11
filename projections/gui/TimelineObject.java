@@ -123,7 +123,8 @@ public class TimelineObject extends Component
 	    }
 	    int ecount = Analysis.getNumUserEntries();
 	    if (n >= ecount) {
-		System.out.println("Fatal error: invalid entry "+n+"!");
+		System.out.println("Fatal error: invalid entry " + n +
+				   " on processor " + pCurrent + "!");
 		System.exit(1) ;
 	    }
 	    bubbletext[textIndex++] = (Analysis.getEntryNames())[n][1] + 

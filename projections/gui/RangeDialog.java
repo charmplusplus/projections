@@ -29,7 +29,7 @@ import projections.analysis.*;
  */
 
 public class RangeDialog extends JDialog
-    implements ActionListener, KeyListener, FocusListener
+    implements ActionListener, KeyListener, FocusListener, ItemListener
 {
     // Constant variables
     private static final int DIALOG_OK = 0;
@@ -48,7 +48,7 @@ public class RangeDialog extends JDialog
     JButton bOK, bUpdate, bCancel;
 
     JComboBox historyList;
-    JButton bAddToHistory, bSaveHistory;
+    JButton bAddToHistory, bRemoveFromHistory, bSaveHistory;
 
     // private GUI objects
     private JLabel startTextLabel, endTextLabel, totalTimeTextLabel,
@@ -69,8 +69,6 @@ public class RangeDialog extends JDialog
 
     // history variables
     RangeHistory history;
-    Vector historyVector;
-    Vector historyStringVector;
 
     // flags
     private boolean layoutComplete = false;
@@ -108,22 +106,6 @@ public class RangeDialog extends JDialog
 
 	history = new RangeHistory(Analysis.getLogDirectory() +
 				   File.separator);
-	try {
-	    // NOTE: historyVector is not a new copy of the vector stored in
-	    // history!!
-	    historyVector = history.loadRanges();
-	    historyStringVector = new Vector();
-	    for (int i=0; i<historyVector.size()/2; i++) {
-		String historyString = 
-		    U.t(((Long)historyVector.elementAt(i*2)).longValue()) + 
-		    " to " + 
-		    U.t(((Long)historyVector.elementAt(i*2+1)).longValue());
-		historyStringVector.add(historyString);
-	    }
-	} catch (IOException e) {
-	    System.err.println("Error: " + e.toString());
-	}
-
 	this.setModal(true);
 	dialogState = DIALOG_CANCELLED; // default state
     }   
@@ -166,6 +148,12 @@ public class RangeDialog extends JDialog
 		String historyString = U.t(start) + " to " + U.t(end);
 		historyList.insertItemAt(historyString,0);
 		historyList.setSelectedIndex(0);
+	    } else if (b == bRemoveFromHistory) {
+		int selected = historyList.getSelectedIndex();
+		if (selected != -1) {
+		    history.remove(selected);
+		    historyList.removeItemAt(selected);
+		}
 	    } else if (b == bSaveHistory) {
 		try {
 		    history.save();
@@ -179,16 +167,20 @@ public class RangeDialog extends JDialog
 	    // input.
 	    updateData((JTextField)evt.getSource());
 	    bOK.setEnabled(true);
-	} else if (evt.getSource() instanceof JComboBox) {
+	}
+    }   
+    
+    public void itemStateChanged(ItemEvent evt) {
+	if (evt.getSource() instanceof JComboBox) {
 	    int selection = historyList.getSelectedIndex();
 	    if (selection == -1) {
 		return;
 	    }
-	    startTimeField.setValue(((Long)historyVector.elementAt(selection*2)).longValue());
-	    endTimeField.setValue(((Long)historyVector.elementAt(selection*2+1)).longValue());
+	    startTimeField.setValue(history.getStartValue(selection));
+	    endTimeField.setValue(history.getEndValue(selection));
 	}
-    }   
-    
+    }
+
     public void focusGained(FocusEvent evt) {
 	// do nothing
     }
@@ -432,32 +424,36 @@ public class RangeDialog extends JDialog
 	// Default history layout
 	JPanel historyPanel = new JPanel();
 	historyPanel.setLayout(gbl);
-	historyList = new JComboBox(historyStringVector);
+	historyList = new JComboBox(history.getHistoryStrings());
 	historyList.setEditable(false);
-	historyList.setMaximumRowCount(5);
-	if (historyList.getItemCount() > 0) {
-	    historyList.setSelectedIndex(0);
-	}
+	historyList.setMaximumRowCount(RangeHistory.MAX_ENTRIES);
+	historyList.setSelectedIndex(-1); // nothing selected at first
+
 	bAddToHistory = new JButton("Add to History List");
+	bRemoveFromHistory = new JButton("Remove selected History");
 	bSaveHistory = new JButton("Save History to Disk");
 
 	if (disableRange) {
 	    historyList.setEnabled(false);
 	    bAddToHistory.setEnabled(false);
+	    bRemoveFromHistory.setEnabled(false);
 	    bSaveHistory.setEnabled(false);
 	} else {
 	    // set listeners
-	    historyList.addActionListener(this);
+	    historyList.addItemListener(this);
 	    bAddToHistory.addActionListener(this);
+	    bRemoveFromHistory.addActionListener(this);
 	    bSaveHistory.addActionListener(this);
 	}
 
 	// layout
 	Util.gblAdd(historyPanel, historyList,
 		    gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(historyPanel, bAddToHistory,
-		    gbc, 1,0, 1,1, 1,1);
 	Util.gblAdd(historyPanel, bSaveHistory,
+		    gbc, 1,0, 1,1, 1,1);
+	Util.gblAdd(historyPanel, bAddToHistory,
+		    gbc, 0,1, 1,1, 1,1);
+	Util.gblAdd(historyPanel, bRemoveFromHistory,
 		    gbc, 1,1, 1,1, 1,1);
 
 	return historyPanel;

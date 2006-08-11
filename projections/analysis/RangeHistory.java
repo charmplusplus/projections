@@ -3,30 +3,44 @@ package projections.analysis;
 import java.io.*;
 import java.util.*;
 
+import projections.gui.*;
+
 public class RangeHistory
 {
     public static final int MAX_ENTRIES = 10;
 
-    private boolean noSource = false;
     private String filename;
     private int numEntries;
     private Vector rangeSet;
+
+    Vector historyStringVector;
 
     public RangeHistory(String logDirectory) 
     {
 	this.filename = logDirectory + "ranges.hst";
 	if (!(new File(this.filename)).exists()) {
-	    noSource = true;
+	    rangeSet = new Vector();
+	} else {
+	    try {
+		loadRanges();
+		historyStringVector = new Vector();
+		for (int i=0; i<rangeSet.size()/2; i++) {
+		    String historyString = 
+			U.t(((Long)rangeSet.elementAt(i*2)).longValue()) + 
+			" to " + 
+			U.t(((Long)rangeSet.elementAt(i*2+1)).longValue());
+		    historyStringVector.add(historyString);
+		}
+	    } catch (IOException e) {
+		System.err.println("Error: " + e.toString());
+	    }
 	}
     }
 
-    public Vector loadRanges() 
+    private void loadRanges() 
 	throws IOException
     {
 	rangeSet = new Vector();
-	if (noSource) {
-	    return rangeSet;
-	}
 	String line;
 	StringTokenizer st;
 	BufferedReader reader = 
@@ -47,7 +61,6 @@ public class RangeHistory
 	    }
 	}
 	reader.close();
-	return rangeSet;
     }
 
     public void save() 
@@ -77,5 +90,53 @@ public class RangeHistory
 	rangeSet.add(0, new Long(end));
 	rangeSet.add(0, new Long(start));
 	numEntries++;
+    }
+
+    public void remove(int index) {
+	if ((index < 0) ||
+	    (index >= numEntries)) {
+	    System.err.println("Internal Error: Attempt to remove " +
+			       "invalid index " + 
+			       index + ". Max number of " +
+			       "histories is " + numEntries +
+			       ". Please report to developers!");
+	    System.exit(-1);
+	}
+	// remove the "same" index twice because the first remove
+	// has the side effect of changing the index.
+	rangeSet.remove(index*2);
+	rangeSet.remove(index*2); 
+	numEntries--;
+    }
+
+    // NOTE: history string is only used at the start of initializing
+    // the history list in the GUI. Any further updates to this string
+    // is quite meaningless.
+    public Vector getHistoryStrings() {
+	return historyStringVector;
+    }
+
+    public long getStartValue(int index) {
+	if ((index < 0) ||
+	    (index >= numEntries)) {
+	    System.err.println("Internal Error: Requested history index " + 
+			       index + " is invalid. Max number of " +
+			       "histories is " + numEntries +
+			       ". Please report to developers!");
+	    System.exit(-1);
+	}
+	return ((Long)rangeSet.elementAt(index*2)).longValue();
+    }
+
+    public long getEndValue(int index) {
+	if ((index < 0) ||
+	    (index >= numEntries)) {
+	    System.err.println("Internal Error: Requested history index " + 
+			       index + " is invalid. Max number of " +
+			       "histories is " + numEntries +
+			       ". Please report to developers!");
+	    System.exit(-1);
+	}
+	return ((Long)rangeSet.elementAt(index*2+1)).longValue();
     }
 }

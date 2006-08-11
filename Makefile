@@ -63,6 +63,7 @@ SRC=\
     projections/gui/CommTimeWindow.java\
     projections/gui/CommWindow.java\
     projections/gui/Converter.java\
+    projections/gui/DialogParameters.java\
     projections/gui/EntrySelectionDialog.java\
     projections/gui/EntryPointWindow.java\
     projections/gui/FormattedNumber.java\

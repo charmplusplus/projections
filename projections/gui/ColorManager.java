@@ -85,6 +85,39 @@ public class ColorManager
     }
 
     /**
+     *  This is the code used by tools to load colors of a particular type.
+     *  In the event the color module used is an old version, the method
+     *  will catch the exception and fallback to the previous code which
+     *  expects a 1D array instead of a 2D array.
+     */
+    public static Color[] loadActivityColors(int type) 
+	throws IOException
+    {
+	ObjectInputStream in =
+	    new ObjectInputStream(new FileInputStream(filename));
+	Color retColors[][] = null;
+	try {
+	    retColors = (Color[][])(in.readObject());
+	} catch (ClassCastException e) {
+	    // attempt a fall-back version for backward compatibility
+	    return loadActivityColorsFallback(type);
+	} catch (Exception e) {
+	    System.err.println("WARNING: Failed to read saved color object");
+	    System.err.println(e);
+	    return null;
+	}
+	in.close();
+	if ((type >= 0) && (type < ActivityManager.NUM_ACTIVITIES)) {
+	    return retColors[type];
+	} else {
+	    System.err.println("WARNING - Internal Error: Activity type " +
+			       type + " unknown when requesting load " +
+			       "colors. Please inform developers");
+	    return null;
+	}
+    }
+
+    /**
      *  This is stand-in code for current tool codes to work while
      *  in preparation for a move to an activity-based
      *  array of arrays of colors.
@@ -92,7 +125,7 @@ public class ColorManager
      *  This should not be required except if a different color set is
      *  required.
      */
-    public static Color[] loadActivityColors(int type) 
+    public static Color[] loadActivityColorsFallback(int type) 
 	throws IOException
     {
 	ObjectInputStream in =

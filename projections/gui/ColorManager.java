@@ -67,8 +67,10 @@ public class ColorManager
 	    // single array format, so back-off to load that instead whilst
 	    // constructing the rest of the array from scratch.
 	    in.close();
-	    retColors[ActivityManager.PROJECTIONS] = 
-		loadActivityColors(ActivityManager.PROJECTIONS);
+	    int activity = ActivityManager.PROJECTIONS;
+	    retColors[activity] =
+		new Color[Analysis.getNumActivity(activity)];
+	    loadActivityColors(activity,retColors[activity]);
 	    for (int i=0; i<retColors.length; i++) {
 		if (retColors[i] == null) {
 		    retColors[i] = 
@@ -89,8 +91,12 @@ public class ColorManager
      *  In the event the color module used is an old version, the method
      *  will catch the exception and fallback to the previous code which
      *  expects a 1D array instead of a 2D array.
+     *
+     *  Silly java handler-thing detected. We have to copy the individual
+     *  colors into the original arrays or risk losing proper management
+     *  of all the pointer structures.
      */
-    public static Color[] loadActivityColors(int type) 
+    public static void loadActivityColors(int type, Color[] origColors) 
 	throws IOException
     {
 	ObjectInputStream in =
@@ -100,20 +106,30 @@ public class ColorManager
 	    retColors = (Color[][])(in.readObject());
 	} catch (ClassCastException e) {
 	    // attempt a fall-back version for backward compatibility
-	    return loadActivityColorsFallback(type);
+	    retColors[type] = loadActivityColorsFallback(type);
 	} catch (Exception e) {
 	    System.err.println("WARNING: Failed to read saved color object");
 	    System.err.println(e);
-	    return null;
 	}
 	in.close();
 	if ((type >= 0) && (type < ActivityManager.NUM_ACTIVITIES)) {
-	    return retColors[type];
+	    // Copy the individual colors. This is done so that every
+	    // tool can see those same colors.
+	    if (origColors.length == retColors[type].length) {
+		for (int i=0; i<origColors.length; i++) {
+		    origColors[i] = retColors[type][i];
+		}
+	    } else {
+		System.err.println("WARNING: Current color array length of " +
+				   origColors.length + " does not match " +
+				   "stored color array length of " +
+				   retColors[type].length + ". Load " +
+				   "request rejected.");
+	    }
 	} else {
 	    System.err.println("WARNING - Internal Error: Activity type " +
 			       type + " unknown when requesting load " +
 			       "colors. Please inform developers");
-	    return null;
 	}
     }
 
@@ -128,22 +144,27 @@ public class ColorManager
     public static Color[] loadActivityColorsFallback(int type) 
 	throws IOException
     {
-	ObjectInputStream in =
-	    new ObjectInputStream(new FileInputStream(filename));
 	Color retColors[] = null;
-	try {
-	    retColors = (Color[])(in.readObject());
-	} catch (ClassCastException e) {
-	    System.err.println("WARNING: Unexpected object format when " +
-			       "attempting to read color file");
-	    System.err.println(e);
-	    return null;
-	} catch (Exception e) {
-	    System.err.println("WARNING: Failed to read saved color object");
-	    System.err.println(e);
-	    return null;
+	if (type == ActivityManager.PROJECTIONS) {
+	    ObjectInputStream in =
+		new ObjectInputStream(new FileInputStream(filename));
+	    try {
+		retColors = (Color[])(in.readObject());
+	    } catch (ClassCastException e) {
+		System.err.println("WARNING: Unexpected object format when " +
+				   "attempting to read color file");
+		System.err.println(e);
+		return null;
+	    } catch (Exception e) {
+		System.err.println("WARNING: Failed to read saved color " +
+				   "object");
+		System.err.println(e);
+		return null;
+	    }
+	    in.close();
+	} else {
+	    retColors = createColorMap(Analysis.getNumActivity(type));
 	}
-	in.close();
 	return retColors;
     }
 

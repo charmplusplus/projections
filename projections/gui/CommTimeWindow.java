@@ -547,8 +547,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    else if (b == loadColors) {
 		// load all entry point colors from disk
 		try {
-		    colorArray[0] = 
-			ColorManager.loadActivityColors(ActivityManager.PROJECTIONS);
+		    ColorManager.loadActivityColors(ActivityManager.PROJECTIONS, colorArray[0]);
 		    // silly inefficiency
 		    setOutputGraphData();
 		} 

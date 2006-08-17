@@ -20,6 +20,7 @@ public class RangeHistory
 	this.filename = logDirectory + "ranges.hst";
 	if (!(new File(this.filename)).exists()) {
 	    rangeSet = new Vector();
+	    historyStringVector = new Vector();
 	} else {
 	    try {
 		loadRanges();

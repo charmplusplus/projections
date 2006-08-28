@@ -74,19 +74,24 @@ public class GraphDisplayCanvas extends Canvas
        } else {
 	   graphDataList = new OrderedGraphDataList();
 	   
-	   int pe = 0;
+	   long x_value = 0;
 	   if (data.xmode == GraphData.PROCESSOR) {
 	       data.origProcList.reset();
-	       pe = data.origProcList.nextElement();
+	       x_value = data.origProcList.nextElement();
+	   } else {
+	       data.interval.list.reset();
+	       x_value = data.interval.list.nextElement()*
+		   data.interval.size;
 	   }
 	   for (int x=data.minx; x<=data.maxx; x++) {
 	       graphDataList.removeAll();
 	       if (MainWindow.dataDump != null) {
+		   MainWindow.dataDump.print(x_value);
 		   if (data.xmode == GraphData.PROCESSOR) {
-		       MainWindow.dataDump.print(pe);
-		       pe = data.origProcList.nextElement();
+		       x_value = data.origProcList.nextElement();
 		   } else {
-		       MainWindow.dataDump.print(x * data.xscale);
+		       x_value = data.interval.list.nextElement()*
+			   data.interval.size;
 		   }
 	       }
 	       for (int a=0; a<data.onGraph.length; a++) {   

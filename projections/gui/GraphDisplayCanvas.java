@@ -20,25 +20,12 @@ public class GraphDisplayCanvas extends Canvas
 
 	  if (data.xmode == GraphData.PROCESSOR) {
 	      y = item.curPData[x];
-	      if (MainWindow.dataDump != null) {
-		  if (GraphWindow.dumpNow) {
-		      MainWindow.dataDump.println(y);
-		  }
-	      }
-	      /* we want non-contigious data support
-	      // gzheng
-	      // figure out the real processor number
-	      int pe = data.origProcList.nextElement();
-	      for (int j=0; j<x; j++)
-	      pe = data.origProcList.nextElement();
-	      y = item.curPData[pe];
-	      */
 	  } else {
 	      y = item.curIData[x];   
-	      if (MainWindow.dataDump != null) {
-		  if (GraphWindow.dumpNow) {
-		      MainWindow.dataDump.println(y);
-		  }
+	  }
+	  if (MainWindow.dataDump != null) {
+	      if (GraphWindow.dumpNow) {
+		  MainWindow.dataDump.print(" " + y);
 	      }
 	  }
 	  if (item.ymode == GraphData.BOTH) {
@@ -82,14 +69,26 @@ public class GraphDisplayCanvas extends Canvas
 		   if (data.onGraph[a].ymode != GraphData.MSGS) {
 		       drawItemLine(g, data.onGraph[a]);
 		   }
-	       }        
+	       }
 	   } 
        } else {
 	   graphDataList = new OrderedGraphDataList();
 	   
+	   int pe = 0;
+	   if (data.xmode == GraphData.PROCESSOR) {
+	       data.origProcList.reset();
+	       pe = data.origProcList.nextElement();
+	   }
 	   for (int x=data.minx; x<=data.maxx; x++) {
 	       graphDataList.removeAll();
-	       
+	       if (MainWindow.dataDump != null) {
+		   if (data.xmode == GraphData.PROCESSOR) {
+		       MainWindow.dataDump.print(pe);
+		       pe = data.origProcList.nextElement();
+		   } else {
+		       MainWindow.dataDump.print(x * data.xscale);
+		   }
+	       }
 	       for (int a=0; a<data.onGraph.length; a++) {   
 		   if (data.ymode == GraphData.MSGS) {
 		       if (data.onGraph[a].ymode != GraphData.TIME) {
@@ -100,7 +99,10 @@ public class GraphDisplayCanvas extends Canvas
 			   addDataForBar(data.onGraph[a], x);
 		       }
 		   }
-	       }   
+	       }
+	       if (MainWindow.dataDump != null) {
+		   MainWindow.dataDump.println();
+	       }
 	       drawItemBar(g, x);
 	   }
        }
@@ -150,25 +152,13 @@ public class GraphDisplayCanvas extends Canvas
 	    
 	    if (data.xmode == GraphData.PROCESSOR) {
 		y2 = item.curPData[x];
-		if (MainWindow.dataDump != null) {
-		    MainWindow.dataDump.println(y2);
-		}
-		/*
-		// gzheng
-		// figure out the real processor number
-		data.origProcList.reset();
-		int pe = data.origProcList.nextElement();
-		for (int j=0; j<x; j++)
-		pe = data.origProcList.nextElement();
-		y2 = item.curPData[pe];
-		*/
 	    } else {
 		y2 = item.curIData[x];   
-		if (MainWindow.dataDump != null) {
-		    MainWindow.dataDump.println(y2);
-		}
 	    }
-					
+	    if (MainWindow.dataDump != null) {
+		MainWindow.dataDump.print(" " + y2);
+	    }
+	    
 	    if (item.ymode == GraphData.BOTH)  
 		y2 = h - (int)(data.wscale * y2);
 	    else           

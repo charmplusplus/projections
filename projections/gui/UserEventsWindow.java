@@ -195,8 +195,23 @@ public class UserEventsWindow extends GenericGraphWindow
 			break;
 		    }
 		}
+		reader.close();
+	    } catch (EOFException e) {
+		// file reading done, close the file and
+		// just go on to the next processor loop
+		try {
+		    reader.close();
+		} catch (IOException evt) {
+		    System.err.println("ERROR: UserEvents Window failed " +
+				       "to " + 
+				       "read log file for processor " + 
+				       nextPe);
+		    System.err.println(e);
+		    System.exit(-1);
+		}
 	    } catch (IOException e) {
-		System.err.println("ERROR: Failed to read log file!");
+		System.err.println("ERROR: UserEvents Window failed to " + 
+				   "read log file for processor " + nextPe);
 		System.err.println(e);
 		System.exit(-1);
 	    }

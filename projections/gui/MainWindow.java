@@ -17,60 +17,63 @@ public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay
 {
     /* **** Static setup data for windows ***** */
-    protected static final int NUM_WINDOWS = 15;
+    protected static final int NUM_WINDOWS = 16;
 
     protected static final int GRAPH_WIN = 0;
-    protected static final int MULTI_WIN = 1;
+    protected static final int TIMELINE_WIN = 1;
     protected static final int PROFILE_WIN = 2;
-    protected static final int TIME_PROF_WIN = 3;
-    protected static final int COMM_WIN = 4;
-    protected static final int COMM_TIME_WIN = 5;
-    protected static final int CALL_TABLE_WIN = 6;
-    protected static final int ANIMATION_WIN = 7;
-    protected static final int LOGVIEW_WIN = 8;
-    protected static final int HIST_WIN = 9;
-    protected static final int TIMELINE_WIN = 10;
-    protected static final int OVERVIEW_WIN = 11;
-    protected static final int FUNCTION_WIN = 12;
-    protected static final int POSE_WIN = 13;
-    protected static final int USER_EVENTS_WIN = 14;
+    protected static final int COMM_WIN = 3;
+    protected static final int COMM_TIME_WIN = 4;
+    protected static final int CALL_TABLE_WIN = 5;
+    protected static final int LOGVIEW_WIN = 6;
+    protected static final int HIST_WIN = 7;
+    protected static final int OVERVIEW_WIN = 8;
+    protected static final int ANIMATION_WIN = 9;
+    protected static final int TIME_PROF_WIN = 10;
+    protected static final int USER_EVENTS_WIN = 11;
+    protected static final int OUTLIER_WIN = 12;
+    protected static final int MULTI_WIN = 13;
+    protected static final int FUNCTION_WIN = 14;
+    protected static final int POSE_WIN = 15;
 
     public static final String[] windowMenuNames =
     {
 	"Graphs",
-	"Multirun Analysis",
+	"Timelines",
 	"Usage Profile",
-	"Time Profile Graph",
 	"Communication",
 	"Communication vs Time",
 	"Call Table",
-	"Animation",
 	"View Log Files",
 	"Histograms",
-	"Timelines",
 	"Overview",
+	"Animation",
+	"Time Profile Graph",
+	"User Events",
+	"Outlier Analysis",
+	"Multirun Analysis",
 	"Function Tool",
-	"POSE Analysis",
-	"User Events"
+	"POSE Analysis"
     };
 
     public static final String[] windowClassNames =
     { 
 	"GraphWindow",
-	"MultiRunWindow",
+	"TimelineWindow",
 	"ProfileWindow",
-	"TimeProfileWindow",
 	"CommWindow",
 	"CommTimeWindow",
 	"CallTableWindow",
-	"AnimationWindow",
 	"LogFileViewerWindow",
 	"HistogramWindow",
-	"TimelineWindow",
 	"StlWindow",
+	"AnimationWindow",
+	"TimeProfileWindow",
+	"UserEventsWindow",
+	"OutlierAnalysisWindow",
+	"MultiRunWindow",
 	"FunctionTool",
-	"PoseAnalysisWindow",
-	"UserEventsWindow"
+	"PoseAnalysisWindow"
     };
 
     public static final boolean[][] menuDataStates =

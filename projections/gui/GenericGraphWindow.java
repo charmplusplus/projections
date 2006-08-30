@@ -1,5 +1,7 @@
 package projections.gui;
 import projections.gui.graph.*;
+
+import java.util.*;
 import java.awt.Color;
 import javax.swing.*;
 
@@ -119,10 +121,30 @@ public abstract class GenericGraphWindow
     }
 
     //  This is used for an X Axis that has discrete, non-contigious values.
+    //  Typically used for getting a subset of the processor list that is
+    //  sorted in increasing processor number.
+    //
     protected void setXAxis(String title,OrderedIntList discreteList){
-	xAxis = new XAxisDiscrete(title,discreteList);	
+	xAxis = new XAxisDiscreteOrdered(title,discreteList);	
     }
     
+    // This is a more general discrete XAxis than the above. 
+    //
+    // It is typically used for displaying a list of processors
+    // pre-sorted in some arbitrary significance order. **NOTE**
+    // Requires that discreteList be a LinkedList of Integers.
+    //
+    // It can also be used in cases (currently unexploited) where groups
+    // of processors pre-sorted in some significance order are supplied.
+    // **NOTE** Requires that discreteList be a LinkedList of Strings.
+    //
+    // XAxisDiscrete will take responsibility for determining the
+    // appropriate behavior given the arbitrary LinkedList.
+    //
+    protected void setXAxis(String title, LinkedList discreteList) {
+	xAxis = new XAxisDiscrete(title, discreteList);
+    }
+
     protected void setXAxis(String title, String units, double startValue, 
 			    double multiplier) {
 	xAxis = new XAxisFixed(title,units);	

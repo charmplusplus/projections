@@ -362,6 +362,72 @@ public class GenericLogReader extends ProjectionsReader
 	}
     }
 
+    public void nextBeginEvent(LogEntryData data)
+	throws IOException, EOFException
+    {
+	while (true) {
+	    nextEvent(data);
+	    if (isBeginType(data)) {
+		return;
+	    }
+	}
+    }
+
+    public void nextEndEvent(LogEntryData data)
+	throws IOException, EOFException
+    {
+	while (true) {
+	    nextEvent(data);
+	    if (isEndType(data)) {
+		return;
+	    }
+	}
+    }
+
+    public void nextBeginEventOnOrAfter(long timestamp,
+					    LogEntryData data)
+	throws IOException, EOFException
+    {
+	while (true) {
+	    nextEventOnOrAfter(timestamp, data);
+	    if (isBeginType(data)) {
+		return;
+	    }
+	}
+    }
+
+    public void nextEndEventOnOrAfter(long timestamp,
+					  LogEntryData data)
+	throws IOException, EOFException
+    {
+	while (true) {
+	    nextEventOnOrAfter(timestamp, data);
+	    if (isEndType(data)) {
+		return;
+	    }
+	}
+    }
+
+    private boolean isBeginType(LogEntryData data) {
+	return ((data.type == BEGIN_IDLE) ||
+		(data.type == BEGIN_PACK) ||
+		(data.type == BEGIN_UNPACK) ||
+		(data.type == BEGIN_PROCESSING) ||
+		(data.type == BEGIN_TRACE) ||
+		(data.type == BEGIN_FUNC) ||
+		(data.type == BEGIN_INTERRUPT));
+    }
+
+    private boolean isEndType(LogEntryData data) {
+	return ((data.type == END_IDLE) ||
+		(data.type == END_PACK) ||
+		(data.type == END_UNPACK) ||
+		(data.type == END_PROCESSING) ||
+		(data.type == END_TRACE) ||
+		(data.type == END_FUNC) ||
+		(data.type == END_INTERRUPT));
+    }
+
     public void close()
         throws IOException
     {

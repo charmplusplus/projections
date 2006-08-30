@@ -116,6 +116,7 @@ SRC=\
     projections/gui/OrderedGraphDataList.java\
     projections/gui/OrderedIntList.java\
     projections/gui/OrderedUsageList.java\
+    projections/gui/OutlierAnalysisWindow.java\
     projections/gui/PieChartWindow.java\
     projections/gui/PopUpAble.java\
     projections/gui/PoseAnalysisWindow.java\
@@ -195,6 +196,7 @@ SRC=\
     projections/gui/graph/SummaryYAxis.java\
     projections/gui/graph/XAxis.java\
     projections/gui/graph/XAxisDiscrete.java\
+    projections/gui/graph/XAxisDiscreteOrdered.java\
     projections/gui/graph/XAxisFixed.java\
     projections/gui/graph/YAxis.java\
     projections/gui/graph/YAxisFixed.java\

@@ -678,6 +678,18 @@ public class Analysis {
 	return 0;
     }
 
+    public static String getActivityName(int type, int index) {
+	switch (type) {
+	case ActivityManager.PROJECTIONS:
+	    return getEntryName(index);
+	case ActivityManager.USER_EVENTS:
+	    return getUserEventName(index);
+	case ActivityManager.FUNCTIONS:
+	    return getFunctionName(index);
+	}
+	return "";
+    }
+
     // *** Run Data accessors (from sts reader) ***
 
     public static int getNumProcessors() {
@@ -823,6 +835,10 @@ public class Analysis {
 							  startInterval,
 							  endInterval,
 							  eps);
+    }
+
+    public static Color[] getColorMap(int activityType) {
+	return activityColors[activityType];
     }
 
     public static Color[] getColorMap() {

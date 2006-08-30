@@ -37,6 +37,15 @@ public class JFloatTextField extends JTextField
 	}
     }   
 
+    public boolean isValueValid() {
+	try {
+	    Float.valueOf(getText().trim() + "0");
+	    return true;
+	} catch (NumberFormatException e) {
+	    return false;
+	}
+    }
+
     public float getValue()
     {
 	checkValue();

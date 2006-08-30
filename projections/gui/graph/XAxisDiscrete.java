@@ -1,20 +1,38 @@
 package projections.gui.graph;
 
+import java.util.*;
 import projections.gui.*;
 
 public class XAxisDiscrete
     extends XAxis
 {
     String title;
-    int discreteList[];
+    String discreteNames[];
     
-    public XAxisDiscrete(String title, OrderedIntList discreteList) {
+    public XAxisDiscrete(String title, LinkedList discreteList) {
 	this.title = title;
-	this.discreteList = new int[discreteList.size()];
-	int count = 0;
-	discreteList.reset();
-	while (discreteList.hasMoreElements()) {
-	    this.discreteList[count++] = discreteList.nextElement();
+	try {
+	    discreteNames = new String[discreteList.size()];
+	    for (int i=0; i<discreteNames.length; i++) {
+		discreteNames[i] = (String)discreteList.get(i);
+	    }
+	} catch (ClassCastException e) {
+	    ListIterator temp = discreteList.listIterator();
+	    discreteNames = new String[discreteList.size()];
+	    int count = 0;
+	    try {
+		while (temp.hasNext()) {
+		    discreteNames[count++] = 
+			((Integer)temp.next()).toString();
+		}
+	    } catch (ClassCastException evt) {
+		System.err.println("Internal Error: XAxisDiscrete expects " +
+				   "either an Integer or String LinkedList " +
+				   ". Please report this error to a " +
+				   "developer.");
+		System.err.println(evt);
+		System.exit(-1);
+	    }
 	}
     }
 
@@ -23,13 +41,11 @@ public class XAxisDiscrete
     }
 
    /**
-    * Return the human-readable name of this index.
+    *   Return the human-readable name of this index.
     *   Indices run from 0 to DataSource.getLastIndex()-1.
     *   Not all indices will necessarily have their name displayed.
     * e.g., "7", "10-11ms"
     */
-   public String getIndexName(int index) { return "" + getIntIndex(index); };
-    private int getIntIndex(int index) { return discreteList[index];};
-   public double getIndex(int index) { return discreteList[index];};
-   public double getMultiplier() { return 1;};
+    public String getIndexName(int index) { return discreteNames[index]; };
+    public double getMultiplier() { return 1;};
 }

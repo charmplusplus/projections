@@ -71,6 +71,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // Animation
 		    false,  // Time Profile Graphs
 		    false,  // User Events
+		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    false,   // Function Tools (temporary)
 		    false   // POSE Analysis
@@ -109,6 +110,7 @@ public class MainMenuManager extends MenuManager
 		    true,  // Animation
 		    false,  // Time Profile Graphs
 		    false,  // User Events
+		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    false,   // Function Tools (temporary)
 		    false,  // POSE Analysis
@@ -147,6 +149,7 @@ public class MainMenuManager extends MenuManager
 		    true,  // Animation
 		    true,  // Time Profile Graphs
 		    true,  // User Events
+		    true,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    true,   // Function Tools (temporary)
 		    false   // POSE Analysis

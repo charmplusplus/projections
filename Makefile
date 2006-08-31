@@ -54,6 +54,7 @@ SRC=\
     projections/gui/Bubble.java\
     projections/gui/CallTableTextArea.java\
     projections/gui/CallTableWindow.java\
+    projections/gui/Clickable.java\
     projections/gui/ColorManager.java\
     projections/gui/ColorMap.java\
     projections/gui/ColorPanel.java\
@@ -136,6 +137,7 @@ SRC=\
     projections/gui/ProjectionsFileMgr.java\
     projections/gui/ProjectionsWindow.java\
     projections/gui/RangeDialog.java\
+    projections/gui/ResponsiveToMouse.java\
     projections/gui/Rubberband.java\
     projections/gui/RubberbandHorizontalZoom.java\
     projections/gui/ScalePanel.java\

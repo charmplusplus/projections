@@ -7,13 +7,14 @@ package projections.gui.graph;
 import projections.gui.*;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.event.*;
 
 public class DataSource2D extends DataSource
 {
     private String title;
     private double[][] data; /*The data to be graphed*/
     private int xValues;
-    private PopUpAble parent;
+    private ResponsiveToMouse parent;
     
     public DataSource2D(String title_, double[][] data_) {
 	title=title_;
@@ -23,7 +24,7 @@ public class DataSource2D extends DataSource
     }
   
     public DataSource2D(String title_, double[][] data_, 
-			PopUpAble parent_) {
+			ResponsiveToMouse parent_) {
 	title=title_;
 	data=data_;
 	parent=parent_;
@@ -38,7 +39,7 @@ public class DataSource2D extends DataSource
     }
   
     public DataSource2D(String title_, int[][] data_,
-			PopUpAble parent_) {
+			ResponsiveToMouse parent_) {
 	title=title_;
 	data=intToDouble(data_);
 	parent=parent_;
@@ -46,10 +47,20 @@ public class DataSource2D extends DataSource
     }
 
     public String[] getPopup(int xVal, int yVal) {
-	if (parent == null) {
-	    return null;	
+	if (parent != null) {
+	    if (parent instanceof PopUpAble) {
+		return ((PopUpAble)parent).getPopup(xVal, yVal);
+	    }
 	} 
-	return parent.getPopup(xVal, yVal);
+	return null;		
+    }
+    
+    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+	if (parent == null) {
+	    // no parent, do nothing.
+	} else if (parent instanceof Clickable) {
+	    ((Clickable)parent).toolClickResponse(e, xVal, yVal);
+	}
     }
 
     public String getTitle() {

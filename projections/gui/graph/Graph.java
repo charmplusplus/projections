@@ -5,9 +5,10 @@ import projections.gui.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import javax.swing.event.*;
  
 public class Graph extends JPanel 
-    implements MouseMotionListener
+    implements MouseInputListener
 {
     public static final int STACKED   = 0;  // type of the bar graph
     public static final int UNSTACKED = 1;  // single, multiple or stacked
@@ -79,6 +80,7 @@ public class Graph extends JPanel
 	yscale = 1.0;
 	
 	addMouseMotionListener(this);
+	addMouseListener(this);
     }
     
     public Graph(DataSource d, XAxis x, YAxis  y)
@@ -257,6 +259,30 @@ public class Graph extends JPanel
 	Analysis.foreground = oldForeground;
     }
 
+    public void mouseClicked(MouseEvent e) {
+	int x = e.getX();
+    	int y = e.getY();
+
+	int xVal = getXValue(x);
+	int yVal = getYValue(xVal, y);
+
+	if((xVal > -1) && (yVal > -1)) {
+	    toolClickResponse(e, xVal, yVal);
+	} 
+    }
+
+    public void mouseEntered(MouseEvent e) {
+    } 
+
+    public void mouseExited(MouseEvent e) {
+    } 
+
+    public void mousePressed(MouseEvent e) {
+    } 
+
+    public void mouseReleased(MouseEvent e) {
+    }
+
     public void mouseMoved(MouseEvent e) {
 	int x = e.getX();
     	int y = e.getY();
@@ -275,6 +301,10 @@ public class Graph extends JPanel
 	    bubble = null;
 	}
     }
+
+    public void mouseDragged(MouseEvent e) {
+    }
+    
 
     /**
      *  This is for the benefit of the bubble text placement. 
@@ -331,7 +361,8 @@ public class Graph extends JPanel
 	}
     }
 
-    public void mouseDragged(MouseEvent e) {
+    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+	dataSource.toolClickResponse(e, xVal, yVal);
     }
 
     private void drawDisplay(Graphics _g)

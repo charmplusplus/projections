@@ -519,7 +519,13 @@ public class TimelineWindow extends ProjectionsWindow
 	userEventWindow.setData(data);
 	setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }   
-  
+
+    // **CW** Note that this is still quite a hack, but it should provide
+    // a prototype for when other tools want to add stuff to timeline.
+    public void addProcessor(int p) {
+	data.addProcessor(p);
+    }
+
     private void CreateLayout()
     {
 	//// MAIN PANEL

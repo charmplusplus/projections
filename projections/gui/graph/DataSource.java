@@ -14,6 +14,7 @@ package projections.gui.graph;
 
 import projections.gui.*;
 import java.awt.Color;
+import java.awt.event.*;
 
 public abstract class DataSource
 {
@@ -39,7 +40,16 @@ public abstract class DataSource
      * Return the text to be shown in the mouse-over popup
      */
     public abstract String[] getPopup(int xVal, int yVal);
-  
+
+    /**
+     * Allows a tool to respond to a mouse click in the graph class.
+     * This abstract class will implement a null response, actual
+     * DataSources will call their parent tools' actions.
+     */
+    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+	// do nothing. Please override.
+    }
+
     /**
      * Return the Color of this value.
      *  The valNo passed in is between 0 and getValueCount()-1, inclusive.

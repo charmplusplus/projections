@@ -18,7 +18,8 @@ import projections.misc.*;
  *
  */
 public class OutlierAnalysisWindow extends GenericGraphWindow
-    implements ActionListener, ItemListener, ColorSelectable
+    implements ActionListener, ItemListener, ColorSelectable,
+	       Clickable
 {
     private OutlierAnalysisWindow thisWindow;
 
@@ -455,6 +456,35 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	rString[2] = df.format(graphData[xVal][yVal]) + "";
 	return rString;
     }	
+
+    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+	// no response if the bars for average values are clicked
+	if (xVal >= 3) {
+	    if (parentWindow.childWindows[MainWindow.TIMELINE_WIN][0] !=
+		null) {
+		final int myX = xVal;
+		// potentially expensive, so apply SwingWorker to this
+		final SwingWorker worker =  new SwingWorker() {
+			public Object construct() {
+			    ((TimelineWindow)parentWindow.childWindows[MainWindow.TIMELINE_WIN][0]).addProcessor(Integer.parseInt((String)outlierList.get(myX)));
+			    return null;
+			}
+			public void finished() {
+			    // GUI code after Long non-gui code.
+			    // Which in this case, is nothing.
+			}
+		    };
+		worker.start();
+	    } else {
+		System.err.println("You wanted to load processor " +
+				   (String)outlierList.get(xVal) +
+				   "'s data onto Timeline. However," +
+				   "the ability to open a new " +
+				   "timeline window from Outlier Analysis " +
+				   "is not supported yet!");
+	    }
+	}
+    }
 
     public void actionPerformed(ActionEvent e) {
 	if (e.getSource() instanceof JButton) {

@@ -678,14 +678,33 @@ public class Analysis {
 	return 0;
     }
 
-    public static String getActivityName(int type, int index) {
+    // This version takes the event id (as logged, which may not be
+    // contigious) and gets the name.
+    public static String getActivityNameByID(int type, int id) {
+	switch (type) {
+	case ActivityManager.PROJECTIONS:
+	    return getEntryName(id);
+	case ActivityManager.USER_EVENTS:
+	    return getUserEventName(id);
+	case ActivityManager.FUNCTIONS:
+	    return getFunctionName(id);
+	}
+	return "";
+    }
+
+    // This version takes the contigious index used by many projections
+    // tools and gets the name.
+    public static String getActivityNameByIndex(int type, int index) {
+	String[] tempNames;
 	switch (type) {
 	case ActivityManager.PROJECTIONS:
 	    return getEntryName(index);
 	case ActivityManager.USER_EVENTS:
-	    return getUserEventName(index);
+	    tempNames = getUserEventNames();
+	    return tempNames[index];
 	case ActivityManager.FUNCTIONS:
-	    return getFunctionName(index);
+	    tempNames = getFunctionNames();
+	    return tempNames[index];
 	}
 	return "";
     }

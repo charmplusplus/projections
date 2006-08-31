@@ -450,8 +450,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    rString[0] = "Outlier Processor " + 
 		(String)outlierList.get(xVal);
 	}
-	rString[1] = "Activity: " + Analysis.getActivityName(currentActivity,
-							     yVal);
+	rString[1] = "Activity: " + 
+	    Analysis.getActivityNameByIndex(currentActivity, yVal);
 	rString[2] = df.format(graphData[xVal][yVal]) + "";
 	return rString;
     }	

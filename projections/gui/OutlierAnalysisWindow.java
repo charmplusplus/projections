@@ -25,7 +25,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 
     private JPanel mainPanel;
     private JPanel controlPanel;
-    private JFloatTextField thresholdField;
+    private JIntTextField thresholdField;
     
     // private control panel gui objects and support variables
     private JComboBox attributeList;
@@ -54,8 +54,10 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private double[][] graphData;
     private Color[] graphColors;
 
-    private double threshold;
-    private double lastThreshold;
+    // Threshold values apply only to processors, so that's the unit
+    // to be used.
+    private int threshold;
+    private int lastThreshold;
     
     // History flags. These are set/overriden only when a user successfully
     // loads new data.
@@ -72,7 +74,12 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	// initialize this to always load projections-based data at start.
 	currentActivity = 0;
 	// initialize default threshold to display the top 10% deviants
-	threshold = 10.0;
+	// for # processors 256 or less. The top 20 otherwise.
+	if (Analysis.getNumProcessors() <= 256) {
+	    threshold = (int)Math.ceil(0.1*Analysis.getNumProcessors());
+	} else {
+	    threshold = 20;
+	}
 	lastThreshold = 0;
         df.setMaximumFractionDigits(3);
 
@@ -115,8 +122,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
        
 	JLabel thresholdLabel = new JLabel("Outlier Threshold: ", 
 					   JLabel.RIGHT);
-	thresholdField = new JFloatTextField((float)threshold, 8);
-	JLabel thresholdPost = new JLabel("%", JLabel.LEFT);
+	thresholdField = new JIntTextField(threshold, 8);
+	JLabel thresholdPost = new JLabel("Processors", JLabel.LEFT);
 	thresholdField.addActionListener(this);
 
 	Util.gblAdd(controlPanel, attributeLabel, gbc, 0,0, 1,0, 0,0);
@@ -383,11 +390,10 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	}
 	// take the top threshold percentage, create the final array
 	// and copy the data in.
-	int numOutliers = (int)Math.ceil((threshold/100)*validPEs.size());
-	int offset = validPEs.size()-numOutliers;
-	graphData = new double[numOutliers+3][numActivities];
+	int offset = validPEs.size()-threshold;
+	graphData = new double[threshold+3][numActivities];
 	outlierList = new LinkedList();
-	for (int i=0; i<numOutliers; i++) {
+	for (int i=0; i<threshold; i++) {
 	    for (int act=0; act<numActivities; act++) {
 		graphData[i+3][act] =
 		    tempData[sortedMap[i+offset]][act];
@@ -406,8 +412,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    for (int i=offset; i<validPEs.size(); i++) {
 		graphData[2][act] += tempData[sortedMap[i]][act];
 	    }
-	    if (numOutliers != 0) {
-		graphData[2][act] /= numOutliers;
+	    if (threshold != 0) {
+		graphData[2][act] /= threshold;
 	    }
 	}
 	// add the 3 special entries
@@ -499,8 +505,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
             } else if(arg.equals("Select Processors")) {
                 showDialog();
             }
-        } else if (e.getSource() instanceof JFloatTextField) {
-	    JFloatTextField field = (JFloatTextField)e.getSource();
+        } else if (e.getSource() instanceof JIntTextField) {
+	    JIntTextField field = (JIntTextField)e.getSource();
 	    if (field.isValueValid()) {
 		threshold = field.getValue();
 	    }

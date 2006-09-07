@@ -38,6 +38,16 @@ public class JIntTextField extends JTextField
 		 setCaretPosition(lastCaretPosition);
 	  }
    }   
+
+    public boolean isValueValid() {
+	try {
+	    Integer.valueOf(getText().trim());
+	    return true;
+	} catch (NumberFormatException e) {
+	    return false;
+	}
+    }
+
    public int getValue()
    {
 	  checkValue();

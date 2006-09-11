@@ -32,12 +32,15 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private JComboBox activityList;
     private String attributes[][] = {
 	{ "Execution Time by Activity",
+	  "Idle Time",
 	  "Msgs Sent by Activity", 
 	  "Bytes Sent by Activity" },
 	{ "Execution Time (us)",
+	  "Time (us)",
 	  "Number of Messages",
 	  "Number of Bytes" },
 	{ "us",
+	  "us",
 	  "",
 	  "" }
     };
@@ -207,9 +210,16 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	// type.
 	numActivities = Analysis.getNumActivity(currentActivity);
 	graphColors = Analysis.getColorMap(currentActivity);
-	double[][] tempData = 
+	double[][] tempData;
+	if (currentAttribute == 1) {
+	    // **CWL NOTE** - this is currently a hack until I can find a way
+	    // to do this more cleanly!!!
+	    numActivities = 1;
+	    graphColors = new Color[1];
+	    graphColors[0] = Color.white;
+	}
+	tempData = 
 	    new double[validPEs.size()][numActivities];
-	
 	int nextPe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =
@@ -272,15 +282,16 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		    logData.time = 0;
 		    // Jump to the first valid event
 		    boolean markedBegin = false;
+		    boolean markedIdle = false;
 		    long beginBlockTime = 0;
 		    reader.nextEventOnOrAfter(startTime, logData);
 		    while (logData.time <= endTime) {
 			if (logData.type == ProjDefs.CREATION) {
 			    if (markedBegin) {
 				int eventIndex = logData.entry;
-				if (currentAttribute == 1) {
+				if (currentAttribute == 2) {
 				    tempData[count][eventIndex]++;
-				} else if (currentAttribute == 2) {
+				} else if (currentAttribute == 3) {
 				    tempData[count][eventIndex] +=
 					logData.msglen;
 				}
@@ -306,6 +317,28 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 				markedBegin = false;
 				if (currentAttribute == 0) {
 				    tempData[count][logData.entry] +=
+					logData.time - beginBlockTime;
+				}
+			    }
+			} else if (logData.type ==
+				   ProjDefs.BEGIN_IDLE) {
+			    // check pairing
+			    if (!markedIdle) {
+				markedIdle = true;
+			    }
+			    // NOTE: This code assumes that IDLEs cannot
+			    // possibly be nested inside of PROCESSING
+			    // blocks (which should be true).
+			    if (currentAttribute == 1) {
+				beginBlockTime = logData.time;
+			    }
+			} else if (logData.type ==
+				   ProjDefs.END_IDLE) {
+			    // check pairing
+			    if (markedIdle) {
+				markedIdle = false;
+				if (currentAttribute == 1) {
+				    tempData[count][0] +=
 					logData.time - beginBlockTime;
 				}
 			    }
@@ -423,11 +456,12 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     }
     
     protected void setGraphSpecificData() {
-	setXAxis("Outlier Processors", outlierList);
+	setXAxis("Outliers", outlierList);
 	setYAxis(attributes[1][currentAttribute], 
 		 attributes[2][currentAttribute]);
-	setDataSource("Outliers (Threshold " + df.format(threshold) + 
-		      "%)", graphData, graphColors, this);
+	setDataSource("Outliers: " + attributes[0][currentAttribute] +
+		      " (Threshold = " + threshold + 
+		      " processors)", graphData, graphColors, this);
 	refreshGraph();
     }
     
@@ -457,9 +491,17 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    rString[0] = "Outlier Processor " + 
 		(String)outlierList.get(xVal);
 	}
-	rString[1] = "Activity: " + 
-	    Analysis.getActivityNameByIndex(currentActivity, yVal);
-	rString[2] = df.format(graphData[xVal][yVal]) + "";
+	if (currentActivity == 1) {
+	    rString[1] = "Activity: Idle Time";
+	} else {
+	    rString[1] = "Activity: " + 
+		Analysis.getActivityNameByIndex(currentActivity, yVal);
+	}
+	if (currentActivity >= 2) {
+	    rString[2] = df.format(graphData[xVal][yVal]) + "";
+	} else {
+	    rString[2] = U.t((long)(graphData[xVal][yVal]));
+	}
 	return rString;
     }	
 

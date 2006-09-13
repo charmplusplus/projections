@@ -12,7 +12,7 @@ import projections.gui.graph.*;
 import projections.misc.LogEntryData;
 
 public class CommWindow extends GenericGraphWindow
-    implements ItemListener, ActionListener
+    implements ItemListener, ActionListener, Clickable
 {
     private double[][] 	sentMsgCount;
     private double[][] 	sentByteCount;
@@ -164,42 +164,70 @@ public class CommWindow extends GenericGraphWindow
 	if(EPNames == null)
 	    EPNames = Analysis.getEntryNames();
 
-	String[] rString = new String[3];
+	String[] rString = new String[4];
+
+	rString[0] = "Processor " + xVal;
 
 	if(currentArrayName.equals("sentMsgCount")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + sentMsgCount[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Count = " + sentMsgCount[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("sentByteCount")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Bytes = " + sentByteCount[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Bytes = " + sentByteCount[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("receivedMsgCount")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + receivedMsgCount[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Count = " + receivedMsgCount[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("receivedByteCount")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + receivedByteCount[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Count = " + receivedByteCount[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("exclusiveRecv")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + exclusiveRecv[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Count = " + exclusiveRecv[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("exclusiveBytesRecv")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Bytes = " + exclusiveBytesRecv[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Bytes = " + exclusiveBytesRecv[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if (currentArrayName.equals("avgHopCount")) {
-	    rString[0] = "EPid: " + EPNames[yVal][0];
-	    rString[1] = "Count = " + avgHopCount[xVal][yVal];
-	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[2] = "Count = " + avgHopCount[xVal][yVal];
+	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if (currentArrayName.equals("avgPeHopCount")) {
-	    rString[0] = "Count = " + avgPeHopCount[xVal][yVal];
-	    rString[1] = "Processor = " + xAxis.getIndexName(xVal);
-	    rString[2] = "";
+	    rString[1] = "Count = " + avgPeHopCount[xVal][yVal];
+	    rString[2] = "Processor = " + xAxis.getIndexName(xVal);
+	    rString[3] = "";
 	}
 	return rString;
+    }
+
+    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+	if (parentWindow.childWindows[MainWindow.TIMELINE_WIN][0] !=
+	    null) {
+	    final int myX = xVal;
+	    // potentially expensive, so apply SwingWorker to this
+	    final SwingWorker worker =  new SwingWorker() {
+		    public Object construct() {
+			((TimelineWindow)parentWindow.childWindows[MainWindow.TIMELINE_WIN][0]).addProcessor(myX);
+			return null;
+		    }
+		    public void finished() {
+			// GUI code after Long non-gui code.
+			// Which in this case, is nothing.
+		    }
+		};
+	    worker.start();
+	} else {
+	    System.err.println("You wanted to load processor " +
+			       xVal +
+			       "'s data onto Timeline. However," +
+			       "the ability to open a new " +
+			       "timeline window from Communication Window " +
+			       "is not supported yet!");
+	}
     }
 
     protected void createMenus(){

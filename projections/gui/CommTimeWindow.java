@@ -474,49 +474,61 @@ public class CommTimeWindow extends GenericGraphWindow
 	    }
 	}
 
-	String[] rString = new String[3];
+	String[] rString = new String[4];
 	
+        rString[0] = "Time Interval: " +
+            U.t((xVal+startInterval)*intervalSize) + " to " +
+            U.t((xVal+startInterval+1)*intervalSize);
+
 	if (currentArrayName.equals("sentMsgCount")) {
-	    rString[0] = "Dest. Chare: " + epClassName;
-	    rString[1] = "Dest. EPid: " + epName;
-	    rString[2] = "Count = " + _format.format(sentMsgOutput[xVal][yVal]);    	
+	    rString[1] = "Dest. Chare: " + epClassName;
+	    rString[2] = "Dest. EPid: " + epName;
+	    rString[3] = "Count = " + 
+		_format.format(sentMsgOutput[xVal][yVal]);    	
 	}
 	else if(currentArrayName.equals("sentByteCount")) {
-	    rString[0] = "Dest. Chare: " + epClassName;
-	    rString[1] = "Dest. EPid: " + epName;	    
-	    rString[2] = "Bytes = " + _format.format(sentByteOutput[xVal][yVal]);
+	    rString[1] = "Dest. Chare: " + epClassName;
+	    rString[2] = "Dest. EPid: " + epName;	    
+	    rString[3] = "Bytes = " + 
+		_format.format(sentByteOutput[xVal][yVal]);
 	}
 	else if(currentArrayName.equals("receivedMsgCount")) {
-	    rString[0] = "Dest. Chare: " + epClassName;
-	    rString[1] = "Dest. EPid: " + epName;	    
-	    rString[2] = "Count = " + _format.format(receivedMsgOutput[xVal][yVal]);
+	    rString[1] = "Dest. Chare: " + epClassName;
+	    rString[2] = "Dest. EPid: " + epName;	    
+	    rString[3] = "Count = " + 
+		_format.format(receivedMsgOutput[xVal][yVal]);
 	}
 	else if(currentArrayName.equals("receivedByteCount")) {
-	    rString[0] = "Dest. Chare: " + epClassName;
-	    rString[1] = "Dest. EPid: " + epName;	    
-	    rString[2] = "Bytes = " + _format.format(receivedByteOutput[xVal][yVal]);
+	    rString[1] = "Dest. Chare: " + epClassName;
+	    rString[2] = "Dest. EPid: " + epName;	    
+	    rString[3] = "Bytes = " + 
+		_format.format(receivedByteOutput[xVal][yVal]);
 	}
 /*
 	else if (currentArrayName.equals("sentExternalMsgCount")) {
-	    rString[0] = "Chare: " + epClassName;
-	    rString[1] = "Destination EP: " + epName;
-	    rString[2] = "Messages Sent Externally: " + sentExternalMsgOutput[xVal][yVal];    	
+	    rString[1] = "Chare: " + epClassName;
+	    rString[2] = "Destination EP: " + epName;
+	    rString[3] = "Messages Sent Externally: " + 
+	        sentExternalMsgOutput[xVal][yVal];    	
 	}
 	else if(currentArrayName.equals("sentExternalByteCount")) {
-	    rString[0] = "Chare: " + epClassName;
-	    rString[1] = "Destination EP: " + epName;	    
-	    rString[2] = "Bytes Sent Externally: " + sentExternalByteOutput[xVal][yVal];
+	    rString[1] = "Chare: " + epClassName;
+	    rString[2] = "Destination EP: " + epName;	    
+	    rString[3] = "Bytes Sent Externally: " + 
+                sentExternalByteOutput[xVal][yVal];
 	}
 */
 	else if(currentArrayName.equals("receivedExternalMsgCount")) {
-	    rString[0] = "Dest. Chare: " + epClassName;
-	    rString[1] = "Dest. EPid: " + epName;	    
-	    rString[2] = "Count = " + _format.format(receivedExternalMsgOutput[xVal][yVal]);
+	    rString[1] = "Dest. Chare: " + epClassName;
+	    rString[2] = "Dest. EPid: " + epName;	    
+	    rString[3] = "Count = " + 
+		_format.format(receivedExternalMsgOutput[xVal][yVal]);
 	}
 	else if(currentArrayName.equals("receivedExternalByteCount")) {
-	    rString[0] = "Dest. Chare: " + epClassName;
-	    rString[1] = "Dest. EPid: " + epName;	    
-	    rString[2] = "Bytes = " + _format.format(receivedExternalByteOutput[xVal][yVal]);
+	    rString[1] = "Dest. Chare: " + epClassName;
+	    rString[2] = "Dest. EPid: " + epName;	    
+	    rString[3] = "Bytes = " + 
+		_format.format(receivedExternalByteOutput[xVal][yVal]);
 	}
 	return rString;
     }

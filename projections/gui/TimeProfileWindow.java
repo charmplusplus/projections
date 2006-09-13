@@ -364,11 +364,14 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    }
 	}
 
-	String[] rString = new String[3];
+	String[] rString = new String[4];
 	
-	rString[0] = "Chare Name: " + epClassName;
-	rString[1] = "Entry Method: " + epName;
-	rString[2] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
+	rString[0] = "Time Interval: " + 
+	    U.t((xVal+startInterval)*intervalSize) + " to " +
+	    U.t((xVal+startInterval+1)*intervalSize);
+	rString[1] = "Chare Name: " + epClassName;
+	rString[2] = "Entry Method: " + epName;
+	rString[3] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
 	return rString;
     }	
 

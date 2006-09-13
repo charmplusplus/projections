@@ -118,6 +118,7 @@ SRC=\
     projections/gui/OrderedIntList.java\
     projections/gui/OrderedUsageList.java\
     projections/gui/OutlierAnalysisWindow.java\
+    projections/gui/OutlierDialog.java\
     projections/gui/PieChartWindow.java\
     projections/gui/PopUpAble.java\
     projections/gui/PoseAnalysisWindow.java\

@@ -24,13 +24,15 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private OutlierAnalysisWindow thisWindow;
 
     private JPanel mainPanel;
-    private JPanel controlPanel;
-    private JIntTextField thresholdField;
-    
-    // private control panel gui objects and support variables
-    private JComboBox attributeList;
-    private JComboBox activityList;
-    private String attributes[][] = {
+
+    // private dialog data
+    private int threshold;
+    private int currentActivity;
+    private int currentAttribute;
+
+    // control panel gui objects and support variables
+    // **CW** Not so good for now, used by both Dialog and Window
+    public String attributes[][] = {
 	{ "Execution Time by Activity",
 	  "Idle Time",
 	  "Msgs Sent by Activity", 
@@ -44,50 +46,21 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	  "",
 	  "" }
     };
-    private JButton loadDataButton;
 
     // derived data after analysis
     LinkedList outlierList;
 
     // meta data variables
     // These will be determined at load time.
-    private int currentAttribute;
-    private int currentActivity;
     private int numActivities;
     private double[][] graphData;
     private Color[] graphColors;
 
-    // Threshold values apply only to processors, so that's the unit
-    // to be used.
-    private int threshold;
-    private int lastThreshold;
-    
-    // History flags. These are set/overriden only when a user successfully
-    // loads new data.
-    private int lastAttributeIndex;
-    private int lastActivityIndex;
     DecimalFormat df = new DecimalFormat();
 
     public OutlierAnalysisWindow(MainWindow mainWindow, Integer myWindowID) {
 	super("Projections Outlier Analysis Tool - " + 
 	      Analysis.getFilename() + ".sts", mainWindow, myWindowID);
-
-	// initialize this to always load execution time at start.
-	currentAttribute = 0;
-	// initialize this to always load projections-based data at start.
-	currentActivity = 0;
-	// initialize default threshold to display the top 10% deviants
-	// for # processors 256 or less. The top 20 otherwise.
-	if (Analysis.getNumProcessors() <= 256) {
-	    threshold = (int)Math.ceil(0.1*Analysis.getNumProcessors());
-	} else {
-	    threshold = 20;
-	}
-	lastThreshold = 0;
-        df.setMaximumFractionDigits(3);
-
-	lastAttributeIndex = -1;
-	lastActivityIndex = -1;
 
 	createMenus();
 	createLayout();
@@ -97,50 +70,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     }
 
     private void createLayout() {
-	mainPanel = new JPanel();
+	mainPanel = getMainPanel();
     	getContentPane().add(mainPanel);
-
-	GridBagConstraints gbc = new GridBagConstraints();
-	GridBagLayout gbl = new GridBagLayout();
-	
-	gbc.fill = GridBagConstraints.BOTH;
-	mainPanel.setLayout(gbl);
-
-	// Assume no special control features for now
-	controlPanel = new JPanel();
-	controlPanel.setLayout(gbl);
-
-	attributeList = new JComboBox(attributes[0]);
-	attributeList.setSelectedIndex(currentAttribute);
-	JLabel attributeLabel = new JLabel("Attribute: ", JLabel.RIGHT);
-	attributeList.addItemListener(this);
-
-	activityList = new JComboBox(ActivityManager.NAMES);
-	activityList.setSelectedIndex(currentActivity);
-	JLabel activityLabel = new JLabel("Activity: ", JLabel.RIGHT);
-	activityList.addItemListener(this);
-
-	loadDataButton = new JButton("Load Data");
-	loadDataButton.addActionListener(this);
-       
-	JLabel thresholdLabel = new JLabel("Outlier Threshold: ", 
-					   JLabel.RIGHT);
-	thresholdField = new JIntTextField(threshold, 8);
-	JLabel thresholdPost = new JLabel("Processors", JLabel.LEFT);
-	thresholdField.addActionListener(this);
-
-	Util.gblAdd(controlPanel, attributeLabel, gbc, 0,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, attributeList,  gbc, 1,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, activityLabel,  gbc, 2,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, activityList,   gbc, 3,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, loadDataButton, gbc, 4,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, thresholdLabel, gbc, 5,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, thresholdField, gbc, 6,0, 1,0, 0,0);
-	Util.gblAdd(controlPanel, thresholdPost,  gbc, 7,0, 1,0, 0,0);
-
-	JPanel graphPanel = getMainPanel();
-	Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
-	Util.gblAdd(mainPanel, controlPanel, gbc, 0,1, 1,0, 0,0);
     }
 
     protected void createMenus(){
@@ -168,27 +99,29 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     
     public void showDialog() {
 	if (dialog == null) {
-	    dialog = new RangeDialog(this, "Select Range");
+	    dialog = new OutlierDialog(this, "Select Range");
 	} else {
 	    setDialogData();
 	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
 	    getDialogData();
-	    // The Dialog time range has changed, so make sure new data
-	    // is always loaded.
-	    lastAttributeIndex = -1;
-	    lastActivityIndex = -1;
 	    if (dialog.isModified()) {
 		loadData();
 	    }
 	}
     }
 
+    public void getDialogData() {
+	OutlierDialog mydialog = (OutlierDialog)dialog;
+
+	threshold = mydialog.threshold;
+	currentActivity = mydialog.currentActivity;
+	currentAttribute = mydialog.currentAttribute;
+	super.getDialogData();
+    }
+
     private void loadData() {
-	if (!isModified()) {
-	    return;
-	}
 	final SwingWorker worker =  new SwingWorker() {
 		public Object construct() {
 		    constructToolData();
@@ -197,8 +130,6 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		public void finished() {
 		    // GUI code after Long non-gui code (above) is done.
 		    setGraphSpecificData();
-		    // capture the last loaded threshold value
-		    lastThreshold = threshold;
 		    thisWindow.setVisible(true);
 		}
 	    };
@@ -535,62 +466,17 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     }
 
     public void actionPerformed(ActionEvent e) {
-	if (e.getSource() instanceof JButton) {
-	    JButton b = (JButton)e.getSource();
-	    if (b == loadDataButton) {
-		loadData();
-	    }
-        } else if (e.getSource() instanceof JMenuItem) {
+        if (e.getSource() instanceof JMenuItem) {
             String arg = ((JMenuItem)e.getSource()).getText();
             if (arg.equals("Close")) {
                 close();
             } else if(arg.equals("Select Processors")) {
                 showDialog();
             }
-        } else if (e.getSource() instanceof JIntTextField) {
-	    JIntTextField field = (JIntTextField)e.getSource();
-	    if (field.isValueValid()) {
-		threshold = field.getValue();
-	    }
 	}
     }
 
-    public void itemStateChanged(ItemEvent evt) {
-        if (evt.getSource() instanceof JComboBox) {
-	    if ((activityList.getSelectedIndex() >= 0) &&
-		(attributeList.getSelectedIndex() >= 0)) {
-		// filter out the options that may not work with each other
-		if ( // **FIXME** Find a way to get around having to hardcode
-		    // pose dop activities have no meaning here
-		    (activityList.getSelectedIndex() == 
-		     ActivityManager.POSE_DOP) ||
-		    // no function support for now either ... *sigh*
-		    (activityList.getSelectedIndex() ==
-		     ActivityManager.FUNCTIONS) ||
-		    // no communication properties associated with user events
-		    ((activityList.getSelectedIndex() == 
-		      ActivityManager.USER_EVENTS) &&
-		     (attributeList.getSelectedIndex() >= 1))
-		    ) {
-		    loadDataButton.setEnabled(false);
-		} else {
-		    loadDataButton.setEnabled(true);
-		}
-	    } else {
-		loadDataButton.setEnabled(false);
-	    }
-	    currentActivity = activityList.getSelectedIndex();
-	    currentAttribute = attributeList.getSelectedIndex();
-        }
-    }
-
-    /**
-     *  Checks if the currently selected set of attributes and activities
-     *  is different from the last loaded set.
-     */
-    private boolean isModified() {
-	return ((activityList.getSelectedIndex() != lastActivityIndex) ||
-		(attributeList.getSelectedIndex() != lastAttributeIndex) ||
-		threshold != lastThreshold);
+    public void itemStateChanged(ItemEvent e) {
+	// do nothing.
     }
 }

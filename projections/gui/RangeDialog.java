@@ -172,12 +172,14 @@ public class RangeDialog extends JDialog
     
     public void itemStateChanged(ItemEvent evt) {
 	if (evt.getSource() instanceof JComboBox) {
-	    int selection = historyList.getSelectedIndex();
-	    if (selection == -1) {
-		return;
+	    if ((JComboBox)evt.getSource() == historyList) {
+		int selection = historyList.getSelectedIndex();
+		if (selection == -1) {
+		    return;
+		}
+		startTimeField.setValue(history.getStartValue(selection));
+		endTimeField.setValue(history.getEndValue(selection));
 	    }
-	    startTimeField.setValue(history.getStartValue(selection));
-	    endTimeField.setValue(history.getEndValue(selection));
 	}
     }
 

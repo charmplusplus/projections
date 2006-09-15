@@ -107,6 +107,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	if (!dialog.isCancelled()){
 	    getDialogData();
 	    if (dialog.isModified()) {
+		thisWindow.setVisible(false);
 		loadData();
 	    }
 	}

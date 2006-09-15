@@ -183,7 +183,8 @@ public class OutlierDialog extends RangeDialog
     public boolean isModified() {
 	return ((threshold != thresholdField.getValue()) ||
 		(currentActivity != lastActivity) ||
-		(currentAttribute != lastAttribute));
+		(currentAttribute != lastAttribute) ||
+		super.isModified());
     }
 
     void setParameters() {

@@ -780,9 +780,12 @@ public class TimelineObject extends Component
    {
        //       System.out.println(beginTime + " " + endTime + " " +
        //			  data.beginTime + " " + data.endTime);
-       if (entry < 0) {
+       if (entry < -1) {
 	   // if I am not a standard entry method, I do not contribute
 	   // to the usage
+	   //
+	   // 2006/10/02 - **CW** changed it such that idle time gets
+	   //              usage accounted for.
 	   return;
        }
 			  

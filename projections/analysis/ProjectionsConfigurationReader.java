@@ -61,10 +61,9 @@ public class ProjectionsConfigurationReader
 		if (value != null) {
 		    configData.put(s1,value);
 		} else {
-		    System.err.println("Internal Error: Unknown projections" +
+		    System.err.println("WARNING: Unknown projections" +
 				       " configuration key [" +
-				       s1 + "]! Please inform developers.");
-		    System.exit(-1);
+				       s1 + "]!");
 		}
 	    }
 	    InFile.close();

@@ -53,6 +53,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     // meta data variables
     // These will be determined at load time.
     private int numActivities;
+    private int numSpecials;
     private double[][] graphData;
     private Color[] graphColors;
 
@@ -140,18 +141,27 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private void constructToolData() {
 	// construct the necessary meta-data given the selected activity
 	// type.
-	numActivities = Analysis.getNumActivity(currentActivity);
-	graphColors = Analysis.getColorMap(currentActivity);
 	double[][] tempData;
+	Color[] tempGraphColors;
+	numActivities = Analysis.getNumActivity(currentActivity); 
+	tempGraphColors = Analysis.getColorMap(currentActivity);
+	numSpecials = 0;
 	if (currentAttribute == 1) {
 	    // **CWL NOTE** - this is currently a hack until I can find a way
 	    // to do this more cleanly!!!
-	    numActivities = 1;
-	    graphColors = new Color[1];
-	    graphColors[0] = Color.white;
+	    //
+	    // add Idle to the current set
+	    numSpecials = 1;
+	    graphColors = new Color[numActivities+numSpecials];
+	    for (int i=0;i<numActivities; i++) {
+		graphColors[i] = tempGraphColors[i];
+	    }
+	    graphColors[numActivities] = Color.white;
+	} else {
+	    graphColors = tempGraphColors;
 	}
 	tempData = 
-	    new double[validPEs.size()][numActivities];
+	    new double[validPEs.size()][numActivities+numSpecials];
 	int nextPe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =
@@ -234,7 +244,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			    if (!markedBegin) {
 				markedBegin = true;
 			    }
-			    if (currentAttribute == 0) {
+			    if (currentAttribute <= 1) {
 				// even if a previous begin is found, just
 				// overwrite the begin time, we're
 				// not expecting nesting here.
@@ -247,7 +257,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			    // this event.
 			    if (markedBegin) {
 				markedBegin = false;
-				if (currentAttribute == 0) {
+				if (currentAttribute <= 1) {
 				    tempData[count][logData.entry] +=
 					logData.time - beginBlockTime;
 				}
@@ -270,7 +280,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			    if (markedIdle) {
 				markedIdle = false;
 				if (currentAttribute == 1) {
-				    tempData[count][0] +=
+				    tempData[count][numActivities] +=
 					logData.time - beginBlockTime;
 				}
 			    }
@@ -312,7 +322,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
        
 	// we know tmpOut has at least x slots. graphData is not ready
 	// to be initialized until we know the number of Outliers.
-	double[] tmpAvg = new double[numActivities];
+	double[] tmpAvg = new double[numActivities+numSpecials];
 	double[] processorDiffs = new double[validPEs.size()];
 	int[] sortedMap = new int[validPEs.size()];
 
@@ -322,22 +332,34 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	}
 
 	// pass #1, determine global average
-	for (int act=0; act<numActivities; act++) {
+	for (int act=0; act<numActivities+numSpecials; act++) {
 	    for (int p=0; p<validPEs.size(); p++) {
+		/*
+		if (tempData[p][act] > 0) {
+		    System.out.println("["+p+"] " + tempData[p][act]);
+		}
+		*/
 		tmpAvg[act] += tempData[p][act];
 	    }
 	    tmpAvg[act] /= validPEs.size();
 	}
 
 	// pass #2, determine outliers by ranking them by distance from
-	// average. Weight that by the original values. It is not enough
+	// average. Weight that by the global average values. It is not 
+	// enough
 	// to discover outliers by merely sorting them, the mapping has
 	// to be preserved for display.
 	for (int p=0; p<validPEs.size(); p++) {
-	    for (int act=0; act<numActivities; act++) {
-		processorDiffs[p] += 
-		    Math.abs(tempData[p][act] - tmpAvg[act]) *
-		    tempData[p][act];
+	    // this is an initial hack.
+	    if (currentAttribute == 1) {
+		// induce a sort by decreasing idle time
+		processorDiffs[p] -= tempData[p][numActivities];
+	    } else {
+		for (int act=0; act<numActivities; act++) {
+		    processorDiffs[p] += 
+			Math.abs(tempData[p][act] - tmpAvg[act]) *
+			tmpAvg[act];
+		}
 	    }
 	}
 	// bubble sort it.
@@ -353,13 +375,13 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		}
 	    }
 	}
-	// take the top threshold percentage, create the final array
+	// take the top threshold processors, create the final array
 	// and copy the data in.
 	int offset = validPEs.size()-threshold;
-	graphData = new double[threshold+3][numActivities];
+	graphData = new double[threshold+3][numActivities+numSpecials];
 	outlierList = new LinkedList();
 	for (int i=0; i<threshold; i++) {
-	    for (int act=0; act<numActivities; act++) {
+	    for (int act=0; act<numActivities+numSpecials; act++) {
 		graphData[i+3][act] =
 		    tempData[sortedMap[i+offset]][act];
 	    }
@@ -367,7 +389,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    outlierList.add(Integer.toString(sortedMap[i+offset]));
 	}
 	graphData[0] = tmpAvg;
-	for (int act=0; act<numActivities; act++) {
+	for (int act=0; act<numActivities+numSpecials; act++) {
 	    for (int i=0; i<offset; i++) {
 		graphData[1][act] += tempData[sortedMap[i]][act];
 	    }
@@ -423,7 +445,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    rString[0] = "Outlier Processor " + 
 		(String)outlierList.get(xVal);
 	}
-	if (currentActivity == 1) {
+	if ((currentAttribute == 1) && (yVal == numActivities)) {
 	    rString[1] = "Activity: Idle Time";
 	} else {
 	    rString[1] = "Activity: " + 

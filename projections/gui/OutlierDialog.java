@@ -169,6 +169,7 @@ public class OutlierDialog extends RangeDialog
 		threshold = thresholdField.getValue();
 	    }
 	}
+	super.updateData(field);
     }
 
     JTextField checkConsistent() {

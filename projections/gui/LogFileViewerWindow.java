@@ -1,7 +1,11 @@
 package projections.gui;
 
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
+
+import projections.misc.*;
+import projections.analysis.*;
 
 public class LogFileViewerWindow extends ProjectionsWindow
    implements ActionListener
@@ -25,7 +29,8 @@ public class LogFileViewerWindow extends ProjectionsWindow
 	super(parentWindow, myWindowID);
 	
 	setBackground(Color.lightGray);
-	setTitle("Projections Log File Viewer - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Log File Viewer - " + 
+		 Analysis.getFilename() + ".sts");
 	  
 	CreateMenus();
 	CreateLayout();
@@ -65,7 +70,7 @@ public class LogFileViewerWindow extends ProjectionsWindow
 	
 	setCursor(new Cursor(Cursor.WAIT_CURSOR));
 	if(logfilenum != oldlogfilenum)
-	    textArea.setText(Analysis.getLogFileText(logfilenum));
+	    textArea.setText(getLogFileText(logfilenum));
 	  setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
     }
    
@@ -144,6 +149,76 @@ public class LogFileViewerWindow extends ProjectionsWindow
        }
        dialog.setVisible(true);
    }   
+
+    /**************** Utility/Access *************/
+    public static String[][] getLogFileText( int num ) {
+	if (!(Analysis.hasLogData())) {
+	    return null;
+	} else {
+	    Vector v = null;
+	    try {
+		v = Analysis.logLoader.view(num);
+	    } catch (LogLoadException e) {
+		System.err.println("Failed to load Log files");
+		return null;
+	    }
+	    if( v == null ) {
+		return null;
+	    }
+	    int length = v.size();
+	    if( length == 0 ) {
+		return null;
+	    }
+	    String[][] text = new String[ length ][ 2 ];
+	    ViewerEvent ve;
+	    for( int i = 0;i < length;i++ ) {
+		ve = (ViewerEvent)v.elementAt(i);
+		text[ i ][ 0 ] = "" + ve.Time;
+		switch( ve.EventType ) {
+		case ( ProjDefs.CREATION ):
+		    text[ i ][ 1 ] = "CREATE message to be sent to " + ve.Dest;
+		    break;
+		case ( ProjDefs.BEGIN_PROCESSING ):
+		    text[ i ][ 1 ] = "BEGIN PROCESSING of message sent to " + 
+			ve.Dest;
+		    text[ i ][ 1 ] += " from processor " + ve.SrcPe;
+		    break;
+		case ( ProjDefs.END_PROCESSING ):
+		    text[ i ][ 1 ] = "END PROCESSING of message sent to " + 
+			ve.Dest;
+		    text[ i ][ 1 ] += " from processor " + ve.SrcPe;
+		    break;
+		case ( ProjDefs.ENQUEUE ):
+		    text[ i ][ 1 ] = "ENQUEUEING message received from " +
+			"processor " + ve.SrcPe + " destined for " + ve.Dest;
+		    break;
+		case ( ProjDefs.BEGIN_IDLE ):
+		    text[ i ][ 1 ] = "IDLE begin";
+		    break;
+		case ( ProjDefs.END_IDLE ):
+		    text[ i ][ 1 ] = "IDLE end";
+		    break;
+		case ( ProjDefs.BEGIN_PACK ):
+		    text[ i ][ 1 ] = "BEGIN PACKING a message to be sent";
+		    break;
+		case ( ProjDefs.END_PACK ):
+		    text[ i ][ 1 ] = "FINISHED PACKING a message to be sent";
+		    break;
+		case ( ProjDefs.BEGIN_UNPACK ):
+		    text[ i ][ 1 ] = "BEGIN UNPACKING a received message";
+		    break;
+		case ( ProjDefs.END_UNPACK ):
+		    text[ i ][ 1 ] = "FINISHED UNPACKING a received message";
+		    break;
+		default:
+		    text[ i ][ 1 ] = "!!!! ADD EVENT TYPE " + ve.EventType +
+			" !!!";
+		    break;
+		}
+	    }
+	    return text;
+	}
+    }
 
     public void showWindow() {
 	// do nothing for now.

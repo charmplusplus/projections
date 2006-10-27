@@ -37,12 +37,59 @@ public class LogLoader extends ProjDefs
     public LogLoader() 
 	throws LogLoadException
     {
-	int              Type;
-	long              Time;
-	int              Len;
-	long 	       back;
-	String           Line;
+	determineValidPEs();
+	determineEndTime();
+    }    
+    
+    public void determineValidPEs() 
+	throws LogLoadException
+    {
+	int nPe = Analysis.getNumProcessors();
 	File testFile;
+	
+	ProgressMonitor progressBar =
+	    new ProgressMonitor(Analysis.guiRoot, "Determining valid PEs",
+				"", 0, nPe);
+
+	validPEStringBuffer = new StringBuffer();
+	validPERange = false;
+	basePE = -1;
+	upperPE = -1;
+
+	for (int i=0; i<nPe; i++) {
+	    if (!progressBar.isCanceled()) {
+		progressBar.setNote(i + " of " + nPe);
+		progressBar.setProgress(i);
+	    } else {
+		System.err.println("Fatal error - Projections cannot" +
+				   " function without valid PE list");
+		System.exit(-1);
+	    }
+	    // test the file to see if it exists ...
+	    testFile = new File(Analysis.getLogName(i));
+	    if (testFile.exists() == false) {
+		System.out.println(Analysis.getLogName(i) +
+				   " does not exist, ignoring.");
+		updatePEStringBuffer();
+		validPERange = false;
+	    } else {
+		// success, so register processor as valid.
+		registerPE(i);
+	    }		
+	}	
+	updatePEStringBuffer();
+	validPEString = validPEStringBuffer.toString();
+	progressBar.close();
+    }
+
+    public void determineEndTime() 
+	throws LogLoadException
+    {
+	int              Type;
+	long             Time;
+	int              Len;
+	long 	         back;
+	String           Line;
 	RandomAccessFile InFile;
 	StringTokenizer  st;
 
@@ -54,11 +101,7 @@ public class LogLoader extends ProjDefs
 	ProgressMonitor progressBar =
 	    new ProgressMonitor(Analysis.guiRoot, "Determining end time",
 				"", 0, nPe);
-
-	validPEStringBuffer = new StringBuffer();
-	validPERange = false;
-	basePE = -1;
-	upperPE = -1;
+	
 	for (int i=0; i<nPe; i++) {
 	    if (!progressBar.isCanceled()) {
 		progressBar.setNote(i + " of " + nPe);
@@ -76,76 +119,67 @@ public class LogLoader extends ProjDefs
 	    long dummyLong = 0;
 	    int type = 0;
 	    try {
-		// test the file to see if it exists ...
-		testFile = new File(Analysis.getLogName(i));
-		if (testFile.exists() == false) {
-		    System.out.println(Analysis.getLogName(i) +
-				       " does not exist, ignoring.");
-		    updatePEStringBuffer();
-		    validPERange = false;
-		} else {
-		    InFile = new RandomAccessFile (testFile, "r");
-
-		    // success, so register processor as valid.
-		    registerPE(i);
-		    back = InFile.length()-80*3; //Seek to the end of the file
-		    if (back < 0) back = 0;
-		    InFile.seek(back);
-		    while (InFile.readByte() != '\n');
-		    while (true) {
-			Line = InFile.readLine();
-			// incomplete files can end on a proper previous
-			// line but not on END_COMPUTATION. This statement
-			// takes care of that.
-			if (Line == null) {
-			    throw new EOFException();
-			}
-			st = new StringTokenizer(Line);
-			if ((type=Integer.parseInt(st.nextToken())) == 
-			    END_COMPUTATION) {
-			    Time = Long.parseLong(st.nextToken());
-			    if (Time > EndTime)
-				EndTime = Time;
-			    break; // while loop
-			} else {
-			    switch (type) {
-			    case CREATION:
-			    case CREATION_MULTICAST:
-			    case BEGIN_PROCESSING:
-			    case END_PROCESSING:
-				dummyInt = 
-				    Integer.parseInt(st.nextToken());
-				dummyInt = 
-				    Integer.parseInt(st.nextToken());
-				break;
-			    case USER_EVENT:
-			    case USER_EVENT_PAIR:
-			    case MESSAGE_RECV: 
-			    case ENQUEUE: 
-			    case DEQUEUE:
-				dummyInt = 
-				    Integer.parseInt(st.nextToken());
-				break;
-			    case BEGIN_IDLE:
-			    case END_IDLE:
-			    case BEGIN_PACK: 
-			    case END_PACK:
-			    case BEGIN_UNPACK: 
-			    case END_UNPACK:
-			    case BEGIN_TRACE: 
-			    case END_TRACE:
-			    case BEGIN_COMPUTATION:
-			    case BEGIN_FUNC:
-			    case END_FUNC:
-			    case BEGIN_INTERRUPT: 
-			    case END_INTERRUPT:
-				break;
-			    }
-			    lastRecordedTime = Long.parseLong(st.nextToken());
-			}
+		InFile = 
+		    new RandomAccessFile(new File(Analysis.getLogName(i)),
+					 "r");
+		
+		back = InFile.length()-80*3; //Seek to the end of the file
+		if (back < 0) back = 0;
+		InFile.seek(back);
+		while (InFile.readByte() != '\n');
+		while (true) {
+		    Line = InFile.readLine();
+		    // incomplete files can end on a proper previous
+		    // line but not on END_COMPUTATION. This statement
+		    // takes care of that.
+		    if (Line == null) {
+			throw new EOFException();
 		    }
-		    InFile.close ();
+		    st = new StringTokenizer(Line);
+		    if ((type=Integer.parseInt(st.nextToken())) == 
+			END_COMPUTATION) {
+			Time = Long.parseLong(st.nextToken());
+			if (Time > EndTime)
+			    EndTime = Time;
+			break; // while loop
+		    } else {
+			switch (type) {
+			case CREATION:
+			case CREATION_MULTICAST:
+			case BEGIN_PROCESSING:
+			case END_PROCESSING:
+			    dummyInt = 
+				Integer.parseInt(st.nextToken());
+			    dummyInt = 
+				Integer.parseInt(st.nextToken());
+			    break;
+			case USER_EVENT:
+			case USER_EVENT_PAIR:
+			case MESSAGE_RECV: 
+			case ENQUEUE: 
+			case DEQUEUE:
+			    dummyInt = 
+				Integer.parseInt(st.nextToken());
+			    break;
+			case BEGIN_IDLE:
+			case END_IDLE:
+			case BEGIN_PACK: 
+			case END_PACK:
+			case BEGIN_UNPACK: 
+			case END_UNPACK:
+			case BEGIN_TRACE: 
+			case END_TRACE:
+			case BEGIN_COMPUTATION:
+			case BEGIN_FUNC:
+			case END_FUNC:
+			case BEGIN_INTERRUPT: 
+			case END_INTERRUPT:
+			    break;
+			}
+			lastRecordedTime = Long.parseLong(st.nextToken());
+		    }
 		}
+		InFile.close ();
 	    } catch (EOFException e) {
 		System.err.println("[" + i + "] " +
 				   "WARNING: Partial Log: Faking End " +
@@ -159,37 +193,42 @@ public class LogLoader extends ProjDefs
 				   Analysis.getLogName(i));
 	    }
 	}
-	updatePEStringBuffer();
-	validPEString = validPEStringBuffer.toString();
-
 	progressBar.close();
 	Analysis.setTotalTime(EndTime-BeginTime);
-    }    
+    }
 
     /**
      * Author: Chao Mei
-     * The procThdVec contains different processing threads vector, in which every processing threads
+     * The procThdVec contains different processing threads vector, 
+     * in which every processing threads
      * have different id (specified by LogEntry's field "id") 
      */
-    public void createAMPIUsageProfile(int procId, long beginTime, long endTime, Vector procThdVec)
+    public void createAMPIUsageProfile(int procId, long beginTime, 
+				       long endTime, Vector procThdVec)
         throws LogLoadException
     {
-
         GenericLogReader logFileRd = null;
         LogEntryData rawLogData = null;
         LogEntry curEntry = null;
         LogEntry prevEntry = null;
-
+	
         /**
          * Variables related to ampi support.
-         * Initially, I tend to maintain a local global variable of current function. But it turns out
+         * Initially, I tend to maintain a local global variable of 
+	 * current function. But it turns out
          * to be unnecessary and possibly wrong because:
-         * 1. The current function is always the top element of curProcessing's auxCallFuncStack.
-         * 2. There are cases when a single processing only contains part of a function. This function's end
-         *    is in the later run of this processing. In log file, it looks like:
-         *    BEGIN_PROCESSING...BEGIN_FUNC..END_PROCESSING......BEGIN_PROCESSING...END_FUNC...END_PROCESSING
-         *    In these cases, maintain the current function variable is somewhat difficult. But it will be easy
-         *    to use current processing's auxCallFuncStack to get the current running function.
+         * 1. The current function is always the top element of 
+	 *    curProcessing's auxCallFuncStack.
+         * 2. There are cases when a single processing only contains 
+	 *    part of a function. This function's end
+         *    is in the later run of this processing. In log file, 
+	 *    it looks like:
+         *    BEGIN_PROCESSING...BEGIN_FUNC..END_PROCESSING...
+	 *    ...BEGIN_PROCESSING...END_FUNC...END_PROCESSING
+         *    In these cases, maintain the current function variable 
+	 *    is somewhat difficult. But it will be easy
+         *    to use current processing's auxCallFuncStack to get the 
+	 *    current running function.
          */
         AmpiProcessProfile curProcessing = null;
         
@@ -205,9 +244,12 @@ public class LogLoader extends ProjDefs
 	    rawLogData = new LogEntryData();
 
             /** 
-            * seek the first BEGIN_PROCESSING within this time interval and its timestamp >= beginTime         .
-            * Therefore, any functions that before the BEGIN_PROCESSING is ignored.
-            * This could be somewhat an error. Consider a dummy function LATER!
+            * seek the first BEGIN_PROCESSING within this time interval 
+	    * and its timestamp >= beginTime         .
+            * Therefore, any functions that before the BEGIN_PROCESSING 
+	    * is ignored.
+            * This could be somewhat an error. Consider a dummy 
+	    * function LATER!
             */
             while(true){
                 logFileRd.nextEvent(rawLogData);
@@ -215,112 +257,150 @@ public class LogLoader extends ProjDefs
                 if(curEntry.TransactionType==BEGIN_PROCESSING 
                    && curEntry.Entry!=-1
                    && curEntry.Time >= beginTime){
-                    curProcessing = new AmpiProcessProfile(curEntry.Time, curEntry.id);                    
+                    curProcessing = new AmpiProcessProfile(curEntry.Time, 
+							   curEntry.id);
                     break;
                 }
             }
-
-            //Foound the starting point, initialize the prevEntry
+	    
+            // Found the starting point, initialize the prevEntry
             prevEntry = curEntry;
-
-           /** 
-            * Processing log file focusing on BEGIN/END_FUNC, BEGIN/END_PROCESSING 
-            * Assumming following conditions:
-            * 1. BEGIN/END_PROCESSING cannot be overlapped
-            * 2. BEGIN/END_PACK/UNPACK cannot be overlapped
-            * 3. BEGIN/END_FUNCTION can be overlapped
-            * 4. In one processing interval, BEGIN/END_FUNC maynot be paired. But in terms of the whole processing
-            * (a processing of same id may be divided into several pieces), BEGIN/END_FUNC must be paired
-            * 5. Currently, between the beginTime and endTime, BEGIN/END_FUNC are assumed to be paired.
-            */
-
+	    
+	    /** 
+	     * Processing log file focusing on BEGIN/END_FUNC, 
+	     * BEGIN/END_PROCESSING 
+	     * Assumming following conditions:
+	     * 1. BEGIN/END_PROCESSING cannot be overlapped
+	     * 2. BEGIN/END_PACK/UNPACK cannot be overlapped
+	     * 3. BEGIN/END_FUNCTION can be overlapped
+	     * 4. In one processing interval, BEGIN/END_FUNC maynot be 
+	     *    paired. But in terms of the whole processing
+	     *    (a processing of same id may be divided into several 
+	     *    pieces), BEGIN/END_FUNC must be paired
+	     * 5. Currently, between the beginTime and endTime, 
+	     *    BEGIN/END_FUNC are assumed to be paired.
+	     */
             boolean reachEndTime = false;
             while(!reachEndTime){
                 logFileRd.nextEvent(rawLogData);
                 curEntry = LogEntry.adapt(rawLogData);
-                if(curEntry.Entry == -1) //something must be wrong with the log file
+		//something must be wrong with the log file
+                if (curEntry.Entry == -1) 
                     continue;
                 switch(curEntry.TransactionType){
                 case BEGIN_PROCESSING:{                
                     if(curProcessing!=null){
-                        System.err.println("Error in parsing log file as processing overlapped!");
+                        System.err.println("Error in parsing log file " +
+					   "as processing overlapped!");
                         return;
                     } else {
-                        //just start a new processing but need to check whether it is the same
-                        //processing that has been stored in the "procThdMap"
-                        AmpiProcessProfile tmp = new AmpiProcessProfile(curEntry.Time, curEntry.id);
-                        AmpiProcessProfile storedProfile = (AmpiProcessProfile) procThdMap.get(tmp.toHashKey());
-                        curProcessing = (storedProfile==null ? tmp:storedProfile);
+                        // just start a new processing but need to 
+			// check whether it is the same
+                        // processing that has been stored in the "procThdMap"
+                        AmpiProcessProfile tmp = 
+			    new AmpiProcessProfile(curEntry.Time, 
+						   curEntry.id);
+                        AmpiProcessProfile storedProfile = 
+			    (AmpiProcessProfile)procThdMap.get(tmp.toHashKey());
+                        curProcessing = 
+			    (storedProfile==null ? tmp:storedProfile);
                     }
                     break;
                 }
                 case END_PROCESSING:{                
                     /**
-                     * Processing the end of a processing. If there're functions within this processing
-                     * push the process into the procThdMap. Otherwise do nothing.
+                     * Processing the end of a processing. If there're 
+		     * functions within this processing
+                     * push the process into the procThdMap. 
+		     * Otherwise do nothing.
                      * Upto this point, curProcessing mustn't be null!
-                     * Processing cannot overlap! i.e it will not appear the sequence like:
-                     * BEGIN_PROCESSING ... BEGIN_PROCESSING...END_PROCESSING...END_PROCESSING
-                     * Compute the accumlated execution time for this process (in terms of its ObjectId)
+                     * Processing cannot overlap! i.e it will not appear 
+		     * the sequence like:
+                     * BEGIN_PROCESSING ... BEGIN_PROCESSING...
+		     * END_PROCESSING...END_PROCESSING
+                     * Compute the accumlated execution time for this 
+		     * process (in terms of its ObjectId)
                      */
-                    if(curProcessing==null){
-                        System.err.println("Error in parsing log file as processing is not paired!");
+                    if (curProcessing==null) {
+                        System.err.println("Error in parsing log file " +
+					   "as processing is not paired!");
                         return;
                     }
-                    /*if(!curEntry.id.compare(curProcessing.getProcessID())){
-                        System.err.println("Error in parsing log file as processing overlapped!");
+                    /*
+		    if (!curEntry.id.compare(curProcessing.getProcessID())){
+		         System.err.println("Error in parsing log file " +
+			                    "as processing overlapped!");
                         return;
-                    }*/
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    if(!curProcessing.getAuxCallFuncStack().empty()){
-                        AmpiFunctionData curFunc = (AmpiFunctionData) curProcessing.getAuxCallFuncStack().peek();
-                        curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);
+                    }
+		    */
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
+                    if (!curProcessing.getAuxCallFuncStack().empty()) {
+                        AmpiFunctionData curFunc = 
+			    (AmpiFunctionData)curProcessing.getAuxCallFuncStack().peek();
+                        curFunc.incrAccExecTime(curEntry.Time - 
+						prevEntry.Time);
                     }
 
-                    //Only store the processing that hasn't been stored!
-                    if(procThdMap.get(curProcessing.toHashKey())==null)
-                        procThdMap.put(curProcessing.toHashKey(), curProcessing);                                            
+                    // Only store the processing that hasn't been stored!
+                    if (procThdMap.get(curProcessing.toHashKey())==null) {
+                        procThdMap.put(curProcessing.toHashKey(), 
+				       curProcessing);
+		    }
                     curProcessing = null;
 
-                    //The parsing will end only when it reaches completely paired BEGIN/END_PROCESSING
-                    if(curEntry.Time >= endTime)
+                    // The parsing will end only when it reaches 
+		    // completely paired BEGIN/END_PROCESSING
+                    if (curEntry.Time >= endTime) {
                         reachEndTime = true;
-
+		    }
                     break;
                 }
-                case BEGIN_FUNC:{                
-                    if(curProcessing==null){
-                        System.err.println("Error in parsing log file as a function is not in a processing!");
+                case BEGIN_FUNC: {                
+                    if (curProcessing==null) {
+                        System.err.println("Error in parsing log file " +
+					   "as a function is not in a " +
+					   "processing!");
                         return;
                     }
 
-                    //first compute the accumlated time for the current processing!
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    //second deal with the new function
+                    // first compute the accumlated time for the current 
+		    // processing!
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
+                    // second deal with the new function
                     AmpiFunctionData curFunc = curEntry.ampiData;
                     Stack auxStk = curProcessing.getAuxCallFuncStack();
                     auxStk.push(curFunc);
                     break;
                 }
                 case END_FUNC:{                
-                    if(curProcessing==null){
-                        System.err.println("Error in parsing log file as a function is not in a processing!");
+                    if (curProcessing==null) {
+                        System.err.println("Error in parsing log file " +
+					   "as a function is not in a " +
+					   "processing!");
                         return;
                     }
-                    if(curProcessing.getAuxCallFuncStack().empty()){                    
-                        System.err.println("Error in parsing log file as a function is not paired properly!");
+                    if (curProcessing.getAuxCallFuncStack().empty()) {
+                        System.err.println("Error in parsing log file as " +
+					   "a function is not paired " +
+					   "properly!");
                         return;
                     }
-                    AmpiFunctionData curFunc = (AmpiFunctionData) curProcessing.getAuxCallFuncStack().peek();
-                    if(curFunc.FunctionID != curEntry.FunctionID){
-                        System.err.println("Error in parsing log file as a function is not paired properly!");
+                    AmpiFunctionData curFunc = 
+			(AmpiFunctionData)curProcessing.getAuxCallFuncStack().peek();
+                    if (curFunc.FunctionID != curEntry.FunctionID) {
+                        System.err.println("Error in parsing log file as " +
+					   "a function is not paired " +
+					   "properly!");
                         return;
                     }
-
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
                     curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    //as the current function is completed, it is popped from the auxCallFuncStack and pushed to 
-                    //the final callFuncStack associated with curProcessing
+                    // as the current function is completed, it is popped 
+		    // from the auxCallFuncStack and pushed to 
+                    // the final callFuncStack associated with curProcessing
                     curProcessing.getAuxCallFuncStack().pop();
                     curProcessing.getFinalCallFuncStack().push(curFunc);
                     break;
@@ -328,20 +408,23 @@ public class LogLoader extends ProjDefs
                 case BEGIN_PACK:
                 case BEGIN_UNPACK:
                 case CREATION:{
-                    if(curProcessing==null)
+                    if (curProcessing==null) {
                         break;
-                    
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    if(curProcessing.getAuxCallFuncStack().empty())
+                    }
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
+                    if (curProcessing.getAuxCallFuncStack().empty()) {
                         break;
-                    AmpiFunctionData curFunc = (AmpiFunctionData) curProcessing.getAuxCallFuncStack().peek();
-                    curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);                    
+		    }
+                    AmpiFunctionData curFunc = 
+			(AmpiFunctionData)curProcessing.getAuxCallFuncStack().peek();
+                    curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);
                     break;
                 }
-
-                /**
-                 * The cases: END_PACK, END_UNPACK 
-                 * are neglected as their time is not contributed to the total execution of 
+		/**
+		 * The cases: END_PACK, END_UNPACK 
+                 * are neglected as their time is not contributed 
+		 * to the total execution of 
                  * the current processing and the current function
                  */               
                 default:
@@ -349,7 +432,6 @@ public class LogLoader extends ProjDefs
                 }
                 prevEntry = curEntry;
             }
-
         } catch (EOFException e) { 
 	    /*ignore*/ 
 	} catch (FileNotFoundException E) {
@@ -359,30 +441,40 @@ public class LogLoader extends ProjDefs
 	    throw new LogLoadException(Analysis.getLogName(procId), 
 				       LogLoadException.READ);
 	}
-
-        //finally select the processes that have functions and push them to the procThdVec
-        for(Enumeration e=procThdMap.keys(); e.hasMoreElements();){
-            AmpiProcessProfile p = (AmpiProcessProfile) procThdMap.get(e.nextElement());
-            if(p.getFinalCallFuncStack().size()>0)
+	
+        // finally select the processes that have functions and 
+	// push them to the procThdVec
+        for (Enumeration e=procThdMap.keys(); e.hasMoreElements();) {
+            AmpiProcessProfile p =
+		(AmpiProcessProfile)procThdMap.get(e.nextElement());
+            if (p.getFinalCallFuncStack().size()>0) {
                 procThdVec.add(p);
+	    }
         }
     }
 
     /**
      * Author: Chao Mei
-     * The procThdVec contains different processing threads vector, in which every processing threads
+     * The procThdVec contains different processing threads vector, 
+     * in which every processing threads
      * have different id (specified by LogEntry's field "id")
-     * This function's logical and data flow is same with createAMPIUsageProfile.
-     * To some extent,createAMPIUsageProfile function can be implemented by calling createAMPIFuncTimeProfile.
-     * However, as I was first asked to implement ampi function's usage profile, I designed the implementation
-     * without considering the ampi function's time profile. Therefore, both of these functions share very similar
-     * codes. If I have time later, I will rewrite the createAMPIUsageProfile function by using this function as 
+     * This function's logical and data flow is same with 
+     * createAMPIUsageProfile.
+     * To some extent,createAMPIUsageProfile function can be implemented 
+     * by calling createAMPIFuncTimeProfile.
+     * However, as I was first asked to implement ampi function's 
+     * usage profile, I designed the implementation
+     * without considering the ampi function's time profile. Therefore, 
+     * both of these functions share very similar
+     * codes. If I have time later, I will rewrite the 
+     * createAMPIUsageProfile function by using this function as 
      * the stub!!!
      */
-    public void createAMPIFuncTimeProfile(int procId, long beginTime, long endTime, Vector procThdVec)
+    public void createAMPIFuncTimeProfile(int procId, long beginTime, 
+					  long endTime, Vector procThdVec)
         throws LogLoadException        
     {
-
+	
         GenericLogReader logFileRd = null;
         LogEntryData rawLogData = null;
         LogEntry curEntry = null;
@@ -390,17 +482,23 @@ public class LogLoader extends ProjDefs
 
         /**
          * Variables related to ampi support.
-         * Initially, I tend to maintain a local global variable of current function. But it turns out
+         * Initially, I tend to maintain a local global variable of 
+	 * current function. But it turns out
          * to be unnecessary and possibly wrong because:
-         * 1. The current function is always the top element of curProcessing's auxCallFuncStack.
-         * 2. There are cases when a single processing only contains part of a function. This function's end
-         *    is in the later run of this processing. In log file, it looks like:
-         *    BEGIN_PROCESSING...BEGIN_FUNC..END_PROCESSING......BEGIN_PROCESSING...END_FUNC...END_PROCESSING
-         *    In these cases, maintain the current function variable is somewhat difficult. But it will be easy
-         *    to use current processing's auxCallFuncStack to get the current running function.
+         * 1. The current function is always the top element of 
+	 *    curProcessing's auxCallFuncStack.
+         * 2. There are cases when a single processing only contains 
+	 *    part of a function. This function's end
+         *    is in the later run of this processing. In log file, 
+	 *    it looks like:
+         *    BEGIN_PROCESSING...BEGIN_FUNC..END_PROCESSING...
+	 *    ...BEGIN_PROCESSING...END_FUNC...END_PROCESSING
+         *    In these cases, maintain the current function variable 
+	 *    is somewhat difficult. But it will be easy
+         *    to use current processing's auxCallFuncStack to get the 
+	 *    current running function.
          */
         AmpiProcessProfile curProcessing = null;
-        
 
         /**
          * key = process' triple id
@@ -408,154 +506,195 @@ public class LogLoader extends ProjDefs
          */
         Hashtable procThdMap = new Hashtable();
 
-        try{
+        try {
             logFileRd = new GenericLogReader(procId,Analysis.getVersion());
 	    rawLogData = new LogEntryData();
 
             /** 
-            * seek the first BEGIN_PROCESSING within this time interval and its timestamp >= beginTime         .
-            * Therefore, any functions that before the BEGIN_PROCESSING is ignored.
-            * This could be somewhat an error. Consider a dummy function LATER!
-            */
-            while(true){
+	     * seek the first BEGIN_PROCESSING within this time interval 
+	     * and its timestamp >= beginTime         .
+	     * Therefore, any functions that before the BEGIN_PROCESSING 
+	     * is ignored.
+	     * This could be somewhat an error. Consider a dummy 
+	     * function LATER!
+	     */
+            while(true) {
                 logFileRd.nextEvent(rawLogData);
                 curEntry = LogEntry.adapt(rawLogData);
-                if(curEntry.TransactionType==BEGIN_PROCESSING 
-                   && curEntry.Entry!=-1
-                   && curEntry.Time >= beginTime){
-                    curProcessing = new AmpiProcessProfile(curEntry.Time, curEntry.id);                    
+                if (curEntry.TransactionType==BEGIN_PROCESSING 
+		    && curEntry.Entry!=-1
+		    && curEntry.Time >= beginTime) {
+                    curProcessing = 
+			new AmpiProcessProfile(curEntry.Time, curEntry.id);
                     break;
                 }
             }
-
-            //Foound the starting point, initialize the prevEntry
+	    
+            // Found the starting point, initialize the prevEntry
             prevEntry = curEntry;
-
+	    
            /** 
-            * Processing log file focusing on BEGIN/END_FUNC, BEGIN/END_PROCESSING 
+            * Processing log file focusing on BEGIN/END_FUNC, 
+	    * BEGIN/END_PROCESSING 
             * Assumming following conditions:
             * 1. BEGIN/END_PROCESSING cannot be overlapped
             * 2. BEGIN/END_PACK/UNPACK cannot be overlapped
             * 3. BEGIN/END_FUNCTION can be overlapped
-            * 4. In one processing interval, BEGIN/END_FUNC maynot be paired. But in terms of the whole processing
-            * (a processing of same id may be divided into several pieces), BEGIN/END_FUNC must be paired
-            * 5. Currently, between the beginTime and endTime, BEGIN/END_FUNC are assumed to be paired.
+            * 4. In one processing interval, BEGIN/END_FUNC maynot be paired.
+	    *    But in terms of the whole processing
+            *    (a processing of same id may be divided into several 
+	    *    pieces), BEGIN/END_FUNC must be paired
+            * 5. Currently, between the beginTime and endTime, 
+	    *    BEGIN/END_FUNC are assumed to be paired.
             */
-
             boolean reachEndTime = false;
-            while(!reachEndTime){                
+            while (!reachEndTime) {
                 logFileRd.nextEvent(rawLogData);
                 curEntry = LogEntry.adapt(rawLogData);
-                if(curEntry.Entry == -1) //something must be wrong with the log file
+		//something must be wrong with the log file
+                if (curEntry.Entry == -1) 
                     continue;
-                switch(curEntry.TransactionType){
-                case BEGIN_PROCESSING:{                
-                    if(curProcessing!=null){
-                        System.err.println("Error in parsing log file as processing overlapped!");
+                switch (curEntry.TransactionType) {
+                case BEGIN_PROCESSING: {                
+                    if (curProcessing!=null) {
+                        System.err.println("Error in parsing log file " +
+					   "as processing overlapped!");
                         return;
                     } else {
-                        //just start a new processing but need to check whether it is the same
-                        //processing that has been stored in the "procThdMap"
-                        AmpiProcessProfile tmp = new AmpiProcessProfile(curEntry.Time, curEntry.id);
-                        AmpiProcessProfile storedProfile = (AmpiProcessProfile) procThdMap.get(tmp.toHashKey());
-                        curProcessing = (storedProfile==null ? tmp:storedProfile);
+                        // just start a new processing but need to check 
+			// whether it is the same
+                        // processing that has been stored in the "procThdMap"
+                        AmpiProcessProfile tmp = 
+			    new AmpiProcessProfile(curEntry.Time, 
+						   curEntry.id);
+                        AmpiProcessProfile storedProfile = 
+			    (AmpiProcessProfile)procThdMap.get(tmp.toHashKey());
+                        curProcessing = 
+			    (storedProfile==null ? tmp:storedProfile);
                     }
                     break;
                 }
-                case END_PROCESSING:{                
+                case END_PROCESSING: {                
                     /**
-                     * Processing the end of a processing. If there're functions within this processing
-                     * push the process into the procThdMap. Otherwise do nothing.
+                     * Processing the end of a processing. If there're 
+		     * functions within this processing
+                     * push the process into the procThdMap. Otherwise 
+		     * do nothing.
                      * Upto this point, curProcessing mustn't be null!
-                     * Processing cannot overlap! i.e it will not appear the sequence like:
-                     * BEGIN_PROCESSING ... BEGIN_PROCESSING...END_PROCESSING...END_PROCESSING
-                     * Compute the accumlated execution time for this process (in terms of its ObjectId)
+                     * Processing cannot overlap! i.e it will not appear 
+		     * the sequence like:
+                     * BEGIN_PROCESSING ... BEGIN_PROCESSING...
+		     * END_PROCESSING...END_PROCESSING
+                     * Compute the accumlated execution time for this 
+		     * process (in terms of its ObjectId)
                      */
-                    if(curProcessing==null){
-                        System.err.println("Error in parsing log file as processing is not paired!");
+                    if (curProcessing==null) {
+                        System.err.println("Error in parsing log file as " +
+					   "processing is not paired!");
                         return;
                     }
                     
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    if(!curProcessing.getAuxCallFuncStack().empty()){
-                        AmpiFunctionData curFunc = (AmpiFunctionData) curProcessing.getAuxCallFuncStack().peek();
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
+                    if (!curProcessing.getAuxCallFuncStack().empty()) {
+                        AmpiFunctionData curFunc = 
+			    (AmpiFunctionData)curProcessing.getAuxCallFuncStack().peek();
                         AmpiFunctionData.AmpiFuncExecInterval gap = 
                             new AmpiFunctionData.AmpiFuncExecInterval(prevEntry.Time,curEntry.Time);
                         curFunc.insertExecInterval(gap);
-                        curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);
+                        curFunc.incrAccExecTime(curEntry.Time - 
+						prevEntry.Time);
                     }
-
-                    //Only store the processing that hasn't been stored!
-                    if(procThdMap.get(curProcessing.toHashKey())==null)
-                        procThdMap.put(curProcessing.toHashKey(), curProcessing);                                            
+		    
+                    // Only store the processing that hasn't been stored!
+                    if (procThdMap.get(curProcessing.toHashKey())==null) {
+                        procThdMap.put(curProcessing.toHashKey(), 
+				       curProcessing);
+		    }
                     curProcessing = null;
-
-                    //The parsing will end only when it reaches completely paired BEGIN/END_PROCESSING
-                    if(curEntry.Time >= endTime)
+		    
+                    // The parsing will end only when it reaches completely 
+		    // paired BEGIN/END_PROCESSING
+                    if (curEntry.Time >= endTime) {
                         reachEndTime = true;
-
+		    }
                     break;
                 }
-                case BEGIN_FUNC:{                
-                    if(curProcessing==null){
-                        System.err.println("Error in parsing log file as a function is not in a processing!");
+                case BEGIN_FUNC: {                
+                    if (curProcessing==null) {
+                        System.err.println("Error in parsing log file as " +
+					   "a function is not in a " +
+					   "processing!");
                         return;
                     }
 
-                    //first compute the accumlated time for the current processing!
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    //second deal with the new function
+                    // first compute the accumlated time for the current 
+		    // processing!
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
+                    // second deal with the new function
                     AmpiFunctionData curFunc = curEntry.ampiData;
                     Stack auxStk = curProcessing.getAuxCallFuncStack();
                     auxStk.push(curFunc);
                     break;
                 }
-                case END_FUNC:{                
-                    if(curProcessing==null){
-                        System.err.println("Error in parsing log file as a function is not in a processing!");
+                case END_FUNC: {                
+                    if (curProcessing==null) {
+                        System.err.println("Error in parsing log file as " +
+					   "a function is not in a " +
+					   "processing!");
                         return;
                     }
-                    if(curProcessing.getAuxCallFuncStack().empty()){                    
-                        System.err.println("Error in parsing log file as a function is not paired properly!");
+                    if (curProcessing.getAuxCallFuncStack().empty()) {
+                        System.err.println("Error in parsing log file as " +
+					   "a function is not paired " +
+					   "properly!");
                         return;
                     }
-                    AmpiFunctionData curFunc = (AmpiFunctionData) curProcessing.getAuxCallFuncStack().peek();
-                    if(curFunc.FunctionID != curEntry.FunctionID){
-                        System.err.println("Error in parsing log file as a function is not paired properly!");
+                    AmpiFunctionData curFunc = 
+			(AmpiFunctionData)curProcessing.getAuxCallFuncStack().peek();
+                    if (curFunc.FunctionID != curEntry.FunctionID) {
+                        System.err.println("Error in parsing log file as " +
+					   "a function is not paired " +
+					   "properly!");
                         return;
                     }
-
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
                     AmpiFunctionData.AmpiFuncExecInterval gap = 
                         new AmpiFunctionData.AmpiFuncExecInterval(prevEntry.Time,curEntry.Time);
                     curFunc.insertExecInterval(gap);
                     curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    //as the current function is completed, it is popped from the auxCallFuncStack and pushed to 
-                    //the final callFuncStack associated with curProcessing
+                    // as the current function is completed, it is popped 
+		    // from the auxCallFuncStack and pushed to 
+                    // the final callFuncStack associated with curProcessing
                     curProcessing.getAuxCallFuncStack().pop();
                     curProcessing.getFinalCallFuncStack().push(curFunc);
                     break;
                 }
                 case BEGIN_PACK:
                 case BEGIN_UNPACK:
-                case CREATION:{
-                    if(curProcessing==null)
+                case CREATION: {
+                    if (curProcessing==null) {
                         break;
-                    
-                    curProcessing.incrAccExecTime(curEntry.Time - prevEntry.Time);
-                    if(curProcessing.getAuxCallFuncStack().empty())
+		    }
+                    curProcessing.incrAccExecTime(curEntry.Time - 
+						  prevEntry.Time);
+                    if (curProcessing.getAuxCallFuncStack().empty()) {
                         break;
-                    AmpiFunctionData curFunc = (AmpiFunctionData) curProcessing.getAuxCallFuncStack().peek();
+		    }
+                    AmpiFunctionData curFunc = 
+			(AmpiFunctionData)curProcessing.getAuxCallFuncStack().peek();
                     AmpiFunctionData.AmpiFuncExecInterval gap = 
                         new AmpiFunctionData.AmpiFuncExecInterval(prevEntry.Time,curEntry.Time);
                     curFunc.insertExecInterval(gap);
-                    curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);                    
+                    curFunc.incrAccExecTime(curEntry.Time - prevEntry.Time);
                     break;
                 }
-
-                /**
+		/**
                  * The cases: END_PACK, END_UNPACK 
-                 * are neglected as their time is not contributed to the total execution of 
+                 * are neglected as their time is not contributed to the 
+		 * total execution of 
                  * the current processing and the current function
                  */               
                 default:
@@ -563,7 +702,6 @@ public class LogLoader extends ProjDefs
                 }
                 prevEntry = curEntry;
             }
-
         } catch (EOFException e) { 
 	    /*ignore*/ 
 	} catch (FileNotFoundException E) {
@@ -574,11 +712,14 @@ public class LogLoader extends ProjDefs
 				       LogLoadException.READ);
 	}
 
-        //finally select the processes that have functions and push them to the procThdVec
-        for(Enumeration e=procThdMap.keys(); e.hasMoreElements();){
-            AmpiProcessProfile p = (AmpiProcessProfile) procThdMap.get(e.nextElement());
-            if(p.getFinalCallFuncStack().size()>0)
+        // finally select the processes that have functions and push 
+	// them to the procThdVec
+        for (Enumeration e=procThdMap.keys(); e.hasMoreElements();) {
+            AmpiProcessProfile p = 
+		(AmpiProcessProfile)procThdMap.get(e.nextElement());
+            if (p.getFinalCallFuncStack().size()>0) {
                 procThdVec.add(p);
+	    }
         }
     }
 
@@ -591,8 +732,10 @@ public class LogLoader extends ProjDefs
 	boolean		LogMsgs     = true;
 	LogEntry          LE          = null;
 	TimelineEvent     TE          = null;
-	Hashtable         userEvents  = new Hashtable();  // store unfinished userEvents
-	UserEvent         userEvent   = null;  // jsut for temp purposes
+	// Hashtable userEvents stores unfinished userEvents
+	Hashtable         userEvents  = new Hashtable();  
+	// just for temp purposes
+	UserEvent         userEvent   = null;  
 	TimelineMessage   TM          = null;
 	PackTime          PT          = null;
 	boolean tempte;
@@ -600,7 +743,7 @@ public class LogLoader extends ProjDefs
 	GenericLogReader reader;
 	LogEntryData data;
 
-	System.gc ();
+	System.gc();
 
 	// open the file
 	try {

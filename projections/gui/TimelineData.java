@@ -6,6 +6,7 @@ import java.awt.*;
 import javax.swing.*;
 
 import projections.analysis.*;
+import projections.misc.*;
 
 public class TimelineData
 {
@@ -337,7 +338,7 @@ public class TimelineData
 	tl = new Vector();
 	Vector userEvents = new Vector();
 	mesgVector[pnum] = new Vector();
-	Analysis.createTL(pnum, beginTime, endTime, tl, userEvents);
+	createTL(pnum, beginTime, endTime, tl, userEvents);
 	// proc userEvents
 	int numUserEvents = userEvents.size();
 	if (numUserEvents > 0) {
@@ -523,4 +524,24 @@ public class TimelineData
 	timelineWindow.validPEs = processorList;
 	timelineWindow.procRangeDialog(false);
     }
+
+    /****************** Timeline ******************/
+    public Vector createTL(int p, long bt, long et, 
+			   Vector timelineEvents, Vector userEvents) {
+	try {
+	    if (Analysis.hasLogData()) {
+		return Analysis.logLoader.createtimeline(p, bt, et, 
+							 timelineEvents, 
+							 userEvents);
+	    } else {
+		System.err.println("createTL: No log files available!");
+		return null;
+	    }
+	} catch (LogLoadException e) {
+	    System.err.println("LOG LOAD EXCEPTION");
+	    return null;
+	}
+    }
+
+
 }

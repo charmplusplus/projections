@@ -3,6 +3,7 @@ package projections.analysis;
 import java.io.*;
 import java.util.*;
 import java.lang.*;
+import java.lang.reflect.*;
 
 import projections.misc.*;
 
@@ -13,7 +14,6 @@ import projections.misc.*;
  *
  *  ProjectionsConfigurationReader reads a simple line-based data file
  *  which describes visualization configurations (like total run time).
- *  **CW** This is still kind of a hack which needs cleaning up.
  *
  */
 public class ProjectionsConfigurationReader
@@ -25,27 +25,32 @@ public class ProjectionsConfigurationReader
     // Variables recognized and stored in a hash table when a 
     // configuration file is read.
     private Hashtable configData;
-    
-    // Private status variables
+
     private boolean dirty;
 
-    public ProjectionsConfigurationReader(String baseName,
-					  String logDirectory) 
+    // Configuration Variables. They *must* begin with "RC_"
+    public static Long RC_GLOBAL_END_TIME = new Long(-1);
+    public static Long RC_POSE_REAL_TIME = new Long(-1);
+    public static Long RC_POSE_VIRT_TIME = new Long(-1);    
+    public static Boolean RC_IS_OUTLIER_FILTERED = Boolean.valueOf(false);
+    public static String RC_VALID_LOG_LIST = "";
+
+    public ProjectionsConfigurationReader(String filename)
     {
+	baseName = FileUtils.getBaseName(filename);
+	logDirectory = FileUtils.dirFromFile(filename);
 	configData = new Hashtable();
-	this.baseName = baseName;
-	this.logDirectory = logDirectory;
 	configurationName = baseName + ".projrc";
 	dirty = false;
 	try {
-	    read();
+	    readfile();
 	} catch (LogLoadException e) {
 	    System.err.println(e.toString());
 	    System.exit(-1);
 	}
     }
 
-    public void read() 
+    public void readfile() 
 	throws LogLoadException
     {
 	try {
@@ -55,15 +60,49 @@ public class ProjectionsConfigurationReader
 	    while ((Line = InFile.readLine()) != null) {
 		StringTokenizer st = new StringTokenizer(Line);
 		String s1 = st.nextToken();
-		// look up against known variables, read their corresponding
-		// data type and return an Object "value" for each.
-		Object value = readValue(s1,st);
-		if (value != null) {
-		    configData.put(s1,value);
-		} else {
-		    System.err.println("WARNING: Unknown projections" +
-				       " configuration key [" +
-				       s1 + "]!");
+		String tempStr = "";
+		// All rc descriptors must start with this string
+		if (!s1.startsWith("RC_")) {
+		    System.err.println("Warning: Key [" + s1 + "] does not " +
+				       "start with RC_ and is rejected.");
+		    continue;
+		}
+		try {
+		    Field rcField =
+			Class.forName("projections.analysis.ProjectionsConfigurationReader").getField(s1);
+		    // The configuration variables must either support the
+		    // valueOf(String) method or be String-compatible.
+		    // Failure to support valueOf is caught by the exception
+		    // NoSuchMethodException and is an internal error (i.e.
+		    // a member of the development team used an incompatible
+		    // type)
+		    tempStr = st.nextToken();
+		    if (Class.forName("java.lang.String").equals(rcField.getType())) {
+			rcField.set(this, tempStr);
+		    } else {
+			rcField.set(this,
+				    rcField.getType().getMethod("valueOf", new Class[] {
+					Class.forName("java.lang.String")
+				    }
+								).invoke(null,new Object[] {
+								    tempStr
+								}));
+		    }
+		    System.out.println(rcField.get(null));
+		} catch (NoSuchFieldException e) {
+		    System.err.println("Warning: Key [" + s1 + "] is " +
+				       "not supported on this version " +
+				       "of Projections!");
+		} catch (Exception e) {
+		    // for ClassNotFoundException, NoSuchMethodException,
+		    //     IllegalAccessException & SecurityException
+		    System.err.println("Internal Error: Encountered when " +
+				       "attempting to assign value [" +
+				       tempStr + "] to configuration key [" +
+				       s1 + "] Please report to " +
+				       "developers!");
+		    System.err.println(e.toString());
+		    System.exit(-1);
 		}
 	    }
 	    InFile.close();
@@ -107,22 +146,6 @@ public class ProjectionsConfigurationReader
 	} catch (LogLoadException e) {
 	    System.err.println(e.toString());
 	    System.exit(-1);
-	}
-    }
-
-    // *********************
-    // * This method uses a different read method for each known
-    // * key.
-    // *********************
-    private Object readValue(String key, StringTokenizer st) {
-	if (key.equals("REAL_TOTAL_TIME")) {
-	    return Long.valueOf(st.nextToken());
-	} else if (key.equals("POSE_REAL_TOTAL_TIME")) {
-	    return Double.valueOf(st.nextToken());
-	} else if (key.equals("POSE_VIRT_TOTAL_TIME")) {
-	    return Long.valueOf(st.nextToken());
-	} else {
-	    return null;
 	}
     }
 

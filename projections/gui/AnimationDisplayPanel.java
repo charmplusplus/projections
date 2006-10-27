@@ -226,10 +226,10 @@ public class AnimationDisplayPanel extends Panel
 	OrderedIntList validPEs = animationWindow.validPEs;
 	numPs = validPEs.size();
 	Isize = animationWindow.intervalSize;
-	data = Analysis.getAnimationData(Isize,
-					 animationWindow.startTime, 
-					 animationWindow.endTime,
-					 validPEs);
+	data = getAnimationData(Isize,
+				animationWindow.startTime, 
+				animationWindow.endTime,
+				validPEs);
 	numIs = data[0].length;
 	if (numIs > 0) {
 	    curI = 0;
@@ -253,6 +253,34 @@ public class AnimationDisplayPanel extends Panel
 	    clearScreen();
 	}   
     }   
+
+    public int[][] getAnimationData(long intervalSize, 
+				    long startTime, long endTime, 
+				    OrderedIntList desiredPEs) {
+	if (intervalSize >= endTime-startTime) {
+	    intervalSize = endTime-startTime;
+	}
+	int startI = (int)(startTime/intervalSize);
+	int endI = (int)(endTime/intervalSize);
+	int numPs = desiredPEs.size();
+	
+	Analysis.LoadGraphData(intervalSize,startI,endI-1,false, null);
+	int[][] animationdata = new int[ numPs ][ endI-startI ];
+	
+	int pInfo = desiredPEs.nextElement();
+	int p = 0;
+	
+	while(pInfo != -1){
+	    for( int t = 0; t <(endI-startI); t++ ){
+		animationdata[ p ][ t ] = 
+		    Analysis.getSystemUsageData(1)[ pInfo ][ t ];
+	    }
+	    pInfo = desiredPEs.nextElement();
+	    p++;
+	}
+	
+	return animationdata;
+    }
 
     public void update(Graphics g)
     {

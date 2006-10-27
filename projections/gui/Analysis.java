@@ -47,7 +47,7 @@ public class Analysis {
 
     private static StsReader sts;
     
-    private static LogLoader logLoader;  //Only for .log files
+    public static LogLoader logLoader;  //Only for .log files
     
     private static SumAnalyzer sumAnalyzer; //Only for .sum files
 
@@ -116,12 +116,11 @@ public class Analysis {
     {
 	guiRoot = rootComponent;
 	try {
-	    baseName = getBaseName(filename);
-	    logDirectory = dirFromFile(filename);
+	    baseName = FileUtils.getBaseName(filename);
+	    logDirectory = FileUtils.dirFromFile(filename);
 	    sts=new StsReader(filename);
 	    rcReader = 
-		new ProjectionsConfigurationReader(getFilename(),
-						   getLogDirectory());
+		new ProjectionsConfigurationReader(filename);
 	    FileUtils.detectFiles(sts, baseName);
 
 	    // if I can find the saved color maps, then use it.
@@ -209,30 +208,11 @@ public class Analysis {
 	}
     }
     
-    /****************** Timeline ******************/
-    public static Vector createTL(int p, long bt, long et, 
-				  Vector timelineEvents, Vector userEvents) {
-	try {
-	    if (hasLogFiles()) {
-		if (logLoader == null) {
-		    logLoader = new LogLoader();
-		}
-		return logLoader.createtimeline(p, bt, et, timelineEvents, 
-						userEvents);
-	    } else {
-		System.err.println("createTL: No log files available!");
-		return null;
-	    }
-	} catch (LogLoadException e) {
-	    System.err.println("LOG LOAD EXCEPTION");
-	    return null;
-	}
-    }
-
     /**
      * Creating AMPI usage profile
      */
-    public static void createAMPIUsage(int procId, long beginTime, long endTime, Vector procThdVec){
+    public static void createAMPIUsage(int procId, long beginTime, 
+				       long endTime, Vector procThdVec){
         try {
 	    if (hasLogFiles()) {
 		if (logLoader == null) {
@@ -250,119 +230,20 @@ public class Analysis {
     /**
      * Create AMPI Functions' Time profile
      */
-    public static void createAMPITimeProfile(int procId, long beginTime, long endTime, Vector procThdVec){
+    public static void createAMPITimeProfile(int procId, long beginTime, 
+					     long endTime, Vector procThdVec){
         try {
 	    if (hasLogFiles()) {
 		if (logLoader == null) {
 		    logLoader = new LogLoader();
 		}
-		logLoader.createAMPIFuncTimeProfile(procId,beginTime,endTime,procThdVec);
+		logLoader.createAMPIFuncTimeProfile(procId,beginTime,
+						    endTime,procThdVec);
 	    } else {
 		System.err.println("createAMPIUsage: No log files available!");
 	    }
 	} catch (LogLoadException e) {
 	    System.err.println("LOG LOAD EXCEPTION");	    
-	}
-    }
-
-
-    public static int[][] getAnimationData(long intervalSize, 
-					   long startTime, long endTime, 
-					   OrderedIntList desiredPEs) {
-	if (intervalSize >= endTime-startTime) {
-	    intervalSize = endTime-startTime;
-	}
-	int startI = (int)(startTime/intervalSize);
-	int endI = (int)(endTime/intervalSize);
-	int numPs = desiredPEs.size();
-	
-	LoadGraphData(intervalSize,startI,endI-1,false, null);
-	int[][] animationdata = new int[ numPs ][ endI-startI ];
-	
-	int pInfo = desiredPEs.nextElement();
-	int p = 0;
-	
-	while(pInfo != -1){
-	    for( int t = 0; t <(endI-startI); t++ ){
-		animationdata[ p ][ t ] = getSystemUsageData(1)[ pInfo ][ t ];
-	    }
-	    pInfo = desiredPEs.nextElement();
-	    p++;
-	}
-	
-	return animationdata;
-    }
-
-    /**************** Utility/Access *************/
-    public static String[][] getLogFileText( int num ) {
-	if (!(hasLogFiles())) {
-	    return null;
-	} else {
-	    Vector v = null;
-	    try {
-		if (logLoader == null) {
-		    logLoader = new LogLoader();
-		}
-		v = logLoader.view(num);
-	    } catch (LogLoadException e) {
-		System.err.println("Failed to load Log files");
-		return null;
-	    }
-	    if( v == null ) {
-		return null;
-	    }
-	    int length = v.size();
-	    if( length == 0 ) {
-		return null;
-	    }
-	    String[][] text = new String[ length ][ 2 ];
-	    ViewerEvent ve;
-	    for( int i = 0;i < length;i++ ) {
-		ve = (ViewerEvent)v.elementAt(i);
-		text[ i ][ 0 ] = "" + ve.Time;
-		switch( ve.EventType ) {
-		case ( ProjDefs.CREATION ):
-		    text[ i ][ 1 ] = "CREATE message to be sent to " + ve.Dest;
-		    break;
-		case ( ProjDefs.BEGIN_PROCESSING ):
-		    text[ i ][ 1 ] = "BEGIN PROCESSING of message sent to " + 
-			ve.Dest;
-		    text[ i ][ 1 ] += " from processor " + ve.SrcPe;
-		    break;
-		case ( ProjDefs.END_PROCESSING ):
-		    text[ i ][ 1 ] = "END PROCESSING of message sent to " + 
-			ve.Dest;
-		    text[ i ][ 1 ] += " from processor " + ve.SrcPe;
-		    break;
-		case ( ProjDefs.ENQUEUE ):
-		    text[ i ][ 1 ] = "ENQUEUEING message received from " +
-			"processor " + ve.SrcPe + " destined for " + ve.Dest;
-		    break;
-		case ( ProjDefs.BEGIN_IDLE ):
-		    text[ i ][ 1 ] = "IDLE begin";
-		    break;
-		case ( ProjDefs.END_IDLE ):
-		    text[ i ][ 1 ] = "IDLE end";
-		    break;
-		case ( ProjDefs.BEGIN_PACK ):
-		    text[ i ][ 1 ] = "BEGIN PACKING a message to be sent";
-		    break;
-		case ( ProjDefs.END_PACK ):
-		    text[ i ][ 1 ] = "FINISHED PACKING a message to be sent";
-		    break;
-		case ( ProjDefs.BEGIN_UNPACK ):
-		    text[ i ][ 1 ] = "BEGIN UNPACKING a received message";
-		    break;
-		case ( ProjDefs.END_UNPACK ):
-		    text[ i ][ 1 ] = "FINISHED UNPACKING a received message";
-		    break;
-		default:
-		    text[ i ][ 1 ] = "!!!! ADD EVENT TYPE " + ve.EventType +
-			" !!!";
-		    break;
-		}
-	    }
-	    return text;
 	}
     }
 
@@ -974,13 +855,4 @@ public class Analysis {
     private static boolean hasPoseDopFiles() {
 	return FileUtils.hasPoseDopFiles();
     }
-
-    private static String getBaseName(String filename) {
-	return FileUtils.getBaseName(filename);
-    }
-
-    private static String dirFromFile(String filename) {
-	return FileUtils.dirFromFile(filename);
-    }
-
 }

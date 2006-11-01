@@ -33,7 +33,7 @@ public class PoseDopReader
     // **************************************************************
     public PoseDopReader() {
 	validPEs =
-	    Analysis.getValidProcessorList(Analysis.DOP);
+	    Analysis.getValidProcessorList(ProjMain.DOP);
     }
     
     public long getTotalRealTime() {

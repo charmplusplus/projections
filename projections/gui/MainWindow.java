@@ -150,7 +150,7 @@ public class MainWindow extends JFrame
 	    {
 		public void windowClosing(WindowEvent e)
 		{
-		    System.exit(0);
+		    ProjMain.shutdown(0);
 		}
 	    });
 
@@ -486,8 +486,9 @@ public class MainWindow extends JFrame
     }
 
     public void shutdown() {
-	// in future, some cleanup action might be required.
-	System.exit(0);
+	// do NOT call exit() here. This routine is executed by ProjMain
+	// which will call exit().
+	Analysis.closeRC();
     }
 
     public void closeCurrent() {
@@ -503,6 +504,7 @@ public class MainWindow extends JFrame
     public void closeAll() {
 	summaryGraphPanel.removeAll();
 	menuManager.lastFileClosed();
+	Analysis.closeRC();
 	setTitle("Projections");
     }
 

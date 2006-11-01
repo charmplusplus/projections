@@ -6,6 +6,8 @@ import java.text.DecimalFormat;
 import javax.swing.*;
 import javax.swing.border.*;
 
+import projections.analysis.ProjMain;
+
 /**
  *  PoseRangeDialog
  *  by Chee Wai Lee
@@ -100,7 +102,7 @@ public class PoseRangeDialog extends JDialog
 	this.parentWindow = parentWindow;
 
 	// Get default values
-	validProcessors = Analysis.getValidProcessorList(Analysis.DOP);
+	validProcessors = Analysis.getValidProcessorList(ProjMain.DOP);
 	validProcessorsString = validProcessors.listToString();
 
 	realIntervalSize = 1000; // default to 1ms.

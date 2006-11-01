@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+import projections.analysis.ProjMain;
+
 /* ***************************************************
  * MainMenuManager.java
  * Chee Wai Lee - 11/7/2002
@@ -205,7 +207,7 @@ public class MainMenuManager extends MenuManager
 	    } else if (arg.equals("Close all data")) {
 		parent.closeAll();
 	    } else if (arg.equals("Quit")) {
-		parent.shutdown();
+		ProjMain.shutdown(0);
 	    } else if (arg.equals("Change Background Color")) {
 		parent.changeBackground();
 	    } else if (arg.equals("Change Foreground Color")) {

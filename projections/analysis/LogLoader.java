@@ -19,13 +19,6 @@ import projections.misc.*;
 
 public class LogLoader extends ProjDefs
 {
-    private long BeginTime, EndTime;
-    private String validPEString;
-    
-    private int basePE, upperPE;
-    private boolean validPERange;
-    private StringBuffer validPEStringBuffer;
-
     // **CW** register previous event timestamp to support delta encoding.
     private long prevTime = 0;
     private boolean deltaEncoded = false;
@@ -33,58 +26,12 @@ public class LogLoader extends ProjDefs
 
     private boolean isProcessing = false;
     boolean ampiTraceOn = false;
+
+    public long determineEndTime(OrderedIntList validPEs) 
+	throws LogLoadException
+    {
+	long BeginTime, EndTime;
     
-    public LogLoader() 
-	throws LogLoadException
-    {
-	determineValidPEs();
-	determineEndTime();
-    }    
-    
-    public void determineValidPEs() 
-	throws LogLoadException
-    {
-	int nPe = Analysis.getNumProcessors();
-	File testFile;
-	
-	ProgressMonitor progressBar =
-	    new ProgressMonitor(Analysis.guiRoot, "Determining valid PEs",
-				"", 0, nPe);
-
-	validPEStringBuffer = new StringBuffer();
-	validPERange = false;
-	basePE = -1;
-	upperPE = -1;
-
-	for (int i=0; i<nPe; i++) {
-	    if (!progressBar.isCanceled()) {
-		progressBar.setNote(i + " of " + nPe);
-		progressBar.setProgress(i);
-	    } else {
-		System.err.println("Fatal error - Projections cannot" +
-				   " function without valid PE list");
-		System.exit(-1);
-	    }
-	    // test the file to see if it exists ...
-	    testFile = new File(Analysis.getLogName(i));
-	    if (testFile.exists() == false) {
-		System.out.println(Analysis.getLogName(i) +
-				   " does not exist, ignoring.");
-		updatePEStringBuffer();
-		validPERange = false;
-	    } else {
-		// success, so register processor as valid.
-		registerPE(i);
-	    }		
-	}	
-	updatePEStringBuffer();
-	validPEString = validPEStringBuffer.toString();
-	progressBar.close();
-    }
-
-    public void determineEndTime() 
-	throws LogLoadException
-    {
 	int              Type;
 	long             Time;
 	int              Len;
@@ -96,21 +43,25 @@ public class LogLoader extends ProjDefs
 	//Find the begin and end time across the parallel machine
 	BeginTime = 0;
 	EndTime   = Integer.MIN_VALUE;
-	int nPe=Analysis.getNumProcessors();
+	int nPe=validPEs.size();
 
 	ProgressMonitor progressBar =
 	    new ProgressMonitor(Analysis.guiRoot, "Determining end time",
 				"", 0, nPe);
-	
-	for (int i=0; i<nPe; i++) {
+	validPEs.reset();
+	int count = 1;
+	while (validPEs.hasMoreElements()) {
+	    int pe = validPEs.nextElement();
 	    if (!progressBar.isCanceled()) {
-		progressBar.setNote(i + " of " + nPe);
-		progressBar.setProgress(i);
+		progressBar.setNote("[" + pe + "] " + count + 
+				    " of " + nPe + " files");
+		progressBar.setProgress(count);
 	    } else {
 		System.err.println("Fatal error - Projections cannot" +
 				   " function without proper end time!");
 		System.exit(-1);
 	    }
+	    count++;
 	    // Throws EOFException at end of file
 	    // 4/16/2006 - Unless we have to fake the end time.
 	    // A Cleaner fake mechanism is probably required.
@@ -120,7 +71,7 @@ public class LogLoader extends ProjDefs
 	    int type = 0;
 	    try {
 		InFile = 
-		    new RandomAccessFile(new File(Analysis.getLogName(i)),
+		    new RandomAccessFile(new File(Analysis.getLogName(pe)),
 					 "r");
 		
 		back = InFile.length()-80*3; //Seek to the end of the file
@@ -181,7 +132,7 @@ public class LogLoader extends ProjDefs
 		}
 		InFile.close ();
 	    } catch (EOFException e) {
-		System.err.println("[" + i + "] " +
+		System.err.println("[" + pe + "] " +
 				   "WARNING: Partial Log: Faking End " +
 				   "Time determination at last recorded " +
 				   "time of " + lastRecordedTime);
@@ -190,11 +141,11 @@ public class LogLoader extends ProjDefs
 		}
 	    } catch (IOException E) {
 		System.err.println("Couldn't read log file " + 
-				   Analysis.getLogName(i));
+				   Analysis.getLogName(pe));
 	    }
 	}
 	progressBar.close();
-	Analysis.setTotalTime(EndTime-BeginTime);
+	return EndTime-BeginTime;
     }
 
     /**
@@ -727,6 +678,8 @@ public class LogLoader extends ProjDefs
 				 Vector Timeline, Vector userEventVector)
 	throws LogLoadException
     {
+	long BeginTime = 0;
+
 	int               Entry       = 0;
 	long              Time        = Long.MIN_VALUE;
 	boolean		LogMsgs     = true;
@@ -1130,6 +1083,8 @@ public class LogLoader extends ProjDefs
 
     private ViewerEvent entrytotext(LogEntry LE)
     {
+	long BeginTime = 0;
+
 	ViewerEvent VE = new ViewerEvent();
 	VE.Time        = LE.Time - BeginTime;
 	VE.EventType   = LE.TransactionType;
@@ -1173,6 +1128,7 @@ public class LogLoader extends ProjDefs
     public long searchtimeline(int PeNum, int Entry, int Num)
 	throws LogLoadException, EntryNotFoundException
     {
+	long BeginTime = 0;
 	long           Count = 0;
 	LogEntry       LE     = null;
 
@@ -1255,25 +1211,13 @@ public class LogLoader extends ProjDefs
 	return ret;
     }   
 
-    public String getValidProcessorString() {
-	return validPEString;
-    }
-
-    private void registerPE(int peIdx) {
-	if (validPERange == false) {
-	    basePE = peIdx;
-	}
-	upperPE = peIdx;
-	validPERange = true;
-    }
-
-    private void updatePEStringBuffer() {
-	if (!validPERange) {
-	    return;
-	}
+    private void updatePEStringBuffer(StringBuffer validPEStringBuffer,
+				      int basePE, int upperPE) {
+	// previously commited stuff exists, so append a comma
 	if (validPEStringBuffer.length() > 0) {
 	    validPEStringBuffer.append(",");
 	}
+	// determine if the new block is a range or just a single value.
 	if (upperPE > basePE) {
 	    validPEStringBuffer.append(String.valueOf(basePE));
 	    validPEStringBuffer.append("-");
@@ -1281,7 +1225,11 @@ public class LogLoader extends ProjDefs
 	} else if (upperPE == basePE) {
 	    validPEStringBuffer.append(String.valueOf(basePE));
 	} else {
-	    // error. Should never happen.
+	    System.err.println("Internal Error: When determining valid " +
+			       "processor range, basePE(" + basePE + ") " +
+			       "> upperPE(" + upperPE + ") which is " +
+			       "impossible. Please report to developers!");
+	    System.exit(-1);
 	}
     }
 }

@@ -78,7 +78,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
 	} else {
 	    virtEndInterval = (int)(virtEndTime/virtIntervalSize);
 	}
-	processorList = Analysis.getValidProcessorList(Analysis.DOP);
+	processorList = Analysis.getValidProcessorList(ProjMain.DOP);
     }
 
     public PoseAnalysisWindow(MainWindow mainWindow, Integer myWindowID) {

@@ -33,14 +33,6 @@ import projections.misc.*;
  */
 public class Analysis {
 
-    // Analysis-specific global constants
-    public static final int NUM_TYPES = 5;
-    public static final int LOG = 0;
-    public static final int SUMMARY = 1;
-    public static final int COUNTER = 2;
-    public static final int SUMDETAIL = 3;
-    public static final int DOP = 4;
-
     /******************* Initialization ************/
     public static ProjectionsConfigurationReader rcReader;
     public static Component guiRoot;
@@ -121,7 +113,7 @@ public class Analysis {
 	    sts=new StsReader(filename);
 	    rcReader = 
 		new ProjectionsConfigurationReader(filename);
-	    FileUtils.detectFiles(sts, baseName);
+	    FileUtils.detectFiles(sts, logDirectory, baseName);
 
 	    // if I can find the saved color maps, then use it.
 	    String colorsaved = 
@@ -189,6 +181,13 @@ public class Analysis {
 	// available to the older tools.
 	if (hasLogFiles()) {
 	    logLoader = new LogLoader();
+	    if (ProjectionsConfigurationReader.RC_GLOBAL_END_TIME.longValue() == -1) {
+		setTotalTime(logLoader.determineEndTime(getValidProcessorList(ProjMain.LOG)));
+		rcReader.setValue("RC_GLOBAL_END_TIME", 
+				  new Long(getTotalTime()));
+	    } else {
+		setTotalTime(ProjectionsConfigurationReader.RC_GLOBAL_END_TIME.longValue());
+	    }
 	}
 	// if pose data exists, compute the end times
 	if (hasPoseDopFiles()) {
@@ -788,13 +787,13 @@ public class Analysis {
      */
     public static String getValidProcessorString() {
 	if (hasLogFiles()) {
-	    return getValidProcessorString(LOG);
+	    return getValidProcessorString(ProjMain.LOG);
 	} else if (hasSumFiles()) {
-	    return getValidProcessorString(SUMMARY);
+	    return getValidProcessorString(ProjMain.SUMMARY);
 	} else if (hasSumDetailFiles()) {
-	    return getValidProcessorString(SUMDETAIL);
+	    return getValidProcessorString(ProjMain.SUMDETAIL);
 	} else if (hasPoseDopFiles()) {
-	    return getValidProcessorString(DOP);
+	    return getValidProcessorString(ProjMain.DOP);
 	} else {
 	    return "";
 	}
@@ -802,24 +801,24 @@ public class Analysis {
 
     public static OrderedIntList getValidProcessorList() {
 	if (hasLogFiles()) {
-	    return getValidProcessorList(LOG);
+	    return getValidProcessorList(ProjMain.LOG);
 	} else if (hasSumFiles()) {
-	    return getValidProcessorList(SUMMARY);
+	    return getValidProcessorList(ProjMain.SUMMARY);
 	} else if (hasSumDetailFiles()) {
-	    return getValidProcessorList(SUMDETAIL);
+	    return getValidProcessorList(ProjMain.SUMDETAIL);
 	} else if (hasPoseDopFiles()) {
-	    return getValidProcessorList(DOP);
+	    return getValidProcessorList(ProjMain.DOP);
 	} else {
 	    return null;
 	}
     }
 
     public static String getLogName(int pnum) {
-	return FileUtils.getLogName(baseName, pnum);
+	return FileUtils.getFileName(baseName, pnum, ProjMain.LOG);
     }   
 
     public static String getSumName(int pnum) {
-	return FileUtils.getSumName(baseName, pnum);
+	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMMARY);
     }   
     
     public static String getSumAccumulatedName() {
@@ -827,11 +826,17 @@ public class Analysis {
     }
 
     public static String getSumDetailName(int pnum) {
-	return FileUtils.getSumDetailName(baseName, pnum);
+	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMDETAIL);
     }
 
     public static String getPoseDopName(int pnum) {
-	return FileUtils.getPoseDopName(baseName, pnum);
+	return FileUtils.getFileName(baseName, pnum, ProjMain.DOP);
+    }
+
+    public static void closeRC() {
+	if (rcReader != null) {
+	    rcReader.close();
+	}
     }
 
     // ************** Internal Data file(s) management routines ********

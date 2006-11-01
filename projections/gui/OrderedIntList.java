@@ -47,6 +47,32 @@ public class OrderedIntList
 	return listcopy;
     }   
 
+    // This is an inefficient union just to get things done. If
+    // efficiency becomes an issue, please implement the merge
+    // algorithm instead.
+    public static OrderedIntList union(OrderedIntList list1,
+				       OrderedIntList list2) {
+	OrderedIntList returnValue;
+	OrderedIntList shorterList;
+	OrderedIntList longerList;
+	if (list1.size() <= list2.size()) {
+	    shorterList = list1;
+	    longerList = list2;
+	} else {
+	    shorterList = list2;
+	    longerList = list1;
+	}
+	returnValue = longerList.copyOf();
+	
+	shorterList.reset();
+	while (shorterList.hasMoreElements()) {
+	    returnValue.insert(shorterList.nextElement());
+	}
+	returnValue.reset();
+
+	return returnValue;
+    }
+
     public int currentElement()
     {
 	Link cur = nextLink();
@@ -114,6 +140,26 @@ public class OrderedIntList
 	    }
 	}
 	return false;
+    }
+
+    public void remove(int eleValue) {
+	int me;
+	reset();
+	Link tmp = nextLink();
+	while (tmp != null && tmp.data < eleValue) {
+	    pre = tmp;
+	    tmp = nextLink();
+	}
+
+	if (tmp != null) {
+	    if (tmp.data == eleValue) {
+		if (pre == null) {
+		    head = tmp.next;
+		} else {
+		    pre.next = tmp.next;
+		}
+	    }
+	}
     }
 
     public void insert(int eleValue)
@@ -207,12 +253,14 @@ public class OrderedIntList
 
     public int nextElement()
     {
+	// move pre pointer
 	if (pre == null) {
 	    pre = head;
 	} else {
 	    pre = pre.next;
 	}
-	  
+
+	// "abuse" pre pointer to get "current" element
 	if (pre == null) {
 	    return -1;
 	} else {

@@ -56,6 +56,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private int numSpecials;
     private double[][] graphData;
     private Color[] graphColors;
+    private OrderedIntList outlierPEs;
 
     DecimalFormat df = new DecimalFormat();
 
@@ -67,7 +68,36 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	createLayout();
 	pack();
 	thisWindow = this;
-	showDialog();
+	// special behavior if initially used (to load the raw 
+	// online-generated outlier information). Quick and dirty, use
+	// static variables ... not possible if multiple runs are supported.
+	if (ProjectionsConfigurationReader.RC_OUTLIER_FILTERED.booleanValue()) {
+	    // get necessary parameters (normally from dialog)
+
+	    // This is still a hack, there might be differentiation in the
+	    // online case.
+	    currentActivity = ActivityManager.PROJECTIONS;
+	    // default to execution time. Again a hack.
+	    currentAttribute = 0;
+	    // finally, something that's not a hack
+	    validPEs = Analysis.getValidProcessorList(ProjMain.LOG);
+	    outlierPEs = new OrderedIntList();
+	    // these might change later when online time ranges are
+	    // permitted.
+	    startTime = 0;
+	    endTime = Analysis.getTotalTime();
+	    if (Analysis.getNumProcessors() <= 256) {
+		threshold = (int)Math.ceil(0.1*Analysis.getNumProcessors());
+	    } else {
+		threshold = 20;
+	    }
+
+	    // Now, read the generated outlier stats, rankings and the top
+	    // [threshold] log files
+	    loadOnlineData();
+	} else {
+	    showDialog();
+	}
     }
 
     private void createLayout() {
@@ -137,7 +167,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    };
 	worker.start();
     }
-    
+
     private void constructToolData() {
 	// construct the necessary meta-data given the selected activity
 	// type.
@@ -409,6 +439,174 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	outlierList.addFirst("Avg");
     }
     
+    private void loadOnlineData() {
+	final SwingWorker worker = new SwingWorker() {
+		public Object construct() {
+		    readOutlierStats();
+		    return null;
+		}
+		public void finished() {
+		    setGraphSpecificData();
+		    thisWindow.setVisible(true);
+		}
+	    };
+	worker.start();
+    }
+    
+    // This method will read the stats file generated during online
+    // outlier analysis which will then determine which processor's
+    // log data to read.
+    private void readOutlierStats() {
+	Color[] tempGraphColors;
+	numActivities = Analysis.getNumActivity(currentActivity); 
+	tempGraphColors = Analysis.getColorMap(currentActivity);
+	numSpecials = 1;
+	graphColors = new Color[numActivities+numSpecials];
+	for (int i=0;i<numActivities; i++) {
+	    graphColors[i] = tempGraphColors[i];
+	}
+	graphColors[numActivities] = Color.white;
+	
+	graphData = new double[threshold+3][numActivities+numSpecials];
+
+	// Read the stats file for global average data.
+	String statsFilePath =
+	    Analysis.getLogDirectory() + File.separator + 
+	    Analysis.getFilename() + ".outlier";
+	try {
+	    BufferedReader InFile =
+		new BufferedReader(new InputStreamReader(new FileInputStream(statsFilePath)));	
+	    String statsLine;
+	    statsLine = InFile.readLine();
+	    StringTokenizer st = new StringTokenizer(statsLine);
+	    for (int i=0; i<numActivities+numSpecials; i++) {
+		graphData[0][i] = Double.parseDouble(st.nextToken());
+	    }
+	    
+	    // Now read the ranked list of processors and then taking the
+	    // top [threshold] number.
+	    statsLine = InFile.readLine();
+	    st = new StringTokenizer(statsLine);
+	    int offset = 0;
+	    if (validPEs.size() > threshold) {
+		offset = validPEs.size() - threshold;
+	    }
+	    int nextPe = 0;
+	    ProgressMonitor progressBar =
+		new ProgressMonitor(Analysis.guiRoot, 
+				    "Reading log files",
+				    "", 0,
+				    threshold);
+	    progressBar.setNote("Reading");
+	    progressBar.setProgress(0);
+	    // clear offset values from the list on file
+	    for (int i=0; i<offset; i++) {
+		st.nextToken();
+	    }
+	    outlierList = new LinkedList();
+	    // add the 3 special entries
+	    outlierList.add("Avg");    
+	    outlierList.add("Non.");
+	    outlierList.add("Out.");
+	    for (int i=0; i<threshold; i++) {
+		nextPe = Integer.parseInt(st.nextToken());
+		outlierList.add(nextPe + "");
+		progressBar.setProgress(i);
+		progressBar.setNote("[PE: " + nextPe +
+				    " ] Reading Data. (" + i + " of " +
+				    threshold + ")");
+		if (progressBar.isCanceled()) {
+		    return;
+		}
+		readOnlineOutlierProcessor(nextPe,i+3);
+	    }
+	    progressBar.close();
+	} catch (IOException e) {
+	    System.err.println("Error: Projections failed to read " +
+			       "outlier data file [" + statsFilePath +
+			       "].");
+	    System.err.println(e.toString());
+	    System.exit(-1);
+	}	    
+	// Calculate the outlier average. Non-outlier average will be
+	// derived from the recorded global average and the outlier average.
+	for (int act=0; act<numActivities+numSpecials; act++) {
+	    for (int i=0; i<threshold; i++) {
+		graphData[2][act] += graphData[i+3][act];
+	    }
+	    // derive total contributed by non-outliers
+	    graphData[1][act] = 
+		graphData[0][act]*Analysis.getNumProcessors() -
+		graphData[2][act];
+	    graphData[1][act] /= Analysis.getNumProcessors() - threshold;
+	    graphData[2][act] /= threshold;
+	}
+    }
+
+    private void readOnlineOutlierProcessor(int pe, int index) {
+	GenericLogReader reader = 
+	    new GenericLogReader(pe, Analysis.getVersion());
+	try {
+	    LogEntryData logData = new LogEntryData();
+	    logData.time = 0;
+	    // Jump to the first valid event
+	    boolean markedBegin = false;
+	    boolean markedIdle = false;
+	    long beginBlockTime = 0;
+	    reader.nextEventOnOrAfter(startTime, logData);
+	    while (logData.time <= endTime) {
+		if (logData.type == ProjDefs.BEGIN_PROCESSING) {
+		    // check pairing
+		    if (!markedBegin) {
+			markedBegin = true;
+		    }
+		    beginBlockTime = logData.time;
+		} else if (logData.type == ProjDefs.END_PROCESSING) {
+		    // check pairing
+		    // if End without a begin, just ignore
+		    // this event.
+		    if (markedBegin) {
+			markedBegin = false;
+			graphData[index][logData.entry] +=
+			    logData.time - beginBlockTime;
+		    }
+		} else if (logData.type == ProjDefs.BEGIN_IDLE) {
+		    // check pairing
+		    if (!markedIdle) {
+			markedIdle = true;
+		    }
+		    // NOTE: This code assumes that IDLEs cannot
+		    // possibly be nested inside of PROCESSING
+		    // blocks (which should be true).
+		    beginBlockTime = logData.time;
+		} else if (logData.type ==
+			   ProjDefs.END_IDLE) {
+		    // check pairing
+		    if (markedIdle) {
+			markedIdle = false;
+			graphData[index][numActivities] +=
+			    logData.time - beginBlockTime;
+		    }
+		}
+		reader.nextEvent(logData);
+	    }
+	    reader.close();
+	} catch (EOFException e) {
+	    // close the reader and let the external loop continue.
+	    try {
+		reader.close();
+	    } catch (IOException evt) {
+		System.err.println("Outlier Analysis: Error in closing "+
+				   "file for processor " + pe);
+		System.err.println(evt);
+	    }
+	} catch (IOException e) {
+	    System.err.println("Outlier Analysis: Error in reading log "+
+			       "data for processor " + pe);
+	    System.err.println(e);
+	}
+    }
+
     protected void setGraphSpecificData() {
 	setXAxis("Outliers", outlierList);
 	setYAxis(attributes[1][currentAttribute], 
@@ -445,7 +643,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    rString[0] = "Outlier Processor " + 
 		(String)outlierList.get(xVal);
 	}
-	if ((currentAttribute == 1) && (yVal == numActivities)) {
+	if ((yVal == numActivities)) {
 	    rString[1] = "Activity: Idle Time";
 	} else {
 	    rString[1] = "Activity: " + 
@@ -502,4 +700,5 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     public void itemStateChanged(ItemEvent e) {
 	// do nothing.
     }
+
 }

@@ -22,6 +22,16 @@ public class ProjMain {
     // entry methods prevent proper analysis (like in cpaimd).
     public static boolean PRINT_USAGE = false;
 
+    // Analysis-specific global constants
+    public static final int NUM_TYPES = 5;
+    public static final int LOG = 0;
+    public static final int SUMMARY = 1;
+    public static final int SUMDETAIL = 2;
+    public static final int DOP = 3;
+    public static final int SUMACC = 4;
+
+    private static MainWindow mainWindow = null;
+
     public static void help()
     {
 	System.out.println();
@@ -36,6 +46,13 @@ public class ProjMain {
 			   "viewing usage profiles.");
 	System.out.println();
 	System.exit(0);
+    }
+
+    public static void shutdown(int code) {
+	if (mainWindow != null) {
+	    mainWindow.shutdown();
+	} 
+	System.exit(code);
     }
 
     public static void main(String args[])
@@ -82,14 +99,14 @@ public class ProjMain {
 	    i++;
 	}
 
-	MainWindow f = new MainWindow();
-	f.pack();
-	f.setTitle("Projections");
-	f.setVisible(true);
+	mainWindow = new MainWindow();
+	mainWindow.pack();
+	mainWindow.setTitle("Projections");
+	mainWindow.setVisible(true);
 
 	// Load Data if specified on command line
 	if (loadSts!=null) { 
-	    f.openFile(loadSts); 
+	    mainWindow.openFile(loadSts); 
 	}
     }
 }

@@ -121,9 +121,9 @@ public class MultiRunData
 		validPESets[run] = detectFiles(stsReaders[run]);
 		hasSummary = 
 		    (hasSummary && 
-		     !(validPESets[run][Analysis.SUMMARY].isEmpty()));
+		     !(validPESets[run][ProjMain.SUMMARY].isEmpty()));
 		hasLog = (hasLog && 
-			  !(validPESets[run][Analysis.LOG].isEmpty()));
+			  !(validPESets[run][ProjMain.LOG].isEmpty()));
 	    }
 
 	    // there has to be at least one run and all sts files have to
@@ -168,7 +168,7 @@ public class MultiRunData
 		for (int run=0; run<numRuns; run++) {
 		    int numPE = pesPerRun[run];
 		    validPEs = 
-			validPESets[run][Analysis.SUMMARY];
+			validPESets[run][ProjMain.SUMMARY];
 		    validPEs.reset();
 		    // approximates any incomplete data by scaling the values
 		    // actually read by a scale factor.
@@ -315,20 +315,20 @@ public class MultiRunData
 	// sts file. This is copied from Analysis.java just because
 	// Multirun cannot understand that silly static Class.
 
-	OrderedIntList[] validPEs = new OrderedIntList[Analysis.NUM_TYPES];
-	for (int i=0; i<Analysis.NUM_TYPES; i++) {
+	OrderedIntList[] validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
+	for (int i=0; i<ProjMain.NUM_TYPES; i++) {
 	    validPEs[i] = new OrderedIntList();
 	}
 
 	for (int i=0;i<sts.getProcessorCount();i++) {
 	    if ((new File(Analysis.getSumName(i))).isFile()) {
-		validPEs[Analysis.SUMMARY].insert(i);
+		validPEs[ProjMain.SUMMARY].insert(i);
 	    }
 	    if ((new File(Analysis.getSumDetailName(i))).isFile()) {
-		validPEs[Analysis.SUMDETAIL].insert(i);
+		validPEs[ProjMain.SUMDETAIL].insert(i);
 	    }
 	    if ((new File(Analysis.getLogName(i))).isFile()) {
-		validPEs[Analysis.LOG].insert(i);
+		validPEs[ProjMain.LOG].insert(i);
 	    }
 	}
 	return validPEs;

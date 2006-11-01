@@ -19,21 +19,9 @@ import projections.gui.*;
 
 public class FileUtils {
 
-    public static final int NUM_TYPES = 5;
-    public static final int LOG = 0;
-    public static final int SUMMARY = 1;
-    public static final int COUNTER = 2;
-    public static final int SUMDETAIL = 3;
-    public static final int DOP = 4;
-
-    private static boolean hasSum;
-    private static boolean hasSumDetail;
-    private static boolean hasSumAccumulated;
-    private static boolean hasLog;
-    private static boolean hasPoseDop;    
-
     private static OrderedIntList validPEs[];
     private static String validPEStrings[];
+    private static boolean hasFiles[];
 
     public static String getBaseName(String filename) {
 	String baseName = null;
@@ -57,142 +45,159 @@ public class FileUtils {
 	return(".");	// present directory
     }
 
-    public static void detectFiles(StsReader sts, String baseName) {
+    public static void detectFiles(StsReader sts, String dirPath,
+				   String baseName) {
 	// determine if any of the data files exist.
 	// We assume they are automatically valid and this is reflected
 	// in the validPEs. 
-	// **FIXME** This is expensive with large numbers of processors!
-	//           Use rc-type information to do this once per dataset
-	//           lifetime.
+	hasFiles = new boolean[ProjMain.NUM_TYPES];
+	validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
+	validPEStrings = new String[ProjMain.NUM_TYPES];
 
-	hasLog = false;
-	hasSum = false;
-	hasSumDetail = false;
-	hasSumAccumulated = false;
-	hasPoseDop = false;
+	for (int type=0; type<ProjMain.NUM_TYPES; type++) {
+	    validPEs[type] = new OrderedIntList();
 
-	validPEs = new OrderedIntList[NUM_TYPES];
-	validPEStrings = new String[NUM_TYPES];
-	for (int i=0; i<NUM_TYPES; i++) {
-	    validPEs[i] = new OrderedIntList();
-	}
-
-	for (int i=0;i<sts.getProcessorCount();i++) {
-	    if ((new File(getSumName(baseName, i))).isFile()) {
-		hasSum = true;
-		validPEs[SUMMARY].insert(i);
-	    }
-	    if ((new File(getSumDetailName(baseName, i))).isFile()) {
-		hasSumDetail = true;
-		validPEs[SUMDETAIL].insert(i);
-	    }
-	    if ((new File(getLogName(baseName, i))).isFile()) {
-		hasLog = true;
-		validPEs[LOG].insert(i);
-	    }
-	    if ((new File(getPoseDopName(baseName, i))).isFile()) {
-		hasPoseDop = true;
-		validPEs[DOP].insert(i);
-	    }
-	}
-	for (int type=0; type<NUM_TYPES; type++) {
+	    detectFiles(sts, dirPath, baseName, type);
 	    validPEStrings[type] = validPEs[type].listToString();
 	}
-	if ((new File(getSumAccumulatedName(baseName))).isFile()) {
-	    hasSumAccumulated = true;
+    }
+
+    public static void detectFiles(StsReader sts, String dirPath,
+				   String baseName, int type) {
+	File testFile = null;
+	String fileExt = "";
+
+	// special condition for SUMACC (and any future, single-file
+	// log types) only
+	if (type == ProjMain.SUMACC) {
+	    testFile = new File(getSumAccumulatedName(baseName));
+	    if (testFile.isFile() &&
+		testFile.length() > 0 &&
+		testFile.canRead()) {
+		hasFiles[type] = true;
+	    }
+	    return;
+	}
+
+	testFile = new File(dirPath);
+	if (!testFile.isDirectory()) {
+	    System.err.println("Internal Error: Path [" + dirPath + "] " +
+			       "supplied for file detection is not a " +
+			       "directory! Please report to developers!");
+	    System.exit(-1);
+	}
+	String files[] = testFile.list();
+	for (int file=0; file<files.length; file++) {
+	    if (files[file].endsWith(getTypeExtension(type))) {
+		hasFiles[type] = true;
+		int pe = -1;
+		int endIdx =
+		    files[file].lastIndexOf(".");
+		if (endIdx != -1) {
+		    int startIdx =
+			files[file].substring(0,endIdx).lastIndexOf(".");
+		    if (startIdx != -1) {
+			if (startIdx+1 < endIdx) {
+			    pe = Integer.parseInt(files[file].substring(startIdx+1, endIdx));
+			} else {
+			    break;
+			}
+		    } else {
+			// some junk file that's not actually a projections 
+			// log file despite having the correct extension.
+			break;
+		    }
+		} else {
+		    // some junk file that's not actually a projections log
+		    // file despite having the correct extension.
+		    break;
+		}
+		validPEs[type].insert(pe);
+	    }
 	}
     }
     
     public static boolean hasLogFiles() {
-	return hasLog;
+	return hasFiles[ProjMain.LOG];
     }   
 
     public static boolean hasSumFiles() {
-	return hasSum;
+	return hasFiles[ProjMain.SUMMARY];
     }
    
     public static boolean hasSumAccumulatedFile() {
-	return hasSumAccumulated;
+	return hasFiles[ProjMain.SUMACC];
     }
 
     public static boolean hasSumDetailFiles() {
-	return hasSumDetail;
+	return hasFiles[ProjMain.SUMDETAIL];
     }
 
     public static boolean hasPoseDopFiles() {
-	return hasPoseDop;
+	return hasFiles[ProjMain.DOP];
     }
 
-    public static String getLogName(String baseName, int pnum) {
-	return baseName+"."+pnum+".log";
-    }   
+    public static String getFileName(String baseName, int pnum, int type) {
+	return baseName + "." + pnum + "." + getTypeExtension(type);
+    }
 
-    public static String getSumName(String baseName, int pnum) {
-	return baseName+"."+pnum+".sum";
-    }   
-    
     public static String getSumAccumulatedName(String baseName) {
 	return baseName+".sum";
     }
 
-    public static String getSumDetailName(String baseName, int pnum) {
-	return baseName + "." + pnum + ".sumd";
-    }
-
-    public static String getPoseDopName(String baseName, int pnum) {
-	return baseName + "." + pnum + ".poselog";
+    public static String getTypeExtension(int type) {
+	String fileExt = null;
+	switch (type) {
+	case ProjMain.SUMMARY:
+	    fileExt = "sum";
+	    break;
+	case ProjMain.SUMDETAIL:
+	    fileExt = "sumd";
+	    break;
+	case ProjMain.LOG:
+	    fileExt = "log";
+	    break;
+	case ProjMain.DOP:
+	    fileExt = "poselog";
+	    break;
+	default:
+	    System.err.println("Internal Error: Unknown file type " +
+			       "index " + type);
+	    System.exit(-1);
+	}
+	return fileExt;
     }
 
     public static OrderedIntList getValidProcessorList(int type) {
+	String errorMsg = "";
 	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
+	case ProjMain.LOG:
+	    errorMsg = "Warning: No log files.";
 	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
+	case ProjMain.SUMMARY:
+	    errorMsg = "Warning: No summary files.";
 	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
+	case ProjMain.SUMDETAIL:
+	    errorMsg = "Warning: No summary detail files.";
 	    break;
-	case DOP:
-	    if (!hasPoseDop) {
-		System.err.println("Warning: No poselog files found.");
-	    }
+	case ProjMain.DOP:
+	    errorMsg = "Warning: No poselog files found.";
 	    break;
+	default:
+	    System.err.println("Internal Error: Unsupported log type " +
+			       "index " + type + " for valid processor " +
+			       "info.");
+	    System.exit(-1);
+
+	}
+	if (!hasFiles[type]) {
+	    System.err.println(errorMsg);
 	}
 	return validPEs[type];
     }
 
     public static String getValidProcessorString(int type) {
-	switch (type) {
-	case LOG:
-	    if (!hasLog) {
-		System.err.println("Warning: No log files.");
-	    }
-	    break;
-	case SUMMARY:
-	    if (!hasSum) {
-		System.err.println("Warning: No summary files.");
-	    }
-	    break;
-	case SUMDETAIL:
-	    if (!hasSumDetail) {
-		System.err.println("Warning: No summary detail files.");
-	    }
-	    break;
-	case DOP:
-	    if (!hasPoseDop) {
-		System.err.println("Warning: No poselog files found.");
-	    }
-	    break;
-	}
-	return validPEStrings[type];
+	return getValidProcessorList(type).listToString();
     }
 
 }

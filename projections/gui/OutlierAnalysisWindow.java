@@ -355,10 +355,13 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	double[] tmpAvg = new double[numActivities+numSpecials];
 	double[] processorDiffs = new double[validPEs.size()];
 	int[] sortedMap = new int[validPEs.size()];
+	String[] peNames = new String[validPEs.size()];
 
-	// initialize sortedMap
+	// initialize sortedMap (maps indices to indices)
+	validPEs.reset();
 	for (int p=0; p<validPEs.size(); p++) {
 	    sortedMap[p] = p;
+	    peNames[p] = Integer.toString(validPEs.nextElement());
 	}
 
 	// pass #1, determine global average
@@ -416,7 +419,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		    tempData[sortedMap[i+offset]][act];
 	    }
 	    // add to outlier list reverse sorted by significance
-	    outlierList.add(Integer.toString(sortedMap[i+offset]));
+	    outlierList.add(peNames[sortedMap[i+offset]]);
 	}
 	graphData[0] = tmpAvg;
 	for (int act=0; act<numActivities+numSpecials; act++) {

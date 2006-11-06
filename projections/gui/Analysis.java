@@ -412,7 +412,6 @@ public class Analysis {
 	    systemMsgsData = logReader.getSystemMsgs();
 	    userEntryData = logReader.getUserEntries();
 	    logReaderIntervalSize = logReader.getIntervalSize();
-	    logReader=null;
 	} else if (hasSumDetailFiles()) {
 	    IntervalData intervalData = new IntervalData();
 	    intervalData.loadIntervalData(intervalSize, intervalStart,

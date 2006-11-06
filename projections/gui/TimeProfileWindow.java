@@ -184,8 +184,6 @@ public class TimeProfileWindow extends GenericGraphWindow
     public void showDialog() {
 	if (dialog == null) {
 	    dialog = new IntervalRangeDialog(this, "Select Range");
-	} else {
-	    setDialogData();
 	}
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
@@ -196,13 +194,14 @@ public class TimeProfileWindow extends GenericGraphWindow
                 ampiGraphPanel.getRangeVals(dialog.getStartTime(),dialog.getEndTime(),
                                             startInterval, endInterval, intervalSize, processorList);
             }
-            
 
 	    final SwingWorker worker =  new SwingWorker() {
 		    public Object construct() {
 			if (dialog.isModified()) {
 			    int nextPe = 0;
 			    int count = 0;
+			    int numIntervals = endInterval-startInterval+1;
+			    graphData = new double[numIntervals][numEPs];
 			    ProgressMonitor progressBar =
 				new ProgressMonitor(Analysis.guiRoot, 
 						    "Reading log files",
@@ -276,13 +275,6 @@ public class TimeProfileWindow extends GenericGraphWindow
 	super.getDialogData();
     }
 
-    public void setDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	dialog.setIntervalSize(intervalSize);
-	dialog.setValidProcessors(processorList);
-	super.setDialogData();
-    }
-
     public void showWindow() {
 	// nothing for now
     }
@@ -292,16 +284,11 @@ public class TimeProfileWindow extends GenericGraphWindow
 	// LogReader is BROKEN and cannot deal with partial data properly.
 	// Any current attempts to fix this will cause GraphWindow to fail
 	// when partial data is actually read.
-	int numIntervals = endInterval-startInterval+1;
-	if (graphData == null) {
-	    graphData = new double[numIntervals][numEPs];
-	}
+
 	for (int ep=0; ep<numEPs; ep++) {
 	    int[][] entryData = Analysis.getUserEntryData(ep, LogReader.TIME);
-	    for (int pe=0; pe<entryData.length; pe++) {
-		for (int interval=0; interval<numIntervals; interval++) {
-		    graphData[interval][ep] += entryData[pe][interval];
-		}
+	    for (int interval=0; interval<graphData.length; interval++) {
+		graphData[interval][ep] += entryData[0][interval];
 	    }
 	}
     }
@@ -341,7 +328,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    setYAxis("Entry point execution time", "us");
 	    setDataSource("Time Profile Graph", outputData, 
 			  outColors, thisWindow);
-	    super.refreshGraph();
+	    refreshGraph();
 	}
     }
 

@@ -269,7 +269,7 @@ public class LogReader
 	intervalEnd = NintervalEnd;
 	numIntervals = intervalEnd - intervalStart + 1;
 	byEntryPoint=NbyEntryPoint;
-	
+
 	// assume full range of processor if null
         if (processorList == null) {
 	    processorList = new OrderedIntList();
@@ -373,7 +373,8 @@ public class LogReader
 	    } catch (EOFException e) {
 		// Do nothing
 	    } catch (IOException e) {
-		// Do nothing
+		System.err.println("Error: Failure to read log file!");
+		System.exit(-1);
 	    }
             try {
                 reader.close();

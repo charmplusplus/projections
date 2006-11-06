@@ -29,7 +29,7 @@ import projections.analysis.*;
  */
 
 public class RangeDialog extends JDialog
-    implements ActionListener, KeyListener, FocusListener, ItemListener
+    implements ActionListener, KeyListener, FocusListener
 {
     // Constant variables
     private static final int DIALOG_OK = 0;
@@ -167,12 +167,9 @@ public class RangeDialog extends JDialog
 	    // input.
 	    updateData((JTextField)evt.getSource());
 	    bOK.setEnabled(true);
-	}
-    }   
-    
-    public void itemStateChanged(ItemEvent evt) {
-	if (evt.getSource() instanceof JComboBox) {
-	    if ((JComboBox)evt.getSource() == historyList) {
+	} else if (evt.getSource() instanceof JComboBox) {
+	    JComboBox item = (JComboBox)evt.getSource();
+	    if (item == historyList) {
 		int selection = historyList.getSelectedIndex();
 		if (selection == -1) {
 		    return;
@@ -181,8 +178,8 @@ public class RangeDialog extends JDialog
 		endTimeField.setValue(history.getEndValue(selection));
 	    }
 	}
-    }
-
+    }   
+    
     public void focusGained(FocusEvent evt) {
 	// do nothing
     }
@@ -442,7 +439,7 @@ public class RangeDialog extends JDialog
 	    bSaveHistory.setEnabled(false);
 	} else {
 	    // set listeners
-	    historyList.addItemListener(this);
+	    historyList.addActionListener(this);
 	    bAddToHistory.addActionListener(this);
 	    bRemoveFromHistory.addActionListener(this);
 	    bSaveHistory.addActionListener(this);

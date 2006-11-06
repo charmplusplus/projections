@@ -90,13 +90,7 @@ public class OutlierDialog extends RangeDialog
 		// update all text fields
 		updateData(thresholdField);
 	    }
-	}
-	// let superclass handle its own action routines.
-	super.actionPerformed(evt);
-    }
-
-    public void itemStateChanged(ItemEvent evt) {
-        if (evt.getSource() instanceof JComboBox) {
+	} else if (evt.getSource() instanceof JComboBox) {
 	    JComboBox item = (JComboBox)evt.getSource();
 	    if (item == attributeList) {
 		currentAttribute = item.getSelectedIndex();
@@ -104,7 +98,8 @@ public class OutlierDialog extends RangeDialog
 		currentActivity = item.getSelectedIndex();
 	    }
         }
-	super.itemStateChanged(evt);
+	// let superclass handle its own action routines.
+	super.actionPerformed(evt);
     }
 
     JPanel createMainLayout() {
@@ -123,12 +118,12 @@ public class OutlierDialog extends RangeDialog
 	    new JComboBox(((OutlierAnalysisWindow)parentWindow).attributes[0]);
 	attributeList.setSelectedIndex(currentAttribute);
 	JLabel attributeLabel = new JLabel("Attribute: ", JLabel.RIGHT);
-	attributeList.addItemListener(this);
+	attributeList.addActionListener(this);
 
 	activityList = new JComboBox(ActivityManager.NAMES);
 	activityList.setSelectedIndex(currentActivity);
 	JLabel activityLabel = new JLabel("Activity: ", JLabel.RIGHT);
-	activityList.addItemListener(this);
+	activityList.addActionListener(this);
 
 	JLabel thresholdLabel = new JLabel("Outlier Threshold: ", 
 					   JLabel.RIGHT);

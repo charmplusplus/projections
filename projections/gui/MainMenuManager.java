@@ -76,7 +76,8 @@ public class MainMenuManager extends MenuManager
 		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    false,   // Function Tools (temporary)
-		    false   // POSE Analysis
+		    false,   // POSE Analysis
+		    false    // AMPI Usage Profile
 		});
 	    break;
 	case OPENED_SUMMARY:
@@ -116,6 +117,7 @@ public class MainMenuManager extends MenuManager
 		    true,   // Multirun Analysis
 		    false,   // Function Tools (temporary)
 		    false,  // POSE Analysis
+		    true // AMPI Usage Profile
 		});
 	    break;
 	case OPENED_FILES :
@@ -154,7 +156,8 @@ public class MainMenuManager extends MenuManager
 		    true,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    true,   // Function Tools (temporary)
-		    false   // POSE Analysis
+		    false,   // POSE Analysis
+		    true    // AMPI Usage Profile
 		});
 	    break;
 	case ADD_POSE:

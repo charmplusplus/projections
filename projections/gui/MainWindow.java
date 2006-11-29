@@ -17,7 +17,7 @@ public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay
 {
     /* **** Static setup data for windows ***** */
-    protected static final int NUM_WINDOWS = 16;
+    protected static final int NUM_WINDOWS = 17;
 
     protected static final int GRAPH_WIN = 0;
     protected static final int TIMELINE_WIN = 1;
@@ -35,6 +35,7 @@ public class MainWindow extends JFrame
     protected static final int MULTI_WIN = 13;
     protected static final int FUNCTION_WIN = 14;
     protected static final int POSE_WIN = 15;
+    protected static final int AMPI_PROFILE_WIN = 16;
 
     public static final String[] windowMenuNames =
     {
@@ -53,7 +54,8 @@ public class MainWindow extends JFrame
 	"Outlier Analysis",
 	"Multirun Analysis",
 	"Function Tool",
-	"POSE Analysis"
+	"POSE Analysis",
+	"AMPI Usage Profile"
     };
 
     public static final String[] windowClassNames =
@@ -73,7 +75,8 @@ public class MainWindow extends JFrame
 	"OutlierAnalysisWindow",
 	"MultiRunWindow",
 	"FunctionTool",
-	"PoseAnalysisWindow"
+	"PoseAnalysisWindow",
+	"AmpiProfileWindow"
     };
 
     public static final boolean[][] menuDataStates =

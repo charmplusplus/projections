@@ -9,6 +9,7 @@ public class AmpiFunctionData {
     public String sourceFileName;
 
     private long accExecTime;
+    private long lastBeginTime;
 
     private Vector execIntervals;
 
@@ -16,6 +17,7 @@ public class AmpiFunctionData {
         FunctionID = LineNo = 0;
         sourceFileName = null;
         accExecTime = 0;
+	lastBeginTime = 0;
         execIntervals = new Vector();
     }
 
@@ -29,6 +31,10 @@ public class AmpiFunctionData {
 
     public void incrAccExecTime(long t) { accExecTime += t; }
     public long getAccExecTime() { return accExecTime; }
+
+    public void incrAccExecTimeNow (long now) { accExecTime += now-lastBeginTime; }
+    public void setLastBeginTime(long t) { lastBeginTime = t; }
+    public long getLastBeginTime() { return lastBeginTime; }
 
     public String toString(){
         return sourceFileName+"@"+LineNo+"::"+FunctionID+" : "+accExecTime;

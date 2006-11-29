@@ -111,6 +111,121 @@ public class UsageCalc extends ProjDefs
 	};
     }
 
+    // returns accumulate_time[func_idx+1(other)]
+    public float [] ampiUsage(int procnum, long begintime, 
+			   long endtime, double v) {
+	int numFunc = Analysis.getNumFunctionEvents();
+	long accTime[] = new long [numFunc+1];
+	float data[] = new float [numFunc+1];
+	for(int i=0;i<numFunc;i++) accTime[i]=0;
+
+	GenericLogReader reader = new GenericLogReader(procnum, v);
+	LogEntryData LE = new LogEntryData();
+	int curTID = -1;
+	AmpiFunctionData curFunc = null;
+
+	long time=0;
+	boolean isProcessing = false;
+
+	// stack of AmpiFunctionData, using only accExecTime, lastBeginTime and funcId
+	CallStackManager funcStack = new CallStackManager();
+
+	try {
+	    /* seek the first BEGIN_PROCESSING within this time interval 
+	     * and its timestamp >= begintime, ignoring any functions that 
+	     * before the BEGIN_PROCESSING */
+            while(true) {
+                reader.nextEvent(LE);
+		time = LE.time;
+                if (LE.type==BEGIN_PROCESSING 
+		    && LE.entry!=-1
+		    && LE.time >= begintime) {
+                    break;
+                }
+            }
+if(LE.id[0]==0) System.out.println("timerange (" + begintime+","+endtime+")");
+
+	    while (time<endtime) { //EOF exception terminates loop
+		switch(LE.type) {
+		case BEGIN_PROCESSING: 
+		    if (isProcessing) {      // bad, ignore.
+			break;
+		    }
+		    isProcessing = true;
+
+		    // peek stack and update its lastbegintime
+		    curFunc = (AmpiFunctionData)funcStack.read(LE.id[0],LE.id[1],LE.id[2]);
+		    if(curFunc!=null)
+			curFunc.setLastBeginTime(time);			
+		    break;
+		case END_PROCESSING:
+		    if (!isProcessing) {     // bad, ignore.
+			break;
+		    }
+		    isProcessing = false;
+
+		    // peek stack and accumulate its time 
+		    curFunc = (AmpiFunctionData)funcStack.read(LE.id[0],LE.id[1],LE.id[2]);
+		    if(curFunc!=null){
+if(LE.id[0]==0 && curFunc.FunctionID==5) System.out.println("peek now " + time);
+			curFunc.incrAccExecTimeNow(time);
+		    }
+
+		    break;
+		case BEGIN_FUNC:
+		    // peek stack and accumulate its time
+		    curFunc = (AmpiFunctionData)funcStack.read(LE.id[0],LE.id[1],LE.id[2]);
+		    if(curFunc!=null)
+			curFunc.incrAccExecTimeNow(time);
+
+		    // push this new function into stack
+		    AmpiFunctionData thisFunc = LogEntry.adapt(LE).ampiData;
+		    thisFunc.setLastBeginTime(time);
+		    funcStack.push(thisFunc,LE.id[0],LE.id[1],LE.id[2]);
+if(LE.id[0]==0 && LE.entry==5) System.out.println("starting "+time);
+
+		    break;
+		case END_FUNC:
+if(LE.id[0]==0) System.out.println("funcid="+LE.entry);
+		    // pop last function, accumulate its time and write back to array
+		    AmpiFunctionData lastFunc = (AmpiFunctionData)funcStack.pop(LE.id[0],LE.id[1],LE.id[2]);
+		    lastFunc.incrAccExecTimeNow(time);
+		    accTime[LE.entry] += lastFunc.getAccExecTime();
+if(LE.id[0]==0 && LE.entry==5) System.out.println("now " + time + ", adding "+lastFunc.getAccExecTime() + ", to " + accTime[LE.entry]);
+
+		    // peek stack and update its lastbegintime
+		    curFunc = (AmpiFunctionData)funcStack.read(LE.id[0],LE.id[1],LE.id[2]);
+		    if(curFunc!=null)
+			curFunc.setLastBeginTime(time);			
+
+		    break;
+		default:
+		    break;
+		}
+		reader.nextEvent(LE);
+		time = LE.time;
+	    }
+	} catch (EOFException e) {
+	    // do nothing
+	} catch (IOException e) {
+	    System.out.println("Exception while reading log file " + pnum); 
+	}
+
+	float accumulated = 0;
+	for (int j=1; j<numFunc; j++) { //Scale times to percent
+	    data[j] = (float)(100.0*accTime[j])/(float)(endtime-begintime);
+	    accumulated += data[j];
+	}
+	if(accumulated > 100){
+	    System.out.println("ERROR: accTime > 100%");
+	    return null;
+	}else{
+	    data[numFunc] = 100-accumulated; 
+	}
+
+	return data;
+    }
+
     public float[][] usage(int procnum, long begintime, 
 			   long endtime, double v) {
 	float total;

@@ -133,6 +133,8 @@ SRC=\
     projections/gui/ProfileObject.java\
     projections/gui/ProfileTitleCanvas.java\
     projections/gui/ProfileWindow.java\
+    projections/gui/AmpiProfileData.java\
+    projections/gui/AmpiProfileWindow.java\
     projections/gui/ProfileYLabelCanvas.java\
     projections/gui/ProjectionsFileChooser.java\
     projections/gui/ProjectionsFileMgr.java\

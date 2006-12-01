@@ -234,6 +234,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	    getDialogData();
 	    final Thread t = new Thread() {
                     public void run() {
+			readAmpiUsageData();
                         setDisplayProfileData();
                         if (ampiTraceOn) {
                             setAmpiDisplayProfileData();
@@ -563,30 +564,14 @@ public class AmpiProfileWindow extends ProjectionsWindow
         profileFrame.setLocationRelativeTo(this);
         profileFrame.setSize(500,250);
         profileFrame.setVisible(true);
+   }
 
-    }
-
-    private void setAmpiDisplayProfileData(){
-        int curPe = -1;
+    private void readAmpiUsageData(){
 	int numPes = data.plist.size();
-	int numFunc = Analysis.getNumFunctionEvents();
-        String[] xNames = new String[numFunc-1];
-	float accTime[][] = new float[numPes][]; //[numFunc+1] and we need [1..numFunc-1]
-        Vector ampiProcess = null;
-        int pCnt=0;
-
-	// [numFunc-1][1]
-        float[][] ampiDataSrc = new float[numFunc-1][];
-        String[][] ampiFuncNameMap = new String[numFunc-1][];
-	double avgScale=1.0/numPes;
-
-        long totalExecTime = data.endtime - data.begintime;
-	long totalExecTimeAll = totalExecTime * data.numPs;
-
-	UsageCalc u = new UsageCalc();
-
-	// first compute summed usage across processors
+	accTime = new float[numPes][]; //[numFunc+1] and we need [1..numFunc-1]
 	int progressCount = 0;
+	int curPe = 0;
+	UsageCalc u = new UsageCalc();
         ProgressMonitor progressBar =
 	    new ProgressMonitor(this,
 				"Computing Usage Values",
@@ -604,6 +589,26 @@ public class AmpiProfileWindow extends ProjectionsWindow
 					 Analysis.getVersion());
 	    progressCount++;
 	}
+	progressBar.close();
+    }
+
+    private void setAmpiDisplayProfileData(){
+        int curPe = -1;
+	int numPes = data.plist.size();
+	int numFunc = Analysis.getNumFunctionEvents();
+        String[] xNames = new String[numFunc-1];
+        Vector ampiProcess = null;
+        int pCnt=0;
+
+	// [numFunc-1][1]
+        float[][] ampiDataSrc = new float[numFunc-1][];
+        String[][] ampiFuncNameMap = new String[numFunc-1][];
+	double avgScale=1.0/numPes;
+
+        long totalExecTime = data.endtime - data.begintime;
+	long totalExecTimeAll = totalExecTime * data.numPs;
+
+	// first compute summed usage across processors
 	for(int i=1;i<numFunc;i++){
 	    ampiDataSrc[i-1] = new float[1];
 	    for(int j=0;j<numPes;j++){
@@ -672,17 +677,14 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     private void createDisplayDataSource(){
         // extra column is that of the average data.
-        int procCnt = data.plist.size()+1;
+        int procCnt = data.plist.size();
 	data.numPs = procCnt;
 	int numFunc = Analysis.getNumFunctionEvents();
 
-        dataSource = new float[procCnt][];
-        colorMap = new int[procCnt][];
-        nameMap = new String[procCnt][];
-	accTime = new float[procCnt][];
+        dataSource = new float[procCnt+1][];
+        colorMap = new int[procCnt+1][];
+        nameMap = new String[procCnt+1][];
 	long totalExecTime = data.endtime - data.begintime;
-
-	UsageCalc u = new UsageCalc();
 
 	avgData = new float[numFunc+1];
         for (int i =0;i<numFunc+1;i++) {
@@ -693,7 +695,10 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
 	int progressCount = 0;
         int curPe = -1;
-	ProgressMonitor progressBar;
+        ProgressMonitor progressBar =
+	    new ProgressMonitor(this,
+				"Computing Usage Values",
+				"", 0, data.numPs);
 
 	// Profile really should be cleanly rewritten.
 	// split the original loop:
@@ -702,25 +707,12 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	// Phase 2 - create display data sources
 
 	// Phase 1a: compute average work
-        progressBar =
-	    new ProgressMonitor(this,
-				"Computing Usage Values",
-				"", 0, data.numPs);
-	data.plist.reset();
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.nextElement();
-	    if (!progressBar.isCanceled()) {
-                progressBar.setNote("[PE: " + curPe + " ] Computing Average.");
-		progressBar.setProgress(progressCount);
-	    } else {
-		break;
-	    }
-	    accTime[progressCount] = u.ampiUsage(curPe, data.begintime, data.endtime,
-					 Analysis.getVersion());
+	progressCount = 0;
+	//System.out.println("bound ("+accTime.length+","+accTime[0].length+") and will go ("+procCnt+","+avgData.length+")");
+	for(int j=0;j<procCnt;j++){
 	    for (int i=0;i<avgData.length;i++) {
-		avgData[i]+=(float)(accTime[progressCount][i]*avgScale);
+		avgData[i]+=(float)(accTime[j][i]*avgScale);
 	    }
-	    progressCount++;
 	}
 
 	// Phase1b: Assigning colors based on the average usage}

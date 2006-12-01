@@ -143,7 +143,6 @@ public class UsageCalc extends ProjDefs
                     break;
                 }
             }
-if(LE.id[0]==0) System.out.println("timerange (" + begintime+","+endtime+")");
 
 	    while (time<endtime) { //EOF exception terminates loop
 		switch(LE.type) {
@@ -167,7 +166,6 @@ if(LE.id[0]==0) System.out.println("timerange (" + begintime+","+endtime+")");
 		    // peek stack and accumulate its time 
 		    curFunc = (AmpiFunctionData)funcStack.read(LE.id[0],LE.id[1],LE.id[2]);
 		    if(curFunc!=null){
-if(LE.id[0]==0 && curFunc.FunctionID==5) System.out.println("peek now " + time);
 			curFunc.incrAccExecTimeNow(time);
 		    }
 
@@ -182,16 +180,13 @@ if(LE.id[0]==0 && curFunc.FunctionID==5) System.out.println("peek now " + time);
 		    AmpiFunctionData thisFunc = LogEntry.adapt(LE).ampiData;
 		    thisFunc.setLastBeginTime(time);
 		    funcStack.push(thisFunc,LE.id[0],LE.id[1],LE.id[2]);
-if(LE.id[0]==0 && LE.entry==5) System.out.println("starting "+time);
 
 		    break;
 		case END_FUNC:
-if(LE.id[0]==0) System.out.println("funcid="+LE.entry);
 		    // pop last function, accumulate its time and write back to array
 		    AmpiFunctionData lastFunc = (AmpiFunctionData)funcStack.pop(LE.id[0],LE.id[1],LE.id[2]);
 		    lastFunc.incrAccExecTimeNow(time);
 		    accTime[LE.entry] += lastFunc.getAccExecTime();
-if(LE.id[0]==0 && LE.entry==5) System.out.println("now " + time + ", adding "+lastFunc.getAccExecTime() + ", to " + accTime[LE.entry]);
 
 		    // peek stack and update its lastbegintime
 		    curFunc = (AmpiFunctionData)funcStack.read(LE.id[0],LE.id[1],LE.id[2]);

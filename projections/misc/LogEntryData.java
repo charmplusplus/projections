@@ -11,6 +11,8 @@ package projections.misc;
 
 public class LogEntryData 
 {
+    private boolean isValid = true;
+
     public int type;	 // type of the event eg: BEGIN_PROCESSING	
     public int mtype;	 // determines
     public long time;	 // timestamp
@@ -73,5 +75,13 @@ public class LogEntryData
 	temp.funcName = new String(funcName);
 
 	return temp;
-    }   
+    }
+
+    public boolean isValid() {
+	return isValid;
+    }
+
+    public void setValid(boolean flag) {
+	isValid = flag;
+    }
 }

@@ -36,14 +36,23 @@ public class GenericLogReader extends ProjectionsReader
     // Technically, lastRecordedTime is not required, but because this
     // class cannot control what client modules do to the "data" object
     // passed in, it is much safer to record the lastRecordedTime locally.
+    //
     private boolean fakedEndComputation = false;
     private long lastRecordedTime = 0;
 
+    // Book-keeping data. Used for consistency when event-blocks happen
+    // to straddle user-specified time-boundaries.
+    //
+    private LogEntryData lastBeginEvent = null;
+
     // indexed by EP with a Vector of run length encoding blocks.
+    //
     private Vector intervalData[];
 
     public GenericLogReader(String filename, double Nversion) {
 	super(filename, String.valueOf(Nversion));
+	lastBeginEvent = new LogEntryData();
+	lastBeginEvent.setValid(false);
 	try {
 	    reader = new AsciiIntegerReader(new FileReader(filename));
 	    version = Nversion;
@@ -55,6 +64,8 @@ public class GenericLogReader extends ProjectionsReader
 
     public GenericLogReader(int peNum, double Nversion) {
 	super(Analysis.getLogName(peNum), String.valueOf(Nversion));
+	lastBeginEvent = new LogEntryData();
+	lastBeginEvent.setValid(false);
 	try {
 	    reader = new AsciiIntegerReader(new FileReader(sourceString));
 	    version = Nversion;
@@ -94,7 +105,18 @@ public class GenericLogReader extends ProjectionsReader
 	try {
 	    data.type = reader.nextInt();
 	    switch (data.type) {
-	    case BEGIN_IDLE: case END_IDLE: 
+	    case BEGIN_IDLE:
+		lastBeginEvent.time = data.time = reader.nextLong();
+		lastBeginEvent.pe = data.pe = reader.nextInt();
+		lastBeginEvent.setValid(true);
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case END_IDLE: 
+		data.time = reader.nextLong();
+		data.pe = reader.nextInt();
+		lastBeginEvent.setValid(false);
+		reader.nextLine(); // Skip over any garbage 
+		break;
 	    case BEGIN_PACK: case END_PACK:
 	    case BEGIN_UNPACK: case END_UNPACK:
 		data.time = reader.nextLong();
@@ -136,32 +158,38 @@ public class GenericLogReader extends ProjectionsReader
 		}
 		break;
 	    case BEGIN_PROCESSING: 
-		data.mtype = reader.nextInt();
-		data.entry = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
+		lastBeginEvent.mtype = data.mtype = reader.nextInt();
+		lastBeginEvent.entry = data.entry = reader.nextInt();
+		lastBeginEvent.time = data.time = reader.nextLong();
+		lastBeginEvent.event = data.event = reader.nextInt();
+		lastBeginEvent.pe = data.pe = reader.nextInt();
 		if (version >= 2.0) {
-		    data.msglen = reader.nextInt();
+		    lastBeginEvent.msglen = data.msglen = reader.nextInt();
 		} else {
-		    data.msglen = -1;
+		    lastBeginEvent.msglen = data.msglen = -1;
 		}
 		if (version >= 4.0) {
-		    data.recvTime  = reader.nextLong();
-		    data.id[0] = reader.nextInt();
-		    data.id[1] = reader.nextInt();
-		    data.id[2] = reader.nextInt();
+		    lastBeginEvent.recvTime = data.recvTime = 
+			reader.nextLong();
+		    lastBeginEvent.id[0] = data.id[0] = reader.nextInt();
+		    lastBeginEvent.id[1] = data.id[1] = reader.nextInt();
+		    lastBeginEvent.id[2] = data.id[2] = reader.nextInt();
 		}
 		if (version >= 6.5) {
-		    data.cpuStartTime = reader.nextLong();
+		    lastBeginEvent.cpuStartTime = data.cpuStartTime = 
+			reader.nextLong();
 		}
 		if (version >= 6.6) {
-		    data.numPerfCounts = reader.nextInt();
+		    lastBeginEvent.numPerfCounts = data.numPerfCounts = 
+			reader.nextInt();
+		    lastBeginEvent.perfCounts = new long[data.numPerfCounts];
 		    data.perfCounts = new long[data.numPerfCounts];
 		    for (int i=0; i<data.numPerfCounts; i++) {
-			data.perfCounts[i] = reader.nextLong();
+			lastBeginEvent.perfCounts[i] = data.perfCounts[i] = 
+			    reader.nextLong();
 		    }
 		}
+		lastBeginEvent.setValid(true);
 		reader.nextLine(); // Skip over any garbage 
 		break;
 	    case END_PROCESSING:
@@ -185,6 +213,7 @@ public class GenericLogReader extends ProjectionsReader
 			data.perfCounts[i] = reader.nextLong();
 		    }
 		}
+		lastBeginEvent.setValid(false);
 		reader.nextLine(); // Skip over any garbage 
 		break;
 	    case BEGIN_TRACE: case END_TRACE:
@@ -406,6 +435,13 @@ public class GenericLogReader extends ProjectionsReader
 		return;
 	    }
 	}
+    }
+
+    public LogEntryData getLastBE() {
+	if (lastBeginEvent.isValid()) {
+	    return lastBeginEvent;
+	}
+	return null;
     }
 
     private boolean isBeginType(LogEntryData data) {

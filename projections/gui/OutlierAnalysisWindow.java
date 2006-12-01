@@ -252,13 +252,24 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		} else {
 		    LogEntryData logData = new LogEntryData();
 		    logData.time = 0;
+		    // dealing with book-keeping events
+		    boolean isFirstEvent = true;
 		    // Jump to the first valid event
 		    boolean markedBegin = false;
 		    boolean markedIdle = false;
-		    long beginBlockTime = 0;
+		    long beginBlockTime = startTime;
 		    reader.nextEventOnOrAfter(startTime, logData);
 		    while (logData.time <= endTime) {
-			if (logData.type == ProjDefs.CREATION) {
+			LogEntryData BE = reader.getLastBE();
+			switch (logData.type) {
+			case ProjDefs.CREATION:
+			    if (isFirstEvent) {
+				if ((BE != null) && 
+				    (BE.type == ProjDefs.BEGIN_PROCESSING)) {
+				    beginBlockTime = startTime;
+				    markedBegin = true;
+				}
+			    }
 			    if (markedBegin) {
 				int eventIndex = logData.entry;
 				if (currentAttribute == 2) {
@@ -268,8 +279,9 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 					logData.msglen;
 				}
 			    }
-			} else if (logData.type == 
-				   ProjDefs.BEGIN_PROCESSING) {
+			    break;
+			case ProjDefs.BEGIN_PROCESSING:
+			    isFirstEvent = false;
 			    // check pairing
 			    if (!markedBegin) {
 				markedBegin = true;
@@ -280,11 +292,13 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 				// not expecting nesting here.
 				beginBlockTime = logData.time;
 			    }
-			} else if (logData.type ==
-				   ProjDefs.END_PROCESSING) {
-			    // check pairing
-			    // if End without a begin, just ignore
-			    // this event.
+			    break;
+			case ProjDefs.END_PROCESSING:
+			    if (isFirstEvent) {
+				markedBegin = true;
+				beginBlockTime = startTime;
+			    }
+			    isFirstEvent = false;
 			    if (markedBegin) {
 				markedBegin = false;
 				if (currentAttribute <= 1) {
@@ -292,8 +306,9 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 					logData.time - beginBlockTime;
 				}
 			    }
-			} else if (logData.type ==
-				   ProjDefs.BEGIN_IDLE) {
+			    break;
+			case ProjDefs.BEGIN_IDLE:
+			    isFirstEvent = false;
 			    // check pairing
 			    if (!markedIdle) {
 				markedIdle = true;
@@ -304,8 +319,12 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			    if (currentAttribute == 1) {
 				beginBlockTime = logData.time;
 			    }
-			} else if (logData.type ==
-				   ProjDefs.END_IDLE) {
+			    break;
+			case ProjDefs.END_IDLE:
+			    if (isFirstEvent) {
+				markedIdle = true;
+				beginBlockTime = startTime;
+			    }
 			    // check pairing
 			    if (markedIdle) {
 				markedIdle = false;
@@ -314,8 +333,55 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 					logData.time - beginBlockTime;
 				}
 			    }
+			    break;
 			}
 			reader.nextEvent(logData);
+		    }
+		    LogEntryData beginEvent = reader.getLastBE();
+		    // Now handle the tail case.
+		    switch (logData.type) {
+		    case ProjDefs.END_PROCESSING:
+			// lastBE is empty by design in this case, so
+			// use beginBlockTime recorded from previously.
+			if (currentAttribute <= 1) {
+			    tempData[count][logData.entry] +=
+				endTime - beginBlockTime;
+			}
+			break;
+		    case ProjDefs.END_IDLE:
+			// lastBE is empty by design in this case, so
+			// use beginBlockTime recorded from previously.
+			if (currentAttribute == 1) {
+			    tempData[count][numActivities] +=
+				endTime - beginBlockTime;
+			}
+			break;
+		    default:
+			// all other cases. Ignore if no beginEvent is
+			// found. Otherwise, use it's begin time if
+			// it is greater than startTime, otherwise, use
+			// startTime.
+			if (beginEvent != null) {
+			    if (beginEvent.time > startTime) {
+				beginBlockTime = beginEvent.time;
+			    } else {
+				beginBlockTime = startTime;
+			    }
+			    switch (beginEvent.type) {
+			    case ProjDefs.BEGIN_PROCESSING:
+				if (currentAttribute <= 1) {
+				    tempData[count][beginEvent.entry] +=
+					endTime - beginBlockTime;
+				}
+				break;
+			    case ProjDefs.BEGIN_IDLE:
+				if (currentAttribute == 1) {
+				    tempData[count][numActivities] +=
+					endTime - beginBlockTime;
+				}
+				break;
+			    }
+			}
 		    }
 		    reader.close();
 		}

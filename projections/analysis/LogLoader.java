@@ -12,7 +12,7 @@ import java.util.*;
 
 import javax.swing.*;
 
-import org.apache.xpath.operations.And;
+//import org.apache.xpath.operations.And;
 
 import projections.gui.*;
 import projections.misc.*;

@@ -9,7 +9,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import org.apache.xpath.operations.And;
+//import org.apache.xpath.operations.And;
 
 import projections.analysis.*;
 import projections.gui.graph.*;

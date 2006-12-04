@@ -6,8 +6,8 @@ import java.text.DecimalFormat;
 
 import javax.swing.*;
 
-import org.apache.xpath.operations.And;
-import org.apache.xpath.operations.Variable;
+//import org.apache.xpath.operations.And;
+//import org.apache.xpath.operations.Variable;
 
 import projections.gui.*; 
 import projections.gui.graph.Graph;

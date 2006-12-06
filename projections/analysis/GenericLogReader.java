@@ -213,11 +213,25 @@ public class GenericLogReader extends ProjectionsReader
 			data.perfCounts[i] = reader.nextLong();
 		    }
 		}
+		reader.nextLine(); // Skip over any garbage 
+		break;
+	    case BEGIN_TRACE: 
+		data.time = reader.nextLong();
+		// invalidates the last Begin Event. BEGIN_TRACE happens
+		// in the context of an entry method that is *not* traced.
+		// Hence when a BEGIN_TRACE event is encountered, no
+		// information is actually known about the entry method
+		// context.
 		lastBeginEvent.setValid(false);
 		reader.nextLine(); // Skip over any garbage 
 		break;
-	    case BEGIN_TRACE: case END_TRACE:
+	    case END_TRACE:
 		data.time = reader.nextLong();
+		// END_TRACE happens in the context of an existing
+		// entry method and hence should logically "end" it.
+		// This means any client taking note of END_TRACE must
+		// take into account lastBeginEvent in order to get
+		// reasonable data.
 		reader.nextLine(); // Skip over any garbage 
 		break;
 	    case BEGIN_FUNC:

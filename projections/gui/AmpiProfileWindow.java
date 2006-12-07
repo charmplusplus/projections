@@ -116,7 +116,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
             mbar.add(Util.makeJMenu("Tools", new Object[]
                                 {
 				    // "Pie Chart",
-                                    // "Change Colors",
+                                    "Change Colors",
                                     "Usage Table" 
                                 },
                                 null, this));
@@ -235,9 +235,10 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	    final Thread t = new Thread() {
                     public void run() {
 			readAmpiUsageData();
-                        setDisplayProfileData();
+                        //setDisplayProfileData();
                         if (ampiTraceOn) {
-                            setAmpiDisplayProfileData();
+                            setDisplayProfileData();
+			    setAmpiDisplayProfileData();
 			}
 			setLocationRelativeTo(parentWindow);
                         setVisible(true);
@@ -356,8 +357,9 @@ public class AmpiProfileWindow extends ProjectionsWindow
                 pieChartWindow =
 		    new PieChartWindow(parentWindow, avgData,
 				       avgData.length, thresh, colors);
+		*/
             } else if(arg.equals("Change Colors")) {
-	    showChangeColorDialog();*/
+		showChangeColorDialog();
             } else if (arg.equals("Usage Table")){
                 showUsageTable();
             } else if (arg.equals("Usage Profile")) {
@@ -381,40 +383,37 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
 
     public void applyDialogColors() {
-        int eps = Analysis.getNumUserEntries();
+	int numFunc = Analysis.getNumFunctionEvents();
 
-        System.out.println(colors[eps+2]);
+        System.out.println(colors[numFunc]);
         displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
         displayCanvas.repaint();
     }
 
     public void showChangeColorDialog() {
-        int noEPs = Analysis.getNumUserEntries();
+	int numFunc = Analysis.getNumFunctionEvents();
         if (entryDialog == null) {
-            String typeLabelStrings[] = {"Entry Points"};
+            String typeLabelStrings[] = {"Functions"};
 
             boolean existsArray[][] =
-                new boolean[1][noEPs+NUM_SYS_EPS];
-            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+                new boolean[1][numFunc+1];
+            for (int i=1; i<numFunc+1; i++) {
                 existsArray[0][i] = true;
             }
 
             boolean stateArray[][] =
-                new boolean[1][noEPs+NUM_SYS_EPS];
-            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+                new boolean[1][numFunc+1];
+            for (int i=1; i<numFunc; i++) {
                 stateArray[0][i] = true;
             }
 
             String entryNames[] =
-                new String[noEPs+NUM_SYS_EPS];
-            for (int i=0; i<noEPs; i++) {
+                new String[numFunc+1];
+            for (int i=1; i<numFunc; i++) {
                 entryNames[i] =
-                    Analysis.getEntryName(i);
+                    Analysis.getFunctionName(i);
             }
-            // cannot seem to avoid a hardcode
-            entryNames[noEPs] = "Pack Time";
-            entryNames[noEPs+1] = "Unpack Time";
-            entryNames[noEPs+2] = "Idle Time";
+            entryNames[numFunc] = "OTHER";
 
             /**
              * Reason why I need create a 2D new color array:

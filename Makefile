@@ -16,6 +16,7 @@ SRC=\
     projections/analysis/EPDataGenerator.java\
     projections/analysis/IntervalData.java\
     projections/analysis/IntervalUtils.java\
+    projections/analysis/KMeansClustering.java\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\

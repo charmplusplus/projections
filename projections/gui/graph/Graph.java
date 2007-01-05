@@ -266,7 +266,10 @@ public class Graph extends JPanel
 	int xVal = getXValue(x);
 	int yVal = getYValue(xVal, y);
 
-	if((xVal > -1) && (yVal > -1)) {
+	// if either x or y is available, support the click
+	// but the client tool is going to have to deal with
+	// it
+	if ((xVal > -1) || (yVal > -1)) {
 	    toolClickResponse(e, xVal, yVal);
 	} 
     }

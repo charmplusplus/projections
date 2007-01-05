@@ -176,7 +176,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	numActivities = Analysis.getNumActivity(currentActivity); 
 	tempGraphColors = Analysis.getColorMap(currentActivity);
 	numSpecials = 0;
-	if (currentAttribute == 1) {
+	if (currentAttribute <= 1) {
 	    // **CWL NOTE** - this is currently a hack until I can find a way
 	    // to do this more cleanly!!!
 	    //
@@ -316,7 +316,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			    // NOTE: This code assumes that IDLEs cannot
 			    // possibly be nested inside of PROCESSING
 			    // blocks (which should be true).
-			    if (currentAttribute == 1) {
+			    if (currentAttribute <= 1) {
 				beginBlockTime = logData.time;
 			    }
 			    break;
@@ -328,7 +328,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			    // check pairing
 			    if (markedIdle) {
 				markedIdle = false;
-				if (currentAttribute == 1) {
+				if (currentAttribute <= 1) {
 				    tempData[count][numActivities] +=
 					logData.time - beginBlockTime;
 				}
@@ -351,7 +351,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		    case ProjDefs.END_IDLE:
 			// lastBE is empty by design in this case, so
 			// use beginBlockTime recorded from previously.
-			if (currentAttribute == 1) {
+			if (currentAttribute <= 1) {
 			    tempData[count][numActivities] +=
 				endTime - beginBlockTime;
 			}
@@ -402,6 +402,22 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    count++;
 	}
 	progressBar.close();
+
+	// **CW** TENTATIVE. Use tempData as source to compute cluster-
+	// determined outliers.
+	/*
+	int numSamples = 5;
+	int clusterMap[] = new int[tempData.length];
+	double clusterDistance[] = new double[tempData.length];
+	long time = System.currentTimeMillis();
+	KMeansClustering.kMeans(tempData, numSamples, clusterMap, 
+				clusterDistance);
+	System.out.println("Time taken for processing [" + tempData.length +
+			   " processors] = " + 
+			   (System.currentTimeMillis() - time) +
+			   " ms");
+	KMeansClustering.outputResults(clusterMap, numSamples);
+	*/
 	/*
 	for (int i=0; i<tempData.length; i++) {
 	    for (int j=0; j<tempData[i].length; j++) {

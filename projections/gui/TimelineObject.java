@@ -387,6 +387,8 @@ public class TimelineObject extends Component
     }
     
     public TimelineMessage searchMesg(Vector v,int eventid){
+	TimelineMessage returnItem = null;
+
 	// the binary search should deal with indices and not absolute
 	// values, hence size-1.
 	//
@@ -398,9 +400,29 @@ public class TimelineObject extends Component
 	    // while linking to the previous event.
 	    return null;  
 	}
-	return binarySearch(v,eventid,0,v.size()-1);
+
+	// Try binary search first. If that fails, try sequential search.
+	// This is because stuff like bigsim logs may not have eventID
+	// stored in sorted order.
+	returnItem = binarySearch(v,eventid,0,v.size()-1);
+	if (returnItem == null) {
+	    return seqSearch(v,eventid);
+	} else {
+	    return returnItem;
+	}
     }
     
+    public TimelineMessage seqSearch(Vector v, int eventid) {
+	TimelineMessage item;
+	for (int i=0; i<v.size()-1; i++) {
+	    item = (TimelineMessage)v.elementAt(i);
+	    if (item.EventID == eventid) {
+		return item;
+	    }
+	}
+	return null;
+    }
+
     public TimelineMessage binarySearch(Vector v,int eventid,
 					int start,int end) {
    	int mid = (start + end)/2;

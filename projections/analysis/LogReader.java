@@ -228,6 +228,11 @@ public class LogReader
 	    }
 	    processing--;
 	    break;
+	case END_TRACE:
+	    //Sayantan:This is supposed to make sure that the entries following
+	    //the end_trace are traced as idle with 0 util, until the next begin_trace
+	    currentEntry = IDLE_ENTRY;
+	    break;
 	default:
 	    System.out.println("Unhandled type "+type+" in logreader!");
 	    break;
@@ -367,6 +372,14 @@ public class LogReader
 			break;
 		    case END_COMPUTATION:
 			fillToInterval(numIntervals);
+			break;
+		    case BEGIN_TRACE:
+		    	//Sayantan: I think we do-not really need to do anything
+			//for begin_trace. However, that may not be the case for a 
+			//complex series of begin and end traces
+			break;
+		    case END_TRACE:
+		    	intervalCalc(curData.type,curData.mtype,0,curData.time);
 			break;
 		    }
 		}

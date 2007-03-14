@@ -73,7 +73,7 @@ public class TimelineData
     {
 	showPacks = false;
 	showMsgs  = true;
-	showIdle  = false;
+	showIdle  = true;
 	
 	oldBT = -1;
 	oldET = -1;

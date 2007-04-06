@@ -29,169 +29,119 @@ import java.util.ArrayList;
 
 public class NoiseMiner extends ProjDefs
 {
+
+	private int numPe;		     //Number of processors
+	private int numEPs;	   	     //Number of entry methods
+
+	private long startTime;	     //Interval begin
+	private long endTime;	     //Interval end
+	private OrderedIntList peList;   //List of processors
+
+	private long baselineMemoryUsage;
+	private long highWatermarkMemoryUsage;
+
+	private String loggingText;
 	
-    private int numPe;		     //Number of processors
-    private int numEPs;	   	     //Number of entry methods
-    
-    private long startTime;	     //Interval begin
-    private long endTime;	     //Interval end
-    private OrderedIntList peList;   //List of processors
-    
-    private long baselineMemoryUsage;
-    private long highWatermarkMemoryUsage;
-    
-    public NoiseMiner(long startInterval, long endInterval, 
-                     OrderedIntList processorList)
-    {
-        //Initialize class variables
+	public NoiseMiner(long startInterval, long endInterval, 
+			OrderedIntList processorList)
+	{
+		//Initialize class variables
 		peList = processorList;
 		numPe = peList.size();
 		numEPs = Analysis.getNumUserEntries();
 		startTime = startInterval;
 		endTime = endInterval;
-	
+
 		baselineMemoryUsage = java.lang.Runtime.getRuntime().totalMemory();
 		highWatermarkMemoryUsage = baselineMemoryUsage;
-    }
-    
-    private void checkMemoryUsage(){
-    	long m = java.lang.Runtime.getRuntime().totalMemory();
-    	if(m > highWatermarkMemoryUsage){
-    		highWatermarkMemoryUsage = m;
-    	}
-    }
-    
-    public String memoryUsageToString(){
-    	return new String("Max memory used by NoiseMiner: " + ((highWatermarkMemoryUsage - baselineMemoryUsage)/1024) + " KB");
-    }
-    
-    public void GatherData(Component parent)
-    {
-        GenericLogReader LogFile;
-		LogEntryData logdata = new LogEntryData();
 		
+		loggingText = "";
+	}
+
+	private void checkMemoryUsage(){
+		long m = java.lang.Runtime.getRuntime().totalMemory();
+		if(m > highWatermarkMemoryUsage){
+			highWatermarkMemoryUsage = m;
+		}
+	}
+
+	public String memoryUsageToString(){
+		String s = "Max memory used by NoiseMiner: " + ((highWatermarkMemoryUsage - baselineMemoryUsage)/1024/1024) + " MB\n";
+		return s;
+	}
+	
+	public void gatherData(Component parent)
+	{
+		GenericLogReader LogFile;
+		LogEntryData logdata = new LogEntryData();
+
 		int currPeIndex = 0;
 		int currPe;
 		int sourceEP;
-	
-        ProgressMonitor progressBar =
-	    new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
-	
-	while (peList.hasMoreElements()) {
-	    currPe = peList.nextElement();
-	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("[PE: " + currPe + " ] Reading data.");
-		progressBar.setProgress(currPeIndex+1);
-	    }
-	    else {
-		progressBar.close();
-		break;
-	    }
-	    LogFile = new GenericLogReader(Analysis.getLogName(currPe), 
-	                                   Analysis.getVersion());    
-	   
-            try
-	    {
-		LogFile.nextEventOnOrAfter(startTime, logdata);
-		//Now we have entered into the time interval
-/*
-		Stack creationStack = new Stack();
-		while ( (logdata.time<endTime)&&(logdata.type!=BEGIN_PROCESSING) ) {
-		    //Account for any Creations encountered after a BP but before an EP
-		    // Basically, the start interval begins inside a Processing Block
-		    if (logdata.type == CREATION) {
-			creationStack.push(new Integer(logdata.entry));
-			creationStack.push(new Integer(logdata.msglen));
-		    }
-		    if (logdata.type == END_PROCESSING) {
-		        sourceEP = logdata.entry;
-			while(!creationStack.empty()) {
-			    int msglen = ((Integer)creationStack.pop()).intValue();
-			    int destEP = ((Integer)creationStack.pop()).intValue();
-			    if ( (minStats[sourceEP][destEP]>msglen) ||
-			         (minStats[sourceEP][destEP]==0) )
-			        minStats[sourceEP][destEP] = msglen;
-			    if (maxStats[sourceEP][destEP]<msglen)
-			        maxStats[sourceEP][destEP] = msglen;
-			    msgCount[sourceEP][destEP]++;
-			    byteSum[sourceEP][destEP]+=(double)msglen;
-			    sumSquares[sourceEP][destEP]+=(double)msglen*(double)msglen;
-			    if (!exists[sourceEP])
-			        exists[sourceEP]=true;
+
+		ProgressMonitor progressBar = new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
+
+		// For each pe
+		while (peList.hasMoreElements()) {
+			currPe = peList.nextElement();
+			if (!progressBar.isCanceled()) {
+				progressBar.setNote("[PE: " + currPe + " ] Reading data.");
+				progressBar.setProgress(currPeIndex+1);
 			}
-			LogFile.nextEvent(logdata);
-			break;
-		    }
-		    LogFile.nextEvent(logdata);
-		}
-*/
+			else {
+				progressBar.close();
+				break;
+			}
+			LogFile = new GenericLogReader(Analysis.getLogName(currPe), Analysis.getVersion());    
+		
+			int count=0;
+			try {
+			
+				LogFile.nextEventOnOrAfter(startTime, logdata);
 
-/*
-		while (logdata.time < endTime) {
-	            //Go through each log file and for each Creation
-		    //  in a Processing Block, update arrays
-		    if (logdata.type == BEGIN_PROCESSING) {
-		        //Starting new entry method
-			sourceEP = logdata.entry;
-		        LogFile.nextEvent(logdata);
-			while ( (logdata.type != END_PROCESSING) &&
-			        (logdata.type != END_COMPUTATION) &&
-				(logdata.time < endTime) ) {
-			    if (logdata.type == CREATION) {
-			        int msglen = logdata.msglen;
-			        int destEP = logdata.entry;
-			        if ( (minStats[sourceEP][destEP]>msglen) ||
-			             (minStats[sourceEP][destEP]==0) )
-			            minStats[sourceEP][destEP] = msglen;
-			        if (maxStats[sourceEP][destEP]<msglen)
-			            maxStats[sourceEP][destEP] = msglen;
-			        msgCount[sourceEP][destEP]++;
-			        byteSum[sourceEP][destEP]+=(double)msglen;
-			        sumSquares[sourceEP][destEP]+=(double)msglen*(double)msglen;
-			        if (!exists[sourceEP])
-			            exists[sourceEP]=true;
-			    }
-			    LogFile.nextEvent(logdata);
-		        }
-		    }
-		    LogFile.nextEvent(logdata);
-		}
+				while (logdata.time < endTime) {
+/*					//Go through each log file and for each Creation
+					//  in a Processing Block, update arrays
+					if (logdata.type == BEGIN_PROCESSING) {
+						//Starting new entry method
+						sourceEP = logdata.entry;	
+						LogFile.nextEvent(logdata);
+						while ( (logdata.type != END_PROCESSING) && (logdata.type != END_COMPUTATION) && (logdata.time < endTime) ) {
+						
+							int msglen = logdata.msglen;
+							int destEP = logdata.entry;
+							loggingText = loggingText + "Log entry: Type=" + logdata.type + " len=" + msglen + " destEP=" + destEP + "\n";
+						
+							LogFile.nextEvent(logdata);
+						}
+					}
 */
-	    }
-	    catch (IOException e)
-	    {
-	    }
-	    currPeIndex++;
-	}
-/*
-	// Update Variance Array
-	for (int srcEP=0; srcEP<numEPs; srcEP++) {
-	    if (exists[srcEP]) {
-	        for (int destEP=0; destEP<numEPs; destEP++) {
-		    if (msgCount[srcEP][destEP]==1)
-		        varStats[srcEP][destEP] = 0;
-		    else if (msgCount[srcEP][destEP]>1) {
-		        double mean = byteSum[srcEP][destEP]/msgCount[srcEP][destEP];
-			//Variance = (sumofsquares - 2*mean*sum + mean*mean*count) / (count-1)
-		        varStats[srcEP][destEP] = ((sumSquares[srcEP][destEP]
-			                           - 2.0*mean*byteSum[srcEP][destEP]
-						   + mean*mean*msgCount[srcEP][destEP])
-						   /(msgCount[srcEP][destEP]-1.0));
-		    }
-		}
-	    }
-	}
-*/
-	    
-	progressBar.close();
-    }
+					count ++;
 
-    public String getText(){
-    	String s = "NoiseMiner Coming Soon!\n" + memoryUsageToString() + "\n";
-    	return s;
-    }
-    
-  
-    
-    
+					LogFile.nextEvent(logdata);
+					
+				}
+			
+				
+			}
+			catch (IOException e)
+			{
+			}
+	
+			loggingText = loggingText + "Found " + count + " events in the specified time range on pe=" + currPe + "\n";
+			checkMemoryUsage();
+			currPeIndex++;
+		}	
+
+		progressBar.close();
+	}
+
+	public String getText(){
+		String s = "NoiseMiner Coming Soon!\n";
+		s = s + loggingText + memoryUsageToString();
+		return s;
+	}
+
+
+
 }		

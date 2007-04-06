@@ -81,6 +81,7 @@ public class ComputationalNoiseWindow extends ProjectionsWindow
 		    final SwingWorker worker = new SwingWorker() {
 			    public Object construct() {
 			    	noiseMiner = new NoiseMiner(startTime, endTime, validPEs);
+			    	noiseMiner.gatherData(thisWindow);
 			        mainText.setText(noiseMiner.getText());
 			        return null;
 			    }

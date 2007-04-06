@@ -160,7 +160,7 @@ public class ProjectionsFileChooser
 	d.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 	d.addWindowListener(new WindowAdapter() {
 		public void windowClosing(WindowEvent e) {
-		    dialog_.hide();
+		    dialog_.setVisible(false);
 		}
 	    });
 	d.setTitle(title);
@@ -202,7 +202,7 @@ public class ProjectionsFileChooser
 		    } catch(Exception e) {
 			e.printStackTrace();
 		    }
-		    dialog_.hide();
+		    dialog_.setVisible(false);
 		    // **CW** this is another hack. There should be an
 		    // interface to serve as a contract between
 		    // ProjectionsFileChooser and the calling frame.
@@ -276,7 +276,7 @@ public class ProjectionsFileChooser
 	list_.setSelectedIndices(selectAll);
 	dialog_.getContentPane().add(new JScrollPane(list_), 
 				     BorderLayout.CENTER);
-	dialog_.show();
+	dialog_.setVisible(true);
 	return userSelect_returnVal;
     }
 }

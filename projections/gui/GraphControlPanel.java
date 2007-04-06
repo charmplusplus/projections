@@ -182,7 +182,7 @@ public class GraphControlPanel extends Panel
 	  	   // create a error dialog
 		   if (errDlg == null)
           	     errDlg = new ErrorDialog(data.graphWindow,"Processors Range Beyond Scope!");
-		   if (!errDlg.isShowing()) errDlg.show();
+		   if (!errDlg.isShowing()) errDlg.setVisible(true);
 		   rangeField.setText(origProcList.listToString());
 		   return;
 		 }

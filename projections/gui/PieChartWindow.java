@@ -252,7 +252,7 @@ public class PieChartWindow extends Frame{
 		    Rectangle bounds = (displayPanel.getGraphicsConfiguration()).getBounds();
 		    bubble = new Bubble(displayPanel, bString);
 		    bubble.setLocation(new Point(x,y));
-		    bubble.show();
+		    bubble.setVisible(true);
 		    hasChanged=0;
 		}	
 	    }else{					// Cursor not inside of pie graph

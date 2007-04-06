@@ -198,9 +198,9 @@ public class MultiRunWindow extends ProjectionsWindow
 		    tablesWindow.getContentPane().add(tablesPanel);
 		    // **CW** stop gap solution ...
 		    tablesWindow.setSize(new Dimension(500,300));
-		    tablesWindow.show();
+		    tablesWindow.setVisible(true);
 		} else {
-		    tablesWindow.show();
+		    tablesWindow.setVisible(true);
 		}
 	    }
 	}

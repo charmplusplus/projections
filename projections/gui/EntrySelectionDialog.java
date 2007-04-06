@@ -153,7 +153,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 		if (callbackTarget != null) {
 		    callbackTarget.applyDialogColors();
 		}
-		hide();
+		setVisible(false);
 	    }
 	}           
     }   

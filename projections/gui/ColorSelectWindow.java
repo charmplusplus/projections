@@ -171,7 +171,7 @@ public class ColorSelectWindow extends Dialog
 	  {
 		 myParent.applyNewColor(currentColor);
 	  }   
-	  hide();
+	  setVisible(false);
    }   
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {

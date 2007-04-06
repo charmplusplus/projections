@@ -32,19 +32,14 @@ public class NoiseMiner extends ProjDefs
 	
     private int numPe;		     //Number of processors
     private int numEPs;	   	     //Number of entry methods
-    private double[][] byteSum;	     //Array for EP message byte sum to be stored
-    private double[][] msgCount;     //Array for EP message count to be stored
-    private double[][] sumSquares;   //Array for EP sum of byte counts squared
-    private int[][] minStats;	     //Array for EP min stats to be stored
-    private int[][] maxStats;	     //Array for EP max stats to be stored
-    private double[][] varStats;     //Array for EP variance stats to be stored
-    private boolean[] exists;	     //Array to remember if sourceEP sent any messages
+    
     private long startTime;	     //Interval begin
     private long endTime;	     //Interval end
     private OrderedIntList peList;   //List of processors
-    private DecimalFormat _format;   //Format for output
     
-	
+    private long baselineMemoryUsage;
+    private long highWatermarkMemoryUsage;
+    
     public NoiseMiner(long startInterval, long endInterval, 
                      OrderedIntList processorList)
     {
@@ -54,14 +49,20 @@ public class NoiseMiner extends ProjDefs
 		numEPs = Analysis.getNumUserEntries();
 		startTime = startInterval;
 		endTime = endInterval;
-		byteSum = new double[numEPs][numEPs];
-		msgCount = new double[numEPs][numEPs];
-		sumSquares = new double[numEPs][numEPs];
-		minStats = new int[numEPs][numEPs];
-		maxStats = new int[numEPs][numEPs];
-		varStats = new double[numEPs][numEPs];
-		exists = new boolean[numEPs];
-        _format = new DecimalFormat("###,###.###");
+	
+		baselineMemoryUsage = java.lang.Runtime.getRuntime().totalMemory();
+		highWatermarkMemoryUsage = baselineMemoryUsage;
+    }
+    
+    private void checkMemoryUsage(){
+    	long m = java.lang.Runtime.getRuntime().totalMemory();
+    	if(m > highWatermarkMemoryUsage){
+    		highWatermarkMemoryUsage = m;
+    	}
+    }
+    
+    public String memoryUsageToString(){
+    	return new String("Max memory used by NoiseMiner: " + ((highWatermarkMemoryUsage - baselineMemoryUsage)/1024) + " KB");
     }
     
     public void GatherData(Component parent)
@@ -93,7 +94,7 @@ public class NoiseMiner extends ProjDefs
 	    {
 		LogFile.nextEventOnOrAfter(startTime, logdata);
 		//Now we have entered into the time interval
-
+/*
 		Stack creationStack = new Stack();
 		while ( (logdata.time<endTime)&&(logdata.type!=BEGIN_PROCESSING) ) {
 		    //Account for any Creations encountered after a BP but before an EP
@@ -123,7 +124,9 @@ public class NoiseMiner extends ProjDefs
 		    }
 		    LogFile.nextEvent(logdata);
 		}
+*/
 
+/*
 		while (logdata.time < endTime) {
 	            //Go through each log file and for each Creation
 		    //  in a Processing Block, update arrays
@@ -153,13 +156,14 @@ public class NoiseMiner extends ProjDefs
 		    }
 		    LogFile.nextEvent(logdata);
 		}
+*/
 	    }
 	    catch (IOException e)
 	    {
 	    }
 	    currPeIndex++;
 	}
-	
+/*
 	// Update Variance Array
 	for (int srcEP=0; srcEP<numEPs; srcEP++) {
 	    if (exists[srcEP]) {
@@ -177,93 +181,17 @@ public class NoiseMiner extends ProjDefs
 		}
 	    }
 	}
+*/
 	    
 	progressBar.close();
     }
 
     public String getText(){
-    	return "NoiseMiner Coming Soon!";
+    	String s = "NoiseMiner Coming Soon!\n" + memoryUsageToString() + "\n";
+    	return s;
     }
     
-    public String[][] getCallTableText(boolean epDetailToggle, boolean statsToggle)
-    {
-        // length is number of lines
-        int length = 0;
-	for (int sourceEP=0; sourceEP<numEPs; sourceEP++) {
-	    if (exists[sourceEP]) {
-	        length++;
-		for (int destEP=0; destEP<numEPs; destEP++) {
-		    if (msgCount[sourceEP][destEP] > 0)
-		        length+=2;
-		}
-		length+=2; //for 2 line spaces between source EPs
-	    }
-	}
-	
-        String[][] text = new String[length][1];
-	int lengthCounter = 0;
-	
-        for (int sourceEP=0; sourceEP<numEPs; sourceEP++) {
-            if (exists[sourceEP]) {
-	        
-		if (epDetailToggle==true) { //need ep detail
-	            text[lengthCounter][0] = Analysis.getEntryChareName(sourceEP) + "::" +
-		                             Analysis.getEntryName(sourceEP);
-		}
-		else { //don't need ep detail
-		    String s = Analysis.getEntryName(sourceEP);
-		    int parenthIndex = s.indexOf('(');
-		    if (parenthIndex != -1) //s has parenthesis
-		        s = s.substring(0, parenthIndex);
-		    text[lengthCounter][0] = s;
-		}
-		    
-		lengthCounter++;
-		
-		for (int destEP=0; destEP<numEPs; destEP++) {
-		    if (msgCount[sourceEP][destEP] > 0) {
-		    
-		        if (epDetailToggle==true) { //need ep detail
-		            text[lengthCounter][0] = "        " + Analysis.getEntryChareName(destEP) + "::" +
-		                                     Analysis.getEntryName(destEP);
-			}
-			else { //don't need ep detail
-		            String s = Analysis.getEntryName(destEP);
-		            int parenthIndex = s.indexOf('(');
-		            if (parenthIndex != -1) //s has parenthesis
-		                s = s.substring(0, parenthIndex);
-		            text[lengthCounter][0] = "        " + s;
-			}
-			
-			lengthCounter++;
-			
-			if (statsToggle==true) { //stats needed
-			    text[lengthCounter][0] = "                " + 
-			                             "Msg's Rec'd=" + _format.format(msgCount[sourceEP][destEP]) + 
-						     "  Bytes Rec'd=" + _format.format(byteSum[sourceEP][destEP]) +
-						     "  Min=" + _format.format(minStats[sourceEP][destEP]) +
-						     "  Max=" + _format.format(maxStats[sourceEP][destEP]) +
-						     "  Mean=" +
-						     _format.format(byteSum[sourceEP][destEP]/msgCount[sourceEP][destEP]) +
-						     "  Variance=" + _format.format(varStats[sourceEP][destEP]);
-			}
-			else { //stats not needed
-			    text[lengthCounter][0] = "";
-			}
-			
-			lengthCounter++;
-		    }
-	        }
-		text[lengthCounter][0] = "";
-		lengthCounter++;
-		text[lengthCounter][0] = "";
-		lengthCounter++;
-	    }
-	}
-	
-	return text;
-    }
-    
+  
     
     
 }		

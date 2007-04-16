@@ -188,8 +188,6 @@ public class StlWindow extends ProjectionsWindow
 	setMenuBar(mbar);
     } 
 
-
-
     public void showDialog()
     {
 	try {

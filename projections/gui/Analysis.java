@@ -421,7 +421,8 @@ public class Analysis {
 	    systemMsgsData = intervalData.getSystemMsgs();
 	    userEntryData = intervalData.getUserEntries();
 	} else if (hasSumFiles()) { // no log files, so load .sum files
-	    loadSummaryData(intervalSize, intervalStart, intervalEnd);
+	    loadSummaryData(intervalSize, intervalStart, intervalEnd,
+			    processorList);
 	} else {
 	    System.err.println("Error: No data Files found!!");
 	}
@@ -444,6 +445,31 @@ public class Analysis {
 	    System.err.println("Caught IOException");
 	}
     }
+
+    // yet another version of summary load for processor subsets.
+    public static void loadSummaryData(long intervalSize, 
+				       int intervalStart, int intervalEnd,
+				       OrderedIntList processorList) {
+	systemUsageData = new int[3][][];
+	int[][][] temp = new int[3][][];
+	try {
+            temp[1] =
+                sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd,
+                                               intervalSize);
+	    processorList.reset();
+	    systemUsageData[1] = 
+		new int[processorList.size()][intervalEnd-intervalStart+1];
+	    for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
+		systemUsageData[1][pIdx] = 
+		    temp[1][processorList.nextElement()];
+	    }
+        } catch (SummaryFormatException E) {
+            System.err.println("Caught SummaryFormatException");
+        } catch (IOException e) {
+            System.err.println("Caught IOException");
+	} 
+    }
+				       
 
     // wrapper method for default interval size.
     public static void loadSummaryData(int intervalStart, int intervalEnd) {

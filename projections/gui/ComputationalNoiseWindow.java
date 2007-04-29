@@ -86,7 +86,7 @@ public class ComputationalNoiseWindow extends ProjectionsWindow
 			        return null;
 			    }
 			    public void finished() {
-			    	System.out.println("displayDialog finished()");
+//			    	System.out.println("displayDialog finished()");
 			    }
 		    };
 		    worker.start();

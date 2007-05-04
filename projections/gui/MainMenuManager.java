@@ -75,9 +75,10 @@ public class MainMenuManager extends MenuManager
 		    false,  // User Events
 		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
-		    false,   // Function Tools (temporary)
-		    false,   // POSE Analysis
-		    false    // AMPI Usage Profile
+		    false,  // Function Tools (temporary)
+		    false,  // POSE Analysis
+		    false,  // AMPI Usage Profile
+			false   // Noise Detection
 		});
 	    break;
 	case OPENED_SUMMARY:
@@ -101,23 +102,24 @@ public class MainMenuManager extends MenuManager
 	    setEnabled(toolMenu,
 		       new boolean[]
 		{
-		    true,  // Graphs
+		    true,   // Graphs
 		    false,  // Timelines
-		    true,  // Usage Profile
+		    true,   // Usage Profile
 		    false,  // Communication
 		    false,  // Communication vs Time
 		    false,  // Call Table
 		    false,  // View Log Files
 		    false,  // Histograms
-		    true,  // Overview
-		    true,  // Animation
+		    true,   // Overview
+		    true,   // Animation
 		    false,  // Time Profile Graphs
 		    false,  // User Events
 		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
-		    false,   // Function Tools (temporary)
+		    false,  // Function Tools (temporary)
 		    false,  // POSE Analysis
-		    true // AMPI Usage Profile
+		    true,   // AMPI Usage Profile
+			true    // Noise Detection
 		});
 	    break;
 	case OPENED_FILES :
@@ -154,10 +156,11 @@ public class MainMenuManager extends MenuManager
 		    true,  // Time Profile Graphs
 		    true,  // User Events
 		    true,  // Outlier Analysis
-		    true,   // Multirun Analysis
-		    true,   // Function Tools (temporary)
-		    false,   // POSE Analysis
-		    true    // AMPI Usage Profile
+		    true,  // Multirun Analysis
+		    true,  // Function Tools (temporary)
+		    false, // POSE Analysis
+		    true,  // AMPI Usage Profile
+			true   // Noise Detection
 		});
 	    break;
 	case ADD_POSE:

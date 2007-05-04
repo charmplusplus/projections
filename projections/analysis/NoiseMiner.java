@@ -57,6 +57,8 @@ public class NoiseMiner extends ProjDefs
 
 	private String loggingText;
 	
+	private long osQuanta_us;
+	
 	/** A class which keeps up to a maximum number of events in a queue. 
 	 * Upon request, it can produce data about the frequencies of the events. 
 	 *
@@ -83,7 +85,7 @@ public class NoiseMiner extends ProjDefs
 		}
 
 		public void merge(eventWindow ew){
-			System.out.println("merge  my size="+occurrences.size() + " other=" + ew.occurrences.size());
+//			System.out.println("merge  my size="+occurrences.size() + " other=" + ew.occurrences.size());
 			Iterator<Long> itr = ew.occurrences.iterator();
 			while(itr.hasNext()){
 				Long v = itr.next();			
@@ -92,7 +94,7 @@ public class NoiseMiner extends ProjDefs
 	//				occurrences.remove(occurrences.first());
 				}
 			}
-			System.out.println("new size=" + occurrences.size());
+//			System.out.println("new size=" + occurrences.size());
 		}
 		
 		public int size(){
@@ -106,7 +108,8 @@ public class NoiseMiner extends ProjDefs
 		public long getLast(){
 			return occurrences.last();
 		}
-		
+
+		/** find the average period between the events in the window */
 		public long getPeriod(){
 			return ((getLast()-getFirst()) / occurrences.size());
 		}
@@ -208,9 +211,9 @@ public class NoiseMiner extends ProjDefs
 			public void merge(long s, long c, eventWindow ew){
 				sum += s;
 				count += c;
-				System.out.println("Cluster::merge() adding "+ ew.size() + " , old size=" + events.size());
+//				System.out.println("Cluster::merge() adding "+ ew.size() + " , old size=" + events.size());
 				events.merge(ew);				
-				System.out.println("\t\t new size="+events.size());
+//				System.out.println("\t\t new size="+events.size());
 
 			}
 			
@@ -235,7 +238,7 @@ public class NoiseMiner extends ProjDefs
 		
 		public int countEvents(){
 			int c=0;
-			for(int i=1;i<nbins;i++){
+			for(int i=0;i<nbins;i++){
 				c+=bin_window[i].size();
 			}
 			System.out.println("total events in all bin windows:" + c);
@@ -393,7 +396,7 @@ public class NoiseMiner extends ProjDefs
 					bin_data[largest] = 0; // mark this bin as already seen
 					Cluster c = new Cluster(bin_sum[largest], bin_count[largest],bin_window[largest]);
 					
-					System.out.println("grow left right");
+//					System.out.println("grow left right");
 					
 					// scan to right until we hit a local minimum
 					for(int j=largest+1;j<nbins && ((j==nbins-1) || (bin_data[j] >= bin_data[j+1])) && bin_data[j]!=0; j++) {
@@ -493,6 +496,8 @@ public class NoiseMiner extends ProjDefs
 		numEPs = Analysis.getNumUserEntries();
 		startTime = startInterval;
 		endTime = endInterval;
+				
+		osQuanta_us = 100000; // linux 2.16 default is 100ms . This should be updated
 
 		baselineMemoryUsage = java.lang.Runtime.getRuntime().totalMemory();
 		highWatermarkMemoryUsage = baselineMemoryUsage;
@@ -589,14 +594,7 @@ public class NoiseMiner extends ProjDefs
 			for(int i=0;i<numEvents;i++){
 				if(h[i].haveManySamples()){
 					h[i].cluster();
-					System.out.println("Clusters for event:" + i + " pe:" + currPe + " are: " + h[i].clusters_toString() );
-				}
-			}
-			
-			for(int i=0;i<numEvents;i++){
-				if(h[i].haveManySamples()){
-					System.out.println("Event:" + i + " pe:" + currPe); 
-					h[i].countEvents();
+//					System.out.println("Clusters for event:" + i + " pe:" + currPe + " are: " + h[i].clusters_toString() );
 				}
 			}
 			
@@ -614,7 +612,7 @@ public class NoiseMiner extends ProjDefs
 						long occurrences = c.count();
 						long mean = c.mean();
 						long temp_when=0;
-						System.out.println("Adding the cluster with occur:" + occurrences);
+//						System.out.println("Adding the cluster with occur:" + occurrences);
 						h_pe.insert(c);
 					
 					}
@@ -622,21 +620,28 @@ public class NoiseMiner extends ProjDefs
 			}
 
 			System.out.println("The histogram is now:"+ h_pe.toString());
-			System.out.println("h_pe : ");
-			h_pe.countEvents();
-			if(false){
-				h_pe.cluster();
+//			System.out.println("h_pe : ");
+//			h_pe.countEvents();
+			
+			h_pe.cluster();
 
-		//	String entryName = entryNames[i][0];
+			//	String entryName = entryNames[i][0];
 			// entryName = entryName.split("\\(")[0];				
 
 		//	System.out.println("Histogram for pe " + currPe + " is: " + h_pe);
 			System.out.println("Clusters for pe " + currPe + " are: " + h_pe.clusters_toString() );
 
 			if(h_pe.hasPrimaryNoise()){
-				loggingText = loggingText + "The primary noise component on processor " + currPe + " has duration of about " + h_pe.primaryNoise().mean() + "us and occurs " + h_pe.primaryNoise().count() + " times\n";
+				loggingText = loggingText + "The primary noise component on processor " + currPe + " has duration of about " + h_pe.primaryNoise().mean() + "us and occurs " + h_pe.primaryNoise().count() + " times. The recent events appear to have a periodicity of about " + h_pe.primaryNoise().events.getPeriod()/1000 + "ms\n";
+				
+				if(h_pe.primaryNoise().events.getPeriod() < osQuanta_us ){
+					loggingText = loggingText + "Because the OS timeslice quanta are significantly longer than the time between occurrences of this primary noise component, it is likely the noise component is produced internally to the program. If the event durations for this program are regular and have durations that don't vary greatly, then the communication layer is a likely suspect!\n";
+				} else {
+					loggingText = loggingText + "It is likely that the primary noise source is external to the application\n";
+				}
+										
 			}
-			}
+			
 		}
 		
 		progressBar.close();

@@ -17,7 +17,7 @@ public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay
 {
     /* **** Static setup data for windows ***** */
-    protected static final int NUM_WINDOWS = 17;
+    protected static final int NUM_WINDOWS = 18;
 
     protected static final int GRAPH_WIN = 0;
     protected static final int TIMELINE_WIN = 1;
@@ -55,7 +55,8 @@ public class MainWindow extends JFrame
 	"Multirun Analysis",
 	"Function Tool",
 	"POSE Analysis",
-	"AMPI Usage Profile"
+	"AMPI Usage Profile",
+	"Noise Miner"
     };
 
     public static final String[] windowClassNames =
@@ -76,7 +77,8 @@ public class MainWindow extends JFrame
 	"MultiRunWindow",
 	"FunctionTool",
 	"PoseAnalysisWindow",
-	"AmpiProfileWindow"
+	"AmpiProfileWindow",
+	"NoiseMinerWindow"
     };
 
     public static final boolean[][] menuDataStates =
@@ -274,9 +276,10 @@ public class MainWindow extends JFrame
 		childWindows[windowIndex][0] = (ProjectionsWindow)(ctr.newInstance(new Object[] {this, new Integer(windowIndex)}));
 	    } else {
 		if (childWindows[windowIndex][0] instanceof ProjectionsWindow) {
+		  System.out.println("showChildWindow ProjectionsWindow case");
 		    ((ProjectionsWindow)childWindows[windowIndex][0]).showDialog();
 		} else {
-		    childWindows[windowIndex][0].show();
+		    childWindows[windowIndex][0].setVisible(true);
 		}
 	    }
 	} catch(Exception e) {

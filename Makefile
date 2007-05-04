@@ -3,6 +3,10 @@
 # Converted by Orion Lawlor, 9/9/1999
 #
 
+# We include an unmodified version of jnt.FFT
+# which is released under GPL, although much
+# of the code is not copyrighted
+
 SRC=\
     projections/analysis/AccumulatedSummaryReader.java\
     projections/analysis/AmpiFunctionData.java\
@@ -20,6 +24,7 @@ SRC=\
     projections/analysis/LogEntry.java\
     projections/analysis/LogLoader.java\
     projections/analysis/LogReader.java\
+    projections/analysis/NoiseMiner.java\
     projections/analysis/PackTime.java\
     projections/analysis/PoseDopReader.java\
     projections/analysis/ProjDefs.java\
@@ -65,6 +70,7 @@ SRC=\
     projections/gui/CommTimeWindow.java\
     projections/gui/CommWindow.java\
     projections/gui/Converter.java\
+    projections/gui/NoiseMinerWindow.java\
     projections/gui/DialogParameters.java\
     projections/gui/EntrySelectionDialog.java\
     projections/gui/EntryPointWindow.java\
@@ -206,7 +212,22 @@ SRC=\
     projections/gui/graph/XAxisFixed.java\
     projections/gui/graph/YAxis.java\
     projections/gui/graph/YAxisFixed.java\
-    projections/gui/graph/YAxisAuto.java
+    projections/gui/graph/YAxisAuto.java\
+	jnt/FFT/ComplexDouble2DFFT.java\
+	jnt/FFT/ComplexDoubleFFT.java\
+	jnt/FFT/ComplexDoubleFFT_Mixed.java\
+	jnt/FFT/ComplexDoubleFFT_Radix2.java\
+	jnt/FFT/ComplexFloat2DFFT.java\
+	jnt/FFT/ComplexFloatFFT.java\
+	jnt/FFT/ComplexFloatFFT_Mixed.java\
+	jnt/FFT/ComplexFloatFFT_Radix2.java\
+	jnt/FFT/Factorize.java\
+	jnt/FFT/RealDoubleFFT.java\
+	jnt/FFT/RealDoubleFFT_Even.java\
+	jnt/FFT/RealDoubleFFT_Radix2.java\
+	jnt/FFT/RealFloat2DFFT_Even.java\
+	jnt/FFT/RealFloatFFT.java\
+	jnt/FFT/RealFloatFFT_Radix2.java
 
 
 all: bin/projections.jar
@@ -224,7 +245,8 @@ bin/projections.jar: projections/analysis/ProjMain.class $(SRC)
 		projections/images/manifest \
 		projections/images/bgimage\
 		projections/*/*.class \
-		projections/*/*/*.class
+		projections/*/*/*.class \
+		jnt/FFT/*.class
 
 run: bin/projections.jar
 	bin/projections test/hello.sts
@@ -234,3 +256,4 @@ clean:
 	- rm -f bin/*.jar
 	- rm -f projections/*/*.class
 	- rm -f projections/*/*/*.class
+	- rm -f jnt/FFT/*.class

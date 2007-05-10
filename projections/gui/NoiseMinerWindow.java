@@ -154,11 +154,11 @@ public class NoiseMinerWindow extends ProjectionsWindow
     	externalPanel.add(descriptionExternal, BorderLayout.NORTH );
     	   	
     	
-        /* Setup our tabbed Pane at the top. Add this pane to the main applet Content Pane.  */
-        JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Internal Noise", internalPanel);
-        tabbedPane.addTab("External OS Noise", externalPanel);
-
+      /* Setup our tabbed Pane at the top. Add this pane to the main applet Content Pane.  */
+      JTabbedPane tabbedPane = new JTabbedPane();
+      tabbedPane.addTab("Internal Noise", internalPanel);
+      tabbedPane.addTab("External OS Noise", externalPanel);
+      
     	
     	noiseMinerResultPanel.setLayout(new java.awt.BorderLayout());
     	noiseMinerResultPanel.add(mainTextScroller, BorderLayout.SOUTH );

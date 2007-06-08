@@ -66,10 +66,10 @@ public class NoiseMinerWindow extends ProjectionsWindow
 		columnNames.add(new String("Seen on Processors"));
 		columnNames.add(new String("Occurrences/PE"));
 		columnNames.add(new String("Periodicity(ms)")); 
-		columnNames.add(new String("Periodicity from FFT(ms)"));
+//		columnNames.add(new String("Periodicity from FFT(ms)"));
 
 		
-		mainText = new JTextArea("", 8, 30); // height, width
+		mainText = new JTextArea("", 4, 30); // height, width
 		mainTextScroller = new JScrollPane(mainText);
 		mainTextScroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 			
@@ -140,8 +140,8 @@ public class NoiseMinerWindow extends ProjectionsWindow
     	JScrollPane resultTableInternal = new JScrollPane(tableInternal);
     	JScrollPane resultTableExternal = new JScrollPane(tableExternal);
     	
-    	JLabel descriptionInternal = new JLabel("<html><body>The following table contains the noise components that have durations much shorter than the OS Timeslice Quanta</body></html>");
-    	JLabel descriptionExternal = new JLabel("<html><body>The following table contains the noise components that have durations that are similar to or longer than the OS Timeslice Quanta</body></html>");
+    	JLabel descriptionInternal = new JLabel("<html><body>The following table contains the noise components that have durations much shorter than a typical OS Timeslice Quanta of 100ms</body></html>");
+    	JLabel descriptionExternal = new JLabel("<html><body>The following table contains the noise components that have durations that are similar to or longer than a typical OS Timeslice Quanta of 100ms</body></html>");
   	
     	JPanel internalPanel = new JPanel();
     	internalPanel.setLayout(new java.awt.BorderLayout());
@@ -152,7 +152,7 @@ public class NoiseMinerWindow extends ProjectionsWindow
     	externalPanel.setLayout(new java.awt.BorderLayout());
     	externalPanel.add(resultTableExternal, BorderLayout.CENTER );
     	externalPanel.add(descriptionExternal, BorderLayout.NORTH );
-    	   	
+    	
     	
       /* Setup our tabbed Pane at the top. Add this pane to the main applet Content Pane.  */
       JTabbedPane tabbedPane = new JTabbedPane();

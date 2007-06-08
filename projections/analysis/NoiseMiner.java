@@ -12,7 +12,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import jnt.FFT.*;
+//import jnt.FFT.*;
 //import java.lang.*;
 
 
@@ -166,19 +166,19 @@ public class NoiseMiner extends ProjDefs
 	private class NoiseResult implements Comparable{
 		public LinkedList<Integer> pes; // list of processors on which the event occurs
 		public Duration periodicity; // The average period determined by the span of the window
-		public Duration periodicity_FFT; // The primary peak in the FFT
+		//public Duration periodicity_FFT; // The primary peak in the FFT
 		public Duration duration; // The amount of time spend in the noise
 		public long occurrences; // The number of times this event occurred per processor
 
-		public NoiseResult(Duration d, long o, Duration p, Duration p_fft, int pe){
+		public NoiseResult(Duration d, long o, Duration p,/* Duration p_fft,*/ int pe){
 			pes = new LinkedList<Integer>();
 			periodicity = new Duration();
-			periodicity_FFT = new Duration();
+			//periodicity_FFT = new Duration();
 			duration = new Duration();
 			
 			pes.add(pe);
 			periodicity = p;
-			periodicity_FFT = p_fft;
+			//periodicity_FFT = p_fft;
 			duration = d;
 			occurrences = o;
 		}
@@ -207,7 +207,7 @@ public class NoiseMiner extends ProjDefs
 		public void merge(NoiseResult nr){
 			pes.addAll(nr.pes);
 			periodicity.set_us((periodicity.us() * occurrences + nr.periodicity.us() * nr.occurrences) / (occurrences+nr.occurrences));
-			periodicity_FFT.set_us((periodicity_FFT.us() * occurrences + nr.periodicity_FFT.us() * nr.occurrences) / (occurrences+nr.occurrences));
+			//periodicity_FFT.set_us((periodicity_FFT.us() * occurrences + nr.periodicity_FFT.us() * nr.occurrences) / (occurrences+nr.occurrences));
 			duration.set_us((duration.us() * occurrences + nr.duration.us() * nr.occurrences) / (occurrences+nr.occurrences));
 			occurrences += nr.occurrences;
 		}
@@ -314,61 +314,61 @@ public class NoiseMiner extends ProjDefs
 			return d;
 		}
 		
-		public Duration periodFromFFT(){
-			return prominentPeriod;
-		}
-		
-		public void buildFFT(){
-			int size=1024;
-
-			Duration first = new Duration(getFirst());
-			Duration last = new Duration(getLast());
-			Duration range = new Duration(first.us(),last.us());
-			float sum = 1.0f;
-
-			float data[] = new float[size];
-
-			for(int i=0;i<size;i++){
-				data[i]=0.0f;
-			}
-
-			// Iterate through the events in the queue and fill in their time-domain values
-
-			Iterator<Long> it = occurrences.iterator();
-			while(it.hasNext()){
-				long t = it.next();
-				double d2 = (double)(t-first.us()) / (double)(last.us()-first.us());
-				int d = (int)(d2*(size-1));
-				data[d] += 1.0;
-				sum+=1.0;
-			}
-
-			// Remove DC offset
-			for(int i=0;i<size;i++){
-				data[i] -= sum/((float)size);
-			}
-
-
-			// Perform an FFT
-			RealFloatFFT_Radix2 fft = new RealFloatFFT_Radix2(size);
-
-			fft.transform(data, 0, 1);
-		
-			float largestVal = 0.0f;
-			int largest = 0;
-			
-			for(int i=1;i<size/2;i++){
-			
-				float valSqr = data[i]*data[i] + data[size-i]*data[size-i];
-				if( valSqr > largestVal ){
-					largest = i;
-					largestVal = valSqr;
-					prominentPeriod.set_us(((double)(last.us()-first.us())/(double)i)); // period associated with this fft entry
-				}
-				
-			}
-
-		}
+//		public Duration periodFromFFT(){
+//			return prominentPeriod;
+//		}
+//		
+//		public void buildFFT(){
+//			int size=1024;
+//
+//			Duration first = new Duration(getFirst());
+//			Duration last = new Duration(getLast());
+//			Duration range = new Duration(first.us(),last.us());
+//			float sum = 1.0f;
+//
+//			float data[] = new float[size];
+//
+//			for(int i=0;i<size;i++){
+//				data[i]=0.0f;
+//			}
+//
+//			// Iterate through the events in the queue and fill in their time-domain values
+//
+//			Iterator<Long> it = occurrences.iterator();
+//			while(it.hasNext()){
+//				long t = it.next();
+//				double d2 = (double)(t-first.us()) / (double)(last.us()-first.us());
+//				int d = (int)(d2*(size-1));
+//				data[d] += 1.0;
+//				sum+=1.0;
+//			}
+//
+//			// Remove DC offset
+//			for(int i=0;i<size;i++){
+//				data[i] -= sum/((float)size);
+//			}
+//
+//
+//			// Perform an FFT
+//			RealFloatFFT_Radix2 fft = new RealFloatFFT_Radix2(size);
+//
+//			fft.transform(data, 0, 1);
+//		
+//			float largestVal = 0.0f;
+//			int largest = 0;
+//			
+//			for(int i=1;i<size/2;i++){
+//			
+//				float valSqr = data[i]*data[i] + data[size-i]*data[size-i];
+//				if( valSqr > largestVal ){
+//					largest = i;
+//					largestVal = valSqr;
+//					prominentPeriod.set_us(((double)(last.us()-first.us())/(double)i)); // period associated with this fft entry
+//				}
+//				
+//			}
+//
+//		}
 
 	}
 
@@ -593,6 +593,7 @@ public class NoiseMiner extends ProjDefs
 		 *  Filter out clusters that do not have sufficient contribution to overall computation time 
 		 *  If the ratio of the duration to the periodicity is not greater than the cutoff the cluster is ignored.
 		 *  This removes clusters that only add a tiny portion of noise infrequently.
+     *  NOTE, THIS IS CURRENTLY BROKEN
 		 */
 		public void filterNormalizedClusters(double cutoff_contribution){
 			// Create normalized versions of clusters
@@ -604,8 +605,13 @@ public class NoiseMiner extends ProjDefs
 					Duration periodicity = new Duration(c.events.period());
 					Duration duration = new Duration(c.mean());
 					if( duration.us() / periodicity.us() > cutoff_contribution ){
-						clustersFiltered.add(c);
+            System.out.println("Keeping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() );
+            clustersFiltered.add(c);
 					}
+          else {
+            System.out.println("Dropping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() ); 
+            // clustersFiltered.add(c); 
+          }
 				}
 			}
 			clustersNormalized = clustersFiltered;
@@ -672,7 +678,7 @@ public class NoiseMiner extends ProjDefs
             */
 			
 			if(clusters.size() > 0){
-				System.out.println("clusters.size()=" + clusters.size());
+        //				System.out.println("clusters.size()=" + clusters.size());
 				ListIterator<Cluster> i = clusters.listIterator();
 				Duration baseMean = clusters.get(0).mean();
 
@@ -840,7 +846,7 @@ public class NoiseMiner extends ProjDefs
 			for(int i=0;i<numEvents;i++){
 				if(h[i].haveManySamples() || true){
 					h[i].cluster();
-					System.out.println("Clusters for event:" + i + " pe:" + currPe + " are: " + h[i].clusters_toString() );
+          //					System.out.println("Clusters for event:" + i + " pe:" + currPe + " are: " + h[i].clusters_toString() );
 				}
 			}
 
@@ -870,23 +876,23 @@ public class NoiseMiner extends ProjDefs
 
 
 			// filter the per-processor clusters
-			//h_pe.filterNormalizedClusters(0.0001);
+      //      h_pe.filterNormalizedClusters(0.0001);
 
 			int n = 1;
 			while(h_pe.hasnthNoise(n)){
-				h_pe.nthNoise(n).events.buildFFT();
+//				h_pe.nthNoise(n).events.buildFFT();
 
 				long occurrences = h_pe.nthNoise(n).count();
 				
 				Duration duration = h_pe.nthNoise(n).mean();
 				
 				Duration periodicity = h_pe.nthNoise(n).events.period();
-				Duration periodicity_fft = h_pe.nthNoise(n).events.periodFromFFT();
+//				Duration periodicity_fft = h_pe.nthNoise(n).events.periodFromFFT();
 				
 				if(occurrences > 5){
-					loggingText = loggingText + "Noise component " + n + " on processor " + currPe + " has duration of about " + duration + " and occurs " + occurrences + " times. The recent events appear to have a periodicity of about " + periodicity + ". The FFT determined the primary period=" + periodicity_fft	+ "\n";
+					loggingText = loggingText + "Noise component " + n + " on processor " + currPe + " has duration of about " + duration + " and occurs " + occurrences + " times with periodicity " + periodicity + "\n";
 
-					results.add(new NoiseResult(duration, occurrences, periodicity, periodicity_fft, currPe));
+					results.add(new NoiseResult(duration, occurrences, periodicity, /* periodicity_fft,*/ currPe));
 				}
 
 				n++;
@@ -929,7 +935,7 @@ public class NoiseMiner extends ProjDefs
 				row.add(new String("" + v.pe_toString() ));
 				row.add(new String("" + v.occurrences ));
 				row.add(new String("" + v.periodicity));
-				row.add(new String("" + v.periodicity_FFT));
+//				row.add(new String("" + v.periodicity_FFT));
 
 				resultTable.add(row);
 			}
@@ -943,7 +949,7 @@ public class NoiseMiner extends ProjDefs
 			row.add(new String("n/a"));
 			row.add(new String("n/a"));
 			row.add(new String("n/a"));
-			row.add(new String("n/a"));
+//			row.add(new String("n/a"));
 			resultTable.add(row);
 		}
 
@@ -972,7 +978,7 @@ public class NoiseMiner extends ProjDefs
 				row.add(new String("" + v.pe_toString() ));
 				row.add(new String("" + v.occurrences ));
 				row.add(new String("" + v.periodicity));
-				row.add(new String("" + v.periodicity_FFT));
+//				row.add(new String("" + v.periodicity_FFT));
 
 				resultTable.add(row);
 			}
@@ -985,7 +991,7 @@ public class NoiseMiner extends ProjDefs
 			row.add(new String("n/a"));
 			row.add(new String("n/a"));
 			row.add(new String("n/a"));
-			row.add(new String("n/a"));
+//			row.add(new String("n/a"));
 			resultTable.add(row);
 		}
 

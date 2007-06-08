@@ -813,7 +813,7 @@ public class TimelineWindow extends ProjectionsWindow
 	    if (cbUser.getState()) {
 	      // pop up window
 	      userEventWindow.setVisible(true);
-	      userEventWindow.show();
+//	      userEventWindow.show();    // This all is deprecated and replaced by setVisible(true) which is on previous line
 	    }
 	    else { userEventWindow.setVisible(false); }
 	  }

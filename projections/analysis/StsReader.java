@@ -105,6 +105,7 @@ public class StsReader extends ProjDefs
 		    ChareList[ID].Type       = new String(s1);
 		    ClassNames[ID]      = ChareList[ID].Name;
 		} else if (s1.equals("ENTRY")) {
+			String Type    = st.nextToken();
 		    ID      = Integer.parseInt(st.nextToken());
 		    StringBuffer nameBuf=new StringBuffer(st.nextToken());
 		    Name = nameBuf.toString();

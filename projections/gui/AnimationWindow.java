@@ -24,7 +24,6 @@ public class AnimationWindow extends ProjectionsWindow
     private Scrollbar slider;
     
     private int redrawDelay; //Real time between frames (ms)
-    private int curInterval = 0; //Frame number
     private boolean keepAnimating;
     private AnimateThread thread;
 

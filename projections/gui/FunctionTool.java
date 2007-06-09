@@ -8,7 +8,6 @@ import java.io.*;
 
 import projections.misc.*;
 import projections.analysis.*;
-import projections.gui.graph.*;
 
 /**
  *  FunctionTool.java
@@ -30,8 +29,6 @@ public class FunctionTool extends GenericGraphWindow
 
     private JRadioButton countCB;
     private JRadioButton timeCB;
-    private ButtonGroup buttonGroup;
-
     // data
     private double countData[][];
     private double timeData[][];

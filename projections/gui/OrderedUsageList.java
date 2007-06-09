@@ -1,7 +1,5 @@
 package projections.gui;
 
-import java.awt.*;
-
 public class OrderedUsageList
 {
    private Link head;

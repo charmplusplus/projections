@@ -55,7 +55,6 @@ public class BinDialog extends RangeDialog
     protected long msgBinSize;
     protected long msgMinBinSize;
 
-    private static final int NUM_TYPES = 2;
     private static final int TIME_DATA = 0;
     private static final int BYTES_DATA = 1;
     private DecimalFormat _format;

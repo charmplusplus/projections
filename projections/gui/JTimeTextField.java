@@ -1,6 +1,5 @@
 package projections.gui;
 import javax.swing.*;
-import java.awt.event.*;
 
 /** This class is meant to be used by any dialog taking time interval as input
 *   It validates the input data to be in us, ms or s

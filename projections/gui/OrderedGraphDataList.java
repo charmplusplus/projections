@@ -5,7 +5,6 @@ import java.awt.*;
 public class OrderedGraphDataList
 {
    private Link head;
-   private Link tail;
    private Link pre;
    private int len;
    
@@ -56,12 +55,10 @@ public class OrderedGraphDataList
 		 if(head == null)
 		 {
 			head = newLink;
-			tail = newLink;
 		 }
 		 else
 		 {
 			pre.next = newLink;
-			tail = newLink;
 		 }
 		 len++;
 	  }
@@ -110,7 +107,6 @@ public class OrderedGraphDataList
   */
 	  pre  = null;
 	  head = null;
-	  tail = null;
 	  len = 0;
    }   
    public void reset()

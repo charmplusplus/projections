@@ -2,10 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.text.DecimalFormat;
 import javax.swing.*;
-import javax.swing.border.*;
-
 import projections.guiUtils.*;
 
 public class OutlierDialog extends RangeDialog

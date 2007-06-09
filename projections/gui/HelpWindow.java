@@ -7,12 +7,11 @@ import java.awt.event.*;
 public class HelpWindow extends Frame
    implements ActionListener
 {  
-   private MainWindow mainWindow;
-   
-   public HelpWindow(MainWindow mainWindow)  
+  
+	private static final long serialVersionUID = 1L;
+
+	public HelpWindow(MainWindow mainWindow)  
    {      
-	  this.mainWindow = mainWindow;
-	  
 	  addWindowListener(new WindowAdapter()
 	  {                    
 		 public void windowClosing(WindowEvent e)
@@ -50,7 +49,7 @@ public class HelpWindow extends Frame
 		 while((line = br.readLine()) != null)
 			ta.append(line + "\n");
 	  }
-	  catch (IOException e) {};
+	  catch (IOException e) {}
 			
 	  add(ta, "Center");
 	  pack();

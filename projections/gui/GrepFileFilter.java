@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.io.*;
-import javax.swing.filechooser.*;
 
 /** Simple class to use in JFileChooser */
 public class GrepFileFilter extends javax.swing.filechooser.FileFilter {

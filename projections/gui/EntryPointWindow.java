@@ -2,7 +2,6 @@ package projections.gui;
 import projections.gui.count.*;
 
 import java.io.*;
-import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -31,7 +30,7 @@ public class EntryPointWindow extends JFrame implements ActionListener
 		public RowData(){
 			value = new Object[numCols];
 		}
-	};
+	}
 
 	private DefaultTableCellRenderer rightJustify_ =
     		new DefaultTableCellRenderer();
@@ -51,7 +50,7 @@ public class EntryPointWindow extends JFrame implements ActionListener
 		          table, value, selected, focused, row, column);
 		        return this;
 		 }
-    	};
+    	}
 
   	private class EPTable extends AbstractTableModel{
 		public EPTable() {}

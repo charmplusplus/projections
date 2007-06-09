@@ -34,9 +34,7 @@ public class GraphData
     protected double            yscale;
     protected double            wscale;
     protected double            xscale;
-    private   float             colorindex;
     private   float             colorvalue;
-    private   boolean           colorflag = false;
     protected ZItem[]           systemUsage;
     protected ZItem[][]         systemMsgs;
     protected ZItem[][]         userEntry;
@@ -68,8 +66,6 @@ public class GraphData
 	numUserEntries = Analysis.getNumUserEntries();
 	
 	colorvalue = (float)0.0;
-	colorindex = (float)1.0 / (numUserEntries + 7);
-	
 	graphtype = BAR;
 	xmode     = INTERVAL;
 	ymode     = MSGS;

@@ -1,15 +1,9 @@
 package projections.gui;
-import projections.misc.LogEntryData;
 import projections.analysis.*;
-import projections.gui.graph.*;
-
 import java.awt.*;
 import java.awt.event.*;
-import java.text.DecimalFormat;
-import java.io.*;
 import java.util.*;
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.table.*;
 
 
@@ -24,14 +18,9 @@ public class NoiseMinerWindow extends ProjectionsWindow
 {
     private NoiseMinerWindow      thisWindow;    
     
-    private Label                lTitle;
-    private Panel                titlePanel;
-
     private JPanel	         mainPanel;
     private JPanel           controlPanel;
-    private JPanel	         noiseMinerResultPanel;
-    
-	private JTable tableInternal;
+    private JTable tableInternal;
 	private DefaultTableModel tableModelInternal;
 	private JTable tableExternal;
 	private DefaultTableModel tableModelExternal;

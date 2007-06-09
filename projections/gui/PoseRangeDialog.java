@@ -79,18 +79,18 @@ public class PoseRangeDialog extends JDialog
     // Internal Variables maintained
     private String validProcessorsString;
 
-    private long numRealIntervals;
+    protected long numRealIntervals;
     private long realStartInterval;
     private long realEndInterval;
 
-    private long numVirtIntervals;
+    protected long numVirtIntervals;
     private long virtStartInterval;
     private long virtEndInterval;
 
-    private static final int NUM_TYPES = 2;
-    private static final int REAL_TIME = 0;
-    private static final int VIRT_TIME = 1;
-    private DecimalFormat _format;
+//    protected static final int NUM_TYPES = 2;
+//    protected static final int REAL_TIME = 0;
+//    protected static final int VIRT_TIME = 1;
+    protected DecimalFormat _format;
 
     // flags
     private boolean layoutComplete = false;
@@ -98,7 +98,7 @@ public class PoseRangeDialog extends JDialog
 
     public PoseRangeDialog(ProjectionsWindow parentWindow,
 			   String titleString) {
-	super((JFrame)parentWindow, titleString, true);
+	super(parentWindow, titleString, true);
 	this.parentWindow = parentWindow;
 
 	// Get default values

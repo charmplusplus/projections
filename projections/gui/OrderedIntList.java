@@ -18,7 +18,6 @@ package projections.gui;
 public class OrderedIntList
 {
     private Link head;
-    private Link tail;
     private Link pre;
     private int len;
     
@@ -177,10 +176,8 @@ public class OrderedIntList
 	    newLink = new Link(eleValue, tmp);
 	    if (head == null) {
 		head = newLink;
-		tail = newLink;
 	    } else {
 		pre.next = newLink;
-		tail = newLink;
 	    }
 	    len++;
 	} else if (tmp.data != eleValue) {      
@@ -290,7 +287,6 @@ public class OrderedIntList
     { 
 	len = 0;
 	head = null;
-	tail = null;
 	pre = null;
     }   
 

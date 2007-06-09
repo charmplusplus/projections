@@ -2,13 +2,11 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import javax.swing.*;
 
 import projections.analysis.*;
-import projections.gui.graph.*;
 import projections.misc.LogEntryData;
 
 public class CommWindow extends GenericGraphWindow
@@ -27,7 +25,6 @@ public class CommWindow extends GenericGraphWindow
     private ArrayList	histogram;
     private int[]	histArray;
     private String 	currentArrayName;
-    private String[][]	popupText;
     private String[][]	EPNames;
 
     private JPanel	mainPanel;
@@ -37,7 +34,6 @@ public class CommWindow extends GenericGraphWindow
 
     private Checkbox    sentMsgs;
     private Checkbox	sentBytes;
-    private Checkbox    histogramCB;
     private Checkbox	receivedMsgs;
     private Checkbox    receivedBytes;
     private Checkbox	recvExclusive;

@@ -3,7 +3,6 @@ package projections.gui;
 import projections.gui.graph.*;
 
 import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
 
 public class PoseVTDopDisplayPanel extends JPanel

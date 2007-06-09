@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.io.*;
-import java.util.*;
 import java.awt.*;
 
 import projections.guiUtils.*;

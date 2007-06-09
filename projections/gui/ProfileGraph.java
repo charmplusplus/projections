@@ -6,12 +6,6 @@ import java.text.DecimalFormat;
 
 import javax.swing.*;
 
-//import org.apache.xpath.operations.And;
-//import org.apache.xpath.operations.Variable;
-
-import projections.gui.*; 
-import projections.gui.graph.Graph;
-
 /**
  * 
  * This class is for displaying general profiling data
@@ -45,23 +39,18 @@ public class ProfileGraph extends JPanel
     private int baseWidth = -1;
     private int baseHeight = -1;
 
-    //About X-Axis settings
-    private int xWidth;
     private int originX;
     private double xscale;
     private String xTitle;
-    private String xUnit;
     private String[] xNames;
     private double pixelIncX; //for label
     private double tickIncX; //for every tick
     private int valPerTickX, valPerLabelX;
 
-    //About Y-Axis settings
-    private int yHeight;
     private int originY;
     private double yscale;
     private String yTitle;
-    private double pixelIncY, tickIncY;
+    private double pixelIncY;
 
     //About font settings on the canvas
     private static final int FONT_SIZE = 12;   
@@ -94,7 +83,6 @@ public class ProfileGraph extends JPanel
 
     public void setXAxis(String title, String unit, String[] names) {
         xTitle = title;
-        xUnit = unit;
         xNames = names;
     }
 
@@ -268,9 +256,6 @@ public class ProfileGraph extends JPanel
         df.setMaximumFractionDigits(3);        
         text[1] = "Usage: "+df.format(dataSource[xVal][yVal])+"%";
 		
-	// else display ballon
-	int bX, bY;
-        
 	// old popup still exists, but mouse has moved over a new 
 	// section that has its own popup
 	if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){

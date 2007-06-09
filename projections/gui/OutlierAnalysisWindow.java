@@ -56,7 +56,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private int numSpecials;
     private double[][] graphData;
     private Color[] graphColors;
-    private OrderedIntList outlierPEs;
+    public OrderedIntList outlierPEs;
 
     DecimalFormat df = new DecimalFormat();
 

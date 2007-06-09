@@ -5,7 +5,6 @@ import projections.misc.*;
 import projections.analysis.*;
 
 import java.io.*;
-import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 

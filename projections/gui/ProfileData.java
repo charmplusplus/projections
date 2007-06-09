@@ -1,7 +1,5 @@
 package projections.gui;
 
-import java.awt.*;
-
 public class ProfileData
 {
    ProfileWindow profileWindow;

@@ -9,7 +9,10 @@ import java.awt.event.*;
 public class IntervalRangeDialog extends RangeDialog
     implements ActionListener, KeyListener, FocusListener
 {
-    // Additional GUI objects
+
+	private static final long serialVersionUID = 1L;
+
+	// Additional GUI objects
     JPanel sizePanel;
 
     JTimeTextField sizeField;
@@ -21,12 +24,7 @@ public class IntervalRangeDialog extends RangeDialog
     // dialog parameter variables
     public long intervalSize = -1;
 
-    // additional state variables (not intended as parameters)
-    private long numIntervals;
     private long validIntervals;
-    private long startInterval;
-    private long endInterval;
-    
     public IntervalRangeDialog(ProjectionsWindow parentWindow,
 			       String titleString)
     {
@@ -36,9 +34,6 @@ public class IntervalRangeDialog extends RangeDialog
 	if (totalValidTime%initialIntervalSize != 0) {
 	    validIntervals++;
 	}
-	startInterval = startTime/initialIntervalSize;
-	endInterval = endTime/initialIntervalSize;
-	numIntervals = endInterval - startInterval + 1;
     }
     
     public void actionPerformed(ActionEvent evt) 

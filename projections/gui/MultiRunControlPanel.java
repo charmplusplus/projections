@@ -1,13 +1,8 @@
 package projections.gui;
 
 import projections.misc.*;
-import projections.analysis.*;
-
 import javax.swing.*;
-import javax.swing.border.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
 
 public class MultiRunControlPanel extends JPanel
 {
@@ -18,15 +13,8 @@ public class MultiRunControlPanel extends JPanel
     private JButton displayTable;
     private JButton done;
 
-    private Label cmdLineLabel;
-    private TextField cmdLine;
-
-    private MultiRunWindow mainWindow;
-
     public MultiRunControlPanel(MultiRunWindow mainWindow, int defaultDataType)
     {
-	this.mainWindow = mainWindow;
-
 	setBackground(Color.lightGray);
 
 	// data type selectors

@@ -2,10 +2,7 @@ package projections.gui;
 
 import java.awt.*;
 import java.io.*;
-import java.sql.Time;
 import java.util.*;
-
-import javax.swing.*;
 
 import projections.analysis.*;
 import projections.guiUtils.*;
@@ -43,8 +40,6 @@ public class Analysis {
     
     private static SumAnalyzer sumAnalyzer; //Only for .sum files
 
-    private static SumDetailReader summaryDetails[]; // .sumd files
-	
     private static PoseDopReader dopReader; //Only for .poselog files
 
     private static IntervalData intervalData; // interval-based data
@@ -88,7 +83,7 @@ public class Analysis {
     private static Color[] grayUserEventColors;
 
     private static Color[] activeColorMap;
-    private static Color[] activeUserColorMap;
+    protected static Color[] activeUserColorMap;
     
     /** ************** Methods ********************** */
 
@@ -249,8 +244,7 @@ public class Analysis {
     public static int getNumPhases() {
 	if (sumAnalyzer!=null)
 	    return sumAnalyzer.GetPhaseCount();
-	else
-	    return 0;
+	return 0;
     }
 
     /**
@@ -307,9 +301,8 @@ public class Analysis {
     public static Color getEntryColor(int entryIdx) {
 	if (entryIdx < sts.getEntryCount()) {
 	    return activeColorMap[entryIdx];
-	} else {
-	    return null;
 	}
+	return null;
     }
 
     public static void setEntryColor(int entryIdx, Color color) {
@@ -334,38 +327,37 @@ public class Analysis {
 	if( hasLogFiles()) { //.log files
 	    UsageCalc u=new UsageCalc();
 	    return u.usage(pnum, begintime, endtime, getVersion() );
-	} else /*The files are sum files*/ {
-	    int temp,numUserEntries=sts.getEntryCount();
-	    long[][] data;
-	    long[][] phasedata;
-	    /*BAD: silently ignores begintime and endtime*/
-	    if( sumAnalyzer.GetPhaseCount()>1 ) {
-		phases.reset();
-		data = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
-		if (phases.hasMoreElements()) {
-		    while (phases.hasMoreElements() && ( pnum > -1 )) {
-			phasedata = 
-			    sumAnalyzer.GetPhaseChareTime(phases.nextElement());
-			for(int q=0; q<numUserEntries; q++) {
-			    data[pnum][q] += phasedata[pnum][q];
-			}
-		    }
-		}
-	    } else {
-		data = sumAnalyzer.GetChareTime();
-	    }
-	    float ret[][]=new float[2][numUserEntries+4];
-	    //Convert to percent-- .sum entries are always over the 
-	    // entire program run.
-	    double scale=100.0/getTotalTime();
-	    for (int q=0;q<numUserEntries;q++){
-		ret[0][q]=(float)(scale*data[pnum][q]);
-		// dummy value for message send time at the moment .. 
-		// summary file reader needs to be fixed first
-		ret[1][q] = (float )0.0; 
-	    }
-	    return ret;
 	}
+	int numUserEntries=sts.getEntryCount();
+	long[][] data;
+	long[][] phasedata;
+	/*BAD: silently ignores begintime and endtime*/
+	if( sumAnalyzer.GetPhaseCount()>1 ) {
+	phases.reset();
+	data = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
+	if (phases.hasMoreElements()) {
+	    while (phases.hasMoreElements() && ( pnum > -1 )) {
+		phasedata = 
+		    sumAnalyzer.GetPhaseChareTime(phases.nextElement());
+		for(int q=0; q<numUserEntries; q++) {
+		    data[pnum][q] += phasedata[pnum][q];
+		}
+	    }
+	}
+	} else {
+	data = sumAnalyzer.GetChareTime();
+	}
+	float ret[][]=new float[2][numUserEntries+4];
+	//Convert to percent-- .sum entries are always over the 
+	// entire program run.
+	double scale=100.0/getTotalTime();
+	for (int q=0;q<numUserEntries;q++){
+	ret[0][q]=(float)(scale*data[pnum][q]);
+	// dummy value for message send time at the moment .. 
+	// summary file reader needs to be fixed first
+	ret[1][q] = (float )0.0; 
+	}
+	return ret;
     }
     
     // a == entry point index, t == type of data
@@ -435,15 +427,9 @@ public class Analysis {
     public static void loadSummaryData(long intervalSize,
 				       int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
-	try {
-	    systemUsageData[1] = 
-		sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
-					       intervalSize);
-	} catch (SummaryFormatException E) {
-	    System.err.println("Caught SummaryFormatException");
-	} catch (IOException e) {
-	    System.err.println("Caught IOException");
-	}
+	systemUsageData[1] = 
+	sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
+				       intervalSize);
     }
 
     // yet another version of summary load for processor subsets.
@@ -452,22 +438,16 @@ public class Analysis {
 				       OrderedIntList processorList) {
 	systemUsageData = new int[3][][];
 	int[][][] temp = new int[3][][];
-	try {
-            temp[1] =
-                sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd,
-                                               intervalSize);
-	    processorList.reset();
-	    systemUsageData[1] = 
-		new int[processorList.size()][intervalEnd-intervalStart+1];
-	    for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
-		systemUsageData[1][pIdx] = 
-		    temp[1][processorList.nextElement()];
-	    }
-        } catch (SummaryFormatException E) {
-            System.err.println("Caught SummaryFormatException");
-        } catch (IOException e) {
-            System.err.println("Caught IOException");
-	} 
+	temp[1] =
+	    sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd,
+	                                   intervalSize);
+   processorList.reset();
+   systemUsageData[1] = 
+new int[processorList.size()][intervalEnd-intervalStart+1];
+   for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
+systemUsageData[1][pIdx] = 
+	temp[1][processorList.nextElement()];
+   } 
     }
 				       
 
@@ -500,7 +480,6 @@ public class Analysis {
     }
 
     public static long searchTimeline( int n, int p, int e ) 
-	throws EntryNotFoundException 
     {
 	try {
 	    if (hasLogFiles()) {

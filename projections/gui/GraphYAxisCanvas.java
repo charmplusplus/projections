@@ -6,9 +6,7 @@ public class GraphYAxisCanvas extends Canvas
 {
    
    private GraphData data;
-   private int width;
    private int textheight;
-   private int labelwidth;
    private int labelincrement;
    private int tickincrement;
    private int numintervals;
@@ -19,9 +17,7 @@ public class GraphYAxisCanvas extends Canvas
    
    public GraphYAxisCanvas()
    {
-	  width = 0;
 	  textheight = 0;
-	  labelwidth = 0;
 	  tickincrement = 0;
 	  numintervals = 0;
 	  pixelincrement = 0;

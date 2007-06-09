@@ -7,9 +7,11 @@ import java.awt.event.*;
 public class LogFileViewerDialog extends Dialog
    implements ActionListener, TextListener
 {
-   private IntTextField  textField;
  
-   private int pnum;
+	private static final long serialVersionUID = 1L;
+
+private IntTextField  textField;
+ 
    private int pmax;
    
    private Button bOK, bCancel;

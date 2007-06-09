@@ -3,9 +3,6 @@ package projections.gui;
 import projections.misc.LogEntryData;
 import projections.analysis.*;
 
-import java.awt.Container;
-import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.*;
 import java.io.*;
 import javax.swing.*;

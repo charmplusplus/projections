@@ -3,8 +3,6 @@ package projections.gui;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import java.awt.event.*;
-
 import projections.misc.*;
 import projections.analysis.*;
 import projections.gui.count.*;

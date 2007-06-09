@@ -3,7 +3,6 @@ package projections.gui;
 import java.io.*;
 
 import java.awt.*;
-import java.awt.event.*;
 
 public class MultiRunTextAreaWriter
     extends Writer

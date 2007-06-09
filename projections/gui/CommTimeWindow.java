@@ -3,14 +3,11 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import javax.swing.*;
 import java.text.*;
 
 import projections.analysis.*;
 import projections.guiUtils.*;
-import projections.gui.graph.*;
 
 public class CommTimeWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, ColorSelectable

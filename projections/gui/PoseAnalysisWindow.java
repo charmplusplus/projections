@@ -1,6 +1,5 @@
 package projections.gui;
 
-import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
@@ -186,7 +185,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
     }
 
     public void getDialogData() {
-	PoseRangeDialog dialog = (PoseRangeDialog)this.dialog;
+	PoseRangeDialog dialog = this.dialog;
 	realStartTime = dialog.getRealStartTime();
 	realEndTime = dialog.getRealEndTime();
 	realIntervalSize = dialog.getRealIntervalSize();
@@ -197,7 +196,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
     }
 
     public void setDialogData() {
-	PoseRangeDialog dialog = (PoseRangeDialog)this.dialog;
+	PoseRangeDialog dialog = this.dialog;
 	dialog.setRealIntervalSize(realIntervalSize);
 	dialog.setRealStartTime(realStartTime);
 	dialog.setRealEndTime(realEndTime);

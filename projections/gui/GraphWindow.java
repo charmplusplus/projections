@@ -10,32 +10,19 @@ import projections.misc.*;
 public class GraphWindow extends ProjectionsWindow
     implements ActionListener
 {
-    private MainWindow mainWindow;
-    private int myWindowID;
-   
     private GraphDisplayPanel      displayPanel;
     private GraphControlPanel      controlPanel;
     private GraphLegendPanel       legendPanel;
-    private GraphAttributesWindow  attributesWindow;
-    
     private GraphData data;
 
     private GraphWindow thisWindow;
 
     private int intervalStart;
     private int intervalEnd;
-    private long startTime;
     private long endTime;
 
-    private int intervalRangeSize;
-    
     private long intervalsize;
     private OrderedIntList processorList;
-    private String processorListString;
-    private int w, h;
-    
-    private boolean firstTime = true;
-
     public static boolean dumpNow = false;
     public static int dumpCount = 0;
     
@@ -64,8 +51,6 @@ public class GraphWindow extends ProjectionsWindow
     }
 
     void windowInit() {
-	// acquire initial values from Analysis
-	startTime = 0;
 	endTime = Analysis.getTotalTime();
 
 	intervalsize = 1000; // default to 1ms

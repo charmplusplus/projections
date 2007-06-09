@@ -54,7 +54,7 @@ public class ProfileWindow extends ProjectionsWindow
 
     private EntrySelectionDialog entryDialog;
 
-    private boolean ampiTraceOn = false;
+    boolean ampiTraceOn = false;
 
     public ProfileWindow(MainWindow parentWindow, Integer myWindowID){
         super(parentWindow, myWindowID);
@@ -560,7 +560,7 @@ public class ProfileWindow extends ProjectionsWindow
 
     }
 
-    private void setAmpiDisplayProfileData(){
+    void setAmpiDisplayProfileData(){
 
         String[] xNames = new String[data.plist.size()];
 
@@ -631,7 +631,7 @@ public class ProfileWindow extends ProjectionsWindow
         ampiDisplayCanvas.repaint();
     }
 
-    private void setDisplayProfileData(){
+    void setDisplayProfileData(){
         createDisplayDataSource();
 
         //testing the data sources

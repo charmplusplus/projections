@@ -20,7 +20,7 @@ import projections.analysis.*;
 
 public class StlPanel extends ScalePanel.Child
 {
-    private int[][] entryData;   // [pe][interval]
+    int[][] entryData;   // [pe][interval]
 
     // utilData (for utilization based visualization)
     // dimension 0 - indexed by processor index
@@ -53,9 +53,9 @@ public class StlPanel extends ScalePanel.Child
     // default mode
     private int mode = StlWindow.MODE_UTILIZATION;
 
-    private boolean newEPData = true;
+    boolean newEPData = true;
 
-    private StlWindow parentWindow = null;
+    StlWindow parentWindow = null;
     
     public StlPanel(StlWindow parentWindow) {
 	this.parentWindow = parentWindow;
@@ -210,7 +210,7 @@ public class StlPanel extends ScalePanel.Child
 	colorMap=cm;
     }
 
-    private void applyColorMap(int [][]data, boolean entryBased) {
+    void applyColorMap(int [][]data, boolean entryBased) {
 	if (!entryBased) {
 	    /**
 	     * Convert processor usage (0..100) to color values.

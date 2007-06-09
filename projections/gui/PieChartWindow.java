@@ -6,34 +6,39 @@ import java.awt.event.*;
 public class PieChartWindow extends Frame{
 
     private MainWindow      mainWindow;
-    private MyPanel         displayPanel;
-    private float[]         data;
-    private int             dataLen;
-    private float           thresh;
-    private int[][]         arc;        // An array of arcs, storing its starting degree, ending degree and index in data that it correlates to
-    private int             numArcs;
-    private Color[]         colors;
-    private int             leftBuf, rightBuf, topBuf, bottomBuf;
-    private String[][]      names;
+    MyPanel         displayPanel;
+    float[]         data;
+    int             dataLen;
+    float           thresh;
+    int[][]         arc;        // An array of arcs, storing its starting degree, ending degree and index in data that it correlates to
+    int             numArcs;
+    Color[]         colors;
+    int             leftBuf;
+	private int rightBuf;
+	int topBuf;
+	private int bottomBuf;
+    String[][]      names;
 
     // PieChart Values
-    private int             diameter;
-    private int             centerX, centerY;
-	private int 			numEntries;
+    int             diameter;
+    int             centerX;
+	int centerY;
+	int 			numEntries;
 
     // Flags
-    private int             outOfRadius;
-    private int             hasChanged;
+    int             outOfRadius;
+    int             hasChanged;
     
     // Cursor values
-    private int 			currX, currY;
-    private int 			dist;
-    private int 			degree;
-    private int 			currArcIndex;
+    int 			currX;
+	int currY;
+    int 			dist;
+    int 			degree;
+    int 			currArcIndex;
 	
     // Bubble values
-    private Bubble			bubble;
-    private String[]		bString;
+    Bubble			bubble;
+    String[]		bString;
 
     /* PieChartWindow Constructor
      * inputs

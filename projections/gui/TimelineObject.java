@@ -473,10 +473,12 @@ public class TimelineObject extends Component
 
    public void mousePressed(MouseEvent evt)
    {
+	   // ignore 	
    }   
 
    public void mouseReleased(MouseEvent evt)
    {
+	   // ignore 
    }   
 
    private void OpenMessageWindow()

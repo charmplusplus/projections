@@ -7,18 +7,18 @@ public class AnimationDisplayPanel extends Panel
     implements MouseMotionListener , MouseListener
 {
     private float MAXHUE = (float)0.65;
-    private int numPs = -1;
+    int numPs = -1;
     private int numIs = -1;
-    private int pwidth;
-    private int pheight;
-    private int numrows;
-    private int numcols;
+    int pwidth;
+    int pheight;
+    int numrows;
+    int numcols;
     private int pold = -1;
-    private int phoffset;
-    private int pvoffset;
-    private int hoffset;
-    private int voffset;
-    private float psize = (float)0.75;
+    int phoffset;
+    int pvoffset;
+    int hoffset;
+    int voffset;
+    float psize = (float)0.75;
     private float fontOffset = (float)0.90;
     private FontMetrics fm = null;
     private Font font = null;
@@ -30,11 +30,12 @@ public class AnimationDisplayPanel extends Panel
     private int curP = -1;
     private long Isize = 0; //Interval length, microseconds
     private int[][] data;
-    private Image offscreen;
+    Image offscreen;
    
     private Color[] colors;
    
-    private int w, h;
+    int w;
+	int h;
    
     private AnimationWindow animationWindow;
    
@@ -83,7 +84,7 @@ public class AnimationDisplayPanel extends Panel
 	setParameters(); 
     }
 
-    private void clearScreen()
+    void clearScreen()
     {
 	if (offscreen == null) {
 	    return;

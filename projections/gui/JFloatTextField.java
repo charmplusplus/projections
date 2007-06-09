@@ -6,7 +6,7 @@ import java.awt.event.*;
 public class JFloatTextField extends JTextField
 {
     private String lastValue;
-    private int    lastCaretPosition;
+    int    lastCaretPosition;
     
     public JFloatTextField(float defval, int size)
     {

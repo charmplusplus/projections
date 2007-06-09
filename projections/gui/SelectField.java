@@ -10,7 +10,7 @@ public class SelectField extends TextField
    implements TextListener
 {
    private String lastValue;
-   private int    lastCaretPosition;
+   int    lastCaretPosition;
    
    public SelectField(String defval, int size)
    {

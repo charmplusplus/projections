@@ -12,15 +12,16 @@ public class TimelineWindow extends ProjectionsWindow
 { 
     private NoUpdatePanel         mainPanel, displayPanel;
     private TimelineLabelCanvas   labelCanvas;
-    private TimelineAxisCanvas    axisTopCanvas, axisBotCanvas;
+    TimelineAxisCanvas    axisTopCanvas;
+	TimelineAxisCanvas axisBotCanvas;
     public TimelineDisplayCanvas displayCanvas;
     private TimelineColorWindow   colorWindow;
 
-    private TimelineWindow thisWindow;
+    TimelineWindow thisWindow;
     
     private Scrollbar HSB, VSB;
    
-    private TimelineData data;
+    TimelineData data;
    
     private FontMetrics fm;
    
@@ -49,9 +50,9 @@ public class TimelineWindow extends ProjectionsWindow
     private class AxisMouseController {
 	public MouseMotionAdapter mouseMotionAdapter = null;
 	public MouseListener mouseListener = null;
-	private TimelineDisplayCanvas canvas_;
-	private TimelineAxisCanvas timeline_;
-	private TimelineWindow window_;
+	TimelineDisplayCanvas canvas_;
+	TimelineAxisCanvas timeline_;
+	TimelineWindow window_;
 	
 	public boolean selected_ = false;
 	AxisMouseController(TimelineWindow window, 
@@ -1143,7 +1144,7 @@ public class TimelineWindow extends ProjectionsWindow
 	  pjob.end(); 
    }   
 		
-	 private void setAllSizes(boolean clearordraw){
+	 void setAllSizes(boolean clearordraw){
 	 	if(clearordraw){
 			data.clearAllLines();
 			setAllSizes();

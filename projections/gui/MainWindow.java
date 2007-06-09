@@ -121,7 +121,7 @@ public class MainWindow extends JFrame
     public static PrintWriter dataDump = null;
 
     // for SwingWorker to work
-    private MainWindow thisWindow;
+    MainWindow thisWindow;
 
     // Indexed by number of runs (currently one) and tools available
     // This should eventually be configurable for multiple runs,
@@ -134,15 +134,15 @@ public class MainWindow extends JFrame
     // components associated with the main window
     private MainTitlePanel        titlePanel;
     private BackGroundImagePanel  background;
-    private MainMenuManager       menuManager;
-    private MainSummaryGraphPanel summaryGraphPanel;
+    MainMenuManager       menuManager;
+    MainSummaryGraphPanel summaryGraphPanel;
     private MainRunStatusPanel    runStatusPanel;
 
     // these should become arrays for future tabbed multirun functionality.
-    private SummaryDataSource    sumDataSource;
-    private SummaryXAxis         sumXAxis;
-    private SummaryYAxis         sumYAxis;
-    private GraphPanel           graphPanel;
+    SummaryDataSource    sumDataSource;
+    SummaryXAxis         sumXAxis;
+    SummaryYAxis         sumYAxis;
+    GraphPanel           graphPanel;
     private Label                status;
     private Image bgimage;
     private GridBagConstraints gbc;

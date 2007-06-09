@@ -26,7 +26,7 @@ import javax.swing.*;
 public class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
-    private MultiRunWindow thisWindow;
+    MultiRunWindow thisWindow;
 
     // Gui components
     private MultiRunControlPanel controlPanel;
@@ -34,10 +34,10 @@ public class MultiRunWindow extends ProjectionsWindow
     private JDialog tablesWindow;
     private GraphPanel graphPanel;
     private Graph graphCanvas;
-    private ProjectionsFileChooser fc;
+    ProjectionsFileChooser fc;
 
-    private MultiRunData data;
-    private MultiRunDataAnalyzer analyzer;
+    MultiRunData data;
+    MultiRunDataAnalyzer analyzer;
 
     private JPanel mainPanel;
 
@@ -46,7 +46,7 @@ public class MultiRunWindow extends ProjectionsWindow
     GridBagLayout      gbl;
     GridBagConstraints gbc;
 
-    private int selectedDataType;
+    int selectedDataType;
 
     void windowInit() {
 	// do nothing. No initialization required.
@@ -123,7 +123,7 @@ public class MultiRunWindow extends ProjectionsWindow
 	worker.start();
     }
 
-    private void createLayout()
+    void createLayout()
     {
 	mainPanel = new JPanel();
 	mainPanel.setBackground(Color.gray);
@@ -148,7 +148,7 @@ public class MultiRunWindow extends ProjectionsWindow
      *  from the createLayout code but yet creates 2 GUI components to
      *  be used in createLayout.
      */
-    private void createDisplayPanels() {
+    void createDisplayPanels() {
 	// for graph mode
 	MultiRunDataSource dataSource = 
 	    analyzer.getDataSource(selectedDataType);

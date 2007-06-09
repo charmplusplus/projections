@@ -10,19 +10,19 @@ import projections.misc.*;
 public class GraphWindow extends ProjectionsWindow
     implements ActionListener
 {
-    private GraphDisplayPanel      displayPanel;
-    private GraphControlPanel      controlPanel;
-    private GraphLegendPanel       legendPanel;
-    private GraphData data;
+    GraphDisplayPanel      displayPanel;
+    GraphControlPanel      controlPanel;
+    GraphLegendPanel       legendPanel;
+    GraphData data;
 
-    private GraphWindow thisWindow;
+    GraphWindow thisWindow;
 
-    private int intervalStart;
-    private int intervalEnd;
+    int intervalStart;
+    int intervalEnd;
     private long endTime;
 
-    private long intervalsize;
-    private OrderedIntList processorList;
+    long intervalsize;
+    OrderedIntList processorList;
     public static boolean dumpNow = false;
     public static int dumpCount = 0;
     
@@ -175,7 +175,7 @@ public class GraphWindow extends ProjectionsWindow
        }
    }   
 
-    private void setChildDatas()
+    void setChildDatas()
     {
 	controlPanel.setGraphData(data);
 	displayPanel.setGraphData(data);

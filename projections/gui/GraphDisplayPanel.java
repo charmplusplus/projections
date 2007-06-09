@@ -9,7 +9,7 @@ public class GraphDisplayPanel extends Container
 {
    private GraphData data;
  
-   private Panel              mainPanel;
+   Panel              mainPanel;
    private GraphTitleCanvas   titleCanvas;
    private GraphYAxisCanvas   yAxisCanvas;
    private GraphXAxisCanvas   xAxisCanvas;

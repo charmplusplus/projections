@@ -7,7 +7,7 @@ public class FloatTextField extends TextField
     implements TextListener
 {
     private String lastValue;
-    private int    lastCaretPosition;
+    int    lastCaretPosition;
     
     public FloatTextField(float defval, int size)
     {

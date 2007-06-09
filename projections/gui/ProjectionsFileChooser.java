@@ -27,15 +27,15 @@ import javax.swing.WindowConstants;
  */
 public class ProjectionsFileChooser
 {
-    private Frame        owner_    = null;   // for making things modal
+    Frame        owner_    = null;   // for making things modal
     private String       title_    = null;   // base title for dialogs
     private JFileChooser fChoose_  = null;   // user picks dirs to search
-    private JDialog      dialog_   = null;   // user picks files to use
-    private JList        list_     = null;   // stores found files
-    private int          listSize_ = 0;      // size of list_
+    JDialog      dialog_   = null;   // user picks files to use
+    JList        list_     = null;   // stores found files
+    int          listSize_ = 0;      // size of list_
     @SuppressWarnings("unused")
 	private Wait         wait_     = new Wait(true); // true if dialog waiting
-    private ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
+    ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
 
     // Allow file chooser to select multiple files
     public static final int MULTIPLE_FILES = 1;

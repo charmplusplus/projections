@@ -12,13 +12,13 @@ import projections.misc.LogEntryData;
 public class CommWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, Clickable
 {
-    private double[][] 	sentMsgCount;
-    private double[][] 	sentByteCount;
-    private double[][] 	receivedMsgCount;
-    private double[][] 	receivedByteCount;
-    private double[][]	exclusiveRecv;
-    private double[][]	exclusiveBytesRecv;
-    private int[][]     hopCount;
+    double[][] 	sentMsgCount;
+    double[][] 	sentByteCount;
+    double[][] 	receivedMsgCount;
+    double[][] 	receivedByteCount;
+    double[][]	exclusiveRecv;
+    double[][]	exclusiveBytesRecv;
+    int[][]     hopCount;
     private double[][]  avgHopCount;
     private double[][]  avgPeHopCount;
 
@@ -41,9 +41,9 @@ public class CommWindow extends GenericGraphWindow
     private Checkbox    hopCountCB;
     private Checkbox    peHopCountCB;
 
-    private CommWindow  thisWindow;
+    CommWindow  thisWindow;
 
-    private OrderedIntList peList;
+    OrderedIntList peList;
 
     void windowInit() {
 	// parameter initialization is completely handled by GenericGraphWindow
@@ -147,7 +147,7 @@ public class CommWindow extends GenericGraphWindow
 	}
     }
 
-    private void setPopupText(String input){
+    void setPopupText(String input){
 	currentArrayName = input;
     }
 

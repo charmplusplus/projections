@@ -17,7 +17,7 @@ import projections.guiUtils.*;
 public class TimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    private TimeProfileWindow thisWindow;
+    TimeProfileWindow thisWindow;
 
     private EntrySelectionDialog entryDialog;
 
@@ -37,28 +37,28 @@ public class TimeProfileWindow extends GenericGraphWindow
     OrderedIntList processorList;
 
     // data required for entry selection dialog
-    private int numEPs;
+    int numEPs;
     private String typeLabelNames[] = {"Entry Points"};
-    private boolean stateArray[][];
-    private boolean existsArray[][];
+    boolean stateArray[][];
+    boolean existsArray[][];
     private Color colorArray[][];
     private String entryNames[];
 
     // stored raw data
-    private double[][] graphData;
+    double[][] graphData;
 
     // output arrays
     private double[][] outputData;
     private Color[] outColors;
     
     // flag signifying callgraph has just begun
-    private boolean	   startFlag;
+    boolean	   startFlag;
 
     //Chao Mei: variables related with ampi time profile    
     private JTabbedPane tabPane = null;
-    private AmpiTimeProfileWindow ampiGraphPanel = null;
+    AmpiTimeProfileWindow ampiGraphPanel = null;
     private JPanel epPanel = null;
-    private boolean ampiTraceOn = false;
+    boolean ampiTraceOn = false;
     protected int ampiPanelTabIndex;
     protected int epPanelTabIndex;
 
@@ -280,7 +280,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	// nothing for now
     }
 
-    private void fillGraphData() {
+    void fillGraphData() {
 	// for now, just assume all processors are added to the mix.
 	// LogReader is BROKEN and cannot deal with partial data properly.
 	// Any current attempts to fix this will cause GraphWindow to fail
@@ -298,7 +298,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	setOutputGraphData();
     }
 
-    private void setOutputGraphData() {
+    void setOutputGraphData() {
 	// need first pass to decide the size of the outputdata
 	int outSize = 0;
 	for (int ep=0; ep<numEPs; ep++) {

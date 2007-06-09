@@ -48,7 +48,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     private EntrySelectionDialog entryDialog;
 
-    private boolean ampiTraceOn = false;
+    boolean ampiTraceOn = false;
 
     public AmpiProfileWindow(MainWindow parentWindow, Integer myWindowID){
         super(parentWindow, myWindowID);
@@ -551,7 +551,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         profileFrame.setVisible(true);
    }
 
-    private void readAmpiUsageData(){
+    void readAmpiUsageData(){
 	int numPes = data.plist.size();
 	accTime = new float[numPes][]; //[numFunc+1] and we need [1..numFunc-1]
 	int progressCount = 0;
@@ -577,7 +577,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	progressBar.close();
     }
 
-    private void setAmpiDisplayProfileData(){
+    void setAmpiDisplayProfileData(){
         int curPe = -1;
 	int numPes = data.plist.size();
 	int numFunc = Analysis.getNumFunctionEvents();
@@ -625,7 +625,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         ampiDisplayCanvas.repaint();
     }
 
-    private void setDisplayProfileData(){
+    void setDisplayProfileData(){
         createDisplayDataSource();
 
         //testing the data sources

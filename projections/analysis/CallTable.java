@@ -267,6 +267,7 @@ public class CallTable extends ProjDefs
         }
 	catch (IOException e)
 	{
+		// ignore
 	}
     }
 }

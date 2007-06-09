@@ -15,6 +15,6 @@ public class WaitButton extends JButton {
       public void actionPerformed(ActionEvent ae) { wait_.setValue(false); }
     });
   }
-  private Wait wait_ = null;
+  Wait wait_ = null;
 }
 

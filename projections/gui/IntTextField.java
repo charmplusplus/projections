@@ -7,7 +7,7 @@ public class IntTextField extends TextField
    implements TextListener
 {
    private String lastValue;
-   private int    lastCaretPosition;
+   int    lastCaretPosition;
    
    public IntTextField(int defval, int size)
    {

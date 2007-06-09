@@ -24,7 +24,7 @@ public abstract class Axis
   private DecimalFormat large_ = null;    // no decimals
   private double min_;
   private double max_;
-  private double scale_ = 1.0;
+  double scale_ = 1.0;
   
   /** Return the border from the axis to edge of tick. */
   public static int getTickSize() { return MAJOR_TICK_OFFSET; }

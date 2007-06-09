@@ -8,8 +8,8 @@ public class AnimationWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener
 {
     private AnimationColorBarPanel colorbarPanel;
-    private AnimationDisplayPanel  displayPanel;
-    private AnimationWindow thisWindow;
+    AnimationDisplayPanel  displayPanel;
+    AnimationWindow thisWindow;
     
     JMenuBar mbar = new JMenuBar();
 
@@ -21,13 +21,13 @@ public class AnimationWindow extends ProjectionsWindow
     
     //private Label lTitle, lStatus;
     private Label lTitle, lStatus, lDelay;
-    private Scrollbar slider;
+    Scrollbar slider;
     
-    private int redrawDelay; //Real time between frames (ms)
-    private boolean keepAnimating;
+    int redrawDelay; //Real time between frames (ms)
+    boolean keepAnimating;
     private AnimateThread thread;
 
-    private boolean layoutComplete = false;
+    boolean layoutComplete = false;
 
     // basic parameter variables consistent with IntervalRangeDialog
     public long intervalSize;
@@ -51,6 +51,7 @@ public class AnimationWindow extends ProjectionsWindow
 		    try { //Give other threads a chance
 			sleep(timeLeft);
 		    } catch (InterruptedException E) {
+		    	// ignore
 		    }
 		} else { //Advance to next frame
 		    finish += redrawDelay;
@@ -180,7 +181,7 @@ public class AnimationWindow extends ProjectionsWindow
 	}
     }
 
-    private void changeCurI(int i)
+    void changeCurI(int i)
     {
 	displayPanel.setCurI(i);
 	setTitleInfo(displayPanel.getCurI()); 
@@ -209,7 +210,7 @@ public class AnimationWindow extends ProjectionsWindow
         setJMenuBar(mbar);
     }
 
-    private void createLayout()
+    void createLayout()
     {
 	Panel mainPanel     = new Panel();
 	titlePanel    = new Panel();

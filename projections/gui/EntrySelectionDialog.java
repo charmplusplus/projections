@@ -157,7 +157,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	}           
     }   
 
-    private void closeDialog()
+    void closeDialog()
     {
 	// this is essentially a cancellation command.
 

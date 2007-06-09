@@ -46,7 +46,7 @@ public class TimelineMessageWindow extends Frame
    {
 	  Close();
    }   
-   private void Close()
+   void Close()
    {
 	  setVisible(false);
 	  obj.CloseMessageWindow();

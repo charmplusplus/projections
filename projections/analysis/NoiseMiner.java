@@ -379,7 +379,7 @@ public class NoiseMiner extends ProjDefs
 		private Duration bin_sum[]; // The sum of all values that fall in each bin
 
 		private eventWindow bin_window[]; // A list of recent events in each bin
-		private int eventsInBinWindow;
+		int eventsInBinWindow;
 
 		private int nbins;
 		private Duration binWidth;
@@ -831,6 +831,7 @@ public class NoiseMiner extends ProjDefs
 
 			catch (IOException e)
 			{
+				// I doubt we'll ever get here
 			}
 
 			loggingText = loggingText + "Found " + count + " entry methods in the specified time range on pe=" + currPe + "\n";

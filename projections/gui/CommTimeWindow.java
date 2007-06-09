@@ -14,7 +14,7 @@ public class CommTimeWindow extends GenericGraphWindow
 {
     // Sent External code commented out and may be implemented later
 
-    private CommTimeWindow      thisWindow;    
+    CommTimeWindow      thisWindow;    
 
     private EntrySelectionDialog entryDialog;
         
@@ -28,7 +28,7 @@ public class CommTimeWindow extends GenericGraphWindow
     private JButton        saveColors;
     private JButton        loadColors;
     
-    private CheckboxGroup  cbg;
+    CheckboxGroup  cbg;
     private Checkbox	   sentMsgs;
     private Checkbox	   sentBytes;
     private Checkbox	   receivedMsgs;
@@ -399,7 +399,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	repaint();
     }    
     
-    private void setOutputGraphData() {
+    void setOutputGraphData() {
 	// need first pass to decide the size of the outputdata
 	int outSize = 0;
 	for (int ep=0; ep<numEPs; ep++) {

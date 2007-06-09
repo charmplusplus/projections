@@ -6,7 +6,7 @@ import javax.swing.*;
 public class JIntTextField extends JTextField
 {
    private String lastValue;
-   private int    lastCaretPosition;
+   int    lastCaretPosition;
    
    public JIntTextField(int defval, int size)
    {

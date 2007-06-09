@@ -18,7 +18,7 @@ import projections.misc.*;
 public class UserEventsWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    private UserEventsWindow thisWindow;
+    UserEventsWindow thisWindow;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
@@ -141,7 +141,7 @@ public class UserEventsWindow extends GenericGraphWindow
 	super.setDialogData();
     }
 
-    private void constructToolData() {
+    void constructToolData() {
 	int nextPe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =

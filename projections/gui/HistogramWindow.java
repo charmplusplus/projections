@@ -34,8 +34,8 @@ public class HistogramWindow extends GenericGraphWindow
     // Data maintained by HistogramWindow
     // countData is indexed by type, then by bin index followed by ep id.
     // NOTE: bin indices need not be of the same size
-    private double[][][] counts;
-    private int binType;
+    double[][][] counts;
+    int binType;
     
     // variables (in addition to those in the super class) 
     // to be set by BinDialog.
@@ -46,9 +46,9 @@ public class HistogramWindow extends GenericGraphWindow
     public long msgBinSize;
     public long msgMinBinSize;
 
-    private HistogramWindow thisWindow;
+    HistogramWindow thisWindow;
 
-    private boolean newDialog; // a temporary hack
+    boolean newDialog; // a temporary hack
     private DecimalFormat _format;
 
     void windowInit() {
@@ -300,7 +300,7 @@ public class HistogramWindow extends GenericGraphWindow
 	return bubbleText;
     }
 
-    private double[][][] getCounts()
+    double[][][] getCounts()
     {
 	// Variables for use with the analysis
 	long executionTime;

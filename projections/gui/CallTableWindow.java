@@ -9,9 +9,9 @@ import projections.analysis.*;
 public class CallTableWindow extends ProjectionsWindow
     implements ItemListener
 {
-    private CallTableWindow      thisWindow;    
+    CallTableWindow      thisWindow;    
     
-    private CallTableTextArea    textArea;
+    CallTableTextArea    textArea;
     private Label                lTitle;
     private Panel                titlePanel;
 
@@ -34,10 +34,10 @@ public class CallTableWindow extends ProjectionsWindow
     public long                  startTime;
     public long                  endTime;
     
-    private CallTable            ct;
+    CallTable            ct;
     
-    private boolean              epDetailToggle;
-    private boolean              statsToggle;
+    boolean              epDetailToggle;
+    boolean              statsToggle;
     
     void windowInit() {
         // acquire data using parent class

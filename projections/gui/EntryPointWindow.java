@@ -221,11 +221,11 @@ public class EntryPointWindow extends JFrame implements ActionListener
 
 	// variables for table
 
-  	private Color BACKGROUND = Color.black;
+  	Color BACKGROUND = Color.black;
   	private Color FOREGROUND = Color.white;
 	private int 		   currRow     = 0;
         private int 		   numRows     = 100;
-        private int 		   numCols     = 5;
-	private RowData[] 	   data	       = new RowData[numRows];	 
+        int 		   numCols     = 5;
+	RowData[] 	   data	       = new RowData[numRows];	 
 
 }

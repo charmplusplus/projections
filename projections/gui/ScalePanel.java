@@ -314,7 +314,7 @@ public class ScalePanel extends Panel
 		hor.setScale(hVal);ver.setScale(vVal);
 	}
 	public void setStatusDisplay(StatusDisplay s) {statusDisplay=s;}
-	private void status(String msg) {
+	void status(String msg) {
 		if (statusDisplay!=null) statusDisplay.setStatus(msg);
 	}
 	//Convert this scale factor into a type suitable for the sliders

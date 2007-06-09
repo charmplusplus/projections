@@ -21,7 +21,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     implements ActionListener, ItemListener, ColorSelectable,
 	       Clickable
 {
-    private OutlierAnalysisWindow thisWindow;
+    OutlierAnalysisWindow thisWindow;
 
     private JPanel mainPanel;
 
@@ -168,7 +168,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	worker.start();
     }
 
-    private void constructToolData() {
+    void constructToolData() {
 	// construct the necessary meta-data given the selected activity
 	// type.
 	double[][] tempData;
@@ -541,7 +541,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     // This method will read the stats file generated during online
     // outlier analysis which will then determine which processor's
     // log data to read.
-    private void readOutlierStats() {
+    void readOutlierStats() {
 	Color[] tempGraphColors;
 	numActivities = Analysis.getNumActivity(currentActivity); 
 	tempGraphColors = Analysis.getColorMap(currentActivity);

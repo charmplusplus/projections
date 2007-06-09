@@ -11,7 +11,7 @@ public class TimelineAxisCanvas extends Canvas
     private String        type;
     private FontMetrics   fm;
     private Image         offscreen;
-    private Component     component_;
+    Component     component_;
     private long          beginCoord_;
     private long          endCoord_;
     private DecimalFormat format_= new DecimalFormat();

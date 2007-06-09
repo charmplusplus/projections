@@ -13,9 +13,9 @@ public class GraphLegendPanel extends Panel
     private LegendCanvas listPanel;
     private ScrollPane sp;
     
-    private GraphData data = null;
+    GraphData data = null;
     private GraphAttributesWindow attributesWindow;
-    private PrintJob pjob;
+    PrintJob pjob;
     
     private class LegendCanvas extends Canvas
     {

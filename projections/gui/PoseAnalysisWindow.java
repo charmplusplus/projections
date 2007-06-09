@@ -17,17 +17,17 @@ import projections.analysis.*;
 public class PoseAnalysisWindow extends ProjectionsWindow
     implements ActionListener
 {
-    private PoseAnalysisWindow thisWindow;
+    PoseAnalysisWindow thisWindow;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
     private JButton setRanges;
     private JTabbedPane subToolsPanel;
-    private PoseRTDopDisplayPanel realTimeDopDisplayPanel;
-    private PoseVTDopDisplayPanel virtTimeDopDisplayPanel;
+    PoseRTDopDisplayPanel realTimeDopDisplayPanel;
+    PoseVTDopDisplayPanel virtTimeDopDisplayPanel;
 
     // override default for ProjectionsWindow
-    private PoseRangeDialog dialog;
+    PoseRangeDialog dialog;
 
     // data used for PoseRangeDialog
     long realStartTime;
@@ -45,12 +45,12 @@ public class PoseAnalysisWindow extends ProjectionsWindow
     OrderedIntList processorList;
 
     // Data from poselog files.
-    private PoseDopReader reader;
-    private int[][] dopRealData;
-    private int[] dopVirtData;
+    PoseDopReader reader;
+    int[][] dopRealData;
+    int[] dopVirtData;
     
     // flag signifying the window has just begun
-    private boolean	   startFlag;
+    boolean	   startFlag;
 
     void windowInit() {
 	// acquire data using parent class

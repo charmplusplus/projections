@@ -40,7 +40,7 @@ public class Analysis {
     
     private static SumAnalyzer sumAnalyzer; //Only for .sum files
 
-    private static PoseDopReader dopReader; //Only for .poselog files
+    static PoseDopReader dopReader; //Only for .poselog files
 
     private static IntervalData intervalData; // interval-based data
 
@@ -49,8 +49,8 @@ public class Analysis {
 
     // The total time (maxed) of a run across all processors.
     private static long totalTime = 0;
-    private static long poseTotalTime = 0;
-    private static long poseTotalVirtualTime = 0;
+    static long poseTotalTime = 0;
+    static long poseTotalVirtualTime = 0;
 
     /******************* Graphs ***************/
     private static int[][][] systemUsageData;

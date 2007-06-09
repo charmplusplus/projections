@@ -35,7 +35,7 @@ public class StlWindow extends ProjectionsWindow
 {
     private ScaleSlider hor,ver;
     private ScalePanel scalePanel;
-    private StlPanel stl;
+    StlPanel stl;
     private Label status;
     // Modified to display data by entry method color. Mode panel.
     public static final int NUM_MODES = 2;
@@ -46,12 +46,12 @@ public class StlWindow extends ProjectionsWindow
 
     private JPanel modePanel;
     private ButtonGroup modeGroup;
-    private JRadioButton utilizationMode;
+    JRadioButton utilizationMode;
     private JRadioButton epMode;
 
     private ColorMap utilColorMap;
 
-    private StlWindow thisWindow;
+    StlWindow thisWindow;
 
     // parameter variables
     public OrderedIntList validPEs;
@@ -158,7 +158,7 @@ public class StlWindow extends ProjectionsWindow
 	stl.setColorMap(utilColorMap);
     }  
 
-    private void setStlPanelData(){
+    void setStlPanelData(){
 	double horSize, verSize;
 	if (validPEs == null) {
 	    horSize=Analysis.getTotalTime();

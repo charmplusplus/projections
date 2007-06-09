@@ -94,7 +94,7 @@ public class PoseRangeDialog extends JDialog
 
     // flags
     private boolean layoutComplete = false;
-    private int dialogState;
+    int dialogState;
 
     public PoseRangeDialog(ProjectionsWindow parentWindow,
 			   String titleString) {

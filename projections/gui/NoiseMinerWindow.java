@@ -16,7 +16,7 @@ import javax.swing.table.*;
 public class NoiseMinerWindow extends ProjectionsWindow
     implements ItemListener
 {
-    private NoiseMinerWindow      thisWindow;    
+    NoiseMinerWindow      thisWindow;    
     
     private JPanel	         mainPanel;
     private JPanel           controlPanel;
@@ -31,14 +31,14 @@ public class NoiseMinerWindow extends ProjectionsWindow
 	
     private JButton              setRanges;
     
-	private JTextArea   mainText;
+	JTextArea   mainText;
 	private JScrollPane	mainTextScroller;
 	        
     public OrderedIntList        validPEs;
     public long                  startTime;
     public long                  endTime;
     
-    private NoiseMiner			noiseMiner;
+    NoiseMiner			noiseMiner;
     
     void windowInit() {
     }
@@ -106,7 +106,7 @@ public class NoiseMinerWindow extends ProjectionsWindow
     }
     
     
-    private void addResultsToTable(Vector dataInternal, Vector dataExternal){
+    void addResultsToTable(Vector dataInternal, Vector dataExternal){
     	tableModelInternal = new DefaultTableModel(dataInternal, columnNames);
     	tableModelExternal = new DefaultTableModel(dataExternal, columnNames);
 

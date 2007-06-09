@@ -104,7 +104,7 @@ public class TimelineColorWindow extends ColorWindowFrame
 	} 
     }   
 
-    private void Close() 
+    void Close() 
     {
 	setVisible(false);
 	data.timelineWindow.CloseColorWindow();

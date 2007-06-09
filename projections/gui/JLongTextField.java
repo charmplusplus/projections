@@ -6,7 +6,7 @@ import javax.swing.*;
 public class JLongTextField extends JTextField
 {
     private String lastValue;
-    private int    lastCaretPosition;
+    int    lastCaretPosition;
     
     public JLongTextField(long defval, int size)
     {

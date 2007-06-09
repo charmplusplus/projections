@@ -17,15 +17,15 @@ import projections.gui.FormattedNumber;
  */
 public class UserEventWindow extends JFrame
 {
-  private Color BACKGROUND = Color.black;
+  Color BACKGROUND = Color.black;
   private Color FOREGROUND = Color.white;
 
   // set the ints to have commas in appropriate places
-  private static DecimalFormat format_ = null;
-  private Checkbox             checkbox_;  // when closing, set to false
-  private UserEvent[][]        events_ = null;
+  static DecimalFormat format_ = null;
+  Checkbox             checkbox_;  // when closing, set to false
+  UserEvent[][]        events_ = null;
   private JTabbedPane          tabbedPane_ = new JTabbedPane();
-  private TableSorter[]        sorter_ = null;
+  TableSorter[]        sorter_ = null;
 
   private DefaultTableCellRenderer rightJustify_ = 
     new DefaultTableCellRenderer();

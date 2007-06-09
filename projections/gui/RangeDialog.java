@@ -69,7 +69,7 @@ public class RangeDialog extends JDialog
 
     // flags
     private boolean layoutComplete = false;
-    private int dialogState;
+    int dialogState;
     private boolean disableRange = false;
 
     /**

@@ -13,7 +13,7 @@ public class ColorSelectWindow extends Dialog
 							  
    private TextField tfRed, tfGreen, tfBlue;
    private Color currentColor;      
-   private String title;
+   String title;
    private Panel p1, p2;
    private ColorWindowFrame myParent;
 

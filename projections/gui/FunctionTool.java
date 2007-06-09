@@ -34,7 +34,7 @@ public class FunctionTool extends GenericGraphWindow
     private double timeData[][];
     private String currentArrayName = "";
 
-    private FunctionTool thisWindow;
+    FunctionTool thisWindow;
 
     public FunctionTool(MainWindow mainWindow, Integer myWindowID) {
 	super("Function tracing", mainWindow, myWindowID);
@@ -124,7 +124,7 @@ public class FunctionTool extends GenericGraphWindow
 	super.refreshGraph();
     }
 
-    private void getData() {
+    void getData() {
 	// setup the reader to read all data.
 	GenericLogReader reader;
 	LogEntryData logEntry = new LogEntryData();

@@ -87,6 +87,7 @@ public class ParseTokenizer extends StreamTokenizer {
 	throws IOException
     {
 	while (!isEOL()) {
+		// seems like a bad way to do things
 	}
     }
 

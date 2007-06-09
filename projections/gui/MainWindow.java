@@ -1,17 +1,33 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.lang.reflect.*;
-import javax.swing.*;
-import java.io.*;
-import java.net.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Label;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.net.URL;
 
-//import projections.gui.count.*;
+import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
 
-import projections.analysis.*;
-import projections.gui.graph.*;
-import projections.misc.*;
+import projections.analysis.IntervalUtils;
+import projections.analysis.ProjMain;
+import projections.gui.graph.Graph;
+import projections.gui.graph.GraphPanel;
+import projections.gui.graph.SummaryDataSource;
+import projections.gui.graph.SummaryXAxis;
+import projections.gui.graph.SummaryYAxis;
 
 public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay
@@ -127,12 +143,7 @@ public class MainWindow extends JFrame
     private SummaryXAxis         sumXAxis;
     private SummaryYAxis         sumYAxis;
     private GraphPanel           graphPanel;
-    private ScalePanel           scalePanel;
-    private StlPanel             stl;
-    private ScaleSlider          hor, ver;
     private Label                status;
-    private ScalePanel.StatusDisplay sd;
-
     private Image bgimage;
     private GridBagConstraints gbc;
     private GridBagLayout gbl;   
@@ -210,7 +221,7 @@ public class MainWindow extends JFrame
     {
 	JColorChooser colorWindow = new JColorChooser();
 	Color returnColor =
-	    colorWindow.showDialog(this, "Background Color",
+	    JColorChooser.showDialog(this, "Background Color",
 				   Analysis.background);
 	if (returnColor != null) {
 	    Analysis.background = returnColor;
@@ -222,7 +233,7 @@ public class MainWindow extends JFrame
     {
 	JColorChooser colorWindow = new JColorChooser();
 	Color returnColor =
-	    colorWindow.showDialog(this, "Foreground Color",
+	    JColorChooser.showDialog(this, "Foreground Color",
 				   Analysis.foreground);
 	if (returnColor != null) {
 	    Analysis.foreground = returnColor;
@@ -311,8 +322,6 @@ public class MainWindow extends JFrame
 	sumYAxis = null;
 	graphPanel = null;
 
-	hor = null;
-	ver = null;
 	final SwingWorker worker = new SwingWorker() {
 		public Object construct() {
 		    try {

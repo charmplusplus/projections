@@ -774,14 +774,6 @@ public class AmpiProfileWindow extends ProjectionsWindow
     {
     }
 
-    private void setScales()
-    {
-    }
-
-    private void setSizes()
-    {
-    }
-
     public int getHSBValue()
     {
         return 0;

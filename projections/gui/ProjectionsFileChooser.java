@@ -1,11 +1,23 @@
 package projections.gui;
 
-import java.io.*;
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import projections.gui.count.*;
+import java.awt.BorderLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
+import java.util.Vector;
+
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.WindowConstants;
 
 /** Joshua Mostkoff Unger, unger1@uiuc.edu
  *  Parallel Programming Laboratory
@@ -17,12 +29,12 @@ public class ProjectionsFileChooser
 {
     private Frame        owner_    = null;   // for making things modal
     private String       title_    = null;   // base title for dialogs
-    private int          type_     = MULTIPLE_FILES;  // final result
     private JFileChooser fChoose_  = null;   // user picks dirs to search
     private JDialog      dialog_   = null;   // user picks files to use
     private JList        list_     = null;   // stores found files
     private int          listSize_ = 0;      // size of list_
-    private Wait         wait_     = new Wait(true); // true if dialog waiting
+    @SuppressWarnings("unused")
+	private Wait         wait_     = new Wait(true); // true if dialog waiting
     private ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
 
     // Allow file chooser to select multiple files
@@ -61,7 +73,6 @@ public class ProjectionsFileChooser
 	}
 	owner_   = owner;
 	title_   = title;
-	type_    = type;
 	fChoose_ = initFileChooser(title_+": File(s) Open");
 	dialog_  = initFileDialog(title_+": Choose Files");
     }

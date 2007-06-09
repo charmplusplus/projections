@@ -1,8 +1,21 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.ScrollPane;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JColorChooser;
 
 public class TimelineColorWindow extends ColorWindowFrame
    implements ActionListener
@@ -13,7 +26,6 @@ public class TimelineColorWindow extends ColorWindowFrame
    private ColorPanel[] cpEntry;
    private ColorPanel   selectedCP;
    private Button       bApply, bClose, bGraphColors;
-   private ColorSelectWindow colorSelectWindow;
    
    class GrayLWPanel extends LWPanel
    {
@@ -84,7 +96,7 @@ public class TimelineColorWindow extends ColorWindowFrame
 	    }
 	    JColorChooser colorWindow = new JColorChooser();
 	    Color returnColor =
-		colorWindow.showDialog(this, s,
+		JColorChooser.showDialog(this, s,
 				       selectedCP.getColor());
 	    if (returnColor != null) {
 		selectedCP.setColor(returnColor);

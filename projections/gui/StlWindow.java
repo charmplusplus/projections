@@ -10,11 +10,24 @@ package projections.gui;
  * much faster than a timeline.
  */
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.Scrollbar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-import projections.misc.*;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 
 public class StlWindow extends ProjectionsWindow
     implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
@@ -24,8 +37,6 @@ public class StlWindow extends ProjectionsWindow
     private ScalePanel scalePanel;
     private StlPanel stl;
     private Label status;
-    private boolean okorcancelled;
-
     // Modified to display data by entry method color. Mode panel.
     public static final int NUM_MODES = 2;
     public static final int MODE_UTILIZATION = 0;

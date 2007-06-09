@@ -8,9 +8,9 @@ Similar to StreamTokenizer, but about 10x faster.
 Will not work properly with true Unicode files--
 only basic ASCII.
 */
-import java.lang.*;
-import java.io.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.Reader;
 
 class AsciiIntegerReader {
 	private Reader file;

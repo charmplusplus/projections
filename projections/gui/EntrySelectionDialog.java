@@ -20,7 +20,6 @@ import javax.swing.*;
 public class EntrySelectionDialog extends ColorWindowFrame 
    implements ActionListener
 {
-    private ColorSelectWindow colorSelectWindow;
     private ColorSelectable callbackTarget;
 
     // indexed by type followed by the entry point index
@@ -120,7 +119,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	    */
 	    JColorChooser colorWindow = new JColorChooser();
 	    Color returnColor =
-		colorWindow.showDialog(this, selectTitle,
+		JColorChooser.showDialog(this, selectTitle,
 				       selectedCP.getColor());
 	    if (returnColor != null) {
 		selectedCP.setColor(returnColor);

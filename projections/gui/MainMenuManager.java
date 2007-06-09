@@ -1,8 +1,13 @@
 package projections.gui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 
 import projections.analysis.ProjMain;
 
@@ -22,9 +27,8 @@ public class MainMenuManager extends MenuManager
     private JMenu fileMenu;
     private JMenu preferencesMenu;
     private JMenu toolMenu;
-    private JMenu counterMenu;
 
-    private static final int NUM_STATES = 4;
+//    private static final int NUM_STATES = 4;
     private static final int NO_DATA = 0;
     private static final int OPENED_FILES = 1;
     private static final int OPENED_SUMMARY = 2;
@@ -192,7 +196,7 @@ public class MainMenuManager extends MenuManager
 	    });
 	menubar.add(preferencesMenu);
 
-	toolMenu = makeJMenu("Tools", parent.windowMenuNames);
+	toolMenu = makeJMenu("Tools", MainWindow.windowMenuNames);
 	menubar.add(toolMenu);
 
 	stateChanged(NO_DATA);
@@ -224,9 +228,9 @@ public class MainMenuManager extends MenuManager
 		parent.setFullColor();
 	    } else {
 		// assume that anything else is a tool selection
-		for (int i=0; i<parent.NUM_WINDOWS; i++) {
-		    if (parent.windowMenuNames[i].equals(arg)) {
-			parent.showChildWindow(parent.windowClassNames[i],i);
+		for (int i=0; i<MainWindow.NUM_WINDOWS; i++) {
+		    if (MainWindow.windowMenuNames[i].equals(arg)) {
+			parent.showChildWindow(MainWindow.windowClassNames[i],i);
 			break;
 		    }
 		}

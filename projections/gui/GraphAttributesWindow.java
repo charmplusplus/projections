@@ -7,7 +7,6 @@ import javax.swing.*;
 public class GraphAttributesWindow extends ColorWindowFrame
     implements ActionListener
 {
-    private ColorSelectWindow colorSelectWindow;
     private GraphData data;
     
     private Checkbox[]     cbSystemUsage;
@@ -79,7 +78,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 	    */
 	    JColorChooser colorWindow = new JColorChooser();
 	    Color returnColor =
-		colorWindow.showDialog(this, s,
+		JColorChooser.showDialog(this, s,
 				       selectedCP.getColor());
 	    if (returnColor != null) {
 		selectedCP.setColor(returnColor);

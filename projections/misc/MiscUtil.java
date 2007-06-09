@@ -67,7 +67,7 @@ public class MiscUtil {
 	    throw new ArrayIndexOutOfBoundsException("Sizes do not match!");
 	}
 	
-	Object tempArray[] = (Object [])(targetArray.clone());
+	Object tempArray[] = (targetArray.clone());
 	for (int i=0; i<map.length; i++) {
 	    targetArray[i] = tempArray[map[i]];
 	}

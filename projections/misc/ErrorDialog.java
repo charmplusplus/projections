@@ -10,7 +10,9 @@ import projections.gui.Util;
 public class ErrorDialog extends Dialog
    implements ActionListener
 {
-   public ErrorDialog(Frame parent, String msg)
+	private static final long serialVersionUID = 1L;
+
+	public ErrorDialog(Frame parent, String msg)
    {
 	  super(parent, "ERROR", true);
 	  

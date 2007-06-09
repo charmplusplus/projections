@@ -10,7 +10,12 @@ package projections.misc;
  */
 
 public class CommandLineException extends java.lang.Exception {
-    public CommandLineException(String info) {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public CommandLineException(String info) {
 	super(info);
     }
 }

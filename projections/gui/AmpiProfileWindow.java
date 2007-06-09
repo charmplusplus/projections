@@ -2,7 +2,6 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Time;
 import java.text.*;
 import java.util.*;
 
@@ -12,16 +11,10 @@ import javax.swing.event.*;
 //import org.apache.xpath.operations.And;
 
 import projections.analysis.*;
-import projections.gui.graph.*;
-import projections.misc.*;
 
 public class AmpiProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
-    private static final int NUM_SYS_EPS = 3;
-
-    private AmpiProfileWindow thisWindow;
-
     private AmpiProfileData data;
     private boolean colorsSet;
     private Color[] colors; //every color corresponds to a function
@@ -51,10 +44,6 @@ public class AmpiProfileWindow extends ProjectionsWindow
     private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY;
     private JFloatTextField txtScaleX, txtScaleY;
 
-    //usage greater than "thresh" will be displayed!
-    private float thresh;
-
-    private PieChartWindow pieChartWindow;
     private float[] avgData; // [numFunc+1(other)]
 
     private EntrySelectionDialog entryDialog;
@@ -63,11 +52,8 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     public AmpiProfileWindow(MainWindow parentWindow, Integer myWindowID){
         super(parentWindow, myWindowID);
-	thisWindow = this;
-        colorsSet = false;
+	colorsSet = false;
         colors = null;
-
-        thresh = 0.01f;
 
         if(Analysis.getNumFunctionEvents() > 0)
             ampiTraceOn = true;

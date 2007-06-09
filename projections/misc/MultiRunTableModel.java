@@ -11,7 +11,10 @@ import projections.analysis.*;
 public class MultiRunTableModel
     extends AbstractTableModel
 {
-    private String tableName;
+
+	private static final long serialVersionUID = 1L;
+
+	protected String tableName;
     private MultiRunDataAnalyzer analysisModule;
     // This is the category type the associated JTable is supposed to
     // visualize.

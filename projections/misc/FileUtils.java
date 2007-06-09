@@ -65,7 +65,6 @@ public class FileUtils {
     public static void detectFiles(StsReader sts, String dirPath,
 				   String baseName, int type) {
 	File testFile = null;
-	String fileExt = "";
 
 	// special condition for SUMACC (and any future, single-file
 	// log types) only

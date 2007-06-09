@@ -1,11 +1,8 @@
 package projections.analysis;
 
 import java.io.*;
-import java.util.*;
-
 import javax.swing.*;
 
-import projections.misc.*;
 import projections.gui.*;
 
 public class PoseDopReader
@@ -124,10 +121,10 @@ public class PoseDopReader
 	long virtualStart;
 	long virtualEnd;
 
-	long realStartTime = (long)(realStartInterval*realIntervalSize);
-	long realEndTime = (long)(realEndInterval*realIntervalSize);
-	long virtStartTime = (long)(virtStartInterval*virtIntervalSize);
-	long virtEndTime = (long)(virtEndInterval*virtIntervalSize);
+	long realStartTime = (realStartInterval*realIntervalSize);
+	long realEndTime = (realEndInterval*realIntervalSize);
+	long virtStartTime = (virtStartInterval*virtIntervalSize);
+	long virtEndTime = (virtEndInterval*virtIntervalSize);
 
 	// **FIXME** Hardcode 2 types = 0 - Real time progress
 	//                              1 - Real time no progress

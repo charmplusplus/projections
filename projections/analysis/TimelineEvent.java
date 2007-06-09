@@ -1,6 +1,5 @@
 package projections.analysis;
 
-import projections.misc.*;
 import java.util.*;
 
 public class TimelineEvent

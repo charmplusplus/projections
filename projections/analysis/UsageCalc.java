@@ -1,9 +1,6 @@
 package projections.analysis;
 
-import java.lang.*;
 import java.io.*;
-import java.util.*;
-
 import projections.gui.*;
 import projections.misc.*;
 
@@ -26,11 +23,7 @@ public class UsageCalc extends ProjDefs
     // it needs, however, to be reset between the reading of two log files.
     private int curEntry = -1;
 
-    // **CW** support variables for delta encoding
-    private long prevTime = 0;
     private boolean deltaEncoded = false;
-    private int tokenExpected = 2;
-    
     private void intervalCalc(float[][] data,int type, int entry, long time) {
 
 	if (type != CREATION) {
@@ -108,7 +101,7 @@ public class UsageCalc extends ProjDefs
 	    break;
 	default:
 	    /*ignore it*/
-	};
+	}
     }
 
     // returns accumulate_time[func_idx+1(other)]
@@ -121,7 +114,6 @@ public class UsageCalc extends ProjDefs
 
 	GenericLogReader reader = new GenericLogReader(procnum, v);
 	LogEntryData LE = new LogEntryData();
-	int curTID = -1;
 	AmpiFunctionData curFunc = null;
 
 	long time=0;
@@ -223,7 +215,6 @@ public class UsageCalc extends ProjDefs
 
     public float[][] usage(int procnum, long begintime, 
 			   long endtime, double v) {
-	float total;
 	version = v;
 	beginTime = begintime;
 	endTime = endtime;
@@ -324,7 +315,6 @@ public class UsageCalc extends ProjDefs
 	    System.out.println("Exception while reading log file " +
 			       pnum); 
 	}
-	total = 0;
 	for (int j=0; j<dataLen; j++) { //Scale times to percent
 	    // System.out.println("Data " + data[0][j] + " Send Time " + 
 	    // data[1][j]);

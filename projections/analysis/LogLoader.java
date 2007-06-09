@@ -6,8 +6,6 @@ package projections.analysis;
  */
 
 import java.io.*;
-import java.lang.*;
-import java.text.DecimalFormat;
 import java.util.*;
 
 import javax.swing.*;
@@ -19,22 +17,14 @@ import projections.misc.*;
 
 public class LogLoader extends ProjDefs
 {
-    // **CW** register previous event timestamp to support delta encoding.
-    private long prevTime = 0;
-    private boolean deltaEncoded = false;
-    private int tokenExpected = 2;
-
     private boolean isProcessing = false;
     boolean ampiTraceOn = false;
 
-    public long determineEndTime(OrderedIntList validPEs) 
-	throws LogLoadException
+    public long determineEndTime(OrderedIntList validPEs)
     {
 	long BeginTime, EndTime;
     
-	int              Type;
 	long             Time;
-	int              Len;
 	long 	         back;
 	String           Line;
 	RandomAccessFile InFile;
@@ -67,7 +57,6 @@ public class LogLoader extends ProjDefs
 	    // A Cleaner fake mechanism is probably required.
 	    long lastRecordedTime = 0;
 	    int dummyInt = 0;
-	    long dummyLong = 0;
 	    int type = 0;
 	    try {
 		InFile = 
@@ -77,7 +66,7 @@ public class LogLoader extends ProjDefs
 		back = InFile.length()-80*3; //Seek to the end of the file
 		if (back < 0) back = 0;
 		InFile.seek(back);
-		while (InFile.readByte() != '\n');
+		while (InFile.readByte() != '\n'){}
 		while (true) {
 		    Line = InFile.readLine();
 		    // incomplete files can end on a proper previous
@@ -680,13 +669,9 @@ public class LogLoader extends ProjDefs
     {
 	long BeginTime = 0;
 
-	int               Entry       = 0;
 	long              Time        = Long.MIN_VALUE;
-	boolean		LogMsgs     = true;
 	LogEntry          LE          = null;
 	TimelineEvent     TE          = null;
-	// Hashtable userEvents stores unfinished userEvents
-	Hashtable         userEvents  = new Hashtable();  
 	// just for temp purposes
 	UserEvent         userEvent   = null;  
 	TimelineMessage   TM          = null;
@@ -709,10 +694,6 @@ public class LogLoader extends ProjDefs
 		ampiTraceOn = true;
 	    }
 
-	    // Each time we open the file, we need to reset the
-	    // previous event timestamp to 0 to support delta encoding.
-	    prevTime = 0;
-
 	    isProcessing = false; 
 	    LogEntry lastBeginEvent = null;
 	    while (true) { //Seek to time Begin
@@ -729,12 +710,10 @@ public class LogLoader extends ProjDefs
 		if ((LE.TransactionType == BEGIN_PROCESSING) && 
 		    (LE.Entry != -1)) {
 		    Time       = LE.Time - BeginTime;
-		    Entry      = LE.Entry;
 		    lastBeginEvent = LE;
 		} else if ((LE.TransactionType == END_PROCESSING) &&
 			   (LE.Entry != -1)) {
 		    Time       = LE.Time - BeginTime;
-		    Entry      = LE.Entry;
 		    lastBeginEvent = null;
 		} else if (LE.TransactionType == BEGIN_IDLE) {
 		    Time = LE.Time - BeginTime;
@@ -1260,7 +1239,7 @@ public class LogLoader extends ProjDefs
     }   
 
     public long searchtimeline(int PeNum, int Entry, int Num)
-	throws LogLoadException, EntryNotFoundException
+	throws LogLoadException
     {
 	long BeginTime = 0;
 	long           Count = 0;
@@ -1274,10 +1253,6 @@ public class LogLoader extends ProjDefs
 	    System.gc();
 	    reader = new GenericLogReader(PeNum, Analysis.getVersion());
 	    data = new LogEntryData();
-
-	    // **CW** each time we open the file, we need to reset the
-	    // previous event timestamp to 0 to support delta encoding.
-	    prevTime = 0;
 
 	    //Throws EOFException at end of file
 	    while(true) {
@@ -1311,8 +1286,6 @@ public class LogLoader extends ProjDefs
     {
 	ViewerEvent    VE;
 	Vector ret = null;
-	String         Line;
-
 	GenericLogReader reader;
 	LogEntryData data;
 
@@ -1320,10 +1293,6 @@ public class LogLoader extends ProjDefs
 	    ret = new Vector ();
 	    reader = new GenericLogReader(PeNum, Analysis.getVersion());
 	    data = new LogEntryData();
-
-	    // **CW** each time we open the file, we need to reset the
-	    // previous event timestamp to 0 to support delta encoding.
-	    prevTime = 0;
 
 	    //Throws EOFException at end of file
 	    while (true) {
@@ -1343,27 +1312,5 @@ public class LogLoader extends ProjDefs
 				       LogLoadException.READ);
 	}
 	return ret;
-    }   
-
-    private void updatePEStringBuffer(StringBuffer validPEStringBuffer,
-				      int basePE, int upperPE) {
-	// previously commited stuff exists, so append a comma
-	if (validPEStringBuffer.length() > 0) {
-	    validPEStringBuffer.append(",");
-	}
-	// determine if the new block is a range or just a single value.
-	if (upperPE > basePE) {
-	    validPEStringBuffer.append(String.valueOf(basePE));
-	    validPEStringBuffer.append("-");
-	    validPEStringBuffer.append(String.valueOf(upperPE));
-	} else if (upperPE == basePE) {
-	    validPEStringBuffer.append(String.valueOf(basePE));
-	} else {
-	    System.err.println("Internal Error: When determining valid " +
-			       "processor range, basePE(" + basePE + ") " +
-			       "> upperPE(" + upperPE + ") which is " +
-			       "impossible. Please report to developers!");
-	    System.exit(-1);
-	}
     }
 }

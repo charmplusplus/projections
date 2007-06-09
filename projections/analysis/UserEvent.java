@@ -31,7 +31,7 @@ public class UserEvent extends Component
 
   public void setBounds(int ylocation, TimelineData data) {
     this.data = data;
-    long LEN, BT, ET;
+    long BT, ET;
     
     if(EndTime > data.endTime)
       ET = data.endTime - data.beginTime;
@@ -61,7 +61,6 @@ public class UserEvent extends Component
   }
  
   public void paint(Graphics g) {
-    long viewbt = BeginTime;
     g.setColor(color);
     g.fillRect(0, 0, width, 5);
   }

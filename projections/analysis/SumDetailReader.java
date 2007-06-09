@@ -1,8 +1,5 @@
 package projections.analysis;
 
-import projections.misc.*;
-
-import java.lang.*;
 import java.io.*;
 import java.util.*;
 
@@ -50,14 +47,9 @@ public class SumDetailReader extends ProjectionsReader
     //                 but good enough.
     private Vector rawData[][];
 
-    // private miscellaneous data
-    private double version;
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
-    private int tokenType;
-
-    public SumDetailReader(String filename, double Nversion) 
-	throws IOException
+    public SumDetailReader(String filename, double Nversion)
     {
 	super(filename, String.valueOf(Nversion));
     }
@@ -243,14 +235,12 @@ public class SumDetailReader extends ProjectionsReader
     }
 
     public void loadIntervalData(double intervalSize, long startInterval,
-				 long endInterval) 
-	throws IOException
+				 long endInterval)
     {
 	
     }
 
-    public void loadIntervalData(long startInterval, long endInterval) 
-	throws IOException
+    public void loadIntervalData(long startInterval, long endInterval)
     {
 	
     }

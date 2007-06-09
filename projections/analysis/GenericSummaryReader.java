@@ -1,10 +1,6 @@
 package projections.analysis;
 
-import projections.misc.*;
-
-import java.lang.*;
 import java.io.*;
-import java.util.*;
 
 /** 
  *  Adapted by Chee Wai Lee
@@ -65,7 +61,7 @@ public class GenericSummaryReader
     public long phaseData[][][];
 
     // private miscellaneous data
-    private double version;
+    protected double version;
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
     private int tokenType;

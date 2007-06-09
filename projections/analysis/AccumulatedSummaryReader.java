@@ -91,8 +91,7 @@ public class AccumulatedSummaryReader extends ProjectionsReader
 	reader.close();
     }
     
-    public void reset() 
-	throws IOException
+    public void reset()
     {
 	// do nothing. This reader is not intended to work in a resetable
 	// fashion.

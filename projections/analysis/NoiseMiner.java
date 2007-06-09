@@ -2,18 +2,13 @@ package projections.analysis;
 
 import projections.misc.*;
 import projections.gui.*;
-//import projections.analysis.*;
 
 import java.io.*;
 import java.util.*;
-import java.text.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 //import jnt.FFT.*;
-//import java.lang.*;
 
 
 /**
@@ -46,7 +41,7 @@ public class NoiseMiner extends ProjDefs
 
 	private Duration osQuanta;
 
-	private final double peMergeDistance = 0.2;
+	protected double peMergeDistance = 0.2;
 
 	private LinkedList<NoiseResult> results;
 	private LinkedList<NoiseResult> resultsClustered;
@@ -267,8 +262,8 @@ public class NoiseMiner extends ProjDefs
 	private class eventWindow{
 		public TreeSet<Long> occurrences; // essentially a sorted list or heap
 		private int max;
-		private Duration period;
-		private Duration prominentPeriod;
+		protected Duration period;
+		protected Duration prominentPeriod;
 
 		eventWindow(int maxSize){
 			occurrences = new TreeSet<Long>();
@@ -452,7 +447,7 @@ public class NoiseMiner extends ProjDefs
 			for(int i=0;i<nbins;i++){
 				c+=bin_window[i].size();
 			}
-			System.out.println("total events in all bin windows:" + c);
+//			System.out.println("total events in all bin windows:" + c);
 			return c;
 		}
 
@@ -605,11 +600,11 @@ public class NoiseMiner extends ProjDefs
 					Duration periodicity = new Duration(c.events.period());
 					Duration duration = new Duration(c.mean());
 					if( duration.us() / periodicity.us() > cutoff_contribution ){
-            System.out.println("Keeping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() );
+//            System.out.println("Keeping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() );
             clustersFiltered.add(c);
 					}
           else {
-            System.out.println("Dropping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() ); 
+//            System.out.println("Dropping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() ); 
             // clustersFiltered.add(c); 
           }
 				}
@@ -852,7 +847,7 @@ public class NoiseMiner extends ProjDefs
 
 
 			// Merge all the events across this pe
-			System.out.println("Creating histogram for pe");
+//			System.out.println("Creating histogram for pe");
 			Histogram h_pe = new Histogram();
 			for(int i=0;i<numEvents;i++){
 				if(h[i].haveManySamples()){

@@ -4,7 +4,6 @@ import projections.gui.graph.*;
 import projections.gui.*;
 import projections.misc.*;
 
-import java.io.*;
 import java.util.*;
 import java.awt.*; // unfortunate!!!
 
@@ -57,9 +56,9 @@ public class MultiRunDataAnalyzer {
 
     // statistical information on the extra information.
     // extraTimeMean - indexed by extra entry ID
-    private double extraTimeMean[];
+//    private double extraTimeMean[];
     // extraTimeVariance - indexed by extra entry ID
-    private double extraTimeVariance[];
+//    private double extraTimeVariance[];
 
     // Categorization support data structure
     // Dimension 0 - indexed by data type.
@@ -76,8 +75,7 @@ public class MultiRunDataAnalyzer {
     private static final int CAT_OVERHEAD_IDLE = 3;
 
     // static color assignments for categories
-    private static final Color catColors[] =
-    { Color.green, Color.yellow, Color.red, Color.white };
+//    private static final Color catColors[] = { Color.green, Color.yellow, Color.red, Color.white };
 
     // base data information
     private int numRuns;
@@ -90,7 +88,7 @@ public class MultiRunDataAnalyzer {
     // Create one statistics object for each data type read from
     // the summary format. These can be reused independently.
     private ProjectionsStatistics timeStats; 
-    private ProjectionsStatistics numCallsStats;
+//    private ProjectionsStatistics numCallsStats;
 
     // OUTPUT data array
     double outputData[][];
@@ -98,7 +96,7 @@ public class MultiRunDataAnalyzer {
     public MultiRunDataAnalyzer(MultiRunData data) {
 
 	timeStats = new ProjectionsStatistics();
-	numCallsStats = new ProjectionsStatistics();
+//	numCallsStats = new ProjectionsStatistics();
 
 	this.data = data;
 	numEPs = data.getNumEPs();

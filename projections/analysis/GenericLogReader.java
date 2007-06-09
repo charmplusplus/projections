@@ -4,7 +4,6 @@ import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
-import java.util.*;
 
 /**
  *  Written by Chee Wai Lee
@@ -21,8 +20,6 @@ import java.util.*;
 public class GenericLogReader extends ProjectionsReader
     implements PointCapableReader
 {
-    private static final long INITIAL_STEP = 1024; // reasonable jump size
-
     private AsciiIntegerReader reader;
     private double version;
 
@@ -44,10 +41,6 @@ public class GenericLogReader extends ProjectionsReader
     // to straddle user-specified time-boundaries.
     //
     private LogEntryData lastBeginEvent = null;
-
-    // indexed by EP with a Vector of run length encoding blocks.
-    //
-    private Vector intervalData[];
 
     public GenericLogReader(String filename, double Nversion) {
 	super(filename, String.valueOf(Nversion));
@@ -338,29 +331,6 @@ public class GenericLogReader extends ProjectionsReader
 	//	lookForEventOnOrAfter(timestamp, INITIAL_STEP, -1, 0, data);
     }
     
-    private void lookForNextEventOnOrAfter(long timestamp, long seekpoint,
-					   long lastTimestamp, 
-					   long lastSeekpoint,
-					   LogEntryData data)
-	throws IOException, EOFException
-    {
-	reader.skip(seekpoint-lastSeekpoint);
-	reader.nextLine();
-	nextEvent(data);
-	// skip unrecognized tags
-	while (data.type == -1) {
-	    nextEvent(data);
-	}
-	if (data.time < timestamp) {
-	    
-	} else if (data.time > timestamp) {
-	    
-	} else {
-	    // found! just return!
-	    return;
-	}
-    }
-
     // More precisely, the next RECOGNIZED event
     private void seqLookForNextEventOnOrAfter(long timestamp, 
 					      LogEntryData data) 

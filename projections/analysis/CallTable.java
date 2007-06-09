@@ -2,16 +2,11 @@ package projections.analysis;
 
 import projections.misc.*;
 import projections.gui.*;
-import projections.analysis.*;
-
 import java.io.*;
 import java.util.*;
 import java.text.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
 public class CallTable extends ProjDefs
 {

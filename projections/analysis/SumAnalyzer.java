@@ -1,10 +1,6 @@
 package projections.analysis;
 
-import java.lang.*;
 import java.io.*;
-import java.util.*;
-
-import java.awt.event.*;
 import javax.swing.*;
 
 import projections.gui.*;
@@ -21,7 +17,6 @@ public class SumAnalyzer extends ProjDefs
     public static final int ACC_MODE = 0;
     public static final int NORMAL_MODE = 1;
 
-    private int[][][][] dataArray;
     private StreamTokenizer tokenizer;
     // Holds the total time (in microseconds) spent executing messages
     private long[][] ChareTime;   
@@ -61,8 +56,6 @@ public class SumAnalyzer extends ProjDefs
     public SumAnalyzer()
 	throws IOException,SummaryFormatException
     {
-	long Filled;
-	double value;
 	int tokenType;
 	int CurrentUserEntry;
 	int nPe=1,numEntry=0,versionNum=0;
@@ -198,7 +191,6 @@ public class SumAnalyzer extends ProjDefs
 	    
 	    //Read the SECOND line (processor usage)
 	    int nUsageRead=0;
-	    boolean error = false;
 	    // we perform on-the-fly expansion of larger interval sized
 	    // data (ie. myIntervalSize > IntervalSize).
 	    int val = 0;
@@ -415,8 +407,7 @@ public class SumAnalyzer extends ProjDefs
      * Resample ProcessorUtilization data into SystemUsageData.
      */
     public int[][] GetSystemUsageData(int intervalStart, int intervalEnd, 
-				      long OutIntervalSize) 
-	throws IOException,SummaryFormatException
+				      long OutIntervalSize)
     {
 	int numProcessors=ProcessorUtilization.length;
 	int intervalRange = intervalEnd - intervalStart + 1;

@@ -2,9 +2,6 @@ package projections.analysis;
 
 import java.io.*;
 import java.util.*;
-import java.lang.*;
-
-import projections.gui.*;
 import projections.misc.*;
 
 /** 
@@ -79,7 +76,7 @@ public class StsReader extends ProjDefs
 	    BufferedReader InFile = 
 		new BufferedReader(new InputStreamReader(new FileInputStream(FileName)));
 	    int ID,ChareID,MsgID;
-	    String Line,Type,Name;
+	    String Line,Name;
 	    while ((Line = InFile.readLine()) != null) {
 		StringTokenizer st = new StringTokenizer(Line);
 		String s1 = st.nextToken();
@@ -108,7 +105,6 @@ public class StsReader extends ProjDefs
 		    ChareList[ID].Type       = new String(s1);
 		    ClassNames[ID]      = ChareList[ID].Name;
 		} else if (s1.equals("ENTRY")) {
-		    Type    = st.nextToken();
 		    ID      = Integer.parseInt(st.nextToken());
 		    StringBuffer nameBuf=new StringBuffer(st.nextToken());
 		    Name = nameBuf.toString();

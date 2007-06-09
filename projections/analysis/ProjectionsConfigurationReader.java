@@ -2,7 +2,6 @@ package projections.analysis;
 
 import java.io.*;
 import java.util.*;
-import java.lang.*;
 import java.lang.reflect.*;
 
 import projections.misc.*;
@@ -19,7 +18,6 @@ import projections.misc.*;
 public class ProjectionsConfigurationReader
 {
     private String baseName;
-    private String logDirectory;
     private String configurationName;
 
     private boolean dirty;
@@ -36,7 +34,7 @@ public class ProjectionsConfigurationReader
     public ProjectionsConfigurationReader(String filename)
     {
 	baseName = FileUtils.getBaseName(filename);
-	logDirectory = FileUtils.dirFromFile(filename);
+	String logDirectory = FileUtils.dirFromFile(filename);
 	configurationName = baseName + ".projrc";
 	dirty = false;
 	try {
@@ -53,7 +51,7 @@ public class ProjectionsConfigurationReader
 	try {
 	    BufferedReader InFile = 
 		new BufferedReader(new InputStreamReader(new FileInputStream(configurationName)));
-	    String Line,Type,Name;
+	    String Line;
 	    while ((Line = InFile.readLine()) != null) {
 		StringTokenizer st = new StringTokenizer(Line);
 		String s1 = "";

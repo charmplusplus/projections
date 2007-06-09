@@ -5,8 +5,6 @@
 package projections.gui.graph;
 
 import projections.gui.*;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.*;
 
 public class DataSource2D extends DataSource

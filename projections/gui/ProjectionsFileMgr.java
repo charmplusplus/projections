@@ -15,7 +15,6 @@ public class ProjectionsFileMgr {
 
   /** Constructor. */
   public ProjectionsFileMgr(String[] fileNames) 
-    throws IOException 
   { 
     stsFiles_ = new File[fileNames.length];
     logFiles_ = new File[fileNames.length][];
@@ -38,7 +37,7 @@ public class ProjectionsFileMgr {
   }
 
   /** Print out the files that were set. */
-  public void printSts() throws IOException {
+  public void printSts() {
     for (int i=0; i<stsFiles_.length; i++) { 
       //System.out.println(stsFiles_[i].getCanonicalPath());
       for (int j=0; j<logFiles_[i].length; j++) {
@@ -71,7 +70,6 @@ public class ProjectionsFileMgr {
   /** Filter files in the directory and only get those logs associated with
    *  the STS file. */
   private File[] findFiles(String stsPathName)
-    throws IOException
   {
     File stsFile = new File(stsPathName);
     File stsDir = new File(stsFile.getParent());

@@ -162,7 +162,7 @@ public abstract class ProjectionsWindow
     public void actionPerformed(ActionEvent ae){
 	if (ae.getSource() instanceof Button) {
 	    Button b = (Button)ae.getSource();
-	    for(int k=0; k < parentWindow.NUM_WINDOWS;k++) {
+	    for(int k=0; k < MainWindow.NUM_WINDOWS;k++) {
 		if (b == window[k]) {
 		    break;
 		}

@@ -280,10 +280,6 @@ public class TableSorter extends TableMap {
         model.setValueAt(aValue, indexes[aRow], aColumn);
     }
 
-    private void sortByColumn(int column) {
-        sortByColumn(column, true);
-    }
-
     public void sortByColumn(int column, boolean ascending) {
         this.ascending = ascending;
         sortingColumns.removeAllElements();

@@ -4,7 +4,6 @@
  */
 
 package projections.gui.graph;
-import projections.gui.*;
 import java.awt.*;
 import java.text.DecimalFormat;
 
@@ -109,7 +108,7 @@ public abstract class Axis
 	dataSize : DIST_BETWEEN_MINOR_TICKS;
       numTicks = (int)(size / tickSpacing);
     }
-  };
+  }
 
   /* draw the axis, ticks, and labels. */
   public void draw(Graphics g, FontMetrics fm, 

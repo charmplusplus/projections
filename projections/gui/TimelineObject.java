@@ -26,8 +26,6 @@ public class TimelineObject extends Component
     private long packtime;
     
     private TimelineData data;
-    private Frame f;
-    
     public TimelineMessage[] messages;
     private PackTime[] packs;
     // private UserEvent[] userEvents;
@@ -66,7 +64,6 @@ public class TimelineObject extends Component
 	pCurrent  = p1;
 	pCreation = tle.SrcPe;
 	EventID = tle.EventID;
-	f = (Frame)data.timelineWindow;
 	msglen = tle.MsgLen;
 	recvTime = tle.RecvTime;
 	if (tle.id != null) {
@@ -504,7 +501,7 @@ public class TimelineObject extends Component
 	b = 255-g;
 	//b = 56;
 	return new Color(r, g,b );
-   };
+   }
    
    public void paint(Graphics g)
    {     
@@ -752,7 +749,7 @@ public class TimelineObject extends Component
 
    public void setBounds(int ylocation)
    {
-	  long LEN, BT, ET;
+	  long BT, ET;
 	  
 	  if(endTime > data.endTime)
 		 ET = data.endTime - data.beginTime;

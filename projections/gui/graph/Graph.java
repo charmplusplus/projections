@@ -36,9 +36,6 @@ public class Graph extends JPanel
     private Font font = null;
     private FontMetrics fm = null;
     
-    // to print y axis title vertically
-    private JLabel yLabel;	
-
     // number of pixels per value
     double pixelincrementX, pixelincrementY;
     // number of pixels per tick
@@ -109,7 +106,7 @@ public class Graph extends JPanel
 	    GraphType = type;
 	    repaint();
 	} else {
-	    ; //unknown graph type.. do nothing ; draw a bargraph
+	     //unknown graph type.. do nothing ; draw a bargraph
 	}
     }
 
@@ -290,9 +287,6 @@ public class Graph extends JPanel
 	int x = e.getX();
     	int y = e.getY();
 	
-	int index,valNo;
-	double value;
-	
 	int xVal = getXValue(x);
 	int yVal = getYValue(xVal, y);
 
@@ -338,11 +332,6 @@ public class Graph extends JPanel
 	if (text == null) {
 	    return;
 	}
-	// else display ballon
-	int bX, bY;
-	// I'm doing these calculations, i probably should see if I
-	// can avoid it
-		
 	// old popup still exists, but mouse has moved over a new 
 	// section that has its own popup
 	if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
@@ -502,7 +491,7 @@ public class Graph extends JPanel
 	    cury = originY - (int)(i*pixelincrementY);
             if (i % valuesPerLabelY == 0) {
 		g.drawLine(originX+5, cury, originX-5,cury);
-		yLabel = "" + (long)(i); 
+		yLabel = "" + i; 
 		g.drawString(yLabel, originX-fm.stringWidth(yLabel)-5, 
 			     cury + sw/2);
 	    } else {
@@ -726,23 +715,6 @@ public class Graph extends JPanel
 	for (int i=0; i<data.length-1; i++) {
 	    data[i+1] = data[i+1]+data[i];
 	}
-    }
-
-    private double findMaxOfSums() {
-	double maxValue = 0.0;
-
-	int xValues = dataSource.getIndexCount();
-	int yValues = dataSource.getValueCount(); // no. of y values for each x
-	double data[] = new double[yValues];
-
-	for (int i=0; i<xValues; i++) {
-	    dataSource.getValues(i, data);
-	    prefixSum(data);
-	    if (maxValue < data[yValues-1]) {
-		maxValue = data[yValues-1];
-	    }
-	}
-	return maxValue;
     }
 
     /**

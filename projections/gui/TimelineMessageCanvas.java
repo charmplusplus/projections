@@ -8,7 +8,7 @@ public class TimelineMessageCanvas extends Canvas
 {
    private String[] sTitles;
    private int[]    width;
-   private TimelineObject obj;;
+   private TimelineObject obj;
    private FontMetrics fm;
    private TimelineMessage[] msgs;
    private String[][] names;

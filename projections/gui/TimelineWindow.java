@@ -5,12 +5,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import java.io.*;
-import java.util.*;
-
 import java.text.*;
-
-import projections.misc.*;
-import projections.analysis.*;
 
 public class TimelineWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener, ItemListener
@@ -42,10 +37,6 @@ public class TimelineWindow extends ProjectionsWindow
     private Checkbox cbPacks, cbMsgs, cbIdle, cbUser;
    
     private int maxLabelLen;
-    private long oldEndTime;
-   
-    private TimelineMessageWindow messageWindow;
-
     private UserEventWindow userEventWindow;
  
     // public access parameter variables
@@ -110,7 +101,7 @@ public class TimelineWindow extends ProjectionsWindow
 		    }
 		};
 	}
-    };
+    }
     
     class NoUpdatePanel extends Panel
     {

@@ -7,7 +7,6 @@
  */
 
 package projections.gui.graph;
-import projections.gui.*;
 
 public abstract class YAxis
 {

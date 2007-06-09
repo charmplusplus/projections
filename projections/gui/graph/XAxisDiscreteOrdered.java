@@ -28,7 +28,7 @@ public class XAxisDiscreteOrdered
     *   Not all indices will necessarily have their name displayed.
     * e.g., "7", "10-11ms"
     */
-   public String getIndexName(int index) { return "" + getIndex(index); };
-   public double getIndex(int index) { return discreteList[index];};
-   public double getMultiplier() { return 1;};
+   public String getIndexName(int index) { return "" + getIndex(index); }
+   public double getIndex(int index) { return discreteList[index];}
+   public double getMultiplier() { return 1;}
 }

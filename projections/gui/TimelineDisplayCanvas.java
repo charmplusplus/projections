@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.awt.*;
-import java.awt.event.*;
 
 public class TimelineDisplayCanvas extends Container 
 {

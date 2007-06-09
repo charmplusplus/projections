@@ -19,8 +19,8 @@ public class LegendCanvas extends Canvas
     private FontMetrics fm;
     private int textheight;
     private int maxTextWidth;
-    private Rectangle boundingBox;
-    private ScrollPane sp;
+//    private Rectangle boundingBox;
+//    private ScrollPane sp;
     private int posx;
     private int posy;
 
@@ -201,29 +201,11 @@ public class LegendCanvas extends Canvas
     }
 
     /**
-     *  For an existing show filter. Avoids creating a new object.
-     */
-    private void defaultShowFilter() {
-	for (int i=0; i<showFilter.length; i++) {
-	    showFilter[i] = true;
-	}
-    }
-
-    /**
      *  For a new sort map
      */
     private void defaultSortMap(int length) {
 	sortMap = new int[length];
 	for (int i=0; i<length; i++) {
-	    sortMap[i] = i;
-	}
-    }
-
-    /**
-     *  For an existing sort map. Avoids the creation of a new object.
-     */
-    private void defaultSortMap() {
-	for (int i=0; i<sortMap.length; i++) {
 	    sortMap[i] = i;
 	}
     }

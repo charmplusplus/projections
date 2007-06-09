@@ -1,7 +1,5 @@
 package projections.gui.graph;
 
-import projections.gui.*;
-
 public class MultiRunXAxis
     extends XAxis
 {

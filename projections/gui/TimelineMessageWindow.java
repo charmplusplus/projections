@@ -2,7 +2,6 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import projections.analysis.*;
 
 public class TimelineMessageWindow extends Frame
    implements ActionListener

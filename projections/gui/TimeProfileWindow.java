@@ -59,7 +59,8 @@ public class TimeProfileWindow extends GenericGraphWindow
     private AmpiTimeProfileWindow ampiGraphPanel = null;
     private JPanel epPanel = null;
     private boolean ampiTraceOn = false;
-    private int ampiPanelTabIndex, epPanelTabIndex;
+    protected int ampiPanelTabIndex;
+    protected int epPanelTabIndex;
 
     void windowInit() {
 	// acquire data using parent class

@@ -2,7 +2,6 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.Time;
 import java.text.*;
 import java.util.*;
 
@@ -12,15 +11,13 @@ import javax.swing.event.*;
 //import org.apache.xpath.operations.And;
 
 import projections.analysis.*;
-import projections.gui.graph.*;
-import projections.misc.*;
 
 public class ProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
     private static final int NUM_SYS_EPS = 3;
 
-    private ProfileWindow thisWindow;
+    public ProfileWindow thisWindow;
 
     private ProfileData data;
     private boolean colorsSet;
@@ -52,7 +49,7 @@ public class ProfileWindow extends ProjectionsWindow
     //usage greater than "thresh" will be displayed!
     private float thresh;
 
-    private PieChartWindow pieChartWindow;
+    public PieChartWindow pieChartWindow;
     private float[][] avgData;
 
     private EntrySelectionDialog entryDialog;
@@ -872,14 +869,6 @@ public class ProfileWindow extends ProjectionsWindow
     }
 
     public void MakePOArray(long bt, long et)
-    {
-    }
-
-    private void setScales()
-    {
-    }
-
-    private void setSizes()
     {
     }
 

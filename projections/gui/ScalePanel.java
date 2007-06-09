@@ -61,7 +61,7 @@ public class ScalePanel extends Panel
 			for (i=0;i<parents.size();i++)
 				((ScalePanel)parents.elementAt(i)).repaint();
 		}
-	};
+	}
 	/* An axis maps screen coordinates to panel coordinates.
 	 * It maintains its direction's zoom slider and the scaling 
 	 * factors.
@@ -185,7 +185,7 @@ public class ScalePanel extends Panel
 			}
 			return ticks;
 		}
-	};
+	}
 	
 	private Axis hor,ver;
 	private Child child;
@@ -194,7 +194,7 @@ public class ScalePanel extends Panel
 	//************ Mouse actions ********
 	public static interface StatusDisplay {
 		public void setStatus(String msg);
-	};
+	}
 	private StatusDisplay statusDisplay;
 	//Update an ongoing mouse drag
 	private int lastX=-1,lastY=-1;

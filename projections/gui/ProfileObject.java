@@ -10,7 +10,6 @@ public class ProfileObject extends Component
 {
    private float usage;
    private String name;
-   private int processor;
    private String[] bubbletext;
    private Bubble bubble;
 
@@ -20,7 +19,6 @@ public class ProfileObject extends Component
    {
 	  usage = u;
 	  name = s;
-	  processor = p;
 	  bubbletext = new String[3];
 	  bubbletext[0] = s;
 	  NumberFormat df = NumberFormat.getInstance();

@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
-import javax.swing.event.*;
 import projections.analysis.UserEvent;
 import java.text.DecimalFormat;
 import projections.gui.count.TableSorter;
@@ -46,7 +45,7 @@ public class UserEventWindow extends JFrame
 	  table, value, selected, focused, row, column);
 	return this;
       }
-    };
+    }
 
   private class UserEventTable extends AbstractTableModel {
     private int index_ = -1;

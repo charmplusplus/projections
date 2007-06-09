@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.util.Vector;
-import java.io.*;
 import java.awt.*;
 import javax.swing.*;
 
@@ -209,7 +208,7 @@ public class TimelineData
 			    for (int j=0;
 				 j<tloArray[newpindex][n].messages.length;
 				 j++) {
-				mesgVector[newp].addElement((TimelineMessage)tloArray[newpindex][n].messages[j]);
+				mesgVector[newp].addElement(tloArray[newpindex][n].messages[j]);
 			    }
 			}
 			// copy user events from larger array into smaller array
@@ -330,11 +329,7 @@ public class TimelineData
 	TimelineEvent tle;
 	
 	int numItems;
-	long btime, etime, rtime;
-	long cpubegin, cpuend;
-	int entry, pSrc, numMsgs, numpacks, msglen;
-	int EventID;
-	ObjectId tid;
+	int numMsgs, numpacks;
 	tl = new Vector();
 	Vector userEvents = new Vector();
 	mesgVector[pnum] = new Vector();
@@ -367,7 +362,7 @@ public class TimelineData
 	    TimelineMessage[] msgs = new TimelineMessage[numMsgs];
 	    for (int m=0; m<numMsgs; m++) {
 		msgs[m] = (TimelineMessage)msglist.elementAt(m);
-		mesgVector[pnum].addElement((TimelineMessage)msglist.elementAt(m));
+		mesgVector[pnum].addElement(msglist.elementAt(m));
 	    }	
 	    packlist = tle.PackTimes;
 	    if (packlist == null) {
@@ -398,23 +393,8 @@ public class TimelineData
 				   int pCurrent,long executiontime,
 				   TimelineObject objCurrent,
 				   int drawordelete) {
-	double yscale;
-	
-	int startpe_position,endpe_position;
-	
-	
 	Dimension dim = displayCanvas.getSize();
-	double calc_xscale = (double )(pixelIncrement/timeIncrement);
-	long time = endTime-beginTime+1;
-	int mywidth=dim.width;
-	int maxx = offset + (int)((endTime-beginTime)*
-				  pixelIncrement/timeIncrement);
-	int h=objCurrent.h;
-	int startY=objCurrent.startY;
-	
 	processorList.reset();
-	startpe_position = 0;
-	endpe_position = 0;
 	int count =0;
 	TimelineLine line;
 	
@@ -440,23 +420,12 @@ public class TimelineData
 	for (int i =0;i < processorList.size();i++) {
 	    int pe = processorList.nextElement();
 	    if (pe == pCreation) {
-		startpe_position = count;
 	    }
 	    if (pe == pCurrent) {
-		endpe_position = count;
 	    }
 	    count++;	
 	}
 	processorList.reset();
-	yscale = (double )dim.height/(double )(processorList.size());
-	
-	int x1 = (int)((double)(creationtime - beginTime)*
-		       calc_xscale+offset);
-	int x2 = (int)((double)(executiontime - beginTime)*
-		       calc_xscale+offset);
-	int y1 = (int )(yscale * (double )startpe_position + h+startY+5+5);
-	int y2 = (int )(yscale * (double )endpe_position + h);
-	
 	line = new TimelineLine(pCreation,pCurrent,objCurrent,
 				creationtime,executiontime);
 	mesgCreateExecVector.add(line);

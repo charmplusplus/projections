@@ -1,7 +1,6 @@
 package projections.gui.graph;
 
 import java.util.*;
-import projections.gui.*;
 
 public class XAxisDiscrete
     extends XAxis
@@ -46,6 +45,6 @@ public class XAxisDiscrete
     *   Not all indices will necessarily have their name displayed.
     * e.g., "7", "10-11ms"
     */
-    public String getIndexName(int index) { return discreteNames[index]; };
-    public double getMultiplier() { return 1;};
+    public String getIndexName(int index) { return discreteNames[index]; }
+    public double getMultiplier() { return 1;}
 }

@@ -22,7 +22,7 @@ public class TimelineLine{
 		this.pCurrent = pCurrent;
 		this.executiontime = executiontime;
 		
-	};
+	}
 
 	TimelineLine(int pCreation,int pCurrent,TimelineObject obj,long creationtime,long executiontime){
 		this.pCreation = pCreation;
@@ -31,4 +31,4 @@ public class TimelineLine{
 		this.creationtime = creationtime;
 		this.executiontime = executiontime;
 	}
-};
+}

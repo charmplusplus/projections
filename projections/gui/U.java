@@ -1,12 +1,5 @@
 package projections.gui;
 
-/*
-(U)ser interface (U)tility routines
-Orion Sky Lawlor, olawlor@acm.org, 12/29/2000
-*/
-import java.awt.*;
-import java.awt.event.*;
-
 public class U
 { 
 	private U() {}

@@ -12,7 +12,7 @@
  */
 package projections.gui.graph;
 
-import projections.gui.*;
+
 import java.awt.Color;
 import java.awt.event.*;
 

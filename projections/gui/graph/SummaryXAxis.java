@@ -4,11 +4,9 @@ import projections.gui.*;
 
 public class SummaryXAxis extends XAxis
 {
-    private int numIntervals;
     private long intervalSize;
 
     public SummaryXAxis(int numIntervals, long intervalSize) {
-	this.numIntervals = numIntervals;
 	this.intervalSize = intervalSize;
     }
 

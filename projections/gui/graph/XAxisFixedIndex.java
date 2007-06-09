@@ -4,7 +4,6 @@
  */
 
 package projections.gui.graph;
-import projections.gui.*;
 
 public class XAxisFixedIndex extends XAxis
 {

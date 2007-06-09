@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.awt.*;
-import java.text.*;
 
 public class TimelineLabelCanvas extends Canvas
 {  

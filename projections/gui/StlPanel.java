@@ -81,7 +81,7 @@ public class StlPanel extends ScalePanel.Child
 	    int numEP = Analysis.getNumUserEntries();
 	    int interval = (int)(t/intervalSize);
 	    
-	    long  timedisplay = t+(long)startTime;
+	    long  timedisplay = t+startTime;
 	    if (mode == StlWindow.MODE_UTILIZATION) {
 		return "Processor " + pe + 
 		    ": Usage = " + utilData[p][interval]+"%" +
@@ -112,7 +112,6 @@ public class StlPanel extends ScalePanel.Child
     public void paint(RepaintRequest req) {
 	double proc2pix=req.y(1)-req.y(0);//Pixels per processor
 	double time2pix=req.x(1)-req.x(0);//Pixels per microsecond
-	double pix2proc=1.0/proc2pix;
 	double pix2time=1.0/time2pix;
 	
 	//Figure out what portion of time and processors are visible
@@ -136,12 +135,6 @@ public class StlPanel extends ScalePanel.Child
 	double x2t_off=req.xInv(startx)/intervalSize;
 	double x2t_slope=pix2time/intervalSize;
 		
-	int testwidth = endx-startx;
-	// System.out.println("pix2time "+ pix2time);
-	// System.out.println("x2t_off = " + x2t_off +" x2t_slope = " + 
-	// x2t_slope + "endx - startx " + testwidth + "   IntervalSize " + 
-	// intervalSize);
-	
 	if(validPEs != null){
 	    if (wid>0 && ht>0) 
 		{//Write data to offscreen buffer

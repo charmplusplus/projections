@@ -298,6 +298,8 @@ public class Util
 	
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
+
+	@SuppressWarnings("unused")
 	String tempString = new String();
 	
 	//If more graphs are created put them here
@@ -312,11 +314,11 @@ public class Util
 			accessFile.writeBytes(typeArray[i] + "\n");
 			for(int j=0; j<colors.length; j++){
 				accessFile.writeBytes(j + " ");
-	    			accessFile.writeBytes(tempString.valueOf(Analysis.getEntryColor(j).getRed()));
+	    			accessFile.writeBytes(String.valueOf(Analysis.getEntryColor(j).getRed()));
 	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(tempString.valueOf(Analysis.getEntryColor(j).getGreen()));
+	    			accessFile.writeBytes(String.valueOf(Analysis.getEntryColor(j).getGreen()));
 	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(tempString.valueOf(Analysis.getEntryColor(j).getBlue()));
+	    			accessFile.writeBytes(String.valueOf(Analysis.getEntryColor(j).getBlue()));
 	    			accessFile.writeBytes(";     ");
 			}
 			accessFile.writeBytes("                    ");
@@ -338,11 +340,11 @@ public class Util
 			
 			for (int j=0; j<colors.length; j++) {
 	    			accessFile.writeBytes(j + " ");
-	    			accessFile.writeBytes(tempString.valueOf(colors[j].getRed()));
+	    			accessFile.writeBytes(String.valueOf(colors[j].getRed()));
 	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(tempString.valueOf(colors[j].getGreen()));
+	    			accessFile.writeBytes(String.valueOf(colors[j].getGreen()));
 	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(tempString.valueOf(colors[j].getBlue()));
+	    			accessFile.writeBytes(String.valueOf(colors[j].getBlue()));
 	    			accessFile.writeBytes(";     ");
 			}
 		}
@@ -408,7 +410,6 @@ public class Util
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 	String tempString = new String();
 	
-	Integer tempInteger = new Integer(0);
 	if(fileExists){
 		tempString = accessFile.readLine();
 		while(!(tempString.compareTo("null") == 0)){
@@ -417,9 +418,9 @@ public class Util
 				new StringTokenizer(accessFile.readLine(), " ;");
 			for (int i=0; i<colors.length; i++){
 				tempString = tokenizer.nextToken();
-				colors[i] = new Color(tempInteger.parseInt(tokenizer.nextToken()),
-							tempInteger.parseInt(tokenizer.nextToken()),
-							tempInteger.parseInt(tokenizer.nextToken()));
+				colors[i] = new Color(Integer.parseInt(tokenizer.nextToken()),
+							Integer.parseInt(tokenizer.nextToken()),
+							Integer.parseInt(tokenizer.nextToken()));
 			}
 			tempString = "null";
 			}

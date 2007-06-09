@@ -4,7 +4,6 @@ import projections.gui.*;
 
 import java.awt.*;
 import javax.swing.*;
-import java.awt.event.*;
 
 public class LegendPanel 
     extends JPanel
@@ -15,12 +14,7 @@ public class LegendPanel
     private JPanel buttonPanel;
     private JButton clearAll;
     private JButton selectAll;
-    private JButton group;
-    private JButton ungroup;
-    private JButton saveGroup;
-
-    private JTextField groupName;
-
+    
     public LegendPanel()
     {
 	setSize(getPreferredSize());
@@ -40,8 +34,6 @@ public class LegendPanel
 	selectAll = new JButton("Select All");
 	selectAll.setActionCommand("select");
 	selectAll.addActionListener(canvas);
-	group = new JButton("Group Selected");
-	ungroup = new JButton("Ungroup");
 	buttonPanel.add(clearAll);
 	buttonPanel.add(selectAll);
 

@@ -19,7 +19,7 @@ public class ScaleSlider extends Canvas
 	//This is quite like AdjustmentListener
 	public static interface ValueListener {
 		public void sliderChanged(ScaleSlider src);
-	};
+	}
 	
 	private int hw=7; //Half width of indicator
 	private int totalThickness=16;//Minimum pixels across short side
@@ -90,7 +90,6 @@ public class ScaleSlider extends Canvas
 		
 		while ((x=val2coor(cur))<=w-hw) {
 			int tick[]={x,0, x,h};
-			int test_w = w-hw;
 			poly(g,tick,Color.black,false,0,0);
 			cur+=tickSep;
 		}

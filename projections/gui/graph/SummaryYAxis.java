@@ -1,6 +1,5 @@
 package projections.gui.graph;
 
-import projections.gui.*;
 
 public class SummaryYAxis extends YAxis
 {

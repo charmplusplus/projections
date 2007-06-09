@@ -114,8 +114,8 @@ public class TimelineAxisCanvas extends Canvas
 			break;
 		    }
 		    if (x % data.labelIncrement == 0) {  
-			tmp = format_.format((long)(data.beginTime + 
-						    (long)labeloffset + 
+			tmp = format_.format((data.beginTime + 
+						    labeloffset + 
 						    (long)x*data.timeIncrement));
 			og.drawLine(curx, axispos-5, curx, axispos + 5);
 			og.drawString(tmp, curx - fm.stringWidth(tmp)/2, 

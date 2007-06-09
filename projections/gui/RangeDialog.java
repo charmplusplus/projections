@@ -1,14 +1,11 @@
 package projections.gui;
 import javax.swing.*;
-import javax.swing.text.*;
-
 import java.awt.BorderLayout;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.event.*;
 
-import java.util.*;
 import java.io.*;
 
 import projections.analysis.*;
@@ -32,8 +29,8 @@ public class RangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
     // Constant variables
-    private static final int DIALOG_OK = 0;
-    private static final int DIALOG_CANCELLED = 1;
+    protected static final int DIALOG_OK = 0;
+    protected static final int DIALOG_CANCELLED = 1;
   
     ProjectionsWindow parentWindow;
 
@@ -95,7 +92,7 @@ public class RangeDialog extends JDialog
     public RangeDialog(ProjectionsWindow parentWindow, 
 		       String titleString)
     {
-	super((JFrame)parentWindow, titleString, true);
+	super(parentWindow, titleString, true);
 	this.parentWindow = parentWindow;
 
 	// the only purpose of numProcessors is to determine the limit

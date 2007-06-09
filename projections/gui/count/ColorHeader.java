@@ -7,6 +7,8 @@ import javax.swing.table.*;
 // Modified from code from http://www.chka.de/swing/table/faq.html
 public class ColorHeader extends DefaultTableCellRenderer
 {
+  private static final long serialVersionUID = 1L;
+  
   private Color c_ = UIManager.getColor("TableHeader.background");
   
   public ColorHeader(Color c, String toolText) {
@@ -52,5 +54,5 @@ public class ColorHeader extends DefaultTableCellRenderer
     setValue(value);
     return this;
   }
-};
+}
 

@@ -1,6 +1,5 @@
 package projections.gui.graph;
 
-import projections.gui.*;
 import projections.analysis.*;
 
 import java.awt.Color;

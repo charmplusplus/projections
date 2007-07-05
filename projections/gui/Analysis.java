@@ -543,8 +543,8 @@ systemUsageData[1][pIdx] =
 	    return ActivityManager.USER_EVENTS;
 	} else if (name.equals("FUNCTIONS")) {
 	    return ActivityManager.FUNCTIONS;
-	} else if (name.equals("POSE_DOP")) {
-	    return ActivityManager.POSE_DOP;
+	    //	} else if (name.equals("POSE_DOP")) {
+	    //	    return ActivityManager.POSE_DOP;
 	} else {
 	    return -1;  // error condition
 	}

@@ -203,6 +203,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    int count = 0;
 			    int numIntervals = endInterval-startInterval+1;
 			    graphData = new double[numIntervals][numEPs];
+			    long progressStart = System.currentTimeMillis();
 			    ProgressMonitor progressBar =
 				new ProgressMonitor(Analysis.guiRoot, 
 						    "Reading log files",

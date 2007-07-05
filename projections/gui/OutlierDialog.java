@@ -12,12 +12,14 @@ public class OutlierDialog extends RangeDialog
     protected JComboBox attributeList;
     protected JComboBox activityList;
     protected JIntTextField thresholdField;
+    protected JIntTextField kField;
     private JTextArea errorText;
 
     // Dialog attributes
     protected int currentAttribute;
     protected int currentActivity;
     protected int threshold;
+    protected int k;
 
     private int lastAttribute = -1;
     private int lastActivity = -1;
@@ -38,6 +40,8 @@ public class OutlierDialog extends RangeDialog
 	} else {
 	    threshold = 20;
 	}
+	// initialize k-means choice of k to be default to 5
+	k = 5;
     }
     
     public void actionPerformed(ActionEvent evt) {
@@ -54,8 +58,8 @@ public class OutlierDialog extends RangeDialog
 		    if ( // **FIXME** Find a way to get around having to 
 			 // hardcode
 			// pose dop activities have no meaning here
-			(activityList.getSelectedIndex() == 
-			 ActivityManager.POSE_DOP) ||
+			//(activityList.getSelectedIndex() == 
+			// ActivityManager.POSE_DOP) ||
 			// no function support for now either ... *sigh*
 			(activityList.getSelectedIndex() ==
 			 ActivityManager.FUNCTIONS) ||
@@ -86,6 +90,7 @@ public class OutlierDialog extends RangeDialog
 	    } else if (b == bUpdate) {
 		// update all text fields
 		updateData(thresholdField);
+		updateData(kField);
 	    }
 	} else if (evt.getSource() instanceof JComboBox) {
 	    JComboBox item = (JComboBox)evt.getSource();
@@ -128,6 +133,10 @@ public class OutlierDialog extends RangeDialog
 	JLabel thresholdPost = new JLabel("Processors", JLabel.LEFT);
 	thresholdField.addActionListener(this);	
 
+	JLabel kLabel = new JLabel("Number of Clusters: ", JLabel.RIGHT);
+	kField = new JIntTextField(k, 3);
+	kField.addActionListener(this);	
+
 	errorText = new JTextArea();
 	errorText.setRows(3);
 	errorText.setEnabled(false);
@@ -145,7 +154,9 @@ public class OutlierDialog extends RangeDialog
         Util.gblAdd(outlierPanel, thresholdLabel, gbc, 0,2, 1,1, 0,1);
         Util.gblAdd(outlierPanel, thresholdField, gbc, 1,2, 1,1, 0,1);
         Util.gblAdd(outlierPanel, thresholdPost,  gbc, 2,2, 1,1, 0,1);
-	Util.gblAdd(outlierPanel, scrollText,     gbc, 0,3, 3,3, 0,1);
+	Util.gblAdd(outlierPanel, kLabel,         gbc, 0,3, 1,1, 0,1);
+	Util.gblAdd(outlierPanel, kField,         gbc, 1,3, 2,1, 0,1);
+	Util.gblAdd(outlierPanel, scrollText,     gbc, 0,4, 3,3, 0,1);
 
 	inputPanel.setLayout(gbl);
 

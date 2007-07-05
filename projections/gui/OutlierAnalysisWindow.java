@@ -29,6 +29,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     private int threshold;
     private int currentActivity;
     private int currentAttribute;
+    private int k;
 
     // control panel gui objects and support variables
     // **CW** Not so good for now, used by both Dialog and Window
@@ -148,6 +149,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	OutlierDialog mydialog = (OutlierDialog)dialog;
 
 	threshold = mydialog.threshold;
+	k = mydialog.k;
 	currentActivity = mydialog.currentActivity;
 	currentAttribute = mydialog.currentAttribute;
 	super.getDialogData();
@@ -403,34 +405,48 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	}
 	progressBar.close();
 
-	// **CW** TENTATIVE. Use tempData as source to compute cluster-
-	// determined outliers.
-	/*
-	int numSamples = 5;
+	// **CW** Use tempData as source to compute clusters using k
+	// from the dialog.
+
 	int clusterMap[] = new int[tempData.length];
-	double clusterDistance[] = new double[tempData.length];
-	long time = System.currentTimeMillis();
-	KMeansClustering.kMeans(tempData, numSamples, clusterMap, 
-				clusterDistance);
+	double distanceFromClusterMean[] = new double[tempData.length];
+	// long time = System.currentTimeMillis();
+	KMeansClustering.kMeans(tempData, k, clusterMap, 
+				distanceFromClusterMean);
+	// Construct average data for each cluster. If cluster is empty,
+	// it will be ignored.
+	double clusterAverage[][] = new double[k][tempData[0].length];
+	int clusterCounts[] = new int[k];
+	int numNonZero = 0;
+	for (int p=0; p<tempData.length; p++) {
+	    for (int ep=0; ep<tempData[p].length; ep++) {
+		clusterAverage[clusterMap[p]][ep] += tempData[p][ep];
+		clusterCounts[clusterMap[p]]++;
+	    }
+	}
+	for (int k=0; k<this.k; k++) {
+	    if (clusterCounts[k] > 0) {
+		for (int ep=0; ep<clusterAverage[k].length; ep++) {
+		    clusterAverage[k][ep] /= clusterCounts[k];
+		}
+		numNonZero++;
+	    }
+	}
+
+	/*
 	System.out.println("Time taken for processing [" + tempData.length +
 			   " processors] = " + 
 			   (System.currentTimeMillis() - time) +
 			   " ms");
-	KMeansClustering.outputResults(clusterMap, numSamples);
 	*/
-	/*
-	for (int i=0; i<tempData.length; i++) {
-	    for (int j=0; j<tempData[i].length; j++) {
-		System.out.print(tempData[i][j] + " ");
-	    }
-	    System.out.println();
-	}
-	*/
+
 	// Now Analyze the data for outliers.
 	// the final graph has 3 extra x-axis slots for 
 	// 1) overall average
 	// 2) non-outlier average
 	// 3) outlier average
+	//
+	// In addition, there will be numNonZero cluster averages.
        
 	// we know tmpOut has at least x slots. graphData is not ready
 	// to be initialized until we know the number of Outliers.
@@ -493,16 +509,44 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	// take the top threshold processors, create the final array
 	// and copy the data in.
 	int offset = validPEs.size()-threshold;
-	graphData = new double[threshold+3][numActivities+numSpecials];
+	graphData = 
+	    new double[threshold+3+numNonZero][numActivities+numSpecials];
 	outlierList = new LinkedList();
 	for (int i=0; i<threshold; i++) {
 	    for (int act=0; act<numActivities+numSpecials; act++) {
-		graphData[i+3][act] =
+		graphData[i+3+numNonZero][act] =
 		    tempData[sortedMap[i+offset]][act];
 	    }
 	    // add to outlier list reverse sorted by significance
 	    outlierList.add(peNames[sortedMap[i+offset]]);
+	    System.out.println(peNames[sortedMap[i+offset]]);
 	}
+	// fill in cluster representative data
+	int minDistanceIndex[] = new int[k];
+	double minDistanceFromClusterMean[] = new double[k];
+	for (int k=0; k<this.k; k++) {
+	    minDistanceFromClusterMean[k] = Double.MAX_VALUE;
+	    minDistanceIndex[k] = -1;
+	}
+	for (int p=0; p<distanceFromClusterMean.length; p++) {
+	    if (distanceFromClusterMean[p] <= 
+		minDistanceFromClusterMean[clusterMap[p]]) {
+		minDistanceIndex[clusterMap[p]] = p;
+	    }
+	}
+	int clusterIndex = 0;
+	for (int k=0; k<this.k; k++) {
+	    if (minDistanceIndex[k] != -1) {
+		for (int act=0; act<numActivities+numSpecials; act++) {
+		    graphData[3+clusterIndex][act] = 
+			tempData[minDistanceIndex[k]][act];
+		}
+		outlierList.addFirst("C"+k+"R"+minDistanceIndex[k]);
+		System.out.println(minDistanceIndex[k]);
+		clusterIndex++;
+	    }
+	}
+
 	graphData[0] = tmpAvg;
 	for (int act=0; act<numActivities+numSpecials; act++) {
 	    for (int i=0; i<offset; i++) {

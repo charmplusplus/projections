@@ -50,7 +50,7 @@ public class MainWindow extends JFrame
     protected static final int OUTLIER_WIN = 12;
     protected static final int MULTI_WIN = 13;
     protected static final int FUNCTION_WIN = 14;
-    protected static final int POSE_WIN = 15;
+    //    protected static final int POSE_WIN = 15;
     protected static final int AMPI_PROFILE_WIN = 16;
 
     public static final String[] windowMenuNames =
@@ -70,7 +70,7 @@ public class MainWindow extends JFrame
 	"Outlier Analysis",
 	"Multirun Analysis",
 	"Function Tool",
-	"POSE Analysis",
+	//	"POSE Analysis",
 	"AMPI Usage Profile",
 	"Noise Miner"
     };
@@ -486,9 +486,9 @@ public class MainWindow extends JFrame
 		    } else if (Analysis.hasSummaryData()) {
 			menuManager.summaryOnly();
 		    }
-		    if (Analysis.hasPoseDopData()) {
-			menuManager.addPose();
-		    }
+		    //		    if (Analysis.hasPoseDopData()) {
+		    //			menuManager.addPose();
+		    //		    }
 		}
 	    };
 	    worker.start();

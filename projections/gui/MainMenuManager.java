@@ -32,7 +32,7 @@ public class MainMenuManager extends MenuManager
     private static final int NO_DATA = 0;
     private static final int OPENED_FILES = 1;
     private static final int OPENED_SUMMARY = 2;
-    private static final int ADD_POSE = 3;
+    //    private static final int ADD_POSE = 3;
 
     private MainWindow parent;
 
@@ -80,7 +80,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    false,  // Function Tools (temporary)
-		    false,  // POSE Analysis
+		    //		    false,  // POSE Analysis
 		    false,  // AMPI Usage Profile
 			false   // Noise Detection
 		});
@@ -121,7 +121,7 @@ public class MainMenuManager extends MenuManager
 		    false,  // Outlier Analysis
 		    true,   // Multirun Analysis
 		    false,  // Function Tools (temporary)
-		    false,  // POSE Analysis
+		    //		    false,  // POSE Analysis
 		    true,   // AMPI Usage Profile
 			true    // Noise Detection
 		});
@@ -162,15 +162,15 @@ public class MainMenuManager extends MenuManager
 		    true,  // Outlier Analysis
 		    true,  // Multirun Analysis
 		    true,  // Function Tools (temporary)
-		    false, // POSE Analysis
+		    //		    false, // POSE Analysis
 		    true,  // AMPI Usage Profile
 			true   // Noise Detection
 		});
 	    break;
-	case ADD_POSE:
-	    setEnabled(toolMenu, 13, // POSE Analysis
-		       true);
-	    break;
+	    //	case ADD_POSE:
+	    //	    setEnabled(toolMenu, 13, // POSE Analysis
+	    //		       true);
+	    //	    break;
 	}
     }
 
@@ -254,7 +254,7 @@ public class MainMenuManager extends MenuManager
 	stateChanged(OPENED_SUMMARY);
     }
 
-    public void addPose() {
-	stateChanged(ADD_POSE);
-    }
+    //    public void addPose() {
+    //	stateChanged(ADD_POSE);
+    //    }
 }

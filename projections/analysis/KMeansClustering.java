@@ -2,9 +2,9 @@ package projections.analysis;
 
 public class KMeansClustering {
 
-    // clusterMap and clusterDistance are meant to be output arrays    
-    public static void kMeans(double data[][], int numSamples,
-			      int clusterMap[], double clusterDistance[]) {
+    // clusterMap and distanceFromClusterMean are meant to be output arrays    
+    public static void kMeans(double data[][], int numClusters,
+			      int clusterMap[], double distanceFromClusterMean[]) {
 	double mean[][];
 	double oldMean[][];
 	double distance[];
@@ -15,11 +15,11 @@ public class KMeansClustering {
 	int numEPs = data[0].length;
 	
 	// initialization O(p + ep)
-	mean = new double[numSamples][numEPs];
-	oldMean = new double[numSamples][numEPs];
-	distance = new double[numSamples];
-	clusterCounts = new int[numSamples];
-	clusterMinBound = new double[numSamples][numEPs];
+	mean = new double[numClusters][numEPs];
+	oldMean = new double[numClusters][numEPs];
+	distance = new double[numClusters];
+	clusterCounts = new int[numClusters];
+	clusterMinBound = new double[numClusters][numEPs];
 	
 	// Place initial mean values O(ep * p)
 	double minVal;
@@ -37,8 +37,8 @@ public class KMeansClustering {
 		    maxVal = data[p][ep];
 		}
 	    }
-	    interval = ((double)(maxVal - minVal + 1))/numSamples;
-	    for (int k=0; k<numSamples; k++) {
+	    interval = ((double)(maxVal - minVal + 1))/numClusters;
+	    for (int k=0; k<numClusters; k++) {
 		mean[k][ep] = (k+1)*interval - interval/2 + minVal;
 	    }
 	}
@@ -52,7 +52,7 @@ public class KMeansClustering {
 	    int minSample;
 	    double tempDist;
 	    
-	    for (int k=0; k<numSamples; k++) {
+	    for (int k=0; k<numClusters; k++) {
 		clusterCounts[k] = 0;
 	    }
 	    
@@ -60,7 +60,7 @@ public class KMeansClustering {
 		minDist = Double.MAX_VALUE;
 		minSample = 0;
 		// compute distance from means
-		for (int k=0; k<numSamples; k++) {
+		for (int k=0; k<numClusters; k++) {
 		    tempDist = 0.0;
 		    for (int ep=0; ep<numEPs; ep++) {
 			tempDist += Math.pow(data[p][ep] - mean[k][ep], 2.0);
@@ -73,13 +73,13 @@ public class KMeansClustering {
 		}
 		clusterCounts[minSample]++;
 		clusterMap[p] = minSample;
-		clusterDistance[p] = minDist;
+		distanceFromClusterMean[p] = minDist;
 	    }
 	    
 	    // Recompute mean
 	    // get bounds, store min in clusterMinBound, abuse mean to store
 	    // the max bounds.
-	    for (int k=0; k<numSamples; k++) {
+	    for (int k=0; k<numClusters; k++) {
 		for (int ep=0; ep<numEPs; ep++) {
 		    clusterMinBound[k][ep] = Double.MAX_VALUE;
 		    mean[k][ep] = Double.MIN_VALUE;
@@ -96,7 +96,7 @@ public class KMeansClustering {
 		    }
 		}
 	    }
-	    for (int k=0; k<numSamples; k++) {
+	    for (int k=0; k<numClusters; k++) {
 		for (int ep=0; ep<numEPs; ep++) {
 		    if (clusterCounts[k] > 0) {
 			mean[k][ep] = 
@@ -108,7 +108,7 @@ public class KMeansClustering {
 		    }
 		}
 	    }
-	    // outputResults(clusterMap, numSamples);
+	    // outputResults(clusterMap, numClusters);
 	}
     }
     
@@ -140,10 +140,10 @@ public class KMeansClustering {
 	}
     }
     
-    public static void outputResults(int clusterMap[], int numSamples) {
+    public static void outputResults(int clusterMap[], int numClusters) {
 	System.out.println("Cluster Map:");
 	System.out.println("------------");
-	for (int k=0; k<numSamples; k++) {
+	for (int k=0; k<numClusters; k++) {
 	    System.out.print("["+ k + "]: ");
 	    for (int p=0; p<clusterMap.length; p++) {
 		if (clusterMap[p] == k) {
@@ -155,14 +155,14 @@ public class KMeansClustering {
     }
 
     public static void main(String args[]) {
-	int numSamples = 5;
+	int numClusters = 5;
 	double data[][] = { {0,5}, {1,1}, {1,2}, {1,4}, {2,1},
 			  {2,7}, {3,6}, {3,8}, {4,9}, {5,2},
 			  {5,7}, {6,1}, {7,2}, {9,4}, {9,5} };
 	int clusterMap[] = new int[data.length];
-	double clusterDistance[] = new double[data.length];
-	KMeansClustering.kMeans(data, numSamples, clusterMap, 
-				clusterDistance);
-	outputResults(clusterMap, numSamples);
+	double distanceFromClusterMean[] = new double[data.length];
+	KMeansClustering.kMeans(data, numClusters, clusterMap, 
+				distanceFromClusterMean);
+	outputResults(clusterMap, numClusters);
     }
 }

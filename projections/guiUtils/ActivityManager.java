@@ -15,9 +15,9 @@ public class ActivityManager {
     public static final int PROJECTIONS = 0;
     public static final int USER_EVENTS = 1;
     public static final int FUNCTIONS = 2;
-    public static final int POSE_DOP = 3;
+    //    public static final int POSE_DOP = 3;
     public static final String NAMES[] = 
     {"PROJECTIONS", "USER_EVENTS",
-     "FUNCTIONS", "POSE_DOP"};
-
+     //     "FUNCTIONS", "POSE_DOP"};
+     "FUNCTIONS"};
 }

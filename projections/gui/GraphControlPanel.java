@@ -7,6 +7,11 @@ import projections.misc.*;
 public class GraphControlPanel extends Panel
    implements ActionListener, ItemListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
 
    private Button       bPlus5;
    private Button       bPlus1;
@@ -176,7 +181,7 @@ public class GraphControlPanel extends Panel
 	  else
 	  {
 //		 data.processor.list   = rangeField.getValue(data.processor.num);
-		 data.processor.list   = rangeField.getValue(Analysis.getNumProcessors());
+		 data.processor.list   = rangeField.getValue(MainWindow.runObject[myRun].getNumProcessors());
 		 if (!origProcList.contains(data.processor.list)) {
 		   System.out.println("Invalid processor range. ");
 	  	   // create a error dialog

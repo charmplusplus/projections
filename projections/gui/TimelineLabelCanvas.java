@@ -4,6 +4,11 @@ import java.awt.*;
 
 public class TimelineLabelCanvas extends Canvas
 {  
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private TimelineData data;
     private FontMetrics fm;
     private Image offscreen;
@@ -11,8 +16,8 @@ public class TimelineLabelCanvas extends Canvas
     public TimelineLabelCanvas(TimelineData data)
     {
 	this.data = data;
-	setBackground(Analysis.background);
-	setForeground(Analysis.foreground);
+	setBackground(MainWindow.runObject[myRun].background);
+	setForeground(MainWindow.runObject[myRun].foreground);
     }   
 
     public void makeNewImage()
@@ -29,7 +34,7 @@ public class TimelineLabelCanvas extends Canvas
 	    og.setClip(0, 0, data.lcw, data.tlh);
 	    
 	    Color oldColor = og.getColor();
-	    og.setColor(Analysis.background);
+	    og.setColor(MainWindow.runObject[myRun].background);
 	    og.fillRect(0, 0, getSize().width, getSize().height);
 	    //og.fillRect(0, 0, data.lcw, data.tlh);
 	    og.setColor(oldColor);
@@ -40,7 +45,7 @@ public class TimelineLabelCanvas extends Canvas
 				    fm.stringWidth("(999,999)") + 20);
 	    }
 	    
-	    og.setColor(Analysis.foreground);
+	    og.setColor(MainWindow.runObject[myRun].foreground);
 	    data.processorList.reset();
 	    /*
 	    NumberFormat df = NumberFormat.getInstance();

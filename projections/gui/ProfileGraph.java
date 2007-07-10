@@ -17,6 +17,11 @@ public class ProfileGraph extends JPanel
     implements MouseMotionListener
 {
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     //Data source: display profile data such as float[][]
     //For convinience, currently set type to float[][]
     //dataSource[x][y] indicates the section y on bar x should have this amount of usage
@@ -193,13 +198,13 @@ public class ProfileGraph extends JPanel
 	    pg.setFont(font);
 	    fm = pg.getFontMetrics(font);
 	}
-	Color oldBackground = Analysis.background;
-	Color oldForeground = Analysis.foreground;
-	Analysis.background = Color.white;
-	Analysis.foreground = Color.black;
+	Color oldBackground = MainWindow.runObject[myRun].background;
+	Color oldForeground = MainWindow.runObject[myRun].foreground;
+	MainWindow.runObject[myRun].background = Color.white;
+	MainWindow.runObject[myRun].foreground = Color.black;
 	drawDisplay(pg);
-	Analysis.background = oldBackground;
-	Analysis.foreground = oldForeground;
+	MainWindow.runObject[myRun].background = oldBackground;
+	MainWindow.runObject[myRun].foreground = oldForeground;
     }
 
     /**
@@ -280,8 +285,8 @@ public class ProfileGraph extends JPanel
     {
         Graphics2D g = (Graphics2D)_g;
 	
-	g.setBackground(Analysis.background);
-	g.setColor(Analysis.foreground);
+	g.setBackground(MainWindow.runObject[myRun].background);
+	g.setColor(MainWindow.runObject[myRun].foreground);
 
 	canvasWidth = getWidth();
 	canvasHeight = getHeight();

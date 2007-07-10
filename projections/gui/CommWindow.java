@@ -12,6 +12,11 @@ import projections.misc.LogEntryData;
 public class CommWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, Clickable
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     double[][] 	sentMsgCount;
     double[][] 	sentByteCount;
     double[][] 	receivedMsgCount;
@@ -51,7 +56,7 @@ public class CommWindow extends GenericGraphWindow
     }
 
     public CommWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Communication - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
+	super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
 	//getContentPane().add(mainPanel);
@@ -158,7 +163,7 @@ public class CommWindow extends GenericGraphWindow
 	    return null;
 
 	if(EPNames == null)
-	    EPNames = Analysis.getEntryNames();
+	    EPNames = MainWindow.runObject[myRun].getEntryNames();
 
 	String[] rString = new String[4];
 
@@ -377,7 +382,7 @@ public class CommWindow extends GenericGraphWindow
 	peList = validPEs.copyOf();
 
 	int numPe = peList.size();
-	int numEPs = Analysis.getNumUserEntries();
+	int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	histogram = new ArrayList();
 
 	int curPeArrayIndex = 0;
@@ -395,8 +400,8 @@ public class CommWindow extends GenericGraphWindow
 		progressBar.close();
 		return;
 	    }
-	    glr = new GenericLogReader(Analysis.getLogName(pe),
-				       Analysis.getVersion());
+	    glr = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+				       MainWindow.runObject[myRun].getVersion());
 	    try {
 		sentMsgCount[curPeArrayIndex] = new double[numEPs];
 		sentByteCount[curPeArrayIndex] = new double[numEPs];

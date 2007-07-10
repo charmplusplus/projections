@@ -6,6 +6,11 @@ import projections.analysis.*;
 
 public class TimelineMessageCanvas extends Canvas
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private String[] sTitles;
    private int[]    width;
    private TimelineObject obj;
@@ -23,7 +28,7 @@ public class TimelineMessageCanvas extends Canvas
 	  w = 0;
 	  h = 0;
 	  msgs = obj.getMessages();
-	  names = Analysis.getEntryNames();
+	  names = MainWindow.runObject[myRun].getEntryNames();
 
           sTitles = new String[numTitles];
 	  width = new int[numTitles];

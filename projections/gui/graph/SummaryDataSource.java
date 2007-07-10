@@ -5,6 +5,11 @@ import java.awt.Color;
 
 public class SummaryDataSource extends DataSource
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private int numIntervals;
     private double dataValues[];
     
@@ -26,7 +31,7 @@ public class SummaryDataSource extends DataSource
      */
     public int getValueCount() { return 1; }
     
-    public Color getColor(int valNo) { return Analysis.foreground; }
+    public Color getColor(int valNo) { return MainWindow.runObject[myRun].foreground; }
 
     /**
      * Return the values associated with this index.

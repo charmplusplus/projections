@@ -33,6 +33,11 @@ public class StlWindow extends ProjectionsWindow
     implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
 	       ItemListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private ScaleSlider hor,ver;
     private ScalePanel scalePanel;
     StlPanel stl;
@@ -59,10 +64,10 @@ public class StlWindow extends ProjectionsWindow
     public long endTime;
 
     void windowInit() {
-	// acquire default data from Analysis.
-	validPEs = Analysis.getValidProcessorList();
+	// acquire default data from MainWindow.runObject[myRun].
+	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	startTime = 0;
-	endTime = Analysis.getTotalTime();
+	endTime = MainWindow.runObject[myRun].getTotalTime();
     }
 
     public StlWindow(MainWindow mainWindow, Integer myWindowID)
@@ -72,7 +77,7 @@ public class StlWindow extends ProjectionsWindow
 
 	setBackground(Color.black);
 	setForeground(Color.lightGray);
-	setTitle("Projections Overview - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Overview - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	
 	createMenus();
 	createLayout();
@@ -122,7 +127,7 @@ public class StlWindow extends ProjectionsWindow
 	modeGroup.add(utilizationMode);
 	modeGroup.add(epMode);
 
-	if (!Analysis.hasLogData()) {
+	if (!MainWindow.runObject[myRun].hasLogData()) {
 	    epMode.setEnabled(false);
 	}
 	  
@@ -161,12 +166,12 @@ public class StlWindow extends ProjectionsWindow
     void setStlPanelData(){
 	double horSize, verSize;
 	if (validPEs == null) {
-	    horSize=Analysis.getTotalTime();
-	    verSize=Analysis.getNumProcessors();
+	    horSize=MainWindow.runObject[myRun].getTotalTime();
+	    verSize=MainWindow.runObject[myRun].getNumProcessors();
 	} else {	
 	    horSize = endTime-startTime;
 	    if(horSize <= 0)
-		horSize = Analysis.getTotalTime();
+		horSize = MainWindow.runObject[myRun].getTotalTime();
 	    verSize = (double)validPEs.size();
 	}	 
 	scalePanel.setScales(horSize,verSize);

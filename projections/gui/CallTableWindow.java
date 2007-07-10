@@ -11,6 +11,11 @@ public class CallTableWindow extends ProjectionsWindow
 {
     CallTableWindow      thisWindow;    
     
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     CallTableTextArea    textArea;
     private Label                lTitle;
     private Panel                titlePanel;
@@ -48,7 +53,7 @@ public class CallTableWindow extends ProjectionsWindow
 	thisWindow = this;
 	
 	setBackground(Color.lightGray);
-	setTitle("Projections Call Table - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Call Table - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	
 	mainPanel = new JPanel();
 	epDetailToggle = false;

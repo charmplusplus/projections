@@ -16,6 +16,11 @@ package projections.gui;
 public class DialogParameters 
     implements Cloneable
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // ***** Variables for RangeDialog (base)
     protected OrderedIntList validPEs;
     protected long startTime;
@@ -35,9 +40,9 @@ public class DialogParameters
 
     public DialogParameters() {
 	// initialization of RangeDialog values
-	validPEs = Analysis.getValidProcessorList().copyOf();
+	validPEs = MainWindow.runObject[myRun].getValidProcessorList().copyOf();
 	startTime = 0;
-	endTime = Analysis.getTotalTime();
+	endTime = MainWindow.runObject[myRun].getTotalTime();
 
 	// initialization of IntervalRangeDialog values
 	intervalSize = 1000;

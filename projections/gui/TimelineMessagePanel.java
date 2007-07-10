@@ -7,6 +7,11 @@ import projections.analysis.*;
 
 public class TimelineMessagePanel extends JPanel {
     
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // GUI components
     private JPanel headerPanel;
     private JTable dataTable;
@@ -54,7 +59,7 @@ public class TimelineMessagePanel extends JPanel {
 					 (messages[row].Time - 
 					  messages[row-1].Time) :
 					 0);
-	    tableData[row][4] = Analysis.getEntryName(messages[row].Entry);
+	    tableData[row][4] = MainWindow.runObject[myRun].getEntryName(messages[row].Entry);
 	    if (messages[row].destPEs != null) {
 		tableData[row][5] = "";
 		for (int i=0; i<messages[row].destPEs.length-1; i++) {
@@ -69,9 +74,9 @@ public class TimelineMessagePanel extends JPanel {
     }
 
     private void createLayout() {
-	epLabel = new JLabel(Analysis.getEntryChareName(obj.getEntry()) +
+	epLabel = new JLabel(MainWindow.runObject[myRun].getEntryChareName(obj.getEntry()) +
 			     " -- " +
-			     Analysis.getEntryName(obj.getEntry()),
+			     MainWindow.runObject[myRun].getEntryName(obj.getEntry()),
 			     JLabel.CENTER);
 	beginTimeField = new LabelPanel("BEGIN TIME:",
 					new JLongTextField(obj.getBeginTime(),

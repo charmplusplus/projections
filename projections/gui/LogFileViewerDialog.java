@@ -7,6 +7,10 @@ import java.awt.event.*;
 public class LogFileViewerDialog extends Dialog
    implements ActionListener, TextListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
  
 	private static final long serialVersionUID = 1L;
 
@@ -23,7 +27,7 @@ private IntTextField  textField;
 	  
 	  this.logFilesWindow = logFilesWindow;
 	  
-	  pmax = Analysis.getNumProcessors() - 1;
+	  pmax = MainWindow.runObject[myRun].getNumProcessors() - 1;
 	  Label l1 = new Label("Select a processor to view the log file for.");
 	  Label l2 = new Label("Valid processors: (0 - " + pmax + ")");
 	  

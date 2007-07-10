@@ -23,6 +23,11 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 {
     OutlierAnalysisWindow thisWindow;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private JPanel mainPanel;
 
     // private dialog data
@@ -63,7 +68,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 
     public OutlierAnalysisWindow(MainWindow mainWindow, Integer myWindowID) {
 	super("Projections Outlier Analysis Tool - " + 
-	      Analysis.getFilename() + ".sts", mainWindow, myWindowID);
+	      MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
 
 	createMenus();
 	createLayout();
@@ -81,14 +86,14 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    // default to execution time. Again a hack.
 	    currentAttribute = 0;
 	    // finally, something that's not a hack
-	    validPEs = Analysis.getValidProcessorList(ProjMain.LOG);
+	    validPEs = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.LOG);
 	    outlierPEs = new OrderedIntList();
 	    // these might change later when online time ranges are
 	    // permitted.
 	    startTime = 0;
-	    endTime = Analysis.getTotalTime();
-	    if (Analysis.getNumProcessors() <= 256) {
-		threshold = (int)Math.ceil(0.1*Analysis.getNumProcessors());
+	    endTime = MainWindow.runObject[myRun].getTotalTime();
+	    if (MainWindow.runObject[myRun].getNumProcessors() <= 256) {
+		threshold = (int)Math.ceil(0.1*MainWindow.runObject[myRun].getNumProcessors());
 	    } else {
 		threshold = 20;
 	    }
@@ -175,8 +180,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	// type.
 	double[][] tempData;
 	Color[] tempGraphColors;
-	numActivities = Analysis.getNumActivity(currentActivity); 
-	tempGraphColors = Analysis.getColorMap(currentActivity);
+	numActivities = MainWindow.runObject[myRun].getNumActivity(currentActivity); 
+	tempGraphColors = MainWindow.runObject[myRun].getColorMap(currentActivity);
 	numSpecials = 0;
 	if (currentAttribute <= 1) {
 	    // **CWL NOTE** - this is currently a hack until I can find a way
@@ -197,7 +202,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	int nextPe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =
-	    new ProgressMonitor(Analysis.guiRoot, 
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
 				"Reading log files",
 				"", 0,
 				validPEs.size());
@@ -224,7 +229,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    // unfortunately requires us to write a different read loop
 	    // for it.
 	    GenericLogReader reader = 
-		new GenericLogReader(nextPe, Analysis.getVersion());
+		new GenericLogReader(nextPe, MainWindow.runObject[myRun].getVersion());
 	    try {
 		if (currentActivity == ActivityManager.USER_EVENTS) {
 		    LogEntryData logData = new LogEntryData();
@@ -240,7 +245,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 		    while (true) {
 			// process pair read previously
 			eventIndex = 
-			    Analysis.getUserDefinedEventIndex(logData.userEventID);
+			    MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID);
 			tempData[count][eventIndex] +=
 			    logDataEnd.time - logData.time;
 			reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR,
@@ -587,8 +592,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     // log data to read.
     void readOutlierStats() {
 	Color[] tempGraphColors;
-	numActivities = Analysis.getNumActivity(currentActivity); 
-	tempGraphColors = Analysis.getColorMap(currentActivity);
+	numActivities = MainWindow.runObject[myRun].getNumActivity(currentActivity); 
+	tempGraphColors = MainWindow.runObject[myRun].getColorMap(currentActivity);
 	numSpecials = 1;
 	graphColors = new Color[numActivities+numSpecials];
 	for (int i=0;i<numActivities; i++) {
@@ -600,8 +605,8 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 
 	// Read the stats file for global average data.
 	String statsFilePath =
-	    Analysis.getLogDirectory() + File.separator + 
-	    Analysis.getFilename() + ".outlier";
+	    MainWindow.runObject[myRun].getLogDirectory() + File.separator + 
+	    MainWindow.runObject[myRun].getFilename() + ".outlier";
 	try {
 	    BufferedReader InFile =
 		new BufferedReader(new InputStreamReader(new FileInputStream(statsFilePath)));	
@@ -622,7 +627,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    }
 	    int nextPe = 0;
 	    ProgressMonitor progressBar =
-		new ProgressMonitor(Analysis.guiRoot, 
+		new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
 				    "Reading log files",
 				    "", 0,
 				    threshold);
@@ -665,16 +670,16 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    }
 	    // derive total contributed by non-outliers
 	    graphData[1][act] = 
-		graphData[0][act]*Analysis.getNumProcessors() -
+		graphData[0][act]*MainWindow.runObject[myRun].getNumProcessors() -
 		graphData[2][act];
-	    graphData[1][act] /= Analysis.getNumProcessors() - threshold;
+	    graphData[1][act] /= MainWindow.runObject[myRun].getNumProcessors() - threshold;
 	    graphData[2][act] /= threshold;
 	}
     }
 
     private void readOnlineOutlierProcessor(int pe, int index) {
 	GenericLogReader reader = 
-	    new GenericLogReader(pe, Analysis.getVersion());
+	    new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 	try {
 	    LogEntryData logData = new LogEntryData();
 	    logData.time = 0;
@@ -776,7 +781,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    rString[1] = "Activity: Idle Time";
 	} else {
 	    rString[1] = "Activity: " + 
-		Analysis.getActivityNameByIndex(currentActivity, yVal);
+		MainWindow.runObject[myRun].getActivityNameByIndex(currentActivity, yVal);
 	}
 	if (currentActivity >= 2) {
 	    rString[2] = df.format(graphData[xVal][yVal]) + "";

@@ -9,6 +9,11 @@ import java.awt.*;
  */
 public class GraphData
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     static final int PROCESSOR = 0;
     static final int INTERVAL  = 1;
     
@@ -63,7 +68,7 @@ public class GraphData
 	offset  = 10;
 	offset2 = 0;
 	offset3 = 0;
-	numUserEntries = Analysis.getNumUserEntries();
+	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
 	
 	colorvalue = (float)0.0;
 	graphtype = BAR;
@@ -83,7 +88,7 @@ public class GraphData
 	for (int a=0; a<3; a++) {
 	    systemUsage[a]       = new ZItem();
 	    systemUsage[a].name  = s1[a];
-	    systemUsage[a].exists=(null!=Analysis.getSystemUsageData(a));
+	    systemUsage[a].exists=(null!=MainWindow.runObject[myRun].getSystemUsageData(a));
 	    float gray=(float)(1.0-a*0.3);
 	    systemUsage[a].color = new Color(gray,gray,gray);
 	    if (a==1) { //Enable system CPU utilization by default
@@ -110,7 +115,7 @@ public class GraphData
 		systemMsgs[a][t] = new ZItem();
 		systemMsgs[a][t].name = s2[a];
 		systemMsgs[a][t].type = s3[t];
-		systemMsgs[a][t].exists=Analysis.hasSystemMsgsData(a,t);
+		systemMsgs[a][t].exists=MainWindow.runObject[myRun].hasSystemMsgsData(a,t);
 		if (t==0) {
 		    systemMsgs[a][t].color = nextColor();
 		    systemMsgs[a][t].ymode = MSGS;
@@ -125,7 +130,7 @@ public class GraphData
 	}
 
 	// Initialize userEntry data
-	String[][] s4 = Analysis.getEntryNames();
+	String[][] s4 = MainWindow.runObject[myRun].getEntryNames();
 	userEntry = new ZItem[numUserEntries][3];
 	for (int a=0; a<numUserEntries; a++) {
 	    for (int t=0; t<3; t++) {
@@ -133,7 +138,7 @@ public class GraphData
 		userEntry[a][t].name = s4[a][0];
 		userEntry[a][t].type = s3[t];
 		userEntry[a][t].parent = s4[a][1];
-		userEntry[a][t].exists=Analysis.hasUserEntryData(a,t);
+		userEntry[a][t].exists=MainWindow.runObject[myRun].hasUserEntryData(a,t);
 		if (t==0) {
 		    userEntry[a][t].color = nextColor();
 		    userEntry[a][t].ymode = MSGS;
@@ -164,11 +169,11 @@ public class GraphData
 	interval.string   = interval.list.listToString();
 		 
 	int numProcessors = origProcList.size();
-	//	int numProcessors = Analysis.getNumProcessors();
+	//	int numProcessors = MainWindow.runObject[myRun].getNumProcessors();
 	// Initialize systemUsage data 
 	for (int a=0; a<3; a++) {
-	    if (null!=Analysis.getSystemUsageData(a)) {
-		systemUsage[a].data = Analysis.getSystemUsageData(a);
+	    if (null!=MainWindow.runObject[myRun].getSystemUsageData(a)) {
+		systemUsage[a].data = MainWindow.runObject[myRun].getSystemUsageData(a);
 		systemUsage[a].curPData = new int[numProcessors];
 		systemUsage[a].curIData = new int[interval.num];
 	    }
@@ -177,8 +182,8 @@ public class GraphData
 	// Initialize systemMsgs data
 	for (int a=0; a<5; a++) {
 	    for (int t=0; t<3; t++) {
-		if (Analysis.hasSystemMsgsData(a,t)) {
-		    systemMsgs[a][t].data = Analysis.getSystemMsgsData(a,t);
+		if (MainWindow.runObject[myRun].hasSystemMsgsData(a,t)) {
+		    systemMsgs[a][t].data = MainWindow.runObject[myRun].getSystemMsgsData(a,t);
 		    systemMsgs[a][t].curPData = new int[numProcessors];
 		    systemMsgs[a][t].curIData = new int[interval.num];
 		}
@@ -188,8 +193,8 @@ public class GraphData
 	// Initialize userEntry data
 	for (int a=0; a<numUserEntries; a++) {
 	    for (int t=0; t<3; t++) {
-		if (Analysis.hasUserEntryData(a,t)) {
-		    userEntry[a][t].data = Analysis.getUserEntryData(a,t);
+		if (MainWindow.runObject[myRun].hasUserEntryData(a,t)) {
+		    userEntry[a][t].data = MainWindow.runObject[myRun].getUserEntryData(a,t);
 		    userEntry[a][t].curPData = new int[numProcessors];
 		    userEntry[a][t].curIData = new int[interval.num];
 		}
@@ -245,7 +250,7 @@ public class GraphData
 	int element, count;
 	int max = 0;
 	int numProcessors = processor.list.size();
-	//	int numProcessors = Analysis.getNumProcessors();
+	//	int numProcessors = MainWindow.runObject[myRun].getNumProcessors();
 	for (int p=0; p<numProcessors; p++) {
 	    item.curPData[p] = 0;
 	    /* In the non-contigious case, we already know the data is

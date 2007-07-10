@@ -10,6 +10,11 @@ import projections.misc.*;
 public class GraphWindow extends ProjectionsWindow
     implements ActionListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     GraphDisplayPanel      displayPanel;
     GraphControlPanel      controlPanel;
     GraphLegendPanel       legendPanel;
@@ -37,7 +42,7 @@ public class GraphWindow extends ProjectionsWindow
 	createMenus();
 	pack();
 	  
-	setTitle("Projections Graph - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	showDialog();
     }   
 
@@ -51,7 +56,7 @@ public class GraphWindow extends ProjectionsWindow
     }
 
     void windowInit() {
-	endTime = Analysis.getTotalTime();
+	endTime = MainWindow.runObject[myRun].getTotalTime();
 
 	intervalsize = 1000; // default to 1ms
 	intervalStart = 0;
@@ -60,7 +65,7 @@ public class GraphWindow extends ProjectionsWindow
 	} else {
 	    intervalEnd = (int)(endTime/intervalsize);
 	}
-	processorList = Analysis.getValidProcessorList();
+	processorList = MainWindow.runObject[myRun].getValidProcessorList();
     }
 
     public void actionPerformed(ActionEvent evt)
@@ -202,7 +207,7 @@ public class GraphWindow extends ProjectionsWindow
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		final SwingWorker worker = new SwingWorker() {
 			public Object construct() {
-			    Analysis.LoadGraphData(intervalsize, 
+			    MainWindow.runObject[myRun].LoadGraphData(intervalsize, 
 						   intervalStart, intervalEnd,
 						   true, processorList);
 			    // got rid of the old optimization that new data 

@@ -17,6 +17,11 @@ public class ProfileWindow extends ProjectionsWindow
 {
     private static final int NUM_SYS_EPS = 3;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     public ProfileWindow thisWindow;
 
     private ProfileData data;
@@ -64,11 +69,11 @@ public class ProfileWindow extends ProjectionsWindow
 
         thresh = 0.01f;
 
-        if(Analysis.getNumFunctionEvents() > 0)
+        if(MainWindow.runObject[myRun].getNumFunctionEvents() > 0)
             ampiTraceOn = true;
 
 	setBackground(Color.lightGray);
-	setTitle("Projections Usage Profile - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Usage Profile - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	CreateMenus();
 	CreateLayout();
 	pack();
@@ -80,10 +85,10 @@ public class ProfileWindow extends ProjectionsWindow
 	data = new ProfileData(this);
 
 	// acquire starting data from Analysis
-	data.plist = Analysis.getValidProcessorList();
-	data.pstring = Analysis.getValidProcessorString();
+	data.plist = MainWindow.runObject[myRun].getValidProcessorList();
+	data.pstring = MainWindow.runObject[myRun].getValidProcessorString();
 	data.begintime = 0;
-	data.endtime = Analysis.getTotalTime();
+	data.endtime = MainWindow.runObject[myRun].getTotalTime();
     }
 
     private void CreateMenus(){
@@ -213,7 +218,7 @@ public class ProfileWindow extends ProjectionsWindow
 
     public void showDialog(){
 	if (dialog == null) {
-	    if ((!Analysis.hasLogData()) && (!Analysis.hasSumDetailData())) {
+	    if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
 		dialog = new RangeDialog(this, "Usage Profile", true);
 	    } else {
 		dialog = new RangeDialog(this, "Usage Profile");
@@ -374,7 +379,7 @@ public class ProfileWindow extends ProjectionsWindow
 
 
     public void applyDialogColors() {
-        int eps = Analysis.getNumUserEntries();
+        int eps = MainWindow.runObject[myRun].getNumUserEntries();
 
         System.out.println(colors[eps+2]);
         displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
@@ -382,7 +387,7 @@ public class ProfileWindow extends ProjectionsWindow
     }
 
     public void showChangeColorDialog() {
-        int noEPs = Analysis.getNumUserEntries();
+        int noEPs = MainWindow.runObject[myRun].getNumUserEntries();
         if (entryDialog == null) {
             String typeLabelStrings[] = {"Entry Points"};
 
@@ -402,7 +407,7 @@ public class ProfileWindow extends ProjectionsWindow
                 new String[noEPs+NUM_SYS_EPS];
             for (int i=0; i<noEPs; i++) {
                 entryNames[i] =
-                    Analysis.getEntryName(i);
+                    MainWindow.runObject[myRun].getEntryName(i);
             }
             // cannot seem to avoid a hardcode
             entryNames[noEPs] = "Pack Time";
@@ -477,7 +482,7 @@ public class ProfileWindow extends ProjectionsWindow
         while(data.plist.hasMoreElements()){
             curPe = data.plist.nextElement();
             ampiProcessVec.clear();
-            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec);
+            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec);
             System.out.println("Processor: "+curPe+":: ampiProcess#"+ampiProcessVec.size());
             for(int i=0; i<ampiProcessVec.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)ampiProcessVec.get(i);
@@ -485,7 +490,7 @@ public class ProfileWindow extends ProjectionsWindow
                 Stack stk = p.getFinalCallFuncStack();
                 for(Enumeration e=stk.elements(); e.hasMoreElements();){
                     AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
-                    System.out.println(d+"::"+Analysis.getFunctionName(d.FunctionID));
+                    System.out.println(d+"::"+MainWindow.runObject[myRun].getFunctionName(d.FunctionID));
                 }
             }
         }*/
@@ -509,7 +514,7 @@ public class ProfileWindow extends ProjectionsWindow
         while(data.plist.hasMoreElements()){
             curPe = data.plist.nextElement();
             ampiProcessVec[pCnt] = new Vector();
-            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
+            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
             Vector v = ampiProcessVec[pCnt];
             for(int i=0; i<v.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
@@ -538,7 +543,7 @@ public class ProfileWindow extends ProjectionsWindow
                     AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
                     tData[lineCnt] = new Object[tHeading.length];
                     tData[lineCnt][0] = ""+curPe;
-                    tData[lineCnt][1] = Analysis.getFunctionName(d.FunctionID);
+                    tData[lineCnt][1] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID);
                     tData[lineCnt][2] = d.sourceFileName;
                     tData[lineCnt][3] = ""+d.LineNo;
                     tData[lineCnt][4] = df.format(d.getAccExecTime()/(double)totalExecTime*100)+"%";
@@ -578,7 +583,7 @@ public class ProfileWindow extends ProjectionsWindow
         while(data.plist.hasMoreElements()){
             curPe = data.plist.nextElement();
             ampiProcess = new Vector();
-            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcess);
+            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcess);
             int total = 0;
             for(int i=0; i<ampiProcess.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)ampiProcess.get(i);
@@ -593,7 +598,7 @@ public class ProfileWindow extends ProjectionsWindow
                 Stack stk = p.getFinalCallFuncStack();
                 for(Enumeration e=stk.elements(); e.hasMoreElements();){
                     AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
-                    ampiFuncNameMap[pCnt][total] = Analysis.getFunctionName(d.FunctionID)+"@"+
+                    ampiFuncNameMap[pCnt][total] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID)+"@"+
                         d.sourceFileName+"("+d.LineNo+")";
                     ampiDataSrc[pCnt][total] = d.getAccExecTime()/(float)totalExecTime*100;
                     total++;
@@ -675,7 +680,7 @@ public class ProfileWindow extends ProjectionsWindow
         colorMap = new int[procCnt][];
         nameMap = new String[procCnt][];
 
-        int numEPs = Analysis.getNumUserEntries();
+        int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	// the first row is for entry method execution time the second is for
 	//time spent sending messages in that entry method
 	float[][] avg=new float[2][numEPs+NUM_SYS_EPS];
@@ -719,7 +724,7 @@ public class ProfileWindow extends ProjectionsWindow
 	    // the second is for time spent sending messages in
 	    // that entry method
 	    float cur[][] =
-		Analysis.GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
+		MainWindow.runObject[myRun].GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
 	    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
 		avg[0][i]+=(float)(cur[0][i]*avgScale);
 		avg[1][i]+=(float)(cur[1][i]*avgScale);
@@ -744,7 +749,7 @@ public class ProfileWindow extends ProjectionsWindow
 	}
 	if (!colorsSet) {
             //also create colors for "PACKING, UNPACKING, IDLE"
-	    Color[] entryColors = Analysis.getColorMap();
+	    Color[] entryColors = MainWindow.runObject[myRun].getColorMap();
             colors = new Color[numEPs+NUM_SYS_EPS];
             for(int i=0; i<numEPs; i++)
                 colors[i] = entryColors[i];
@@ -772,7 +777,7 @@ public class ProfileWindow extends ProjectionsWindow
 	    } else {
 		break;
 	    }
-	    float rawData[][]=Analysis.GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
+	    float rawData[][]=MainWindow.runObject[myRun].GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
 
             createSingleProcSource(rawData, curPe);
 
@@ -810,8 +815,8 @@ public class ProfileWindow extends ProjectionsWindow
         int sigCnt=-1;
         int epIndex;
         float usage;
-        int numUserEntries = Analysis.getNumUserEntries();
-        String[][] epNames = Analysis.getEntryNames();
+        int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
+        String[][] epNames = MainWindow.runObject[myRun].getEntryNames();
         for(epIndex=0; epIndex<rawData[0].length; epIndex++){
             usage = rawData[0][epIndex];
             if(usage<=thresh) continue;
@@ -837,7 +842,7 @@ public class ProfileWindow extends ProjectionsWindow
             }
         }
 
-	if (Analysis.getVersion() > 4.9) {
+	if (MainWindow.runObject[myRun].getVersion() > 4.9) {
             //Computing the entry point message sendTime
             String prefix = "Message Send Time: ";
             for(epIndex=0; epIndex<rawData[1].length; epIndex++){

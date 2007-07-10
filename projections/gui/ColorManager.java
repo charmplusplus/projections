@@ -16,6 +16,11 @@ import projections.guiUtils.*;
 
 public class ColorManager
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private static String filename = null;
 
     public static void setDefaultLocation(String fname) {
@@ -26,7 +31,7 @@ public class ColorManager
 	Color retColors[][] = new Color[ActivityManager.NUM_ACTIVITIES][];
 	for (int i=0; i<retColors.length; i++) {
 	    retColors[i] = 
-		createColorMap(Analysis.getNumActivity(i));
+		createColorMap(MainWindow.runObject[myRun].getNumActivity(i));
 	}
 	return retColors;
     }
@@ -50,7 +55,7 @@ public class ColorManager
 		return null;
 	    }
 	    for (int i=0; i<tempColors.length; i++) {
-		index = Analysis.stringToActivity(names[i]);
+		index = MainWindow.runObject[myRun].stringToActivity(names[i]);
 		if (index != -1) {
 		    retColors[index] = tempColors[i];
 		}
@@ -58,7 +63,7 @@ public class ColorManager
 	    for (int i=0; i<retColors.length; i++) {
 		if (retColors[i] == null) {
 		    retColors[i] = 
-			createColorMap(Analysis.getNumActivity(i));
+			createColorMap(MainWindow.runObject[myRun].getNumActivity(i));
 		}
 	    }
 	} catch (ClassCastException e) {
@@ -68,12 +73,12 @@ public class ColorManager
 	    in.close();
 	    int activity = ActivityManager.PROJECTIONS;
 	    retColors[activity] =
-		new Color[Analysis.getNumActivity(activity)];
+		new Color[MainWindow.runObject[myRun].getNumActivity(activity)];
 	    loadActivityColors(activity,retColors[activity]);
 	    for (int i=0; i<retColors.length; i++) {
 		if (retColors[i] == null) {
 		    retColors[i] = 
-			createColorMap(Analysis.getNumActivity(i));
+			createColorMap(MainWindow.runObject[myRun].getNumActivity(i));
 		}
 	    }
 	} catch (Exception e) {
@@ -162,7 +167,7 @@ public class ColorManager
 	    }
 	    in.close();
 	} else {
-	    retColors = createColorMap(Analysis.getNumActivity(type));
+	    retColors = createColorMap(MainWindow.runObject[myRun].getNumActivity(type));
 	}
 	return retColors;
     }

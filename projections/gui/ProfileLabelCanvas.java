@@ -4,6 +4,11 @@ import java.awt.*;
 
 public class ProfileLabelCanvas extends Canvas
 {  
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private ProfileData data;
    private Image offscreen;
    private int maxwidth;
@@ -15,8 +20,8 @@ public class ProfileLabelCanvas extends Canvas
 	  this.data = data;
 	  offscreen = null;
 	  maxwidth = 0;
-	  setForeground(Analysis.foreground);
-	  setBackground(Analysis.background);
+	  setForeground(MainWindow.runObject[myRun].foreground);
+	  setBackground(MainWindow.runObject[myRun].background);
    }   
    private void drawLabels(Graphics g)
    {    
@@ -29,7 +34,7 @@ public class ProfileLabelCanvas extends Canvas
 	  if(fm == null)
 	  {
 		 fm = g.getFontMetrics(g.getFont());
-		 maxwidth = fm.stringWidth("" + Analysis.getNumProcessors()) + 20;
+		 maxwidth = fm.stringWidth("" + MainWindow.runObject[myRun].getNumProcessors()) + 20;
 	  }   
 	  
 	  labelincrement = (int)(Math.ceil((double)maxwidth/width));

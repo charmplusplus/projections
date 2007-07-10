@@ -4,6 +4,11 @@ import java.awt.*;
 
 public class TimelineDisplayCanvas extends Container 
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private TimelineData data;
     private Image offscreen;
     public Rubberband rubberBand = null;
@@ -34,14 +39,14 @@ public class TimelineDisplayCanvas extends Container
 	    
 	    og.setClip(0, 0, data.tlw, data.tlh);
 	    Color oldColor = og.getColor();
-	    og.setColor(Analysis.background);
+	    og.setColor(MainWindow.runObject[myRun].background);
 	    og.fillRect(0,0, data.tlw, data.tlh);
 	    og.setColor(oldColor);
 	    
 	    int maxx = data.offset + 
 		(int)((data.endTime-data.beginTime) * 
 		      data.pixelIncrement/data.timeIncrement);
-	    og.setColor(Analysis.foreground);
+	    og.setColor(MainWindow.runObject[myRun].foreground);
 	    for (int i=0; i<data.numPs; i++) {
 		int y = data.tluh/2 + i*data.tluh;
 		og.drawLine(data.offset, y, maxx, y);

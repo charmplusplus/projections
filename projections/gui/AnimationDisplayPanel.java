@@ -6,6 +6,11 @@ import java.awt.event.*;
 public class AnimationDisplayPanel extends Panel
     implements MouseMotionListener , MouseListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private float MAXHUE = (float)0.65;
     int numPs = -1;
     private int numIs = -1;
@@ -42,7 +47,7 @@ public class AnimationDisplayPanel extends Panel
     public AnimationDisplayPanel(AnimationWindow animationWindow)
     {
 	this.animationWindow = animationWindow;
-	setBackground(Analysis.background);
+	setBackground(MainWindow.runObject[myRun].background);
 
 	addComponentListener(new ComponentAdapter()
 	    {
@@ -265,7 +270,7 @@ public class AnimationDisplayPanel extends Panel
 	int endI = (int)(endTime/intervalSize);
 	int numPs = desiredPEs.size();
 	
-	Analysis.LoadGraphData(intervalSize,startI,endI-1,false, null);
+	MainWindow.runObject[myRun].LoadGraphData(intervalSize,startI,endI-1,false, null);
 	int[][] animationdata = new int[ numPs ][ endI-startI ];
 	
 	int pInfo = desiredPEs.nextElement();
@@ -274,7 +279,7 @@ public class AnimationDisplayPanel extends Panel
 	while(pInfo != -1){
 	    for( int t = 0; t <(endI-startI); t++ ){
 		animationdata[ p ][ t ] = 
-		    Analysis.getSystemUsageData(1)[ pInfo ][ t ];
+		    MainWindow.runObject[myRun].getSystemUsageData(1)[ pInfo ][ t ];
 	    }
 	    pInfo = desiredPEs.nextElement();
 	    p++;

@@ -19,6 +19,11 @@ public class PoseAnalysisWindow extends ProjectionsWindow
 {
     PoseAnalysisWindow thisWindow;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private JPanel mainPanel;
     private JPanel controlPanel;
     private JButton setRanges;
@@ -57,7 +62,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
 	// super.windowInit(); base class is abstract
 
 	realStartTime = 0;
-	realEndTime = Analysis.getPoseTotalTime();
+	realEndTime = MainWindow.runObject[myRun].getPoseTotalTime();
 	realIntervalSize = 1000; // default 1ms 
 	realStartInterval = 0;
 	if (realEndTime%realIntervalSize == 0) {
@@ -67,7 +72,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
 	}
 
 	virtStartTime = 0;
-	virtEndTime = Analysis.getPoseTotalVirtualTime();
+	virtEndTime = MainWindow.runObject[myRun].getPoseTotalVirtualTime();
 	// Virtual values really vary a lot, so divide the range into
 	// approximately 100 intervals by default, if there's enough time.
 	virtIntervalSize = virtEndTime/100 + 1;
@@ -77,7 +82,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
 	} else {
 	    virtEndInterval = (int)(virtEndTime/virtIntervalSize);
 	}
-	processorList = Analysis.getValidProcessorList(ProjMain.DOP);
+	processorList = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.DOP);
     }
 
     public PoseAnalysisWindow(MainWindow mainWindow, Integer myWindowID) {
@@ -134,7 +139,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
 	    final SwingWorker worker =  new SwingWorker() {
 		    public Object construct() {
 			if (dialog.isModified()) {
-			    reader = Analysis.getPoseDopReader();
+			    reader = MainWindow.runObject[myRun].getPoseDopReader();
 			    /*
 			    System.out.println(realIntervalSize + " " +
 					       realStartTime + " " +

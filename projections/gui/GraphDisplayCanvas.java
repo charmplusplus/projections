@@ -4,13 +4,18 @@ import java.awt.*;
 
 public class GraphDisplayCanvas extends Canvas 
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private GraphData data;
    private OrderedGraphDataList graphDataList;
    private Image offscreen;
 
    public GraphDisplayCanvas()
    {
-	  setBackground(Analysis.background);
+	  setBackground(MainWindow.runObject[myRun].background);
    }   
    private void addDataForBar(ZItem item, int x)
    {
@@ -44,9 +49,9 @@ public class GraphDisplayCanvas extends Canvas
        int w = getSize().width;
        int h = getSize().height;
        
-       g.setColor(Analysis.background);
+       g.setColor(MainWindow.runObject[myRun].background);
        g.fillRect(0, 0, w, h);
-       g.setColor(Analysis.foreground);
+       g.setColor(MainWindow.runObject[myRun].foreground);
        g.translate(-data.displayPanel.getHSBValue(), 0);
        
        if (MainWindow.dataDump != null) {

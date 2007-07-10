@@ -26,6 +26,11 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     private AmpiTimeProfileWindow thisWindow = null;
     private EntrySelectionDialog entryDialog = null;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private JPanel mainPanel;
     private JPanel controlPanel;
     private JButton epSelection;
@@ -67,7 +72,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 
     
     public AmpiTimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Time Profile Graph--AMPI - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
+	super("Projections Time Profile Graph--AMPI - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
 	setGraphSpecificData();	
         createLayout();
         thisWindow = this;
@@ -152,7 +157,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     public void createAMPITimeProfileData(int procId, int index){        
         processProfiles[index] = new Vector();
         //currently read all log data thus obtaining the time profile across the whole timeline!
-        Analysis.createAMPITimeProfile(procId,0,Analysis.getTotalTime(), processProfiles[index]);
+        MainWindow.runObject[myRun].createAMPITimeProfile(procId,0,MainWindow.runObject[myRun].getTotalTime(), processProfiles[index]);
     }
     
     public void getRangeVals(long beginT, long endT, int beginI, int endI, long iSize, OrderedIntList procList){
@@ -332,7 +337,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
                 setOutputGraphData(true);
 	    } else if (b == saveColors) {
 		// save all entry point colors to disk
-		Analysis.saveColors();
+		MainWindow.runObject[myRun].saveColors();
 	    } else if (b == loadColors) {
 		//load all entry point colors from disk
 		try {

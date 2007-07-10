@@ -8,6 +8,11 @@ import javax.swing.*;
 public class GraphPanel extends JPanel
     implements ActionListener, ItemListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private JPanel mainPanel; 
     private JScrollPane displayPanel;
     private Graph displayCanvas;
@@ -249,8 +254,8 @@ public class GraphPanel extends JPanel
         XAxisFixed xa=new XAxisFixed("Grainsize","ms");
 	xa.setLimits(1.0,2.0);
         YAxis ya=new YAxisAuto("Number of Computes","",ds);
-	Analysis.foreground = Color.black;
-	Analysis.background = Color.white;
+	MainWindow.runObject[myRun].foreground = Color.black;
+	MainWindow.runObject[myRun].background = Color.white;
         Graph g=new Graph();
         g.setGraphType(Graph.BAR);
         g.setStackGraph(true);

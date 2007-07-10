@@ -19,6 +19,11 @@ import javax.swing.*;
 public class IntervalWindow extends GenericGraphWindow
     implements ActionListener,ItemListener{
     
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // parameter variables in addition to superclass
     public long thresholdTime;	// to record EPs that cross this time
     public long intervalSize;
@@ -226,8 +231,8 @@ public class IntervalWindow extends GenericGraphWindow
 	    int pe = tmpPEs.nextElement();
 	    int binValue;
 	    logReader = 
-		new GenericLogReader(Analysis.getLogName(pe),
-				     Analysis.getVersion());
+		new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+				     MainWindow.runObject[myRun].getVersion());
 	    try {
                 logReader.nextEventOnOrAfter(startTime,logData);
                 while(true) {

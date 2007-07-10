@@ -9,6 +9,11 @@ import projections.misc.*;
 
 public class TimelineData
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     int vpw, vph;
     int tlw, tlh;
     int lcw;
@@ -98,7 +103,7 @@ public class TimelineData
 	labelIncrement = 5;
 	numIntervals = 1;
 	beginTime = 0;
-	totalTime = Analysis.getTotalTime();
+	totalTime = MainWindow.runObject[myRun].getTotalTime();
 	endTime = totalTime;
 	xmin = 0;
 	xmax = numIntervals;
@@ -111,14 +116,14 @@ public class TimelineData
 	
 	tloArray = null;
 	mesgVector = null;
-	entries = new int[Analysis.getNumUserEntries()];
-	entryColor = Analysis.getColorMap();
+	entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
+	entryColor = MainWindow.runObject[myRun].getColorMap();
 	/*
-	entryColor = new Color[Analysis.getNumUserEntries()];
+	entryColor = new Color[MainWindow.runObject[myRun].getNumUserEntries()];
 	float H = (float)1.0;
 	float S = (float)1.0;
 	float B = (float)1.0;
-	float delta = (float)(1.0/Analysis.getNumUserEntries());
+	float delta = (float)(1.0/MainWindow.runObject[myRun].getNumUserEntries());
 	if (new File("bin/color.map").exists()) {
 	    try {
 		Util.restoreColors(entryColor, "Timeline Graph", null);
@@ -126,9 +131,9 @@ public class TimelineData
 		System.err.println("unable to load color.map");
 	    } 
 	} else {
-	    for (int i=0; i<Analysis.getNumUserEntries(); i++) {
+	    for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 		entries[i] = 0;
-		entryColor[i] = Analysis.getEntryColor(i);
+		entryColor[i] = MainWindow.runObject[myRun].getEntryColor(i);
 	    }   
 	}
 	*/
@@ -139,8 +144,8 @@ public class TimelineData
 	TimelineObject[][] oldtloArray = tloArray;
 	UserEvent[][] oldUserEventsArray = userEventsArray;
 	oldmesgVector = mesgVector;
-	mesgVector = new Vector[Analysis.getNumProcessors()];
-	for(int i=0;i < Analysis.getNumProcessors();i++){
+	mesgVector = new Vector[MainWindow.runObject[myRun].getNumProcessors()];
+	for(int i=0;i < MainWindow.runObject[myRun].getNumProcessors();i++){
 	    mesgVector[i] = null;
 	}
 	
@@ -259,7 +264,7 @@ public class TimelineData
        processorList.reset();
        int numPEs = processorList.size();
        ProgressMonitor progressBar = 
-	   new ProgressMonitor(Analysis.guiRoot, "Reading timeline data",
+	   new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data",
 			       "", 0, numPEs);
        progressBar.setProgress(0);
        for (int p=0; p<numPEs; p++) {
@@ -275,12 +280,12 @@ public class TimelineData
 	   }
        }
        progressBar.close();
-       for (int e=0; e<Analysis.getNumUserEntries(); e++) {
+       for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 	   entries[e] = 0;
        }
        processorUsage = new float[tloArray.length];
        entryUsageList = new OrderedUsageList[tloArray.length];
-       float[] entryUsageArray = new float[Analysis.getNumUserEntries()];
+       float[] entryUsageArray = new float[MainWindow.runObject[myRun].getNumUserEntries()];
        idleUsage  = new float[tloArray.length];
        packUsage  = new float[tloArray.length];
 	  
@@ -288,7 +293,7 @@ public class TimelineData
 	   processorUsage[p] = 0;
 	   idleUsage[p] = 0;
 	   packUsage[p] = 0;
-	   for (int i=0; i<Analysis.getNumUserEntries(); i++) {
+	   for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 	       entryUsageArray[i] = 0;
 	   }
 	   for (int n=0; n<tloArray[p].length; n++) {
@@ -314,7 +319,7 @@ public class TimelineData
 			      processorUsage[p]);
 	   */
 	   entryUsageList[p] = new OrderedUsageList();
-	   for (int i=0; i<Analysis.getNumUserEntries(); i++) {
+	   for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 	       if (entryUsageArray[i] > 0) {
 		   entryUsageList[p].insert(entryUsageArray[i], i);
 	       }
@@ -435,7 +440,7 @@ public class TimelineData
     public void drawAllLines(){
    	Graphics g = displayCanvas.getGraphics();
    	if (!mesgCreateExecVector.isEmpty()) {
-	    g.setColor(Analysis.foreground);
+	    g.setColor(MainWindow.runObject[myRun].foreground);
 	    
 	    Dimension dim = displayCanvas.getSize();
 	    double calc_xscale = (double )(pixelIncrement/timeIncrement);
@@ -498,8 +503,8 @@ public class TimelineData
     public Vector createTL(int p, long bt, long et, 
 			   Vector timelineEvents, Vector userEvents) {
 	try {
-	    if (Analysis.hasLogData()) {
-		return Analysis.logLoader.createtimeline(p, bt, et, 
+	    if (MainWindow.runObject[myRun].hasLogData()) {
+		return MainWindow.runObject[myRun].logLoader.createtimeline(p, bt, et, 
 							 timelineEvents, 
 							 userEvents);
 	    } else {

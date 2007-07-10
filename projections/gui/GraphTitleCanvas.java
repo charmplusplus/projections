@@ -4,13 +4,18 @@ import java.awt.*;
 
 public class GraphTitleCanvas extends Canvas 
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private GraphData data;
    private FontMetrics fm;
    
    public GraphTitleCanvas()
    {
-	  setBackground(Analysis.background);
-	  setForeground(Analysis.foreground);
+	  setBackground(MainWindow.runObject[myRun].background);
+	  setForeground(MainWindow.runObject[myRun].foreground);
    }   
    public int getPreferredHeight()
    {
@@ -55,9 +60,9 @@ public class GraphTitleCanvas extends Canvas
 	  int x = (getSize().width - fm.stringWidth(title))/2;
 	  int y = (getSize().height + fm.getHeight())/2;
 
-	  g.setColor(Analysis.background);
+	  g.setColor(MainWindow.runObject[myRun].background);
 	  g.fillRect(0, 0, getSize().width, getSize().height);
-	  g.setColor(Analysis.foreground);
+	  g.setColor(MainWindow.runObject[myRun].foreground);
 	  g.drawString(title, x, y);    
    }   
    public void print(Graphics pg)

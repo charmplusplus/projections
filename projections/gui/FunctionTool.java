@@ -22,6 +22,11 @@ import projections.analysis.*;
 public class FunctionTool extends GenericGraphWindow
     implements PopUpAble
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // local GUI components
     private JPanel mainPanel;
     private JPanel graphPanel;
@@ -80,12 +85,12 @@ public class FunctionTool extends GenericGraphWindow
     protected void setGraphSpecificData(){
 	if (currentArrayName.equals("timeData")) {
 	    setDataSource("Total Function Time", timeData, 
-			  Analysis.getFunctionColors(), thisWindow);
+			  MainWindow.runObject[myRun].getFunctionColors(), thisWindow);
 	    setXAxis("Processor", "");
 	    setYAxis("Time Spent in Function", "us");
 	} else if (currentArrayName.equals("countData")) {
 	    setDataSource("Total Function Calls", countData, 
-			  Analysis.getFunctionColors(), thisWindow);
+			  MainWindow.runObject[myRun].getFunctionColors(), thisWindow);
 	    setXAxis("Processor", "");
 	    setYAxis("# Times Called", "");
 	}
@@ -128,9 +133,9 @@ public class FunctionTool extends GenericGraphWindow
 	// setup the reader to read all data.
 	GenericLogReader reader;
 	LogEntryData logEntry = new LogEntryData();
-	OrderedIntList validPEs = Analysis.getValidProcessorList();
+	OrderedIntList validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	validPEs.reset();
-	int numFunc = Analysis.getNumFunctionEvents();
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 	CallStackManager stack = new CallStackManager();
 	int activeThread[] = new int[3];
 
@@ -154,8 +159,8 @@ public class FunctionTool extends GenericGraphWindow
 		    progressBar.close();
 		    return;
 		}
-		reader = new GenericLogReader(Analysis.getLogName(pe),
-					      Analysis.getVersion());
+		reader = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+					      MainWindow.runObject[myRun].getVersion());
 		double lastFuncTime = 0.0;
 		Integer stackEntry;
 		// find first begin processing event.
@@ -286,11 +291,11 @@ public class FunctionTool extends GenericGraphWindow
 
 	if (currentArrayName.equals("timeData")) {
 	    popupText[0] = "Processor: " + pe;
-	    popupText[1] = "Function: " + Analysis.getFunctionName(funcID);
+	    popupText[1] = "Function: " + MainWindow.runObject[myRun].getFunctionName(funcID);
 	    popupText[2] = "Time spent (us): " + (long)(timeData[pe][funcID]);
 	} else if (currentArrayName.equals("countData")) {
 	    popupText[0] = "Processor: " + pe;
-	    popupText[1] = "Function: " + Analysis.getFunctionName(funcID);
+	    popupText[1] = "Function: " + MainWindow.runObject[myRun].getFunctionName(funcID);
 	    popupText[2] = "Times called: " + (int)(countData[pe][funcID]);
 	}
 

@@ -15,6 +15,11 @@ import projections.analysis.*;
 public class AmpiProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private AmpiProfileData data;
     private boolean colorsSet;
     private Color[] colors; //every color corresponds to a function
@@ -55,11 +60,11 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	colorsSet = false;
         colors = null;
 
-        if(Analysis.getNumFunctionEvents() > 0)
+        if(MainWindow.runObject[myRun].getNumFunctionEvents() > 0)
             ampiTraceOn = true;
 
 	setBackground(Color.lightGray);
-	setTitle("Projections AMPI Usage Profile - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections AMPI Usage Profile - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	CreateMenus();
 	CreateLayout();
 	pack();
@@ -71,10 +76,10 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	data = new AmpiProfileData(this);
 
 	// acquire starting data from Analysis
-	data.plist = Analysis.getValidProcessorList();
-	data.pstring = Analysis.getValidProcessorString();
+	data.plist = MainWindow.runObject[myRun].getValidProcessorList();
+	data.pstring = MainWindow.runObject[myRun].getValidProcessorString();
 	data.begintime = 0;
-	data.endtime = Analysis.getTotalTime();
+	data.endtime = MainWindow.runObject[myRun].getTotalTime();
     }
 
     private void CreateMenus(){
@@ -206,7 +211,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     public void showDialog(){
 	if (dialog == null) {
-	    if ((!Analysis.hasLogData()) && (!Analysis.hasSumDetailData())) {
+	    if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
 		dialog = new RangeDialog(this, "AMPI Usage Profile", true);
 	    } else {
 		dialog = new RangeDialog(this, "AMPI Usage Profile");
@@ -369,7 +374,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
 
     public void applyDialogColors() {
-	int numFunc = Analysis.getNumFunctionEvents();
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 
         System.out.println(colors[numFunc]);
         displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
@@ -377,7 +382,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
     }
 
     public void showChangeColorDialog() {
-	int numFunc = Analysis.getNumFunctionEvents();
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
         if (entryDialog == null) {
             String typeLabelStrings[] = {"Functions"};
 
@@ -397,7 +402,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
                 new String[numFunc+1];
             for (int i=1; i<numFunc; i++) {
                 entryNames[i] =
-                    Analysis.getFunctionName(i);
+                    MainWindow.runObject[myRun].getFunctionName(i);
             }
             entryNames[numFunc] = "OTHER";
 
@@ -469,7 +474,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         while(data.plist.hasMoreElements()){
             curPe = data.plist.nextElement();
             ampiProcessVec.clear();
-            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec);
+            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec);
             System.out.println("Processor: "+curPe+":: ampiProcess#"+ampiProcessVec.size());
             for(int i=0; i<ampiProcessVec.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)ampiProcessVec.get(i);
@@ -477,7 +482,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
                 Stack stk = p.getFinalCallFuncStack();
                 for(Enumeration e=stk.elements(); e.hasMoreElements();){
                     AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
-                    System.out.println(d+"::"+Analysis.getFunctionName(d.FunctionID));
+                    System.out.println(d+"::"+MainWindow.runObject[myRun].getFunctionName(d.FunctionID));
                 }
             }
         }*/
@@ -501,7 +506,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         while(data.plist.hasMoreElements()){
             curPe = data.plist.nextElement();
             ampiProcessVec[pCnt] = new Vector();
-            Analysis.createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
+            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
             Vector v = ampiProcessVec[pCnt];
             for(int i=0; i<v.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
@@ -530,7 +535,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
                     AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
                     tData[lineCnt] = new Object[tHeading.length];
                     tData[lineCnt][0] = ""+curPe;
-                    tData[lineCnt][1] = Analysis.getFunctionName(d.FunctionID);
+                    tData[lineCnt][1] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID);
                     tData[lineCnt][2] = d.sourceFileName;
                     tData[lineCnt][3] = ""+d.LineNo;
                     tData[lineCnt][4] = df.format(d.getAccExecTime()/(double)totalExecTime*100)+"%";
@@ -571,7 +576,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 		break;
 	    }
 	    accTime[progressCount] = u.ampiUsage(curPe, data.begintime, data.endtime,
-					 Analysis.getVersion());
+					 MainWindow.runObject[myRun].getVersion());
 	    progressCount++;
 	}
 	progressBar.close();
@@ -580,7 +585,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
     void setAmpiDisplayProfileData(){
         int curPe = -1;
 	int numPes = data.plist.size();
-	int numFunc = Analysis.getNumFunctionEvents();
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
         String[] xNames = new String[numFunc-1];
         Vector ampiProcess = null;
         int pCnt=0;
@@ -599,7 +604,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	    for(int j=0;j<numPes;j++){
 		ampiDataSrc[i-1][0] += accTime[j][i]*avgScale;
 	    }
-	    xNames[i-1] = Analysis.getFunctionName(i);
+	    xNames[i-1] = MainWindow.runObject[myRun].getFunctionName(i);
 	    ampiFuncNameMap[i-1] = new String[1];
 	    ampiFuncNameMap[i-1][0] = xNames[i-1];
 	}
@@ -664,7 +669,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         // extra column is that of the average data.
         int procCnt = data.plist.size();
 	data.numPs = procCnt;
-	int numFunc = Analysis.getNumFunctionEvents();
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 
         dataSource = new float[procCnt+1][];
         colorMap = new int[procCnt+1][];
@@ -741,7 +746,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     public void createSingleProcSource(float[] rawData, int procNum){
         //fisrt compute number of significant sections
-	int numFunc = Analysis.getNumFunctionEvents()-1;
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents()-1;
         float[] dSrc = new float[numFunc+1];
         int[] cMap = new int[numFunc+1];
         String[] nMap = new String[numFunc+1];
@@ -756,7 +761,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
         int funcIdx;
         float usage;
-        String[] funcNames = Analysis.getFunctionNames();
+        String[] funcNames = MainWindow.runObject[myRun].getFunctionNames();
         for(funcIdx=0; funcIdx<numFunc+1; funcIdx++){
             usage = rawData[funcIdx+1];
             if(usage<=0) continue;
@@ -765,7 +770,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
             if(funcIdx==numFunc){
                 nMap[funcIdx] = "OTHER";
             }else{
-                nMap[funcIdx] = Analysis.getFunctionName(funcIdx+1);
+                nMap[funcIdx] = MainWindow.runObject[myRun].getFunctionName(funcIdx+1);
             }
         }
     }

@@ -9,6 +9,11 @@ import java.text.DecimalFormat;
 public class TimelineObject extends Component
    implements MouseListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private String[]  bubbletext;
     private Bubble  bubble;
     private TimelineMessageWindow msgwindow;
@@ -49,8 +54,8 @@ public class TimelineObject extends Component
     {
 	format_.setGroupingUsed(true);
 
-	setBackground(Analysis.background);
-	setForeground(Analysis.foreground);
+	setBackground(MainWindow.runObject[myRun].background);
+	setForeground(MainWindow.runObject[myRun].foreground);
 	
 	this.data = data;
 	beginTime = tle.BeginTime;
@@ -88,7 +93,7 @@ public class TimelineObject extends Component
 
 	    bubbletext = new String[textSize];
 	    bubbletext[textIndex++] = "Function: " +
-		Analysis.getFunctionName(entry);
+		MainWindow.runObject[myRun].getFunctionName(entry);
 	    bubbletext[textIndex++] = "Begin Time: " + 
 		format_.format(beginTime);
 	    bubbletext[textIndex++] = "End Time: " +
@@ -105,7 +110,7 @@ public class TimelineObject extends Component
 		AmpiFunctionData functionData = 
 		    (AmpiFunctionData)tle.callStack.pop();
 		bubbletext[textIndex++] = 
-		    "[Func]: " + Analysis.getFunctionName(functionData.FunctionID);
+		    "[Func]: " + MainWindow.runObject[myRun].getFunctionName(functionData.FunctionID);
 		bubbletext[textIndex++] =
 		    "   line:" + functionData.LineNo + " file: " +
 		    functionData.sourceFileName;
@@ -118,14 +123,14 @@ public class TimelineObject extends Component
 	    } else {
 		bubbletext = new String[textSize];
 	    }
-	    int ecount = Analysis.getNumUserEntries();
+	    int ecount = MainWindow.runObject[myRun].getNumUserEntries();
 	    if (n >= ecount) {
 		System.out.println("Fatal error: invalid entry " + n +
 				   " on processor " + pCurrent + "!");
 		System.exit(1) ;
 	    }
-	    bubbletext[textIndex++] = (Analysis.getEntryNames())[n][1] + 
-		"::" + (Analysis.getEntryNames())[n][0]; 
+	    bubbletext[textIndex++] = (MainWindow.runObject[myRun].getEntryNames())[n][1] + 
+		"::" + (MainWindow.runObject[myRun].getEntryNames())[n][0]; 
 	    bubbletext[textIndex++] = "Msg Len: " + msglen;
 	    bubbletext[textIndex] = "Begin Time: " + format_.format(beginTime);
 	    if (cpuTime > 0) {
@@ -163,13 +168,13 @@ public class TimelineObject extends Component
 	    if (numPapiCounts > 0) {
 		bubbletext[textIndex++] = "*** PAPI counts ***";
 		for (int i=0; i<numPapiCounts; i++) {
-		    bubbletext[textIndex++] = Analysis.getPerfCountNames()[i] +
+		    bubbletext[textIndex++] = MainWindow.runObject[myRun].getPerfCountNames()[i] +
 			" = " + format_.format(papiCounts[i]);
 		    /* Dropping the hack - some more general way of
 		       intelligently performing derived analysis of raw
 		       counters should be developed
 		    // hack for now
-		    bubbletext[textIndex] = Analysis.getPerfCountNames()[i] +
+		    bubbletext[textIndex] = MainWindow.runObject[myRun].getPerfCountNames()[i] +
 			" = " + format_.format(papiCounts[i]);
 		    if (i == 0) {
 			// processor count
@@ -527,7 +532,7 @@ public class TimelineObject extends Component
 		}else{
 			c = data.entryColor[entry];
 			if (isFunction) {
-			    c = Analysis.getFunctionColor(entry);
+			    c = MainWindow.runObject[myRun].getFunctionColor(entry);
 			}
 		}	
 	  }

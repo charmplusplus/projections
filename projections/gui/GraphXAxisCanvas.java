@@ -4,6 +4,11 @@ import java.awt.*;
 
 public class GraphXAxisCanvas extends Canvas 
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private GraphData data;
    private FontMetrics fm;
    
@@ -15,8 +20,8 @@ public class GraphXAxisCanvas extends Canvas
    
    public GraphXAxisCanvas()
    {
-	  setBackground(Analysis.background);
-	  setForeground(Analysis.foreground);
+	  setBackground(MainWindow.runObject[myRun].background);
+	  setForeground(MainWindow.runObject[myRun].foreground);
    }   
    private void drawAxis(Graphics g)
    {
@@ -26,7 +31,7 @@ public class GraphXAxisCanvas extends Canvas
 	  int w  = getSize().width;
 	  int h  = getSize().height;
 	  
-	  g.setColor(Analysis.background);
+	  g.setColor(MainWindow.runObject[myRun].background);
 	  g.fillRect(0, 0, w, h);
 	
 	  int hsbval = data.displayPanel.getHSBValue();
@@ -49,7 +54,7 @@ public class GraphXAxisCanvas extends Canvas
 	  if(data.graphtype == GraphData.BAR)
 		 linemax += (int)pixelincrement;
 
-	  g.setColor(Analysis.foreground);
+	  g.setColor(MainWindow.runObject[myRun].foreground);
 	  g.drawLine(linemin, 5, linemax, 5); 
 	  
 	  if(fm == null)
@@ -141,8 +146,8 @@ public class GraphXAxisCanvas extends Canvas
 	  
 	  drawAxis(pg);
 	  
-	  ((Graphics2D)pg).setBackground(Analysis.background);
-	  setForeground(Analysis.foreground);
+	  ((Graphics2D)pg).setBackground(MainWindow.runObject[myRun].background);
+	  setForeground(MainWindow.runObject[myRun].foreground);
    }   
    public void setBounds(int x, int y, int w, int h)
    {

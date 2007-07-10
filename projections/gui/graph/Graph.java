@@ -10,6 +10,11 @@ import javax.swing.event.*;
 public class Graph extends JPanel 
     implements MouseInputListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     public static final int STACKED   = 0;  // type of the bar graph
     public static final int UNSTACKED = 1;  // single, multiple or stacked
     public static final int AREA      = 2;  // Area graph (stacked)
@@ -247,13 +252,13 @@ public class Graph extends JPanel
 	    pg.setFont(font);
 	    fm = pg.getFontMetrics(font);
 	}
-	Color oldBackground = Analysis.background;
-	Color oldForeground = Analysis.foreground;
-	Analysis.background = Color.white;
-	Analysis.foreground = Color.black;
+	Color oldBackground = MainWindow.runObject[myRun].background;
+	Color oldForeground = MainWindow.runObject[myRun].foreground;
+	MainWindow.runObject[myRun].background = Color.white;
+	MainWindow.runObject[myRun].foreground = Color.black;
 	drawDisplay(pg);
-	Analysis.background = oldBackground;
-	Analysis.foreground = oldForeground;
+	MainWindow.runObject[myRun].background = oldBackground;
+	MainWindow.runObject[myRun].foreground = oldForeground;
     }
 
     public void mouseClicked(MouseEvent e) {
@@ -361,8 +366,8 @@ public class Graph extends JPanel
     {
 	Graphics2D g = (Graphics2D)_g;
 	
-	g.setBackground(Analysis.background);
-	g.setColor(Analysis.foreground);
+	g.setBackground(MainWindow.runObject[myRun].background);
+	g.setColor(MainWindow.runObject[myRun].foreground);
 
 	w = getWidth();
 	h = getHeight();

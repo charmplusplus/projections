@@ -10,6 +10,11 @@ import java.text.*;
 public class TimelineWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener, ItemListener
 { 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private NoUpdatePanel         mainPanel, displayPanel;
     private TimelineLabelCanvas   labelCanvas;
     TimelineAxisCanvas    axisTopCanvas;
@@ -118,14 +123,14 @@ public class TimelineWindow extends ProjectionsWindow
 	axisBotCanvas.repaint();
 	displayCanvas.makeNewImage();
 	displayCanvas.repaint();
-	displayPanel.setBackground(Analysis.background);
+	displayPanel.setBackground(MainWindow.runObject[myRun].background);
 	displayPanel.repaint();
     }
 
     void windowInit() {
-	validPEs = Analysis.getValidProcessorList();
+	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	startTime = 0;
-	endTime = Analysis.getTotalTime();
+	endTime = MainWindow.runObject[myRun].getTotalTime();
     }
 
     public TimelineWindow(MainWindow parentWindow, Integer myWindowID)
@@ -159,7 +164,7 @@ public class TimelineWindow extends ProjectionsWindow
 	
 	data = new TimelineData(this);
 	
-	setTitle("Projections Timelines - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Timelines - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	CreateMenus();
 	CreateLayout();
 	showDialog();
@@ -298,11 +303,11 @@ public class TimelineWindow extends ProjectionsWindow
 	double jStart = axisBotCanvas.canvasToTime(rect.x);
 	double jEnd = axisBotCanvas.canvasToTime(rect.x+rect.width);
 	
-	Analysis.setJTimeAvailable(true);
+	MainWindow.runObject[myRun].setJTimeAvailable(true);
 	if (rect.width == 0) {
-	    Analysis.setJTime((long)(0), Analysis.getTotalTime());
+	    MainWindow.runObject[myRun].setJTime((long)(0), MainWindow.runObject[myRun].getTotalTime());
 	} else {
-	    Analysis.setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
+	    MainWindow.runObject[myRun].setJTime((long)(jStart+0.5), (long)(jEnd+0.5));
 	}
      
 	// **CW** DELIBERATE BUG (adding 0 to window open), just to make
@@ -379,7 +384,7 @@ public class TimelineWindow extends ProjectionsWindow
 	    else if(arg.equals("Change Entry Point Colors")) { ShowColorWindow(); }
 	    else if(arg.equals("Save Entry Point Colors")) {
                 // save all entry point colors to disk
-		Analysis.saveColors();
+		MainWindow.runObject[myRun].saveColors();
 	    }
 	    else if(arg.equals("Restore Entry Point Colors")) {
 		//		openColorFile();
@@ -392,7 +397,7 @@ public class TimelineWindow extends ProjectionsWindow
 		
 	    } else if (arg.equals("Default Entry Point Colors")) {
 		for (int i=0; i<data.entryColor.length; i++) {
-		    data.entryColor[i] = Analysis.getEntryColor(i);
+		    data.entryColor[i] = MainWindow.runObject[myRun].getEntryColor(i);
 		}
 		data.displayCanvas.updateColors();
 	    }
@@ -542,7 +547,7 @@ public class TimelineWindow extends ProjectionsWindow
 	VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
 	  
 	mainPanel.setLayout(null);
-	mainPanel.setBackground(Analysis.background);
+	mainPanel.setBackground(MainWindow.runObject[myRun].background);
 	mainPanel.add(labelCanvas);
 	mainPanel.add(axisTopCanvas);
 	mainPanel.add(axisBotCanvas);
@@ -752,7 +757,7 @@ public class TimelineWindow extends ProjectionsWindow
     }   
     public Color getGraphColor(int e)
     {
-	return Analysis.getEntryColor(e);
+	return MainWindow.runObject[myRun].getEntryColor(e);
 	// return parentWindow.getGraphColor(e);
     }   
    public int getHSBValue()
@@ -875,8 +880,8 @@ public class TimelineWindow extends ProjectionsWindow
 	  int axisht =  20 + textheight;
 	  int footht = textheight + 5;
 	  
-	  int[] entries = new int[Analysis.getNumUserEntries()];
-	  for(int i=0; i<Analysis.getNumUserEntries(); i++)
+	  int[] entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
+	  for(int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++)
 		 entries[i] = 0;
 	  
 	  int idle = 0;   
@@ -899,7 +904,7 @@ public class TimelineWindow extends ProjectionsWindow
 	  }   
 	  
 	  int legendcount = 0;
-	  for(int i=0; i<Analysis.getNumUserEntries(); i++)
+	  for(int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++)
 	  {
 		 if(entries[i] > 0)
 			legendcount++;
@@ -964,7 +969,7 @@ public class TimelineWindow extends ProjectionsWindow
 		 data.processorList.nextElement();
 		 
 	  NumberFormat df = NumberFormat.getInstance();
-	  String[][] names = Analysis.getEntryNames();
+	  String[][] names = MainWindow.runObject[myRun].getEntryNames();
 
 	  int curp = miny;
 	  int curlegenditem = 0;
@@ -983,7 +988,7 @@ public class TimelineWindow extends ProjectionsWindow
 		 int curheight = 0;
 		 
 		 // DRAW THE TITLE     
-		 String title = "PROJECTIONS TIMELINE FOR " + Analysis.getFilename();
+		 String title = "PROJECTIONS TIMELINE FOR " + MainWindow.runObject[myRun].getFilename();
 		 pg.setColor(Color.black);
 		 curheight += textheight;
 		 pg.drawString(title, (printWidth - pfm.stringWidth(title))/2, curheight);

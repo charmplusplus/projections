@@ -20,6 +20,10 @@ import javax.swing.JColorChooser;
 public class TimelineColorWindow extends ColorWindowFrame
    implements ActionListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
    
    private TimelineData data;
    private String[][]   names;
@@ -68,7 +72,7 @@ public class TimelineColorWindow extends ColorWindowFrame
 	    Button b = (Button)evt.getSource();
 		 
 	    if (b == bApply) {
-		for (int e=0; e<Analysis.getNumUserEntries(); e++) {
+		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 		    if (cpEntry[e] != null) {
 			data.entryColor[e] = cpEntry[e].getColor();
 		    }
@@ -78,7 +82,7 @@ public class TimelineColorWindow extends ColorWindowFrame
 		Close(); 
 	    } else if (b == bGraphColors) {
 		if (GraphExists()) {
-		    for (int e=0; e<Analysis.getNumUserEntries(); e++) {
+		    for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			if (cpEntry[e] != null) {
 			    cpEntry[e].setColor(getGraphColor(e));
 			}
@@ -89,7 +93,7 @@ public class TimelineColorWindow extends ColorWindowFrame
 	    selectedCP = (ColorPanel)evt.getSource();
 	    String s = null;
 		 
-	    for (int e=0; e<Analysis.getNumUserEntries(); e++) {
+	    for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 		if (selectedCP == cpEntry[e]) {
 		    s = names[e][0];
 		}
@@ -120,15 +124,15 @@ public class TimelineColorWindow extends ColorWindowFrame
 	GridBagConstraints gbc = new GridBagConstraints();
 	gbc.fill = GridBagConstraints.BOTH;
 	
-	names = Analysis.getEntryNames();
-	cpEntry = new ColorPanel[Analysis.getNumUserEntries()];
+	names = MainWindow.runObject[myRun].getEntryNames();
+	cpEntry = new ColorPanel[MainWindow.runObject[myRun].getNumUserEntries()];
 	
 	LWPanel p1 = new LWPanel();
 	p1.setLayout(gbl);
 	
 	int ypos = 0;
 	String charename = new String();
-	for (int e=0; e<Analysis.getNumUserEntries(); e++) {
+	for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 	    if (data.entries[e] > 0) {
 		if (!charename.equals(names[e][1])) {
 		    charename = names[e][1];

@@ -15,6 +15,11 @@ public class LogFileViewerWindow extends ProjectionsWindow
     private int logfilenum = -1;
     private int oldlogfilenum = -1;
     
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private LogFileViewerTextArea textArea;
     private Label lTitle;
     private Button bOpen, bClose;
@@ -30,7 +35,7 @@ public class LogFileViewerWindow extends ProjectionsWindow
 	
 	setBackground(Color.lightGray);
 	setTitle("Projections Log File Viewer - " + 
-		 Analysis.getFilename() + ".sts");
+		 MainWindow.runObject[myRun].getFilename() + ".sts");
 	  
 	CreateMenus();
 	CreateLayout();
@@ -152,12 +157,12 @@ public class LogFileViewerWindow extends ProjectionsWindow
 
     /**************** Utility/Access *************/
     public static String[][] getLogFileText( int num ) {
-	if (!(Analysis.hasLogData())) {
+	if (!(MainWindow.runObject[myRun].hasLogData())) {
 	    return null;
 	} else {
 	    Vector v = null;
 	    try {
-		v = Analysis.logLoader.view(num);
+		v = MainWindow.runObject[myRun].logLoader.view(num);
 	    } catch (LogLoadException e) {
 		System.err.println("Failed to load Log files");
 		return null;

@@ -25,11 +25,16 @@ public abstract class GenericGraphWindow
     extends ProjectionsWindow 
     implements PopUpAble
 {
-    static final Color BACKGROUND = Analysis.background;
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+    static final Color BACKGROUND = MainWindow.runObject[myRun].background;
 
     // inheritable GUI objects
     protected GraphPanel graphPanel;
     protected Graph graphCanvas;
+
 
     // all child classes should implement this function and 
     // call it to initialize the graph data
@@ -50,9 +55,9 @@ public abstract class GenericGraphWindow
     public long endTime;
 
     void windowInit() {
-	validPEs = Analysis.getValidProcessorList();
+	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	startTime = 0;
-	endTime = Analysis.getTotalTime();
+	endTime = MainWindow.runObject[myRun].getTotalTime();
     }
 
     // constructor 
@@ -162,7 +167,7 @@ public abstract class GenericGraphWindow
     // whenever datasource changes, yaxis needs to be changed too
     protected void setDataSource(String title, int [] data){
 	dataSource = new DataSource1D(title,data);
-	dataSource.setColors(Analysis.getColorMap());
+	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
@@ -170,7 +175,7 @@ public abstract class GenericGraphWindow
 
     protected void setDataSource(String title, double [][] data){
 	dataSource = new DataSource2D(title,data);
-	dataSource.setColors(Analysis.getColorMap());
+	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
@@ -191,7 +196,7 @@ public abstract class GenericGraphWindow
 
     protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
 	dataSource = new DataSource1D(title,data,parent);
-	dataSource.setColors(Analysis.getColorMap());
+	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
@@ -199,7 +204,7 @@ public abstract class GenericGraphWindow
 
     protected void setDataSource(String title, double [][] data, GenericGraphWindow parent){
 	dataSource = new DataSource2D(title,data, parent);
-	dataSource.setColors(Analysis.getColorMap());
+	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
 	if(yAxis != null)
 	    yAxis = 
 		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);

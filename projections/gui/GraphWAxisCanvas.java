@@ -4,6 +4,11 @@ import java.awt.*;
 
 public class GraphWAxisCanvas extends Canvas 
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private GraphData data;
    private int width;
    private int textheight;
@@ -18,8 +23,8 @@ public class GraphWAxisCanvas extends Canvas
 	  labelwidth = 0;
 	  deltay = 0;
 	  labelincrement = 0;
-	  setBackground(Analysis.background);
-	  setForeground(Analysis.foreground);
+	  setBackground(MainWindow.runObject[myRun].background);
+	  setForeground(MainWindow.runObject[myRun].foreground);
    }   
    public int getPreferredWidth()
    {
@@ -44,7 +49,7 @@ public class GraphWAxisCanvas extends Canvas
 	  int w = getSize().width;
 	  int h = getSize().height - data.offset2;
 
-	  g.setColor(Analysis.background);
+	  g.setColor(MainWindow.runObject[myRun].background);
 	  g.fillRect(0, 0, getSize().width, getSize().height);
 
 	  if(textheight == 0)
@@ -54,7 +59,7 @@ public class GraphWAxisCanvas extends Canvas
 		 labelwidth = fm.stringWidth("%");
 	  }   
 	 
-	  g.setColor(Analysis.foreground);
+	  g.setColor(MainWindow.runObject[myRun].foreground);
 	  
 	  g.drawString("%", w - 5 - labelwidth, h/2);
 	  g.drawLine(5, data.offset, 5, h-1); 

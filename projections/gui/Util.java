@@ -10,6 +10,11 @@ import java.lang.Integer;
 
 public class Util
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     public static void gblAdd(Container target, Component c,
 			      GridBagConstraints gbc,
 			      int x, int y, int dx, int dy, int wx, int wy)
@@ -282,8 +287,8 @@ public class Util
      */
     public static void saveColors(Color[] colors, String graphType, String filePath) throws IOException {
 	
-	// **sharon** somehow Analysis.getLogDirectory() returns null
-	//File filename = new File(Analysis.getLogDirectory() +
+	// **sharon** somehow MainWindow.runObject[myRun].getLogDirectory() returns null
+	//File filename = new File(MainWindow.runObject[myRun].getLogDirectory() +
 	//			 File.separator +
 	//			 "color.map");
 	
@@ -314,11 +319,11 @@ public class Util
 			accessFile.writeBytes(typeArray[i] + "\n");
 			for(int j=0; j<colors.length; j++){
 				accessFile.writeBytes(j + " ");
-	    			accessFile.writeBytes(String.valueOf(Analysis.getEntryColor(j).getRed()));
+	    			accessFile.writeBytes(String.valueOf(MainWindow.runObject[myRun].getEntryColor(j).getRed()));
 	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(String.valueOf(Analysis.getEntryColor(j).getGreen()));
+	    			accessFile.writeBytes(String.valueOf(MainWindow.runObject[myRun].getEntryColor(j).getGreen()));
 	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(String.valueOf(Analysis.getEntryColor(j).getBlue()));
+	    			accessFile.writeBytes(String.valueOf(MainWindow.runObject[myRun].getEntryColor(j).getBlue()));
 	    			accessFile.writeBytes(";     ");
 			}
 			accessFile.writeBytes("                    ");
@@ -369,7 +374,7 @@ public class Util
 	throws IOException 
     {
         FileOutputStream fileStream = 
-            new FileOutputStream(Analysis.getLogDirectory() +
+            new FileOutputStream(MainWindow.runObject[myRun].getLogDirectory() +
                                  File.separator +
                                  "color.map");
         ObjectOutputStream objStream =
@@ -384,7 +389,7 @@ public class Util
         throws IOException, ClassNotFoundException
     {
         FileInputStream fileStream =
-            new FileInputStream(Analysis.getLogDirectory() +
+            new FileInputStream(MainWindow.runObject[myRun].getLogDirectory() +
                                 File.separator +
                                 "color.map");
         ObjectInputStream objStream =
@@ -429,7 +434,7 @@ public class Util
 	}
 	else{
 		for (int i=0; i<colors.length; i++) {
-			colors[i] = Analysis.getEntryColor(i);
+			colors[i] = MainWindow.runObject[myRun].getEntryColor(i);
 	   	}
 	}
 	

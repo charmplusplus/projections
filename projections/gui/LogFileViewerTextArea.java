@@ -6,6 +6,11 @@ import java.awt.event.*;
 public class LogFileViewerTextArea extends Panel
    implements AdjustmentListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private Scrollbar VSB;
    private String[][] text;
    private FontMetrics fm;
@@ -134,7 +139,7 @@ public class LogFileViewerTextArea extends Panel
 	  titleheight = lineheight + 20;
 	  linenumwidth = fm.stringWidth("" + numlines);
 	  if(linenumwidth < fm.stringWidth("LINE")) linenumwidth = fm.stringWidth("LINE");
-	  timewidth = fm.stringWidth("" + Analysis.getTotalTime());
+	  timewidth = fm.stringWidth("" + MainWindow.runObject[myRun].getTotalTime());
 	  if(timewidth < fm.stringWidth("TIME")) timewidth = fm.stringWidth("TIME");
 	  
 	  int w = getSize().width - 20;

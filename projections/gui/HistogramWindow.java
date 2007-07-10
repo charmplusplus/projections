@@ -19,6 +19,11 @@ import javax.swing.border.*;
 public class HistogramWindow extends GenericGraphWindow 
     implements ActionListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private static final int NUM_TYPES = 2;
     private static final int TYPE_TIME = 0;
     private static final int TYPE_MSG_SIZE = 1;
@@ -70,7 +75,7 @@ public class HistogramWindow extends GenericGraphWindow
 	binType = TYPE_TIME;
 	_format = new DecimalFormat();
 
-	setTitle("Projections Histograms - " + Analysis.getFilename() + ".sts");
+	setTitle("Projections Histograms - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
 	createMenus();
 	getContentPane().add(getMainPanel());
@@ -270,7 +275,7 @@ public class HistogramWindow extends GenericGraphWindow
     private String[] getTimePopup(int xVal, int yVal) {
 	String bubbleText[] = new String[3];
 
-	bubbleText[0] = Analysis.getEntryName(yVal);
+	bubbleText[0] = MainWindow.runObject[myRun].getEntryName(yVal);
 	bubbleText[1] = "Count: " + counts[TYPE_TIME][xVal][yVal];
 	if (xVal < timeNumBins) {
 	    bubbleText[2] = "Bin: " + U.t(xVal*timeBinSize+timeMinBinSize) +
@@ -285,7 +290,7 @@ public class HistogramWindow extends GenericGraphWindow
     private String[] getMsgSizePopup(int xVal, int yVal) {
 	String bubbleText[] = new String[3];
 
-	bubbleText[0] = Analysis.getEntryName(yVal);
+	bubbleText[0] = MainWindow.runObject[myRun].getEntryName(yVal);
 	bubbleText[1] = "Count: " + counts[TYPE_MSG_SIZE][xVal][yVal];
 	if (xVal < msgNumBins) {
 	    bubbleText[2] = "Bin: " + 
@@ -307,7 +312,7 @@ public class HistogramWindow extends GenericGraphWindow
 	long adjustedTime;
 	long adjustedSize;
 
-	int numEPs = Analysis.getNumUserEntries();
+	int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 
 	OrderedIntList tmpPEs = validPEs.copyOf();
 	GenericLogReader r;
@@ -346,8 +351,8 @@ public class HistogramWindow extends GenericGraphWindow
 		progressBar.close();
 	    }
 	    curPeCount++;
-	    r = new GenericLogReader(Analysis.getLogName(pe),
-				     Analysis.getVersion());
+	    r = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+				     MainWindow.runObject[myRun].getVersion());
 	    try {
 		r.nextEventOnOrAfter(startTime, logdata);
 		boolean done = false;

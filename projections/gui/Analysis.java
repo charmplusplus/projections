@@ -11,6 +11,8 @@ import projections.misc.*;
 /**
  *  Analysis
  *  Modified by Chee Wai Lee
+ *  7/9/2007 - Finally making it an object with non-static members
+ *
  *  7/4/2003
  *  10/26/2005 - moved file manipulation abstraction from StsReader to
  *               this poor over-burdened Class.
@@ -31,60 +33,65 @@ import projections.misc.*;
 public class Analysis {
 
     /******************* Initialization ************/
-    public static ProjectionsConfigurationReader rcReader;
-    public static Component guiRoot;
+    public ProjectionsConfigurationReader rcReader;
+    public Component guiRoot;
 
-    private static StsReader sts;
+    private StsReader sts;
     
-    public static LogLoader logLoader;  //Only for .log files
+    public LogLoader logLoader;  //Only for .log files
     
-    private static SumAnalyzer sumAnalyzer; //Only for .sum files
+    private SumAnalyzer sumAnalyzer; //Only for .sum files
 
-    static PoseDopReader dopReader; //Only for .poselog files
+    PoseDopReader dopReader; //Only for .poselog files
 
-    private static IntervalData intervalData; // interval-based data
+    private IntervalData intervalData; // interval-based data
 
-    private static String baseName;
-    private static String logDirectory;
+    private String baseName;
+    private String logDirectory;
 
     // The total time (maxed) of a run across all processors.
-    private static long totalTime = 0;
-    static long poseTotalTime = 0;
-    static long poseTotalVirtualTime = 0;
+    private long totalTime = 0;
+    long poseTotalTime = 0;
+    long poseTotalVirtualTime = 0;
 
     /******************* Graphs ***************/
-    private static int[][][] systemUsageData;
-    private static int[][][][] systemMsgsData;
-    private static int[][][][] userEntryData;
-    private static int[] bgData;
+    private int[][][] systemUsageData;
+    private int[][][][] systemMsgsData;
+    private int[][][][] userEntryData;
+    private int[] bgData;
 
     // stupid hack to compensate for the fact that LogReaders are never
     // maintained inside Analysis.
-    private static long logReaderIntervalSize = -1;
+    private long logReaderIntervalSize = -1;
 
     /****************** Jump from Timeline to graphs ******/
     // Used for storing user defined startTime and endTime when jumping from
     // TimelineWindow to other graphs
-    private static long jStartTime, jEndTime;
-    private static boolean jTimeAvailable;
+    private long jStartTime, jEndTime;
+    private boolean jTimeAvailable;
 
     /** *************** Color Maps 6/27/2002 ************ */
 
-    public static Color background = Color.black;
-    public static Color foreground = Color.white;
+    public Color background = Color.black;
+    public Color foreground = Color.white;
     
-    private static Color[] entryColors;
-    private static Color[] userEventColors;
-    private static Color[] functionColors;
-    private static Color[][] activityColors =
+    private Color[] entryColors;
+    private Color[] userEventColors;
+    private Color[] functionColors;
+    private Color[][] activityColors =
 	new Color[ActivityManager.NUM_ACTIVITIES][];
 
-    private static Color[] grayColors;
-    private static Color[] grayUserEventColors;
+    private Color[] grayColors;
+    private Color[] grayUserEventColors;
 
-    private static Color[] activeColorMap;
-    protected static Color[] activeUserColorMap;
+    private Color[] activeColorMap;
+    protected Color[] activeUserColorMap;
     
+    public Analysis() {
+	// empty constructor for now. initAnalysis is still the "true"
+	// constructor until multiple run data is supported.
+    }
+
     /** ************** Methods ********************** */
 
     /**
@@ -98,7 +105,7 @@ public class Analysis {
      *  3) total time of the run should be known.
      *
      */    
-    public static void initAnalysis(String filename, Component rootComponent) 
+    public void initAnalysis(String filename, Component rootComponent) 
 	throws IOException 
     {
 	guiRoot = rootComponent;
@@ -205,7 +212,7 @@ public class Analysis {
     /**
      * Creating AMPI usage profile
      */
-    public static void createAMPIUsage(int procId, long beginTime, 
+    public void createAMPIUsage(int procId, long beginTime, 
 				       long endTime, Vector procThdVec){
         try {
 	    if (hasLogFiles()) {
@@ -224,7 +231,7 @@ public class Analysis {
     /**
      * Create AMPI Functions' Time profile
      */
-    public static void createAMPITimeProfile(int procId, long beginTime, 
+    public void createAMPITimeProfile(int procId, long beginTime, 
 					     long endTime, Vector procThdVec){
         try {
 	    if (hasLogFiles()) {
@@ -241,7 +248,7 @@ public class Analysis {
 	}
     }
 
-    public static int getNumPhases() {
+    public int getNumPhases() {
 	if (sumAnalyzer!=null)
 	    return sumAnalyzer.GetPhaseCount();
 	return 0;
@@ -252,7 +259,7 @@ public class Analysis {
      *  that are logged. type refers to the time of data (eg. time) logged.
      *  note that "type" here is different from "type" in getSystemUsageData.
      */
-    public static int[][] getSystemMsgsData(int categoryIdx, int type) {
+    public int[][] getSystemMsgsData(int categoryIdx, int type) {
 	return systemMsgsData[categoryIdx][type];
     }
 
@@ -260,52 +267,52 @@ public class Analysis {
      *  "type" here refers to the type of usage data (ie. Idle, System Queue
      *  length or CPU usage).
      */
-    public static int[][] getSystemUsageData(int type) {
+    public int[][] getSystemUsageData(int type) {
 	return systemUsageData[type];
     }
 
-    public static long getTotalTime() {
+    public long getTotalTime() {
 	return totalTime;
     }
 
-    public static void setTotalTime(long time) {
+    public void setTotalTime(long time) {
 	totalTime = time;
     }
 
-    public static long getPoseTotalTime() {
+    public long getPoseTotalTime() {
 	return poseTotalTime;
     }
 
-    public static long getPoseTotalVirtualTime() {
+    public long getPoseTotalVirtualTime() {
 	return poseTotalVirtualTime;
     }
 
-    public static PoseDopReader getPoseDopReader() {
+    public PoseDopReader getPoseDopReader() {
 	return dopReader;
     }
 
     // yet another interval size hack. When am I ever going to end up
     // finding the time to fix all these ...
-    public static long getLogReaderIntervalSize() {
+    public long getLogReaderIntervalSize() {
 	return logReaderIntervalSize;
     }
 
-    public static double[] getSummaryAverageData() {
+    public double[] getSummaryAverageData() {
 	return sumAnalyzer.getSummaryAverageData();
     }
 
-    public static long getSummaryIntervalSize() {
+    public long getSummaryIntervalSize() {
 	return sumAnalyzer.getIntervalSize();
     }
 
-    public static Color getEntryColor(int entryIdx) {
+    public Color getEntryColor(int entryIdx) {
 	if (entryIdx < sts.getEntryCount()) {
 	    return activeColorMap[entryIdx];
 	}
 	return null;
     }
 
-    public static void setEntryColor(int entryIdx, Color color) {
+    public void setEntryColor(int entryIdx, Color color) {
 	if (entryIdx < sts.getEntryCount()) {
 	    activeColorMap[entryIdx] = color;
 	} else {
@@ -322,7 +329,7 @@ public class Analysis {
 	
 	The returned values are in percent CPU time spent. 
     */
-    public static float[][] GetUsageData(int pnum, long begintime, 
+    public float[][] GetUsageData(int pnum, long begintime, 
 					 long endtime, OrderedIntList phases) {
 	if( hasLogFiles()) { //.log files
 	    UsageCalc u=new UsageCalc();
@@ -361,11 +368,11 @@ public class Analysis {
     }
     
     // a == entry point index, t == type of data
-    public static int[][] getUserEntryData( int a, int t ) {
+    public int[][] getUserEntryData( int a, int t ) {
 	return userEntryData[ a ][ t ];
     }
 
-    public static boolean hasSystemMsgsData( int a, int t ) {
+    public boolean hasSystemMsgsData( int a, int t ) {
 	if (systemMsgsData==null) return false;
 	return null!=systemMsgsData[a][t];
     }
@@ -373,7 +380,7 @@ public class Analysis {
     /**
        check if one user entry data of type t is there.
     */
-    public static boolean hasUserEntryData( int a, int t ) {
+    public boolean hasUserEntryData( int a, int t ) {
 	if (userEntryData==null) return false;
 	if (userEntryData[a][t] == null) return false;
 	for (int pe=0; pe<getNumProcessors(); pe++)
@@ -381,7 +388,7 @@ public class Analysis {
 	return false;
     }
 
-    public static int[] getBGData() {
+    public int[] getBGData() {
 	return bgData;
     }
 
@@ -390,7 +397,7 @@ public class Analysis {
        a list of processors to read.
        Two more parameters - intervalStart and intervalEnd added.
     */
-    public static void LoadGraphData(long intervalSize, 
+    public void LoadGraphData(long intervalSize, 
 				     int intervalStart, int intervalEnd,
 				     boolean byEntryPoint, 
 				     OrderedIntList processorList) 
@@ -424,7 +431,7 @@ public class Analysis {
      *  **CW** Time to stop being stupid and use the new summary reader
      *  and gain more control over the reading process.
      */
-    public static void loadSummaryData(long intervalSize,
+    public void loadSummaryData(long intervalSize,
 				       int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
 	systemUsageData[1] = 
@@ -433,7 +440,7 @@ public class Analysis {
     }
 
     // yet another version of summary load for processor subsets.
-    public static void loadSummaryData(long intervalSize, 
+    public void loadSummaryData(long intervalSize, 
 				       int intervalStart, int intervalEnd,
 				       OrderedIntList processorList) {
 	systemUsageData = new int[3][][];
@@ -452,7 +459,7 @@ systemUsageData[1][pIdx] =
 				       
 
     // wrapper method for default interval size.
-    public static void loadSummaryData(int intervalStart, int intervalEnd) {
+    public void loadSummaryData(int intervalStart, int intervalEnd) {
 	loadSummaryData(sumAnalyzer.getIntervalSize(), intervalStart,
 			intervalEnd);
     }
@@ -465,7 +472,7 @@ systemUsageData[1][pIdx] =
      *  even more intervals than the 180k seen in current NAMD logs may
      *  require dynamic rebinning on read.
      */
-    public static void loadSummaryData() {
+    public void loadSummaryData() {
 	if (hasSumFiles()) { 
 	    int sizeInt=(int)(sumAnalyzer.getIntervalSize());
 	    int nInt=(int)(getTotalTime()/sizeInt);
@@ -475,11 +482,11 @@ systemUsageData[1][pIdx] =
 	}
     }
 
-    public static double[][] getSumDetailData(int pe, int type) {
+    public double[][] getSumDetailData(int pe, int type) {
 	return intervalData.getData(pe, type);
     }
 
-    public static long searchTimeline( int n, int p, int e ) 
+    public long searchTimeline( int n, int p, int e ) 
     {
 	try {
 	    if (hasLogFiles()) {
@@ -501,7 +508,7 @@ systemUsageData[1][pIdx] =
     /** ******************* Accessor Methods ************** */
 
     // *** Version accessor ***
-    public static double getVersion() { 
+    public double getVersion() { 
 	if (sts == null) {
 	    return MainWindow.CUR_VERSION; 
 	} else {
@@ -510,33 +517,33 @@ systemUsageData[1][pIdx] =
     }
 
     // *** Data File-related accessors (from sts reader) ***
-    public static boolean hasSummaryData() {
+    public boolean hasSummaryData() {
 	return (hasSumFiles() || hasSumAccumulatedFile());
     }
 
-    public static boolean hasLogData() {
+    public boolean hasLogData() {
 	return hasLogFiles();
     }
 
-    public static boolean hasSumDetailData() {
+    public boolean hasSumDetailData() {
 	return hasSumDetailFiles();
     }
 
-    public static boolean hasPoseDopData() {
+    public boolean hasPoseDopData() {
 	return hasPoseDopFiles();
     }
 
-    public static String getLogDirectory() {
+    public String getLogDirectory() {
 	return logDirectory;
     }
 
-    public static String getFilename() { 
+    public String getFilename() { 
 	return baseName;
     }   
     
     // *** Activity Management *** */
 
-    public static int stringToActivity(String name) {
+    public int stringToActivity(String name) {
 	if (name.equals("PROJECTIONS")) {
 	    return ActivityManager.PROJECTIONS;
 	} else if (name.equals("USER_EVENTS")) {
@@ -550,7 +557,7 @@ systemUsageData[1][pIdx] =
 	}
     }
 
-    public static int getNumActivity(int type) {
+    public int getNumActivity(int type) {
 	switch (type) {
 	case ActivityManager.PROJECTIONS:
 	    return getNumUserEntries();
@@ -564,7 +571,7 @@ systemUsageData[1][pIdx] =
 
     // This version takes the event id (as logged, which may not be
     // contigious) and gets the name.
-    public static String getActivityNameByID(int type, int id) {
+    public String getActivityNameByID(int type, int id) {
 	switch (type) {
 	case ActivityManager.PROJECTIONS:
 	    return getEntryName(id);
@@ -578,7 +585,7 @@ systemUsageData[1][pIdx] =
 
     // This version takes the contigious index used by many projections
     // tools and gets the name.
-    public static String getActivityNameByIndex(int type, int index) {
+    public String getActivityNameByIndex(int type, int index) {
 	String[] tempNames;
 	switch (type) {
 	case ActivityManager.PROJECTIONS:
@@ -595,71 +602,71 @@ systemUsageData[1][pIdx] =
 
     // *** Run Data accessors (from sts reader) ***
 
-    public static int getNumProcessors() {
+    public int getNumProcessors() {
 	return sts.getProcessorCount();
     }
 
-    public static int getNumUserEntries() {
+    public int getNumUserEntries() {
 	return sts.getEntryCount();
     }
 
-    public static String[][] getEntryNames() {
+    public String[][] getEntryNames() {
 	return sts.getEntryNames();
     }
 
-    public static String getEntryName(int epIdx) {
+    public String getEntryName(int epIdx) {
 	return (sts.getEntryNames())[epIdx][0];
     }
 
-    public static String getEntryChareName(int epIdx) {
+    public String getEntryChareName(int epIdx) {
 	return (sts.getEntryNames())[epIdx][1];
     }
 
-    public static int getNumUserDefinedEvents() {
+    public int getNumUserDefinedEvents() {
 	return sts.getNumUserDefinedEvents();
     }
 
-    public static int getUserDefinedEventIndex(int eventID) {
+    public int getUserDefinedEventIndex(int eventID) {
 	return sts.getUserEventIndex(eventID);
     }
 
-    public static String getUserEventName(int eventID) {
+    public String getUserEventName(int eventID) {
 	return sts.getUserEventName(eventID); 
     }
     
-    public static String[] getUserEventNames() {
+    public String[] getUserEventNames() {
 	return sts.getUserEventNames();
     }
 
-    public static int getNumPerfCounts() {
+    public int getNumPerfCounts() {
 	return sts.getNumPerfCounts();
     }
 
-    public static String[] getPerfCountNames() {
+    public String[] getPerfCountNames() {
 	return sts.getPerfCountNames();
     }
 
-    public static int getNumFunctionEvents() {
+    public int getNumFunctionEvents() {
 	return sts.getNumFunctionEvents();
     }
 
-    public static Color getFunctionColor(int eventID) {
+    public Color getFunctionColor(int eventID) {
 	return functionColors[sts.getFunctionEventIndex(eventID)];
     }
 
-    public static Color[] getFunctionColors() {
+    public Color[] getFunctionColors() {
 	return functionColors;
     }
 
-    public static void saveColors() {
+    public void saveColors() {
 	ColorManager.saveColors(activityColors);
     }
 
-    public static String getFunctionName(int funcID) {
+    public String getFunctionName(int funcID) {
 	return sts.getFunctionEventDescriptor(funcID);
     }
 
-    public static String[] getFunctionNames() {
+    public String[] getFunctionNames() {
 	return sts.getFunctionEventDescriptors();
     }
     
@@ -669,7 +676,7 @@ systemUsageData[1][pIdx] =
      *  **CW** this error will currently only be a print error. In future
      *  an exception should be designed for this.
      */
-    public static int getNumIntervals() {
+    public int getNumIntervals() {
 	if (intervalData == null) {
 	    System.err.println("No interval based data. " +
 			       "Call to getNumIntervals is invalid.");
@@ -683,7 +690,7 @@ systemUsageData[1][pIdx] =
      *  getIntervalSize applies only to interval-based data. The same
      *  comments for getNumIntervals apply equally to this method.
      */
-    public static double getIntervalSize() {
+    public double getIntervalSize() {
 	if (intervalData == null) {
 	    System.err.println("No interval based data. " +
 			       "Call to getIntervalSize is invalid.");
@@ -693,7 +700,7 @@ systemUsageData[1][pIdx] =
 	}
     }
 
-    public static Color getUserEventColor(int eventID) {
+    public Color getUserEventColor(int eventID) {
 	if (sts != null) { 
 	    return userEventColors[sts.getUserEventIndex(eventID)]; 
 	} else { 
@@ -715,7 +722,7 @@ systemUsageData[1][pIdx] =
      *  This should be slightly more efficient when acquiring data for
      *  the full range of EPs.
      */
-    public static double[][] getDataSummedAcrossProcessors(int type,
+    public double[][] getDataSummedAcrossProcessors(int type,
 							   OrderedIntList pes,
 							   int startInterval,
 							   int endInterval) {
@@ -729,7 +736,7 @@ systemUsageData[1][pIdx] =
      *  the vector representing possibly non-contigious EPs. The arrays
      *  are indexed by interval id.
      */
-    public static Vector getDataSummedAcrossProcessors(int type,
+    public Vector getDataSummedAcrossProcessors(int type,
 						       OrderedIntList pes,
 						       int startInterval,
 						       int endInterval,
@@ -740,20 +747,20 @@ systemUsageData[1][pIdx] =
 							  eps);
     }
 
-    public static Color[] getColorMap(int activityType) {
+    public Color[] getColorMap(int activityType) {
 	return activityColors[activityType];
     }
 
-    public static Color[] getColorMap() {
+    public Color[] getColorMap() {
 	return activeColorMap;
     }
 
-    public static void setFullColor() {
+    public void setFullColor() {
 	activeColorMap = entryColors;
 	activeUserColorMap = userEventColors;
     }
 
-    public static void setGrayscale() {
+    public void setGrayscale() {
 	activeColorMap = grayColors;
 	activeUserColorMap = grayUserEventColors;
     }
@@ -762,24 +769,24 @@ systemUsageData[1][pIdx] =
      *  Used for storing user defined startTime and endTime 
      *	when jumping from TimelineWindow to other graphs
      */
-    public static void setJTimeAvailable(boolean jBoo) { jTimeAvailable = jBoo; }
-    public static boolean checkJTimeAvailable()        { return jTimeAvailable; }
-    public static void setJTime(long start, long end)  { jStartTime = start;
+    public void setJTimeAvailable(boolean jBoo) { jTimeAvailable = jBoo; }
+    public boolean checkJTimeAvailable()        { return jTimeAvailable; }
+    public void setJTime(long start, long end)  { jStartTime = start;
     							 jEndTime = end; }
-    public static long getJStart()                     { return jStartTime; }
-    public static long getJEnd()                       { return jEndTime; }
+    public long getJStart()                     { return jStartTime; }
+    public long getJEnd()                       { return jEndTime; }
     
 
-    public static boolean hasPapi() {
+    public boolean hasPapi() {
 	return sts.hasPapi();
     }
 
     // ************** Public Accessors to File Information *************
-    public static String getValidProcessorString(int type) {
+    public String getValidProcessorString(int type) {
 	return FileUtils.getValidProcessorString(type);
     }
 
-    public static OrderedIntList getValidProcessorList(int type) {
+    public OrderedIntList getValidProcessorList(int type) {
 	return FileUtils.getValidProcessorList(type);
     }
 
@@ -789,7 +796,7 @@ systemUsageData[1][pIdx] =
      *  This is to support legacy codes that assume there is only
      *  one set of valid files.
      */
-    public static String getValidProcessorString() {
+    public String getValidProcessorString() {
 	if (hasLogFiles()) {
 	    return getValidProcessorString(ProjMain.LOG);
 	} else if (hasSumFiles()) {
@@ -803,7 +810,7 @@ systemUsageData[1][pIdx] =
 	}
     }
 
-    public static OrderedIntList getValidProcessorList() {
+    public OrderedIntList getValidProcessorList() {
 	if (hasLogFiles()) {
 	    return getValidProcessorList(ProjMain.LOG);
 	} else if (hasSumFiles()) {
@@ -817,27 +824,27 @@ systemUsageData[1][pIdx] =
 	}
     }
 
-    public static String getLogName(int pnum) {
+    public String getLogName(int pnum) {
 	return FileUtils.getFileName(baseName, pnum, ProjMain.LOG);
     }   
 
-    public static String getSumName(int pnum) {
+    public String getSumName(int pnum) {
 	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMMARY);
     }   
     
-    public static String getSumAccumulatedName() {
+    public String getSumAccumulatedName() {
 	return FileUtils.getSumAccumulatedName(baseName);
     }
 
-    public static String getSumDetailName(int pnum) {
+    public String getSumDetailName(int pnum) {
 	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMDETAIL);
     }
 
-    public static String getPoseDopName(int pnum) {
+    public String getPoseDopName(int pnum) {
 	return FileUtils.getFileName(baseName, pnum, ProjMain.DOP);
     }
 
-    public static void closeRC() {
+    public void closeRC() {
 	if (rcReader != null) {
 	    rcReader.close();
 	}
@@ -845,23 +852,23 @@ systemUsageData[1][pIdx] =
 
     // ************** Internal Data file(s) management routines ********
 
-    private static boolean hasLogFiles() {
+    private boolean hasLogFiles() {
 	return FileUtils.hasLogFiles();
     }   
 
-    private static boolean hasSumFiles() {
+    private boolean hasSumFiles() {
 	return FileUtils.hasSumFiles();
     }
    
-    private static boolean hasSumAccumulatedFile() {
+    private boolean hasSumAccumulatedFile() {
 	return FileUtils.hasSumAccumulatedFile();
     }
 
-    private static boolean hasSumDetailFiles() {
+    private boolean hasSumDetailFiles() {
 	return FileUtils.hasSumDetailFiles();
     }
 
-    private static boolean hasPoseDopFiles() {
+    private boolean hasPoseDopFiles() {
 	return FileUtils.hasPoseDopFiles();
     }
 }

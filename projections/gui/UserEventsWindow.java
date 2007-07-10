@@ -20,6 +20,11 @@ public class UserEventsWindow extends GenericGraphWindow
 {
     UserEventsWindow thisWindow;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private JPanel mainPanel;
     private JPanel controlPanel;
 
@@ -31,7 +36,7 @@ public class UserEventsWindow extends GenericGraphWindow
 
     // meta data variables
     private int numActivities;
-    // Normally derived from Analysis.java
+    // Normally derived from MainWindow.runObject[myRun].java
     private String activityNames[];
 
     // stored raw data
@@ -41,12 +46,12 @@ public class UserEventsWindow extends GenericGraphWindow
     
     public UserEventsWindow(MainWindow mainWindow, Integer myWindowID) {
 	super("Projections User Events Tool - " + 
-	      Analysis.getFilename() + ".sts", mainWindow, myWindowID);
-	// hardcode start. Usually derived from Analysis.java
-	numActivities = Analysis.getNumUserDefinedEvents(); 
-	activityNames = Analysis.getUserEventNames();
+	      MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
+	// hardcode start. Usually derived from MainWindow.runObject[myRun].java
+	numActivities = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
+	activityNames = MainWindow.runObject[myRun].getUserEventNames();
 	// Normally would set activity names here.
-	// Normally would get color maps from Analysis.java.
+	// Normally would get color maps from MainWindow.runObject[myRun].java.
 	graphColors = ColorManager.createColorMap(numActivities);
 
 	createMenus();
@@ -145,7 +150,7 @@ public class UserEventsWindow extends GenericGraphWindow
 	int nextPe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =
-	    new ProgressMonitor(Analysis.guiRoot, 
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
 				"Reading log files",
 				"", 0,
 				processorList.size());
@@ -167,7 +172,7 @@ public class UserEventsWindow extends GenericGraphWindow
 
 	    // READ - nothing here
 	    GenericLogReader reader = new GenericLogReader(nextPe,
-							   Analysis.getVersion());
+							   MainWindow.runObject[myRun].getVersion());
 	    LogEntryData logData = new LogEntryData();
 	    LogEntryData logDataEnd = new LogEntryData();
 	    logData.time = 0;
@@ -182,7 +187,7 @@ public class UserEventsWindow extends GenericGraphWindow
 		int eventIndex = 0;
 		while (true) {
 		    // process pair read previously
-		    eventIndex = Analysis.getUserDefinedEventIndex(logData.userEventID);
+		    eventIndex = MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID);
 		    graphData[count][eventIndex] +=
 			logDataEnd.time - logData.time;
 		    numCalls[count][eventIndex]++;

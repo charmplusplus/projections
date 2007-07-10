@@ -32,6 +32,15 @@ import projections.gui.graph.SummaryYAxis;
 public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay
 {
+    /* **** Temporary hardcode for the number of runs supported
+       in Projections **** */
+    protected static final int NUM_RUNS = 1;
+
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     /* **** Static setup data for windows ***** */
     protected static final int NUM_WINDOWS = 18;
 
@@ -123,6 +132,10 @@ public class MainWindow extends JFrame
     // for SwingWorker to work
     MainWindow thisWindow;
 
+    // The Analysis object from which tools derive their performance
+    // data from. This is temporarily a one-element array.
+    public static Analysis runObject[];
+
     // Indexed by number of runs (currently one) and tools available
     // This should eventually be configurable for multiple runs,
     // multiple languages with multiple user-level visualization tools.
@@ -171,6 +184,15 @@ public class MainWindow extends JFrame
 	    });
 
 	setBackground(Color.lightGray);
+
+	// set up the main run analysis object. This is a unique object
+	// for now until a mechanism is built for handling multiple runs.
+	// long timestamp = System.currentTimeMillis();
+	runObject = new Analysis[NUM_RUNS];
+	runObject[0] = new Analysis();
+	//	System.out.println("Time taken to init Analysis = " +
+	//			   (System.currentTimeMillis() - timestamp) +
+	//			   "milliseconds.");
 
 	childWindows = new JFrame[NUM_WINDOWS][DEFAULT_NUM_RUNS];
 
@@ -222,9 +244,9 @@ public class MainWindow extends JFrame
 	JColorChooser colorWindow = new JColorChooser();
 	Color returnColor =
 	    JColorChooser.showDialog(this, "Background Color",
-				   Analysis.background);
+				   MainWindow.runObject[myRun].background);
 	if (returnColor != null) {
-	    Analysis.background = returnColor;
+	    MainWindow.runObject[myRun].background = returnColor;
 	    repaintAllWindows();
 	}
     }
@@ -234,20 +256,20 @@ public class MainWindow extends JFrame
 	JColorChooser colorWindow = new JColorChooser();
 	Color returnColor =
 	    JColorChooser.showDialog(this, "Foreground Color",
-				   Analysis.foreground);
+				   MainWindow.runObject[myRun].foreground);
 	if (returnColor != null) {
-	    Analysis.foreground = returnColor;
+	    MainWindow.runObject[myRun].foreground = returnColor;
 	    repaintAllWindows();
 	}
     }
 
     public void setGrayscale() {
-	Analysis.setGrayscale();
+	MainWindow.runObject[myRun].setGrayscale();
 	repaintAllWindows();
     }
 
     public void setFullColor() {
-	Analysis.setFullColor();
+	MainWindow.runObject[myRun].setFullColor();
 	repaintAllWindows();
     }
 
@@ -325,7 +347,7 @@ public class MainWindow extends JFrame
 	final SwingWorker worker = new SwingWorker() {
 		public Object construct() {
 		    try {
-			Analysis.initAnalysis(newfile, thisWindow);
+			MainWindow.runObject[myRun].initAnalysis(newfile, thisWindow);
 		    } catch(IOException e) {
 			InvalidFileDialog ifd =
 			    new InvalidFileDialog(thisWindow);
@@ -337,9 +359,9 @@ public class MainWindow extends JFrame
 			ifd.setVisible(true);
 		    }
 
-		    if (Analysis.hasSummaryData()) {
+		    if (MainWindow.runObject[myRun].hasSummaryData()) {
 			// see "finished()"
-		    } else if (Analysis.hasLogData()) {
+		    } else if (MainWindow.runObject[myRun].hasLogData()) {
 			/* (need to deal with visualization bug)
 			status = new Label("");
 			status.setBackground(Color.black);
@@ -353,9 +375,9 @@ public class MainWindow extends JFrame
 			scalePanel.setStatusDisplay(thisWindow);
 			
 			OrderedIntList validPEs = 
-			    Analysis.getValidProcessorList();
+			    MainWindow.runObject[myRun].getValidProcessorList();
 			long startTime = 0;
-			long endTime = Analysis.getTotalTime();
+			long endTime = MainWindow.runObject[myRun].getTotalTime();
 			
 			ColorMap utilColorMap = new ColorMap();
 			utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0);
@@ -368,7 +390,7 @@ public class MainWindow extends JFrame
 
 			Runtime rt = Runtime.getRuntime();
 			// 4 bytes per index, 500 indexs per processor
-			int memUsage = 4 * 500 * Analysis.getNumProcessors();
+			int memUsage = 4 * 500 * MainWindow.runObject[myRun].getNumProcessors();
 			int maxMem = (int)(rt.totalMemory() * .01 );
 			int interval = 1;
 
@@ -393,12 +415,12 @@ public class MainWindow extends JFrame
 			}
 
 			if (validPEs == null) {
-			    horSize=Analysis.getTotalTime();
-			    verSize=Analysis.getNumProcessors();
+			    horSize=MainWindow.runObject[myRun].getTotalTime();
+			    verSize=MainWindow.runObject[myRun].getNumProcessors();
 			} else {	
 			    horSize = endTime-startTime;
 			    if(horSize <= 0)
-				horSize = Analysis.getTotalTime();
+				horSize = MainWindow.runObject[myRun].getTotalTime();
 			    verSize = (double)validPEs.size();
 			}	 
 			scalePanel.setScales(horSize,verSize);
@@ -425,10 +447,10 @@ public class MainWindow extends JFrame
 
 		public void finished() {
 		    setTitle("Projections - " + newfile);
-		    if (Analysis.hasSummaryData()) {
-			Analysis.loadSummaryData();	  
-			double[] data = Analysis.getSummaryAverageData();
-			long originalSize = Analysis.getSummaryIntervalSize();
+		    if (MainWindow.runObject[myRun].hasSummaryData()) {
+			MainWindow.runObject[myRun].loadSummaryData();	  
+			double[] data = MainWindow.runObject[myRun].getSummaryAverageData();
+			long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
 			long bestSize =    
 			    (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);	 
 			if (bestSize != originalSize) {
@@ -444,7 +466,7 @@ public class MainWindow extends JFrame
 						     (double)bestSize);	 
 			    try {
 				dataDump = 
-				    new PrintWriter(new FileWriter(Analysis.getLogDirectory() + File.separator +
+				    new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
 								   "SummaryDump.out"));
 				dataDump.println("--- Summary Graph ---");
 				for (int i=0; i<newdata.length; i++) {
@@ -466,7 +488,7 @@ public class MainWindow extends JFrame
 			    sumDataSource = new SummaryDataSource(data);
 			    sumXAxis =	    
 				new SummaryXAxis(data.length,	 
-						 (long)(Analysis.getSummaryIntervalSize()));
+						 (long)(MainWindow.runObject[myRun].getSummaryIntervalSize()));
 			}			   
 			sumYAxis = new SummaryYAxis();	 
 			graphPanel =
@@ -481,12 +503,12 @@ public class MainWindow extends JFrame
 			Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
 		    */
 		    }
-		    if (Analysis.hasLogData()) {
+		    if (MainWindow.runObject[myRun].hasLogData()) {
 			menuManager.fileOpened();
-		    } else if (Analysis.hasSummaryData()) {
+		    } else if (MainWindow.runObject[myRun].hasSummaryData()) {
 			menuManager.summaryOnly();
 		    }
-		    //		    if (Analysis.hasPoseDopData()) {
+		    //		    if (MainWindow.runObject[myRun].hasPoseDopData()) {
 		    //			menuManager.addPose();
 		    //		    }
 		}
@@ -503,7 +525,7 @@ public class MainWindow extends JFrame
     public void shutdown() {
 	// do NOT call exit() here. This routine is executed by ProjMain
 	// which will call exit().
-	Analysis.closeRC();
+	MainWindow.runObject[myRun].closeRC();
     }
 
     public void closeCurrent() {
@@ -519,7 +541,7 @@ public class MainWindow extends JFrame
     public void closeAll() {
 	summaryGraphPanel.removeAll();
 	menuManager.lastFileClosed();
-	Analysis.closeRC();
+	MainWindow.runObject[myRun].closeRC();
 	setTitle("Projections");
     }
 

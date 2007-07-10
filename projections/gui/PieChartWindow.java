@@ -5,6 +5,11 @@ import java.awt.event.*;
 
 public class PieChartWindow extends Frame{
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private MainWindow      mainWindow;
     MyPanel         displayPanel;
     float[]         data;
@@ -68,7 +73,7 @@ public class PieChartWindow extends Frame{
         arc = null;
         outOfRadius = 1;
 	
-        names = Analysis.getEntryNames();
+        names = MainWindow.runObject[myRun].getEntryNames();
 	
         addWindowListener(new WindowAdapter(){
 		public void windowClosing(WindowEvent e){close();}
@@ -236,7 +241,7 @@ public class PieChartWindow extends Frame{
 			bubble = null;
 		    }
 		    
-		    numEntries = Analysis.getNumUserEntries();
+		    numEntries = MainWindow.runObject[myRun].getNumUserEntries();
 		    
 		    degree = (int)Math.toRadians(degree);
 		    

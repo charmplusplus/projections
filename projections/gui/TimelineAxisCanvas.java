@@ -6,6 +6,11 @@ import java.text.DecimalFormat;
 
 public class TimelineAxisCanvas extends Canvas
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private TimelineData  data;
     private int           axispos, textpos;
     private String        type;
@@ -21,8 +26,8 @@ public class TimelineAxisCanvas extends Canvas
 	this.data = data;
 	this.type = type;
 	component_ = this;
-	setBackground(Analysis.background);
-	setForeground(Analysis.foreground);
+	setBackground(MainWindow.runObject[myRun].background);
+	setForeground(MainWindow.runObject[myRun].foreground);
 	this.addMouseListener(new MouseAdapter() {
 		public void mouseEntered(MouseEvent e) {
 		    component_.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
@@ -73,7 +78,7 @@ public class TimelineAxisCanvas extends Canvas
 	    og.setClip(0, 0, data.tlw, data.ath);
 	    
 	    Color oldColor = og.getColor();
-	    og.setColor(Analysis.background);
+	    og.setColor(MainWindow.runObject[myRun].background);
 	    og.fillRect(0, 0, getSize().width, getSize().height);
 	    //og.fillRect(0,0, data.tlw, data.ath);
 	    og.setColor(oldColor);
@@ -99,7 +104,7 @@ public class TimelineAxisCanvas extends Canvas
 		int maxx = data.offset + 
 		    (int)((data.endTime-data.beginTime)*
 			  data.pixelIncrement/data.timeIncrement);
-		og.setColor(Analysis.foreground);
+		og.setColor(MainWindow.runObject[myRun].foreground);
 		og.drawLine(data.offset, axispos, maxx, axispos);
 		beginCoord_ = data.offset;
 		endCoord_ = maxx;

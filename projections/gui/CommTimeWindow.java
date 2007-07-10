@@ -12,6 +12,11 @@ import projections.guiUtils.*;
 public class CommTimeWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, ColorSelectable
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     // Sent External code commented out and may be implemented later
 
     CommTimeWindow      thisWindow;    
@@ -94,22 +99,22 @@ public class CommTimeWindow extends GenericGraphWindow
 	    endInterval = (int)(endTime/intervalSize);
 	}
 	numIntervals = endInterval-startInterval+1;
-	processorList = Analysis.getValidProcessorList();
+	processorList = MainWindow.runObject[myRun].getValidProcessorList();
     }
 
     public CommTimeWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Communication vs Time Graph - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
+	super("Projections Communication vs Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here
-	numEPs = Analysis.getNumUserEntries();
+	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	stateArray = new boolean[1][numEPs];
 	existsArray = new boolean[1][numEPs];
 	colorArray = new Color[1][numEPs];
 	entryNames = new String[numEPs];
 	for (int ep=0; ep<numEPs; ep++) {
-	    colorArray[0][ep] = Analysis.getEntryColor(ep);
-	    entryNames[ep] = Analysis.getEntryName(ep);
+	    colorArray[0][ep] = MainWindow.runObject[myRun].getEntryColor(ep);
+	    entryNames[ep] = MainWindow.runObject[myRun].getEntryName(ep);
 	}
 	mainPanel = new JPanel();
         _format = new DecimalFormat("###,###.###");
@@ -464,8 +469,8 @@ public class CommTimeWindow extends GenericGraphWindow
 	for (int ep=0; ep<numEPs; ep++) {
 	    if (stateArray[0][ep]) {
 		if (count++ == yVal) {
-		    epName = Analysis.getEntryName(ep);
-		    epClassName = Analysis.getEntryChareName(ep);
+		    epName = MainWindow.runObject[myRun].getEntryName(ep);
+		    epClassName = MainWindow.runObject[myRun].getEntryChareName(ep);
 		    break;
 		}
 	    }
@@ -551,7 +556,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    }
 	    else if (b == saveColors) {
 		// save all entry point colors to disk
-		Analysis.saveColors();
+		MainWindow.runObject[myRun].saveColors();
 	    }
 	    else if (b == loadColors) {
 		// load all entry point colors from disk

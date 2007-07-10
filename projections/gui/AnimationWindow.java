@@ -7,6 +7,11 @@ import javax.swing.*;
 public class AnimationWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private AnimationColorBarPanel colorbarPanel;
     AnimationDisplayPanel  displayPanel;
     AnimationWindow thisWindow;
@@ -64,16 +69,16 @@ public class AnimationWindow extends ProjectionsWindow
     void windowInit() {
 	// acquire data from Analysis
 	intervalSize = 1000; // default to 1ms
-	validPEs = Analysis.getValidProcessorList();
+	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
         startTime = 0;
-        endTime = Analysis.getTotalTime();
+        endTime = MainWindow.runObject[myRun].getTotalTime();
     }
   
     public AnimationWindow(MainWindow mainWindow, Integer myWindowID)
     {
 	super(mainWindow, myWindowID);
-	setBackground(Analysis.background);
-	setTitle("Projections Animation - " + Analysis.getFilename() + ".sts");
+	setBackground(MainWindow.runObject[myRun].background);
+	setTitle("Projections Animation - " + MainWindow.runObject[myRun].getFilename() + ".sts");
           
 	thisWindow = this;
 	showDialog();
@@ -240,8 +245,8 @@ public class AnimationWindow extends ProjectionsWindow
 	setRanges = new Button("Set Ranges");
 	setRanges.addActionListener(this);
 
-	titlePanel.setBackground(Analysis.background);
-	titlePanel.setForeground(Analysis.foreground);
+	titlePanel.setBackground(MainWindow.runObject[myRun].background);
+	titlePanel.setForeground(MainWindow.runObject[myRun].foreground);
 	Font titleFont = new Font("SansSerif", Font.BOLD, 16);
 	lTitle = new Label("", Label.CENTER);
 	lTitle.setFont(titleFont);

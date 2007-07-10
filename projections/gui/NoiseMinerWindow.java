@@ -18,6 +18,11 @@ public class NoiseMinerWindow extends ProjectionsWindow
 {
     NoiseMinerWindow      thisWindow;    
     
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private JPanel	         mainPanel;
     private JPanel           controlPanel;
     private JTable tableInternal;
@@ -48,7 +53,7 @@ public class NoiseMinerWindow extends ProjectionsWindow
 		thisWindow = this;
 		
 		setBackground(Color.lightGray);
-		setTitle("Projections Computational Noise Miner - " + Analysis.getFilename() + ".sts");
+		setTitle("Projections Computational Noise Miner - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 		
 		columnNames = new Vector();
 		columnNames.add(new String("Noise Duration(us)"));

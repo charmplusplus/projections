@@ -7,6 +7,11 @@ import projections.guiUtils.*;
 
 public class OutlierDialog extends RangeDialog
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // GUI components
     protected JPanel outlierPanel;
     protected JComboBox attributeList;
@@ -35,8 +40,8 @@ public class OutlierDialog extends RangeDialog
 	currentActivity = ActivityManager.PROJECTIONS;
 	// initialize default threshold to display the top 10% deviants
 	// for # processors 256 or less. The top 20 otherwise.
-	if (Analysis.getNumProcessors() <= 256) {
-	    threshold = (int)Math.ceil(0.1*Analysis.getNumProcessors());
+	if (MainWindow.runObject[myRun].getNumProcessors() <= 256) {
+	    threshold = (int)Math.ceil(0.1*MainWindow.runObject[myRun].getNumProcessors());
 	} else {
 	    threshold = 20;
 	}
@@ -178,7 +183,7 @@ public class OutlierDialog extends RangeDialog
     JTextField checkConsistent() {
 	if ((thresholdField.getValue() < 0) ||
 	    (thresholdField.getValue() >
-	     processorsField.getValue(Analysis.getNumProcessors()).size())) {
+	     processorsField.getValue(MainWindow.runObject[myRun].getNumProcessors()).size())) {
 	    return thresholdField;
 	}
 	return super.checkConsistent();

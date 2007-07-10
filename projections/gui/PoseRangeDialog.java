@@ -23,6 +23,11 @@ public class PoseRangeDialog extends JDialog
 {
     ProjectionsWindow parentWindow;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // Constant variables
     private static final int DIALOG_OK = 0;
     private static final int DIALOG_CANCELLED = 1;
@@ -102,18 +107,18 @@ public class PoseRangeDialog extends JDialog
 	this.parentWindow = parentWindow;
 
 	// Get default values
-	validProcessors = Analysis.getValidProcessorList(ProjMain.DOP);
+	validProcessors = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.DOP);
 	validProcessorsString = validProcessors.listToString();
 
 	realIntervalSize = 1000; // default to 1ms.
 	realStartTime = 0;
-	realEndTime = Analysis.getPoseTotalTime(); // default full range.
+	realEndTime = MainWindow.runObject[myRun].getPoseTotalTime(); // default full range.
 	realStartInterval = 0;
 	realEndInterval = realEndTime/realIntervalSize;
 	numRealIntervals = realEndInterval - realStartInterval + 1;
 
 	virtStartTime = 0;
-	virtEndTime = Analysis.getPoseTotalVirtualTime(); // full range.
+	virtEndTime = MainWindow.runObject[myRun].getPoseTotalVirtualTime(); // full range.
 	// default to (very) roughly 100 interval's worth
 	virtIntervalSize = virtEndTime/100 + 1;
 	virtStartInterval = 0;
@@ -290,7 +295,7 @@ public class PoseRangeDialog extends JDialog
 
 	validRealTimeLabel =
 	    new JLabel("Valid Real Time Range: " + U.t(0) + " to " +
-		       U.t(Analysis.getPoseTotalTime()));
+		       U.t(MainWindow.runObject[myRun].getPoseTotalTime()));
 	totalSelectedRealTimeLabel =
 	    new JLabel("Selected Total Time: " + 
 		       U.t(realEndTime - realStartTime));
@@ -349,7 +354,7 @@ public class PoseRangeDialog extends JDialog
 
 	validVirtTimeLabel =
 	    new JLabel("Valid Virtual Time Range: " + 0 + " to " +
-		       (Analysis.getPoseTotalVirtualTime()));
+		       (MainWindow.runObject[myRun].getPoseTotalVirtualTime()));
 	totalSelectedVirtTimeLabel =
 	    new JLabel("Units of Selected Total Time: " + 
 		       (virtEndTime - virtStartTime));

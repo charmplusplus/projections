@@ -6,6 +6,11 @@ import java.awt.event.*;
 public class GraphLegendPanel extends Panel
     implements ActionListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private Frame parent;
     private GridBagConstraints gbc;
     
@@ -118,7 +123,7 @@ public class GraphLegendPanel extends Panel
 	    height = textheight;
 	    width = 0;
 
-	    g.setColor(Analysis.background);
+	    g.setColor(MainWindow.runObject[myRun].background);
 	    g.fillRect(0, 0, getSize().width, getSize().height);
 	    
 	    for (int a=0; a<data.onGraph.length; a++) {

@@ -19,6 +19,11 @@ public class TimeProfileWindow extends GenericGraphWindow
 {
     TimeProfileWindow thisWindow;
 
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private EntrySelectionDialog entryDialog;
 
     private JPanel mainPanel;
@@ -73,28 +78,28 @@ public class TimeProfileWindow extends GenericGraphWindow
 	} else {
 	    endInterval = (int)(endTime/intervalSize);
 	}
-	processorList = Analysis.getValidProcessorList();
+	processorList = MainWindow.runObject[myRun].getValidProcessorList();
     }
 
     public TimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Time Profile Graph - " + Analysis.getFilename() + ".sts", mainWindow, myWindowID);
+	super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here
-	numEPs = Analysis.getNumUserEntries();
+	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	stateArray = new boolean[1][numEPs];
 	existsArray = new boolean[1][numEPs];
 	colorArray = new Color[1][];
-	colorArray[0] = Analysis.getColorMap();
+	colorArray[0] = MainWindow.runObject[myRun].getColorMap();
 	entryNames = new String[numEPs];
 	for (int ep=0; ep<numEPs; ep++) {
-	    entryNames[ep] = Analysis.getEntryName(ep);
+	    entryNames[ep] = MainWindow.runObject[myRun].getEntryName(ep);
 	}
 	mainPanel = new JPanel();
     	getContentPane().add(mainPanel);
 
         //creating ampi tabbed pane
-        if(Analysis.getNumFunctionEvents() > 0)
+        if(MainWindow.runObject[myRun].getNumFunctionEvents() > 0)
             ampiTraceOn = true;
         if(ampiTraceOn){
             tabPane = new JTabbedPane();
@@ -205,7 +210,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    graphData = new double[numIntervals][numEPs];
 			    long progressStart = System.currentTimeMillis();
 			    ProgressMonitor progressBar =
-				new ProgressMonitor(Analysis.guiRoot, 
+				new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
 						    "Reading log files",
 						    "", 0,
 						    processorList.size());
@@ -223,7 +228,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 				OrderedIntList tempList = 
 				    new OrderedIntList();
 				tempList.insert(nextPe);
-				Analysis.LoadGraphData(intervalSize,
+				MainWindow.runObject[myRun].LoadGraphData(intervalSize,
 						       startInterval,
 						       endInterval,
 						       true, tempList);
@@ -288,7 +293,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	// when partial data is actually read.
 
 	for (int ep=0; ep<numEPs; ep++) {
-	    int[][] entryData = Analysis.getUserEntryData(ep, LogReader.TIME);
+	    int[][] entryData = MainWindow.runObject[myRun].getUserEntryData(ep, LogReader.TIME);
 	    for (int interval=0; interval<graphData.length; interval++) {
 		graphData[interval][ep] += entryData[0][interval];
 	    }
@@ -346,8 +351,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 	for (int ep=0; ep<numEPs; ep++) {
 	    if (stateArray[0][ep]) {
 		if (count++ == yVal) {
-		    epName = Analysis.getEntryName(ep);
-		    epClassName = Analysis.getEntryChareName(ep);
+		    epName = MainWindow.runObject[myRun].getEntryName(ep);
+		    epClassName = MainWindow.runObject[myRun].getEntryChareName(ep);
 		    break;
 		}
 	    }
@@ -380,7 +385,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 		showDialog();
 	    } else if (b == saveColors) {
 		// save all entry point colors to disk
-		Analysis.saveColors();
+		MainWindow.runObject[myRun].saveColors();
 	    } else if (b == loadColors) {
 		// load all entry point colors from disk
 		try {

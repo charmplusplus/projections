@@ -7,6 +7,11 @@ import java.awt.print.*;
 public class GraphDisplayPanel extends Container
    implements ActionListener, ItemListener, AdjustmentListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    private GraphData data;
  
    Panel              mainPanel;
@@ -52,8 +57,8 @@ public class GraphDisplayPanel extends Container
 	  HSB = new Scrollbar(Scrollbar.HORIZONTAL, 0, 1, 0, 1);
 	  
 	  mainPanel.setLayout(null);
-	  mainPanel.setBackground(Analysis.background);
-	  mainPanel.setForeground(Analysis.foreground);
+	  mainPanel.setBackground(MainWindow.runObject[myRun].background);
+	  mainPanel.setForeground(MainWindow.runObject[myRun].foreground);
 	  mainPanel.add(titleCanvas);
 	  mainPanel.add(yAxisCanvas);
 	  mainPanel.add(wAxisCanvas);
@@ -185,10 +190,10 @@ public class GraphDisplayPanel extends Container
        if (g instanceof PrinterGraphics) {
 	   mainPanel.setBackground(Color.white);
        } else {
-	   mainPanel.setBackground(Analysis.background);
+	   mainPanel.setBackground(MainWindow.runObject[myRun].background);
        }
        /*
-       g.setColor(Analysis.background);
+       g.setColor(MainWindow.runObject[myRun].background);
        g.fillRect(0, 0, getSize().width, getSize().height);
        g.setColor(Color.black);
        g.drawRect(0, 0, getSize().width-1, getSize().height-1);
@@ -202,7 +207,7 @@ public class GraphDisplayPanel extends Container
 	xAxisCanvas.repaint();
 	wAxisCanvas.repaint();
 	displayCanvas.repaint();
-	mainPanel.setBackground(Analysis.background);
+	mainPanel.setBackground(MainWindow.runObject[myRun].background);
 	mainPanel.repaint();
     }
 
@@ -238,7 +243,7 @@ public class GraphDisplayPanel extends Container
 	  
 	  mainPanel.setSize(oldSize);
 	  setAllBounds();
-	  mainPanel.setBackground(Analysis.background);
+	  mainPanel.setBackground(MainWindow.runObject[myRun].background);
    }   
 
    public void setAllBounds()

@@ -20,6 +20,11 @@ import projections.analysis.*;
 
 public class StlPanel extends ScalePanel.Child
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     int[][] entryData;   // [pe][interval]
 
     // utilData (for utilization based visualization)
@@ -78,7 +83,7 @@ public class StlPanel extends ScalePanel.Child
 		pe = validPEs.nextElement();
 		count++;
 	    }
-	    int numEP = Analysis.getNumUserEntries();
+	    int numEP = MainWindow.runObject[myRun].getNumUserEntries();
 	    int interval = (int)(t/intervalSize);
 	    
 	    long  timedisplay = t+startTime;
@@ -96,7 +101,7 @@ public class StlPanel extends ScalePanel.Child
 			utilData[p][interval]+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
 			" EP = " + 
-			Analysis.getEntryName(entryData[p][interval]);
+			MainWindow.runObject[myRun].getEntryName(entryData[p][interval]);
 		} else {
 		    return "Processor "+pe+": Usage = "+
 			utilData[p][interval]+"%"+
@@ -246,7 +251,7 @@ public class StlPanel extends ScalePanel.Child
 		for (int interval=0; interval<numIntervals; interval++) {
 		    if (data[pe][interval] > 0) {
 			colors[pe][interval] =
-			    Analysis.getEntryColor(data[pe][interval]).getRGB();
+			    MainWindow.runObject[myRun].getEntryColor(data[pe][interval]).getRGB();
 		    } else {
 			colors[pe][interval] =
 			    Color.black.getRGB();
@@ -258,7 +263,7 @@ public class StlPanel extends ScalePanel.Child
     
     public void setMode(int mode) {
 	this.mode = mode;
-	int numEPs = Analysis.getNumUserEntries();
+	int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	if (mode == StlWindow.MODE_UTILIZATION) {
 	    applyColorMap(mergedData, false);
 	    repaint();
@@ -317,7 +322,7 @@ public class StlPanel extends ScalePanel.Child
 	int endInterval = (int)(endTime/intervalSize);
 
 	nPe=validPEs.size();
-	int numEPs = Analysis.getNumUserEntries();
+	int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 
 	// Now that we no longer load 4D data, It becomes important that
 	// the data is reloaded each time a setData request is made.
@@ -341,13 +346,13 @@ public class StlPanel extends ScalePanel.Child
 	}
 
 	validPEs.reset();
-	Analysis.LoadGraphData(intervalSize,
+	MainWindow.runObject[myRun].LoadGraphData(intervalSize,
 			       startInterval, endInterval, false,
 			       validPEs);
-	utilData = Analysis.getSystemUsageData(LogReader.SYS_CPU);
-	idleData = Analysis.getSystemUsageData(LogReader.SYS_IDLE);
+	utilData = MainWindow.runObject[myRun].getSystemUsageData(LogReader.SYS_CPU);
+	idleData = MainWindow.runObject[myRun].getSystemUsageData(LogReader.SYS_IDLE);
 	
-	// **CW** Silly hack because Analysis.getSystemUsageData returns
+	// **CW** Silly hack because MainWindow.runObject[myRun].getSystemUsageData returns
 	// null when LogReader.SYS_IDLE is not available. Create an
 	// empty array - do a proper fix if this becomes a memory issue.
 	if (idleData == null) {
@@ -404,16 +409,16 @@ public class StlPanel extends ScalePanel.Child
         int endInterval = (int)(endTime/intervalSize);
 
         nPe=validPEs.size();
-        int numEPs = Analysis.getNumUserEntries();
+        int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 
 	/**
 	 *  **CW** This is pretty much a stop-gap measure to reduce
 	 *  the unnecessary memory foot print of using EP-based
 	 *  visualization for Overview. One of these days ...
 	 */
-	if (Analysis.hasLogData()) {
+	if (MainWindow.runObject[myRun].hasLogData()) {
 	    ProgressMonitor progressBar =
-		new ProgressMonitor(Analysis.guiRoot, "Building EP Data",
+		new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Building EP Data",
 				    "", 0, validPEs.size());
 	    progressBar.setNote("Building EP Data");
 	    progressBar.setProgress(0);
@@ -434,12 +439,12 @@ public class StlPanel extends ScalePanel.Child
 		progressBar.setNote("[PE: " + curPE + " ( " +
 				    curPeIdx + " of " +
 				    validPEs.size()+") ] Acummulating Data");
-		Analysis.LoadGraphData(intervalSize,
+		MainWindow.runObject[myRun].LoadGraphData(intervalSize,
 				       startInterval, endInterval, true,
 				       curPEList);
 		for (int ep=0; ep<numEPs; ep++) {
 		    temp[curPeIdx] = 
-			Analysis.getUserEntryData(ep, LogReader.TIME)[0];
+			MainWindow.runObject[myRun].getUserEntryData(ep, LogReader.TIME)[0];
 		    // find max so far for each valid interval
 		    for (int i=0; 
 			 (i<temp[curPeIdx].length) && (i<desiredIntervals); 

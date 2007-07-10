@@ -4,6 +4,11 @@ public class AmpiProfileData
 {
    AmpiProfileWindow profileWindow;
    
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
    int vpw, vph;
    int dcw, dch;
    int numPs;
@@ -18,15 +23,15 @@ public class AmpiProfileData
    {
 	  
 	  this.profileWindow = profileWindow;
-	  numPs     = Analysis.getNumProcessors();
+	  numPs     = MainWindow.runObject[myRun].getNumProcessors();
 	  
-	  if(Analysis.checkJTimeAvailable() == true) { 
-		begintime = Analysis.getJStart();
-		endtime = Analysis.getJEnd();
-		Analysis.setJTimeAvailable(false);}
+	  if(MainWindow.runObject[myRun].checkJTimeAvailable() == true) { 
+		begintime = MainWindow.runObject[myRun].getJStart();
+		endtime = MainWindow.runObject[myRun].getJEnd();
+		MainWindow.runObject[myRun].setJTimeAvailable(false);}
 	  else {
 	  	begintime = 0;
-	  	endtime   = Analysis.getTotalTime();}
+	  	endtime   = MainWindow.runObject[myRun].getTotalTime();}
 	  
 	  pstring   = "0";
 	  offset    = 10;

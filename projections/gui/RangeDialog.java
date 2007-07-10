@@ -28,6 +28,11 @@ import projections.analysis.*;
 public class RangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // Constant variables
     protected static final int DIALOG_OK = 0;
     protected static final int DIALOG_CANCELLED = 1;
@@ -97,11 +102,11 @@ public class RangeDialog extends JDialog
 
 	// the only purpose of numProcessors is to determine the limit
 	// of the processor list.
-	numProcessors = Analysis.getNumProcessors();
-	totalTime = Analysis.getTotalTime();
+	numProcessors = MainWindow.runObject[myRun].getNumProcessors();
+	totalTime = MainWindow.runObject[myRun].getTotalTime();
 	totalValidTime = totalTime;
 
-	history = new RangeHistory(Analysis.getLogDirectory() +
+	history = new RangeHistory(MainWindow.runObject[myRun].getLogDirectory() +
 				   File.separator);
 	this.setModal(true);
 	dialogState = DIALOG_CANCELLED; // default state
@@ -302,10 +307,10 @@ public class RangeDialog extends JDialog
 	processorsPanel = new JPanel();
 	processorsPanel.setLayout(gbl);
 	validProcessorsLabel = new JLabel("Valid Processors = " + 
-					  Analysis.getValidProcessorString(),
+					  MainWindow.runObject[myRun].getValidProcessorString(),
 					  JLabel.LEFT);
 	processorTextLabel = new JLabel("Processors :", JLabel.LEFT);
-	processorsField = new JSelectField(Analysis.getValidProcessorString(),
+	processorsField = new JSelectField(MainWindow.runObject[myRun].getValidProcessorString(),
 					   12);
 	// set listeners
 	processorsField.addActionListener(this);
@@ -322,14 +327,14 @@ public class RangeDialog extends JDialog
 	timePanel.setLayout(gbl);
 	validTimeRangeLabel = new JLabel("Valid Time Range = " +
 					 U.t(0) + " to " +
-					 U.t(Analysis.getTotalTime()), 
+					 U.t(MainWindow.runObject[myRun].getTotalTime()), 
 					 JLabel.LEFT);
 	startTextLabel = new JLabel("Start Time :", JLabel.LEFT);
 	startTimeField = new JTimeTextField(0, 12);
 	endTextLabel = new JLabel("End Time :", JLabel.LEFT);
-	endTimeField = new JTimeTextField(Analysis.getTotalTime(), 12);
+	endTimeField = new JTimeTextField(MainWindow.runObject[myRun].getTotalTime(), 12);
 	totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
-	totalTimeLabel = new JLabel(U.t(Analysis.getTotalTime()), JLabel.LEFT);
+	totalTimeLabel = new JLabel(U.t(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
 
 	if (disableRange) {
 	    startTimeField.setEnabled(false);	    

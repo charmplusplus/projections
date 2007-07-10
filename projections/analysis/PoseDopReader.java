@@ -7,6 +7,11 @@ import projections.gui.*;
 
 public class PoseDopReader
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // This is a simple data indexed by interval id
     private static final int NUM_SIM_STATES = 2;
     private static final int FORWARD_SIM_PROGRESS = 0;
@@ -30,7 +35,7 @@ public class PoseDopReader
     // **************************************************************
     public PoseDopReader() {
 	validPEs =
-	    Analysis.getValidProcessorList(ProjMain.DOP);
+	    MainWindow.runObject[myRun].getValidProcessorList(ProjMain.DOP);
     }
     
     public long getTotalRealTime() {
@@ -63,7 +68,7 @@ public class PoseDopReader
 	long virtualEnd;
 	
 	ProgressMonitor progressBar =
-	    new ProgressMonitor(Analysis.guiRoot, "Computing End Times",
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Computing End Times",
 				"", 0, numProcessors);
 	validPEs.reset();
 	long eventCount = 0;
@@ -73,7 +78,7 @@ public class PoseDopReader
 	    progressBar.setNote("[PE: " + curPe + "] Getting End Time ...");
 	    try {
 		reader = 
-		    new BufferedReader(new FileReader(Analysis.getPoseDopName(curPe)));
+		    new BufferedReader(new FileReader(MainWindow.runObject[myRun].getPoseDopName(curPe)));
 		initTokenizer(reader);
 		// read all lines (no choice in dop format)
 		while (true) {
@@ -142,7 +147,7 @@ public class PoseDopReader
 	long eventCount = 0;
 
 	ProgressMonitor progressBar = 
-	    new ProgressMonitor(Analysis.guiRoot, "Reading dop files",
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading dop files",
 				"", 0, numProcessors);
 	curPe = processorList.nextElement();
 	while (curPe != -1) {
@@ -150,7 +155,7 @@ public class PoseDopReader
 	    progressBar.setNote("[PE: " + curPe + "] Reading ...");
 	    try {
 		reader = 
-		    new BufferedReader(new FileReader(Analysis.getPoseDopName(curPe)));
+		    new BufferedReader(new FileReader(MainWindow.runObject[myRun].getPoseDopName(curPe)));
 		initTokenizer(reader);
 		// read all lines (no choice in dop format)
 		while (true) {

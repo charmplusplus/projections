@@ -18,6 +18,11 @@ import projections.gui.*;
  */
 public class IntervalData
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // Types of information available for IntervalData. Some may be supported
     // only by a subset of the possible sources of data. This subset support
     // should, as far as possible, be avoided.
@@ -56,22 +61,22 @@ public class IntervalData
      *  The constructor
      */
     public IntervalData() {
-	this.numPEs = Analysis.getNumProcessors();
-	this.numEPs = Analysis.getNumUserEntries();
+	this.numPEs = MainWindow.runObject[myRun].getNumProcessors();
+	this.numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 
 	// load at least the summary detail data.
-	if (Analysis.hasSumDetailData()) {
+	if (MainWindow.runObject[myRun].hasSumDetailData()) {
 	    summaryDetails = new SumDetailReader[numPEs];
 	    rawData = new Vector[SumDetailReader.NUM_TAGS][numPEs][];
 	    OrderedIntList availablePEs = 
-		Analysis.getValidProcessorList(ProjMain.SUMDETAIL);
+		MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
 	    availablePEs.reset();
 	    while (availablePEs.hasMoreElements()) {
 		int pe = availablePEs.nextElement();
 		try {
 		    summaryDetails[pe] = 
-			new SumDetailReader(Analysis.getSumDetailName(pe),
-					    Analysis.getVersion());
+			new SumDetailReader(MainWindow.runObject[myRun].getSumDetailName(pe),
+					    MainWindow.runObject[myRun].getVersion());
 		    summaryDetails[pe].read();
 		    for (int type=0; type<SumDetailReader.NUM_TAGS; type++) {
 			rawData[type][pe] = summaryDetails[pe].getData(type);
@@ -87,7 +92,7 @@ public class IntervalData
 		} catch (IOException e) {
 		    // This exception, in future, should simply cause the
 		    // necessary adjustments to the list of available PEs
-		    // listed in Analysis for summary detail files.
+		    // listed in MainWindow.runObject for summary detail files.
 		    System.err.println("Warning: Failed to read summary " +
 				       "detail file for processor " + pe);
 		    continue;
@@ -309,7 +314,7 @@ public class IntervalData
 						    OrderedIntList pes,
 						    int startInterval,
 						    int endInterval) {
-	int numEPs = Analysis.getNumUserEntries();
+	int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	double returnArray[][] = 
 	    new double[numEPs][endInterval-startInterval+1];
 	

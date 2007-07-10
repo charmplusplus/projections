@@ -17,6 +17,11 @@ import projections.misc.*;
 
 public class LogLoader extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private boolean isProcessing = false;
     boolean ampiTraceOn = false;
 
@@ -36,7 +41,7 @@ public class LogLoader extends ProjDefs
 	int nPe=validPEs.size();
 
 	ProgressMonitor progressBar =
-	    new ProgressMonitor(Analysis.guiRoot, "Determining end time",
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Determining end time",
 				"", 0, nPe);
 	validPEs.reset();
 	int count = 1;
@@ -60,7 +65,7 @@ public class LogLoader extends ProjDefs
 	    int type = 0;
 	    try {
 		InFile = 
-		    new RandomAccessFile(new File(Analysis.getLogName(pe)),
+		    new RandomAccessFile(new File(MainWindow.runObject[myRun].getLogName(pe)),
 					 "r");
 		
 		back = InFile.length()-80*3; //Seek to the end of the file
@@ -130,7 +135,7 @@ public class LogLoader extends ProjDefs
 		}
 	    } catch (IOException E) {
 		System.err.println("Couldn't read log file " + 
-				   Analysis.getLogName(pe));
+				   MainWindow.runObject[myRun].getLogName(pe));
 	    }
 	}
 	progressBar.close();
@@ -180,7 +185,7 @@ public class LogLoader extends ProjDefs
         Hashtable procThdMap = new Hashtable();
 
         try{
-            logFileRd = new GenericLogReader(procId,Analysis.getVersion());
+            logFileRd = new GenericLogReader(procId,MainWindow.runObject[myRun].getVersion());
 	    rawLogData = new LogEntryData();
 
             /** 
@@ -376,9 +381,9 @@ public class LogLoader extends ProjDefs
 	    /*ignore*/ 
 	} catch (FileNotFoundException E) {
 	    System.out.println("ERROR: couldn't open file " + 
-			       Analysis.getLogName(procId));
+			       MainWindow.runObject[myRun].getLogName(procId));
 	} catch (IOException E) {
-	    throw new LogLoadException(Analysis.getLogName(procId), 
+	    throw new LogLoadException(MainWindow.runObject[myRun].getLogName(procId), 
 				       LogLoadException.READ);
 	}
 	
@@ -447,7 +452,7 @@ public class LogLoader extends ProjDefs
         Hashtable procThdMap = new Hashtable();
 
         try {
-            logFileRd = new GenericLogReader(procId,Analysis.getVersion());
+            logFileRd = new GenericLogReader(procId,MainWindow.runObject[myRun].getVersion());
 	    rawLogData = new LogEntryData();
 
             /** 
@@ -646,9 +651,9 @@ public class LogLoader extends ProjDefs
 	    /*ignore*/ 
 	} catch (FileNotFoundException E) {
 	    System.out.println("ERROR: couldn't open file " + 
-			       Analysis.getLogName(procId));
+			       MainWindow.runObject[myRun].getLogName(procId));
 	} catch (IOException E) {
-	    throw new LogLoadException(Analysis.getLogName(procId), 
+	    throw new LogLoadException(MainWindow.runObject[myRun].getLogName(procId), 
 				       LogLoadException.READ);
 	}
 
@@ -685,12 +690,12 @@ public class LogLoader extends ProjDefs
 
 	// open the file
 	try {
-	    reader = new GenericLogReader(PeNum,Analysis.getVersion());
+	    reader = new GenericLogReader(PeNum,MainWindow.runObject[myRun].getVersion());
 	    data = new LogEntryData();
 	    // to treat dummy thread EPs as a special-case EP
 	    //  **CW** I consider this a hack. A more elegant way must
 	    // be found design-wise.
-	    if (Analysis.getNumFunctionEvents() > 0) {
+	    if (MainWindow.runObject[myRun].getNumFunctionEvents() > 0) {
 		ampiTraceOn = true;
 	    }
 
@@ -1186,9 +1191,9 @@ public class LogLoader extends ProjDefs
 	    /*ignore*/ 
 	} catch (FileNotFoundException E) {
 	    System.out.println("ERROR: couldn't open file " + 
-			       Analysis.getLogName(PeNum));
+			       MainWindow.runObject[myRun].getLogName(PeNum));
 	} catch (IOException E) {
-	    throw new LogLoadException(Analysis.getLogName(PeNum), 
+	    throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
 				       LogLoadException.READ);
 	}
 	return Timeline;
@@ -1218,7 +1223,7 @@ public class LogLoader extends ProjDefs
 	case BEGIN_PROCESSING:
 	case END_PROCESSING:
 	case ENQUEUE:
-	    String e2desc[][] = Analysis.getEntryNames();
+	    String e2desc[][] = MainWindow.runObject[myRun].getEntryNames();
 	    VE.Dest = new String(e2desc[LE.Entry][1] + 
 				 "::" + e2desc[LE.Entry][0]);     
 	    if (LE.TransactionType != CREATION) {
@@ -1251,7 +1256,7 @@ public class LogLoader extends ProjDefs
 	// open the file
 	try {
 	    System.gc();
-	    reader = new GenericLogReader(PeNum, Analysis.getVersion());
+	    reader = new GenericLogReader(PeNum, MainWindow.runObject[myRun].getVersion());
 	    data = new LogEntryData();
 
 	    //Throws EOFException at end of file
@@ -1271,11 +1276,11 @@ public class LogLoader extends ProjDefs
 	    }
 	} catch (FileNotFoundException E) {
 	    System.out.println("ERROR: couldn't open file " + 
-			       Analysis.getLogName(PeNum));
+			       MainWindow.runObject[myRun].getLogName(PeNum));
 	} catch (EOFException E) {
 	    /*ignore*/
 	} catch (IOException E) {
-	    throw new LogLoadException(Analysis.getLogName(PeNum), 
+	    throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
 				       LogLoadException.READ);
 	}  
 	return LE.Time - BeginTime;
@@ -1291,7 +1296,7 @@ public class LogLoader extends ProjDefs
 
 	try {	  
 	    ret = new Vector ();
-	    reader = new GenericLogReader(PeNum, Analysis.getVersion());
+	    reader = new GenericLogReader(PeNum, MainWindow.runObject[myRun].getVersion());
 	    data = new LogEntryData();
 
 	    //Throws EOFException at end of file
@@ -1304,11 +1309,11 @@ public class LogLoader extends ProjDefs
 	    }
 	} catch (FileNotFoundException E) {
 	    System.out.println("ERROR: couldn't open file " + 
-			       Analysis.getLogName(PeNum));
+			       MainWindow.runObject[myRun].getLogName(PeNum));
 	} catch (EOFException E) {
 	} catch (IOException E) {
 	    System.out.println("throwing....2");
-	    throw new LogLoadException(Analysis.getLogName(PeNum), 
+	    throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
 				       LogLoadException.READ);
 	}
 	return ret;

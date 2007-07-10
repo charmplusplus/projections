@@ -20,6 +20,11 @@ import java.io.*;
 public class GenericLogReader extends ProjectionsReader
     implements PointCapableReader
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     private AsciiIntegerReader reader;
     private double version;
 
@@ -56,7 +61,7 @@ public class GenericLogReader extends ProjectionsReader
     }
 
     public GenericLogReader(int peNum, double Nversion) {
-	super(Analysis.getLogName(peNum), String.valueOf(Nversion));
+	super(MainWindow.runObject[myRun].getLogName(peNum), String.valueOf(Nversion));
 	lastBeginEvent = new LogEntryData();
 	lastBeginEvent.setValid(false);
 	try {

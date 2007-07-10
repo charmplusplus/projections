@@ -6,6 +6,11 @@ import projections.misc.*;
 
 public class UsageCalc extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private long beginTime,endTime;
     private long startTime;
     private int pnum;
@@ -107,7 +112,7 @@ public class UsageCalc extends ProjDefs
     // returns accumulate_time[func_idx+1(other)]
     public float [] ampiUsage(int procnum, long begintime, 
 			   long endtime, double v) {
-	int numFunc = Analysis.getNumFunctionEvents();
+	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 	long accTime[] = new long [numFunc+1];
 	float data[] = new float [numFunc+1];
 	for(int i=0;i<numFunc;i++) accTime[i]=0;
@@ -219,7 +224,7 @@ public class UsageCalc extends ProjDefs
 	beginTime = begintime;
 	endTime = endtime;
 	pnum = procnum;
-	numUserEntries = Analysis.getNumUserEntries();
+	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
 	dataLen = numUserEntries + 4;
 
 	GenericLogReader reader;

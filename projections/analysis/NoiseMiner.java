@@ -31,6 +31,11 @@ import java.util.ArrayList;
 
 public class NoiseMiner extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
 	private int numPe;		     //Number of processors
 
 	private long startTime;	     //Interval begin
@@ -773,7 +778,7 @@ public class NoiseMiner extends ProjDefs
 
 		ProgressMonitor progressBar = new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
 
-		String[][] entryNames = Analysis.getEntryNames(); // needed to determine number of events
+		String[][] entryNames = MainWindow.runObject[myRun].getEntryNames(); // needed to determine number of events
 		int numEvents = entryNames.length;
 		
 		// For each pe
@@ -799,7 +804,7 @@ public class NoiseMiner extends ProjDefs
 				break;
 			}
 
-			LogFile = new GenericLogReader(Analysis.getLogName(currPe), Analysis.getVersion());
+			LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), MainWindow.runObject[myRun].getVersion());
 
 			try {
 

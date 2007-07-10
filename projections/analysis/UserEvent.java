@@ -1,12 +1,15 @@
 package projections.analysis;
 
-import projections.gui.Analysis;
 import java.awt.*;
-import projections.gui.TimelineData;
-
+import projections.gui.*;
 
 public class UserEvent extends Component
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
   public static final int SINGLE=1;   // if this just marks one point in time
   public static final int PAIR=2;  // if this has a begin and end point
 
@@ -25,8 +28,8 @@ public class UserEvent extends Component
     BeginTime=EndTime=t;
     UserEventID=e;
     CharmEventID=event;
-    color=Analysis.getUserEventColor(UserEventID);
-    Name=Analysis.getUserEventName(UserEventID);
+    color=MainWindow.runObject[myRun].getUserEventColor(UserEventID);
+    Name=MainWindow.runObject[myRun].getUserEventName(UserEventID);
   }
 
   public void setBounds(int ylocation, TimelineData data) {

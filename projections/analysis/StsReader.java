@@ -54,7 +54,7 @@ public class StsReader extends ProjDefs
 
     /**
      *  Basically a hack to allow multirun tool to bypass the 
-     *  ActivityManager and it's use of Analysis. Hence this
+     *  ActivityManager and it's use of Analysis.java. Hence this
      *  wrapper is used for normal tools.
      */
     public StsReader(String FileName) 

@@ -1,9 +1,14 @@
 package projections.analysis;
 import java.util.Vector;
 
-import projections.gui.Analysis;
+import projections.gui.*;
 
 public class AmpiFunctionData {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     // AMPI function tracing
     public int FunctionID, LineNo;
     public String sourceFileName;
@@ -57,7 +62,7 @@ public class AmpiFunctionData {
     }
 
     public String getFunctionName(){
-        String name = Analysis.getFunctionName(FunctionID);
+        String name = MainWindow.runObject[myRun].getFunctionName(FunctionID);
         return name+"@"+sourceFileName+"("+LineNo+")";
     }
 

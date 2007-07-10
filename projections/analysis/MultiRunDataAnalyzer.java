@@ -571,7 +571,7 @@ public class MultiRunDataAnalyzer {
      *  white and leave every other EP colored (but kept in position).
      */
     private Color[] computeColorMap(int numColors, int dataType, int scheme) {
-	// Ask Analysis for a simple (for now) colormap.
+	// Ask the runObjects for a simple (for now) colormap.
 	// Then overwrite the slot for insignificant and overhead colors
 	Color colorMap[] = new Color[numColors];
 

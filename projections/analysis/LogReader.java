@@ -9,6 +9,11 @@ import projections.gui.*;
 public class LogReader 
     extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     //sysUsgData[SYS_Q] is length of message queue
     public static final int SYS_Q=0; 
     //sysUsgData[SYS_CPU] is percent processing time
@@ -244,8 +249,8 @@ public class LogReader
 		     int NintervalStart, int NintervalEnd,
 		     boolean NbyEntryPoint, OrderedIntList processorList)
     {
-	numProcessors = Analysis.getNumProcessors();
-	numUserEntries = Analysis.getNumUserEntries();
+	numProcessors = MainWindow.runObject[myRun].getNumProcessors();
+	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
 	intervalSize = reqIntervalSize;
 	intervalStart = NintervalStart;
 	intervalEnd = NintervalEnd;
@@ -264,7 +269,7 @@ public class LogReader
 	}
 
 	ProgressMonitor progressBar = 
-	    new ProgressMonitor(Analysis.guiRoot, "Reading log files",
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading log files",
 				"", 0, numProcessors);
 	progressBar.setNote("Allocating Global Memory");
 	progressBar.setProgress(0);
@@ -300,7 +305,7 @@ public class LogReader
 	    
 	    int nLines = 2;
 	    
-	    reader = new GenericLogReader(curPe, Analysis.getVersion());
+	    reader = new GenericLogReader(curPe, MainWindow.runObject[myRun].getVersion());
 	    boolean isProcessing = false;
 	    try { 
 		while (true) { //EOFException will terminate loop

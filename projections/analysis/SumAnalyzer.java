@@ -11,6 +11,11 @@ import projections.misc.*;
 
 public class SumAnalyzer extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     // Summary modes (so that SumAnalyzer, as a data manager, can make use
     // of one or more data modes).
     public static final int NUM_MODES = 2;
@@ -45,7 +50,7 @@ public class SumAnalyzer extends ProjDefs
     public SumAnalyzer(StsReader stsReader, int mode) {
 	this.mode = mode;
 	accumulatedReader =
-	    new AccumulatedSummaryReader(Analysis.getSumAccumulatedName(),
+	    new AccumulatedSummaryReader(MainWindow.runObject[myRun].getSumAccumulatedName(),
 					 "5.0");
 	TotalTime = (long)accumulatedReader.totalTime;
 	IntervalCount = (int)accumulatedReader.numIntervals;
@@ -70,7 +75,7 @@ public class SumAnalyzer extends ProjDefs
 	// size for the whole system.
 	ProgressMonitor progressBar;
 	progressBar =
-	    new ProgressMonitor(Analysis.guiRoot, "Determining max intervals",
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Determining max intervals",
 				"", 0, nPe);
 	for (int p=0; p<nPe; p++) {
             if (!progressBar.isCanceled()) {
@@ -82,7 +87,7 @@ public class SumAnalyzer extends ProjDefs
 				   " summary intervals!");
                 System.exit(-1);
             }
-	    FileReader file=new FileReader(Analysis.getSumName(p));
+	    FileReader file=new FileReader(MainWindow.runObject[myRun].getSumName(p));
 	    BufferedReader b = new BufferedReader(file);
 	    tokenizer = new StreamTokenizer(b);
 	    //Set up the tokenizer
@@ -135,7 +140,7 @@ public class SumAnalyzer extends ProjDefs
 
 	// second pass
 	progressBar = 
-	    new ProgressMonitor(Analysis.guiRoot, "Reading summary data",
+	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading summary data",
 				"", 0, nPe);
 	for (int p = 0; p<nPe; p++) {
             if (!progressBar.isCanceled()) {
@@ -145,7 +150,7 @@ public class SumAnalyzer extends ProjDefs
 		progressBar.close();
 		return;
             }
-	    FileReader file=new FileReader(Analysis.getSumName(p));
+	    FileReader file=new FileReader(MainWindow.runObject[myRun].getSumName(p));
 	    BufferedReader b = new BufferedReader(file);
 	    tokenizer=new StreamTokenizer(b);
 	    //Set up the tokenizer
@@ -363,7 +368,7 @@ public class SumAnalyzer extends ProjDefs
 	    // System.out.println("Finished reading in data for processor #"+p+"/"+nPe);
 	}
 	progressBar.close();
-	Analysis.setTotalTime(TotalTime);
+	MainWindow.runObject[myRun].setTotalTime(TotalTime);
     }
 
     private void checkNextString(String expected) 

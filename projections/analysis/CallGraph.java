@@ -19,6 +19,11 @@ import java.awt.*;
 
 public class CallGraph extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private int numPe;		             //Number of processors
     private int numEPs;	   	             //Number of entry methods
     private double[][] messageArray;         //Array for EP message count to be stored
@@ -36,7 +41,7 @@ public class CallGraph extends ProjDefs
         //Initialize class variables
 	peList = processorList;
 	numPe = peList.size();
-	numEPs = Analysis.getNumUserEntries();
+	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	startTime = startInterval*intervalSize;
 	endTime = endInterval*intervalSize;
 	messageArray = new double[endInterval-startInterval+1][numEPs*2];
@@ -67,7 +72,7 @@ public class CallGraph extends ProjDefs
 		progressBar.close();
 		break;
 	    }
-	    LogFile = new GenericLogReader(Analysis.getLogName(currPe), Analysis.getVersion());
+	    LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), MainWindow.runObject[myRun].getVersion());
 	
 	    try
 	    {

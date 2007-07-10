@@ -10,6 +10,11 @@ import java.awt.*;
 
 public class CallTable extends ProjDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     private int numPe;		     //Number of processors
     private int numEPs;	   	     //Number of entry methods
     private double[][] byteSum;	     //Array for EP message byte sum to be stored
@@ -30,7 +35,7 @@ public class CallTable extends ProjDefs
         //Initialize class variables
 	peList = processorList;
 	numPe = peList.size();
-	numEPs = Analysis.getNumUserEntries();
+	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	startTime = startInterval;
 	endTime = endInterval;
 	byteSum = new double[numEPs][numEPs];
@@ -66,8 +71,8 @@ public class CallTable extends ProjDefs
 		progressBar.close();
 		break;
 	    }
-	    LogFile = new GenericLogReader(Analysis.getLogName(currPe), 
-	                                   Analysis.getVersion());    
+	    LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), 
+	                                   MainWindow.runObject[myRun].getVersion());    
 	   
             try
 	    {
@@ -183,11 +188,11 @@ public class CallTable extends ProjDefs
             if (exists[sourceEP]) {
 	        
 		if (epDetailToggle==true) { //need ep detail
-	            text[lengthCounter][0] = Analysis.getEntryChareName(sourceEP) + "::" +
-		                             Analysis.getEntryName(sourceEP);
+	            text[lengthCounter][0] = MainWindow.runObject[myRun].getEntryChareName(sourceEP) + "::" +
+		                             MainWindow.runObject[myRun].getEntryName(sourceEP);
 		}
 		else { //don't need ep detail
-		    String s = Analysis.getEntryName(sourceEP);
+		    String s = MainWindow.runObject[myRun].getEntryName(sourceEP);
 		    int parenthIndex = s.indexOf('(');
 		    if (parenthIndex != -1) //s has parenthesis
 		        s = s.substring(0, parenthIndex);
@@ -200,11 +205,11 @@ public class CallTable extends ProjDefs
 		    if (msgCount[sourceEP][destEP] > 0) {
 		    
 		        if (epDetailToggle==true) { //need ep detail
-		            text[lengthCounter][0] = "        " + Analysis.getEntryChareName(destEP) + "::" +
-		                                     Analysis.getEntryName(destEP);
+		            text[lengthCounter][0] = "        " + MainWindow.runObject[myRun].getEntryChareName(destEP) + "::" +
+		                                     MainWindow.runObject[myRun].getEntryName(destEP);
 			}
 			else { //don't need ep detail
-		            String s = Analysis.getEntryName(destEP);
+		            String s = MainWindow.runObject[myRun].getEntryName(destEP);
 		            int parenthIndex = s.indexOf('(');
 		            if (parenthIndex != -1) //s has parenthesis
 		                s = s.substring(0, parenthIndex);
@@ -246,17 +251,17 @@ public class CallTable extends ProjDefs
 	{
     	    //Write arrays to file
             BufferedWriter output = new BufferedWriter(new FileWriter("calltable"));
-	    output.write("CALL TABLE FOR " + Analysis.getFilename() + ".sts -\n");
+	    output.write("CALL TABLE FOR " + MainWindow.runObject[myRun].getFilename() + ".sts -\n");
             for (int sourceEP=0; sourceEP<numEPs; sourceEP++) {
 	        if (exists[sourceEP]) {
 	            output.write("\n\n");
-	            output.write(Analysis.getEntryChareName(sourceEP) + "::" +
-		                 Analysis.getEntryName(sourceEP) + "[EPid #" +
+	            output.write(MainWindow.runObject[myRun].getEntryChareName(sourceEP) + "::" +
+		                 MainWindow.runObject[myRun].getEntryName(sourceEP) + "[EPid #" +
 			         sourceEP + "]\n");
 		    for (int destEP=0; destEP<numEPs; destEP++) {
 		        if (msgCount[sourceEP][destEP] > 0) {
-		            output.write("    " + Analysis.getEntryChareName(destEP) + "::" +
-		                         Analysis.getEntryName(destEP) + "[EPid #" + destEP + "] - " +
+		            output.write("    " + MainWindow.runObject[myRun].getEntryChareName(destEP) + "::" +
+		                         MainWindow.runObject[myRun].getEntryName(destEP) + "[EPid #" + destEP + "] - " +
 				         msgCount[sourceEP][destEP] + " messages, " +
 				         byteSum[sourceEP][destEP] + " bytes\n");
 		        }

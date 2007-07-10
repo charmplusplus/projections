@@ -9,13 +9,18 @@ public class EPDataGenerator
     extends ProjDefs
     implements EPNamdDefs
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    int myRun = 0;
+
     public EPDataGenerator(long data[][], OrderedIntList validPEs,
 			   long startTime, long endTime) {
 	OrderedIntList tmpPEs = validPEs.copyOf();
 	GenericLogReader reader;
 	LogEntryData logData = new LogEntryData();
-	int numUserEPs = Analysis.getNumUserEntries();
-	int numUserEvents = Analysis.getNumUserDefinedEvents();
+	int numUserEPs = MainWindow.runObject[myRun].getNumUserEntries();
+	int numUserEvents = MainWindow.runObject[myRun].getNumUserDefinedEvents();
 
 	// flags
 	boolean processing = false;
@@ -33,8 +38,8 @@ public class EPDataGenerator
 	// read each prescribed PE
 	while (tmpPEs.hasMoreElements()) {
 	    int pe = tmpPEs.nextElement();
-	    reader = new GenericLogReader(Analysis.getLogName(pe),
-					  Analysis.getVersion());
+	    reader = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+					  MainWindow.runObject[myRun].getVersion());
 	    // data reset for every new PE file
 	    processing = false;
 	    packing = false;
@@ -114,7 +119,7 @@ public class EPDataGenerator
 				reader.nextEvent(logData);
 			    }
 			    data[TIME_DATA][numUserEPs+
-					   Analysis.getUserDefinedEventIndex(logData.userEventID)] += (logData.time - userBeginTime);
+					   MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID)] += (logData.time - userBeginTime);
 			    if (processing | inIdle) {
 				subtractTime += logData.time - userBeginTime;
 			    }

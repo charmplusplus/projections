@@ -21,6 +21,11 @@ import javax.swing.*;
 
 public class MultiRunData 
 {
+    // Temporary hardcode. This variable will be assigned appropriate
+    // meaning in future versions of Projections that support multiple
+    // runs.
+    static int myRun = 0;
+
     // IO reader objects (holds data after construction unless on exception)
     private StsReader stsReaders[];
 
@@ -174,7 +179,7 @@ public class MultiRunData
 		    // actually read by a scale factor.
 		    double scale = numPE/(validPEs.size()*1.0);
 		    progressBar =
-			new ProgressMonitor(Analysis.guiRoot, 
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
 					    "Reading summary Data for run " +
 					    run + " of " + numRuns,
 					    "", 0, validPEs.size());
@@ -198,8 +203,8 @@ public class MultiRunData
 			    System.exit(-1);
 			}
 			reader = 
-			    new GenericSummaryReader(Analysis.getSumName(pe),
-						     Analysis.getVersion());
+			    new GenericSummaryReader(MainWindow.runObject[myRun].getSumName(pe),
+						     MainWindow.runObject[myRun].getVersion());
 			for (int ep=0; ep<numEPs; ep++) {
 			    dataTable[TYPE_TIME][run][ep] += 
 				reader.epData[ep][GenericSummaryReader.TOTAL_TIME] * scale;
@@ -312,7 +317,7 @@ public class MultiRunData
 
     private static OrderedIntList[] detectFiles(StsReader sts) {
 	// determine if any of the desired data files exist for each
-	// sts file. This is copied from Analysis.java just because
+	// sts file. This is copied from MainWindow.runObject[myRun].java just because
 	// Multirun cannot understand that silly static Class.
 
 	OrderedIntList[] validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
@@ -321,13 +326,13 @@ public class MultiRunData
 	}
 
 	for (int i=0;i<sts.getProcessorCount();i++) {
-	    if ((new File(Analysis.getSumName(i))).isFile()) {
+	    if ((new File(MainWindow.runObject[myRun].getSumName(i))).isFile()) {
 		validPEs[ProjMain.SUMMARY].insert(i);
 	    }
-	    if ((new File(Analysis.getSumDetailName(i))).isFile()) {
+	    if ((new File(MainWindow.runObject[myRun].getSumDetailName(i))).isFile()) {
 		validPEs[ProjMain.SUMDETAIL].insert(i);
 	    }
-	    if ((new File(Analysis.getLogName(i))).isFile()) {
+	    if ((new File(MainWindow.runObject[myRun].getLogName(i))).isFile()) {
 		validPEs[ProjMain.LOG].insert(i);
 	    }
 	}

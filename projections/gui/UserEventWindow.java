@@ -68,7 +68,7 @@ public class UserEventWindow extends JFrame
       }
     }
     public Object getValueAt(int row, int col) { 
-      if (events_ != null && events_[0] != null) {
+      if (events_ != null && events_[index_] != null) {
 	switch (col) {
 	  case 0:  
 	    return events_[index_][row].Name;

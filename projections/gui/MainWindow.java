@@ -1,33 +1,15 @@
 package projections.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Label;
-import java.awt.Toolkit;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
-import java.net.URL;
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
 
-import javax.swing.JColorChooser;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
+import java.io.*;
+import java.lang.reflect.*;
+import java.net.*;
 
-import projections.analysis.IntervalUtils;
-import projections.analysis.ProjMain;
-import projections.gui.graph.Graph;
-import projections.gui.graph.GraphPanel;
-import projections.gui.graph.SummaryDataSource;
-import projections.gui.graph.SummaryXAxis;
-import projections.gui.graph.SummaryYAxis;
+import projections.analysis.*;
+import projections.gui.graph.*;
 
 public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay

@@ -8,6 +8,7 @@ import java.util.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.math.BigInteger;
 //import jnt.FFT.*;
 
 
@@ -785,7 +786,6 @@ public class NoiseMiner extends ProjDefs
 
 		long total_count=0;
 		while (peList.hasMoreElements()) {
-			long count=0;
 			
 			System.gc();
 
@@ -822,7 +822,6 @@ public class NoiseMiner extends ProjDefs
 						if(previous_entry == logdata.entry){
 							Duration duration = new Duration(previous_time,logdata.time);
 							h[logdata.entry].insert(duration, previous_time);
-							count ++;
 							total_count++;
 						}
 					}
@@ -839,7 +838,6 @@ public class NoiseMiner extends ProjDefs
 				// I doubt we'll ever get here
 			}
 
-			loggingText = loggingText + "Found " + count + " entry methods in the specified time range on pe=" + currPe + "\n";
 			currPeIndex++;
 
 			// print each event's histogram

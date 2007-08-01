@@ -236,7 +236,7 @@ all: bin/projections.jar
 
 projections/analysis/ProjMain.class: $(SRC)
 	@ echo "Compiling java sources:"
-	@ /usr/apps/java/jdk1.6.0/bin/javac -sourcepath . -d . -deprecation -O $(SRC)
+	@ javac -sourcepath . -d . -deprecation -O $(SRC)
 	@ echo "Complete."
 
 bin/projections.jar: projections/analysis/ProjMain.class $(SRC)

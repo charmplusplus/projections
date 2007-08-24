@@ -56,7 +56,7 @@ public class NoiseMinerWindow extends ProjectionsWindow
 		setTitle("Projections Computational Noise Miner - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 		
 		columnNames = new Vector();
-		columnNames.add(new String("Noise Duration(us)"));
+		columnNames.add(new String("Noise Duration"));
 		columnNames.add(new String("Seen on Processors"));
 		columnNames.add(new String("Occurrences/PE"));
 		columnNames.add(new String("Periodicity(ms)")); 

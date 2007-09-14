@@ -10,6 +10,6 @@ then
   fi 
 fi
 
-/usr/apps/java/jdk1.6.0/jre/bin/java -ms256000000 -mx1000000000 \
+java -ms256000000 -mx1000000000 \
   -classpath $jarpath \
   projections.analysis.ProjMain $*

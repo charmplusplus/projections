@@ -382,7 +382,7 @@ public class HistogramWindow extends GenericGraphWindow
 			    }
 			    break;
 			} else {
-			    if (logdata.event != typeLogs[TYPE_TIME].event) {
+			    if (logdata.entry != typeLogs[TYPE_TIME].entry) {
 				// The events are mismatched! Clear all.
 				// Possible under current tracing scheme.
 				isActive[TYPE_TIME] = false;

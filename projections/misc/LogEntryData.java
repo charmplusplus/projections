@@ -19,6 +19,8 @@ public class LogEntryData
     public int entry;	 // EntryPoint number found in sts file
     public int event;	 // Unique sequence number assigned to CREATION Events 
     public int pe;	 // processor number where the event occurred
+    public int numPEs;   // Number of processors a message was sent to.
+                         // Used for CREATION_BCAST and CREATION_MULTICAST
 
     // version 2.0 constructs
     public int msglen;	 // only for CREATION events

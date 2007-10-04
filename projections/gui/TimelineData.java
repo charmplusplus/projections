@@ -118,25 +118,6 @@ public class TimelineData
 	mesgVector = null;
 	entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 	entryColor = MainWindow.runObject[myRun].getColorMap();
-	/*
-	entryColor = new Color[MainWindow.runObject[myRun].getNumUserEntries()];
-	float H = (float)1.0;
-	float S = (float)1.0;
-	float B = (float)1.0;
-	float delta = (float)(1.0/MainWindow.runObject[myRun].getNumUserEntries());
-	if (new File("bin/color.map").exists()) {
-	    try {
-		Util.restoreColors(entryColor, "Timeline Graph", null);
-	    } catch (IOException e) {
-		System.err.println("unable to load color.map");
-	    } 
-	} else {
-	    for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
-		entries[i] = 0;
-		entryColor[i] = MainWindow.runObject[myRun].getEntryColor(i);
-	    }   
-	}
-	*/
     }   
     
     public void createTLOArray()

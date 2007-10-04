@@ -432,6 +432,13 @@ public class CommWindow extends GenericGraphWindow
 			sentByteCount[curPeArrayIndex][EPid] += 
 			    logdata.msglen;
 			histogram.add(new Integer(logdata.msglen));
+		    } else if ((logdata.type == ProjDefs.CREATION_BCAST) ||
+			       (logdata.type == 
+				ProjDefs.CREATION_MULTICAST)) {
+			EPid = logdata.entry;
+			sentMsgCount[curPeArrayIndex][EPid]+= logdata.numPEs;
+			sentByteCount[curPeArrayIndex][EPid] +=
+			    (logdata.msglen * logdata.numPEs);
 		    } else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
 			EPid = logdata.entry;
 			receivedMsgCount[curPeArrayIndex][EPid]++;

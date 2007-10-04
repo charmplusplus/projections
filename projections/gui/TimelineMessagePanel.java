@@ -61,6 +61,7 @@ public class TimelineMessagePanel extends JPanel {
 					 0);
 	    tableData[row][4] = MainWindow.runObject[myRun].getEntryName(messages[row].Entry);
 	    if (messages[row].destPEs != null) {
+		// This is a multicast.
 		tableData[row][5] = "";
 		for (int i=0; i<messages[row].destPEs.length-1; i++) {
 		    tableData[row][5] = (String)tableData[row][5] + messages[row].destPEs[i] + ", ";
@@ -68,7 +69,14 @@ public class TimelineMessagePanel extends JPanel {
 		tableData[row][5] = (String)tableData[row][5] + 
 		    messages[row].destPEs[messages[row].destPEs.length-1] + "";
 	    } else {
-		tableData[row][5] = "unknown";
+		if (messages[row].numPEs > 0) {
+		    // This is a broadcast of some sort.
+		    tableData[row][5] = 
+			"Group/Node Broadcast (" + messages[row].numPEs + ")";
+		} else {
+		    // This is a regular send event.
+		    tableData[row][5] = "unknown";
+		}
 	    }
 	}
     }

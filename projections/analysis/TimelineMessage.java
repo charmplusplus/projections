@@ -6,6 +6,7 @@ public class TimelineMessage
     public int Entry;
     public int MsgLen;
     public int EventID;
+    public int numPEs;
     public int destPEs[];
     
     public TimelineMessage(long t,int e,int mlen) {
@@ -16,11 +17,27 @@ public class TimelineMessage
 	this(t, e, mlen, EventID, null);
     }
     
-    public TimelineMessage(long t, int e, int mlen, int EventID, int destPEs[]) {
+    public TimelineMessage(long t, int e, int mlen, int EventID, 
+			   int destPEs[]) {
 	Time=t;
 	Entry=e;
 	MsgLen=mlen;
 	this.EventID = EventID;
+	if (destPEs != null) {
+	    this.numPEs = destPEs.length;
+	} else {
+	    this.numPEs = 0;
+	}
 	this.destPEs = destPEs;
+    }
+
+    public TimelineMessage(long t, int e, int mlen, int EventID, 
+			   int numPEs) {
+	Time=t;
+	Entry=e;
+	MsgLen=mlen;
+	this.EventID = EventID;
+	this.numPEs = numPEs;
+	this.destPEs = null;
     }
 }

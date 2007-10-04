@@ -11,6 +11,7 @@ class LogEntry
     ObjectId id;
     long recvTime;
     long sendTime;
+    int numPEs;
     int destPEs[];
     long cpuBegin, cpuEnd;
     // PAPI entries/information
@@ -46,7 +47,9 @@ class LogEntry
 	log.sendTime = data.sendTime;
 	log.recvTime = data.recvTime;
 	log.id = new ObjectId(data.id[0],data.id[1],data.id[2]);
-	
+
+	log.numPEs = data.numPEs;
+
 	if (data.destPEs != null) {
 	    log.destPEs = new int[data.destPEs.length];
 	    for (int i=0;i<log.destPEs.length;i++) {

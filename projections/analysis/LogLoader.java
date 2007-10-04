@@ -90,6 +90,7 @@ public class LogLoader extends ProjDefs
 		    } else {
 			switch (type) {
 			case CREATION:
+			case CREATION_BCAST:
 			case CREATION_MULTICAST:
 			case BEGIN_PROCESSING:
 			case END_PROCESSING:
@@ -1014,6 +1015,39 @@ public class LogLoader extends ProjDefs
 			TM = new TimelineMessage(LE.Time - BeginTime,
 						 LE.Entry, LE.MsgLen,
 						 LE.EventID);
+			TE.addMessage(TM);
+			if (tempte) {
+			    TE = null;
+			}
+			break;
+		    case CREATION_BCAST:
+			// see if this is the first CREATION_BCAST event 
+			// after the start of time range. If so, create a 
+			// block based on the lastBeginEvent and attach 
+			// the CREATION event to that block.
+			if ((lastBeginEvent != null) &&
+			    (lastBeginEvent.TransactionType ==
+			     BEGIN_PROCESSING)) {
+			    TE = new TimelineEvent(lastBeginEvent.Time -
+						   BeginTime,
+						   End - BeginTime,
+						   lastBeginEvent.Entry,
+						   lastBeginEvent.Pe);
+			    Timeline.addElement(TE);
+			    isProcessing = true;
+			}
+			lastBeginEvent = null;
+			tempte = false;
+			if (TE == null) {
+			    TE = new TimelineEvent(LE.Time - BeginTime,
+						   LE.Time - BeginTime,
+						   -2, LE.Pe, LE.MsgLen);
+			    Timeline.addElement(TE);
+			    tempte = true;
+			}
+			TM = new TimelineMessage(LE.Time - BeginTime,
+						 LE.Entry, LE.MsgLen,
+						 LE.EventID, LE.numPEs);
 			TE.addMessage(TM);
 			if (tempte) {
 			    TE = null;

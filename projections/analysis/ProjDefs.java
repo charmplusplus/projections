@@ -11,7 +11,7 @@ public class ProjDefs extends java.lang.Object
 {
 
 // NUM_EVENT IS NEVER USED, BUT I'M UPDATING ANYWAY FOR USER_EVENT_PAIR 
-public static final int NUM_EVENTS               = 19 + 19 + 1 + 1;
+public static final int NUM_EVENTS               = 23 + 1 + 19;
 
 public static final int CREATION                 = 1;
 public static final int BEGIN_PROCESSING         = 2;
@@ -32,6 +32,7 @@ public static final int BEGIN_PACK               = 16;
 public static final int END_PACK                 = 17;
 public static final int BEGIN_UNPACK             = 18;
 public static final int END_UNPACK               = 19;
+public static final int CREATION_BCAST           = 20;
 
 public static final int CREATION_MULTICAST       = 21;
 public static final int BEGIN_FUNC               = 22;

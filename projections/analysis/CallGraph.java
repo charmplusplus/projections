@@ -90,9 +90,15 @@ public class CallGraph extends ProjDefs
 			byteArray[currTimeInterval][destEP]+=logdata.msglen;
 			
 			// May implement Sent External later on
-		    }
-
-		    else if (logdata.type == BEGIN_PROCESSING) {  // Starting new entry method
+		    } else if ((logdata.type == CREATION_BCAST) ||
+			       (logdata.type == CREATION_MULTICAST)) {
+			int destEP = logdata.entry;
+			int currTimeInterval = getInterval(logdata.time);
+			messageArray[currTimeInterval][destEP] += 
+			    logdata.numPEs;
+			byteArray[currTimeInterval][destEP] +=
+			    (logdata.msglen * logdata.numPEs);
+		    } else if (logdata.type == BEGIN_PROCESSING) {  // Starting new entry method
 		        int currEP = logdata.entry;
 		        int srcPe = logdata.pe;
 		        int currTimeInterval = getInterval(logdata.time);

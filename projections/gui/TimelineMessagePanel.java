@@ -71,8 +71,15 @@ public class TimelineMessagePanel extends JPanel {
 	    } else {
 		if (messages[row].numPEs > 0) {
 		    // This is a broadcast of some sort.
-		    tableData[row][5] = 
-			"Group/Node Broadcast (" + messages[row].numPEs + ")";
+		    if (messages[row].numPEs == 
+			MainWindow.runObject[myRun].getNumProcessors()) {
+			tableData[row][5] = 
+			    "Group Broadcast (" + messages[row].numPEs + ")";
+		    } else {
+			tableData[row][5] = 
+			    "Nodegroup Broadcast (" + messages[row].numPEs + 
+			    ")";
+		    }
 		} else {
 		    // This is a regular send event.
 		    tableData[row][5] = "unknown";

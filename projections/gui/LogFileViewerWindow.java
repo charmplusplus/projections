@@ -183,6 +183,21 @@ public class LogFileViewerWindow extends ProjectionsWindow
 		case ( ProjDefs.CREATION ):
 		    text[ i ][ 1 ] = "CREATE message to be sent to " + ve.Dest;
 		    break;
+		case ( ProjDefs.CREATION_BCAST ):
+		    if (ve.numDestPEs == 
+			MainWindow.runObject[myRun].getNumProcessors()) {
+			text[ i ][ 1 ] = "GROUP BROADCAST (" + ve.numDestPEs +
+			    " processors)";
+		    } else {
+			text[ i ][ 1 ] = "NODEGROUP BROADCAST (" + 
+			    ve.numDestPEs +
+			    " processors)";
+		    }
+		    break;
+		case ( ProjDefs.CREATION_MULTICAST ):
+		    text[ i ][ 1 ] = "MULTICAST message sent to " + 
+			ve.numDestPEs + " processors";
+		    break;
 		case ( ProjDefs.BEGIN_PROCESSING ):
 		    text[ i ][ 1 ] = "BEGIN PROCESSING of message sent to " + 
 			ve.Dest;

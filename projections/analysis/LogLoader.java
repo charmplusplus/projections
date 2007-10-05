@@ -1240,6 +1240,7 @@ public class LogLoader extends ProjDefs
 	ViewerEvent VE = new ViewerEvent();
 	VE.Time        = LE.Time - BeginTime;
 	VE.EventType   = LE.TransactionType;
+	VE.numDestPEs  = LE.numPEs;
 
 	if (LE.Entry == -1) {
 	    return null;
@@ -1254,6 +1255,8 @@ public class LogLoader extends ProjDefs
 	case END_UNPACK:
 	    return VE;
 	case CREATION:
+	case CREATION_BCAST:
+	case CREATION_MULTICAST:
 	case BEGIN_PROCESSING:
 	case END_PROCESSING:
 	case ENQUEUE:

@@ -83,7 +83,7 @@ public class MainWindow extends JFrame
 	"OutlierAnalysisWindow",
 	"MultiRunWindow",
 	"FunctionTool",
-	"PoseAnalysisWindow",
+  //	"PoseAnalysisWindow",
 	"AmpiProfileWindow",
 	"NoiseMinerWindow"
     };

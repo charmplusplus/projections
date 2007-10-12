@@ -383,27 +383,27 @@ public class SumAnalyzer extends ProjDefs
 	return IntervalSize;
     }
 
-    public long[][] GetChareTime()
+    public long[][] getChareTime()
     {
 	return ChareTime;
     }
 
-    public int[][] GetNumEntryMsgs()
+    public int[][] getNumEntryMsgs()
     {
 	return NumEntryMsgs;
     }
 
-    public long[][] GetPhaseChareTime(int Phase)
+    public long[][] getPhaseChareTime(int Phase)
     {
 	return PhaseChareTime[Phase];
     }
 
-    public int GetPhaseCount() 
+    public int getPhaseCount() 
     {
 	return PhaseCount;
     }
 
-    public int[][] GetPhaseNumEntryMsgs(int Phase)
+    public int[][] getPhaseNumEntryMsgs(int Phase)
     {
 	return PhaseNumEntryMsgs[Phase];
     }
@@ -411,16 +411,16 @@ public class SumAnalyzer extends ProjDefs
     /**
      * Resample ProcessorUtilization data into SystemUsageData.
      */
-    public int[][] GetSystemUsageData(int intervalStart, int intervalEnd, 
-				      long OutIntervalSize)
+    public int[][] getSystemUsageData(int intervalStart, int intervalEnd, 
+				      long outIntervalSize)
     {
 	int numProcessors=ProcessorUtilization.length;
 	int intervalRange = intervalEnd - intervalStart + 1;
 	int [][]ret = new int[numProcessors][intervalRange];
 
-	// **CW** optimization, if OutIntervalSize == IntervalSize, just
+	// **CW** optimization, if outIntervalSize == IntervalSize, just
 	// copy the appropriate parts of the internal array!
-	if (OutIntervalSize == IntervalSize) {
+	if (outIntervalSize == IntervalSize) {
 	    for (int p=0; p<numProcessors; p++) {
 		for (int i=intervalStart; 
 		     (i<intervalEnd) && (i<ProcessorUtilization[p].length); 
@@ -433,7 +433,7 @@ public class SumAnalyzer extends ProjDefs
 	}
 
 	int sourceStartInterval = 
-	    (int)((intervalStart*OutIntervalSize)/IntervalSize);
+	    (int)((intervalStart*outIntervalSize)/IntervalSize);
 	double [][]tempData = new double[numProcessors][intervalRange];
 	for (int p=0; p<numProcessors; p++) {
 	    int interval = sourceStartInterval;
@@ -443,7 +443,7 @@ public class SumAnalyzer extends ProjDefs
 		// don't spread it!
 		if (ProcessorUtilization[p][interval] > 0) {
 		    IntervalUtils.fillIntervals(tempData[p],
-						OutIntervalSize,
+						outIntervalSize,
 						(long)intervalStart,
 						interval*IntervalSize,
 						(interval+1)*IntervalSize,
@@ -458,41 +458,11 @@ public class SumAnalyzer extends ProjDefs
 	    for (int i=0; i<tempData[p].length; i++) {
 		tempData[p][i] = 
 		    IntervalUtils.timeToUtil(tempData[p][i],
-					     (double)OutIntervalSize);
+					     (double)outIntervalSize);
 		ret[p][i] = (int)tempData[p][i];
 	    }
 	}
 	return ret;
-
-	/* 
-	 *  WHAT A LOAD OF CRAP **CW** 6/9/2005
-
-	int intervalRange = intervalEnd - intervalStart + 1;
-	
-	int NumProcessors=ProcessorUtilization.length;
-	int[][] ret = new int[NumProcessors][intervalRange];
-
-	for (int p = 0; p < NumProcessors; p++) {
-	    int in = 0, 
-		out=0; //Indices into ProcessorUtilization[p] and ret[p]
-	    int usage=0,nUsage=0; //Accumulated processor usage
-	    int out_t=0; //Accumulated time in output array
-	    while(out < intervalRange) {
-		if (in <ProcessorUtilization[p].length)
-		    usage += ProcessorUtilization[p][in];
-		nUsage++;
-		in++;
-		out_t += IntervalSize;
-		if (out_t >= OutIntervalSize) {
-		    ret[p][out++] = (int)(usage/nUsage);
-		    out_t = 0;
-		    usage=0;nUsage=0;
-		}
-	    }
-	}
-
-	return ret;
-	*/
     }
 
     /**
@@ -525,7 +495,7 @@ public class SumAnalyzer extends ProjDefs
 	return null;
     }
 
-    public long GetTotalTime() 
+    public long getTotalTime() 
     {
 	return TotalTime;
     }

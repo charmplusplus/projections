@@ -171,7 +171,7 @@ System.out.println(val+" "+tokenizer.nval);
 			{
 			    tokenType=tokenizer.nextToken();
 			    if (tokenType !=  StreamTokenizer.TT_NUMBER)
-				System.out.println("Unrecorgnized syntax at end of li\ne 2");
+				System.out.println("Unrecorgnized syntax at end of line 2");
 			    for (int i=1; i<(int)tokenizer.nval; i++)
 				processorUtil[nUsageRead++] = val;
 			}

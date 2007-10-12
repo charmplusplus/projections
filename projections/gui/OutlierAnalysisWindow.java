@@ -77,7 +77,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	// special behavior if initially used (to load the raw 
 	// online-generated outlier information). Quick and dirty, use
 	// static variables ... not possible if multiple runs are supported.
-	if (ProjectionsConfigurationReader.RC_OUTLIER_FILTERED.booleanValue()) {
+	if (MainWindow.runObject[myRun].rcReader.RC_OUTLIER_FILTERED.booleanValue()) {
 	    // get necessary parameters (normally from dialog)
 
 	    // This is still a hack, there might be differentiation in the

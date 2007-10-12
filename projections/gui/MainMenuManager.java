@@ -254,7 +254,9 @@ public class MainMenuManager extends MenuManager
 	stateChanged(OPENED_SUMMARY);
     }
 
-    //    public void addPose() {
-    //	stateChanged(ADD_POSE);
-    //    }
+  // Removed to avoid confusing people reading the manual and this
+  //   still-being-developed feature.
+  // public void addPose() {
+  //  	stateChanged(ADD_POSE);
+  //  }
 }

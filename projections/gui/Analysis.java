@@ -32,201 +32,244 @@ import projections.misc.*;
  */
 public class Analysis {
 
-    /******************* Initialization ************/
-    public ProjectionsConfigurationReader rcReader;
-    public Component guiRoot;
+  /******************* Initialization ************/
+  public ProjectionsConfigurationReader rcReader;
+  public Component guiRoot;
+  
+  private StsReader sts;
+  
+  public LogLoader logLoader;  //Only for .log files
+  
+  private SumAnalyzer sumAnalyzer; //Only for .sum files
+  
+  PoseDopReader dopReader; //Only for .poselog files
+  
+  private IntervalData intervalData; // interval-based data
 
-    private StsReader sts;
-    
-    public LogLoader logLoader;  //Only for .log files
-    
-    private SumAnalyzer sumAnalyzer; //Only for .sum files
+  private String baseName;
+  private String logDirectory;
+  
+  // The total time (maxed) of a run across all processors.
+  private long totalTime = 0;
+  long poseTotalTime = 0;
+  long poseTotalVirtualTime = 0;
+  
+  /******************* Graphs ***************/
+  private int[][][] systemUsageData;
+  private int[][][][] systemMsgsData;
+  private int[][][][] userEntryData;
+  private int[] bgData;
+  
+  // stupid hack to compensate for the fact that LogReaders are never
+  // maintained inside Analysis.
+  private long logReaderIntervalSize = -1;
+  
+  /****************** Jump from Timeline to graphs ******/
+  // Used for storing user defined startTime and endTime when jumping from
+  // TimelineWindow to other graphs
+  private long jStartTime, jEndTime;
+  private boolean jTimeAvailable;
+  
+  /** *************** Color Maps 6/27/2002 ************ */
+  
+  public Color background = Color.black;
+  public Color foreground = Color.white;
+  
+  private Color[] entryColors;
+  private Color[] userEventColors;
+  private Color[] functionColors;
+  private Color[][] activityColors =
+  new Color[ActivityManager.NUM_ACTIVITIES][];
+  
+  private Color[] grayColors;
+  private Color[] grayUserEventColors;
+  
+  private Color[] activeColorMap;
+  protected Color[] activeUserColorMap;
+  
+  public Analysis() {
+    // empty constructor for now. initAnalysis is still the "true"
+    // constructor until multiple run data is supported.
+  }
+  
+  /** ************** Methods ********************** */
+  
+  /**
+   *  initAnalysis can be considered as Analysis's "constructor".
+   *  It attempts to read the sts file associated with this run and
+   *  determines the presence of all associated log files.
+   *
+   *  At the end of initAnalysis, the following should happen:
+   *  1) SummaryReaders should be activated and summary data available.
+   *  2) Sum Detail Readers should be activated and sumDetail data available.
+   *  3) total time of the run should be known.
+   *
+   */    
+  public void initAnalysis(String filename, Component rootComponent) 
+    throws IOException 
+  {
+    guiRoot = rootComponent;
+    try {
+      baseName = FileUtils.getBaseName(filename);
+      logDirectory = FileUtils.dirFromFile(filename);
+      sts = new StsReader(filename);
+      rcReader = 
+	new ProjectionsConfigurationReader(filename);
+      FileUtils.detectFiles(sts, logDirectory, baseName);
+      
+      // Projections Colors
+      String colorsaved = 
+	getLogDirectory() + File.separator + "savedcolors.prj";
+      initColors(colorsaved);
 
-    PoseDopReader dopReader; //Only for .poselog files
+      // Build Summary Data
+      if (hasSumFiles()) {
+	sumAnalyzer = null;
+	sumAnalyzer = new SumAnalyzer();
+      }
 
-    private IntervalData intervalData; // interval-based data
+      // Build Summary Detail Data
+      if (hasSumDetailFiles()) {
+	if (intervalData == null) {
+	  intervalData = new IntervalData();
+	}
+      }
 
-    private String baseName;
-    private String logDirectory;
+      // Build POSE dop Data
+      if (hasPoseDopFiles()) {
+	dopReader = new PoseDopReader();
+      }
+      
+      // Determine End Time
+      findEndTime();
 
-    // The total time (maxed) of a run across all processors.
-    private long totalTime = 0;
-    long poseTotalTime = 0;
-    long poseTotalVirtualTime = 0;
-
-    /******************* Graphs ***************/
-    private int[][][] systemUsageData;
-    private int[][][][] systemMsgsData;
-    private int[][][][] userEntryData;
-    private int[] bgData;
-
-    // stupid hack to compensate for the fact that LogReaders are never
-    // maintained inside Analysis.
-    private long logReaderIntervalSize = -1;
-
-    /****************** Jump from Timeline to graphs ******/
-    // Used for storing user defined startTime and endTime when jumping from
-    // TimelineWindow to other graphs
-    private long jStartTime, jEndTime;
-    private boolean jTimeAvailable;
-
-    /** *************** Color Maps 6/27/2002 ************ */
-
-    public Color background = Color.black;
-    public Color foreground = Color.white;
-    
-    private Color[] entryColors;
-    private Color[] userEventColors;
-    private Color[] functionColors;
-    private Color[][] activityColors =
-	new Color[ActivityManager.NUM_ACTIVITIES][];
-
-    private Color[] grayColors;
-    private Color[] grayUserEventColors;
-
-    private Color[] activeColorMap;
-    protected Color[] activeUserColorMap;
-    
-    public Analysis() {
-	// empty constructor for now. initAnalysis is still the "true"
-	// constructor until multiple run data is supported.
+      // Flush any updated RC data to disk
+      rcReader.writeFile();
+    } catch (LogLoadException e) {
+      // if sts reader could not be created because of a log load
+      // exception, forward the error as an IOException.
+      // LogLoadException is a silly exception in the first place!
+      throw new IOException(e.toString());
+    } catch (SummaryFormatException e) {
+      throw new IOException(e.toString());
     }
+  }
 
-    /** ************** Methods ********************** */
-
-    /**
-     *  initAnalysis can be considered as Analysis's "constructor".
-     *  It attempts to read the sts file associated with this run and
-     *  determines the presence of all associated log files.
-     *
-     *  At the end of initAnalysis, the following should happen:
-     *  1) SummaryReaders should be activated and summary data available.
-     *  2) Sum Detail Readers should be activated and sumDetail data available.
-     *  3) total time of the run should be known.
-     *
-     */    
-    public void initAnalysis(String filename, Component rootComponent) 
-	throws IOException 
-    {
-	guiRoot = rootComponent;
-	try {
-	    baseName = FileUtils.getBaseName(filename);
-	    logDirectory = FileUtils.dirFromFile(filename);
-	    sts=new StsReader(filename);
-	    rcReader = 
-		new ProjectionsConfigurationReader(filename);
-	    FileUtils.detectFiles(sts, logDirectory, baseName);
-
-	    // if I can find the saved color maps, then use it.
-	    String colorsaved = 
-		getLogDirectory() + File.separator + "savedcolors.prj";
-	    ColorManager.setDefaultLocation(colorsaved);
-	    if ((new File(colorsaved)).exists()) {
-		activityColors = ColorManager.initializeColors(colorsaved);
-		// fall back on error
-		if (activityColors == null) {
-		    activityColors = ColorManager.initializeColors();
-		}
-	    } else {
-		activityColors = ColorManager.initializeColors();
-	    }
-	    entryColors = activityColors[ActivityManager.PROJECTIONS];
-	    userEventColors = activityColors[ActivityManager.USER_EVENTS];
-	    functionColors = activityColors[ActivityManager.FUNCTIONS];
-	    grayColors = 
-		ColorManager.createGrayscaleColorMap(sts.getEntryCount());
-	    grayUserEventColors = 
-		ColorManager.createGrayscaleColorMap(sts.getNumUserDefinedEvents());
-	    // default to full colors
-	    activeColorMap = entryColors;
-	    activeUserColorMap = userEventColors;
-	} catch (LogLoadException e) {
-	    // if sts reader could not be created because of a log load
-	    // exception, forward the error as an IOException.
-	    // LogLoadException is a silly exception in the first place!
-	    throw new IOException(e.toString());
+  private void findEndTime() {
+    // If the Configuration file has saved data, then use it!
+    if (rcReader.RC_GLOBAL_END_TIME.longValue() >= 0) {
+      totalTime =
+	rcReader.RC_GLOBAL_END_TIME.longValue();
+    } else {
+      // Need to determine End Time as the max of all log information.
+      // ...
+      // From accumulated summary file
+      if (hasSumAccumulatedFile()) {
+	/* DO NOTHING FOR NOW. WILL WRITE NEW CODE FOR THIS BEHAVIOR
+	// clear memory first ...
+	sumAnalyzer = null;
+	sumAnalyzer = new SumAnalyzer(sts, SumAnalyzer.ACC_MODE);
+	setTotalTime(sumAnalyzer.getTotalTime());
+	*/
+      }
+      // From summary files
+      if (hasSumFiles()) {
+	if (sumAnalyzer.getTotalTime() > totalTime) {
+	  totalTime = sumAnalyzer.getTotalTime();
 	}
-
-	// Summary Files are handled orthogonally with the current scheme
-	// which should just have 2 types of data - interval data and point
-	// data.
-
-	// Read the super summarized data where available.
-	if (hasSumAccumulatedFile()) { // SINGLE <stsname>.sum file
-	    // clear memory first ...
-	    sumAnalyzer = null;
-	    sumAnalyzer = new SumAnalyzer(sts, SumAnalyzer.ACC_MODE);
-	    setTotalTime(sumAnalyzer.GetTotalTime());
+      }
+      // From summary detail files
+      if (hasSumDetailFiles()) {
+	long temp = ((long)(intervalData.getNumIntervals()*
+			    intervalData.getIntervalSize()*
+			    1000000));
+	if (temp > totalTime) {
+	  totalTime = temp;
 	}
-	if( hasSumFiles() ) { //.sum files
-	    try {
-		// clear memory first ...
-		sumAnalyzer = null;
-		sumAnalyzer = new SumAnalyzer();
-		setTotalTime(sumAnalyzer.GetTotalTime());
-	    } catch (SummaryFormatException e) {
-		System.err.println(e.toString());
-	    }
+      }
+      // From log files
+      if (hasLogFiles()) {
+	logLoader = new LogLoader();
+	long temp = 
+	  logLoader.determineEndTime(getValidProcessorList(ProjMain.LOG));
+	if (temp > totalTime) {
+	  totalTime = temp;
 	}
-	// setting up interval-based data
-	if (hasSumDetailFiles()) {
-	    if (intervalData == null) {
-		intervalData = new IntervalData();
-	    }
-	    setTotalTime((long)(intervalData.getNumIntervals()*
-				intervalData.getIntervalSize()*
-				1000000));
-	}
-	// setting up point-based data.
-	// **CW** for backward compatibility - initialize the log files
-	// by creating the log reader so that the timing information is
-	// available to the older tools.
-	if (hasLogFiles()) {
-	    logLoader = new LogLoader();
-	    if (ProjectionsConfigurationReader.RC_GLOBAL_END_TIME.longValue() == -1) {
-		setTotalTime(logLoader.determineEndTime(getValidProcessorList(ProjMain.LOG)));
-		rcReader.setValue("RC_GLOBAL_END_TIME", 
-				  new Long(getTotalTime()));
-	    } else {
-		setTotalTime(ProjectionsConfigurationReader.RC_GLOBAL_END_TIME.longValue());
-	    }
-	}
-	// if pose data exists, compute the end times
-	if (hasPoseDopFiles()) {
-	    dopReader = new PoseDopReader();
-	    final SwingWorker worker =  new SwingWorker() {
-		    public Object construct() {
-			poseTotalTime = dopReader.getTotalRealTime();
-			poseTotalVirtualTime = 
-			    dopReader.getTotalVirtualTime();
-			return null;
-		    }
-		    public void finished() {
-			// nothing to do
-		    }
-		};
-	    worker.start();
-	}
+      }
+      rcReader.setValue("RC_GLOBAL_END_TIME", totalTime);
     }
     
-    /**
-     * Creating AMPI usage profile
-     */
-    public void createAMPIUsage(int procId, long beginTime, 
-				       long endTime, Vector procThdVec){
-        try {
-	    if (hasLogFiles()) {
-		if (logLoader == null) {
-		    logLoader = new LogLoader();
-		}
-		logLoader.createAMPIUsageProfile(procId,beginTime,endTime,procThdVec);
-	    } else {
-		System.err.println("createAMPIUsage: No log files available!");
+    // Find Pose End Time Data
+    if ((rcReader.RC_POSE_REAL_TIME.longValue() >= 0) &&
+	(rcReader.RC_POSE_VIRT_TIME.longValue() >= 0)) {
+      poseTotalTime = rcReader.RC_POSE_REAL_TIME.longValue();
+      poseTotalVirtualTime = rcReader.RC_POSE_VIRT_TIME.longValue();
+    } else {
+      if (hasPoseDopFiles()) {
+	final SwingWorker worker = new SwingWorker() {
+	    public Object construct() {
+	      poseTotalTime = dopReader.getTotalRealTime();
+	      poseTotalVirtualTime = 
+		dopReader.getTotalVirtualTime();
+	      rcReader.setValue("RC_POSE_REAL_TIME", poseTotalTime);
+	      rcReader.setValue("RC_POSE_VIRT_TIME", poseTotalVirtualTime);
+	      return null;
 	    }
-	} catch (LogLoadException e) {
-	    System.err.println("LOG LOAD EXCEPTION");	    
-	}
+	    public void finished() {
+	      // nothing to do
+	    }
+	  };
+	worker.start();
+      }
     }
+  }
+  
+  /**
+   *  Read or initialize color maps
+   */
+  private void initColors(String colorsaved) 
+    throws IOException
+  {
+    ColorManager.setDefaultLocation(colorsaved);
+    if ((new File(colorsaved)).exists()) {
+      activityColors = ColorManager.initializeColors(colorsaved);
+      // fall back on error
+      if (activityColors == null) {
+	activityColors = ColorManager.initializeColors();
+      }
+    } else {
+      activityColors = ColorManager.initializeColors();
+    }
+    entryColors = activityColors[ActivityManager.PROJECTIONS];
+    userEventColors = activityColors[ActivityManager.USER_EVENTS];
+    functionColors = activityColors[ActivityManager.FUNCTIONS];
+    grayColors = 
+      ColorManager.createGrayscaleColorMap(sts.getEntryCount());
+    grayUserEventColors = 
+      ColorManager.createGrayscaleColorMap(sts.getNumUserDefinedEvents());
+    // default to full colors
+    activeColorMap = entryColors;
+    activeUserColorMap = userEventColors;
+  }
+    
+  /**
+   * Creating AMPI usage profile
+   */
+  public void createAMPIUsage(int procId, long beginTime, 
+			      long endTime, Vector procThdVec){
+    try {
+      if (hasLogFiles()) {
+	if (logLoader == null) {
+	  logLoader = new LogLoader();
+	}
+	logLoader.createAMPIUsageProfile(procId,beginTime,endTime,procThdVec);
+      } else {
+	System.err.println("createAMPIUsage: No log files available!");
+      }
+    } catch (LogLoadException e) {
+      System.err.println("LOG LOAD EXCEPTION");	    
+    }
+  }
 
     /**
      * Create AMPI Functions' Time profile
@@ -250,7 +293,7 @@ public class Analysis {
 
     public int getNumPhases() {
 	if (sumAnalyzer!=null)
-	    return sumAnalyzer.GetPhaseCount();
+	    return sumAnalyzer.getPhaseCount();
 	return 0;
     }
 
@@ -339,20 +382,20 @@ public class Analysis {
 	long[][] data;
 	long[][] phasedata;
 	/*BAD: silently ignores begintime and endtime*/
-	if( sumAnalyzer.GetPhaseCount()>1 ) {
+	if( sumAnalyzer.getPhaseCount()>1 ) {
 	phases.reset();
-	data = sumAnalyzer.GetPhaseChareTime( phases.nextElement() );
+	data = sumAnalyzer.getPhaseChareTime( phases.nextElement() );
 	if (phases.hasMoreElements()) {
 	    while (phases.hasMoreElements() && ( pnum > -1 )) {
 		phasedata = 
-		    sumAnalyzer.GetPhaseChareTime(phases.nextElement());
+		    sumAnalyzer.getPhaseChareTime(phases.nextElement());
 		for(int q=0; q<numUserEntries; q++) {
 		    data[pnum][q] += phasedata[pnum][q];
 		}
 	    }
 	}
 	} else {
-	data = sumAnalyzer.GetChareTime();
+	data = sumAnalyzer.getChareTime();
 	}
 	float ret[][]=new float[2][numUserEntries+4];
 	//Convert to percent-- .sum entries are always over the 
@@ -435,7 +478,7 @@ public class Analysis {
 				       int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
 	systemUsageData[1] = 
-	sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd, 
+	sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd, 
 				       intervalSize);
     }
 
@@ -446,17 +489,17 @@ public class Analysis {
 	systemUsageData = new int[3][][];
 	int[][][] temp = new int[3][][];
 	temp[1] =
-	    sumAnalyzer.GetSystemUsageData(intervalStart, intervalEnd,
+	    sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd,
 	                                   intervalSize);
-   processorList.reset();
-   systemUsageData[1] = 
-new int[processorList.size()][intervalEnd-intervalStart+1];
-   for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
-systemUsageData[1][pIdx] = 
-	temp[1][processorList.nextElement()];
-   } 
+	processorList.reset();
+	systemUsageData[1] = 
+	  new int[processorList.size()][intervalEnd-intervalStart+1];
+	for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
+	  systemUsageData[1][pIdx] = 
+	    temp[1][processorList.nextElement()];
+	} 
     }
-				       
+  
 
     // wrapper method for default interval size.
     public void loadSummaryData(int intervalStart, int intervalEnd) {

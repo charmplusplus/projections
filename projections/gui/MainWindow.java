@@ -325,177 +325,96 @@ public class MainWindow extends JFrame
 	sumXAxis = null;
 	sumYAxis = null;
 	graphPanel = null;
-
+	
 	final SwingWorker worker = new SwingWorker() {
-		public Object construct() {
-		    try {
-			MainWindow.runObject[myRun].initAnalysis(newfile, thisWindow);
-		    } catch(IOException e) {
-			InvalidFileDialog ifd =
-			    new InvalidFileDialog(thisWindow);
-			ifd.setVisible(true);
-		    } catch(StringIndexOutOfBoundsException e) {
-			e.printStackTrace();
-			InvalidFileDialog ifd =
-			    new InvalidFileDialog(thisWindow);
-			ifd.setVisible(true);
+	    public Object construct() {
+	      try {
+		MainWindow.runObject[myRun].initAnalysis(newfile, 
+							 thisWindow);
+	      } catch (IOException e) {
+		InvalidFileDialog ifd =
+		  new InvalidFileDialog(thisWindow, e);
+		ifd.setVisible(true);
+	      } catch (StringIndexOutOfBoundsException e) {
+		e.printStackTrace();
+		InvalidFileDialog ifd =
+		  new InvalidFileDialog(thisWindow, e);
+		ifd.setVisible(true);
+	      }
+	      return null;
+	    }
+	    public void finished() {
+	      setTitle("Projections - " + newfile);
+	      if (MainWindow.runObject[myRun].hasSummaryData()) {
+		MainWindow.runObject[myRun].loadSummaryData();	  
+		double[] data = MainWindow.runObject[myRun].getSummaryAverageData();
+		long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
+		long bestSize =    
+		  (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);	 
+		if (bestSize != originalSize) {
+		  // if there are changes    
+		  // transform the data into absolute time first.
+		  IntervalUtils.utilToTime(data,	  
+					   (double)originalSize);
+		  double[] newdata =	       
+		    IntervalUtils.rebin(data, originalSize,	 
+					(double)bestSize);
+		  // transform the re-binned data to utilization.
+		  IntervalUtils.timeToUtil(newdata,	 
+					   (double)bestSize);	 
+		  try {
+		    dataDump = 
+		      new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
+						     "SummaryDump.out"));
+		    dataDump.println("--- Summary Graph ---");
+		    for (int i=0; i<newdata.length; i++) {
+		      dataDump.println(newdata[i]);
 		    }
-
-		    if (MainWindow.runObject[myRun].hasSummaryData()) {
-			// see "finished()"
-		    } else if (MainWindow.runObject[myRun].hasLogData()) {
-			/* (need to deal with visualization bug)
-			status = new Label("");
-			status.setBackground(Color.black);
-			status.setForeground(Color.lightGray);
-
-			hor=new ScaleSlider(Scrollbar.HORIZONTAL);
-			ver=new ScaleSlider(Scrollbar.VERTICAL);
-
-			stl = new StlPanel();
-			scalePanel=new ScalePanel(hor,ver,stl);
-			scalePanel.setStatusDisplay(thisWindow);
-			
-			OrderedIntList validPEs = 
-			    MainWindow.runObject[myRun].getValidProcessorList();
-			long startTime = 0;
-			long endTime = MainWindow.runObject[myRun].getTotalTime();
-			
-			ColorMap utilColorMap = new ColorMap();
-			utilColorMap.addBreak(0,0, 0,55, 70,255, 0,0);
-			utilColorMap.addBreak(70,255, 0,0, 100,255, 255,255);
-			// Overflow-- green. Should not happen for utilization.
-			utilColorMap.addBreak(101,0, 255,0, 255,0, 255,0); 
-			stl.setColorMap(utilColorMap);
-
-			double horSize, verSize;
-
-			Runtime rt = Runtime.getRuntime();
-			// 4 bytes per index, 500 indexs per processor
-			int memUsage = 4 * 500 * MainWindow.runObject[myRun].getNumProcessors();
-			int maxMem = (int)(rt.totalMemory() * .01 );
-			int interval = 1;
-
-			while (memUsage/interval > maxMem) {
-			    interval++;
-			}
-			if (interval > 1) {
-			    OrderedIntList tempPEs = validPEs.copyOf();
-			    int element, tmp;
-			    int count = 0;
-			    validPEs.removeAll();
-			    tempPEs.reset();
-			    
-			    while((element = tempPEs.nextElement()) != -1){
-				tmp = count / interval;
-				tmp = count - tmp*interval;
-				if(tmp == 0){
-				    validPEs.insert(element);
-				}
-				count++;
-			    }
-			}
-
-			if (validPEs == null) {
-			    horSize=MainWindow.runObject[myRun].getTotalTime();
-			    verSize=MainWindow.runObject[myRun].getNumProcessors();
-			} else {	
-			    horSize = endTime-startTime;
-			    if(horSize <= 0)
-				horSize = MainWindow.runObject[myRun].getTotalTime();
-			    verSize = (double)validPEs.size();
-			}	 
-			scalePanel.setScales(horSize,verSize);
-			
-			double hMin=scalePanel.toSlider(1.0/horSize);
-			//0.1ms fills screen
-			double hMax=scalePanel.toSlider(0.01);
-			hor.setMin(hMin); hor.setMax(hMax);
-			hor.setValue(hMin);
-			hor.setTicks(Math.floor(hMin),1);
-			
-			double vMin=scalePanel.toSlider(1.0/verSize);
-			//One processor fills screen
-			double vMax=scalePanel.toSlider(1.0);
-			ver.setMin(vMin); ver.setMax(vMax);
-			ver.setValue(vMin);
-			ver.setTicks(Math.floor(vMin),1);
-			
-			stl.setData(validPEs,startTime,endTime);
-			*/
-		    }			
-		    return null;
-		}
-
-		public void finished() {
-		    setTitle("Projections - " + newfile);
-		    if (MainWindow.runObject[myRun].hasSummaryData()) {
-			MainWindow.runObject[myRun].loadSummaryData();	  
-			double[] data = MainWindow.runObject[myRun].getSummaryAverageData();
-			long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
-			long bestSize =    
-			    (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);	 
-			if (bestSize != originalSize) {
-			    // if there are changes    
-			    // transform the data into absolute time first.
-			    IntervalUtils.utilToTime(data,	  
-						     (double)originalSize);
-			    double[] newdata =	       
-				IntervalUtils.rebin(data, originalSize,	 
-						    (double)bestSize);
-			    // transform the re-binned data to utilization.
-			    IntervalUtils.timeToUtil(newdata,	 
-						     (double)bestSize);	 
-			    try {
-				dataDump = 
-				    new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
-								   "SummaryDump.out"));
-				dataDump.println("--- Summary Graph ---");
-				for (int i=0; i<newdata.length; i++) {
-				    dataDump.println(newdata[i]);
-				}
-				dataDump.flush();
-			    } catch (IOException e) {
-				System.err.println("WARNING: " +
-						   "Failed to handle dump " +
-						   "file SummaryDump.out. " +
-						   "Reason: ");
-				System.err.println(e);
-			    }
-			    sumDataSource = new SummaryDataSource(newdata);
-			    sumXAxis =	    
-				new SummaryXAxis(newdata.length,	 
-						 (long)bestSize);	  
-			} else {		   
-			    sumDataSource = new SummaryDataSource(data);
-			    sumXAxis =	    
-				new SummaryXAxis(data.length,	 
-						 (long)(MainWindow.runObject[myRun].getSummaryIntervalSize()));
-			}			   
-			sumYAxis = new SummaryYAxis();	 
-			graphPanel =
-			    new GraphPanel(new Graph(sumDataSource, 
-						     sumXAxis, sumYAxis));
-			summaryGraphPanel.add("data", graphPanel, "run data");
-		    } else {
-		    /* (bypass the visualization problem for now)
-			summaryGraphPanel.add("data", scalePanel, "overview");
-			Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
-			Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
-			Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
-		    */
-		    }
-		    if (MainWindow.runObject[myRun].hasLogData()) {
-			menuManager.fileOpened();
-		    } else if (MainWindow.runObject[myRun].hasSummaryData()) {
-			menuManager.summaryOnly();
-		    }
-		    //		    if (MainWindow.runObject[myRun].hasPoseDopData()) {
-		    //			menuManager.addPose();
-		    //		    }
-		}
-	    };
-	    worker.start();
+		    dataDump.flush();
+		  } catch (IOException e) {
+		    System.err.println("WARNING: " +
+				       "Failed to handle dump " +
+				       "file SummaryDump.out. " +
+				       "Reason: ");
+		    System.err.println(e);
+		  }
+		  sumDataSource = new SummaryDataSource(newdata);
+		  sumXAxis =	    
+		    new SummaryXAxis(newdata.length,	 
+				     (long)bestSize);	  
+		} else {		   
+		  sumDataSource = new SummaryDataSource(data);
+		  sumXAxis =	    
+		    new SummaryXAxis(data.length,	 
+				     (long)(MainWindow.runObject[myRun].getSummaryIntervalSize()));
+		}			   
+		sumYAxis = new SummaryYAxis();	 
+		graphPanel =
+		  new GraphPanel(new Graph(sumDataSource, 
+					   sumXAxis, sumYAxis));
+		summaryGraphPanel.add("data", graphPanel, "run data");
+	      } else {
+		/* (bypass the visualization problem for now)
+		   summaryGraphPanel.add("data", scalePanel, "overview");
+		   Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
+		   Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
+		   Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
+		*/
+	      }
+	      if (MainWindow.runObject[myRun].hasLogData()) {
+		menuManager.fileOpened();
+	      } else if (MainWindow.runObject[myRun].hasSummaryData()) {
+		menuManager.summaryOnly();
+	      }
+	      /* Removed to avoid confusing readers of the manual.
+		 This is a still-being-developed feature.
+	      if (MainWindow.runObject[myRun].hasPoseDopData()) {
+		menuManager.addPose();
+	      }
+	      */
+	    }
+	  };
+	worker.start();
     }
 
     /* called by the childWindows to remove references to themselves */

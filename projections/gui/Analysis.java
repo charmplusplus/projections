@@ -135,6 +135,11 @@ public class Analysis {
 	}
       }
 
+      // Initialize Log Data
+      if (hasLogFiles()) {
+	logLoader = new LogLoader();
+      }
+
       // Build POSE dop Data
       if (hasPoseDopFiles()) {
 	dopReader = new PoseDopReader();
@@ -189,7 +194,6 @@ public class Analysis {
       }
       // From log files
       if (hasLogFiles()) {
-	logLoader = new LogLoader();
 	long temp = 
 	  logLoader.determineEndTime(getValidProcessorList(ProjMain.LOG));
 	if (temp > totalTime) {

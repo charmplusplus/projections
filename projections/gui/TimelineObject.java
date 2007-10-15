@@ -29,6 +29,8 @@ public class TimelineObject extends Component
     private double  usage;
     private float packusage;
     private long packtime;
+
+    private String tleUserEventName;
     
     private TimelineData data;
     public TimelineMessage[] messages;
@@ -76,6 +78,9 @@ public class TimelineObject extends Component
 	} else {
 	    tid = new ObjectId();
 	}
+
+	tleUserEventName = tle.userEventName;
+
 	numPapiCounts = tle.numPapiCounts;
 	papiCounts    = tle.papiCounts;
 
@@ -117,7 +122,8 @@ public class TimelineObject extends Component
 	    }
 	} else if (n >= 0) {
 	    int textIndex = 0;
-	    int textSize = 10;
+	    int textSize=10;
+	    if(tleUserEventName!=null) textSize = 11;
 	    if (numPapiCounts > 0) {
 		bubbletext = new String[textSize+numPapiCounts+1];
 	    } else {
@@ -164,6 +170,9 @@ public class TimelineObject extends Component
 	    bubbletext[textIndex++] = "Created by processor " + pCreation;
 	    bubbletext[textIndex++] = "Id: " + tid.id[0] + ":" + tid.id[1] + 
 		":" + tid.id[2];
+	    if(tleUserEventName!=null){
+		bubbletext[textIndex++] = "Associated User Event: "+tleUserEventName;
+	    }
 	    bubbletext[textIndex++] = "Recv Time: " + recvTime;
 	    if (numPapiCounts > 0) {
 		bubbletext[textIndex++] = "*** PAPI counts ***";

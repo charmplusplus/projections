@@ -3,6 +3,10 @@
 # Converted by Orion Lawlor, 9/9/1999
 # Modified by Isaac Dooley to support multiple java versions 10/15/2007
 
+# Type "make version" to see the version you are attempting to build
+# we have two sets of source code we include depending on the version of
+# javac we are using
+
 # We include an unmodified version of jnt.FFT
 # which is released under GPL, although much
 # of the jnt.FFT code is not copyrighted
@@ -444,17 +448,21 @@ SRC15=\
 # JVERSION will contain something like "1.5" or "1.3"
 
 $(shell javac -version 2> .j; javac -version >> .j)
-JVERSION :=$(shell sed 's/javac \([0-9]\)\.\([0-9]\)\.\([0-9]\)/\1\.\2/' < .j)
+JVERSION :=$(shell sed 's/javac \([0-9]\)\.\([0-9]\)\.\([0-9]\).*/\1\.\2/' < .j)
 
 # Chose the appropriate list of valid source files based on the java version
 ifeq "$(JVERSION)" "1.5"
 SRC=$(SRC15)
+JVDESC="Java 1.5"
 else ifeq "$(JVERSION)" "1.6"
 SRC=$(SRC15)
+JVDESC="Java 1.5"
 else ifeq "$(JVERSION)" "1.7"
 SRC=$(SRC15)
+JVDESC="Java 1.5"
 else
 SRC=$(SRC13)
+JVDESC="Java 1.3"
 endif
 
 
@@ -480,6 +488,9 @@ bin/projections.jar: projections/analysis/ProjMain.class $(SRC)
 
 run: bin/projections.jar
 	bin/projections test/hello.sts
+
+version:
+	@ echo "Compiling code associated with $(JVDESC)"
 
 clean:
 	@ echo "** Removing temporary files"

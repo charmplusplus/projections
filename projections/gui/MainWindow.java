@@ -297,9 +297,25 @@ public class MainWindow extends JFrame
 		    childWindows[windowIndex][0].setVisible(true);
 		}
 	    }
-	} catch(Exception e) {
-	    e.printStackTrace();
-	}
+        } 
+        catch (NoSuchMethodException e){
+          e.printStackTrace();
+        }
+        catch (InstantiationException e){
+          e.printStackTrace();
+        }
+        catch(IllegalAccessException e){
+          e.printStackTrace();
+        }
+        catch(InvocationTargetException e){
+          e.printStackTrace();
+        }
+        catch ( LinkageError e){
+          e.printStackTrace();
+        } 
+        catch ( ClassNotFoundException e){
+          JOptionPane.showMessageDialog(this, "Tool not available. You should use a different version of java(>=1.5) to compile projections.", "Tool Not Available", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     public void showOpenFileDialog()

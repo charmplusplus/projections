@@ -243,7 +243,7 @@ SRC15=$(SRC13) \
 
 #determine the version of the java compiler we are using
 # JVERSION will contain something like "1.5" or "1.3"
-JVERSION :=$(shell javac -version 2>&1 | head -n 1 | sed 's/javac \([0-9]\)\.\([0-9]\)\.\([0-9]\).*/\1\.\2/')
+JVERSION :=$(shell javac -version 2>&1 | sed -n 's/javac \([0-9]\)\.\([0-9]\)\.\([0-9]\).*/\1\.\2/p')
 
 # Chose the appropriate list of valid source files based on the java version
 ifeq "$(JVERSION)" "1.5"

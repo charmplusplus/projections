@@ -184,8 +184,6 @@ public class ComplexDoubleFFT_Mixed extends ComplexDoubleFFT{
       int m = n / factor;
       int q = n / product;
       int product_1 = product / factor;
-      int jump = (factor - 1) * product_1;
-
       double tau = sign * Math.sqrt(3.0) / 2.0;
       int di = istride * m;
       int dj = ostride * product_1;
@@ -255,7 +253,6 @@ public class ComplexDoubleFFT_Mixed extends ComplexDoubleFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
     int i = in0, j = out0;
     int di = istride * m;
     int dj = ostride * p_1;
@@ -338,7 +335,6 @@ public class ComplexDoubleFFT_Mixed extends ComplexDoubleFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
     double tau = (Math.sqrt (5.0) / 4.0);
     double sin_2pi_by_5 =  sign * Math.sin (2.0 * PI / 5.0);
     double sin_2pi_by_10 = sign * Math.sin (2.0 * PI / 10.0);
@@ -463,7 +459,6 @@ public class ComplexDoubleFFT_Mixed extends ComplexDoubleFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
     double tau = sign * Math.sqrt (3.0) / 2.0;
     int i = in0, j = out0;
     int di = istride * m;
@@ -603,7 +598,6 @@ public class ComplexDoubleFFT_Mixed extends ComplexDoubleFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
     double c1 = Math.cos(1.0 * 2.0 * PI / 7.0);
     double c2 = Math.cos(2.0 * 2.0 * PI / 7.0);
     double c3 = Math.cos(3.0 * 2.0 * PI / 7.0);

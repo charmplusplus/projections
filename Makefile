@@ -249,17 +249,20 @@ JVERSION :=$(shell javac -version 2>&1 | sed -n 's/javac \([0-9]\)\.\([0-9]\)\.\
 ifeq "$(JVERSION)" "1.5"
 SRC=$(SRC15)
 JVDESC="Java 1.5"
-else ifeq "$(JVERSION)" "1.6"
+else 
+ifeq "$(JVERSION)" "1.6"
 SRC=$(SRC15)
 JVDESC="Java 1.5"
-else ifeq "$(JVERSION)" "1.7"
+else 
+ifeq "$(JVERSION)" "1.7"
 SRC=$(SRC15)
 JVDESC="Java 1.5"
 else
 SRC=$(SRC13)
 JVDESC="Java 1.3"
 endif
-
+endif
+endif
 
 
 # And now for the real rules:

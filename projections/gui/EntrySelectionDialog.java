@@ -20,7 +20,12 @@ import javax.swing.*;
 public class EntrySelectionDialog extends ColorWindowFrame 
    implements ActionListener
 {
-    private ColorSelectable callbackTarget;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private ColorSelectable callbackTarget;
 
     // indexed by type followed by the entry point index
     private ColorPanel[][] entryPointColors;

@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class ProfileTitleCanvas extends Canvas
 {
-   FontMetrics fm;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+FontMetrics fm;
    String text1 = " ";
    String text2 = " ";
    

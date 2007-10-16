@@ -5,7 +5,11 @@ import java.io.*;
 public class ProjectionsFormatException 
     extends IOException
 {
-    private String expectedVersion;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String expectedVersion;
     private String reason;
 
     public ProjectionsFormatException(String expectedVersion, String reason) {

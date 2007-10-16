@@ -18,7 +18,12 @@ import projections.misc.*;
 public class UserEventsWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    UserEventsWindow thisWindow;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	UserEventsWindow thisWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -254,7 +259,7 @@ public class UserEventsWindow extends GenericGraphWindow
 
     public void actionPerformed(ActionEvent e) {
 	if (e.getSource() instanceof JButton) {
-	    JButton b = (JButton)e.getSource();
+//	    JButton b = (JButton)e.getSource();
         } else if (e.getSource() instanceof JMenuItem) {
             String arg = ((JMenuItem)e.getSource()).getText();
             if (arg.equals("Close")) {

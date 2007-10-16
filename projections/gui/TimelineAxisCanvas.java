@@ -6,7 +6,12 @@ import java.text.DecimalFormat;
 
 public class TimelineAxisCanvas extends Canvas
 {
-    // Temporary hardcode. This variable will be assigned appropriate
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;

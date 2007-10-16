@@ -7,7 +7,12 @@ import javax.swing.*;
 public class GraphAttributesWindow extends ColorWindowFrame
     implements ActionListener
 {
-    private GraphData data;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private GraphData data;
     
     private Checkbox[]     cbSystemUsage;
     private ColorPanel[]   cpSystemUsage;

@@ -15,10 +15,19 @@ import java.util.Vector;
 public class ScalePanel extends Panel
    implements MouseMotionListener, MouseListener
 {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	/* This is the panel type we pan, zoom, and display.
 	 * Several panels may share a child.
 	 */
 	public static class Child extends Component {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		/*Describes a single redraw*/
 		public static final class RepaintRequest {
 			public Graphics g;//Destination port

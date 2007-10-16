@@ -23,7 +23,11 @@ import projections.guiUtils.*;
 public class AmpiTimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    private AmpiTimeProfileWindow thisWindow = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private AmpiTimeProfileWindow thisWindow = null;
     private EntrySelectionDialog entryDialog = null;
 
     // Temporary hardcode. This variable will be assigned appropriate

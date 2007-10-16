@@ -13,7 +13,11 @@ import java.awt.*;
  * *******************************************/
 
 public class MainWindowPanel extends JPanel {
-    private Image bgimage = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Image bgimage = null;
 
     public MainWindowPanel(Image bgimage) {
 	this.bgimage = bgimage;

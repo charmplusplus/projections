@@ -21,7 +21,12 @@ import projections.analysis.ProjMain;
 public class PoseRangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
-    ProjectionsWindow parentWindow;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	ProjectionsWindow parentWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

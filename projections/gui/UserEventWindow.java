@@ -17,7 +17,11 @@ import projections.gui.FormattedNumber;
  */
 public class UserEventWindow extends JFrame
 {
-  Color BACKGROUND = Color.black;
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+Color BACKGROUND = Color.black;
   private Color FOREGROUND = Color.white;
 
   // set the ints to have commas in appropriate places
@@ -31,7 +35,11 @@ public class UserEventWindow extends JFrame
     new DefaultTableCellRenderer();
 
   private class NameRenderer extends DefaultTableCellRenderer {
-    private int index_;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int index_;
     public NameRenderer(int index) { index_ = index; }
     public Component getTableCellRendererComponent(
       JTable table, Object value, boolean selected, boolean focused, 
@@ -48,7 +56,11 @@ public class UserEventWindow extends JFrame
     }
 
   private class UserEventTable extends AbstractTableModel {
-    private int index_ = -1;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int index_ = -1;
 
     public UserEventTable(int i) { index_ = i; }
     public int getColumnCount() { return 4; }

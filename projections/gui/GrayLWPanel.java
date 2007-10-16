@@ -4,7 +4,12 @@ import java.awt.*;
 
 class GrayLWPanel extends LWPanel
 {
-   public void paint(Graphics g)
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+public void paint(Graphics g)
    {
 	  g.setColor(Color.lightGray);
 	  g.fillRect(0, 0, getSize().width, getSize().height);

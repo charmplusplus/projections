@@ -18,7 +18,11 @@ import projections.gui.count.*;
 public class MultiRunTables 
     extends JTabbedPane
 {
-    private MultiRunDataAnalyzer analysisModule;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private MultiRunDataAnalyzer analysisModule;
 
     /**
      *  Default constructor. Creates an empty tabbed pane. The calling

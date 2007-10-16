@@ -6,7 +6,11 @@ import java.awt.event.*;
 public class ColorSelectWindow extends Dialog
    implements AdjustmentListener, ActionListener
 {
-   private Label lRed, lGreen, lBlue;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private Label lRed, lGreen, lBlue;
    private Scrollbar sbRed, sbGreen, sbBlue;
    private DisplayCanvas displayCanvas;
    private Button bOK, bCancel;                           
@@ -19,7 +23,11 @@ public class ColorSelectWindow extends Dialog
 
    private class DisplayCanvas extends Canvas
    {
-	  private Color foreground;
+	  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Color foreground;
 	  int w, h;
 	  private FontMetrics fm;
 	  private int titleHeight;

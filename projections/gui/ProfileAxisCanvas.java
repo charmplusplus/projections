@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class ProfileAxisCanvas extends Canvas
 {
-   private ProfileData data;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private ProfileData data;
    private Image offscreen;
    private FontMetrics fm;
    private int textheight;

@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class ProfileYLabelCanvas extends Canvas
 {
-   FontMetrics fm;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+FontMetrics fm;
    String text = "%";
    
    public ProfileYLabelCanvas()

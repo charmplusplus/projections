@@ -26,7 +26,12 @@ import javax.swing.*;
 public class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
-    MultiRunWindow thisWindow;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	MultiRunWindow thisWindow;
 
     // Gui components
     private MultiRunControlPanel controlPanel;
@@ -167,7 +172,7 @@ public class MultiRunWindow extends ProjectionsWindow
 
     public void itemStateChanged(ItemEvent e) {
 	if (e.getSource() instanceof JRadioButton) {
-	    JRadioButton button = (JRadioButton)e.getSource();
+	   // JRadioButton button = (JRadioButton)e.getSource();
 	    if (e.getStateChange() == ItemEvent.SELECTED) {
 		selectedDataType = 
 		    controlPanel.getSelectedIdx(e.getItemSelectable());

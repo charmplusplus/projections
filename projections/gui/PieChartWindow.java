@@ -5,7 +5,12 @@ import java.awt.event.*;
 
 public class PieChartWindow extends Frame{
 
-    // Temporary hardcode. This variable will be assigned appropriate
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
@@ -135,7 +140,11 @@ public class PieChartWindow extends Frame{
 
 
     public class MyPanel extends Panel implements MouseMotionListener{
-        private PieChartWindow pcw;
+        /**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+		private PieChartWindow pcw;
 	
         public MyPanel(PieChartWindow pcw){
             addMouseMotionListener(this);

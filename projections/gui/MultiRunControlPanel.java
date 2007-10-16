@@ -6,7 +6,11 @@ import java.awt.*;
 
 public class MultiRunControlPanel extends JPanel
 {
-    private ButtonGroup dataTypeModes;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private ButtonGroup dataTypeModes;
     private JPanel dataTypePanel;
     private JRadioButton dataTypeButtons[];
 

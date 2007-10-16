@@ -8,7 +8,11 @@ import java.util.*;
  */
 public class CallStackManager extends Hashtable {
 
-    Stack activeStack;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	Stack activeStack;
 
     // Public interface to CallStackManager
     public void push(Object data, int id1, int id2, int id3) {

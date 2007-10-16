@@ -17,7 +17,12 @@ import projections.guiUtils.*;
 public class TimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    TimeProfileWindow thisWindow;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	TimeProfileWindow thisWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

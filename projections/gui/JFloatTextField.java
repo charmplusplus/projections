@@ -5,7 +5,11 @@ import java.awt.event.*;
 
 public class JFloatTextField extends JTextField
 {
-    private String lastValue;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String lastValue;
     int    lastCaretPosition;
     
     public JFloatTextField(float defval, int size)

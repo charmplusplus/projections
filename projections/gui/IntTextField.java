@@ -6,7 +6,11 @@ import java.awt.event.*;
 public class IntTextField extends TextField
    implements TextListener
 {
-   private String lastValue;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private String lastValue;
    int    lastCaretPosition;
    
    public IntTextField(int defval, int size)

@@ -5,7 +5,11 @@ import javax.swing.*;
 
 public class JIntTextField extends JTextField
 {
-   private String lastValue;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private String lastValue;
    int    lastCaretPosition;
    
    public JIntTextField(int defval, int size)

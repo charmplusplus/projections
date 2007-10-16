@@ -4,7 +4,11 @@ import java.awt.*;
 import javax.swing.*;
 
 public class BackGroundImagePanel extends JPanel {
-    private Image bgimage = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private Image bgimage = null;
     private boolean tile;
 
     public BackGroundImagePanel(Image bgimage, boolean tile) {

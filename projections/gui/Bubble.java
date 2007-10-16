@@ -6,7 +6,11 @@ import java.awt.event.*;
 public class Bubble extends Window
 implements MouseListener
 {
-   private FontMetrics fm;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private FontMetrics fm;
    private String[] text;
 	//private JPanel textPanel;
    //private Button closeButton;

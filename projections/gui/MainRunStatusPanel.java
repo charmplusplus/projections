@@ -20,7 +20,11 @@ import java.awt.*;
 public class MainRunStatusPanel extends JPanel 
     implements ChangeListener
 {
-    JTextField statusField;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	JTextField statusField;
     JLabel statusLabel;
 
     int tabIndex = 0;

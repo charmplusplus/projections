@@ -6,7 +6,11 @@ import java.awt.event.*;
 public class TimelineMessageWindow extends Frame
    implements ActionListener
 {
-   private TimelineObject obj;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private TimelineObject obj;
    private TimelineMessagePanel canvas;
    private ScrollPane sp;
    

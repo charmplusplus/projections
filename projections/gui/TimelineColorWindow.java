@@ -20,7 +20,12 @@ import javax.swing.JColorChooser;
 public class TimelineColorWindow extends ColorWindowFrame
    implements ActionListener
 {
-    // Temporary hardcode. This variable will be assigned appropriate
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
@@ -33,7 +38,12 @@ public class TimelineColorWindow extends ColorWindowFrame
    
    class GrayLWPanel extends LWPanel
    {
-       public void paint(Graphics g)
+       /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public void paint(Graphics g)
        {
 	   g.setColor(Color.lightGray);
 	   g.fillRect(0, 0, getSize().width, getSize().height);

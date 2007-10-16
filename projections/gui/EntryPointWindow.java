@@ -22,6 +22,11 @@ import java.text.DecimalFormat;
 public class EntryPointWindow extends JFrame implements ActionListener
 {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	// structure for storing each row
 	private class RowData{
 		Object[] value;		// actual value of the object
@@ -36,6 +41,10 @@ public class EntryPointWindow extends JFrame implements ActionListener
     		new DefaultTableCellRenderer();
 
   	private class NameRenderer extends DefaultTableCellRenderer {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		public NameRenderer() {}
     		public Component getTableCellRendererComponent(
       		JTable table, Object value, boolean selected, boolean focused,
@@ -53,6 +62,11 @@ public class EntryPointWindow extends JFrame implements ActionListener
     	}
 
   	private class EPTable extends AbstractTableModel{
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 		public EPTable() {}
 		public int getColumnCount() { return numCols; }
 		public int getRowCount() {

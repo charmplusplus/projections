@@ -8,7 +8,11 @@ import java.awt.event.*;
  *  A button that sets the "Wait" class to false when pressed. 
  *  See projections.gui.Wait for usage. */
 public class WaitButton extends JButton {
-  public WaitButton(String title, Wait w) {
+  /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+public WaitButton(String title, Wait w) {
     super(title);
     wait_ = w;
     super.addActionListener(new ActionListener() {

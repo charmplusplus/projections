@@ -4,7 +4,12 @@ import java.awt.*;
 
 public class LWPanel extends Container
 {
-   public void paint(Graphics g)
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+public void paint(Graphics g)
    {
 	  super.paint(g);
    }   

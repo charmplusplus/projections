@@ -6,7 +6,11 @@ import java.awt.*;
 public class MultiRunFileDialogControl
     extends JPanel
 {
-    // Gui components
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// Gui components
     private JLabel label;
     private JTextField field;
     private JCheckBox chkbox;

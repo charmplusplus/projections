@@ -16,7 +16,12 @@ import javax.swing.table.*;
 public class NoiseMinerWindow extends ProjectionsWindow
     implements ItemListener
 {
-    NoiseMinerWindow      thisWindow;    
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	NoiseMinerWindow      thisWindow;    
     
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

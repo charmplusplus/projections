@@ -4,7 +4,12 @@ import java.awt.*;
 
 public class ColorWindowFrame extends Dialog
 {
-   public ColorWindowFrame(Frame parent){
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+public ColorWindowFrame(Frame parent){
 	super(parent, false);		// default non (*CW*) Modal dialogbox
    }
    

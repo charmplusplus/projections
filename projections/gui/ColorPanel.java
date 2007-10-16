@@ -7,7 +7,11 @@ import java.awt.event.*;
 public class ColorPanel extends Canvas
    implements MouseListener
 {
-    private int type;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private int type;
     private int index;
 
    private int w, h;

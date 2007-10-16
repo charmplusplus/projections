@@ -16,7 +16,11 @@ public class MainSummaryGraphPanel extends JTabbedPane {
     // it is initially empty and is added to by MainWindow's open file(s)
     // menu option.
 
-    private MainWindow parent;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private MainWindow parent;
     private MainRunStatusPanel statusPanel;
     private JPanel fillerPanel;
     private boolean empty;

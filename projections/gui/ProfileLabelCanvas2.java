@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class ProfileLabelCanvas2 extends Canvas
 {
-   FontMetrics fm;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+FontMetrics fm;
    String text = "Processor Number";
    
    public ProfileLabelCanvas2()

@@ -8,7 +8,11 @@ import java.awt.event.*;
 public class TimeTextField extends TextField
    implements TextListener
 {   
-   public TimeTextField(long defval, int size)
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+public TimeTextField(long defval, int size)
    {
 	   this(U.t(defval),size);
    }   

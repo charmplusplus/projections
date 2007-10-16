@@ -17,7 +17,12 @@ import projections.analysis.*;
 public class PoseAnalysisWindow extends ProjectionsWindow
     implements ActionListener
 {
-    PoseAnalysisWindow thisWindow;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	PoseAnalysisWindow thisWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

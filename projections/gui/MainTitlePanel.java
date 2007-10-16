@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class MainTitlePanel extends Component
 { 
-   private FontMetrics fm;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private FontMetrics fm;
    private int sw, sh;
    private String s;
    

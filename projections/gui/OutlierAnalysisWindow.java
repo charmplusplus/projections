@@ -21,7 +21,12 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
     implements ActionListener, ItemListener, ColorSelectable,
 	       Clickable
 {
-    OutlierAnalysisWindow thisWindow;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	OutlierAnalysisWindow thisWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

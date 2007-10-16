@@ -10,7 +10,12 @@ import java.text.*;
 public class TimelineWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener, ItemListener
 { 
-    // Temporary hardcode. This variable will be assigned appropriate
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
@@ -111,6 +116,11 @@ public class TimelineWindow extends ProjectionsWindow
     
     class NoUpdatePanel extends Panel
     {
+	/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
+
 	public void update(Graphics g) { paint(g); }
     }      
     

@@ -6,7 +6,11 @@ import java.awt.event.*;
 class MyButton extends Component
    implements MouseListener
 {
-   private String text;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private String text;
    private FontMetrics fm;
    private boolean highlighted = false;
    private boolean pressed = false;

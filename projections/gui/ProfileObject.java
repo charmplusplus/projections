@@ -8,7 +8,11 @@ import java.text.*;
 public class ProfileObject extends Component
    implements MouseListener
 {
-   private float usage;
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+private float usage;
    private String name;
    private String[] bubbletext;
    private Bubble bubble;

@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class AnimationColorBarPanel extends Panel
 {
-    private float MAXHUE = (float)0.65;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private float MAXHUE = (float)0.65;
     private FontMetrics fm;
     private int textwidth0;
     private int textwidth100;

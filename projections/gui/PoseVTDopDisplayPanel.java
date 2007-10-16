@@ -8,7 +8,11 @@ import javax.swing.*;
 public class PoseVTDopDisplayPanel extends JPanel
     implements PopUpAble
 {
-    private GraphPanel graphPanel;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private GraphPanel graphPanel;
     private JPanel controlPanel;
     private Graph graph;
     

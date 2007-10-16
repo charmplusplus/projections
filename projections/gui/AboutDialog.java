@@ -5,7 +5,12 @@ import java.awt.event.*;
 
 class AboutDialog extends Dialog
 {
-   public AboutDialog(Frame parent)
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+public AboutDialog(Frame parent)
    {
 	  super(parent, "About Projections", true);
 	  

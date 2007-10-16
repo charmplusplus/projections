@@ -3,7 +3,11 @@ import java.text.NumberFormat;
 
   /** To enable the correct format for both int and scientific. */
   public class FormattedNumber extends Number {
-    double       number;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	double       number;
     NumberFormat format;
     public FormattedNumber(double d, NumberFormat f) {
       number = d;

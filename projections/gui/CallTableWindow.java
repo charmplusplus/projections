@@ -9,7 +9,12 @@ import projections.analysis.*;
 public class CallTableWindow extends ProjectionsWindow
     implements ItemListener
 {
-    CallTableWindow      thisWindow;    
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	CallTableWindow      thisWindow;    
     
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

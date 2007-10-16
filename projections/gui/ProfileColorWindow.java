@@ -4,7 +4,11 @@ import java.awt.*;
 
 public class ProfileColorWindow extends Dialog 
 {
-   public ProfileColorWindow(Frame parent,ProfileData data)
+   /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+public ProfileColorWindow(Frame parent,ProfileData data)
    {
 	  super(parent);
    }   

@@ -14,7 +14,12 @@ import projections.gui.graph.*;
 public class MainWindow extends JFrame
     implements ScalePanel.StatusDisplay
 {
-    /* **** Temporary hardcode for the number of runs supported
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	/* **** Temporary hardcode for the number of runs supported
        in Projections **** */
     protected static final int NUM_RUNS = 1;
 

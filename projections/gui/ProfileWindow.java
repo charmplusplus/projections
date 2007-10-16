@@ -15,7 +15,12 @@ import projections.analysis.*;
 public class ProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
-    private static final int NUM_SYS_EPS = 3;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	private static final int NUM_SYS_EPS = 3;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

@@ -10,7 +10,11 @@ import projections.analysis.*;
 public class LogFileViewerWindow extends ProjectionsWindow
    implements ActionListener
 {
-    // LogFileViewerWindow is another tool that uses its own dialog.
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	// LogFileViewerWindow is another tool that uses its own dialog.
     private LogFileViewerDialog dialog;
     private int logfilenum = -1;
     private int oldlogfilenum = -1;

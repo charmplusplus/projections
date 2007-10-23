@@ -113,6 +113,17 @@ public class Analysis {
       baseName = FileUtils.getBaseName(filename);
       logDirectory = FileUtils.dirFromFile(filename);
       sts = new StsReader(filename);
+      
+      // Version Check (Kind of a hack, since the format of the Sts file
+      // can change between versions.
+      if (sts.getVersion() > MainWindow.CUR_VERSION) {
+	System.err.println("Projections Version [" + MainWindow.CUR_VERSION +
+			   "] unable to handle files of Version [" +
+			   sts.getVersion() + "].");
+	System.err.println("Exiting.");
+	System.exit(-1);
+      }
+
       rcReader = 
 	new ProjectionsConfigurationReader(filename);
       FileUtils.detectFiles(sts, logDirectory, baseName);

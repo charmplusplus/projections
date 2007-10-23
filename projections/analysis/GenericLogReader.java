@@ -190,6 +190,9 @@ public class GenericLogReader extends ProjectionsReader
 		    lastBeginEvent.id[1] = data.id[1] = reader.nextInt();
 		    lastBeginEvent.id[2] = data.id[2] = reader.nextInt();
 		}
+		if (version >= 7.0) {
+		  lastBeginEvent.id[3] = data.id[3] = reader.nextInt();
+		}
 		if (version >= 6.5) {
 		    lastBeginEvent.cpuStartTime = data.cpuStartTime = 
 			reader.nextLong();

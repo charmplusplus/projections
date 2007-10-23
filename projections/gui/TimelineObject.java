@@ -173,8 +173,15 @@ public class TimelineObject extends Component
 	    }
 	    bubbletext[textIndex++] = "Msgs created: " + msgs.length;
 	    bubbletext[textIndex++] = "Created by processor " + pCreation;
-	    bubbletext[textIndex++] = "Id: " + tid.id[0] + ":" + tid.id[1] + 
-		":" + tid.id[2];
+	    // if anything in the id field is -1, then it is not an
+	    // array object ... indicate so.
+	    if (tid.id[0] == -1 || tid.id[1] == -1 ||
+		tid.id[2] == -1 || tid.id[3] == -1) {
+	      bubbletext[textIndex++] = "Id: Chare obj, no id";
+	    } else {
+	      bubbletext[textIndex++] = "Id: " + tid.id[0] + ":" + tid.id[1] + 
+		":" + tid.id[2] + ":" + tid.id[3];
+	    }
 	    if(tleUserEventName!=null){
 		bubbletext[textIndex++] = "Associated User Event: "+tleUserEventName;
 	    }

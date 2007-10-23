@@ -13,7 +13,11 @@ import projections.gui.MainWindow;
 public class ProjMain {
 
     // ** System-level variables ** 
-    public static double CUR_VERSION = 4.0;
+    // CUR_VERSION indicates what logs this version of Projections
+    // is capable of reading. Any logs that are of a higher version
+    // cannot be read and this will be indicated by an unrecoverable
+    // error when attempted.
+    public static double CUR_VERSION = 7.0;
     public static boolean IGNORE_IDLE = false;
     public static boolean BLUEGENE = false;
     public static int BLUEGENE_SIZE[] = new int[3];

@@ -46,7 +46,7 @@ class LogEntry
 	log.MsgLen = data.msglen;
 	log.sendTime = data.sendTime;
 	log.recvTime = data.recvTime;
-	log.id = new ObjectId(data.id[0],data.id[1],data.id[2]);
+	log.id = new ObjectId(data.id[0],data.id[1],data.id[2],data.id[3]);
 
 	log.numPEs = data.numPEs;
 

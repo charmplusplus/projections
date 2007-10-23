@@ -32,6 +32,7 @@ public class LogEntryData
     public long recvTime;       // the time the processor *actually* received
                                 // the message.
     public int id[];            // the thread id (3D array tuple).
+                                // as of ver 7.0, it is a 4-tuple
 
     public long cpuStartTime;   // start of cpu timer
     public long cpuEndTime;     // end of cpu timer
@@ -43,7 +44,8 @@ public class LogEntryData
 
     public LogEntryData() {
 	// this is fixed (since it is based on a 3D tuple)
-	id = new int[3];
+        // As of version 7.0, it is a 4-tuple which includes array ID.
+	id = new int[4];
     }
 
     // 9/14/2004 - added AMPI Function tracing support
@@ -66,6 +68,7 @@ public class LogEntryData
 	temp.id[0] = id[0];
 	temp.id[1] = id[1];
 	temp.id[2] = id[2];
+	temp.id[3] = id[3];
 	temp.cpuStartTime = cpuStartTime;
 	temp.cpuEndTime = cpuEndTime;
 	temp.numPerfCounts = numPerfCounts;

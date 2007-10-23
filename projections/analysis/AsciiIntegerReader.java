@@ -97,13 +97,20 @@ class AsciiIntegerReader {
     }
 
 	//Read a positive long from the current file 
+        //With version 7.0, negative numbers have to be
+        //  properly handled as well.
 	final public long nextLong() throws IOException {
-		char c;
-		while (isSpace(c=nextChar())) {}
-		long ret=toDigit(c);
-		while (!isSpace(last=c=nextChar())) 
-			ret=10*ret+toDigit(c);
-			return ret;
+	  int multiplier = 1;
+	  char c;
+	  while (isSpace(c=nextChar())) {}
+	  if (c == '-') {
+	    multiplier = -1;
+	    last=c=nextChar();
+	  }
+	  long ret=toDigit(c);
+	  while (!isSpace(last=c=nextChar())) 
+	    ret=10*ret+toDigit(c);
+	  return ret*multiplier;
 	}
 	//Read a whitespace-separated string
 	public String nextString() throws IOException {

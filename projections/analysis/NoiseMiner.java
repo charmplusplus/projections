@@ -164,6 +164,7 @@ public class NoiseMiner extends ProjDefs
 
 	}
 	
+	/** A resulting cluster of noise occurrences */
 	private class NoiseResult implements Comparable{
 		public LinkedList<Integer> pes; // list of processors on which the event occurs
 		public Duration periodicity; // The average period determined by the span of the window
@@ -278,6 +279,7 @@ public class NoiseMiner extends ProjDefs
 			prominentPeriod = new Duration();
 		}
 
+		/** Need to keep track of the time, duration, and event id, PE of the event, not just the time */
 		public void insert(long t){
 			occurrences.add(t);
 			if(occurrences.size() > max){

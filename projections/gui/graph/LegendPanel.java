@@ -8,7 +8,11 @@ import javax.swing.*;
 public class LegendPanel 
     extends JPanel
 {
-    private LegendCanvas canvas;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private LegendCanvas canvas;
     private JScrollPane sp;
 
     private JPanel buttonPanel;

@@ -8,7 +8,11 @@ import java.awt.event.*;
 public class LegendCanvas extends Canvas
     implements MouseListener, ActionListener
 {
-    private String labels[] = null;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String labels[] = null;
     private Color colorMap[] = null;
 
     private int sortMap[] = null;

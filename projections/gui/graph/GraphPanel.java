@@ -8,7 +8,12 @@ import javax.swing.*;
 public class GraphPanel extends JPanel
     implements ActionListener, ItemListener
 {
-    // Temporary hardcode. This variable will be assigned appropriate
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
     static int myRun = 0;

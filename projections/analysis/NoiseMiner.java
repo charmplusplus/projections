@@ -171,12 +171,13 @@ public class NoiseMiner extends ProjDefs
 		//public Duration periodicity_FFT; // The primary peak in the FFT
 		public Duration duration; // The amount of time spend in the noise
 		public long occurrences; // The number of times this event occurred per processor
-
-		public NoiseResult(Duration d, long o, Duration p,/* Duration p_fft,*/ int pe){
+		public eventWindow ew; 
+		
+		
+		public NoiseResult(Duration d, long o, Duration p, int pe, eventWindow ew){
 			pes = new LinkedList<Integer>();
-			periodicity = new Duration();
-			//periodicity_FFT = new Duration();
-			duration = new Duration();
+
+			this.ew = ew;
 			
 			pes.add(pe);
 			periodicity = p;
@@ -267,30 +268,30 @@ public class NoiseMiner extends ProjDefs
 	 *
 	 */
 	private class eventWindow{
-		public TreeSet<Long> occurrences; // essentially a sorted list or heap
+		public TreeSet<TimelineEvent> occurrences; // essentially a sorted list or heap
 		private int max;
 		protected Duration period;
 		protected Duration prominentPeriod;
 
 		eventWindow(int maxSize){
-			occurrences = new TreeSet<Long>();
+			occurrences = new TreeSet<TimelineEvent>();
 			max = maxSize;
 			period = new Duration();
 			prominentPeriod = new Duration();
 		}
 
 		/** Need to keep track of the time, duration, and event id, PE of the event, not just the time */
-		public void insert(long t){
-			occurrences.add(t);
+		public void insert(TimelineEvent e){
+			occurrences.add(e);
 			if(occurrences.size() > max){
 				occurrences.remove(occurrences.first());
 			}
 		}
 
 		public void merge(eventWindow ew){
-			Iterator<Long> itr = ew.occurrences.iterator();
+			Iterator<TimelineEvent> itr = ew.occurrences.iterator();
 			while(itr.hasNext()){
-				Long v = itr.next();
+				TimelineEvent v = itr.next();
 				occurrences.add(v);
 				if(occurrences.size() > max){
 					occurrences.remove(occurrences.first());
@@ -302,18 +303,18 @@ public class NoiseMiner extends ProjDefs
 			return occurrences.size();
 		}
 
-		public long getFirst(){
+		public TimelineEvent getFirst(){
 			return occurrences.first();
 		}
 
-		public long getLast(){
+		public TimelineEvent getLast(){
 			return occurrences.last();
 		}
 
 		/** find the average period between the events in the window */
 		public Duration period(){
 			Duration d = new Duration();
-			d.set_us((getLast()-getFirst()) / occurrences.size());
+			d.set_us((getLast().BeginTime-getFirst().BeginTime) / occurrences.size());
 			return d;
 		}
 		
@@ -488,7 +489,7 @@ public class NoiseMiner extends ProjDefs
 		public Cluster nthNoise(int n){
 			return clustersNormalized.get(n);
 		}
-		public boolean hasnthNoise(int n){
+		public boolean hasNthNoiseComponent(int n){
 			return (clustersNormalized.size()>n);
 		}
 
@@ -513,7 +514,8 @@ public class NoiseMiner extends ProjDefs
 			}
 		}
 
-		public void insert(Duration duration, long when){
+		public void insert(TimelineEvent event) {
+			Duration duration = new Duration(event.EndTime-event.BeginTime);
 			used=true;
 			total_count ++;
 			total_sum.add(duration);
@@ -524,27 +526,27 @@ public class NoiseMiner extends ProjDefs
 			if(which_bin >= 0){
 				bin_count[which_bin] ++;
 				bin_sum[which_bin].add(duration);
-				bin_window[which_bin].insert(when);
+				bin_window[which_bin].insert(event);
 			}
 		}
 
 
-		public void insert(Duration duration, long when, long occurrences){
-			if(occurrences > 0){
-				used=true;
-				total_count += occurrences;
-				total_sum.add_us(duration.us()*occurrences);
-				int which_bin = (int)(duration.us() / binWidth.us());
-				if(which_bin > nbins-1){
-					which_bin = nbins-1;
-				}
-				if(which_bin >= 0){
-					bin_count[which_bin] +=occurrences;
-					bin_sum[which_bin].add_us(duration.us()*occurrences);
-					bin_window[which_bin].insert(when);
-				}
-			}
-		}
+//		public void insert(Duration duration, long when, long occurrences){
+//			if(occurrences > 0){
+//				used=true;
+//				total_count += occurrences;
+//				total_sum.add_us(duration.us()*occurrences);
+//				int which_bin = (int)(duration.us() / binWidth.us());
+//				if(which_bin > nbins-1){
+//					which_bin = nbins-1;
+//				}
+//				if(which_bin >= 0){
+//					bin_count[which_bin] +=occurrences;
+//					bin_sum[which_bin].add_us(duration.us()*occurrences);
+//					bin_window[which_bin].insert(when);
+//				}
+//			}
+//		}
 
 		/**  Insert a cluster to this histogram, including its event window. Put the whole cluster into the
 		 *   bin matching the cluster mean
@@ -776,8 +778,10 @@ public class NoiseMiner extends ProjDefs
 		int currPeIndex = 0;
 		int currPe;
 
-		long previous_time=-1;
-		int  previous_entry=-1;
+		long previous_begin_time=-1;
+		long previous_end_time=-1;
+		int  previous_begin_entry=-1;
+		int  previous_end_entry=-1;
 
 		ProgressMonitor progressBar = new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
 
@@ -816,14 +820,15 @@ public class NoiseMiner extends ProjDefs
 					//Go through each log file and for each Creation
 					//  in a Processing Block, update arrays
 					if(logdata.type == BEGIN_PROCESSING){
-						previous_time = logdata.time;
-						previous_entry = logdata.entry;
+						previous_begin_time = logdata.time;
+						previous_begin_entry = logdata.entry;
 
 					} else if(logdata.type == END_PROCESSING){
 						// if we have seen the matching BEGIN_PROCESSING
-						if(previous_entry == logdata.entry){
-							Duration duration = new Duration(previous_time,logdata.time);
-							h[logdata.entry].insert(duration, previous_time);
+						if(previous_begin_entry == logdata.entry){
+
+							h[logdata.entry].insert(new TimelineEvent(previous_begin_time,logdata.time,-1,logdata.pe));
+							
 							total_count++;
 						}
 					}
@@ -880,20 +885,22 @@ public class NoiseMiner extends ProjDefs
       //      h_pe.filterNormalizedClusters(0.0001);
 
 			int n = 1;
-			while(h_pe.hasnthNoise(n)){
+			while(h_pe.hasNthNoiseComponent(n)){
 //				h_pe.nthNoise(n).events.buildFFT();
 
+				eventWindow ew = h_pe.nthNoise(n).events;
+				
 				long occurrences = h_pe.nthNoise(n).count();
 				
 				Duration duration = h_pe.nthNoise(n).mean();
 				
-				Duration periodicity = h_pe.nthNoise(n).events.period();
-//				Duration periodicity_fft = h_pe.nthNoise(n).events.periodFromFFT();
+				Duration periodicity = ew.period();
+//				Duration periodicity_fft = ew.periodFromFFT();
 				
 				if(occurrences > 5){
 					loggingText = loggingText + "Noise component " + n + " on processor " + currPe + " has duration of about " + duration + " and occurs " + occurrences + " times with periodicity " + periodicity + "\n";
 
-					results.add(new NoiseResult(duration, occurrences, periodicity, /* periodicity_fft,*/ currPe));
+					results.add(new NoiseResult(duration, occurrences, periodicity, /* periodicity_fft,*/ currPe, ew));
 				}
 
 				n++;
@@ -937,7 +944,8 @@ public class NoiseMiner extends ProjDefs
 				row.add(new String("" + v.occurrences ));
 				row.add(new String("" + v.periodicity));
 //				row.add(new String("" + v.periodicity_FFT));
-
+//				row.add(new JButton("Test")); // button to go here
+				
 				resultTable.add(row);
 			}
 		}

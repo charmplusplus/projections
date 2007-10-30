@@ -50,7 +50,7 @@ public class NoiseMinerWindow extends ProjectionsWindow
     
     NoiseMiner			noiseMiner;
     
-    void windowInit() {
+    protected void windowInit() {
     }
 
     public NoiseMinerWindow(MainWindow parentWindow, Integer myWindowID) {
@@ -66,6 +66,7 @@ public class NoiseMinerWindow extends ProjectionsWindow
 		columnNames.add(new String("Occurrences/PE"));
 		columnNames.add(new String("Periodicity")); 
 //		columnNames.add(new String("Periodicity from FFT(ms)"));
+//		columnNames.add(new String("")); // buttons go here
 
 		
 		mainText = new JTextArea("", 4, 30); // height, width
@@ -152,13 +153,16 @@ public class NoiseMinerWindow extends ProjectionsWindow
     	externalPanel.add(resultTableExternal, BorderLayout.CENTER );
     	externalPanel.add(descriptionExternal, BorderLayout.NORTH );
     	
-    	
+//    	NoiseMinerTimelinesView timelinesPanel = new NoiseMinerTimelinesView();
+ 
+   
       /* Setup our tabbed Pane at the top. Add this pane to the main applet Content Pane.  */
       JTabbedPane tabbedPane = new JTabbedPane();
       tabbedPane.addTab("Internal Noise", internalPanel);
       tabbedPane.addTab("External OS Noise", externalPanel);
+//      tabbedPane.addTab("Representative Timelines", timelinesPanel);
       
-    	
+    		
     	noiseMinerResultPanel.setLayout(new java.awt.BorderLayout());
     	noiseMinerResultPanel.add(mainTextScroller, BorderLayout.SOUTH );
     	noiseMinerResultPanel.add(tabbedPane, BorderLayout.CENTER );

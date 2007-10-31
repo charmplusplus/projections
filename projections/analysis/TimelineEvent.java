@@ -1,8 +1,9 @@
 package projections.analysis;
 
 import java.util.*;
+import java.lang.Comparable;
 
-public class TimelineEvent
+public class TimelineEvent implements Comparable
 {
  
 public long BeginTime, EndTime, RecvTime;
@@ -90,5 +91,9 @@ public void addPack(PackTime p)
 {
 	if (PackTimes==null) PackTimes=new Vector();
 	PackTimes.addElement(p);
+}
+
+public int compareTo(Object o) {
+	return (int)(this.BeginTime - ((TimelineEvent)o).BeginTime );
 }
 }

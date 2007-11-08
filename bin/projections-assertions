@@ -1,0 +1,16 @@
+#!/bin/sh
+
+jarpath="`dirname $0`/projections.jar"
+
+if test -x /usr/bin/cygpath
+then 
+  if test "`uname -o`" = "Cygwin"
+  then
+    jarpath=`/usr/bin/cygpath -w -a $jarpath`
+  fi 
+fi
+
+java -enableassertions \
+  -ms256000000 -mx1000000000 \
+  -classpath $jarpath \
+  projections.analysis.ProjMain $*

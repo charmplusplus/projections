@@ -5,13 +5,44 @@ import java.util.Vector;
 import javax.swing.*;
 import java.awt.Font;
 import java.awt.Color;
-import java.awt.Dimension;
 import projections.analysis.*;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
 import projections.gui.Util;
 import projections.misc.*;
+
+
+/**
+ * This class is responsible for providing information on what should be visualized:
+ * 		-- The time range
+ *  	-- The scale factor(used when zooming)
+ * 		-- The list of processors for which we draw timelines
+ * 		-- An array of the objects that are to be displayed
+ *      -- Information about entry method names
+ *      -- whether idle time is displayed
+ *      -- whether user events are displayed
+ *      -- A set of lines representing message sends
+ *      -- Various margins/offsets/insets used when painting
+ * 		-- A selection and highlight
+ * 
+ *  Style information is also to be found here
+ * 		-- Colors for the background/foreground
+ * 		-- Fonts to be used for the axis and labels
+ *
+ *  Also many utility functions are here:
+ *      -- Conversions between screen coordinates and times
+ *  	-- Handling user selections/highlights
+ *  
+ *  Additionally some screwy things are here.
+ *  
+ *  
+ *  This class requires a handler(which implements an appropriate interface) be provided. This
+ *  handler is used when things change enough that a repaint or re-layout is required
+ * 
+ * @author idooley et. al.
+ *
+ */
 
 public class Data
 {
@@ -62,6 +93,8 @@ public class Data
 
 	public Vector [] oldmesgVector;
 
+	// TODO: this array doesn't really have a right to exist here
+	// remove it or free it at some point
 	UserEventObject[][] timelineUserEventObjectsArray = null;
 
 	float[] processorUsage;

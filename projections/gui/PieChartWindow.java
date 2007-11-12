@@ -268,7 +268,7 @@ public class PieChartWindow extends Frame{
 		    
 		    bString[1] = "usage: " +data[currArcIndex] +"%";
 		    
-		    Rectangle bounds = (displayPanel.getGraphicsConfiguration()).getBounds();
+//		    Rectangle bounds = (displayPanel.getGraphicsConfiguration()).getBounds();
 		    bubble = new Bubble(displayPanel, bString);
 		    bubble.setLocation(new Point(x,y));
 		    bubble.setVisible(true);

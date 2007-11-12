@@ -26,7 +26,9 @@ public class GraphDisplayCanvas extends Canvas
    {
 	  int h = getSize().height;
 	  
-	  int element, count, y = 0;
+	  int element;
+//	  int count;
+	  int y = 0;
 
 	  if (data.xmode == GraphData.PROCESSOR) {
 	      y = item.curPData[x];
@@ -156,13 +158,13 @@ public class GraphDisplayCanvas extends Canvas
 
     private void drawItemLine(Graphics g, ZItem item)
     {
-	int element, count, x1, x2, y1, y2;
+	int element, x1, x2, y1, y2;
 	g.setColor(item.color);
 	x1 = y1 = -1;
 	
 	int h = getSize().height;
 	for (int x=data.minx; x<= data.maxx; x++) {
-	    count = 0;
+	   
 	    x2 = data.offset3 + (int)(x * data.xscale);
 	    
 	    if (data.xmode == GraphData.PROCESSOR) {

@@ -2,8 +2,6 @@ package projections.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.Iterator;
@@ -12,8 +10,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
-
 import projections.analysis.TimelineEvent;
 import projections.analysis.NoiseMiner.EventWindow;
 import projections.analysis.NoiseMiner.NoiseResult;

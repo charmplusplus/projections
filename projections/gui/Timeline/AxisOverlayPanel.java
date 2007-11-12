@@ -2,18 +2,10 @@
 package projections.gui.Timeline;
 
 import java.awt.event.*;
-import java.text.DecimalFormat;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Dimension;
-
 import javax.swing.*;
 import java.awt.Cursor;
-import java.awt.FontMetrics;
-import java.awt.Point;
-import projections.gui.Rubberband;
-import projections.gui.RubberbandHorizontalZoom;
 
 /** A class that handles the mouse events and painting of a user selection over the axis */
 public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMotionListener

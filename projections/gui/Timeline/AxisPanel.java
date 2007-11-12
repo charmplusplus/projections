@@ -1,16 +1,11 @@
 package projections.gui.Timeline;
 
-import java.awt.event.*;
 import java.text.DecimalFormat;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Dimension;
-import java.awt.RenderingHints;
-
 import javax.swing.*;
 import java.awt.FontMetrics;
-import java.awt.Point;
 
 public class AxisPanel extends JPanel 
 {

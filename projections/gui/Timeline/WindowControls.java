@@ -72,13 +72,11 @@ ItemListener {
 
 		CreateLayout();
 
-		System.out.println("Creating userEventWindow\n");
 		userEventWindow = new UserEventWindow(cbUser);
 
 	}
 
 	public void showDialog() {
-		System.out.println("showDialog()");
 
 		if (parentWindow.dialog == null) {
 			parentWindow.dialog = new RangeDialog(parentWindow,
@@ -113,7 +111,6 @@ ItemListener {
 	}
 
 	public void setHighlightTime(double time) {
-		// System.out.println(time);
 		highlightTime.setText(format.format(time));
 	}
 
@@ -146,12 +143,10 @@ ItemListener {
 
 
 	public void zoomSelected() {
-		System.out.println("Zoom Selected");
 		if (data.selectionValid()) {
 			double selectionStartTime = data.leftSelectionTime();
 			double selectionEndTime = data.rightSelectionTime();
 
-			System.out.println("startTime="+selectionStartTime+" endTime="+selectionEndTime);
 			unsetSelectedTime();
 					
 			data.setScaleFactor( (float) ((data.endTime() - data.beginTime()) / (selectionEndTime -
@@ -164,14 +159,11 @@ ItemListener {
 
 	/** Load a new time region */
 	public void loadSelected() {
-		System.out.println("loadSelected");
 		if (data.selectionValid()) {
 			
 	
 			double startTime = data.leftSelectionTime();
 			double endTime = data.rightSelectionTime();
-			System.out.println("startTime="+startTime+" endTime="+endTime);
-
 			
 			data.invalidateSelection();
 			unsetSelectedTime();
@@ -183,12 +175,10 @@ ItemListener {
 				endTime = data.endTime();
 			}
 
-			System.out.println("calling setNewRange("+(long)(startTime+0.5)+","+(long)(endTime+0.5)+")");
 			data.setNewRange((long)(startTime+0.5),(long)(endTime+0.5));
 
 			scaleField.setText("" + 1.0);	
-			
-			System.out.println("Calling loadTimelineObjects()");
+
 			parentWindow.mainPanel.loadTimelineObjects(true);
 			
 			cbUser.setText("View User Events (" + data.getNumUserEvents() + ")");
@@ -236,7 +226,6 @@ ItemListener {
 		// If the event is a menu action
 		
 		if (evt.getSource() instanceof JMenuItem) {
-			System.out.println("JMenuItem Event");
 			String arg = ((JMenuItem) evt.getSource()).getText();
 			if (arg.equals("Close"))
 				parentWindow.close();
@@ -385,7 +374,6 @@ ItemListener {
 	}
 
 	private void CreateLayout() {
-		System.out.println("CreateLayout() for TimelineWindowController\n");
 
 		// // CHECKBOX PANEL
 		cbPacks = new JCheckBox("Display Pack Times", data.showPacks);

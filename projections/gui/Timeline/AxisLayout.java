@@ -24,7 +24,6 @@ public class AxisLayout implements LayoutManager {
 	
 	/** Layout that respects the size of the parent container */
 	public AxisLayout(Data data, JPanel sizingPanel) {
-		System.out.println("*** AxisLayout constructor");
 		this.sizingPanel = sizingPanel;
 		this.data = data;
 	}
@@ -43,8 +42,6 @@ public class AxisLayout implements LayoutManager {
 	 * of applets, at least, they probably won't be.
 	 */
 	public void layoutContainer(Container parent) {
-
-		System.out.println("*** AxisLayout layoutContainer()");
 		
 		int width;
 		int height;
@@ -54,13 +51,8 @@ public class AxisLayout implements LayoutManager {
 		width = parent.getWidth() - (insets.left + insets.right);
 		height = parent.getHeight() - (insets.top + insets.bottom);
 	
-		System.out.println("Layout AxisPanel to size "+width+"x"+height);
-	
 		
 		// The whole panel size is here:
-//		int scaledWidth = data.scaledScreenWidth(width); //a step behind the current resize???
-//		
-//		System.out.println("Layout AxisPanel to size "+scaledWidth+"x"+height);
 
 		int nComps = parent.getComponentCount();
 		
@@ -72,12 +64,10 @@ public class AxisLayout implements LayoutManager {
 	}
 
 	public Dimension minimumLayoutSize(Container parent) {
-		System.out.println("*** AxisLayout minimumLayoutSize()");
 		return sizingPanel.getPreferredSize();
 	}
 
 	public Dimension preferredLayoutSize(Container parent) {
-		System.out.println("*** AxisLayout preferredLayoutSize()");
 		return sizingPanel.getPreferredSize();
 	}
 

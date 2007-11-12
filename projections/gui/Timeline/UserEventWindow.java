@@ -93,7 +93,6 @@ public class UserEventWindow extends JFrame
 	}
 
 	public void setData(Data data) { 
-		System.out.println("UserEventWindow setData()");
 
 		events_ = data.timelineUserEventObjectsArray;
 		// create the layout here
@@ -135,7 +134,6 @@ public class UserEventWindow extends JFrame
 	public UserEventWindow(JCheckBox c) { 
 
 		super("User Event Window");
-		System.out.println("Constructing UserEventWindow");
 
 		if (format_ == null) {
 			format_ = new DecimalFormat();
@@ -143,7 +141,6 @@ public class UserEventWindow extends JFrame
 		}
 		rightJustify_.setHorizontalAlignment(JLabel.RIGHT);
 		checkbox_ = c;
-		System.out.println("Calling setSize");
 		setSize(480, 400);
 		tabbedPane_ = new JTabbedPane();
 

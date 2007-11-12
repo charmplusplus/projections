@@ -41,11 +41,8 @@ public class MainPanel extends JPanel  implements Scrollable{
 	
 	/** Used when painting an Image manually */
 	public void paintComponentWithChildren(Graphics g){
-		System.out.println("Painting the MainPanel");
 		paintComponent(g);
-		System.out.println("Painting " + this.getComponentCount() + " children");
-		paintChildren(g);
-		
+		paintChildren(g);		
 	}
 
 	/** Paint the panel, filling the entire panel's width */
@@ -54,8 +51,6 @@ public class MainPanel extends JPanel  implements Scrollable{
 		super.paintComponent(g);
 		
 		int width = getWidth();
-		
-		System.out.println("PaintComponent() MainPanel size="+getWidth()+"x"+getHeight());
 		
 		g.setColor(data.getBackgroundColor());
 		Rectangle clipBounds = g.getClipBounds();
@@ -149,8 +144,6 @@ public class MainPanel extends JPanel  implements Scrollable{
 	 * @note This was formerly called procRangeDialog()
 	 */
 	public void loadTimelineObjects(boolean keeplines) {
-
-//		System.out.println("loadTimelineObjects()");
 		
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.
@@ -160,14 +153,10 @@ public class MainPanel extends JPanel  implements Scrollable{
 		data.createTLOArray();
 
 		// Add the entry method (EntryMethodObject)
-//		System.out.println("data.numPs="+data.numPs());
 		for (int p = 0; p < data.numPs(); p++) {
-//			System.out.println("data.tloArray["+p+"].length="+data.tloArray[p].length);
-
 			for (int i = 0; i < data.tloArray[p].length; i++){
 				data.tloArray[p][i].setWhichTimeline(p);
 				this.add(data.tloArray[p][i]);
-//				System.out.println("Adding an object");
 			}
 		}
 

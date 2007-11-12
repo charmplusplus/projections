@@ -187,17 +187,21 @@ public class Data
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		entryColor = MainWindow.runObject[myRun].getColorMap();
 
-		labelFont = new Font("SansSerif", Font.PLAIN, 10); 
+		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
 
 	}
-	/** Currently called from Window:addProcessor() from EntryMethodObject upon clicking to draw the "message sent" 
-	 * line when a prcossor is not yet loaded 
+	/** 
+	 * Add the data for a new processor to this visualization
 	 */
 	public void addProcessor(int pCreation){
 		oldplist = processorList.copyOf();
 		processorList.insert(pCreation);
-		displayMustBeRedrawn();
+		
+		System.out.println("processorList="+processorList);
+		processorList.printList();
+
+		modificationHandler.notifyProcessorListHasChanged();
 	}
 
 	/** Change the font sizes used */
@@ -235,7 +239,7 @@ public class Data
 	}
 
 	/****************** Timeline ******************/
-	public Vector createTL(int p, long bt, long et, 
+	private Vector createTL(int p, long bt, long et, 
 			Vector timelineEvents, Vector userEvents) {
 		try {
 			if (MainWindow.runObject[myRun].hasLogData()) {
@@ -251,7 +255,14 @@ public class Data
 			return null;
 		}
 	}
-	/** Create the array of timeline objects */
+	
+	
+	/** Create the array of timeline objects 
+	 *  
+	 *  @note if a new processor has been added, then 
+	 *  	  its data will be retrieved using getData()
+	 *        which calls createTL() 
+	 */
 	public void createTLOArray()
 	{
 
@@ -267,6 +278,7 @@ public class Data
 		timelineUserEventObjectsArray = new UserEventObject[processorList.size()][];
 
 		
+		// If we had a preexisting tloArray and the times haven't changed
 		if (oldtloArray != null && beginTime >= oldBT && endTime <= oldET) {
 
 			int oldp, newp;
@@ -287,6 +299,7 @@ public class Data
 				if (oldp == newp) {
 					if (beginTime == oldBT && endTime == oldET) {
 						tloArray[newpindex] = oldtloArray[oldpindex];
+						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
 						assert(oldUserEventsArray != null);
 						timelineUserEventObjectsArray[newpindex] = 
 							oldUserEventsArray[oldpindex];
@@ -321,6 +334,7 @@ public class Data
 
 						// copy the array
 						tloArray[newpindex] = new EntryMethodObject[newNumItems];
+						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
 						mesgVector[newp] = new Vector();
 						for (n=0; n<newNumItems; n++) {
 							tloArray[newpindex][n] = 
@@ -394,6 +408,7 @@ public class Data
 			}
 			pnum = processorList.nextElement();
 			if (tloArray[p] == null) { 
+				System.out.println("new tloarray["+p+"] is loaded from getData()");
 				tloArray[p] = getData(pnum, p);
 			}
 		}

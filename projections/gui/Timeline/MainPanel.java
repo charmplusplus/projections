@@ -89,10 +89,6 @@ public class MainPanel extends JPanel  implements Scrollable{
 
 	/** paint the message send lines */
 	public void drawAllLines(Graphics g){
-		Graphics2D g2d = (Graphics2D)g;
-		Stroke oldStroke = g2d.getStroke();
-		g2d.setStroke(new BasicStroke(data.messageLineThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND ));
-
 
 		if (!data.mesgCreateExecVector.isEmpty()) {
 			g.setColor(data.getForegroundColor());
@@ -129,21 +125,19 @@ public class MainPanel extends JPanel  implements Scrollable{
 				int y2 = (int)(yscale * (double)endpe_position +
 						lineElement.obj.h);
 
-				g2d.drawLine(x1,y1,x2,y2);
+				g.drawLine(x1,y1,x2,y2);
 			}
 		}
-
-		g2d.setStroke(oldStroke);
 
 	}
 
 
 	/** 
-	 * Load or Reload the timeline objects, adding them to the displayed canvas
-	 * 
+	 * Load or Reload the timeline objects from the data object's tloArray
+	 *  
 	 * @note This was formerly called procRangeDialog()
 	 */
-	public void loadTimelineObjects(boolean keeplines) {
+	public void loadTimelineObjects() {
 		
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.

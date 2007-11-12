@@ -132,7 +132,7 @@ implements MouseListener
 						" on processor " + pCurrent + "</b>!");
 				System.exit(1) ;
 			}
-			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[n][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[n][0] + "</b><br>"; 
+			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[n][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[n][0] + "</b><br><br>"; 
 			infoString += "<i>Msg Len:</i> " + msglen + "<br>";
 			
 			
@@ -157,7 +157,7 @@ implements MouseListener
 			infoString += "<br>";
 			
 			infoString += "<i>Msgs created:</i> " + msgs.length + "<br>";
-			infoString += "<i>Created by processor</i> " + pCreation + "<br>";
+			infoString += "<i>Created by processor:</i> " + pCreation + "<br>";
 			infoString += "<i>Id:</i> " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			if(tleUserEventName!=null)
 				infoString += "<i>Associated User Event:</i> "+tleUserEventName+ "<br>";
@@ -171,7 +171,7 @@ implements MouseListener
 				}
 			}
 		} else if (n == -1) {
-			infoString += "<b>IDLE TIME</b><br>";
+			infoString += "<b>Idle Time</b><br><br>";
 			infoString += "<i>Begin Time:</i> " + format_.format(beginTime)+ "<br>";
 			infoString += "<i>End Time:</i> " + format_.format(endTime) + "<br>";
 			infoString += "<i>Total Time:</i> " + U.t(endTime-beginTime) + "<br>";
@@ -309,7 +309,13 @@ implements MouseListener
 			} else {	
 				System.out.println("))))) Non-Left Click");
 	
+				System.out.println("pCreation="+pCreation);
+//				System.out.println("data.mesgVector="+data.mesgVector);
+//				System.out.println("data.mesgVector[pCreation]="+data.mesgVector[pCreation]);
 				
+				// we may need to load this processor
+				data.addProcessor(pCreation);
+								
 				created_message = searchMesg(data.mesgVector[pCreation],EventID);
 				
 				data.toggleConnectingLine(pCreation,created_message.Time,
@@ -341,6 +347,9 @@ implements MouseListener
 		// Try binary search first. If that fails, try sequential search.
 		// This is because stuff like bigsim logs may not have eventID
 		// stored in sorted order.
+//		System.out.println("v="+v);
+		System.out.println("eventid="+eventid);
+
 		returnItem = binarySearch(v,eventid,0,v.size()-1);
 		if (returnItem == null) {
 			return seqSearch(v,eventid);

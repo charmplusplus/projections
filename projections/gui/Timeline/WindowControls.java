@@ -92,7 +92,7 @@ ItemListener {
 				// the main window visible after it has finished loading
 				final SwingWorker worker = new SwingWorker() {
 					public Object construct() {
-						parentWindow.mainPanel.loadTimelineObjects(true);
+						parentWindow.mainPanel.loadTimelineObjects();
 						cbUser.setText("View User Events (" + data.getNumUserEvents() + ")");
 						return null;
 					}
@@ -179,7 +179,7 @@ ItemListener {
 
 			scaleField.setText("" + 1.0);	
 
-			parentWindow.mainPanel.loadTimelineObjects(true);
+			parentWindow.mainPanel.loadTimelineObjects();
 			
 			cbUser.setText("View User Events (" + data.getNumUserEvents() + ")");
 			
@@ -367,11 +367,6 @@ ItemListener {
 		userEventWindow.setData(data);
 	}
 
-//	**CW** Note that this is still quite a hack, but it should provide
-//	a prototype for when other tools want to add stuff to timeline.
-	public void addProcessor(int p) {
-		parentWindow.addProcessor(p);
-	}
 
 	private void CreateLayout() {
 

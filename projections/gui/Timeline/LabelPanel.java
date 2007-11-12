@@ -9,20 +9,14 @@ import java.awt.FontMetrics;
 /** Draws the left column of the timeline view. The labels such as "PE 0", "PE 1" */
 public class LabelPanel extends JPanel 
 {  
+
+	// TODO: create a component for each displayed PE which contains 
+	// a tooltip showing the confusing "(23, 20)" portion of the display
+		
 	private static final long serialVersionUID = 1L;
-
-	/** The desired width of the panel */
-	private int myWidth = 65; // This is what corresponds to the font we use now
-	
-	
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
-
+		
 	private Data data;
-//	private MainHandler parentWindow; 
-	
+
 	public LabelPanel(Data data)
 	{
 		setOpaque(true);	
@@ -37,7 +31,7 @@ public class LabelPanel extends JPanel
 		if(data.useMinimalView())
 			return 40;
 		else
-			return 85;
+			return 90;
 	}
 	
 	public Dimension getPreferredSize() {
@@ -72,7 +66,7 @@ public class LabelPanel extends JPanel
 				String peString = "PE "+data.processorList().nextElement();
 				g.drawString(peString, 10, data.singleTimelineHeight()/2 + p*data.singleTimelineHeight());
 				
-				String percentString = "(" + (int)(100 - data.idleUsage[p]) + "%," + (int)(data.processorUsage[p]) + "%)";
+				String percentString = "(" + (int)(100 - data.idleUsage[p]) + ", " + (int)(data.processorUsage[p]) + "%)";
 				g.drawString(percentString, 15, data.singleTimelineHeight()/2 + p*data.singleTimelineHeight() + fm.getHeight() + 2);
 		
 			}
@@ -82,10 +76,6 @@ public class LabelPanel extends JPanel
 
 	}
 
-
-	public int getDesiredWidth() {
-		return myWidth;
-	}   
 
 }
 

@@ -64,7 +64,7 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		
 		// create a MainPanel for it	
 		displayPanel = new MainPanel(data, this);
-		displayPanel.loadTimelineObjects(true);
+		displayPanel.loadTimelineObjects();
 				
 		labelPanel = new LabelPanel(data);
 		
@@ -124,6 +124,12 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 	
 	public void setData(Data data){
 		this.data = data;
+	}
+
+
+	/** Required by interface MainHandler. This one does nothing */
+	public void notifyProcessorListHasChanged() {
+		// Do nothing
 	}
 
 	

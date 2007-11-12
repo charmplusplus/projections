@@ -11,9 +11,6 @@ import projections.gui.Util;
 
 public class MessagePanel extends JPanel {
      
-    /**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate

@@ -10,13 +10,11 @@ package projections.gui.Timeline;
  */
 public interface MainHandler {
 
-	/** Called to insert another PE into the visualization
+	/** A processor has been added, and now this object must update its displays appropriately
 	 * 
-	 * @note Called by mouse handler in mainpanel when a message dependency is required and a processor involved is not yet loaded
-	 * 
-	 * @param PE The processor id to add
+	 * @note Called when a new processor is added in Data.addProcessor(int p)
 	 */
-	void addProcessor(int PE);
+	void notifyProcessorListHasChanged();
 	
 	/** Called by the main panel once it has loaded the objects. 
 	 * 

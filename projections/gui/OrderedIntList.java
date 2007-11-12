@@ -1,5 +1,10 @@
 package projections.gui;
 
+/** @note this class has no right to exist anymore. 
+ * Java contains types that already make sorted lists 
+ * or trees, such as TreeSet */
+
+
 // use this by:
 //
 // OrderedIntList list = new OrderedIntList();

@@ -155,15 +155,29 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
     	super.setDialogData();
     }
 	
-	public void addProcessor(int p) {
-		data.addProcessor(p); // FIXME Potential Bug: Should this be done after the next line ????
-		mainPanel.loadTimelineObjects(false);
-	}
-
-	protected void windowInit() {
+ 	protected void windowInit() {
 		data = new Data(this);		
 		data.setProcessorList(MainWindow.runObject[myRun].getValidProcessorList());
 		data.setRange(0, MainWindow.runObject[myRun].getTotalTime());
 	}
-    
+
+ 	
+    /** Reload the timelines in this visualization
+     *  @note called by data object after data object adds a processor
+     *  @note Required for interface MainHandler 
+     */
+	public void notifyProcessorListHasChanged() {
+		mainPanel.loadTimelineObjects();
+	}
+	
+	 /** Add a timeline to the Timeline visualization
+     *  @note called by external tools
+     *  @note Simply forwards request to 'data' object
+     */
+	public void addProcessor(int p) {
+		data.addProcessor(p);
+	}
+	
+	
+ 	
 }

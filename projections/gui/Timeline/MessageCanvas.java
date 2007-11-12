@@ -134,7 +134,7 @@ public class MessageCanvas extends JPanel
    {
           int i;
 	  int wi = getSize().width;
-	  int ht = getSize().height;
+//	  int ht = getSize().height;
 		 
 	  int space0 = (wi-width[0]-width[1])/2;
 	  int space1 = (wi-width[2]-width[3]-width[4]-width[5]-width[6]-width[7])/2;

@@ -59,7 +59,7 @@ public class MainPanel extends JPanel  implements Scrollable{
 		
 		g.setColor(data.getBackgroundColor());
 		Rectangle clipBounds = g.getClipBounds();
-		g.fillRect(0,0,getWidth(),getHeight());
+		g.fillRect(clipBounds.x,clipBounds.y,clipBounds.width,clipBounds.height);
 
 	
 		// Paint the selection region

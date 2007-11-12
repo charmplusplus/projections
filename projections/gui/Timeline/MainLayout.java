@@ -44,11 +44,11 @@ public class MainLayout implements LayoutManager {
 	public void layoutContainer(Container parent) {
 
 		int width;
-		int height;
+//		int height;
 
 		Insets insets = parent.getInsets();
 		width = parent.getWidth() - (insets.left + insets.right);
-		height = parent.getHeight() - (insets.top + insets.bottom);
+//		height = parent.getHeight() - (insets.top + insets.bottom);
 
 //		System.out.println("Layout MainPanel to size "+width+"x"+height);
 

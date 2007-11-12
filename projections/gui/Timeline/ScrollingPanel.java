@@ -3,22 +3,13 @@ package projections.gui.Timeline;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.event.AdjustmentEvent;
-import java.awt.event.AdjustmentListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.ComponentListener;
-
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 /**
  * A scrolling panel that holds all the graphical pieces of the visualization
  * 
  */
-public class ScrollingPanel extends JPanel implements AdjustmentListener  {
+public class ScrollingPanel extends JPanel  {
 
 	private static final long serialVersionUID = 1L;
 
@@ -43,9 +34,6 @@ public class ScrollingPanel extends JPanel implements AdjustmentListener  {
 		mainPanel=mainPanel_;
 		axisPanel=axisPanel_;
 		labelPanel=labelPanel_;	
-		
-		int vsbPolicy = ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS;
-		int hsbPolicy = ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS;
 
 		scrollpane = new JScrollPane();
 		scrollpane.setLayout(new projections.gui.Timeline.TimelineScrollPaneLayout(data));
@@ -74,8 +62,6 @@ public class ScrollingPanel extends JPanel implements AdjustmentListener  {
 		mainPanel.setVisible(true);
 		labelPanel.setVisible(true);
 		setVisible(true);
-		
-		scrollpane.getHorizontalScrollBar().addAdjustmentListener(this);
 		
 	}
 	
@@ -125,25 +111,5 @@ public class ScrollingPanel extends JPanel implements AdjustmentListener  {
 		return getPreferredSize();	
 	}
 
-
-
-	/** THIS IS A HORRIBLE HACK TO FIX SOME WEIRD UNDIAGNOSED PROBLEM 
-	 * 
-	 * */
-
-	
-	public void adjustmentValueChanged(AdjustmentEvent e) {
-		System.out.println("Scrollbar value changed");
-		
-		Point p = scrollpane.getColumnHeader().getViewPosition();
-		System.out.println("Colheader position is really "+p.x+","+p.y);
-		
-		Point p2 = scrollpane.getViewport().getViewPosition();
-		System.out.println("Viewport position is really "+p2.x+","+p2.y);
-
-		axisPanel.repaint();
-		mainPanel.repaint();
-		
-	}
 	
 };

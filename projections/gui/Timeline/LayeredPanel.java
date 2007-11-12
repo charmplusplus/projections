@@ -1,7 +1,5 @@
 package projections.gui.Timeline;
 
-import java.awt.event.*;
-import java.text.DecimalFormat;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
@@ -10,12 +8,7 @@ import java.awt.Dimension;
 
 import javax.swing.*;
 
-import java.awt.Cursor;
-import java.awt.FontMetrics;
-import java.awt.Point;
-
-/** A layered panel which will contain a main panel and one or more overlay layers
- * 
+/** A scrollable layered panel which will contain a main panel and one or more overlay layers
  * 
  * Depth=10 corresponds to the main panel
  * Depth=20 corresponds to the overlayed display for the selection

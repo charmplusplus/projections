@@ -1,6 +1,5 @@
 package projections.gui.Timeline;
 
-import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.Dimension;
@@ -22,13 +21,12 @@ public class LabelPanel extends JPanel
 	int myRun = 0;
 
 	private Data data;
-	private MainHandler parentWindow; 
+//	private MainHandler parentWindow; 
 	
-	public LabelPanel(Data data, MainHandler parentWindow)
+	public LabelPanel(Data data)
 	{
 		setOpaque(true);	
 		this.data = data;
-		this.parentWindow = parentWindow;
 	}
 	
 	/** Determine the preferred width for this panel, respecting the data.useMinimalMargins flag 

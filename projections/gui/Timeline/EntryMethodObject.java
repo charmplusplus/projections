@@ -3,7 +3,6 @@ package projections.gui.Timeline;
 import java.awt.*;
 import java.awt.event.*;
 import projections.analysis.*;
-import projections.gui.Bubble;
 import projections.gui.MainWindow;
 import projections.gui.U;
 
@@ -29,8 +28,7 @@ implements MouseListener
 	private int     entry;
 	private int     msglen;
 	private int EventID;
-	private ObjectId tid;
-	private boolean inside = false; 
+	private ObjectId tid; 
 	private int pCurrent; // I assume this is which displayed timeline the event is assocated with
 	private int pCreation;
 	private double  usage;
@@ -40,7 +38,6 @@ implements MouseListener
 	
 	private String tleUserEventName;
 
-	private MainHandler parentContainer=null;
 
 	private Data data = null;
 	public TimelineMessage[] messages;
@@ -60,8 +57,6 @@ implements MouseListener
 	/** The distance from the top and bottom to the rectangle painted to represent the object in the timeline */
 	int verticalInset;
 	
-	// if line from message creation already exists
-	private int creationLine;
 
 	private TimelineMessage created_message;
 
@@ -319,15 +314,12 @@ implements MouseListener
 				
 				data.toggleConnectingLine(pCreation,created_message.Time,
 						pCurrent,beginTime,this);
-				creationLine = 1;
-				
 		
 			}
 		}
 	} 
 
 	public void clearCreationLine() {
-		creationLine = 0;
 		created_message = null;
 	}
 
@@ -471,7 +463,7 @@ implements MouseListener
 			
 			// Idle time
 			
-			Color fg = data.getForegroundColor();
+//			Color fg = data.getForegroundColor();
 			Color bg = data.getBackgroundColor();
 
 			int brightness = bg.getRed() + bg.getGreen() + bg.getBlue();

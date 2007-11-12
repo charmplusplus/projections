@@ -3,8 +3,6 @@ package projections.gui.Timeline;
 import java.awt.*;
 import java.awt.event.*;
 
-import javax.swing.JScrollPane;
-
 public class MessageWindow extends Frame
    implements ActionListener
 {

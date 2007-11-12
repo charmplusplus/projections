@@ -2,9 +2,6 @@ package projections.gui.Timeline;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-
 import javax.swing.*;
 
 import projections.gui.OrderedIntList;
@@ -69,7 +66,7 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		displayPanel = new MainPanel(data, this);
 		displayPanel.loadTimelineObjects(true);
 				
-		labelPanel = new LabelPanel(data, this);
+		labelPanel = new LabelPanel(data);
 		
 		axisPanel = new AxisPanel(data);
 		

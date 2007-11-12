@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.gui.Timeline;
 
 import java.io.*;
 import java.awt.*;
@@ -6,6 +6,15 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import projections.analysis.*;
+import projections.gui.ColorManager;
+import projections.gui.ColorSelectable;
+import projections.gui.GenericGraphWindow;
+import projections.gui.IntervalRangeDialog;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.SwingWorker;
+import projections.gui.U;
+import projections.gui.Util;
 import projections.misc.*;
 
 /**

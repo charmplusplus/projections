@@ -72,7 +72,7 @@ public class TimeProfileWindow extends GenericGraphWindow
     protected int ampiPanelTabIndex;
     protected int epPanelTabIndex;
 
-    void windowInit() {
+    protected void windowInit() {
 	// acquire data using parent class
 	super.windowInit();
 

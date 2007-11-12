@@ -44,7 +44,7 @@ public class IntervalWindow extends GenericGraphWindow
     private final int SEND_COUNT        = 1;
     private final int MSG_LEN_COUNT     = 2;
 
-    void windowInit() {
+    protected void windowInit() {
 	intervalSize = 1000; // 1 ms default
 	super.windowInit();
     }
@@ -66,7 +66,7 @@ public class IntervalWindow extends GenericGraphWindow
     }
     
     /* Show the RangeDialog to set processor numbers and interval times */
-    void showDialog()
+    protected void showDialog()
     {
         if (dialog == null)
 	    dialog = new IntervalRangeDialog(this,"Select Range");

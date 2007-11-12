@@ -1,20 +1,21 @@
-package projections.gui;
+package projections.gui.Timeline;
 
 import java.awt.*;
 import java.awt.event.*;
 
-public class TimelineMessageWindow extends Frame
+import javax.swing.JScrollPane;
+
+public class MessageWindow extends Frame
    implements ActionListener
 {
-   /**
-	 * 
-	 */
+
+
 	private static final long serialVersionUID = 1L;
-private TimelineObject obj;
-   private TimelineMessagePanel canvas;
+	private EntryMethodObject obj;
+   private MessagePanel canvas;
    private ScrollPane sp;
    
-   public TimelineMessageWindow(TimelineObject obj)
+   public MessageWindow(EntryMethodObject obj)
    {
 	  this.obj  = obj;
 	  
@@ -31,7 +32,7 @@ private TimelineObject obj;
  
 	  sp = new ScrollPane();
 	  
-	  canvas = new TimelineMessagePanel(obj);
+	  canvas = new MessagePanel(obj);
 	  sp.add(canvas);
 	  
 	  Panel p = new Panel();

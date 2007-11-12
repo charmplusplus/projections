@@ -60,7 +60,7 @@ public class GraphWindow extends ProjectionsWindow
 	}
     }
 
-    void windowInit() {
+    protected void windowInit() {
 	endTime = MainWindow.runObject[myRun].getTotalTime();
 
 	intervalsize = 1000; // default to 1ms

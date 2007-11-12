@@ -40,7 +40,6 @@ SRC13=\
     projections/analysis/SumDetailReader.java\
     projections/analysis/TimelineEvent.java\
     projections/analysis/TimelineMessage.java\
-    projections/analysis/UserEvent.java\
     projections/analysis/UsageCalc.java\
     projections/analysis/UsageInterval.java\
     projections/analysis/ViewerEvent.java\
@@ -163,21 +162,29 @@ SRC13=\
     projections/gui/SwingWorker.java\
     projections/gui/TimeProfileWindow.java\
     projections/gui/TimeTextField.java\
-    projections/gui/TimelineAxisCanvas.java\
-    projections/gui/TimelineColorWindow.java\
-    projections/gui/TimelineData.java\
-    projections/gui/TimelineDisplayCanvas.java\
-    projections/gui/TimelineLabelCanvas.java\
-    projections/gui/TimelineMessageCanvas.java\
-    projections/gui/TimelineMessagePanel.java\
-    projections/gui/TimelineMessageWindow.java\
-    projections/gui/TimelineObject.java\
-    projections/gui/TimelineWindow.java\
-    projections/gui/TimelineLine.java\
+	projections/gui/Timeline/AxisPanel.java \
+    projections/gui/Timeline/ColorChooser.java \
+    projections/gui/Timeline/Data.java \
+    projections/gui/Timeline/LabelPanel.java \
+    projections/gui/Timeline/Line.java \
+    projections/gui/Timeline/MainPanel.java \
+    projections/gui/Timeline/MainHandler.java \
+    projections/gui/Timeline/MessageCanvas.java \
+    projections/gui/Timeline/MessagePanel.java \
+    projections/gui/Timeline/MessageWindow.java \
+    projections/gui/Timeline/EntryMethodObject.java \
+    projections/gui/Timeline/SaveImage.java \
+    projections/gui/Timeline/NonScrollingPanel.java \
+    projections/gui/Timeline/NonScrollingLayout.java \
+    projections/gui/Timeline/ScrollingPanel.java \
+	projections/gui/Timeline/TimelineScrollPaneLayout.java \
+    projections/gui/Timeline/UserEventObject.java \
+    projections/gui/Timeline/UserEventsWindow.java\
+    projections/gui/Timeline/UserEventWindow.java\
+    projections/gui/Timeline/WindowControls.java \
+    projections/gui/Timeline/TimelineWindow.java \
     projections/gui/U.java\
     projections/gui/Util.java\
-    projections/gui/UserEventsWindow.java\
-    projections/gui/UserEventWindow.java\
     projections/gui/Wait.java\
     projections/gui/WaitButton.java\
     projections/gui/ZItem.java\
@@ -224,6 +231,7 @@ SRC13=\
 SRC15=$(SRC13) \
     projections/analysis/NoiseMiner.java\
     projections/gui/NoiseMinerWindow.java\
+	projections/gui/NoiseMinerExemplarTimelineWindow.java\
 	jnt/FFT/ComplexDouble2DFFT.java\
 	jnt/FFT/ComplexDoubleFFT.java\
 	jnt/FFT/ComplexDoubleFFT_Mixed.java\

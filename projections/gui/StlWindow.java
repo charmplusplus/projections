@@ -68,7 +68,7 @@ public class StlWindow extends ProjectionsWindow
     public long startTime;
     public long endTime;
 
-    void windowInit() {
+    protected void windowInit() {
 	// acquire default data from MainWindow.runObject[myRun].
 	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	startTime = 0;

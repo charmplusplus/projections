@@ -62,7 +62,7 @@ public class PoseAnalysisWindow extends ProjectionsWindow
     // flag signifying the window has just begun
     boolean	   startFlag;
 
-    void windowInit() {
+    protected void windowInit() {
 	// acquire data using parent class
 	// super.windowInit(); base class is abstract
 

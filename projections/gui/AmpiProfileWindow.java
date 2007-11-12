@@ -76,7 +76,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	showDialog();
     }
 
-    void windowInit() {
+    protected void windowInit() {
 	// get new data object
 	data = new AmpiProfileData(this);
 

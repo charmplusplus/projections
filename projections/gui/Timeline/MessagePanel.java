@@ -1,14 +1,16 @@
-package projections.gui;
+package projections.gui.Timeline;
 
 import java.awt.*;
 import javax.swing.*;
 
-import java.text.*;
-
 import projections.analysis.*;
+import projections.gui.JLongTextField;
+import projections.gui.LabelPanel;
+import projections.gui.MainWindow;
+import projections.gui.Util;
 
-public class TimelineMessagePanel extends JPanel {
-    
+public class MessagePanel extends JPanel {
+     
     /**
 	 * 
 	 */
@@ -31,23 +33,18 @@ public class TimelineMessagePanel extends JPanel {
     private JPanel executedPEField;
 
     // Data objects
-    private TimelineObject obj;
+    private EntryMethodObject obj;
     private TimelineMessage messages[];
     private Object tableData[][];
     private Object columnNames[];
 
     private static final int NUM_FIELDS = 6;
 
-  private DecimalFormat df;
-
-    TimelineMessagePanel(TimelineObject obj) {
+    MessagePanel(EntryMethodObject obj) {
 	this.obj = obj;
 	messages = obj.getMessages();
 	tableData = new Object[obj.getNumMsgs()][NUM_FIELDS];
 	columnNames = new Object[NUM_FIELDS];
-	df = new DecimalFormat();
-	df.setGroupingUsed(true);
-	df.setGroupingSize(3);
 	setData();
 	createLayout();
     }
@@ -65,22 +62,18 @@ public class TimelineMessagePanel extends JPanel {
 	for (int row=0; row<tableData.length; row++) {
 	    // fill in the NUM_FIELDS columns
 	    tableData[row][0] = new Integer(row);
-	    tableData[row][1] = df.format(messages[row].MsgLen);
-	    tableData[row][2] = df.format(messages[row].Time);
-	    tableData[row][3] = df.format((row>0) ? 
-					  (messages[row].Time - 
-					   messages[row-1].Time) :
-					  (messages[row].Time -
-					   obj.getBeginTime())
-					  );
-	    tableData[row][4] = 
-	      MainWindow.runObject[myRun].getEntryName(messages[row].Entry);
+	    tableData[row][1] = new Integer(messages[row].MsgLen);
+	    tableData[row][2] = new Long(messages[row].Time);
+	    tableData[row][3] = new Long((row>0) ? 
+					 (messages[row].Time - 
+					  messages[row-1].Time) :
+					 0);
+	    tableData[row][4] = MainWindow.runObject[myRun].getEntryName(messages[row].Entry);
 	    if (messages[row].destPEs != null) {
 		// This is a multicast.
-		tableData[row][5] = "(" + messages[row].numPEs + ") ";
+		tableData[row][5] = "";
 		for (int i=0; i<messages[row].destPEs.length-1; i++) {
-		    tableData[row][5] = (String)tableData[row][5] + 
-		      messages[row].destPEs[i] + ", ";
+		    tableData[row][5] = (String)tableData[row][5] + messages[row].destPEs[i] + ", ";
 		}
 		tableData[row][5] = (String)tableData[row][5] + 
 		    messages[row].destPEs[messages[row].destPEs.length-1] + "";
@@ -110,13 +103,14 @@ public class TimelineMessagePanel extends JPanel {
 			     MainWindow.runObject[myRun].getEntryName(obj.getEntry()),
 			     JLabel.CENTER);
 	beginTimeField = new LabelPanel("BEGIN TIME:",
-					new JTextField(df.format(obj.getBeginTime()),
-						       10));
+					new JLongTextField(obj.getBeginTime(),
+							   10));
 	endTimeField = new LabelPanel("END TIME:",
-				      new JTextField(df.format(obj.getEndTime()),
-						     10));
+				      new JLongTextField(obj.getEndTime(),
+							 10));
 	numMsgsField = new LabelPanel("MSGS:",
-				      new JTextField(df.format(obj.getNumMsgs()),10));
+				      new JTextField("" + 
+						     obj.getNumMsgs(),10));
 	createdPEField = new LabelPanel("CREATED BY:",
 					new JTextField("Processor " +
 						       obj.getPCreation()));

@@ -61,7 +61,7 @@ public class HistogramWindow extends GenericGraphWindow
     boolean newDialog; // a temporary hack
     private DecimalFormat _format;
 
-    void windowInit() {
+    protected void windowInit() {
 	timeNumBins = 100;  // default to 100 bins
 	timeBinSize = 1000; // 1ms default bin size
 	timeMinBinSize = 0; // default, look at all bins

@@ -48,7 +48,7 @@ public abstract class ProjectionsWindow
     protected MainWindow parentWindow;
 
     // NOTE: There NEED NOT be a dialog.
-    protected RangeDialog dialog;
+    public RangeDialog dialog;
 
     /**
      *  All implementing classes MUST use windowInit() to set up
@@ -59,8 +59,12 @@ public abstract class ProjectionsWindow
      *  The implementing class can choose to either allow the parent
      *  class to dictate default values or set it's own default
      *  parameter values.
+     *  
+     *  DANGER NOTE:
+     *  windowInit() is called at the beginning of the class's constructor
+     *  
      */
-    abstract void windowInit();
+    protected abstract void windowInit();
 
     /**
      *  Must implement code to show the dialog box and handle
@@ -71,12 +75,12 @@ public abstract class ProjectionsWindow
      *  ProjectionsWindows should decide whether or not they wish
      *  to call setDialogData();
      */
-    abstract void showDialog();
+    protected abstract void showDialog();
 
     // Must implement code to display the window. This
     // bypasses the dialog and MUST NOT perform any serious
     // blocking computation.
-    abstract void showWindow();
+    protected abstract void showWindow();
 
     /**
      *  Must implement code to set parameter data to the window
@@ -96,7 +100,7 @@ public abstract class ProjectionsWindow
      *             ... blah blah blah ...
      *           }
      */
-    abstract void getDialogData();
+    protected abstract void getDialogData();
 
 
     /**
@@ -145,7 +149,8 @@ public abstract class ProjectionsWindow
 		    close();
 		}
 	    });
-	windowInit();
+    // FIXME:  Dangerous because we call a subclass's method before the associated object has been fully constructed(we are still in the constructor here
+	windowInit(); 
     }
 
     public void setLayout(JPanel mainPanel) {

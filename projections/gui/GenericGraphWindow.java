@@ -54,7 +54,7 @@ public abstract class GenericGraphWindow
     public long startTime;
     public long endTime;
 
-    void windowInit() {
+    protected void windowInit() {
 	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	startTime = 0;
 	endTime = MainWindow.runObject[myRun].getTotalTime();

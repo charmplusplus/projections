@@ -71,7 +71,7 @@ public class AnimationWindow extends ProjectionsWindow
 	}  
     }       
 
-    void windowInit() {
+    protected void windowInit() {
 	// acquire data from Analysis
 	intervalSize = 1000; // default to 1ms
 	validPEs = MainWindow.runObject[myRun].getValidProcessorList();

@@ -8,6 +8,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import projections.analysis.*;
+import projections.gui.Timeline.TimelineWindow;
 import projections.guiUtils.*;
 import projections.misc.*;
 

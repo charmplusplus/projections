@@ -53,7 +53,7 @@ public class MultiRunWindow extends ProjectionsWindow
 
     int selectedDataType;
 
-    void windowInit() {
+    protected void windowInit() {
 	// do nothing. No initialization required.
     }
 

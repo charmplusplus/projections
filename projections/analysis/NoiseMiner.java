@@ -7,6 +7,10 @@ import java.io.*;
 import java.util.*;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 //import java.math.BigInteger;
 //import jnt.FFT.*;
@@ -164,18 +168,19 @@ public class NoiseMiner extends ProjDefs
 
 	}
 	
+	
 	/** A resulting cluster of noise occurrences */
-	private class NoiseResult implements Comparable{
-		public LinkedList<Integer> pes; // list of processors on which the event occurs
+	public class NoiseResult implements Comparable{
+		public TreeSet<Integer> pes; // list of processors on which the event occurs
 		public Duration periodicity; // The average period determined by the span of the window
 		//public Duration periodicity_FFT; // The primary peak in the FFT
 		public Duration duration; // The amount of time spend in the noise
 		public long occurrences; // The number of times this event occurred per processor
-		public eventWindow ew; 
+		public EventWindow ew; 
 		
-		
-		public NoiseResult(Duration d, long o, Duration p, int pe, eventWindow ew){
-			pes = new LinkedList<Integer>();
+		  
+		public NoiseResult(Duration d, long o, Duration p, int pe, EventWindow ew){
+			pes = new TreeSet<Integer>();
 
 			this.ew = ew;
 			
@@ -213,6 +218,7 @@ public class NoiseMiner extends ProjDefs
 			//periodicity_FFT.set_us((periodicity_FFT.us() * occurrences + nr.periodicity_FFT.us() * nr.occurrences) / (occurrences+nr.occurrences));
 			duration.set_us((duration.us() * occurrences + nr.duration.us() * nr.occurrences) / (occurrences+nr.occurrences));
 			occurrences += nr.occurrences;
+			ew.merge(nr.ew);
 		}
 
 
@@ -267,13 +273,13 @@ public class NoiseMiner extends ProjDefs
 	 * Upon request, it can produce data about the frequencies of the events.
 	 *
 	 */
-	private class eventWindow{
+	public class EventWindow{
 		public TreeSet<TimelineEvent> occurrences; // essentially a sorted list or heap
 		private int max;
 		protected Duration period;
 		protected Duration prominentPeriod;
 
-		eventWindow(int maxSize){
+		EventWindow(int maxSize){
 			occurrences = new TreeSet<TimelineEvent>();
 			max = maxSize;
 			period = new Duration();
@@ -288,7 +294,7 @@ public class NoiseMiner extends ProjDefs
 			}
 		}
 
-		public void merge(eventWindow ew){
+		public void merge(EventWindow ew){
 			Iterator<TimelineEvent> itr = ew.occurrences.iterator();
 			while(itr.hasNext()){
 				TimelineEvent v = itr.next();
@@ -387,7 +393,7 @@ public class NoiseMiner extends ProjDefs
 		private long bin_count[]; // The number of values that fall in each bin
 		private Duration bin_sum[]; // The sum of all values that fall in each bin
 
-		private eventWindow bin_window[]; // A list of recent events in each bin
+		private EventWindow bin_window[]; // A list of recent events in each bin
 		int eventsInBinWindow;
 
 		private int nbins;
@@ -400,29 +406,29 @@ public class NoiseMiner extends ProjDefs
 		private class Cluster{
 			private Duration sum;
 			private long count;
-			eventWindow events;
+			EventWindow events;
 
-			Cluster(Duration s, long c, eventWindow ew){
+			Cluster(Duration s, long c, EventWindow ew){
 				sum = new Duration(s);
 				count=c;
 				assert(c>=0);
 				eventsInBinWindow = 50;
-				events = new eventWindow(eventsInBinWindow);
+				events = new EventWindow(eventsInBinWindow);
 				events.merge(ew);
 			}
 			
-			Cluster(double s_us, long c, eventWindow ew){
+			Cluster(double s_us, long c, EventWindow ew){
 				assert s_us>=0 : ("s_us=" + s_us);
 				sum= new Duration(s_us);
 				count=c;
 				assert(c>=0);
 				eventsInBinWindow = 50;
-				events = new eventWindow(eventsInBinWindow);
+				events = new EventWindow(eventsInBinWindow);
 				events.merge(ew);
 			}
 			
 			
-			public void merge(Duration s, long c, eventWindow ew){
+			public void merge(Duration s, long c, EventWindow ew){
 				sum.add(s);
 				count += c;
 				assert(c>=0);
@@ -499,18 +505,18 @@ public class NoiseMiner extends ProjDefs
 
 		public Histogram(){
 			used=false;
-			nbins = 20;
-			binWidth = new Duration(500);
+			nbins = 2000;
+			binWidth = new Duration(1);
 			total_sum = new Duration(0);
 			
 			eventsInBinWindow = 80;
 			bin_count = new long[nbins];
 			bin_sum = new Duration[nbins];
-			bin_window = new eventWindow[nbins];
+			bin_window = new EventWindow[nbins];
 			for(int i=0;i<nbins;i++){
 				bin_count[i] = 0;
 				bin_sum[i] = new Duration(0.0);
-				bin_window[i] = new eventWindow(eventsInBinWindow);
+				bin_window[i] = new EventWindow(eventsInBinWindow);
 			}
 		}
 
@@ -606,7 +612,7 @@ public class NoiseMiner extends ProjDefs
 			ListIterator<Cluster> i = clustersNormalized.listIterator();
 			while(i.hasNext()){
 				Cluster c = i.next();
-				if(c.count() > 0){
+				if(c.count() >= 5){
 					Duration periodicity = new Duration(c.events.period());
 					Duration duration = new Duration(c.mean());
 					if( duration.us() / periodicity.us() > cutoff_contribution ){
@@ -783,10 +789,15 @@ public class NoiseMiner extends ProjDefs
 		int  previous_begin_entry=-1;
 		int  previous_end_entry=-1;
 
+		//The variable to track whether there's no intermediate events
+		//in a black part
+		long previous_black_time = -1;
+
 		ProgressMonitor progressBar = new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
 
 		String[][] entryNames = MainWindow.runObject[myRun].getEntryNames(); // needed to determine number of events
 		int numEvents = entryNames.length;
+		int blackPartIdx = numEvents;		
 		
 		// For each pe
 
@@ -795,8 +806,10 @@ public class NoiseMiner extends ProjDefs
 			
 			System.gc();
 
-			Histogram h[] = new Histogram[numEvents];
-			for(int i=0;i<numEvents;i++){
+			//The additional is to track the stretch in black parts
+			Histogram h[] = new Histogram[numEvents+1];
+			
+			for(int i=0;i<h.length;i++){
 				h[i] = new Histogram();
 			}
 
@@ -827,19 +840,34 @@ public class NoiseMiner extends ProjDefs
 						// if we have seen the matching BEGIN_PROCESSING
 						if(previous_begin_entry == logdata.entry){
 
-							h[logdata.entry].insert(new TimelineEvent(previous_begin_time,logdata.time,-1,logdata.pe));
+							h[logdata.entry].insert(new TimelineEvent(previous_begin_time,logdata.time,-1,currPe));
 							
 							total_count++;
 						}
 					}
 
-					LogFile.nextEvent(logdata);
-					
+					//process the black part
+					//Four cases for a black part
+					//1. END_PROCESSING to BEGIN_IDLE
+					//2. END_PROCESSING to BEGIN_PROCESSING
+					//3. END_IDLE to BEGIN_PROCESSING
+					//4. END_IDLE to BEGIN_IDLE
+					//we need to ensure there's no intermeidate events between the two events
+					//so previous_black_time is used to ensure this if the value of it is not -1					
+					if(logdata.type == END_PROCESSING || logdata.type == END_IDLE){
+					    previous_black_time = logdata.time;
+					}else if(logdata.type == BEGIN_PROCESSING || logdata.type == BEGIN_IDLE){
+					    if(previous_black_time != -1){
+						h[blackPartIdx].insert(new TimelineEvent(previous_black_time, logdata.time, -1, currPe));
+						total_count++;
+					    }
+					}else{
+					    //other events
+					    previous_black_time = -1;
+					}
+					LogFile.nextEvent(logdata);				
 				}
-
-
 			}
-
 			catch (IOException e)
 			{
 				// I doubt we'll ever get here
@@ -849,7 +877,8 @@ public class NoiseMiner extends ProjDefs
 
 			// print each event's histogram
 
-			for(int i=0;i<numEvents;i++){
+			//for(int i=0;i<numEvents;i++){
+			for(int i=0;i<h.length;i++){
 				if(h[i].haveManySamples() || true){
 					h[i].cluster();
           //					System.out.println("Clusters for event:" + i + " pe:" + currPe + " are: " + h[i].clusters_toString() );
@@ -860,7 +889,8 @@ public class NoiseMiner extends ProjDefs
 			// Merge all the events across this pe
 //			System.out.println("Creating histogram for pe");
 			Histogram h_pe = new Histogram();
-			for(int i=0;i<numEvents;i++){
+			//for(int i=0;i<numEvents;i++){
+			for(int i=0;i<h.length;i++){
 				if(h[i].haveManySamples()){
 					// for each normalized cluster
 					ListIterator<Histogram.Cluster> itr = h[i].clustersNormalized().listIterator();
@@ -882,13 +912,13 @@ public class NoiseMiner extends ProjDefs
 
 
 			// filter the per-processor clusters
-      //      h_pe.filterNormalizedClusters(0.0001);
+			h_pe.filterNormalizedClusters(0.01);
 
 			int n = 1;
 			while(h_pe.hasNthNoiseComponent(n)){
 //				h_pe.nthNoise(n).events.buildFFT();
 
-				eventWindow ew = h_pe.nthNoise(n).events;
+				EventWindow ew = h_pe.nthNoise(n).events;
 				
 				long occurrences = h_pe.nthNoise(n).count();
 				
@@ -897,11 +927,11 @@ public class NoiseMiner extends ProjDefs
 				Duration periodicity = ew.period();
 //				Duration periodicity_fft = ew.periodFromFFT();
 				
-				if(occurrences > 5){
+				//if(occurrences > 0){
 					loggingText = loggingText + "Noise component " + n + " on processor " + currPe + " has duration of about " + duration + " and occurs " + occurrences + " times with periodicity " + periodicity + "\n";
 
 					results.add(new NoiseResult(duration, occurrences, periodicity, /* periodicity_fft,*/ currPe, ew));
-				}
+				//}
 
 				n++;
 			}
@@ -921,8 +951,27 @@ public class NoiseMiner extends ProjDefs
 		return s;
 	}
 
+	
+	/** An extended JButton that also contains a reference to some NoiseMiner results */
+	public class NoiseResultButton extends JButton {
+		public NoiseResult nr;
+
+		public NoiseResultButton(String label, NoiseResult nr){
+			super(label);
+			this.nr = nr;
+		}
+		
+		/** Create a nice window displaying timelines for the entries in nr */
+		public void display(){
+			NoiseMinerExemplarTimelineWindow nmetw = new NoiseMinerExemplarTimelineWindow(nr);  
+			nmetw.setSize(1000,600);
+			nmetw.setVisible(true);
+		}
+	}
+	
+	
 	/** Create an array of objects representing the internal noise components */
-	public Vector getResultsTableInternal(){
+	public Vector getResultsTable(){
 		Collections.sort(resultsClustered);
 
 		// scan through results to find only the ones with periodicity close to or longer than the OS time quanta
@@ -932,22 +981,27 @@ public class NoiseMiner extends ProjDefs
 		Vector resultTable = new Vector();
 
 		Iterator<NoiseResult> itr = resultsClustered.iterator();
+		int i=0;
 		while(itr.hasNext()){
 			NoiseResult v = itr.next();
-
+			
+			Vector row = new Vector();
+			
+			row.add(new String("" + v.duration ));
+			row.add(new String("" + v.pe_toString() ));
+			row.add(new String("" + v.occurrences ));
+			row.add(new String("" + v.periodicity));
+			
 			if(v.periodicity.us() < osQuanta.us()*0.8 ) {
+				row.add(new String("internal"));
+			} else {
+				row.add(new String("external"));
+			}
 
-				Vector row = new Vector();
-
-				row.add(new String("" + v.duration ));
-				row.add(new String("" + v.pe_toString() ));
-				row.add(new String("" + v.occurrences ));
-				row.add(new String("" + v.periodicity));
-//				row.add(new String("" + v.periodicity_FFT));
-//				row.add(new JButton("Test")); // button to go here
+			row.add(new NoiseResultButton("view",v)); // will turn into a button
+			
+			resultTable.add(row);
 				
-				resultTable.add(row);
-			}
 		}
 
 
@@ -965,46 +1019,5 @@ public class NoiseMiner extends ProjDefs
 		return resultTable;
 	}
 
-	/** Create an array of objects representing the external noise components */
-	public Vector getResultsTableExternal(){
-		Collections.sort(resultsClustered);
-
-		// scan through results to find only the ones with periodicity close to or longer than the OS time quanta
-
-		int numResultRows = resultsClustered.size();
-
-		Vector resultTable = new Vector();
-
-		Iterator<NoiseResult> itr = resultsClustered.iterator();
-		while(itr.hasNext()){
-			NoiseResult v = itr.next();
-
-			if(v.periodicity.us() >= osQuanta.us()*0.8) {
-
-				Vector row = new Vector();
-
-				row.add(new String("" + v.duration ));
-				row.add(new String("" + v.pe_toString() ));
-				row.add(new String("" + v.occurrences ));
-				row.add(new String("" + v.periodicity));
-//				row.add(new String("" + v.periodicity_FFT));
-
-				resultTable.add(row);
-			}
-		}
-
-		// If we have no data, put a string into the table
-		if(resultTable.size() == 0){
-			Vector row = new Vector();
-			row.add(new String("No Noise Components Found"));
-			row.add(new String("n/a"));
-			row.add(new String("n/a"));
-			row.add(new String("n/a"));
-//			row.add(new String("n/a"));
-			resultTable.add(row);
-		}
-
-		return resultTable;
-	}
-
+	
 }

@@ -29,7 +29,7 @@ public class LogFileViewerWindow extends ProjectionsWindow
     private Button bOpen, bClose;
     private Panel titlePanel;
     
-    void windowInit() {
+    protected void windowInit() {
 	// do nothing, no parameters need to be set.
     }
     

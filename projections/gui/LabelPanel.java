@@ -17,13 +17,13 @@ public class LabelPanel extends JPanel {
 	JTextField field;
     JLabel label;
 
-    LabelPanel(String label, int alignment, JTextField fieldEntry) {
+    public LabelPanel(String label, int alignment, JTextField fieldEntry) {
 	this.label = new JLabel(label, alignment);
 	field = fieldEntry;
 	createLayout();
     }
 
-    LabelPanel(String label, JTextField fieldEntry) {
+    public LabelPanel(String label, JTextField fieldEntry) {
 	this(label, JLabel.RIGHT, fieldEntry);
     }
 

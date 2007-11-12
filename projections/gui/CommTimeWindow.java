@@ -91,7 +91,7 @@ public class CommTimeWindow extends GenericGraphWindow
     // format for output
     private DecimalFormat  _format;
             
-    void windowInit() {
+    protected void windowInit() {
         // acquire data using parent class
 	super.windowInit();
 	

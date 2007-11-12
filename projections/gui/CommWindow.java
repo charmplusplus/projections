@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import javax.swing.*;
 
 import projections.analysis.*;
+import projections.gui.Timeline.TimelineWindow;
 import projections.misc.LogEntryData;
 
 public class CommWindow extends GenericGraphWindow
@@ -55,7 +56,7 @@ public class CommWindow extends GenericGraphWindow
 
     OrderedIntList peList;
 
-    void windowInit() {
+    protected void windowInit() {
 	// parameter initialization is completely handled by GenericGraphWindow
 	super.windowInit();
     }

@@ -1,14 +1,19 @@
-package projections.gui;
-
-import java.awt.*;
-import projections.analysis.*;
+package projections.gui.Timeline;
 
 
-public class TimelineMessageCanvas extends Canvas
+import java.awt.Color;
+import java.awt.Graphics;
+import javax.swing.*;
+import java.awt.FontMetrics;
+import projections.analysis.TimelineMessage;
+import projections.gui.MainWindow;
+
+import java.awt.Dimension;
+
+
+public class MessageCanvas extends JPanel
 {
-    /**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -18,7 +23,7 @@ public class TimelineMessageCanvas extends Canvas
 
    private String[] sTitles;
    private int[]    width;
-   private TimelineObject obj;
+   private EntryMethodObject obj;
    private FontMetrics fm;
    private TimelineMessage[] msgs;
    private String[][] names;
@@ -27,7 +32,7 @@ public class TimelineMessageCanvas extends Canvas
    private int numColumns = 5; // number of columns that will be drawn
    private int[] maxColWidth = null;  // store max col width for each col
    
-   public TimelineMessageCanvas(TimelineObject obj)
+   public MessageCanvas(EntryMethodObject obj)
    {
 	  this.obj  = obj;
 	  w = 0;
@@ -59,7 +64,7 @@ public class TimelineMessageCanvas extends Canvas
 	  sTitles[16]= "TO ENTRY:";
 	  //	  sTitles[17]= "DEST PE:";
 	  
-	  setBackground(Color.black);
+	  setBackground(Color.pink);
 	  setForeground(Color.lightGray);
    }   
    public Dimension getMinimumSize()

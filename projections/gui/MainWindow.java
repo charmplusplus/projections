@@ -49,6 +49,7 @@ public class MainWindow extends JFrame
     //    protected static final int POSE_WIN = 15;
     protected static final int AMPI_PROFILE_WIN = 16;
 
+    // When modifying this list also make sure you modify the list below and MainMenuManager
     public static final String[] windowMenuNames =
     {
 	"Graphs",
@@ -74,7 +75,7 @@ public class MainWindow extends JFrame
     public static final String[] windowClassNames =
     { 
 	"GraphWindow",
-	"TimelineWindow",
+	"Timeline.TimelineWindow",
 	"ProfileWindow",
 	"CommWindow",
 	"CommTimeWindow",
@@ -266,8 +267,8 @@ public class MainWindow extends JFrame
 	    if (childWindows[i][0] != null) {
 		if (childWindows[i][0] instanceof GraphWindow) {
 		    ((GraphWindow)childWindows[i][0]).refreshDisplay();
-		} else if (childWindows[i][0] instanceof TimelineWindow) {
-		    ((TimelineWindow)childWindows[i][0]).refreshDisplay();
+		} else if (childWindows[i][0] instanceof projections.gui.Timeline.TimelineWindow) {
+		    ((projections.gui.Timeline.TimelineWindow)childWindows[i][0]).refreshDisplay(false);
 		} else {  // default
 		    ((Frame)childWindows[i][0]).repaint();
 		}

@@ -49,7 +49,7 @@ public class CallTableWindow extends ProjectionsWindow
     boolean              epDetailToggle;
     boolean              statsToggle;
     
-    void windowInit() {
+    protected void windowInit() {
         // acquire data using parent class
     }
 

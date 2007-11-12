@@ -530,7 +530,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 	    }
 	    // add to outlier list reverse sorted by significance
 	    outlierList.add(peNames[sortedMap[i+offset]]);
-	    System.out.println(peNames[sortedMap[i+offset]]);
+	    // System.out.println(peNames[sortedMap[i+offset]]);
 	}
 	// fill in cluster representative data
 	int minDistanceIndex[] = new int[k];
@@ -553,7 +553,7 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 			tempData[minDistanceIndex[k]][act];
 		}
 		outlierList.addFirst("C"+k+"R"+minDistanceIndex[k]);
-		System.out.println(minDistanceIndex[k]);
+		// System.out.println(minDistanceIndex[k]);
 		clusterIndex++;
 	    }
 	}

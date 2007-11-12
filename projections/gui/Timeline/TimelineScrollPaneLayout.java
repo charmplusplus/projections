@@ -1,8 +1,6 @@
 package projections.gui.Timeline;
 
 
-import javax.swing.JScrollBar;
-import javax.swing.JViewport;
 import javax.swing.border.*;
 
 import java.awt.LayoutManager;
@@ -10,7 +8,6 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Dimension;
 import java.awt.Insets;
 import java.io.Serializable;
 
@@ -57,7 +54,6 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 	 */
 	private void adjustForVSB(Rectangle available,
 			Rectangle vsbR, Insets vpbInsets) {
-		int oldWidth = vsbR.width;
 		int vsbWidth = Math.max(0, Math.min(vsb.getPreferredSize().width, available.width));
 		available.width -= vsbWidth;
 		vsbR.width = vsbWidth;
@@ -70,7 +66,6 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 	 */
 	private void adjustForHSB(Rectangle available,
 			Rectangle hsbR, Insets vpbInsets) {
-		int oldHeight = hsbR.height;
 		int hsbHeight = Math.max(0, Math.min(available.height, hsb.getPreferredSize().height));
 		available.height -= hsbHeight;
 		hsbR.y = available.y + available.height + vpbInsets.bottom;
@@ -94,8 +89,6 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 		Point originalViewPosition = viewport.getViewPosition();		
 		int originalScaledWidth = viewport.getView().getWidth();
 		int originalViewWidth = viewport.getWidth();
-		
-		System.out.println("Original Position = " + originalViewPosition.x + " Width="+originalScaledWidth);
 		
 		super.layoutContainer(parent);
 		
@@ -167,35 +160,16 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 			vpbInsets = new Insets(0,0,0,0);
 		}
 
-		Component view = (viewport != null) ? viewport.getView() : null;
-		Dimension viewPrefSize =  (view != null) ? view.getPreferredSize() : new Dimension(0,0);
-
-		Dimension extentSize = (viewport != null) ? viewport.toViewCoordinates(availR.getSize()) : new Dimension(0,0);
-
-		boolean viewTracksViewportWidth = false;
-		boolean viewTracksViewportHeight = false;
-		boolean isEmpty = (availR.width < 0 || availR.height < 0);
-		Scrollable sv;
-
-		sv = (Scrollable)view;
-		viewTracksViewportWidth = sv.getScrollableTracksViewportWidth();
-		viewTracksViewportHeight = sv.getScrollableTracksViewportHeight();
-
-
 		Rectangle vsbR = new Rectangle(0, availR.y - vpbInsets.top, 0, 0);
 
 		if (vsb != null) {
 			adjustForVSB(availR, vsbR, vpbInsets);
-			extentSize = viewport.toViewCoordinates(availR.getSize());
 		}
 
 		Rectangle hsbR = new Rectangle(availR.x - vpbInsets.left, 0, 0, 0);
 
 		if (hsb != null) {
 			adjustForHSB(availR, hsbR, vpbInsets);
-
-			extentSize = viewport.toViewCoordinates(availR.getSize());
-
 		}
 
 
@@ -207,19 +181,11 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 
 			viewport.setBounds(availR);
 
-			System.out.println("$$$ Setting viewport bounds to "+availR.x+","+availR.y+" "+availR.width + "x" + availR.height);
-
 			int requiredScreenHeight = data.screenHeight();
-			System.out.println("$$$ MainPanel new size will be " + scaledWidth +"x" + requiredScreenHeight);
 			if(scaledWidth != c.getWidth()) {
 				c.setBounds(0,0,scaledWidth,requiredScreenHeight);
 			}
 
-			if (sv != null) {
-				extentSize = viewport.toViewCoordinates(availR.getSize());
-				viewTracksViewportWidth = sv.getScrollableTracksViewportWidth();
-				viewTracksViewportHeight = sv.getScrollableTracksViewportHeight();
-			}
 		}
 
 
@@ -239,7 +205,6 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 			int rowHeadR_width = rowHeadR.width;
 			int rowHeadR_height = rowHeadR.height;
 			rowHead.setBounds(rowHeadR_x,rowHeadR_y,rowHeadR_width,rowHeadR_height);
-//			System.out.println("$$$ Setting bounds for row header to "+rowHeadR_width + "x" + rowHeadR_height);
 		}
 
 		if (colHead != null) {
@@ -311,7 +276,6 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 		 * This would occur when we click the zoom button
 		 */
 		if(viewport != null){
-			System.out.println("Setting view position");
 
 			boolean doMoveView = false;
 
@@ -326,14 +290,10 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 				// Try to keep the center of the visible area at the same portion of the timeline, even though its width may have changed
 
 				int oldViewPositionCenter = originalViewPosition.x + originalViewWidth / 2 ;
-
-				System.out.println("old View position is "+oldViewPositionCenter);
 				
 				double relativePosition = ((double)(oldViewPositionCenter-data.offset()))/((double)(originalScaledWidth-2*data.offset()));
 
 				newViewPositionCenter = data.offset()+(int)(relativePosition* (scaledWidth-2*data.offset()));
-				
-				System.out.println("new View position(relative="+relativePosition+") has been decided to be "+newViewPositionCenter);
 				
 				data.keepViewCentered(false);
 
@@ -352,13 +312,8 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 				if(newViewPositionLeft > scaledWidth - availR.width)
 					newViewPositionLeft = scaledWidth - availR.width;
 
-
-				System.out.println("========= Using newViewPosition = "+newViewPositionLeft);
-				Point p;
-
-				p = viewport.getViewPosition();
+				Point p = viewport.getViewPosition();
 				p.x = newViewPositionLeft;
-				System.out.println("$$$$$$ Setting viewport view to horizontal coordinate "+p.x);
 				viewport.setViewPosition(p);
 
 				data.resetPreferredView();

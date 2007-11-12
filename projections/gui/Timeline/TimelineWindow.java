@@ -2,12 +2,27 @@ package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JLayeredPane;
 import javax.swing.ToolTipManager;
 
 import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
  
+
+
+/**
+ * The main window for the Timeline Projections Tool
+ * 
+ * This window uses:
+ * 		a ScrollingPanel for the graphical portion of the display
+ * 		a WindowControls panel for the buttons and checkboxes and JLabels
+ * 
+ * Many of the decisions about the rendering are stored in 'data'
+ * 
+ * 
+ * 
+ * @author idooley2
+ *
+ */
 public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 
 	private static final long serialVersionUID = 1L;
@@ -16,32 +31,27 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	// meaning in future versions of Projections that support multiple
 	// runs.
 	int myRun = 0;
-  	
+
+	
+	/** The panel that ties together three other panels with some scrollbars
+	 * @note internally it contains a JScrollPane with a custom layout manager */
 	public ScrollingPanel scrollingPanel;
 	
+	/** The panel on the left that displays strings like "PE 0 (20%,40%)" */
 	public LabelPanel labelPanel;
+	/** The panel on top that draws a scale for the time dimension */
 	public LayeredPanel axisPanel; 
+	/** The panel that draws the main portion of the window, the timelines */
 	public MainPanel mainPanel;
 	
-
-	
-	/**	 A layered panel which will contain the standard axisPanel 
-	 * as well as an overlay on which the selection or highlights 
-	 * can be drawn 
-	 * 
-	 * Depth=10 corresponds to the mainPanel
-	 * Depth=20 corresponds to the Rubberband selection
-	 * 
-	 * */
-	public JLayeredPane mainLayeredPanel; 
-	
-
 		
-	/** The JPanel containing all the buttons */
+	/** The JPanel containing all the buttons and labels */
 	public WindowControls controls;
 	
+	/** A reference to this object for use by event listener inner classes */
 	TimelineWindow thisWindow;
-	
+
+	/** A structure that stores the information necessary to render everything */
     Data data;
 
 	
@@ -80,7 +90,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		data = new Data(this);
 		
-		labelPanel = new LabelPanel(data, this);
+		labelPanel = new LabelPanel(data);
 
 		
 		
@@ -98,10 +108,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		
 		mainPanel = new MainPanel(data, this);
-//		MainOverlayPanel op2 = new MainOverlayPanel(data);
-		MainLayout lay2 = new MainLayout(data);
-//		mainPanel = new LayeredPanel(data,mp,op2,lay);
-		
 		
 		scrollingPanel = new ScrollingPanel(data, mainPanel, axisPanel, labelPanel);
 

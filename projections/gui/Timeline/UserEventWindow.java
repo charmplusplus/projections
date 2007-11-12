@@ -29,8 +29,6 @@ public class UserEventWindow extends JFrame
 	private JTabbedPane          tabbedPane_ = new JTabbedPane();
 	TableSorter[]        sorter_ = null;
 
-	private Data data;
-
 	private DefaultTableCellRenderer rightJustify_ = 
 		new DefaultTableCellRenderer();
 
@@ -134,10 +132,9 @@ public class UserEventWindow extends JFrame
 	}
 
 	/** Constructor. */
-	public UserEventWindow(JCheckBox c, Data data) { 
+	public UserEventWindow(JCheckBox c) { 
 
 		super("User Event Window");
-		this.data = data;
 		System.out.println("Constructing UserEventWindow");
 
 		if (format_ == null) {

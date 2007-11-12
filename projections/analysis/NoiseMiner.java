@@ -7,10 +7,6 @@ import java.io.*;
 import java.util.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 //import java.math.BigInteger;
 //import jnt.FFT.*;
@@ -785,9 +781,9 @@ public class NoiseMiner extends ProjDefs
 		int currPe;
 
 		long previous_begin_time=-1;
-		long previous_end_time=-1;
+//		long previous_end_time=-1;
 		int  previous_begin_entry=-1;
-		int  previous_end_entry=-1;
+//		int  previous_end_entry=-1;
 
 		//The variable to track whether there's no intermediate events
 		//in a black part
@@ -981,7 +977,7 @@ public class NoiseMiner extends ProjDefs
 		Vector resultTable = new Vector();
 
 		Iterator<NoiseResult> itr = resultsClustered.iterator();
-		int i=0;
+		
 		while(itr.hasNext()){
 			NoiseResult v = itr.next();
 			

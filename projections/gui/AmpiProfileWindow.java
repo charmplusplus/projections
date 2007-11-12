@@ -588,11 +588,11 @@ public class AmpiProfileWindow extends ProjectionsWindow
     }
 
     void setAmpiDisplayProfileData(){
-        int curPe = -1;
+//        int curPe = -1;
 	int numPes = data.plist.size();
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
         String[] xNames = new String[numFunc-1];
-        Vector ampiProcess = null;
+//        Vector ampiProcess = null;
         int pCnt=0;
 
 	// [numFunc-1][1]

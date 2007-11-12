@@ -154,7 +154,7 @@ public class AccumulatedSummaryReader extends ProjectionsReader
 	double newEndTime = endInterval*intervalSize;
 	
 	long interval = 0;
-	double delta = Double.MIN_VALUE; // to throw off exact values **HACK**
+//	double delta = Double.MIN_VALUE; // to throw off exact values **HACK**
 
 	while (!(tokenizer.isEOL())) {
 	    // find out when actual data is to be read.

@@ -7,7 +7,7 @@ public class KMeansClustering {
 			      int clusterMap[], double distanceFromClusterMean[]) {
 	double mean[][];
 	double oldMean[][];
-	double distance[];
+//	double distance[];
 	int clusterCounts[];
 	double clusterMinBound[][];
     
@@ -17,7 +17,7 @@ public class KMeansClustering {
 	// initialization O(p + ep)
 	mean = new double[numClusters][numEPs];
 	oldMean = new double[numClusters][numEPs];
-	distance = new double[numClusters];
+//	distance = new double[numClusters];
 	clusterCounts = new int[numClusters];
 	clusterMinBound = new double[numClusters][numEPs];
 	

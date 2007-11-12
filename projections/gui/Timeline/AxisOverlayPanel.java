@@ -38,7 +38,6 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-//		System.out.println("PaintComponent() AxisOverlayPanel size="+getWidth()+"x"+getHeight());
 
 		if(data.selectionValid()){
 			g.setColor(Color.white);
@@ -65,7 +64,6 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		System.out.println("Mouse Clicked");
 		data.invalidateSelection();
 	}
 
@@ -79,13 +77,11 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		System.out.println("Mouse Entered");
 		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
 		data.setHighlight(e.getPoint().x);
 	}
 
 	public void mouseExited(MouseEvent e) {
-		System.out.println("Mouse Exited");
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		data.removeHighlight();
 	}

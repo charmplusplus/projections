@@ -92,7 +92,6 @@ public class AxisPanel extends JPanel
 	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
-		System.out.println("PaintComponent() AxisPanel size="+getWidth()+"x"+getHeight());
 		
 		g.setFont(data.axisFont);
 		FontMetrics fm = g.getFontMetrics();

@@ -57,7 +57,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	
     /** called when the display must be redrawn, sometimes as a callback from data object */
 	public void refreshDisplay(boolean doRevalidate){
-		System.out.println("TimelineWindow refreshDisplay()");
 
 		// Set the values from the buttons
 		if(data.selectionValid()){
@@ -84,7 +83,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	/** WHOLE CONSTRUCTOR IS NOT CALLED BEFORE windowInit() */
 	public TimelineWindow(MainWindow parentWindow, Integer myWindowID) {
 		super(parentWindow, myWindowID);
-		System.out.println("Continue Window constructor");
 		
         thisWindow = this;
 		
@@ -128,9 +126,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	
 	
 	protected void showWindow(){
-		// do nothing
-		System.out.println("Begin Window ShowWindow()");
-		
+		// do nothing		
 	}
 
 
@@ -145,16 +141,13 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 
 	
 	protected void getDialogData(){
-		System.out.println("Begin Window getDialogData()");
-		
 		data.setProcessorList(dialog.getValidProcessors());
         data.setRange(dialog.getStartTime(),dialog.getEndTime());
 		
 	}
 	
     public void setDialogData() {
-		System.out.println("Begin Window setDialogData()");
-     
+	
     	dialog.setValidProcessors(data.processorList());
     	dialog.setStartTime(data.startTime());
     	dialog.setEndTime(data.endTime());
@@ -168,15 +161,9 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	}
 
 	protected void windowInit() {
-		System.out.println("Begin Window windowInit()");
-		System.out.println("MainWindow.runObject[myRun]="+ MainWindow.runObject[myRun]);
-		System.out.println("data="+data);
-		
-		data = new Data(this);
-				
+		data = new Data(this);		
 		data.setProcessorList(MainWindow.runObject[myRun].getValidProcessorList());
 		data.setRange(0, MainWindow.runObject[myRun].getTotalTime());
-
 	}
     
 }

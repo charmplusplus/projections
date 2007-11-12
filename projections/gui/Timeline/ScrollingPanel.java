@@ -75,18 +75,13 @@ public class ScrollingPanel extends JPanel  {
 	void refreshDisplay(boolean doRevalidate){
 
 		if(doRevalidate){
-			System.out.println("ScrollingPanel.refreshDisplay() calling revalidates");
-
 			data.invalidateSelection();
-			
 			this.revalidate();
 			scrollpane.revalidate();
 			mainPanel.revalidate();
 			axisPanel.revalidate();
 			labelPanel.revalidate();
 		}
-		
-		System.out.println("ScrollingPanel.refreshDisplay() calling repaints");
 		
 		this.repaint();
 		scrollpane.repaint();

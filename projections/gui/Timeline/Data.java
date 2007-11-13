@@ -70,9 +70,6 @@ public class Data
 	 * */
 	private int mostRecentScaledScreenWidth;
 
-	/** The height of the objects drawn in the timeline ? */
-	private int barheight;
-
 	private OrderedIntList processorList;
 
 
@@ -166,8 +163,6 @@ public class Data
 		oldplist = null;
 		oldpstring = null;
 
-		barheight = 20;
-
 		processorUsage = null;
 		entryUsageList = null;
 
@@ -214,9 +209,7 @@ public class Data
 		axisFont = new Font("SansSerif", Font.PLAIN, axisFontSize);
 	}
 
-	public int barheight(){
-		return barheight;
-	}
+
 	public long beginTime(){
 		return beginTime;
 	}
@@ -699,12 +692,17 @@ public class Data
 	}
 
 
+	/** The height of the timeline event object rectangles */
+	public int barheight(){
+		return 14;
+	}
+		
 	/** Get the height required to draw a single PE's Timeline */
 	public int singleTimelineHeight(){
 		if(useMinimalView())
-			return barheight + 4;
+			return barheight() + 10;
 		else
-			return barheight + 20;
+			return barheight() + 14;
 	}
 
 	public void setColors(Color backgroundColor, Color foregroundColor){
@@ -896,6 +894,10 @@ public class Data
 		return offset() + (int)(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
 	}
 
+	public int timeToScreenPixel(long startTime, int assumedScreenWidth) {
+		double fractionAlongTimeAxis =  ((double) (startTime-beginTime)) /((double)(endTime-beginTime));
+		return offset() + (int)(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
+	}
 
 
 	/** Set the preferred position for the horizontal view or scrollbar  */
@@ -943,6 +945,15 @@ public class Data
 	}	
 	public boolean keepViewCentered() {
 		return keepViewCentered;
+	}
+	
+	/** The height of the little line below the entry method designating a message send */
+	public int messageSendHeight() {
+		return 5;
+	}
+	/** The height of the rectangle that displays the message pack time below the entry method */
+	public int messagePackHeight() {
+		return 3;
 	}
 
 

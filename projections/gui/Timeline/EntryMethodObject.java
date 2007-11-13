@@ -50,14 +50,9 @@ implements MouseListener
 	private boolean isFunction = false;
 
 	private static DecimalFormat format_ = new DecimalFormat();
-	double scale;
-	int left;
-	int h;
+//	double scale;
+//	int left;
 	
-	/** The distance from the top and bottom to the rectangle painted to represent the object in the timeline */
-	int verticalInset;
-	
-
 	private TimelineMessage created_message;
 
 	public EntryMethodObject(Data data,  TimelineEvent tle, 
@@ -212,6 +207,7 @@ implements MouseListener
 		msgwindow = null;
 	}   
 
+	/** paint an entry method that tapers to a point at its left side */
 	private void drawLeftArrow(Graphics g, Color c, int startY, int h)
 	{
 		int[] xpts = {5, 0, 5};
@@ -226,7 +222,8 @@ implements MouseListener
 		g.setColor(c.darker());
 		g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);   
 	}   
-
+	
+	/** paint an entry method that tapers to a point at its right side */
 	private void drawRightArrow(Graphics g, Color c, int startY, int h, int w)
 	{
 		int[] xpts = {w-6, w, w-6};
@@ -470,7 +467,7 @@ implements MouseListener
 		// Set the colors of the object
 		if (entry == -1) { 
 			
-			// Idle time
+			// Idle time regions are white on a dark background, or grey on a light background
 			
 //			Color fg = data.getForegroundColor();
 			Color bg = data.getBackgroundColor();
@@ -489,7 +486,6 @@ implements MouseListener
 			c = getBackground();
 		}  else {
 			if(data.colorbyObjectId()){
-				//System.out.println("Should be colored by ObjectId");
 				c = getObjectColor(tid);
 			}else{
 				c = data.entryColor()[entry];
@@ -499,62 +495,61 @@ implements MouseListener
 			}	
 		}
 		
-		// Determine object height
-		if(entry==-1){
-			// Idle regions are thinner vertically
-			// leave 8 pixels above and below
-			verticalInset = 8;
-		} else {
-			// leave 5 pixels above and below
-			verticalInset = 5;
-		}
 		
-		int w = getSize().width;
-		h = getSize().height - 2*verticalInset;
+		// Determine the coordinates and sizes of the components of the graphical representation of the object
+		int rectWidth = getSize().width;
+		int rectHeight = data.barheight();
+		
+		// Idle regions are thinner vertically
+		if(entry==-1){
+			rectHeight -= 6;
+		}
 
-		left  = 0;
-		int right = w-1;
+		// The distance from the top or bottom to the rectangle
+		int verticalInset = (getHeight()-rectHeight)/2;
+		
+//		System.out.println("rectWidth="+rectWidth+" rectHeight="+rectHeight+"verticalInset="+verticalInset);
+		
+		int left  = 0;
+		int right = rectWidth-1;
 
 		long viewbt = beginTime;
 		long viewet = endTime;
 
 		if(beginTime < data.beginTime())
 		{
-			drawLeftArrow(g, c, verticalInset, h);
+			drawLeftArrow(g, c, verticalInset, rectHeight);
 			left = 5;
 			viewbt = data.beginTime();
 		}
 
 		if(endTime > data.endTime())
 		{
-			drawRightArrow(g, c, verticalInset, h, w);
-			right = w-6;
+			drawRightArrow(g, c, verticalInset, rectHeight, rectWidth);
+			right = rectWidth-6;
 			viewet = data.endTime();
 		}
 
-		int pixelwidth = right-left+1;
-
-		
 		// Paint the main rectangle for the object
 		g.setColor(c);
-		g.fillRect(left, verticalInset, pixelwidth, h);
+		g.fillRect(left, verticalInset, rectWidth, rectHeight);
 
 		
-		if(w > 2)
+		// Paint the edges of the rectangle lighter/darker to give an embossed look
+		if(rectWidth > 2)
 		{
 			g.setColor(c.brighter());
 			g.drawLine(left, verticalInset, right, verticalInset);
 			if(left == 0)
-				g.drawLine(0, verticalInset, 0, verticalInset+h-1);
+				g.drawLine(0, verticalInset, 0, verticalInset+rectHeight-1);
 
 			g.setColor(c.darker());
-			g.drawLine(left, verticalInset+h-1, right, verticalInset+h-1);
-			if(right == w-1)
-				g.drawLine(w-1, verticalInset, w-1, verticalInset+h-1);
+			g.drawLine(left, verticalInset+rectHeight-1, right, verticalInset+rectHeight-1);
+			if(right == rectWidth-1)
+				g.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
 		}
 
-		scale= pixelwidth /((double)(viewet - viewbt + 1)); 
-
+		// Show the message sends
 		if(data.showMsgs == true && messages != null)
 		{
 			g.setColor(getForeground());
@@ -563,10 +558,10 @@ implements MouseListener
 				long msgtime = messages[m].Time;
 				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
 				{
-					int pos = (int)((msgtime - viewbt) * scale);
-					if(beginTime < data.beginTime())
-						pos += 5;
-					g.drawLine(pos, verticalInset+h, pos, verticalInset+h+5);
+					double scale= rectWidth /((double)(viewet - viewbt + 1));
+					int xPos = (int)((msgtime - viewbt+1.0) * scale);
+					g.drawLine(xPos, verticalInset+rectHeight, xPos, verticalInset+rectHeight+data.messageSendHeight());
+//					System.out.println("Displaying a message send from "+xPos+","+(verticalInset+rectHeight)+" to "+ xPos+","+ (verticalInset+rectHeight+data.messageSendHeight()));
 				}
 			}
 		}               
@@ -582,10 +577,9 @@ implements MouseListener
 
 				if(pet >= data.beginTime() && pbt <= data.endTime())
 				{
-					int pos = (int)((pbt - viewbt) * scale);
-					if(beginTime < data.beginTime())
-						pos += 5;
-					g.fillRect(pos, verticalInset+h, (int)(pet-pbt+1), 3);
+					double scale= rectWidth /((double)(viewet - viewbt + 1));
+					int xPos = (int)((pbt - viewbt) * scale);
+					g.fillRect(xPos, verticalInset+rectHeight, (int)(pet-pbt+1), data.messagePackHeight());
 				}
 			}
 		}               
@@ -732,12 +726,8 @@ implements MouseListener
 			LENS += 5;
 		}
 
-
-//		System.out.println("Entry Method new bounds : " + BTS + "," + (data.tluh/2 + ylocation*data.tluh - data.barheight/2) + "," +
-//				LENS + "," + data.barheight + "," + 5);
-		
-		this.setBounds(BTS,  data.singleTimelineHeight()/2 + ylocation*data.singleTimelineHeight() - data.barheight()/2,
-				LENS, data.barheight() + 5);
+		this.setBounds(BTS,  ylocation*data.singleTimelineHeight(),
+				LENS, data.singleTimelineHeight());
 	}   
 
 	public void setPackUsage()

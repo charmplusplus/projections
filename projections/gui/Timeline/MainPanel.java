@@ -79,7 +79,7 @@ public class MainPanel extends JPanel  implements Scrollable{
 		// Draw the horizontal line 
 		g.setColor(new Color(128,128,128));
 		for (int i=0; i<data.numPs(); i++) {
-			int y = 2 + data.singleTimelineHeight()/2 + i*data.singleTimelineHeight();
+			int y = data.singleTimelineHeight()/2 + i*data.singleTimelineHeight();
 			g.drawLine(0+data.offset(), y, width-data.offset(), y);
 		}
 
@@ -94,38 +94,47 @@ public class MainPanel extends JPanel  implements Scrollable{
 			g.setColor(data.getForegroundColor());
 
 			Dimension dim = getSize();
-			double calc_xscale = (double )(data.pixelIncrement(getWidth())/data.timeIncrement(getWidth()));
-			double yscale = (double )dim.height/
-			(double)(data.processorList().size());
-
+			
 			for (int i=0;i<data.mesgCreateExecVector.size();i++) {
 				Line lineElement = 
 					(Line)data.mesgCreateExecVector.elementAt(i);
-				int startpe_position=0;
-				int endpe_position=0;
+				int startpe_index=0;
+				int endpe_index=0;
 				data.processorList().reset();
 				for (int j=0;j<data.processorList().size();j++) {
 					int pe = data.processorList().nextElement();
 					if (pe == lineElement.pCreation) {
-						startpe_position = j;
+						startpe_index = j;
 					}
 					if (pe == lineElement.pCurrent) {
-						endpe_position = j;
+						endpe_index = j;
 					}
 				}
 
-				int x1 = 
-					(int)((double)(lineElement.creationtime - data.beginTime())*
-							calc_xscale+data.offset());
-				int x2 = 
-					(int)((double)(lineElement.executiontime - data.beginTime())*
-							calc_xscale+data.offset());
-				int y1 = (int)(yscale * (double)startpe_position + 
-						lineElement.obj.h+lineElement.obj.verticalInset+5+5);
-				int y2 = (int)(yscale * (double)endpe_position +
-						lineElement.obj.h);
+				
+//				double calc_xscale = (double )(data.pixelIncrement(getWidth())/data.timeIncrement(getWidth()));
+//				double yscale = (double )dim.height/ (double)(data.processorList().size());
+//				
+				// Message Creation point
+				int x1 = data.timeToScreenPixel(lineElement.creationtime-1, getWidth());
+					
+//					(int)((double)(lineElement.creationtime - data.beginTime())*
+//							calc_xscale+data.offset());
+				
+				double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
+						
+				
+				
+				// Message executed (entry method starts) 
+				int x2 =  data.timeToScreenPixel(lineElement.executiontime, getWidth());
+//					(int)((double)(lineElement.executiontime - data.beginTime())*
+//							calc_xscale+data.offset());
+				
+				double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5);
+//					(int)(yscale * (double)endpe_index +
+//						lineElement.obj.h);
 
-				g.drawLine(x1,y1,x2,y2);
+				g.drawLine(x1,(int)y1,x2,(int)y2);
 			}
 		}
 

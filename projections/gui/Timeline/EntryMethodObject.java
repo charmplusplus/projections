@@ -50,10 +50,7 @@ implements MouseListener
 	private boolean isFunction = false;
 
 	private static DecimalFormat format_ = new DecimalFormat();
-//	double scale;
-//	int left;
-	
-	private TimelineMessage created_message;
+
 
 	public EntryMethodObject(Data data,  TimelineEvent tle, 
 			TimelineMessage[] msgs, PackTime[] packs,
@@ -99,25 +96,25 @@ implements MouseListener
 		
 		// Construct a nice informative html formatted string about this entry method object. 
 		// This string is displayed on mouseover(by setting it as this component's tooltip)
-		String infoString = "<html><body>";
+		String infoString = "";
 
 		// **CW** special treatment for functions. There really should
 		// be a general way of dealing with this.
 		if (isFunction) {
 			
-			infoString += "<i>Function:</i> " + MainWindow.runObject[myRun].getFunctionName(entry) + "<br>";
-			infoString += "<i>Begin Time:</i> " + format_.format(beginTime) + "<br>";
-			infoString += "<i>End Time:</i> " + format_.format(endTime) + "<br>";
-			infoString += "<i>Total Time:</i> " + U.t(endTime-beginTime) + "<br>";
-			infoString += "<i>Msgs created:</i> " + msgs.length + "<br>";
-			infoString += "<i>Id:</i> " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
-			infoString += "<hr><br><i>Function Callstack:</i><br>";
+			infoString += "<i>Function</i>: " + MainWindow.runObject[myRun].getFunctionName(entry) + "<br>";
+			infoString += "<i>Begin Time</i>: " + format_.format(beginTime) + "<br>";
+			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
+			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
+			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
+			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
+			infoString += "<hr><br><i>Function Callstack</i>:<br>";
 
 			// consume the call stack
 			while (!tle.callStack.empty()) {
 				AmpiFunctionData functionData = (AmpiFunctionData)tle.callStack.pop();
-				infoString += "<i>[Func]:</i> " + MainWindow.runObject[myRun].getFunctionName(functionData.FunctionID) + "<br>";
-				infoString += "&nbsp&nbps&nbsp&nbps<i>line:</i>" + functionData.LineNo + " <i>file:</i> " + functionData.sourceFileName + "<br>";
+				infoString += "<i>[Func]</i>: " + MainWindow.runObject[myRun].getFunctionName(functionData.FunctionID) + "<br>";
+				infoString += "&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>";
 			}
 		} else if (n >= 0) {
 
@@ -128,36 +125,36 @@ implements MouseListener
 				System.exit(1) ;
 			}
 			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[n][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[n][0] + "</b><br><br>"; 
-			infoString += "<i>Msg Len:</i> " + msglen + "<br>";
+			infoString += "<i>Msg Len</i>: " + msglen + "<br>";
 			
 			
-			infoString +=  "<i>Begin Time:</i> " + format_.format(beginTime);
+			infoString +=  "<i>Begin Time</i>: " + format_.format(beginTime);
 			if (cpuTime > 0) 
 				infoString +=  " (" + format_.format(cpuBegin) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>End Time:</i> " + format_.format(endTime) ;
+			infoString +=  "<i>End Time</i>: " + format_.format(endTime) ;
 			if (cpuTime > 0)
 				infoString +=  " (" + format_.format(cpuEnd) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Total Time:</i> " + U.t(endTime-beginTime);
+			infoString +=  "<i>Total Time</i>: " + U.t(endTime-beginTime);
 			if (cpuTime > 0)
 				infoString +=  " (" + U.t(cpuTime) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Packing:</i> " + U.t(packtime);
+			infoString +=  "<i>Packing</i>: " + U.t(packtime);
 			if (packtime > 0)
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
 			
-			infoString += "<i>Msgs created:</i> " + msgs.length + "<br>";
-			infoString += "<i>Created by processor:</i> " + pCreation + "<br>";
-			infoString += "<i>Id:</i> " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
+			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
+			infoString += "<i>Created by processor</i>: " + pCreation + "<br>";
+			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			if(tleUserEventName!=null)
-				infoString += "<i>Associated User Event:</i> "+tleUserEventName+ "<br>";
+				infoString += "<i>Associated User Event</i>: "+tleUserEventName+ "<br>";
 			
-			infoString += "<i>Recv Time:</i> " + recvTime + "<br>";
+			infoString += "<i>Recv Time</i>: " + recvTime + "<br>";
 			
 			if (numPapiCounts > 0) {
 				infoString += "<i>*** PAPI counts ***</i>" + "<br>";
@@ -167,39 +164,40 @@ implements MouseListener
 			}
 		} else if (n == -1) {
 			infoString += "<b>Idle Time</b><br><br>";
-			infoString += "<i>Begin Time:</i> " + format_.format(beginTime)+ "<br>";
-			infoString += "<i>End Time:</i> " + format_.format(endTime) + "<br>";
-			infoString += "<i>Total Time:</i> " + U.t(endTime-beginTime) + "<br>";
+			infoString += "<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>";
+			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
+			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
 		} else if (n == -2) {
 			infoString += "<i>Unaccounted Time</i>" + "<br>";
 			
-			infoString +=  "<i>Begin Time:</i> " + format_.format(beginTime);
+			infoString +=  "<i>Begin Time</i>: " + format_.format(beginTime);
 			if (cpuTime > 0) 
 				infoString +=  " (" + format_.format(cpuBegin) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>End Time:</i> " + format_.format(endTime);
+			infoString +=  "<i>End Time</i>: " + format_.format(endTime);
 			if (cpuTime > 0) 
 				infoString +=  " (" + format_.format(cpuEnd) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Total Time:</i> " + U.t(endTime-beginTime);
+			infoString +=  "<i>Total Time</i>: " + U.t(endTime-beginTime);
 			if (cpuTime > 0) 
 				infoString +=  " (" + (cpuTime) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Packing:</i> " + U.t(packtime);
+			infoString +=  "<i>Packing</i>: " + U.t(packtime);
 			if (packtime > 0) 
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
 			
-			infoString += "<i>Msgs created:</i> " + msgs.length + "<br>";
+			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
 		}
 		addMouseListener(this);
 		
-		infoString += "</html></body>";
-		this.setToolTipText(infoString);
-				
+//		infoString += traceAvailableDependencies();
+		
+		this.setToolTipText("<html><body>" + infoString + "</html></body>");
+					
 	} 
 	
 	public void CloseMessageWindow()
@@ -301,19 +299,16 @@ implements MouseListener
 	{
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
-				System.out.println("))))) Left Click");
+//				System.out.println("))))) Left Click");
 				OpenMessageWindow();
 			} else {	
-				System.out.println("))))) Non-Left Click");
+//				System.out.println("))))) Non-Left Click");
 	
-				System.out.println("pCreation="+pCreation);
-//				System.out.println("data.mesgVector="+data.mesgVector);
-//				System.out.println("data.mesgVector[pCreation]="+data.mesgVector[pCreation]);
-				
 				// we may need to load this processor
 				data.addProcessor(pCreation);
 								
-				created_message = searchMesg(data.mesgVector[pCreation],EventID);
+
+				TimelineMessage created_message = searchMesg(data.mesgVector[pCreation],EventID);
 				
 				data.toggleConnectingLine(pCreation,created_message.Time,
 						pCurrent,beginTime,this);
@@ -321,11 +316,37 @@ implements MouseListener
 			}
 		}
 	} 
+	
+	
+	/** This will eventually trace the upstream messages that led to this entry method, without loading any additional processor timelines */
+	public String traceAvailableDependencies(){
+		String s = "";
 
-	public void clearCreationLine() {
-		created_message = null;
+		if (entry != -1){
+			s += "<br><hr><br><b>Tracing Available Dependencies</b>:";
+
+			s += "This event is EventID="+EventID+" from creation processor="+pCreation+"<br>";
+//
+//			if(pCreation <= data.maxPs()){
+//				
+//				if (data.mesgVector[pCreation] != null){
+//
+//					s += "caller timeline is loaded<br>";
+////				TimelineMessage created_message = searchMesg(data.mesgVector[pCreation],EventID);
+////			} else {
+////				s += "caller timeline is not loaded<br>";
+//
+//				}
+//			}
+			
+		}
+		
+		return s;
 	}
-
+	
+	
+	
+	
 	public TimelineMessage searchMesg(Vector v,int eventid){
 		TimelineMessage returnItem = null;
 
@@ -344,8 +365,6 @@ implements MouseListener
 		// Try binary search first. If that fails, try sequential search.
 		// This is because stuff like bigsim logs may not have eventID
 		// stored in sorted order.
-//		System.out.println("v="+v);
-		System.out.println("eventid="+eventid);
 
 		returnItem = binarySearch(v,eventid,0,v.size()-1);
 		if (returnItem == null) {

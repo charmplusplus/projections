@@ -190,13 +190,14 @@ public class Data
 	 * Add the data for a new processor to this visualization
 	 */
 	public void addProcessor(int pCreation){
+		int oldNumP = processorList.size();
 		oldplist = processorList.copyOf();
 		processorList.insert(pCreation);
+		int newNumP = processorList.size();
 		
-//		System.out.println("processorList="+processorList);
-//		processorList.printList();
-
-		modificationHandler.notifyProcessorListHasChanged();
+		if(oldNumP != newNumP)
+			modificationHandler.notifyProcessorListHasChanged();
+	
 	}
 
 	/** Change the font sizes used */
@@ -214,19 +215,8 @@ public class Data
 		return beginTime;
 	}
 
-	public void clearAllLines() {
-		if (tloArray != null) {
-			for (int i=0;i<tloArray.length;i++) {
-				if (tloArray[i] != null)
-					for (int j=0;j<tloArray[i].length;j++) {
-						if (tloArray[i][j]!= null) {
-							tloArray[i][j].clearCreationLine();
-						}
-					}
-			}
-		}
-		mesgCreateExecVector.clear();
-	}
+
+	
 	public boolean colorbyObjectId(){
 		return colorbyObjectId;
 	}
@@ -461,6 +451,12 @@ public class Data
 		}
 	}
 
+	/** remove all the message send lines */
+	public void clearAllLines() {
+		mesgCreateExecVector.clear();
+		displayMustBeRepainted();
+	}
+	
 	/** Add or Remove a new line to the visualization representing the sending of a message */
 	public void toggleConnectingLine(int pCreation,long creationtime,
 			int pCurrent,long executiontime,
@@ -694,7 +690,7 @@ public class Data
 
 	/** The height of the timeline event object rectangles */
 	public int barheight(){
-		return 14;
+		return 16;
 	}
 		
 	/** Get the height required to draw a single PE's Timeline */
@@ -702,7 +698,7 @@ public class Data
 		if(useMinimalView())
 			return barheight() + 10;
 		else
-			return barheight() + 14;
+			return barheight() + 18;
 	}
 
 	public void setColors(Color backgroundColor, Color foregroundColor){

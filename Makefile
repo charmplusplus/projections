@@ -151,8 +151,6 @@ SRC13=\
     projections/gui/ProjectionsWindow.java\
     projections/gui/RangeDialog.java\
     projections/gui/ResponsiveToMouse.java\
-    projections/gui/Rubberband.java\
-    projections/gui/RubberbandHorizontalZoom.java\
     projections/gui/ScalePanel.java\
     projections/gui/ScaleSlider.java\
     projections/gui/ScreenInfo.java\

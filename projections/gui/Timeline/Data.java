@@ -193,8 +193,8 @@ public class Data
 		oldplist = processorList.copyOf();
 		processorList.insert(pCreation);
 		
-		System.out.println("processorList="+processorList);
-		processorList.printList();
+//		System.out.println("processorList="+processorList);
+//		processorList.printList();
 
 		modificationHandler.notifyProcessorListHasChanged();
 	}
@@ -292,7 +292,7 @@ public class Data
 				if (oldp == newp) {
 					if (beginTime == oldBT && endTime == oldET) {
 						tloArray[newpindex] = oldtloArray[oldpindex];
-						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
+//						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
 						assert(oldUserEventsArray != null);
 						timelineUserEventObjectsArray[newpindex] = 
 							oldUserEventsArray[oldpindex];
@@ -327,7 +327,7 @@ public class Data
 
 						// copy the array
 						tloArray[newpindex] = new EntryMethodObject[newNumItems];
-						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
+//						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
 						mesgVector[newp] = new Vector();
 						for (n=0; n<newNumItems; n++) {
 							tloArray[newpindex][n] = 
@@ -401,7 +401,7 @@ public class Data
 			}
 			pnum = processorList.nextElement();
 			if (tloArray[p] == null) { 
-				System.out.println("new tloarray["+p+"] is loaded from getData()");
+//				System.out.println("new tloarray["+p+"] is loaded from getData()");
 				tloArray[p] = getData(pnum, p);
 			}
 		}

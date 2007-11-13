@@ -224,9 +224,9 @@ implements MouseListener
 	}   
 	
 	/** paint an entry method that tapers to a point at its right side */
-	private void drawRightArrow(Graphics g, Color c, int startY, int h, int w)
+	private void drawRightArrow(Graphics g, Color c, int startY, int h, int right)
 	{
-		int[] xpts = {w-6, w, w-6};
+		int[] xpts = {right-6, right, right-6};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
 		g.setColor(c);
@@ -519,6 +519,7 @@ implements MouseListener
 		if(beginTime < data.beginTime())
 		{
 			drawLeftArrow(g, c, verticalInset, rectHeight);
+			rectWidth -= 5;
 			left = 5;
 			viewbt = data.beginTime();
 		}
@@ -526,14 +527,15 @@ implements MouseListener
 		if(endTime > data.endTime())
 		{
 			drawRightArrow(g, c, verticalInset, rectHeight, rectWidth);
+			rectWidth -= 5; // the rectangle is only a portion of the area
 			right = rectWidth-6;
 			viewet = data.endTime();
 		}
 
-		// Paint the main rectangle for the object
+		// Paint the main rectangle for the object 
 		g.setColor(c);
 		g.fillRect(left, verticalInset, rectWidth, rectHeight);
-
+		
 		
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
 		if(rectWidth > 2)
@@ -586,118 +588,6 @@ implements MouseListener
 
 	}   
 
-	public void print(Graphics pg, long minx, long maxx, double pixelIncrement, int timeIncrement)
-	{
-		if ((entry == -1 && data.showIdle == false) ||
-				(entry == -1 && MainWindow.IGNORE_IDLE)) {
-			return;
-		}
-
-		Color c;
-
-		if(entry == -1)
-			c = Color.black;
-		else
-			c = data.entryColor()[entry];
-
-		int w = (int)((endTime - beginTime + 1) * pixelIncrement / timeIncrement);
-		if(w < 1) w = 1;
-		if(beginTime < minx)
-			w -= (int)((minx - beginTime) * pixelIncrement / timeIncrement) - 5;
-		if(endTime > maxx)
-			w -= (int)((endTime - maxx) * pixelIncrement / timeIncrement) - 5; 
-
-		int h = 20;
-		Rectangle r = pg.getClipBounds();
-		pg.setClip(0, 0, w, 25);
-
-		int left  = 0;
-		int right = w-1;
-
-		long viewbt = beginTime;
-		long viewet = endTime;
-
-		if(beginTime < minx)
-		{
-			drawLeftArrow(pg, c, 0, h);
-			left = 5;
-			viewbt = minx;
-		}
-
-		if(endTime > maxx)
-		{
-			drawRightArrow(pg, c, 0, h, w);
-			right = w-6;
-			viewet = maxx;
-		}
-
-		pg.setColor(c);
-
-		int pixelwidth = right-left+1;
-		pg.fillRect(left, 0, pixelwidth, h);
-
-		if(entry == -1)
-		{
-			pg.setColor(Color.white);
-			for(int x=0; x<w+h-2; x += 4)
-			{
-				pg.drawLine(x, 0, x-h, h);
-				pg.drawLine(x+1, 0, x-h+1, h);
-			}
-		}
-
-		if(w > 2)
-		{
-			pg.setColor(c.brighter());
-			pg.drawLine(left, 0, right, 0);
-			if(left == 0)
-				pg.drawLine(0, 0, 0, h-1);
-
-			pg.setColor(c.darker());
-			pg.drawLine(left, h-1, right, h-1);
-			if(right == w-1)
-				pg.drawLine(w-1, 0, w-1, h-1);
-		}
-
-
-		double scale= pixelwidth /((double)(viewet - viewbt + 1)); 
-
-		if(data.showMsgs == true && messages != null)
-		{
-			pg.setColor(Color.black);
-			for(int m=0; m<messages.length; m++)
-			{
-				long msgtime = messages[m].Time;
-				if(msgtime >= minx && msgtime <= maxx)
-				{
-					int pos = (int)((msgtime - viewbt) * scale);
-					if(beginTime < minx)
-						pos += 5;
-					pg.drawLine(pos, h, pos, h+5);
-				}
-			}
-		}               
-
-		if(data.showPacks == true && packs != null)
-		{
-			pg.setColor(Color.pink);
-			for(int p=0; p<packs.length; p++)
-			{
-				long pbt = packs[p].BeginTime;
-				long pet = packs[p].EndTime;
-
-				if(pet >= minx && pbt <= maxx)
-				{
-					int pos = (int)((pbt - viewbt) * scale);
-					if(beginTime < minx)
-						pos += 5;
-					pg.fillRect(pos, h, (int)(pet-pbt+1), 3);
-				}
-			}
-		}
-
-		pg.setClip(r);               
-	}   
 
 	public void setLocationAndSize(int actualDisplayWidth)
 	{

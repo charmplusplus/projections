@@ -53,7 +53,7 @@ public class NoiseMinerExemplarTimelineWindow extends JFrame {
 			numRows = (numMiniTimelines+numCols-1) / numCols;
  		}
 		
- 		System.out.println("Laying out grid for "+numMiniTimelines+ " mini-timelines to be of size "+numRows+"x"+numCols);
+// 		System.out.println("Laying out grid for "+numMiniTimelines+ " mini-timelines to be of size "+numRows+"x"+numCols);
 		/** Set the actual layout for the content pane */
 		contents.setLayout(new GridLayout(numRows,numCols));
 		

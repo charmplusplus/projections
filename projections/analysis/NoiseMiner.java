@@ -406,7 +406,7 @@ public class NoiseMiner extends ProjDefs
 				sum = new Duration(s);
 				count=c;
 				assert(c>=0);
-				eventsInBinWindow = 50;
+				eventsInBinWindow = 40;
 				events = new EventWindow(eventsInBinWindow);
 				events.merge(ew);
 			}
@@ -416,7 +416,7 @@ public class NoiseMiner extends ProjDefs
 				sum= new Duration(s_us);
 				count=c;
 				assert(c>=0);
-				eventsInBinWindow = 50;
+				eventsInBinWindow = 40;
 				events = new EventWindow(eventsInBinWindow);
 				events.merge(ew);
 			}
@@ -494,16 +494,13 @@ public class NoiseMiner extends ProjDefs
 		}
 
 
-
-
-
 		public Histogram(){
 			used=false;
-			nbins = 2000;
-			binWidth = new Duration(1);
+			nbins = 3000;
+			binWidth = new Duration(5);  //< microseconds width for each bin
 			total_sum = new Duration(0);
 			
-			eventsInBinWindow = 80;
+			eventsInBinWindow = 50;
 			bin_count = new long[nbins];
 			bin_sum = new Duration[nbins];
 			bin_window = new EventWindow[nbins];
@@ -598,7 +595,7 @@ public class NoiseMiner extends ProjDefs
 		 *  Filter out clusters that do not have sufficient contribution to overall computation time 
 		 *  If the ratio of the duration to the periodicity is not greater than the cutoff the cluster is ignored.
 		 *  This removes clusters that only add a tiny portion of noise infrequently.
-     *  NOTE, THIS IS CURRENTLY BROKEN
+		 *  NOTE, THIS IS CURRENTLY BROKEN
 		 */
 		public void filterNormalizedClusters(double cutoff_contribution){
 			// Create normalized versions of clusters
@@ -610,13 +607,13 @@ public class NoiseMiner extends ProjDefs
 					Duration periodicity = new Duration(c.events.period());
 					Duration duration = new Duration(c.mean());
 					if( duration.us() / periodicity.us() > cutoff_contribution ){
-//            System.out.println("Keeping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() );
-            clustersFiltered.add(c);
+//						System.out.println("Keeping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() );
+						clustersFiltered.add(c);
 					}
-          else {
-//            System.out.println("Dropping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() ); 
-            // clustersFiltered.add(c); 
-          }
+					else {
+//						System.out.println("Dropping cluster with duration=" + duration.us() + " and periodicity " + periodicity.us() ); 
+						// clustersFiltered.add(c); 
+					}
 				}
 			}
 			clustersNormalized = clustersFiltered;
@@ -906,7 +903,7 @@ public class NoiseMiner extends ProjDefs
 
 
 			// filter the per-processor clusters
-			h_pe.filterNormalizedClusters(0.01);
+			h_pe.filterNormalizedClusters(0.02);
 
 			int n = 1;
 			while(h_pe.hasNthNoiseComponent(n)){

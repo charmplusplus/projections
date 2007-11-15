@@ -82,7 +82,7 @@ implements ItemListener
 		CreateLayout();
 		pack();
 		showDialog();
-		setSize(900,500);
+		setSize(1000,500);
 		setVisible(true);
 	}
 
@@ -123,13 +123,17 @@ implements ItemListener
 
 
 	void addResultsToTable(Vector data){
+
 		tableModel = new DefaultTableModel(data, columnNames);
 		table.setModel(tableModel);
-
+		
 		ButtonColumn bc = new ButtonColumn();
 		table.getColumn(buttonColumnTitle).setCellRenderer(bc);
 		table.getColumn(buttonColumnTitle).setCellEditor(bc);
 
+
+		table.revalidate();
+		table.repaint();
 	}
 
 
@@ -183,6 +187,7 @@ implements ItemListener
 
 	
 
+	/** A class that renders and handles events for the JButtons in our table */
 	class ButtonColumn extends AbstractCellEditor
 	implements TableCellRenderer, TableCellEditor, ActionListener
 	{

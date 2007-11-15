@@ -196,7 +196,7 @@ implements MouseListener
 		
 //		infoString += traceAvailableDependencies();
 		
-		this.setToolTipText("<html><body>" + infoString + "</html></body>");
+		setToolTipText("<html><body>" + infoString + "</html></body>");
 					
 	} 
 	
@@ -309,10 +309,10 @@ implements MouseListener
 								
 
 				TimelineMessage created_message = searchMesg(data.mesgVector[pCreation],EventID);
-				
-				data.toggleConnectingLine(pCreation,created_message.Time,
-						pCurrent,beginTime,this);
-		
+
+				if(created_message != null){
+					data.toggleConnectingLine(pCreation,created_message.Time, pCurrent,beginTime,this);
+				}		
 			}
 		}
 	} 
@@ -347,6 +347,7 @@ implements MouseListener
 	
 	
 	
+	/** Search for specified event in vector v using a binary search. Returns null if not found, or eventid=-1. */
 	public TimelineMessage searchMesg(Vector v,int eventid){
 		TimelineMessage returnItem = null;
 
@@ -370,7 +371,7 @@ implements MouseListener
 		if (returnItem == null) {
 			return seqSearch(v,eventid);
 		} else {
-			return returnItem;
+			return null;
 		}
 	}
 

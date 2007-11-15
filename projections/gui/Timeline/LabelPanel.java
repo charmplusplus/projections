@@ -29,7 +29,7 @@ public class LabelPanel extends JPanel
 	 * */
 	private int preferredWidth(){
 		if(data.useMinimalView())
-			return 40;
+			return 60;
 		else
 			return 90;
 	}

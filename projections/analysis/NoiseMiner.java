@@ -40,6 +40,8 @@ public class NoiseMiner extends ProjDefs
 	private String loggingText;
 
 	private Duration osQuanta;
+	
+	private int eventsInBinWindow=500;
 
 	/** A distance used to merge similar clusters, currently clusters are merged if the difference in their durations is 40% */
 	protected double peMergeDistance = 0.15;
@@ -431,7 +433,6 @@ public class NoiseMiner extends ProjDefs
 		private Duration bin_sum[]; //< The sum of all values that fall in each bin
 
 		private EventWindow bin_window[]; //< A list of recent events in each bin
-		private int eventsInBinWindow;
 		
 		/** The sum of the durations of all events seen so far */
 		private Duration cummulativeEventDurations;
@@ -452,7 +453,6 @@ public class NoiseMiner extends ProjDefs
 				sum = new Duration(s);
 				count=c;
 				assert(c>=0);
-				eventsInBinWindow = 40;
 				events = new EventWindow(eventsInBinWindow);
 				events.merge(ew);
 			}
@@ -462,7 +462,6 @@ public class NoiseMiner extends ProjDefs
 				sum= new Duration(s_us);
 				count=c;
 				assert(c>=0);
-				eventsInBinWindow = 40;
 				events = new EventWindow(eventsInBinWindow);
 				events.merge(ew);
 			}
@@ -539,7 +538,6 @@ public class NoiseMiner extends ProjDefs
 		public Histogram(){
 			cummulativeEventDurations = new Duration(0);
 			
-			eventsInBinWindow = 40;
 			bin_count = new long[nbins];
 			bin_sum = new Duration[nbins];
 			bin_window = new EventWindow[nbins];

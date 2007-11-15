@@ -295,24 +295,16 @@ implements MouseListener
 		return (float)usage;
 	}   
 
+	
 	public void mouseClicked(MouseEvent evt)
 	{
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
-//				System.out.println("))))) Left Click");
+				// Left Click
 				OpenMessageWindow();
 			} else {	
-//				System.out.println("))))) Non-Left Click");
-	
-				// we may need to load this processor
-				data.addProcessor(pCreation);
-								
-
-				TimelineMessage created_message = searchMesg(data.mesgVector[pCreation],EventID);
-
-				if(created_message != null){
-					data.toggleConnectingLine(pCreation,created_message.Time, pCurrent,beginTime,this);
-				}		
+				// non-left click
+				data.entryMethodObjectRightClick(pCreation, EventID, pCurrent, this);				
 			}
 		}
 	} 
@@ -346,62 +338,7 @@ implements MouseListener
 	
 	
 	
-	
-	/** Search for specified event in vector v using a binary search. Returns null if not found, or eventid=-1. */
-	public TimelineMessage searchMesg(Vector v,int eventid){
-		TimelineMessage returnItem = null;
 
-		// the binary search should deal with indices and not absolute
-		// values, hence size-1.
-		//
-		// if eventid = -1, the event has no source. Link to the end of
-		// the last event. (No spontaneous event creation is allowed in
-		// charm++) **CW** VERIFY THIS!
-		if (eventid == -1) {
-			// still trying to find a way to make everything work together
-			// while linking to the previous event.
-			return null;  
-		}
-
-		// Try binary search first. If that fails, try sequential search.
-		// This is because stuff like bigsim logs may not have eventID
-		// stored in sorted order.
-
-		returnItem = binarySearch(v,eventid,0,v.size()-1);
-		if (returnItem == null) {
-			return seqSearch(v,eventid);
-		} else {
-			return null;
-		}
-	}
-
-	public TimelineMessage seqSearch(Vector v, int eventid) {
-		TimelineMessage item;
-		for (int i=0; i<v.size()-1; i++) {
-			item = (TimelineMessage)v.elementAt(i);
-			if (item.EventID == eventid) {
-				return item;
-			}
-		}
-		return null;
-	}
-
-	public TimelineMessage binarySearch(Vector v,int eventid,
-			int start,int end) {
-		int mid = (start + end)/2;
-		TimelineMessage middle = (TimelineMessage)v.elementAt(mid);
-		if(middle.EventID == eventid){
-			return middle;
-		}
-		if(start==end){
-			return null;
-		}
-		if(middle.EventID > eventid){
-			return binarySearch(v,eventid,start,mid);
-		}else{
-			return binarySearch(v,eventid,mid+1,end);
-		}
-	}
 
 	public void mouseEntered(MouseEvent evt)
 	{

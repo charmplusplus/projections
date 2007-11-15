@@ -18,8 +18,6 @@ import projections.gui.ProjectionsWindow;
  * 
  * Many of the decisions about the rendering are stored in 'data'
  * 
- * 
- * 
  * @author idooley2
  *
  */
@@ -91,10 +89,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		labelPanel = new LabelPanel(data);
 
 		
-		
-		
-		// Set the tooltip delay to 0, so the entry method objects display their bubbles more quickly
-		 ToolTipManager.sharedInstance().setInitialDelay(0);
 		
 		
 		// Construct the various layers, and the layout manager

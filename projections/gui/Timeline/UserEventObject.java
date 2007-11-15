@@ -26,7 +26,7 @@ public class UserEventObject extends JComponent
 	public int    CharmEventID; // for matching with end time
 	private Color  color;
 	public String Name;
-	public int width;
+	private Data data;
 	
 	private int ylocation;
 
@@ -45,41 +45,49 @@ public class UserEventObject extends JComponent
 	
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
 
-		long BT, ET;
+		long beginTime, endTime;
 
 		if(EndTime > data.endTime())
-			ET = data.endTime() - data.beginTime();
+			endTime = data.endTime() - data.beginTime();
 		else
-			ET = EndTime - data.beginTime();
+			endTime = EndTime - data.beginTime();
 
 		if(BeginTime < data.beginTime()) 
-			BT = 0;
-		else BT = BeginTime - data.beginTime();
+			beginTime = 0;
+		else beginTime = BeginTime - data.beginTime();
 
-		int BTS  = data.offset() + (int)(BT*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-		int ETS  = data.offset() + (int)(ET*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-		int LENS = ETS - BTS + 1; 
-		if(LENS < 1) LENS = 1;
 
-		if(EndTime > data.endTime()) LENS += 5;
+		int beginTimeInPixels  = data.offset() + (int)(beginTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
+		int endTimeInPixels  = data.offset() + (int)(endTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
+
+
+		int widthInPixels = endTimeInPixels - beginTimeInPixels + 1; 
+		if(widthInPixels < 1) widthInPixels = 1;
+
+		
+		if(EndTime > data.endTime()) widthInPixels -= 5;
 		if(BeginTime < data.beginTime())
 		{
-			BTS  -= 5;
-			LENS += 5;
+			beginTimeInPixels  -= 5;
+			widthInPixels += 5;
 		}
 
 		
-		this.setBounds(BTS,  data.singleTimelineHeight()/2 + ylocation*data.singleTimelineHeight() - data.barheight()/2,
-				LENS, 5);
+		/** The y coordinate of the top of the rectangle */
+		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - data.userEventRectHeight();
+		
+		this.setBounds( beginTimeInPixels,  
+						(int)yTop,
+						widthInPixels, 
+						data.userEventRectHeight() );
 
-		width = LENS;
 	}
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-//		System.out.println("UserEventObject paintComponent");
-g.setColor(color);
-g.fillRect(0, 0, width, 5);
+
+		g.setColor(color);
+		g.fillRect(0, 0, getWidth(), getHeight());
 	}
 
 	public Color getColor() {

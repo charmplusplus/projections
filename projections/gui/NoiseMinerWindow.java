@@ -67,9 +67,9 @@ implements ItemListener
 		columnNames = new Vector();
 		columnNames.add(new String("Noise Duration"));
 		columnNames.add(new String("Seen on Processors"));
-		columnNames.add(new String("Occurrences/PE"));
+		columnNames.add(new String("Occurrences"));
 		columnNames.add(new String("Periodicity")); 
-		columnNames.add(new String("Likely Source of Noise")); 
+		columnNames.add(new String("Likely Source of Noise"));
 		columnNames.add(new String(buttonColumnTitle)); // buttons go here
 		numColumns = 6;
 
@@ -259,8 +259,7 @@ implements ItemListener
 		public void actionPerformed(ActionEvent e)
 		{
 			fireEditingStopped();
-			System.out.println("ACTION: " + e.getActionCommand() + " : " + table.getSelectedRow());
-
+			
 			// Find the column that holds the button
 			int whichColumnHasButtons=-1;
 			for(int i=0;i<numColumns;i++){

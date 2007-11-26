@@ -1,0 +1,79 @@
+<!-- 
+
+Running "ant" in this directory will cause the projections.jar file to
+be built.
+
+The directory bin will contain the final jar file
+The directory build will contain the compiled class files
+
+author = idooley2
+
+-->
+
+
+<project name="Projections" default="dist" basedir="." >
+    <description>
+        Ant based build system for Projections
+    </description>
+
+  <target name="cleanbuild" depends="clean,dist" description="Performing a fresh build" />
+
+  <!-- Setup anything for the build -->
+  <target name="init">
+    <mkdir dir="bin"/>
+    <mkdir dir="build"/>
+  </target>
+
+
+  <!-- set the property NewJava if the current java version is at least 1.5 -->
+  <target name="getJavaVersion">
+    <condition property="NewJava">
+      <not>
+        <or>
+          <equals arg1="${ant.java.version}" arg2="1.1"/>
+          <equals arg1="${ant.java.version}" arg2="1.2"/>
+          <equals arg1="${ant.java.version}" arg2="1.3"/>
+          <equals arg1="${ant.java.version}" arg2="1.4"/>
+        </or>
+      </not>
+    </condition>
+
+<
+
+  </target>
+
+
+  <!-- Compile the java code. Put class files into "build" directory -->
+  <target name="compile" depends="init, getJavaVersion" description="compile the source" >
+
+    <javac sourcepath="" srcdir="." destdir="build" >
+      <include name="**/*"/>
+      <!-- only include NoiseMiner if we have java version 1.5 or newer -->
+      <exclude name="**/NoiseMiner*.java" unless="NewJava" />
+    </javac>
+
+  </target>
+
+
+  <!-- Make the jar file from the files in "build" -->
+  <target name="dist" depends="compile" description="generate the jar file" >
+   
+    <!-- Copy images over -->
+    <mkdir dir="build/projections/images"/>
+    <copy file="projections/images/bgimage" tofile="build/projections/images/bgimage" />
+
+    <jar jarfile="bin/projections.jar" basedir="build"/>
+
+  </target>
+
+
+  <!-- Cleanup -->
+  <target name="clean" description="clean up" >
+    <!-- Delete the build directory -->
+    <delete dir="build"/>
+    <delete file="bin/projections.jar"/>
+  </target>
+
+
+</project>
+

@@ -2,8 +2,6 @@ package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
 
-import javax.swing.ToolTipManager;
-
 import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
  

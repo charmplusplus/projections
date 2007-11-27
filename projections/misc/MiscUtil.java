@@ -67,37 +67,37 @@ public class MiscUtil {
 	    throw new ArrayIndexOutOfBoundsException("Sizes do not match!");
 	}
 	
-	Object tempArray[] = (targetArray.clone());
+	Object tempArray[] = (Object[])(targetArray.clone());
 	for (int i=0; i<map.length; i++) {
 	    targetArray[i] = tempArray[map[i]];
 	}
     }
 
-    public static void main(String args[]) {
-	int mydata[] = {4, 6, 2, 3, 1, 8};
-	String myObjectData[] = new String[6]; 
-	// myObjectData is basically an string array that makes sense
-	// if its indices are sorted according to mydata.
-	myObjectData[0] = "than";
-	myObjectData[1] = "your";
-	myObjectData[2] = "Charm++\'s";
-	myObjectData[3] = "better";
-	myObjectData[4] = "My";
-	myObjectData[5] = "Charm++";
-	int result[];
-	result = MiscUtil.getSortMap(mydata);
-	for (int i=0; i<mydata.length; i++) {
-	    System.out.print(result[i] + " ");
-	}
-	System.out.println();
-	for (int i=0; i<mydata.length; i++) {
-	    System.out.print(mydata[i] + " " );
-	}
-	System.out.println();
-	MiscUtil.applyMap(myObjectData, result);
-	for (int i=0; i<myObjectData.length; i++) {
-	    System.out.print(myObjectData[i] + " ");
-	}
-	System.out.println();
-    }
+//      public static void main(String args[]) {
+// 	int mydata[] = {4, 6, 2, 3, 1, 8};
+// 	String myObjectData[] = new String[6]; 
+// 	// myObjectData is basically an string array that makes sense
+// 	// if its indices are sorted according to mydata.
+// 	myObjectData[0] = "than";
+// 	myObjectData[1] = "your";
+// 	myObjectData[2] = "Charm++\'s";
+// 	myObjectData[3] = "better";
+// 	myObjectData[4] = "My";
+// 	myObjectData[5] = "Charm++";
+// 	int result[];
+// 	result = MiscUtil.getSortMap(mydata);
+// 	for (int i=0; i<mydata.length; i++) {
+// 	    System.out.print(result[i] + " ");
+// 	}
+// 	System.out.println();
+// 	for (int i=0; i<mydata.length; i++) {
+// 	    System.out.print(mydata[i] + " " );
+// 	}
+// 	System.out.println();
+// 	MiscUtil.applyMap(myObjectData, result);
+// 	for (int i=0; i<myObjectData.length; i++) {
+// 	    System.out.print(myObjectData[i] + " ");
+// 	}
+// 	System.out.println();
+//     }
 }

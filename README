@@ -1,15 +1,17 @@
-*** Last Update: March 9, 2000 by Orion Lawlor
-
+*** Last Update: November 2007 by Isaac Dooley
 
 TO COMPILE PROJECTIONS:
 ----------------------
 
 1) Make sure the JDK commands "java", "javac" and "jar" 
-   are in your path
+   are in your path. You should use at least java version 1.5, 
+   and your java and javac should be of the same version.
 
-2) Type "make"
+2) Type "ant"
 
-3) The following files will be placed in 'bin':
+   Ant is a java tool similar to make which is available on most platforms.
+
+3) The following files will be located in 'bin':
 
       projections           : Starts projections, for UNIX machines
       projections.bat       : Starts projections, for Windows machines

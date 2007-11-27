@@ -66,7 +66,7 @@ public class LabelPanel extends JPanel
 				String peString = "PE "+data.processorList().nextElement();
 				g.drawString(peString, 10, data.singleTimelineHeight()/2 + p*data.singleTimelineHeight());
 				
-				String percentString = "(" + (int)(100 - data.idleUsage[p]) + ", " + (int)(data.processorUsage[p]) + "%)";
+				String percentString = "(" + (int)(100 - data.idleUsage[p]) + ", " + (int)(data.processorUsage[p]) + ")";
 				g.drawString(percentString, 15, data.singleTimelineHeight()/2 + p*data.singleTimelineHeight() + fm.getHeight() + 2);
 		
 			}

@@ -15,7 +15,7 @@ public class AxisPanel extends JPanel
 		if(data.useMinimalView())
 			return axispos()+largeTickHalfLength;
 		else
-			return 10+axispos()+largeTickHalfLength;
+			return 14+10+axispos()+largeTickHalfLength;
 	}
 	
 	/** Distance from top to the horizontal line **/
@@ -26,13 +26,20 @@ public class AxisPanel extends JPanel
 			return 5 + largeTickHalfLength + textpos();
 	}
 	
-	
-	/** Baseline for the labels (pixels from top) */
+	/** Distance from top to the bottom of the text label */
+	public int axisLabelPositionY(){
+		if(data.useMinimalView())
+			return 0;
+		else
+			return 15;
+	}
+		
+	/** Distance from top to the baseline for the timestamps */
 	private int textpos() {
 		if(data.useMinimalView())
-			return data.axisFont.getSize();
+			return data.axisFont.getSize()+axisLabelPositionY();
 		else
-			return 5+data.axisFont.getSize();
+			return 5+data.axisFont.getSize()+axisLabelPositionY();
 	}
 	
 	/** The distance the small tick marks extend from the horizontal line */
@@ -111,6 +118,7 @@ public class AxisPanel extends JPanel
 		g.setColor(data.getForegroundColor());
 		g.drawLine(data.offset(), axispos(), maxx-data.offset(), axispos());
 
+		// Draw the tick marks and timestamps
 		int curx;
 		String tmp;
 		for (int x=0; x<data.numIntervals(getWidth()); x++) {
@@ -131,11 +139,18 @@ public class AxisPanel extends JPanel
 				g.drawLine(curx, axispos()-smallTickHalfLength, curx, axispos()+smallTickHalfLength);
 			}
 		}
-
+		
+		
+		// Draw the label for the axis
+		g.drawString(axisLabel(), getWidth()/2 - fm.stringWidth(axisLabel())/2, axisLabelPositionY());
 
 	}
 
 
+	public String axisLabel(){
+		return "Time In Microseconds";
+	}
+	
 
 
 }

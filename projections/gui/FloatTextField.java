@@ -6,10 +6,7 @@ import java.awt.event.*;
 public class FloatTextField extends TextField
     implements TextListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	private String lastValue;
     int    lastCaretPosition;
     

@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.event.*;
 import javax.swing.*;
 
+import projections.gui.FloatJTextField;
 import projections.gui.FloatTextField;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -51,7 +52,7 @@ ItemListener {
 
 	private DecimalFormat format;
 
-	private FloatTextField scaleField;
+	private FloatJTextField scaleField;
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser;
 
@@ -295,8 +296,8 @@ ItemListener {
 		
 		
 		// If the action corresponds to the scale value changing(likely typed in)
-		if (evt.getSource() instanceof FloatTextField) {
-			FloatTextField b = (FloatTextField) evt.getSource();
+		if (evt.getSource() instanceof FloatJTextField) {
+			FloatJTextField b = (FloatJTextField) evt.getSource();
 			if (b == scaleField) {
 				data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
 				data.setScaleFactor(b.getValue());
@@ -408,10 +409,11 @@ ItemListener {
 		bIncrease.addActionListener(this);
 		bReset.addActionListener(this);
 
-		JLabel lScale = new JLabel("SCALE: ", JLabel.CENTER);
-		scaleField = new FloatTextField(data.getScaleFactor(), 5);
+		JLabel lScale = new JLabel("Scale: ", JLabel.CENTER);
+		scaleField = new FloatJTextField(data.getScaleFactor(), 5);
 		scaleField.addActionListener(this);
-
+		
+		
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(gbl);
 

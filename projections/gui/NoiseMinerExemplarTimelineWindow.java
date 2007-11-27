@@ -61,7 +61,8 @@ public class NoiseMinerExemplarTimelineWindow extends JFrame {
 		for (Iterator<TimelineEvent> itr = ew.occurrences.iterator(); itr.hasNext();){
 
 			TimelineEvent e =  itr.next();
-			System.out.println(""+((e.BeginTime+e.EndTime )/ 2));
+			
+			//System.out.println(""+((e.BeginTime+e.EndTime )/ 2));
 			
 			
 			if(eventsSoFar<numMiniTimelines){
@@ -82,7 +83,7 @@ public class NoiseMinerExemplarTimelineWindow extends JFrame {
 
 				eventsSoFar ++;
 			} else {
-			//	break;
+				break;
 			}
 		}	
 

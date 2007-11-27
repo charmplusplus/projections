@@ -6,7 +6,9 @@ import java.lang.Comparable;
 public class TimelineEvent implements Comparable
 {
  
-public long BeginTime, EndTime, RecvTime;
+public long BeginTime;
+public long EndTime;
+public long RecvTime;
     public long cpuBegin, cpuEnd;
     public int EntryPoint, SrcPe, MsgLen;
     public int EventID; //seq no of processor
@@ -29,14 +31,30 @@ public long BeginTime, EndTime, RecvTime;
     public String userEventName;
     public static final int USEREVENTMAXGAP=3;
 
-public TimelineEvent ()
-{
-}
-
+    public void setDefaultValues(){
+    	BeginTime = -1;
+    	EndTime = -1;
+    	RecvTime = -1;
+    	cpuBegin = -1;
+    	cpuEnd = -1;
+    	EntryPoint = -1;
+    	SrcPe = -1;
+    	MsgLen = -1;
+    	EventID = -1;
+    	id = null;
+    	MsgsSent = null;
+    	PackTimes = null;
+    	numPapiCounts = 0;
+        papiCounts = null;
+    }
+    
+    
+    
 public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
 		     ObjectId d, long cpubegin, long cpuend, 
 		     int numPapiCounts, long papiCounts[])
 {
+	setDefaultValues();
 	BeginTime=bt; EndTime=et;
 	cpuBegin = cpubegin;
 	cpuEnd = cpuend;
@@ -53,11 +71,14 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r,
 		     ObjectId d,int eventid, long cpubegin, long cpuend, 
 		     int numPapiCounts, long papiCounts[])
 {
+	setDefaultValues();
 	BeginTime=bt; EndTime=et;
 	cpuBegin = cpubegin;
 	cpuEnd = cpuend;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
+
+        System.out.println("RecvTime in constructor = "+RecvTime);
 	id = new ObjectId(d);
 	EventID = eventid;
 	this.numPapiCounts = numPapiCounts;
@@ -67,9 +88,13 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r,
 }
 
 
+public TimelineEvent(){
+	setDefaultValues();
+}
 
 public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 {
+	setDefaultValues();
 	BeginTime=bt; EndTime=et;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
 
@@ -77,6 +102,7 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 }
 public TimelineEvent(long bt,long et, int ep,int pe)
 {
+	setDefaultValues();
 	BeginTime=bt; EndTime=et;
 	EntryPoint=ep; SrcPe=pe; MsgLen=0;
 

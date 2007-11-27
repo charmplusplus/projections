@@ -283,7 +283,7 @@ public class Data
 					if (beginTime == oldBT && endTime == oldET) {
 						tloArray[newpindex] = oldtloArray[oldpindex];
 //						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
-						assert(oldUserEventsArray != null);
+						//		assert(oldUserEventsArray != null);
 						timelineUserEventObjectsArray[newpindex] = 
 							oldUserEventsArray[oldpindex];
 						mesgVector[oldp] = oldmesgVector[newp];
@@ -459,9 +459,9 @@ public class Data
 	
 	/** Add or Remove a new line to the visualization representing the sending of a message */
 	public void toggleConnectingLine(int pCreation,long creationtime,
-			int pCurrent,long executiontime,
-			EntryMethodObject objCurrent) {
+			int pCurrent, EntryMethodObject objCurrent) {
 
+		long executiontime = objCurrent.getBeginTime();
 		
 		// Search to see if we already have this line or not
 		// If we find the line, we just remove it and return
@@ -477,6 +477,7 @@ public class Data
 		
 		// We didn't find the line yet, so add it
 		
+		System.out.println("executiontime here="+executiontime);
 		Line line = new Line(pCreation,pCurrent,objCurrent,
 				creationtime,executiontime);
 		mesgCreateExecVector.add(line);
@@ -542,7 +543,7 @@ public class Data
 
 			TimelineMessage[] msgs = new TimelineMessage[numMsgs];
 			for (int m=0; m<numMsgs; m++) {
-				assert(msglist != null);
+			  //	assert(msglist != null);
 				msgs[m] = (TimelineMessage)msglist.elementAt(m);
 				mesgVector[pnum].addElement(msglist.elementAt(m));
 			}	
@@ -554,9 +555,10 @@ public class Data
 			}
 			PackTime[] packs = new PackTime[numpacks];
 			for (int p=0; p<numpacks; p++) {
-				assert(packlist!=null);
+			  //	assert(packlist!=null);
 				packs[p] = (PackTime)packlist.elementAt(p);
 			}
+			System.out.println("tle.recvTime="+tle.RecvTime);
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
 		}
 		return tlo;
@@ -960,13 +962,16 @@ public class Data
 	public void entryMethodObjectRightClick(int pCreation, int EventID, int pCurrent, EntryMethodObject obj) {
 		
 		if(! useMinimalView()){
-
+			
 			addProcessor(pCreation);
 			
 			TimelineMessage created_message = searchMesg(mesgVector[pCreation],EventID);
 
 			if(created_message != null){
-				toggleConnectingLine(pCreation,created_message.Time, pCurrent,beginTime,obj);
+				System.out.println("adding message send line");
+				toggleConnectingLine(pCreation,created_message.Time, pCurrent,obj);
+			} else {
+				System.out.println("couldn't find line to draw");
 			}
 			
 		}		
@@ -977,6 +982,8 @@ public class Data
 	public TimelineMessage searchMesg(Vector v,int eventid){
 		TimelineMessage returnItem = null;
 
+		System.out.println("searchMesg() vector size="+v.size());
+				
 		// the binary search should deal with indices and not absolute
 		// values, hence size-1.
 		//
@@ -993,12 +1000,14 @@ public class Data
 		// This is because stuff like bigsim logs may not have eventID
 		// stored in sorted order.
 
-		returnItem = binarySearch(v,eventid,0,v.size()-1);
-		if (returnItem == null) {
+//		returnItem = binarySearch(v,eventid,0,v.size()-1);
+//		System.out.println("eventid="+eventid+"  returnItem="+returnItem);
+//		if (returnItem == null) {
+//			System.out.println("Attempting sequential search");
 			return seqSearch(v,eventid);
-		} else {
-			return null;
-		}
+//		} else {
+//			return null;
+//		}
 	}
 
 	public TimelineMessage seqSearch(Vector v, int eventid) {

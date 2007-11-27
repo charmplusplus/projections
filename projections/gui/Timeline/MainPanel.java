@@ -3,8 +3,12 @@ package projections.gui.Timeline;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.*;
 
@@ -15,7 +19,7 @@ import javax.swing.*;
  *  This is so it will stretch horizontally with the window.
  */
 
-public class MainPanel extends JPanel  implements Scrollable{
+public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -24,6 +28,8 @@ public class MainPanel extends JPanel  implements Scrollable{
 	// runs.
 	int myRun = 0;
 	
+	int viewX, viewY;
+	
 	Data data;
 	MainHandler handler;
 	
@@ -31,10 +37,16 @@ public class MainPanel extends JPanel  implements Scrollable{
 	public MainPanel(Data data, MainHandler handler){
 		this.handler = handler;
 		this.data = data;
+
+		setAutoscrolls(true); //enable synthetic drag events
+		addMouseMotionListener(this); //handle mouse drags
+
 		setLayout(new MainLayout(data));
+				
 	}
 	
-
+	
+	
 	
 	/** Used when painting an Image manually */
 	public void paintComponentWithChildren(Graphics g){
@@ -80,13 +92,9 @@ public class MainPanel extends JPanel  implements Scrollable{
 			g.drawLine(0+data.offset(), y, width-data.offset(), y);
 		}
 
-		drawAllLines(g);	
 
-	}
-
-	/** paint the message send lines */
-	public void drawAllLines(Graphics g){
-
+	// paint the message send lines 
+		
 		if (!data.mesgCreateExecVector.isEmpty()) {
 			g.setColor(data.getForegroundColor());
 
@@ -108,28 +116,24 @@ public class MainPanel extends JPanel  implements Scrollable{
 					}
 				}
 
+				System.out.println("startpe_index="+startpe_index);
+				System.out.println("endpe_index="+endpe_index);
+				
 				
 //				double calc_xscale = (double )(data.pixelIncrement(getWidth())/data.timeIncrement(getWidth()));
 //				double yscale = (double )dim.height/ (double)(data.processorList().size());
 //				
 				// Message Creation point
-				int x1 = data.timeToScreenPixel(lineElement.creationtime-1, getWidth());
-					
-//					(int)((double)(lineElement.creationtime - data.beginTime())*
-//							calc_xscale+data.offset());
-				
+				System.out.println("left time ="+(lineElement.creationtime-1));
+				int x1 = data.timeToScreenPixel(lineElement.creationtime, getWidth());			
 				double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
 						
 				
 				
 				// Message executed (entry method starts) 
+				System.out.println("right time ="+lineElement.executiontime);
 				int x2 =  data.timeToScreenPixel(lineElement.executiontime, getWidth());
-//					(int)((double)(lineElement.executiontime - data.beginTime())*
-//							calc_xscale+data.offset());
-				
-				double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5);
-//					(int)(yscale * (double)endpe_index +
-//						lineElement.obj.h);
+				double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
 
 				g.drawLine(x1,(int)y1,x2,(int)y2);
 			}
@@ -157,6 +161,21 @@ public class MainPanel extends JPanel  implements Scrollable{
 			for (int i = 0; i < data.tloArray[p].length; i++){
 				data.tloArray[p][i].setWhichTimeline(p);
 				this.add(data.tloArray[p][i]);
+			
+				// See if we have registered this as a mouse motion listener
+				MouseMotionListener[] mml = data.tloArray[p][i].getMouseMotionListeners();
+				boolean found = false;
+				for(int mml_index=0;mml_index<mml.length;mml_index++){
+					if(mml[mml_index]==this){
+						found = true;
+					}
+				}
+				
+				if(!found){
+					data.tloArray[p][i].addMouseListener(this);
+					data.tloArray[p][i].addMouseMotionListener(this);
+				}
+							
 			}
 		}
 
@@ -206,6 +225,61 @@ public class MainPanel extends JPanel  implements Scrollable{
 	public Data getData() {
 		return data;
 	}
+
+//
+//	public void mouseDragged(MouseEvent e) {
+//        //The user is dragging us, so scroll!
+//        Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
+//        scrollRectToVisible(r);
+//        
+//    }
+//	
+    public void mouseDragged(MouseEvent e) {
+	    JViewport jv = (JViewport)getParent();
+	    Point p = jv.getViewPosition();
+	    int newX = p.x - (e.getX()-viewX);
+	    int newY = p.y - (e.getY()-viewY);
+	    int maxX = getWidth() - jv.getWidth();
+	    int maxY = getHeight() - jv.getHeight();
+	    if (newX > maxX) newX = maxX;
+	    if (newY > maxY) newY = maxY;
+	    if (newX < 0) newX = 0;
+	    if (newY < 0) newY = 0;
+	    jv.setViewPosition(new Point(newX, newY));
+    }
+	
+
+    public void mousePressed(MouseEvent e) {
+	    viewX = e.getX();
+	    viewY = e.getY();
+	    setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+    }
+
+
+	public void mouseReleased(MouseEvent e) {
+		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+	}
+	
+	public void mouseMoved(MouseEvent e) {
+		// do nothing
+	}
+
+
+	public void mouseClicked(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
 
 
 }

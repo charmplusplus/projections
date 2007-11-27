@@ -6,7 +6,6 @@ import projections.analysis.*;
 import projections.gui.MainWindow;
 import projections.gui.U;
 
-import java.util.Vector;
 import java.text.DecimalFormat;
 import javax.swing.*;
 
@@ -77,6 +76,7 @@ implements MouseListener
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
 		recvTime = tle.RecvTime;
+		System.out.println("recvTime="+recvTime);
 		if (tle.id != null) {
 			tid = new ObjectId(tle.id);
 		} else {
@@ -125,8 +125,10 @@ implements MouseListener
 				System.exit(1) ;
 			}
 			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[n][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[n][0] + "</b><br><br>"; 
-			infoString += "<i>Msg Len</i>: " + msglen + "<br>";
-			
+
+			if(msglen > 0) {
+				infoString += "<i>Msg Len</i>: " + msglen + "<br>";
+			}
 			
 			infoString +=  "<i>Begin Time</i>: " + format_.format(beginTime);
 			if (cpuTime > 0) 
@@ -154,7 +156,9 @@ implements MouseListener
 			if(tleUserEventName!=null)
 				infoString += "<i>Associated User Event</i>: "+tleUserEventName+ "<br>";
 			
-			infoString += "<i>Recv Time</i>: " + recvTime + "<br>";
+			if(recvTime > 0){
+				infoString += "<i>Recv Time</i>: " + recvTime + "<br>";
+			}	
 			
 			if (numPapiCounts > 0) {
 				infoString += "<i>*** PAPI counts ***</i>" + "<br>";
@@ -304,6 +308,7 @@ implements MouseListener
 				OpenMessageWindow();
 			} else {	
 				// non-left click
+				System.out.println("right click");
 				data.entryMethodObjectRightClick(pCreation, EventID, pCurrent, this);				
 			}
 		}
@@ -341,37 +346,13 @@ implements MouseListener
 
 
 	public void mouseEntered(MouseEvent evt)
-	{
-//		if ((entry == -1 && data.showIdle == false) ||
-//				(entry == -1 && MainWindow.IGNORE_IDLE)) {
-//			return;
-//		}
-//
-//		if(!inside)
-//		{
-//			inside = true;
-//			EntryMethodObject to = EntryMethodObject.this;
-//			Point scrnloc = to.getLocationOnScreen();
-//			Dimension size = getSize();
-//
-//			if(bubble == null)
-//				bubble = new Bubble(this, bubbletext);
-//			bubble.setLocation(scrnloc.x + evt.getX(), scrnloc.y + size.height + 2);
-//			bubble.setVisible(true);
-//		}     
+	{   
+		// ignore 	
 	}   
 
 	public void mouseExited(MouseEvent evt)
 	{
-//		if(inside)
-//		{
-//			if(bubble != null)
-//			{
-//				bubble.dispose();
-//				bubble = null;
-//			}   
-//			inside = false;
-//		}      
+		// ignore 	
 	}   
 
 	public void mousePressed(MouseEvent evt)
@@ -381,7 +362,7 @@ implements MouseListener
 
 	public void mouseReleased(MouseEvent evt)
 	{
-		// ignore cause problems if the window containing the container is resized.
+		// ignore 	
 	}   
 
 	private void OpenMessageWindow()
@@ -420,13 +401,11 @@ implements MouseListener
 
 		Color c;
 
-		
 		// Set the colors of the object
 		if (entry == -1) { 
 			
 			// Idle time regions are white on a dark background, or grey on a light background
 			
-//			Color fg = data.getForegroundColor();
 			Color bg = data.getBackgroundColor();
 
 			int brightness = bg.getRed() + bg.getGreen() + bg.getBlue();
@@ -465,20 +444,15 @@ implements MouseListener
 		// The distance from the top or bottom to the rectangle
 		int verticalInset = (getHeight()-rectHeight)/2;
 		
-//		System.out.println("rectWidth="+rectWidth+" rectHeight="+rectHeight+"verticalInset="+verticalInset);
-		
 		int left  = 0;
 		int right = rectWidth-1;
 
-		long viewbt = beginTime;
-		long viewet = endTime;
 
 		if(beginTime < data.beginTime())
 		{
 			drawLeftArrow(g, c, verticalInset, rectHeight);
 			rectWidth -= 5;
 			left = 5;
-			viewbt = data.beginTime();
 		}
 
 		if(endTime > data.endTime())
@@ -486,12 +460,12 @@ implements MouseListener
 			drawRightArrow(g, c, verticalInset, rectHeight, rectWidth);
 			rectWidth -= 5; // the rectangle is only a portion of the area
 			right = rectWidth-6;
-			viewet = data.endTime();
 		}
 
-		// Paint the main rectangle for the object 
+		// Paint the main rectangle for the object, as long as it is not a skinny idle event
 		g.setColor(c);
-		g.fillRect(left, verticalInset, rectWidth, rectHeight);
+		if(rectWidth > 1 || entry!=-1)
+			g.fillRect(left, verticalInset, rectWidth, rectHeight);
 		
 		
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
@@ -517,13 +491,13 @@ implements MouseListener
 				long msgtime = messages[m].Time;
 				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
 				{
-					double scale= rectWidth /((double)(viewet - viewbt + 1));
-					int xPos = (int)((msgtime - viewbt+1.0) * scale);
+					double scale= rectWidth /((double)(data.endTime() - data.beginTime() + 1));
+					int xPos = (int)((msgtime - data.beginTime()+1.0) * scale);
 					g.drawLine(xPos, verticalInset+rectHeight, xPos, verticalInset+rectHeight+data.messageSendHeight());
 //					System.out.println("Displaying a message send from "+xPos+","+(verticalInset+rectHeight)+" to "+ xPos+","+ (verticalInset+rectHeight+data.messageSendHeight()));
 				}
 			}
-		}               
+		}
 
 		// Paint the message packing area
 		if(data.showPacks == true && packs != null)
@@ -536,8 +510,8 @@ implements MouseListener
 
 				if(pet >= data.beginTime() && pbt <= data.endTime())
 				{
-					double scale= rectWidth /((double)(viewet - viewbt + 1));
-					int xPos = (int)((pbt - viewbt) * scale);
+					double scale= rectWidth /((double)(data.endTime() - data.beginTime() + 1));
+					int xPos = (int)((pbt - data.beginTime()) * scale);
 					g.fillRect(xPos, verticalInset+rectHeight, (int)(pet-pbt+1), data.messagePackHeight());
 				}
 			}

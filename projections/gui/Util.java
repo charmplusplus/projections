@@ -304,7 +304,6 @@ public class Util
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 
-	@SuppressWarnings("unused")
 	String tempString = new String();
 	
 	//If more graphs are created put them here

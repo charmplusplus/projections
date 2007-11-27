@@ -33,7 +33,6 @@ public class ProjectionsFileChooser
     JDialog      dialog_   = null;   // user picks files to use
     JList        list_     = null;   // stores found files
     int          listSize_ = 0;      // size of list_
-    @SuppressWarnings("unused")
 	private Wait         wait_     = new Wait(true); // true if dialog waiting
     ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
 

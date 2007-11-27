@@ -211,7 +211,7 @@ public class Analysis {
 	  totalTime = temp;
 	}
       }
-      rcReader.setValue("RC_GLOBAL_END_TIME", totalTime);
+      rcReader.setValue("RC_GLOBAL_END_TIME", new Long(totalTime));
     }
     
     // Find Pose End Time Data
@@ -226,8 +226,8 @@ public class Analysis {
 	      poseTotalTime = dopReader.getTotalRealTime();
 	      poseTotalVirtualTime = 
 		dopReader.getTotalVirtualTime();
-	      rcReader.setValue("RC_POSE_REAL_TIME", poseTotalTime);
-	      rcReader.setValue("RC_POSE_VIRT_TIME", poseTotalVirtualTime);
+	      rcReader.setValue("RC_POSE_REAL_TIME", new Long(poseTotalTime));
+	      rcReader.setValue("RC_POSE_VIRT_TIME", new Long(poseTotalVirtualTime));
 	      return null;
 	    }
 	    public void finished() {

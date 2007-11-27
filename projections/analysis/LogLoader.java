@@ -1336,7 +1336,7 @@ public class LogLoader extends ProjDefs
 			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
 					LogLoadException.READ);
 		}  
-		assert(LE != null);
+		//	assert(LE != null);
 		return LE.Time - BeginTime;
 	}   
 

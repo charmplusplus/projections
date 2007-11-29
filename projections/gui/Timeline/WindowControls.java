@@ -4,10 +4,12 @@ import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
+
 import javax.swing.*;
 
 import projections.gui.FloatJTextField;
-import projections.gui.FloatTextField;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
@@ -255,9 +257,34 @@ ItemListener {
 					data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
 				parentWindow.refreshDisplay(false);
 
-			} else if (arg.equals("Save PNG")) {
-				SaveImage p = new SaveImage(parentWindow.scrollingPanel);
-				p.saveImagePNG("TimelineOut.png");
+			} else if (arg.equals("Save as JPG or PNG")) {
+				try{
+					SaveImage p = new SaveImage(parentWindow.scrollingPanel);
+
+					// Create a file chooser so the user can choose where to save the image
+					JFileChooser fc = new JFileChooser();
+					ImageFilter imageFilter = new ImageFilter();
+					fc.setFileFilter(imageFilter);
+					fc.setSelectedFile(new File("./TimelineScreenshot.png"));
+
+					int returnVal = fc.showSaveDialog(parentWindow);
+
+					if (returnVal == JFileChooser.APPROVE_OPTION) {
+						File file = fc.getSelectedFile();
+
+						if(imageFilter.isJPEG(file))       		
+							p.saveImageJPEG(file.getCanonicalPath());
+
+						if(imageFilter.isPNG(file))       		
+							p.saveImagePNG(file.getCanonicalPath());
+
+					} else {
+						// Save command cancelled by user
+					}
+				} catch (IOException e){
+					JOptionPane.showMessageDialog(this, "Error occurred while saving file:" + e.getLocalizedMessage());
+				}     
+				
 			}
 		}
 
@@ -345,8 +372,8 @@ ItemListener {
 		i8.addActionListener(this);
 		mbar.add(colorMenu);
 
-		JMenu saveMenu = new JMenu("Image");
-		JMenuItem i9 = new JMenuItem("Save PNG");
+		JMenu saveMenu = new JMenu("Screenshot");
+		JMenuItem i9 = new JMenuItem("Save as JPG or PNG");
 		saveMenu.add(i9);
 		i9.addActionListener(this);
 		mbar.add(saveMenu);

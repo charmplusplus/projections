@@ -5,6 +5,9 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Dimension;
 import javax.swing.*;
+
+import projections.gui.Util;
+
 import java.awt.FontMetrics;
 
 public class AxisPanel extends JPanel 
@@ -63,23 +66,14 @@ public class AxisPanel extends JPanel
 	{
 		this.data = data;
 		format_.setGroupingUsed(true);
-
 	}   
 
 
-	/** Get the preferred size. The Width provided should likely be ignored */
+	/** Get the preferred size. The Width provided should be ignored */
 	public Dimension getPreferredSize() {
 		int preferredWidth = 200;
 		int preferredHeight = totalHeight();
 		return new Dimension(preferredWidth, preferredHeight);
-	}
-
-
-	// given a coordinate in coordinates from beginning of 
-	// TimelineAxisCanvas, return the time in us
-	public double canvasToTime(int x) {
-		return (x-data.leftOffset())/(double)(getWidth()-data.leftOffset()-data.rightOffset())*
-		(data.endTime()-data.beginTime())+data.beginTime();
 	}
 
 
@@ -92,9 +86,7 @@ public class AxisPanel extends JPanel
 		return (int)(actualOffset + data.leftOffset() + 0.5);
 	}
 
-	/** Paint the axis in its panel 
-	 *
-	 */
+	/** Paint the axis in its panel */
 
 	public void paintComponent(Graphics g)
 	{
@@ -107,37 +99,29 @@ public class AxisPanel extends JPanel
 		Rectangle clipBounds = g.getClipBounds();
 		g.fillRect(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
 
-		long labeloffset = data.timeIncrement(getWidth()) - 
-		(data.beginTime() % data.timeIncrement(getWidth()));
-		if (labeloffset == data.timeIncrement(getWidth())) {
-			labeloffset = 0;
-		}
-
 		int maxx = getWidth();
 
 		g.setColor(data.getForegroundColor());
 		g.drawLine(data.offset(), axispos(), maxx-data.offset(), axispos());
 
 		// Draw the tick marks and timestamps
-		int curx;
-		String tmp;
-		for (int x=0; x<data.numIntervals(getWidth()); x++) {
-			curx = data.offset() + (int)(x*data.pixelIncrement(getWidth())) 
-			+ (int)(labeloffset * 
-					data.pixelIncrement(getWidth())/data.timeIncrement(getWidth()));
+		for (int x=0; x<numIntervals(); x++) {
+			
+			/** the coordinate in the panel */
+			int curx = data.leftOffset() + (int)(x*pixelsPerTickMark()) ;
+
 			if (curx > maxx) {
 				break;
 			}
-			if (x % data.labelIncrement(getWidth()) == 0) {  
-				tmp = format_.format((long)(data.beginTime() + 
-						labeloffset + 
-						(long)x * data.timeIncrement(getWidth())));
+			
+			if (x % labelIncrement() == 0) {  
+				String tmp = format_.format(data.screenToTime(curx));				
 				g.drawLine(curx, axispos()-largeTickHalfLength, curx, axispos() + largeTickHalfLength);
-				g.drawString(tmp, curx - fm.stringWidth(tmp)/2, 
-						textpos());
+				g.drawString(tmp, curx - fm.stringWidth(tmp)/2, textpos());
 			} else {
 				g.drawLine(curx, axispos()-smallTickHalfLength, curx, axispos()+smallTickHalfLength);
 			}
+			
 		}
 		
 		
@@ -151,6 +135,25 @@ public class AxisPanel extends JPanel
 		return "Time In Microseconds";
 	}
 	
+	
+	/** The number of ticks we can display on the timeline in the given sized window */
+	public int numIntervals(){
+		return (int) Math.ceil(data.totalTime() / timeIncrement(getWidth())) + 1;
+	}   
 
+	/** The number of tickmarks between the labeled big ticks */
+	public int labelIncrement() {
+		return (int) Util.getBestIncrement((int)(Math.ceil(data.maxLabelLen() / pixelsPerTickMark())));
+	}
+	
+	/** Number of microseconds per tickmark */
+	public int timeIncrement(int actualDisplayWidth){
+		return Util.getBestIncrement( (int) Math.ceil(5 / ( (double) data.lineWidth(actualDisplayWidth) / data.totalTime() )  ) );
+	}
+
+	/** number of pixels per tick mark */
+	public double pixelsPerTickMark(){
+		return  ((double) data.lineWidth(getWidth())) / ((double)numIntervals());
+	}
 
 }

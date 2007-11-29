@@ -78,7 +78,6 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r,
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 
-        System.out.println("RecvTime in constructor = "+RecvTime);
 	id = new ObjectId(d);
 	EventID = eventid;
 	this.numPapiCounts = numPapiCounts;

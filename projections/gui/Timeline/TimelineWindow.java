@@ -2,6 +2,8 @@ package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JOptionPane;
+
 import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
  
@@ -13,6 +15,8 @@ import projections.gui.ProjectionsWindow;
  * This window uses:
  * 		a ScrollingPanel for the graphical portion of the display
  * 		a WindowControls panel for the buttons and checkboxes and JLabels
+ * 
+ * The menus and controls are setup and handled in the WindowControls class
  * 
  * Many of the decisions about the rendering are stored in 'data'
  * 
@@ -169,7 +173,11 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	public void addProcessor(int p) {
 		data.addProcessor(p);
 	}
-	
+
+
+	public void displayWarning(String message) {
+		JOptionPane.showMessageDialog(this, message);
+	}
 	
  	
 }

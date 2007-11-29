@@ -93,7 +93,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 
 
-	// paint the message send lines 
+		// paint the message send lines 
 		
 		if (!data.mesgCreateExecVector.isEmpty()) {
 			g.setColor(data.getForegroundColor());
@@ -116,22 +116,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					}
 				}
 
-				System.out.println("startpe_index="+startpe_index);
-				System.out.println("endpe_index="+endpe_index);
-				
-				
-//				double calc_xscale = (double )(data.pixelIncrement(getWidth())/data.timeIncrement(getWidth()));
-//				double yscale = (double )dim.height/ (double)(data.processorList().size());
-//				
 				// Message Creation point
-				System.out.println("left time ="+(lineElement.creationtime-1));
-				int x1 = data.timeToScreenPixel(lineElement.creationtime, getWidth());			
+				int x1 = data.timeToScreenPixelLeft(lineElement.creationtime, getWidth());			
 				double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
 						
-				
-				
 				// Message executed (entry method starts) 
-				System.out.println("right time ="+lineElement.executiontime);
 				int x2 =  data.timeToScreenPixel(lineElement.executiontime, getWidth());
 				double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
 
@@ -162,7 +151,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				data.tloArray[p][i].setWhichTimeline(p);
 				this.add(data.tloArray[p][i]);
 			
-				// See if we have registered this as a mouse motion listener
+				// Register a mouse motion listener for dragging of the viewport
+
+				// Only register it if we have not already registered it
 				MouseMotionListener[] mml = data.tloArray[p][i].getMouseMotionListeners();
 				boolean found = false;
 				for(int mml_index=0;mml_index<mml.length;mml_index++){
@@ -170,13 +161,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 						found = true;
 					}
 				}
-				
 				if(!found){
 					data.tloArray[p][i].addMouseListener(this);
 					data.tloArray[p][i].addMouseMotionListener(this);
 				}
-							
 			}
+
+
 		}
 
 		// Add each user event 
@@ -226,38 +217,38 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		return data;
 	}
 
-//
-//	public void mouseDragged(MouseEvent e) {
-//        //The user is dragging us, so scroll!
-//        Rectangle r = new Rectangle(e.getX(), e.getY(), 1, 1);
-//        scrollRectToVisible(r);
-//        
-//    }
-//	
-    public void mouseDragged(MouseEvent e) {
-	    JViewport jv = (JViewport)getParent();
-	    Point p = jv.getViewPosition();
-	    int newX = p.x - (e.getX()-viewX);
-	    int newY = p.y - (e.getY()-viewY);
-	    int maxX = getWidth() - jv.getWidth();
-	    int maxY = getHeight() - jv.getHeight();
-	    if (newX > maxX) newX = maxX;
-	    if (newY > maxY) newY = maxY;
-	    if (newX < 0) newX = 0;
-	    if (newY < 0) newY = 0;
-	    jv.setViewPosition(new Point(newX, newY));
-    }
+
+	/** Handle dragging of panel if we are in a viewport */
+	public void mouseDragged(MouseEvent e) {
+		if(getParent() instanceof JViewport){
+			JViewport jv = (JViewport)getParent();
+			Point p = jv.getViewPosition();
+			int newX = p.x - (e.getX()-viewX);
+			int newY = p.y - (e.getY()-viewY);
+			int maxX = getWidth() - jv.getWidth();
+			int maxY = getHeight() - jv.getHeight();
+			if (newX > maxX) newX = maxX;
+			if (newY > maxY) newY = maxY;
+			if (newX < 0) newX = 0;
+			if (newY < 0) newY = 0;
+			jv.setViewPosition(new Point(newX, newY));
+		}
+	}
 	
-
+	/** Handle dragging of panel if we are in a viewport */
     public void mousePressed(MouseEvent e) {
-	    viewX = e.getX();
-	    viewY = e.getY();
-	    setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+    	if(getParent() instanceof JViewport){
+    		viewX = e.getX();	
+    		viewY = e.getY();
+    		setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+    	}
     }
 
-
+    /** Handle dragging of panel if we are in a viewport */
 	public void mouseReleased(MouseEvent e) {
-		setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		if(getParent() instanceof JViewport){
+			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+		}
 	}
 	
 	public void mouseMoved(MouseEvent e) {
@@ -266,20 +257,16 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+		// do nothing
 		
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		// do nothing
 	}
 
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		// do nothing
 	}
-
-
 
 }

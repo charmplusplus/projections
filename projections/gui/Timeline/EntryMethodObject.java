@@ -33,7 +33,16 @@ implements MouseListener
 	private double  usage;
 	private float packusage;
 	private long packtime;
-	private int ylocation;
+	
+	/** Vertical index that shows which displayed timeline this event lives on */
+	private int whichTimelineVerticalIndex;
+	
+	/** Pixel coordinate of left side of object */
+	private int leftCoord=0;
+
+	/** Pixel coordinate of right side of object */
+	private int rightCoord=0;
+	
 	
 	private String tleUserEventName;
 
@@ -41,7 +50,6 @@ implements MouseListener
 	private Data data = null;
 	public TimelineMessage[] messages;
 	private PackTime[] packs;
-	// private UserEventObject[] userEvents;
 
 	private int numPapiCounts = 0;
 	private long papiCounts[];
@@ -76,7 +84,6 @@ implements MouseListener
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
 		recvTime = tle.RecvTime;
-		System.out.println("recvTime="+recvTime);
 		if (tle.id != null) {
 			tid = new ObjectId(tle.id);
 		} else {
@@ -196,7 +203,10 @@ implements MouseListener
 			
 			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
 		}
-		addMouseListener(this);
+		
+		if(!isIdleEvent()){
+			addMouseListener(this);
+		}
 		
 //		infoString += traceAvailableDependencies();
 		
@@ -308,7 +318,6 @@ implements MouseListener
 				OpenMessageWindow();
 			} else {	
 				// non-left click
-				System.out.println("right click");
 				data.entryMethodObjectRightClick(pCreation, EventID, pCurrent, this);				
 			}
 		}
@@ -388,21 +397,27 @@ implements MouseListener
 		//b = 56;
 		return new Color(r, g,b );
 	}
+	
+	/** Is this an idle event */
+	public boolean isIdleEvent(){
+		return (entry==-1);
+	}
+	
 
 	public void paintComponent(Graphics g)
 	{     
 		super.paintComponent(g);
 
 		// If this is an idle time region, we may not display it
-		if ((entry == -1 && data.showIdle == false) ||
-				(entry == -1 && MainWindow.IGNORE_IDLE)) {
+		if ((isIdleEvent() && data.showIdle == false) ||
+				(isIdleEvent() && MainWindow.IGNORE_IDLE)) {
 			return;
 		}
 
 		Color c;
 
 		// Set the colors of the object
-		if (entry == -1) { 
+		if (isIdleEvent()) { 
 			
 			// Idle time regions are white on a dark background, or grey on a light background
 			
@@ -433,7 +448,7 @@ implements MouseListener
 		
 		
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
-		int rectWidth = getSize().width;
+		int rectWidth = getWidth();
 		int rectHeight = data.barheight();
 		
 		// Idle regions are thinner vertically
@@ -458,7 +473,7 @@ implements MouseListener
 		if(endTime > data.endTime())
 		{
 			drawRightArrow(g, c, verticalInset, rectHeight, rectWidth);
-			rectWidth -= 5; // the rectangle is only a portion of the area
+			rectWidth -= 5;
 			right = rectWidth-6;
 		}
 
@@ -482,7 +497,51 @@ implements MouseListener
 				g.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
 		}
 
-		// Show the message sends
+		
+		/* 
+		 
+		   Paint the message packing area
+		   
+		   The packing rectangle goes from the leftmost pixel associated with the 
+		   packBeginTime to the rightmost pixel associated with the packEndTime
+	   
+	       The beginning will either be the same as the message send, or it will 
+	       be one microsecond later. The mess packing area may therefore not be
+	       connected to the message send when zoomed in.
+	     
+	     */
+
+		if(data.showPacks == true && packs != null)
+		{
+			g.setColor(Color.pink);
+			for(int p=0; p<packs.length; p++)
+			{
+				long packBeginTime = packs[p].BeginTime;
+				long packEndTime = packs[p].EndTime;
+
+				if(packEndTime >= data.beginTime() && packBeginTime <= data.endTime())
+				{
+					
+					// Compute the begin pixel coordinate relative to the containing panel
+					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
+					
+					// Compute the begin pixel coordinate relative to the Entry method object itself
+					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord;
+					
+					// Compute the end pixel coordinate relative to the containing panel
+					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
+					
+					// Compute the end pixel coordinate relative to the Entry method object itself
+					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord;
+					
+					g.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (int)(packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
+				
+				}
+			}
+		}
+		
+		// Show the message sends. See note above for the message packing areas
+		// Don't change this without changing MainPanel's paintComponent which draws message send lines
 		if(data.showMsgs == true && messages != null)
 		{
 			g.setColor(getForeground());
@@ -491,64 +550,37 @@ implements MouseListener
 				long msgtime = messages[m].Time;
 				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
 				{
-					double scale= rectWidth /((double)(data.endTime() - data.beginTime() + 1));
-					int xPos = (int)((msgtime - data.beginTime()+1.0) * scale);
-					g.drawLine(xPos, verticalInset+rectHeight, xPos, verticalInset+rectHeight+data.messageSendHeight());
-//					System.out.println("Displaying a message send from "+xPos+","+(verticalInset+rectHeight)+" to "+ xPos+","+ (verticalInset+rectHeight+data.messageSendHeight()));
+					// Compute the pixel coordinate relative to the containing panel
+					int msgPanelCoordX = data.timeToScreenPixelLeft(msgtime);
+					 
+					// Compute the pixel coordinate relative to the Entry method object itself
+					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
+								
+					g.drawLine(msgObjectCoordX, verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
+
 				}
 			}
 		}
-
-		// Paint the message packing area
-		if(data.showPacks == true && packs != null)
-		{
-			g.setColor(Color.pink);
-			for(int p=0; p<packs.length; p++)
-			{
-				long pbt = packs[p].BeginTime;
-				long pet = packs[p].EndTime;
-
-				if(pet >= data.beginTime() && pbt <= data.endTime())
-				{
-					double scale= rectWidth /((double)(data.endTime() - data.beginTime() + 1));
-					int xPos = (int)((pbt - data.beginTime()) * scale);
-					g.fillRect(xPos, verticalInset+rectHeight, (int)(pet-pbt+1), data.messagePackHeight());
-				}
-			}
-		}               
 
 	}   
 
 
 	public void setLocationAndSize(int actualDisplayWidth)
 	{
-
-		long BT, ET;
+		leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+		rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
 
 		if(endTime > data.endTime())
-			ET = data.endTime() - data.beginTime();
-		else
-			ET = endTime - data.beginTime();
+			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
 
-		if(beginTime < data.beginTime()) 
-			BT = 0;
-		else BT = beginTime - data.beginTime();
-
-		
-		int BTS  = data.offset() + (int)(BT*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-		int ETS  = data.offset() + (int)(ET*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-		int LENS = ETS - BTS + 1; 
-		if(LENS < 1) LENS = 1;
-
-		if(endTime > data.endTime()) LENS += 5;
 		if(beginTime < data.beginTime())
-		{
-			BTS  -= 5;
-			LENS += 5;
-		}
-
-		this.setBounds(BTS,  ylocation*data.singleTimelineHeight(),
-				LENS, data.singleTimelineHeight());
+			leftCoord = data.timeToScreenPixelLeft(data.beginTime(), actualDisplayWidth);
+		
+		int width = rightCoord-leftCoord+1;
+		
+		this.setBounds(leftCoord,  whichTimelineVerticalIndex*data.singleTimelineHeight(),
+				width, data.singleTimelineHeight());
+	
 	}   
 
 	public void setPackUsage()
@@ -603,7 +635,7 @@ implements MouseListener
 	}
 
 	public void setWhichTimeline(int p) {
-		ylocation = p;
+		whichTimelineVerticalIndex = p;
 	}   
 
 

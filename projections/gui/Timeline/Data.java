@@ -9,7 +9,6 @@ import projections.analysis.*;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
-import projections.gui.Util;
 import projections.misc.*;
 
 
@@ -476,8 +475,6 @@ public class Data
 		}
 		
 		// We didn't find the line yet, so add it
-		
-		System.out.println("executiontime here="+executiontime);
 		Line line = new Line(pCreation,pCurrent,objCurrent,
 				creationtime,executiontime);
 		mesgCreateExecVector.add(line);
@@ -555,10 +552,8 @@ public class Data
 			}
 			PackTime[] packs = new PackTime[numpacks];
 			for (int p=0; p<numpacks; p++) {
-			  //	assert(packlist!=null);
 				packs[p] = (PackTime)packlist.elementAt(p);
 			}
-			System.out.println("tle.recvTime="+tle.RecvTime);
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
 		}
 		return tlo;
@@ -587,9 +582,7 @@ public class Data
 	public void increaseScaleFactor(){
 		setScaleFactor( (float) ((int) (getScaleFactor() * 4) + 1) / 4 );
 	}
-	public int 	labelIncrement(int actualDisplayWidth) {
-		return  (int) Util.getBestIncrement((int)(Math.ceil(maxLabelLen() / pixelIncrement(actualDisplayWidth))));
-	}
+
 
 //	public Window timelineWindow;
 
@@ -602,10 +595,6 @@ public class Data
 		return 70;
 	}   
 
-	/** Determine the number of ticks we can display on the timeline in the given sized window */
-	public int numIntervals(int actualDisplayWidth){
-		return (int) Math.ceil(totalTime() / timeIncrement(actualDisplayWidth)) + 1;
-	}   
 
 	/** Number of processors in the processor List */
 	public int numPs(){
@@ -658,10 +647,6 @@ public class Data
 
 	public String oldpstring(){
 		return oldpstring;
-	}
-
-	public double pixelIncrement(int actualDisplayWidth){
-		return  (double) lineWidth(actualDisplayWidth) / (double)numIntervals(actualDisplayWidth);
 	}
 
 
@@ -764,10 +749,6 @@ public class Data
 		return beginTime();
 	}
 
-	/** Some time measure per pixel ??? */
-	public int timeIncrement(int actualDisplayWidth){
-		return Util.getBestIncrement( (int) Math.ceil(5 / ( (double) lineWidth(actualDisplayWidth) / totalTime() )  ) );
-	}
 
 	public long totalTime(){
 		return endTime-beginTime;
@@ -874,33 +855,63 @@ public class Data
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	public double screenToTime(int xPixelCoord){
+	public long screenToTime(int xPixelCoord){
 		double fractionAlongAxis = ((double) (xPixelCoord-leftOffset())) /
 		((double)(mostRecentScaledScreenWidth-2*offset()));
 
-		return beginTime + fractionAlongAxis*(endTime-beginTime);	
+		return Math.round(beginTime + fractionAlongAxis*(endTime-beginTime));	
 	}
 
-	/** Convert time to screen coordinate
+	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
 	 * 
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	public int timeToScreenPixel(double startTime) {
-		double fractionAlongTimeAxis =  ((double) (startTime-beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
+	public int timeToScreenPixel(double time) {
+		double fractionAlongTimeAxis =  ((double) (time-beginTime)) /((double)(endTime-beginTime));
+		return offset() + (int)Math.round(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
+	}
+	
+	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
+	 * 
+	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
+	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
+	 */
+	public int timeToScreenPixelRight(double time) {
+		double fractionAlongTimeAxis =  ((double) (time+0.5-beginTime)) /((double)(endTime-beginTime));
+		return offset() + (int)Math.floor((double)fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
+	}
+	
+	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel
+	 * 
+	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
+	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
+	 */
+	public int timeToScreenPixelLeft(double time) {
+		double fractionAlongTimeAxis =  ((time-0.5-(double)beginTime)) /((double)(endTime-beginTime));
+		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
 	}
 
-	public int timeToScreenPixel(double startTime, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ((double) (startTime-beginTime)) /((double)(endTime-beginTime));
+	
+	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
+	public int timeToScreenPixel(double time, int assumedScreenWidth) {
+		double fractionAlongTimeAxis =  ((time-(double)beginTime)) /((double)(endTime-beginTime));
 		return offset() + (int)(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
 	}
-
-	public int timeToScreenPixel(long startTime, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ((double) (startTime-beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
+	
+	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel */
+	public int timeToScreenPixelLeft(double time, int assumedScreenWidth) {
+		double fractionAlongTimeAxis =  ((time-0.5-(double)beginTime)) /((double)(endTime-beginTime));
+		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
 	}
-
+	
+	/** Convert time to screen coordinate, The returned pixel is the rightmost pixel for this time if a microsecond is longer than one pixel */
+	public int timeToScreenPixelRight(double time, int assumedScreenWidth) {
+		double fractionAlongTimeAxis =  ( (time+0.5-(double)beginTime)) /((double)(endTime-beginTime));
+		return offset() + (int)Math.floor(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
+	}
+	
+		
 
 	/** Set the preferred position for the horizontal view or scrollbar  */
 	public void setPreferredViewTimeCenter(double time) {
@@ -968,10 +979,9 @@ public class Data
 			TimelineMessage created_message = searchMesg(mesgVector[pCreation],EventID);
 
 			if(created_message != null){
-				System.out.println("adding message send line");
 				toggleConnectingLine(pCreation,created_message.Time, pCurrent,obj);
 			} else {
-				System.out.println("couldn't find line to draw");
+				modificationHandler.displayWarning("Message was sent from outside the current time range");
 			}
 			
 		}		
@@ -979,11 +989,8 @@ public class Data
 	
 	
 	/** Search for specified event in vector v using a binary search. Returns null if not found, or eventid=-1. */
-	public TimelineMessage searchMesg(Vector v,int eventid){
-		TimelineMessage returnItem = null;
-
-		System.out.println("searchMesg() vector size="+v.size());
-				
+	private TimelineMessage searchMesg(Vector v,int eventid){
+		
 		// the binary search should deal with indices and not absolute
 		// values, hence size-1.
 		//
@@ -1000,17 +1007,16 @@ public class Data
 		// This is because stuff like bigsim logs may not have eventID
 		// stored in sorted order.
 
-//		returnItem = binarySearch(v,eventid,0,v.size()-1);
-//		System.out.println("eventid="+eventid+"  returnItem="+returnItem);
-//		if (returnItem == null) {
-//			System.out.println("Attempting sequential search");
+		TimelineMessage returnItem = binarySearch(v,eventid);
+		if (returnItem == null) {
 			return seqSearch(v,eventid);
-//		} else {
-//			return null;
-//		}
+		} else {
+			return returnItem;
+		}
 	}
 
-	public TimelineMessage seqSearch(Vector v, int eventid) {
+	/** Linear search for an event in a vector */
+	private TimelineMessage seqSearch(Vector v, int eventid) {
 		TimelineMessage item;
 		for (int i=0; i<v.size()-1; i++) {
 			item = (TimelineMessage)v.elementAt(i);
@@ -1020,9 +1026,19 @@ public class Data
 		}
 		return null;
 	}
+	
 
-	public TimelineMessage binarySearch(Vector v,int eventid,
-			int start,int end) {
+	/** Search in log-n-time an entire vector for an event */
+	private TimelineMessage binarySearch(Vector v,int eventid) {
+		if(v.size() > 0){
+			return binarySearch(v,eventid,0,v.size()-1);
+		} else {
+			return null;
+		}
+	}
+
+	/** Binary search for an event in a vector */
+	private TimelineMessage binarySearch(Vector v,int eventid, int start,int end) {
 		int mid = (start + end)/2;
 		TimelineMessage middle = (TimelineMessage)v.elementAt(mid);
 		if(middle.EventID == eventid){
@@ -1038,5 +1054,6 @@ public class Data
 		}
 	}
 
+	
 
 }

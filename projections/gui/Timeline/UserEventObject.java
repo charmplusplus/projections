@@ -43,43 +43,68 @@ public class UserEventObject extends JComponent
 		ylocation = whichTimeline;
 	}
 	
+	/** Called by the layout manager to put this in the right place */
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
 
-		long beginTime, endTime;
+		int leftCoord = data.timeToScreenPixel(BeginTime, actualDisplayWidth);
+		int rightCoord = data.timeToScreenPixel(EndTime, actualDisplayWidth);
 
 		if(EndTime > data.endTime())
-			endTime = data.endTime() - data.beginTime();
-		else
-			endTime = EndTime - data.beginTime();
+			rightCoord = data.timeToScreenPixel(data.endTime(), actualDisplayWidth) - 5;
 
-		if(BeginTime < data.beginTime()) 
-			beginTime = 0;
-		else beginTime = BeginTime - data.beginTime();
-
-
-		int beginTimeInPixels  = data.offset() + (int)(beginTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-		int endTimeInPixels  = data.offset() + (int)(endTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-
-
-		int widthInPixels = endTimeInPixels - beginTimeInPixels + 1; 
-		if(widthInPixels < 1) widthInPixels = 1;
-
-		
-		if(EndTime > data.endTime()) widthInPixels -= 5;
 		if(BeginTime < data.beginTime())
-		{
-			beginTimeInPixels  -= 5;
-			widthInPixels += 5;
-		}
-
+			leftCoord = data.timeToScreenPixel(data.beginTime(), actualDisplayWidth) + 5;
 		
+		int width = rightCoord-leftCoord+1;
+		
+		this.setBounds(leftCoord,  ylocation*data.singleTimelineHeight(),
+				width, data.singleTimelineHeight());
+
 		/** The y coordinate of the top of the rectangle */
 		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - data.userEventRectHeight();
 		
-		this.setBounds( beginTimeInPixels,  
+		this.setBounds( leftCoord,  
 						(int)yTop,
-						widthInPixels, 
+						width, 
 						data.userEventRectHeight() );
+		
+//		
+//		
+//		long beginTime, endTime;
+//
+//		if(EndTime > data.endTime())
+//			endTime = data.endTime() - data.beginTime();
+//		else
+//			endTime = EndTime - data.beginTime();
+//
+//		if(BeginTime < data.beginTime()) 
+//			beginTime = 0;
+//		else beginTime = BeginTime - data.beginTime();
+//
+//
+//		int beginTimeInPixels  = data.offset() + (int)(beginTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
+//		int endTimeInPixels  = data.offset() + (int)(endTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
+//
+//
+//		int widthInPixels = endTimeInPixels - beginTimeInPixels + 1; 
+//		if(widthInPixels < 1) widthInPixels = 1;
+//
+//		
+//		if(EndTime > data.endTime()) widthInPixels -= 5;
+//		if(BeginTime < data.beginTime())
+//		{
+//			beginTimeInPixels  -= 5;
+//			widthInPixels += 5;
+//		}
+
+//		
+//		/** The y coordinate of the top of the rectangle */
+//		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - data.userEventRectHeight();
+//		
+//		this.setBounds( beginTimeInPixels,  
+//						(int)yTop,
+//						widthInPixels, 
+//						data.userEventRectHeight() );
 
 	}
 

@@ -135,5 +135,10 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		// Do nothing
 	}
 
+
+	public void displayWarning(String message) {
+		// Do nothing
+	}
+
 	
 }

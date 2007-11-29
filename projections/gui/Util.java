@@ -47,18 +47,18 @@ public class Util
 
     public static int getBestIncrement(int initialIncrement)
     {
-	int[] indices = {1, 2, 5, 25};
-	int best = -1;
-	for (int i=0; i<indices.length; i++) {
-	    int t=0;
-	    int sum=0;
-	    while ((sum = (int)(indices[i] * Math.pow(10,t)))
-		   < initialIncrement)
-		t++;
-	    if((sum-initialIncrement) < (best-initialIncrement) || best < 0)
-		best = sum;
-	}
-	return best;
+    	int[] indices = {1, 2, 5, 25};
+    	int best = -1;
+    	for (int i=0; i<indices.length; i++) {
+    		int t=0;
+    		int sum=0;
+    		while ((sum = (int)(indices[i] * Math.pow(10,t)))
+    				< initialIncrement)
+    			t++;
+    		if((sum-initialIncrement) < (best-initialIncrement) || best < 0)
+    			best = sum;
+    	}
+    	return best;
     }
 
     // do not remove yet - still being used by various windows

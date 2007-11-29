@@ -30,4 +30,9 @@ public interface MainHandler {
 	 */
 	void refreshDisplay(boolean doRevalidate);
 	
+	/** Display a warning dialog
+	 * @note This is used when trying to draw a line to a message sent from a time outside the range of the visualization
+	 */
+	void displayWarning(String message);
+	
 }

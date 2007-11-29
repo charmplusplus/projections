@@ -55,6 +55,15 @@ public class SaveImage {
         }
 	}
 	
-	
+	public void saveImageJPEG(String filename){
+		generateImage();
+		
+        try {
+          ImageIO.write(image, "jpg", new File(filename));
+        }
+        catch(IOException ioe) {
+          System.out.println(ioe.getMessage());
+        }
+	}
 	
 };

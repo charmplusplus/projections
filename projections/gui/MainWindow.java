@@ -297,7 +297,7 @@ public class MainWindow extends JFrame
 		childWindows[windowIndex][0] = (ProjectionsWindow)(ctr.newInstance(new Object[] {this, new Integer(windowIndex)}));
 	    } else {
 		if (childWindows[windowIndex][0] instanceof ProjectionsWindow) {
-		  System.out.println("showChildWindow ProjectionsWindow case");
+		    // System.out.println("showChildWindow ProjectionsWindow case");
 		    ((ProjectionsWindow)childWindows[windowIndex][0]).showDialog();
 		} else {
 		    childWindows[windowIndex][0].setVisible(true);

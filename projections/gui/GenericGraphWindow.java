@@ -29,7 +29,6 @@ public abstract class GenericGraphWindow
     // meaning in future versions of Projections that support multiple
     // runs.
     static int myRun = 0;
-    static final Color BACKGROUND = MainWindow.runObject[myRun].background;
 
     // inheritable GUI objects
     protected GraphPanel graphPanel;
@@ -64,7 +63,6 @@ public abstract class GenericGraphWindow
     public GenericGraphWindow(String title, 
 			      MainWindow mainWindow, Integer myWindowID) {
 	super(title, mainWindow, myWindowID);
-	setBackground(BACKGROUND);
 	menuBar.add(fileMenu);
     }
 

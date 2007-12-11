@@ -80,7 +80,6 @@ public class StlWindow extends ProjectionsWindow
 	super(mainWindow, myWindowID);
 	thisWindow = this;
 
-	setBackground(Color.black);
 	setForeground(Color.lightGray);
 	setTitle("Projections Overview - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 	

@@ -1,5 +1,6 @@
 package projections.gui.Timeline;
 
+
 import java.awt.*;
 import java.awt.event.*;
 import projections.analysis.*;
@@ -7,6 +8,9 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 
 import java.text.DecimalFormat;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.*;
 
 public class EntryMethodObject extends JComponent
@@ -26,10 +30,12 @@ implements MouseListener
 	private long cpuBegin, cpuEnd;
 	private int     entry;
 	private int     msglen;
-	private int EventID;
+	int EventID;
 	private ObjectId tid; 
-	private int pCurrent; // I assume this is which displayed timeline the event is assocated with
-	private int pCreation;
+	int pCurrent; // I assume this is which displayed timeline the event is assocated with
+	int pCreation;
+	
+	/** The duration of the visible portion of this event */
 	private double  usage;
 	private float packusage;
 	private long packtime;
@@ -208,8 +214,6 @@ implements MouseListener
 			addMouseListener(this);
 		}
 		
-//		infoString += traceAvailableDependencies();
-		
 		setToolTipText("<html><body>" + infoString + "</html></body>");
 					
 	} 
@@ -276,7 +280,8 @@ implements MouseListener
 		return new Dimension(getSize().width, getSize().height);
 	}   
 
-	public float getNetUsage()
+	
+	public float getNonPackUsage()
 	{
 		return (float)usage - packusage;
 	}   
@@ -318,51 +323,80 @@ implements MouseListener
 				OpenMessageWindow();
 			} else {	
 				// non-left click
-				data.entryMethodObjectRightClick(pCreation, EventID, pCurrent, this);				
+				data.entryMethodObjectRightClick(this);				
 			}
 		}
 	} 
 	
-	
-	/** This will eventually trace the upstream messages that led to this entry method, without loading any additional processor timelines */
-	public String traceAvailableDependencies(){
-		String s = "";
 
-		if (entry != -1){
-			s += "<br><hr><br><b>Tracing Available Dependencies</b>:";
-
-			s += "This event is EventID="+EventID+" from creation processor="+pCreation+"<br>";
-//
-//			if(pCreation <= data.maxPs()){
-//				
-//				if (data.mesgVector[pCreation] != null){
-//
-//					s += "caller timeline is loaded<br>";
-////				TimelineMessage created_message = searchMesg(data.mesgVector[pCreation],EventID);
-////			} else {
-////				s += "caller timeline is not loaded<br>";
-//
-//				}
-//			}
-			
-		}
+	/** Iteratively trace the upstream messages that 
+	 * led to this entry method, without loading any 
+	 * additional processor timelines 
+	 * 
+	 * return a set of entry method objects and 
+	 * TimelineMessage objects associated with the 
+	 * trace
+	 * 
+	 */
+	public HashSet traceDependencies(){
+		EntryMethodObject obj = this;
+		HashSet v = new HashSet();
 		
-		return s;
+		boolean done = false;
+		while(!done){
+			done = true;
+			v.add(obj);
+			if (obj.entry != -1){
+				if(obj.pCreation <= data.maxPs()){
+					if (data.mesgVector[obj.pCreation] != null){
+						// Find message that created the object
+						TimelineMessage created_message = obj.creationMessage();
+						// Find object that created the message
+						if(created_message != null && created_message.getSenderEventID() != -1){
+							obj = data.searchTLO(obj.pCreation, created_message.getSenderEventID());
+							if(obj != null){
+								done = false;
+							}
+						}
+					}
+				}
+			}
+		}
+		return v;
+	}
+
+
+	public TimelineMessage creationMessage(){
+		if(data != null && data.mesgVector != null && pCreation >= 0 && data.mesgVector[pCreation] != null)
+			return data.searchMesg(data.mesgVector[pCreation],EventID);
+		else 
+			return null;
 	}
 	
 	
-	
-
 
 	public void mouseEntered(MouseEvent evt)
 	{   
-		// ignore 	
+		// Highlight the dependencies of this object
+		if(data.showDependenciesOnHover()){
+			Set s = traceDependencies();
+			data.clearMessageSendLines();
+			data.addMessageSendLine(s);
+			data.HighlightObjects(s);
+			data.displayMustBeRepainted();
+		}
 	}   
+
 
 	public void mouseExited(MouseEvent evt)
 	{
-		// ignore 	
+		if(data.showDependenciesOnHover()){
+			data.clearObjectHighlights();
+			data.clearMessageSendLines();
+			data.displayMustBeRepainted();
+		}
 	}   
+
 
 	public void mousePressed(MouseEvent evt)
 	{
@@ -418,13 +452,13 @@ implements MouseListener
 
 		// Set the colors of the object
 		if (isIdleEvent()) { 
-			
+
 			// Idle time regions are white on a dark background, or grey on a light background
-			
+
 			Color bg = data.getBackgroundColor();
 
 			int brightness = bg.getRed() + bg.getGreen() + bg.getBlue();
-			
+
 			if(brightness > (128*3)){
 				// bright background
 				c = bg.darker();
@@ -432,7 +466,7 @@ implements MouseListener
 				// dark background ( keep the same traditional look for the old folks ) 
 				c = Color.white;
 			}
-			
+
 		} else if (entry == -2) { // unknown domain
 			c = getBackground();
 		}  else {
@@ -447,10 +481,15 @@ implements MouseListener
 		}
 		
 		
+		if(data.isObjectDimmed(this))
+			c = c.darker();
+		
+
+
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();
 		int rectHeight = data.barheight();
-		
+
 		// Idle regions are thinner vertically
 		if(entry==-1){
 			rectHeight -= 6;
@@ -458,7 +497,7 @@ implements MouseListener
 
 		// The distance from the top or bottom to the rectangle
 		int verticalInset = (getHeight()-rectHeight)/2;
-		
+
 		int left  = 0;
 		int right = rectWidth-1;
 
@@ -481,8 +520,8 @@ implements MouseListener
 		g.setColor(c);
 		if(rectWidth > 1 || entry!=-1)
 			g.fillRect(left, verticalInset, rectWidth, rectHeight);
-		
-		
+
+
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
 		if(rectWidth > 2)
 		{
@@ -497,19 +536,19 @@ implements MouseListener
 				g.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
 		}
 
-		
+
 		/* 
-		 
+
 		   Paint the message packing area
-		   
+
 		   The packing rectangle goes from the leftmost pixel associated with the 
 		   packBeginTime to the rightmost pixel associated with the packEndTime
-	   
+
 	       The beginning will either be the same as the message send, or it will 
 	       be one microsecond later. The mess packing area may therefore not be
 	       connected to the message send when zoomed in.
-	     
-	     */
+
+		 */
 
 		if(data.showPacks == true && packs != null)
 		{
@@ -521,25 +560,25 @@ implements MouseListener
 
 				if(packEndTime >= data.beginTime() && packBeginTime <= data.endTime())
 				{
-					
+
 					// Compute the begin pixel coordinate relative to the containing panel
 					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
-					
+
 					// Compute the begin pixel coordinate relative to the Entry method object itself
 					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord;
-					
+
 					// Compute the end pixel coordinate relative to the containing panel
 					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
-					
+
 					// Compute the end pixel coordinate relative to the Entry method object itself
 					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord;
-					
+
 					g.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (int)(packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
-				
+
 				}
 			}
 		}
-		
+
 		// Show the message sends. See note above for the message packing areas
 		// Don't change this without changing MainPanel's paintComponent which draws message send lines
 		if(data.showMsgs == true && messages != null)
@@ -552,17 +591,16 @@ implements MouseListener
 				{
 					// Compute the pixel coordinate relative to the containing panel
 					int msgPanelCoordX = data.timeToScreenPixelLeft(msgtime);
-					 
+
 					// Compute the pixel coordinate relative to the Entry method object itself
 					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
-								
+
 					g.drawLine(msgObjectCoordX, verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
 
 				}
 			}
 		}
-
-	}   
+	}
 
 
 	public void setLocationAndSize(int actualDisplayWidth)
@@ -636,7 +674,11 @@ implements MouseListener
 
 	public void setWhichTimeline(int p) {
 		whichTimelineVerticalIndex = p;
-	}   
+	}
+
+	public int getEventID() {
+		return EventID;
+	}
 
 
 }

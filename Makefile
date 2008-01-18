@@ -164,7 +164,6 @@ SRC13=\
     projections/gui/Timeline/ColorChooser.java \
     projections/gui/Timeline/Data.java \
     projections/gui/Timeline/LabelPanel.java \
-    projections/gui/Timeline/Line.java \
     projections/gui/Timeline/MainPanel.java \
     projections/gui/Timeline/MainHandler.java \
     projections/gui/Timeline/MessageCanvas.java \

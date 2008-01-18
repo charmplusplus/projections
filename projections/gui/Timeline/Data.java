@@ -1,6 +1,8 @@
 package projections.gui.Timeline;
 
-import java.util.Iterator;
+
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 import javax.swing.*;
 import java.awt.Font;
@@ -132,9 +134,9 @@ public class Data
 		return useMinimalView;
 	}
 
-	/** A set of lines representing message sends */
-	// TODO: update this to refer to the objects themselves instead, because these won't survive a change in the scale factor or window resize
-	public Vector mesgCreateExecVector;
+	/** A set of objects for which we draw their creation message lines */
+	public Set drawMessagesForTheseObjects;
+	
 	
 	/** The line thickness for the mesg send lines */
 	public float messageLineThickness=2.5f;
@@ -174,8 +176,8 @@ public class Data
 		beginTime = 0;
 		endTime = MainWindow.runObject[myRun].getTotalTime();
 
-		mesgCreateExecVector = new Vector();
-
+		drawMessagesForTheseObjects = new HashSet();
+		
 		tloArray = null;
 		mesgVector = null;
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
@@ -184,6 +186,8 @@ public class Data
 		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
 
+		highlightedObjects = new HashSet();
+		
 	}
 	/** 
 	 * Add the data for a new processor to this visualization
@@ -418,7 +422,7 @@ public class Data
 					entries[entrynum]++;
 					processorUsage[p] += usage;
 					packUsage[p] += tloArray[p][n].getPackUsage();
-					entryUsageArray[entrynum] += tloArray[p][n].getNetUsage();
+					entryUsageArray[entrynum] += tloArray[p][n].getNonPackUsage();
 				} else {
 					idleUsage[p] += usage;
 				}
@@ -452,36 +456,54 @@ public class Data
 
 	/** remove all the message send lines */
 	public void clearAllLines() {
-		mesgCreateExecVector.clear();
+		drawMessagesForTheseObjects.clear();
 		displayMustBeRepainted();
 	}
 	
 	/** Add or Remove a new line to the visualization representing the sending of a message */
-	public void toggleConnectingLine(int pCreation,long creationtime,
-			int pCurrent, EntryMethodObject objCurrent) {
+	public void toggleMessageSendLine(EntryMethodObject obj) {
+		
+		TimelineMessage created_message = obj.creationMessage();
 
-		long executiontime = objCurrent.getBeginTime();
-		
-		// Search to see if we already have this line or not
-		// If we find the line, we just remove it and return
-		Iterator iter = mesgCreateExecVector.iterator();		
-		while(iter.hasNext()) {
-			Line line = (Line ) iter.next();
-			if (line.pCurrent == pCurrent && line.executiontime == executiontime) {
-				mesgCreateExecVector.remove(line);
-				displayMustBeRepainted();
-				return;
+		if(created_message != null){
+			
+			if(drawMessagesForTheseObjects.contains(obj)){
+				drawMessagesForTheseObjects.remove(obj);
+			} else {
+				drawMessagesForTheseObjects.add(obj);
 			}
+			
+			displayMustBeRepainted();
+			
+		} else {
+			modificationHandler.displayWarning("Message was sent from outside the current time range, or set of processors");
 		}
-		
-		// We didn't find the line yet, so add it
-		Line line = new Line(pCreation,pCurrent,objCurrent,
-				creationtime,executiontime);
-		mesgCreateExecVector.add(line);
-				
-		displayMustBeRepainted();
+	}
+	
+	/** Add a new line to the visualization representing the sending of a message.
+	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
+	 */
+	public void addMessageSendLine(EntryMethodObject obj) {
+			drawMessagesForTheseObjects.add(obj);
 	}
 
+	/** Add a set of objects for which we want their creation messages to be displayed
+	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
+	 */
+	public void addMessageSendLine(Set s) {
+		drawMessagesForTheseObjects.addAll(s);
+	}
+	
+	/** Remove a set of objects so their creation messages are no longer displayed
+	 * @note the caller should call 	displayMustBeRepainted() after removing all desired messages
+	 */
+	public void removeMessageSendLine(Set s) {
+		drawMessagesForTheseObjects.removeAll(s);
+	}
+	
+	public void clearMessageSendLines() {
+		drawMessagesForTheseObjects.clear();
+	}
 	
 	
 	public long endTime(){
@@ -970,26 +992,19 @@ public class Data
 	}
 	
 	/** Do something when the user right clicks on an entry method object */
-	public void entryMethodObjectRightClick(int pCreation, int EventID, int pCurrent, EntryMethodObject obj) {
-		
+	public void entryMethodObjectRightClick(EntryMethodObject obj) {
+		// pCreation, EventID, pCurrent, 
 		if(! useMinimalView()){
 			
-			addProcessor(pCreation);
-			
-			TimelineMessage created_message = searchMesg(mesgVector[pCreation],EventID);
-
-			if(created_message != null){
-				toggleConnectingLine(pCreation,created_message.Time, pCurrent,obj);
-			} else {
-				modificationHandler.displayWarning("Message was sent from outside the current time range");
-			}
+			addProcessor(obj.pCreation);
+			toggleMessageSendLine(obj);
 			
 		}		
 	}
 	
 	
 	/** Search for specified event in vector v using a binary search. Returns null if not found, or eventid=-1. */
-	private TimelineMessage searchMesg(Vector v,int eventid){
+	TimelineMessage searchMesg(Vector v,int eventid){
 		
 		// the binary search should deal with indices and not absolute
 		// values, hence size-1.
@@ -1053,7 +1068,59 @@ public class Data
 			return binarySearch(v,eventid,mid+1,end);
 		}
 	}
+	
+	/** A set of objects to highlight. The paintComponent() methods for the objects 
+	 * should paint themselves appropriately after determining if they are in this set 
+	 */
+	private Set highlightedObjects;
+ 	
+	/** Highlight the dependencies when mouse is over an event */
+	private boolean showDependenciesOnHover;
+	
+	/** Clear any highlights created by HighlightObjects() */
+	public void clearObjectHighlights() {
+		highlightedObjects.clear();
+	}
+	
+	/** Highlight the given set of timeline objects */
+	public void HighlightObjects(Set objects) {
+		highlightedObjects.addAll(objects);
+	}
 
+	/** Determine if an object should be dimmed. 
+	 * If there are any objects set to be highlighted, 
+	 * all others will be dimmed 
+	 */
+	public boolean isObjectDimmed(Object o){
+		if(highlightedObjects.size() == 0)
+			return false;
+		else
+			return ! highlightedObjects.contains(o);
+	}
+		
+
+	public boolean showDependenciesOnHover() {
+		return showDependenciesOnHover;
+	}
+	
+	public void setShowDependenciesOnHover(boolean showDependenciesOnHover) {
+		this.showDependenciesOnHover = showDependenciesOnHover;
+	}
+	
+	
+	/** Linear search for an entry method for a specific processor */
+	public EntryMethodObject searchTLO(int proc, int eventid){
+				
+		for (int p=0; p<tloArray[proc].length; p++) {
+			EntryMethodObject o = tloArray[proc][p];
+		
+			if(o.getEventID()==eventid){
+				return o;
+			}
+		}
+		return null;
+	}
+	
 	
 
 }

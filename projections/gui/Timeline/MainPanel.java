@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Iterator;
 
 import javax.swing.*;
 
@@ -95,40 +96,58 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// paint the message send lines 
 		
-		if (!data.mesgCreateExecVector.isEmpty()) {
+		if (data.drawMessagesForTheseObjects.size()>0) {
 			g.setColor(data.getForegroundColor());
 
 			Dimension dim = getSize();
-			
-			for (int i=0;i<data.mesgCreateExecVector.size();i++) {
-				Line lineElement = 
-					(Line)data.mesgCreateExecVector.elementAt(i);
-				int startpe_index=0;
-				int endpe_index=0;
-				data.processorList().reset();
-				for (int j=0;j<data.processorList().size();j++) {
-					int pe = data.processorList().nextElement();
-					if (pe == lineElement.pCreation) {
-						startpe_index = j;
-					}
-					if (pe == lineElement.pCurrent) {
-						endpe_index = j;
+
+			Iterator iter = data.drawMessagesForTheseObjects.iterator();
+			while(iter.hasNext()){
+		
+				Object o = iter.next();
+							
+				if(o instanceof EntryMethodObject){
+	
+					EntryMethodObject obj = (EntryMethodObject)o;
+					
+					if(obj.creationMessage() != null){
+
+						int pCreation = obj.pCreation;
+						int pExecution = obj.pCurrent;
+
+						// Find the index for the PEs in the list of displayed PEs
+						int startpe_index=0;
+						int endpe_index=0;
+						data.processorList().reset();
+						for (int j=0;j<data.processorList().size();j++) {
+							int pe = data.processorList().nextElement();
+							if (pe == pCreation) {
+								startpe_index = j;
+							}
+							if (pe == pExecution) {
+								endpe_index = j;
+							}
+						}
+
+						// Message Creation point
+						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
+						double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
+
+						// Message executed (entry method starts) 
+						int x2 =  data.timeToScreenPixel(obj.getBeginTime(), getWidth());
+						double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
+
+						g.drawLine(x1,(int)y1,x2,(int)y2);
+
 					}
 				}
 
-				// Message Creation point
-				int x1 = data.timeToScreenPixelLeft(lineElement.creationtime, getWidth());			
-				double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
-						
-				// Message executed (entry method starts) 
-				int x2 =  data.timeToScreenPixel(lineElement.executiontime, getWidth());
-				double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
-
-				g.drawLine(x1,(int)y1,x2,(int)y2);
 			}
-		}
 
+
+		}
 	}
+
 
 
 	/** 

@@ -1013,7 +1013,7 @@ public class LogLoader extends ProjDefs
 							Timeline.addElement(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(LE.Time - BeginTime,
+						TM = new TimelineMessage(TE.EventID, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID);
 						TE.addMessage(TM);
@@ -1046,7 +1046,7 @@ public class LogLoader extends ProjDefs
 							Timeline.addElement(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(LE.Time - BeginTime,
+						TM = new TimelineMessage(TE.EventID, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID, LE.numPEs);
 						TE.addMessage(TM);
@@ -1078,7 +1078,7 @@ public class LogLoader extends ProjDefs
 							Timeline.addElement(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(LE.Time - BeginTime,
+						TM = new TimelineMessage(TE.EventID, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID, LE.destPEs);
 						TE.addMessage(TM);

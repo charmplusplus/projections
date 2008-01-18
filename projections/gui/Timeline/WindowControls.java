@@ -56,7 +56,7 @@ ItemListener {
 
 	private FloatJTextField scaleField;
 
-	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser;
+	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbTraceDependencies;
 
 	private UserEventWindow userEventWindow;
 
@@ -403,11 +403,14 @@ ItemListener {
 		cbMsgs = new JCheckBox("Display Message Sends", data.showMsgs);
 		cbIdle = new JCheckBox("Display Idle Time", data.showIdle);
 		cbUser = new JCheckBox("Display User Event Window", false);
+		cbTraceDependencies = new JCheckBox("Display Event Dependencies", false);
 
+		
 		cbPacks.addItemListener(this);
 		cbMsgs.addItemListener(this);
 		cbIdle.addItemListener(this);
 		cbUser.addItemListener(this);
+		cbTraceDependencies.addItemListener(this);
 
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -422,6 +425,7 @@ ItemListener {
 		Util.gblAdd(cbPanel, cbMsgs, gbc, 1, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbIdle, gbc, 2, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUser, gbc, 3, 0, 1, 1, 1, 1);
+		Util.gblAdd(cbPanel, cbTraceDependencies, gbc, 4, 0, 1, 1, 1, 1);
 
 		// // BUTTON PANEL
 		bSelectRange = new JButton("Select Ranges");
@@ -595,6 +599,8 @@ ItemListener {
 			data.showMsgs = (evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbIdle)
 			data.showIdle = (evt.getStateChange() == ItemEvent.SELECTED);
+		else if (c == cbTraceDependencies)
+			data.setShowDependenciesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbUser) {
 			if (evt.getStateChange() == ItemEvent.SELECTED){
 				userEventWindow.pack();

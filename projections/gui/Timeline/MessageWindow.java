@@ -3,66 +3,44 @@ package projections.gui.Timeline;
 import java.awt.*;
 import java.awt.event.*;
 
-public class MessageWindow extends Frame
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.WindowConstants;
+
+public class MessageWindow extends JFrame
    implements ActionListener
 {
 
-
 	private static final long serialVersionUID = 1L;
 	private EntryMethodObject obj;
-   private MessagePanel canvas;
-   private ScrollPane sp;
+	private MessagePanel canvas;
+	private ScrollPane sp;
    
    public MessageWindow(EntryMethodObject obj)
    {
 	  this.obj  = obj;
-	  
-	  addWindowListener(new WindowAdapter()
-	  {                    
-		 public void windowClosing(WindowEvent e)
-		 {
-			Close();
-		 }
-	  });
 
-	  setBackground(Color.lightGray);
 	  setTitle("Timeline Entry Details");
  
 	  sp = new ScrollPane();
 	  
 	  canvas = new MessagePanel(obj);
 	  sp.add(canvas);
-	  
-	  Panel p = new Panel();
-	  p.setLayout(new FlowLayout());
-	  Button bClose = new Button("Close");
-	  bClose.addActionListener(this);
-	  p.add(bClose);
-	  
-	  setLayout(new BorderLayout());
-	  add(sp, "Center");
-	  add(p,  "South");
+
+	  getContentPane().setLayout(new BorderLayout());
+	  getContentPane().add(sp, "Center");
 	  
 	  pack();
    }   
-   public void actionPerformed(ActionEvent evt)
-   {
-	  Close();
-   }   
-   void Close()
-   {
-	  setVisible(false);
-	  obj.CloseMessageWindow();
-	  dispose();
-   }   
+   
    public Dimension getPreferredSize() {
-       if (canvas != null) { 
-	   Dimension d = canvas.getPreferredSize(); 
-	   d.width += 10;
-	   d.height += 30;
-	   return d;
-       }
-       return new Dimension(640, 480);
+       return new Dimension(400, 800);
+   }
+
+
+   public void actionPerformed(ActionEvent e) {
+	   // TODO Auto-generated method stub
+
    }
 }
 

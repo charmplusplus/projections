@@ -164,7 +164,6 @@ ItemListener {
 	public void loadSelected() {
 		if (data.selectionValid()) {
 			
-	
 			double startTime = data.leftSelectionTime();
 			double endTime = data.rightSelectionTime();
 			

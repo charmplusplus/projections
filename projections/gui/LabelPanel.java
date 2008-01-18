@@ -10,10 +10,6 @@ import javax.swing.*;
 
 public class LabelPanel extends JPanel {
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	JTextField field;
     JLabel label;
 

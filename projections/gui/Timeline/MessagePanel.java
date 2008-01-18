@@ -10,9 +10,7 @@ import projections.gui.MainWindow;
 import projections.gui.Util;
 
 public class MessagePanel extends JPanel {
-     
-	private static final long serialVersionUID = 1L;
-
+  
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.

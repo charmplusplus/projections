@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Graphics;
 import javax.swing.*;
 import java.awt.FontMetrics;
-import projections.analysis.TimelineMessage;
 import projections.gui.MainWindow;
 
 import java.awt.Dimension;

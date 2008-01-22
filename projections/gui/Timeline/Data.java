@@ -406,6 +406,12 @@ public class Data
 			}
 		}
 		progressBar.close();
+		
+				
+		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
+		
+		
+		
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
 		}

@@ -3,6 +3,8 @@ package projections.analysis;
 import java.util.*;
 import java.lang.Comparable;
 
+import projections.gui.Timeline.TimelineMessage;
+
 public class TimelineEvent implements Comparable
 {
  

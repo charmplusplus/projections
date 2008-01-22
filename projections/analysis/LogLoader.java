@@ -13,6 +13,7 @@ import javax.swing.*;
 //import org.apache.xpath.operations.And;
 
 import projections.gui.*;
+import projections.gui.Timeline.TimelineMessage;
 import projections.gui.Timeline.UserEventObject;
 import projections.misc.*;
 
@@ -25,7 +26,12 @@ public class LogLoader extends ProjDefs
 
 	private boolean isProcessing = false;
 	boolean ampiTraceOn = false;
+	
+	
+	private boolean useTimeIndexes = false;
+	
 
+	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
 	public long determineEndTime(OrderedIntList validPEs)
 	{
 		long BeginTime, EndTime;
@@ -1246,6 +1252,7 @@ public class LogLoader extends ProjDefs
 			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
 					LogLoadException.READ);
 		}
+				
 		return Timeline;
 	}
 
@@ -1372,4 +1379,142 @@ public class LogLoader extends ProjDefs
 		}
 		return ret;
 	}
+	
+	
+	/** Create an index of each logfile by jumping into the file at regular intervals, getting the next line, and parsing out a timestamp */
+
+	public void createTimeIndexes(OrderedIntList validPEs){
+		if(useTimeIndexes) {
+			long BeginTime=0;
+			long EndTime = determineEndTime(validPEs);
+
+			System.out.println("creating Index");
+
+			long 	         back;
+			String           Line;
+			RandomAccessFile InFile;
+			StringTokenizer  st;
+			int nPe=validPEs.size();
+
+			ProgressMonitor progressBar =
+				new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Creating an index to speed up future accesses to the trace files",
+						"", 0, nPe);
+			validPEs.reset();
+			int count = 1;
+			while (validPEs.hasMoreElements()) {
+				int pe = validPEs.nextElement();
+
+				System.out.println("creating Index for pe"+pe);
+
+				if (!progressBar.isCanceled()) {
+					progressBar.setNote("[" + pe + "] " + count + 
+							" of " + nPe + " files");
+					progressBar.setProgress(count);
+				} else {
+					System.err.println("Fatal error - Something bad happened while creating time indexes to the trace files!");
+					System.exit(-1);
+				}
+				count++;
+
+				String filename = MainWindow.runObject[myRun].getLogName(pe);
+
+				TreeMap index = new TreeMap();
+
+				int dummyInt = 0;
+				int type = 0;
+				try {
+					InFile = new RandomAccessFile(new File(filename), "r");
+					back = InFile.length();
+
+
+					System.out.println("File " + filename + " has length " + back);
+
+					if(back > 1024*256){
+						int sample_rate = 10000;
+						long num_samples = back / sample_rate; // sample one line every 10000 bytes
+						long Time;
+
+						for(int i=0;i<num_samples;i++) {
+							int offset = sample_rate * i;
+							InFile.seek(offset);
+							// Chomp away until we get to a new line
+							while (InFile.readByte() != '\n'){}
+							// Read a real line
+							Line = InFile.readLine();
+							if (Line == null) {
+								throw new EOFException();
+							}
+							st = new StringTokenizer(Line);
+							type=Integer.parseInt(st.nextToken());
+
+							switch (type) {
+							case CREATION:
+							case CREATION_BCAST:
+							case CREATION_MULTICAST:
+							case BEGIN_PROCESSING:
+							case END_PROCESSING:
+								dummyInt = 
+									Integer.parseInt(st.nextToken());
+								dummyInt = 
+									Integer.parseInt(st.nextToken());
+								break;
+							case USER_EVENT:
+							case USER_EVENT_PAIR:
+							case MESSAGE_RECV: 
+							case ENQUEUE: 
+							case DEQUEUE:
+								dummyInt = 
+									Integer.parseInt(st.nextToken());
+								break;
+							case BEGIN_IDLE:
+							case END_IDLE:
+							case BEGIN_PACK: 
+							case END_PACK:
+							case BEGIN_UNPACK: 
+							case END_UNPACK:
+							case BEGIN_TRACE: 
+							case END_TRACE:
+							case BEGIN_COMPUTATION:
+							case BEGIN_FUNC:
+							case END_FUNC:
+							case BEGIN_INTERRUPT: 
+							case END_INTERRUPT: 
+							case END_COMPUTATION: 
+								break;
+							}
+							Time = Long.parseLong(st.nextToken());
+
+							index.put(Time, offset);
+
+
+						} // end for
+
+
+						System.out.println("Index for file "+ filename + " contains " + index.size() + " entries");
+						InFile.close ();
+
+					}
+				} catch (EOFException e) {
+
+				} catch (IOException E) {
+					System.err.println("Couldn't read log file " + filename);
+				}
+
+				try {
+					FileOutputStream fout = new FileOutputStream(filename+".index");
+					ObjectOutputStream oos = new ObjectOutputStream(fout);
+					oos.writeObject(new String("This is a serialized index"));
+					oos.writeObject(index);
+					oos.close();
+				}
+				catch (Exception e) { e.printStackTrace(); }
+
+			}
+
+			progressBar.close();
+
+		}
+	}
+	
+	
 }

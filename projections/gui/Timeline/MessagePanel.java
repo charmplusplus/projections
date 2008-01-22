@@ -6,7 +6,6 @@ import java.util.Set;
 
 import javax.swing.*;
 
-import projections.analysis.*;
 import projections.gui.JLongTextField;
 import projections.gui.LabelPanel;
 import projections.gui.MainWindow;

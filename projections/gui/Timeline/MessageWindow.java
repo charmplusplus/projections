@@ -4,8 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
-import javax.swing.WindowConstants;
 
 public class MessageWindow extends JFrame
    implements ActionListener

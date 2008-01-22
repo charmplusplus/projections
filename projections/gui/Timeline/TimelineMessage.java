@@ -1,4 +1,4 @@
-package projections.analysis;
+package projections.gui.Timeline;
 
 public class TimelineMessage implements Comparable
 {

@@ -447,7 +447,11 @@ public class Data
 				}
 			}      
 		} 
-		
+
+		progressBar = new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Creating auxiliary data structures to speed up visualization", "", 0, 4);
+		progressBar.setProgress(0);
+		progressBar.setNote("Creating Map 1");
+				
 		/** Create a mapping from EventIDs on each pe to messages */
 		eventIDToMessageMap = new HashMap[processorList.size()];
 		for(int i=0;i<processorList.size();i++){
@@ -461,6 +465,8 @@ public class Data
 			}
 		}
 
+		progressBar.setProgress(1);
+		progressBar.setNote("Creating Map 2");
 		
 		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
 		eventIDToEntryMethodMap = new HashMap[processorList.size()];
@@ -475,7 +481,9 @@ public class Data
 			}		
 		}
 
-
+		progressBar.setProgress(2);
+		progressBar.setNote("Creating Map 3");
+		
 		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
 		messageToSendingObjectsMap = new HashMap();
 		for(int i=0;i<tloArray.length;i++){
@@ -492,7 +500,9 @@ public class Data
 			}
 		}
 				
-
+		progressBar.setProgress(3);
+		progressBar.setNote("Creating Map 4");
+		
 		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
 		messageToExecutingObjectsMap = new HashMap();
 		for(int i=0;i<tloArray.length;i++){
@@ -520,6 +530,8 @@ public class Data
 				}				
 			}
 		}
+		
+		progressBar.close();
 		
 	}
 	

@@ -142,6 +142,8 @@ public class Data
 
 	/** A set of objects for which we draw their creation message lines */
 	public Set drawMessagesForTheseObjects;
+	/** A set of objects for which we draw their creation message lines in an alternate color */
+	public Set drawMessagesForTheseObjectsAlt;
 	
 	
 	/** The line thickness for the mesg send lines */
@@ -184,6 +186,7 @@ public class Data
 		endTime = MainWindow.runObject[myRun].getTotalTime();
 
 		drawMessagesForTheseObjects = new HashSet();
+		drawMessagesForTheseObjectsAlt = new HashSet();
 		
 		tloArray = null;
 		mesgVector = null;
@@ -558,6 +561,7 @@ public class Data
 	/** remove all the message send lines */
 	public void clearAllLines() {
 		drawMessagesForTheseObjects.clear();
+		drawMessagesForTheseObjectsAlt.clear();
 		displayMustBeRepainted();
 	}
 	
@@ -587,6 +591,10 @@ public class Data
 	public void addMessageSendLine(EntryMethodObject obj) {
 			drawMessagesForTheseObjects.add(obj);
 	}
+	
+	public void addMessageSendLineAlt(Set s) {
+		drawMessagesForTheseObjectsAlt.addAll(s);
+	}
 
 	/** Add a set of objects for which we want their creation messages to be displayed
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
@@ -600,10 +608,12 @@ public class Data
 	 */
 	public void removeMessageSendLine(Set s) {
 		drawMessagesForTheseObjects.removeAll(s);
+		drawMessagesForTheseObjectsAlt.removeAll(s);
 	}
 	
 	public void clearMessageSendLines() {
 		drawMessagesForTheseObjects.clear();
+		drawMessagesForTheseObjectsAlt.clear();
 	}
 	
 	
@@ -1155,6 +1165,15 @@ public class Data
 		ToolTipManager.sharedInstance().setInitialDelay(2000);
 		ToolTipManager.sharedInstance().setDismissDelay(10000);	
 	}
+	
+	public Color getMessageColor() {
+		return Color.white;
+	}
+	
+	public Color getMessageAltColor() {
+		return Color.yellow;
+	}
+	
 	
 
 }

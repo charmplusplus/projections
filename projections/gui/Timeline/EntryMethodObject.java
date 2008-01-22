@@ -412,12 +412,17 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	{   
 		// Highlight the dependencies of this object
 		if(data.showDependenciesOnHover()){
-			Set s = new HashSet();
-			s.addAll(traceBackwardDependencies());
-			s.addAll(traceForwardDependencies());
+			Set fwd = traceForwardDependencies();
+			Set back = traceBackwardDependencies();
+			
+			Set fwdAndBack = new HashSet();
+			fwdAndBack.addAll(fwd);
+			fwdAndBack.addAll(back);
+			
 			data.clearMessageSendLines();
-			data.addMessageSendLine(s);
-			data.HighlightObjects(s);
+			data.addMessageSendLine(back);
+			data.addMessageSendLineAlt(fwd);
+			data.HighlightObjects(fwdAndBack);
 			data.displayMustBeRepainted();
 		}
 	}   

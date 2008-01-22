@@ -10,6 +10,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
+import java.util.Set;
 
 import javax.swing.*;
 
@@ -94,27 +95,28 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 
 
-		// paint the message send lines 
-		
-		if (data.drawMessagesForTheseObjects.size()>0) {
-			g.setColor(data.getForegroundColor());
-
-			Dimension dim = getSize();
-
-			Iterator iter = data.drawMessagesForTheseObjects.iterator();
-			while(iter.hasNext()){
-		
-				Object o = iter.next();
-							
-				if(o instanceof EntryMethodObject){
+		// paint the message send lines
 	
-					EntryMethodObject obj = (EntryMethodObject)o;
-					
-					if(obj.creationMessage() != null){
+		paintMessageSendLines(g, data.getMessageColor(), data.drawMessagesForTheseObjects);
+		paintMessageSendLines(g, data.getMessageAltColor(), data.drawMessagesForTheseObjectsAlt);
+		
+		
+	}
 
+
+	
+	public void paintMessageSendLines(Graphics g, Color c, Set drawMessagesForObjects){
+		// paint the message send lines
+		if (drawMessagesForObjects.size()>0) {
+			g.setColor(c);
+			Iterator iter = drawMessagesForObjects.iterator();
+			while(iter.hasNext()){
+				Object o = iter.next();
+				if(o instanceof EntryMethodObject){
+					EntryMethodObject obj = (EntryMethodObject)o;
+					if(obj.creationMessage() != null){
 						int pCreation = obj.pCreation;
 						int pExecution = obj.pCurrent;
-
 						// Find the index for the PEs in the list of displayed PEs
 						int startpe_index=0;
 						int endpe_index=0;
@@ -128,27 +130,22 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 								endpe_index = j;
 							}
 						}
-
 						// Message Creation point
 						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
 						double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
-
 						// Message executed (entry method starts) 
 						int x2 =  data.timeToScreenPixel(obj.getBeginTime(), getWidth());
 						double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
-
+						// I like painting a line :)
 						g.drawLine(x1,(int)y1,x2,(int)y2);
-
 					}
 				}
-
 			}
-
-
 		}
+
 	}
-
-
+	
+	
 
 	/** 
 	 * Load or Reload the timeline objects from the data object's tloArray

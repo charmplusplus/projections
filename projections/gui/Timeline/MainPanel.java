@@ -164,7 +164,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		this.removeAll();
 		data.createTLOArray();
 
-		// Add the entry method (EntryMethodObject)
+		// Add the entry method instances (EntryMethodObject) to the panel for displaying
 		for (int p = 0; p < data.numPs(); p++) {
 			for (int i = 0; i < data.tloArray[p].length; i++){
 				data.tloArray[p][i].setWhichTimeline(p);

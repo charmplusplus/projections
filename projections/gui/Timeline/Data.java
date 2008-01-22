@@ -1,9 +1,15 @@
 package projections.gui.Timeline;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 import javax.swing.*;
+
 import java.awt.Font;
 import java.awt.Color;
 import projections.analysis.*;
@@ -18,11 +24,10 @@ import projections.misc.*;
  * 		-- The time range
  *  	-- The scale factor(used when zooming)
  * 		-- The list of processors for which we draw timelines
- * 		-- An array of the objects that are to be displayed
+ * 		-- Sets of the EntryMethodObject, UserEventObject, and Message lines that are to be displayed
  *      -- Information about entry method names
  *      -- whether idle time is displayed
  *      -- whether user events are displayed
- *      -- A set of lines representing message sends
  *      -- Various margins/offsets/insets used when painting
  * 		-- A selection and highlight
  * 
@@ -52,10 +57,6 @@ public class Data
 	int myRun = 0;
 
 	private MainHandler modificationHandler = null;
-
-
-//	/** The portion of the screen dedicated to the visible portion of the main panel */
-//	private int screenWidth;
 
 
 	private float scaleFactor = 1.0f;
@@ -90,9 +91,7 @@ public class Data
 
 	public Vector [] oldmesgVector;
 
-	// TODO: this array doesn't really have a right to exist here
-	// remove it or free it at some point
-	UserEventObject[][] timelineUserEventObjectsArray = null;
+	public UserEventObject[][] timelineUserEventObjectsArray = null;
 
 	float[] processorUsage;
 
@@ -102,9 +101,10 @@ public class Data
 
 	OrderedUsageList[] entryUsageList;
 
-	/** The times for the displayed time region */
+	/** The start time for the time range. */
 	private long beginTime; 
 
+	/** The end time for the time range. */
 	private long endTime;
 
 	/** The old begin time, used to make loading of new ranges more
@@ -116,8 +116,16 @@ public class Data
 	/** The old end time */
 	long oldET; 
 
+	
+	/** Some associative containers to make lookups fast */
+	Map []eventIDToMessageMap;
+	Map []eventIDToEntryMethodMap;
+	Map messageToExecutingObjectsMap;
+	Map messageToSendingObjectsMap;
+		
+	
+	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
 	boolean showPacks, showIdle, showMsgs;
-
 
 
 	/** The font used by the LabelPanel */
@@ -142,6 +150,7 @@ public class Data
 	
 	private boolean useCustomColors=false;
 	
+	/** A custom foreground color that can override the application wide background pattern. Used by NoiseMiner to set a white background */
 	private Color customForeground;
 	private Color customBackground;
 
@@ -326,11 +335,10 @@ public class Data
 								oldtloArray[oldpindex][n+startIndex];
 							tloArray[newpindex][n].setUsage();
 							tloArray[newpindex][n].setPackUsage();
-							for (int j=0;
-							j<tloArray[newpindex][n].messages.length;
-							j++) {
-								mesgVector[newp].addElement(tloArray[newpindex][n].messages[j]);
-							}
+					
+							// Add each message to mesgVector
+							mesgVector[newp].addAll(tloArray[newpindex][n].messages);
+													
 						}
 						// copy user events from larger array into smaller array
 						if (oldUserEventsArray != null && 
@@ -434,7 +442,84 @@ public class Data
 				}
 			}      
 		} 
-	}	  
+		
+		/** Create a mapping from EventIDs on each pe to messages */
+		eventIDToMessageMap = new HashMap[processorList.size()];
+		for(int i=0;i<processorList.size();i++){
+			eventIDToMessageMap[i] = new HashMap();
+			// scan through mesgVector[i] and add each TimelineMessage entry to the map
+			Iterator iter = mesgVector[i].iterator();
+			while(iter.hasNext()){
+				TimelineMessage msg = (TimelineMessage) iter.next();
+				if(msg!=null)
+					eventIDToMessageMap[i].put(msg.EventID, msg);
+			}
+		}
+
+		
+		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
+		eventIDToEntryMethodMap = new HashMap[processorList.size()];
+		for(int i=0;i<processorList.size();i++){
+			eventIDToEntryMethodMap[i] = new HashMap();
+			if(tloArray[i]!=null){
+				for(int j=0;j<tloArray[i].length;j++){
+					EntryMethodObject obj=tloArray[i][j];
+					if(obj!=null)
+						eventIDToEntryMethodMap[i].put(obj.EventID, obj);
+				}
+			}		
+		}
+
+
+		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
+		messageToSendingObjectsMap = new HashMap();
+		for(int i=0;i<tloArray.length;i++){
+			if(tloArray[i]!=null){
+				for(int j=0;j<tloArray[i].length;j++){
+					EntryMethodObject obj=tloArray[i][j];
+					// put all the messages created by obj into the map, listing obj as the creator
+					Iterator iter = obj.messages.iterator();
+					while(iter.hasNext()){
+						TimelineMessage msg = (TimelineMessage) iter.next();
+						messageToSendingObjectsMap.put(msg, obj);
+					}
+				}				
+			}
+		}
+				
+
+		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
+		messageToExecutingObjectsMap = new HashMap();
+		for(int i=0;i<tloArray.length;i++){
+			if(tloArray[i]!=null){
+				for(int j=0;j<tloArray[i].length;j++){
+
+					EntryMethodObject obj=tloArray[i][j];
+					if(obj!=null){
+						TimelineMessage msg = obj.creationMessage();
+						if(msg!=null){
+							// for each EntryMethodObject, add its creation Message to the map
+							if(messageToExecutingObjectsMap.containsKey(msg)){
+								// add it to the TreeSet in the map
+								Object o= messageToExecutingObjectsMap.get(msg);
+								TreeSet ts = (TreeSet)o;
+								ts.add(obj);
+							} else {
+								// create a new TreeSet and put it in the map
+								TreeSet ts = new TreeSet();
+								ts.add(obj);
+								messageToExecutingObjectsMap.put(msg, ts);
+							}
+						}
+					}
+				}				
+			}
+		}
+		
+	}
+	
+	
+	
 	public void decreaseScaleFactor(){
 		setScaleFactor( (float) ((int) (getScaleFactor() * 4) - 1) / 4 );
 	}
@@ -521,7 +606,8 @@ public class Data
 			return MainWindow.runObject[myRun].background;
 	}
 
-	// index into userEventArray
+
+	/** Load the timelines! */
 	private EntryMethodObject[] getData(int pnum, int index)  
 	{
 
@@ -529,7 +615,7 @@ public class Data
 		TimelineEvent tle;
 
 		int numItems;
-		int numMsgs, numpacks;
+		int numpacks;
 		tl = new Vector();
 		Vector userEvents = new Vector();
 		mesgVector[pnum] = new Vector();
@@ -553,18 +639,12 @@ public class Data
 		for (int i=0; i<numItems; i++) {
 			tle   = (TimelineEvent)tl.elementAt(i);
 			msglist = tle.MsgsSent;
-			if (msglist == null) {
-				numMsgs = 0;
-			} else {
-				numMsgs = msglist.size();
+			TreeSet msgs = new TreeSet();
+			if(msglist!=null){
+				msgs.addAll( msglist );
+				mesgVector[pnum].addAll(msglist);
 			}
 
-			TimelineMessage[] msgs = new TimelineMessage[numMsgs];
-			for (int m=0; m<numMsgs; m++) {
-			  //	assert(msglist != null);
-				msgs[m] = (TimelineMessage)msglist.elementAt(m);
-				mesgVector[pnum].addElement(msglist.elementAt(m));
-			}	
 			packlist = tle.PackTimes;
 			if (packlist == null) {
 				numpacks = 0;
@@ -575,8 +655,11 @@ public class Data
 			for (int p=0; p<numpacks; p++) {
 				packs[p] = (PackTime)packlist.elementAt(p);
 			}
+		
+			
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
 		}
+					
 		return tlo;
 	}
 	public Color getForegroundColor(){
@@ -774,7 +857,6 @@ public class Data
 	public long totalTime(){
 		return endTime-beginTime;
 	}
-
 
 
 	/** The pixel x-coordinates for the selection to be highlighted
@@ -1000,73 +1082,7 @@ public class Data
 			
 		}		
 	}
-	
-	
-	/** Search for specified event in vector v using a binary search. Returns null if not found, or eventid=-1. */
-	TimelineMessage searchMesg(Vector v,int eventid){
-		
-		// the binary search should deal with indices and not absolute
-		// values, hence size-1.
-		//
-		// if eventid = -1, the event has no source. Link to the end of
-		// the last event. (No spontaneous event creation is allowed in
-		// charm++) **CW** VERIFY THIS!
-		if (eventid == -1) {
-			// still trying to find a way to make everything work together
-			// while linking to the previous event.
-			return null;  
-		}
 
-		// Try binary search first. If that fails, try sequential search.
-		// This is because stuff like bigsim logs may not have eventID
-		// stored in sorted order.
-
-		TimelineMessage returnItem = binarySearch(v,eventid);
-		if (returnItem == null) {
-			return seqSearch(v,eventid);
-		} else {
-			return returnItem;
-		}
-	}
-
-	/** Linear search for an event in a vector */
-	private TimelineMessage seqSearch(Vector v, int eventid) {
-		TimelineMessage item;
-		for (int i=0; i<v.size()-1; i++) {
-			item = (TimelineMessage)v.elementAt(i);
-			if (item.EventID == eventid) {
-				return item;
-			}
-		}
-		return null;
-	}
-	
-
-	/** Search in log-n-time an entire vector for an event */
-	private TimelineMessage binarySearch(Vector v,int eventid) {
-		if(v.size() > 0){
-			return binarySearch(v,eventid,0,v.size()-1);
-		} else {
-			return null;
-		}
-	}
-
-	/** Binary search for an event in a vector */
-	private TimelineMessage binarySearch(Vector v,int eventid, int start,int end) {
-		int mid = (start + end)/2;
-		TimelineMessage middle = (TimelineMessage)v.elementAt(mid);
-		if(middle.EventID == eventid){
-			return middle;
-		}
-		if(start==end){
-			return null;
-		}
-		if(middle.EventID > eventid){
-			return binarySearch(v,eventid,start,mid);
-		}else{
-			return binarySearch(v,eventid,mid+1,end);
-		}
-	}
 	
 	/** A set of objects to highlight. The paintComponent() methods for the objects 
 	 * should paint themselves appropriately after determining if they are in this set 
@@ -1104,22 +1120,24 @@ public class Data
 	
 	public void setShowDependenciesOnHover(boolean showDependenciesOnHover) {
 		this.showDependenciesOnHover = showDependenciesOnHover;
-	}
-	
-	
-	/** Linear search for an entry method for a specific processor */
-	public EntryMethodObject searchTLO(int proc, int eventid){
-				
-		for (int p=0; p<tloArray[proc].length; p++) {
-			EntryMethodObject o = tloArray[proc][p];
 		
-			if(o.getEventID()==eventid){
-				return o;
-			}
-		}
-		return null;
+		if(showDependenciesOnHover)
+			SetToolTipDelayLarge();
+		else
+			SetToolTipDelaySmall();
+		
 	}
 	
+	public void SetToolTipDelaySmall() {
+		ToolTipManager.sharedInstance().setInitialDelay(0);
+		ToolTipManager.sharedInstance().setDismissDelay(600000);	
+	}
+	
+
+	public void SetToolTipDelayLarge() {
+		ToolTipManager.sharedInstance().setInitialDelay(2000);
+		ToolTipManager.sharedInstance().setDismissDelay(10000);	
+	}
 	
 
 }

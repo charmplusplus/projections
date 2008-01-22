@@ -9,12 +9,13 @@ import projections.gui.U;
 
 import java.text.DecimalFormat;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import javax.swing.*;
 
-public class EntryMethodObject extends JComponent
-implements MouseListener
+public class EntryMethodObject extends JComponent implements Comparable, MouseListener
 {
 
 	private static final long serialVersionUID = 1L;
@@ -35,6 +36,9 @@ implements MouseListener
 	int pCurrent; // I assume this is which displayed timeline the event is assocated with
 	int pCreation;
 	
+	/** Stores the creationMessage after it has been found by creationMessage() */
+	private TimelineMessage creationMessage;
+	
 	/** The duration of the visible portion of this event */
 	private double  usage;
 	private float packusage;
@@ -54,7 +58,7 @@ implements MouseListener
 
 
 	private Data data = null;
-	public TimelineMessage[] messages;
+	public TreeSet messages; // Set of TimelineMessage's
 	private PackTime[] packs;
 
 	private int numPapiCounts = 0;
@@ -66,7 +70,7 @@ implements MouseListener
 
 
 	public EntryMethodObject(Data data,  TimelineEvent tle, 
-			TimelineMessage[] msgs, PackTime[] packs,
+			TreeSet msgs, PackTime[] packs,
 			int p1)
 	{
 		format_.setGroupingUsed(true);
@@ -83,7 +87,7 @@ implements MouseListener
 		cpuEnd    = tle.cpuEnd;
 		cpuTime   = cpuEnd - cpuBegin;
 		entry     = tle.EntryPoint;
-		messages  = msgs;
+		messages  = msgs; // Set of TimelineMessage
 		this.packs= packs;
 		pCurrent  = p1;
 		pCreation = tle.SrcPe;
@@ -119,7 +123,7 @@ implements MouseListener
 			infoString += "<i>Begin Time</i>: " + format_.format(beginTime) + "<br>";
 			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
 			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
-			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
+			infoString += "<i>Msgs created</i>: " + msgs.size() + "<br>";
 			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			infoString += "<hr><br><i>Function Callstack</i>:<br>";
 
@@ -163,7 +167,7 @@ implements MouseListener
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
 			
-			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
+			infoString += "<i>Msgs created</i>: " + msgs.size() + "<br>";
 			infoString += "<i>Created by processor</i>: " + pCreation + "<br>";
 			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			if(tleUserEventName!=null)
@@ -207,7 +211,7 @@ implements MouseListener
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
 			
-			infoString += "<i>Msgs created</i>: " + msgs.length + "<br>";
+			infoString += "<i>Msgs created</i>: " + msgs.size() + "<br>";
 		}
 		
 		if(!isIdleEvent()){
@@ -270,7 +274,8 @@ implements MouseListener
 		return entry;
 	}   
 
-	public TimelineMessage[] getMessages()
+	/** Return a set of messages for this entry method */
+	public Set getMessages()
 	{
 		return messages;
 	}   
@@ -291,7 +296,7 @@ implements MouseListener
 		if(messages == null)
 			return 0;
 		else
-			return messages.length;
+			return messages.size();
 	}   
 
 	public float getPackUsage()
@@ -338,7 +343,7 @@ implements MouseListener
 	 * trace
 	 * 
 	 */
-	public HashSet traceDependencies(){
+	public HashSet traceBackwardDependencies(){
 		EntryMethodObject obj = this;
 		HashSet v = new HashSet();
 		
@@ -346,19 +351,17 @@ implements MouseListener
 		while(!done){
 			done = true;
 			v.add(obj);
-			if (obj.entry != -1){
-				if(obj.pCreation <= data.maxPs()){
-					if (data.mesgVector[obj.pCreation] != null){
-						// Find message that created the object
-						TimelineMessage created_message = obj.creationMessage();
-						// Find object that created the message
-						if(created_message != null && created_message.getSenderEventID() != -1){
-							obj = data.searchTLO(obj.pCreation, created_message.getSenderEventID());
-							if(obj != null){
-								done = false;
-							}
-						}
+			
+			if (obj.entry != -1 && obj.pCreation <= data.maxPs() && data.mesgVector[obj.pCreation] != null ){
+				// Find message that created the object
+				TimelineMessage created_message = obj.creationMessage();
+				if(created_message != null){
+					// Find object that created the message
+					obj = (EntryMethodObject) data.messageToSendingObjectsMap.get(created_message);
+					if(obj != null){
+						done = false;
 					}
+
 				}
 			}
 		}
@@ -366,10 +369,40 @@ implements MouseListener
 	}
 
 
+	/** Trace one level of message sends forward from this object
+	 *
+	 *  @note This uses an inefficient algorithm which could be sped up by using more suitable data structures
+	 *
+	 */
+	public HashSet traceForwardDependencies(){
+		HashSet v = new HashSet();
+
+		// For all loaded EntryMethodObjects, see if they match any of the sends from this object
+		for(int i=0;i<data.tloArray.length;i++){
+			for(int j=0;j<data.tloArray[i].length;j++){
+				EntryMethodObject obj = data.tloArray[i][j];
+				
+				// If any of the messages sent by this object created the EntryMethodObject obj
+				TimelineMessage m = obj.creationMessage();
+				// a message found on pe=obj.pCreation with eventID==obj.EventID
+				
+				if(m!=null && messages.contains(m))
+					v.add(obj);
+						
+			}
+
+		}
+		
+		return v;
+	}
+
+	
+	
+	/** Return the message that caused the entry method to execute. Complexity=O(1) time */
 	public TimelineMessage creationMessage(){
-		if(data != null && data.mesgVector != null && pCreation >= 0 && data.mesgVector[pCreation] != null)
-			return data.searchMesg(data.mesgVector[pCreation],EventID);
-		else 
+		if(data != null && pCreation>=0 && data.eventIDToMessageMap != null && pCreation<data.eventIDToMessageMap.length)
+			return (TimelineMessage) data.eventIDToMessageMap[pCreation].get(EventID);
+		else
 			return null;
 	}
 	
@@ -379,7 +412,9 @@ implements MouseListener
 	{   
 		// Highlight the dependencies of this object
 		if(data.showDependenciesOnHover()){
-			Set s = traceDependencies();
+			Set s = new HashSet();
+			s.addAll(traceBackwardDependencies());
+			s.addAll(traceForwardDependencies());
 			data.clearMessageSendLines();
 			data.addMessageSendLine(s);
 			data.HighlightObjects(s);
@@ -482,7 +517,7 @@ implements MouseListener
 		
 		
 		if(data.isObjectDimmed(this))
-			c = c.darker();
+			c = c.darker().darker();
 		
 
 
@@ -584,9 +619,11 @@ implements MouseListener
 		if(data.showMsgs == true && messages != null)
 		{
 			g.setColor(getForeground());
-			for(int m=0; m<messages.length; m++)
-			{
-				long msgtime = messages[m].Time;
+			
+			Iterator m = messages.iterator();
+			while(m.hasNext()){
+				TimelineMessage msg = (TimelineMessage) m.next();
+				long msgtime = msg.Time;
 				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
 				{
 					// Compute the pixel coordinate relative to the containing panel
@@ -678,6 +715,16 @@ implements MouseListener
 
 	public int getEventID() {
 		return EventID;
+	}
+
+	public int compareTo(Object o) {
+		EntryMethodObject obj = (EntryMethodObject) o;
+		if(pCreation != obj.pCreation)
+			return pCreation-obj.pCreation;
+		else if(pCurrent != obj.pCurrent)
+			return pCurrent - obj.pCurrent;
+		else
+			return EventID - obj.EventID;
 	}
 
 

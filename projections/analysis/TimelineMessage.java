@@ -1,6 +1,6 @@
 package projections.analysis;
 
-public class TimelineMessage
+public class TimelineMessage implements Comparable
 {
     public long Time;
     public int Entry;
@@ -46,5 +46,9 @@ public class TimelineMessage
 
 	public int getSenderEventID() {
 		return SenderEventID;
+	}
+
+	public int compareTo(Object o) {
+		return (int) (this.Time - ((TimelineMessage)o).Time);
 	}
 }

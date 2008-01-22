@@ -9,6 +9,8 @@ import projections.analysis.TimelineMessage;
 import projections.gui.MainWindow;
 
 import java.awt.Dimension;
+import java.util.Iterator;
+import java.util.Set;
 
 
 public class MessageCanvas extends JPanel
@@ -25,7 +27,7 @@ public class MessageCanvas extends JPanel
    private int[]    width;
    private EntryMethodObject obj;
    private FontMetrics fm;
-   private TimelineMessage[] msgs;
+   private Set msgs; // Set of TimelineMessage's
    private String[][] names;
    private int w,h;
    private int numTitles = 17; // index of sTitle with last actual title
@@ -73,63 +75,9 @@ public class MessageCanvas extends JPanel
    }   
    public Dimension getPreferredSize()
    {
-          int i;
-	  if(fm == null)
-	  {
-		 Graphics g = getGraphics();
-		 if(g != null)
-		 {
-			fm = g.getFontMetrics(g.getFont());
-			h = (fm.getHeight() + 5) * (6 + obj.getNumMsgs());
-	 
-			for(i=0; i<numTitles; i++)
-			{
-			   width[i] = fm.stringWidth(sTitles[i]);
-			}
-
-			// figure out the maximum width of each each column
-			if (maxColWidth==null) { 
-			    maxColWidth = new int[numColumns];
-			}
-			for(int m=0; m<obj.getNumMsgs(); m++)
-			{
-			   int w1 = fm.stringWidth("" + m);
-			   int w2 = fm.stringWidth("" + msgs[m].MsgLen);
-			   int w3 = fm.stringWidth("" + msgs[m].Time);
-			   int w4 = (m>0) ? 
-			       fm.stringWidth(""+(msgs[m].Time-msgs[m-1].Time)) : 0;
-			   int w5 = fm.stringWidth(names[msgs[m].Entry][0]);
-
-			   if(w1 > maxColWidth[0]) maxColWidth[0] = w1;
-			   if(w2 > maxColWidth[1]) maxColWidth[1] = w2;
-			   if(w3 > maxColWidth[2]) maxColWidth[2] = w3;
-			   if(w4 > maxColWidth[3]) maxColWidth[3] = w4;
-			   if(w5 > maxColWidth[4]) maxColWidth[4] = w5;
-			}
-			for (i=0; i<maxColWidth.length; i++) {
-			    if (width[12+i]>maxColWidth[i]) { maxColWidth[i] = width[12+i]; }
-			}
-			w = width[0] + width[1];
-			int wtmp = 0;
-			for(i=2; i<=7; i++) wtmp += width[i];
-			if(wtmp > w) w = wtmp;
-			wtmp = 0;
-			for(i=8; i<=11; i++) wtmp += width[i];
-			if(wtmp > w) w = wtmp;
-			wtmp = 18;
-			for(i=12; i<numTitles; i++) wtmp += width[i];
-			if(wtmp > w) w = wtmp;
-			wtmp = 18;
-			for(i=0; i<maxColWidth.length; i++) 
-			    wtmp += maxColWidth[i];
-			if(wtmp > w) w = wtmp;
-
-			g.dispose();
-		 }
-	  }        
-	  
-	  return new Dimension(w, h);
-   }   
+	  return new Dimension(400,600);
+   }  
+   
    public void paint(Graphics g)
    {
           int i;
@@ -200,18 +148,25 @@ public class MessageCanvas extends JPanel
 	  // draw columns
 	  g.setColor(Color.lightGray);
 	  String[] s = new String[numColumns];
-	  for(int m=0; m<obj.getNumMsgs(); m++)
-	  {
-		s[0] = new String("" + m);
-		s[1] = new String("" + msgs[m].MsgLen);
-		s[2] = new String("" + msgs[m].Time);
-		s[3] = (m>0) ? new String("" + (int)(msgs[m].Time-msgs[m-1].Time)) : "-";
-		s[4] = new String(names[msgs[m].Entry][0]);
-		 
-		y+=dy;
-		for (i=0; i<numColumns; i++) {
-		    g.drawString(s[i], (colWidth[i]-fm.stringWidth(s[i]))/2+colStart[i], y);
-		}
+	  
+	  Iterator iter = obj.messages.iterator();
+	  int m=-1;
+	  TimelineMessage msg=null, prev=null;
+	  while(iter.hasNext()){
+		  prev = msg;
+		  msg = (TimelineMessage) iter.next();
+		  m++;
+		  
+		  s[0] = new String("" + m);
+		  s[1] = new String("" + msg.MsgLen);
+		  s[2] = new String("" + msg.Time);
+		  s[3] = (m>0) ? new String("" + (int)(msg.Time-prev.Time)) : "-";
+		  s[4] = new String(names[msg.Entry][0]);
+
+		  y+=dy;
+		  for (i=0; i<numColumns; i++) {
+			  g.drawString(s[i], (colWidth[i]-fm.stringWidth(s[i]))/2+colStart[i], y);
+		  }
 	  }     
    }   
    public void update(Graphics g)

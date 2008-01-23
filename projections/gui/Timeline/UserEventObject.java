@@ -67,44 +67,6 @@ public class UserEventObject extends JComponent
 						(int)yTop,
 						width, 
 						data.userEventRectHeight() );
-		
-//		
-//		
-//		long beginTime, endTime;
-//
-//		if(EndTime > data.endTime())
-//			endTime = data.endTime() - data.beginTime();
-//		else
-//			endTime = EndTime - data.beginTime();
-//
-//		if(BeginTime < data.beginTime()) 
-//			beginTime = 0;
-//		else beginTime = BeginTime - data.beginTime();
-//
-//
-//		int beginTimeInPixels  = data.offset() + (int)(beginTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-//		int endTimeInPixels  = data.offset() + (int)(endTime*data.pixelIncrement(actualDisplayWidth)/data.timeIncrement(actualDisplayWidth));
-//
-//
-//		int widthInPixels = endTimeInPixels - beginTimeInPixels + 1; 
-//		if(widthInPixels < 1) widthInPixels = 1;
-//
-//		
-//		if(EndTime > data.endTime()) widthInPixels -= 5;
-//		if(BeginTime < data.beginTime())
-//		{
-//			beginTimeInPixels  -= 5;
-//			widthInPixels += 5;
-//		}
-
-//		
-//		/** The y coordinate of the top of the rectangle */
-//		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - data.userEventRectHeight();
-//		
-//		this.setBounds( beginTimeInPixels,  
-//						(int)yTop,
-//						widthInPixels, 
-//						data.userEventRectHeight() );
 
 	}
 

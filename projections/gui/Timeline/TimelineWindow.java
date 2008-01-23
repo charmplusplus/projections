@@ -102,7 +102,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		
 		mainPanel = new MainPanel(data, this);
-		
+	
 		scrollingPanel = new ScrollingPanel(data, mainPanel, axisPanel, labelPanel);
 
 		controls = new WindowControls(this, data);

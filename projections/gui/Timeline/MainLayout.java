@@ -44,25 +44,15 @@ public class MainLayout implements LayoutManager {
 	public void layoutContainer(Container parent) {
 
 		int width;
-//		int height;
+		int height;
 
 		Insets insets = parent.getInsets();
 		width = parent.getWidth() - (insets.left + insets.right);
-//		height = parent.getHeight() - (insets.top + insets.bottom);
-
-//		System.out.println("Layout MainPanel to size "+width+"x"+height);
+		height = parent.getHeight() - (insets.top + insets.bottom);
 
 		int nComps = parent.getComponentCount();
-//		System.out.println("number of children components = "+ nComps);
-
-//		System.out.println("Entry Method: setting location using width="+(int)(width/data.getScaleFactor()));
-		
-		
 		for (int i = 0 ; i < nComps ; i++) {
 			Component c = parent.getComponent(i);
-//			if (c.isVisible()) {
-//			Dimension d = c.getPreferredSize();
-
 			// Determine if the component is a EntryMethodObject
 
 			
@@ -71,14 +61,18 @@ public class MainLayout implements LayoutManager {
 			} 
 			else if ( c instanceof UserEventObject ) {
 				((UserEventObject)c).setLocationAndSize(data, (int)(width));	// setBounds on child	
-			} else {
+			} 
+			else if ( c instanceof MainPanelForeground ) {
+				((MainPanelForeground)c).setBounds(0, 0, width, height );
+			} 
+			else if ( c instanceof MainPanelBackground ) {
+				((MainPanelBackground)c).setBounds(0, 0, width, height );
+			} 
+			else {
 //				System.out.println("MainLayout found unknown type of child object");
 			}	
-//			c.invalidate();
-//			c.repaint();
 
 		}
-
 
 	}
 

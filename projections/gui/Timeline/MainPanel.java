@@ -1,6 +1,8 @@
 package projections.gui.Timeline;
 
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -9,9 +11,6 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.Iterator;
-import java.util.Set;
-
 import javax.swing.*;
 
 
@@ -44,109 +43,19 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		addMouseMotionListener(this); //handle mouse drags
 
 		setLayout(new MainLayout(data));
-				
-	}
-	
-	
-	
-	
-	/** Used when painting an Image manually */
-	public void paintComponentWithChildren(Graphics g){
-		paintComponent(g);
-		paintChildren(g);		
+
+		// Add the panel which will draw the message send lines on top of everything else
+		add(new MainPanelForeground(data));
+			
 	}
 
 	/** Paint the panel, filling the entire panel's width */
 	protected void paintComponent(Graphics g) {
-
 		super.paintComponent(g);
-		
-		int width = getWidth();
-		
-		g.setColor(data.getBackgroundColor());
-		Rectangle clipBounds = g.getClipBounds();
-		g.fillRect(clipBounds.x,clipBounds.y,clipBounds.width,clipBounds.height);
-
-	
-		// Paint the selection region
-		if(data.selectionValid()){
-			// Draw a  background for the selected timelines
-			g.setColor(new Color(100,100,100));
-			g.fillRect(data.leftSelection(), 0,  data.rightSelection()-data.leftSelection(), getHeight()-1);
-			
-			// Draw vertical lines at the selection boundaries
-			g.setColor(Color.white);
-			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
-			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
-		}
-		
-		// Paint the highlight where the mouse cursor was last seen
-		if(data.highlightValid()){
-			// Draw vertical line
-			g.setColor(Color.white);
-			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
-		}
-		
-		// Draw the horizontal line 
-		g.setColor(new Color(128,128,128));
-		for (int i=0; i<data.numPs(); i++) {
-			int y = data.singleTimelineHeight()/2 + i*data.singleTimelineHeight();
-			g.drawLine(0+data.offset(), y, width-data.offset(), y);
-		}
-
-
-		// paint the message send lines
-	
-		paintMessageSendLines(g, data.getMessageColor(), data.drawMessagesForTheseObjects);
-		paintMessageSendLines(g, data.getMessageAltColor(), data.drawMessagesForTheseObjectsAlt);
-		
-		
 	}
 
 
 	
-	public void paintMessageSendLines(Graphics g, Color c, Set drawMessagesForObjects){
-		// paint the message send lines
-		if (drawMessagesForObjects.size()>0) {
-			g.setColor(c);
-			Iterator iter = drawMessagesForObjects.iterator();
-			while(iter.hasNext()){
-				Object o = iter.next();
-				if(o instanceof EntryMethodObject){
-					EntryMethodObject obj = (EntryMethodObject)o;
-					if(obj.creationMessage() != null){
-						int pCreation = obj.pCreation;
-						int pExecution = obj.pCurrent;
-						// Find the index for the PEs in the list of displayed PEs
-						int startpe_index=0;
-						int endpe_index=0;
-						data.processorList().reset();
-						for (int j=0;j<data.processorList().size();j++) {
-							int pe = data.processorList().nextElement();
-							if (pe == pCreation) {
-								startpe_index = j;
-							}
-							if (pe == pExecution) {
-								endpe_index = j;
-							}
-						}
-						// Message Creation point
-						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
-						double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
-						// Message executed (entry method starts) 
-						int x2 =  data.timeToScreenPixel(obj.getBeginTime(), getWidth());
-						double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
-						// I like painting a line :)
-						g.drawLine(x1,(int)y1,x2,(int)y2);
-					}
-				}
-			}
-		}
-
-	}
-	
-	
-
 	/** 
 	 * Load or Reload the timeline objects from the data object's tloArray
 	 *  
@@ -161,6 +70,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		this.removeAll();
 		data.createTLOArray();
 
+		// Add the panel which will draw the message send lines on top of everything else
+		add(new MainPanelForeground(data));
+			
+		
 		// Add the entry method instances (EntryMethodObject) to the panel for displaying
 		for (int p = 0; p < data.numPs(); p++) {
 			for (int i = 0; i < data.tloArray[p].length; i++){
@@ -195,7 +108,14 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 						this.add(data.timelineUserEventObjectsArray[p][i]);
 					}
 		
-
+		
+		MainPanelBackground b = new MainPanelBackground(data);
+		b.addMouseListener(this);
+		b.addMouseMotionListener(this);
+		add(b);
+		
+		
+		
 		handler.setData(data);
 		handler.refreshDisplay(true);
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -227,8 +147,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		return false;
 	}
 
-
-
 	public Data getData() {
 		return data;
 	}
@@ -249,6 +167,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			if (newY < 0) newY = 0;
 			jv.setViewPosition(new Point(newX, newY));
 		}
+		data.displayMustBeRepainted();
 	}
 	
 	/** Handle dragging of panel if we are in a viewport */

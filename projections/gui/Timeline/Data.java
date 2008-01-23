@@ -409,7 +409,7 @@ public class Data
 		}
 		progressBar.close();
 		
-				
+		// Generate the index files
 		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
 		
 		

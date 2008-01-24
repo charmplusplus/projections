@@ -44,7 +44,7 @@ author = idooley2
   <!-- Compile the java code. Put class files into "build" directory -->
   <target name="compile" depends="init, getJavaVersion" description="compile the source" >
 
-    <javac sourcepath="" srcdir="." destdir="build" >
+    <javac sourcepath="" srcdir="." destdir="build"  debug="true" debuglevel="lines,vars,source" >
       <include name="**/*"/>
       <!-- only include NoiseMiner if we have java version 1.5 or newer -->
       <exclude name="**/NoiseMiner*.java" unless="NewJava" />

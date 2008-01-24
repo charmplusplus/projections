@@ -480,4 +480,23 @@ public class GenericLogReader extends ProjectionsReader
             reader.close();
         }
     }
+    
+    
+	public void skip(long offsetToBeginRecord) {
+		try{reader.skip(offsetToBeginRecord);}
+		catch(Exception E){
+			System.err.println("ERROR: error while seeking through a file");		
+		}
+	}
+	
+	
+	public void seek(long offset){
+		try {
+			reader.seek(offset);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 }

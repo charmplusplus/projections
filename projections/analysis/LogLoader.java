@@ -1,22 +1,17 @@
 package projections.analysis;
 
-/** This class reads in .log files and turns them into a timeline.
- *  @author Sid Cammeresi
- *  @version 1.0
- */
 
 import java.io.*;
 import java.util.*;
 
 import javax.swing.*;
 
-//import org.apache.xpath.operations.And;
-
 import projections.gui.*;
 import projections.gui.Timeline.TimelineMessage;
 import projections.gui.Timeline.UserEventObject;
 import projections.misc.*;
 
+/** This class reads in .log files and turns them into a timeline.  */
 public class LogLoader extends ProjDefs
 {
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -28,7 +23,7 @@ public class LogLoader extends ProjDefs
 	boolean ampiTraceOn = false;
 	
 	
-	private boolean useTimeIndexes = false;
+	public final boolean useTimeIndexes = false;
 	
 
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
@@ -709,6 +704,18 @@ public class LogLoader extends ProjDefs
 
 			isProcessing = false; 
 			LogEntry lastBeginEvent = null;
+						
+			
+			// We will lookup a good seek point from the index file
+			long offsetToBeginRecord = lookupIndexOffset(PeNum,Begin);
+			
+			// If we found a file offset to seek, we do the seek
+			if(offsetToBeginRecord != -1){
+				System.out.println("Found offset "+ offsetToBeginRecord + " in index file for pe "+PeNum);
+				reader.seek(offsetToBeginRecord);
+			}		
+			
+			
 			while (true) { //Seek to time Begin
 				reader.nextEvent(data);
 				LE = LogEntry.adapt(data);
@@ -735,6 +742,10 @@ public class LogLoader extends ProjDefs
 					lastBeginEvent = null;
 				}
 			}
+			
+			
+			
+			
 			if (Time == Long.MIN_VALUE) {
 				Time = Begin;
 			}
@@ -1381,8 +1392,19 @@ public class LogLoader extends ProjDefs
 	}
 	
 	
-	/** Create an index of each logfile by jumping into the file at regular intervals, getting the next line, and parsing out a timestamp */
-
+	/** 
+	 * Create an index of each logfile, saving it into a resulting "*.index" file.
+	 * 
+	 * The index contains up to 100 BEGIN_PROCESSING timestamp records and 
+	 * corresponding file offsets in a sorted data structure.
+	 * 
+	 * @note The index is created as follows:
+	 *  We seek into a small fixed number of locations in the file.
+	 *  Then we advance until we find the next BEGIN_PROCESSING record.
+	 *  Then we add the file offset and timestamp to the index structure.
+	 *  Finally we save the index structure to a file. 
+	 *  
+	 * */
 	public void createTimeIndexes(OrderedIntList validPEs){
 		if(useTimeIndexes) {
 			long BeginTime=0;
@@ -1390,7 +1412,7 @@ public class LogLoader extends ProjDefs
 
 			System.out.println("creating Index");
 
-			long 	         back;
+			long 	         fileLength;
 			String           Line;
 			RandomAccessFile InFile;
 			StringTokenizer  st;
@@ -1404,8 +1426,6 @@ public class LogLoader extends ProjDefs
 			while (validPEs.hasMoreElements()) {
 				int pe = validPEs.nextElement();
 
-				System.out.println("creating Index for pe"+pe);
-
 				if (!progressBar.isCanceled()) {
 					progressBar.setNote("[" + pe + "] " + count + 
 							" of " + nPe + " files");
@@ -1416,105 +1436,140 @@ public class LogLoader extends ProjDefs
 				}
 				count++;
 
-				String filename = MainWindow.runObject[myRun].getLogName(pe);
-
-				TreeMap index = new TreeMap();
-
-				int dummyInt = 0;
-				int type = 0;
+				String inFilename = MainWindow.runObject[myRun].getLogName(pe);
+				String outFilename = inFilename+".index";
+				
+				
+				// Test if the output index file already exists. If so, don't recreate it
+				boolean existingFileIsGood=false;
 				try {
-					InFile = new RandomAccessFile(new File(filename), "r");
-					back = InFile.length();
+					FileInputStream fin = new FileInputStream(outFilename);
+					ObjectInputStream ois = new ObjectInputStream(fin);
+					Object t = ois.readObject();
+					if(t instanceof TreeMap)
+						existingFileIsGood=true;
+					ois.close();
+				}
+				catch (Exception e) { 
+					// do nothing
+				}
+				
+				
+				if(!existingFileIsGood){
+					TreeMap index = new TreeMap();
+
+					int dummyInt = 0;
+					int type = 0;
+					try {
+						InFile = new RandomAccessFile(new File(inFilename), "r");
+						fileLength = InFile.length();
+
+						if(fileLength > 1024*256){
+							long num_samples = 100; // Take 100 samples in the file for BEGIN_PROCESSING lines
+							long Time;
+
+							// For each sample
+							for(int i=0;i<num_samples;i++) { 
+								long offset = fileLength/num_samples * i;
+								InFile.seek(offset);
+								// Chomp away until we get to a new line
+								while (InFile.readByte() != '\n'){}
+
+								// Keep reading in lines until we hit a BEGIN_PROCESSING
+								while (true){
+									offset = InFile.getFilePointer();
+									Line = InFile.readLine();
+									if (Line == null) {
+										throw new EOFException();
+									}
+									st = new StringTokenizer(Line);
+
+									type=Integer.parseInt(st.nextToken());
+
+									if(type == BEGIN_PROCESSING){
+
+										dummyInt = Integer.parseInt(st.nextToken());
+										dummyInt = Integer.parseInt(st.nextToken());
+
+										Time = Long.parseLong(st.nextToken());
+//										System.out.println("Found a BEGIN at offset "+offset+" at timestamp "+Time);
+										index.put(Time, offset);
+										break;
+									}
+								}							
 
 
-					System.out.println("File " + filename + " has length " + back);
-
-					if(back > 1024*256){
-						int sample_rate = 10000;
-						long num_samples = back / sample_rate; // sample one line every 10000 bytes
-						long Time;
-
-						for(int i=0;i<num_samples;i++) {
-							int offset = sample_rate * i;
-							InFile.seek(offset);
-							// Chomp away until we get to a new line
-							while (InFile.readByte() != '\n'){}
-							// Read a real line
-							Line = InFile.readLine();
-							if (Line == null) {
-								throw new EOFException();
-							}
-							st = new StringTokenizer(Line);
-							type=Integer.parseInt(st.nextToken());
-
-							switch (type) {
-							case CREATION:
-							case CREATION_BCAST:
-							case CREATION_MULTICAST:
-							case BEGIN_PROCESSING:
-							case END_PROCESSING:
-								dummyInt = 
-									Integer.parseInt(st.nextToken());
-								dummyInt = 
-									Integer.parseInt(st.nextToken());
-								break;
-							case USER_EVENT:
-							case USER_EVENT_PAIR:
-							case MESSAGE_RECV: 
-							case ENQUEUE: 
-							case DEQUEUE:
-								dummyInt = 
-									Integer.parseInt(st.nextToken());
-								break;
-							case BEGIN_IDLE:
-							case END_IDLE:
-							case BEGIN_PACK: 
-							case END_PACK:
-							case BEGIN_UNPACK: 
-							case END_UNPACK:
-							case BEGIN_TRACE: 
-							case END_TRACE:
-							case BEGIN_COMPUTATION:
-							case BEGIN_FUNC:
-							case END_FUNC:
-							case BEGIN_INTERRUPT: 
-							case END_INTERRUPT: 
-							case END_COMPUTATION: 
-								break;
-							}
-							Time = Long.parseLong(st.nextToken());
-
-							index.put(Time, offset);
+							} // end for
 
 
-						} // end for
+							System.out.println("Creating Index file "+ outFilename + " containing " + index.size() + " entries");
+							InFile.close ();
 
+						}
+					} catch (EOFException e) {
 
-						System.out.println("Index for file "+ filename + " contains " + index.size() + " entries");
-						InFile.close ();
-
+					} catch (IOException E) {
+						System.err.println("Couldn't read log file " + inFilename);
 					}
-				} catch (EOFException e) {
 
-				} catch (IOException E) {
-					System.err.println("Couldn't read log file " + filename);
+					try {
+						FileOutputStream fout = new FileOutputStream(outFilename);
+						ObjectOutputStream oos = new ObjectOutputStream(fout);
+						oos.writeObject(index);
+						oos.close();
+					}
+					catch (Exception e) { e.printStackTrace(); }
+
 				}
 
-				try {
-					FileOutputStream fout = new FileOutputStream(filename+".index");
-					ObjectOutputStream oos = new ObjectOutputStream(fout);
-					oos.writeObject(new String("This is a serialized index"));
-					oos.writeObject(index);
-					oos.close();
-				}
-				catch (Exception e) { e.printStackTrace(); }
+				progressBar.close();
 
 			}
-
-			progressBar.close();
-
 		}
 	}
+	
+	
+	
+	/** 
+	 *  Lookup the offset in index file to a BEGIN_PROCESSING event before given timestamp
+	 * */
+	public long lookupIndexOffset(int pe, long timestamp){
+		if(useTimeIndexes) {
+			String indexFilename = MainWindow.runObject[myRun].getLogName(pe)+".index";
+
+			try {
+				FileInputStream fin = new FileInputStream(indexFilename);
+				ObjectInputStream ois = new ObjectInputStream(fin);
+
+				Object t = ois.readObject();
+				if(t instanceof TreeMap){
+					TreeMap tm = (TreeMap)t;
+
+					// Get a reference to the head of the map(which will contain 
+					// keys less than the desired timestamp)
+					// Then look at the last key in that set
+					Long foundTimestamp = (Long) tm.headMap(timestamp).lastKey();
+					Long foundOffset= (Long) tm.get(foundTimestamp);
+					ois.close();
+					return foundOffset.longValue();
+
+				}
+
+				ois.close();
+			}
+			catch (Exception e) { 
+				System.out.println("Couldn't load an index file, Defaulting to the slow linear scan from the beginning of the log file.");
+			}
+		}
+		
+		return -1;
+	}
+	
+	
+	
+	
+	
+	
 	
 	
 }

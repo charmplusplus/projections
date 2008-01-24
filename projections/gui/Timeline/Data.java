@@ -262,6 +262,12 @@ public class Data
 	public void createTLOArray()
 	{
 
+
+		// Generate the index files
+		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
+		
+		
+		
 		EntryMethodObject[][] oldtloArray = tloArray;
 		UserEventObject[][] oldUserEventsArray = timelineUserEventObjectsArray;
 		oldmesgVector = mesgVector;
@@ -408,9 +414,6 @@ public class Data
 			}
 		}
 		progressBar.close();
-		
-		// Generate the index files
-		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
 		
 		
 		
@@ -683,7 +686,6 @@ public class Data
 				packs[p] = (PackTime)packlist.elementAt(p);
 			}
 		
-			
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
 		}
 					

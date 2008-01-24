@@ -62,6 +62,10 @@ class AsciiIntegerReader {
 	return charsSkipped;
     }
 
+    public void seek(long n) throws IOException{
+    	skip(n-idx); 	
+    }
+    
 	final public boolean isSpace(char c) {
 		return c==' '||c=='\n'||c=='\t';
 	}

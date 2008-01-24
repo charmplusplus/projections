@@ -462,12 +462,14 @@ public class Data
 		eventIDToMessageMap = new HashMap[processorList.size()];
 		for(int i=0;i<processorList.size();i++){
 			eventIDToMessageMap[i] = new HashMap();
-			// scan through mesgVector[i] and add each TimelineMessage entry to the map
-			Iterator iter = mesgVector[i].iterator();
-			while(iter.hasNext()){
-				TimelineMessage msg = (TimelineMessage) iter.next();
-				if(msg!=null)
-					eventIDToMessageMap[i].put(msg.EventID, msg);
+			if(mesgVector[i] != null){
+				// scan through mesgVector[i] and add each TimelineMessage entry to the map
+				Iterator iter = mesgVector[i].iterator();
+				while(iter.hasNext()){
+					TimelineMessage msg = (TimelineMessage) iter.next();
+					if(msg!=null)
+						eventIDToMessageMap[i].put(msg.EventID, msg);
+				}
 			}
 		}
 

@@ -351,7 +351,7 @@ public class Data
 							tloArray[newpindex][n].setPackUsage();
 					
 							// Add each message to mesgVector
-							System.out.println("dumping " + tloArray[newpindex][n].messages.size() + " messages into mesgVector");
+//							System.out.println("dumping " + tloArray[newpindex][n].messages.size() + " messages into mesgVector");
 							mesgVector[newp].addAll(tloArray[newpindex][n].messages);
 													
 						}

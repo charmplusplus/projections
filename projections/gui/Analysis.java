@@ -660,6 +660,7 @@ public class Analysis {
 
     // *** Run Data accessors (from sts reader) ***
 
+    /** number of processors listed in sts file */
     public int getNumProcessors() {
 	return sts.getProcessorCount();
     }

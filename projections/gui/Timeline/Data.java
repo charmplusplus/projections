@@ -86,6 +86,9 @@ public class Data
 
 	public EntryMethodObject[][] tloArray;
 
+	/** For each PE, A vector containing all the messages sent from it 
+	 * @note this is not indexed the same way as timelineUserEventObjectsArray
+	 * */
 	public Vector [] mesgVector;
 
 	public Vector [] oldmesgVector;
@@ -253,28 +256,30 @@ public class Data
 	}
 	
 	
-	/** Create the array of timeline objects 
+	/** Create the initial array of timeline objects 
 	 *  
 	 *  @note if a new processor has been added, then 
-	 *  	  its data will be retrieved using getData()
+	 *  	  this will not be called. the new proc's
+	 *        data will be retrieved using getData()
 	 *        which calls createTL() 
 	 */
 	public void createTLOArray()
 	{
-
-
+//		System.out.println("createTLOArray()");
+		
 		// Generate the index files
-		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
-		
-		
+//		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
 		
 		EntryMethodObject[][] oldtloArray = tloArray;
 		UserEventObject[][] oldUserEventsArray = timelineUserEventObjectsArray;
-		oldmesgVector = mesgVector;
-		mesgVector = new Vector[maxPs()+1]; // want an array of size 1 if pe list={0}
-		for(int i=0; i<maxPs()+1; i++){
+		if(mesgVector != null)
+			oldmesgVector = mesgVector;
+		
+		mesgVector = new Vector[numPEs()]; // want an array of size 1 if pe list={0}
+		for(int i=0; i<numPEs(); i++){
 			mesgVector[i] = null;
 		}
+//		System.out.println("Allocated mesgVector of size " + mesgVector.length);
 
 		tloArray = new EntryMethodObject[processorList.size()][];
 		timelineUserEventObjectsArray = new UserEventObject[processorList.size()][];
@@ -292,6 +297,7 @@ public class Data
 			newp = processorList.nextElement();
 			oldp = oldplist.nextElement();
 			while (newp != -1) {
+				System.out.println("newp="+newp);
 				while (oldp != -1 && oldp < newp) {
 					oldp = oldplist.nextElement();
 					oldpindex++;
@@ -301,7 +307,7 @@ public class Data
 				if (oldp == newp) {
 					if (beginTime == oldBT && endTime == oldET) {
 						tloArray[newpindex] = oldtloArray[oldpindex];
-//						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
+						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
 						//		assert(oldUserEventsArray != null);
 						timelineUserEventObjectsArray[newpindex] = 
 							oldUserEventsArray[oldpindex];
@@ -336,7 +342,7 @@ public class Data
 
 						// copy the array
 						tloArray[newpindex] = new EntryMethodObject[newNumItems];
-//						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
+						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
 						mesgVector[newp] = new Vector();
 						for (n=0; n<newNumItems; n++) {
 							tloArray[newpindex][n] = 
@@ -345,6 +351,7 @@ public class Data
 							tloArray[newpindex][n].setPackUsage();
 					
 							// Add each message to mesgVector
+							System.out.println("dumping " + tloArray[newpindex][n].messages.size() + " messages into mesgVector");
 							mesgVector[newp].addAll(tloArray[newpindex][n].messages);
 													
 						}
@@ -395,14 +402,14 @@ public class Data
 
 		int pnum;
 		processorList.reset();
-		int numPEs = processorList.size();
+		int numPs = processorList.size();
 		ProgressMonitor progressBar = 
 			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data",
-					"", 0, numPEs);
+					"", 0, numPs);
 		progressBar.setProgress(0);
-		for (int p=0; p<numPEs; p++) {
+		for (int p=0; p<numPs; p++) {
 			if (!progressBar.isCanceled()) {
-				progressBar.setNote(p + " of " + numPEs);
+				progressBar.setNote(p + " of " + numPs);
 				progressBar.setProgress(p);
 			} else {
 				break;
@@ -410,6 +417,7 @@ public class Data
 			pnum = processorList.nextElement();
 			if (tloArray[p] == null) { 
 //				System.out.println("new tloarray["+p+"] is loaded from getData()");
+//				System.out.println("getData("+pnum+","+p+")");
 				tloArray[p] = getData(pnum, p);
 			}
 		}
@@ -454,39 +462,66 @@ public class Data
 			}      
 		} 
 
+
+		// TODO These are computed anytime a new range or pe is loaded. Make faster by just adding in the new PEs portion
+		
 		progressBar = new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Creating auxiliary data structures to speed up visualization", "", 0, 4);
 		progressBar.setProgress(0);
 		progressBar.setNote("Creating Map 1");
-				
+		
 		/** Create a mapping from EventIDs on each pe to messages */
-		eventIDToMessageMap = new HashMap[processorList.size()];
-		for(int i=0;i<processorList.size();i++){
-			eventIDToMessageMap[i] = new HashMap();
-			if(mesgVector[i] != null){
-				// scan through mesgVector[i] and add each TimelineMessage entry to the map
-				Iterator iter = mesgVector[i].iterator();
-				while(iter.hasNext()){
-					TimelineMessage msg = (TimelineMessage) iter.next();
-					if(msg!=null)
-						eventIDToMessageMap[i].put(msg.EventID, msg);
+		eventIDToMessageMap = new HashMap[numPEs()];
+
+		if(processorList!=null){
+			int i=0;
+			processorList.reset();	
+			while(processorList.hasMoreElements()){
+				int p = processorList.nextElement();
+
+				eventIDToMessageMap[p] = new HashMap();
+				if(mesgVector[p] != null){
+//					System.out.println("Message vector size = "+mesgVector[p].size());
+
+					// scan through mesgVector[p] and add each TimelineMessage entry to the map
+					Iterator iter = mesgVector[p].iterator();
+					while(iter.hasNext()){
+						TimelineMessage msg = (TimelineMessage) iter.next();
+						if(msg!=null)
+							eventIDToMessageMap[p].put(msg.EventID, msg);
+					}
+				} else {
+					System.out.println("Message vector is empty");
 				}
+				i++;
 			}
+			
 		}
+
+		
 
 		progressBar.setProgress(1);
 		progressBar.setNote("Creating Map 2");
 		
 		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
-		eventIDToEntryMethodMap = new HashMap[processorList.size()];
-		for(int i=0;i<processorList.size();i++){
-			eventIDToEntryMethodMap[i] = new HashMap();
-			if(tloArray[i]!=null){
-				for(int j=0;j<tloArray[i].length;j++){
-					EntryMethodObject obj=tloArray[i][j];
-					if(obj!=null)
-						eventIDToEntryMethodMap[i].put(obj.EventID, obj);
-				}
-			}		
+		eventIDToEntryMethodMap = new HashMap[numPEs()];
+
+		
+		if(processorList!=null){
+			processorList.reset();	
+			int i=0;
+			while(processorList.hasMoreElements()){
+				int p = processorList.nextElement();
+
+				eventIDToEntryMethodMap[p] = new HashMap();
+				if(tloArray[i]!=null){
+					for(int j=0;j<tloArray[i].length;j++){
+						EntryMethodObject obj=tloArray[i][j];
+						if(obj!=null)
+							eventIDToEntryMethodMap[p].put(obj.EventID, obj);
+					}
+				}		
+			i++;
+			}
 		}
 
 		progressBar.setProgress(2);
@@ -586,7 +621,7 @@ public class Data
 			displayMustBeRepainted();
 			
 		} else {
-			modificationHandler.displayWarning("Message was sent from outside the current time range, or set of processors");
+			modificationHandler.displayWarning("Message was sent from outside the current time range");
 		}
 	}
 	
@@ -639,7 +674,9 @@ public class Data
 	}
 
 
-	/** Load the timelines! */
+	/** Load the timeline for processor pnum by 
+	 * calling createTL();
+	 * */
 	private EntryMethodObject[] getData(int pnum, int index)  
 	{
 
@@ -676,7 +713,7 @@ public class Data
 				msgs.addAll( msglist );
 				mesgVector[pnum].addAll(msglist);
 			}
-
+			
 			packlist = tle.PackTimes;
 			if (packlist == null) {
 				numpacks = 0;
@@ -690,6 +727,9 @@ public class Data
 		
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
 		}
+		
+//		System.out.println("" + mesgVector[pnum].size() + " messages sent by pe="+pnum);
+		
 					
 		return tlo;
 	}
@@ -718,9 +758,7 @@ public class Data
 		setScaleFactor( (float) ((int) (getScaleFactor() * 4) + 1) / 4 );
 	}
 
-
-//	public Window timelineWindow;
-
+	
 	/**	 the width of the timeline portion that is drawn(fit so that labels are onscreen) */
 	public int lineWidth(int actualDisplayWidth) {
 		return actualDisplayWidth - 2*offset();
@@ -736,20 +774,8 @@ public class Data
 		return processorList.size();
 	}
 	/** The maximum processor index in the processor list, or -1 if null processor list */
-	public int maxPs(){
-		int largestSeen = -1;
-
-		if(processorList!=null){
-			processorList.reset();	
-			while(processorList.hasMoreElements()){
-				int p = processorList.nextElement();
-				if (p>largestSeen){
-					largestSeen=p; 
-				}
-			}
-		}
-
-		return largestSeen;
+	public int numPEs(){
+		return MainWindow.runObject[myRun].getNumProcessors();		
 	}	
 
 	/** the left/right margins for the timeline & axis. 

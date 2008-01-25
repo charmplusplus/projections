@@ -1,6 +1,5 @@
 package projections.gui.Timeline;
 
-
 /** An interface for anything that will be used to hold a MainPanel.
  * 
  *  This is used to handle/intercept events such as clicking on TimelineEntryMethodObjects.

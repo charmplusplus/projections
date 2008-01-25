@@ -1,6 +1,7 @@
 package projections.gui.Timeline;
 
 import java.awt.*;
+import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -37,11 +38,16 @@ public class MessagePanel extends JPanel {
 
     private static final int NUM_FIELDS = 6;
 
+    private DecimalFormat df;
+    
     MessagePanel(EntryMethodObject obj) {
 	this.obj = obj;
 	messages = obj.getMessages();
 	tableData = new Object[obj.getNumMsgs()][NUM_FIELDS];
 	columnNames = new Object[NUM_FIELDS];
+	df = new DecimalFormat();
+	df.setGroupingUsed(true);
+	df.setGroupingSize(3);
 	setData();
 	createLayout();
     }
@@ -65,35 +71,13 @@ public class MessagePanel extends JPanel {
 
     		// fill in the NUM_FIELDS columns
     		tableData[row][0] = new Integer(row);
-    		tableData[row][1] = new Integer(msg.MsgLen);
-    		tableData[row][2] = new Long(msg.Time);
-    		tableData[row][3] = new Long((row>0) ? (msg.Time - prev.Time) : 0);
-    		tableData[row][4] = MainWindow.runObject[myRun].getEntryName(msg.Entry);
-    		if (msg.destPEs != null) {
-    			// This is a multicast.
-    			tableData[row][5] = "";
-    			for (int i=0; i<msg.destPEs.length-1; i++) {
-    				tableData[row][5] = (String)tableData[row][5] + msg.destPEs[i] + ", ";
-    			}
-    			tableData[row][5] = (String)tableData[row][5] + 
-    			msg.destPEs[msg.destPEs.length-1] + "";
-    		} else {
-    			if (msg.numPEs > 0) {
-    				// This is a broadcast of some sort.
-    				if (msg.numPEs == 
-    					MainWindow.runObject[myRun].getNumProcessors()) {
-    					tableData[row][5] = 
-    						"Group Broadcast (" + msg.numPEs + ")";
-    				} else {
-    					tableData[row][5] = 
-    						"Nodegroup Broadcast (" + msg.numPEs + 
-    						")";
-    				}
-    			} else {
-    				// This is a regular send event.
-    				tableData[row][5] = "unknown";
-    			}
-    		}
+
+    		tableData[row][1] = df.format(msg.MsgLen);
+    		tableData[row][2] = df.format(msg.Time);
+    		tableData[row][3] = df.format((row>0) ? (msg.Time - prev.Time) : (msg.Time - obj.getBeginTime()) );
+    		tableData[row][4] = MainWindow.runObject[myRun].getEntryName(msg.Entry);								 
+    		tableData[row][5] = msg.destination(MainWindow.runObject[myRun].getNumProcessors());
+
     		row++;
     	}// end while
     }

@@ -3,9 +3,6 @@ package projections.gui.Timeline;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.util.Iterator;
-import java.util.Set;
-
 import javax.swing.*;
 
 /**

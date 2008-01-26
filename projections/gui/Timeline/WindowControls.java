@@ -56,7 +56,7 @@ ItemListener {
 
 	private FloatJTextField scaleField;
 
-	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbTraceDependencies;
+	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbTraceMessages, cbTraceArrayElementID;
 
 	private UserEventWindow userEventWindow;
 
@@ -402,15 +402,16 @@ ItemListener {
 		cbMsgs = new JCheckBox("Display Message Sends", data.showMsgs);
 		cbIdle = new JCheckBox("Display Idle Time", data.showIdle);
 		cbUser = new JCheckBox("Display User Event Window", false);
-		cbTraceDependencies = new JCheckBox("Display Event Dependencies", false);
-
+		cbTraceMessages = new JCheckBox("Trace Messages", false);
+		cbTraceArrayElementID = new JCheckBox("Trace Array Element Index", false);
 		
 		cbPacks.addItemListener(this);
 		cbMsgs.addItemListener(this);
 		cbIdle.addItemListener(this);
 		cbUser.addItemListener(this);
-		cbTraceDependencies.addItemListener(this);
-
+		cbTraceMessages.addItemListener(this);
+		cbTraceArrayElementID.addItemListener(this);
+		
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
 
@@ -424,8 +425,9 @@ ItemListener {
 		Util.gblAdd(cbPanel, cbMsgs, gbc, 1, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbIdle, gbc, 2, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUser, gbc, 3, 0, 1, 1, 1, 1);
-		Util.gblAdd(cbPanel, cbTraceDependencies, gbc, 4, 0, 1, 1, 1, 1);
-
+		Util.gblAdd(cbPanel, cbTraceMessages, gbc, 4, 0, 1, 1, 1, 1);
+		Util.gblAdd(cbPanel, cbTraceArrayElementID, gbc, 5, 0, 1, 1, 1, 1);
+		
 		// // BUTTON PANEL
 		bSelectRange = new JButton("Select Ranges");
 		bColors = new JButton("Change Entry Point Colors");
@@ -598,8 +600,10 @@ ItemListener {
 			data.showMsgs = (evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbIdle)
 			data.showIdle = (evt.getStateChange() == ItemEvent.SELECTED);
-		else if (c == cbTraceDependencies)
-			data.setShowDependenciesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+		else if (c == cbTraceMessages)
+			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+		else if (c == cbTraceArrayElementID)
+			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbUser) {
 			if (evt.getStateChange() == ItemEvent.SELECTED){
 				userEventWindow.pack();

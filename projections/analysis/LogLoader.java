@@ -673,6 +673,7 @@ public class LogLoader extends ProjDefs
 		}
 	}
 
+	/** Read the timeline for a single PE and return the result as a vector of TimelineEvent's */
 	public Vector createtimeline(int PeNum, long Begin, long End, 
 			Vector Timeline, Vector userEventVector)
 	throws LogLoadException
@@ -901,6 +902,7 @@ public class LogLoader extends ProjDefs
 						}
 						break;
 					case BEGIN_PROCESSING:
+						
 						lastBeginEvent = null;
 						if (isProcessing) {
 							// We add a "pretend" end event to accomodate

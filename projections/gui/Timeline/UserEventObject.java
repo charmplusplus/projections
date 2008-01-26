@@ -45,6 +45,7 @@ public class UserEventObject extends JComponent
 	
 	/** Called by the layout manager to put this in the right place */
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
+		this.data = data;
 
 		int leftCoord = data.timeToScreenPixel(BeginTime, actualDisplayWidth);
 		int rightCoord = data.timeToScreenPixel(EndTime, actualDisplayWidth);
@@ -72,9 +73,17 @@ public class UserEventObject extends JComponent
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
+		Color c = color;
 
-		g.setColor(color);
+		// Darken these if we are darkening stuff for some other reason.
+		// Basically we don't ever want these to be prominent
+		if(data!=null && data.isAnyObjectDimmed())
+			c = c.darker().darker();
+		
+		g.setColor(c);
 		g.fillRect(0, 0, getWidth(), getHeight());
+		
+		
 	}
 
 	public Color getColor() {

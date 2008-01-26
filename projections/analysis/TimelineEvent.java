@@ -5,6 +5,7 @@ import java.lang.Comparable;
 
 import projections.gui.Timeline.TimelineMessage;
 
+/** A class that represents an event from the log, Eventually an EntryMethod object or UserEventObject will be created from this data */
 public class TimelineEvent implements Comparable
 {
  
@@ -51,23 +52,23 @@ public long RecvTime;
     }
     
     
-    
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
-		     ObjectId d, long cpubegin, long cpuend, 
-		     int numPapiCounts, long papiCounts[])
-{
-	setDefaultValues();
-	BeginTime=bt; EndTime=et;
-	cpuBegin = cpubegin;
-	cpuEnd = cpuend;
-	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
-        RecvTime = r;
-	id = new ObjectId(d);
-	this.numPapiCounts = numPapiCounts;
-	this.papiCounts = papiCounts;
-
-	userEventName = null;
-}
+//    
+//public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
+//		     ObjectId d, long cpubegin, long cpuend, 
+//		     int numPapiCounts, long papiCounts[])
+//{
+//	setDefaultValues();
+//	BeginTime=bt; EndTime=et;
+//	cpuBegin = cpubegin;
+//	cpuEnd = cpuend;
+//	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
+//        RecvTime = r;
+//	id = new ObjectId(d);
+//	this.numPapiCounts = numPapiCounts;
+//	this.papiCounts = papiCounts;
+//
+//	userEventName = null;
+//}
 
 public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
 		     ObjectId d,int eventid, long cpubegin, long cpuend, 

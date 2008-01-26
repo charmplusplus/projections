@@ -8,6 +8,7 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -410,31 +411,57 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 	public void mouseEntered(MouseEvent evt)
 	{   
-		// Highlight the dependencies of this object
-		if(data.showDependenciesOnHover()){
+		boolean needRepaint = false;
+		
+		// Highlight the messages linked to this object
+		if(data.traceMessagesOnHover()){
 			Set fwd = traceForwardDependencies();
 			Set back = traceBackwardDependencies();
 			
-			Set fwdAndBack = new HashSet();
-			fwdAndBack.addAll(fwd);
-			fwdAndBack.addAll(back);
-			
+			// Highlight the forward and backward messages
 			data.clearMessageSendLines();
 			data.addMessageSendLine(back);
 			data.addMessageSendLineAlt(fwd);
-			data.HighlightObjects(fwdAndBack);
-			data.displayMustBeRepainted();
+			
+			// highlight the objects as well
+			data.HighlightObjects(fwd);
+			data.HighlightObjects(back);
+			
+			needRepaint=true;
 		}
+		
+		
+		// Highlight any Entry Method invocations for the same chare array element
+		if(data.traceOIDOnHover()){
+			Set allWithSameId = (Set) data.oidToEntryMethonObjectsMap.get(tid);
+			data.HighlightObjects(allWithSameId);
+			needRepaint=true;
+		}
+
+		
+		if(needRepaint)
+			data.displayMustBeRepainted();
+		
 	}   
 
 
 	public void mouseExited(MouseEvent evt)
 	{
-		if(data.showDependenciesOnHover()){
+		boolean needRepaint = false;
+		
+		if(data.traceMessagesOnHover()){
 			data.clearObjectHighlights();
 			data.clearMessageSendLines();
-			data.displayMustBeRepainted();
+			needRepaint=true;
 		}
+		if(data.traceOIDOnHover()){
+			data.clearObjectHighlights();	
+			needRepaint=true;
+		}
+				
+		if(needRepaint)
+			data.displayMustBeRepainted();
+		
 	}   
 
 
@@ -730,6 +757,10 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			return pCurrent - obj.pCurrent;
 		else
 			return EventID - obj.EventID;
+	}
+
+	public ObjectId getTid() {
+		return tid;
 	}
 
 

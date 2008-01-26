@@ -2,6 +2,7 @@ package projections.analysis;
 
 import projections.misc.*;
 
+/** A class representing an entry in a log */
 class LogEntry
 {
     public int Replay, TransactionType, MsgType, Entry;
@@ -33,6 +34,8 @@ class LogEntry
     /**
      *   A temporary measure to adapt LogEntryData objects to this class
      *   for use with timelines.
+     *
+     *  TODO convert this to a constructor. No reason for it to be a static method that instantiates a return value.
      */
     public static LogEntry adapt(LogEntryData data) {
 	LogEntry log = new LogEntry();

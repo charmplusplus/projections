@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.swing.*;
@@ -122,9 +123,15 @@ public class Data
 	/** Some associative containers to make lookups fast */
 	Map []eventIDToMessageMap;
 	Map []eventIDToEntryMethodMap;
+	
+	/** Map from a message to the the resulting entry methods entry object invocations */
 	Map messageToExecutingObjectsMap;
+	
+	/** Map from a message to its invoking entry method instance */
 	Map messageToSendingObjectsMap;
-		
+	
+	/** Map from Chare Array element id's to the corresponding known entry method invocations */
+	Map oidToEntryMethonObjectsMap;
 	
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
 	boolean showPacks, showIdle, showMsgs;
@@ -279,7 +286,6 @@ public class Data
 		for(int i=0; i<numPEs(); i++){
 			mesgVector[i] = null;
 		}
-//		System.out.println("Allocated mesgVector of size " + mesgVector.length);
 
 		tloArray = new EntryMethodObject[processorList.size()][];
 		timelineUserEventObjectsArray = new UserEventObject[processorList.size()][];
@@ -297,7 +303,6 @@ public class Data
 			newp = processorList.nextElement();
 			oldp = oldplist.nextElement();
 			while (newp != -1) {
-				System.out.println("newp="+newp);
 				while (oldp != -1 && oldp < newp) {
 					oldp = oldplist.nextElement();
 					oldpindex++;
@@ -307,8 +312,6 @@ public class Data
 				if (oldp == newp) {
 					if (beginTime == oldBT && endTime == oldET) {
 						tloArray[newpindex] = oldtloArray[oldpindex];
-						System.out.println("new tloarray["+newpindex+"]=oldtloArray["+oldpindex+"]");
-						//		assert(oldUserEventsArray != null);
 						timelineUserEventObjectsArray[newpindex] = 
 							oldUserEventsArray[oldpindex];
 						mesgVector[oldp] = oldmesgVector[newp];
@@ -533,11 +536,14 @@ public class Data
 			if(tloArray[i]!=null){
 				for(int j=0;j<tloArray[i].length;j++){
 					EntryMethodObject obj=tloArray[i][j];
-					// put all the messages created by obj into the map, listing obj as the creator
-					Iterator iter = obj.messages.iterator();
-					while(iter.hasNext()){
-						TimelineMessage msg = (TimelineMessage) iter.next();
-						messageToSendingObjectsMap.put(msg, obj);
+					
+					if(obj != null){
+						// put all the messages created by obj into the map, listing obj as the creator
+						Iterator iter = obj.messages.iterator();
+						while(iter.hasNext()){
+							TimelineMessage msg = (TimelineMessage) iter.next();
+							messageToSendingObjectsMap.put(msg, obj);
+						}
 					}
 				}				
 			}
@@ -554,6 +560,8 @@ public class Data
 
 					EntryMethodObject obj=tloArray[i][j];
 					if(obj!=null){
+						
+						
 						TimelineMessage msg = obj.creationMessage();
 						if(msg!=null){
 							// for each EntryMethodObject, add its creation Message to the map
@@ -573,6 +581,38 @@ public class Data
 				}				
 			}
 		}
+		
+
+		progressBar.setProgress(4);
+		progressBar.setNote("Creating Map 5");
+		
+		/** Create a mapping from Chare array element indices to their EntryMethodObject's */
+		oidToEntryMethonObjectsMap = new TreeMap();
+		for(int i=0;i<tloArray.length;i++){
+			if(tloArray[i]!=null){
+				for(int j=0;j<tloArray[i].length;j++){
+					EntryMethodObject obj=tloArray[i][j];
+					
+					if(obj != null){
+						ObjectId id = obj.getTid();
+						
+						if(oidToEntryMethonObjectsMap.containsKey(id)){
+							// add obj to the existing set
+							TreeSet s = (TreeSet) oidToEntryMethonObjectsMap.get(id);
+							s.add(obj);
+						} else {
+							// create a set for the id
+							TreeSet s = new TreeSet();
+							s.add(obj);
+							oidToEntryMethonObjectsMap.put(id, s);
+						}
+
+					}
+				}				
+			}
+		}
+					
+//		System.out.println("oidToEntryMethonObjectsMap contains " + oidToEntryMethonObjectsMap.size() + " unique chare array indices");
 		
 		progressBar.close();
 		
@@ -675,7 +715,7 @@ public class Data
 
 
 	/** Load the timeline for processor pnum by 
-	 * calling createTL();
+	 * calling createTL() which calls createtimeline();
 	 * */
 	private EntryMethodObject[] getData(int pnum, int index)  
 	{
@@ -1146,8 +1186,11 @@ public class Data
 	 */
 	private Set highlightedObjects;
  	
-	/** Highlight the dependencies when mouse is over an event */
-	private boolean showDependenciesOnHover;
+	/** Highlight the message links to the object upon mouseover */
+	private boolean traceMessagesOnHover;
+	
+	/** Highlight the other entry method invocations upon mouseover */
+	private boolean traceOIDOnHover;
 	
 	/** Clear any highlights created by HighlightObjects() */
 	public void clearObjectHighlights() {
@@ -1170,20 +1213,36 @@ public class Data
 			return ! highlightedObjects.contains(o);
 	}
 		
+	/** Determine if any objects should be dimmed. 
+	 */
+	public boolean isAnyObjectDimmed(){
+		return highlightedObjects.size()>0;
+	}
+		
+	
 
-	public boolean showDependenciesOnHover() {
-		return showDependenciesOnHover;
+	public boolean traceMessagesOnHover() {
+		return traceMessagesOnHover;
 	}
 	
-	public void setShowDependenciesOnHover(boolean showDependenciesOnHover) {
-		this.showDependenciesOnHover = showDependenciesOnHover;
+	public boolean traceOIDOnHover() {
+		return traceOIDOnHover;
+	}
+	
+	public void setTraceMessagesOnHover(boolean traceMessagesOnHover) {
+		this.traceMessagesOnHover = traceMessagesOnHover;
 		
-		if(showDependenciesOnHover)
+		if(traceMessagesOnHover)
 			SetToolTipDelayLarge();
 		else
 			SetToolTipDelaySmall();
 		
 	}
+		
+	public void setTraceOIDOnHover(boolean showOIDOnHover) {
+		this.traceOIDOnHover = showOIDOnHover;
+	}
+	
 	
 	public void SetToolTipDelaySmall() {
 		ToolTipManager.sharedInstance().setInitialDelay(0);

@@ -485,19 +485,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		msgwindow.setVisible(true);
 	} 
-
-	private Color getObjectColor(ObjectId tid){
-		int r;
-		int g;
-		int b;
-		int nPE = data.processorList().size();
-		int d = (int )(255/(double )nPE);
-		r = ((tid.id[0])*d) % 255;
-		g = ((tid.id[1])*23) % 255;
-		b = 255-g;
-		//b = 56;
-		return new Color(r, g,b );
-	}
 	
 	/** Is this an idle event */
 	public boolean isIdleEvent(){
@@ -537,22 +524,21 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		} else if (entry == -2) { // unknown domain
 			c = getBackground();
 		}  else {
-			if(data.colorbyObjectId()){
-				c = getObjectColor(tid);
-			}else{
-				c = data.entryColor()[entry];
-				if (isFunction) {
-					c = MainWindow.runObject[myRun].getFunctionColor(entry);
-				}
-			}	
+			c = data.entryColor()[entry];
+			if (isFunction) {
+				c = MainWindow.runObject[myRun].getFunctionColor(entry);
+			}
 		}
 		
-		
+		// Sometimes Overrule the normal colors and use one based on the chare array index
+		if( ! isIdleEvent() && data.colorbyObjectId())
+			c = colorFromOID();
+	
+		// Dimm this object if we want to focus on some objects(for some reason or another)
 		if(data.isObjectDimmed(this))
 			c = c.darker().darker();
 		
-
-
+		
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();
 		int rectHeight = data.barheight();
@@ -671,6 +657,37 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}
 	}
 
+
+
+	private Color colorFromOID() {
+
+		/** hashes of the object indices */
+		int h1, h2, h3, h4;
+		
+		h1 = (getTid().id[0] * 7841) % 223;
+		h2 = (getTid().id[1] * 7841) % 223;
+		h3 = ((getTid().id[2]+5) * 7841) % 223;
+		h4 = ((getTid().id[3]+7) * 7841) % 223;
+
+		int h5 = h1^h3;
+		int h6 = h2^h4;
+		
+		float h;   // Should range from 0.0 to 1.0
+		h = (h5 % 400) / 400.0f;
+		if(h < 1.0f)
+			h += 1.0f;
+		
+		float s;   // Should be 0.5 or 1.0
+		if((h6%2) == 0)
+			s = 1.0f;
+		else
+			s = 0.5f;
+		
+		
+		float b = 1.0f;   // Should be 1.0
+		
+		return Color.getHSBColor(h, s, b);
+	}
 
 	public void setLocationAndSize(int actualDisplayWidth)
 	{

@@ -56,7 +56,7 @@ ItemListener {
 
 	private FloatJTextField scaleField;
 
-	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbTraceMessages, cbTraceArrayElementID;
+	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbTraceMessages, cbTraceArrayElementID, cbColorByIndex;
 
 	private UserEventWindow userEventWindow;
 
@@ -404,6 +404,7 @@ ItemListener {
 		cbUser = new JCheckBox("Display User Event Window", false);
 		cbTraceMessages = new JCheckBox("Trace Messages", false);
 		cbTraceArrayElementID = new JCheckBox("Trace Array Element Index", false);
+		cbColorByIndex = new JCheckBox("Color Events by Index", false);
 		
 		cbPacks.addItemListener(this);
 		cbMsgs.addItemListener(this);
@@ -411,13 +412,12 @@ ItemListener {
 		cbUser.addItemListener(this);
 		cbTraceMessages.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
+		cbColorByIndex.addItemListener(this);
 		
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
-
 		gbc.fill = GridBagConstraints.NONE;
 		gbc.anchor = GridBagConstraints.CENTER;
-
 		JPanel cbPanel = new JPanel();
 		cbPanel.setLayout(gbl);
 
@@ -425,10 +425,21 @@ ItemListener {
 		Util.gblAdd(cbPanel, cbMsgs, gbc, 1, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbIdle, gbc, 2, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUser, gbc, 3, 0, 1, 1, 1, 1);
-		Util.gblAdd(cbPanel, cbTraceMessages, gbc, 4, 0, 1, 1, 1, 1);
-		Util.gblAdd(cbPanel, cbTraceArrayElementID, gbc, 5, 0, 1, 1, 1, 1);
 		
-		// // BUTTON PANEL
+		
+		GridBagLayout gbl2 = new GridBagLayout();
+		GridBagConstraints gbc2 = new GridBagConstraints();
+		gbc2.fill = GridBagConstraints.NONE;
+		gbc2.anchor = GridBagConstraints.CENTER;
+		JPanel cbPanel2 = new JPanel();
+		cbPanel2.setLayout(gbl2);
+		
+		Util.gblAdd(cbPanel2, cbTraceMessages, gbc, 0, 0, 1, 1, 1, 1);
+		Util.gblAdd(cbPanel2, cbTraceArrayElementID, gbc, 1, 0, 1, 1, 1, 1);
+		Util.gblAdd(cbPanel2, cbColorByIndex, gbc, 2, 0, 1, 1, 1, 1);
+		
+		
+		// BUTTON PANEL
 		bSelectRange = new JButton("Select Ranges");
 		bColors = new JButton("Change Entry Point Colors");
 		bDecrease = new JButton("<<");
@@ -500,39 +511,12 @@ ItemListener {
 		Util.gblAdd(zoomPanel, new JLabel("Selection Length", JLabel.CENTER),
 				gbc, 5, 1, 1, 1, 1, 1);
 
-		// JUMP TO GRAPH
-//		bJumpProfile = new JButton("Usage Profile");
-//		bJumpGraph = new JButton("Graph");
-//		bJumpHistogram = new JButton("Histogram");
-//		bJumpComm = new JButton("Communication");
-//		bJumpStl = new JButton("Overview");
-//
-//		bJumpProfile.addActionListener(this);
-//		bJumpGraph.addActionListener(this);
-//		bJumpHistogram.addActionListener(this);
-//		bJumpComm.addActionListener(this);
-//		bJumpStl.addActionListener(this);
-
-//		JPanel jumpPanel = new JPanel();
-//		jumpPanel.setLayout(gbl);
-//		gbc.fill = GridBagConstraints.BOTH;
-//
-//		Util.gblAdd(jumpPanel, new JLabel(" "), gbc, 0, 0, 1, 1, 1, 1);
-//		Util.gblAdd(jumpPanel, new JLabel("Jump to graph: ", JLabel.LEFT), gbc,
-//				1, 1, 1, 1, 1, 1);
-//		Util.gblAdd(jumpPanel, bJumpProfile, gbc, 3, 1, 1, 1, 1, 1);
-//		Util.gblAdd(jumpPanel, bJumpGraph, gbc, 4, 1, 1, 1, 1, 1);
-//		Util.gblAdd(jumpPanel, bJumpHistogram, gbc, 5, 1, 1, 1, 1, 1);
-//		Util.gblAdd(jumpPanel, bJumpComm, gbc, 6, 1, 1, 1, 1, 1);
-//		Util.gblAdd(jumpPanel, bJumpStl, gbc, 7, 1, 1, 1, 1, 1);
-
-		// // WINDOW
-
+		
 		this.setLayout(gbl);
 		Util.gblAdd(this, cbPanel, gbc, 0, 1, 1, 1, 1, 0);
-		Util.gblAdd(this, buttonPanel, gbc, 0, 2, 1, 1, 1, 0);
-		Util.gblAdd(this, zoomPanel, gbc, 0, 3, 1, 1, 1, 0);
-//		Util.gblAdd(this, jumpPanel, gbc, 0, 4, 1, 1, 1, 0);
+		Util.gblAdd(this, cbPanel2, gbc, 0, 2, 1, 1, 1, 0);
+		Util.gblAdd(this, buttonPanel, gbc, 0, 3, 1, 1, 1, 0);
+		Util.gblAdd(this, zoomPanel, gbc, 0, 4, 1, 1, 1, 0);
 
 	}
 
@@ -604,6 +588,8 @@ ItemListener {
 			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+		else if (c == cbColorByIndex)
+			data.setColorByIndex(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbUser) {
 			if (evt.getStateChange() == ItemEvent.SELECTED){
 				userEventWindow.pack();

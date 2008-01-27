@@ -345,7 +345,7 @@ public class Data
 
 						// copy the array
 						tloArray[newpindex] = new EntryMethodObject[newNumItems];
-						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
+//						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
 						mesgVector[newp] = new Vector();
 						for (n=0; n<newNumItems; n++) {
 							tloArray[newpindex][n] = 
@@ -1262,7 +1262,9 @@ public class Data
 	public Color getMessageAltColor() {
 		return Color.yellow;
 	}
-	
-	
+	public void setColorByIndex(boolean b) {
+		colorbyObjectId = b;
+		displayMustBeRepainted();
+	}
 
 }

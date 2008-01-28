@@ -657,34 +657,31 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}
 	}
 
-
-
+	/** Create a color based on the chare array index for the object executing this entry method */
 	private Color colorFromOID() {
 
-		/** hashes of the object indices */
+		// hashes of the object indices
 		int h1, h2, h3, h4;
 		
-		h1 = (getTid().id[0] * 7841) % 223;
-		h2 = (getTid().id[1] * 7841) % 223;
+		h1 = ((getTid().id[0]+2) * 7841) % 223;
+		h2 = ((getTid().id[1]+3) * 7841) % 223;
 		h3 = ((getTid().id[2]+5) * 7841) % 223;
 		h4 = ((getTid().id[3]+7) * 7841) % 223;
 
-		int h5 = h1^h3;
-		int h6 = h2^h4;
+		// This will give us a pretty crazy random bitpattern
+		int h5 = h1^h3^h2^h4;
+		h5 = h5 ^ (h5/1024);
 		
 		float h;   // Should range from 0.0 to 1.0
-		h = (h5 % 400) / 400.0f;
-		if(h < 1.0f)
-			h += 1.0f;
+		h = (h5 % 512) / 512.0f;
 		
-		float s;   // Should be 0.5 or 1.0
-		if((h6%2) == 0)
-			s = 1.0f;
+		float s = 1.0f;   // Should be 1.0
+				
+		float b = 1.0f;   // Should be 0.5 or 1.0
+		if((h5%2) == 0)
+			b = 1.0f;
 		else
-			s = 0.5f;
-		
-		
-		float b = 1.0f;   // Should be 1.0
+			b = 0.5f;
 		
 		return Color.getHSBColor(h, s, b);
 	}

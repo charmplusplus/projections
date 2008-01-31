@@ -45,10 +45,6 @@ ItemListener {
 
 	private JButton bZoomSelected, bLoadSelected;
 
-//	// jump to graphs
-//	private JButton bJumpProfile, bJumpGraph, bJumpHistogram, bJumpComm,
-//	bJumpStl;
-
 	private JTextField highlightTime, selectionBeginTime, selectionEndTime,
 	selectionDiff;
 
@@ -56,7 +52,7 @@ ItemListener {
 
 	private FloatJTextField scaleField;
 
-	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbTraceMessages, cbTraceArrayElementID, cbColorByIndex;
+	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable, cbTraceMessages, cbTraceArrayElementID, cbColorByIndex, cbColorByUserSupplied;
 
 	private UserEventWindow userEventWindow;
 
@@ -75,7 +71,7 @@ ItemListener {
 
 		CreateLayout();
 
-		userEventWindow = new UserEventWindow(cbUser);
+		userEventWindow = new UserEventWindow(cbUserTable);
 
 	}
 
@@ -96,7 +92,7 @@ ItemListener {
 				final SwingWorker worker = new SwingWorker() {
 					public Object construct() {
 						parentWindow.mainPanel.loadTimelineObjects();
-						cbUser.setText("View User Events (" + data.getNumUserEvents() + ")");
+						cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 						return null;
 					}
 
@@ -183,7 +179,7 @@ ItemListener {
 
 			parentWindow.mainPanel.loadTimelineObjects();
 			
-			cbUser.setText("View User Events (" + data.getNumUserEvents() + ")");
+			cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 			
 		} else{
 			System.out.println("ERROR: somehow you clicked the loadSelected button which shouldn't have been enabled!");			
@@ -401,18 +397,22 @@ ItemListener {
 		cbPacks = new JCheckBox("Display Pack Times", data.showPacks);
 		cbMsgs = new JCheckBox("Display Message Sends", data.showMsgs);
 		cbIdle = new JCheckBox("Display Idle Time", data.showIdle);
-		cbUser = new JCheckBox("Display User Event Window", false);
+		cbUser = new JCheckBox("Display User Events", true);
+		cbUserTable = new JCheckBox("Display User Events Window", false);
 		cbTraceMessages = new JCheckBox("Trace Messages", false);
-		cbTraceArrayElementID = new JCheckBox("Trace Array Element Index", false);
-		cbColorByIndex = new JCheckBox("Color Events by Index", false);
+		cbTraceArrayElementID = new JCheckBox("Trace Object ID", false);
+		cbColorByIndex = new JCheckBox("Color Events by Object ID", false);
+		cbColorByUserSupplied = new JCheckBox("Color Events by User Supplied Parameter(timestep) ", false);
 		
 		cbPacks.addItemListener(this);
 		cbMsgs.addItemListener(this);
 		cbIdle.addItemListener(this);
 		cbUser.addItemListener(this);
+		cbUserTable.addItemListener(this);
 		cbTraceMessages.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
 		cbColorByIndex.addItemListener(this);
+		cbColorByUserSupplied.addItemListener(this);
 		
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -425,6 +425,7 @@ ItemListener {
 		Util.gblAdd(cbPanel, cbMsgs, gbc, 1, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbIdle, gbc, 2, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUser, gbc, 3, 0, 1, 1, 1, 1);
+		Util.gblAdd(cbPanel, cbUserTable, gbc, 4, 0, 1, 1, 1, 1);
 		
 		
 		GridBagLayout gbl2 = new GridBagLayout();
@@ -437,7 +438,7 @@ ItemListener {
 		Util.gblAdd(cbPanel2, cbTraceMessages, gbc, 0, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel2, cbTraceArrayElementID, gbc, 1, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel2, cbColorByIndex, gbc, 2, 0, 1, 1, 1, 1);
-		
+		Util.gblAdd(cbPanel2, cbColorByUserSupplied, gbc, 3,  0, 1, 1, 1, 1);
 		
 		// BUTTON PANEL
 		bSelectRange = new JButton("Select Ranges");
@@ -590,7 +591,11 @@ ItemListener {
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbColorByIndex)
 			data.setColorByIndex(evt.getStateChange() == ItemEvent.SELECTED);
-		else if (c == cbUser) {
+		else if (c == cbColorByUserSupplied)
+			data.setColorByUserSupplied(evt.getStateChange() == ItemEvent.SELECTED);
+		else if (c == cbUser)
+			data.showUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
+		else if (c == cbUserTable) {
 			if (evt.getStateChange() == ItemEvent.SELECTED){
 				userEventWindow.pack();
 				userEventWindow.setVisible(true); // pop up window

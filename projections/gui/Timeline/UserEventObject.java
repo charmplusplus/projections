@@ -71,16 +71,11 @@ public class UserEventObject extends JComponent
 
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		Color c = color;
 
-		// Darken these if we are darkening stuff for some other reason.
-		// Basically we don't ever want these to be prominent
-		if(data!=null && data.isAnyObjectDimmed())
-			c = c.darker().darker();
-		
-		g.setColor(c);
-		g.fillRect(0, 0, getWidth(), getHeight());
-		
+		if(data.showUserEvents()){
+			g.setColor(color);
+			g.fillRect(0, 0, getWidth(), getHeight());
+		}		
 		
 	}
 

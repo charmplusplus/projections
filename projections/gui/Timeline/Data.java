@@ -81,6 +81,9 @@ public class Data
 	// boolean for testing if entries are to be colored by Object ID
 	private boolean colorbyObjectId;
 
+	// boolean for testing if entries are to be colored by the user supplied parameter
+	private boolean colorbyUserSupplied;
+	
 	private int[]          entries;
 
 	private Color[]        entryColor;
@@ -134,7 +137,7 @@ public class Data
 	Map oidToEntryMethonObjectsMap;
 	
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
-	boolean showPacks, showIdle, showMsgs;
+	boolean showPacks, showIdle, showMsgs, showUserEvents;
 
 
 	/** The font used by the LabelPanel */
@@ -175,7 +178,8 @@ public class Data
 		showPacks = false;
 		showMsgs  = true;
 		showIdle  = true;
-
+		showUserEvents = true;
+		
 		processorList = MainWindow.runObject[myRun].getValidProcessorList();
 
 		oldBT = -1;
@@ -1266,5 +1270,17 @@ public class Data
 		colorbyObjectId = b;
 		displayMustBeRepainted();
 	}
-
+	public void setColorByUserSupplied(boolean b) {
+		colorbyUserSupplied=b;
+		displayMustBeRepainted();
+	}
+	public boolean colorByUserSupplied() {
+		return colorbyUserSupplied;
+	}
+	public void showUserEvents(boolean b) {
+		showUserEvents = b;
+	}
+	public boolean showUserEvents() {
+		return showUserEvents;
+	}
 }

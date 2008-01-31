@@ -11,6 +11,7 @@ import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.swing.*;
@@ -70,7 +71,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private boolean isFunction = false;
 
 	private static DecimalFormat format_ = new DecimalFormat();
-
+	private AmpiFunctionData funcData[];
 
 	public EntryMethodObject(Data data,  TimelineEvent tle, 
 			TreeSet msgs, PackTime[] packs,
@@ -79,8 +80,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		format_.setGroupingUsed(true);
 
 		setVisible(true);
-
-		System.out.println("Usersupplied="+tle.UserSpecifiedData);
 		
 		setBackground(MainWindow.runObject[myRun].background);
 		setForeground(MainWindow.runObject[myRun].foreground);
@@ -111,43 +110,61 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		numPapiCounts = tle.numPapiCounts;
 		papiCounts    = tle.papiCounts;
 
-		int n = tle.EntryPoint;
 		isFunction = tle.isFunction;
 
 		setUsage();
 		setPackUsage();
+
+		if (isFunction) {
+			// copy the callstack	
+			funcData = new AmpiFunctionData[tle.callStack.size()];
+			tle.callStack.copyInto(funcData);
+					
+		} else if (tle.EntryPoint >= 0) {
+			int ecount = MainWindow.runObject[myRun].getNumUserEntries();
+			if (tle.EntryPoint >= ecount) {
+				System.out.println("<b>Fatal error: invalid entry " + tle.EntryPoint +
+						" on processor " + pCurrent + "</b>!");
+				System.exit(1) ;
+			}
+		}
 		
+		updateToolTipText();
+		
+		if(!isIdleEvent()){
+			addMouseListener(this);
+		}
+					
+	} 
+	
+	
+	/** Set the tooltip to a nicely formatted representation of this object */
+	public void updateToolTipText(){
+
 		// Construct a nice informative html formatted string about this entry method object. 
 		// This string is displayed on mouseover(by setting it as this component's tooltip)
 		String infoString = "";
 
 		// **CW** special treatment for functions. There really should
 		// be a general way of dealing with this.
-		if (isFunction) {
-			
+		if (isFunction) {			
 			infoString += "<i>Function</i>: " + MainWindow.runObject[myRun].getFunctionName(entry) + "<br>";
 			infoString += "<i>Begin Time</i>: " + format_.format(beginTime) + "<br>";
 			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
 			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
-			infoString += "<i>Msgs created</i>: " + msgs.size() + "<br>";
+			infoString += "<i>Msgs created</i>: " + messages.size() + "<br>";
 			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			infoString += "<hr><br><i>Function Callstack</i>:<br>";
 
-			// consume the call stack
-			while (!tle.callStack.empty()) {
-				AmpiFunctionData functionData = (AmpiFunctionData)tle.callStack.pop();
+			// look at the call stack
+			for(int i=0;i<funcData.length;i++){
+				AmpiFunctionData functionData = funcData[i];
 				infoString += "<i>[Func]</i>: " + MainWindow.runObject[myRun].getFunctionName(functionData.FunctionID) + "<br>";
 				infoString += "&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>";
 			}
-		} else if (n >= 0) {
+		} else if (entry >= 0) {
 
-			int ecount = MainWindow.runObject[myRun].getNumUserEntries();
-			if (n >= ecount) {
-				System.out.println("<b>Fatal error: invalid entry " + n +
-						" on processor " + pCurrent + "</b>!");
-				System.exit(1) ;
-			}
-			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[n][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[n][0] + "</b><br><br>"; 
+			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[entry][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[entry][0] + "</b><br><br>"; 
 
 			if(msglen > 0) {
 				infoString += "<i>Msg Len</i>: " + msglen + "<br>";
@@ -173,7 +190,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
 			
-			infoString += "<i>Msgs created</i>: " + msgs.size() + "<br>";
+			infoString += "<i>Msgs created</i>: " + messages.size() + "<br>";
 			infoString += "<i>Created by processor</i>: " + pCreation + "<br>";
 			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			if(tleUserEventName!=null)
@@ -189,12 +206,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 					infoString += MainWindow.runObject[myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>";
 				}
 			}
-		} else if (n == -1) {
+		} else if (entry == -1) {
 			infoString += "<b>Idle Time</b><br><br>";
 			infoString += "<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>";
 			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
 			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
-		} else if (n == -2) {
+		} else if (entry == -2) {
 			infoString += "<i>Unaccounted Time</i>" + "<br>";
 			
 			infoString +=  "<i>Begin Time</i>: " + format_.format(beginTime);
@@ -217,16 +234,19 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
 			
-			infoString += "<i>Msgs created</i>: " + msgs.size() + "<br>";
+			infoString += "<i>Num Msgs created</i>: " + messages.size() + "<br>";
 		}
-		
-		if(!isIdleEvent()){
-			addMouseListener(this);
+
+		if(userSuppliedData != null){
+			infoString += "<i>User Supplied Data:</i> " + userSuppliedData.intValue() + "<br>";
 		}
-		
+			
 		setToolTipText("<html><body>" + infoString + "</html></body>");
-					
-	} 
+		
+	}
+	
+	
+	
 	
 	public void CloseMessageWindow()
 	{
@@ -539,20 +559,20 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		if( ! isIdleEvent() && data.colorbyObjectId())
 			c = colorFromOID();
 	
-		// Dimm this object if we want to focus on some objects(for some reason or another)
+		// Dim this object if we want to focus on some objects(for some reason or another)
 		if(data.isObjectDimmed(this))
 			c = c.darker().darker();
 		
 		
-		if(userSuppliedData ==  null){
-			c = Color.red;
-		} else {
-			c = Color.green;
+		// grey out the objects with odd userSuppliedData value 
+		if(data.colorByUserSupplied()){
+			if(userSuppliedData !=  null && (((userSuppliedData.intValue()+4096)%2)==1)){
+				c = Color.darkGray;
+			} else {
+			}
 		}
 		
-		
-		
-		
+	
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();
 		int rectHeight = data.barheight();

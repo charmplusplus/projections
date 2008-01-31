@@ -1014,7 +1014,7 @@ public class LogLoader extends ProjDefs
 						break;
 					
 					case USER_SUPPLIED:
-						System.out.println("Found a user supplied value");
+						// Tag the last begin TimelineEvent with the user supplied value(likely a timestep number)
 						lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
 						break;
 					

@@ -103,6 +103,7 @@ public class LogLoader extends ProjDefs
 							dummyInt = 
 								Integer.parseInt(st.nextToken());
 							break;
+						case USER_SUPPLIED:
 						case USER_EVENT:
 						case USER_EVENT_PAIR:
 						case MESSAGE_RECV: 
@@ -707,7 +708,7 @@ public class LogLoader extends ProjDefs
 
 			isProcessing = false; 
 			LogEntry lastBeginEvent = null;
-						
+			TimelineEvent lastBeginTimelineEvent = null;
 			
 //			// We will lookup a good seek point from the index file
 //			long offsetToBeginRecord = index.lookupIndexOffset(PeNum,Begin);
@@ -958,6 +959,7 @@ public class LogLoader extends ProjDefs
 								LE.numPapiCounts,
 								LE.papiCounts);
 						Timeline.addElement(TE);
+						lastBeginTimelineEvent = TE;
 						break;
 					case END_PROCESSING:
 						// see if this is the first END_PROCESSING event
@@ -1010,6 +1012,12 @@ public class LogLoader extends ProjDefs
 						TE = null;
 						isProcessing = false;
 						break;
+					
+					case USER_SUPPLIED:
+						System.out.println("Found a user supplied value");
+						lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
+						break;
+					
 					case CREATION:
 						// see if this is the first CREATION event after
 						// the start of time range. If so, create a block

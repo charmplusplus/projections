@@ -18,6 +18,7 @@ class LogEntry
     // PAPI entries/information
     int numPapiCounts;
     long papiCounts[];
+    Integer userSupplied;
 
     // AMPI function tracing. The duplication is unfortunate but required.
     int FunctionID;
@@ -50,7 +51,8 @@ class LogEntry
 	log.sendTime = data.sendTime;
 	log.recvTime = data.recvTime;
 	log.id = new ObjectId(data.id[0],data.id[1],data.id[2],data.id[3]);
-
+	log.userSupplied = data.userSupplied;
+	
 	log.numPEs = data.numPEs;
 
 	if (data.destPEs != null) {
@@ -76,4 +78,12 @@ class LogEntry
 
 	return log;
     }
+
+	public int userSuppliedValue() {
+		return userSupplied;
+	}
+
+	public void setUserSupplied(int userSuppliedValue) {
+		userSupplied = userSuppliedValue;
+	}
 }

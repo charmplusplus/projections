@@ -58,16 +58,14 @@ public class UserEventObject extends JComponent
 		
 		int width = rightCoord-leftCoord+1;
 		
-		this.setBounds(leftCoord,  ylocation*data.singleTimelineHeight(),
-				width, data.singleTimelineHeight());
-
 		/** The y coordinate of the top of the rectangle */
-		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - data.userEventRectHeight();
+		int rectHeight = data.userEventRectHeight();
+		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - rectHeight;
 		
 		this.setBounds( leftCoord,  
 						(int)yTop,
 						width, 
-						data.userEventRectHeight() );
+						rectHeight );
 
 	}
 

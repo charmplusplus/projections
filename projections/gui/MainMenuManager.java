@@ -228,7 +228,7 @@ public class MainMenuManager extends MenuManager
 		parent.setFullColor();
 	    } else {
 		// assume that anything else is a tool selection
-		for (int i=0; i<MainWindow.NUM_WINDOWS; i++) {
+		for (int i=0; i<MainWindow.NUM_WINDOWS && i<MainWindow.windowMenuNames.length; i++) {
 		    if (MainWindow.windowMenuNames[i].equals(arg)) {
 			parent.showChildWindow(MainWindow.windowClassNames[i],i);
 			break;

@@ -95,8 +95,11 @@ public class GenericLogReader extends ProjectionsReader
 	reader.nextLine();
     }
 
-    // The LogEntryData object should be created by the calling method
-    // and passed into nextEvent.
+ 
+    /** read the next line from the log and put its contents into parameter data 
+     * 
+     * @note The caller should create the data object.
+     * */
     public void nextEvent(LogEntryData data) 
 	throws IOException, EOFException
     {
@@ -121,7 +124,10 @@ public class GenericLogReader extends ProjectionsReader
 		data.pe = reader.nextInt();
 		reader.nextLine(); // Skip over any garbage 
 		break;
-	    case CREATION:
+	    case USER_SUPPLIED:
+			data.userSupplied = reader.nextInt();
+		break;
+		case CREATION:
 		data.mtype = reader.nextInt();
 		data.entry = reader.nextInt();
 		data.time = reader.nextLong();

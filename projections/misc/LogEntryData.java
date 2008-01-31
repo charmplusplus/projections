@@ -42,6 +42,8 @@ public class LogEntryData
 
     public int destPEs[];       // list of multicast destination processors
 
+    public Integer userSupplied;
+    
     public LogEntryData() {
 	// this is fixed (since it is based on a 3D tuple)
         // As of version 7.0, it is a 4-tuple which includes array ID.
@@ -78,7 +80,8 @@ public class LogEntryData
 	}
 	temp.lineNo = lineNo;
 	temp.funcName = new String(funcName);
-
+	temp.userSupplied = userSupplied;
+	
 	return temp;
     }
 

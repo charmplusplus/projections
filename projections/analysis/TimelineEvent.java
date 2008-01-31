@@ -20,12 +20,14 @@ public long RecvTime;
     public Vector PackTimes; // of class PackTime
     public int numPapiCounts = 0;
     public long papiCounts[];
-
+    public Integer UserSpecifiedData;
+    
+    
     public boolean isFunction = false;
     public Stack callStack;
 
     //this indicates the name of the user event which is the most closely
-    //associated with this TimelineEvent. This variable is detemined by
+    //associated with this TimelineEvent. This variable is determined by
     //the beginTime of this user event and the timelineevent. If the beginTIme
     //of the timelineevent is bigger than that of this user event, and the 
     //difference is less than USEREVENTMAXGAP, then this user event is 
@@ -52,23 +54,7 @@ public long RecvTime;
     }
     
     
-//    
-//public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
-//		     ObjectId d, long cpubegin, long cpuend, 
-//		     int numPapiCounts, long papiCounts[])
-//{
-//	setDefaultValues();
-//	BeginTime=bt; EndTime=et;
-//	cpuBegin = cpubegin;
-//	cpuEnd = cpuend;
-//	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
-//        RecvTime = r;
-//	id = new ObjectId(d);
-//	this.numPapiCounts = numPapiCounts;
-//	this.papiCounts = papiCounts;
-//
-//	userEventName = null;
-//}
+
 
 public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
 		     ObjectId d,int eventid, long cpubegin, long cpuend, 

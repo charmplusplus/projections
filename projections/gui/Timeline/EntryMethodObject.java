@@ -8,7 +8,6 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 
 import java.text.DecimalFormat;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -36,6 +35,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private ObjectId tid; 
 	int pCurrent; // I assume this is which displayed timeline the event is assocated with
 	int pCreation;
+	
+	/** Data specified by the user, likely a timestep. Null if nonspecified */
+	Integer userSuppliedData;
 	
 	/** Stores the creationMessage after it has been found by creationMessage() */
 	private TimelineMessage creationMessage;
@@ -78,6 +80,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		setVisible(true);
 
+		System.out.println("Usersupplied="+tle.UserSpecifiedData);
+		
 		setBackground(MainWindow.runObject[myRun].background);
 		setForeground(MainWindow.runObject[myRun].foreground);
 
@@ -100,6 +104,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		} else {
 			tid = new ObjectId();
 		}
+		userSuppliedData = tle.UserSpecifiedData;
 
 		tleUserEventName = tle.userEventName;
 
@@ -539,6 +544,15 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			c = c.darker().darker();
 		
 		
+		if(userSuppliedData ==  null){
+			c = Color.red;
+		} else {
+			c = Color.green;
+		}
+		
+		
+		
+		
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();
 		int rectHeight = data.barheight();
@@ -699,8 +713,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 		int width = rightCoord-leftCoord+1;
 		
-		this.setBounds(leftCoord,  whichTimelineVerticalIndex*data.singleTimelineHeight(),
-				width, data.singleTimelineHeight());
+		int singleTimelineH = data.singleTimelineHeight();
+		this.setBounds(leftCoord,  whichTimelineVerticalIndex*singleTimelineH,
+				width, singleTimelineH);
 	
 	}   
 

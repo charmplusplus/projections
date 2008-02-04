@@ -11,7 +11,6 @@ import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Stack;
 import java.util.TreeSet;
 
 import javax.swing.*;
@@ -39,6 +38,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 	/** Data specified by the user, likely a timestep. Null if nonspecified */
 	Integer userSuppliedData;
+	
+	/** Memory usage at some point in this entry method. Null if nonspecified */
+	Integer memoryUsage;
 	
 	/** Stores the creationMessage after it has been found by creationMessage() */
 	private TimelineMessage creationMessage;
@@ -104,7 +106,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			tid = new ObjectId();
 		}
 		userSuppliedData = tle.UserSpecifiedData;
-
+		memoryUsage = tle.memoryUsage;
+		
 		tleUserEventName = tle.userEventName;
 
 		numPapiCounts = tle.numPapiCounts;
@@ -241,6 +244,10 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			infoString += "<i>User Supplied Data:</i> " + userSuppliedData.intValue() + "<br>";
 		}
 			
+		if(memoryUsage != null){
+			infoString += "<i>Memory Usage:</i> " + memoryUsage.intValue()/1024/1024 + " MB<br>";
+		}
+		
 		setToolTipText("<html><body>" + infoString + "</html></body>");
 		
 	}
@@ -572,7 +579,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			}
 		}
 		
-	
+			
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();
 		int rectHeight = data.barheight();

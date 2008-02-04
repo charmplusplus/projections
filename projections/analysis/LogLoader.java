@@ -104,6 +104,7 @@ public class LogLoader extends ProjDefs
 								Integer.parseInt(st.nextToken());
 							break;
 						case USER_SUPPLIED:
+						case MEMORY_USAGE:
 						case USER_EVENT:
 						case USER_EVENT_PAIR:
 						case MESSAGE_RECV: 
@@ -126,6 +127,7 @@ public class LogLoader extends ProjDefs
 						case BEGIN_INTERRUPT: 
 						case END_INTERRUPT:
 							break;
+
 						}
 						lastRecordedTime = Long.parseLong(st.nextToken());
 					}
@@ -1017,6 +1019,11 @@ public class LogLoader extends ProjDefs
 						// Tag the last begin TimelineEvent with the user supplied value(likely a timestep number)
 						lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
 						break;
+						
+					case MEMORY_USAGE:
+						lastBeginTimelineEvent.memoryUsage = LE.memoryUsage();
+						break;
+						
 					
 					case CREATION:
 						// see if this is the first CREATION event after

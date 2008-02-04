@@ -39,6 +39,10 @@ public static final int END_FUNC                 = 23;
 /** A record for a user supplied integer value, likely a timestep */
 public static final int USER_SUPPLIED            = 26;
 
+/** A record for the memory usage */
+public static final int MEMORY_USAGE            = 27;
+
+
 public static final int USER_EVENT_PAIR          = 100;
 
 /* *** USER category *** */

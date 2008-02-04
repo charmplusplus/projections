@@ -19,6 +19,7 @@ class LogEntry
     int numPapiCounts;
     long papiCounts[];
     Integer userSupplied;
+    Integer memoryUsage;
 
     // AMPI function tracing. The duplication is unfortunate but required.
     int FunctionID;
@@ -52,6 +53,7 @@ class LogEntry
 	log.recvTime = data.recvTime;
 	log.id = new ObjectId(data.id[0],data.id[1],data.id[2],data.id[3]);
 	log.userSupplied = data.userSupplied;
+	log.memoryUsage = data.memoryUsage;
 	
 	log.numPEs = data.numPEs;
 
@@ -81,6 +83,10 @@ class LogEntry
 
 	public int userSuppliedValue() {
 		return userSupplied;
+	}
+	
+	public int memoryUsage() {
+		return memoryUsage;
 	}
 
 	public void setUserSupplied(int userSuppliedValue) {

@@ -21,7 +21,7 @@ public long RecvTime;
     public int numPapiCounts = 0;
     public long papiCounts[];
     public Integer UserSpecifiedData;
-    
+    public Integer memoryUsage;
     
     public boolean isFunction = false;
     public Stack callStack;

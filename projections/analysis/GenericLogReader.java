@@ -127,6 +127,9 @@ public class GenericLogReader extends ProjectionsReader
 	    case USER_SUPPLIED:
 			data.userSupplied = reader.nextInt();
 		break;
+	    case MEMORY_USAGE:
+			data.memoryUsage = reader.nextInt();
+		break;
 		case CREATION:
 		data.mtype = reader.nextInt();
 		data.entry = reader.nextInt();

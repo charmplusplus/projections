@@ -121,6 +121,9 @@ public class Data
 	long oldBT;
 	/** The old end time */
 	long oldET; 
+	
+	/** The miniumum and maximum memory usage that have been seen so far */
+	long minMem, maxMem;
 
 	
 	/** Some associative containers to make lookups fast */
@@ -190,6 +193,8 @@ public class Data
 		processorUsage = null;
 		entryUsageList = null;
 
+		minMem = Integer.MAX_VALUE;
+		maxMem = Integer.MIN_VALUE;	
 
 		/** The selected time range for which we display the timeline.
 		 *  The value is by default the entire range found in the log files
@@ -770,10 +775,16 @@ public class Data
 			}
 		
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
+	
+			if(tle!=null && tle.memoryUsage!=null){
+				if(tle.memoryUsage > maxMem)
+					maxMem = tle.memoryUsage;
+				if(tle.memoryUsage < minMem)
+					minMem = tle.memoryUsage;
+			}			
 		}
 		
-//		System.out.println("" + mesgVector[pnum].size() + " messages sent by pe="+pnum);
-		
+		System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
 					
 		return tlo;
 	}

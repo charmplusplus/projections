@@ -428,13 +428,13 @@ ItemListener {
 		bDecrease = new JButton(new ImageIcon(zoomOutURL));
 		bIncrease = new JButton(new ImageIcon(zoomInURL));
 		
-		bReset = new JButton("Reset");
+		bReset = new JButton("Reset Zoom");
 
 		bDecrease.addActionListener(this);
 		bIncrease.addActionListener(this);
 		bReset.addActionListener(this);
 
-		JLabel lScale = new JLabel("Scale: ", JLabel.CENTER);
+		JLabel lScale = new JLabel("Zoom Ratio: ", JLabel.CENTER);
 		scaleField = new FloatJTextField(data.getScaleFactor(), 5);
 		scaleField.addActionListener(this);
 		
@@ -452,8 +452,8 @@ ItemListener {
 
 		// ZOOM PANEL
 
-		bZoomSelected = new JButton("Zoom Selected");
-		bLoadSelected = new JButton("Load Selected");
+		bZoomSelected = new JButton("Zoom Selection");
+		bLoadSelected = new JButton("Load Selection");
 
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
@@ -481,7 +481,7 @@ ItemListener {
 		Util.gblAdd(zoomPanel, selectionBeginTime, gbc, 3, 2, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, selectionEndTime, gbc, 4, 2, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, selectionDiff, gbc, 5, 2, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, new JLabel("Highlight Time", JLabel.CENTER),
+		Util.gblAdd(zoomPanel, new JLabel("Time At Mouse Cursor", JLabel.CENTER),
 				gbc, 2, 1, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel,
 				new JLabel("Selection Begin Time", JLabel.CENTER), gbc, 3, 1,

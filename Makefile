@@ -283,8 +283,10 @@ projections/analysis/ProjMain.class: $(SRC)
 bin/projections.jar: projections/analysis/ProjMain.class $(SRC)
 	@ echo "** Creating jar file"
 	jar -cfm0 bin/projections.jar \
-		projections/images/manifest \
-		projections/images/bgimage\
+		projections/images/manifest\
+		projections/images/bgimage.jpg\
+		projections/images/ZoomIn24.gif\
+		projections/images/ZoomOut24.gif\
 		*/*/*.class \
 		*/*/*/*.class 
 

@@ -191,7 +191,7 @@ public class MainWindow extends JFrame
     private void createLayout()
     {
 	try {
-	    URL imageURL = ((Object)this).getClass().getResource("/projections/images/bgimage");
+	    URL imageURL = ((Object)this).getClass().getResource("/projections/images/bgimage.jpg");
 	    bgimage = Toolkit.getDefaultToolkit().getImage(imageURL);
 	    // mainPanel is used to draw the wall paper and serves as the
 	    // MainWindow's contentPane.

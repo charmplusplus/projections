@@ -78,11 +78,14 @@ public class Data
 
 	private String oldpstring;
 
-	// boolean for testing if entries are to be colored by Object ID
-	private boolean colorbyObjectId;
+	/** If true, color entry method invocations by Object ID */
+	private boolean colorByObjectId;
+	
+	/** If true, color the entry method invocations by the memory used at that point in time */
+	private boolean colorByMemoryUsage;
 
-	// boolean for testing if entries are to be colored by the user supplied parameter
-	private boolean colorbyUserSupplied;
+	/** If true, color the entry method invocations by a user supplied parameter(like timestep) */
+	private boolean colorByUserSupplied;
 	
 	private int[]          entries;
 
@@ -217,6 +220,11 @@ public class Data
 
 		highlightedObjects = new HashSet();
 		
+		colorByMemoryUsage = false;
+		colorByObjectId = false;
+		colorByUserSupplied = false;
+		
+		
 	}
 	/** 
 	 * Add the data for a new processor to this visualization
@@ -250,7 +258,7 @@ public class Data
 
 	
 	public boolean colorbyObjectId(){
-		return colorbyObjectId;
+		return colorByObjectId;
 	}
 
 	/****************** Timeline ******************/
@@ -1277,21 +1285,50 @@ public class Data
 	public Color getMessageAltColor() {
 		return Color.yellow;
 	}
-	public void setColorByIndex(boolean b) {
-		colorbyObjectId = b;
-		displayMustBeRepainted();
-	}
-	public void setColorByUserSupplied(boolean b) {
-		colorbyUserSupplied=b;
-		displayMustBeRepainted();
-	}
-	public boolean colorByUserSupplied() {
-		return colorbyUserSupplied;
-	}
+
 	public void showUserEvents(boolean b) {
 		showUserEvents = b;
 	}
 	public boolean showUserEvents() {
 		return showUserEvents;
 	}
+
+	
+	public void setColorByDefault() {
+		colorByObjectId = false;
+		colorByMemoryUsage=false;
+		colorByUserSupplied=false;
+		displayMustBeRepainted();
+	}
+	
+	public void setColorByMemoryUsage() {
+		colorByMemoryUsage=true;
+		colorByObjectId = false;
+		colorByUserSupplied=false;
+		displayMustBeRepainted();
+	}
+
+	public void setColorByUserSupplied() {
+		colorByUserSupplied=true;
+		colorByObjectId = false;
+		colorByMemoryUsage=false;
+		displayMustBeRepainted();
+	}
+
+	public void setColorByIndex() {
+		colorByObjectId = true;
+		colorByMemoryUsage=false;
+		colorByUserSupplied=false;
+		displayMustBeRepainted();
+	}
+	
+	public boolean colorByUserSupplied() {
+		return colorByUserSupplied;
+	}
+	
+	public boolean colorByMemoryUsage() {
+		return colorByMemoryUsage;
+	}
+
+
 }

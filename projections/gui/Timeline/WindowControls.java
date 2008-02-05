@@ -6,6 +6,7 @@ import java.awt.GridBagConstraints;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import javax.swing.*;
 
@@ -41,7 +42,7 @@ ItemListener {
 	Data data;
 
 	// basic zoom controls
-	private JButton bSelectRange, bColors, bDecrease, bIncrease, bReset;
+	private JButton bDecrease, bIncrease, bReset;
 
 	private JButton bZoomSelected, bLoadSelected;
 
@@ -52,7 +53,7 @@ ItemListener {
 
 	private FloatJTextField scaleField;
 
-	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable, cbTraceMessages, cbTraceArrayElementID, cbColorByIndex, cbColorByUserSupplied;
+	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable, cbTraceMessages, cbTraceArrayElementID;
 
 	private UserEventWindow userEventWindow;
 
@@ -186,39 +187,6 @@ ItemListener {
 		}
 	}
 
-//	public void jumpToGraph(String b) {
-//		Rectangle rect = parentWindow.displayPanel.rubberBandBounds();
-//		double jStart = parentWindow.axisPanel.canvasToTime(rect.x);
-//		double jEnd = parentWindow.axisPanel.canvasToTime(rect.x + rect.width);
-//
-//		
-//		MainWindow.runObject[myRun].setJTimeAvailable(true);
-//		if (rect.width == 0) {
-//			MainWindow.runObject[myRun].setJTime((long) (0),
-//					MainWindow.runObject[myRun].getTotalTime());
-//		} else {
-//			MainWindow.runObject[myRun].setJTime((long) (jStart + 0.5),
-//					(long) (jEnd + 0.5));
-//		}
-//
-//		// **CW** DELIBERATE BUG (adding 0 to window open), just to make
-//		// it compile for now.
-//		if (b == "Profile") {
-//			ProfileWindow profileWindow = new ProfileWindow(parentWindow.parentWindow,
-//					new Integer(0));
-//		} else if (b == "Graph") {
-//			GraphWindow graphWindow = new GraphWindow(parentWindow.parentWindow,
-//					new Integer(0));
-//		} else if (b == "Histogram") {
-//			HistogramWindow histogramWindow = new HistogramWindow(parentWindow.parentWindow,
-//					new Integer(0));
-//		} else if (b == "Comm") {
-//			CommWindow commWindow = new CommWindow(parentWindow.parentWindow, new Integer(0));
-//		} else if (b == "Stl") {
-//			StlWindow stlWindow = new StlWindow(parentWindow.parentWindow, new Integer(0));
-//		}
-//	}
-
 	public void actionPerformed(ActionEvent evt) {
 		
 		// If the event is a menu action
@@ -227,32 +195,32 @@ ItemListener {
 			String arg = ((JMenuItem) evt.getSource()).getText();
 			if (arg.equals("Close"))
 				parentWindow.close();
+			
 			else if (arg.equals("Modify Ranges"))
 				showDialog();
-			// else if (arg.equals("Print Timeline"))
-			// PrintTimeline();
-			else if (arg.equals("Change Entry Point Colors")) {
+			
+			else if (arg.equals("Change Entry Point Colors")) 
 				ShowColorWindow();
-			} else if (arg.equals("Save Entry Point Colors")) {
-				// save all entry point colors to disk
+			
+			else if (arg.equals("Save Entry Point Colors")) 
 				MainWindow.runObject[myRun].saveColors();
-			} else if (arg.equals("Restore Entry Point Colors")) {
-				// openColorFile();
+			
+			else if (arg.equals("Restore Entry Point Colors")) {
 				try {
 					Util.restoreColors(data.entryColor(), "Timeline Graph");
 					parentWindow.refreshDisplay(false);
 				} catch (Exception e) {
 					System.err.println("Attempt to read from color.map failed");
 				}
-
-
-			} else if (arg.equals("Default Entry Point Colors")) {
-
+			} 
+			
+			else if (arg.equals("Default Entry Point Colors")) {
 				for (int i = 0; i < data.entryColor().length; i++)
 					data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
 				parentWindow.refreshDisplay(false);
-
-			} else if (arg.equals("Save as JPG or PNG")) {
+			} 
+			
+			else if (arg.equals("Save as JPG or PNG")) {
 				try{
 					SaveImage p = new SaveImage(parentWindow.scrollingPanel);
 
@@ -278,9 +246,22 @@ ItemListener {
 					}
 				} catch (IOException e){
 					JOptionPane.showMessageDialog(this, "Error occurred while saving file:" + e.getLocalizedMessage());
-				}     
-				
+				}
 			}
+
+			
+			else if (arg.equals("Color by Default"))
+				data.setColorByDefault();
+
+			else if (arg.equals("Color by Event Index")) 
+				data.setColorByIndex();
+
+			else if (arg.equals("Color by User Supplied Parameter(timestep)")) 
+				data.setColorByUserSupplied();
+
+			else if (arg.equals("Color by Memory Usage"))
+				data.setColorByMemoryUsage();
+
 		}
 
 		
@@ -288,32 +269,39 @@ ItemListener {
 		
 		if (evt.getSource() instanceof JButton) {
 			JButton b = (JButton) evt.getSource();
-			if (b == bSelectRange) {
-				showDialog();
-			} else if (b == bColors) {
-				ShowColorWindow();
-			} else if (b == bZoomSelected) {
+			
+			
+			if (b == bZoomSelected) {
 				zoomSelected();
 				parentWindow.refreshDisplay(true);
-			} else if (b == bLoadSelected) {
+			} 
+
+			else if (b == bLoadSelected) {
 				loadSelected();
 				parentWindow.refreshDisplay(true);
-			} else {
+			} 
 
-				if (b == bDecrease) {
-					data.keepViewCentered(true); // Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
-					data.decreaseScaleFactor();
-				} else if (b == bIncrease) {
-					data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
-					data.increaseScaleFactor();
-				} else if (b == bReset) {
-					data.setScaleFactor(1.0f);
-				}
+			else if (b == bDecrease) {
+				data.keepViewCentered(true); // Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
+				data.decreaseScaleFactor();
 				scaleField.setText("" + data.getScaleFactor());
-
 				parentWindow.refreshDisplay(true);
+			} 
 
+			else if (b == bIncrease) {
+				data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
+				data.increaseScaleFactor();
+				scaleField.setText("" + data.getScaleFactor());
+				parentWindow.refreshDisplay(true);
+			} 
+
+			else if (b == bReset) {
+				data.setScaleFactor(1.0f);
+				scaleField.setText("" + data.getScaleFactor());
+				parentWindow.refreshDisplay(true);
 			}
+			
+
 		}
 		
 		
@@ -352,36 +340,47 @@ ItemListener {
 		i4.addActionListener(this);
 		mbar.add(toolsMenu);
 
-		JMenu colorMenu = new JMenu("Colors");
-		JMenuItem i5 = new JMenuItem("Change Entry Point Colors");
-		JMenuItem i6 = new JMenuItem("Save Entry Point Colors");
-		JMenuItem i7 = new JMenuItem("Restore Entry Point Colors");
-		JMenuItem i8 = new JMenuItem("Default Entry Point Colors");
-		colorMenu.add(i5);
-		colorMenu.add(i6);
-		colorMenu.add(i7);
-		colorMenu.add(i8);
-		i5.addActionListener(this);
-		i6.addActionListener(this);
-		i7.addActionListener(this);
-		i8.addActionListener(this);
-		mbar.add(colorMenu);
 
 		JMenu saveMenu = new JMenu("Screenshot");
 		JMenuItem i9 = new JMenuItem("Save as JPG or PNG");
 		saveMenu.add(i9);
 		i9.addActionListener(this);
 		mbar.add(saveMenu);
+		
+		JMenu colorMenu = new JMenu("Colors");
+		
+		JMenuItem i5 = new JMenuItem("Change Entry Point Colors");
+		JMenuItem i6 = new JMenuItem("Save Entry Point Colors");
+		JMenuItem i7 = new JMenuItem("Restore Entry Point Colors");
+		JMenuItem i8 = new JMenuItem("Default Entry Point Colors");
+		
+		JMenuItem i10 = new JMenuItem("Color by Default");
+		JMenuItem i11 = new JMenuItem("Color by Event Index");
+		JMenuItem i12 = new JMenuItem("Color by User Supplied Parameter(timestep)");
+		JMenuItem i13 = new JMenuItem("Color by Memory Usage");
 
-		// JMenu helpMenu = new JMenu("Help");
-		// JMenuItem i9 = new JMenuItem("Index");
-		// JMenuItem i10 = new JMenuItem("About");
-		// helpMenu.add(i9);
-		// helpMenu.add(i10);
-		// i9.addActionListener(this);
-		// i10.addActionListener(this);
-		// mbar.add(helpMenu);
+		
+		colorMenu.add(i5);
+		colorMenu.add(i6);
+		colorMenu.add(i7);
+		colorMenu.add(i8);
+		colorMenu.addSeparator();
+		colorMenu.add(i10);
+		colorMenu.add(i11);
+		colorMenu.add(i12);
+		colorMenu.add(i13);
+		
+		i5.addActionListener(this);
+		i6.addActionListener(this);
+		i7.addActionListener(this);
+		i8.addActionListener(this);
+		i10.addActionListener(this);
+		i11.addActionListener(this);
+		i12.addActionListener(this);
+		i13.addActionListener(this);
 
+		mbar.add(colorMenu);
+		
 		parentWindow.setJMenuBar(mbar);
 
 	}
@@ -399,21 +398,15 @@ ItemListener {
 		cbIdle = new JCheckBox("Display Idle Time", data.showIdle);
 		cbUser = new JCheckBox("Display User Events", true);
 		cbUserTable = new JCheckBox("Display User Events Window", false);
-		cbTraceMessages = new JCheckBox("Trace Messages", false);
-		cbTraceArrayElementID = new JCheckBox("Trace Object ID", false);
-		cbColorByIndex = new JCheckBox("Color Events by Object ID", false);
-		cbColorByUserSupplied = new JCheckBox("Color Events by User Supplied Parameter(timestep) ", false);
-		
+
+	
 		cbPacks.addItemListener(this);
 		cbMsgs.addItemListener(this);
 		cbIdle.addItemListener(this);
 		cbUser.addItemListener(this);
 		cbUserTable.addItemListener(this);
-		cbTraceMessages.addItemListener(this);
-		cbTraceArrayElementID.addItemListener(this);
-		cbColorByIndex.addItemListener(this);
-		cbColorByUserSupplied.addItemListener(this);
 		
+				
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.NONE;
@@ -427,28 +420,16 @@ ItemListener {
 		Util.gblAdd(cbPanel, cbUser, gbc, 3, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUserTable, gbc, 4, 0, 1, 1, 1, 1);
 		
-		
-		GridBagLayout gbl2 = new GridBagLayout();
-		GridBagConstraints gbc2 = new GridBagConstraints();
-		gbc2.fill = GridBagConstraints.NONE;
-		gbc2.anchor = GridBagConstraints.CENTER;
-		JPanel cbPanel2 = new JPanel();
-		cbPanel2.setLayout(gbl2);
-		
-		Util.gblAdd(cbPanel2, cbTraceMessages, gbc, 0, 0, 1, 1, 1, 1);
-		Util.gblAdd(cbPanel2, cbTraceArrayElementID, gbc, 1, 0, 1, 1, 1, 1);
-		Util.gblAdd(cbPanel2, cbColorByIndex, gbc, 2, 0, 1, 1, 1, 1);
-		Util.gblAdd(cbPanel2, cbColorByUserSupplied, gbc, 3,  0, 1, 1, 1, 1);
-		
 		// BUTTON PANEL
-		bSelectRange = new JButton("Select Ranges");
-		bColors = new JButton("Change Entry Point Colors");
-		bDecrease = new JButton("<<");
-		bIncrease = new JButton(">>");
+		
+		URL zoomInURL = ((Object)this).getClass().getResource("/projections/images/ZoomIn24.gif");
+		URL zoomOutURL = ((Object)this).getClass().getResource("/projections/images/ZoomOut24.gif");
+		
+		bDecrease = new JButton(new ImageIcon(zoomOutURL));
+		bIncrease = new JButton(new ImageIcon(zoomInURL));
+		
 		bReset = new JButton("Reset");
 
-		bSelectRange.addActionListener(this);
-		bColors.addActionListener(this);
 		bDecrease.addActionListener(this);
 		bIncrease.addActionListener(this);
 		bReset.addActionListener(this);
@@ -463,8 +444,6 @@ ItemListener {
 
 		gbc.fill = GridBagConstraints.BOTH;
 
-		Util.gblAdd(buttonPanel, bSelectRange, gbc, 0, 0, 1, 1, 1, 1);
-		Util.gblAdd(buttonPanel, bColors, gbc, 1, 0, 1, 1, 1, 1);
 		Util.gblAdd(buttonPanel, bDecrease, gbc, 3, 0, 1, 1, 1, 1);
 		Util.gblAdd(buttonPanel, lScale, gbc, 4, 0, 1, 1, 1, 1);
 		Util.gblAdd(buttonPanel, scaleField, gbc, 5, 0, 1, 1, 1, 1);
@@ -515,7 +494,7 @@ ItemListener {
 		
 		this.setLayout(gbl);
 		Util.gblAdd(this, cbPanel, gbc, 0, 1, 1, 1, 1, 0);
-		Util.gblAdd(this, cbPanel2, gbc, 0, 2, 1, 1, 1, 0);
+//		Util.gblAdd(this, cbPanel2, gbc, 0, 2, 1, 1, 1, 0);
 		Util.gblAdd(this, buttonPanel, gbc, 0, 3, 1, 1, 1, 0);
 		Util.gblAdd(this, zoomPanel, gbc, 0, 4, 1, 1, 1, 0);
 
@@ -589,10 +568,6 @@ ItemListener {
 			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
-		else if (c == cbColorByIndex)
-			data.setColorByIndex(evt.getStateChange() == ItemEvent.SELECTED);
-		else if (c == cbColorByUserSupplied)
-			data.setColorByUserSupplied(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbUser)
 			data.showUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
 		else if (c == cbUserTable) {

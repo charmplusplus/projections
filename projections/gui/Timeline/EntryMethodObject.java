@@ -20,10 +20,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 	private static final long serialVersionUID = 1L;
 
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
 
 	private MessageWindow msgwindow;
 	private long    beginTime, endTime, recvTime;
@@ -83,8 +79,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		setVisible(true);
 		
-		setBackground(MainWindow.runObject[myRun].background);
-		setForeground(MainWindow.runObject[myRun].foreground);
+		setBackground(MainWindow.runObject[data.myRun].background);
+		setForeground(MainWindow.runObject[data.myRun].foreground);
 
 		this.data = data;
 		beginTime = tle.BeginTime;
@@ -124,7 +120,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			tle.callStack.copyInto(funcData);
 					
 		} else if (tle.EntryPoint >= 0) {
-			int ecount = MainWindow.runObject[myRun].getNumUserEntries();
+			int ecount = MainWindow.runObject[data.myRun].getNumUserEntries();
 			if (tle.EntryPoint >= ecount) {
 				System.out.println("<b>Fatal error: invalid entry " + tle.EntryPoint +
 						" on processor " + pCurrent + "</b>!");
@@ -151,7 +147,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		// **CW** special treatment for functions. There really should
 		// be a general way of dealing with this.
 		if (isFunction) {			
-			infoString += "<i>Function</i>: " + MainWindow.runObject[myRun].getFunctionName(entry) + "<br>";
+			infoString += "<i>Function</i>: " + MainWindow.runObject[data.myRun].getFunctionName(entry) + "<br>";
 			infoString += "<i>Begin Time</i>: " + format_.format(beginTime) + "<br>";
 			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
 			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
@@ -162,12 +158,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			// look at the call stack
 			for(int i=0;i<funcData.length;i++){
 				AmpiFunctionData functionData = funcData[i];
-				infoString += "<i>[Func]</i>: " + MainWindow.runObject[myRun].getFunctionName(functionData.FunctionID) + "<br>";
+				infoString += "<i>[Func]</i>: " + MainWindow.runObject[data.myRun].getFunctionName(functionData.FunctionID) + "<br>";
 				infoString += "&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>";
 			}
 		} else if (entry >= 0) {
 
-			infoString += "<b>"+(MainWindow.runObject[myRun].getEntryNames())[entry][1] + "::" + (MainWindow.runObject[myRun].getEntryNames())[entry][0] + "</b><br><br>"; 
+			infoString += "<b>"+(MainWindow.runObject[data.myRun].getEntryNames())[entry][1] + "::" + (MainWindow.runObject[data.myRun].getEntryNames())[entry][0] + "</b><br><br>"; 
 
 			if(msglen > 0) {
 				infoString += "<i>Msg Len</i>: " + msglen + "<br>";
@@ -206,7 +202,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			if (numPapiCounts > 0) {
 				infoString += "<i>*** PAPI counts ***</i>" + "<br>";
 				for (int i=0; i<numPapiCounts; i++) {
-					infoString += MainWindow.runObject[myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>";
+					infoString += MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>";
 				}
 			}
 		} else if (entry == -1) {
@@ -241,7 +237,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}
 
 		if(userSuppliedData != null){
-			infoString += "<i>User Supplied Data:</i> " + userSuppliedData.intValue() + "<br>";
+			infoString += "<i>User Supplied Parameter(timestep):</i> " + userSuppliedData.intValue() + "<br>";
 		}
 			
 		if(memoryUsage != null){
@@ -558,7 +554,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}  else {
 			c = data.entryColor()[entry];
 			if (isFunction) {
-				c = MainWindow.runObject[myRun].getFunctionColor(entry);
+				c = MainWindow.runObject[data.myRun].getFunctionColor(entry);
 			}
 		}
 		
@@ -577,6 +573,24 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				c = Color.darkGray;
 			} else {
 			}
+		}
+		
+		// color the objects by memory usage 
+		if(data.colorByMemoryUsage()){
+			if(this.memoryUsage == null){
+				c = Color.darkGray;
+			}else{
+				// scale the memory usage to the interval [0,1]
+				float m = (float)(memoryUsage.intValue() - data.minMem) / (float)(data.maxMem-data.minMem);
+				
+				if( m<0.0 || m>1.0 )
+					c = Color.darkGray;
+				else {
+//					System.out.println("memoryUsage="+memoryUsage.intValue()+"  m="+m);
+					c = Color.getHSBColor(0.2f-m*0.25f, 1.0f, 1.0f); 
+				}
+			}
+			
 		}
 		
 			
@@ -617,7 +631,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
-		if(rectWidth > 2)
+		if(rectWidth > 2 && !data.colorByMemoryUsage())
 		{
 			g.setColor(c.brighter());
 			g.drawLine(left, verticalInset, right, verticalInset);

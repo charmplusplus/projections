@@ -1316,7 +1316,7 @@ public class Data
 			colorByUserSupplied=false;
 			displayMustBeRepainted();
 		} else {
-			modificationHandler.displayWarning("No memory usage entries were encountered when reading the logs. You must add calls to traceMemoryUsage() inside each Charm++ entry method or between MPI calls in your AMPI program");
+			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() in the application");
 		}
 		
 	}

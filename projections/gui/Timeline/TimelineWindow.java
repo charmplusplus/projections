@@ -175,8 +175,9 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	}
 
 
+	/** Display a popup warning message */
 	public void displayWarning(String message) {
-		JOptionPane.showMessageDialog(this, message);
+		JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
 	}
 	
  	

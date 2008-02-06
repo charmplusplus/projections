@@ -1307,12 +1307,18 @@ public class Data
 		colorByUserSupplied=false;
 		displayMustBeRepainted();
 	}
-	
+
+	/** Color the events by memory usage if possible */
 	public void setColorByMemoryUsage() {
-		colorByMemoryUsage=true;
-		colorByObjectId = false;
-		colorByUserSupplied=false;
-		displayMustBeRepainted();
+		if(memoryUsageValid()){
+			colorByMemoryUsage=true;
+			colorByObjectId = false;
+			colorByUserSupplied=false;
+			displayMustBeRepainted();
+		} else {
+			modificationHandler.displayWarning("No memory usage entries were encountered when reading the logs. You must add calls to traceMemoryUsage() inside each Charm++ entry method or between MPI calls in your AMPI program");
+		}
+		
 	}
 
 	public void setColorByUserSupplied() {

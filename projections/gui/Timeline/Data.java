@@ -792,10 +792,17 @@ public class Data
 			}			
 		}
 		
-		System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
-					
+		if(memoryUsageValid())
+			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
+		
 		return tlo;
 	}
+	
+	/** Did the logs we loaded so far contain any memory usage entries? */
+	private boolean memoryUsageValid() {
+		return maxMem != Integer.MIN_VALUE && minMem != Integer.MAX_VALUE;
+	}
+
 	public Color getForegroundColor(){
 		if(useCustomColors)
 			return customForeground;

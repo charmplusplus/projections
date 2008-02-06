@@ -53,8 +53,11 @@ ItemListener {
 
 	private FloatJTextField scaleField;
 
-	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable, cbTraceMessages, cbTraceArrayElementID;
-
+	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
+	
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID;
+	
+	
 	private UserEventWindow userEventWindow;
 
 
@@ -379,7 +382,24 @@ ItemListener {
 		i12.addActionListener(this);
 		i13.addActionListener(this);
 
+		
 		mbar.add(colorMenu);
+		
+		
+		// Tracing menu
+		JMenu tracingMenu = new JMenu("Tracing");
+		
+		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages");
+		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
+
+		tracingMenu.add(cbTraceMessages);
+		tracingMenu.add(cbTraceArrayElementID);
+		
+		cbTraceMessages.addItemListener(this);
+		cbTraceArrayElementID.addItemListener(this);
+
+		mbar.add(tracingMenu);
+	
 		
 		parentWindow.setJMenuBar(mbar);
 
@@ -560,16 +580,22 @@ ItemListener {
 
 		if (c == cbPacks)
 			data.showPacks = (evt.getStateChange() == ItemEvent.SELECTED);
+		
 		else if (c == cbMsgs)
 			data.showMsgs = (evt.getStateChange() == ItemEvent.SELECTED);
+		
 		else if (c == cbIdle)
 			data.showIdle = (evt.getStateChange() == ItemEvent.SELECTED);
+
 		else if (c == cbTraceMessages)
 			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+				
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+				
 		else if (c == cbUser)
 			data.showUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
+		
 		else if (c == cbUserTable) {
 			if (evt.getStateChange() == ItemEvent.SELECTED){
 				userEventWindow.pack();

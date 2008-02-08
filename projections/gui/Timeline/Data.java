@@ -800,7 +800,7 @@ public class Data
 	
 	/** Did the logs we loaded so far contain any memory usage entries? */
 	private boolean memoryUsageValid() {
-		return maxMem != Integer.MIN_VALUE && minMem != Integer.MAX_VALUE;
+		return maxMem != Integer.MIN_VALUE && minMem != Integer.MAX_VALUE && maxMem != 0;
 	}
 
 	public Color getForegroundColor(){
@@ -1316,7 +1316,7 @@ public class Data
 			colorByUserSupplied=false;
 			displayMustBeRepainted();
 		} else {
-			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() in the application");
+			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() and gnu malloc in the application");
 		}
 		
 	}

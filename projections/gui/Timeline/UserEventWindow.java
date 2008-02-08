@@ -144,8 +144,8 @@ public class UserEventWindow extends JFrame
 		setSize(480, 400);
 		tabbedPane_ = new JTabbedPane();
 
-		this.setLayout(new BorderLayout());
-		this.add(tabbedPane_, BorderLayout.CENTER);
+		this.getContentPane().setLayout(new BorderLayout());
+		this.getContentPane().add(tabbedPane_, BorderLayout.CENTER);
 
 		// define closing behavior
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);

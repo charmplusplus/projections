@@ -1017,11 +1017,11 @@ public class LogLoader extends ProjDefs
 					
 					case USER_SUPPLIED:
 						// Tag the last begin TimelineEvent with the user supplied value(likely a timestep number)
-						lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
+					  lastBeginTimelineEvent.UserSpecifiedData = new Integer(LE.userSuppliedValue());
 						break;
 						
 					case MEMORY_USAGE:
-						lastBeginTimelineEvent.memoryUsage = LE.memoryUsage();
+					  lastBeginTimelineEvent.memoryUsage = new Integer(LE.memoryUsage());
 						break;
 						
 					

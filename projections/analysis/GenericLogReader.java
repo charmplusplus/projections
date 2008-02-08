@@ -125,10 +125,10 @@ public class GenericLogReader extends ProjectionsReader
 		reader.nextLine(); // Skip over any garbage 
 		break;
 	    case USER_SUPPLIED:
-			data.userSupplied = reader.nextInt();
+		  data.userSupplied = new Integer(reader.nextInt());
 		break;
 	    case MEMORY_USAGE:
-			data.memoryUsage = reader.nextInt();
+		  data.memoryUsage = new Integer(reader.nextInt());
 		break;
 		case CREATION:
 		data.mtype = reader.nextInt();

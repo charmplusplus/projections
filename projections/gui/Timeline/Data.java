@@ -507,7 +507,7 @@ public class Data
 					while(iter.hasNext()){
 						TimelineMessage msg = (TimelineMessage) iter.next();
 						if(msg!=null)
-							eventIDToMessageMap[p].put(msg.EventID, msg);
+						  eventIDToMessageMap[p].put(new Integer(msg.EventID), msg);
 					}
 				} else {
 					System.out.println("Message vector is empty");
@@ -537,7 +537,7 @@ public class Data
 					for(int j=0;j<tloArray[i].length;j++){
 						EntryMethodObject obj=tloArray[i][j];
 						if(obj!=null)
-							eventIDToEntryMethodMap[p].put(obj.EventID, obj);
+						  eventIDToEntryMethodMap[p].put(new Integer(obj.EventID), obj);
 					}
 				}		
 			i++;
@@ -785,10 +785,10 @@ public class Data
 			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
 	
 			if(tle!=null && tle.memoryUsage!=null){
-				if(tle.memoryUsage > maxMem)
-					maxMem = tle.memoryUsage;
-				if(tle.memoryUsage < minMem)
-					minMem = tle.memoryUsage;
+			  if(tle.memoryUsage.longValue() > maxMem)
+				  maxMem = tle.memoryUsage.longValue();
+			  if(tle.memoryUsage.longValue() < minMem)
+				  minMem = tle.memoryUsage.longValue();
 			}			
 		}
 		

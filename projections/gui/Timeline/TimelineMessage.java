@@ -73,7 +73,7 @@ public class TimelineMessage implements Comparable
 				if(i<numPEs-1)
 					ds = ds + ",";
 			}
-			return "Multicast to " + ds;
+			return "Multicast to " +numPEs + " PEs: " + ds;
 		}
 		else if(isBroadcast()) {
 

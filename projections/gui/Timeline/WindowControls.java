@@ -327,13 +327,13 @@ ItemListener {
 		JMenuBar mbar = new JMenuBar();
 
 		JMenu fileMenu = new JMenu("File");
-		JMenuItem i1 = new JMenuItem("Print Timeline");
-		i1.setEnabled(false);
+//		JMenuItem i1 = new JMenuItem("Print Timeline");
+//		i1.setEnabled(false);
 		JMenuItem i3 = new JMenuItem("Close");
-		fileMenu.add(i1);
-		fileMenu.addSeparator();
+//		fileMenu.add(i1);
+//		fileMenu.addSeparator();
 		fileMenu.add(i3);
-		i1.addActionListener(this);
+//		i1.addActionListener(this);
 		i3.addActionListener(this);
 		mbar.add(fileMenu);
 

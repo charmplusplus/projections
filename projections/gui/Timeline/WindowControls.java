@@ -130,17 +130,17 @@ ItemListener {
 		format.setMinimumFractionDigits(0);
 		format.setMaximumFractionDigits(0);
 		
-		bZoomSelected.setEnabled(true);
-		bLoadSelected.setEnabled(true);
+//		bZoomSelected.setEnabled(true);
+//		bLoadSelected.setEnabled(true);
 	}
 
 	public void unsetSelectedTime() {
 		selectionBeginTime.setText("");
 		selectionEndTime.setText("");
 		selectionDiff.setText("");
-		
-		bZoomSelected.setEnabled(false);
-		bLoadSelected.setEnabled(false);
+//		
+//		bZoomSelected.setEnabled(false);
+//		bLoadSelected.setEnabled(false);
 	}
 
 
@@ -151,12 +151,10 @@ ItemListener {
 			double selectionEndTime = data.rightSelectionTime();
 
 			unsetSelectedTime();
-					
-			data.setScaleFactor( (float) ((data.endTime() - data.beginTime()) / (selectionEndTime -
-					selectionStartTime)) );
-				
 			// Set scroll to the place we want
 			data.setPreferredViewTimeCenter((selectionStartTime+selectionEndTime) / 2.0);
+			data.setScaleFactor( (float) ((data.endTime() - data.beginTime()) / (selectionEndTime -
+					selectionStartTime)) );
 		}
 	}
 
@@ -270,13 +268,13 @@ ItemListener {
 		
 		// If the event is a JButton
 		
-		if (evt.getSource() instanceof JButton) {
+		else if (evt.getSource() instanceof JButton) {
 			JButton b = (JButton) evt.getSource();
 			
 			
 			if (b == bZoomSelected) {
+				System.out.println("zoom selected");
 				zoomSelected();
-				parentWindow.refreshDisplay(true);
 			} 
 
 			else if (b == bLoadSelected) {
@@ -475,8 +473,8 @@ ItemListener {
 		bZoomSelected = new JButton("Zoom Selection");
 		bLoadSelected = new JButton("Load Selection");
 
-		bZoomSelected.setEnabled(false);
-		bLoadSelected.setEnabled(false);
+		bZoomSelected.setEnabled(true);
+		bLoadSelected.setEnabled(true);
 			
 		bZoomSelected.addActionListener(this);
 		bLoadSelected.addActionListener(this);

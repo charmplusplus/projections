@@ -81,12 +81,12 @@ class LogEntry
 	return log;
     }
 
-	public int userSuppliedValue() {
-	  return userSupplied.intValue();
+	public Integer userSuppliedValue() {
+	  return userSupplied;
 	}
 	
-	public int memoryUsage() {
-	  return memoryUsage.intValue();
+	public Integer memoryUsage() {
+	  return memoryUsage;
 	}
 
 	public void setUserSupplied(int userSuppliedValue) {

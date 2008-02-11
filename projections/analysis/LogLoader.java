@@ -1017,11 +1017,13 @@ public class LogLoader extends ProjDefs
 					
 					case USER_SUPPLIED:
 						// Tag the last begin TimelineEvent with the user supplied value(likely a timestep number)
-					  lastBeginTimelineEvent.UserSpecifiedData = new Integer(LE.userSuppliedValue());
+						if(LE.userSuppliedValue() != null && lastBeginTimelineEvent!=null)
+							lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
 						break;
-						
+
 					case MEMORY_USAGE:
-					  lastBeginTimelineEvent.memoryUsage = new Integer(LE.memoryUsage());
+						if(LE.memoryUsage() != null && lastBeginTimelineEvent!=null)
+							lastBeginTimelineEvent.memoryUsage = LE.memoryUsage();
 						break;
 						
 					
@@ -1282,7 +1284,7 @@ public class LogLoader extends ProjDefs
 			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
 					LogLoadException.READ);
 		}
-				
+		System.gc();
 		return Timeline;
 	}
 

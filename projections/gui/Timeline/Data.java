@@ -912,7 +912,7 @@ public class Data
 	/** The height of the timeline event object rectangles */
 	public int barheight(){
 		if(useCompactView())
-			return 14;
+			return 12;
 		else
 			return 16;
 	}

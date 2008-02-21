@@ -83,6 +83,11 @@ public class UserEventObject extends JComponent
 		return color;
 	}
 
+	public void shiftTimesBy(long shift) {
+		BeginTime += shift;
+		EndTime += shift;
+	}
+
 }
 
 

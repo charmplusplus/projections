@@ -20,16 +20,15 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 	private static final long serialVersionUID = 1L;
 
-
 	private MessageWindow msgwindow;
-	private long    beginTime, endTime, recvTime;
+	private long beginTime, endTime, recvTime;
 	private long cpuTime;
 	private long cpuBegin, cpuEnd;
-	private int     entry;
-	private int     msglen;
+	private int entry;
+	private int msglen;
 	int EventID;
 	private ObjectId tid; 
-	int pCurrent; // I assume this is which displayed timeline the event is assocated with
+	int pCurrent;
 	int pCreation;
 	
 	/** Data specified by the user, likely a timestep. Null if nonspecified */
@@ -525,7 +524,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		super.paintComponent(g);
 
 		// If this is an idle time region, we may not display it
-		if ((isIdleEvent() && data.showIdle == false) ||
+		if ((isIdleEvent() && data.showIdle() == false) ||
 				(isIdleEvent() && MainWindow.IGNORE_IDLE)) {
 			return;
 		}
@@ -658,7 +657,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		 */
 
-		if(data.showPacks == true && packs != null)
+		if(data.showPacks() && packs != null)
 		{
 			g.setColor(Color.pink);
 			for(int p=0; p<packs.length; p++)
@@ -689,7 +688,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		// Show the message sends. See note above for the message packing areas
 		// Don't change this without changing MainPanel's paintComponent which draws message send lines
-		if(data.showMsgs == true && messages != null)
+		if(data.showMsgs() == true && messages != null)
 		{
 			g.setColor(getForeground());
 			
@@ -833,5 +832,14 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		return tid;
 	}
 
+	/** Shift all the times associated with this entry method by given amount */
+	public void shiftTimesBy(long s){
+		beginTime += s;
+		endTime += s;
+		recvTime += s;
+		cpuBegin += s;
+		cpuEnd += s;
+	}
+	
 
 }

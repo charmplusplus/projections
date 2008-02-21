@@ -55,8 +55,8 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		data.setRange(startTime, endTime);
 		data.setUseMinimalMargins(useMinimalMargins);
 		data.setFontSizes(12, 10, true);
-		data.showIdle = true;
-		data.showPacks = true;
+		data.showIdle(true);
+		data.showPacks(true);
 
 		
 		if(background != null && foreground != null)

@@ -55,7 +55,7 @@ ItemListener {
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 	
-	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID;
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID, cbCompactView;
 	
 	
 	private UserEventWindow userEventWindow;
@@ -130,6 +130,7 @@ ItemListener {
 		format.setMinimumFractionDigits(0);
 		format.setMaximumFractionDigits(0);
 		
+		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 //		bZoomSelected.setEnabled(true);
 //		bLoadSelected.setEnabled(true);
 	}
@@ -138,7 +139,9 @@ ItemListener {
 		selectionBeginTime.setText("");
 		selectionEndTime.setText("");
 		selectionDiff.setText("");
-//		
+		
+
+		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 //		bZoomSelected.setEnabled(false);
 //		bLoadSelected.setEnabled(false);
 	}
@@ -263,6 +266,9 @@ ItemListener {
 			else if (arg.equals("Color by Memory Usage"))
 				data.setColorByMemoryUsage();
 
+			else if(arg.equals("Shift Timelines to fix inconsistent clocks"))
+				data.fixTachyons();
+			
 		}
 
 		
@@ -399,6 +405,21 @@ ItemListener {
 		mbar.add(tracingMenu);
 	
 		
+		
+		// Actions Menu
+		JMenu actionMenu = new JMenu("Experimental Features");
+		JMenuItem i40 = new JMenuItem("Shift Timelines to fix inconsistent clocks");
+		actionMenu.add(i40);
+		i40.addActionListener(this);
+		
+		
+		cbCompactView = new JCheckBoxMenuItem("Compact View");
+		actionMenu.add(cbCompactView);
+		cbCompactView.addItemListener(this);
+
+		mbar.add(actionMenu);
+		
+		
 		parentWindow.setJMenuBar(mbar);
 
 	}
@@ -411,9 +432,9 @@ ItemListener {
 	private void CreateLayout() {
 
 		// // CHECKBOX PANEL
-		cbPacks = new JCheckBox("Display Pack Times", data.showPacks);
-		cbMsgs = new JCheckBox("Display Message Sends", data.showMsgs);
-		cbIdle = new JCheckBox("Display Idle Time", data.showIdle);
+		cbPacks = new JCheckBox("Display Pack Times", data.showPacks());
+		cbMsgs = new JCheckBox("Display Message Sends", data.showMsgs());
+		cbIdle = new JCheckBox("Display Idle Time", data.showIdle());
 		cbUser = new JCheckBox("Display User Events", true);
 		cbUserTable = new JCheckBox("Display User Events Window", false);
 
@@ -473,6 +494,7 @@ ItemListener {
 		bZoomSelected = new JButton("Zoom Selection");
 		bLoadSelected = new JButton("Load Selection");
 
+		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 		bZoomSelected.setEnabled(true);
 		bLoadSelected.setEnabled(true);
 			
@@ -577,17 +599,20 @@ ItemListener {
 		Object c = evt.getItemSelectable();
 
 		if (c == cbPacks)
-			data.showPacks = (evt.getStateChange() == ItemEvent.SELECTED);
+			data.showPacks(evt.getStateChange() == ItemEvent.SELECTED);
 		
 		else if (c == cbMsgs)
-			data.showMsgs = (evt.getStateChange() == ItemEvent.SELECTED);
+			data.showMsgs(evt.getStateChange() == ItemEvent.SELECTED);
 		
 		else if (c == cbIdle)
-			data.showIdle = (evt.getStateChange() == ItemEvent.SELECTED);
+			data.showIdle(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if (c == cbTraceMessages)
 			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 				
+		else if(c == cbCompactView)
+			data.setCompactView(evt.getStateChange() == ItemEvent.SELECTED);
+		
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 				

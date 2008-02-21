@@ -3,10 +3,16 @@ package projections.gui.Timeline;
 
 public class TimelineMessage implements Comparable
 {
+	/** Message send time */
 	public long Time;
+	
 	public int Entry;
+	
+	/** Message Length */
 	public int MsgLen;
+	
 	public int EventID;
+	
 	public int SenderEventID;
 
 	private int destPEs[];
@@ -99,6 +105,10 @@ public class TimelineMessage implements Comparable
 
 	public boolean isUnicast(){
 		return (numPEs==0);
+	}
+
+	public void shiftTimesBy(long shift) {
+		Time += shift;
 	}
 	
 	

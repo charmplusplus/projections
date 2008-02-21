@@ -94,6 +94,9 @@ public class Data
 	public EntryMethodObject[][] tloArray;
 
 	/** For each PE, A vector containing all the messages sent from it 
+	 * 
+	 *  Each element in the vector is Vector of TimelineMessage objects
+	 * 
 	 * @note this is not indexed the same way as timelineUserEventObjectsArray
 	 * */
 	public Vector [] mesgVector;
@@ -143,7 +146,7 @@ public class Data
 	Map oidToEntryMethonObjectsMap;
 	
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
-	boolean showPacks, showIdle, showMsgs, showUserEvents;
+	private boolean showPacks, showIdle, showMsgs, showUserEvents;
 
 
 	/** The font used by the LabelPanel */
@@ -908,18 +911,30 @@ public class Data
 
 	/** The height of the timeline event object rectangles */
 	public int barheight(){
-		return 16;
+		if(useCompactView())
+			return 14;
+		else
+			return 16;
 	}
 		
 	/** Get the height required to draw a single PE's Timeline */
 	public int singleTimelineHeight(){
-		if(useMinimalView())
+		if(useCompactView())
+			return barheight()+1;
+		else if(useMinimalView())
 			return barheight() + 10;
 		else
 			return barheight() + 18;
 	}
+
+	
+	
+	/** get the height of each user event rectangle */
 	public int userEventRectHeight(){
-		return 5;
+		if(useCompactView())
+			return 0;
+		else
+			return 5;
 	}
 	
 
@@ -1221,6 +1236,9 @@ public class Data
 	
 	/** Highlight the other entry method invocations upon mouseover */
 	private boolean traceOIDOnHover;
+
+	/** Should we use a very compact view, with no message sends, or user events */
+	private boolean useCompactView;
 	
 	/** Clear any highlights created by HighlightObjects() */
 	public void clearObjectHighlights() {
@@ -1296,8 +1314,12 @@ public class Data
 	public void showUserEvents(boolean b) {
 		showUserEvents = b;
 	}
+
 	public boolean showUserEvents() {
-		return showUserEvents;
+		if(useCompactView())
+			return false;
+		else
+			return showUserEvents;
 	}
 
 	
@@ -1342,6 +1364,153 @@ public class Data
 	public boolean colorByMemoryUsage() {
 		return colorByMemoryUsage;
 	}
+	
+	/** Fixup the messages that were sent back in time, breaking the causality assumptions many hold to be true */
+	public void fixTachyons() {
+		System.out.println("The fix tachyons feature is still experimental. It will probably not work well if new processors are loaded, or ranges are changed");
+		
+		int numIterations = 100;
+		long threshold_us = 10;
+		
+		System.out.println("Executing at most " + numIterations + " times or until no tachyons longer than " + threshold_us + "us are found");
+		
+		for(int iteration = 0; iteration < numIterations; iteration++){
+
+			long minLatency = Integer.MAX_VALUE;
+			int minSender = -1;
+			int minDest = -1;
+			
+			// Iterate through all entry methods, and compare their execution times to the message send times
+			for(int i=0;i< tloArray.length;i++){
+				if(tloArray[i] != null){
+					for(int j=0;j<tloArray[i].length;j++){
+						EntryMethodObject e = tloArray[i][j];
+
+						if(e != null){
+							TimelineMessage m = e.creationMessage();
+							if(m!=null){
+								long sendTime = m.Time;
+								long executeTime = e.getBeginTime();
+
+								long latency = executeTime - sendTime;
+
+								int senderPE = m.srcPE;
+								int executingPE = e.pCurrent;
+
+								if(minLatency> latency ){
+									minLatency = latency;
+									minSender = senderPE;
+									minDest = executingPE;	
+								}
+							}						
+						}
+
+					}
+				}
+			}
+
+//			System.out.println("Processor skew is greatest between " + sender + " and " + dest);
+
+			System.out.println("Processor " + minDest + " is lagging behind by " + (-1*minLatency) + "us");
+
+			// Adjust times for all objects and messages associated with processor dest
+			int laggingPE = minDest;
+			long shift = -1*minLatency;
+
+			
+			if(shift < threshold_us){
+				System.out.println("No tachyons go back further than "+threshold_us+" us");
+				break;
+			}
+				
+
+//			System.out.println("Shifting times for processor " + dest);
+
+			
+			
+			// Find index for the pe into the tloArray
+			int indexLaggingPE = -1;
+			processorList.reset();
+			for(int i=0;i<processorList.size();i++) {
+				int pnum = processorList.nextElement();
+				if(pnum == laggingPE){
+					indexLaggingPE = i;
+				}
+			}
+
+			System.out.println("index for lagging pe is " + indexLaggingPE);
 
 
+			// Shift all events on the lagging pe	
+			if(tloArray[indexLaggingPE] != null){
+				for(int j=0;j<tloArray[indexLaggingPE].length;j++){
+					EntryMethodObject e = tloArray[indexLaggingPE][j];
+					if(e != null){
+						e.shiftTimesBy(shift);
+					}
+
+					// Shift all messages sent by the entry method
+					Iterator iter = e.messages.iterator();
+					while(iter.hasNext()){
+						TimelineMessage msg = (TimelineMessage) iter.next();
+						msg.shiftTimesBy(shift);
+					}
+
+				}
+			}
+
+			// Shift all user event objects on lagging pe
+
+			if(timelineUserEventObjectsArray[indexLaggingPE] != null){
+				for(int j=0;j<timelineUserEventObjectsArray[indexLaggingPE].length;j++){
+					UserEventObject obj = timelineUserEventObjectsArray[indexLaggingPE][j];
+					obj.shiftTimesBy(shift);
+				}
+			}
+		}
+
+		displayMustBeRedrawn();
+	}
+	public void setCompactView(boolean b) {
+		useCompactView=b;
+		displayMustBeRedrawn();
+	}
+
+	/** Should the message pack time regions be displayed */
+	public boolean showPacks() {
+		if(useCompactView())
+			return false;
+		else
+			return showPacks;
+	}
+
+	/** Should the message send points be displayed */
+	public boolean showMsgs() {
+		if(useCompactView())
+			return false;
+		else
+			return showMsgs;
+	}
+	
+	/** Should the idle regions be displayed */
+	public boolean showIdle() {
+		return showIdle;
+	}
+	
+	public void showIdle(boolean b) {
+		showIdle = b;
+	}
+	
+	public void showPacks(boolean b) {
+		showPacks = b;
+	}
+	
+	public void showMsgs(boolean b) {
+		showMsgs = b;
+	}
+	
+	public boolean useCompactView() {
+		return useCompactView;
+	}
+	
 }

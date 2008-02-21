@@ -55,7 +55,7 @@ public class LabelPanel extends JPanel
 		
 		for (int p=0; p<data.numPs(); p++) {
 
-			if(data.useMinimalView()){
+			if(data.useMinimalView() || data.useCompactView()){
 				// A simpler version (right justified, bold larger PE label, no idle percentage)
 				String peString = "PE "+data.processorList().nextElement();
 				int stringWidth = fm.stringWidth(peString);			

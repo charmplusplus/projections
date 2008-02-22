@@ -131,8 +131,8 @@ ItemListener {
 		format.setMaximumFractionDigits(0);
 		
 		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
-//		bZoomSelected.setEnabled(true);
-//		bLoadSelected.setEnabled(true);
+		bZoomSelected.setEnabled(true);
+		bLoadSelected.setEnabled(true);
 	}
 
 	public void unsetSelectedTime() {
@@ -142,8 +142,8 @@ ItemListener {
 		
 
 		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
-//		bZoomSelected.setEnabled(false);
-//		bLoadSelected.setEnabled(false);
+		bZoomSelected.setEnabled(false);
+		bLoadSelected.setEnabled(false);
 	}
 
 
@@ -495,8 +495,8 @@ ItemListener {
 		bLoadSelected = new JButton("Load Selection");
 
 		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
-		bZoomSelected.setEnabled(true);
-		bLoadSelected.setEnabled(true);
+		bZoomSelected.setEnabled(false);
+		bLoadSelected.setEnabled(false);
 			
 		bZoomSelected.addActionListener(this);
 		bLoadSelected.addActionListener(this);

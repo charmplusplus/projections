@@ -1,5 +1,6 @@
 package projections.gui.Timeline;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -412,7 +413,12 @@ public class Data
 			oldUserEventsArray = null;
 		}
 
+		
+		//==========================================	
+		// DO MULTITHREADED FILE READING NOW
 
+//		Date startReadingTime  = new Date();
+		
 		int pe;
 		processorList.reset();
 		int numPs = processorList.size();
@@ -430,13 +436,10 @@ public class Data
 				readers[p] = new ThreadedFileReader(pe,p,this);
 			}
 		}
-		
-		
-		// DO MULTITHREADED FILE READING NOW
-		
+				
 		int lastCompleted = -1;
 		int lastSpawned = -1;
-		int numConcurrentThreads = 4;
+		int numConcurrentThreads = 8;
 		
 		// execute reader threads, a few at a time, until all have executed
 		while(lastCompleted != numPs-1){
@@ -477,6 +480,10 @@ public class Data
 			}
 		}
 
+		
+//		Date endReadingTime  = new Date();
+//		System.out.println("TIme to read input files: " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
+		
 		progressBar.close();
 
 		

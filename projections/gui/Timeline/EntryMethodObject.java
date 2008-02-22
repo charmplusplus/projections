@@ -372,28 +372,30 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 * 
 	 */
 	public HashSet traceBackwardDependencies(){
-		EntryMethodObject obj = this;
-		HashSet v = new HashSet();
-		
-		boolean done = false;
-		while(!done){
-			done = true;
-			v.add(obj);
-			
-			if (obj.entry != -1 && obj.pCreation <= data.numPEs() && data.mesgVector[obj.pCreation] != null ){
-				// Find message that created the object
-				TimelineMessage created_message = obj.creationMessage();
-				if(created_message != null){
-					// Find object that created the message
-					obj = (EntryMethodObject) data.messageToSendingObjectsMap.get(created_message);
-					if(obj != null){
-						done = false;
-					}
+		synchronized(data.messageStructures){
+			EntryMethodObject obj = this;
+			HashSet v = new HashSet();
 
+			boolean done = false;
+			while(!done){
+				done = true;
+				v.add(obj);
+
+				if (obj.entry != -1 && obj.pCreation <= data.numPEs() && data.mesgVector[obj.pCreation] != null ){
+					// Find message that created the object
+					TimelineMessage created_message = obj.creationMessage();
+					if(created_message != null){
+						// Find object that created the message
+						obj = (EntryMethodObject) data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
+						if(obj != null){
+							done = false;
+						}
+
+					}
 				}
 			}
+			return v;
 		}
-		return v;
 	}
 
 
@@ -428,10 +430,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 	/** Return the message that caused the entry method to execute. Complexity=O(1) time */
 	public TimelineMessage creationMessage(){
-		if(data != null && pCreation>=0 && data.eventIDToMessageMap != null && data.eventIDToMessageMap[pCreation] != null && pCreation<data.eventIDToMessageMap.length)
-		  return (TimelineMessage) data.eventIDToMessageMap[pCreation].get(new Integer(EventID));
-		else
-			return null;
+		synchronized(data.messageStructures){
+			if(data != null && pCreation>=0 && data.messageStructures.getEventIDToMessageMap() != null && data.messageStructures.getEventIDToMessageMap()[pCreation] != null && pCreation<data.messageStructures.getEventIDToMessageMap().length)
+				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCreation].get(new Integer(EventID));
+			else
+				return null;
+		}
 	}
 	
 	
@@ -460,10 +464,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 		// Highlight any Entry Method invocations for the same chare array element
 		if(data.traceOIDOnHover()){
-			Set allWithSameId = (Set) data.oidToEntryMethonObjectsMap.get(tid);
+			synchronized(data.messageStructures){
+			Set allWithSameId = (Set) data.messageStructures.getOidToEntryMethodObjectsMap().get(tid);
 			data.HighlightObjects(allWithSameId);
 			needRepaint=true;
-		}
+			}
+		}	
 
 		
 		if(needRepaint)

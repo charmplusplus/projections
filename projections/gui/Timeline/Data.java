@@ -1,15 +1,14 @@
 package projections.gui.Timeline;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.swing.*;
 
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Color;
 import projections.analysis.*;
@@ -71,7 +70,7 @@ public class Data
 	 * */
 	private int mostRecentScaledScreenWidth;
 
-	private OrderedIntList processorList;
+	OrderedIntList processorList;
 
 
 	private OrderedIntList oldplist;
@@ -131,19 +130,8 @@ public class Data
 	/** The miniumum and maximum memory usage that have been seen so far */
 	long minMem, maxMem;
 
+	MessageStructures messageStructures;
 	
-	/** Some associative containers to make lookups fast */
-	Map []eventIDToMessageMap;
-	Map []eventIDToEntryMethodMap;
-	
-	/** Map from a message to the the resulting entry methods entry object invocations */
-	Map messageToExecutingObjectsMap;
-	
-	/** Map from a message to its invoking entry method instance */
-	Map messageToSendingObjectsMap;
-	
-	/** Map from Chare Array element id's to the corresponding known entry method invocations */
-	Map oidToEntryMethonObjectsMap;
 	
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
 	private boolean showPacks, showIdle, showMsgs, showUserEvents;
@@ -191,6 +179,8 @@ public class Data
 		
 		processorList = MainWindow.runObject[myRun].getValidProcessorList();
 
+		messageStructures = new MessageStructures(this);
+			
 		oldBT = -1;
 		oldET = -1;
 		oldplist = null;
@@ -283,7 +273,7 @@ public class Data
 	}
 	
 	
-	/** Create the initial array of timeline objects 
+	/** Load the initial array of timeline objects 
 	 *  
 	 *  @note if a new processor has been added, then 
 	 *  	  this will not be called. the new proc's
@@ -427,26 +417,72 @@ public class Data
 		processorList.reset();
 		int numPs = processorList.size();
 		ProgressMonitor progressBar = 
-			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data",
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data in parallel",
 					"", 0, numPs);
 		progressBar.setProgress(0);
+
+		
+		// Create worker threads
+		ThreadedFileReader readers[] = new ThreadedFileReader[numPs];
+		
 		for (int p=0; p<numPs; p++) {
+			pnum = processorList.nextElement();
+			if (tloArray[p] == null) {
+				readers[p] = new ThreadedFileReader(pnum,p,this);
+			}
+		}
+				
+		// execute reader threads, a few at a time, until all have executed
+		int lastCompleted = -1;
+		int lastSpawned = -1;
+		int numConcurrent = 4;
+		long delayMillis = 250;
+		while(lastCompleted != numPs-1){
+			// spawn some threads
+			for(int p=lastSpawned+1; p<lastCompleted+numConcurrent && p<numPs; p++){
+				System.out.println("Spawning reader thread " + p);
+				if(readers[p] != null){
+					readers[p].start();
+				}
+				lastSpawned = p;
+			}
+			
+			// update the progress bar
 			if (!progressBar.isCanceled()) {
-				progressBar.setNote(p + " of " + numPs);
-				progressBar.setProgress(p);
+				progressBar.setNote(lastCompleted + " of " + numPs);
+				progressBar.setProgress(lastCompleted);
 			} else {
 				break;
 			}
-			pnum = processorList.nextElement();
-			if (tloArray[p] == null) { 
-//				System.out.println("new tloarray["+p+"] is loaded from getData()");
-//				System.out.println("getData("+pnum+","+p+")");
-				tloArray[p] = getData(pnum, p);
+						
+			// wait on a thread to complete
+			try {
+				int waitOnThread = lastCompleted + 1;
+				
+				if(readers[waitOnThread] != null){
+					if(waitOnThread < numPs){
+						readers[waitOnThread].join(delayMillis);
+
+						if (readers[waitOnThread].isAlive()) {
+							// Timeout occurred; thread has not finished
+						} else {
+							// Thread Finished
+							// spawn another thread
+							lastCompleted = waitOnThread;
+							System.out.println("Reader thread " + lastCompleted + " completed");
+						}
+					}
+				} else {
+					lastCompleted=waitOnThread;
+				}
+				
+			} catch (InterruptedException e) {
+				// Thread was interrupted
 			}
 		}
+
 		progressBar.close();
-		
-		
+				
 		
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
@@ -485,160 +521,10 @@ public class Data
 			}      
 		} 
 
-
-		// TODO These are computed anytime a new range or pe is loaded. Make faster by just adding in the new PEs portion
-		
-		progressBar = new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Creating auxiliary data structures to speed up visualization", "", 0, 4);
-		progressBar.setProgress(0);
-		progressBar.setNote("Creating Map 1");
-		
-		/** Create a mapping from EventIDs on each pe to messages */
-		eventIDToMessageMap = new HashMap[numPEs()];
-
-		if(processorList!=null){
-			int i=0;
-			processorList.reset();	
-			while(processorList.hasMoreElements()){
-				int p = processorList.nextElement();
-
-				eventIDToMessageMap[p] = new HashMap();
-				if(mesgVector[p] != null){
-//					System.out.println("Message vector size = "+mesgVector[p].size());
-
-					// scan through mesgVector[p] and add each TimelineMessage entry to the map
-					Iterator iter = mesgVector[p].iterator();
-					while(iter.hasNext()){
-						TimelineMessage msg = (TimelineMessage) iter.next();
-						if(msg!=null)
-						  eventIDToMessageMap[p].put(new Integer(msg.EventID), msg);
-					}
-				} else {
-					System.out.println("Message vector is empty");
-				}
-				i++;
-			}
-			
-		}
-
-		
-
-		progressBar.setProgress(1);
-		progressBar.setNote("Creating Map 2");
-		
-		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
-		eventIDToEntryMethodMap = new HashMap[numPEs()];
-
-		
-		if(processorList!=null){
-			processorList.reset();	
-			int i=0;
-			while(processorList.hasMoreElements()){
-				int p = processorList.nextElement();
-
-				eventIDToEntryMethodMap[p] = new HashMap();
-				if(tloArray[i]!=null){
-					for(int j=0;j<tloArray[i].length;j++){
-						EntryMethodObject obj=tloArray[i][j];
-						if(obj!=null)
-						  eventIDToEntryMethodMap[p].put(new Integer(obj.EventID), obj);
-					}
-				}		
-			i++;
-			}
-		}
-
-		progressBar.setProgress(2);
-		progressBar.setNote("Creating Map 3");
-		
-		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
-		messageToSendingObjectsMap = new HashMap();
-		for(int i=0;i<tloArray.length;i++){
-			if(tloArray[i]!=null){
-				for(int j=0;j<tloArray[i].length;j++){
-					EntryMethodObject obj=tloArray[i][j];
-					
-					if(obj != null){
-						// put all the messages created by obj into the map, listing obj as the creator
-						Iterator iter = obj.messages.iterator();
-						while(iter.hasNext()){
-							TimelineMessage msg = (TimelineMessage) iter.next();
-							messageToSendingObjectsMap.put(msg, obj);
-						}
-					}
-				}				
-			}
-		}
-				
-		progressBar.setProgress(3);
-		progressBar.setNote("Creating Map 4");
-		
-		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
-		messageToExecutingObjectsMap = new HashMap();
-		for(int i=0;i<tloArray.length;i++){
-			if(tloArray[i]!=null){
-				for(int j=0;j<tloArray[i].length;j++){
-
-					EntryMethodObject obj=tloArray[i][j];
-					if(obj!=null){
-						
-						
-						TimelineMessage msg = obj.creationMessage();
-						if(msg!=null){
-							// for each EntryMethodObject, add its creation Message to the map
-							if(messageToExecutingObjectsMap.containsKey(msg)){
-								// add it to the TreeSet in the map
-								Object o= messageToExecutingObjectsMap.get(msg);
-								TreeSet ts = (TreeSet)o;
-								ts.add(obj);
-							} else {
-								// create a new TreeSet and put it in the map
-								TreeSet ts = new TreeSet();
-								ts.add(obj);
-								messageToExecutingObjectsMap.put(msg, ts);
-							}
-						}
-					}
-				}				
-			}
-		}
-		
-
-		progressBar.setProgress(4);
-		progressBar.setNote("Creating Map 5");
-		
-		/** Create a mapping from Chare array element indices to their EntryMethodObject's */
-		oidToEntryMethonObjectsMap = new TreeMap();
-		for(int i=0;i<tloArray.length;i++){
-			if(tloArray[i]!=null){
-				for(int j=0;j<tloArray[i].length;j++){
-					EntryMethodObject obj=tloArray[i][j];
-					
-					if(obj != null){
-						ObjectId id = obj.getTid();
-						
-						if(oidToEntryMethonObjectsMap.containsKey(id)){
-							// add obj to the existing set
-							TreeSet s = (TreeSet) oidToEntryMethonObjectsMap.get(id);
-							s.add(obj);
-						} else {
-							// create a set for the id
-							TreeSet s = new TreeSet();
-							s.add(obj);
-							oidToEntryMethonObjectsMap.put(id, s);
-						}
-
-					}
-				}				
-			}
-		}
-					
-//		System.out.println("oidToEntryMethonObjectsMap contains " + oidToEntryMethonObjectsMap.size() + " unique chare array indices");
-		
-		progressBar.close();
-		
+		// Spawn a thread that computes some secondary message related data structures
+		messageStructures.create();
+	
 	}
-	
-	
 	
 	public void decreaseScaleFactor(){
 		setScaleFactor( (float) ((int) (getScaleFactor() * 4) - 1) / 4 );
@@ -737,7 +623,7 @@ public class Data
 	/** Load the timeline for processor pnum by 
 	 * calling createTL() which calls createtimeline();
 	 * */
-	private EntryMethodObject[] getData(int pnum, int index)  
+	EntryMethodObject[] getData(int pnum, int index)  
 	{
 
 		Vector tl, msglist, packlist;
@@ -1511,6 +1397,10 @@ public class Data
 	
 	public boolean useCompactView() {
 		return useCompactView;
+	}
+	
+	public Component guiRoot() {
+		return MainWindow.runObject[myRun].guiRoot;
 	}
 	
 }

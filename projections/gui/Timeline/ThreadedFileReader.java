@@ -4,18 +4,18 @@ package projections.gui.Timeline;
 public class ThreadedFileReader extends Thread  {
 	
 	EntryMethodObject[][] tloArray;
-	int pnum;
+	int pe;
 	int p;
 	Data data;
 	
-	public ThreadedFileReader(int pnum, int p, Data data){
+	public ThreadedFileReader(int pe, int p, Data data){
 		this.data = data;
-		this.pnum = pnum;
+		this.pe = pe;
 		this.p = p;
 	}
 	
      public void run() {
-    		data.tloArray[p] = data.getData(pnum, p);
+     	 	data.tloArray[p] = data.getData(pe, p);
      }
 
 }

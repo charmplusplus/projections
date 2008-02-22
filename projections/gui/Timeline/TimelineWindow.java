@@ -88,11 +88,10 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		data = new Data(this);
 		
+		data.guiRoot(this);
+		
 		labelPanel = new LabelPanel(data);
 
-		
-		
-		
 		// Construct the various layers, and the layout manager
 		AxisPanel ap = new AxisPanel(data);
 		AxisOverlayPanel op = new AxisOverlayPanel(data);

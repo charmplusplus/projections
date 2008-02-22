@@ -413,36 +413,37 @@ public class Data
 		}
 
 
-		int pnum;
+		int pe;
 		processorList.reset();
 		int numPs = processorList.size();
 		ProgressMonitor progressBar = 
 			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data in parallel",
 					"", 0, numPs);
 		progressBar.setProgress(0);
-
 		
 		// Create worker threads
 		ThreadedFileReader readers[] = new ThreadedFileReader[numPs];
 		
 		for (int p=0; p<numPs; p++) {
-			pnum = processorList.nextElement();
+			pe = processorList.nextElement();
 			if (tloArray[p] == null) {
-				readers[p] = new ThreadedFileReader(pnum,p,this);
+				readers[p] = new ThreadedFileReader(pe,p,this);
 			}
 		}
-				
-		// execute reader threads, a few at a time, until all have executed
+		
+		
+		// DO MULTITHREADED FILE READING NOW
+		
 		int lastCompleted = -1;
 		int lastSpawned = -1;
-		int numConcurrent = 4;
-		long delayMillis = 250;
+		int numConcurrentThreads = 4;
+		
+		// execute reader threads, a few at a time, until all have executed
 		while(lastCompleted != numPs-1){
 			// spawn some threads
-			for(int p=lastSpawned+1; p<lastCompleted+numConcurrent && p<numPs; p++){
-				System.out.println("Spawning reader thread " + p);
+			for(int p=lastSpawned+1; p<=lastCompleted+numConcurrentThreads && p<numPs; p++){
 				if(readers[p] != null){
-					readers[p].start();
+					readers[p].start(); // will cause the run method to be executed
 				}
 				lastSpawned = p;
 			}
@@ -454,35 +455,30 @@ public class Data
 			} else {
 				break;
 			}
-						
-			// wait on a thread to complete
+			
+			// wait on the next thread to complete
 			try {
 				int waitOnThread = lastCompleted + 1;
-				
-				if(readers[waitOnThread] != null){
-					if(waitOnThread < numPs){
-						readers[waitOnThread].join(delayMillis);
+				if(waitOnThread <= lastSpawned){ // has thread been spawned yet
+					if(readers[waitOnThread] != null){
+						if(waitOnThread < numPs){
+							readers[waitOnThread].join();
 
-						if (readers[waitOnThread].isAlive()) {
-							// Timeout occurred; thread has not finished
-						} else {
 							// Thread Finished
 							// spawn another thread
 							lastCompleted = waitOnThread;
-							System.out.println("Reader thread " + lastCompleted + " completed");
 						}
+					} else {
+						lastCompleted=waitOnThread;
 					}
-				} else {
-					lastCompleted=waitOnThread;
-				}
-				
+				}				
 			} catch (InterruptedException e) {
-				// Thread was interrupted
+				System.out.println("Error: InterruptedException");
 			}
 		}
 
 		progressBar.close();
-				
+
 		
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
@@ -623,7 +619,7 @@ public class Data
 	/** Load the timeline for processor pnum by 
 	 * calling createTL() which calls createtimeline();
 	 * */
-	EntryMethodObject[] getData(int pnum, int index)  
+	EntryMethodObject[] getData(int pe, int index)  
 	{
 
 		Vector tl, msglist, packlist;
@@ -633,8 +629,8 @@ public class Data
 		int numpacks;
 		tl = new Vector();
 		Vector userEvents = new Vector();
-		mesgVector[pnum] = new Vector();
-		createTL(pnum, beginTime, endTime, tl, userEvents);
+		mesgVector[pe] = new Vector();
+		createTL(pe, beginTime, endTime, tl, userEvents);
 		// proc userEvents
 		int numUserEvents = userEvents.size();
 		if (numUserEvents > 0) {
@@ -657,7 +653,7 @@ public class Data
 			TreeSet msgs = new TreeSet();
 			if(msglist!=null){
 				msgs.addAll( msglist );
-				mesgVector[pnum].addAll(msglist);
+				mesgVector[pe].addAll(msglist);
 			}
 			
 			packlist = tle.PackTimes;
@@ -671,7 +667,7 @@ public class Data
 				packs[p] = (PackTime)packlist.elementAt(p);
 			}
 		
-			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pnum);
+			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pe);
 	
 			if(tle!=null && tle.memoryUsage!=null){
 			  if(tle.memoryUsage.longValue() > maxMem)
@@ -1125,6 +1121,8 @@ public class Data
 
 	/** Should we use a very compact view, with no message sends, or user events */
 	private boolean useCompactView;
+
+	private Component guiRoot;
 	
 	/** Clear any highlights created by HighlightObjects() */
 	public void clearObjectHighlights() {
@@ -1400,7 +1398,13 @@ public class Data
 	}
 	
 	public Component guiRoot() {
-		return MainWindow.runObject[myRun].guiRoot;
+		if(guiRoot != null)
+			return guiRoot;
+		else
+			return MainWindow.runObject[myRun].guiRoot;
+	}
+	public void guiRoot(TimelineWindow timelineWindow) {
+		guiRoot = timelineWindow;
 	}
 	
 }

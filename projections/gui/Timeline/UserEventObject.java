@@ -31,6 +31,7 @@ public class UserEventObject extends JComponent
 	private int ylocation;
 
 	public UserEventObject(long t, int e, int event, int type) {
+		setFocusable(false); // optimization for speed
 		Type=type;
 		BeginTime=EndTime=t;
 		UserEventID=e;

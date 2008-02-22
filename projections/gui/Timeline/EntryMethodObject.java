@@ -74,13 +74,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			TreeSet msgs, PackTime[] packs,
 			int p1)
 	{
-		format_.setGroupingUsed(true);
-
+		setFocusable(false); // optimization for speed
 		setVisible(true);
 		
 		setBackground(MainWindow.runObject[data.myRun].background);
 		setForeground(MainWindow.runObject[data.myRun].foreground);
-
+		
 		this.data = data;
 		beginTime = tle.BeginTime;
 		endTime   = tle.EndTime;
@@ -110,6 +109,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		isFunction = tle.isFunction;
 
+		format_.setGroupingUsed(true);
+	
 		setUsage();
 		setPackUsage();
 

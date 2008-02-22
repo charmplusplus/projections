@@ -36,6 +36,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		this.handler = handler;
 		this.data = data;
 
+		this.setFocusable(true);
+		this.setFocusCycleRoot(true);
+		this.setFocusTraversalPolicy(new NullFocusTraversalPolicy());
+		
 		setAutoscrolls(true); //enable synthetic drag events
 		addMouseMotionListener(this); //handle mouse drags
 
@@ -110,9 +114,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		b.addMouseListener(this);
 		b.addMouseMotionListener(this);
 		add(b);
-		
-		
-		
+			
 		handler.setData(data);
 		handler.refreshDisplay(true);
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));

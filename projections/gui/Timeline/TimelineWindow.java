@@ -2,6 +2,7 @@ package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import projections.gui.MainWindow;
@@ -91,7 +92,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		data.guiRoot(this);
 		
 		labelPanel = new LabelPanel(data);
-
+		
 		// Construct the various layers, and the layout manager
 		AxisPanel ap = new AxisPanel(data);
 		AxisOverlayPanel op = new AxisOverlayPanel(data);
@@ -99,11 +100,10 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		// Create the layered panel containing our layers
 		axisPanel = new LayeredPanel(data,ap,op,lay);
 		
-		
 		mainPanel = new MainPanel(data, this);
-	
+		
 		scrollingPanel = new ScrollingPanel(data, mainPanel, axisPanel, labelPanel);
-
+		
 		controls = new WindowControls(this, data);
 
 		thisWindow.getContentPane().setLayout(new BorderLayout());	

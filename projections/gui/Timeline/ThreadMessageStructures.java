@@ -30,11 +30,13 @@ public class ThreadMessageStructures extends Thread {
 	public void run() {
 		synchronized(messageStructures){
 
+			yield();
+			
 			// TODO These are computed anytime a new range or pe is loaded. Make faster by just adding in the new PEs portion
 
-			ProgressMonitor progressBar = new ProgressMonitor(data.guiRoot(), "Creating auxiliary data structures to speed up visualization", "", 0, 4);
-			progressBar.setProgress(0);
-			progressBar.setNote("Creating Map 1");
+//			ProgressMonitor progressBar = new ProgressMonitor(data.guiRoot(), "Creating auxiliary data structures to speed up visualization", "", 0, 4);
+//			progressBar.setProgress(0);
+//			progressBar.setNote("Creating Map 1");
 
 			/** Create a mapping from EventIDs on each pe to messages */
 			messageStructures.setEventIDToMessageMap(new HashMap[data.numPEs()]);
@@ -65,8 +67,8 @@ public class ThreadMessageStructures extends Thread {
 			}
 
 
-			progressBar.setProgress(1);
-			progressBar.setNote("Creating Map 2");
+//			progressBar.setProgress(1);
+//			progressBar.setNote("Creating Map 2");
 			yield();
 
 			/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
@@ -91,8 +93,8 @@ public class ThreadMessageStructures extends Thread {
 				}
 			}
 
-			progressBar.setProgress(2);
-			progressBar.setNote("Creating Map 3");
+//			progressBar.setProgress(2);
+//			progressBar.setNote("Creating Map 3");
 			yield();
 
 
@@ -115,8 +117,8 @@ public class ThreadMessageStructures extends Thread {
 				}
 			}
 
-			progressBar.setProgress(3);
-			progressBar.setNote("Creating Map 4");
+//			progressBar.setProgress(3);
+//			progressBar.setNote("Creating Map 4");
 			yield();
 
 			/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
@@ -150,8 +152,8 @@ public class ThreadMessageStructures extends Thread {
 			}
 
 
-			progressBar.setProgress(4);
-			progressBar.setNote("Creating Map 5");
+//			progressBar.setProgress(4);
+//			progressBar.setNote("Creating Map 5");
 			yield();
 
 			/** Create a mapping from Chare array element indices to their EntryMethodObject's */
@@ -182,7 +184,7 @@ public class ThreadMessageStructures extends Thread {
 
 //			System.out.println("oidToEntryMethonObjectsMap contains " + oidToEntryMethonObjectsMap.size() + " unique chare array indices");
 
-			progressBar.close();
+//			progressBar.close();
 
 		}
     	 

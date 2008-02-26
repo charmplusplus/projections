@@ -279,7 +279,6 @@ ItemListener {
 			
 			
 			if (b == bZoomSelected) {
-				System.out.println("zoom selected");
 				zoomSelected();
 			} 
 

@@ -1,10 +1,12 @@
 package projections.gui.Timeline;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import java.util.LinkedList;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import javax.swing.*;
@@ -58,7 +60,7 @@ public class Data
 
 	private MainHandler modificationHandler = null;
 
-
+	/** A factor describin how zoomed in we are */
 	private float scaleFactor = 1.0f;
 
 	private double preferredViewTime = -1.0;
@@ -71,12 +73,10 @@ public class Data
 	 * */
 	private int mostRecentScaledScreenWidth;
 
+	/** The list of processors used in this tool. Can differ from those used in other tools */
 	OrderedIntList processorList;
-
-
-	private OrderedIntList oldplist;
-
-	private String oldpstring;
+	/** The list of pes displayed, sorted in vertical ordering <Integer, Integer>*/
+	HashMap peToLine;
 
 	/** If true, color entry method invocations by Object ID */
 	private boolean colorByObjectId;
@@ -91,26 +91,29 @@ public class Data
 
 	private Color[]        entryColor;
 
-	public EntryMethodObject[][] tloArray;
+	/** Each value of the TreeMap is a TreeSet (sorted list) of EntryMethodObject's .
+	 *  Each key of the TreeMap is an Integer pe 
+	 *  <Integer,LinkedList<EntryMethodObject> >
+	 */
+	public TreeMap allEntryMethodObjects;
 
-	/** For each PE, A vector containing all the messages sent from it 
-	 * 
-	 *  Each element in the vector is Vector of TimelineMessage objects
-	 * 
-	 * @note this is not indexed the same way as timelineUserEventObjectsArray
-	 * */
-	public Vector [] mesgVector;
+	/** Each value in this TreeMap is a TreeSet of UserEventObject's .
+	 *  Each key of the TreeMap is an Integer pe
+	 *  <Integer,LinkedList<UserEventObject> >
+	 */
+	public TreeMap allUserEventObjects;
 
-	public Vector [] oldmesgVector;
 
-	public UserEventObject[][] timelineUserEventObjectsArray = null;
-
+	/** processor usage indexed by PE */
 	float[] processorUsage;
 
+	/** idle usage indexed by PE */
 	float[] idleUsage;
 
+	/** pack usage indexed by PE */
 	float[] packUsage;
 
+	/** entry usage list indexed by PE */
 	OrderedUsageList[] entryUsageList;
 
 	/** The start time for the time range. */
@@ -131,8 +134,8 @@ public class Data
 	/** The miniumum and maximum memory usage that have been seen so far */
 	long minMem, maxMem;
 
+	/** Stores various lookup tables for messages and associated entry points */
 	MessageStructures messageStructures;
-	
 	
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
 	private boolean showPacks, showIdle, showMsgs, showUserEvents;
@@ -165,6 +168,7 @@ public class Data
 	/** A custom foreground color that can override the application wide background pattern. Used by NoiseMiner to set a white background */
 	private Color customForeground;
 	private Color customBackground;
+	
 
 	/** A constructor that takes in a TimelineContainer(for handling some events) 
 	 *  and provides sensible default values for various parameters 
@@ -181,11 +185,9 @@ public class Data
 		processorList = MainWindow.runObject[myRun].getValidProcessorList();
 
 		messageStructures = new MessageStructures(this);
-			
+		
 		oldBT = -1;
 		oldET = -1;
-		oldplist = null;
-		oldpstring = null;
 
 		processorUsage = null;
 		entryUsageList = null;
@@ -204,8 +206,7 @@ public class Data
 		drawMessagesForTheseObjects = new HashSet();
 		drawMessagesForTheseObjectsAlt = new HashSet();
 		
-		tloArray = null;
-		mesgVector = null;
+		allEntryMethodObjects = null;
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		entryColor = MainWindow.runObject[myRun].getColorMap();
 
@@ -225,9 +226,10 @@ public class Data
 	 */
 	public void addProcessor(int pCreation){
 		int oldNumP = processorList.size();
-		oldplist = processorList.copyOf();
 		processorList.insert(pCreation);
 		int newNumP = processorList.size();
+
+		peToLine = null;
 		
 		if(oldNumP != newNumP)
 			modificationHandler.notifyProcessorListHasChanged();
@@ -255,23 +257,6 @@ public class Data
 		return colorByObjectId;
 	}
 
-	/****************** Timeline ******************/
-	private Vector createTL(int p, long bt, long et, 
-			Vector timelineEvents, Vector userEvents) {
-		try {
-			if (MainWindow.runObject[myRun].hasLogData()) {
-				return MainWindow.runObject[myRun].logLoader.createtimeline(p, bt, et, 
-						timelineEvents,
-						userEvents);
-			} else {
-				System.err.println("createTL: No log files available!");
-				return null;
-			}
-		} catch (LogLoadException e) {
-			System.err.println("LOG LOAD EXCEPTION");
-			return null;
-		}
-	}
 	
 	
 	/** Load the initial array of timeline objects 
@@ -283,247 +268,207 @@ public class Data
 	 */
 	public void createTLOArray()
 	{
-//		System.out.println("createTLOArray()");
+		
+		// Kill off the secondary processing threads if needed
+		messageStructures.kill();
 		
 		// Generate the index files
 //		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
 		
-		EntryMethodObject[][] oldtloArray = tloArray;
-		UserEventObject[][] oldUserEventsArray = timelineUserEventObjectsArray;
-		if(mesgVector != null)
-			oldmesgVector = mesgVector;
+		// Can we reuse our already loaded data?
+		if(beginTime >= oldBT && endTime <= oldET){
 		
-		mesgVector = new Vector[numPEs()]; // want an array of size 1 if pe list={0}
-		for(int i=0; i<numPEs(); i++){
-			mesgVector[i] = null;
-		}
+			/** <Integer,LinkedList<EntryMethodObject>> */
+			TreeMap oldEntryMethodObjects = allEntryMethodObjects;
+			/** <Integer,LinkedList<UserEventObject>> */
+			TreeMap oldUserEventObjects = allUserEventObjects;
+			
+			allEntryMethodObjects = new TreeMap();
+			allUserEventObjects = new TreeMap();
 
-		tloArray = new EntryMethodObject[processorList.size()][];
-		timelineUserEventObjectsArray = new UserEventObject[processorList.size()][];
-
-		
-		// If we had a preexisting tloArray and the times haven't changed
-		if (oldtloArray != null && beginTime >= oldBT && endTime <= oldET) {
-
-			int oldp, newp;
-			int oldpindex=0, newpindex=0;
-
+			// Remove any unused objects from our data structures 
+			// (the components in the JPanel will be regenerated later from this updated list)
 			processorList.reset();
-			oldplist.reset();
-
-			newp = processorList.nextElement();
-			oldp = oldplist.nextElement();
-			while (newp != -1) {
-				while (oldp != -1 && oldp < newp) {
-					oldp = oldplist.nextElement();
-					oldpindex++;
-				}   
-				if (oldp == -1)
-					break;
-				if (oldp == newp) {
-					if (beginTime == oldBT && endTime == oldET) {
-						tloArray[newpindex] = oldtloArray[oldpindex];
-						timelineUserEventObjectsArray[newpindex] = 
-							oldUserEventsArray[oldpindex];
-						mesgVector[oldp] = oldmesgVector[newp];
-					} else {
-						// copy timelineobjects from larger array into 
-						// smaller array
-						int n;
-						int oldNumItems = oldtloArray[oldpindex].length;
-						int newNumItems = 0;
-						int startIndex  = 0;
-						int endIndex    = oldNumItems - 1;
-
-						// calculate which part of the old array to copy
-						for (n=0; n<oldNumItems; n++) {
-							if (oldtloArray[oldpindex][n].getEndTime() < 
-									beginTime) { 
-								startIndex++; 
-							} else { 
-								break; 
-							}
-						}
-						for (n=oldNumItems-1; n>=0; n--) {
-							if (oldtloArray[oldpindex][n].getBeginTime() > 
-							endTime) { 
-								endIndex--; 
-							} else { 
-								break; 
-							}
-						}
-						newNumItems = endIndex - startIndex + 1;
-
-						// copy the array
-						tloArray[newpindex] = new EntryMethodObject[newNumItems];
-//						System.out.println("new tloarray["+newpindex+"]= new array, but entries are copied in from old array");
-						mesgVector[newp] = new Vector();
-						for (n=0; n<newNumItems; n++) {
-							tloArray[newpindex][n] = 
-								oldtloArray[oldpindex][n+startIndex];
-							tloArray[newpindex][n].setUsage();
-							tloArray[newpindex][n].setPackUsage();
+			int p = processorList.nextElement();
+			while (p != -1) {
+				Integer pe = new Integer(p);
 					
-							// Add each message to mesgVector
-//							System.out.println("dumping " + tloArray[newpindex][n].messages.size() + " messages into mesgVector");
-							mesgVector[newp].addAll(tloArray[newpindex][n].messages);
-													
-						}
-						// copy user events from larger array into smaller array
-						if (oldUserEventsArray != null && 
-								oldUserEventsArray[oldpindex] != null) {
-							oldNumItems = oldUserEventsArray[oldpindex].length;
-							newNumItems = 0;
-							startIndex = 0;
-							endIndex = oldNumItems -1;
+				if(oldEntryMethodObjects.containsKey(pe)){
+					// Reuse the already loaded data
+					allEntryMethodObjects.put(pe, oldEntryMethodObjects.get(pe));
+					allUserEventObjects.put(pe, oldUserEventObjects.get(pe));
 
-							// calculate which part of the old array to copy
-							for (n=0; n<oldNumItems; n++) {
-								if (oldUserEventsArray[oldpindex][n].EndTime < 
-										beginTime) { 
-									startIndex++; 
-								} else { 
-									break; 
-								}
-							}
-							for (n=oldNumItems-1; n>=0; n--) {
-								if (oldUserEventsArray[oldpindex][n].BeginTime >
-							endTime) { 
-									endIndex--; 
-								} else { 
-									break; 
-								}
-							}
-							newNumItems = endIndex - startIndex + 1;
-
-							// copy the array
-							timelineUserEventObjectsArray[newpindex] = 
-								new UserEventObject[newNumItems];
-							for (n=0; n<newNumItems; n++) {
-								timelineUserEventObjectsArray[newpindex][n] = 
-									oldUserEventsArray[oldpindex][startIndex+n];
-							}
+					// Drop elements from mesgVector and allEntryMethodObjects outside range
+					Iterator iter = ((LinkedList)allEntryMethodObjects.get(pe)).iterator();
+					while(iter.hasNext()){
+						EntryMethodObject obj = (EntryMethodObject) iter.next();
+						if(obj.getEndTime() < beginTime || obj.getBeginTime() > endTime){
+							iter.remove();
 						}
 					}
-				}                                       
-				newp = processorList.nextElement();
-				newpindex++;
-			}   
-			oldtloArray = null;
-			oldUserEventsArray = null;
-		}
 
+					// Drop elements from userEventsArray outside range
+					Iterator iter2 = ((LinkedList)allUserEventObjects.get(pe)).iterator();
+					while(iter2.hasNext()){
+						UserEventObject obj = (UserEventObject) iter2.next();
+						if(obj.EndTime < beginTime || obj.BeginTime > endTime){
+							iter2.remove();
+						}
+					}
+				}
+
+				p = processorList.nextElement();
+			}
+			
+		} else {
+			// We need to reload everything
+			allEntryMethodObjects = new TreeMap();
+			allUserEventObjects = new TreeMap();
+		}
+		
+		oldBT = beginTime;
+		oldET = endTime;
+		
 		
 		//==========================================	
-		// DO MULTITHREADED FILE READING NOW
+		// Do multithreaded file reading
+		// TODO this could be made faster for times where the set of processors to be loaded is non-contiguous
 
-//		Date startReadingTime  = new Date();
+		Date startReadingTime  = new Date();
 		
-		int pe;
 		processorList.reset();
 		int numPs = processorList.size();
 		ProgressMonitor progressBar = 
-			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data in parallel",
-					"", 0, numPs);
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data in parallel","", 0, numPs+1);
+		progressBar.setMillisToPopup(0);
+		progressBar.setMillisToDecideToPopup(0);
 		progressBar.setProgress(0);
-		
+				
 		// Create worker threads
-		ThreadedFileReader readers[] = new ThreadedFileReader[numPs];
+		LinkedList readyReaders = new LinkedList();
 		
 		for (int p=0; p<numPs; p++) {
-			pe = processorList.nextElement();
-			if (tloArray[p] == null) {
-				readers[p] = new ThreadedFileReader(pe,p,this);
+			int pe = processorList.nextElement();
+			if(!allEntryMethodObjects.containsKey(new Integer(pe))) {
+				readyReaders.add(new ThreadedFileReader(pe,p,this));
 			}
 		}
 				
-		int lastCompleted = -1;
-		int lastSpawned = -1;
-		int numConcurrentThreads = 8;
+		int totalToLoad = readyReaders.size();
+		progressBar.setMaximum(totalToLoad);
+		int numConcurrentThreads = 16;
+		
+		if(totalToLoad < numConcurrentThreads){
+			numConcurrentThreads = totalToLoad;
+		}
 		
 		// execute reader threads, a few at a time, until all have executed
-		while(lastCompleted != numPs-1){
+		LinkedList spawnedReaders = new LinkedList();
+		while(readyReaders.size() > 0 || spawnedReaders.size() > 0){
+
+			//------------------------------------
 			// spawn some threads
-			for(int p=lastSpawned+1; p<=lastCompleted+numConcurrentThreads && p<numPs; p++){
-				if(readers[p] != null){
-					readers[p].start(); // will cause the run method to be executed
-				}
-				lastSpawned = p;
+			ThreadedFileReader r;
+			while(readyReaders.size()>0 && spawnedReaders.size()<numConcurrentThreads){
+				r = (ThreadedFileReader) readyReaders.removeFirst(); // retrieve and remove from list
+				spawnedReaders.add(r);
+				r.start(); // will cause the run method to be executed
 			}
-			
+
+			//------------------------------------
 			// update the progress bar
+			int doneCount = totalToLoad-readyReaders.size()-spawnedReaders.size();
 			if (!progressBar.isCanceled()) {
-				progressBar.setNote(lastCompleted + " of " + numPs);
-				progressBar.setProgress(lastCompleted);
+				progressBar.setNote(doneCount+ " of " + totalToLoad);
+				progressBar.setProgress(doneCount);
 			} else {
 				break;
 			}
-			
-			// wait on the next thread to complete
-			try {
-				int waitOnThread = lastCompleted + 1;
-				if(waitOnThread <= lastSpawned){ // has thread been spawned yet
-					if(readers[waitOnThread] != null){
-						if(waitOnThread < numPs){
-							readers[waitOnThread].join();
 
-							// Thread Finished
-							// spawn another thread
-							lastCompleted = waitOnThread;
-						}
-					} else {
-						lastCompleted=waitOnThread;
-					}
-				}				
-			} catch (InterruptedException e) {
-				System.out.println("Error: InterruptedException");
+			//------------------------------------
+			// wait on the threads to complete
+			Iterator iter = spawnedReaders.iterator();
+			int waitMillis = 1000; // wait for 1000 ms for the first thread, and 1 ms for each additional thread
+			while(iter.hasNext()){
+				r = (ThreadedFileReader) iter.next();
+				try {
+					r.join(waitMillis);
+					waitMillis = 1;
+					if(! r.isAlive()) {
+						// Thread Finished
+						iter.remove();
+					} 
+				}
+				catch (InterruptedException e) {
+					throw new RuntimeException("Thread was interrupted. This should not ever occur");
+				}
 			}
+						
 		}
 
-		
-//		Date endReadingTime  = new Date();
-//		System.out.println("TIme to read input files: " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
-		
-		progressBar.close();
-
+		if(totalToLoad > 0){
+			Date endReadingTime  = new Date();
+			System.out.println("Time to read " + totalToLoad +  " input files(using up to " + numConcurrentThreads + " threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
+		}
+			
+		if (!progressBar.isCanceled()) {
+			progressBar.setNote("Finishing");
+			progressBar.setProgress(numPs);
+		}
 		
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
 		}
-		processorUsage = new float[tloArray.length];
-		entryUsageList = new OrderedUsageList[tloArray.length];
+		
+		processorUsage = new float[numPEs()];
+		entryUsageList = new OrderedUsageList[numPEs()];
 		float[] entryUsageArray = new float[MainWindow.runObject[myRun].getNumUserEntries()];
-		idleUsage  = new float[tloArray.length];
-		packUsage  = new float[tloArray.length];
-		for (int p=0; p<tloArray.length; p++) {
+		idleUsage  = new float[numPEs()];
+		packUsage  = new float[numPEs()];
+
+		for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
+			entryUsageArray[i] = 0;
+		}
+		
+		for (int p=0; p<numPEs(); p++) {
 			processorUsage[p] = 0;
 			idleUsage[p] = 0;
 			packUsage[p] = 0;
-			for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
-				entryUsageArray[i] = 0;
-			}
-			for (int n=0; n<tloArray[p].length; n++) {
-				float usage = tloArray[p][n].getUsage();
-				int entrynum = tloArray[p][n].getEntry();
-				
+		}
+
+		Iterator pe_iter = allEntryMethodObjects.keySet().iterator();
+		while(pe_iter.hasNext()){
+			Integer pe = (Integer)pe_iter.next();
+			LinkedList objs = (LinkedList)allEntryMethodObjects.get(pe);
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+
+				float usage = obj.getUsage();
+				int entrynum = obj.getEntry();
+
 				if (entrynum >=0) {
 					entries[entrynum]++;
-					processorUsage[p] += usage;
-					packUsage[p] += tloArray[p][n].getPackUsage();
-					entryUsageArray[entrynum] += tloArray[p][n].getNonPackUsage();
+					processorUsage[pe.intValue()] += usage;
+					packUsage[pe.intValue()] += obj.getPackUsage();
+					entryUsageArray[entrynum] += obj.getNonPackUsage();
 				} else {
-					idleUsage[p] += usage;
+					idleUsage[pe.intValue()] += usage;
 				}
 			}
-			
-			entryUsageList[p] = new OrderedUsageList();
+
+			entryUsageList[pe.intValue()] = new OrderedUsageList();
 			for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 				if (entryUsageArray[i] > 0) {
-					entryUsageList[p].insert(entryUsageArray[i], i);
+					entryUsageList[pe.intValue()].insert(entryUsageArray[i], i);
 				}
 			}      
 		} 
 
+		updatePEVerticalOrdering();
+		
+		progressBar.close();
+		
 		// Spawn a thread that computes some secondary message related data structures
 		messageStructures.create();
 	
@@ -623,47 +568,53 @@ public class Data
 	}
 
 
-	/** Load the timeline for processor pnum by 
-	 * calling createTL() which calls createtimeline();
+	/** Load the timeline for processor pe.
+	 * 
+	 *  This method loads the timeline into: timelineUserEventObjectsArray, allEntryMethodObjects, 
+	 * 
+	 * 
 	 * */
-	EntryMethodObject[] getData(int pe, int index)  
+	void getData(Integer pe)  
 	{
 
-		Vector tl, msglist, packlist;
-		TimelineEvent tle;
-
-		int numItems;
-		int numpacks;
-		tl = new Vector();
-		Vector userEvents = new Vector();
-		mesgVector[pe] = new Vector();
-		createTL(pe, beginTime, endTime, tl, userEvents);
-		// proc userEvents
-		int numUserEvents = userEvents.size();
-		if (numUserEvents > 0) {
-			timelineUserEventObjectsArray[index] = new UserEventObject[numUserEvents];
-			for (int i=0; i<numUserEvents; i++) {
-				timelineUserEventObjectsArray[index][i] = 
-					(UserEventObject) userEvents.elementAt(i);
+		LinkedList tl = new LinkedList();
+		LinkedList userEvents= new LinkedList();
+				
+		try {
+			if (MainWindow.runObject[myRun].hasLogData()) {
+				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), beginTime, endTime, tl, userEvents);
+			} else {
+				System.err.println("createTL: No log files available!");
+				return;
 			}
-		} else { 
-			// probably already numm
-			timelineUserEventObjectsArray[index] = null; 
-		} 
-
+		} catch (LogLoadException e) {
+			System.err.println("LOG LOAD EXCEPTION");
+			return;
+		}
+		
+		// The user events are simply that which were produced by createtimeline
+		allUserEventObjects.put(pe,userEvents);
+		
+		// The entry method objects must however be constructed
+		allEntryMethodObjects.put(pe, new LinkedList());
+		LinkedList perPEObjects = (LinkedList)allEntryMethodObjects.get(pe);
+		
 		// proc timeline events
-		numItems = tl.size();   
-		EntryMethodObject[] tlo = new EntryMethodObject[numItems];
-		for (int i=0; i<numItems; i++) {
-			tle   = (TimelineEvent)tl.elementAt(i);
-			msglist = tle.MsgsSent;
+		Iterator iter = tl.iterator();
+		while(iter.hasNext()){
+		
+			TimelineEvent tle = (TimelineEvent)iter.next();
+			
+			// Construct a list of messages sent by the object
+			Vector msglist = tle.MsgsSent;
 			TreeSet msgs = new TreeSet();
 			if(msglist!=null){
 				msgs.addAll( msglist );
-				mesgVector[pe].addAll(msglist);
 			}
 			
-			packlist = tle.PackTimes;
+			// Construct a list of message pack times for the object
+			Vector packlist = tle.PackTimes;
+			int numpacks;
 			if (packlist == null) {
 				numpacks = 0;
 			} else {
@@ -674,7 +625,8 @@ public class Data
 				packs[p] = (PackTime)packlist.elementAt(p);
 			}
 		
-			tlo[i] = new EntryMethodObject(this, tle, msgs, packs, pe);
+			// Create the object itself
+			perPEObjects.add(new EntryMethodObject(this, tle, msgs, packs, pe.intValue()));
 	
 			if(tle!=null && tle.memoryUsage!=null){
 			  if(tle.memoryUsage.longValue() > maxMem)
@@ -682,12 +634,12 @@ public class Data
 			  if(tle.memoryUsage.longValue() < minMem)
 				  minMem = tle.memoryUsage.longValue();
 			}			
+		
 		}
 		
 		if(memoryUsageValid())
 			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
 		
-		return tlo;
 	}
 	
 	/** Did the logs we loaded so far contain any memory usage entries? */
@@ -704,10 +656,10 @@ public class Data
 
 
 	public int getNumUserEvents() {
-		if (timelineUserEventObjectsArray == null) { return 0; }
+		Iterator iter = allUserEventObjects.values().iterator();
 		int num = 0;
-		for (int i=0; i<timelineUserEventObjectsArray.length; i++) {
-			if (timelineUserEventObjectsArray[i] != null) { num += timelineUserEventObjectsArray[i].length; }
+		while(iter.hasNext()){
+			num += ((LinkedList)(iter.next())).size();
 		}
 		return num;
 	}
@@ -760,18 +712,6 @@ public class Data
 	public int rightOffset(){
 		return offset();
 	}
-
-
-	public OrderedIntList oldplist(){
-		return oldplist;	
-	}
-
-
-
-	public String oldpstring(){
-		return oldpstring;
-	}
-
 
 	public OrderedIntList processorList() {
 		return processorList;
@@ -846,20 +786,8 @@ public class Data
 	 * 	Scale will be reset to zero, and
 	 *  the old range will be recorded */
 	public void setNewRange(long beginTime, long endTime) {
-
-		// Record the old time range
-		this.oldBT = this.beginTime;
-		this.oldET = this.endTime;
-
 		this.beginTime = beginTime;
 		this.endTime = endTime;
-
-		if (processorList == null) {
-			oldplist = null;
-		} else {
-			oldplist = processorList.copyOf();
-		}
-
 		setScaleFactor(1.0f);
 	}
 
@@ -1096,7 +1024,11 @@ public class Data
 	
 	/** The height of the little line below the entry method designating a message send */
 	public int messageSendHeight() {
-		return 5;
+		if(this.useCompactView()){
+			return 0;
+		} else {
+			return 5;
+		}
 	}
 	/** The height of the rectangle that displays the message pack time below the entry method */
 	public int messagePackHeight() {
@@ -1272,30 +1204,29 @@ public class Data
 			int minDest = -1;
 			
 			// Iterate through all entry methods, and compare their execution times to the message send times
-			for(int i=0;i< tloArray.length;i++){
-				if(tloArray[i] != null){
-					for(int j=0;j<tloArray[i].length;j++){
-						EntryMethodObject e = tloArray[i][j];
+			Iterator pe_iter = allEntryMethodObjects.keySet().iterator();
+			while(pe_iter.hasNext()){
+				Integer pe =  (Integer) pe_iter.next();
+				LinkedList objs = (LinkedList)allEntryMethodObjects.get(pe);
+				Iterator obj_iter = objs.iterator();
+				while(obj_iter.hasNext()){ 
+					EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+					
+					TimelineMessage m = obj.creationMessage();
+					if(m!=null){
+						long sendTime = m.Time;
+						long executeTime = obj.getBeginTime();
 
-						if(e != null){
-							TimelineMessage m = e.creationMessage();
-							if(m!=null){
-								long sendTime = m.Time;
-								long executeTime = e.getBeginTime();
+						long latency = executeTime - sendTime;
 
-								long latency = executeTime - sendTime;
+						int senderPE = m.srcPE;
+						int executingPE = obj.pCurrent;
 
-								int senderPE = m.srcPE;
-								int executingPE = e.pCurrent;
-
-								if(minLatency> latency ){
-									minLatency = latency;
-									minSender = senderPE;
-									minDest = executingPE;	
-								}
-							}						
+						if(minLatency> latency ){
+							minLatency = latency;
+							minSender = senderPE;
+							minDest = executingPE;	
 						}
-
 					}
 				}
 			}
@@ -1305,7 +1236,8 @@ public class Data
 			System.out.println("Processor " + minDest + " is lagging behind by " + (-1*minLatency) + "us");
 
 			// Adjust times for all objects and messages associated with processor dest
-			int laggingPE = minDest;
+			Integer laggingPE = new Integer(minDest);
+			
 			long shift = -1*minLatency;
 
 			
@@ -1315,49 +1247,29 @@ public class Data
 			}
 				
 
-//			System.out.println("Shifting times for processor " + dest);
-
-			
-			
-			// Find index for the pe into the tloArray
-			int indexLaggingPE = -1;
-			processorList.reset();
-			for(int i=0;i<processorList.size();i++) {
-				int pnum = processorList.nextElement();
-				if(pnum == laggingPE){
-					indexLaggingPE = i;
-				}
-			}
-
-			System.out.println("index for lagging pe is " + indexLaggingPE);
-
-
 			// Shift all events on the lagging pe	
-			if(tloArray[indexLaggingPE] != null){
-				for(int j=0;j<tloArray[indexLaggingPE].length;j++){
-					EntryMethodObject e = tloArray[indexLaggingPE][j];
-					if(e != null){
-						e.shiftTimesBy(shift);
-					}
+			Iterator iter = ((LinkedList)allEntryMethodObjects.get(laggingPE)).iterator();
+			while(iter.hasNext()){
+				EntryMethodObject e = (EntryMethodObject) iter.next();
+				e.shiftTimesBy(shift);
 
-					// Shift all messages sent by the entry method
-					Iterator iter = e.messages.iterator();
-					while(iter.hasNext()){
-						TimelineMessage msg = (TimelineMessage) iter.next();
-						msg.shiftTimesBy(shift);
-					}
-
+				// Shift all messages sent by the entry method
+				Iterator msg_iter = e.messages.iterator();
+				while(msg_iter.hasNext()){
+					TimelineMessage msg = (TimelineMessage) msg_iter.next();
+					msg.shiftTimesBy(shift);
 				}
+
 			}
 
 			// Shift all user event objects on lagging pe
-
-			if(timelineUserEventObjectsArray[indexLaggingPE] != null){
-				for(int j=0;j<timelineUserEventObjectsArray[indexLaggingPE].length;j++){
-					UserEventObject obj = timelineUserEventObjectsArray[indexLaggingPE][j];
-					obj.shiftTimesBy(shift);
-				}
+	
+			iter = ((LinkedList)allUserEventObjects.get(laggingPE)).iterator();
+			while(iter.hasNext()){
+				UserEventObject obj = (UserEventObject) iter.next();
+				obj.shiftTimesBy(shift);
 			}
+
 		}
 
 		displayMustBeRedrawn();
@@ -1414,4 +1326,126 @@ public class Data
 		guiRoot = timelineWindow;
 	}
 	
+	
+	/** Determines which vertical position represents PE */
+	public int whichTimelineVerticalPosition(int PE) {
+		return ((Integer)peToLine.get(new Integer(PE))).intValue();
+		
+	}
+	
+	/** Update the ordering of the PEs (vertical position ordering) */
+	void updatePEVerticalOrdering(){
+
+		/** <Integer, Integer> */
+		HashMap oldPeToLine = peToLine;
+		peToLine = new HashMap();
+		
+		// Create list of just the elements which we had before, and we still want
+		processorList.reset();
+		int p = processorList.nextElement();
+		while (p != -1) {
+			Integer pe = new Integer(p);
+			if(oldPeToLine != null && oldPeToLine.containsKey(pe)){
+				Integer pos = (Integer)oldPeToLine.get(pe);
+				peToLine.put(pe, pos);
+			}
+			p = processorList.nextElement();
+		}
+
+		// Compact the list down because we may have lost some PEs
+		for(int i=0;i<peToLine.size();i++){
+			Integer pos = new Integer(i);
+			if(peToLine.containsValue(pos)){
+				// good continue
+			} else {
+				// shift all positions > i down by one
+				Iterator iter = peToLine.keySet().iterator();
+				while(iter.hasNext()){
+					Integer pe = (Integer) iter.next();
+					int line =  ((Integer)peToLine.get(pe)).intValue();
+					if(line > i){
+						peToLine.put(pe,new Integer(line-1));
+					}
+				}
+			}
+			
+		}
+				
+		// Add the newly selected PEs
+		processorList.reset();
+		p = processorList.nextElement();
+		int i=peToLine.size();
+		while (p != -1) {
+			Integer pe = new Integer(p);
+			if(!peToLine.containsKey(pe)){
+				peToLine.put(pe, new Integer(i));
+				i++;
+			}
+			p = processorList.nextElement();
+		}
+		
+	}
+	
+		
+	/** Determines the PE for a given vertical position 
+	 * 
+	 * @note this may be slow, don't call frequently
+	 * 
+	 */
+	public int whichPE(int verticalPosition) {
+		Iterator iter = peToLine.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = (Integer) iter.next();
+			if( ((Integer)peToLine.get(pe)).intValue() == verticalPosition)
+				return pe.intValue();
+		}
+		return -1;
+	}
+
+
+	public void dumpPEOrder(){
+		Iterator iter = peToLine.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = (Integer) iter.next();
+			int line =  ((Integer)peToLine.get(pe)).intValue();
+			System.out.println("pe " + pe +  " is at " + line);
+		}
+	}
+	
+	public void movePEToLine(int PE, int newPos){
+		int oldPos = whichTimelineVerticalPosition(PE);
+
+		if(newPos >= peToLine.size())
+			newPos = peToLine.size()-1;
+		
+		if(oldPos < newPos){
+			// The lines < oldPos don't move 
+			// The lines inbetween shift down by one
+			Iterator iter = peToLine.keySet().iterator();
+			while(iter.hasNext()){
+				Integer pe = (Integer) iter.next();
+				int line =  ((Integer)peToLine.get(pe)).intValue();
+				if(line > oldPos && line <= newPos){
+					peToLine.put(pe,new Integer(line-1));
+				}
+			}
+			// The lines > newPos don't move
+		} else {
+			// The lines < newPos don't move 
+			// The lines inbetween shift up by one
+			Iterator iter = peToLine.keySet().iterator();
+			while(iter.hasNext()){
+				Integer pe = (Integer) iter.next();
+				int line =  ((Integer)peToLine.get(pe)).intValue();
+				if(line < oldPos && line >= newPos){
+					peToLine.put(pe,new Integer(line+1));
+				}
+			}
+			// The lines < oldPos don't move
+		}
+		
+		peToLine.put(new Integer(PE), new Integer(newPos));
+		
+		this.displayMustBeRedrawn();
+	}
 }

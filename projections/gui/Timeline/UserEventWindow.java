@@ -5,6 +5,8 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.table.*;
 import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import projections.gui.count.TableSorter;
 import projections.gui.FormattedNumber;
@@ -25,7 +27,7 @@ public class UserEventWindow extends JFrame
 	// set the ints to have commas in appropriate places
 	static DecimalFormat format_ = null;
 	JCheckBox             checkbox_;  // when closing, set to false
-	UserEventObject[][]        events_ = null;
+	Object[][]        events_ = null;
 	private JTabbedPane          tabbedPane_ = new JTabbedPane();
 	TableSorter[]        sorter_ = null;
 
@@ -43,7 +45,7 @@ public class UserEventWindow extends JFrame
 		{
 			setHorizontalAlignment(JLabel.CENTER);
 			setEnabled(table == null || table.isEnabled()); // see question above
-			setForeground(events_[index_][sorter_[index_].mapRow(row)].getColor());
+			setForeground(((UserEventObject)events_[index_][sorter_[index_].mapRow(row)]).getColor());
 			setBackground(BACKGROUND);
 			super.getTableCellRendererComponent(
 					table, value, selected, focused, row, column);
@@ -76,11 +78,11 @@ public class UserEventWindow extends JFrame
 			if (events_ != null && events_[index_] != null) {
 				switch (col) {
 				case 0:  
-					return events_[index_][row].Name;
-				case 1:  return new FormattedNumber((int)events_[index_][row].BeginTime, format_);
-				case 2:  return new FormattedNumber((int)events_[index_][row].EndTime, format_);
-				case 3:  return new FormattedNumber((int)events_[index_][row].EndTime-
-						(int)events_[index_][row].BeginTime, format_);
+					return ((UserEventObject)events_[index_][row]).Name;
+				case 1:  return new FormattedNumber((int)((UserEventObject)events_[index_][row]).BeginTime, format_);
+				case 2:  return new FormattedNumber((int)((UserEventObject)events_[index_][row]).EndTime, format_);
+				case 3:  return new FormattedNumber((int)((UserEventObject)events_[index_][row]).EndTime-
+						(int)((UserEventObject)events_[index_][row]).BeginTime, format_);
 				default: return "ERROR";
 				}
 			}
@@ -94,7 +96,18 @@ public class UserEventWindow extends JFrame
 
 	public void setData(Data data) { 
 
-		events_ = data.timelineUserEventObjectsArray;
+		// TODO This file should be converted to use the treeset structure instead of these old arrays
+		//  events_ is sorted already because it comes from a treeset
+		events_ = new Object[data.numPs()][];
+		
+		
+		Iterator pe_iter = data.allUserEventObjects.keySet().iterator();
+		int pindex=0;
+		while(pe_iter.hasNext()){
+			events_[pindex] = ((LinkedList)data.allUserEventObjects.get(pe_iter.next())).toArray();	
+			pindex++;
+		}
+		
 		// create the layout here
 		data.processorList().reset();
 		super.getContentPane().removeAll();

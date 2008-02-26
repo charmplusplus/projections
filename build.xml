@@ -47,7 +47,7 @@ author = idooley2
     <javac sourcepath="" srcdir="." destdir="build"  debug="true" debuglevel="lines,vars,source" >
       <include name="**/*"/>
       <!-- only include NoiseMiner if we have java version 1.5 or newer -->
-      <exclude name="**/NoiseMiner*.java" unless="NewJava" />
+     <!--  <exclude name="**/NoiseMiner*.java" unless="NewJava" /> -->
     </javac>
 
   </target>

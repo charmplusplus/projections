@@ -10,6 +10,7 @@ import projections.gui.U;
 import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -45,8 +46,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private float packusage;
 	private long packtime;
 	
-	/** Vertical index that shows which displayed timeline this event lives on */
-	private int whichTimelineVerticalIndex;
 	
 	/** Pixel coordinate of left side of object */
 	private int leftCoord=0;
@@ -59,7 +58,10 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 
 	private Data data = null;
-	public TreeSet messages; // Set of TimelineMessage's
+	
+	/** A set of TimelineMessage's */
+	public TreeSet messages;
+	
 	private PackTime[] packs;
 
 	private int numPapiCounts = 0;
@@ -382,7 +384,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				done = true;
 				v.add(obj);
 
-				if (obj.entry != -1 && obj.pCreation <= data.numPEs() && data.mesgVector[obj.pCreation] != null ){
+				if (obj.entry != -1 && obj.pCreation <= data.numPEs() ){
 					// Find message that created the object
 					TimelineMessage created_message = obj.creationMessage();
 					if(created_message != null){
@@ -409,9 +411,14 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		HashSet v = new HashSet();
 
 		// For all loaded EntryMethodObjects, see if they match any of the sends from this object
-		for(int i=0;i<data.tloArray.length;i++){
-			for(int j=0;j<data.tloArray[i].length;j++){
-				EntryMethodObject obj = data.tloArray[i][j];
+		Iterator iter = data.allEntryMethodObjects.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = (Integer) iter.next();
+			LinkedList entryMethods = (LinkedList)data.allEntryMethodObjects.get(pe);
+			
+			Iterator j = entryMethods.iterator();
+			while(j.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) j.next();
 				
 				// If any of the messages sent by this object created the EntryMethodObject obj
 				TimelineMessage m = obj.creationMessage();
@@ -761,10 +768,15 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		int width = rightCoord-leftCoord+1;
 		
 		int singleTimelineH = data.singleTimelineHeight();
-		this.setBounds(leftCoord,  whichTimelineVerticalIndex*singleTimelineH,
+		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
 				width, singleTimelineH);
 	
 	}   
+	
+	public int whichTimelineVerticalIndex(){
+		return data.whichTimelineVerticalPosition(pCurrent);		
+	}
+	
 
 	public void setPackUsage()
 	{
@@ -817,9 +829,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		// System.out.println(usage);
 	}
 
-	public void setWhichTimeline(int p) {
-		whichTimelineVerticalIndex = p;
-	}
+
 
 	public int getEventID() {
 		return EventID;

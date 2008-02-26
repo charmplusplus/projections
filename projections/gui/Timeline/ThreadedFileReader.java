@@ -15,7 +15,7 @@ public class ThreadedFileReader extends Thread  {
 	}
 	
      public void run() {
-     	 	data.tloArray[p] = data.getData(pe, p);
+     	 	data.getData(new Integer(pe));
      }
 
 }

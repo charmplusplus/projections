@@ -58,9 +58,9 @@ public class NoiseMinerExemplarTimelineWindow extends JFrame {
 		contents.setLayout(new GridLayout(numRows,numCols));
 		
 		int eventsSoFar=0;
-		for (Iterator<TimelineEvent> itr = ew.occurrences.iterator(); itr.hasNext();){
+		for (Iterator itr = ew.occurrences.iterator(); itr.hasNext();){
 
-			TimelineEvent e =  itr.next();
+			TimelineEvent e =  (TimelineEvent) itr.next();
 			
 			//System.out.println(""+((e.BeginTime+e.EndTime )/ 2));
 			

@@ -665,6 +665,7 @@ public class Analysis {
 	return sts.getProcessorCount();
     }
 
+    /** Number of entries in the STS file */
     public int getNumUserEntries() {
 	return sts.getEntryCount();
     }

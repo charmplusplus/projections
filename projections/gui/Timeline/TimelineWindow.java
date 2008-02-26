@@ -2,7 +2,6 @@ package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
 
-import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 
 import projections.gui.MainWindow;

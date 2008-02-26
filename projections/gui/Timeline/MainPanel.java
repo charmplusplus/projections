@@ -8,6 +8,8 @@ import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Iterator;
+import java.util.LinkedList;
 import javax.swing.*;
 
 
@@ -73,18 +75,22 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// Add the panel which will draw the message send lines on top of everything else
 		add(new MainPanelForeground(data));
-			
 		
 		// Add the entry method instances (EntryMethodObject) to the panel for displaying
-		for (int p = 0; p < data.numPs(); p++) {
-			for (int i = 0; i < data.tloArray[p].length; i++){
-				data.tloArray[p][i].setWhichTimeline(p);
-				this.add(data.tloArray[p][i]);
+				
+		/** <LinkedList<EntryMethodObject>> */
+		Iterator pe_iter = data.allEntryMethodObjects.values().iterator();
+		while(pe_iter.hasNext()){
+			LinkedList objs = (LinkedList) pe_iter.next();
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+				this.add(obj);
 			
 				// Register a mouse motion listener for dragging of the viewport
 
 				// Only register it if we have not already registered it
-				MouseMotionListener[] mml = data.tloArray[p][i].getMouseMotionListeners();
+				MouseMotionListener[] mml = obj.getMouseMotionListeners();
 				boolean found = false;
 				for(int mml_index=0;mml_index<mml.length;mml_index++){
 					if(mml[mml_index]==this){
@@ -92,23 +98,26 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					}
 				}
 				if(!found){
-					data.tloArray[p][i].addMouseListener(this);
-					data.tloArray[p][i].addMouseMotionListener(this);
+					obj.addMouseListener(this);
+					obj.addMouseMotionListener(this);
 				}
 			}
 
-
 		}
 
+
 		// Add each user event 
-		if (data.timelineUserEventObjectsArray != null)
-			for (int p = 0; p < data.numPs(); p++)
-				if (data.timelineUserEventObjectsArray[p] != null)
-					for (int i = 0; i < data.timelineUserEventObjectsArray[p].length; i++){
-						data.timelineUserEventObjectsArray[p][i].setWhichTimeline(p);
-						this.add(data.timelineUserEventObjectsArray[p][i]);
-					}
-		
+		/** <LinkedList<UserEventObject>> */
+		Iterator iter = data.allUserEventObjects.values().iterator();
+		while(iter.hasNext()){
+			/** <UserEventObject> */
+			LinkedList userEvents = (LinkedList) iter.next();
+			Iterator ue_iter = userEvents.iterator();
+			while(ue_iter.hasNext()){
+				UserEventObject ueo = (UserEventObject) ue_iter.next();
+				this.add(ueo);						
+			}
+		}
 		
 		MainPanelBackground b = new MainPanelBackground(data);
 		b.addMouseListener(this);

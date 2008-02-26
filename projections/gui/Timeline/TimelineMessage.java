@@ -65,7 +65,6 @@ public class TimelineMessage implements Comparable
 
 		if(srcPE == other.srcPE){
 			return EventID - other.EventID;
-
 		} else {
 			return srcPE-other.srcPE;
 		}

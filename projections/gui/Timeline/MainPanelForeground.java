@@ -53,18 +53,14 @@ public class MainPanelForeground extends JPanel {
 						int pCreation = obj.pCreation;
 						int pExecution = obj.pCurrent;
 						// Find the index for the PEs in the list of displayed PEs
-						int startpe_index=0;
-						int endpe_index=0;
-						data.processorList().reset();
-						for (int j=0;j<data.processorList().size();j++) {
-							int pe = data.processorList().nextElement();
-							if (pe == pCreation) {
-								startpe_index = j;
-							}
-							if (pe == pExecution) {
-								endpe_index = j;
-							}
-						}
+						int startpe_index=data.whichTimelineVerticalPosition(pCreation);
+						int endpe_index=data.whichTimelineVerticalPosition(pExecution);
+						
+//						data.dumpPEOrder();
+						
+						System.out.println("pexe="+pExecution + " vpos=" + endpe_index);
+						System.out.println("pcreate="+pCreation + " vpos=" + startpe_index + "\n");
+						
 						// Message Creation point
 						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
 						double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();

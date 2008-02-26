@@ -6,7 +6,7 @@ import javax.swing.*;
 
 import projections.gui.MainWindow;
 
-public class UserEventObject extends JComponent
+public class UserEventObject extends JComponent implements Comparable
 {
 
 	private static final long serialVersionUID = 1L;
@@ -28,9 +28,9 @@ public class UserEventObject extends JComponent
 	public String Name;
 	private Data data;
 	
-	private int ylocation;
+	private int pe;
 
-	public UserEventObject(long t, int e, int event, int type) {
+	public UserEventObject(int pe, long t, int e, int event, int type) {
 		setFocusable(false); // optimization for speed
 		Type=type;
 		BeginTime=EndTime=t;
@@ -38,11 +38,9 @@ public class UserEventObject extends JComponent
 		CharmEventID=event;
 		color=MainWindow.runObject[myRun].getUserEventColor(UserEventID);
 		Name=MainWindow.runObject[myRun].getUserEventName(UserEventID);
+		this.pe = pe;
 	}
 
-	public void setWhichTimeline(int whichTimeline){
-		ylocation = whichTimeline;
-	}
 	
 	/** Called by the layout manager to put this in the right place */
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
@@ -61,7 +59,7 @@ public class UserEventObject extends JComponent
 		
 		/** The y coordinate of the top of the rectangle */
 		int rectHeight = data.userEventRectHeight();
-		double yTop = ((double)ylocation+0.5)*data.singleTimelineHeight() - data.barheight()/2 - rectHeight;
+		double yTop = ((double)verticalDisplayPosition()+0.5)*data.singleTimelineHeight() - data.barheight()/2 - rectHeight;
 		
 		this.setBounds( leftCoord,  
 						(int)yTop,
@@ -89,6 +87,22 @@ public class UserEventObject extends JComponent
 		EndTime += shift;
 	}
 
+	public int compareTo(Object o) {
+		UserEventObject ueo = (UserEventObject) o;
+		if(pe != ueo.pe){
+			return pe - ueo.pe;
+		}
+		else{
+			return (int) (BeginTime - ueo.BeginTime);
+		}	
+	}
+
+	/** The position in the ordering of PEs displayed */
+	public int verticalDisplayPosition(){
+		return data.whichTimelineVerticalPosition(pe);		
+	}
+	
+	
 }
 
 

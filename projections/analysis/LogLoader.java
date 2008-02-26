@@ -676,9 +676,9 @@ public class LogLoader extends ProjDefs
 		}
 	}
 
-	/** Read the timeline for a single PE and return the result as a vector of TimelineEvent's */
-	public Vector createtimeline(int PeNum, long Begin, long End, 
-			Vector Timeline, Vector userEventVector)
+	/** Read the timeline for a single PE and return the result as a Collection of TimelineEvent's */
+	public void createtimeline(int pe, long Begin, long End, 
+			List Timeline, Collection userEventVector)
 	throws LogLoadException
 	{
 		long BeginTime = 0;
@@ -699,7 +699,7 @@ public class LogLoader extends ProjDefs
 
 		// open the file
 		try {
-			reader = new GenericLogReader(PeNum,MainWindow.runObject[myRun].getVersion());
+			reader = new GenericLogReader(pe,MainWindow.runObject[myRun].getVersion());
 			data = new LogEntryData();
 			// to treat dummy thread EPs as a special-case EP
 			//  **CW** I consider this a hack. A more elegant way must
@@ -760,8 +760,8 @@ public class LogLoader extends ProjDefs
 				case BEGIN_PROCESSING:
 					// the whole line must be empty
 					System.out.println("finished empty timeline for " + 
-							PeNum);
-					return Timeline;                              
+							pe);
+					return;                              
 				case END_PROCESSING:
 					// the whole line is straddled by that single entry method
 					// in this case, we know the actual bounds of the entry 
@@ -769,29 +769,29 @@ public class LogLoader extends ProjDefs
 					if ((lastBeginEvent != null) &&
 							(lastBeginEvent.TransactionType==BEGIN_PROCESSING) &&
 							(lastBeginEvent.Entry == LE.Entry)) {
-						Timeline.addElement(TE=
+						Timeline.add(TE=
 							new TimelineEvent(lastBeginEvent.Time-BeginTime,
 									LE.Time-BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe));
 					}
-					return Timeline;
+					return;
 				case BEGIN_IDLE:
 					// the whole line must be empty
 					System.out.println("finished empty timeline for " +
-							PeNum);
-					return Timeline;
+							pe);
+					return;
 				case END_IDLE:
 					// the whole line is straddled by idle time.
 					// we also know the complete bounds of the idle time.
 					if ((lastBeginEvent != null) &&
 							(lastBeginEvent.TransactionType==BEGIN_IDLE)) {
-						Timeline.addElement(TE=
+						Timeline.add(TE=
 							new TimelineEvent(lastBeginEvent.Time-BeginTime,
 									LE.Time-BeginTime,
 									-1, -1));
 					}
-					return Timeline;
+					return;
 				default:
 					// some other event. If there is a lastBeginEvent, it
 					// must straddle the time range, BUT we will not know
@@ -800,14 +800,14 @@ public class LogLoader extends ProjDefs
 					if (lastBeginEvent != null) {
 						switch (lastBeginEvent.TransactionType) {
 						case BEGIN_PROCESSING:
-							Timeline.addElement(TE=
+							Timeline.add(TE=
 								new TimelineEvent(lastBeginEvent.Time-BeginTime,
 										End-BeginTime,
 										lastBeginEvent.Entry,
 										lastBeginEvent.Pe));
 							break;
 						case BEGIN_IDLE:
-							Timeline.addElement(TE=
+							Timeline.add(TE=
 								new TimelineEvent(lastBeginEvent.Time-BeginTime,
 										End-BeginTime,
 										-1, -1));
@@ -815,9 +815,9 @@ public class LogLoader extends ProjDefs
 						}
 					} else {
 						System.out.println("finished empty timeline for " +
-								PeNum);
+								pe);
 					}
-				return Timeline;
+				return;
 				}
 			}
 			//Throws EOFException at end of file; break if past endTime
@@ -856,7 +856,7 @@ public class LogLoader extends ProjDefs
 						TE.callStack = 
 							cstack.getStack(TE.id.id[0], TE.id.id[1], 
 									TE.id.id[2]);
-						Timeline.addElement(TE);
+						Timeline.add(TE);
 						break;
 					case END_FUNC:
 						// Phase 1: End current function.
@@ -889,7 +889,7 @@ public class LogLoader extends ProjDefs
 									enclosingDummy.cpuEnd,
 									enclosingDummy.numPapiCounts,
 									enclosingDummy.papiCounts);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 						} else {
 							// "create" previous function on stack.
 							TE = new TimelineEvent();
@@ -901,7 +901,7 @@ public class LogLoader extends ProjDefs
 							TE.callStack =
 								cstack.getStack(TE.id.id[0], TE.id.id[1],
 										TE.id.id[2]);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 						}
 						break;
 					case BEGIN_PROCESSING:
@@ -946,7 +946,7 @@ public class LogLoader extends ProjDefs
 								TE.callStack =
 									cstack.getStack(TE.id.id[0], TE.id.id[1],
 											TE.id.id[2]);
-								Timeline.addElement(TE);
+								Timeline.add(TE);
 								break;
 							}
 						}
@@ -960,7 +960,7 @@ public class LogLoader extends ProjDefs
 								LE.cpuBegin, LE.cpuEnd,
 								LE.numPapiCounts,
 								LE.papiCounts);
-						Timeline.addElement(TE);
+						Timeline.add(TE);
 						lastBeginTimelineEvent = TE;
 						break;
 					case END_PROCESSING:
@@ -974,7 +974,7 @@ public class LogLoader extends ProjDefs
 									LE.Time-BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							TE = null;
 							isProcessing = false;
 							break;
@@ -1038,7 +1038,7 @@ public class LogLoader extends ProjDefs
 									End-BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
@@ -1048,10 +1048,10 @@ public class LogLoader extends ProjDefs
 							TE = new TimelineEvent(LE.Time-BeginTime,
 									LE.Time-BeginTime,
 									-2,LE.Pe,LE.MsgLen);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(PeNum, TE.EventID, LE.Time - BeginTime,
+						TM = new TimelineMessage(pe, TE.EventID, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID);
 						TE.addMessage(TM);
@@ -1072,7 +1072,7 @@ public class LogLoader extends ProjDefs
 									End - BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
@@ -1081,10 +1081,10 @@ public class LogLoader extends ProjDefs
 							TE = new TimelineEvent(LE.Time - BeginTime,
 									LE.Time - BeginTime,
 									-2, LE.Pe, LE.MsgLen);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(PeNum, TE.EventID, LE.Time - BeginTime,
+						TM = new TimelineMessage(pe, TE.EventID, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID, LE.numPEs);
 						TE.addMessage(TM);
@@ -1104,7 +1104,7 @@ public class LogLoader extends ProjDefs
 									End-BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
@@ -1113,10 +1113,10 @@ public class LogLoader extends ProjDefs
 							TE = new TimelineEvent(LE.Time-BeginTime,
 									LE.Time-BeginTime,
 									-2, LE.Pe, LE.MsgLen);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(PeNum, TE.EventID, LE.Time - BeginTime,
+						TM = new TimelineMessage(pe, TE.EventID, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID, LE.destPEs);
 						TE.addMessage(TM);
@@ -1126,16 +1126,16 @@ public class LogLoader extends ProjDefs
 						break;
 					case USER_EVENT:
 						// don't mess with TE, that's just for EPs
-						UserEventObject event = new UserEventObject(LE.Time-BeginTime,
+						UserEventObject event = new UserEventObject(pe, LE.Time-BeginTime,
 								LE.Entry, LE.EventID,
 								UserEventObject.SINGLE);
-						userEventVector.addElement(event);
+						userEventVector.add(event);
 						break;
 					case USER_EVENT_PAIR:
 						// **CW** UserEventPairs come in a two-line block
 						// because of the way the tracing code is currently
 						// written.
-						userEventObject = new UserEventObject(LE.Time-BeginTime,
+						userEventObject = new UserEventObject(pe, LE.Time-BeginTime,
 								LE.Entry, LE.EventID,
 								UserEventObject.PAIR); 
 						// assume the end time to be the end of range
@@ -1164,12 +1164,12 @@ public class LogLoader extends ProjDefs
 						} else {
 
 							userEventObject.EndTime = LE.Time-BeginTime;
-							userEventVector.addElement(userEventObject);
+							userEventVector.add(userEventObject);
 							if(!Timeline.isEmpty()) {
 								//If the log is loaded somewhere in the middle where
 								//user event happens before a timeline event, then the
 								//timeline vector would be empty
-								TimelineEvent curLastOne = (TimelineEvent)Timeline.lastElement();
+								TimelineEvent curLastOne = (TimelineEvent) Timeline.get(Timeline.size()-1);
 								long tleBeginTime = curLastOne.BeginTime;
 								//System.out.println("TLE's begin: "+tleBeginTime+" user's begin: "+userEvent.BeginTime);
 								if(tleBeginTime <= userEventObject.BeginTime && 
@@ -1193,7 +1193,7 @@ public class LogLoader extends ProjDefs
 									End-BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
@@ -1202,7 +1202,7 @@ public class LogLoader extends ProjDefs
 							TE = new TimelineEvent(LE.Time-BeginTime,
 									LE.Time-BeginTime,-2,
 									LE.Pe);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 						}
 						TE.addPack (PT=new PackTime(LE.Time-BeginTime));
 						break;
@@ -1225,7 +1225,7 @@ public class LogLoader extends ProjDefs
 						TE = new TimelineEvent(LE.Time - BeginTime,
 								Long.MAX_VALUE,
 								-1,-1); 
-						Timeline.addElement(TE);
+						Timeline.add(TE);
 						break;
 					case END_IDLE:
 						if (MainWindow.IGNORE_IDLE) {
@@ -1241,7 +1241,7 @@ public class LogLoader extends ProjDefs
 							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
 									End-BeginTime,
 									-1, -1);
-							Timeline.addElement(TE);
+							Timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
@@ -1279,13 +1279,13 @@ public class LogLoader extends ProjDefs
 			/*ignore*/ 
 		} catch (FileNotFoundException E) {
 			System.out.println("ERROR: couldn't open file " + 
-					MainWindow.runObject[myRun].getLogName(PeNum));
+					MainWindow.runObject[myRun].getLogName(pe));
 		} catch (IOException E) {
-			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
+			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(pe), 
 					LogLoadException.READ);
 		}
 		System.gc();
-		return Timeline;
+		return;
 	}
 
 	private ViewerEvent entrytotext(LogEntry LE)

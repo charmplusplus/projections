@@ -1,7 +1,8 @@
 package projections.gui.Timeline;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Vector;
+import java.util.TreeMap;
 
 /** this class is used to hold some data structures that are initialized by a separate thread 
  * 
@@ -15,8 +16,12 @@ public class MessageStructures {
 	
 	Data data;
 	
-	/** Some associative containers to make lookups fast */
+	// TODO update each of these first two members to make them not require space proportional to PE.
+	
+	/** A Map for each PE, key = eventID value = Message */
 	private Map []eventIDToMessageMap;
+	
+	/** A Map for each PE, key = eventID value = EntryMethodObject */
 	private Map []eventIDToEntryMethodMap;
 	
 	/** Map from a message to the the resulting entry methods entry object invocations */
@@ -33,14 +38,36 @@ public class MessageStructures {
 	
 	public MessageStructures(Data data){
 		this.data = data;
+		init();
 	}
 
+	
+	/** Delete all old references by initializing each data structure */
+	private void init(){
+		synchronized(this){
+			int pe = data.numPEs();
+
+			eventIDToMessageMap = new HashMap[pe];
+			for(int i=0;i<pe;i++)
+				eventIDToMessageMap[i] = new HashMap();
+
+			eventIDToEntryMethodMap = new HashMap[pe];
+			for(int i=0;i<pe;i++)
+				eventIDToEntryMethodMap[i] = new HashMap();
+
+			messageToSendingObjectsMap = new HashMap();
+			messageToExecutingObjectsMap = new HashMap();
+
+			oidToEntryMethodObjectsMap = new TreeMap();
+		}		
+	}
+	
 	/** Spawn a thread that will fill in the data structures. It is unlikely in the visualization that these 
 	 * structures will be needed early on. Due to the mutual exclusion synchronization on this object,
 	 *  all threads that eventually need the data will block until the data has been produced */
 	public void create(){
 		// Create the secondary structures for efficient accessing of messages
-
+		init();
 		secondaryWorkers = new ThreadMessageStructures(this);
 		secondaryWorkers.setPriority(Thread.MIN_PRIORITY);
 		secondaryWorkers.start();
@@ -90,6 +117,14 @@ public class MessageStructures {
 
 	public void setMessageToSendingObjectsMap(Map messageToSendingObjectsMap) {
 		this.messageToSendingObjectsMap = messageToSendingObjectsMap;
+	}
+
+	public void kill() {
+		if(secondaryWorkers != null){
+			secondaryWorkers.stop();
+			secondaryWorkers = null;
+		}
+		init();
 	}
 			
 }

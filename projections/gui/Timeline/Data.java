@@ -332,19 +332,13 @@ public class Data
 		
 		//==========================================	
 		// Do multithreaded file reading
-		// TODO this could be made faster for times where the set of processors to be loaded is non-contiguous
 
 		Date startReadingTime  = new Date();
 		
 		processorList.reset();
 		int numPs = processorList.size();
-		ProgressMonitor progressBar = 
-			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading timeline data in parallel","", 0, numPs+1);
-		progressBar.setMillisToPopup(0);
-		progressBar.setMillisToDecideToPopup(0);
-		progressBar.setProgress(0);
-				
-		// Create worker threads
+			
+		// Create a list of worker threads
 		LinkedList readyReaders = new LinkedList();
 		
 		for (int p=0; p<numPs; p++) {
@@ -353,69 +347,20 @@ public class Data
 				readyReaders.add(new ThreadedFileReader(pe,p,this));
 			}
 		}
-				
-		int totalToLoad = readyReaders.size();
-		progressBar.setMaximum(totalToLoad);
-		int numConcurrentThreads = 16;
+	
+		// Pass this list of threads to a class that manages/runs the threads nicely
+		ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, MainWindow.runObject[myRun].guiRoot);
+		threadManager.runThreads();
+
 		
-		if(totalToLoad < numConcurrentThreads){
-			numConcurrentThreads = totalToLoad;
-		}
+		//==========================================	
+		//  Perform some post processing
 		
-		// execute reader threads, a few at a time, until all have executed
-		LinkedList spawnedReaders = new LinkedList();
-		while(readyReaders.size() > 0 || spawnedReaders.size() > 0){
-
-			//------------------------------------
-			// spawn some threads
-			ThreadedFileReader r;
-			while(readyReaders.size()>0 && spawnedReaders.size()<numConcurrentThreads){
-				r = (ThreadedFileReader) readyReaders.removeFirst(); // retrieve and remove from list
-				spawnedReaders.add(r);
-				r.start(); // will cause the run method to be executed
-			}
-
-			//------------------------------------
-			// update the progress bar
-			int doneCount = totalToLoad-readyReaders.size()-spawnedReaders.size();
-			if (!progressBar.isCanceled()) {
-				progressBar.setNote(doneCount+ " of " + totalToLoad);
-				progressBar.setProgress(doneCount);
-			} else {
-				break;
-			}
-
-			//------------------------------------
-			// wait on the threads to complete
-			Iterator iter = spawnedReaders.iterator();
-			int waitMillis = 1000; // wait for 1000 ms for the first thread, and 1 ms for each additional thread
-			while(iter.hasNext()){
-				r = (ThreadedFileReader) iter.next();
-				try {
-					r.join(waitMillis);
-					waitMillis = 1;
-					if(! r.isAlive()) {
-						// Thread Finished
-						iter.remove();
-					} 
-				}
-				catch (InterruptedException e) {
-					throw new RuntimeException("Thread was interrupted. This should not ever occur");
-				}
-			}
-						
-		}
-
-		if(totalToLoad > 0){
+		if(threadManager.numInitialThreads > 0){
 			Date endReadingTime  = new Date();
-			System.out.println("Time to read " + totalToLoad +  " input files(using up to " + numConcurrentThreads + " threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
+			System.out.println("Time to read " + threadManager.numInitialThreads +  " input files(using up to " + threadManager.numConcurrentThreads + " threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
 		}
 			
-		if (!progressBar.isCanceled()) {
-			progressBar.setNote("Finishing");
-			progressBar.setProgress(numPs);
-		}
-		
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
 		}
@@ -466,8 +411,6 @@ public class Data
 		} 
 
 		updatePEVerticalOrdering();
-		
-		progressBar.close();
 		
 		// Spawn a thread that computes some secondary message related data structures
 		messageStructures.create();
@@ -571,8 +514,7 @@ public class Data
 	/** Load the timeline for processor pe.
 	 * 
 	 *  This method loads the timeline into: timelineUserEventObjectsArray, allEntryMethodObjects, 
-	 * 
-	 * 
+	 *  
 	 * */
 	void getData(Integer pe)  
 	{

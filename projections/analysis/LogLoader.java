@@ -7,6 +7,7 @@ import java.util.*;
 import javax.swing.*;
 
 import projections.gui.*;
+import projections.gui.Timeline.ThreadedFileReader;
 import projections.gui.Timeline.TimelineMessage;
 import projections.gui.Timeline.UserEventObject;
 import projections.misc.*;
@@ -30,124 +31,36 @@ public class LogLoader extends ProjDefs
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
 	public long determineEndTime(OrderedIntList validPEs)
 	{
-		long BeginTime, EndTime;
+		
+		int nPe=validPEs.size();
+		
+		//==========================================	
+		// Do multithreaded file reading
 
-		long             Time;
-		long 	         back;
-		String           Line;
-		RandomAccessFile InFile;
-		StringTokenizer  st;
+		// Create a list of worker threads
+		LinkedList workerThreads = new LinkedList();
+
+ 		validPEs.reset();
+ 		while (validPEs.hasMoreElements()) {
+ 				int pe = validPEs.nextElement();
+				workerThreads.add(new LogLoaderEndTimeThread( MainWindow.runObject[myRun].getLogName(pe)) );
+			}
+	
+		// Pass this list of threads to a class that manages/runs the threads nicely
+		ThreadManager threadManager = new ThreadManager("Computing End Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot);
+		threadManager.runThreads();
 
 		
-		//Find the begin and end time across the parallel machine
-		BeginTime = 0;
-		EndTime   = Integer.MIN_VALUE;
-		int nPe=validPEs.size();
-
-		ProgressMonitor progressBar =
-			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Determining end time",
-					"", 0, nPe);
-		validPEs.reset();
-		int count = 1;
-		while (validPEs.hasMoreElements()) {
-			int pe = validPEs.nextElement();
-			if (!progressBar.isCanceled()) {
-				progressBar.setNote("[" + pe + "] " + count + 
-						" of " + nPe + " files");
-				progressBar.setProgress(count);
-			} else {
-				System.err.println("Fatal error - Projections cannot" +
-				" function without proper end time!");
-				System.exit(-1);
-			}
-			count++;
-			// Throws EOFException at end of file
-			// 4/16/2006 - Unless we have to fake the end time.
-			// A Cleaner fake mechanism is probably required.
-			long lastRecordedTime = 0;
-			int dummyInt = 0;
-			int type = 0;
-			try {
-				InFile = 
-					new RandomAccessFile(new File(MainWindow.runObject[myRun].getLogName(pe)),
-							"r");
-
-				back = InFile.length()-80*3; //Seek to the end of the file
-				if (back < 0) back = 0;
-				InFile.seek(back);
-				while (InFile.readByte() != '\n'){}
-				while (true) {
-					Line = InFile.readLine();
-					// incomplete files can end on a proper previous
-					// line but not on END_COMPUTATION. This statement
-					// takes care of that.
-					if (Line == null) {
-						throw new EOFException();
-					}
-					st = new StringTokenizer(Line);
-					if ((type=Integer.parseInt(st.nextToken())) == 
-						END_COMPUTATION) {
-						Time = Long.parseLong(st.nextToken());
-						if (Time > EndTime)
-							EndTime = Time;
-						break; // while loop
-					} else {
-						switch (type) {
-						case CREATION:
-						case CREATION_BCAST:
-						case CREATION_MULTICAST:
-						case BEGIN_PROCESSING:
-						case END_PROCESSING:
-							dummyInt = 
-								Integer.parseInt(st.nextToken());
-							dummyInt = 
-								Integer.parseInt(st.nextToken());
-							break;
-						case USER_SUPPLIED:
-						case MEMORY_USAGE:
-						case USER_EVENT:
-						case USER_EVENT_PAIR:
-						case MESSAGE_RECV: 
-						case ENQUEUE: 
-						case DEQUEUE:
-							dummyInt = 
-								Integer.parseInt(st.nextToken());
-							break;
-						case BEGIN_IDLE:
-						case END_IDLE:
-						case BEGIN_PACK: 
-						case END_PACK:
-						case BEGIN_UNPACK: 
-						case END_UNPACK:
-						case BEGIN_TRACE: 
-						case END_TRACE:
-						case BEGIN_COMPUTATION:
-						case BEGIN_FUNC:
-						case END_FUNC:
-						case BEGIN_INTERRUPT: 
-						case END_INTERRUPT:
-							break;
-
-						}
-						lastRecordedTime = Long.parseLong(st.nextToken());
-					}
-				}
-				InFile.close ();
-			} catch (EOFException e) {
-				System.err.println("[" + pe + "] " +
-						"WARNING: Partial Log: Faking End " +
-						"Time determination at last recorded " +
-						"time of " + lastRecordedTime);
-				if (lastRecordedTime > EndTime) {
-					EndTime = lastRecordedTime;
-				}
-			} catch (IOException E) {
-				System.err.println("Couldn't read log file " + 
-						MainWindow.runObject[myRun].getLogName(pe));
+		Iterator iter = workerThreads.iterator();
+		int maxTimeFound = Integer.MIN_VALUE;
+		while(iter.hasNext()){
+			LogLoaderEndTimeThread worker = (LogLoaderEndTimeThread) iter.next();
+			if(worker.result > maxTimeFound ){
+				maxTimeFound = worker.result;
 			}
 		}
-		progressBar.close();
-		return EndTime-BeginTime;
+		
+		return maxTimeFound;
 	}
 
 	/**

@@ -58,9 +58,6 @@ public class MainPanelForeground extends JPanel {
 						
 //						data.dumpPEOrder();
 						
-						System.out.println("pexe="+pExecution + " vpos=" + endpe_index);
-						System.out.println("pcreate="+pCreation + " vpos=" + startpe_index + "\n");
-						
 						// Message Creation point
 						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
 						double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();

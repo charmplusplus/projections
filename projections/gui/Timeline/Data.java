@@ -1271,8 +1271,17 @@ public class Data
 	
 	/** Determines which vertical position represents PE */
 	public int whichTimelineVerticalPosition(int PE) {
-		return ((Integer)peToLine.get(new Integer(PE))).intValue();
+		if(peToLine==null){
+			throw new RuntimeException("peToLine is null");
+		}
+		if(!peToLine.containsKey(new Integer(PE))){
+			throw new RuntimeException("peToLine does not contain pe " + PE);
+		}
+		if(peToLine.get(new Integer(PE)) == null){
+			throw new RuntimeException("peToLine is null");
+		}
 		
+		return ((Integer)peToLine.get(new Integer(PE))).intValue();
 	}
 	
 	/** Update the ordering of the PEs (vertical position ordering) */

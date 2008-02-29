@@ -269,6 +269,11 @@ ItemListener {
 			else if(arg.equals("Shift Timelines to fix inconsistent clocks"))
 				data.fixTachyons();
 			
+			else if(arg.equals("Determine Time Ranges for User Supplied Values")){
+				UserSuppliedAnalyzer usa = new UserSuppliedAnalyzer(data);
+				
+			}
+			
 		}
 
 		
@@ -417,6 +422,19 @@ ItemListener {
 		cbCompactView.addItemListener(this);
 
 		mbar.add(actionMenu);
+		
+		
+		JMenu userSuppliedMenu = new JMenu("User Supplied Data");
+		JMenuItem i50 = new JMenuItem("Determine Time Ranges for User Supplied Values");
+		JMenuItem i51 = new JMenuItem("Color by Memory Usage");
+
+		userSuppliedMenu.add(i50);
+		userSuppliedMenu.add(i51);
+		
+		i50.addActionListener(this);
+		i51.addActionListener(this);
+
+		mbar.add(userSuppliedMenu);
 		
 		
 		parentWindow.setJMenuBar(mbar);

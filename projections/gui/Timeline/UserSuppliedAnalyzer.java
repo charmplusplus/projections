@@ -130,9 +130,7 @@ public class UserSuppliedAnalyzer extends JFrame {
 			row.add(new String(""));
 			data.add(row);
 		}
-		
-		
-		
+				
 		DefaultTableModel tableModel = new DefaultTableModel(data, columnNames);
 
 		JTable table = new JTable(tableModel);

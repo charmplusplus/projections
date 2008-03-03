@@ -570,20 +570,22 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			}
 		}
 		
-		// Sometimes Overrule the normal colors and use one based on the chare array index
-		if( ! isIdleEvent() && data.colorbyObjectId())
-			c = colorFromOID();
-	
-		// Dim this object if we want to focus on some objects(for some reason or another)
-		if(data.isObjectDimmed(this))
-			c = c.darker().darker();
-		
 		
 		// grey out the objects with odd userSuppliedData value 
 		if(data.colorByUserSupplied()){
-			if(userSuppliedData !=  null && (((userSuppliedData.intValue()+4096)%2)==1)){
-				c = Color.darkGray;
-			} else {
+			if(userSuppliedData !=  null){
+				switch ((userSuppliedData.intValue()+5000)%10) {
+				 case 0: c = Color.green; break;
+				 case 1: c = Color.red; break;
+				 case 2: c = Color.blue; break;
+				 case 3: c = Color.yellow; break;
+				 case 4: c = Color.darkGray; break;
+				 case 5: c = Color.magenta; break;
+				 case 6: c = Color.cyan; break;
+				 case 7: c = Color.orange; break;
+				 case 8: c = Color.pink; break;
+				 case 9: c = Color.lightGray; break;
+				}
 			}
 		}
 		
@@ -604,7 +606,17 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			}
 			
 		}
+			
 		
+		// Sometimes Overrule the normal colors and use one based on the chare array index
+		if( ! isIdleEvent() && data.colorbyObjectId())
+			c = colorFromOID();
+	
+		// Dim this object if we want to focus on some objects(for some reason or another)
+		if(data.isObjectDimmed(this))
+			c = c.darker().darker();
+		
+	
 			
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();

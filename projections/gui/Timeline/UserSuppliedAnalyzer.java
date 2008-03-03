@@ -6,6 +6,8 @@ import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -16,7 +18,7 @@ import projections.analysis.NoiseMiner.NoiseResultButton;
 import projections.gui.MainWindow;
 
 
-/** A class that analyzes the user supplied data ranges */
+/** A class that analyzes the user supplied data ranges, and displays a table of the results */
 public class UserSuppliedAnalyzer extends JFrame {
 	Data data;
 	
@@ -112,6 +114,23 @@ public class UserSuppliedAnalyzer extends JFrame {
 			prevMax = max;
 			data.add(row);	
 		}
+		
+		// If we didn't find any values, put some other text in the table
+		
+		if(parameterMinTime.size() == 0){
+			JLabel msg = new JLabel("<html><body>No User Supplied Values Found in the currently loaded timeline.<br> Try selecting a different time range, or add calls to <br><font color=blue><tt>traceUserSuppliedData(int value)</tt></font> to the program.</body></html>");
+			JOptionPane.showMessageDialog(this, msg, "Warning", JOptionPane.WARNING_MESSAGE);
+			
+			Vector row = new Vector();
+			row.add(new String("No data found"));
+			row.add(new String(""));
+			row.add(new String(""));
+			row.add(new String(""));
+			row.add(new String(""));
+			row.add(new String(""));
+			data.add(row);
+		}
+		
 		
 		
 		DefaultTableModel tableModel = new DefaultTableModel(data, columnNames);

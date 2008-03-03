@@ -1,8 +1,13 @@
 package projections.gui.Timeline;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
+
+import projections.analysis.ObjectId;
 
 /** this class is used to hold some data structures that are initialized by a separate thread 
  * 
@@ -65,13 +70,16 @@ public class MessageStructures {
 	/** Spawn a thread that will fill in the data structures. It is unlikely in the visualization that these 
 	 * structures will be needed early on. Due to the mutual exclusion synchronization on this object,
 	 *  all threads that eventually need the data will block until the data has been produced */
-	public void create(){
+	public void create(boolean useSeparateThread){
 		// Create the secondary structures for efficient accessing of messages
 		init();
 		secondaryWorkers = new ThreadMessageStructures(this);
-		secondaryWorkers.setPriority(Thread.MIN_PRIORITY);
-		secondaryWorkers.start();
-	
+		if(useSeparateThread){
+			secondaryWorkers.setPriority(Thread.MIN_PRIORITY);
+			secondaryWorkers.start();
+		} else {
+			generate();
+		}
 	}
 
 	public void setEventIDToMessageMap(Map [] eventIDToMessageMap) {
@@ -125,6 +133,137 @@ public class MessageStructures {
 			secondaryWorkers = null;
 		}
 		init();
+	}
+	
+	public void generate(){
+
+		// TODO These are computed anytime a new range or pe is loaded. Make faster by just adding in the new PEs portion
+
+		/** Create a mapping from EventIDs on each pe to messages */
+		Iterator pe_iter = data.allEntryMethodObjects.keySet().iterator();
+		while(pe_iter.hasNext()){
+			Integer pe =  (Integer) pe_iter.next();
+			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){  
+				// For each EntryMethod Object
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+				Iterator msg_iter = obj.messages.iterator();
+				while(msg_iter.hasNext()){
+					// For each message sent by the object
+					TimelineMessage msg = (TimelineMessage) msg_iter.next();
+					getEventIDToMessageMap()[pe.intValue()].put(new Integer(msg.EventID), msg);
+				}
+			}
+		}
+
+
+//		progressBar.setProgress(1);
+//		progressBar.setNote("Creating Map 2");
+
+
+		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
+	
+		pe_iter = data.allEntryMethodObjects.keySet().iterator();
+		while(pe_iter.hasNext()){
+			Integer pe =  (Integer) pe_iter.next();
+			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+				getEventIDToEntryMethodMap()[pe.intValue()].put(new Integer(obj.EventID), obj);
+			}
+		}
+
+//		progressBar.setProgress(2);
+//		progressBar.setNote("Creating Map 3");
+
+
+		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
+
+		pe_iter = data.allEntryMethodObjects.keySet().iterator();
+		while(pe_iter.hasNext()){
+			Integer pe =  (Integer) pe_iter.next();
+			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+
+				// put all the messages created by obj into the map, listing obj as the creator
+				Iterator iter = obj.messages.iterator();
+				while(iter.hasNext()){
+					TimelineMessage msg = (TimelineMessage) iter.next();
+					getMessageToSendingObjectsMap().put(msg, obj);
+				}
+			}				
+		}
+	
+
+//		progressBar.setProgress(3);
+//		progressBar.setNote("Creating Map 4");
+
+
+		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
+	
+		pe_iter = data.allEntryMethodObjects.keySet().iterator();
+		while(pe_iter.hasNext()){
+			Integer pe =  (Integer) pe_iter.next();
+			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+
+				TimelineMessage msg = obj.creationMessage();
+				if(msg!=null){
+					// for each EntryMethodObject, add its creation Message to the map
+					if(getMessageToExecutingObjectsMap().containsKey(msg)){
+						// add it to the TreeSet in the map
+						Object o= getMessageToExecutingObjectsMap().get(msg);
+						TreeSet ts = (TreeSet)o;
+						ts.add(obj);
+					} else {
+						// create a new TreeSet and put it in the map
+						TreeSet ts = new TreeSet();
+						ts.add(obj);
+						getMessageToExecutingObjectsMap().put(msg, ts);
+					}
+				}
+							
+			}
+		}
+
+
+//		progressBar.setProgress(4);
+//		progressBar.setNote("Creating Map 5");
+
+
+		/** Create a mapping from Chare array element indices to their EntryMethodObject's */
+
+		pe_iter = data.allEntryMethodObjects.keySet().iterator();
+		while(pe_iter.hasNext()){
+			Integer pe =  (Integer) pe_iter.next();
+			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
+			Iterator obj_iter = objs.iterator();
+			while(obj_iter.hasNext()){
+				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+
+				if(obj != null){
+					ObjectId id = obj.getTid();
+
+					if(getOidToEntryMethodObjectsMap().containsKey(id)){
+						// add obj to the existing set
+						TreeSet s = (TreeSet) getOidToEntryMethodObjectsMap().get(id);
+						s.add(obj);
+					} else {
+						// create a set for the id
+						TreeSet s = new TreeSet();
+						s.add(obj);
+						getOidToEntryMethodObjectsMap().put(id, s);
+					}
+
+				}
+			}				
+		}
 	}
 			
 }

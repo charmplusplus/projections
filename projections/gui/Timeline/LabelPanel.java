@@ -70,52 +70,54 @@ public class LabelPanel extends JPanel implements MouseListener, MouseMotionList
 
 			int pe = data.whichPE(verticalPosition);
 
-			if(data.useMinimalView() || data.useCompactView()){
-				// A simpler version (right justified, bold larger PE label, no idle percentage)
-				
-				if(clickedOnPE == pe){
-					// don't draw the old location
-				}
-				else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
-					// draw the PE we are dragging around here
-					g.setColor(Color.red);
-					String peString = "PE "+clickedOnPE;
-					int stringWidth = fm.stringWidth(peString);			
-					g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
-				}
-				else {
-					String peString = "PE "+pe;
-					int stringWidth = fm.stringWidth(peString);			
-					g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
-				}
+			if(pe > -1){
 
-			} else {
-			
-				// The full version
-				if(clickedOnPE == pe){
-					// don't draw the old location
-				}
-				else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
-					// draw the PE we are dragging around here
-					g.setColor(Color.red);
+				if(data.useMinimalView() || data.useCompactView()){
+					// A simpler version (right justified, bold larger PE label, no idle percentage)
 
-					String peString = "PE "+ clickedOnPE;
-					g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+					if(clickedOnPE == pe){
+						// don't draw the old location
+					}
+					else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
+						// draw the PE we are dragging around here
+						g.setColor(Color.red);
+						String peString = "PE "+clickedOnPE;
+						int stringWidth = fm.stringWidth(peString);			
+						g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+					}
+					else {
+						String peString = "PE "+pe;
+						int stringWidth = fm.stringWidth(peString);			
+						g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+					}
 
-					String percentString = "(" + (int)(100 - data.idleUsage[clickedOnPE]) + ", " + (int)(data.processorUsage[clickedOnPE]) + ")";
-					g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
-				}
-				else {
-					g.setColor(data.getForegroundColor());
+				} else {
 
-					String peString = "PE "+ pe;
-					g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+					// The full version
+					if(clickedOnPE == pe){
+						// don't draw the old location
+					}
+					else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
+						// draw the PE we are dragging around here
+						g.setColor(Color.red);
 
-					String percentString = "(" + (int)(100 - data.idleUsage[pe]) + ", " + (int)(data.processorUsage[pe]) + ")";
-					g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
+						String peString = "PE "+ clickedOnPE;
+						g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+
+						String percentString = "(" + (int)(100 - data.idleUsage[clickedOnPE]) + ", " + (int)(data.processorUsage[clickedOnPE]) + ")";
+						g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
+					}
+					else {
+						g.setColor(data.getForegroundColor());
+
+						String peString = "PE "+ pe;
+						g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+
+						String percentString = "(" + (int)(100 - data.idleUsage[pe]) + ", " + (int)(data.processorUsage[pe]) + ")";
+						g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
+					}
 				}
 			}
-			
 		}
 
 	}

@@ -1,5 +1,6 @@
 package projections.gui.Timeline;
 
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -60,18 +61,22 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 	
 	/** 
-	 * Load or Reload the timeline objects from the data object's tloArray
+	 * Load or Reload the timeline objects from the data object's tloArray.
+	 *  
+	 *  if useHelperThreads is true, the information about messages sent will be offloaded to a separate thread. 
+	 *  This will allow the results to be returned faster, but if the message information is needed immedeately, 
+	 *  this should be set to false.
 	 *  
 	 * @note This was formerly called procRangeDialog()
 	 */
-	public void loadTimelineObjects() {
+	public void loadTimelineObjects(boolean useHelperThreads, Component rootWindow) {
 		
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
-	
+		
 		this.removeAll();
-		data.createTLOArray();
+		data.createTLOArray(useHelperThreads, rootWindow);
 
 		// Add the panel which will draw the message send lines on top of everything else
 		add(new MainPanelForeground(data));
@@ -104,7 +109,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			}
 
 		}
-
 
 		// Add each user event 
 		/** <LinkedList<UserEventObject>> */

@@ -50,7 +50,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	/** Pixel coordinate of left side of object */
 	private int leftCoord=0;
 
-	/** Pixel coordinate of right side of object */
 	private int rightCoord=0;
 	
 	

@@ -59,7 +59,7 @@ public class Data
 	int myRun = 0;
 
 	private MainHandler modificationHandler = null;
-
+	
 	/** A factor describin how zoomed in we are */
 	private float scaleFactor = 1.0f;
 
@@ -74,8 +74,9 @@ public class Data
 	private int mostRecentScaledScreenWidth;
 
 	/** The list of processors used in this tool. Can differ from those used in other tools */
-	OrderedIntList processorList;
-	/** The list of pes displayed, sorted in vertical ordering <Integer, Integer>*/
+	private OrderedIntList processorList;
+	
+	/** The list of pes displayed, the key is the PE the value is the vertical index <Integer, Integer>*/
 	HashMap peToLine;
 
 	/** If true, color entry method invocations by Object ID */
@@ -228,8 +229,6 @@ public class Data
 		int oldNumP = processorList.size();
 		processorList.insert(pCreation);
 		int newNumP = processorList.size();
-
-		peToLine = null;
 		
 		if(oldNumP != newNumP)
 			modificationHandler.notifyProcessorListHasChanged();
@@ -265,8 +264,11 @@ public class Data
 	 *  	  this will not be called. the new proc's
 	 *        data will be retrieved using getData()
 	 *        which calls createTL() 
+	 *        
+	 * If the message send lines are needed immedeately, no helper threads should be used(race condition)
+	 *        
 	 */
-	public void createTLOArray()
+	public void createTLOArray(boolean useHelperThreads, Component rootWindow)
 	{
 		
 		// Kill off the secondary processing threads if needed
@@ -349,7 +351,10 @@ public class Data
 		}
 	
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, MainWindow.runObject[myRun].guiRoot);
+		if(rootWindow==null)
+			rootWindow = MainWindow.runObject[myRun].guiRoot;
+		
+		ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, rootWindow);
 		threadManager.runThreads();
 
 		
@@ -358,7 +363,7 @@ public class Data
 		
 		if(threadManager.numInitialThreads > 0){
 			Date endReadingTime  = new Date();
-			System.out.println("Time to read " + threadManager.numInitialThreads +  " input files(using up to " + threadManager.numConcurrentThreads + " threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
+			System.out.println("Time to read " + threadManager.numInitialThreads +  " input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
 		}
 			
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
@@ -413,7 +418,7 @@ public class Data
 		updatePEVerticalOrdering();
 		
 		// Spawn a thread that computes some secondary message related data structures
-		messageStructures.create();
+		messageStructures.create(useHelperThreads);
 	
 	}
 	
@@ -1286,7 +1291,9 @@ public class Data
 	
 	/** Update the ordering of the PEs (vertical position ordering) */
 	void updatePEVerticalOrdering(){
-
+//
+//		System.out.println("updatePEVerticalOrdering");
+		
 		/** <Integer, Integer> */
 		HashMap oldPeToLine = peToLine;
 		peToLine = new HashMap();

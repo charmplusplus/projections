@@ -3,6 +3,7 @@ package projections.gui.Timeline;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.Toolkit;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
@@ -78,7 +79,6 @@ ItemListener {
 		userEventWindow = new UserEventWindow(cbUserTable);
 
 	}
-
 	public void showDialog() {
 
 		if (parentWindow.dialog == null) {
@@ -95,14 +95,15 @@ ItemListener {
 				// the main window visible after it has finished loading
 				final SwingWorker worker = new SwingWorker() {
 					public Object construct() {
-						parentWindow.mainPanel.loadTimelineObjects();
+						parentWindow.mainPanel.loadTimelineObjects(true, null);
 						cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 						return null;
 					}
 
 					public void finished() {
 						// Here we are basically at startup after the dialog window and the trace log has been read
-						parentWindow.setSize(1000, 600);
+//						parentWindow.setSize(1000, 600);
+						parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 						parentWindow.setVisible(true);
 					}
 				};
@@ -182,7 +183,7 @@ ItemListener {
 
 			scaleField.setText("" + 1.0);	
 
-			parentWindow.mainPanel.loadTimelineObjects();
+			parentWindow.mainPanel.loadTimelineObjects(true, null);
 			
 			cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 			
@@ -345,7 +346,7 @@ ItemListener {
 		i3.addActionListener(this);
 		mbar.add(fileMenu);
 
-		JMenu toolsMenu = new JMenu("Tools");
+		JMenu toolsMenu = new JMenu("Ranges");
 		JMenuItem i4 = new JMenuItem("Modify Ranges");
 		toolsMenu.add(i4);
 		i4.addActionListener(this);
@@ -409,33 +410,22 @@ ItemListener {
 		mbar.add(tracingMenu);
 	
 		
-		
 		// Actions Menu
-		JMenu actionMenu = new JMenu("Experimental Features");
+		JMenu experimentalMenu = new JMenu("Experimental Features");
 		JMenuItem i40 = new JMenuItem("Shift Timelines to fix inconsistent clocks");
-		actionMenu.add(i40);
 		i40.addActionListener(this);
-		
+		experimentalMenu.add(i40);
 		
 		cbCompactView = new JCheckBoxMenuItem("Compact View");
-		actionMenu.add(cbCompactView);
 		cbCompactView.addItemListener(this);
-
-		mbar.add(actionMenu);
+		experimentalMenu.add(cbCompactView);
 		
-		
-		JMenu userSuppliedMenu = new JMenu("User Supplied Data");
 		JMenuItem i50 = new JMenuItem("Determine Time Ranges for User Supplied Values");
-		JMenuItem i51 = new JMenuItem("Color by Memory Usage");
-
-		userSuppliedMenu.add(i50);
-		userSuppliedMenu.add(i51);
-		
 		i50.addActionListener(this);
-		i51.addActionListener(this);
-
-		mbar.add(userSuppliedMenu);
+		experimentalMenu.add(i50);
 		
+		mbar.add(experimentalMenu);
+	
 		
 		parentWindow.setJMenuBar(mbar);
 

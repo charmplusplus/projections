@@ -64,7 +64,7 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		
 		// create a MainPanel for it	
 		displayPanel = new MainPanel(data, this);
-		displayPanel.loadTimelineObjects();
+		displayPanel.loadTimelineObjects(true, null);
 				
 		labelPanel = new LabelPanel(data);
 		

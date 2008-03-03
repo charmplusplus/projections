@@ -161,7 +161,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
      *  @note Required for interface MainHandler 
      */
 	public void notifyProcessorListHasChanged() {
-		mainPanel.loadTimelineObjects();
+		mainPanel.loadTimelineObjects(false, this);
 	}
 	
 	 /** Add a timeline to the Timeline visualization

@@ -129,17 +129,17 @@ public class TimeProfileWindow extends GenericGraphWindow
                                     "Close"
             },
                                 null, this));
-        mbar.add(Util.makeJMenu("Tools", new Object[]
-            {
-                "Change Colors",
-            },
-                                null, this));
-        mbar.add(Util.makeJMenu("Help", new Object[]
-            {
-                "Index",
-                                    "About"
-            },
-                                null, this));
+//        mbar.add(Util.makeJMenu("Tools", new Object[]
+//            {
+//                "Change Colors",
+//            },
+//                                null, this));
+//        mbar.add(Util.makeJMenu("Help", new Object[]
+//            {
+//                "Index",
+//                                    "About"
+//            },
+//                                null, this));
         setJMenuBar(mbar);
     }
 

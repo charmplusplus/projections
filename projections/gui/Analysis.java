@@ -456,9 +456,9 @@ public class Analysis {
        Two more parameters - intervalStart and intervalEnd added.
     */
     public void LoadGraphData(long intervalSize, 
-				     int intervalStart, int intervalEnd,
-				     boolean byEntryPoint, 
-				     OrderedIntList processorList) 
+			      int intervalStart, int intervalEnd,
+			      boolean byEntryPoint, 
+			      OrderedIntList processorList) 
     {
 	if( hasLogFiles()) { // .log files
 	    LogReader logReader = new LogReader();
@@ -490,17 +490,17 @@ public class Analysis {
      *  and gain more control over the reading process.
      */
     public void loadSummaryData(long intervalSize,
-				       int intervalStart, int intervalEnd) {
+				int intervalStart, int intervalEnd) {
 	systemUsageData = new int[3][][];
 	systemUsageData[1] = 
-	sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd, 
-				       intervalSize);
+	    sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd, 
+					   intervalSize);
     }
 
     // yet another version of summary load for processor subsets.
     public void loadSummaryData(long intervalSize, 
-				       int intervalStart, int intervalEnd,
-				       OrderedIntList processorList) {
+				int intervalStart, int intervalEnd,
+				OrderedIntList processorList) {
 	systemUsageData = new int[3][][];
 	int[][][] temp = new int[3][][];
 	temp[1] =
@@ -515,7 +515,6 @@ public class Analysis {
 	} 
     }
   
-
     // wrapper method for default interval size.
     public void loadSummaryData(int intervalStart, int intervalEnd) {
 	loadSummaryData(sumAnalyzer.getIntervalSize(), intervalStart,
@@ -529,6 +528,8 @@ public class Analysis {
      *  and rebin each file (which will work for now) - summary files with
      *  even more intervals than the 180k seen in current NAMD logs may
      *  require dynamic rebinning on read.
+
+     *  **CWL** LOOKS LIKE THIS MIGHT BE COMPLETELY USELESS!
      */
     public void loadSummaryData() {
 	if (hasSumFiles()) { 

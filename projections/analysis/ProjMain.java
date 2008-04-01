@@ -22,6 +22,13 @@ public class ProjMain {
     public static boolean BLUEGENE = false;
     public static int BLUEGENE_SIZE[] = new int[3];
 
+    // **CW** kind of a hack to allow users to specify initial summary
+    // window data.
+    public static int SUM_START_INT = 0;
+    public static int SUM_END_INT = 0;
+    public static long SUM_INT_SIZE = 0;
+    public static boolean SUM_OVERRIDE = false;
+
     // **CW** workaround to print details on system usage where too many
     // entry methods prevent proper analysis (like in cpaimd).
     public static boolean PRINT_USAGE = false;
@@ -95,6 +102,14 @@ public class ProjMain {
 		i++;
 		BLUEGENE_SIZE[2] = Integer.parseInt(args[i]);
 		BLUEGENE = true;
+	    } else if (args[i].equals("-summary")) {
+		i++;
+		SUM_START_INT = Integer.parseInt(args[i]);
+		i++;
+		SUM_END_INT = Integer.parseInt(args[i]);
+		i++;
+		SUM_INT_SIZE = Long.parseLong(args[i]);
+		SUM_OVERRIDE = true;
 	    } else if (args[i].equals("-print_usage")) {
 		PRINT_USAGE = true;
 	    } else /* Expected Sts Filename */ {

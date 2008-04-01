@@ -5,8 +5,12 @@ import projections.gui.*;
 public class SummaryXAxis extends XAxis
 {
     private long intervalSize;
+    private int start;
+    private int end;
 
-    public SummaryXAxis(int numIntervals, long intervalSize) {
+    public SummaryXAxis(int start, int end, long intervalSize) {
+	this.start = start;
+	this.end = end;
 	this.intervalSize = intervalSize;
     }
 
@@ -25,6 +29,7 @@ public class SummaryXAxis extends XAxis
     * e.g., "7", "10-11ms"
     */
    public String getIndexName(int index) {
-       return String.valueOf(index);
+       return String.valueOf(index+start);
+       //       return String.valueOf(index);
    }
 }

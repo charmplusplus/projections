@@ -173,7 +173,7 @@ public class GraphXAxisCanvas extends Canvas
 	  
 	  if(data.graphtype == GraphData.BAR)
 		 maxvalue++;
-	  
+
 	  int width = (int)(w * data.scale) - 2 * data.offset3;   
 	 
 	  tickincrement = (int)Math.ceil(5/((double)width/maxvalue));

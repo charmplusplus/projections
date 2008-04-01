@@ -368,91 +368,121 @@ public class MainWindow extends JFrame
 	    public void finished() {
 	      setTitle("Projections - " + newfile);
 	      if (MainWindow.runObject[myRun].hasSummaryData()) {
-		MainWindow.runObject[myRun].loadSummaryData();	  
+		  //		MainWindow.runObject[myRun].loadSummaryData();	  
 		double[] data = MainWindow.runObject[myRun].getSummaryAverageData();
 		long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
-		long bestSize =    
-		  (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);	 
+		// if summary override, perform sanity check
+		if (ProjMain.SUM_OVERRIDE) {
+		    if ((ProjMain.SUM_END_INT <= ProjMain.SUM_START_INT) ||
+			(((long)data.length * originalSize) <
+			 ((long)ProjMain.SUM_END_INT * ProjMain.SUM_INT_SIZE)))
+			{
+			    // re-use defaults while printing warning message
+			    System.out.println("Warning: Specified Summary " +
+					       "parameters of [" + 
+					       ProjMain.SUM_START_INT + "," +
+					       ProjMain.SUM_END_INT + "," +
+					       ProjMain.SUM_INT_SIZE + "] " +
+					       "is inconsistent. " +
+					       "Real Summary Data " +
+					       "has [" + 0 + "," + 
+					       data.length + 
+					       "," +
+					       originalSize + "]. " + 
+					       "Reverting to default " +
+					       "main summary display.");
+			    ProjMain.SUM_OVERRIDE = false;
+			}
+		}
+		long bestSize = 0;
+		// if override is specified, make sure user choice is respected
+		if (ProjMain.SUM_OVERRIDE) {
+		    bestSize = ProjMain.SUM_INT_SIZE;
+		} else {
+		    bestSize = (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);
+		}
+		// default cases
+		double[] tempdata = data;
+		double[] newdata = data;
 		if (bestSize != originalSize) {
-		  // if there are changes    
-		  // transform the data into absolute time first.
-		  IntervalUtils.utilToTime(data,	  
-					   (double)originalSize);
-		  double[] newdata =	       
-		    IntervalUtils.rebin(data, originalSize,	 
-					(double)bestSize);
-		  // transform the re-binned data to utilization.
-		  IntervalUtils.timeToUtil(newdata,	 
-					   (double)bestSize);	 
-		  try {
+		    // if there are changes    
+		    // transform the data into absolute time first.
+		    IntervalUtils.utilToTime(data,	  
+					     (double)originalSize);
+		    tempdata =	       
+			IntervalUtils.rebin(data, originalSize,	 
+					    (double)bestSize);
+		    // transform the re-binned data to utilization.
+		    IntervalUtils.timeToUtil(tempdata,	 
+					     (double)bestSize);	 
+		    
+		    // default case
+		    newdata = tempdata;
+		    // special case
+		    if (ProjMain.SUM_OVERRIDE) {
+			newdata = new double[ProjMain.SUM_END_INT -
+					     ProjMain.SUM_START_INT + 1];
+			for (int i=0; i<newdata.length; i++) {
+			    newdata[i] = 
+				tempdata[i+ProjMain.SUM_START_INT];
+			}
+		    }
+		} else {
+		    if (ProjMain.SUM_OVERRIDE) {
+			newdata = new double[ProjMain.SUM_END_INT -
+					     ProjMain.SUM_START_INT + 1];
+			for (int i=0; i<newdata.length; i++) {
+			    newdata[i] = 
+				tempdata[i+ProjMain.SUM_START_INT];
+			}
+		    }
+		}
+		try {
 		    dataDump = 
-		      new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
-						     "SummaryDump.out"));
+			new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
+						       "SummaryDump.out"));
 		    dataDump.println("--- Summary Graph ---");
 		    for (int i=0; i<newdata.length; i++) {
-		      dataDump.println(newdata[i]);
+			dataDump.println(newdata[i]);
 		    }
 		    dataDump.flush();
-		  } catch (IOException e) {
+		} catch (IOException e) {
 		    System.err.println("WARNING: " +
 				       "Failed to handle dump " +
 				       "file SummaryDump.out. " +
 				       "Reason: ");
 		    System.err.println(e);
-		  }
-		  sumDataSource = new SummaryDataSource(newdata);
-		  sumXAxis =	    
-		    new SummaryXAxis(newdata.length,	 
-				     (long)bestSize);	  
-		} else {
-		    try {
-			dataDump = 
-			    new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
-							   "SummaryDump.out"));
-			dataDump.println("--- Summary Graph ---");
-			for (int i=0; i<data.length; i++) {
-			    dataDump.println(data[i]);
-			}
-			dataDump.flush();
-		    } catch (IOException e) {
-			System.err.println("WARNING: " +
-					   "Failed to handle dump " +
-					   "file SummaryDump.out. " +
-					   "Reason: ");
-			System.err.println(e);
-		    }
-		    
-		    sumDataSource = new SummaryDataSource(data);
+		}
+		sumDataSource = new SummaryDataSource(newdata);
+		if (ProjMain.SUM_OVERRIDE) {
 		    sumXAxis =	    
-			new SummaryXAxis(data.length,	 
-					 (long)(MainWindow.runObject[myRun].getSummaryIntervalSize()));
-		}			   
+			new SummaryXAxis(ProjMain.SUM_START_INT,
+					 ProjMain.SUM_END_INT,
+					 ProjMain.SUM_INT_SIZE);
+		} else {		  
+		    sumXAxis =	    
+			new SummaryXAxis(0, newdata.length,	 
+					 (long)bestSize);	  
+		}
 		sumYAxis = new SummaryYAxis();	 
 		graphPanel =
 		    new GraphPanel(new Graph(sumDataSource, 
 					     sumXAxis, sumYAxis));
 		summaryGraphPanel.add("data", graphPanel, "run data");
-	      } else {
-		  /* (bypass the visualization problem for now)
-		     summaryGraphPanel.add("data", scalePanel, "overview");
-		     Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
-		     Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
-		     Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
-		  */
 	      }
 	      if (MainWindow.runObject[myRun].hasLogData()) {
-		menuManager.fileOpened();
+		  menuManager.fileOpened();
 	      } else if (MainWindow.runObject[myRun].hasSummaryData()) {
-		menuManager.summaryOnly();
+		  menuManager.summaryOnly();
 	      }
 	      /* Removed to avoid confusing readers of the manual.
 		 This is a still-being-developed feature.
-	      if (MainWindow.runObject[myRun].hasPoseDopData()) {
-		menuManager.addPose();
-	      }
+		 if (MainWindow.runObject[myRun].hasPoseDopData()) {
+		 menuManager.addPose();
+		 }
 	      */
 	    }
-	  };
+	    };
 	worker.start();
     }
 

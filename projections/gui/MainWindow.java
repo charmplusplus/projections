@@ -404,24 +404,41 @@ public class MainWindow extends JFrame
 		  sumXAxis =	    
 		    new SummaryXAxis(newdata.length,	 
 				     (long)bestSize);	  
-		} else {		   
-		  sumDataSource = new SummaryDataSource(data);
-		  sumXAxis =	    
-		    new SummaryXAxis(data.length,	 
-				     (long)(MainWindow.runObject[myRun].getSummaryIntervalSize()));
+		} else {
+		    try {
+			dataDump = 
+			    new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
+							   "SummaryDump.out"));
+			dataDump.println("--- Summary Graph ---");
+			for (int i=0; i<data.length; i++) {
+			    dataDump.println(data[i]);
+			}
+			dataDump.flush();
+		    } catch (IOException e) {
+			System.err.println("WARNING: " +
+					   "Failed to handle dump " +
+					   "file SummaryDump.out. " +
+					   "Reason: ");
+			System.err.println(e);
+		    }
+		    
+		    sumDataSource = new SummaryDataSource(data);
+		    sumXAxis =	    
+			new SummaryXAxis(data.length,	 
+					 (long)(MainWindow.runObject[myRun].getSummaryIntervalSize()));
 		}			   
 		sumYAxis = new SummaryYAxis();	 
 		graphPanel =
-		  new GraphPanel(new Graph(sumDataSource, 
-					   sumXAxis, sumYAxis));
+		    new GraphPanel(new Graph(sumDataSource, 
+					     sumXAxis, sumYAxis));
 		summaryGraphPanel.add("data", graphPanel, "run data");
 	      } else {
-		/* (bypass the visualization problem for now)
-		   summaryGraphPanel.add("data", scalePanel, "overview");
-		   Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
-		   Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
-		   Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
-		*/
+		  /* (bypass the visualization problem for now)
+		     summaryGraphPanel.add("data", scalePanel, "overview");
+		     Util.gblAdd(background, ver,    gbc, 1,2, 1,1, 0,1);
+		     Util.gblAdd(background, hor,    gbc, 0,3, 1,1, 1,0);
+		     Util.gblAdd(background, status, gbc, 0,4, 1,1, 1,0);
+		  */
 	      }
 	      if (MainWindow.runObject[myRun].hasLogData()) {
 		menuManager.fileOpened();

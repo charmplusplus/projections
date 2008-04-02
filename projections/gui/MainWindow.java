@@ -443,6 +443,11 @@ public class MainWindow extends JFrame
 						       "SummaryDump.out"));
 		    dataDump.println("--- Summary Graph ---");
 		    for (int i=0; i<newdata.length; i++) {
+			if (ProjMain.SUM_OVERRIDE) {
+			    dataDump.print(i+ProjMain.SUM_START_INT + " ");
+			} else {
+			    dataDump.print(i);
+			}
 			dataDump.println(newdata[i]);
 		    }
 		    dataDump.flush();

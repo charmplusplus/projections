@@ -518,15 +518,21 @@ public class Data
 
 	/** Load the timeline for processor pe.
 	 * 
-	 *  This method loads the timeline into: timelineUserEventObjectsArray, allEntryMethodObjects, 
+	 *  This method loads the timeline into: timelineUserEventObjectsArray, allEntryMethodObjects
+	 *  
+	 *  This function must be thread safe
 	 *  
 	 * */
 	void getData(Integer pe)  
 	{
-
 		LinkedList tl = new LinkedList();
 		LinkedList userEvents= new LinkedList();
-				
+		LinkedList perPEObjects = new LinkedList();
+		if(perPEObjects == null){
+			System.err.println("perPEOBjects was not allocated successfully!!!!");
+		}
+		
+		
 		try {
 			if (MainWindow.runObject[myRun].hasLogData()) {
 				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), beginTime, endTime, tl, userEvents);
@@ -539,12 +545,11 @@ public class Data
 			return;
 		}
 		
-		// The user events are simply that which were produced by createtimeline
-		allUserEventObjects.put(pe,userEvents);
+		// Save perPEObjects and userEvents
+		getDataSyncSaveObjectLists(pe, perPEObjects, userEvents);
 		
-		// The entry method objects must however be constructed
-		allEntryMethodObjects.put(pe, new LinkedList());
-		LinkedList perPEObjects = (LinkedList)allEntryMethodObjects.get(pe);
+		long minMemThisPE = Long.MAX_VALUE;
+		long maxMemThisPE = 0;
 		
 		// proc timeline events
 		Iterator iter = tl.iterator();
@@ -573,21 +578,58 @@ public class Data
 			}
 		
 			// Create the object itself
+			if(tle==null){
+				System.out.println("tle is NULL");
+			}
+			if(msgs==null){
+				System.out.println("msgs is NULL");
+			}
+			if(pe==null){
+				System.out.println("pe is NULL");
+			}
+			if(perPEObjects==null){
+				System.out.println("perPEObjects is NULL");
+			}
+			
 			perPEObjects.add(new EntryMethodObject(this, tle, msgs, packs, pe.intValue()));
-	
+
 			if(tle!=null && tle.memoryUsage!=null){
-			  if(tle.memoryUsage.longValue() > maxMem)
-				  maxMem = tle.memoryUsage.longValue();
-			  if(tle.memoryUsage.longValue() < minMem)
-				  minMem = tle.memoryUsage.longValue();
-			}			
+				if(tle.memoryUsage.longValue() > maxMemThisPE)
+					maxMemThisPE = tle.memoryUsage.longValue();
+				if(tle.memoryUsage.longValue() < minMemThisPE)
+					minMemThisPE = tle.memoryUsage.longValue();
+			}
 		
 		}
 		
-		if(memoryUsageValid())
-			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
+		// save the time range
+		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE);
 		
 	}
+	
+	
+
+	/** Thread-safe storing of the userEvents and perPEObjects */
+	synchronized void getDataSyncSaveObjectLists(Integer pe, LinkedList perPEObjects, LinkedList userEvents )  
+	{
+		// The user events are simply that which were produced by createtimeline
+		allUserEventObjects.put(pe,userEvents);
+		// The entry method objects must however be constructed
+		allEntryMethodObjects.put(pe,perPEObjects);
+	}
+	
+	/** Thread safe updating of the memory usage ranges */
+	synchronized void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE)  
+	{
+		if(minMemThisPE < minMem)
+			minMem = minMemThisPE;
+		if(maxMemThisPE > maxMem)
+			maxMem = maxMemThisPE;
+		
+		if(memoryUsageValid())
+			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
+	}
+
 	
 	/** Did the logs we loaded so far contain any memory usage entries? */
 	private boolean memoryUsageValid() {

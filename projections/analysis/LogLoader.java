@@ -590,8 +590,7 @@ public class LogLoader extends ProjDefs
 	}
 
 	/** Read the timeline for a single PE and return the result as a Collection of TimelineEvent's */
-	public void createtimeline(int pe, long Begin, long End, 
-			List Timeline, Collection userEventVector)
+	public void createtimeline(int pe, long Begin, long End, List Timeline, Collection userEventVector)
 	throws LogLoadException
 	{
 		long BeginTime = 0;
@@ -607,8 +606,6 @@ public class LogLoader extends ProjDefs
 
 		GenericLogReader reader;
 		LogEntryData data;
-
-		System.gc();
 
 		// open the file
 		try {
@@ -1197,7 +1194,6 @@ public class LogLoader extends ProjDefs
 			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(pe), 
 					LogLoadException.READ);
 		}
-		System.gc();
 		return;
 	}
 

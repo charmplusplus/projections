@@ -222,9 +222,12 @@ public class StsReader extends ProjDefs
 	return userEvents.size();
     }
 
-    public int getUserEventIndex(int eventID) {
+    public Integer getUserEventIndex(int eventID) {
 	Integer key = new Integer(eventID);
-	return ((Integer)userEventIndices.get(key)).intValue();
+	if(userEventIndices.containsKey(key))
+		return ((Integer)userEventIndices.get(key));
+	else
+		return null;
     }
 
     public String getUserEventName(int eventID) { 

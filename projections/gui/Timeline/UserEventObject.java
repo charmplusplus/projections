@@ -37,6 +37,8 @@ public class UserEventObject extends JComponent implements Comparable
 		UserEventID=e;
 		CharmEventID=event;
 		color=MainWindow.runObject[myRun].getUserEventColor(UserEventID);
+		if(color == null)
+			color = Color.white;
 		Name=MainWindow.runObject[myRun].getUserEventName(UserEventID);
 		this.pe = pe;
 	}

@@ -762,11 +762,13 @@ public class Analysis {
     }
 
     public Color getUserEventColor(int eventID) {
-	if (sts != null) { 
-	    return userEventColors[sts.getUserEventIndex(eventID)]; 
-	} else { 
-	    return null; 
-	}
+    	if (sts != null) { 
+    		Integer idx = sts.getUserEventIndex(eventID);
+    		if(idx!=null)
+    			return userEventColors[idx.intValue()]; 
+    	} 
+
+    	return null; 
     }
 
     // *** Derived Data accessors ***

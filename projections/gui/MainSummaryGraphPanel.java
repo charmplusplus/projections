@@ -52,6 +52,7 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 				   " Continuing.");
 		fillerPanel = new BackGroundImagePanel(null);
 	    }
+	    fillerPanel.setBackground(Color.black);
 	}
 	setEmpty();
     }

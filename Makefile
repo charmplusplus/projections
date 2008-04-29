@@ -285,6 +285,7 @@ bin/projections.jar: projections/analysis/ProjMain.class $(SRC)
 	jar -cfm0 bin/projections.jar \
 		projections/images/manifest\
 		projections/images/bgimage.jpg\
+		projections/images/noSummary.jpg\
 		projections/images/ZoomIn24.gif\
 		projections/images/ZoomOut24.gif\
 		*/*/*.class \

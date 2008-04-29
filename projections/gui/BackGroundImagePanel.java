@@ -5,10 +5,10 @@ import javax.swing.*;
 
 public class BackGroundImagePanel extends JPanel {
     /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private Image bgimage = null;
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+    private Image bgimage = null;
     private boolean tile;
 
     public BackGroundImagePanel(Image bgimage, boolean tile) {
@@ -26,8 +26,9 @@ public class BackGroundImagePanel extends JPanel {
     public void paintComponent(Graphics g)
     {
 	super.paintComponent(g);
-	if (bgimage!=null)
+	if (bgimage!=null) {
 	    wallPaper(this, g, bgimage);
+	}
     }
     
     private void wallPaper(Component component, Graphics  g, Image image)
@@ -37,7 +38,7 @@ public class BackGroundImagePanel extends JPanel {
 	
 	int patchW = image.getWidth(component);
 	int patchH = image.getHeight(component);
-
+	    
 	if (tile) {
 	    for (int r=0; r < compsize.width; r += patchW) {
 		for(int c=0; c < compsize.height; c += patchH) {
@@ -45,9 +46,28 @@ public class BackGroundImagePanel extends JPanel {
 		}
 	    }
 	} else {
-	    // fixed size image.
-	    setPreferredSize(new Dimension(patchW, patchH));
-	    g.drawImage(image, 0, 0, component);
+	    // draw center scaled image.
+	    double imgAspect = patchH*1.0/patchW;
+	    double pnlAspect = compsize.height*1.0/compsize.width;
+
+	    if (pnlAspect > imgAspect) {
+		// panel has more height than width compared to image
+		Image scaledImg = 
+		    image.getScaledInstance(compsize.width, -1, 
+					    Image.SCALE_SMOOTH);
+		waitForImage(component, scaledImg);
+		int scaledImgH = scaledImg.getHeight(component);
+		int heightOffset = (compsize.height - scaledImgH)/2;
+		g.drawImage(scaledImg, 0, heightOffset, component);
+	    } else {
+		Image scaledImg =
+		    image.getScaledInstance(-1, compsize.height, 
+					    Image.SCALE_SMOOTH);
+		waitForImage(component, scaledImg);
+		int scaledImgW = scaledImg.getWidth(component);
+		int widthOffset = (compsize.width - scaledImgW)/2;
+		g.drawImage(scaledImg, widthOffset, 0, component);
+	    }
 	}
     }
     

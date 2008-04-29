@@ -37,6 +37,9 @@ public class ProjMain {
     // entry methods prevent proper analysis (like in cpaimd).
     public static boolean PRINT_USAGE = false;
 
+    // **CW** My little going-away joke.
+    public static boolean FUNNY = false;
+
     // Analysis-specific global constants
     public static final int NUM_TYPES = 5;
     public static final int LOG = 0;
@@ -144,6 +147,8 @@ public class ProjMain {
     			SUM_OVERRIDE = true;
     		} else if (args[i].equals("-print_usage")) {
     			PRINT_USAGE = true;
+    		} else if (args[i].equals("-humor")) {
+    			FUNNY = true;
     		} else /* Expected Sts Filename */ {
     			loadSts=args[i];
     		}

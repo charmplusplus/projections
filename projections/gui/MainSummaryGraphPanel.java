@@ -3,6 +3,11 @@ package projections.gui;
 import javax.swing.*;
 import java.awt.*;
 
+import java.net.*;
+import java.io.*;
+
+import projections.analysis.*;
+
 /* **************************************************
  * MainSummaryGraphPanel.java
  * Chee Wai Lee - 10/29/2002
@@ -16,14 +21,13 @@ public class MainSummaryGraphPanel extends JTabbedPane {
     // it is initially empty and is added to by MainWindow's open file(s)
     // menu option.
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-	private MainWindow parent;
+    private static final long serialVersionUID = 1L;
+    private MainWindow parent;
     private MainRunStatusPanel statusPanel;
-    private JPanel fillerPanel;
+    //    private JPanel fillerPanel;
     private boolean empty;
+    private Image bgimage;
+    private JPanel fillerPanel;
 
     public MainSummaryGraphPanel(MainWindow parent,
 				 MainRunStatusPanel statusPanel) {
@@ -32,10 +36,23 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	this.statusPanel = statusPanel;
 
 	addChangeListener(this.statusPanel);
-	fillerPanel = new JPanel();
-	fillerPanel.setBackground(Color.black);
-	fillerPanel.setPreferredSize(new Dimension(ScreenInfo.screenWidth/3, 
-						   ScreenInfo.screenHeight/3));
+
+	if (!ProjMain.FUNNY) {
+	    fillerPanel = new JPanel();
+	    fillerPanel.setBackground(Color.black);
+	    fillerPanel.setPreferredSize(new Dimension(ScreenInfo.screenWidth/3, 
+						       ScreenInfo.screenHeight/3));
+	} else {
+	    try {
+		URL imageURL = ((Object)parent).getClass().getResource("/projections/images/noSummary.jpg");
+		bgimage = Toolkit.getDefaultToolkit().getImage(imageURL);
+		fillerPanel = new BackGroundImagePanel(bgimage, false);
+	    } catch (Exception E) {
+		System.out.println("Warning: can't load background image." +
+				   " Continuing.");
+		fillerPanel = new BackGroundImagePanel(null);
+	    }
+	}
 	setEmpty();
     }
 
@@ -80,7 +97,7 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	// make this an obvious warning color
 	setForegroundAt(0, Color.red);
 	setSelectedIndex(0);
-	fillerPanel.revalidate();
+	((JComponent)fillerPanel).revalidate();
 	parent.validate();
     }
 

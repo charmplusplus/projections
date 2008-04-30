@@ -2,6 +2,7 @@ package projections.analysis;
 
 import projections.misc.*;
 import projections.gui.*;
+
 import java.io.*;
 import javax.swing.*;
 import java.awt.*;
@@ -99,18 +100,18 @@ public class CallGraph extends ProjDefs
 			byteArray[currTimeInterval][destEP] +=
 			    (logdata.msglen * logdata.numPEs);
 		    } else if (logdata.type == BEGIN_PROCESSING) {  // Starting new entry method
-		        int currEP = logdata.entry;
+		        int currEPindex = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
 		        int srcPe = logdata.pe;
 		        int currTimeInterval = getInterval(logdata.time);
 			
 			// Update message and byte received arrays
-			messageArray[currTimeInterval][currEP+numEPs]++;
-			byteArray[currTimeInterval][currEP+numEPs]+=logdata.msglen;
+			messageArray[currTimeInterval][currEPindex+numEPs]++;
+			byteArray[currTimeInterval][currEPindex+numEPs]+=logdata.msglen;
 			
 			if (currPe != srcPe) {
 			    // Update message and byte received external arrays
-			    externalMessageArray[currTimeInterval][currEP+numEPs]++;
-			    externalByteArray[currTimeInterval][currEP+numEPs]+=logdata.msglen;
+			    externalMessageArray[currTimeInterval][currEPindex+numEPs]++;
+			    externalByteArray[currTimeInterval][currEPindex+numEPs]+=logdata.msglen;
 			}
 		    }
 		    

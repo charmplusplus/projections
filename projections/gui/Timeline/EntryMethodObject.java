@@ -26,6 +26,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private long cpuTime;
 	private long cpuBegin, cpuEnd;
 	private int entry;
+	private int entryIndex;
 	private int msglen;
 	int EventID;
 	private ObjectId tid; 
@@ -88,6 +89,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		cpuEnd    = tle.cpuEnd;
 		cpuTime   = cpuEnd - cpuBegin;
 		entry     = tle.EntryPoint;
+		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
 		this.packs= packs;
 		pCurrent  = p1;
@@ -121,12 +123,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			tle.callStack.copyInto(funcData);
 					
 		} else if (tle.EntryPoint >= 0) {
-			int ecount = MainWindow.runObject[data.myRun].getNumUserEntries();
-			if (tle.EntryPoint >= ecount) {
-				System.out.println("<b>Fatal error: invalid entry " + tle.EntryPoint +
-						" on processor " + pCurrent + "</b>!");
-				System.exit(1) ;
-			}
 		}
 		
 		updateToolTipText();
@@ -164,7 +160,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			}
 		} else if (entry >= 0) {
 
-			infoString += "<b>"+(MainWindow.runObject[data.myRun].getEntryNames())[entry][1] + "::" + (MainWindow.runObject[data.myRun].getEntryNames())[entry][0] + "</b><br><br>"; 
+			infoString += "<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry) + "</b><br><br>"; 
 
 			if(msglen > 0) {
 				infoString += "<i>Msg Len</i>: " + msglen + "<br>";
@@ -299,11 +295,16 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		return endTime;
 	}   
 
-	public int getEntry()
+	public int getEntryID()
 	{
 		return entry;
 	}   
 
+	public int getEntryIndex()
+	{
+		return MainWindow.runObject[data.myRun].getEntryIndex(entry);
+	}   
+	
 	/** Return a set of messages for this entry method */
 	public Set getMessages()
 	{
@@ -561,12 +562,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				c = Color.white;
 			}
 
-		} else if (entry == -2) { // unknown domain
+		} else if (entryIndex == -2) { // unknown domain
 			c = getBackground();
 		}  else {
-			c = data.entryColor()[entry];
+			c = data.entryColor()[entryIndex];
 			if (isFunction) {
-				c = MainWindow.runObject[data.myRun].getFunctionColor(entry);
+				c = MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 			}
 		}
 		
@@ -623,7 +624,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		int rectHeight = data.barheight();
 
 		// Idle regions are thinner vertically
-		if(entry==-1){
+		if(entryIndex==-1){
 			rectHeight -= 6;
 		}
 
@@ -650,7 +651,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		// Paint the main rectangle for the object, as long as it is not a skinny idle event
 		g.setColor(c);
-		if(rectWidth > 1 || entry!=-1)
+		if(rectWidth > 1 || entryIndex!=-1)
 			g.fillRect(left, verticalInset, rectWidth, rectHeight);
 
 
@@ -812,7 +813,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	{
 		//       System.out.println(beginTime + " " + endTime + " " +
 		//			  data.beginTime + " " + data.endTime);
-		if (entry < -1) {
+		if (entryIndex < -1) {
 			// if I am not a standard entry method, I do not contribute
 			// to the usage
 			//

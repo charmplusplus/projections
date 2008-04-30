@@ -395,13 +395,13 @@ public class Data
 				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
 
 				float usage = obj.getUsage();
-				int entrynum = obj.getEntry();
+				int entryIndex = obj.getEntryIndex();
 
-				if (entrynum >=0) {
-					entries[entrynum]++;
+				if (entryIndex >=0) {
+					entries[entryIndex]++;
 					processorUsage[pe.intValue()] += usage;
 					packUsage[pe.intValue()] += obj.getPackUsage();
-					entryUsageArray[entrynum] += obj.getNonPackUsage();
+					entryUsageArray[entryIndex] += obj.getNonPackUsage();
 				} else {
 					idleUsage[pe.intValue()] += usage;
 				}

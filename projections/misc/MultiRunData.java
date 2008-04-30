@@ -145,7 +145,7 @@ public class MultiRunData
 	    // the rest are consistent.
 	    epNames = new String[numEPs];
 	    for (int ep=0; ep<numEPs; ep++) {
-		epNames[ep] = stsReaders[0].getEntryNames()[ep][0];
+	    	epNames[ep] = stsReaders[0].getEntryNameByID(ep);
 	    }
 
 	    // generating the (somewhat) human-readable names of runs.

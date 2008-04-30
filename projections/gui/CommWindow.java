@@ -36,7 +36,6 @@ public class CommWindow extends GenericGraphWindow
     private ArrayList	histogram;
     private int[]	histArray;
     private String 	currentArrayName;
-    private String[][]	EPNames;
 
     private JPanel	mainPanel;
     private JPanel	graphPanel;
@@ -168,39 +167,38 @@ public class CommWindow extends GenericGraphWindow
 	if( (xVal < 0) || (yVal <0) || currentArrayName==null)
 	    return null;
 
-	if(EPNames == null)
-	    EPNames = MainWindow.runObject[myRun].getEntryNames();
-
+	Analysis a = MainWindow.runObject[myRun];
+	
 	String[] rString = new String[4];
 
 	rString[0] = "Processor " + xVal;
 
 	if(currentArrayName.equals("sentMsgCount")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Count = " + sentMsgCount[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("sentByteCount")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Bytes = " + sentByteCount[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("receivedMsgCount")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Count = " + receivedMsgCount[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("receivedByteCount")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Count = " + receivedByteCount[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("exclusiveRecv")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Count = " + exclusiveRecv[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if(currentArrayName.equals("exclusiveBytesRecv")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Bytes = " + exclusiveBytesRecv[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if (currentArrayName.equals("avgHopCount")) {
-	    rString[1] = "EPid: " + EPNames[yVal][0];
+	    rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 	    rString[2] = "Count = " + avgHopCount[xVal][yVal];
 	    rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 	} else if (currentArrayName.equals("avgPeHopCount")) {
@@ -433,7 +431,7 @@ public class CommWindow extends GenericGraphWindow
 		    }
 		    glr.nextEvent(logdata);
 		    if (logdata.type == ProjDefs.CREATION) {
-			EPid = logdata.entry;
+			EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
 			sentMsgCount[curPeArrayIndex][EPid]++;
 			sentByteCount[curPeArrayIndex][EPid] += 
 			    logdata.msglen;
@@ -441,12 +439,12 @@ public class CommWindow extends GenericGraphWindow
 		    } else if ((logdata.type == ProjDefs.CREATION_BCAST) ||
 			       (logdata.type == 
 				ProjDefs.CREATION_MULTICAST)) {
-			EPid = logdata.entry;
+		    	EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
 			sentMsgCount[curPeArrayIndex][EPid]+= logdata.numPEs;
 			sentByteCount[curPeArrayIndex][EPid] +=
 			    (logdata.msglen * logdata.numPEs);
 		    } else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
-			EPid = logdata.entry;
+		    	EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
 			receivedMsgCount[curPeArrayIndex][EPid]++;
 			receivedByteCount[curPeArrayIndex][EPid] += 
 			    logdata.msglen;
@@ -474,9 +472,17 @@ public class CommWindow extends GenericGraphWindow
 
 	// **CW** Highly inefficient ... needs to be re-written as a
 	// bin-based solution instead.
-	int max = ((Integer)histogram.get(0)).intValue();
-	int min = ((Integer)histogram.get(0)).intValue();
 
+	int max;
+	int min;
+	if(histogram.size()>0){
+		max = ((Integer)histogram.get(0)).intValue();
+		min = ((Integer)histogram.get(0)).intValue();
+	} else {
+		min = 0;
+		max = 0;
+	}
+	
 	for(int k=1; k<histogram.size(); k++){
 	    if(((Integer)histogram.get(k)).intValue() < min)
 		min = ((Integer)histogram.get(k)).intValue();

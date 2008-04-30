@@ -1224,9 +1224,7 @@ public class LogLoader extends ProjDefs
 		case BEGIN_PROCESSING:
 		case END_PROCESSING:
 		case ENQUEUE:
-			String e2desc[][] = MainWindow.runObject[myRun].getEntryNames();
-			VE.Dest = new String(e2desc[LE.Entry][1] + 
-					"::" + e2desc[LE.Entry][0]);     
+			VE.Dest = MainWindow.runObject[myRun].getEntryFullNameByID(LE.Entry);
 			if (LE.TransactionType != CREATION) {
 				VE.SrcPe = LE.Pe;
 			}

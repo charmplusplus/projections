@@ -32,9 +32,20 @@ public class StsReader extends ProjDefs
     private String ClassNames[];    // indexed by chare id
     private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
-    // indexed by (ep id) X (type) where type == 0 -> entry name
-    //                               and type == 1 -> class (chare) name
-    private String EntryNames[][];  
+ 
+    
+    /** Entry Names */
+    private int entryIndex = 0; ///< The next available index
+    
+    /** index by Integer ID in STS file, return String name */
+    private Hashtable entryNames = new Hashtable(); 
+    /** index by Integer ID in STS file, return String name */
+    private Hashtable entryChareNames = new Hashtable(); 
+    /** keys are indexes into flat arrays, values are the IDs given in STS file */
+    private Hashtable entryFlatToID = new Hashtable();
+    /** keys are the IDs given in STS file, values are indexes into flat arrays */
+    private Hashtable entryIDToFlat = new Hashtable();
+    
     
     // User Event information
     private int userEventIndex = 0;
@@ -92,7 +103,6 @@ public class StsReader extends ProjDefs
 		    ClassNames  = new String[TotalChares];
 		} else if (s1.equals("TOTAL_EPS")) {
 		    EntryCount   = Integer.parseInt(st.nextToken());
-		    EntryNames   = new String[EntryCount][2];
 		} else if (s1.equals("TOTAL_MSGS")) {
 		    TotalMsgs = Integer.parseInt(st.nextToken());
 		    MsgTable  = new long[TotalMsgs];
@@ -106,25 +116,28 @@ public class StsReader extends ProjDefs
 		    ClassNames[ID]      = ChareList[ID].Name;
 		} else if (s1.equals("ENTRY")) {
 			String Type    = st.nextToken();
-		    ID      = Integer.parseInt(st.nextToken());
-		    StringBuffer nameBuf=new StringBuffer(st.nextToken());
-		    Name = nameBuf.toString();
-		    if (-1!=Name.indexOf('(') && -1==Name.indexOf(')')) {
-			//Parse strings until we find the close-paren
-			while (true) {
-			    String tmp=st.nextToken();
-			    nameBuf.append(" ");
-			    nameBuf.append(tmp);
-			    if (tmp.endsWith(")"))
-				break;
+			ID      = Integer.parseInt(st.nextToken());
+			StringBuffer nameBuf=new StringBuffer(st.nextToken());
+			Name = nameBuf.toString();
+			if (-1!=Name.indexOf('(') && -1==Name.indexOf(')')) {
+				//Parse strings until we find the close-paren
+				while (true) {
+					String tmp=st.nextToken();
+					nameBuf.append(" ");
+					nameBuf.append(tmp);
+					if (tmp.endsWith(")"))
+						break;
+				}
 			}
-		    }
-		    Name    = nameBuf.toString();
-		    ChareID = Integer.parseInt(st.nextToken());
-		    MsgID   = Integer.parseInt(st.nextToken());
-		    
-		    EntryNames[ID][0] = Name;
-		    EntryNames[ID][1] = ClassNames [ChareID];
+			Name    = nameBuf.toString();
+			ChareID = Integer.parseInt(st.nextToken());
+			MsgID   = Integer.parseInt(st.nextToken());
+
+			entryFlatToID.put(entryIndex, ID);
+			entryIDToFlat.put(ID,entryIndex);
+			entryIndex++;
+			entryNames.put(ID,Name);
+			entryChareNames.put(ID,ClassNames [ChareID]);
 		} else if (s1.equals("MESSAGE")) {
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
@@ -195,7 +208,7 @@ public class StsReader extends ProjDefs
     }
 
     public int getEntryCount() { 
-	return EntryCount;
+    	return EntryCount;
     }   
     
     public int getProcessorCount() {
@@ -206,16 +219,36 @@ public class StsReader extends ProjDefs
 	return Machine;
     }
     
-    /** 
-     * Gives the user entry points as read in from the .sts file as an 
-     * array of two strings:  one for the name of the entry point with 
-     * BOC or CHARE prepended to the front and a second containing the 
-     * name of its parent BOC or chare.
-     * @return a two-dimensional array of Strings containing these records
-     */
-    public String[][] getEntryNames() {
-	return EntryNames;
+
+    
+    public String getEntryNameByID(int ID) {
+    	return (String) entryNames.get(ID);
     }   
+    
+    public String getEntryNameByIndex(int index) {
+    	return (String) entryNames.get(entryFlatToID.get(index));
+    }   
+    
+    public String getEntryChareNameByID(int ID) {
+    	return (String) entryChareNames.get(ID);
+    }   
+    
+    public String getEntryChareNameByIndex(int index) {
+    	return (String) entryChareNames.get(entryFlatToID.get(index));
+    }   
+
+    public String getEntryFullNameByID(int ID) {
+    	return  getEntryChareNameByID(ID) + "::" + getEntryNameByID(ID);
+    }   
+    
+    public String getEntryFullNameByIndex(int index) {
+    	return getEntryChareNameByIndex(index) + "::" + getEntryNameByIndex(index);
+    }   
+    
+	public Integer getEntryIndex(Integer ID) {
+		return (Integer)entryIDToFlat.get(ID);
+	}
+       
     
     // *** user event accessors ***
     public int getNumUserDefinedEvents() {
@@ -288,5 +321,7 @@ public class StsReader extends ProjDefs
     public boolean hasPapi() {
 	return hasPAPI;
     }
+
+
 }
 

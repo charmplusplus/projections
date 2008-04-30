@@ -27,7 +27,6 @@ public class MessageCanvas extends JPanel
    private EntryMethodObject obj;
    private FontMetrics fm;
    private Set msgs; // Set of TimelineMessage's
-   private String[][] names;
    private int w,h;
    private int numTitles = 17; // index of sTitle with last actual title
    private int numColumns = 5; // number of columns that will be drawn
@@ -39,15 +38,14 @@ public class MessageCanvas extends JPanel
 	  w = 0;
 	  h = 0;
 	  msgs = obj.getMessages();
-	  names = MainWindow.runObject[myRun].getEntryNames();
 
-          sTitles = new String[numTitles];
+	  sTitles = new String[numTitles];
 	  width = new int[numTitles];
 	  
-	  int entry = obj.getEntry();
+	  int entryID = obj.getEntryID();
 	  
 	  sTitles[0] = "DETAILS FOR ENTRY: ";
-	  sTitles[1] = names[entry][1] + " -- " + names[entry][0];
+	  sTitles[1] = MainWindow.runObject[myRun].getEntryFullNameByID(entryID);
 	  sTitles[2] = "BEGIN TIME: ";
 	  sTitles[3] = "" + obj.getBeginTime();
 	  sTitles[4] = "     END TIME: ";
@@ -160,7 +158,7 @@ public class MessageCanvas extends JPanel
 		  s[1] = new String("" + msg.MsgLen);
 		  s[2] = new String("" + msg.Time);
 		  s[3] = (m>0) ? new String("" + (int)(msg.Time-prev.Time)) : "-";
-		  s[4] = new String(names[msg.Entry][0]);
+		  s[4] = new String(MainWindow.runObject[myRun].getEntryNameByID(msg.Entry));
 
 		  y+=dy;
 		  for (i=0; i<numColumns; i++) {

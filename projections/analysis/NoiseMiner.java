@@ -715,11 +715,8 @@ public class NoiseMiner extends ProjDefs
 
 		ProgressMonitor progressBar = new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
 
-		/** Names of the entry methods appearing in these traces. */
-		String[][] entryNames = MainWindow.runObject[myRun].getEntryNames(); 
-
 		/** Number of entry methods in this set of trace logs */
-		int numEvents = entryNames.length;
+		int numEvents = MainWindow.runObject[myRun].getEntryCount();
 		
 		int blackPartIdx = numEvents;		
 		

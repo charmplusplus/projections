@@ -633,7 +633,7 @@ public class Analysis {
     public String getActivityNameByID(int type, int id) {
 	switch (type) {
 	case ActivityManager.PROJECTIONS:
-	    return getEntryName(id);
+	    return getEntryNameByID(id);
 	case ActivityManager.USER_EVENTS:
 	    return getUserEventName(id);
 	case ActivityManager.FUNCTIONS:
@@ -648,7 +648,7 @@ public class Analysis {
 	String[] tempNames;
 	switch (type) {
 	case ActivityManager.PROJECTIONS:
-	    return getEntryName(index);
+	    return getEntryNameByIndex(index);
 	case ActivityManager.USER_EVENTS:
 	    tempNames = getUserEventNames();
 	    return tempNames[index];
@@ -667,22 +667,43 @@ public class Analysis {
     }
 
     /** Number of entries in the STS file */
+    public int getEntryCount() {
+    	return sts.getEntryCount();
+    }
+ 
     public int getNumUserEntries() {
-	return sts.getEntryCount();
+    	return getEntryCount();
+    }
+    
+    public String getEntryNameByIndex(int epIdx) {
+    	return sts.getEntryNameByIndex(epIdx);
     }
 
-    public String[][] getEntryNames() {
-	return sts.getEntryNames();
+    public String getEntryChareNameByIndex(int epIdx) {
+    	return sts.getEntryChareNameByIndex(epIdx);
     }
 
-    public String getEntryName(int epIdx) {
-	return (sts.getEntryNames())[epIdx][0];
+    public String getEntryFullNameByIndex(int epIdx) {
+    	return sts.getEntryFullNameByIndex(epIdx);
     }
 
-    public String getEntryChareName(int epIdx) {
-	return (sts.getEntryNames())[epIdx][1];
+    public String getEntryNameByID(int ID) {
+    	return sts.getEntryNameByID(ID);
     }
 
+    public String getEntryChareNameByID(int ID) {
+    	return sts.getEntryChareNameByID(ID);
+    }
+
+    public String getEntryFullNameByID(int ID) {
+    	return sts.getEntryFullNameByID(ID);
+    }
+    
+    public Integer getEntryIndex(Integer ID){
+    	return sts.getEntryIndex(ID);
+    }
+    
+    
     public int getNumUserDefinedEvents() {
 	return sts.getNumUserDefinedEvents();
     }

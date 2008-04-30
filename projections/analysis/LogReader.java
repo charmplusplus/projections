@@ -79,7 +79,7 @@ public class LogReader
 	    sysUsgData[SYS_CPU][curPeIdx][j-intervalStart] += 
 		maxPercents?100:extra;
 	    if (byEntryPoint) {
-		userEntries[currentEntry][TIME][curPeIdx][j-intervalStart] += 
+		userEntries[MainWindow.runObject[myRun].getEntryIndex(currentEntry)][TIME][curPeIdx][j-intervalStart] += 
 		    extra; 
 		int catIdx = mtypeToCategoryIdx(currentMtype); 
 		if (catIdx!=-1) {
@@ -94,9 +94,11 @@ public class LogReader
     /**
        Add this entry point to the counts
     */
-    final private void count(int mtype,int entry,int TYPE)
+    final private void count(int mtype,int entryID,int TYPE)
     {
-	if (!byEntryPoint) { 
+    int entry = MainWindow.runObject[myRun].getEntryIndex(entryID);
+
+    if (!byEntryPoint) { 
 	    return;
 	}
 	if (userEntries[entry][TYPE][curPeIdx]==null) {

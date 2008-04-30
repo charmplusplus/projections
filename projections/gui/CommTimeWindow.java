@@ -119,7 +119,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	entryNames = new String[numEPs];
 	for (int ep=0; ep<numEPs; ep++) {
 	    colorArray[0][ep] = MainWindow.runObject[myRun].getEntryColor(ep);
-	    entryNames[ep] = MainWindow.runObject[myRun].getEntryName(ep);
+	    entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 	}
 	mainPanel = new JPanel();
         _format = new DecimalFormat("###,###.###");
@@ -473,11 +473,11 @@ public class CommTimeWindow extends GenericGraphWindow
 	String epClassName = "";
 	for (int ep=0; ep<numEPs; ep++) {
 	    if (stateArray[0][ep]) {
-		if (count++ == yVal) {
-		    epName = MainWindow.runObject[myRun].getEntryName(ep);
-		    epClassName = MainWindow.runObject[myRun].getEntryChareName(ep);
-		    break;
-		}
+	    	if (count++ == yVal) {
+	    		epName = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
+	    		epClassName = MainWindow.runObject[myRun].getEntryChareNameByIndex(ep);
+	    		break;
+	    	}
 	    }
 	}
 

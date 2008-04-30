@@ -188,11 +188,10 @@ public class CallTable extends ProjDefs
             if (exists[sourceEP]) {
 	        
 		if (epDetailToggle==true) { //need ep detail
-	            text[lengthCounter][0] = MainWindow.runObject[myRun].getEntryChareName(sourceEP) + "::" +
-		                             MainWindow.runObject[myRun].getEntryName(sourceEP);
+	            text[lengthCounter][0] = MainWindow.runObject[myRun].getEntryFullNameByIndex(sourceEP);
 		}
 		else { //don't need ep detail
-		    String s = MainWindow.runObject[myRun].getEntryName(sourceEP);
+		    String s = MainWindow.runObject[myRun].getEntryNameByIndex(sourceEP);
 		    int parenthIndex = s.indexOf('(');
 		    if (parenthIndex != -1) //s has parenthesis
 		        s = s.substring(0, parenthIndex);
@@ -205,11 +204,10 @@ public class CallTable extends ProjDefs
 		    if (msgCount[sourceEP][destEP] > 0) {
 		    
 		        if (epDetailToggle==true) { //need ep detail
-		            text[lengthCounter][0] = "        " + MainWindow.runObject[myRun].getEntryChareName(destEP) + "::" +
-		                                     MainWindow.runObject[myRun].getEntryName(destEP);
+		            text[lengthCounter][0] = "        " + MainWindow.runObject[myRun].getEntryFullNameByIndex(destEP);
 			}
 			else { //don't need ep detail
-		            String s = MainWindow.runObject[myRun].getEntryName(destEP);
+		            String s = MainWindow.runObject[myRun].getEntryNameByIndex(destEP);
 		            int parenthIndex = s.indexOf('(');
 		            if (parenthIndex != -1) //s has parenthesis
 		                s = s.substring(0, parenthIndex);
@@ -255,13 +253,11 @@ public class CallTable extends ProjDefs
             for (int sourceEP=0; sourceEP<numEPs; sourceEP++) {
 	        if (exists[sourceEP]) {
 	            output.write("\n\n");
-	            output.write(MainWindow.runObject[myRun].getEntryChareName(sourceEP) + "::" +
-		                 MainWindow.runObject[myRun].getEntryName(sourceEP) + "[EPid #" +
+	            output.write(MainWindow.runObject[myRun].getEntryFullNameByIndex(sourceEP) + "[EPid #" +
 			         sourceEP + "]\n");
 		    for (int destEP=0; destEP<numEPs; destEP++) {
 		        if (msgCount[sourceEP][destEP] > 0) {
-		            output.write("    " + MainWindow.runObject[myRun].getEntryChareName(destEP) + "::" +
-		                         MainWindow.runObject[myRun].getEntryName(destEP) + "[EPid #" + destEP + "] - " +
+		            output.write("    " + MainWindow.runObject[myRun].getEntryFullNameByIndex(destEP) + "[EPid #" + destEP + "] - " +
 				         msgCount[sourceEP][destEP] + " messages, " +
 				         byteSum[sourceEP][destEP] + " bytes\n");
 		        }

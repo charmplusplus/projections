@@ -98,7 +98,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	colorArray[0] = MainWindow.runObject[myRun].getColorMap();
 	entryNames = new String[numEPs];
 	for (int ep=0; ep<numEPs; ep++) {
-	    entryNames[ep] = MainWindow.runObject[myRun].getEntryName(ep);
+	    entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 	}
 	mainPanel = new JPanel();
     	getContentPane().add(mainPanel);
@@ -356,8 +356,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 	for (int ep=0; ep<numEPs; ep++) {
 	    if (stateArray[0][ep]) {
 		if (count++ == yVal) {
-		    epName = MainWindow.runObject[myRun].getEntryName(ep);
-		    epClassName = MainWindow.runObject[myRun].getEntryChareName(ep);
+		    epName = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
+		    epClassName = MainWindow.runObject[myRun].getEntryChareNameByIndex(ep);
 		    break;
 		}
 	    }

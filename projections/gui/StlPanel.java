@@ -106,7 +106,7 @@ public class StlPanel extends ScalePanel.Child
 			utilData[p][interval]+"%"+
 			" at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
 			" EP = " + 
-			MainWindow.runObject[myRun].getEntryName(entryData[p][interval]);
+			MainWindow.runObject[myRun].getEntryNameByIndex(entryData[p][interval]);
 		} else {
 		    return "Processor "+pe+": Usage = "+
 			utilData[p][interval]+"%"+

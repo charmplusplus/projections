@@ -280,7 +280,7 @@ public class HistogramWindow extends GenericGraphWindow
     private String[] getTimePopup(int xVal, int yVal) {
 	String bubbleText[] = new String[3];
 
-	bubbleText[0] = MainWindow.runObject[myRun].getEntryName(yVal);
+	bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
 	bubbleText[1] = "Count: " + counts[TYPE_TIME][xVal][yVal];
 	if (xVal < timeNumBins) {
 	    bubbleText[2] = "Bin: " + U.t(xVal*timeBinSize+timeMinBinSize) +
@@ -295,7 +295,7 @@ public class HistogramWindow extends GenericGraphWindow
     private String[] getMsgSizePopup(int xVal, int yVal) {
 	String bubbleText[] = new String[3];
 
-	bubbleText[0] = MainWindow.runObject[myRun].getEntryName(yVal);
+	bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
 	bubbleText[1] = "Count: " + counts[TYPE_MSG_SIZE][xVal][yVal];
 	if (xVal < msgNumBins) {
 	    bubbleText[2] = "Bin: " + 

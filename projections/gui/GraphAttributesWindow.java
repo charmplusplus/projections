@@ -65,7 +65,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 			s = data.systemMsgs[a][t].name;
 			s += data.systemMsgs[a][t].type;
 		    }   
-	    for(int a=0; a<data.numUserEntries; a++) 
+	    for(int a=0; a<data.numEntries; a++) 
 		for(int t=0; t<2; t++)
 		    if(selectedCP == cpUserEntry[a][t]) {
 			s = data.userEntry[a][t].name;
@@ -98,7 +98,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 		    cbSystemMsgs[a][0].setState(dest);
 		    cbSystemMsgs[a][1].setState(dest);
 		}   
-		for(int a=0; a<data.numUserEntries; a++)  
+		for(int a=0; a<data.numEntries; a++)  
 		    if (null!=cbUserEntry[a][0]) {
 			cbUserEntry[a][0].setState(dest);
 			cbUserEntry[a][1].setState(dest);
@@ -139,7 +139,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 				numOnGraph++;
 			}      
 		    }
-		for(int a=0; a<data.numUserEntries; a++)
+		for(int a=0; a<data.numEntries; a++)
 		    if (null!=cbUserEntry[a][0]) {
 			for(int t=0; t<3; t++) {
 			    if(t < 2) {
@@ -176,7 +176,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 				    data.systemMsgs[a][t];
 			}
 		}         
-		for(int a=0; a<data.numUserEntries; a++) {
+		for(int a=0; a<data.numEntries; a++) {
 		    for(int t=0; t<3; t++)
 			if (data.userEntry[a][t].exists) {
 			    if(data.userEntry[a][t].state == true)
@@ -217,7 +217,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 			cpSystemMsgs[a][t].setColor(data.systemMsgs[a][t].color);
 		 }
 	  }   
-	  for(int a=0; a<data.numUserEntries; a++)
+	  for(int a=0; a<data.numEntries; a++)
 	  if (null!=cbUserEntry[a][0])
 	  {
 		 for(int t=0; t<2; t++)
@@ -254,9 +254,9 @@ public class GraphAttributesWindow extends ColorWindowFrame
 		 }      
 	  }
 	  
-	  cbUserEntry = new Checkbox[data.numUserEntries][2];
-	  cpUserEntry = new ColorPanel[data.numUserEntries][2];
-	  for(int a=0; a<data.numUserEntries; a++)
+	  cbUserEntry = new Checkbox[data.numEntries][2];
+	  cpUserEntry = new ColorPanel[data.numEntries][2];
+	  for(int a=0; a<data.numEntries; a++)
 	  {
 		 for(int t=0; t<2; t++) 
 		 if (data.userEntry[a][0].exists || data.userEntry[a][1].exists)
@@ -355,7 +355,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 	  Label l;
 	  gbc.fill = GridBagConstraints.BOTH;
 	  Util.gblAdd(p3, lhdr2, gbc, 0, ypos++, 1, 1, 1, 0);
-	  for(int a=0; a<data.numUserEntries; a++)
+	  for(int a=0; a<data.numEntries; a++)
 	  if (data.userEntry[a][0].exists || data.userEntry[a][1].exists)
 	  {
 		 gbc.anchor = GridBagConstraints.CENTER;

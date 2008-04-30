@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JColorChooser;
 
+import projections.gui.Analysis;
 import projections.gui.ColorPanel;
 import projections.gui.ColorWindowFrame;
 import projections.gui.LWPanel;
@@ -38,7 +39,6 @@ public class ColorChooser extends ColorWindowFrame
    
    private Data data;
    private TimelineWindow parentTimelineWindow;
-   private String[][]   names;
    private ColorPanel[] cpEntry;
    private ColorPanel   selectedCP;
    private Button       bApply, bClose;
@@ -116,7 +116,7 @@ public class ColorChooser extends ColorWindowFrame
 		 
 	    for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 		if (selectedCP == cpEntry[e]) {
-		    s = names[e][0];
+		    s = MainWindow.runObject[myRun].getEntryNameByIndex(e);
 		}
 	    }
 	    JColorChooser colorWindow = new JColorChooser();
@@ -144,8 +144,7 @@ public class ColorChooser extends ColorWindowFrame
 	GridBagLayout      gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
 	gbc.fill = GridBagConstraints.BOTH;
-	
-	names = MainWindow.runObject[myRun].getEntryNames();
+
 	cpEntry = new ColorPanel[MainWindow.runObject[myRun].getNumUserEntries()];
 	
 	LWPanel p1 = new LWPanel();
@@ -153,14 +152,15 @@ public class ColorChooser extends ColorWindowFrame
 	
 	int ypos = 0;
 	String charename = new String();
-	for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
+	Analysis a = MainWindow.runObject[myRun];
+	for (int e=0; e<a.getNumUserEntries(); e++) {
 	    if (data.entries()[e] > 0) {
-		if (!charename.equals(names[e][1])) {
-		    charename = names[e][1];
-		    Label lc = new Label(names[e][1], Label.LEFT);
+		if (!charename.equals(a.getEntryChareNameByIndex(e))) {
+		    charename = a.getEntryChareNameByIndex(e);
+		    Label lc = new Label(a.getEntryChareNameByIndex(e), Label.LEFT);
 		    Util.gblAdd(p1, lc, gbc, 0,ypos++, 1,1, 1,0, 0,5,0,5);
 		}   
-		Label l = new Label(names[e][0], Label.RIGHT);
+		Label l = new Label(a.getEntryNameByIndex(e), Label.RIGHT);
 		Util.gblAdd(p1, l, gbc, 0,ypos, 1,1, 1,0, 0,5,0,5);
 		
 		cpEntry[e] = new ColorPanel(data.entryColor()[e]);

@@ -57,7 +57,7 @@ public class UsageCalc extends ProjDefs
 	case BEGIN_PROCESSING:
 	    packtime = 0;
 	    unpacktime = 0;
-	    curEntry = entry;
+	    curEntry = MainWindow.runObject[myRun].getEntryIndex(entry);
 	    startTime = time;
 	    break;
 	case END_PROCESSING:

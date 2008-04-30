@@ -75,7 +75,7 @@ public class MessagePanel extends JPanel {
     		tableData[row][1] = df.format(msg.MsgLen);
     		tableData[row][2] = df.format(msg.Time);
     		tableData[row][3] = df.format((row>0) ? (msg.Time - prev.Time) : (msg.Time - obj.getBeginTime()) );
-    		tableData[row][4] = MainWindow.runObject[myRun].getEntryName(msg.Entry);								 
+    		tableData[row][4] = MainWindow.runObject[myRun].getEntryNameByID(msg.Entry);								 
     		tableData[row][5] = msg.destination(MainWindow.runObject[myRun].getNumProcessors());
 
     		row++;
@@ -83,10 +83,7 @@ public class MessagePanel extends JPanel {
     }
 
     private void createLayout() {
-	epLabel = new JLabel(MainWindow.runObject[myRun].getEntryChareName(obj.getEntry()) +
-			     " -- " +
-			     MainWindow.runObject[myRun].getEntryName(obj.getEntry()),
-			     JLabel.CENTER);
+	epLabel = new JLabel(MainWindow.runObject[myRun].getEntryFullNameByID(obj.getEntryID()), JLabel.CENTER);
 	beginTimeField = new LabelPanel("BEGIN TIME:",
 					new JLongTextField(obj.getBeginTime(),
 							   10));

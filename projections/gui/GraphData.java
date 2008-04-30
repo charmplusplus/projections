@@ -26,7 +26,7 @@ public class GraphData
     
     protected int intervalStart;
     protected int intervalEnd;
-    protected int               numUserEntries;
+    protected int               numEntries;
     protected int               graphtype;
     protected int               xmode;     
     protected int               ymode;
@@ -68,7 +68,7 @@ public class GraphData
 	offset  = 10;
 	offset2 = 0;
 	offset3 = 0;
-	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
+	numEntries = MainWindow.runObject[myRun].getNumUserEntries();
 	
 	colorvalue = (float)0.0;
 	graphtype = BAR;
@@ -129,15 +129,14 @@ public class GraphData
 	    }  
 	}
 
-	// Initialize userEntry data
-	String[][] s4 = MainWindow.runObject[myRun].getEntryNames();
-	userEntry = new ZItem[numUserEntries][3];
-	for (int a=0; a<numUserEntries; a++) {
+	
+	userEntry = new ZItem[numEntries][3];
+	for (int a=0; a<numEntries; a++) {
 	    for (int t=0; t<3; t++) {
 		userEntry[a][t] = new ZItem();
-		userEntry[a][t].name = s4[a][0];
+		userEntry[a][t].name = MainWindow.runObject[myRun].getEntryNameByIndex(a);
 		userEntry[a][t].type = s3[t];
-		userEntry[a][t].parent = s4[a][1];
+		userEntry[a][t].parent = MainWindow.runObject[myRun].getEntryChareNameByIndex(a);
 		userEntry[a][t].exists=MainWindow.runObject[myRun].hasUserEntryData(a,t);
 		if (t==0) {
 		    userEntry[a][t].color = nextColor();
@@ -191,7 +190,7 @@ public class GraphData
 	}  
 
 	// Initialize userEntry data
-	for (int a=0; a<numUserEntries; a++) {
+	for (int a=0; a<numEntries; a++) {
 	    for (int t=0; t<3; t++) {
 		if (MainWindow.runObject[myRun].hasUserEntryData(a,t)) {
 		    userEntry[a][t].data = MainWindow.runObject[myRun].getUserEntryData(a,t);

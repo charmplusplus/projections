@@ -164,25 +164,32 @@ public class Graph extends JPanel
     }
 
     private void createStackArray() {
-	if (dataSource != null) {
-	    double tempMax = 0;
-	    int numY = dataSource.getValueCount();
-	    stackArray = new double[dataSource.getIndexCount()][];
-	    for (int k=0; k<dataSource.getIndexCount(); k++) {
-		stackArray[k] = new double[numY];
-		
-		dataSource.getValues(k, stackArray[k]);
-		for (int j=1; j<numY; j++) {
-		    stackArray[k][j] += stackArray[k][j-1];
-		}
-		if (tempMax < stackArray[k][numY-1]) {
-		    tempMax = stackArray[k][numY-1];
-		}
-	    }
-	    maxSumY = tempMax;
-	} else {
-	    stackArray = null;
-	}
+    	if (dataSource != null) {
+    		double tempMax = 0;
+    		int numY = dataSource.getValueCount();
+    		stackArray = new double[dataSource.getIndexCount()][];
+    		for (int k=0; k<dataSource.getIndexCount(); k++) {
+    			stackArray[k] = new double[numY];
+
+    			dataSource.getValues(k, stackArray[k]);
+    			for (int j=1; j<numY; j++) {
+    				stackArray[k][j] += stackArray[k][j-1];
+    			}
+    			if (    stackArray!=null && 
+    					stackArray.length > k && 
+    					stackArray[k]!=null && 
+    					(numY-1) >= 0 &&
+    					stackArray[k].length > (numY-1) && 
+    					tempMax < stackArray[k][numY-1]     ) {
+    				
+    				tempMax = stackArray[k][numY-1];
+    				
+    			}
+    		}
+    		maxSumY = tempMax;
+    	} else {
+    		stackArray = null;
+    	}
     }
 
     /**  

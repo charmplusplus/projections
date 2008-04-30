@@ -412,7 +412,7 @@ public class ProfileWindow extends ProjectionsWindow
                 new String[noEPs+NUM_SYS_EPS];
             for (int i=0; i<noEPs; i++) {
                 entryNames[i] =
-                    MainWindow.runObject[myRun].getEntryName(i);
+                    MainWindow.runObject[myRun].getEntryNameByIndex(i);
             }
             // cannot seem to avoid a hardcode
             entryNames[noEPs] = "Pack Time";
@@ -821,7 +821,7 @@ public class ProfileWindow extends ProjectionsWindow
         int epIndex;
         float usage;
         int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
-        String[][] epNames = MainWindow.runObject[myRun].getEntryNames();
+
         for(epIndex=0; epIndex<rawData[0].length; epIndex++){
             usage = rawData[0][epIndex];
             if(usage<=thresh) continue;
@@ -835,7 +835,7 @@ public class ProfileWindow extends ProjectionsWindow
             } else if(epIndex==numUserEntries+2) {
                 nMap[sigCnt] = "IDLE";
             } else {
-                nMap[sigCnt] = epNames[epIndex][1]+"::"+ epNames[epIndex][0];
+                nMap[sigCnt] = MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
             }
 
             //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
@@ -863,7 +863,7 @@ public class ProfileWindow extends ProjectionsWindow
                 } else if(epIndex==numUserEntries+2) {
                     nMap[sigCnt] = prefix+"IDLE";
                 } else {
-                    nMap[sigCnt] = prefix+epNames[epIndex][1]+"::"+ epNames[epIndex][0];
+                    nMap[sigCnt] = MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
                 }
 
                 //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!

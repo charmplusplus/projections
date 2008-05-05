@@ -246,6 +246,8 @@ public class StsReader extends ProjDefs
     }   
     
 	public Integer getEntryIndex(Integer ID) {
+		if(ID<0)
+    		return ID;
 		return (Integer)entryIDToFlat.get(ID);
 	}
        

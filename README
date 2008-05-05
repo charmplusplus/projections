@@ -263,3 +263,8 @@ will be active.
    - a line number (starting at 0)
    - the time the event occurred at
    - a description of what happened.
+
+
+7. Notes:
+------------------
+ Charts in some tools are produced by JFreeChart.

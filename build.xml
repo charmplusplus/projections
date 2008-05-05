@@ -22,32 +22,35 @@ author = idooley2
   <target name="init">
     <mkdir dir="bin"/>
     <mkdir dir="build"/>
+ 
+	<!-- JFreeChart Initialization. -->
+	<tstamp />
+	<property name="jfreechart.name" value="jfreechart" />
+	<property name="jfreechart.version" value="1.0.9" />
+	<property name="jcommon.name" value="jcommon" />
+	<property name="jcommon.version" value="1.0.12" />
+	<property name="jfreechart.jar" value="lib/${jfreechart.name}-${jfreechart.version}.jar" />
+	<property name="jfreechart-experimental.jar" value="lib/${jfreechart.name}-${jfreechart.version}-experimental.jar" />
+	<property name="jcommon.jar" value="lib/${jcommon.name}-${jcommon.version}.jar"/>
+	<property name="itext.jar" value="lib/itext-2.0.6.jar"/>
+		  
+  	
+  	<path id="build.classpath">
+		<pathelement location="${jfreechart.jar}"/>
+		<pathelement location="${jfreechart-experimental.jar}"/>
+		<pathelement location="${jcommon.jar}"/>
+		<pathelement location="${itext.jar}"/>
+	</path>
+
+  	
   </target>
-
-
-  <!-- set the property NewJava if the current java version is at least 1.5 -->
-  <target name="getJavaVersion">
-    <condition property="NewJava">
-      <not>
-        <or>
-          <equals arg1="${ant.java.version}" arg2="1.1"/>
-          <equals arg1="${ant.java.version}" arg2="1.2"/>
-          <equals arg1="${ant.java.version}" arg2="1.3"/>
-          <equals arg1="${ant.java.version}" arg2="1.4"/>
-        </or>
-      </not>
-    </condition>
-
-  </target>
-
 
   <!-- Compile the java code. Put class files into "build" directory -->
-  <target name="compile" depends="init, getJavaVersion" description="compile the source" >
+  <target name="compile" depends="init" description="compile the source" >
 
-    <javac sourcepath="" srcdir="." destdir="build"  debug="true" debuglevel="lines,vars,source" >
-      <include name="**/*"/>
-      <!-- only include NoiseMiner if we have java version 1.5 or newer -->
-     <!--  <exclude name="**/NoiseMiner*.java" unless="NewJava" /> -->
+	<javac sourcepath="" srcdir="." destdir="build" debug="true" debuglevel="lines,vars,source" >
+		  <classpath refid="build.classpath" />
+		<include name="**/*"/>
     </javac>
 
   </target>
@@ -61,9 +64,13 @@ author = idooley2
     <copy file="projections/images/bgimage.jpg" tofile="build/projections/images/bgimage.jpg" />
     <copy file="projections/images/ZoomIn24.gif" tofile="build/projections/images/ZoomIn24.gif" />
     <copy file="projections/images/ZoomOut24.gif" tofile="build/projections/images/ZoomOut24.gif" />
-    <copy file="projections/images/noSummary.jpg" tofile="build/projections/images/noSummary.jpg" />
 
-    <jar jarfile="bin/projections.jar" basedir="build"/>
+    <jar jarfile="bin/projections.jar" basedir="build">
+		<zipfileset src="${jfreechart.jar}"/>
+		<zipfileset src="${jfreechart-experimental.jar}"/>
+		<zipfileset src="${jcommon.jar}"/>
+		<zipfileset src="${itext.jar}"/>
+    </jar>
 
   </target>
 

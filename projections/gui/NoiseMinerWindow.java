@@ -1,14 +1,27 @@
 package projections.gui;
 import projections.analysis.*;
+import projections.analysis.NoiseMiner.Histogram;
 import projections.analysis.NoiseMiner.NoiseResultButton;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
+
 import javax.swing.*;
 import javax.swing.table.*;
 
 
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYBarRenderer;
+import org.jfree.data.statistics.HistogramDataset;
+import org.jfree.data.xy.IntervalXYDataset;
+import org.jfree.ui.ApplicationFrame;
+import org.jfree.ui.RefineryUtilities;
 
 /**
  *  @class NoiseMinerWindow
@@ -34,7 +47,7 @@ implements ItemListener
 	private DefaultTableModel tableModel;
 	private JTable table;
 
-
+	private JPanel chartJPanel;
 
 	private final Vector columnNames;
 
@@ -111,8 +124,10 @@ implements ItemListener
 					noiseMiner.gatherData(thisWindow);
 					mainText.setText(noiseMiner.getText());
 					addResultsToTable(noiseMiner.getResultsTable());
+					addDataToHistogram(noiseMiner.getNumBins(), noiseMiner.binWidth().ms(), noiseMiner.perPEHistograms);
 					return null;
 				}
+				
 				public void finished() {
 //					System.out.println("displayDialog finished()");
 				}
@@ -120,7 +135,63 @@ implements ItemListener
 			worker.start();
 		}
 	}
+	
+	
+	
+	private void addDataToHistogram(int nbins, double binwidth_ms, Hashtable perPEHistograms) {
+		int numPEs = perPEHistograms.size();
+		if(numPEs > 0){
+		
 
+			double[] series1 = new double[nbins+1];
+			for(int i=0;i<nbins;i++)
+				series1[i] = 0.0;
+			
+			/* Consolidate the data for the histogram plot */
+			
+			Iterator keyIter = perPEHistograms.keySet().iterator();
+			while(keyIter.hasNext()){
+				Integer pe = (Integer) keyIter.next();
+				NoiseMiner.Histogram[] hists = (Histogram[]) perPEHistograms.get(pe);
+				for(int event=0;event<hists.length;event++){
+					NoiseMiner.Histogram h = hists[event];
+					for(int bin=0;bin<nbins;bin++){
+						series1[bin] += h.getBin_count(bin);
+					}	
+				}
+			}
+			
+			
+			/* Generate a nice looking histogram plot */
+			
+			HistogramDataset dataset = new HistogramDataset();
+
+			dataset.addSeries("All Events", series1, nbins+1, 0.0, binwidth_ms*nbins);
+			JFreeChart chart = ChartFactory.createHistogram(
+					"Histogram of Event Durations", 
+					null, 
+					null, 
+					dataset, 
+					PlotOrientation.VERTICAL, 
+					true, 
+					true, 
+					false
+			);
+			XYPlot plot = (XYPlot) chart.getPlot();
+			plot.setForegroundAlpha(0.8f);
+			XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer();
+			renderer.setDrawBarOutline(false);
+
+			ChartPanel chartpanel = new ChartPanel(chart);
+
+			chartJPanel.removeAll();
+			chartJPanel.setLayout(new java.awt.BorderLayout());
+			chartJPanel.add(chartpanel, BorderLayout.CENTER);
+			chartJPanel.validate();
+			chartJPanel.repaint();
+		}
+		
+	}
 
 	void addResultsToTable(Vector data){
 
@@ -149,7 +220,11 @@ implements ItemListener
 
 		JTabbedPane tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Results", resultTable);
-		tabbedPane.addTab("Text Summary", mainTextScroller);
+//		tabbedPane.addTab("Text Summary", mainTextScroller);
+		
+	
+		chartJPanel = new JPanel();
+		tabbedPane.addTab("Histogram Plot", chartJPanel);
 
 		mainPanel.setLayout(new java.awt.BorderLayout());
 

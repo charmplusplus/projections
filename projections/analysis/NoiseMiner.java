@@ -51,9 +51,16 @@ public class NoiseMiner extends ProjDefs
 
 	
 	/** Number of bins in each histogram */
-	int nbins = 5001;
+	private int nbins = 5001;
 	/** temporal width of each histogram bin (microseconds)*/
-	Duration binWidth = new Duration(10); 
+	private Duration binWidth = new Duration(10); 
+	public Duration binWidth(){
+		return binWidth;
+	}
+	
+	/** Map from pe to its array of Histograms */
+	public Hashtable perPEHistograms = new Hashtable();
+	
 	
 	/** A list of noise result components
 	 * 
@@ -124,7 +131,7 @@ public class NoiseMiner extends ProjDefs
 	}
 
 	/** essentially an alias to Time class */
-	private class Duration extends Time{
+	public class Duration extends Time{
 		public Duration(){	
 			d = 0.0;
 		}
@@ -422,7 +429,7 @@ public class NoiseMiner extends ProjDefs
 
 
 
-	private class Histogram{
+	public class Histogram{
 		private long bin_count[]; //< The number of values that fall in each bin
 		private Duration bin_sum[]; //< The sum of all values that fall in each bin
 
@@ -679,6 +686,12 @@ public class NoiseMiner extends ProjDefs
 			return i;
 		}
 
+	
+
+		public long getBin_count(int bin) {
+			return bin_count[bin];
+		}
+
 	}
 
 
@@ -724,13 +737,13 @@ public class NoiseMiner extends ProjDefs
 		
 		// For each pe
 		while (peList.hasMoreElements()) {
-			
-			System.gc();
 
 			/** The histograms for this processor.
 			 * @note the indices 0 to numEvents-1 are for the entry methods
 			 *       while index numEvents is for the black regions(no entry method, non-idle). 
 			 */ 
+			
+			
 			Histogram h[] = new Histogram[numEvents+1];
 			for(int i=0;i<h.length;i++){
 				h[i] = new Histogram();
@@ -746,6 +759,8 @@ public class NoiseMiner extends ProjDefs
 				break;
 			}
 
+			perPEHistograms.put(new Integer(currPe), h );
+			
 			LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), MainWindow.runObject[myRun].getVersion());
 
 			try {
@@ -762,9 +777,7 @@ public class NoiseMiner extends ProjDefs
 					} else if(logdata.type == END_PROCESSING){
 						// if we have seen the matching BEGIN_PROCESSING
 						if(previous_begin_entry == logdata.entry){
-
-							h[logdata.entry].insert(new TimelineEvent(previous_begin_time,logdata.time,-1,currPe));
-					
+							h[MainWindow.runObject[myRun].getEntryIndex(logdata.entry)].insert(new TimelineEvent(previous_begin_time,logdata.time,-1,currPe));
 						}
 					}
 
@@ -975,6 +988,11 @@ public class NoiseMiner extends ProjDefs
 		}
 
 		return resultTable;
+	}
+
+
+	public int getNumBins() {
+		return nbins;
 	}
 
 	

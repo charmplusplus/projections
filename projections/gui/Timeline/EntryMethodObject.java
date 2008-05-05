@@ -4,6 +4,7 @@ package projections.gui.Timeline;
 import java.awt.*;
 import java.awt.event.*;
 import projections.analysis.*;
+import projections.gui.Analysis;
 import projections.gui.MainWindow;
 import projections.gui.U;
 

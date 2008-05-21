@@ -223,8 +223,8 @@ implements ItemListener
 //		tabbedPane.addTab("Text Summary", mainTextScroller);
 		
 	
-		chartJPanel = new JPanel();
-		tabbedPane.addTab("Histogram Plot", chartJPanel);
+//		chartJPanel = new JPanel();
+//		tabbedPane.addTab("Histogram Plot", chartJPanel);
 
 		mainPanel.setLayout(new java.awt.BorderLayout());
 

@@ -49,11 +49,11 @@ public class NoiseMiner extends ProjDefs
 	/** The proportion of the total runtime that a result must have to be important*/
 	protected double importanceCutoff = 0.8;
 
-	
+
 	/** Number of bins in each histogram */
-	private int nbins = 5001;
+	private int nbins = 3001;
 	/** temporal width of each histogram bin (microseconds)*/
-	private Duration binWidth = new Duration(10); 
+	private Duration binWidth = new Duration(15); 
 	public Duration binWidth(){
 		return binWidth;
 	}
@@ -759,7 +759,7 @@ public class NoiseMiner extends ProjDefs
 				break;
 			}
 
-			perPEHistograms.put(new Integer(currPe), h );
+//			perPEHistograms.put(new Integer(currPe), h );
 			
 			LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), MainWindow.runObject[myRun].getVersion());
 

@@ -51,9 +51,9 @@ public class NoiseMiner extends ProjDefs
 
 
 	/** Number of bins in each histogram */
-	private int nbins = 3001;
+	private int nbins = 5001;
 	/** temporal width of each histogram bin (microseconds)*/
-	private Duration binWidth = new Duration(15); 
+	private Duration binWidth = new Duration(10); 
 	public Duration binWidth(){
 		return binWidth;
 	}
@@ -710,6 +710,29 @@ public class NoiseMiner extends ProjDefs
 		loggingText = "";
 	}
 
+	private class Event implements Comparable {
+		public int event;
+		public int userEvent;
+
+		public Event(int e, int u){
+			event = e;
+			userEvent = u;
+		}
+		
+		public int compareTo(Object o) {
+			Event other = (Event) o;
+			if(event == other.event){
+				return userEvent - other.userEvent;
+			} else {
+				return event - other.event;
+			}
+			
+		}
+		
+		
+	}
+	
+	
 
 	/** Do the gathering and processing of the data */
 	public void gatherData(Component parent)
@@ -720,9 +743,11 @@ public class NoiseMiner extends ProjDefs
 		int currPeIndex = 0;
 		int currPe;
 
-		long previous_begin_time=-1;
-		int  previous_begin_entry=-1;
-
+		long previous_begin_time = -1;
+		int previous_begin_entry = -1;
+		
+		int encountered_user_event = -1;
+		
 		/** Track whether there's no intermediate event in a black part */
 		long previous_black_time = -1;
 
@@ -731,7 +756,7 @@ public class NoiseMiner extends ProjDefs
 		/** Number of entry methods in this set of trace logs */
 		int numEvents = MainWindow.runObject[myRun].getEntryCount();
 		
-		int blackPartIdx = numEvents;		
+		int blackPartIdx = -2;		
 		
 		LinkedList results = new LinkedList();
 		
@@ -744,11 +769,10 @@ public class NoiseMiner extends ProjDefs
 			 */ 
 			
 			
-			Histogram h[] = new Histogram[numEvents+1];
-			for(int i=0;i<h.length;i++){
-				h[i] = new Histogram();
-			}
-
+			/** Histograms for each type of event. Each entry is of type "Event" */
+			TreeMap h = new TreeMap();
+			
+			
 			currPe = peList.nextElement();
 			if (!progressBar.isCanceled()) {
 				progressBar.setNote("[PE: " + currPe + " ] Reading data.");
@@ -777,9 +801,17 @@ public class NoiseMiner extends ProjDefs
 					} else if(logdata.type == END_PROCESSING){
 						// if we have seen the matching BEGIN_PROCESSING
 						if(previous_begin_entry == logdata.entry){
-							h[MainWindow.runObject[myRun].getEntryIndex(logdata.entry)].insert(new TimelineEvent(previous_begin_time,logdata.time,-1,currPe));
+							Event e = new Event(logdata.entry, encountered_user_event);
+							if(! h.containsKey(e)){
+								h.put(e, new Histogram());
+							}							
+							((Histogram)h.get(e)).insert(new TimelineEvent(previous_begin_time,logdata.time,-1,currPe));
+							encountered_user_event = -1;
 						}
+					} else if(logdata.type == USER_EVENT || logdata.type == USER_EVENT_PAIR){
+						encountered_user_event = logdata.userEventID;
 					}
+					
 
 					//process the black part
 					//Four cases for a black part
@@ -792,8 +824,14 @@ public class NoiseMiner extends ProjDefs
 					if(logdata.type == END_PROCESSING || logdata.type == END_IDLE){
 					    previous_black_time = logdata.time;
 					}else if(logdata.type == BEGIN_PROCESSING || logdata.type == BEGIN_IDLE){
-					    if(previous_black_time != -1){
-						h[blackPartIdx].insert(new TimelineEvent(previous_black_time, logdata.time, -1, currPe));
+						if(previous_black_time != -1){
+
+							Event e = new Event(blackPartIdx, -1);
+							if(! h.containsKey(e)){
+								h.put(e, new Histogram());
+							}							
+							((Histogram)h.get(e)).insert(new TimelineEvent(previous_black_time, logdata.time, -1, currPe));
+						
 					    }
 					}else{
 					    //other events
@@ -811,27 +849,25 @@ public class NoiseMiner extends ProjDefs
 
 			
 			// Generate clusters from each histogram
-			for(int i=0;i<h.length;i++){
-				h[i].cluster();
-			}
-
-
 			// Merge all the normalized clusters for this pe
 			// i.e. merge clusters from all entry methods
 			Histogram h_pe = new Histogram();
-			for(int i=0;i<h.length;i++){
-				// for each normalized cluster
-		
-				ListIterator itr = h[i].clustersNormalized().listIterator();
+			
+			Iterator iter = h.values().iterator();
+			while(iter.hasNext()){
+				Histogram hist = (Histogram) iter.next();
+				hist.cluster();
+				
+				ListIterator itr = hist.clustersNormalized().listIterator();
 				while(itr.hasNext()){
 					Cluster c = (Cluster) itr.next();
 					h_pe.insert(c);
 				}
 			}
 
+			
 			// Generate clusters for the processor
 			h_pe.cluster();
-
 
 			int n = 1;
 			while(h_pe.hasNthNoiseComponent(n)){

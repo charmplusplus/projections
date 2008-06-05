@@ -64,7 +64,7 @@ author = idooley2
     <copy file="projections/images/bgimage.jpg" tofile="build/projections/images/bgimage.jpg" />
     <copy file="projections/images/ZoomIn24.gif" tofile="build/projections/images/ZoomIn24.gif" />
     <copy file="projections/images/ZoomOut24.gif" tofile="build/projections/images/ZoomOut24.gif" />
-
+    <copy file="projections/images/noSummary.jpg" tofile="build/projections/images/noSummary.jpg" />
     <jar jarfile="bin/projections.jar" basedir="build">
 		<zipfileset src="${jfreechart.jar}"/>
 		<zipfileset src="${jfreechart-experimental.jar}"/>

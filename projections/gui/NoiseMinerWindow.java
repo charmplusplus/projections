@@ -1,27 +1,47 @@
 package projections.gui;
-import projections.analysis.*;
-import projections.analysis.NoiseMiner.Histogram;
-import projections.analysis.NoiseMiner.NoiseResultButton;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Calendar;
+import java.util.Vector;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.util.*;
-
-import javax.swing.*;
-import javax.swing.table.*;
-
+import javax.swing.AbstractCellEditor;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.UIManager;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.LogAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.NumberTickUnit;
+import org.jfree.chart.axis.TickUnits;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
 import org.jfree.chart.renderer.xy.XYBarRenderer;
 import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.xy.IntervalXYDataset;
-import org.jfree.ui.ApplicationFrame;
-import org.jfree.ui.RefineryUtilities;
+import org.jfree.data.time.RegularTimePeriod;
+import org.jfree.data.time.TimeTableXYDataset;
+import org.jfree.data.time.Year;
+import org.jfree.data.xy.DefaultTableXYDataset;
+import org.jfree.data.xy.XYSeries;
+
+import projections.analysis.NoiseMiner;
+import projections.analysis.NoiseMiner.NoiseResultButton;
+
 
 /**
  *  @class NoiseMinerWindow
@@ -124,7 +144,7 @@ implements ItemListener
 					noiseMiner.gatherData(thisWindow);
 					mainText.setText(noiseMiner.getText());
 					addResultsToTable(noiseMiner.getResultsTable());
-					addDataToHistogram(noiseMiner.getNumBins(), noiseMiner.binWidth().ms(), noiseMiner.perPEHistograms);
+					addDataToHistogram(noiseMiner.usPerDisplayBin(), noiseMiner.histogramToDisplay);
 					return null;
 				}
 				
@@ -138,58 +158,46 @@ implements ItemListener
 	
 	
 	
-	private void addDataToHistogram(int nbins, double binwidth_ms, Hashtable perPEHistograms) {
-		int numPEs = perPEHistograms.size();
-		if(numPEs > 0){
-		
+	private void addDataToHistogram(double binwidth_us, long[] data) {
+			
+		/* Generate a nice looking histogram plot */
 
-			double[] series1 = new double[nbins+1];
-			for(int i=0;i<nbins;i++)
-				series1[i] = 0.0;
-			
-			/* Consolidate the data for the histogram plot */
-			
-			Iterator keyIter = perPEHistograms.keySet().iterator();
-			while(keyIter.hasNext()){
-				Integer pe = (Integer) keyIter.next();
-				NoiseMiner.Histogram[] hists = (Histogram[]) perPEHistograms.get(pe);
-				for(int event=0;event<hists.length;event++){
-					NoiseMiner.Histogram h = hists[event];
-					for(int bin=0;bin<nbins;bin++){
-						series1[bin] += h.getBin_count(bin);
-					}	
-				}
-			}
-			
-			
-			/* Generate a nice looking histogram plot */
-			
-			HistogramDataset dataset = new HistogramDataset();
+        DefaultTableXYDataset dataset = new DefaultTableXYDataset();
+        XYSeries s = new XYSeries("All Event Types", true, false);
+    
+        for(int i=0;i<data.length;i++){
+        	if(data[i] > 0){
+        		s.add(i, data[i]);
+        		System.out.println("data["+i+"]="+data[i]);
+        	}
+        }
+        
+        dataset.addSeries(s);
 
-			dataset.addSeries("All Events", series1, nbins+1, 0.0, binwidth_ms*nbins);
-			JFreeChart chart = ChartFactory.createHistogram(
-					"Histogram of Event Durations", 
-					null, 
-					null, 
-					dataset, 
-					PlotOrientation.VERTICAL, 
-					true, 
-					true, 
-					false
-			);
-			XYPlot plot = (XYPlot) chart.getPlot();
-			plot.setForegroundAlpha(0.8f);
-			XYBarRenderer renderer = (XYBarRenderer) plot.getRenderer();
-			renderer.setDrawBarOutline(false);
+        NumberAxis domainAxis = new NumberAxis("Event Duration (not in Microseconds)");
+        domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 
-			ChartPanel chartpanel = new ChartPanel(chart);
+//        LogAxis rangeAxis = new LogAxis("Number of Events");
+//        rangeAxis.setLowerBound(1.0);
+//        rangeAxis.setUpperBound(1000000);
+        
+        NumberAxis rangeAxis = new NumberAxis("Number of Events");
 
-			chartJPanel.removeAll();
-			chartJPanel.setLayout(new java.awt.BorderLayout());
-			chartJPanel.add(chartpanel, BorderLayout.CENTER);
-			chartJPanel.validate();
-			chartJPanel.repaint();
-		}
+        StackedXYBarRenderer renderer = new StackedXYBarRenderer();
+
+        renderer.setDrawBarOutline(true);
+        
+        XYPlot plot = new XYPlot(dataset, domainAxis, rangeAxis, renderer);
+
+        JFreeChart chart = new JFreeChart("Event Durations Histogram (Click & Drag to zoom)", plot);
+
+		ChartPanel chartpanel = new ChartPanel(chart);
+
+		chartJPanel.removeAll();
+		chartJPanel.setLayout(new java.awt.BorderLayout());
+		chartJPanel.add(chartpanel, BorderLayout.CENTER);
+		chartJPanel.validate();
+		chartJPanel.repaint();
 		
 	}
 
@@ -202,9 +210,9 @@ implements ItemListener
 		table.getColumn(buttonColumnTitle).setCellRenderer(bc);
 		table.getColumn(buttonColumnTitle).setCellEditor(bc);
 
-
 		table.revalidate();
 		table.repaint();
+
 	}
 
 
@@ -223,8 +231,8 @@ implements ItemListener
 //		tabbedPane.addTab("Text Summary", mainTextScroller);
 		
 	
-//		chartJPanel = new JPanel();
-//		tabbedPane.addTab("Histogram Plot", chartJPanel);
+		chartJPanel = new JPanel();
+		tabbedPane.addTab("Histogram Plot", chartJPanel);
 
 		mainPanel.setLayout(new java.awt.BorderLayout());
 

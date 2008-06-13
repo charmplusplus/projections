@@ -2,9 +2,11 @@ package projections.analysis;
 
 import projections.misc.*;
 import projections.gui.*;
+import projections.gui.Timeline.ThreadedFileReader;
 
 import java.io.*;
 import java.util.*;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
@@ -53,20 +55,17 @@ public class NoiseMiner extends ProjDefs
 	/** Number of bins in each histogram */
 	private int nbins = 5001;
 	/** temporal width of each histogram bin (microseconds)*/
-	private Duration binWidth = new Duration(10); 
-	public Duration binWidth(){
-		return binWidth;
-	}
+	private Duration binWidth = new Duration(10);
 	
-	/** Map from pe to its array of Histograms */
-	public Hashtable perPEHistograms = new Hashtable();
+	public int numDisplayBins = 200;
 	
 	
 	/** A list of noise result components
 	 * 
 	 *  */
 	private LinkedList finalResults;
-
+	public long[] histogramToDisplay;
+	
 	private class Time {
 
 		protected double d; // stores duration in us
@@ -430,8 +429,8 @@ public class NoiseMiner extends ProjDefs
 
 
 	public class Histogram{
-		private long bin_count[]; //< The number of values that fall in each bin
-		private Duration bin_sum[]; //< The sum of all values that fall in each bin
+		public long bin_count[]; //< The number of values that fall in each bin
+		public Duration bin_sum[]; //< The sum of all values that fall in each bin
 
 		private EventWindow bin_window[]; //< A list of recent events in each bin
 		
@@ -448,7 +447,7 @@ public class NoiseMiner extends ProjDefs
 
 		public int countEvents(){
 			int c=0;
-			for(int i=0;i<nbins;i++){
+			for(int i=0;i<getNbins();i++){
 				c+=bin_window[i].size();
 			}
 			return c;
@@ -488,10 +487,10 @@ public class NoiseMiner extends ProjDefs
 		public Histogram(){
 			cummulativeEventDurations = new Duration(0);
 			
-			bin_count = new long[nbins];
-			bin_sum = new Duration[nbins];
-			bin_window = new EventWindow[nbins];
-			for(int i=0;i<nbins;i++){
+			bin_count = new long[getNbins()];
+			bin_sum = new Duration[getNbins()];
+			bin_window = new EventWindow[getNbins()];
+			for(int i=0;i<getNbins();i++){
 				bin_count[i] = 0;
 				bin_sum[i] = new Duration(0.0);
 				bin_window[i] = new EventWindow(eventsInBinWindow);
@@ -503,8 +502,8 @@ public class NoiseMiner extends ProjDefs
 			eventsSeenSoFar ++;
 			cummulativeEventDurations.add(duration);
 			int which_bin = (int)(duration.us() / binWidth.us());
-			if(which_bin > nbins-1){
-				which_bin = nbins-1;
+			if(which_bin > getNbins()-1){
+				which_bin = getNbins()-1;
 			}
 			if(which_bin >= 0){
 				bin_count[which_bin] ++;
@@ -522,8 +521,8 @@ public class NoiseMiner extends ProjDefs
 				eventsSeenSoFar += c.count();
 				cummulativeEventDurations.add(c.sum());
 				int which_bin = (int)(c.mean().us() / binWidth.us());
-				if(which_bin > nbins-1){
-					which_bin = nbins-1;
+				if(which_bin > getNbins()-1){
+					which_bin = getNbins()-1;
 				}
 				if(which_bin >= 0){
 					bin_count[which_bin] += c.count();
@@ -534,12 +533,10 @@ public class NoiseMiner extends ProjDefs
 		}
 
 
-
-
 		public String toString(){
 			String s ="";
 			if(used()){
-				for(int i=0;i<nbins;i++){
+				for(int i=0;i<getNbins();i++){
 					s = s + bin_count[i] + "\t";
 				}
 			}
@@ -566,9 +563,9 @@ public class NoiseMiner extends ProjDefs
 			clustersNormalized = new ArrayList();
 
 			boolean done=false;
-			long bin_data[] = new long[nbins+1]; // a local copy of the histogram data. Entries of this are zeroed out below
-			bin_data[nbins] = 0; // padding the right side so the algorithm below is simpler
-			for(int i=0;i<nbins;i++)
+			long bin_data[] = new long[getNbins()+1]; // a local copy of the histogram data. Entries of this are zeroed out below
+			bin_data[getNbins()] = 0; // padding the right side so the algorithm below is simpler
+			for(int i=0;i<getNbins();i++)
 				bin_data[i] = bin_count[i];
 
 			// Repeat the following until enough clusters are found:
@@ -577,7 +574,7 @@ public class NoiseMiner extends ProjDefs
 				// Find the heaviest bin remaining
 				long largest_val = bin_data[0];
 				int largest = 0;
-				for(int i=1;i<nbins;++i){
+				for(int i=1;i<getNbins();++i){
 					if(bin_data[i] > largest_val){
 						largest_val = bin_data[i];
 						largest = i;
@@ -594,7 +591,7 @@ public class NoiseMiner extends ProjDefs
 					Cluster c = new Cluster(bin_sum[largest], bin_count[largest],bin_window[largest]);
 
 					// scan to right until we hit a local minimum
-					for(int j=largest+1;j<nbins && ((j==nbins-1) || (bin_data[j] >= bin_data[j+1])) && bin_data[j]!=0; j++) {
+					for(int j=largest+1;j<getNbins() && ((j==getNbins()-1) || (bin_data[j] >= bin_data[j+1])) && bin_data[j]!=0; j++) {
 						// merge into cluster
 						c.merge(bin_sum[j], bin_count[j], bin_window[j]);
 						bin_data[j] = 0;	// mark this bin as already seen
@@ -675,7 +672,7 @@ public class NoiseMiner extends ProjDefs
 			}
 
 			int i;
-			for(i=1;i<nbins-1;i++){
+			for(i=1;i<getNbins()-1;i++){
 				long next = bin_count[i+1];
 				if(current>=previous && current > next)
 					return i;
@@ -692,6 +689,8 @@ public class NoiseMiner extends ProjDefs
 			return bin_count[bin];
 		}
 
+
+
 	}
 
 
@@ -701,8 +700,8 @@ public class NoiseMiner extends ProjDefs
 		//Initialize class variables
 		peList = processorList;
 		numPe = peList.size();
-		startTime = startInterval;
-		endTime = endInterval;
+		setStartTime(startInterval);
+		setEndTime(endInterval);
 
 		osQuanta = new Duration();
 		osQuanta.set_ms(100); // @todo. This should be recovered from a new type of entry in the projection log. linux 2.16 default is 100ms . This should be updated
@@ -710,7 +709,9 @@ public class NoiseMiner extends ProjDefs
 		loggingText = "";
 	}
 
-	private class Event implements Comparable {
+	
+
+	public class Event implements Comparable {
 		public int event;
 		public int userEvent;
 
@@ -729,182 +730,70 @@ public class NoiseMiner extends ProjDefs
 			
 		}
 		
-		
 	}
+	
 	
 	
 
 	/** Do the gathering and processing of the data */
 	public void gatherData(Component parent)
 	{
-		GenericLogReader LogFile;
-		LogEntryData logdata = new LogEntryData();
-
-		int currPeIndex = 0;
-		int currPe;
-
-		long previous_begin_time = -1;
-		int previous_begin_entry = -1;
 		
-		int encountered_user_event = -1;
+		peList.reset();
+		int numPs = peList.size();
+			
+		// Create a list of worker threads
+		LinkedList readyReaders = new LinkedList();
 		
-		/** Track whether there's no intermediate event in a black part */
-		long previous_black_time = -1;
+		for (int p=0; p<numPs; p++) {
+			int pe = peList.nextElement();
+			readyReaders.add(new NoiseMinerThread(pe, MainWindow.runObject[myRun], this));
+		}	
 
-		ProgressMonitor progressBar = new ProgressMonitor(parent, "Mining for Computational Noise","", 0, numPe);
+		ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, parent);
+		threadManager.runThreads();
 
-		/** Number of entry methods in this set of trace logs */
-		int numEvents = MainWindow.runObject[myRun].getEntryCount();
-		
-		int blackPartIdx = -2;		
-		
+		// Retrieve results for each PE
+				
+		histogramToDisplay = new long[numDisplayBins];
+
+		for(int i=0;i<numDisplayBins;i++){
+			histogramToDisplay[i] = 0;
+		}
 		LinkedList results = new LinkedList();
 		
-		// For each pe
-		while (peList.hasMoreElements()) {
-
-			/** The histograms for this processor.
-			 * @note the indices 0 to numEvents-1 are for the entry methods
-			 *       while index numEvents is for the black regions(no entry method, non-idle). 
-			 */ 
-			
-			
-			/** Histograms for each type of event. Each entry is of type "Event" */
-			TreeMap h = new TreeMap();
-			
-			
-			currPe = peList.nextElement();
-			if (!progressBar.isCanceled()) {
-				progressBar.setNote("[PE: " + currPe + " ] Reading data.");
-				progressBar.setProgress(currPeIndex+1);
+		
+		Iterator iter = readyReaders.iterator();
+		while(iter.hasNext()) {
+			NoiseMinerThread thread = (NoiseMinerThread) iter.next();
+			results.addAll(thread.results);
+			for(int i=0;i<numDisplayBins;i++){
+				histogramToDisplay[i] += thread.histogramToDisplay[i];
 			}
-			else {
-				progressBar.close();
-				break;
-			}
-
-//			perPEHistograms.put(new Integer(currPe), h );
-			
-			LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), MainWindow.runObject[myRun].getVersion());
-
-			try {
-
-				LogFile.nextEventOnOrAfter(startTime, logdata);
-				while (logdata.time < endTime) {
-					//System.out.println("Time=" + logdata.time + " event " + logdata.event);
-					//Go through each log file and for each Creation
-					//  in a Processing Block, update arrays
-					if(logdata.type == BEGIN_PROCESSING){
-						previous_begin_time = logdata.time;
-						previous_begin_entry = logdata.entry;
-
-					} else if(logdata.type == END_PROCESSING){
-						// if we have seen the matching BEGIN_PROCESSING
-						if(previous_begin_entry == logdata.entry){
-							Event e = new Event(logdata.entry, encountered_user_event);
-							if(! h.containsKey(e)){
-								h.put(e, new Histogram());
-							}							
-							((Histogram)h.get(e)).insert(new TimelineEvent(previous_begin_time,logdata.time,-1,currPe));
-							encountered_user_event = -1;
-						}
-					} else if(logdata.type == USER_EVENT || logdata.type == USER_EVENT_PAIR){
-						encountered_user_event = logdata.userEventID;
-					}
-					
-
-					//process the black part
-					//Four cases for a black part
-					//1. END_PROCESSING to BEGIN_IDLE
-					//2. END_PROCESSING to BEGIN_PROCESSING
-					//3. END_IDLE to BEGIN_PROCESSING
-					//4. END_IDLE to BEGIN_IDLE
-					//we need to ensure there's no intermeidate events between the two events
-					//so previous_black_time is used to ensure this if the value of it is not -1					
-					if(logdata.type == END_PROCESSING || logdata.type == END_IDLE){
-					    previous_black_time = logdata.time;
-					}else if(logdata.type == BEGIN_PROCESSING || logdata.type == BEGIN_IDLE){
-						if(previous_black_time != -1){
-
-							Event e = new Event(blackPartIdx, -1);
-							if(! h.containsKey(e)){
-								h.put(e, new Histogram());
-							}							
-							((Histogram)h.get(e)).insert(new TimelineEvent(previous_black_time, logdata.time, -1, currPe));
-						
-					    }
-					}else{
-					    //other events
-					    previous_black_time = -1;
-					}
-					LogFile.nextEvent(logdata);				
-				}
-			}
-			catch (IOException e)
-			{
-				// I doubt we'll ever get here
-			}
-
-			currPeIndex++;
-
-			
-			// Generate clusters from each histogram
-			// Merge all the normalized clusters for this pe
-			// i.e. merge clusters from all entry methods
-			Histogram h_pe = new Histogram();
-			
-			Iterator iter = h.values().iterator();
-			while(iter.hasNext()){
-				Histogram hist = (Histogram) iter.next();
-				hist.cluster();
-				
-				ListIterator itr = hist.clustersNormalized().listIterator();
-				while(itr.hasNext()){
-					Cluster c = (Cluster) itr.next();
-					h_pe.insert(c);
-				}
-			}
-
-			
-			// Generate clusters for the processor
-			h_pe.cluster();
-
-			int n = 1;
-			while(h_pe.hasNthNoiseComponent(n)){
-//				h_pe.nthNoise(n).events.buildFFT();
-
-				EventWindow ew = h_pe.nthNoise(n).events;
-				long occurrences = h_pe.nthNoise(n).count();
-				Duration duration = h_pe.nthNoise(n).mean();
-				
-				Duration periodicity = ew.period();
-//				Duration periodicity_fft = ew.periodFromFFT();
-				
-				results.add(new NoiseResult(duration, occurrences, currPe, ew));
-
-				n++;
-			}
-
-		}// end for each pe
-
+		}
 		
 		// cluster all result records across all processors
 		finalResults = clusterResultsAcrossProcs(results);
-
 		results = null;
-
 		finalResults = filterResults(finalResults);
-		
-		progressBar.close();
+	
 	}
 
 	public String getText(){
 		String s = "NoiseMiner Text Report:\n";
-		s = s + "Time range " + startTime + " to " + endTime + "\n";
+		s = s + "Time range " + getStartTime() + " to " + getEndTime() + "\n";
 		s = s + loggingText;
 		return s;
 	}
 
+	
+	public int numOldBinsPerNewBin() {
+		return (int) Math.ceil((double)getNbins() / (double)numDisplayBins);
+	}
+	
+	public double usPerDisplayBin() {
+		return ((double)binWidth.us() * numOldBinsPerNewBin());
+	}
 	
 	/** An extended JButton that also contains a reference to some NoiseMiner results */
 	public class NoiseResultButton extends JButton {
@@ -924,7 +813,7 @@ public class NoiseMiner extends ProjDefs
 	}
 	
 	
-	private class Cluster{
+	public class Cluster{
 		private Duration sum;
 		private long count;
 		EventWindow events;
@@ -1028,8 +917,36 @@ public class NoiseMiner extends ProjDefs
 
 
 	public int getNumBins() {
+		return getNbins();
+	}
+
+	public void setStartTime(long startTime) {
+		this.startTime = startTime;
+	}
+
+	public long getStartTime() {
+		return startTime;
+	}
+
+	public void setEndTime(long endTime) {
+		this.endTime = endTime;
+	}
+
+	public long getEndTime() {
+		return endTime;
+	}
+
+	public void setNbins(int nbins) {
+		this.nbins = nbins;
+	}
+
+	public int getNbins() {
 		return nbins;
 	}
 
+
+	public Duration binWidth(){
+		return binWidth;
+	}
 	
 }

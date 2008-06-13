@@ -38,8 +38,8 @@ public class ThreadManager {
 	public void runThreads(){
 
 		ProgressMonitor progressBar = new ProgressMonitor(parentWindow, description,"", 0, numInitialThreads);
-		progressBar.setMillisToPopup(0);
-		progressBar.setMillisToDecideToPopup(0);
+		progressBar.setMillisToPopup(10);
+		progressBar.setMillisToDecideToPopup(10);
 		progressBar.setProgress(0);
 
 		int totalToLoad = threads.size();

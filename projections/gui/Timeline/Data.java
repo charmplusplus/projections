@@ -301,22 +301,29 @@ public class Data
 					allUserEventObjects.put(pe, oldUserEventObjects.get(pe));
 
 					// Drop elements from mesgVector and allEntryMethodObjects outside range
-					Iterator iter = ((LinkedList)allEntryMethodObjects.get(pe)).iterator();
-					while(iter.hasNext()){
-						EntryMethodObject obj = (EntryMethodObject) iter.next();
-						if(obj.getEndTime() < beginTime || obj.getBeginTime() > endTime){
-							iter.remove();
+					if(allEntryMethodObjects.containsKey(pe)){
+						LinkedList objs = (LinkedList)allEntryMethodObjects.get(pe);
+						Iterator iter = objs.iterator();
+						while(iter.hasNext()){
+							EntryMethodObject obj = (EntryMethodObject) iter.next();
+							if(obj.getEndTime() < beginTime || obj.getBeginTime() > endTime){
+								iter.remove();
+							}
 						}
 					}
 
 					// Drop elements from userEventsArray outside range
-					Iterator iter2 = ((LinkedList)allUserEventObjects.get(pe)).iterator();
-					while(iter2.hasNext()){
-						UserEventObject obj = (UserEventObject) iter2.next();
-						if(obj.EndTime < beginTime || obj.BeginTime > endTime){
-							iter2.remove();
+					if(allUserEventObjects.containsKey(pe)){
+						LinkedList objs = (LinkedList)allUserEventObjects.get(pe);
+						Iterator iter2 = objs.iterator();
+						while(iter2.hasNext()){
+							UserEventObject obj = (UserEventObject) iter2.next();
+							if(obj.EndTime < beginTime || obj.BeginTime > endTime){
+								iter2.remove();
+							}
 						}
 					}
+					
 				}
 
 				p = processorList.nextElement();

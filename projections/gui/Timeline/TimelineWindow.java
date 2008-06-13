@@ -137,15 +137,12 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	protected void getDialogData(){
 		data.setProcessorList(dialog.getValidProcessors());
         data.setRange(dialog.getStartTime(),dialog.getEndTime());
-		
 	}
 	
     public void setDialogData() {
-	
     	dialog.setValidProcessors(data.processorList());
     	dialog.setStartTime(data.startTime());
     	dialog.setEndTime(data.endTime());
-        
     	super.setDialogData();
     }
 	

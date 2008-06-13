@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -72,12 +73,9 @@ public class Data
 	 * 
 	 * */
 	private int mostRecentScaledScreenWidth;
-
-	/** The list of processors used in this tool. Can differ from those used in other tools */
-	private OrderedIntList processorList;
 	
-	/** The list of pes displayed, the key is the PE the value is the vertical index <Integer, Integer>*/
-	HashMap peToLine;
+	/** The list of pes displayed, in display order*/
+	LinkedList peToLine;
 
 	/** If true, color entry method invocations by Object ID */
 	private boolean colorByObjectId;
@@ -169,8 +167,14 @@ public class Data
 	/** A custom foreground color that can override the application wide background pattern. Used by NoiseMiner to set a white background */
 	private Color customForeground;
 	private Color customBackground;
-	
 
+
+	
+	public Data(){
+		System.err.println("Do not call this constructor\n");
+		System.exit(1);
+	}
+	
 	/** A constructor that takes in a TimelineContainer(for handling some events) 
 	 *  and provides sensible default values for various parameters 
 	 * */
@@ -183,8 +187,8 @@ public class Data
 		showIdle  = true;
 		showUserEvents = true;
 		
-		processorList = MainWindow.runObject[myRun].getValidProcessorList();
-
+		peToLine = new LinkedList();
+		
 		messageStructures = new MessageStructures(this);
 		
 		oldBT = -1;
@@ -206,7 +210,7 @@ public class Data
 
 		drawMessagesForTheseObjects = new HashSet();
 		drawMessagesForTheseObjectsAlt = new HashSet();
-		
+				
 		allEntryMethodObjects = null;
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		entryColor = MainWindow.runObject[myRun].getColorMap();
@@ -220,21 +224,61 @@ public class Data
 		colorByObjectId = false;
 		colorByUserSupplied = false;
 		
+		// Get the list of PEs to display
+		loadGlobalPEList();
 		
 	}
 	/** 
 	 * Add the data for a new processor to this visualization
 	 */
 	public void addProcessor(int pCreation){
-		int oldNumP = processorList.size();
-		processorList.insert(pCreation);
-		int newNumP = processorList.size();
-		
-		if(oldNumP != newNumP)
+		Integer p = new Integer(pCreation);
+		if(!peToLine.contains(p)){
+			peToLine.addLast(p);
 			modificationHandler.notifyProcessorListHasChanged();
-	
+		}
 	}
 
+	
+	
+	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
+	public void setProcessorList(OrderedIntList processorList){
+		peToLine.clear();
+		processorList.reset();
+		int p = processorList.nextElement();
+		Integer line = 0;
+		while (p != -1) {
+			Integer pe = new Integer(p);
+			peToLine.addLast(pe);
+			line ++;
+			p = processorList.nextElement();
+		}
+	}
+
+
+	/** Load the set of PEs found in MainWindow.runObject[myRun].getValidProcessorList() */
+	private void loadGlobalPEList(){
+		OrderedIntList processorList = MainWindow.runObject[myRun].getValidProcessorList();
+		setProcessorList(processorList);
+	}
+	
+	
+	/** Get the set of PEs as an OrderedIntList. The internal storage for the PE list is not a sorted list. */
+	public OrderedIntList processorList(){
+		OrderedIntList processorList = new OrderedIntList();
+		
+		Iterator iter = peToLine.iterator();
+		while(iter.hasNext()){
+			Integer pe = (Integer) iter.next();
+			processorList.insert(pe);
+		}
+		
+		return processorList;
+	}
+	
+	
+	
+	
 	/** Change the font sizes used */
 	public void setFontSizes(int labelFontSize, int axisFontSize, boolean useBoldForLabel){
 		if(useBoldForLabel)
@@ -274,9 +318,6 @@ public class Data
 		// Kill off the secondary processing threads if needed
 		messageStructures.kill();
 		
-		// Generate the index files
-//		MainWindow.runObject[myRun].logLoader.createTimeIndexes(processorList);
-		
 		// Can we reuse our already loaded data?
 		if(beginTime >= oldBT && endTime <= oldET){
 		
@@ -290,10 +331,10 @@ public class Data
 
 			// Remove any unused objects from our data structures 
 			// (the components in the JPanel will be regenerated later from this updated list)
-			processorList.reset();
-			int p = processorList.nextElement();
-			while (p != -1) {
-				Integer pe = new Integer(p);
+		
+			Iterator peIter = peToLine.iterator();
+			while(peIter.hasNext()){
+				Integer pe = (Integer) peIter.next();
 					
 				if(oldEntryMethodObjects.containsKey(pe)){
 					// Reuse the already loaded data
@@ -326,7 +367,6 @@ public class Data
 					
 				}
 
-				p = processorList.nextElement();
 			}
 			
 		} else {
@@ -343,18 +383,19 @@ public class Data
 		// Do multithreaded file reading
 
 		Date startReadingTime  = new Date();
-		
-		processorList.reset();
-		int numPs = processorList.size();
+	
 			
 		// Create a list of worker threads
 		LinkedList readyReaders = new LinkedList();
 		
-		for (int p=0; p<numPs; p++) {
-			int pe = processorList.nextElement();
-			if(!allEntryMethodObjects.containsKey(new Integer(pe))) {
-				readyReaders.add(new ThreadedFileReader(pe,p,this));
+		Iterator peIter = peToLine.iterator();
+		int pIdx=0;
+		while(peIter.hasNext()){
+			Integer pe = (Integer) peIter.next();
+			if(!allEntryMethodObjects.containsKey(pe)) {
+				readyReaders.add(new ThreadedFileReader(pe,pIdx,this));
 			}
+			pIdx++;
 		}
 	
 		// Pass this list of threads to a class that manages/runs the threads nicely
@@ -422,8 +463,6 @@ public class Data
 			}      
 		} 
 
-		updatePEVerticalOrdering();
-		
 		// Spawn a thread that computes some secondary message related data structures
 		messageStructures.create(useHelperThreads);
 	
@@ -681,7 +720,7 @@ public class Data
 
 	/** Number of processors in the processor List */
 	public int numPs(){
-		return processorList.size();
+		return peToLine.size();
 	}
 	/** The maximum processor index in the processor list, or -1 if null processor list */
 	public int numPEs(){
@@ -709,9 +748,9 @@ public class Data
 		return offset();
 	}
 
-	public OrderedIntList processorList() {
-		return processorList;
-	}
+//	public OrderedIntList processorList() {
+//		return processorList;
+//	}
 	/** The width we should draw in, compensated for the scaling(zoom) factor 
 	 * 
 	 * 
@@ -774,9 +813,10 @@ public class Data
 		modificationHandler = rh;
 		displayMustBeRedrawn();
 	}
-	public void setProcessorList(OrderedIntList procs){
-		processorList = procs.copyOf();
-	}
+	
+//	public void setProcessorList(OrderedIntList procs){
+//		
+//	}
 
 	/** Choose a new time range to display. 
 	 * 	Scale will be reset to zero, and
@@ -1328,71 +1368,27 @@ public class Data
 		if(peToLine==null){
 			throw new RuntimeException("peToLine is null");
 		}
-		if(!peToLine.containsKey(new Integer(PE))){
+		if(!peToLine.contains(new Integer(PE))){
 			throw new RuntimeException("peToLine does not contain pe " + PE);
 		}
-		if(peToLine.get(new Integer(PE)) == null){
-			throw new RuntimeException("peToLine is null");
-		}
-		
-		return ((Integer)peToLine.get(new Integer(PE))).intValue();
+		return peToLine.indexOf(new Integer(PE));
 	}
 	
 	/** Update the ordering of the PEs (vertical position ordering) */
-	void updatePEVerticalOrdering(){
+//	void updatePEVerticalOrdering(){
+//=
+//		// Add the newly selected PEs
+//		processorList.reset();
+//		int p = processorList.nextElement();
+//		while (p != -1) {
+//			Integer pe = new Integer(p);
+//			
 //
-//		System.out.println("updatePEVerticalOrdering");
-		
-		/** <Integer, Integer> */
-		HashMap oldPeToLine = peToLine;
-		peToLine = new HashMap();
-		
-		// Create list of just the elements which we had before, and we still want
-		processorList.reset();
-		int p = processorList.nextElement();
-		while (p != -1) {
-			Integer pe = new Integer(p);
-			if(oldPeToLine != null && oldPeToLine.containsKey(pe)){
-				Integer pos = (Integer)oldPeToLine.get(pe);
-				peToLine.put(pe, pos);
-			}
-			p = processorList.nextElement();
-		}
-
-		// Compact the list down because we may have lost some PEs
-		for(int i=0;i<peToLine.size();i++){
-			Integer pos = new Integer(i);
-			if(peToLine.containsValue(pos)){
-				// good continue
-			} else {
-				// shift all positions > i down by one
-				Iterator iter = peToLine.keySet().iterator();
-				while(iter.hasNext()){
-					Integer pe = (Integer) iter.next();
-					int line =  ((Integer)peToLine.get(pe)).intValue();
-					if(line > i){
-						peToLine.put(pe,new Integer(line-1));
-					}
-				}
-			}
-			
-		}
-				
-		// Add the newly selected PEs
-		processorList.reset();
-		p = processorList.nextElement();
-		int i=peToLine.size();
-		while (p != -1) {
-			Integer pe = new Integer(p);
-			if(!peToLine.containsKey(pe)){
-				peToLine.put(pe, new Integer(i));
-				i++;
-			}
-			p = processorList.nextElement();
-		}
-		
-	}
-	
+//			
+//			p = processorList.nextElement();
+//		}
+//		
+//	}
 		
 	/** Determines the PE for a given vertical position 
 	 * 
@@ -1400,59 +1396,24 @@ public class Data
 	 * 
 	 */
 	public int whichPE(int verticalPosition) {
-		Iterator iter = peToLine.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = (Integer) iter.next();
-			if( ((Integer)peToLine.get(pe)).intValue() == verticalPosition)
-				return pe.intValue();
-		}
-		return -1;
+		Integer which = (Integer) peToLine.get(verticalPosition);
+		return which;
 	}
 
 
 	public void dumpPEOrder(){
-		Iterator iter = peToLine.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = (Integer) iter.next();
-			int line =  ((Integer)peToLine.get(pe)).intValue();
-			System.out.println("pe " + pe +  " is at " + line);
-		}
+//		Iterator iter = peToLine.keySet().iterator();
+//		while(iter.hasNext()){
+//			Integer pe = (Integer) iter.next();
+//			int line =  ((Integer)peToLine.get(pe)).intValue();
+//			System.out.println("pe " + pe +  " is at " + line);
+//		}
 	}
 	
 	public void movePEToLine(int PE, int newPos){
-		int oldPos = whichTimelineVerticalPosition(PE);
-
-		if(newPos >= peToLine.size())
-			newPos = peToLine.size()-1;
-		
-		if(oldPos < newPos){
-			// The lines < oldPos don't move 
-			// The lines inbetween shift down by one
-			Iterator iter = peToLine.keySet().iterator();
-			while(iter.hasNext()){
-				Integer pe = (Integer) iter.next();
-				int line =  ((Integer)peToLine.get(pe)).intValue();
-				if(line > oldPos && line <= newPos){
-					peToLine.put(pe,new Integer(line-1));
-				}
-			}
-			// The lines > newPos don't move
-		} else {
-			// The lines < newPos don't move 
-			// The lines inbetween shift up by one
-			Iterator iter = peToLine.keySet().iterator();
-			while(iter.hasNext()){
-				Integer pe = (Integer) iter.next();
-				int line =  ((Integer)peToLine.get(pe)).intValue();
-				if(line < oldPos && line >= newPos){
-					peToLine.put(pe,new Integer(line+1));
-				}
-			}
-			// The lines < oldPos don't move
-		}
-		
-		peToLine.put(new Integer(PE), new Integer(newPos));
-		
+		Integer p = new Integer(PE);
+		peToLine.remove(p);
+		peToLine.add(newPos, p);
 		this.displayMustBeRedrawn();
 	}
 }

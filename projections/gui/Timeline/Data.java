@@ -368,10 +368,10 @@ public class Data
 		//==========================================	
 		//  Perform some post processing
 		
-		if(threadManager.numInitialThreads > 0){
-			Date endReadingTime  = new Date();
-			System.out.println("Time to read " + threadManager.numInitialThreads +  " input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
-		}
+//		if(threadManager.numInitialThreads > 0){
+//			Date endReadingTime  = new Date();
+//			System.out.println("Time to read " + threadManager.numInitialThreads +  " input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
+//		}
 			
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;

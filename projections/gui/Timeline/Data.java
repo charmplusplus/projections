@@ -223,6 +223,10 @@ public class Data
 		colorByMemoryUsage = false;
 		colorByObjectId = false;
 		colorByUserSupplied = false;
+			
+		/// Default value for custom color (Normally not used)
+		customForeground = Color.white; 
+		customBackground = Color.black;
 		
 		// Get the list of PEs to display
 		loadGlobalPEList();
@@ -238,7 +242,6 @@ public class Data
 			modificationHandler.notifyProcessorListHasChanged();
 		}
 	}
-
 	
 	
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
@@ -802,12 +805,7 @@ public class Data
 	}
 	
 
-	public void setColors(Color backgroundColor, Color foregroundColor){
-		customForeground = foregroundColor;
-		customBackground = backgroundColor;
-		useCustomColors = true;
-		displayMustBeRedrawn();
-	}
+
 	public void setHandler(MainHandler rh)
 	{ 
 		modificationHandler = rh;
@@ -1416,4 +1414,28 @@ public class Data
 		peToLine.add(newPos, p);
 		this.displayMustBeRedrawn();
 	}
+
+	
+
+	
+	public void setBackgroundColor(Color c) {
+		customBackground = c;
+		useCustomColors = true;
+		displayMustBeRedrawn();
+	}
+	
+	
+	public void setForegroundColor(Color c) {
+		customForeground = c;
+		useCustomColors = true;
+		displayMustBeRedrawn();
+	}
+	
+	
+	public void setColors(Color backgroundColor, Color foregroundColor){
+		setBackgroundColor(backgroundColor);
+		setForegroundColor(foregroundColor);
+	}
+	
+	
 }

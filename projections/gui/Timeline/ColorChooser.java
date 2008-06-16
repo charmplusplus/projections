@@ -78,6 +78,7 @@ public class ColorChooser extends ColorWindowFrame
 	setBackground(Color.lightGray);
 	setTitle("Timeline Colors");
 	setLocation(0, 0);
+	setSize(400, 600);
 	
 	CreateLayout();
 	pack();

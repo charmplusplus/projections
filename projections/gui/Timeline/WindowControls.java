@@ -45,7 +45,7 @@ ItemListener {
 	// basic zoom controls
 	private JButton bDecrease, bIncrease, bReset;
 
-	private JButton bZoomSelected, bLoadSelected;
+	private JButton bZoomSelected, bLoadSelected, bRanges;
 
 	private JTextField highlightTime, selectionBeginTime, selectionEndTime,
 	selectionDiff;
@@ -57,7 +57,6 @@ ItemListener {
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 	
 	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID, cbCompactView;
-	
 	
 	private UserEventWindow userEventWindow;
 
@@ -130,8 +129,6 @@ ItemListener {
 		selectionDiff.setText(format.format((time2 - time1) / 1000) + " ms");
 		format.setMinimumFractionDigits(0);
 		format.setMaximumFractionDigits(0);
-		
-		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 		bZoomSelected.setEnabled(true);
 		bLoadSelected.setEnabled(true);
 	}
@@ -140,9 +137,6 @@ ItemListener {
 		selectionBeginTime.setText("");
 		selectionEndTime.setText("");
 		selectionDiff.setText("");
-		
-
-		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
 	}
@@ -267,6 +261,12 @@ ItemListener {
 			else if (arg.equals("Color by Memory Usage"))
 				data.setColorByMemoryUsage();
 
+			else if (arg.equals("Select Background Color"))
+				selectBackgroundColor();
+
+			else if (arg.equals("Select Foreground Color"))
+				selectForegroundColor();
+
 			else if(arg.equals("Shift Timelines to fix inconsistent clocks"))
 				data.fixTachyons();
 			
@@ -287,6 +287,10 @@ ItemListener {
 			if (b == bZoomSelected) {
 				zoomSelected();
 			} 
+			
+			else if (b == bRanges) {
+				showDialog();
+			}
 
 			else if (b == bLoadSelected) {
 				loadSelected();
@@ -361,6 +365,9 @@ ItemListener {
 		
 		JMenu colorMenu = new JMenu("Colors");
 		
+		JMenuItem i5a = new JMenuItem("Select Background Color");
+		JMenuItem i5b = new JMenuItem("Select Foreground Color");
+		
 		JMenuItem i5 = new JMenuItem("Change Entry Point Colors");
 		JMenuItem i6 = new JMenuItem("Save Entry Point Colors");
 		JMenuItem i7 = new JMenuItem("Restore Entry Point Colors");
@@ -371,7 +378,9 @@ ItemListener {
 		JMenuItem i12 = new JMenuItem("Color by User Supplied Parameter(timestep)");
 		JMenuItem i13 = new JMenuItem("Color by Memory Usage");
 
-		
+		colorMenu.add(i5a);
+		colorMenu.add(i5b);
+		colorMenu.addSeparator();
 		colorMenu.add(i5);
 		colorMenu.add(i6);
 		colorMenu.add(i7);
@@ -382,6 +391,9 @@ ItemListener {
 		colorMenu.add(i12);
 		colorMenu.add(i13);
 		
+
+		i5a.addActionListener(this);
+		i5b.addActionListener(this);
 		i5.addActionListener(this);
 		i6.addActionListener(this);
 		i7.addActionListener(this);
@@ -500,14 +512,18 @@ ItemListener {
 
 		bZoomSelected = new JButton("Zoom Selection");
 		bLoadSelected = new JButton("Load Selection");
-
+		bRanges = new JButton("Load New Time/PE Range");
+		
 		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
-			
+		bRanges.setEnabled(true);
+		
 		bZoomSelected.addActionListener(this);
 		bLoadSelected.addActionListener(this);
+		bRanges.addActionListener(this);
 
+		
 		highlightTime = new JTextField("");
 		selectionBeginTime = new JTextField("");
 		selectionEndTime = new JTextField("");
@@ -521,27 +537,22 @@ ItemListener {
 		zoomPanel.setLayout(gbl);
 		gbc.fill = GridBagConstraints.BOTH;
 
-		Util.gblAdd(zoomPanel, new JLabel(" "), gbc, 0, 0, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, bZoomSelected, gbc, 0, 2, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, bLoadSelected, gbc, 1, 2, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, highlightTime, gbc, 2, 2, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, new JLabel(" "),    gbc, 0, 0, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, bZoomSelected,      gbc, 0, 2, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, bLoadSelected,      gbc, 1, 2, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, highlightTime,      gbc, 2, 2, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, selectionBeginTime, gbc, 3, 2, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, selectionEndTime, gbc, 4, 2, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, selectionDiff, gbc, 5, 2, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, new JLabel("Time At Mouse Cursor", JLabel.CENTER),
-				gbc, 2, 1, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel,
-				new JLabel("Selection Begin Time", JLabel.CENTER), gbc, 3, 1,
-				1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, new JLabel("Selection End Time", JLabel.CENTER),
-				gbc, 4, 1, 1, 1, 1, 1);
-		Util.gblAdd(zoomPanel, new JLabel("Selection Length", JLabel.CENTER),
-				gbc, 5, 1, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, selectionEndTime,   gbc, 4, 2, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, selectionDiff,      gbc, 5, 2, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, bRanges,            gbc, 0, 1, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, new JLabel("Time At Mouse Cursor", JLabel.CENTER), gbc, 2, 1, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, new JLabel("Selection Begin Time", JLabel.CENTER), gbc, 3, 1, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, new JLabel("Selection End Time", JLabel.CENTER),	  gbc, 4, 1, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, new JLabel("Selection Length", JLabel.CENTER),     gbc, 5, 1, 1, 1, 1, 1);
 
 		
 		this.setLayout(gbl);
 		Util.gblAdd(this, cbPanel, gbc, 0, 1, 1, 1, 1, 0);
-//		Util.gblAdd(this, cbPanel2, gbc, 0, 2, 1, 1, 1, 0);
 		Util.gblAdd(this, buttonPanel, gbc, 0, 3, 1, 1, 1, 0);
 		Util.gblAdd(this, zoomPanel, gbc, 0, 4, 1, 1, 1, 0);
 
@@ -639,6 +650,15 @@ ItemListener {
 
 	}
 
+	private void selectBackgroundColor(){
+		 Color c = JColorChooser.showDialog(parentWindow, "Choose Background Color", data.getBackgroundColor()); 
+		 data.setBackgroundColor(c);
+	}
+	
+	private void selectForegroundColor(){
+		 Color c = JColorChooser.showDialog(parentWindow, "Choose Foreground Color", data.getForegroundColor()); 
+		 data.setForegroundColor(c);
+	}
 
 	private void ShowColorWindow() {
 		if (colorWindow == null)

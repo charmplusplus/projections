@@ -18,6 +18,7 @@ public class MainPanelBackground extends JPanel {
 	
 	/** Paint the panel, filling the entire panel's width */
 	protected void paintComponent(Graphics g) {
+		super.paintComponent(g);
 		
 		int width = getWidth();
 		

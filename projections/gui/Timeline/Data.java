@@ -1438,4 +1438,75 @@ public class Data
 	}
 	
 	
+	
+	public void printUserEventInfo(){
+
+		
+		//		 <Integer, Long>
+		HashMap min = new HashMap();
+		HashMap max = new HashMap();
+		HashMap total = new HashMap();
+		HashMap count = new HashMap();
+		HashMap name = new HashMap();
+
+		
+		Iterator iter = allUserEventObjects.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = (Integer)iter.next();
+			LinkedList userEvents = (LinkedList)allUserEventObjects.get(pe);
+			Iterator eventiter = userEvents.iterator();
+			while(eventiter.hasNext()){
+				UserEventObject obj = (UserEventObject) eventiter.next();
+				if(obj.Type == UserEventObject.PAIR){
+					long BeginTime = obj.BeginTime;
+					long EndTime = obj.EndTime;
+					Integer UserEventID = new Integer(obj.UserEventID); 
+
+					long duration = EndTime-BeginTime;
+
+					if(! min.containsKey(UserEventID)){
+						min.put(UserEventID, new Long(duration));
+						max.put(UserEventID, new Long(duration));
+						total.put(UserEventID, new Long(duration));
+						count.put(UserEventID, new Long(1));
+						name.put(UserEventID, obj.Name);
+					} else {
+
+						if((Long)min.get(UserEventID) > duration){
+							min.put(UserEventID, new Long(duration));
+						}
+
+						if((Long)max.get(UserEventID) < duration){
+							max.put(UserEventID, new Long(duration));
+						}
+
+						total.put(UserEventID, (Long)total.get(UserEventID) + new Long(duration));
+						count.put(UserEventID, (Long)count.get(UserEventID) + new Long(1));
+
+					}
+
+				}
+				
+			}
+			
+		}
+		
+		iter = min.keySet().iterator();
+		while(iter.hasNext()){
+			Integer UserEventID = (Integer) iter.next();
+
+			double avg = ((Long)total.get(UserEventID)).doubleValue() /	((Long)count.get(UserEventID)).doubleValue();
+			
+			System.out.println("User Event #" + UserEventID + "  " + name.get(UserEventID));
+			System.out.println("    count = " + count.get(UserEventID));
+			System.out.println("    min   = " + min.get(UserEventID) + " us");
+			System.out.println("    max   = " + max.get(UserEventID) + " us");
+			System.out.println("    avg   = " + avg + " us");
+			System.out.println("    total = " + total.get(UserEventID) + " us");
+			System.out.println();
+		}
+		
+	}
+	
+	
 }

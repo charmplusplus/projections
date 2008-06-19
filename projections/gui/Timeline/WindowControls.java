@@ -270,6 +270,9 @@ ItemListener {
 			else if(arg.equals("Shift Timelines to fix inconsistent clocks"))
 				data.fixTachyons();
 			
+			else if(arg.equals("User Event Reporting"))
+				data.printUserEventInfo();
+			
 			else if(arg.equals("Determine Time Ranges for User Supplied Values")){
 				UserSuppliedAnalyzer usa = new UserSuppliedAnalyzer(data);
 				
@@ -425,8 +428,15 @@ ItemListener {
 		// Actions Menu
 		JMenu experimentalMenu = new JMenu("Experimental Features");
 		JMenuItem i40 = new JMenuItem("Shift Timelines to fix inconsistent clocks");
+		JMenuItem i41 = new JMenuItem("User Event Reporting");
+
 		i40.addActionListener(this);
 		experimentalMenu.add(i40);
+		
+		i41.addActionListener(this);
+		experimentalMenu.add(i41);
+
+		
 		
 		cbCompactView = new JCheckBoxMenuItem("Compact View");
 		cbCompactView.addItemListener(this);

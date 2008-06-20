@@ -30,6 +30,9 @@ public class UserEventObject extends JComponent implements Comparable
 	
 	private int pe;
 
+	/** If displaying nested user events in multiple rows, use this value to determine the row in which we draw this event */
+	private int nestedRow;
+	
 	public UserEventObject(int pe, long t, int e, int event, int type) {
 		setFocusable(false); // optimization for speed
 		Type=type;
@@ -75,7 +78,12 @@ public class UserEventObject extends JComponent implements Comparable
 
 		if(data.showUserEvents()){
 			g.setColor(color);
-			g.fillRect(0, 0, getWidth(), getHeight());
+		
+			int height = getHeight() / data.getNumUserEventRows();
+			int top = 0 + height * (data.getNumUserEventRows() - this.nestedRow - 1);
+//			System.out.println("height="+height+ " top=" + top + " getHeight()=" + getHeight() + " getNumUserEventRows="+data.getNumUserEventRows());
+			
+			g.fillRect(0, top, getWidth(), height);
 		}		
 		
 	}
@@ -102,6 +110,11 @@ public class UserEventObject extends JComponent implements Comparable
 	/** The position in the ordering of PEs displayed */
 	public int verticalDisplayPosition(){
 		return data.whichTimelineVerticalPosition(pe);		
+	}
+
+
+	public void setNestedRow(int row) {
+		nestedRow = row;
 	}
 	
 	

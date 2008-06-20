@@ -104,7 +104,7 @@ public class UserEventWindow extends JFrame
 		Iterator pe_iter = data.allUserEventObjects.keySet().iterator();
 		int pindex=0;
 		while(pe_iter.hasNext()){
-			events_[pindex] = ((LinkedList)data.allUserEventObjects.get(pe_iter.next())).toArray();	
+			events_[pindex] = (data.allUserEventObjects.get(pe_iter.next())).toArray();	
 			pindex++;
 		}
 		

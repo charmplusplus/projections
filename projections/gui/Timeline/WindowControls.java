@@ -56,7 +56,7 @@ ItemListener {
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 	
-	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID, cbCompactView;
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID, cbCompactView, cbNestedUserEvents;
 	
 	private UserEventWindow userEventWindow;
 
@@ -442,6 +442,11 @@ ItemListener {
 		cbCompactView.addItemListener(this);
 		experimentalMenu.add(cbCompactView);
 		
+		cbNestedUserEvents = new JCheckBoxMenuItem("Show Nested Bracketed User Events");
+		cbNestedUserEvents.addItemListener(this);
+		experimentalMenu.add(cbNestedUserEvents);
+		
+		
 		JMenuItem i50 = new JMenuItem("Determine Time Ranges for User Supplied Values");
 		i50.addActionListener(this);
 		experimentalMenu.add(i50);
@@ -640,6 +645,10 @@ ItemListener {
 				
 		else if(c == cbCompactView)
 			data.setCompactView(evt.getStateChange() == ItemEvent.SELECTED);
+		
+		else if(c == cbNestedUserEvents)
+			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
+		
 		
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);

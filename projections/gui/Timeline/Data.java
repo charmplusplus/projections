@@ -1,5 +1,6 @@
 package projections.gui.Timeline;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -54,14 +56,14 @@ import projections.misc.*;
 
 public class Data
 {
-	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
+	// Temporary hardcode. This variable will be assigned appropriate
 	// runs.
 	int myRun = 0;
 
 	private MainHandler modificationHandler = null;
 	
-	/** A factor describin how zoomed in we are */
+	/** A factor describing how zoomed in we are */
 	private float scaleFactor = 1.0f;
 
 	private double preferredViewTime = -1.0;
@@ -100,7 +102,7 @@ public class Data
 	 *  Each key of the TreeMap is an Integer pe
 	 *  <Integer,LinkedList<UserEventObject> >
 	 */
-	public TreeMap allUserEventObjects;
+	public TreeMap<Integer, TreeSet <UserEventObject> > allUserEventObjects;
 
 
 	/** processor usage indexed by PE */
@@ -168,7 +170,8 @@ public class Data
 	private Color customForeground;
 	private Color customBackground;
 
-
+	private int numUserEventRows = 1;
+	private boolean drawNestedUserEventRows = false;
 	
 	public Data(){
 		System.err.println("Do not call this constructor\n");
@@ -327,7 +330,7 @@ public class Data
 			/** <Integer,LinkedList<EntryMethodObject>> */
 			TreeMap oldEntryMethodObjects = allEntryMethodObjects;
 			/** <Integer,LinkedList<UserEventObject>> */
-			TreeMap oldUserEventObjects = allUserEventObjects;
+			TreeMap <Integer, TreeSet <UserEventObject> > oldUserEventObjects = allUserEventObjects;
 			
 			allEntryMethodObjects = new TreeMap();
 			allUserEventObjects = new TreeMap();
@@ -358,8 +361,8 @@ public class Data
 
 					// Drop elements from userEventsArray outside range
 					if(allUserEventObjects.containsKey(pe)){
-						LinkedList objs = (LinkedList)allUserEventObjects.get(pe);
-						Iterator iter2 = objs.iterator();
+
+						Iterator iter2 = allUserEventObjects.get(pe).iterator();
 						while(iter2.hasNext()){
 							UserEventObject obj = (UserEventObject) iter2.next();
 							if(obj.EndTime < beginTime || obj.BeginTime > endTime){
@@ -575,8 +578,14 @@ public class Data
 	void getData(Integer pe)  
 	{
 		LinkedList tl = new LinkedList();
-		LinkedList userEvents= new LinkedList();
+		
+		/** Stores all user events from the currently loaded PE/time range. It must be sorted, 
+		 *  so the nesting of bracketed user events can be efficiently processed.
+		 *  */
+		TreeSet userEvents= new TreeSet();
+		
 		LinkedList perPEObjects = new LinkedList();
+		
 		if(perPEObjects == null){
 			System.err.println("perPEOBjects was not allocated successfully!!!!");
 		}
@@ -659,7 +668,7 @@ public class Data
 	
 
 	/** Thread-safe storing of the userEvents and perPEObjects */
-	synchronized void getDataSyncSaveObjectLists(Integer pe, LinkedList perPEObjects, LinkedList userEvents )  
+	synchronized void getDataSyncSaveObjectLists(Integer pe, LinkedList perPEObjects, TreeSet userEvents )  
 	{
 		// The user events are simply that which were produced by createtimeline
 		allUserEventObjects.put(pe,userEvents);
@@ -694,10 +703,10 @@ public class Data
 
 
 	public int getNumUserEvents() {
-		Iterator iter = allUserEventObjects.values().iterator();
+		Iterator<TreeSet<UserEventObject>> iter = allUserEventObjects.values().iterator();
 		int num = 0;
 		while(iter.hasNext()){
-			num += ((LinkedList)(iter.next())).size();
+			num += iter.next().size();
 		}
 		return num;
 	}
@@ -789,9 +798,9 @@ public class Data
 		if(useCompactView())
 			return barheight()+1;
 		else if(useMinimalView())
-			return barheight() + 10;
+			return barheight() + 2*userEventRectHeight() + 5;
 		else
-			return barheight() + 18;
+			return barheight() + 2*userEventRectHeight() + 13;
 	}
 
 	
@@ -801,7 +810,8 @@ public class Data
 		if(useCompactView())
 			return 0;
 		else
-			return 5;
+			return 8*getNumUserEventRows();
+		
 	}
 	
 
@@ -1298,7 +1308,7 @@ public class Data
 
 			// Shift all user event objects on lagging pe
 	
-			iter = ((LinkedList)allUserEventObjects.get(laggingPE)).iterator();
+			iter = allUserEventObjects.get(laggingPE).iterator();
 			while(iter.hasNext()){
 				UserEventObject obj = (UserEventObject) iter.next();
 				obj.shiftTimesBy(shift);
@@ -1453,8 +1463,8 @@ public class Data
 		Iterator iter = allUserEventObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = (Integer)iter.next();
-			LinkedList userEvents = (LinkedList)allUserEventObjects.get(pe);
-			Iterator eventiter = userEvents.iterator();
+			
+			Iterator eventiter = allUserEventObjects.get(pe).iterator();
 			while(eventiter.hasNext()){
 				UserEventObject obj = (UserEventObject) eventiter.next();
 				if(obj.Type == UserEventObject.PAIR){
@@ -1505,8 +1515,85 @@ public class Data
 			System.out.println("    total = " + total.get(UserEventID) + " us");
 			System.out.println();
 		}
+	}
+	
+	
+	
+	
+	/** Determine how many rows are needed for displaying nested bracketed user events. 
+	 *  Choose the new size for the User Event rows, and cause a redraw
+	 * 
+	 *  Determine the depth for each User Event, and store it in the event itself.
+	 */
+	public int determineUserEventNestings(){
+		
+		// create a stack of endtimes
+		
+
+		int maxDepth = 0;
+		
+		Iterator iter = allUserEventObjects.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = (Integer)iter.next();
+			
+			Stack <Long> activeEndTimes = new Stack();
+			
+			// The iterator must go in order of start times(It will as long as allUserEventObjects.get(pe) is a TreeSet
+			Iterator eventiter = allUserEventObjects.get(pe).iterator();
+			while(eventiter.hasNext()){
+				UserEventObject obj = (UserEventObject) eventiter.next();
+				if(obj.Type == UserEventObject.PAIR){
+					long BeginTime = obj.BeginTime;
+					long EndTime = obj.EndTime;
+
+					
+					// pop all user events from the stack if their endtime is earlier than this one's start time
+					while(activeEndTimes.size()>0 && activeEndTimes.peek() < BeginTime){
+						activeEndTimes.pop();
+					}
+					
+					// push this event onto the stack
+					activeEndTimes.push(EndTime);
+
+					
+					// Notify this event of its depth in the stack
+					obj.setNestedRow(activeEndTimes.size()-1);
+
+					
+					if(activeEndTimes.size() > maxDepth)
+						maxDepth = activeEndTimes.size();
+
+				}
+
+			}
+
+		}
+		return maxDepth;
+	}
+
+	/** Enable or disable the displaying of multiple rows of nested user events */
+	public void showNestedUserEvents(boolean b) {
+		
+		drawNestedUserEventRows = b;
+		if(b == true){
+			setNumUserEventRows(determineUserEventNestings());
+		} else {
+			setNumUserEventRows(1);
+		}
+		
+		displayMustBeRedrawn();
 		
 	}
+
+	public void setNumUserEventRows(int numUserEventRows) {
+		this.numUserEventRows = numUserEventRows;
+	}
+
+	public int getNumUserEventRows() {
+		return numUserEventRows;
+	}
+	
+	
 	
 	
 }

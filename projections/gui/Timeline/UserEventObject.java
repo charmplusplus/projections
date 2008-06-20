@@ -42,8 +42,6 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.CharmEventID=event;
 		this.pe = pe;
 		
-		setToolTipText("<html><body><p>" + getName() + "</p><p>Duration: " + (EndTime-BeginTime) + " us</p></html></body>");
-	
 		addMouseListener(this);
 	}
 
@@ -75,23 +73,27 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		int width = rightCoord-leftCoord+1;
 		
-//		/** The y coordinate of the top of the rectangle */
-//		int rectHeight = data.userEventRectHeight();
-//		int yTop = data.userEventLocationTop(pe);
-//			
+		
+		
 		
 		// Do the layout to account for multiple rows
 		
 		int heightPerRow = data.userEventRectHeight() / data.getNumUserEventRows();
-		int bottom = data.userEventLocationBottom(pe) +   - heightPerRow * ( this.nestedRow );
+		int bottom = data.userEventLocationBottom(pe);
+
+		if(data.drawNestedUserEventRows){
+			 bottom -= heightPerRow * ( nestedRow );
+		}
 		
 		int top = bottom - heightPerRow;
-				
-		this.setBounds( leftCoord, 
-						top,
-						width,
-						heightPerRow );
 
+		setToolTipText("<html><body><p>" + getName() + "</p><p>Duration: " + (EndTime-BeginTime) + " us</p><p>event=" + UserEventID + "</p><p>nested row="+ nestedRow + "</p></html></body>");
+		
+		this.setBounds( leftCoord, 
+				top,
+				width,
+				heightPerRow );
+				
 	}
 
 	public void paintComponent(Graphics g) {
@@ -164,7 +166,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		System.out.println("Mouse Clicked on user event object");
+	    //		System.out.println("Mouse Clicked on user event object");
 		 Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
 		 MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
 		 data.displayMustBeRepainted();

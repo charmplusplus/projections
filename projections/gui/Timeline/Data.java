@@ -171,7 +171,7 @@ public class Data
 	private Color customBackground;
 
 	private int numUserEventRows = 1;
-	private boolean drawNestedUserEventRows = false;
+	boolean drawNestedUserEventRows = false;
 	
 	public Data(){
 		System.err.println("Do not call this constructor\n");

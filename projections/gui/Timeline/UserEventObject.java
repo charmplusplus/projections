@@ -1,12 +1,14 @@
 package projections.gui.Timeline;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.*;
 
 import projections.gui.MainWindow;
 
-public class UserEventObject extends JComponent implements Comparable
+public class UserEventObject extends JComponent implements Comparable, MouseListener
 {
 
 	private static final long serialVersionUID = 1L;
@@ -19,13 +21,12 @@ public class UserEventObject extends JComponent implements Comparable
 	public static final int SINGLE=1;   // if this just marks one point in time
 	public static final int PAIR=2;  // if this has a begin and end point
 
-	public int    Type;
-	public long   BeginTime;
-	public long   EndTime;
-	public int    UserEventID;  
+	public int    Type;         // should be SINGLE or PAIR
+	public long   BeginTime;    // Begin Time
+	public long   EndTime;      // End Time
+	public int    UserEventID;  // The user supplied value used to distinguish different types of user events
 	public int    CharmEventID; // for matching with end time
-	private Color  color;
-	public String Name;
+
 	private Data data;
 	
 	private int pe;
@@ -35,17 +36,29 @@ public class UserEventObject extends JComponent implements Comparable
 	
 	public UserEventObject(int pe, long t, int e, int event, int type) {
 		setFocusable(false); // optimization for speed
-		Type=type;
-		BeginTime=EndTime=t;
-		UserEventID=e;
-		CharmEventID=event;
-		color=MainWindow.runObject[myRun].getUserEventColor(UserEventID);
-		if(color == null)
-			color = Color.white;
-		Name=MainWindow.runObject[myRun].getUserEventName(UserEventID);
+		this.Type=type;
+		this.BeginTime=EndTime=t;
+		this.UserEventID=e;
+		this.CharmEventID=event;
 		this.pe = pe;
+		
+		setToolTipText("<html><body><p>" + getName() + "</p><p>Duration: " + (EndTime-BeginTime) + " us</p></html></body>");
+	
+		addMouseListener(this);
 	}
 
+	public String getName(){
+		return MainWindow.runObject[myRun].getUserEventName(UserEventID);
+	}
+	
+	public Color getColor(){	
+		Color c = MainWindow.runObject[myRun].getUserEventColor(UserEventID);
+		if(c != null)
+			return c;
+		else 
+			return Color.white;
+	}
+	
 	
 	/** Called by the layout manager to put this in the right place */
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
@@ -64,7 +77,9 @@ public class UserEventObject extends JComponent implements Comparable
 		
 		/** The y coordinate of the top of the rectangle */
 		int rectHeight = data.userEventRectHeight();
-		double yTop = ((double)verticalDisplayPosition()+0.5)*data.singleTimelineHeight() - data.barheight()/2 - rectHeight;
+
+		int yTop = data.userEventLocationTop(pe);
+			
 		
 		this.setBounds( leftCoord,  
 						(int)yTop,
@@ -77,17 +92,19 @@ public class UserEventObject extends JComponent implements Comparable
 		super.paintComponent(g);
 
 		if(data.showUserEvents()){
-			g.setColor(color);
+			g.setColor(getColor());
 		
 			int height = getHeight() / data.getNumUserEventRows();
-			int top = 0 + height * (data.getNumUserEventRows() - this.nestedRow - 1);
+			
+			int bottom =  getHeight() - height * ( this.nestedRow );
+			int top = bottom - height;
+//			int top = 0 + height * (data.getNumUserEventRows() - this.nestedRow - 1);
 //			System.out.println("height="+height+ " top=" + top + " getHeight()=" + getHeight() + " getNumUserEventRows="+data.getNumUserEventRows());
 			
 			g.fillRect(0, top, getWidth(), height);
-			
-			
+						
 			// Draw the name of the user event
-			if(Name != null){
+			if(getName() != null){
 				int leftpad = 3;
 				int rightpad = 3;
 				int toppad = 1;
@@ -96,11 +113,11 @@ public class UserEventObject extends JComponent implements Comparable
 
 				g.setFont(data.labelFont);
 				FontMetrics fm = g.getFontMetrics();
-				int stringWidth = fm.stringWidth(Name);		
+				int stringWidth = fm.stringWidth(getName());		
 
 				if( fontsize >=9 && stringWidth < getWidth() - leftpad - rightpad){
 					g.setColor(Color.black);
-					g.drawString(Name, leftpad, top + toppad + fontsize);
+					g.drawString(getName(), leftpad, top + toppad + fontsize);
 					
 					g.setPaintMode();
 				}
@@ -113,10 +130,6 @@ public class UserEventObject extends JComponent implements Comparable
 		
 		
 		
-	}
-
-	public Color getColor() {
-		return color;
 	}
 
 	public void shiftTimesBy(long shift) {
@@ -142,6 +155,33 @@ public class UserEventObject extends JComponent implements Comparable
 
 	public void setNestedRow(int row) {
 		nestedRow = row;
+	}
+
+	public void mouseClicked(MouseEvent e) {
+		System.out.println("Mouse Clicked on user event object");
+		 Color c = JColorChooser.showDialog(null, "Choose color for this type of user event", getColor()); 
+		 MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
+		 data.displayMustBeRepainted();
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	

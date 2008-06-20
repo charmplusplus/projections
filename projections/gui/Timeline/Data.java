@@ -729,7 +729,6 @@ public class Data
 		return 70;
 	}   
 
-
 	/** Number of processors in the processor List */
 	public int numPs(){
 		return peToLine.size();
@@ -751,7 +750,6 @@ public class Data
 
 	}
 
-
 	public int leftOffset(){
 		return offset();
 	}
@@ -760,9 +758,21 @@ public class Data
 		return offset();
 	}
 
-//	public OrderedIntList processorList() {
-//		return processorList;
-//	}
+	public int topOffset(){
+		if(useMinimalView() || useCompactView())
+			return 1;
+		else
+			return 4;
+	}
+	
+	public int bottomOffset(){
+		if(useMinimalView() || useCompactView())
+			return 1;
+		else
+			return 4;
+	}
+
+	
 	/** The width we should draw in, compensated for the scaling(zoom) factor 
 	 * 
 	 * 
@@ -778,10 +788,7 @@ public class Data
 
 	/** The height of the panel that should be used to draw the timelines  */
 	public int screenHeight(){
-		if(useMinimalView())
 			return singleTimelineHeight()*numPs();
-		else
-			return singleTimelineHeight()*numPs()+15;
 	}
 
 
@@ -795,12 +802,7 @@ public class Data
 		
 	/** Get the height required to draw a single PE's Timeline */
 	public int singleTimelineHeight(){
-		if(useCompactView())
-			return barheight()+1;
-		else if(useMinimalView())
-			return barheight() + 2*userEventRectHeight() + 5;
-		else
-			return barheight() + 2*userEventRectHeight() + 13;
+		return topOffset() + userEventRectHeight() + barheight() + messageSendHeight() + bottomOffset();
 	}
 
 	
@@ -1480,7 +1482,7 @@ public class Data
 						max.put(UserEventID, new Long(duration));
 						total.put(UserEventID, new Long(duration));
 						count.put(UserEventID, new Long(1));
-						name.put(UserEventID, obj.Name);
+						name.put(UserEventID, obj.getName());
 					} else {
 
 						if((Long)min.get(UserEventID) > duration){
@@ -1547,9 +1549,8 @@ public class Data
 					long BeginTime = obj.BeginTime;
 					long EndTime = obj.EndTime;
 
-					
 					// pop all user events from the stack if their endtime is earlier than this one's start time
-					while(activeEndTimes.size()>0 && activeEndTimes.peek() < BeginTime){
+					while(activeEndTimes.size()>0 && activeEndTimes.peek() <= BeginTime){
 						activeEndTimes.pop();
 					}
 					
@@ -1593,8 +1594,32 @@ public class Data
 	public int getNumUserEventRows() {
 		return numUserEventRows;
 	}
+
+	/** The pixel offset for the top of the entry method from the top of a single PE's timeline */
+	public int entryMethodLocationTop(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
+	}
 	
+	/** The pixel height of the entry method object. This includes just the rectangular region and the descending message sends */
+	public int entryMethodLocationHeight() {
+		return barheight()+messageSendHeight();
+	}
+
+	public int userEventLocationTop(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*yidx + topOffset();
+	}
+
+	public int horizontalLineLocationTop(int i) {
+		return singleTimelineHeight()*i + topOffset() + userEventRectHeight() + (barheight()/2);		
+	}
 	
+	/** The message send tick mark bottom point*/
+	public int messageSendLocationY(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
+	}
 	
 	
 }

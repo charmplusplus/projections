@@ -48,7 +48,9 @@ public class MainPanelBackground extends JPanel {
 		// Draw the horizontal line 
 		g.setColor(new Color(128,128,128));
 		for (int i=0; i<data.numPs(); i++) {
-			int y = data.singleTimelineHeight()/2 + i*data.singleTimelineHeight();
+			
+			int y = data.horizontalLineLocationTop(i);
+
 			g.drawLine(0+data.offset(), y, width-data.offset(), y);
 		}
 		

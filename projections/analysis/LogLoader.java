@@ -1084,7 +1084,7 @@ public class LogLoader extends ProjDefs
 								//System.out.println("TLE's begin: "+tleBeginTime+" user's begin: "+userEvent.BeginTime);
 								if(tleBeginTime <= userEventObject.BeginTime && 
 										userEventObject.BeginTime - tleBeginTime<= TimelineEvent.USEREVENTMAXGAP){
-									curLastOne.userEventName = userEventObject.Name;
+									curLastOne.userEventName = userEventObject.getName();
 								}
 								//System.out.println("Encountering user name: "+userEvent.Name);
 

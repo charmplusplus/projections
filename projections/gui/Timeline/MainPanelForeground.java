@@ -31,11 +31,9 @@ public class MainPanelForeground extends JPanel {
 
 	/** Paint the panel, filling the entire panel's width */
 	protected void paintComponent(Graphics g) {
-
 		// paint the message send lines	
 		paintMessageSendLines(g, data.getMessageColor(), data.drawMessagesForTheseObjects);
 		paintMessageSendLines(g, data.getMessageAltColor(), data.drawMessagesForTheseObjectsAlt);
-			
 	}
 
 
@@ -53,17 +51,17 @@ public class MainPanelForeground extends JPanel {
 						int pCreation = obj.pCreation;
 						int pExecution = obj.pCurrent;
 						// Find the index for the PEs in the list of displayed PEs
-						int startpe_index=data.whichTimelineVerticalPosition(pCreation);
-						int endpe_index=data.whichTimelineVerticalPosition(pExecution);
+//						int startpe_index=data.whichTimelineVerticalPosition(pCreation);
+//						int endpe_index=data.whichTimelineVerticalPosition(pExecution);
 						
 //						data.dumpPEOrder();
 						
 						// Message Creation point
 						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
-						double y1 = (double)data.singleTimelineHeight() * ((double)startpe_index + 0.5) + data.barheight()/2 + data.messageSendHeight();
+						double y1 = data.messageSendLocationY(pCreation);
 						// Message executed (entry method starts) 
 						int x2 =  data.timeToScreenPixel(obj.getBeginTime(), getWidth());
-						double y2 = (double)data.singleTimelineHeight() * ((double)endpe_index + 0.5) - (data.barheight()/2);
+						double y2 = data.messageSendLocationY(pExecution);
 						// I like painting a line :)
 						g.drawLine(x1,(int)y1,x2,(int)y2);
 					}

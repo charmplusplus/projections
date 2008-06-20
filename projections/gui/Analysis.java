@@ -792,6 +792,16 @@ public class Analysis {
     	return null; 
     }
 
+    
+    public void setUserEventColor(int eventID, Color c) {
+    	if (sts != null) { 
+    		Integer idx = sts.getUserEventIndex(eventID);
+    		if(idx!=null)
+    			userEventColors[idx.intValue()] = c; 
+    	} 
+    }
+
+    
     // *** Derived Data accessors ***
 
     // *** "Projected" sum detail data accessors ***

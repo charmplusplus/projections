@@ -78,7 +78,7 @@ public class UserEventWindow extends JFrame
 			if (events_ != null && events_[index_] != null) {
 				switch (col) {
 				case 0:  
-					return ((UserEventObject)events_[index_][row]).Name;
+					return ((UserEventObject)events_[index_][row]).getName();
 				case 1:  return new FormattedNumber((int)((UserEventObject)events_[index_][row]).BeginTime, format_);
 				case 2:  return new FormattedNumber((int)((UserEventObject)events_[index_][row]).EndTime, format_);
 				case 3:  return new FormattedNumber((int)((UserEventObject)events_[index_][row]).EndTime-

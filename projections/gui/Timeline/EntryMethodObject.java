@@ -624,14 +624,17 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		int rectWidth = getWidth();
 		int rectHeight = data.barheight();
 
+	
+
+		// The distance from the top or bottom to the rectangle
+		int verticalInset = 0;
+
 		// Idle regions are thinner vertically
 		if(entryIndex==-1){
 			rectHeight -= 6;
+			verticalInset += 3;
 		}
-
-		// The distance from the top or bottom to the rectangle
-		int verticalInset = (getHeight()-rectHeight)/2;
-
+		
 		int left  = 0;
 		int right = rectWidth-1;
 
@@ -781,13 +784,17 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		int width = rightCoord-leftCoord+1;
 		
 		int singleTimelineH = data.singleTimelineHeight();
-		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
-				width, singleTimelineH);
+		
+//		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
+//				width, singleTimelineH);
+		
+		this.setBounds(leftCoord,  data.entryMethodLocationTop(pCurrent),
+				width, data.entryMethodLocationHeight());
 	
 	}   
 	
 	public int whichTimelineVerticalIndex(){
-		return data.whichTimelineVerticalPosition(pCurrent);		
+		return data.whichTimelineVerticalPosition(pCurrent);
 	}
 	
 

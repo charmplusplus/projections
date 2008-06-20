@@ -150,9 +150,17 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(pe != ueo.pe){
 			return pe - ueo.pe;
 		}
-		else{
+		else if (BeginTime != ueo.BeginTime) {
 			return (int) (BeginTime - ueo.BeginTime);
-		}	
+		} else if (EndTime != ueo.EndTime) {
+			return (int) (ueo.EndTime - EndTime);
+		} else if (this != ueo) {
+			return this.UserEventID - ueo.UserEventID;
+		} else {
+			System.err.println("ERROR: compareTo not working correctly for class UserEventObject");
+			return 0;
+		}
+	
 	}
 
 	/** The position in the ordering of PEs displayed */

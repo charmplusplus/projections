@@ -1510,12 +1510,12 @@ public class Data
 
 			double avg = ((Long)total.get(UserEventID)).doubleValue() /	((Long)count.get(UserEventID)).doubleValue();
 			
-			System.out.println("User Event #" + UserEventID + "  " + name.get(UserEventID));
-			System.out.println("    count = " + count.get(UserEventID));
-			System.out.println("    min   = " + min.get(UserEventID) + " us");
-			System.out.println("    max   = " + max.get(UserEventID) + " us");
-			System.out.println("    avg   = " + avg + " us");
-			System.out.println("    total = " + total.get(UserEventID) + " us");
+			System.out.print("User Event #" + UserEventID + "  \"" + name.get(UserEventID) + "\"");
+			System.out.print("    count = " + count.get(UserEventID));
+			System.out.print("    min   = " + min.get(UserEventID) + " us");
+			System.out.print("    max   = " + max.get(UserEventID) + " us");
+			System.out.print("    avg   = " + avg + " us");
+			System.out.print("    total = " + total.get(UserEventID) + " us");
 			System.out.println();
 		}
 	}

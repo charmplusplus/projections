@@ -75,16 +75,22 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		int width = rightCoord-leftCoord+1;
 		
-		/** The y coordinate of the top of the rectangle */
-		int rectHeight = data.userEventRectHeight();
-
-		int yTop = data.userEventLocationTop(pe);
-			
+//		/** The y coordinate of the top of the rectangle */
+//		int rectHeight = data.userEventRectHeight();
+//		int yTop = data.userEventLocationTop(pe);
+//			
 		
-		this.setBounds( leftCoord,  
-						(int)yTop,
-						width, 
-						rectHeight );
+		// Do the layout to account for multiple rows
+		
+		int heightPerRow = data.userEventRectHeight() / data.getNumUserEventRows();
+		int bottom = data.userEventLocationBottom(pe) +   - heightPerRow * ( this.nestedRow );
+		
+		int top = bottom - heightPerRow;
+				
+		this.setBounds( leftCoord, 
+						top,
+						width,
+						heightPerRow );
 
 	}
 
@@ -94,14 +100,14 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(data.showUserEvents()){
 			g.setColor(getColor());
 		
-			int height = getHeight() / data.getNumUserEventRows();
-			
-			int bottom =  getHeight() - height * ( this.nestedRow );
-			int top = bottom - height;
+//			int height = getHeight() / data.getNumUserEventRows();
+//			
+//			int bottom =  getHeight() - height * ( this.nestedRow );
+//			int top = bottom - height;
 //			int top = 0 + height * (data.getNumUserEventRows() - this.nestedRow - 1);
 //			System.out.println("height="+height+ " top=" + top + " getHeight()=" + getHeight() + " getNumUserEventRows="+data.getNumUserEventRows());
 			
-			g.fillRect(0, top, getWidth(), height);
+			g.fillRect(0, 0, getWidth(), getHeight());
 						
 			// Draw the name of the user event
 			if(getName() != null){
@@ -109,7 +115,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 				int rightpad = 3;
 				int toppad = 1;
 				int bottompad = 1;
-				int fontsize = height - toppad - bottompad;
+				int fontsize = getHeight() - toppad - bottompad;
 
 				g.setFont(data.labelFont);
 				FontMetrics fm = g.getFontMetrics();
@@ -117,7 +123,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 
 				if( fontsize >=9 && stringWidth < getWidth() - leftpad - rightpad){
 					g.setColor(Color.black);
-					g.drawString(getName(), leftpad, top + toppad + fontsize);
+					g.drawString(getName(), leftpad, toppad + fontsize);
 					
 					g.setPaintMode();
 				}
@@ -159,7 +165,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 
 	public void mouseClicked(MouseEvent e) {
 		System.out.println("Mouse Clicked on user event object");
-		 Color c = JColorChooser.showDialog(null, "Choose color for this type of user event", getColor()); 
+		 Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
 		 MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
 		 data.displayMustBeRepainted();
 	}

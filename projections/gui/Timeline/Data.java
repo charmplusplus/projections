@@ -1611,6 +1611,10 @@ public class Data
 		return singleTimelineHeight()*yidx + topOffset();
 	}
 
+	public int userEventLocationBottom(int pe) {
+		return userEventLocationTop(pe) + userEventRectHeight();
+	}
+	
 	public int horizontalLineLocationTop(int i) {
 		return singleTimelineHeight()*i + topOffset() + userEventRectHeight() + (barheight()/2);		
 	}

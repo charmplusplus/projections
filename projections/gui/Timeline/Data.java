@@ -809,9 +809,10 @@ public class Data
 	public int userEventRectHeight(){
 		if(useCompactView())
 			return 0;
-		else
+		else if (this.drawNestedUserEventRows)
 			return 12*getNumUserEventRows();
-		
+		else
+			return 8*getNumUserEventRows();	
 	}
 	
 

@@ -810,7 +810,7 @@ public class Data
 		if(useCompactView())
 			return 0;
 		else
-			return 8*getNumUserEventRows();
+			return 12*getNumUserEventRows();
 		
 	}
 	

@@ -84,7 +84,34 @@ public class UserEventObject extends JComponent implements Comparable
 //			System.out.println("height="+height+ " top=" + top + " getHeight()=" + getHeight() + " getNumUserEventRows="+data.getNumUserEventRows());
 			
 			g.fillRect(0, top, getWidth(), height);
+			
+			
+			// Draw the name of the user event
+			if(Name != null){
+				int leftpad = 3;
+				int rightpad = 3;
+				int toppad = 1;
+				int bottompad = 1;
+				int fontsize = height - toppad - bottompad;
+
+				g.setFont(data.labelFont);
+				FontMetrics fm = g.getFontMetrics();
+				int stringWidth = fm.stringWidth(Name);		
+
+				if( fontsize >=9 && stringWidth < getWidth() - leftpad - rightpad){
+					g.setColor(Color.black);
+					g.drawString(Name, leftpad, top + toppad + fontsize);
+					
+					g.setPaintMode();
+				}
+			}		
+			
 		}		
+		
+		
+		
+		
+		
 		
 	}
 

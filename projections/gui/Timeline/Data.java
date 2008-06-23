@@ -268,20 +268,21 @@ public class Data
 		setProcessorList(processorList);
 	}
 	
-	
+
 	/** Get the set of PEs as an OrderedIntList. The internal storage for the PE list is not a sorted list. */
-	public OrderedIntList processorList(){
+	public OrderedIntList processorListOrdered(){
 		OrderedIntList processorList = new OrderedIntList();
-		
+
 		Iterator iter = peToLine.iterator();
 		while(iter.hasNext()){
 			Integer pe = (Integer) iter.next();
 			processorList.insert(pe);
+			System.out.println("processorList " + pe);
 		}
-		
+
 		return processorList;
 	}
-	
+
 	
 	
 	

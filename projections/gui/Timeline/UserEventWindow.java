@@ -10,6 +10,7 @@ import java.util.LinkedList;
 
 import projections.gui.count.TableSorter;
 import projections.gui.FormattedNumber;
+import projections.gui.OrderedIntList;
 
 /** Joshua Mostkoff Unger
  *  Parallel Programming Laboratory
@@ -100,7 +101,6 @@ public class UserEventWindow extends JFrame
 		//  events_ is sorted already because it comes from a treeset
 		events_ = new Object[data.numPs()][];
 		
-		
 		Iterator pe_iter = data.allUserEventObjects.keySet().iterator();
 		int pindex=0;
 		while(pe_iter.hasNext()){
@@ -109,11 +109,11 @@ public class UserEventWindow extends JFrame
 		}
 		
 		// create the layout here
-		data.processorList().reset();
 		super.getContentPane().removeAll();
 		tabbedPane_.removeAll();
 		if (events_.length > 1) { super.getContentPane().add(tabbedPane_); }
 		sorter_ = new TableSorter[events_.length];
+		
 		for (int i=0; i<events_.length; i++) {
 			UserEventTable userEvents = new UserEventTable(i);
 			sorter_[i] = new TableSorter(userEvents);
@@ -134,9 +134,12 @@ public class UserEventWindow extends JFrame
 				super.getContentPane().add(new JScrollPane(table));
 			}
 			else {
+				Integer pe = new Integer(-1);
+				
 				tabbedPane_.addTab(
-						new Integer(data.processorList().nextElement()).toString(),
+						pe.toString(),
 						new JScrollPane(table));
+				
 			}
 		}
 		super.getContentPane().invalidate();

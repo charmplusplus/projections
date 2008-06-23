@@ -618,13 +618,6 @@ ItemListener {
 			return data.packUsage;
 	}
 
-	public OrderedIntList getProcessorList() {
-		if (data == null)
-			return null;
-		else
-			return data.processorList();
-	}
-
 	public void itemStateChanged(ItemEvent evt) {
 		if (data == null)
 			return;

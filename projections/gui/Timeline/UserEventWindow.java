@@ -29,6 +29,7 @@ public class UserEventWindow extends JFrame
 	static DecimalFormat format_ = null;
 	JCheckBox             checkbox_;  // when closing, set to false
 	Object[][]        events_ = null;
+	Integer[] pes;
 	private JTabbedPane          tabbedPane_ = new JTabbedPane();
 	TableSorter[]        sorter_ = null;
 
@@ -100,11 +101,14 @@ public class UserEventWindow extends JFrame
 		// TODO This file should be converted to use the treeset structure instead of these old arrays
 		//  events_ is sorted already because it comes from a treeset
 		events_ = new Object[data.numPs()][];
+		pes = new Integer[data.numPs()];
 		
 		Iterator pe_iter = data.allUserEventObjects.keySet().iterator();
 		int pindex=0;
 		while(pe_iter.hasNext()){
-			events_[pindex] = (data.allUserEventObjects.get(pe_iter.next())).toArray();	
+			Integer pe = (Integer) pe_iter.next();
+			events_[pindex] = (data.allUserEventObjects.get(pe)).toArray();	
+			pes[pindex] = pe;
 			pindex++;
 		}
 		
@@ -134,12 +138,9 @@ public class UserEventWindow extends JFrame
 				super.getContentPane().add(new JScrollPane(table));
 			}
 			else {
-				Integer pe = new Integer(-1);
-				
 				tabbedPane_.addTab(
-						pe.toString(),
+						pes[i].toString(),
 						new JScrollPane(table));
-				
 			}
 		}
 		super.getContentPane().invalidate();

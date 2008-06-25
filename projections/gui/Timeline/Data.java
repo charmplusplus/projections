@@ -1623,6 +1623,12 @@ public class Data
 	/** The message send tick mark bottom point*/
 	public int messageSendLocationY(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight() + barheight()+this.messageSendHeight();
+	}
+	
+	/** The message send tick mark bottom point*/
+	public int messageRecvLocationY(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
 	}
 	

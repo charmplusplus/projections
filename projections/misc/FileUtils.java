@@ -19,103 +19,104 @@ import projections.gui.*;
 
 public class FileUtils {
 
-    private static OrderedIntList validPEs[];
-    private static String validPEStrings[];
-    private static boolean hasFiles[];
+	private static OrderedIntList validPEs[];
+	private static String validPEStrings[];
+	private static boolean hasFiles[];
 
-    public static String getBaseName(String filename) {
-	String baseName = null;
-	if (filename.endsWith(".sum.sts")) {
-	    baseName = filename.substring(0, filename.length()-8);
-	} else if (filename.endsWith(".sts")) {
-	    baseName = filename.substring(0, filename.length()-4); 
-	} else {
-	    System.err.println("Invalid sts filename! Exiting ...");
-	    System.exit(-1);
-	}
-	return baseName;
-    }
-
-    public static String dirFromFile(String filename) {
-	// pre condition - filename is a full path name
-	int index = filename.lastIndexOf(File.separator);
-	if (index != -1) {
-	    return filename.substring(0,index);
-	}
-	return(".");	// present directory
-    }
-
-    public static void detectFiles(StsReader sts, String dirPath,
-				   String baseName) {
-	// determine if any of the data files exist.
-	// We assume they are automatically valid and this is reflected
-	// in the validPEs. 
-	hasFiles = new boolean[ProjMain.NUM_TYPES];
-	validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
-	validPEStrings = new String[ProjMain.NUM_TYPES];
-
-	for (int type=0; type<ProjMain.NUM_TYPES; type++) {
-	    validPEs[type] = new OrderedIntList();
-
-	    detectFiles(sts, dirPath, baseName, type);
-	    validPEStrings[type] = validPEs[type].listToString();
-	}
-    }
-
-    public static void detectFiles(StsReader sts, String dirPath,
-				   String baseName, int type) {
-	File testFile = null;
-
-	// special condition for SUMACC (and any future, single-file
-	// log types) only
-	if (type == ProjMain.SUMACC) {
-	    testFile = new File(getSumAccumulatedName(baseName));
-	    if (testFile.isFile() &&
-		testFile.length() > 0 &&
-		testFile.canRead()) {
-		hasFiles[type] = true;
-	    }
-	    return;
-	}
-
-	testFile = new File(dirPath);
-	if (!testFile.isDirectory()) {
-	    System.err.println("Internal Error: Path [" + dirPath + "] " +
-			       "supplied for file detection is not a " +
-			       "directory! Please report to developers!");
-	    System.exit(-1);
-	}
-	String files[] = testFile.list();
-	for (int file=0; file<files.length; file++) {
-	    if (files[file].endsWith(getTypeExtension(type))) {
-		hasFiles[type] = true;
-		int pe = -1;
-		int endIdx =
-		    files[file].lastIndexOf(".");
-		if (endIdx != -1) {
-		    int startIdx =
-			files[file].substring(0,endIdx).lastIndexOf(".");
-		    if (startIdx != -1) {
-			if (startIdx+1 < endIdx) {
-			    pe = Integer.parseInt(files[file].substring(startIdx+1, endIdx));
-			} else {
-			    break;
-			}
-		    } else {
-			// some junk file that's not actually a projections 
-			// log file despite having the correct extension.
-			break;
-		    }
+	public static String getBaseName(String filename) {
+		String baseName = null;
+		if (filename.endsWith(".sum.sts")) {
+			baseName = filename.substring(0, filename.length()-8);
+		} else if (filename.endsWith(".sts")) {
+			baseName = filename.substring(0, filename.length()-4); 
 		} else {
-		    // some junk file that's not actually a projections log
-		    // file despite having the correct extension.
-		    break;
+			System.err.println("Invalid sts filename! Exiting ...");
+			System.exit(-1);
 		}
-		validPEs[type].insert(pe);
-	    }
+		return baseName;
 	}
-    }
-    
+
+	public static String dirFromFile(String filename) {
+		// pre condition - filename is a full path name
+		int index = filename.lastIndexOf(File.separator);
+		if (index != -1) {
+			return filename.substring(0,index);
+		}
+		return(".");	// present directory
+	}
+
+	public static void detectFiles(StsReader sts, String baseName) {
+		// determine if any of the data files exist.
+		// We assume they are automatically valid and this is reflected
+		// in the validPEs. 
+		hasFiles = new boolean[ProjMain.NUM_TYPES];
+		validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
+		validPEStrings = new String[ProjMain.NUM_TYPES];
+
+		for (int type=0; type<ProjMain.NUM_TYPES; type++) {
+			validPEs[type] = new OrderedIntList();
+
+			detectFiles(sts, baseName, type);
+			validPEStrings[type] = validPEs[type].listToString();
+		}
+	}
+
+	public static void detectFiles(StsReader sts, String baseName, int type) {
+		File testFile = null;
+
+		// special condition for SUMACC (and any future, single-file
+		// log types) only
+		if (type == ProjMain.SUMACC) {
+			testFile = new File(getSumAccumulatedName(baseName));
+			if (testFile.isFile() &&
+					testFile.length() > 0 &&
+					testFile.canRead()) {
+				hasFiles[type] = true;
+			}
+			return;
+		}
+
+		File prefix = new File( baseName );
+		String prefix_s = prefix.getName();
+		
+		testFile = new File( FileUtils.dirFromFile(baseName) );
+		if (!testFile.isDirectory()) {
+			System.err.println("Internal Error: Path [" + baseName + "] " +
+					"supplied for file detection is not a " +
+			"directory! Please report to developers!");
+			System.exit(-1);
+		}
+		String files[] = testFile.list();
+		for (int file=0; file<files.length; file++) {
+			if (files[file].endsWith(getTypeExtension(type)) && files[file].startsWith(prefix_s)) {	
+				hasFiles[type] = true;
+				int pe = -1;
+				int endIdx =
+					files[file].lastIndexOf(".");
+				if (endIdx != -1) {
+					int startIdx =
+						files[file].substring(0,endIdx).lastIndexOf(".");
+					if (startIdx != -1) {
+						if (startIdx+1 < endIdx) {
+							pe = Integer.parseInt(files[file].substring(startIdx+1, endIdx));
+						} else {
+							break;
+						}
+					} else {
+						// some junk file that's not actually a projections 
+						// log file despite having the correct extension.
+						break;
+					}
+				} else {
+					// some junk file that's not actually a projections log
+					// file despite having the correct extension.
+					break;
+				}
+				validPEs[type].insert(pe);
+			}
+		}
+	}
+
     public static boolean hasLogFiles() {
 	return hasFiles[ProjMain.LOG];
     }   
@@ -137,11 +138,11 @@ public class FileUtils {
     }
 
     public static String getFileName(String baseName, int pnum, int type) {
-	return baseName + "." + pnum + "." + getTypeExtension(type);
+    	return baseName + "." + pnum + "." + getTypeExtension(type);
     }
 
     public static String getSumAccumulatedName(String baseName) {
-	return baseName+".sum";
+    	return baseName+".sum";
     }
 
     public static String getTypeExtension(int type) {

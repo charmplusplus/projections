@@ -47,7 +47,6 @@ public class Analysis {
   private IntervalData intervalData; // interval-based data
 
   private String baseName;
-  private String logDirectory;
   
   // The total time (maxed) of a run across all processors.
   private long totalTime = 0;
@@ -111,7 +110,6 @@ public class Analysis {
     guiRoot = rootComponent;
     try {
       baseName = FileUtils.getBaseName(filename);
-      logDirectory = FileUtils.dirFromFile(filename);
       sts = new StsReader(filename);
       
       // Version Check (Kind of a hack, since the format of the Sts file
@@ -126,7 +124,7 @@ public class Analysis {
 
       rcReader = 
 	new ProjectionsConfigurationReader(filename);
-      FileUtils.detectFiles(sts, logDirectory, baseName);
+      FileUtils.detectFiles(sts, baseName);
       
       // Projections Colors
       String colorsaved = 
@@ -593,11 +591,11 @@ public class Analysis {
     }
 
     public String getLogDirectory() {
-	return logDirectory;
+    	return FileUtils.dirFromFile(baseName);
     }
 
     public String getFilename() { 
-	return baseName;
+    	return baseName;
     }   
     
     // *** Activity Management *** */

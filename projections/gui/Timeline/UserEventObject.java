@@ -87,7 +87,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		int top = bottom - heightPerRow;
 
-		setToolTipText("<html><body><p>" + getName() + "</p><p>Duration: " + (EndTime-BeginTime) + " us</p><p>event=" + UserEventID + "</p><p>nested row="+ nestedRow + "</p></html></body>");
+		setToolTipText("<html><body><b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p></html></body>");
 		
 		this.setBounds( leftCoord, 
 				top,
@@ -102,13 +102,6 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(data.showUserEvents()){
 			g.setColor(getColor());
 		
-//			int height = getHeight() / data.getNumUserEventRows();
-//			
-//			int bottom =  getHeight() - height * ( this.nestedRow );
-//			int top = bottom - height;
-//			int top = 0 + height * (data.getNumUserEventRows() - this.nestedRow - 1);
-//			System.out.println("height="+height+ " top=" + top + " getHeight()=" + getHeight() + " getNumUserEventRows="+data.getNumUserEventRows());
-			
 			g.fillRect(0, 0, getWidth(), getHeight());
 						
 			// Draw the name of the user event
@@ -174,10 +167,11 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	}
 
 	public void mouseClicked(MouseEvent e) {
-	    //		System.out.println("Mouse Clicked on user event object");
-		 Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
-		 MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
-		 data.displayMustBeRepainted();
+		Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
+		if(c !=null){
+			MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
+			data.displayMustBeRepainted();
+		}
 	}
 
 	public void mouseEntered(MouseEvent e) {

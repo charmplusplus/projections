@@ -61,7 +61,7 @@ public class MainPanelForeground extends JPanel {
 						double y1 = data.messageSendLocationY(pCreation);
 						// Message executed (entry method starts) 
 						int x2 =  data.timeToScreenPixel(obj.getBeginTime(), getWidth());
-						double y2 = data.messageSendLocationY(pExecution);
+						double y2 = data.messageRecvLocationY(pExecution);
 						// I like painting a line :)
 						g.drawLine(x1,(int)y1,x2,(int)y2);
 					}

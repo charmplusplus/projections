@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>sts</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>sts.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Projections sts</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>STS</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSIsAppleDefaultForType</key>
+			<true/>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>projrc</string>
+			</array>
+			<key>CFBundleTypeIconFile</key>
+			<string>projrc.icns</string>
+			<key>CFBundleTypeName</key>
+			<string>Projections projrc</string>
+			<key>CFBundleTypeOSTypes</key>
+			<array>
+				<string>projrc</string>
+			</array>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSIsAppleDefaultForType</key>
+			<true/>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>projections-osx.sh</string>
+	<key>CFBundleIconFile</key>
+	<string>proj.icns</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>1.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>

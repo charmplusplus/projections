@@ -698,10 +698,13 @@ public class Analysis {
     }
     
     public Integer getEntryIndex(Integer ID){
-    	return sts.getEntryIndex(ID);
+    	Integer result = sts.getEntryIndex(ID);	
+    	if(result != null)
+    		return result;
+    	else 
+    		throw new RuntimeException("ERROR: log files and sts file are inconsistent. The log files refer to EP " + ID + " but the sts file doesn't contain an entry for that \"ENTRY CHARE\"\n");
     }
-    
-    
+        
     public int getNumUserDefinedEvents() {
 	return sts.getNumUserDefinedEvents();
     }
@@ -963,4 +966,5 @@ public class Analysis {
     private boolean hasPoseDopFiles() {
 	return FileUtils.hasPoseDopFiles();
     }
+    
 }

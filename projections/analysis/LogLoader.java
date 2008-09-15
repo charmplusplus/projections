@@ -52,7 +52,7 @@ public class LogLoader extends ProjDefs
 
 		
 		Iterator iter = workerThreads.iterator();
-		int maxTimeFound = Integer.MIN_VALUE;
+		long maxTimeFound = Long.MIN_VALUE;
 		while(iter.hasNext()){
 			LogLoaderEndTimeThread worker = (LogLoaderEndTimeThread) iter.next();
 			if(worker.result > maxTimeFound ){

@@ -15,10 +15,10 @@ import projections.gui.MainWindow;
 public class LogLoaderEndTimeThread  extends Thread {
 
 	public String logName;
-	public Integer result;
+	public Long result;
 
 	public LogLoaderEndTimeThread(String  _logName) {
-		result = new Integer(0);
+		result = new Long(0);
 		logName = _logName;
 	}
 
@@ -30,12 +30,12 @@ public class LogLoaderEndTimeThread  extends Thread {
 
 		// Find the begin and end time for the given logfile
 
-		int dummyInt = 0;
+		long dummyLong = 0;
 		int type = 0;
 		try {
 			InFile =  new RandomAccessFile(logName, "r");
 
-			long back = InFile.length()-80*3; //Seek to the end of the file
+			long back = InFile.length()-100*3; //Seek to the end of the file
 			if (back < 0) back = 0;
 			InFile.seek(back);
 			while (InFile.readByte() != '\n'){}
@@ -51,7 +51,7 @@ public class LogLoaderEndTimeThread  extends Thread {
 				if ((type=Integer.parseInt(st.nextToken())) == ProjDefs.END_COMPUTATION) {
 					long time = Long.parseLong(st.nextToken());
 					if (time > result)
-						result = (int) time;
+						result = time;
 					break; // while loop
 				} else {
 					switch (type) {
@@ -60,8 +60,8 @@ public class LogLoaderEndTimeThread  extends Thread {
 					case ProjDefs.CREATION_MULTICAST:
 					case ProjDefs.BEGIN_PROCESSING:
 					case ProjDefs.END_PROCESSING:
-						dummyInt = Integer.parseInt(st.nextToken());
-						dummyInt = Integer.parseInt(st.nextToken());
+						dummyLong = Integer.parseInt(st.nextToken());
+						dummyLong = Integer.parseInt(st.nextToken());
 						break;
 					case ProjDefs.USER_SUPPLIED:
 					case ProjDefs.MEMORY_USAGE:
@@ -70,7 +70,7 @@ public class LogLoaderEndTimeThread  extends Thread {
 					case ProjDefs.MESSAGE_RECV: 
 					case ProjDefs.ENQUEUE: 
 					case ProjDefs.DEQUEUE:
-						dummyInt = 	Integer.parseInt(st.nextToken());
+						dummyLong = 	Integer.parseInt(st.nextToken());
 						break;
 					case ProjDefs.BEGIN_IDLE:
 					case ProjDefs.END_IDLE:

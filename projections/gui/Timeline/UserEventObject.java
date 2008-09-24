@@ -1,6 +1,8 @@
 package projections.gui.Timeline;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -8,7 +10,7 @@ import javax.swing.*;
 
 import projections.gui.MainWindow;
 
-public class UserEventObject extends JComponent implements Comparable, MouseListener
+public class UserEventObject extends JComponent implements Comparable, MouseListener,  ActionListener
 {
 
 	private static final long serialVersionUID = 1L;
@@ -30,6 +32,8 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	private Data data;
 	
 	private int pe;
+
+	final static String popupChangeColor = "Change Color";
 
 	/** If displaying nested user events in multiple rows, use this value to determine the row in which we draw this event */
 	private int nestedRow;
@@ -166,12 +170,21 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		nestedRow = row;
 	}
 
-	public void mouseClicked(MouseEvent e) {
-		Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
-		if(c !=null){
-			MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
-			data.displayMustBeRepainted();
+	public void mouseClicked(MouseEvent evt) {
+		
+		if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
+			// Left Click
+		} else {	
+			// non-left click: display popup menu
+			JPopupMenu popup = new JPopupMenu();
+
+			JMenuItem menuItem = new JMenuItem(popupChangeColor);
+			menuItem.addActionListener(this);
+			popup.add(menuItem);
+
+			popup.show(this, evt.getX(), evt.getY());			
 		}
+		
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -192,6 +205,22 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public void mouseReleased(MouseEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() instanceof JMenuItem) {
+			String arg = ((JMenuItem) e.getSource()).getText();
+			
+			if (arg.equals(popupChangeColor)){
+				Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
+				if(c !=null){
+					MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
+					data.displayMustBeRepainted();
+				}
+
+			}
+
+		}
 	}
 	
 	

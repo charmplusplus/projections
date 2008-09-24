@@ -247,6 +247,18 @@ public class Data
 	}
 	
 	
+	/** 
+	 * Add the data for a new processor to this visualization
+	 */
+	public void removeProcessor(int pCreation){
+		Integer p = new Integer(pCreation);
+		if(peToLine.contains(p)){
+			peToLine.remove(p);
+			modificationHandler.notifyProcessorListHasChanged();
+		}
+	}
+	
+	
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
 	public void setProcessorList(OrderedIntList processorList){
 		peToLine.clear();
@@ -1084,13 +1096,10 @@ public class Data
 	}
 	
 	/** Do something when the user right clicks on an entry method object */
-	public void entryMethodObjectRightClick(EntryMethodObject obj) {
-		// pCreation, EventID, pCurrent, 
+	public void clickTraceSender(EntryMethodObject obj) {
 		if(! useMinimalView()){
-			
 			addProcessor(obj.pCreation);
 			toggleMessageSendLine(obj);
-			
 		}		
 	}
 
@@ -1630,6 +1639,67 @@ public class Data
 	public int messageRecvLocationY(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
+	}
+
+	
+	public void dropPEsUnrelatedToPE(Integer pe) {
+		dropPEsUnrelatedToObjects((Collection<EntryMethodObject>)allEntryMethodObjects.get(pe));
+	}
+	
+	public void dropPEsUnrelatedToObject(EntryMethodObject obj) {
+		System.out.println("dropPEsUnrelatedToObject()");
+		HashSet set = new HashSet();
+		set.add(obj);
+		dropPEsUnrelatedToObjects(set);
+	}
+	
+	
+
+	public void dropPEsUnrelatedToObjects(Collection<EntryMethodObject> objs) {
+		System.out.println("dropPEsUnrelatedToObjects()");
+		HashSet<EntryMethodObject> allRelatedEntries = new HashSet();
+
+		// Find all entry method invocations related to this one
+		Iterator<EntryMethodObject> objIter = objs.iterator();
+		while(objIter.hasNext()){
+			EntryMethodObject obj = objIter.next();
+			allRelatedEntries.add(obj);
+			allRelatedEntries.addAll(obj.traceForwardDependencies());
+			allRelatedEntries.addAll(obj.traceBackwardDependencies());
+		}
+		
+		// Find all PEs related to this object
+		HashSet<Integer> relatedPEs = new HashSet<Integer>();
+			
+		Iterator<EntryMethodObject> iter = allRelatedEntries.iterator();
+		while(iter.hasNext()){
+			EntryMethodObject o = iter.next();
+			relatedPEs.add(o.pCurrent); 
+		}
+		
+		dropPEsNotInList(relatedPEs);
+	}
+	
+	
+	
+	// Drop timelines from any PEs not in the provided list
+	void dropPEsNotInList(Set keepPEs){
+		// Drop any PEs not in the list
+		HashSet currentPEs = new HashSet();
+		currentPEs.addAll(peToLine);
+
+		Iterator currPEiter = currentPEs.iterator();
+		while(currPEiter.hasNext()){
+			Integer p = (Integer) currPEiter.next();
+			if(keepPEs.contains(p)){
+				// Keep this PE 
+			} else {
+				// Drop this PE
+				peToLine.remove(p);		
+			}
+		}
+		
+		modificationHandler.notifyProcessorListHasChanged();
 	}
 	
 	

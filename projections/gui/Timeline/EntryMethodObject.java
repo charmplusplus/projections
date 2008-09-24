@@ -3,6 +3,7 @@ package projections.gui.Timeline;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import projections.analysis.*;
 import projections.gui.Analysis;
 import projections.gui.MainWindow;
@@ -17,7 +18,7 @@ import java.util.TreeSet;
 
 import javax.swing.*;
 
-public class EntryMethodObject extends JComponent implements Comparable, MouseListener
+public class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
 {
 
 	private static final long serialVersionUID = 1L;
@@ -33,6 +34,14 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private ObjectId tid; 
 	int pCurrent;
 	int pCreation;
+	
+	
+	final static String popupChangeColor = "Change Entry Point Color";
+	final static String popupShowDetails = "Show details";
+	final static String popupTraceSender = "Trace message to sender";
+	final static String popupDropPEsForObject = "Drop all PEs unrelated to this entry method";
+	final static String popupDropPEsForPE = "Drop all PEs unrelated to entry methods on this PE";
+	
 	
 	/** Data specified by the user, likely a timestep. Null if nonspecified */
 	Integer userSuppliedData;
@@ -357,10 +366,33 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
 				// Left Click
-				OpenMessageWindow();
+				data.clickTraceSender(this);	
 			} else {	
-				// non-left click
-				data.entryMethodObjectRightClick(this);				
+				// non-left click: display popup menu
+				JPopupMenu popup = new JPopupMenu();
+				JMenuItem menuItem;
+		        
+				menuItem = new JMenuItem(popupShowDetails);
+				menuItem.addActionListener(this);
+				popup.add(menuItem);
+		        
+		        menuItem = new JMenuItem(popupTraceSender);
+		        menuItem.addActionListener(this);
+		        popup.add(menuItem);
+		        
+		        menuItem = new JMenuItem(popupChangeColor);
+		        menuItem.addActionListener(this);
+		        popup.add(menuItem);
+		        
+		        menuItem = new JMenuItem(popupDropPEsForObject);
+		        menuItem.addActionListener(this);
+		        popup.add(menuItem);
+
+		        menuItem = new JMenuItem(popupDropPEsForPE);
+		        menuItem.addActionListener(this);
+		        popup.add(menuItem);
+		            
+		        popup.show(this, evt.getX(), evt.getY());			
 			}
 		}
 	} 
@@ -877,6 +909,38 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		cpuBegin += s;
 		cpuEnd += s;
 	}
-	
+
+
+	/** Handle the right-click popup menu events */
+	public void actionPerformed(ActionEvent e) {
+
+		if (e.getSource() instanceof JMenuItem) {
+			String arg = ((JMenuItem) e.getSource()).getText();
+			if (arg.equals(popupChangeColor)){
+				Color old = MainWindow.runObject[data.myRun].getEntryColor(entry);
+				Color c = JColorChooser.showDialog(null, "Choose new color", old); 
+				if(c !=null){
+					MainWindow.runObject[data.myRun].setEntryColor(entry, c);
+					data.displayMustBeRepainted();
+				}
+
+			} 
+			else if(arg.equals(popupShowDetails)) {
+				OpenMessageWindow();
+			} 
+			else if(arg.equals(popupTraceSender)) {
+				data.clickTraceSender(this);				
+			} 
+			else if(arg.equals(popupDropPEsForObject)) {	
+				data.dropPEsUnrelatedToObject(this);
+			} 
+			else if(arg.equals(popupDropPEsForPE)) {
+				data.dropPEsUnrelatedToPE(this.pCurrent);
+			}
+
+		}
+
+	}
+
 
 }

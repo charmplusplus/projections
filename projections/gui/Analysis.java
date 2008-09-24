@@ -783,6 +783,8 @@ public class Analysis {
 	}
     }
 
+    
+    
     public Color getUserEventColor(int eventID) {
     	if (sts != null) { 
     		Integer idx = sts.getUserEventIndex(eventID);
@@ -802,6 +804,7 @@ public class Analysis {
     	} 
     }
 
+    
     
     // *** Derived Data accessors ***
 

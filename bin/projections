@@ -10,6 +10,6 @@ then
   fi 
 fi
 
-java -ms256000000 -mx1000000000 \
+java -ms256000000 -mx2560000000 \
   -classpath $jarpath \
   projections.analysis.ProjMain $*

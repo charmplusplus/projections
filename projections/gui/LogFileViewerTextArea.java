@@ -2,203 +2,172 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Vector;
 
-public class LogFileViewerTextArea extends Panel
-   implements AdjustmentListener
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.StyleContext;
+
+import projections.analysis.ProjDefs;
+import projections.analysis.ViewerEvent;
+import projections.misc.LogLoadException;
+
+
+/** This class displays a log file as html formatted text inside a JPanel 
+ *  
+ *   Inside this JPanel is a JScrollPane that provides a scrollbar.
+ *   Inside the JScrollPane is a JTextPane that holds the formatted text.
+ *   
+ *   The text is composed from the log file data obtained in a vector:
+ *   	Vector v = MainWindow.runObject[myRun].logLoader.view(PE);
+ *
+ *   The entries in the vector are formatted differently depending on their type.
+ *   
+ *   A StringBuilder object is used to build up the long string because simple
+ *   string concatenation is too slow(each new string must copy the entire old 
+ *   string into itself).
+ *
+ */
+
+
+public class LogFileViewerTextArea extends JPanel
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
-	// Temporary hardcode. This variable will be assigned appropriate
-    // meaning in future versions of Projections that support multiple
-    // runs.
-    int myRun = 0;
+	static int myRun = 0;
 
-   private Scrollbar VSB;
-   private String[][] text;
-   private FontMetrics fm;
-   private int lineheight;
-   private int titleheight;
-   private Image offscreen;
-   private int linenumwidth;
-   private int timewidth;
-   
-   public LogFileViewerTextArea()
-   {
-	  addComponentListener(new ComponentAdapter()
-	  {
-		 public void componentResized(ComponentEvent e)
-		 {
-			setBounds();  
-		 }
-	  });
-	  
-	  setLayout(null);
-	  setBackground(Color.black);
-	  
-	  VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
-	  VSB.setVisible(false);
-	  VSB.setBackground(Color.lightGray);
-	  VSB.addAdjustmentListener(this);
-	  add(VSB);
-   }   
-   public void adjustmentValueChanged(AdjustmentEvent evt)
-   {
-	  repaint();
-   }   
-   //Make sure we aren't made too tiny
-   public Dimension getMinimumSize() {return new Dimension(150,100);}   
-   public Dimension getPreferredSize() {return new Dimension(500,300);}   
-   public void paint(Graphics g)
-   {
-	  if(fm == null)
-		 setBounds();
-		 
-	  if(text == null)
-		 return; 
-	  
-	  Graphics og = g;
-	  
-	  g = offscreen.getGraphics();
-	 
-	  int vsb = VSB.getValue();  
-	  g.translate(0, -vsb);     
-	  
-	  int w = getSize().width - 20;
-	  int h = getSize().height - titleheight;   
-	  
-	  int minline = (vsb - lineheight)/lineheight;
-	  int maxline = (vsb - lineheight + h)/lineheight + 1;
-	  
-	  if(minline < 0) minline = 0;
-	  if(maxline < minline) maxline = minline;
-	  if(maxline > text.length-1) maxline = text.length-1;
- 
-	  g.setColor(Color.white);
-	  String s;
-	  int xpos, ypos;
-	  for(int i=minline; i<=maxline; i++)
-	  {
-		 ypos = (i+1) * lineheight + titleheight;
-		 
-		 s = "" + i;
-		 xpos = 10 + (linenumwidth - fm.stringWidth(s))/2;
-		 g.setColor(Color.yellow);
-		 g.drawString("" + i, xpos, ypos);
-		 
-		 s = text[i][0];
-		 xpos = 10 + linenumwidth + 10 + timewidth - fm.stringWidth(s);
-		 g.setColor(Color.red);
-		 g.drawString(s, xpos, ypos);
-		 
-		 s = text[i][1];
-		 xpos = 10 + linenumwidth + 10 + timewidth + 10;
-		 g.setColor(Color.white);
-		 g.drawString(s, xpos, ypos);
-	  }
-	  
-	  
-	  g.translate(0, vsb); 
-	  g.clearRect(0, 0, w, titleheight);
-	  g.setColor(Color.white);
-	  s = "LINE";
-	  xpos = (linenumwidth - fm.stringWidth(s))/2 + 10;
-	  ypos = (titleheight + fm.getHeight())/2;
-	  
-	  g.drawString(s, xpos, ypos);
-	  g.drawLine(xpos, ypos+2, xpos + fm.stringWidth(s), ypos+2);
-	  
-	  s = "TIME";
-	  xpos = 10 + linenumwidth + 10 + (timewidth - fm.stringWidth(s))/2; 
-	  g.drawString(s, xpos, ypos);
-	  g.drawLine(xpos, ypos+2, xpos + fm.stringWidth(s), ypos+2);
-	  
-	  s = "EVENT";
-	  xpos = 10 + linenumwidth + 10 + timewidth + 10;
-	  g.drawString(s, xpos, ypos); 
-	  g.drawLine(xpos, ypos+2, xpos + fm.stringWidth(s), ypos+2);
-	  
-	  
-	  og.drawImage(offscreen, 0,0,w,h+titleheight, 0,0,w,h+titleheight, null);    
-   }   
-   public void setBounds()
-   {
-	 
-	  if(fm == null)
-	  {
-		 Graphics g = getGraphics();
-		 if(g != null)
-		 {
-			fm = g.getFontMetrics(g.getFont());
-			lineheight = fm.getHeight() + 2;
-		 }   
-	  }
-	  
-	  if(fm == null || text == null)
-		 return;
-	  
-	  int numlines = text.length;
-	  int totalheight = lineheight * (numlines + 1);
-	  titleheight = lineheight + 20;
-	  linenumwidth = fm.stringWidth("" + numlines);
-	  if(linenumwidth < fm.stringWidth("LINE")) linenumwidth = fm.stringWidth("LINE");
-	  timewidth = fm.stringWidth("" + MainWindow.runObject[myRun].getTotalTime());
-	  if(timewidth < fm.stringWidth("TIME")) timewidth = fm.stringWidth("TIME");
-	  
-	  int w = getSize().width - 20;
-	  int h = getSize().height - titleheight;
-	  
+	JTextPane textPane;
+	JScrollPane scrollPane;
 
-	  VSB.setBounds(w, titleheight, 20, h);
-	  
-	  if(totalheight > h)
-	  {
-		 VSB.setMaximum(totalheight);
-		 VSB.setVisibleAmount(h);
-		 VSB.setBlockIncrement(h);
-		 VSB.setUnitIncrement(lineheight);
-		 VSB.setVisible(true);
-	  }
-	  else
-		 VSB.setVisible(false);
-		 
-	  try
-	  {
-		 offscreen = createImage(w, h+titleheight);
-	  }
-	  catch(OutOfMemoryError e)
-	  {
-		 System.out.println("NOT ENOUGH MEMORY!");  
-	  }
-	  
-	  repaint();   
-   }   
-   public void setText(String[][] s)
-   {
-	  text = s;    
-	  
-	  if(s == null)
-	  {
-		 text = new String[1][2];
-		 text[0][0] = "";
-		 text[0][1] = "THIS LOG FILE IS EMPTY";
-	  }
+	public LogFileViewerTextArea()
+	{
+		// Set the layout for this JPanel.
+		setLayout(new BorderLayout());
+		this.setPreferredSize(new Dimension(800,500));
 
-	  setBounds();
-   }   
-   public void update(Graphics g)
-   {
-	  int w = getSize().width - 20;
-	  int h = getSize().height;
-	  
-	  if(offscreen != null)
-	  {
-		 Graphics og = offscreen.getGraphics();
-		 og.clearRect(0, 0, w, h);
-	  }
-	  
-	  paint(g);
-   }   
+		// At first we don't have any data to display. 
+		// Later setPE() will add the real text.
+		String text = new String("<html><body>Log Not Yet Loaded</body></html>");
+
+		textPane = new JTextPane();
+		textPane.setEditable(false);
+		textPane.setContentType("text/html");
+		textPane.setText(text);
+
+		// The only component in this JPanel is a JScrollPane containing textPane
+		scrollPane = new JScrollPane(textPane);
+		this.add(scrollPane, BorderLayout.CENTER);
+
+	}   
+
+
+	public void setPE(int PE) {
+
+		if (!(MainWindow.runObject[myRun].hasLogData())){
+			textPane.setText("<h1>ERROR: Don't have any log data</h1>");
+			return;
+		}
+
+
+		// Load the log file entries into the vector v
+		Vector v;
+		try {
+			v = MainWindow.runObject[myRun].logLoader.view(PE);
+		} catch (LogLoadException e) {
+			textPane.setText("<h1>Failed to load Log files for PE " + PE + "</h1>");
+			return;
+		}
+
+		// Verify that we loaded some data in v
+		if( v == null || v.size()==0) {
+			textPane.setText("<h1>Don't have log data for PE " + PE+ "</h1>");
+			return;
+		}
+
+		// The number of log entries we found is:
+		int length = v.size();
+
+
+		// Create a buffer into which we compose the html formatted text.
+		// We expect the length of each log file entry to be under 150. 
+		// If this buffer is large enough, then it won't have to be resized(and thus will be fast).
+		StringBuilder htmlFormattedTable = new StringBuilder(length * 150);
+
+		
+		// Start composing the html formatted text
+		htmlFormattedTable.append( "<html><body><font size=+3 color=\"#777777\"> All " + length +  " events in log for PE " + PE + ":</font>");
+		htmlFormattedTable.append( "<table><tr><td><h2>Time</h2><td><h2>Event type and description</h2>");
+
+		// Compose the rows in the html table
+		for( int i = 0;i < length;i++ ) {
+
+			ViewerEvent ve = (ViewerEvent)v.elementAt(i);
+
+			htmlFormattedTable.append( "<tr><td>" + ve.Time + "<td>");
+
+			switch( ve.EventType ) {
+			case ( ProjDefs.CREATION ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#660000\">CREATE</font> message to be sent to <em>" + ve.Dest + "</em>");
+			break;
+			case ( ProjDefs.CREATION_BCAST ):
+				if (ve.numDestPEs == MainWindow.runObject[myRun].getNumProcessors()) {
+					htmlFormattedTable.append( "<font size=+1 color=\"#666600\">GROUP BROADCAST</font> (" + ve.numDestPEs + " processors)");
+				} else {
+					htmlFormattedTable.append( "<font size=+1 color=\"#666600\">NODEGROUP BROADCAST</font> (" + ve.numDestPEs + " processors)");
+				}
+			break;
+			case ( ProjDefs.CREATION_MULTICAST ):
+				htmlFormattedTable.append( "<td><font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + ve.numDestPEs + " processors");
+			break;
+			case ( ProjDefs.BEGIN_PROCESSING ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of message sent to <em>" + ve.Dest + "</em> from processor " + ve.SrcPe);
+			break;
+			case ( ProjDefs.END_PROCESSING ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#000088\">END PROCESSING</font> of message sent to <em>" + ve.Dest + "</em> from processor " + ve.SrcPe);
+				htmlFormattedTable.append( "<tr>"); // add an extra blank row after this end event
+			break;
+			case ( ProjDefs.ENQUEUE ):
+				htmlFormattedTable.append( "<font size=+1>ENQUEUEING</font> message received from " + "processor " + ve.SrcPe + " destined for " + ve.Dest);
+			break;
+			case ( ProjDefs.BEGIN_IDLE ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#333333\">IDLE begin</font>");
+			break;
+			case ( ProjDefs.END_IDLE ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#333333\">IDLE end</font>");
+				htmlFormattedTable.append( "<tr>"); // add an extra blank row after this end event
+			break;
+			case ( ProjDefs.BEGIN_PACK ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#008800\">BEGIN PACKING</font> a message to be sent");
+			break;
+			case ( ProjDefs.END_PACK ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#008800\">FINISHED PACKING</font> a message to be sent");
+			break;
+			case ( ProjDefs.BEGIN_UNPACK ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#880000\">BEGIN UNPACKING</font> a received message");
+			break;
+			case ( ProjDefs.END_UNPACK ):
+				htmlFormattedTable.append( "<font size=+1 color=\"#880000\">FINISHED UNPACKING</font> a received message");
+			break;
+			default:
+				htmlFormattedTable.append( "Unknown Event Type:" + ve.EventType + " !!!");
+			break;
+			}
+		}
+
+		// Put the finishing touches on the html formatted text
+		htmlFormattedTable.append( "</table></body></html>");
+
+		// Set the text in textPane to the html formatted text
+		textPane.setText(htmlFormattedTable.toString());		
+
+		// Scroll to the top
+		textPane.setSelectionStart(0);
+		textPane.setSelectionEnd(0);
+
+	}
+
 }

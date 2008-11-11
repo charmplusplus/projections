@@ -65,7 +65,7 @@ public class LogFileViewerTextArea extends JPanel
 	}   
 
 
-	public void setPE(int PE) {
+	public void setPE(int PE, long startTime, long endTime) {
 
 		if (!(MainWindow.runObject[myRun].hasLogData())){
 			textPane.setText("<h1>ERROR: Don't have any log data</h1>");
@@ -97,9 +97,9 @@ public class LogFileViewerTextArea extends JPanel
 		// If this buffer is large enough, then it won't have to be resized(and thus will be fast).
 		StringBuilder htmlFormattedTable = new StringBuilder(length * 150);
 
-		
+
 		// Start composing the html formatted text
-		htmlFormattedTable.append( "<html><body><font size=+3 color=\"#777777\"> All " + length +  " events in log for PE " + PE + ":</font>");
+		htmlFormattedTable.append( "<html><body><font size=+2> All events in log for PE " + PE + " with times between " + startTime + " and " + endTime + "</font>");
 		htmlFormattedTable.append( "<table><tr><td><h2>Time</h2><td><h2>Event type and description</h2>");
 
 		// Compose the rows in the html table
@@ -107,57 +107,60 @@ public class LogFileViewerTextArea extends JPanel
 
 			ViewerEvent ve = (ViewerEvent)v.elementAt(i);
 
-			htmlFormattedTable.append( "<tr><td>" + ve.Time + "<td>");
+			if(ve.Time >= startTime && ve.Time <= endTime){
 
-			switch( ve.EventType ) {
-			case ( ProjDefs.CREATION ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#660000\">CREATE</font> message to be sent to <em>" + ve.Dest + "</em>");
-			break;
-			case ( ProjDefs.CREATION_BCAST ):
-				if (ve.numDestPEs == MainWindow.runObject[myRun].getNumProcessors()) {
-					htmlFormattedTable.append( "<font size=+1 color=\"#666600\">GROUP BROADCAST</font> (" + ve.numDestPEs + " processors)");
-				} else {
-					htmlFormattedTable.append( "<font size=+1 color=\"#666600\">NODEGROUP BROADCAST</font> (" + ve.numDestPEs + " processors)");
+				htmlFormattedTable.append( "<tr><td>" + ve.Time + "<td>");
+
+				switch( ve.EventType ) {
+				case ( ProjDefs.CREATION ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#660000\">CREATE</font> message to be sent to <em>" + ve.Dest + "</em>");
+				break;
+				case ( ProjDefs.CREATION_BCAST ):
+					if (ve.numDestPEs == MainWindow.runObject[myRun].getNumProcessors()) {
+						htmlFormattedTable.append( "<font size=+1 color=\"#666600\">GROUP BROADCAST</font> (" + ve.numDestPEs + " processors)");
+					} else {
+						htmlFormattedTable.append( "<font size=+1 color=\"#666600\">NODEGROUP BROADCAST</font> (" + ve.numDestPEs + " processors)");
+					}
+				break;
+				case ( ProjDefs.CREATION_MULTICAST ):
+					htmlFormattedTable.append( "<td><font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + ve.numDestPEs + " processors");
+				break;
+				case ( ProjDefs.BEGIN_PROCESSING ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of message sent to <em>" + ve.Dest + "</em> from processor " + ve.SrcPe);
+				break;
+				case ( ProjDefs.END_PROCESSING ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#000088\">END PROCESSING</font> of message sent to <em>" + ve.Dest + "</em> from processor " + ve.SrcPe);
+				htmlFormattedTable.append( "<tr>"); // add an extra blank row after this end event
+				break;
+				case ( ProjDefs.ENQUEUE ):
+					htmlFormattedTable.append( "<font size=+1>ENQUEUEING</font> message received from " + "processor " + ve.SrcPe + " destined for " + ve.Dest);
+				break;
+				case ( ProjDefs.BEGIN_IDLE ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#333333\">IDLE begin</font>");
+				break;
+				case ( ProjDefs.END_IDLE ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#333333\">IDLE end</font>");
+				htmlFormattedTable.append( "<tr>"); // add an extra blank row after this end event
+				break;
+				case ( ProjDefs.BEGIN_PACK ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#008800\">BEGIN PACKING</font> a message to be sent");
+				break;
+				case ( ProjDefs.END_PACK ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#008800\">FINISHED PACKING</font> a message to be sent");
+				break;
+				case ( ProjDefs.BEGIN_UNPACK ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#880000\">BEGIN UNPACKING</font> a received message");
+				break;
+				case ( ProjDefs.END_UNPACK ):
+					htmlFormattedTable.append( "<font size=+1 color=\"#880000\">FINISHED UNPACKING</font> a received message");
+				break;
+				default:
+					htmlFormattedTable.append( "Unknown Event Type:" + ve.EventType + " !!!");
+				break;
 				}
-			break;
-			case ( ProjDefs.CREATION_MULTICAST ):
-				htmlFormattedTable.append( "<td><font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + ve.numDestPEs + " processors");
-			break;
-			case ( ProjDefs.BEGIN_PROCESSING ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of message sent to <em>" + ve.Dest + "</em> from processor " + ve.SrcPe);
-			break;
-			case ( ProjDefs.END_PROCESSING ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#000088\">END PROCESSING</font> of message sent to <em>" + ve.Dest + "</em> from processor " + ve.SrcPe);
-				htmlFormattedTable.append( "<tr>"); // add an extra blank row after this end event
-			break;
-			case ( ProjDefs.ENQUEUE ):
-				htmlFormattedTable.append( "<font size=+1>ENQUEUEING</font> message received from " + "processor " + ve.SrcPe + " destined for " + ve.Dest);
-			break;
-			case ( ProjDefs.BEGIN_IDLE ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#333333\">IDLE begin</font>");
-			break;
-			case ( ProjDefs.END_IDLE ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#333333\">IDLE end</font>");
-				htmlFormattedTable.append( "<tr>"); // add an extra blank row after this end event
-			break;
-			case ( ProjDefs.BEGIN_PACK ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#008800\">BEGIN PACKING</font> a message to be sent");
-			break;
-			case ( ProjDefs.END_PACK ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#008800\">FINISHED PACKING</font> a message to be sent");
-			break;
-			case ( ProjDefs.BEGIN_UNPACK ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#880000\">BEGIN UNPACKING</font> a received message");
-			break;
-			case ( ProjDefs.END_UNPACK ):
-				htmlFormattedTable.append( "<font size=+1 color=\"#880000\">FINISHED UNPACKING</font> a received message");
-			break;
-			default:
-				htmlFormattedTable.append( "Unknown Event Type:" + ve.EventType + " !!!");
-			break;
 			}
 		}
-
+		
 		// Put the finishing touches on the html formatted text
 		htmlFormattedTable.append( "</table></body></html>");
 

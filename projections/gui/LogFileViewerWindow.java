@@ -6,6 +6,7 @@ import java.awt.event.*;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
 import projections.misc.*;
 import projections.analysis.*;
@@ -17,16 +18,15 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	// runs.
 	static int myRun = 0;
 	
+	JTabbedPane tabbedPane;
 	
-	/** The JPanel that loads a log file and displays it as html formatted text */
-	private LogFileViewerTextArea textArea;
-
 	/** A button that can be used to choose a different processor's log file */
 	private JButton bOpen;
-
-	/** A dialog input */
-	LogFileViewerDialog dialog;
 	
+	/** Remember what the user put in the dialog box */
+	OrderedIntList validPEs;
+	long startTime;
+	long endTime;
 
 	/** The method that gets called when the user selects this tool from the Projections menu */
 	public LogFileViewerWindow(MainWindow parentWindow, Integer myWindowID)
@@ -39,8 +39,9 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());	  
 
-		// Create the html formatting log display JPanel
-		textArea = new LogFileViewerTextArea();
+		// Create a JTabbedPane. When data is later loaded, there will be one tab per PE
+		tabbedPane = new JTabbedPane();
+		
 
 		// Create a button. When the button is clicked, 
 		// The action handler for 'this' is called
@@ -54,7 +55,7 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 		buttonPanel.add(bOpen, BorderLayout.WEST);
 		
 		// Add both JPanels to the new JPanel p
-		p.add(textArea, BorderLayout.CENTER);
+		p.add(tabbedPane, BorderLayout.CENTER);
 		p.add(buttonPanel, BorderLayout.SOUTH);
 
 		// Add our newly constructed JPanel p to this tool's window
@@ -78,33 +79,52 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 		}
 	}   
 
-
-
-	/** Create a new dialog box if one isn't already active */	
-	public void showDialog()
-	{
-		if(dialog == null){
-			dialog = new LogFileViewerDialog(this);
-			dialog.setVisible(true);
-		}
-	}	   
-
-		 
-	/** Load the new log file */
-	public void setLogFileNum(int p)
-	{
-		textArea.setPE(p);
-	}
-
 	
-	/** Close the dialog box and null our reference to it.
-	 *  This is needed so we only open one dialog box at a time
-	 */
-	public void closeDialog() {
-		dialog.dispose();
-		dialog = null;
-	}
+	public void showDialog() {
+		if (dialog == null) {
+			dialog = new RangeDialog(this, "select Range");
+		}
+		else {
+			setDialogData();
+		}
 		
+		dialog.displayDialog();
+		if (!dialog.isCancelled()) {
+		
+			// At this point the user has provided a time range and list of PEs in the dialog box 
+			
+			// get the time range and PE list from the dialog box
+			getDialogData();
+
+			// because it may take a while to load the data, turn on the waiting cursor
+			setCursor(new Cursor(Cursor.WAIT_CURSOR));
+
+			// Remove all the tabs that previously were there
+			tabbedPane.removeAll();
+			
+			// Access the list of PEs chosen by the user:
+			validPEs.reset(); // start at the beginning of the list
+			while(validPEs.hasMoreElements()){ // check if there are more items in the list
+				int p = validPEs.nextElement(); // get the next item from the list
+				
+				// Create a text area to put in the tab for this PE 
+				LogFileViewerTextArea textArea = new LogFileViewerTextArea();
+				// Have the text area load the logfile data
+				textArea.setPE(p,startTime,endTime);		
+				// Add a tab for the PE
+				tabbedPane.add("PE " + p, textArea);
+				
+			}
+			
+			// Since the layout of the window has changed, 
+			// we should have everything be resized. pack() does this
+			this.pack();
+
+			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			
+		}
+	}
+	
 	
 	/** A function required for ProjectionsWindow interface. We just ignore it */
 	protected void windowInit() {
@@ -115,10 +135,20 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	public void showWindow() {
 		// do nothing for now.
 	}
+
 	
-	/** A function required for ProjectionsWindow interface. We just ignore it */
 	public void getDialogData() {
-		// do nothing. This tool uses its own dialog.
+		validPEs = dialog.getValidProcessors();
+		startTime = dialog.getStartTime();
+		endTime = dialog.getEndTime();
 	}
+
+	public void setDialogData() {
+		dialog.setValidProcessors(validPEs);
+		dialog.setStartTime(startTime);
+		dialog.setEndTime(endTime);
+		super.setDialogData();	
+	}
+
 
 }

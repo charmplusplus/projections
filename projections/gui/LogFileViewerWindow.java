@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -36,30 +37,30 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 		setTitle("Projections Log File Viewer - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
 		// Create the GUI layout:
-		JPanel p = new JPanel();
-		p.setLayout(new BorderLayout());	  
+		// This object is a LogFileViewerWindow which is a swing Container.
+		// In the Container, we can set a layout.
+		// The layout will determine the position for all other components added to the Container.
+		// A BorderLayout is the simplest standard layout.
+		setLayout(new BorderLayout());	  
 
-		// Create a JTabbedPane. When data is later loaded, there will be one tab per PE
-		tabbedPane = new JTabbedPane();
+		// The overall layout will be a tabbed main area and a button at the bottom.
+		// First we create these two sections, then below we will put the two together.
 		
-
+		// Create a JTabbedPane. When data is later loaded, there will be one tab per PE
+		// But for now we will create a simple little tab with a single JLabel in it
+		tabbedPane = new JTabbedPane();
+		JLabel simpleLabel = new JLabel("<html><body><h1>Data is loading</h1></body></html>");
+		tabbedPane.add("loading ...", simpleLabel);
+		
 		// Create a button. When the button is clicked, 
 		// The action handler for 'this' is called
 		bOpen = new JButton("Load Different PE ...");
 		bOpen.addActionListener(this);
 		bOpen.setPreferredSize(new Dimension(200, 40));
 		
-		// Put the button in its own JPanel. this way the button can be sized smaller than the entire width of the window
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new BorderLayout());
-		buttonPanel.add(bOpen, BorderLayout.WEST);
-		
-		// Add both JPanels to the new JPanel p
-		p.add(tabbedPane, BorderLayout.CENTER);
-		p.add(buttonPanel, BorderLayout.SOUTH);
-
-		// Add our newly constructed JPanel p to this tool's window
-		this.add(p);
+		// Add both the button and the JTabbedPane to this Container
+		add(tabbedPane, BorderLayout.CENTER);
+		add(bOpen, BorderLayout.SOUTH);
 
 		// Force the window to be displayed
 		pack();

@@ -47,18 +47,40 @@ ItemListener {
 
 	private JButton bZoomSelected, bLoadSelected, bRanges;
 
-	private JTextField highlightTime, selectionBeginTime, selectionEndTime,
-	selectionDiff;
+	private JTextField highlightTime, selectionBeginTime, selectionEndTime,	selectionDiff;
 
 	private DecimalFormat format;
 
 	private FloatJTextField scaleField;
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
-	
+
 	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID, cbCompactView, cbNestedUserEvents;
-	
+
 	private UserEventWindow userEventWindow;
+
+	private JMenuItem mClose;
+	private JMenuItem mModifyRanges;
+
+	private JMenuItem mSaveScreenshot;
+
+	private JMenuItem mSelectBGColor;
+	private JMenuItem mSelectFGColor;
+
+	private JMenuItem mChangeColors;
+	private JMenuItem mSaveColors;
+	private JMenuItem mRestoreColors;
+	private JMenuItem mDefaultColors;
+
+	private JMenuItem mColorByDefault;
+	private JMenuItem mColorByEventIdx;
+	private JMenuItem mColorByUserRandom;
+	private JMenuItem mColorByUserGradient;
+	private JMenuItem mColorByMemUsage;
+
+	private JMenuItem mShiftTimelines;
+	private JMenuItem mUserEventReport;
+	private JMenuItem mDetermineTimeRangesUserSupplied;
 
 
 	public WindowControls(TimelineWindow parentWindow_,
@@ -101,7 +123,7 @@ ItemListener {
 
 					public void finished() {
 						// Here we are basically at startup after the dialog window and the trace log has been read
-//						parentWindow.setSize(1000, 600);
+						//						parentWindow.setSize(1000, 600);
 						parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 						parentWindow.setVisible(true);
 					}
@@ -159,13 +181,13 @@ ItemListener {
 	/** Load a new time region */
 	public void loadSelected() {
 		if (data.selectionValid()) {
-			
+
 			double startTime = data.leftSelectionTime();
 			double endTime = data.rightSelectionTime();
-			
+
 			data.invalidateSelection();
 			unsetSelectedTime();
-						
+
 			if (startTime < data.beginTime()) { // This seems unlikely to happen
 				startTime = data.beginTime();
 			}
@@ -178,282 +200,269 @@ ItemListener {
 			scaleField.setText("" + 1.0);	
 
 			parentWindow.mainPanel.loadTimelineObjects(true, null);
-			
+
 			cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
-			
+
 		} else{
 			System.out.println("ERROR: somehow you clicked the loadSelected button which shouldn't have been enabled!");			
 		}
 	}
 
 	public void actionPerformed(ActionEvent evt) {
-		
+
 		// If the event is a menu action
-		
-		if (evt.getSource() instanceof JMenuItem) {
-			String arg = ((JMenuItem) evt.getSource()).getText();
-			if (arg.equals("Close"))
-				parentWindow.close();
-			
-			else if (arg.equals("Modify Ranges"))
-				showDialog();
-			
-			else if (arg.equals("Change Entry Point Colors")) 
-				ShowColorWindow();
-			
-			else if (arg.equals("Save Entry Point Colors")) 
-				MainWindow.runObject[myRun].saveColors();
-			
-			else if (arg.equals("Restore Entry Point Colors")) {
-				try {
-					Util.restoreColors(data.entryColor(), "Timeline Graph");
-					parentWindow.refreshDisplay(false);
-				} catch (Exception e) {
-					System.err.println("Attempt to read from color.map failed");
+
+		if(evt.getSource() == mClose)
+			parentWindow.close();
+
+		else if(evt.getSource() == mModifyRanges)
+			showDialog();
+
+		else if(evt.getSource() == mSaveScreenshot){
+			try{
+				SaveImage p = new SaveImage(parentWindow.scrollingPanel);
+
+				// Create a file chooser so the user can choose where to save the image
+				JFileChooser fc = new JFileChooser();
+				ImageFilter imageFilter = new ImageFilter();
+				fc.setFileFilter(imageFilter);
+				fc.setSelectedFile(new File("./TimelineScreenshot.png"));
+
+				int returnVal = fc.showSaveDialog(parentWindow);
+
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+
+					if(imageFilter.isJPEG(file))       		
+						p.saveImageJPEG(file.getCanonicalPath());
+
+					if(imageFilter.isPNG(file))       		
+						p.saveImagePNG(file.getCanonicalPath());
+
+				} else {
+					// Save command cancelled by user
 				}
-			} 
-			
-			else if (arg.equals("Default Entry Point Colors")) {
-				for (int i = 0; i < data.entryColor().length; i++)
-					data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
+			} catch (IOException e){
+				JOptionPane.showMessageDialog(this, "Error occurred while saving file:" + e.getLocalizedMessage());
+			}
+		}
+
+		else if(evt.getSource() == mSelectBGColor)
+			selectBackgroundColor();
+
+		else if(evt.getSource() == 	mSelectFGColor)
+			selectForegroundColor();
+
+		else if(evt.getSource() == mChangeColors)
+			ShowColorWindow();
+
+		else if(evt.getSource() == mSaveColors)
+			MainWindow.runObject[myRun].saveColors();
+
+		else if(evt.getSource() == mRestoreColors){
+			try {
+				Util.restoreColors(data.entryColor(), "Timeline Graph");
 				parentWindow.refreshDisplay(false);
-			} 
-			
-			else if (arg.equals("Save as JPG or PNG")) {
-				try{
-					SaveImage p = new SaveImage(parentWindow.scrollingPanel);
-
-					// Create a file chooser so the user can choose where to save the image
-					JFileChooser fc = new JFileChooser();
-					ImageFilter imageFilter = new ImageFilter();
-					fc.setFileFilter(imageFilter);
-					fc.setSelectedFile(new File("./TimelineScreenshot.png"));
-
-					int returnVal = fc.showSaveDialog(parentWindow);
-
-					if (returnVal == JFileChooser.APPROVE_OPTION) {
-						File file = fc.getSelectedFile();
-
-						if(imageFilter.isJPEG(file))       		
-							p.saveImageJPEG(file.getCanonicalPath());
-
-						if(imageFilter.isPNG(file))       		
-							p.saveImagePNG(file.getCanonicalPath());
-
-					} else {
-						// Save command cancelled by user
-					}
-				} catch (IOException e){
-					JOptionPane.showMessageDialog(this, "Error occurred while saving file:" + e.getLocalizedMessage());
-				}
-			}
-
-			
-			else if (arg.equals("Color by Default"))
-				data.setColorByDefault();
-
-			else if (arg.equals("Color by Event Index")) 
-				data.setColorByIndex();
-
-			else if (arg.equals("Color by User Supplied Parameter(timestep)")) 
-				data.setColorByUserSupplied();
-
-			else if (arg.equals("Color by Memory Usage"))
-				data.setColorByMemoryUsage();
-
-			else if (arg.equals("Select Background Color"))
-				selectBackgroundColor();
-
-			else if (arg.equals("Select Foreground Color"))
-				selectForegroundColor();
-
-			else if(arg.equals("Shift Timelines to fix inconsistent clocks"))
-				data.fixTachyons();
-			
-			else if(arg.equals("User Event Reporting"))
-				data.printUserEventInfo();
-			
-			else if(arg.equals("Determine Time Ranges for User Supplied Values")){
-				UserSuppliedAnalyzer usa = new UserSuppliedAnalyzer(data);
-				
-			}
-			
+			} catch (Exception e) {
+				System.err.println("Attempt to read from color.map failed");
+			}	
 		}
 
-		
-		// If the event is a JButton
-		
-		else if (evt.getSource() instanceof JButton) {
-			JButton b = (JButton) evt.getSource();
-			
-			
-			if (b == bZoomSelected) {
-				zoomSelected();
-			} 
-			
-			else if (b == bRanges) {
-				showDialog();
-			}
+		else if(evt.getSource() == mDefaultColors){
+			for (int i = 0; i < data.entryColor().length; i++)
+				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
+			parentWindow.refreshDisplay(false);
+		} 
 
-			else if (b == bLoadSelected) {
-				loadSelected();
-				parentWindow.refreshDisplay(true);
-			} 
+		else if(evt.getSource() == mColorByDefault)
+			data.setColorByDefault();
 
-			else if (b == bDecrease) {
-				data.keepViewCentered(true); // Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
-				data.decreaseScaleFactor();
-				scaleField.setText("" + data.getScaleFactor());
-				parentWindow.refreshDisplay(true);
-			} 
+		else if(evt.getSource() == mColorByEventIdx)
+			data.setColorByIndex();
 
-			else if (b == bIncrease) {
-				data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
-				data.increaseScaleFactor();
-				scaleField.setText("" + data.getScaleFactor());
-				parentWindow.refreshDisplay(true);
-			} 
+		else if(evt.getSource() == mColorByUserRandom)
+			data.setColorByUserSupplied(Data.RandomColors);
 
-			else if (b == bReset) {
-				data.setScaleFactor(1.0f);
-				scaleField.setText("" + data.getScaleFactor());
-				parentWindow.refreshDisplay(true);
-			}
-			
+		else if(evt.getSource() == mColorByUserGradient)
+			data.setColorByUserSupplied(Data.BlueGradientColors);
 
+		else if(evt.getSource() == mColorByMemUsage)
+			data.setColorByMemoryUsage();
+
+		else if(evt.getSource() == mShiftTimelines)
+			data.fixTachyons();
+
+		else if(evt.getSource() == mUserEventReport){
+			data.printUserEventInfo();
 		}
-		
-		
+		else if(evt.getSource() == mDetermineTimeRangesUserSupplied){
+			UserSuppliedAnalyzer usa = new UserSuppliedAnalyzer(data);
+		}
+
+		else if (evt.getSource()  == bZoomSelected) {
+			zoomSelected();
+		} 
+
+		else if (evt.getSource()  == bRanges) {
+			showDialog();
+		}
+
+		else if (evt.getSource()  == bLoadSelected) {
+			loadSelected();
+			parentWindow.refreshDisplay(true);
+		} 
+
+		else if (evt.getSource()  == bDecrease) {
+			data.keepViewCentered(true); // Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
+			data.decreaseScaleFactor();
+			scaleField.setText("" + data.getScaleFactor());
+			parentWindow.refreshDisplay(true);
+		} 
+
+		else if (evt.getSource()  == bIncrease) {
+			data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
+			data.increaseScaleFactor();
+			scaleField.setText("" + data.getScaleFactor());
+			parentWindow.refreshDisplay(true);
+		} 
+
+		else if (evt.getSource()  == bReset) {
+			data.setScaleFactor(1.0f);
+			scaleField.setText("" + data.getScaleFactor());
+			parentWindow.refreshDisplay(true);
+		}
+
+
+
 		// If the action corresponds to the scale value changing(likely typed in)
-		if (evt.getSource() instanceof FloatJTextField) {
-			FloatJTextField b = (FloatJTextField) evt.getSource();
-			if (b == scaleField) {
-				data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
-				data.setScaleFactor(b.getValue());
-				parentWindow.refreshDisplay(true);
-			}
+		else if (evt.getSource() == scaleField) {
+			data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
+			data.setScaleFactor(scaleField.getValue());
+			parentWindow.refreshDisplay(true);
 		}
 
-		
-		
-		
 	}
+
+
+
+
+
+
+
+
 
 	public void CreateMenus() {
 		JMenuBar mbar = new JMenuBar();
 
+		// File Menu
 		JMenu fileMenu = new JMenu("File");
-//		JMenuItem i1 = new JMenuItem("Print Timeline");
-//		i1.setEnabled(false);
-		JMenuItem i3 = new JMenuItem("Close");
-//		fileMenu.add(i1);
-//		fileMenu.addSeparator();
-		fileMenu.add(i3);
-//		i1.addActionListener(this);
-		i3.addActionListener(this);
+		mClose = new JMenuItem("Close");
+		mClose.addActionListener(this);
+		fileMenu.add(mClose);
 		mbar.add(fileMenu);
 
+		// Ranges Menu
 		JMenu toolsMenu = new JMenu("Ranges");
-		JMenuItem i4 = new JMenuItem("Modify Ranges");
-		toolsMenu.add(i4);
-		i4.addActionListener(this);
+		mModifyRanges = new JMenuItem("Modify Ranges");
+		mModifyRanges.addActionListener(this);
+		toolsMenu.add(mModifyRanges);
 		mbar.add(toolsMenu);
 
-
+		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Screenshot");
-		JMenuItem i9 = new JMenuItem("Save as JPG or PNG");
-		saveMenu.add(i9);
-		i9.addActionListener(this);
+		mSaveScreenshot = new JMenuItem("Save as JPG or PNG");
+		mSaveScreenshot.addActionListener(this);
+		saveMenu.add(mSaveScreenshot);
 		mbar.add(saveMenu);
-		
+
+		// Color Menu
 		JMenu colorMenu = new JMenu("Colors");
-		
-		JMenuItem i5a = new JMenuItem("Select Background Color");
-		JMenuItem i5b = new JMenuItem("Select Foreground Color");
-		
-		JMenuItem i5 = new JMenuItem("Change Entry Point Colors");
-		JMenuItem i6 = new JMenuItem("Save Entry Point Colors");
-		JMenuItem i7 = new JMenuItem("Restore Entry Point Colors");
-		JMenuItem i8 = new JMenuItem("Default Entry Point Colors");
-		
-		JMenuItem i10 = new JMenuItem("Color by Default");
-		JMenuItem i11 = new JMenuItem("Color by Event Index");
-		JMenuItem i12 = new JMenuItem("Color by User Supplied Parameter(timestep)");
-		JMenuItem i13 = new JMenuItem("Color by Memory Usage");
 
-		colorMenu.add(i5a);
-		colorMenu.add(i5b);
+		mSelectBGColor = new JMenuItem("Select Background Color");
+		mSelectFGColor = new JMenuItem("Select Foreground Color");
+
+		mChangeColors = new JMenuItem("Change Entry Point Colors");
+		mSaveColors = new JMenuItem("Save Entry Point Colors");
+		mRestoreColors = new JMenuItem("Restore Entry Point Colors");
+		mDefaultColors = new JMenuItem("Default Entry Point Colors");
+
+		mColorByDefault = new JMenuItem("Color by Default");
+		mColorByEventIdx = new JMenuItem("Color by Event Index");
+		mColorByUserRandom = new JMenuItem("Color by User Supplied Parameter(timestep) with Disjoint Colors");
+		mColorByUserGradient = new JMenuItem("Color by User Supplied Parameter(timestep) with Gradient");
+		mColorByMemUsage = new JMenuItem("Color by Memory Usage");
+
+		colorMenu.add(mSelectBGColor);
+		colorMenu.add(mSelectFGColor);
 		colorMenu.addSeparator();
-		colorMenu.add(i5);
-		colorMenu.add(i6);
-		colorMenu.add(i7);
-		colorMenu.add(i8);
+		colorMenu.add(mChangeColors);
+		colorMenu.add(mSaveColors);
+		colorMenu.add(mRestoreColors);
+		colorMenu.add(mDefaultColors);
 		colorMenu.addSeparator();
-		colorMenu.add(i10);
-		colorMenu.add(i11);
-		colorMenu.add(i12);
-		colorMenu.add(i13);
-		
+		colorMenu.add(mColorByDefault);
+		colorMenu.add(mColorByEventIdx);
+		colorMenu.add(mColorByUserRandom);
+		colorMenu.add(mColorByUserGradient);
+		colorMenu.add(mColorByMemUsage);
 
-		i5a.addActionListener(this);
-		i5b.addActionListener(this);
-		i5.addActionListener(this);
-		i6.addActionListener(this);
-		i7.addActionListener(this);
-		i8.addActionListener(this);
-		i10.addActionListener(this);
-		i11.addActionListener(this);
-		i12.addActionListener(this);
-		i13.addActionListener(this);
 
-		
+		mSelectBGColor.addActionListener(this);
+		mSelectFGColor.addActionListener(this);
+		mChangeColors.addActionListener(this);
+		mSaveColors.addActionListener(this);
+		mRestoreColors.addActionListener(this);
+		mDefaultColors.addActionListener(this);
+		mColorByDefault.addActionListener(this);
+		mColorByEventIdx.addActionListener(this);
+		mColorByUserRandom.addActionListener(this);
+		mColorByUserGradient.addActionListener(this);
+		mColorByMemUsage.addActionListener(this);
+
 		mbar.add(colorMenu);
-		
-		
+
+
 		// Tracing menu
 		JMenu tracingMenu = new JMenu("Tracing");
-		
+
 		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages");
 		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
 
 		tracingMenu.add(cbTraceMessages);
 		tracingMenu.add(cbTraceArrayElementID);
-		
+
 		cbTraceMessages.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
 
 		mbar.add(tracingMenu);
-	
-		
-		// Actions Menu
+
+
+		// Experimental Features Menu
 		JMenu experimentalMenu = new JMenu("Experimental Features");
-		JMenuItem i40 = new JMenuItem("Shift Timelines to fix inconsistent clocks");
-		JMenuItem i41 = new JMenuItem("User Event Reporting");
+		mShiftTimelines = new JMenuItem("Shift Timelines to fix inconsistent clocks");
+		mUserEventReport = new JMenuItem("User Event Reporting");
 
-		i40.addActionListener(this);
-		experimentalMenu.add(i40);
-		
-		i41.addActionListener(this);
-		experimentalMenu.add(i41);
+		mShiftTimelines.addActionListener(this);
+		experimentalMenu.add(mShiftTimelines);
 
-		
-		
+		mUserEventReport.addActionListener(this);
+		experimentalMenu.add(mUserEventReport);
+
 		cbCompactView = new JCheckBoxMenuItem("Compact View");
 		cbCompactView.addItemListener(this);
 		experimentalMenu.add(cbCompactView);
-		
+
 		cbNestedUserEvents = new JCheckBoxMenuItem("Show Nested Bracketed User Events");
 		cbNestedUserEvents.addItemListener(this);
 		experimentalMenu.add(cbNestedUserEvents);
-		
-		
-		JMenuItem i50 = new JMenuItem("Determine Time Ranges for User Supplied Values");
-		i50.addActionListener(this);
-		experimentalMenu.add(i50);
-		
+
+
+		mDetermineTimeRangesUserSupplied = new JMenuItem("Determine Time Ranges for User Supplied Values");
+		mDetermineTimeRangesUserSupplied.addActionListener(this);
+		experimentalMenu.add(mDetermineTimeRangesUserSupplied);
+
 		mbar.add(experimentalMenu);
-	
-		
+
 		parentWindow.setJMenuBar(mbar);
 
 	}
@@ -472,14 +481,14 @@ ItemListener {
 		cbUser = new JCheckBox("Display User Events", true);
 		cbUserTable = new JCheckBox("Display User Events Window", false);
 
-	
+
 		cbPacks.addItemListener(this);
 		cbMsgs.addItemListener(this);
 		cbIdle.addItemListener(this);
 		cbUser.addItemListener(this);
 		cbUserTable.addItemListener(this);
-		
-				
+
+
 		GridBagLayout gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.NONE;
@@ -492,15 +501,15 @@ ItemListener {
 		Util.gblAdd(cbPanel, cbIdle, gbc, 2, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUser, gbc, 3, 0, 1, 1, 1, 1);
 		Util.gblAdd(cbPanel, cbUserTable, gbc, 4, 0, 1, 1, 1, 1);
-		
+
 		// BUTTON PANEL
-		
+
 		URL zoomInURL = ((Object)this).getClass().getResource("/projections/images/ZoomIn24.gif");
 		URL zoomOutURL = ((Object)this).getClass().getResource("/projections/images/ZoomOut24.gif");
-		
+
 		bDecrease = new JButton(new ImageIcon(zoomOutURL));
 		bIncrease = new JButton(new ImageIcon(zoomInURL));
-		
+
 		bReset = new JButton("Reset Zoom");
 
 		bDecrease.addActionListener(this);
@@ -510,8 +519,8 @@ ItemListener {
 		JLabel lScale = new JLabel("Zoom Ratio: ", JLabel.CENTER);
 		scaleField = new FloatJTextField(data.getScaleFactor(), 5);
 		scaleField.addActionListener(this);
-		
-		
+
+
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(gbl);
 
@@ -528,17 +537,17 @@ ItemListener {
 		bZoomSelected = new JButton("Zoom Selection");
 		bLoadSelected = new JButton("Load Selection");
 		bRanges = new JButton("Load New Time/PE Range");
-		
+
 		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
 		bRanges.setEnabled(true);
-		
+
 		bZoomSelected.addActionListener(this);
 		bLoadSelected.addActionListener(this);
 		bRanges.addActionListener(this);
 
-		
+
 		highlightTime = new JTextField("");
 		selectionBeginTime = new JTextField("");
 		selectionEndTime = new JTextField("");
@@ -565,7 +574,7 @@ ItemListener {
 		Util.gblAdd(zoomPanel, new JLabel("Selection End Time", JLabel.CENTER),	  gbc, 4, 1, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, new JLabel("Selection Length", JLabel.CENTER),     gbc, 5, 1, 1, 1, 1, 1);
 
-		
+
 		this.setLayout(gbl);
 		Util.gblAdd(this, cbPanel, gbc, 0, 1, 1, 1, 1, 0);
 		Util.gblAdd(this, buttonPanel, gbc, 0, 3, 1, 1, 1, 0);
@@ -626,29 +635,29 @@ ItemListener {
 
 		if (c == cbPacks)
 			data.showPacks(evt.getStateChange() == ItemEvent.SELECTED);
-		
+
 		else if (c == cbMsgs)
 			data.showMsgs(evt.getStateChange() == ItemEvent.SELECTED);
-		
+
 		else if (c == cbIdle)
 			data.showIdle(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if (c == cbTraceMessages)
 			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
-				
+
 		else if(c == cbCompactView)
 			data.setCompactView(evt.getStateChange() == ItemEvent.SELECTED);
-		
+
 		else if(c == cbNestedUserEvents)
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
-		
-		
+
+
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
-				
+
 		else if (c == cbUser)
 			data.showUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
-		
+
 		else if (c == cbUserTable) {
 			if (evt.getStateChange() == ItemEvent.SELECTED){
 				userEventWindow.pack();
@@ -663,13 +672,13 @@ ItemListener {
 	}
 
 	private void selectBackgroundColor(){
-		 Color c = JColorChooser.showDialog(parentWindow, "Choose Background Color", data.getBackgroundColor()); 
-		 data.setBackgroundColor(c);
+		Color c = JColorChooser.showDialog(parentWindow, "Choose Background Color", data.getBackgroundColor()); 
+		data.setBackgroundColor(c);
 	}
-	
+
 	private void selectForegroundColor(){
-		 Color c = JColorChooser.showDialog(parentWindow, "Choose Foreground Color", data.getForegroundColor()); 
-		 data.setForegroundColor(c);
+		Color c = JColorChooser.showDialog(parentWindow, "Choose Foreground Color", data.getForegroundColor()); 
+		data.setForegroundColor(c);
 	}
 
 	private void ShowColorWindow() {

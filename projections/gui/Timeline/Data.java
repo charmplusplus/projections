@@ -56,6 +56,9 @@ import projections.misc.*;
 
 public class Data
 {
+	public static final int BlueGradientColors = 0;
+	public static final int RandomColors = 1;
+
 	// meaning in future versions of Projections that support multiple
 	// Temporary hardcode. This variable will be assigned appropriate
 	// runs.
@@ -172,6 +175,8 @@ public class Data
 
 	private int numUserEventRows = 1;
 	boolean drawNestedUserEventRows = false;
+	public long minUserSupplied = 0;
+	public long maxUserSupplied = 0;
 	
 	public Data(){
 		System.err.println("Do not call this constructor\n");
@@ -203,6 +208,9 @@ public class Data
 		minMem = Integer.MAX_VALUE;
 		maxMem = Integer.MIN_VALUE;	
 
+		minUserSupplied = Integer.MAX_VALUE;
+		maxUserSupplied = Integer.MIN_VALUE;	
+		
 		/** The selected time range for which we display the timeline.
 		 *  The value is by default the entire range found in the log files
 		 *  It is modified by Window when the user enters a new 
@@ -622,6 +630,10 @@ public class Data
 		long minMemThisPE = Long.MAX_VALUE;
 		long maxMemThisPE = 0;
 		
+		long minUserSuppliedThisPE = Long.MAX_VALUE;
+		long maxUserSuppliedThisPE = 0;
+		
+		
 		// proc timeline events
 		Iterator iter = tl.iterator();
 		while(iter.hasNext()){
@@ -662,7 +674,8 @@ public class Data
 				System.out.println("perPEObjects is NULL");
 			}
 			
-			perPEObjects.add(new EntryMethodObject(this, tle, msgs, packs, pe.intValue()));
+			EntryMethodObject obj = new EntryMethodObject(this, tle, msgs, packs, pe.intValue());
+			perPEObjects.add(obj);
 
 			if(tle!=null && tle.memoryUsage!=null){
 				if(tle.memoryUsage.longValue() > maxMemThisPE)
@@ -670,11 +683,19 @@ public class Data
 				if(tle.memoryUsage.longValue() < minMemThisPE)
 					minMemThisPE = tle.memoryUsage.longValue();
 			}
+			
+			if(tle!=null && tle.UserSpecifiedData!=null){
+				if(tle.UserSpecifiedData.intValue() > maxUserSuppliedThisPE)
+					maxUserSuppliedThisPE = tle.UserSpecifiedData.intValue();
+				if(tle.UserSpecifiedData.intValue() < minUserSuppliedThisPE)
+					minUserSuppliedThisPE = tle.UserSpecifiedData.intValue();
+			}
+			
 		
 		}
 		
 		// save the time range
-		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE);
+		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE, minUserSuppliedThisPE, maxUserSuppliedThisPE);
 		
 	}
 	
@@ -689,14 +710,20 @@ public class Data
 		allEntryMethodObjects.put(pe,perPEObjects);
 	}
 	
-	/** Thread safe updating of the memory usage ranges */
-	synchronized void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE)  
+	/** Thread safe updating of the memory and user supplied ranges */
+	synchronized void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE, long minUserSuppliedThisPE, long maxUserSuppliedThisPE)  
 	{
 		if(minMemThisPE < minMem)
 			minMem = minMemThisPE;
 		if(maxMemThisPE > maxMem)
 			maxMem = maxMemThisPE;
 		
+		
+		if(minUserSuppliedThisPE < minUserSupplied)
+			minUserSupplied = minUserSuppliedThisPE;
+		if(maxUserSuppliedThisPE > maxUserSupplied)
+			maxUserSupplied = maxUserSuppliedThisPE;
+
 		if(memoryUsageValid())
 			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
 	}
@@ -1119,6 +1146,7 @@ public class Data
 	private boolean useCompactView;
 
 	private Component guiRoot;
+	int colorSchemeForUserSupplied;
 	
 	/** Clear any highlights created by HighlightObjects() */
 	public void clearObjectHighlights() {
@@ -1223,7 +1251,8 @@ public class Data
 		
 	}
 
-	public void setColorByUserSupplied() {
+	public void setColorByUserSupplied(int colorScheme) {
+		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = false;
 		colorByMemoryUsage=false;
@@ -1464,6 +1493,7 @@ public class Data
 	
 	public void printUserEventInfo(){
 
+		System.out.println("printUserEventInfo()");
 		
 		//		 <Integer, Long>
 		HashMap min = new HashMap();

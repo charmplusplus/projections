@@ -606,7 +606,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 		
 		// grey out the objects with odd userSuppliedData value 
-		if(data.colorByUserSupplied()){
+		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.RandomColors){
 			if(userSuppliedData !=  null){
 				switch ((userSuppliedData.intValue()+5000)%10) {
 				 case 0: c = Color.green; break;
@@ -621,6 +621,13 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				 case 9: c = Color.lightGray; break;
 				}
 			}
+		} else if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.BlueGradientColors){
+			if(userSuppliedData !=  null){
+				long value = userSuppliedData.longValue();
+				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);
+
+				c = Color.getHSBColor(0.25f-normalizedValue*0.75f, 1.0f, 1.0f); 
+			} 	
 		}
 		
 		// color the objects by memory usage 
@@ -629,13 +636,13 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				c = Color.darkGray;
 			}else{
 				// scale the memory usage to the interval [0,1]
-				float m = (float)(memoryUsage.intValue() - data.minMem) / (float)(data.maxMem-data.minMem);
+				float normalizedValue = (float)(memoryUsage.intValue() - data.minMem) / (float)(data.maxMem-data.minMem);
 				
-				if( m<0.0 || m>1.0 )
+				if( normalizedValue<0.0 || normalizedValue>1.0 )
 					c = Color.darkGray;
 				else {
 //					System.out.println("memoryUsage="+memoryUsage.intValue()+"  m="+m);
-					c = Color.getHSBColor(0.2f-m*0.25f, 1.0f, 1.0f); 
+					c = Color.getHSBColor(0.2f-normalizedValue*0.25f, 1.0f, 1.0f); 
 				}
 			}
 			

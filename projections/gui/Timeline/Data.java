@@ -1139,6 +1139,9 @@ public class Data
 	/** Highlight the message links to the object upon mouseover */
 	private boolean traceMessagesOnHover;
 	
+	/** Highlight the message links forward from the object upon mouseover */
+	private boolean traceMessagesForwardOnHover;
+	
 	/** Highlight the other entry method invocations upon mouseover */
 	private boolean traceOIDOnHover;
 
@@ -1176,9 +1179,12 @@ public class Data
 	}
 		
 	
-
 	public boolean traceMessagesOnHover() {
 		return traceMessagesOnHover;
+	}
+	
+	public boolean traceMessagesForwardOnHover() {
+		return traceMessagesForwardOnHover;
 	}
 	
 	public boolean traceOIDOnHover() {
@@ -1194,7 +1200,19 @@ public class Data
 			SetToolTipDelaySmall();
 		
 	}
+	
+	public void setTraceMessagesForwardOnHover(boolean traceMessagesForwardOnHover) {
+		this.traceMessagesForwardOnHover = traceMessagesForwardOnHover;
 		
+		if(traceMessagesForwardOnHover)
+			SetToolTipDelayLarge();
+		else
+			SetToolTipDelaySmall();
+		
+	}
+		
+	
+	
 	public void setTraceOIDOnHover(boolean showOIDOnHover) {
 		this.traceOIDOnHover = showOIDOnHover;
 	}

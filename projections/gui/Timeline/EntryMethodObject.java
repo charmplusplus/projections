@@ -442,27 +442,41 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 */
 	public HashSet traceForwardDependencies(){
 		HashSet v = new HashSet();
-
-		// For all loaded EntryMethodObjects, see if they match any of the sends from this object
-		Iterator iter = data.allEntryMethodObjects.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = (Integer) iter.next();
-			LinkedList entryMethods = (LinkedList)data.allEntryMethodObjects.get(pe);
-			
-			Iterator j = entryMethods.iterator();
-			while(j.hasNext()){
-				EntryMethodObject obj = (EntryMethodObject) j.next();
-				
-				// If any of the messages sent by this object created the EntryMethodObject obj
-				TimelineMessage m = obj.creationMessage();
-				// a message found on pe=obj.pCreation with eventID==obj.EventID
-				
-				if(m!=null && messages.contains(m))
-					v.add(obj);
+		
+		LinkedList<EntryMethodObject> toExamine = new LinkedList();
+		
+		toExamine.add(this);
+		
+		while(toExamine.size()>0){
+			EntryMethodObject current = toExamine.poll();
+			v.add(current);
 						
-			}
+			// For all loaded EntryMethodObjects, see if they match any of the sends from this object
+			Iterator iter = data.allEntryMethodObjects.keySet().iterator();
+			while(iter.hasNext()){
+				Integer pe = (Integer) iter.next();
+				LinkedList entryMethods = (LinkedList)data.allEntryMethodObjects.get(pe);
 
+				Iterator j = entryMethods.iterator();
+				while(j.hasNext()){
+					EntryMethodObject obj = (EntryMethodObject) j.next();
+
+					// If any of the messages sent by this object created the EntryMethodObject obj
+					TimelineMessage m = obj.creationMessage();
+					// a message found on pe=obj.pCreation with eventID==obj.EventID
+
+					if(m!=null && current.messages.contains(m))
+						toExamine.add(obj);
+					
+				}
+
+			}
+			if(data.traceMessagesForwardOnHover() == false){
+				break; // only go one step forward from the current object
+			}
 		}
+		
+		v.remove(this);
 		
 		return v;
 	}
@@ -486,8 +500,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		boolean needRepaint = false;
 		
 		// Highlight the messages linked to this object
-		if(data.traceMessagesOnHover()){
-			Set fwd = traceForwardDependencies();
+		if(data.traceMessagesOnHover() || data.traceMessagesForwardOnHover()){
+			Set fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
 			Set back = traceBackwardDependencies();
 			
 			// Highlight the forward and backward messages
@@ -501,7 +515,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			
 			needRepaint=true;
 		}
-		
+			
 		
 		// Highlight any Entry Method invocations for the same chare array element
 		if(data.traceOIDOnHover()){
@@ -523,7 +537,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	{
 		boolean needRepaint = false;
 		
-		if(data.traceMessagesOnHover()){
+		if(data.traceMessagesOnHover() || data.traceMessagesForwardOnHover()){
 			data.clearObjectHighlights();
 			data.clearMessageSendLines();
 			needRepaint=true;

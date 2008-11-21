@@ -32,7 +32,7 @@ public class MessageWindow extends JFrame
    }   
    
    public Dimension getPreferredSize() {
-       return new Dimension(400, 800);
+       return new Dimension(600, 800);
    }
 
 

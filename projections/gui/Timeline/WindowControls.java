@@ -55,7 +55,7 @@ ItemListener {
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 
-	private JCheckBoxMenuItem cbTraceMessages, cbTraceArrayElementID, cbCompactView, cbNestedUserEvents;
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceArrayElementID, cbCompactView, cbNestedUserEvents;
 
 	private UserEventWindow userEventWindow;
 
@@ -426,12 +426,15 @@ ItemListener {
 		JMenu tracingMenu = new JMenu("Tracing");
 
 		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages");
+		cbTraceMessagesForward = new JCheckBoxMenuItem("Trace Messages Forward");
 		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
 
 		tracingMenu.add(cbTraceMessages);
+		tracingMenu.add(cbTraceMessagesForward);
 		tracingMenu.add(cbTraceArrayElementID);
 
 		cbTraceMessages.addItemListener(this);
+		cbTraceMessagesForward.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
 
 		mbar.add(tracingMenu);
@@ -644,6 +647,9 @@ ItemListener {
 
 		else if (c == cbTraceMessages)
 			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+
+		else if (c == cbTraceMessagesForward)
+			data.setTraceMessagesForwardOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if(c == cbCompactView)
 			data.setCompactView(evt.getStateChange() == ItemEvent.SELECTED);

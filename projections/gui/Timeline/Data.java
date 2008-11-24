@@ -1137,7 +1137,7 @@ public class Data
 	private Set highlightedObjects;
  	
 	/** Highlight the message links to the object upon mouseover */
-	private boolean traceMessagesOnHover;
+	private boolean traceMessagesBackOnHover;
 	
 	/** Highlight the message links forward from the object upon mouseover */
 	private boolean traceMessagesForwardOnHover;
@@ -1179,8 +1179,8 @@ public class Data
 	}
 		
 	
-	public boolean traceMessagesOnHover() {
-		return traceMessagesOnHover;
+	public boolean traceMessagesBackOnHover() {
+		return traceMessagesBackOnHover;
 	}
 	
 	public boolean traceMessagesForwardOnHover() {
@@ -1191,8 +1191,8 @@ public class Data
 		return traceOIDOnHover;
 	}
 	
-	public void setTraceMessagesOnHover(boolean traceMessagesOnHover) {
-		this.traceMessagesOnHover = traceMessagesOnHover;
+	public void setTraceMessagesBackOnHover(boolean traceMessagesOnHover) {
+		this.traceMessagesBackOnHover = traceMessagesOnHover;
 		
 		if(traceMessagesOnHover)
 			SetToolTipDelayLarge();

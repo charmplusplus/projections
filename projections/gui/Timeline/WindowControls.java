@@ -425,7 +425,7 @@ ItemListener {
 		// Tracing menu
 		JMenu tracingMenu = new JMenu("Tracing");
 
-		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages");
+		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages Back");
 		cbTraceMessagesForward = new JCheckBoxMenuItem("Trace Messages Forward");
 		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
 
@@ -646,7 +646,7 @@ ItemListener {
 			data.showIdle(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if (c == cbTraceMessages)
-			data.setTraceMessagesOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+			data.setTraceMessagesBackOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if (c == cbTraceMessagesForward)
 			data.setTraceMessagesForwardOnHover(evt.getStateChange() == ItemEvent.SELECTED);

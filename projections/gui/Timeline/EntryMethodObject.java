@@ -409,24 +409,26 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 */
 	public HashSet traceBackwardDependencies(){
 		synchronized(data.messageStructures){
-			EntryMethodObject obj = this;
 			HashSet v = new HashSet();
+			if(data.traceMessagesBackOnHover()){
+				EntryMethodObject obj = this;
 
-			boolean done = false;
-			while(!done){
-				done = true;
-				v.add(obj);
+				boolean done = false;
+				while(!done){
+					done = true;
+					v.add(obj);
 
-				if (obj.entry != -1 && obj.pCreation <= data.numPEs() ){
-					// Find message that created the object
-					TimelineMessage created_message = obj.creationMessage();
-					if(created_message != null){
-						// Find object that created the message
-						obj = (EntryMethodObject) data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
-						if(obj != null){
-							done = false;
+					if (obj.entry != -1 && obj.pCreation <= data.numPEs() ){
+						// Find message that created the object
+						TimelineMessage created_message = obj.creationMessage();
+						if(created_message != null){
+							// Find object that created the message
+							obj = (EntryMethodObject) data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
+							if(obj != null){
+								done = false;
+							}
+
 						}
-
 					}
 				}
 			}
@@ -500,9 +502,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		boolean needRepaint = false;
 		
 		// Highlight the messages linked to this object
-		if(data.traceMessagesOnHover() || data.traceMessagesForwardOnHover()){
+		if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
 			Set fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
-			Set back = traceBackwardDependencies();
+			Set back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
 			
 			// Highlight the forward and backward messages
 			data.clearMessageSendLines();
@@ -537,7 +539,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	{
 		boolean needRepaint = false;
 		
-		if(data.traceMessagesOnHover() || data.traceMessagesForwardOnHover()){
+		if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
 			data.clearObjectHighlights();
 			data.clearMessageSendLines();
 			needRepaint=true;

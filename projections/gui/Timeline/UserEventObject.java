@@ -66,18 +66,16 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
 		this.data = data;
 
-		int leftCoord = data.timeToScreenPixel(BeginTime, actualDisplayWidth);
+		int left = data.timeToScreenPixel(BeginTime, actualDisplayWidth);
 		int rightCoord = data.timeToScreenPixel(EndTime, actualDisplayWidth);
 
 		if(EndTime > data.endTime())
 			rightCoord = data.timeToScreenPixel(data.endTime(), actualDisplayWidth) - 5;
 
 		if(BeginTime < data.beginTime())
-			leftCoord = data.timeToScreenPixel(data.beginTime(), actualDisplayWidth) + 5;
+			left = data.timeToScreenPixel(data.beginTime(), actualDisplayWidth) + 5;
 		
-		int width = rightCoord-leftCoord+1;
-		
-		
+		int width = rightCoord-left+1;
 		
 		
 		// Do the layout to account for multiple rows
@@ -90,13 +88,20 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		}
 		
 		int top = bottom - heightPerRow;
-
-		setToolTipText("<html><body><b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p></html></body>");
+		int height = heightPerRow;
 		
-		this.setBounds( leftCoord, 
+		// Use a very large height if this is meant to span all PE timelines
+		if(getName().contains("***")){
+			top = 5;
+			height = 100000;
+		}
+		
+		setToolTipText("<html><body><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p></html></body>");
+		
+		this.setBounds( left, 
 				top,
 				width,
-				heightPerRow );
+				height );
 				
 	}
 

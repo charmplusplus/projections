@@ -50,8 +50,12 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	}
 
 	public String getName(){
-		return MainWindow.runObject[myRun].getUserEventName(UserEventID);
-	}
+		if(MainWindow.runObject[myRun].getUserEventName(UserEventID) == null){
+			return "";
+		} else {
+			return MainWindow.runObject[myRun].getUserEventName(UserEventID);
+		}
+	}		
 	
 	public Color getColor(){	
 		Color c = MainWindow.runObject[myRun].getUserEventColor(UserEventID);
@@ -92,16 +96,13 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		// Use a very large height if this is meant to span all PE timelines
 		if(getName().contains("***")){
-			top = 5;
-			height = 100000;
+			top = 3;
+			height = data.screenHeight()-top;
 		}
 		
-		setToolTipText("<html><body><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p></html></body>");
+		setToolTipText("<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>");
 		
-		this.setBounds( left, 
-				top,
-				width,
-				height );
+		this.setBounds( left, top, width, height );
 				
 	}
 

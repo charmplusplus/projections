@@ -488,10 +488,19 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	/** Return the message that caused the entry method to execute. Complexity=O(1) time */
 	public TimelineMessage creationMessage(){
 		synchronized(data.messageStructures){
-			if(data != null && pCreation>=0 && data.messageStructures.getEventIDToMessageMap() != null && data.messageStructures.getEventIDToMessageMap()[pCreation] != null && pCreation<data.messageStructures.getEventIDToMessageMap().length)
-				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCreation].get(new Integer(EventID));
-			else
+			if(data == null)
 				return null;
+			else if(pCreation<0)
+				return null;
+			else if(data.messageStructures.getEventIDToMessageMap() == null)
+				return null;
+			else if(pCreation >= data.messageStructures.getEventIDToMessageMap().length)
+				return null;
+			else if(data.messageStructures.getEventIDToMessageMap()[pCreation] == null)
+				return null;
+			else
+				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCreation].get(new Integer(EventID));
+
 		}
 	}
 	

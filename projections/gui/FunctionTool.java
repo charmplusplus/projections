@@ -169,8 +169,7 @@ public class FunctionTool extends GenericGraphWindow
 		double lastFuncTime = 0.0;
 		Integer stackEntry;
 		// find first begin processing event.
-		reader.nextEventOfType(ProjDefs.BEGIN_PROCESSING,
-				       logEntry);
+		logEntry = reader.nextEventOfType(ProjDefs.BEGIN_PROCESSING);
 		while (true) {
 		    switch (logEntry.type) {
 		    case ProjDefs.BEGIN_PROCESSING:
@@ -264,7 +263,7 @@ public class FunctionTool extends GenericGraphWindow
 			lastFuncTime = logEntry.time;
 			break;
 		    }
-		    reader.nextEvent(logEntry);
+		    logEntry = reader.nextEvent();
 		}
 	    } catch (EOFException e) {
 		// the only way the system can stop correctly

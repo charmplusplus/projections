@@ -109,10 +109,11 @@ public abstract class ProjectionsReader
      */
     protected abstract void readStaticData() throws IOException;
 
-    /**
-     *  INHERITANCE NOTE: This is a public method that implementing
-     *  classes should use to bring the reader to a state where all
-     *  NON-STATIC data is unread.
-     */
-    public abstract void reset() throws IOException;
+//    /**
+//     *  INHERITANCE NOTE: This is a public method that implementing
+//     *  classes should use to bring the reader to a state where all
+//     *  NON-STATIC data is unread.
+//     */
+//    public abstract void reset() throws IOException;
+
 }

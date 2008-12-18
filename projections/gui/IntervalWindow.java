@@ -239,9 +239,9 @@ public class IntervalWindow extends GenericGraphWindow
 		new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
 				     MainWindow.runObject[myRun].getVersion());
 	    try {
-                logReader.nextEventOnOrAfter(startTime,logData);
+	    	logData = logReader.nextEventOnOrAfter(startTime);
                 while(true) {
-		    logReader.nextEvent(logData);	// find the next event
+                	logData = logReader.nextEvent();	// find the next event
 		    // this might not count the last EP. is it ok??
 		    if(logData.time > endTime)
 			break;

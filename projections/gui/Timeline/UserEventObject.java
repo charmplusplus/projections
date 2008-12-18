@@ -33,6 +33,8 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	
 	private int pe;
 
+	private String note;
+	
 	final static String popupChangeColor = "Change Color";
 
 	/** If displaying nested user events in multiple rows, use this value to determine the row in which we draw this event */
@@ -48,8 +50,22 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		addMouseListener(this);
 	}
+	
+	/** Create a user event that is a note */
+	public UserEventObject(int pe, long t, String note) {
+		setFocusable(false); // optimization for speed
+		
+		this.BeginTime=EndTime=t;
+		this.pe = pe;
+		this.note = note;
+		
+		addMouseListener(this);
+	}
 
 	public String getName(){
+		if(note != null)
+			return note;
+		
 		if(MainWindow.runObject[myRun].getUserEventName(UserEventID) == null){
 			return "";
 		} else {
@@ -100,8 +116,12 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 			height = data.screenHeight()-top;
 		}
 		
-		setToolTipText("<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>");
-		
+		if(note == null)
+			setToolTipText("<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>");
+		else
+			setToolTipText("<html><body><p><i>User Supplied Note:</i><p><i>occurred on PE:</i> " + pe + "</p><p></p><p>" + note + "</p></html></body>");
+
+			
 		this.setBounds( left, top, width, height );
 				
 	}

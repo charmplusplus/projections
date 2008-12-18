@@ -311,7 +311,7 @@ public class LogReader
 	    boolean isProcessing = false;
 	    try { 
 		while (true) { //EOFException will terminate loop
-		    reader.nextEvent(curData);
+			curData = reader.nextEvent();
 		    nLines++;
 		    switch (curData.type) {
 		    case BEGIN_IDLE: case END_IDLE:

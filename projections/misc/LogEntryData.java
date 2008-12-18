@@ -1,5 +1,9 @@
 package projections.misc;
 
+import projections.analysis.ProjDefs;
+import projections.analysis.ProjectionsReader;
+import projections.gui.MainWindow;
+
 /**
  *  Written by Chee Wai Lee
  *  4/12/2002
@@ -9,8 +13,11 @@ package projections.misc;
  *
  */
 
-public class LogEntryData 
+public class LogEntryData extends ProjDefs
 {
+	
+	static public int myRun = 0;
+	
     private boolean isValid = true;
 
     public int type;	 // type of the event eg: BEGIN_PROCESSING	
@@ -46,6 +53,9 @@ public class LogEntryData
     
     public Integer memoryUsage;
     
+    /// An arbitrary string provided by the user. Should be displayed as a user event
+	public String note;
+ 
     
     public LogEntryData() {
 	// this is fixed (since it is based on a 3D tuple)
@@ -57,6 +67,7 @@ public class LogEntryData
     // "entry" in the case of functions will be the function ID.
     public int lineNo;          // line number of the function call.
     public String funcName;     // the name of the function
+
     
     /* return the copy of the current object */ 
     public LogEntryData copyOf(){
@@ -85,6 +96,7 @@ public class LogEntryData
 	temp.funcName = new String(funcName);
 	temp.userSupplied = userSupplied;
 	temp.memoryUsage = memoryUsage;
+	temp.note = note;
 	
 	return temp;
     }
@@ -96,4 +108,70 @@ public class LogEntryData
     public void setValid(boolean flag) {
 	isValid = flag;
     }
+    
+    
+    
+    public String htmlFormattedDescription(){
+    	
+    	switch( type ) {
+		case ( ProjDefs.CREATION ):
+			return ( "<font size=+1 color=\"#660000\">CREATE</font> message to be sent to <em> " + MainWindow.runObject[myRun].getEntryFullNameByID(entry) + "</em>");
+		case ( ProjDefs.CREATION_BCAST ):
+			if (numPEs == MainWindow.runObject[myRun].getNumProcessors()) {
+				return ( "<font size=+1 color=\"#666600\">GROUP BROADCAST</font> (" + numPEs + " processors)");
+			} else {
+				return ( "<font size=+1 color=\"#666600\">NODEGROUP BROADCAST</font> (" + numPEs + " processors)");
+			}
+		case ( ProjDefs.CREATION_MULTICAST ):
+			return ( "<td><font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + numPEs + " processors");
+		case ( ProjDefs.BEGIN_PROCESSING ):
+			return ( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of message sent to <em>" + MainWindow.runObject[myRun].getEntryFullNameByID(entry)  + "</em> from processor " + pe);
+		case ( ProjDefs.END_PROCESSING ):
+			return ( "<font size=+1 color=\"#000088\">END PROCESSING</font> of message sent to <em>" + MainWindow.runObject[myRun].getEntryFullNameByID(entry)  + "</em> from processor " + pe);
+		case ( ProjDefs.ENQUEUE ):
+			return( "<font size=+1>ENQUEUEING</font> message received from " + "processor " + pe + " destined for " + MainWindow.runObject[myRun].getEntryFullNameByID(entry) );
+		case ( ProjDefs.BEGIN_IDLE ):
+			return( "<font size=+1 color=\"#333333\">IDLE begin</font>");
+		case ( ProjDefs.END_IDLE ):
+			return ( "<font size=+1 color=\"#333333\">IDLE end</font>");
+		case ( ProjDefs.BEGIN_PACK ):
+			return ( "<font size=+1 color=\"#008800\">BEGIN PACKING</font> a message to be sent");
+		case ( ProjDefs.END_PACK ):
+			return ( "<font size=+1 color=\"#008800\">FINISHED PACKING</font> a message to be sent");
+		case ( ProjDefs.BEGIN_UNPACK ):
+			return ( "<font size=+1 color=\"#880000\">BEGIN UNPACKING</font> a received message");
+		case ( ProjDefs.END_UNPACK ):
+			return ( "<font size=+1 color=\"#880000\">FINISHED UNPACKING</font> a received message");
+		case ( ProjDefs.USER_SUPPLIED_NOTE):
+			if(note != null)
+				return ( "<font size=+1 color=\"#880000\">USER SUPPLIED NOTE:</font> " + note);
+			else
+				return ( "<font size=+1 color=\"#880000\">USER SUPPLIED NOTE:</font> <i>blank</i>" );		
+		default:
+			System.out.println("Unknown event type");
+		return ( "Unknown Event Type:" + type + " !!!");
+		}
+	}
+    	
+        
+	public boolean isBeginType() {
+		return ((type == BEGIN_IDLE) ||
+				(type == BEGIN_PACK) ||
+				(type == BEGIN_UNPACK) ||
+				(type == BEGIN_PROCESSING) ||
+				(type == BEGIN_TRACE) ||
+				(type == BEGIN_FUNC) ||
+				(type == BEGIN_INTERRUPT));
+	}
+
+	public boolean isEndType() {
+		return ((type == END_IDLE) ||
+				(type == END_PACK) ||
+				(type == END_UNPACK) ||
+				(type == END_PROCESSING) ||
+				(type == END_TRACE) ||
+				(type == END_FUNC) ||
+				(type == END_INTERRUPT));
+	}
+    
 }

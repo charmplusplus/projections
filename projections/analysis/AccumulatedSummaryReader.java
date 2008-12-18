@@ -232,7 +232,7 @@ public class AccumulatedSummaryReader extends ProjectionsReader
 		System.out.print((long)(data[i]) + " ");
 	    }
 	    System.out.println();
-	    reader.reset();
+//	    reader.reset();
 	} catch (IOException e) {
 	    System.err.println(e.toString());
 	}

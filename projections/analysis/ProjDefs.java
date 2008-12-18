@@ -42,6 +42,9 @@ public static final int USER_SUPPLIED            = 26;
 /** A record for the memory usage */
 public static final int MEMORY_USAGE            = 27;
 
+/** A record for a user supplied string */
+public static final int USER_SUPPLIED_NOTE            = 28;
+
 
 public static final int USER_EVENT_PAIR          = 100;
 

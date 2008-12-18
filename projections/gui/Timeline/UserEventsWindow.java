@@ -187,16 +187,17 @@ public class UserEventsWindow extends GenericGraphWindow
 	    // READ - nothing here
 	    GenericLogReader reader = new GenericLogReader(nextPe,
 							   MainWindow.runObject[myRun].getVersion());
-	    LogEntryData logData = new LogEntryData();
-	    LogEntryData logDataEnd = new LogEntryData();
-	    logData.time = 0;
+	    LogEntryData logData;
+	    LogEntryData logDataEnd;
+	    
 	    // Skip to the first begin.
 	    try {
+			logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+		    logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+
 		while (logData.time < startInterval*intervalSize) {
-		    reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR,
-					   logData);
-		    reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR,
-					   logDataEnd);
+			logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+		    logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 		}
 		int eventIndex = 0;
 		while (true) {
@@ -205,10 +206,8 @@ public class UserEventsWindow extends GenericGraphWindow
 		    graphData[count][eventIndex] +=
 			logDataEnd.time - logData.time;
 		    numCalls[count][eventIndex]++;
-		    reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR,
-					   logData);
-		    reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR,
-					   logDataEnd);
+		    logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+		    logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 		    if (logDataEnd.time > endInterval*intervalSize) {
 			break;
 		    }

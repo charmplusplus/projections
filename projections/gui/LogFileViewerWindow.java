@@ -33,7 +33,7 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	public LogFileViewerWindow(MainWindow parentWindow, Integer myWindowID)
 	{
 		super(parentWindow, myWindowID);
-
+ 
 		setTitle("Projections Log File Viewer - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
 		// Create the GUI layout:

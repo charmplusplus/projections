@@ -18,7 +18,7 @@ public class EPDataGenerator
 			   long startTime, long endTime) {
 	OrderedIntList tmpPEs = validPEs.copyOf();
 	GenericLogReader reader;
-	LogEntryData logData = new LogEntryData();
+	LogEntryData logData;
 	int numUserEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	int numUserEvents = MainWindow.runObject[myRun].getNumUserDefinedEvents();
 
@@ -51,7 +51,7 @@ public class EPDataGenerator
 	    subtractTime = 0;
 	    try {
 		while (true) {
-		    reader.nextEvent(logData);
+			logData = reader.nextEvent();
 		    // ignore all events outside time range
 		    if (logData.time >= startTime && logData.time <= endTime) {
 			switch (logData.type) {
@@ -113,10 +113,10 @@ public class EPDataGenerator
 			    // another USER_EVENT_PAIR is expected.
 			    int eventID = logData.userEventID;
 			    userBeginTime = logData.time;
-			    reader.nextEvent(logData);
+			    logData = reader.nextEvent();
 			    while (logData.userEventID != eventID) {
 				// nested user events, ignore
-				reader.nextEvent(logData);
+			    	logData = reader.nextEvent();
 			    }
 			    data[TIME_DATA][numUserEPs+
 					   MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID)] += (logData.time - userBeginTime);

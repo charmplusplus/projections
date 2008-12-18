@@ -69,7 +69,7 @@ public class NoiseMinerThread extends Thread {
 
 		try {
 
-			LogFile.nextEventOnOrAfter(parent.getStartTime(), logdata);
+			logdata = LogFile.nextEventOnOrAfter(parent.getStartTime());
 			while (logdata.time < parent.getEndTime()) {
 				//System.out.println("Time=" + logdata.time + " event " + logdata.event);
 				//Go through each log file and for each Creation
@@ -117,7 +117,7 @@ public class NoiseMinerThread extends Thread {
 					//other events
 					previous_black_time = -1;
 				}
-				LogFile.nextEvent(logdata);				
+				logdata = LogFile.nextEvent();				
 			}
 		}
 		catch (IOException e)

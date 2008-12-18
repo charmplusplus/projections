@@ -107,8 +107,7 @@ public class LogLoader extends ProjDefs
 
 		try{
 			logFileRd = new GenericLogReader(procId,MainWindow.runObject[myRun].getVersion());
-			rawLogData = new LogEntryData();
-
+			
 			/** 
 			 * seek the first BEGIN_PROCESSING within this time interval 
 			 * and its timestamp >= beginTime         .
@@ -118,8 +117,8 @@ public class LogLoader extends ProjDefs
 			 * function LATER!
 			 */
 			while(true){
-				logFileRd.nextEvent(rawLogData);
-				curEntry = LogEntry.adapt(rawLogData);
+				rawLogData = logFileRd.nextEvent();
+				curEntry = new LogEntry(rawLogData);
 				if(curEntry.TransactionType==BEGIN_PROCESSING 
 						&& curEntry.Entry!=-1
 						&& curEntry.Time >= beginTime){
@@ -148,8 +147,8 @@ public class LogLoader extends ProjDefs
 			 */
 			boolean reachEndTime = false;
 			while(!reachEndTime){
-				logFileRd.nextEvent(rawLogData);
-				curEntry = LogEntry.adapt(rawLogData);
+				rawLogData = logFileRd.nextEvent();
+				curEntry = new LogEntry(rawLogData);
 				//something must be wrong with the log file
 				if (curEntry.Entry == -1) 
 					continue;
@@ -374,7 +373,6 @@ public class LogLoader extends ProjDefs
 
 		try {
 			logFileRd = new GenericLogReader(procId,MainWindow.runObject[myRun].getVersion());
-			rawLogData = new LogEntryData();
 
 			/** 
 			 * seek the first BEGIN_PROCESSING within this time interval 
@@ -385,8 +383,8 @@ public class LogLoader extends ProjDefs
 			 * function LATER!
 			 */
 			while(true) {
-				logFileRd.nextEvent(rawLogData);
-				curEntry = LogEntry.adapt(rawLogData);
+				rawLogData = logFileRd.nextEvent();
+				curEntry = new LogEntry(rawLogData);
 				if (curEntry.TransactionType==BEGIN_PROCESSING 
 						&& curEntry.Entry!=-1
 						&& curEntry.Time >= beginTime) {
@@ -415,8 +413,8 @@ public class LogLoader extends ProjDefs
 			 */
 			boolean reachEndTime = false;
 			while (!reachEndTime) {
-				logFileRd.nextEvent(rawLogData);
-				curEntry = LogEntry.adapt(rawLogData);
+				rawLogData = logFileRd.nextEvent();
+				curEntry = new LogEntry(rawLogData);
 				//something must be wrong with the log file
 				if (curEntry.Entry == -1) 
 					continue;
@@ -610,7 +608,6 @@ public class LogLoader extends ProjDefs
 		// open the file
 		try {
 			reader = new GenericLogReader(pe,MainWindow.runObject[myRun].getVersion());
-			data = new LogEntryData();
 			// to treat dummy thread EPs as a special-case EP
 			//  **CW** I consider this a hack. A more elegant way must
 			// be found design-wise.
@@ -633,8 +630,8 @@ public class LogLoader extends ProjDefs
 //			
 			
 			while (true) { //Seek to time Begin
-				reader.nextEvent(data);
-				LE = LogEntry.adapt(data);
+				data = reader.nextEvent();
+				LE = new LogEntry(data);
 				if (LE.Time >= Begin) {
 					break;
 				}
@@ -930,6 +927,7 @@ public class LogLoader extends ProjDefs
 						if(LE.userSuppliedValue() != null && lastBeginTimelineEvent!=null)
 							lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
 						break;
+				
 
 					case MEMORY_USAGE:
 						if(LE.memoryUsage() != null && lastBeginTimelineEvent!=null)
@@ -1036,10 +1034,12 @@ public class LogLoader extends ProjDefs
 						break;
 					case USER_EVENT:
 						// don't mess with TE, that's just for EPs
-						UserEventObject event = new UserEventObject(pe, LE.Time-BeginTime,
-								LE.Entry, LE.EventID,
-								UserEventObject.SINGLE);
+						UserEventObject event = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.SINGLE);
 						userEventVector.add(event);
+						break;
+					case USER_SUPPLIED_NOTE:
+						UserEventObject note = new UserEventObject(pe, LE.Time-BeginTime, LE.note);
+						userEventVector.add(note);
 						break;
 					case USER_EVENT_PAIR:
 						// **CW** UserEventPairs come in a two-line block
@@ -1054,8 +1054,8 @@ public class LogLoader extends ProjDefs
 
 						// Now, expect to read the second entry and handle
 						// errors if necessary.
-						reader.nextEvent(data);
-						LE = LogEntry.adapt(data);
+						data = reader.nextEvent();
+						LE = new LogEntry(data);
 
 						if (LE.TransactionType != USER_EVENT_PAIR) {
 							// DANGLING - throw away the old event
@@ -1162,8 +1162,8 @@ public class LogLoader extends ProjDefs
 						break;
 					}
 				}
-				reader.nextEvent(data);
-				LE = LogEntry.adapt(data);
+				data = reader.nextEvent();
+				LE = new LogEntry(data);
 				// this will still eventually end because of the 
 				// END COMPUTATION event.
 				if (LE.Entry != -1) {
@@ -1182,8 +1182,8 @@ public class LogLoader extends ProjDefs
 						TE=null;
 					}
 				}
-				reader.nextEvent(data);
-				LE = LogEntry.adapt(data);
+				data = reader.nextEvent();
+				LE = new LogEntry(data);
 			}
 		} catch (EOFException e) { 
 			/*ignore*/ 
@@ -1197,50 +1197,6 @@ public class LogLoader extends ProjDefs
 		return;
 	}
 
-	private ViewerEvent entrytotext(LogEntry LE)
-	{
-		long BeginTime = 0;
-
-		ViewerEvent VE = new ViewerEvent();
-		VE.Time        = LE.Time - BeginTime;
-		VE.EventType   = LE.TransactionType;
-		VE.numDestPEs  = LE.numPEs;
-
-		if (LE.Entry == -1) {
-			return null;
-		}
-
-		switch (LE.TransactionType) {
-		case BEGIN_IDLE:
-		case END_IDLE:
-		case BEGIN_PACK:
-		case END_PACK:
-		case BEGIN_UNPACK:
-		case END_UNPACK:
-			return VE;
-		case CREATION:
-		case CREATION_BCAST:
-		case CREATION_MULTICAST:
-		case BEGIN_PROCESSING:
-		case END_PROCESSING:
-		case ENQUEUE:
-			VE.Dest = MainWindow.runObject[myRun].getEntryFullNameByID(LE.Entry);
-			if (LE.TransactionType != CREATION) {
-				VE.SrcPe = LE.Pe;
-			}
-			return VE;
-		case USER_EVENT:
-		case USER_EVENT_PAIR:
-		case DEQUEUE:
-		case BEGIN_TRACE:
-		case END_TRACE:
-		case MESSAGE_RECV:
-		case BEGIN_INTERRUPT:
-		case END_INTERRUPT:
-		default:
-			return null;
-		}
-	}   
 
 	public long searchtimeline(int PeNum, int Entry, int Num)
 	throws LogLoadException
@@ -1260,8 +1216,8 @@ public class LogLoader extends ProjDefs
 
 			//Throws EOFException at end of file
 			while(true) {
-				reader.nextEvent(data);
-				LE = LogEntry.adapt(data);
+				data = reader.nextEvent();
+				LE = new LogEntry(data);
 				if (LE.Entry == -1) {
 					continue;
 				}
@@ -1286,47 +1242,14 @@ public class LogLoader extends ProjDefs
 		return LE.Time - BeginTime;
 	}   
 
-	public Vector view(int PeNum) 
-	throws LogLoadException
-	{
-		ViewerEvent    VE;
-		Vector ret = null;
-		GenericLogReader reader;
-		LogEntryData data;
-
-		try {	  
-			ret = new Vector ();
-			reader = new GenericLogReader(PeNum, MainWindow.runObject[myRun].getVersion());
-			data = new LogEntryData();
-
-			//Throws EOFException at end of file
-			while (true) {
-				reader.nextEvent(data);
-				VE = entrytotext(LogEntry.adapt(data));
-				if (VE != null) {
-					ret.addElement (VE);
-				}
-			}
-		} catch (FileNotFoundException E) {
-			System.out.println("ERROR: couldn't open file " + 
-					MainWindow.runObject[myRun].getLogName(PeNum));
-		} catch (EOFException E) {
-		} catch (IOException E) {
-			System.out.println("throwing....2");
-			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
-					LogLoadException.READ);
-		}
-		return ret;
-	}
-
-	public void createTimeIndexes(OrderedIntList processorList) {
-		if(index == null){
-			String indexFilename = MainWindow.runObject[myRun].getFilename() + ".index";
-			index = new LogIndex(indexFilename, this);
-		}
-			
-		index.createTimeIndexes(processorList);
-	}
+//	public void createTimeIndexes(OrderedIntList processorList) {
+//		if(index == null){
+//			String indexFilename = MainWindow.runObject[myRun].getFilename() + ".index";
+//			index = new LogIndex(indexFilename, this);
+//		}
+//			
+//		index.createTimeIndexes(processorList);
+//	}
 	
 	
 }

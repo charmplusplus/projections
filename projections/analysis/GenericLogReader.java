@@ -6,506 +6,463 @@ import projections.misc.*;
 import java.io.*;
 
 /**
- *  Written by Chee Wai Lee
- *  4/12/2002
- *
+ *  Written by Chee Wai Lee  4/12/2002
+ *  Rewritten by Isaac 12/17/2008
+ *  
  *  GenericLogReader reads a log file and returns entry data one at a time.
  *  
  *  The general contract is that the caller supplies the Reader stream on
  *  object creation time (which means the input can actually come from a
  *  networked stream instead of from just a file).
+ *  
+ *  
  *
  */
 
 public class GenericLogReader extends ProjectionsReader
-    implements PointCapableReader
+implements PointCapableReader
 {
-    // Temporary hardcode. This variable will be assigned appropriate
-    // meaning in future versions of Projections that support multiple
-    // runs.
-    static int myRun = 0;
+	// Temporary hardcode. This variable will be assigned appropriate
+	// meaning in future versions of Projections that support multiple
+	// runs.
+	static int myRun = 0;
 
-    private AsciiIntegerReader reader;
-    private double version;
+	private double version;
 
-    // This flag is to handle truncated partial projections logs.
-    // The flag is raised whenever Projections is forced to fake an
-    // END_COMPUTATION event as a result of an unexpected EOF
-    // exception. When this flag is detected again the next time
-    // it is read, Projections will raise the exception as usual for
-    // the calling routines to operate on transparently.
-    //
-    // Technically, lastRecordedTime is not required, but because this
-    // class cannot control what client modules do to the "data" object
-    // passed in, it is much safer to record the lastRecordedTime locally.
-    //
-    private boolean fakedEndComputation = false;
-    private long lastRecordedTime = 0;
-
-    // Book-keeping data. Used for consistency when event-blocks happen
-    // to straddle user-specified time-boundaries.
-    //
-    private LogEntryData lastBeginEvent = null;
-
-    public GenericLogReader(String filename, double Nversion) {
-	super(filename, String.valueOf(Nversion));
-	lastBeginEvent = new LogEntryData();
-	lastBeginEvent.setValid(false);
-	try {
-	    reader = new AsciiIntegerReader(new FileReader(filename));
-	    version = Nversion;
-	    reader.nextLine(); // skip over the header (already read)
-	} catch (IOException e) {
-	    System.err.println("Error reading file " + filename);
-	}
-    }
-
-    public GenericLogReader(int peNum, double Nversion) {
-	super(MainWindow.runObject[myRun].getLogName(peNum), String.valueOf(Nversion));
-	lastBeginEvent = new LogEntryData();
-	lastBeginEvent.setValid(false);
-	try {
-	    reader = new AsciiIntegerReader(new FileReader(sourceString));
-	    version = Nversion;
-	    reader.nextLine(); // skip over the header (already read)
-	} catch (IOException e) {
-	    System.err.println("Error reading file " + sourceString);
-	}
-    }
-
-    protected boolean checkAvailable() {
-	File sourceFile = new File(sourceString);
-	return sourceFile.canRead();
-    }
-
-    public void readStaticData() {
-	// do nothing for now (since the original code ignored the header)
-	// **CW** must change later (for versioning control) of course ...
-    }
-
-    /**
-     *  resets the file stream. Not all streams in Java support the reset()
-     *  method, so the only way is to close the stream and restart it.
-     */
-    public void reset() 
-	throws IOException
-    {
-	reader.close();
-	reader = new AsciiIntegerReader(new FileReader(sourceString));
-	reader.nextLine();
-    }
-
- 
-    /** read the next line from the log and put its contents into parameter data 
-     * 
-     * @note The caller should create the data object.
-     * */
-    public void nextEvent(LogEntryData data) 
-	throws IOException, EOFException
-    {
-	try {
-	    data.type = reader.nextInt();
-	    switch (data.type) {
-	    case BEGIN_IDLE:
-		lastBeginEvent.time = data.time = reader.nextLong();
-		lastBeginEvent.pe = data.pe = reader.nextInt();
-		lastBeginEvent.setValid(true);
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case END_IDLE: 
-		data.time = reader.nextLong();
-		data.pe = reader.nextInt();
-		lastBeginEvent.setValid(false);
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case BEGIN_PACK: case END_PACK:
-	    case BEGIN_UNPACK: case END_UNPACK:
-		data.time = reader.nextLong();
-		data.pe = reader.nextInt();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case USER_SUPPLIED:
-		  data.userSupplied = new Integer(reader.nextInt());
-		break;
-	    case MEMORY_USAGE:
-		  data.memoryUsage = new Integer(reader.nextInt());
-		break;
-		case CREATION:
-		data.mtype = reader.nextInt();
-		data.entry = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		if (version >= 2.0) {
-		    data.msglen = reader.nextInt();
-		} else {
-		    data.msglen = -1;
-		}
-		if (version >= 5.0) {
-		    data.sendTime = reader.nextLong();
-		}
-		break;
-	    case CREATION_BCAST:
-		data.mtype = reader.nextInt();
-		data.entry = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		if (version >= 2.0) {
-		    data.msglen = reader.nextInt();
-		} else {
-		    data.msglen = -1;
-		}
-		if (version >= 5.0) {
-		    data.sendTime = reader.nextLong();
-		}
-		data.numPEs = reader.nextInt();
-		break;
-	    case CREATION_MULTICAST:
-		data.mtype = reader.nextInt();
-		data.entry = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		if (version >= 2.0) {
-		    data.msglen = reader.nextInt();
-		} else {
-		    data.msglen = -1;
-		}
-		if (version >= 5.0) {
-		    data.sendTime = reader.nextLong();
-		}
-		data.numPEs = reader.nextInt();
-		data.destPEs = new int[data.numPEs];
-		for (int i=0;i<data.numPEs;i++) {
-		    data.destPEs[i] = reader.nextInt();
-		}
-		break;
-	    case BEGIN_PROCESSING: 
-		lastBeginEvent.mtype = data.mtype = reader.nextInt();
-		lastBeginEvent.entry = data.entry = reader.nextInt();
-		lastBeginEvent.time = data.time = reader.nextLong();
-		lastBeginEvent.event = data.event = reader.nextInt();
-		lastBeginEvent.pe = data.pe = reader.nextInt();
-		if (version >= 2.0) {
-		    lastBeginEvent.msglen = data.msglen = reader.nextInt();
-		} else {
-		    lastBeginEvent.msglen = data.msglen = -1;
-		}
-		if (version >= 4.0) {
-		    lastBeginEvent.recvTime = data.recvTime = 
-			reader.nextLong();
-		    lastBeginEvent.id[0] = data.id[0] = reader.nextInt();
-		    lastBeginEvent.id[1] = data.id[1] = reader.nextInt();
-		    lastBeginEvent.id[2] = data.id[2] = reader.nextInt();
-		}
-		if (version >= 7.0) {
-		  lastBeginEvent.id[3] = data.id[3] = reader.nextInt();
-		}
-		if (version >= 6.5) {
-		    lastBeginEvent.cpuStartTime = data.cpuStartTime = 
-			reader.nextLong();
-		}
-		if (version >= 6.6) {
-		    lastBeginEvent.numPerfCounts = data.numPerfCounts = 
-			reader.nextInt();
-		    lastBeginEvent.perfCounts = new long[data.numPerfCounts];
-		    data.perfCounts = new long[data.numPerfCounts];
-		    for (int i=0; i<data.numPerfCounts; i++) {
-			lastBeginEvent.perfCounts[i] = data.perfCounts[i] = 
-			    reader.nextLong();
-		    }
-		}
-		lastBeginEvent.setValid(true);
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case END_PROCESSING:
-		data.mtype = reader.nextInt();
-		data.entry = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		if (version >= 2.0) {
-		    data.msglen = reader.nextInt();
-		} else {
-		    data.msglen = -1;
-		}
-		if (version >= 6.5) {
-		    data.cpuEndTime = reader.nextLong();
-		}
-		if (version >= 6.6) {
-		    data.numPerfCounts = reader.nextInt();
-		    data.perfCounts = new long[data.numPerfCounts];
-		    for (int i=0; i<data.numPerfCounts; i++) {
-			data.perfCounts[i] = reader.nextLong();
-		    }
-		}
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case BEGIN_TRACE: 
-		data.time = reader.nextLong();
-		// invalidates the last Begin Event. BEGIN_TRACE happens
-		// in the context of an entry method that is *not* traced.
-		// Hence when a BEGIN_TRACE event is encountered, no
-		// information is actually known about the entry method
-		// context.
-		lastBeginEvent.setValid(false);
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case END_TRACE:
-		data.time = reader.nextLong();
-		// END_TRACE happens in the context of an existing
-		// entry method and hence should logically "end" it.
-		// This means any client taking note of END_TRACE must
-		// take into account lastBeginEvent in order to get
-		// reasonable data.
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case BEGIN_FUNC:
-		data.time = reader.nextLong();
-		data.entry = reader.nextInt();
-		data.lineNo = reader.nextInt();
-		data.funcName = reader.nextString();
-		// comment of interest, what "nextString" is doing in an
-		// AsciiIntegerReader is beyond me, but I appreciate its
-		// existance!
-		reader.nextLine();
-		break;
-	    case END_FUNC:
-		data.time = reader.nextLong();
-		data.entry = reader.nextInt();
-		reader.nextLine();
-		break;
-	    case MESSAGE_RECV:
-		data.mtype = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		data.msglen = reader.nextInt();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case ENQUEUE: case DEQUEUE:
-		data.mtype = reader.nextInt();
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case BEGIN_INTERRUPT: case END_INTERRUPT:
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case BEGIN_COMPUTATION: case END_COMPUTATION:
-		data.time = reader.nextLong();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case USER_EVENT:
-		data.userEventID = reader.nextInt();
-		// tentative hack for compatibility
-		data.entry = data.userEventID; 
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    case USER_EVENT_PAIR:
-		data.userEventID = reader.nextInt();
-		// tentative hack for compatibility
-		data.entry = data.userEventID;
-		data.time = reader.nextLong();
-		data.event = reader.nextInt();
-		data.pe = reader.nextInt();
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    default:
-		data.type = -1;
-		reader.nextLine(); // Skip over any garbage 
-		break;
-	    }
-	    lastRecordedTime = data.time;
-	} catch (EOFException e) {
-	    if (fakedEndComputation || (data.type == END_COMPUTATION)) {
-		// throw the exception as if this were a proper EOF
-		throw e;
-	    } else {
-		// This is to deal with partial truncated projections logs.
-		// Fake an END_COMPUTATION event. This should *NEVER* be
-		// silent!!! A Warning *MUST* be sounded.
-		fakedEndComputation = true;
-		data.type = END_COMPUTATION;
-		data.time = lastRecordedTime;
-		System.err.println("[" + sourceString + "] " +
-				   "WARNING: Partial or Corrupted " +
-				   "Projections log. Faked END_COMPUTATION " +
-				   "entry added for last recorded time of " +
-				   data.time);
-	    }
-	}
-    }
-
-    /**
-     *
-     *  ***CURRENT IMP*** exponential search too hard, using sequential
-     *
-     *  eventOnOrAfter takes a timestamp and uses an exponential search 
-     *  to locate the event. The trouble is that a seek backwards requires 
-     *  resetting the stream.
-     *
-     *  It looks for recognized events. The current recognition scheme 
-     *  overlooks a lot of important events!
-     *
-     *  An EOFException indicates that no such event was found.
-     */
-    public void nextEventOnOrAfter(long timestamp, LogEntryData data) 
-	throws IOException, EOFException
-    {
-	seqLookForNextEventOnOrAfter(timestamp, data);
-	//	lookForEventOnOrAfter(timestamp, INITIAL_STEP, -1, 0, data);
-    }
-    
-    // More precisely, the next RECOGNIZED event
-    private void seqLookForNextEventOnOrAfter(long timestamp, 
-					      LogEntryData data) 
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEvent(data);
-	    // skip unrecognized tags
-	    while (data.type == -1) {
-		nextEvent(data);
-	    }
-	    if (data.time >= timestamp) {
-		// found! just return!
-		return;
-	    }
-	}
-    }
-
-    /**
-     *  nextEventOfType gets the next event of the eventType.
-     */
-    public void nextEventOfType(int eventType, LogEntryData data) 
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEvent(data);
-	    if (data.type == eventType) {
-		return;
-	    }
-	}
-    }
-
-    public void nextEventOfTypeOnOrAfter(int eventType, long timestamp,
-					 LogEntryData data)
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEventOnOrAfter(timestamp, data);
-	    if (data.type == eventType) {
-		return;
-	    }
-	}
-    }
-
-    public void nextBeginEvent(LogEntryData data)
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEvent(data);
-	    if (isBeginType(data)) {
-		return;
-	    }
-	}
-    }
-
-    public void nextEndEvent(LogEntryData data)
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEvent(data);
-	    if (isEndType(data)) {
-		return;
-	    }
-	}
-    }
-
-    public void nextBeginEventOnOrAfter(long timestamp,
-					    LogEntryData data)
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEventOnOrAfter(timestamp, data);
-	    if (isBeginType(data)) {
-		return;
-	    }
-	}
-    }
-
-    public void nextEndEventOnOrAfter(long timestamp,
-					  LogEntryData data)
-	throws IOException, EOFException
-    {
-	while (true) {
-	    nextEventOnOrAfter(timestamp, data);
-	    if (isEndType(data)) {
-		return;
-	    }
-	}
-    }
-
-    public LogEntryData getLastBE() {
-	if (lastBeginEvent.isValid()) {
-	    return lastBeginEvent;
-	}
-	return null;
-    }
-
-    private boolean isBeginType(LogEntryData data) {
-	return ((data.type == BEGIN_IDLE) ||
-		(data.type == BEGIN_PACK) ||
-		(data.type == BEGIN_UNPACK) ||
-		(data.type == BEGIN_PROCESSING) ||
-		(data.type == BEGIN_TRACE) ||
-		(data.type == BEGIN_FUNC) ||
-		(data.type == BEGIN_INTERRUPT));
-    }
-
-    private boolean isEndType(LogEntryData data) {
-	return ((data.type == END_IDLE) ||
-		(data.type == END_PACK) ||
-		(data.type == END_UNPACK) ||
-		(data.type == END_PROCESSING) ||
-		(data.type == END_TRACE) ||
-		(data.type == END_FUNC) ||
-		(data.type == END_INTERRUPT));
-    }
-
-    public void close()
-        throws IOException
-    {
-        if (reader != null) {
-            reader.close();
-        }
-    }
-    
-    
-	public void skip(long offsetToBeginRecord) {
-		try{reader.skip(offsetToBeginRecord);}
-		catch(Exception E){
-			System.err.println("ERROR: error while seeking through a file");		
-		}
-	}
+	private BufferedReader reader;
 	
-	
-	public void seek(long offset){
+	// Technically, lastRecordedTime is not required, but because this
+	// class cannot control what client modules do to the "data" object
+	// passed in, it is much safer to record the lastRecordedTime locally.
+	//
+	private long lastRecordedTime = 0;
+
+	// Book-keeping data. Used for consistency when event-blocks happen
+	// to straddle user-specified time-boundaries.
+	//
+	private LogEntryData lastBeginEvent = null;
+
+	private boolean endComputationOccurred;
+
+	public GenericLogReader(String filename, double Nversion) {
+		super(filename, String.valueOf(Nversion));
+		lastBeginEvent = new LogEntryData();
+		lastBeginEvent.setValid(false);
+		endComputationOccurred = false;
 		try {
-			reader.seek(offset);
+			reader = new BufferedReader(new FileReader(filename));
+			version = Nversion;
+			reader.readLine(); // skip over the header (already read)
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println("Error reading file " + filename);
 		}
 	}
-	
-	
+
+	public GenericLogReader(int peNum, double Nversion) {
+		super(MainWindow.runObject[myRun].getLogName(peNum), String.valueOf(Nversion));
+		lastBeginEvent = new LogEntryData();
+		lastBeginEvent.setValid(false);
+		endComputationOccurred = false;
+		try {
+			reader = new BufferedReader(new FileReader(sourceString));
+			version = Nversion;
+			reader.readLine(); // skip over the header (already read)
+		} catch (IOException e) {
+			System.err.println("Error reading file " + sourceString);
+		}
+	}
+
+	protected boolean checkAvailable() {
+		File sourceFile = new File(sourceString);
+		return sourceFile.canRead();
+	}
+
+	public void readStaticData() {
+		// do nothing for now (since the original code ignored the header)
+		// **CW** must change later (for versioning control) of course ...
+	}
+
+
+	/** 
+	 * Create a new LogEntryData by reading/parsing the next line from the log 
+	 * 
+	 * Upon reaching the end of the file, a fake END_COMPUTATION event will be produced if none was found in the log file.
+	 * After the end of the file is reached and after some END_COMPUTATION has been returned, an EOFException will be thrown
+	 * 
+	 * If any problem is detected when reading within a line, an IOException is produced
+	 * 
+	 * */
+	public LogEntryData nextEvent() 
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+
+		String line = reader.readLine();
+		AsciiLineParser parser = new AsciiLineParser(line);
+
+		// If actually at end of file
+		if(line == null){
+			// Generate a fake END_COMPUTATION if no legitimate one was found
+			// Otherwise, signal that we have reached end of file by throwing an EOFException
+			if (! endComputationOccurred){
+				// Fake an END_COMPUTATION event. This should *NEVER* be
+				// silent!!! A Warning *MUST* be sounded.
+				// This is to deal with partial truncated projections logs.
+				endComputationOccurred = true;
+				data.type = END_COMPUTATION;
+				data.time = lastRecordedTime;
+				System.err.println("[" + sourceString + "] WARNING: Partial or Corrupted Projections log. Faked END_COMPUTATION entry added for last recorded time of " +	data.time);
+			} else {
+				throw new EOFException();
+			}
+		}		
+
+
+		data.type = parser.nextInt();
+		switch (data.type) {
+		case BEGIN_IDLE:
+			lastBeginEvent.time = data.time = parser.nextLong();
+			lastBeginEvent.pe = data.pe = parser.nextInt();
+			lastBeginEvent.setValid(true);
+			break;
+		case END_IDLE: 
+			data.time = parser.nextLong();
+			data.pe = parser.nextInt();
+			lastBeginEvent.setValid(false);
+			break;
+		case BEGIN_PACK: case END_PACK:
+		case BEGIN_UNPACK: case END_UNPACK:
+			data.time = parser.nextLong();
+			data.pe = parser.nextInt();
+			break;
+		case USER_SUPPLIED:
+			data.userSupplied = new Integer(parser.nextInt());
+			break;
+		case USER_SUPPLIED_NOTE:
+			data.time = new Integer(parser.nextInt());
+			Integer strlen = new Integer(parser.nextInt());
+			data.note = new String(parser.restOfLine());
+			break;
+		case MEMORY_USAGE:
+			data.memoryUsage = new Integer(parser.nextInt());
+			break;
+		case CREATION:
+			data.mtype = parser.nextInt();
+			data.entry = parser.nextInt();
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			if (version >= 2.0) {
+				data.msglen = parser.nextInt();
+			} else {
+				data.msglen = -1;
+			}
+			if (version >= 5.0) {
+				data.sendTime = parser.nextLong();
+			}
+			break;
+		case CREATION_BCAST:
+			data.mtype = parser.nextInt();
+			data.entry = parser.nextInt();
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			if (version >= 2.0) {
+				data.msglen = parser.nextInt();
+			} else {
+				data.msglen = -1;
+			}
+			if (version >= 5.0) {
+				data.sendTime = parser.nextLong();
+			}
+			data.numPEs = parser.nextInt();
+			break;
+		case CREATION_MULTICAST:
+			data.mtype = parser.nextInt();
+			data.entry = parser.nextInt();
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			if (version >= 2.0) {
+				data.msglen = parser.nextInt();
+			} else {
+				data.msglen = -1;
+			}
+			if (version >= 5.0) {
+				data.sendTime = parser.nextLong();
+			}
+			data.numPEs = parser.nextInt();
+			data.destPEs = new int[data.numPEs];
+			for (int i=0;i<data.numPEs;i++) {
+				data.destPEs[i] = parser.nextInt();
+			}
+			break;
+		case BEGIN_PROCESSING: 
+			lastBeginEvent.mtype = data.mtype = parser.nextInt();
+			lastBeginEvent.entry = data.entry = parser.nextInt();
+			lastBeginEvent.time = data.time = parser.nextLong();
+			lastBeginEvent.event = data.event = parser.nextInt();
+			lastBeginEvent.pe = data.pe = parser.nextInt();
+			if (version >= 2.0) {
+				lastBeginEvent.msglen = data.msglen = parser.nextInt();
+			} else {
+				lastBeginEvent.msglen = data.msglen = -1;
+			}
+			if (version >= 4.0) {
+				lastBeginEvent.recvTime = data.recvTime = 
+					parser.nextLong();
+				lastBeginEvent.id[0] = data.id[0] = parser.nextInt();
+				lastBeginEvent.id[1] = data.id[1] = parser.nextInt();
+				lastBeginEvent.id[2] = data.id[2] = parser.nextInt();
+			}
+			if (version >= 7.0) {
+				lastBeginEvent.id[3] = data.id[3] = parser.nextInt();
+			}
+			if (version >= 6.5) {
+				lastBeginEvent.cpuStartTime = data.cpuStartTime = 
+					parser.nextLong();
+			}
+			if (version >= 6.6) {
+				lastBeginEvent.numPerfCounts = data.numPerfCounts = 
+					parser.nextInt();
+				lastBeginEvent.perfCounts = new long[data.numPerfCounts];
+				data.perfCounts = new long[data.numPerfCounts];
+				for (int i=0; i<data.numPerfCounts; i++) {
+					lastBeginEvent.perfCounts[i] = data.perfCounts[i] = 
+						parser.nextLong();
+				}
+			}
+			lastBeginEvent.setValid(true);
+			break;
+		case END_PROCESSING:
+			data.mtype = parser.nextInt();
+			data.entry = parser.nextInt();
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			if (version >= 2.0) {
+				data.msglen = parser.nextInt();
+			} else {
+				data.msglen = -1;
+			}
+			if (version >= 6.5) {
+				data.cpuEndTime = parser.nextLong();
+			}
+			if (version >= 6.6) {
+				data.numPerfCounts = parser.nextInt();
+				data.perfCounts = new long[data.numPerfCounts];
+				for (int i=0; i<data.numPerfCounts; i++) {
+					data.perfCounts[i] = parser.nextLong();
+				}
+			}
+			break;
+		case BEGIN_TRACE: 
+			data.time = parser.nextLong();
+			// invalidates the last Begin Event. BEGIN_TRACE happens
+			// in the context of an entry method that is *not* traced.
+			// Hence when a BEGIN_TRACE event is encountered, no
+			// information is actually known about the entry method
+			// context.
+			lastBeginEvent.setValid(false);
+			break;
+		case END_TRACE:
+			data.time = parser.nextLong();
+			// END_TRACE happens in the context of an existing
+			// entry method and hence should logically "end" it.
+			// This means any client taking note of END_TRACE must
+			// take into account lastBeginEvent in order to get
+			// reasonable data.
+			break;
+		case BEGIN_FUNC:
+			data.time = parser.nextLong();
+			data.entry = parser.nextInt();
+			data.lineNo = parser.nextInt();
+			data.funcName = parser.restOfLine();
+			break;
+		case END_FUNC:
+			data.time = parser.nextLong();
+			data.entry = parser.nextInt();
+			break;
+		case MESSAGE_RECV:
+			data.mtype = parser.nextInt();
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			data.msglen = parser.nextInt();
+			break;
+		case ENQUEUE: case DEQUEUE:
+			data.mtype = parser.nextInt();
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			break;
+		case BEGIN_INTERRUPT: case END_INTERRUPT:
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			break;
+		case BEGIN_COMPUTATION:
+			data.time = parser.nextLong();
+			break;
+		case END_COMPUTATION:
+			data.time = parser.nextLong();
+			endComputationOccurred = true;
+			break;
+		case USER_EVENT:
+			data.userEventID = parser.nextInt();
+			data.entry = data.userEventID; 
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			break;
+		case USER_EVENT_PAIR:
+			data.userEventID = parser.nextInt();
+			data.entry = data.userEventID;
+			data.time = parser.nextLong();
+			data.event = parser.nextInt();
+			data.pe = parser.nextInt();
+			break;
+		default:
+			data.type = -1;
+		break;
+
+		}
+
+		lastRecordedTime = data.time;
+
+		return data;
+
+	}
+
+	/**
+	 *
+	 *  ***CURRENT IMP*** exponential search too hard, using sequential
+	 *
+	 *  eventOnOrAfter takes a timestamp and uses an exponential search 
+	 *  to locate the event. The trouble is that a seek backwards requires 
+	 *  resetting the stream.
+	 *
+	 *  It looks for recognized events. The current recognition scheme 
+	 *  overlooks a lot of important events!
+	 *
+	 *  An EOFException indicates that no such event was found.
+	 */
+	public LogEntryData nextEventOnOrAfter(long timestamp) 
+	throws IOException, EOFException
+	{
+		return seqLookForNextEventOnOrAfter(timestamp);
+	}
+
+	// More precisely, the next RECOGNIZED event
+	private LogEntryData seqLookForNextEventOnOrAfter(long timestamp)
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+		while (true) {
+			data = nextEvent();
+			// skip unrecognized tags
+			while (data.type == -1) {
+				data = nextEvent();
+			}
+			if (data.time >= timestamp) {
+				// found!
+				return data;
+			}
+		}
+	}
+
+	/**
+	 *  nextEventOfType gets the next event of the eventType.
+	 */
+	public LogEntryData nextEventOfType(int eventType) 
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+		while (true) {
+			data = nextEvent();
+			if (data.type == eventType) {
+				return data;
+			}
+		}
+	}
+
+	public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+
+		while (true) {
+			data = nextEventOnOrAfter(timestamp);
+			if (data.type == eventType) {
+				return data;
+			}
+		}
+	}
+
+	public LogEntryData nextBeginEvent()
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+
+		while (true) {
+			data = nextEvent();
+			if (data.isBeginType()) {
+				return data;
+			}
+		}
+	}
+
+	public void nextEndEvent(LogEntryData data)
+	throws IOException, EOFException
+	{
+		while (true) {
+			data = nextEvent();
+			if (data.isEndType()) {
+				return;
+			}
+		}
+	}
+
+	public LogEntryData nextBeginEventOnOrAfter(long timestamp)
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+
+		while (true) {
+			data = nextEventOnOrAfter(timestamp);
+			if (data.isBeginType()) {
+				return data;
+			}
+		}
+	}
+
+	public LogEntryData nextEndEventOnOrAfter(long timestamp)
+	throws IOException, EOFException
+	{
+		LogEntryData data = new LogEntryData();
+
+		while (true) {
+			data = nextEventOnOrAfter(timestamp);
+			if (data.isEndType()) {
+				return data;
+			}
+		}
+	}
+
+	public LogEntryData getLastBE() {
+		if (lastBeginEvent.isValid()) {
+			return lastBeginEvent;
+		}
+		return null;
+	}
+
+
+	public void close()
+	throws IOException
+	{
+		if (reader != null) {
+			reader.close();
+		}
+	}
+
 }

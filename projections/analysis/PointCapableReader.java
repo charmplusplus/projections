@@ -6,17 +6,16 @@ import java.io.*;
 
 public interface PointCapableReader {
     
-    public void nextEvent(LogEntryData data)
+    public LogEntryData nextEvent()
         throws IOException, EOFException;
 
-    public void nextEventOnOrAfter(long timestamp, LogEntryData data)
+    public LogEntryData nextEventOnOrAfter(long timestamp)
         throws IOException, EOFException;    
 
-    public void nextEventOfType(int eventType, LogEntryData data)
+    public LogEntryData nextEventOfType(int eventType)
         throws IOException, EOFException;    
 
-    public void nextEventOfTypeOnOrAfter(int eventType, long timestamp,
-					 LogEntryData data)
-        throws IOException, EOFException;    
+    public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
+        throws IOException, EOFException; 
 
 }

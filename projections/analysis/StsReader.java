@@ -136,8 +136,8 @@ public class StsReader extends ProjDefs
 			entryFlatToID.put(entryIndex, ID);
 			entryIDToFlat.put(ID,entryIndex);
 			entryIndex++;
-			entryNames.put(ID,Name);
-			entryChareNames.put(ID,ClassNames [ChareID]);
+			getEntryNames().put(ID,Name);
+			getEntryChareNames().put(ID,ClassNames [ChareID]);
 		} else if (s1.equals("MESSAGE")) {
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
@@ -222,19 +222,19 @@ public class StsReader extends ProjDefs
 
     
     public String getEntryNameByID(int ID) {
-    	return (String) entryNames.get(ID);
+    	return (String) getEntryNames().get(ID);
     }   
     
     public String getEntryNameByIndex(int index) {
-    	return (String) entryNames.get(entryFlatToID.get(index));
+    	return (String) getEntryNames().get(entryFlatToID.get(index));
     }   
     
     public String getEntryChareNameByID(int ID) {
-    	return (String) entryChareNames.get(ID);
+    	return (String) getEntryChareNames().get(ID);
     }   
     
     public String getEntryChareNameByIndex(int index) {
-    	return (String) entryChareNames.get(entryFlatToID.get(index));
+    	return (String) getEntryChareNames().get(entryFlatToID.get(index));
     }   
 
     public String getEntryFullNameByID(int ID) {
@@ -323,6 +323,22 @@ public class StsReader extends ProjDefs
     public boolean hasPapi() {
 	return hasPAPI;
     }
+
+	public void setEntryNames(Hashtable entryNames) {
+		this.entryNames = entryNames;
+	}
+
+	public Hashtable getEntryNames() {
+		return entryNames;
+	}
+
+	public void setEntryChareNames(Hashtable entryChareNames) {
+		this.entryChareNames = entryChareNames;
+	}
+
+	public Hashtable getEntryChareNames() {
+		return entryChareNames;
+	}
 
 
 }

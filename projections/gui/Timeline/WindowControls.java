@@ -81,6 +81,7 @@ ItemListener {
 	private JMenuItem mShiftTimelines;
 	private JMenuItem mUserEventReport;
 	private JMenuItem mDetermineTimeRangesUserSupplied;
+	private JMenuItem mShowHideEntries;
 
 
 	public WindowControls(TimelineWindow parentWindow_,
@@ -291,6 +292,10 @@ ItemListener {
 
 		else if(evt.getSource() == mShiftTimelines)
 			data.fixTachyons();
+		
+		else if(evt.getSource() == 	mShowHideEntries){
+			ChooseEntriesWindow chooseEntriesWindow = new ChooseEntriesWindow(data);
+		}
 
 		else if(evt.getSource() == mUserEventReport){
 			data.printUserEventInfo();
@@ -443,14 +448,17 @@ ItemListener {
 		// Experimental Features Menu
 		JMenu experimentalMenu = new JMenu("Experimental Features");
 		mShiftTimelines = new JMenuItem("Shift Timelines to fix inconsistent clocks");
-		mUserEventReport = new JMenuItem("User Event Reporting");
-
 		mShiftTimelines.addActionListener(this);
 		experimentalMenu.add(mShiftTimelines);
 
+		mShowHideEntries = new JMenuItem("Show & Hide Entry Methods");
+		mShowHideEntries.addActionListener(this);
+		experimentalMenu.add(mShowHideEntries);
+		
+		mUserEventReport = new JMenuItem("User Event Reporting");
 		mUserEventReport.addActionListener(this);
 		experimentalMenu.add(mUserEventReport);
-
+	
 		cbCompactView = new JCheckBoxMenuItem("Compact View");
 		cbCompactView.addItemListener(this);
 		experimentalMenu.add(cbCompactView);

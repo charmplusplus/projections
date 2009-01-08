@@ -110,21 +110,21 @@ public class Analysis {
     guiRoot = rootComponent;
     try {
       baseName = FileUtils.getBaseName(filename);
-      sts = new StsReader(filename);
+      setSts(new StsReader(filename));
       
       // Version Check (Kind of a hack, since the format of the Sts file
       // can change between versions.
-      if (sts.getVersion() > MainWindow.CUR_VERSION) {
+      if (getSts().getVersion() > MainWindow.CUR_VERSION) {
 	System.err.println("Projections Version [" + MainWindow.CUR_VERSION +
 			   "] unable to handle files of Version [" +
-			   sts.getVersion() + "].");
+			   getSts().getVersion() + "].");
 	System.err.println("Exiting.");
 	System.exit(-1);
       }
 
       rcReader = 
 	new ProjectionsConfigurationReader(filename);
-      FileUtils.detectFiles(sts, baseName);
+      FileUtils.detectFiles(getSts(), baseName);
       
       // Projections Colors
       String colorsaved = 
@@ -257,9 +257,9 @@ public class Analysis {
     userEventColors = activityColors[ActivityManager.USER_EVENTS];
     functionColors = activityColors[ActivityManager.FUNCTIONS];
     grayColors = 
-      ColorManager.createGrayscaleColorMap(sts.getEntryCount());
+      ColorManager.createGrayscaleColorMap(getSts().getEntryCount());
     grayUserEventColors = 
-      ColorManager.createGrayscaleColorMap(sts.getNumUserDefinedEvents());
+      ColorManager.createGrayscaleColorMap(getSts().getNumUserDefinedEvents());
     // default to full colors
     activeColorMap = entryColors;
     activeUserColorMap = userEventColors;
@@ -362,14 +362,14 @@ public class Analysis {
     }
 
     public Color getEntryColor(int entryIdx) {
-	if (entryIdx < sts.getEntryCount()) {
+	if (entryIdx < getSts().getEntryCount()) {
 	    return activeColorMap[entryIdx];
 	}
 	return null;
     }
 
     public void setEntryColor(int entryIdx, Color color) {
-	if (entryIdx < sts.getEntryCount()) {
+	if (entryIdx < getSts().getEntryCount()) {
 	    activeColorMap[entryIdx] = color;
 	} else {
 	    System.err.println("Warning: entry point index " + entryIdx +
@@ -391,7 +391,7 @@ public class Analysis {
 	    UsageCalc u=new UsageCalc();
 	    return u.usage(pnum, begintime, endtime, getVersion() );
 	}
-	int numUserEntries=sts.getEntryCount();
+	int numUserEntries=getSts().getEntryCount();
 	long[][] data;
 	long[][] phasedata;
 	/*BAD: silently ignores begintime and endtime*/
@@ -566,10 +566,10 @@ public class Analysis {
 
     // *** Version accessor ***
     public double getVersion() { 
-	if (sts == null) {
+	if (getSts() == null) {
 	    return MainWindow.CUR_VERSION; 
 	} else {
-	    return sts.getVersion();
+	    return getSts().getVersion();
 	}
     }
 
@@ -661,12 +661,12 @@ public class Analysis {
 
     /** number of processors listed in sts file */
     public int getNumProcessors() {
-	return sts.getProcessorCount();
+	return getSts().getProcessorCount();
     }
 
     /** Number of entries in the STS file */
     public int getEntryCount() {
-    	return sts.getEntryCount();
+    	return getSts().getEntryCount();
     }
  
     public int getNumUserEntries() {
@@ -674,31 +674,31 @@ public class Analysis {
     }
     
     public String getEntryNameByIndex(int epIdx) {
-    	return sts.getEntryNameByIndex(epIdx);
+    	return getSts().getEntryNameByIndex(epIdx);
     }
 
     public String getEntryChareNameByIndex(int epIdx) {
-    	return sts.getEntryChareNameByIndex(epIdx);
+    	return getSts().getEntryChareNameByIndex(epIdx);
     }
 
     public String getEntryFullNameByIndex(int epIdx) {
-    	return sts.getEntryFullNameByIndex(epIdx);
+    	return getSts().getEntryFullNameByIndex(epIdx);
     }
 
     public String getEntryNameByID(int ID) {
-    	return sts.getEntryNameByID(ID);
+    	return getSts().getEntryNameByID(ID);
     }
 
     public String getEntryChareNameByID(int ID) {
-    	return sts.getEntryChareNameByID(ID);
+    	return getSts().getEntryChareNameByID(ID);
     }
 
     public String getEntryFullNameByID(int ID) {
-    	return sts.getEntryFullNameByID(ID);
+    	return getSts().getEntryFullNameByID(ID);
     }
     
     public Integer getEntryIndex(Integer ID){
-    	Integer result = sts.getEntryIndex(ID);	
+    	Integer result = getSts().getEntryIndex(ID);	
     	if(result != null)
     		return result;
     	else 
@@ -706,35 +706,35 @@ public class Analysis {
     }
         
     public int getNumUserDefinedEvents() {
-	return sts.getNumUserDefinedEvents();
+	return getSts().getNumUserDefinedEvents();
     }
 
     public int getUserDefinedEventIndex(int eventID) {
-	return sts.getUserEventIndex(eventID);
+	return getSts().getUserEventIndex(eventID);
     }
 
     public String getUserEventName(int eventID) {
-	return sts.getUserEventName(eventID); 
+	return getSts().getUserEventName(eventID); 
     }
     
     public String[] getUserEventNames() {
-	return sts.getUserEventNames();
+	return getSts().getUserEventNames();
     }
 
     public int getNumPerfCounts() {
-	return sts.getNumPerfCounts();
+	return getSts().getNumPerfCounts();
     }
 
     public String[] getPerfCountNames() {
-	return sts.getPerfCountNames();
+	return getSts().getPerfCountNames();
     }
 
     public int getNumFunctionEvents() {
-	return sts.getNumFunctionEvents();
+	return getSts().getNumFunctionEvents();
     }
 
     public Color getFunctionColor(int eventID) {
-	return functionColors[sts.getFunctionEventIndex(eventID)];
+	return functionColors[getSts().getFunctionEventIndex(eventID)];
     }
 
     public Color[] getFunctionColors() {
@@ -746,11 +746,11 @@ public class Analysis {
     }
 
     public String getFunctionName(int funcID) {
-	return sts.getFunctionEventDescriptor(funcID);
+	return getSts().getFunctionEventDescriptor(funcID);
     }
 
     public String[] getFunctionNames() {
-	return sts.getFunctionEventDescriptors();
+	return getSts().getFunctionEventDescriptors();
     }
     
     /**
@@ -786,8 +786,8 @@ public class Analysis {
     
     
     public Color getUserEventColor(int eventID) {
-    	if (sts != null) { 
-    		Integer idx = sts.getUserEventIndex(eventID);
+    	if (getSts() != null) { 
+    		Integer idx = getSts().getUserEventIndex(eventID);
     		if(idx!=null)
     			return userEventColors[idx.intValue()]; 
     	} 
@@ -797,8 +797,8 @@ public class Analysis {
 
     
     public void setUserEventColor(int eventID, Color c) {
-    	if (sts != null) { 
-    		Integer idx = sts.getUserEventIndex(eventID);
+    	if (getSts() != null) { 
+    		Integer idx = getSts().getUserEventIndex(eventID);
     		if(idx!=null)
     			userEventColors[idx.intValue()] = c; 
     	} 
@@ -876,7 +876,7 @@ public class Analysis {
     
 
     public boolean hasPapi() {
-	return sts.hasPapi();
+	return getSts().hasPapi();
     }
 
     // ************** Public Accessors to File Information *************
@@ -969,5 +969,13 @@ public class Analysis {
     private boolean hasPoseDopFiles() {
 	return FileUtils.hasPoseDopFiles();
     }
+
+	public void setSts(StsReader sts) {
+		this.sts = sts;
+	}
+
+	public StsReader getSts() {
+		return sts;
+	}
     
 }

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,7 +18,10 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Color;
-import projections.analysis.*;
+
+import projections.analysis.PackTime;
+import projections.analysis.ThreadManager;
+import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
@@ -95,6 +99,10 @@ public class Data
 
 	private Color[]        entryColor;
 
+	/** A set of entry point ids that should be hidden */
+	Set<Integer> hiddenEntryPoints;
+
+	
 	/** Each value of the TreeMap is a TreeSet (sorted list) of EntryMethodObject's .
 	 *  Each key of the TreeMap is an Integer pe 
 	 *  <Integer,LinkedList<EntryMethodObject> >
@@ -198,6 +206,9 @@ public class Data
 		peToLine = new LinkedList();
 		
 		messageStructures = new MessageStructures(this);
+		
+		hiddenEntryPoints = new TreeSet<Integer>();
+
 		
 		oldBT = -1;
 		oldET = -1;
@@ -1748,6 +1759,45 @@ public class Data
 		}
 		
 		modificationHandler.notifyProcessorListHasChanged();
+	}
+
+	
+	/** Produce a hashmap containing the ids and nicely mangled string names for each entry method */
+	public Hashtable<Integer, String> getEntryNames() {
+		
+		Hashtable entryNames = MainWindow.runObject[myRun].getSts().getEntryNames();
+		Hashtable entryChareNames = MainWindow.runObject[myRun].getSts().getEntryChareNames();
+
+		Hashtable<Integer, String> result = new Hashtable<Integer, String>();
+		
+		Iterator iter = entryNames.keySet().iterator();
+		while(iter.hasNext()){
+			Integer id = (Integer) iter.next();
+			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
+		}
+		
+		return result;	
+	}
+
+	
+	/** Make visible the entry methods for this id */	
+	public void makeEntryVisibleID(Integer id) {
+		hiddenEntryPoints.remove(id);
+		this.displayMustBeRepainted();
+	}	
+
+	/** Hide the entry methods for this id */
+	public void makeEntryInvisibleID(Integer id) {
+		hiddenEntryPoints.add(id);
+		this.displayMustBeRepainted();
+	}
+
+	public boolean entryIsHiddenID(Integer id) {
+		return hiddenEntryPoints.contains(id);
+	}
+	
+	public boolean entryIsVisibleID(Integer id) {
+		return ! hiddenEntryPoints.contains(id);
 	}
 	
 	

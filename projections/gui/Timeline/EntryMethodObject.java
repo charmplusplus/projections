@@ -594,12 +594,15 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	public void paintComponent(Graphics g)
 	{     
 		super.paintComponent(g);
-
+		
 		// If this is an idle time region, we may not display it
-		if ((isIdleEvent() && data.showIdle() == false) ||
-				(isIdleEvent() && MainWindow.IGNORE_IDLE)) {
+		if 	(isIdleEvent() && data.showIdle() == false) 
 			return;
-		}
+		if (isIdleEvent() && MainWindow.IGNORE_IDLE)
+			return;
+		if(data.entryIsHiddenID(this.getEntryID()))
+			return;
+		
 
 		Color c;
 

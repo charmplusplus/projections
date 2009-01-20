@@ -94,8 +94,6 @@ public class LogFileViewerTextArea extends JPanel
 				if(data.time >= startTime && data.time <= endTime){
 
 					htmlFormattedTable.append( "<tr><td>" + data.time + "<td>");
-
-					System.out.println("event: " + data.htmlFormattedDescription());
 					
 					htmlFormattedTable.append(data.htmlFormattedDescription());
 
@@ -106,21 +104,20 @@ public class LogFileViewerTextArea extends JPanel
 
 				}
 
-				// Put the finishing touches on the html formatted text
-				htmlFormattedTable.append( "</table></body></html>");
-
-				// Set the text in textPane to the html formatted text
-				textPane.setText(htmlFormattedTable.toString());		
-
-				// Scroll to the top
-				textPane.setSelectionStart(0);
-				textPane.setSelectionEnd(0);
 
 			}
 
 		} catch (Exception e) {
 			
-			
+			// Put the finishing touches on the html formatted text
+			htmlFormattedTable.append( "</table></body></html>");
+
+			// Set the text in textPane to the html formatted text
+			textPane.setText(htmlFormattedTable.toString());		
+
+			// Scroll to the top
+			textPane.setSelectionStart(0);
+			textPane.setSelectionEnd(0);
 		}
 		
 	}

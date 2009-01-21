@@ -693,6 +693,7 @@ public class Analysis {
     	return getSts().getEntryChareNameByID(ID);
     }
 
+    /** Return the name specified in the STS file for the event with ID, as specified in STS file */
     public String getEntryFullNameByID(int ID) {
     	return getSts().getEntryFullNameByID(ID);
     }

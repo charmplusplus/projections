@@ -8,6 +8,7 @@ import java.awt.event.MouseListener;
 
 import javax.swing.*;
 
+import projections.gui.Analysis;
 import projections.gui.MainWindow;
 
 public class UserEventObject extends JComponent implements Comparable, MouseListener,  ActionListener
@@ -57,11 +58,25 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		this.BeginTime=EndTime=t;
 		this.pe = pe;
-		this.note = note;
-		
+		setNote(note);
 		addMouseListener(this);
 	}
 
+	/** Set the note, replacing any occurrences of <EP #> with the name of the entry point */
+	public void setNote(String s){
+		Analysis a = MainWindow.runObject[myRun];
+		String modified = s;
+		if(s.contains("<EP")){
+			int numEntries = a.getEntryCount();
+			for(int i=0; i<numEntries; i++){
+				String name = a.getEntryFullNameByID(i);
+				modified = modified.replace("<EP " + i + ">", name);
+			}		
+		}
+				
+		this.note = modified;
+	}
+	
 	public String getName(){
 		if(note != null)
 			return note;
@@ -119,8 +134,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(note == null)
 			setToolTipText("<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>");
 		else
-			setToolTipText("<html><body><p><i>User Supplied Note:</i><p><i>occurred on PE:</i> " + pe + "</p><p></p><p>" + note + "</p></html></body>");
-
+			setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>");
 			
 		this.setBounds( left, top, width, height );
 				

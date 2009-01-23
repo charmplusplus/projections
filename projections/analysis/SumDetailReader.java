@@ -167,9 +167,6 @@ public class SumDetailReader extends ProjectionsReader
 	reader = null;
     }
 
-    public void reset() {
-	// stupid, but do it for doing it's sake.
-    }
 
     private void buildTable(int type) 
 	throws IOException

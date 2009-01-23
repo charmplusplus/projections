@@ -5,10 +5,7 @@ import javax.swing.*;
 
 public class JLongTextField extends JTextField
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	private String lastValue;
     int    lastCaretPosition;
     

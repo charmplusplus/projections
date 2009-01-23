@@ -61,8 +61,8 @@ public abstract class GenericGraphWindow
 
     // constructor 
     public GenericGraphWindow(String title, 
-			      MainWindow mainWindow, Integer myWindowID) {
-	super(title, mainWindow, myWindowID);
+			      MainWindow mainWindow) {
+	super(title, mainWindow);
 	menuBar.add(fileMenu);
     }
 
@@ -94,17 +94,17 @@ public abstract class GenericGraphWindow
 	return mainPanel;
     }
 
-    // set Graph Specific data
-    // **CW** 12/01/2003 - a more appropriate name
-    protected void setStackGraph(boolean isSet) {
-	if (graphCanvas != null) {
-	    graphCanvas.setStackGraph(isSet);
-	} else {
-	    // issue warning.
-	    System.err.println("Warning: The graph canvas has not yet been " +
-			       "initialized! Ignoring request.");
-	}
-    }
+//    // set Graph Specific data
+//    // **CW** 12/01/2003 - a more appropriate name
+//    protected void setStackGraph(boolean isSet) {
+//	if (graphCanvas != null) {
+//	    graphCanvas.setStackGraph(isSet);
+//	} else {
+//	    // issue warning.
+//	    System.err.println("Warning: The graph canvas has not yet been " +
+//			       "initialized! Ignoring request.");
+//	}
+//    }
 
     protected void getDialogData() {
 	validPEs = dialog.getValidProcessors();
@@ -163,21 +163,21 @@ public abstract class GenericGraphWindow
     }
 
     // whenever datasource changes, yaxis needs to be changed too
-    protected void setDataSource(String title, int [] data){
-	dataSource = new DataSource1D(title,data);
-	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-	if(yAxis != null)
-	    yAxis = 
-		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-    }
+//    protected void setDataSource(String title, int [] data){
+//	dataSource = new DataSource1D(title,data);
+//	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
+//	if(yAxis != null)
+//	    yAxis = 
+//		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+//    }
 
-    protected void setDataSource(String title, double [][] data){
-	dataSource = new DataSource2D(title,data);
-	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-	if(yAxis != null)
-	    yAxis = 
-		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-    }
+//    protected void setDataSource(String title, double [][] data){
+//	dataSource = new DataSource2D(title,data);
+//	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
+//	if(yAxis != null)
+//	    yAxis = 
+//		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+//    }
 
     // This should be the correct way of setting a data source with a partial
     // set of colors
@@ -192,13 +192,13 @@ public abstract class GenericGraphWindow
 	}
     }
 
-    protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
-	dataSource = new DataSource1D(title,data,parent);
-	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-	if(yAxis != null)
-	    yAxis = 
-		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-    }
+//    protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
+//	dataSource = new DataSource1D(title,data,parent);
+//	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
+//	if(yAxis != null)
+//	    yAxis = 
+//		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+//    }
 
     protected void setDataSource(String title, double [][] data, GenericGraphWindow parent){
 	dataSource = new DataSource2D(title,data, parent);

@@ -18,35 +18,35 @@ import projections.analysis.ObjectId;
  * 
  * */
 public class MessageStructures {
-	
+
 	Data data;
-	
+
 	// TODO update each of these first two members to make them not require space proportional to PE.
-	
+
 	/** A Map for each PE, key = eventID value = Message */
 	private Map []eventIDToMessageMap;
-	
+
 	/** A Map for each PE, key = eventID value = EntryMethodObject */
 	private Map []eventIDToEntryMethodMap;
-	
+
 	/** Map from a message to the the resulting entry methods entry object invocations */
 	private Map messageToExecutingObjectsMap;
-	
+
 	/** Map from a message to its invoking entry method instance */
 	private Map messageToSendingObjectsMap;
-	
+
 	/** Map from Chare Array element id's to the corresponding known entry method invocations */
 	private Map oidToEntryMethodObjectsMap;
-	
+
 	/** A worker thread that creates those data structures */
 	private ThreadMessageStructures secondaryWorkers;
-	
+
 	public MessageStructures(Data data){
 		this.data = data;
 		init();
 	}
 
-	
+
 	/** Delete all old references by initializing each data structure */
 	private void init(){
 		synchronized(this){
@@ -66,7 +66,7 @@ public class MessageStructures {
 			oidToEntryMethodObjectsMap = new TreeMap();
 		}		
 	}
-	
+
 	/** Spawn a thread that will fill in the data structures. It is unlikely in the visualization that these 
 	 * structures will be needed early on. Due to the mutual exclusion synchronization on this object,
 	 *  all threads that eventually need the data will block until the data has been produced */
@@ -78,7 +78,7 @@ public class MessageStructures {
 			secondaryWorkers.setPriority(Thread.MIN_PRIORITY);
 			secondaryWorkers.start();
 		} else {
-			generate();
+			generate(null);
 		}
 	}
 
@@ -92,10 +92,6 @@ public class MessageStructures {
 
 	public Map getMessageToSendingObjectsMap() {
 		return messageToSendingObjectsMap;
-	}
-
-	public Map getOidToEntryMethonObjectsMap() {
-		return getOidToEntryMethodObjectsMap();
 	}
 
 	public void setOidToEntryMethodObjectsMap(Map oidToEntryMethodObjectsMap) {
@@ -129,19 +125,22 @@ public class MessageStructures {
 
 	public void kill() {
 		if(secondaryWorkers != null){
-			secondaryWorkers.stop();
+			secondaryWorkers.stopThread();
 			secondaryWorkers = null;
 		}
 		init();
 	}
-	
-	public void generate(){
+
+	public void generate(ThreadMessageStructures structures){
 
 		// TODO These are computed anytime a new range or pe is loaded. Make faster by just adding in the new PEs portion
-
 		/** Create a mapping from EventIDs on each pe to messages */
 		Iterator pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
+
+			if(structures!=null && structures.stop)
+				return;
+			
 			Integer pe =  (Integer) pe_iter.next();
 			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
 			Iterator obj_iter = objs.iterator();
@@ -158,14 +157,14 @@ public class MessageStructures {
 		}
 
 
-//		progressBar.setProgress(1);
-//		progressBar.setNote("Creating Map 2");
-
-
 		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
-	
+
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
+
+			if(structures!=null && structures.stop)
+				return;
+			
 			Integer pe =  (Integer) pe_iter.next();
 			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
 			Iterator obj_iter = objs.iterator();
@@ -175,14 +174,16 @@ public class MessageStructures {
 			}
 		}
 
-//		progressBar.setProgress(2);
-//		progressBar.setNote("Creating Map 3");
-
 
 		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
 
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
+			
+
+			if(structures!=null && structures.stop)
+				return;
+			
 			Integer pe =  (Integer) pe_iter.next();
 			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
 			Iterator obj_iter = objs.iterator();
@@ -197,16 +198,16 @@ public class MessageStructures {
 				}
 			}				
 		}
-	
-
-//		progressBar.setProgress(3);
-//		progressBar.setNote("Creating Map 4");
 
 
 		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
-	
+
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
+
+			if(structures!=null && structures.stop)
+				return;
+			
 			Integer pe =  (Integer) pe_iter.next();
 			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
 			Iterator obj_iter = objs.iterator();
@@ -228,19 +229,18 @@ public class MessageStructures {
 						getMessageToExecutingObjectsMap().put(msg, ts);
 					}
 				}
-							
+
 			}
 		}
-
-
-//		progressBar.setProgress(4);
-//		progressBar.setNote("Creating Map 5");
-
 
 		/** Create a mapping from Chare array element indices to their EntryMethodObject's */
 
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
+
+			if(structures!=null && structures.stop)
+				return;
+			
 			Integer pe =  (Integer) pe_iter.next();
 			LinkedList objs = (LinkedList)data.allEntryMethodObjects.get(pe);
 			Iterator obj_iter = objs.iterator();
@@ -265,5 +265,5 @@ public class MessageStructures {
 			}				
 		}
 	}
-			
+
 }

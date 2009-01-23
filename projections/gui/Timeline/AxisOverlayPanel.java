@@ -13,12 +13,7 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 	
 	private AxisOverlayPanel thisPanel;
 
-
-	private static final long serialVersionUID = 1L;
-
 	private Data  data;
-
-
 
 	public AxisOverlayPanel(Data data)
 	{

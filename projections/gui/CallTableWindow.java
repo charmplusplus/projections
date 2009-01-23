@@ -9,10 +9,6 @@ import projections.analysis.*;
 public class CallTableWindow extends ProjectionsWindow
     implements ItemListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	CallTableWindow      thisWindow;    
     
@@ -53,8 +49,8 @@ public class CallTableWindow extends ProjectionsWindow
         // acquire data using parent class
     }
 
-    public CallTableWindow(MainWindow parentWindow, Integer myWindowID) {
-	super(parentWindow, myWindowID);
+    public CallTableWindow(MainWindow parentWindow ) {
+	super(parentWindow);
 	thisWindow = this;
 	
 	setBackground(Color.lightGray);
@@ -230,7 +226,4 @@ public class CallTableWindow extends ProjectionsWindow
 	super.setDialogData();
     }
 
-    public void showWindow() {
-	// do nothing
-    }
 }

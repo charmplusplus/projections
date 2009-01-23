@@ -320,21 +320,10 @@ public class StsReader extends ProjDefs
 	}
     }
 
-    public boolean hasPapi() {
-	return hasPAPI;
-    }
-
-	public void setEntryNames(Hashtable entryNames) {
-		this.entryNames = entryNames;
-	}
-
 	public Hashtable getEntryNames() {
 		return entryNames;
 	}
 
-	public void setEntryChareNames(Hashtable entryChareNames) {
-		this.entryChareNames = entryChareNames;
-	}
 
 	public Hashtable getEntryChareNames() {
 		return entryChareNames;

@@ -16,20 +16,7 @@ package projections.analysis;
 
 public class Sorter
 {
-    public static int[] sort(double[] inArray) {
-	int sortMap[] = new int[inArray.length];
-	double workArray[] = new double[inArray.length];
-
-	// initialization
-	for (int i=0; i<inArray.length; i++) {
-	    sortMap[i] = i;
-	    workArray[i] = inArray[i];
-	}
-
-	qSort(sortMap, workArray, 0, inArray.length-1);
-
-	return sortMap;
-    }
+  
 
     /** 
      *  Invariant: Every element to the left of the pivot is smaller than

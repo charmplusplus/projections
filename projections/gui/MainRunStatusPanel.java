@@ -20,10 +20,7 @@ import java.awt.*;
 public class MainRunStatusPanel extends JPanel 
     implements ChangeListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	JTextField statusField;
     JLabel statusLabel;
 
@@ -32,7 +29,7 @@ public class MainRunStatusPanel extends JPanel
     public MainRunStatusPanel() {
 	createLayout();
     }
-
+ 
     public void stateChanged(ChangeEvent e) {
 	if (e.getSource() instanceof MainSummaryGraphPanel) {
 	    MainSummaryGraphPanel pane = 

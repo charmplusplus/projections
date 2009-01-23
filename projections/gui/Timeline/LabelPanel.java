@@ -18,8 +18,6 @@ public class LabelPanel extends JPanel implements MouseListener, MouseMotionList
 	// TODO: create a component for each displayed PE which contains 
 	// a tooltip showing the confusing "(23, 20)" portion of the display
 		
-	private static final long serialVersionUID = 1L;
-		
 	private Data data;
 
 	int clickedOnPE;

@@ -6,7 +6,7 @@ package projections.analysis;
  *  constant definitions for numbers in the logs.
  */
 public class ProjDefs extends java.lang.Object
-{
+{ 
 
 /** Message Creation point */
 public static final int CREATION                 = 1;
@@ -50,26 +50,26 @@ public static final int USER_EVENT_PAIR          = 100;
 
 /* *** USER category *** */
 public static final int NEW_CHARE_MSG            = 0;
-public static final int NEW_CHARE_NO_BALANCE_MSG = 1;
+//public static final int NEW_CHARE_NO_BALANCE_MSG = 1;
 public static final int FOR_CHARE_MSG            = 2;
 public static final int BOC_INIT_MSG             = 3;
-public static final int BOC_MSG                  = 4;
-public static final int TERMINATE_TO_ZERO        = 5;  // never used ??
-public static final int TERMINATE_SYS            = 6;  // never used ??
-public static final int INIT_COUNT_MSG           = 7;
-public static final int READ_VAR_MSG             = 8;
-public static final int READ_MSG_MSG             = 9;
-public static final int BROADCAST_BOC_MSG        = 10;
-public static final int DYNAMIC_BOC_INIT_MSG     = 11;
+//public static final int BOC_MSG                  = 4;
+//public static final int TERMINATE_TO_ZERO        = 5;  // never used ??
+//public static final int TERMINATE_SYS            = 6;  // never used ??
+//public static final int INIT_COUNT_MSG           = 7;
+//public static final int READ_VAR_MSG             = 8;
+//public static final int READ_MSG_MSG             = 9;
+//public static final int BROADCAST_BOC_MSG        = 10;
+//public static final int DYNAMIC_BOC_INIT_MSG     = 11;
 
 /* *** IMMEDIATE category *** */
 public static final int LDB_MSG                  = 12;
-public static final int VID_SEND_OVER_MSG        = 13;
+//public static final int VID_SEND_OVER_MSG        = 13;
 public static final int QD_BOC_MSG               = 14;
 public static final int QD_BROADCAST_BOC_MSG     = 15;
-public static final int IMM_BOC_MSG              = 16;
-public static final int IMM_BROADCAST_BOC_MSG    = 17;
-public static final int INIT_BARRIER_PHASE_1     = 18;
-public static final int INIT_BARRIER_PHASE_2     = 19;
+//public static final int IMM_BOC_MSG              = 16;
+//public static final int IMM_BROADCAST_BOC_MSG    = 17;
+//public static final int INIT_BARRIER_PHASE_1     = 18;
+//public static final int INIT_BARRIER_PHASE_2     = 19;
 
 }

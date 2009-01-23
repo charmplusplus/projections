@@ -171,10 +171,7 @@ public class Data
 	/** A set of objects for which we draw their creation message lines in an alternate color */
 	public Set drawMessagesForTheseObjectsAlt;
 	
-	
-	/** The line thickness for the mesg send lines */
-	public float messageLineThickness=2.5f;
-	
+		
 	private boolean useCustomColors=false;
 	
 	/** A custom foreground color that can override the application wide background pattern. Used by NoiseMiner to set a white background */
@@ -185,11 +182,6 @@ public class Data
 	boolean drawNestedUserEventRows = false;
 	public long minUserSupplied = 0;
 	public long maxUserSupplied = 0;
-	
-	public Data(){
-		System.err.println("Do not call this constructor\n");
-		System.exit(1);
-	}
 	
 	/** A constructor that takes in a TimelineContainer(for handling some events) 
 	 *  and provides sensible default values for various parameters 
@@ -265,19 +257,7 @@ public class Data
 		}
 	}
 	
-	
-	/** 
-	 * Add the data for a new processor to this visualization
-	 */
-	public void removeProcessor(int pCreation){
-		Integer p = new Integer(pCreation);
-		if(peToLine.contains(p)){
-			peToLine.remove(p);
-			modificationHandler.notifyProcessorListHasChanged();
-		}
-	}
-	
-	
+
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
 	public void setProcessorList(OrderedIntList processorList){
 		peToLine.clear();
@@ -524,12 +504,6 @@ public class Data
 		}
 	}
 
-	/** remove all the message send lines */
-	public void clearAllLines() {
-		drawMessagesForTheseObjects.clear();
-		drawMessagesForTheseObjectsAlt.clear();
-		displayMustBeRepainted();
-	}
 	
 	/** Add or Remove a new line to the visualization representing the sending of a message */
 	public void toggleMessageSendLine(EntryMethodObject obj) {
@@ -551,13 +525,9 @@ public class Data
 		}
 	}
 	
-	/** Add a new line to the visualization representing the sending of a message.
+	/** Add a set of new lines to the visualization representing the sending of a message.
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */
-	public void addMessageSendLine(EntryMethodObject obj) {
-			drawMessagesForTheseObjects.add(obj);
-	}
-	
 	public void addMessageSendLineAlt(Set s) {
 		drawMessagesForTheseObjectsAlt.addAll(s);
 	}
@@ -569,13 +539,6 @@ public class Data
 		drawMessagesForTheseObjects.addAll(s);
 	}
 	
-	/** Remove a set of objects so their creation messages are no longer displayed
-	 * @note the caller should call 	displayMustBeRepainted() after removing all desired messages
-	 */
-	public void removeMessageSendLine(Set s) {
-		drawMessagesForTheseObjects.removeAll(s);
-		drawMessagesForTheseObjectsAlt.removeAll(s);
-	}
 	
 	public void clearMessageSendLines() {
 		drawMessagesForTheseObjects.clear();
@@ -805,9 +768,6 @@ public class Data
 		return offset();
 	}
 
-	public int rightOffset(){
-		return offset();
-	}
 
 	public int topOffset(){
 		if(useMinimalView() || useCompactView())
@@ -968,13 +928,7 @@ public class Data
 			return selection1;
 	}
 
-	/** Get the width of the selection in pixels
-	 * 
-	 * @note This should only be called if selectionValid() already returns true
-	 * */
-	public int selectionWidth(){
-		return rightSelection() - leftSelection();
-	}
+
 
 	/** Set the first selection boundary x screen/pixel coordinate */
 	public void setSelection1(int value){
@@ -1022,15 +976,16 @@ public class Data
 		return Math.round(beginTime + fractionAlongAxis*(endTime-beginTime));	
 	}
 
-	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
-	 * 
-	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
-	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
-	 */
-	public int timeToScreenPixel(double time) {
-		double fractionAlongTimeAxis =  ((double) (time-beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)Math.round(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
-	}
+//	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
+//	 * 
+//	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
+//	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
+//	 */
+//	public int timeToScreenPixel(double time) {
+//		double fractionAlongTimeAxis =  ((double) (time-beginTime)) /((double)(endTime-beginTime));
+//		return offset() + (int)Math.round(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
+//	}
+//	
 	
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
 	 * 
@@ -1182,13 +1137,6 @@ public class Data
 		else
 			return ! highlightedObjects.contains(o);
 	}
-		
-	/** Determine if any objects should be dimmed. 
-	 */
-	public boolean isAnyObjectDimmed(){
-		return highlightedObjects.size()>0;
-	}
-		
 	
 	public boolean traceMessagesBackOnHover() {
 		return traceMessagesBackOnHover;
@@ -1431,12 +1379,7 @@ public class Data
 		return useCompactView;
 	}
 	
-	public Component guiRoot() {
-		if(guiRoot != null)
-			return guiRoot;
-		else
-			return MainWindow.runObject[myRun].guiRoot;
-	}
+	
 	public void guiRoot(TimelineWindow timelineWindow) {
 		guiRoot = timelineWindow;
 	}
@@ -1480,15 +1423,6 @@ public class Data
 	}
 
 
-	public void dumpPEOrder(){
-//		Iterator iter = peToLine.keySet().iterator();
-//		while(iter.hasNext()){
-//			Integer pe = (Integer) iter.next();
-//			int line =  ((Integer)peToLine.get(pe)).intValue();
-//			System.out.println("pe " + pe +  " is at " + line);
-//		}
-	}
-	
 	public void movePEToLine(int PE, int newPos){
 		Integer p = new Integer(PE);
 		peToLine.remove(p);

@@ -20,7 +20,7 @@ import java.io.*;
  */
 public abstract class ProjectionsReader
     extends ProjDefs
-{
+{ 
     private boolean available;
     protected String expectedVersion = null;
 
@@ -86,22 +86,24 @@ public abstract class ProjectionsReader
      */
     protected abstract boolean checkAvailable();
 
-    /**
-     *  This accessor can be used by external tools to determine if a
-     *  particular file (typically a processor) is available for use.
-     */
-    public final boolean isAvailable() {
-	return available;
-    }
+//    /**
+//     *  This accessor can be used by external tools to determine if a
+//     *  particular file (typically a processor) is available for use.
+//     */
+//    public final boolean isAvailable() {
+//	return available;
+//    }
 
-    /**
-     *  This accessor can be used by the inheriting class to mark
-     *  the file unavailable in response to more specialized conditions.
-     */
-    protected final void markUnavailable() {
-	available = false;
-    }
+    
+//    /**
+//     *  This accessor can be used by the inheriting class to mark
+//     *  the file unavailable in response to more specialized conditions.
+//     */
+//    protected final void markUnavailable() {
+//	available = false;
+//    }
 
+    
     /**
      *  INHERITANCE NOTE: Implementing classes should override this 
      *  method for the reading of static data stored in the target

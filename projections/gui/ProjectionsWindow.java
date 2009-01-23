@@ -37,11 +37,7 @@ public abstract class ProjectionsWindow
 {
     private Button window[];
 
-    /**
-     *  unique identifier to allow the main window to identify and
-     *  destroy this window completely
-     */
-    protected int myWindowID;
+    
     /**
      *  reference to the main window
      */
@@ -77,11 +73,7 @@ public abstract class ProjectionsWindow
      */
     protected abstract void showDialog();
 
-    // Must implement code to display the window. This
-    // bypasses the dialog and MUST NOT perform any serious
-    // blocking computation.
-    protected abstract void showWindow();
-
+    
     /**
      *  Must implement code to set parameter data to the window
      *  (more specifically the tool) via the dialog. Because of the
@@ -122,35 +114,21 @@ public abstract class ProjectionsWindow
 	}
     }
 
-    /**
-     *  constructor - Wierdness. For Reflection to work on this class,
-     *  the inheriting classes must use:
-     *  <constructor>(MainWindow, Integer) instead of
-     *  <constructor>(MainWindow, int)
-     *
-     *  Hence the wrapper constructor.
-     */
-    public ProjectionsWindow(String title, MainWindow parentWindow, 
-			     Integer myWindowID) {
-	this(title, parentWindow, myWindowID.intValue());
+
+    public ProjectionsWindow(MainWindow parentWindow) {
+    	this("", parentWindow);
     }
 
-    public ProjectionsWindow(MainWindow parentWindow, Integer myWindowID) {
-	this("", parentWindow, myWindowID.intValue());
-    }
-
-    public ProjectionsWindow(String title, MainWindow parentWindow, 
-			     int myWindowID) {
-	this.myWindowID = myWindowID;
-	this.parentWindow = parentWindow;
-	setTitle(title);
-	addWindowListener(new WindowAdapter() {
-		public void windowClosing(WindowEvent e){
-		    close();
-		}
-	    });
-    // FIXME:  Dangerous because we call a subclass's method before the associated object has been fully constructed(we are still in the constructor here
-	windowInit(); 
+    public ProjectionsWindow(String title, MainWindow parentWindow) {
+    	this.parentWindow = parentWindow;
+    	setTitle(title);
+    	addWindowListener(new WindowAdapter() {
+    		public void windowClosing(WindowEvent e){
+    			close();
+    		}
+    	});
+    	// FIXME:  Dangerous because we call a subclass's method before the associated object has been fully constructed(we are still in the constructor here
+    	windowInit(); 
     }
 
     public void setLayout(JPanel mainPanel) {
@@ -177,7 +155,14 @@ public abstract class ProjectionsWindow
     
     // close (and destroy all access) to the window
     public void close(){
-	dispose();
-	parentWindow.closeChildWindow(myWindowID);
+    	dispose();
+    	parentWindow.closeChildWindow(this);
     }
+
+    /** A method to be overridden by any subclasses that wish to be able to have a new PE loaded from within another tool. */
+	public void addProcessor(int pe) {
+	}
+    
+    
+    
 }

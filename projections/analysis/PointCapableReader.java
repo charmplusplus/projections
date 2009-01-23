@@ -14,8 +14,8 @@ public interface PointCapableReader {
 
     public LogEntryData nextEventOfType(int eventType)
         throws IOException, EOFException;    
-
-    public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
-        throws IOException, EOFException; 
+//
+//    public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
+//        throws IOException, EOFException; 
 
 }

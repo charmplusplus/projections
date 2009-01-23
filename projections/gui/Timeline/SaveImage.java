@@ -16,8 +16,6 @@ import javax.swing.*;
  */
 
 public class SaveImage {
-
-	private static final long serialVersionUID = 1L;
 	
 	private JPanel view;
 	private BufferedImage image;
@@ -39,10 +37,10 @@ public class SaveImage {
         g.dispose();
 	}
 	
-	public Image getImage(){
-		generateImage();
-		return image;
-	}
+//	public Image getImage(){
+//		generateImage();
+//		return image;
+//	}
 	
 	public void saveImagePNG(String filename){
 		generateImage();

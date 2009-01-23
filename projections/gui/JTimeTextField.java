@@ -10,10 +10,6 @@ import javax.swing.*;
 
 public class JTimeTextField extends JTextField
 {   
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	public JTimeTextField(long defval, int size)
     {

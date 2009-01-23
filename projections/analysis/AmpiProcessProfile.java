@@ -46,12 +46,6 @@ public class AmpiProcessProfile {
     public void incrAccExecTime(long t) { accExecTime += t; }
     public long getAccExecTime() { return accExecTime; }
 
-    public void setBeginTime(long t) { beginTime = t; }
-    public long getBeginTime() { return beginTime; }
-
-    public ObjectId getProcessID() { return processID; }
-    public void setProcessID(ObjectId procID) { processID = procID; }
-
     public Object toHashKey(){
         return processID.id[0]+":"+processID.id[1]+":"+processID.id[2];
     }

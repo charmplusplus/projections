@@ -28,10 +28,6 @@ import projections.analysis.*;
 public class RangeDialog extends JDialog
     implements ActionListener, KeyListener, FocusListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -612,14 +608,10 @@ public class RangeDialog extends JDialog
     public String getValidProcessorString() {
 	return processorsField.getText();
     }
-
+    
     public void setValidProcessors(OrderedIntList validPEs) {
-	this.validProcessors = validPEs;
+    	this.validProcessors = validPEs;
     }
-
-    public void setValidProcessors(String validPEString) {
-	processorsField.setText(validPEString);
-	this.validProcessors = processorsField.getValue(numProcessors);
-    }
+    
 }
 

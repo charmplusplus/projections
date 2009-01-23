@@ -20,7 +20,6 @@ import projections.gui.OrderedIntList;
  */
 public class UserEventWindow extends JFrame
 {
-	private static final long serialVersionUID = 1L;
 
 	private Color BACKGROUND = Color.black;
 	private Color FOREGROUND = Color.white;
@@ -38,7 +37,6 @@ public class UserEventWindow extends JFrame
 
 	private class NameRenderer extends DefaultTableCellRenderer {
 
-		private static final long serialVersionUID = 1L;
 		private int index_;
 		public NameRenderer(int index) { index_ = index; }
 		public Component getTableCellRendererComponent(
@@ -56,7 +54,6 @@ public class UserEventWindow extends JFrame
 	}
 
 	private class UserEventTable extends AbstractTableModel {
-		private static final long serialVersionUID = 1L;
 		private int index_ = -1;
 
 		public UserEventTable(int i) { index_ = i; }

@@ -5,7 +5,6 @@ import java.io.*;
 import java.util.*;
 
 import projections.analysis.*;
-import projections.guiUtils.*;
 import projections.misc.*;
 
 /**
@@ -57,7 +56,6 @@ public class Analysis {
   private int[][][] systemUsageData;
   private int[][][][] systemMsgsData;
   private int[][][][] userEntryData;
-  private int[] bgData;
   
   // stupid hack to compensate for the fact that LogReaders are never
   // maintained inside Analysis.
@@ -68,6 +66,16 @@ public class Analysis {
   // TimelineWindow to other graphs
   private long jStartTime, jEndTime;
   private boolean jTimeAvailable;
+
+  /** ************** Constants ********************** */
+  
+  public static final int NUM_ACTIVITIES = 4;
+  public static final int PROJECTIONS = 0;
+  public static final int USER_EVENTS = 1;
+  public static final int FUNCTIONS = 2;
+  //    public static final int POSE_DOP = 3;
+  public static final String NAMES[] = {"PROJECTIONS", "USER_EVENTS", "FUNCTIONS"};
+  
   
   /** *************** Color Maps 6/27/2002 ************ */
   
@@ -78,7 +86,7 @@ public class Analysis {
   private Color[] userEventColors;
   private Color[] functionColors;
   private Color[][] activityColors =
-  new Color[ActivityManager.NUM_ACTIVITIES][];
+  new Color[NUM_ACTIVITIES][];
   
   private Color[] grayColors;
   private Color[] grayUserEventColors;
@@ -90,6 +98,8 @@ public class Analysis {
     // empty constructor for now. initAnalysis is still the "true"
     // constructor until multiple run data is supported.
   }
+  
+  
   
   /** ************** Methods ********************** */
   
@@ -253,9 +263,9 @@ public class Analysis {
     } else {
       activityColors = ColorManager.initializeColors();
     }
-    entryColors = activityColors[ActivityManager.PROJECTIONS];
-    userEventColors = activityColors[ActivityManager.USER_EVENTS];
-    functionColors = activityColors[ActivityManager.FUNCTIONS];
+    entryColors = activityColors[PROJECTIONS];
+    userEventColors = activityColors[USER_EVENTS];
+    functionColors = activityColors[FUNCTIONS];
     grayColors = 
       ColorManager.createGrayscaleColorMap(getSts().getEntryCount());
     grayUserEventColors = 
@@ -304,11 +314,11 @@ public class Analysis {
 	}
     }
 
-    public int getNumPhases() {
-	if (sumAnalyzer!=null)
-	    return sumAnalyzer.getPhaseCount();
-	return 0;
-    }
+//    public int getNumPhases() {
+//	if (sumAnalyzer!=null)
+//	    return sumAnalyzer.getPhaseCount();
+//	return 0;
+//    }
 
     /**
      *  categoryIdx (see LogReader) refers to the category of system messages
@@ -335,23 +345,23 @@ public class Analysis {
 	totalTime = time;
     }
 
-    public long getPoseTotalTime() {
-	return poseTotalTime;
-    }
+//    public long getPoseTotalTime() {
+//	return poseTotalTime;
+//    }
+//
+//    public long getPoseTotalVirtualTime() {
+//	return poseTotalVirtualTime;
+//    }
+//
+//    public PoseDopReader getPoseDopReader() {
+//	return dopReader;
+//    }
 
-    public long getPoseTotalVirtualTime() {
-	return poseTotalVirtualTime;
-    }
-
-    public PoseDopReader getPoseDopReader() {
-	return dopReader;
-    }
-
-    // yet another interval size hack. When am I ever going to end up
-    // finding the time to fix all these ...
-    public long getLogReaderIntervalSize() {
-	return logReaderIntervalSize;
-    }
+//    // yet another interval size hack. When am I ever going to end up
+//    // finding the time to fix all these ...
+//    public long getLogReaderIntervalSize() {
+//	return logReaderIntervalSize;
+//    }
 
     public double[] getSummaryAverageData() {
 	return sumAnalyzer.getSummaryAverageData();
@@ -444,9 +454,6 @@ public class Analysis {
 	return false;
     }
 
-    public int[] getBGData() {
-	return bgData;
-    }
 
     /**
        replace LoadGraphData(), with one more parameter containing
@@ -483,17 +490,17 @@ public class Analysis {
 	}
     }
     
-    /**
-     *  **CW** Time to stop being stupid and use the new summary reader
-     *  and gain more control over the reading process.
-     */
-    public void loadSummaryData(long intervalSize,
-				int intervalStart, int intervalEnd) {
-	systemUsageData = new int[3][][];
-	systemUsageData[1] = 
-	    sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd, 
-					   intervalSize);
-    }
+//    /**
+//     *  **CW** Time to stop being stupid and use the new summary reader
+//     *  and gain more control over the reading process.
+//     */
+//    public void loadSummaryData(long intervalSize,
+//				int intervalStart, int intervalEnd) {
+//	systemUsageData = new int[3][][];
+//	systemUsageData[1] = 
+//	    sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd, 
+//					   intervalSize);
+//    }
 
     // yet another version of summary load for processor subsets.
     public void loadSummaryData(long intervalSize, 
@@ -513,54 +520,54 @@ public class Analysis {
 	} 
     }
   
-    // wrapper method for default interval size.
-    public void loadSummaryData(int intervalStart, int intervalEnd) {
-	loadSummaryData(sumAnalyzer.getIntervalSize(), intervalStart,
-			intervalEnd);
-    }
+//    // wrapper method for default interval size.
+//    public void loadSummaryData(int intervalStart, int intervalEnd) {
+//	loadSummaryData(sumAnalyzer.getIntervalSize(), intervalStart,
+//			intervalEnd);
+//    }
+//    
+//    /**
+//     *  wrapper method for default summary load (used by main window)
+//     *  This has a "control" value to limit the number of intervals used.
+//     *  GenericSummaryReader will then be used to independently read
+//     *  and rebin each file (which will work for now) - summary files with
+//     *  even more intervals than the 180k seen in current NAMD logs may
+//     *  require dynamic rebinning on read.
+//
+//     *  **CWL** LOOKS LIKE THIS MIGHT BE COMPLETELY USELESS!
+//     */
+//    public void loadSummaryData() {
+//	if (hasSumFiles()) { 
+//	    int sizeInt=(int)(sumAnalyzer.getIntervalSize());
+//	    int nInt=(int)(getTotalTime()/sizeInt);
+//	    loadSummaryData(sizeInt, 0, nInt-1);
+//	} else if (hasSumAccumulatedFile()) {
+//	    // do nothing **HACK** - action taken later.
+//	}
+//    }
 
-    /**
-     *  wrapper method for default summary load (used by main window)
-     *  This has a "control" value to limit the number of intervals used.
-     *  GenericSummaryReader will then be used to independently read
-     *  and rebin each file (which will work for now) - summary files with
-     *  even more intervals than the 180k seen in current NAMD logs may
-     *  require dynamic rebinning on read.
+//    public double[][] getSumDetailData(int pe, int type) {
+//	return intervalData.getData(pe, type);
+//    }
 
-     *  **CWL** LOOKS LIKE THIS MIGHT BE COMPLETELY USELESS!
-     */
-    public void loadSummaryData() {
-	if (hasSumFiles()) { 
-	    int sizeInt=(int)(sumAnalyzer.getIntervalSize());
-	    int nInt=(int)(getTotalTime()/sizeInt);
-	    loadSummaryData(sizeInt, 0, nInt-1);
-	} else if (hasSumAccumulatedFile()) {
-	    // do nothing **HACK** - action taken later.
-	}
-    }
-
-    public double[][] getSumDetailData(int pe, int type) {
-	return intervalData.getData(pe, type);
-    }
-
-    public long searchTimeline( int n, int p, int e ) 
-    {
-	try {
-	    if (hasLogFiles()) {
-		if (logLoader == null) {
-		    logLoader = new LogLoader();
-		}
-		return logLoader.searchtimeline( p, e, n );
-	    } else {
-		System.err.println("No log files!");
-		return -1;
-	    }
-	}
-	catch( LogLoadException lle ) {
-	    System.err.println( "LogLoadException" );
-	    return -1;
-	}
-    }
+//    public long searchTimeline( int n, int p, int e ) 
+//    {
+//	try {
+//	    if (hasLogFiles()) {
+//		if (logLoader == null) {
+//		    logLoader = new LogLoader();
+//		}
+//		return logLoader.searchtimeline( p, e, n );
+//	    } else {
+//		System.err.println("No log files!");
+//		return -1;
+//	    }
+//	}
+//	catch( LogLoadException lle ) {
+//	    System.err.println( "LogLoadException" );
+//	    return -1;
+//	}
+//    }
 
     /** ******************* Accessor Methods ************** */
 
@@ -586,9 +593,9 @@ public class Analysis {
 	return hasSumDetailFiles();
     }
 
-    public boolean hasPoseDopData() {
-	return hasPoseDopFiles();
-    }
+//    public boolean hasPoseDopData() {
+//	return hasPoseDopFiles();
+//    }
 
     public String getLogDirectory() {
     	return FileUtils.dirFromFile(baseName);
@@ -602,11 +609,11 @@ public class Analysis {
 
     public int stringToActivity(String name) {
 	if (name.equals("PROJECTIONS")) {
-	    return ActivityManager.PROJECTIONS;
+	    return PROJECTIONS;
 	} else if (name.equals("USER_EVENTS")) {
-	    return ActivityManager.USER_EVENTS;
+	    return USER_EVENTS;
 	} else if (name.equals("FUNCTIONS")) {
-	    return ActivityManager.FUNCTIONS;
+	    return FUNCTIONS;
 	    //	} else if (name.equals("POSE_DOP")) {
 	    //	    return ActivityManager.POSE_DOP;
 	} else {
@@ -616,11 +623,11 @@ public class Analysis {
 
     public int getNumActivity(int type) {
 	switch (type) {
-	case ActivityManager.PROJECTIONS:
+	case PROJECTIONS:
 	    return getNumUserEntries();
-	case ActivityManager.USER_EVENTS:
+	case USER_EVENTS:
 	    return getNumUserDefinedEvents();
-	case ActivityManager.FUNCTIONS:
+	case FUNCTIONS:
 	    return getNumFunctionEvents();
 	}
 	return 0;
@@ -630,11 +637,11 @@ public class Analysis {
     // contigious) and gets the name.
     public String getActivityNameByID(int type, int id) {
 	switch (type) {
-	case ActivityManager.PROJECTIONS:
+	case PROJECTIONS:
 	    return getEntryNameByID(id);
-	case ActivityManager.USER_EVENTS:
+	case USER_EVENTS:
 	    return getUserEventName(id);
-	case ActivityManager.FUNCTIONS:
+	case FUNCTIONS:
 	    return getFunctionName(id);
 	}
 	return "";
@@ -645,12 +652,12 @@ public class Analysis {
     public String getActivityNameByIndex(int type, int index) {
 	String[] tempNames;
 	switch (type) {
-	case ActivityManager.PROJECTIONS:
+	case PROJECTIONS:
 	    return getEntryNameByIndex(index);
-	case ActivityManager.USER_EVENTS:
+	case USER_EVENTS:
 	    tempNames = getUserEventNames();
 	    return tempNames[index];
-	case ActivityManager.FUNCTIONS:
+	case FUNCTIONS:
 	    tempNames = getFunctionNames();
 	    return tempNames[index];
 	}
@@ -722,9 +729,9 @@ public class Analysis {
 	return getSts().getUserEventNames();
     }
 
-    public int getNumPerfCounts() {
-	return getSts().getNumPerfCounts();
-    }
+//    public int getNumPerfCounts() {
+//	return getSts().getNumPerfCounts();
+//    }
 
     public String[] getPerfCountNames() {
 	return getSts().getPerfCountNames();
@@ -754,35 +761,35 @@ public class Analysis {
 	return getSts().getFunctionEventDescriptors();
     }
     
-    /**
-     *  This applies to interval-based data. If none exists, an error
-     *  should be generated.
-     *  **CW** this error will currently only be a print error. In future
-     *  an exception should be designed for this.
-     */
-    public int getNumIntervals() {
-	if (intervalData == null) {
-	    System.err.println("No interval based data. " +
-			       "Call to getNumIntervals is invalid.");
-	    return -1;
-	} else {
-	    return intervalData.getNumIntervals();
-	}
-    }
+//    /**
+//     *  This applies to interval-based data. If none exists, an error
+//     *  should be generated.
+//     *  **CW** this error will currently only be a print error. In future
+//     *  an exception should be designed for this.
+//     */
+//    public int getNumIntervals() {
+//	if (intervalData == null) {
+//	    System.err.println("No interval based data. " +
+//			       "Call to getNumIntervals is invalid.");
+//	    return -1;
+//	} else {
+//	    return intervalData.getNumIntervals();
+//	}
+//    }
 
-    /**
-     *  getIntervalSize applies only to interval-based data. The same
-     *  comments for getNumIntervals apply equally to this method.
-     */
-    public double getIntervalSize() {
-	if (intervalData == null) {
-	    System.err.println("No interval based data. " +
-			       "Call to getIntervalSize is invalid.");
-	    return -1.0;
-	} else {
-	    return intervalData.getIntervalSize();
-	}
-    }
+//    /**
+//     *  getIntervalSize applies only to interval-based data. The same
+//     *  comments for getNumIntervals apply equally to this method.
+//     */
+//    public double getIntervalSize() {
+//	if (intervalData == null) {
+//	    System.err.println("No interval based data. " +
+//			       "Call to getIntervalSize is invalid.");
+//	    return -1.0;
+//	} else {
+//	    return intervalData.getIntervalSize();
+//	}
+//    }
 
     
     
@@ -812,39 +819,39 @@ public class Analysis {
     // *** "Projected" sum detail data accessors ***
     // These methods return a collapsed (accumulated across one or more
     // dimensions) part of the sum detail data.
-
-    /**
-     *  This version of getDataSummedAcrossProcessors outputs a 2D array
-     *  of double values with the first dimension indexed by ep id and
-     *  the second dimension indexed by interval id.
-     *
-     *  This should be slightly more efficient when acquiring data for
-     *  the full range of EPs.
-     */
-    public double[][] getDataSummedAcrossProcessors(int type,
-							   OrderedIntList pes,
-							   int startInterval,
-							   int endInterval) {
-	return intervalData.getDataSummedAcrossProcessors(type, pes,
-							  startInterval,
-							  endInterval);
-    }
-
-    /**
-     *  getDataSummedAcrossProcessors outputs a vector of double[] with
-     *  the vector representing possibly non-contigious EPs. The arrays
-     *  are indexed by interval id.
-     */
-    public Vector getDataSummedAcrossProcessors(int type,
-						       OrderedIntList pes,
-						       int startInterval,
-						       int endInterval,
-						       OrderedIntList eps) {
-	return intervalData.getDataSummedAcrossProcessors(type, pes,
-							  startInterval,
-							  endInterval,
-							  eps);
-    }
+//
+//    /**
+//     *  This version of getDataSummedAcrossProcessors outputs a 2D array
+//     *  of double values with the first dimension indexed by ep id and
+//     *  the second dimension indexed by interval id.
+//     *
+//     *  This should be slightly more efficient when acquiring data for
+//     *  the full range of EPs.
+//     */
+//    public double[][] getDataSummedAcrossProcessors(int type,
+//							   OrderedIntList pes,
+//							   int startInterval,
+//							   int endInterval) {
+//	return intervalData.getDataSummedAcrossProcessors(type, pes,
+//							  startInterval,
+//							  endInterval);
+//    }
+//
+//    /**
+//     *  getDataSummedAcrossProcessors outputs a vector of double[] with
+//     *  the vector representing possibly non-contigious EPs. The arrays
+//     *  are indexed by interval id.
+//     */
+//    public Vector getDataSummedAcrossProcessors(int type,
+//						       OrderedIntList pes,
+//						       int startInterval,
+//						       int endInterval,
+//						       OrderedIntList eps) {
+//	return intervalData.getDataSummedAcrossProcessors(type, pes,
+//							  startInterval,
+//							  endInterval,
+//							  eps);
+//    }
 
     public Color[] getColorMap(int activityType) {
 	return activityColors[activityType];
@@ -870,15 +877,15 @@ public class Analysis {
      */
     public void setJTimeAvailable(boolean jBoo) { jTimeAvailable = jBoo; }
     public boolean checkJTimeAvailable()        { return jTimeAvailable; }
-    public void setJTime(long start, long end)  { jStartTime = start;
-    							 jEndTime = end; }
+//    public void setJTime(long start, long end)  { jStartTime = start;
+//    							 jEndTime = end; }
     public long getJStart()                     { return jStartTime; }
     public long getJEnd()                       { return jEndTime; }
     
 
-    public boolean hasPapi() {
-	return getSts().hasPapi();
-    }
+//    public boolean hasPapi() {
+//	return getSts().hasPapi();
+//    }
 
     // ************** Public Accessors to File Information *************
     public String getValidProcessorString(int type) {
@@ -931,9 +938,9 @@ public class Analysis {
 	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMMARY);
     }   
     
-    public String getSumAccumulatedName() {
-	return FileUtils.getSumAccumulatedName(baseName);
-    }
+//    public String getSumAccumulatedName() {
+//	return FileUtils.getSumAccumulatedName(baseName);
+//    }
 
     public String getSumDetailName(int pnum) {
 	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMDETAIL);

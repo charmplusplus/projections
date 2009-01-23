@@ -33,7 +33,7 @@ public class ProjectionsFileChooser
     JDialog      dialog_   = null;   // user picks files to use
     JList        list_     = null;   // stores found files
     int          listSize_ = 0;      // size of list_
-	private Wait         wait_     = new Wait(true); // true if dialog waiting
+//	private Wait         wait_     = new Wait(true); // true if dialog waiting
     ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
 
     // Allow file chooser to select multiple files
@@ -47,15 +47,6 @@ public class ProjectionsFileChooser
     // ActionListener for JButton in dialog_
     public int [] userSelect_selected;
 
-    public CallBack callback;
-
-    /** 
-     *  Default constructor 
-     */
-    public ProjectionsFileChooser(Frame owner)
-    {
-	this(owner, "ProjectionsFileChooser", MULTIPLE_FILES);
-    }
 
     /** 
      *  Constructor.  Specify title of file chooser window.
@@ -76,27 +67,17 @@ public class ProjectionsFileChooser
 	dialog_  = initFileDialog(title_+": Choose Files");
     }
 
-    /** 
-     *  Given a bunch of strings, search for all sts files and set fileMgr.
-     *  Return number of files found. 
-     */
-    public int getFiles(String[] args) throws IOException {
-	File[] fileArray = new File[args.length];
-	for (int i=0; i<args.length; i++) { fileArray[i] = new File(args[i]); }
-	Vector files = filterFiles(fileArray, fChoose_.getFileFilter());
-	fileMgr_ = new ProjectionsFileMgr(files);
-	return fileMgr_.getNumFiles();
-    }
-
-    /** 
-     *  Pop up first file chooser dialog, then the sts chooser dialog.
-     *  Returns JFileChooser.APPROVE_OPTION if user chooses file, or
-     *  JFileChooser.CANCEL_OPTION if user cancels or doesn't choose file 
-     */
-    public int showDialog(CallBack callback) {
-	this.callback = callback;
-	return showDialog();
-    }
+//    /** 
+//     *  Given a bunch of strings, search for all sts files and set fileMgr.
+//     *  Return number of files found. 
+//     */
+//    public int getFiles(String[] args) throws IOException {
+//	File[] fileArray = new File[args.length];
+//	for (int i=0; i<args.length; i++) { fileArray[i] = new File(args[i]); }
+//	Vector files = filterFiles(fileArray, fChoose_.getFileFilter());
+//	fileMgr_ = new ProjectionsFileMgr(files);
+//	return fileMgr_.getNumFiles();
+//    }
 
     public int showDialog() {
 	int returnVal = fChoose_.showDialog(null, "Open/Search");
@@ -115,13 +96,13 @@ public class ProjectionsFileChooser
 	return returnVal;
     }
 
-    /** 
-     *  Returns ProjectionFileMgr for the files opened.  If no files opened,
-     *  returns null 
-     */
-    public ProjectionsFileMgr getProjectionsFileMgr() { 
-	return fileMgr_; 
-    }
+//    /** 
+//     *  Returns ProjectionFileMgr for the files opened.  If no files opened,
+//     *  returns null 
+//     */
+//    public ProjectionsFileMgr getProjectionsFileMgr() { 
+//	return fileMgr_; 
+//    }
 
     /** 
      *  Set up the GUI for the file chooser and return it. 

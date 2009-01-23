@@ -7,10 +7,6 @@ import java.awt.print.*;
 public class GraphDisplayPanel extends Container
    implements ActionListener, ItemListener, AdjustmentListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -166,10 +162,7 @@ public class GraphDisplayPanel extends Container
 	  xAxisCanvas.repaint();
 	  displayCanvas.repaint();
    }   
-   public int getDCW()
-   {
-	  return displayCanvas.getSize().width;
-   }   
+
    public int getHSBValue()
    {
 	  return HSB.getValue();
@@ -215,41 +208,6 @@ public class GraphDisplayPanel extends Container
 	mainPanel.setBackground(MainWindow.runObject[myRun].background);
 	mainPanel.repaint();
     }
-
-    // ***** no longer in use *****
-   public void PrintGraph(Graphics pg, PrintJob pjob)
-   {
-	  Dimension oldSize = mainPanel.getSize();
-	  Dimension d = pjob.getPageDimension();
-	  
-	  int marginLeft;
-	  int marginTop;
-	  if(d.width < d.height)
-	  {
-		 marginLeft = (int)(0.7 * d.width / 8.5);    
-		 marginTop  = (int)(0.7 * d.height / 11.0);
-	  }
-	  else
-	  {
-		 marginLeft = (int)(0.7 * d.width / 11.0);
-		 marginTop  = (int)(0.7 * d.height / 8.5);
-	  }      
-	  
-	  int printWidth  = d.width  - 2*marginLeft;
-	  int printHeight = d.height - 2*marginTop;
-	  
-	  mainPanel.setSize(printWidth, printHeight);
-	  pg.translate(marginLeft, marginTop);
-	  
-	  setAllBounds();
-	  mainPanel.setBackground(Color.white);
-	  
-	  mainPanel.printAll(pg);
-	  
-	  mainPanel.setSize(oldSize);
-	  setAllBounds();
-	  mainPanel.setBackground(MainWindow.runObject[myRun].background);
-   }   
 
    public void setAllBounds()
    {

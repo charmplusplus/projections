@@ -19,8 +19,7 @@ import javax.swing.*;
 
 public class LayeredPanel extends JPanel  implements Scrollable
 {
-	private static final long serialVersionUID = 1L;
-
+	
 	private Data data; // Probably unneeded, but I think the layout manager may use this
 	
 	JLayeredPane jLayeredPane = null;
@@ -61,13 +60,6 @@ public class LayeredPanel extends JPanel  implements Scrollable
 		super.paintComponent(g);	
 	}
 
-	public Data getData(){
-		return data;
-	}
-
-	public int getDesiredHeight() {
-		return mainPanel.getPreferredSize().height;
-	}
 	
 	public Dimension getPreferredSize() {
 		if(mainPanel != null){
@@ -77,28 +69,7 @@ public class LayeredPanel extends JPanel  implements Scrollable
 		}
 	}
 	
-	/** Returns the JPanel responsible for providing preferred sizes */
-	public JPanel getSizingPanel(){
-		return mainPanel;
-	}
-
-	/** Return the main panel if it is of type MainPanel */
-	public MainPanel getMainPanel(){
-		if(mainPanel instanceof MainPanel)
-			return (MainPanel)mainPanel;
-		else
-			return null;
-	}
-
-	/** Return the main panel if it is of type AxisPanel */
-	public AxisPanel getAxisPanel(){
-		if(mainPanel instanceof AxisPanel)
-			return (AxisPanel)mainPanel;
-		else
-			return null;
-	}
 	
-
 	public Dimension getMinimumSize() {
 		return mainPanel.getPreferredSize();
 	}

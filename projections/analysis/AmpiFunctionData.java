@@ -26,28 +26,24 @@ public class AmpiFunctionData {
         execIntervals = new Vector();
     }
 
-    public AmpiFunctionData(int funcId, int line, String srcFileName) {
-        FunctionID = funcId;
-        LineNo = line;
-        sourceFileName = srcFileName;
-        accExecTime = 0;
-        execIntervals = new Vector();
-    }
+//    public AmpiFunctionData(int funcId, int line, String srcFileName) {
+//        FunctionID = funcId;
+//        LineNo = line;
+//        sourceFileName = srcFileName;
+//        accExecTime = 0;
+//        execIntervals = new Vector();
+//    }
 
     public void incrAccExecTime(long t) { accExecTime += t; }
     public long getAccExecTime() { return accExecTime; }
 
     public void incrAccExecTimeNow (long now) { accExecTime += now-lastBeginTime; }
     public void setLastBeginTime(long t) { lastBeginTime = t; }
-    public long getLastBeginTime() { return lastBeginTime; }
 
     public String toString(){
         return sourceFileName+"@"+LineNo+"::"+FunctionID+" : "+accExecTime;
     }
 
-    public Vector getExecIntervals(){
-        return execIntervals;
-    }
 
     public void insertExecInterval(AmpiFuncExecInterval interval){
         execIntervals.add(interval);

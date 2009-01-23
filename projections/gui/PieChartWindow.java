@@ -5,11 +5,6 @@ import java.awt.event.*;
 
 public class PieChartWindow extends Frame{
 
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
@@ -104,8 +99,6 @@ public class PieChartWindow extends Frame{
     
     public void close(){
         setVisible(false);
-	// **CW** DELIBERATE BUG to make it compile for now.
-        mainWindow.closeChildWindow(0);
         dispose();
     }
 
@@ -138,10 +131,6 @@ public class PieChartWindow extends Frame{
 
 
     public class MyPanel extends Panel implements MouseMotionListener{
-        /**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 		private PieChartWindow pcw;
 	
         public MyPanel(PieChartWindow pcw){

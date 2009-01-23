@@ -9,7 +9,6 @@ public class MessageWindow extends JFrame
    implements ActionListener
 {
 
-	private static final long serialVersionUID = 1L;
 	private EntryMethodObject obj;
 	private MessagePanel canvas;
 	private ScrollPane sp;

@@ -243,32 +243,32 @@ public class CallTable extends ProjDefs
 		return text;
 	}
 
-	public void PrintToFile()
-	{
-		try
-		{
-			//Write arrays to file
-			BufferedWriter output = new BufferedWriter(new FileWriter("calltable"));
-			output.write("CALL TABLE FOR " + MainWindow.runObject[myRun].getFilename() + ".sts -\n");
-			for (int sourceEP=0; sourceEP<numEPs; sourceEP++) {
-				if (exists[sourceEP]) {
-					output.write("\n\n");
-					output.write(MainWindow.runObject[myRun].getEntryFullNameByIndex(sourceEP) + "[EPid #" +
-							sourceEP + "]\n");
-					for (int destEP=0; destEP<numEPs; destEP++) {
-						if (msgCount[sourceEP][destEP] > 0) {
-							output.write("    " + MainWindow.runObject[myRun].getEntryFullNameByIndex(destEP) + "[EPid #" + destEP + "] - " +
-									msgCount[sourceEP][destEP] + " messages, " +
-									byteSum[sourceEP][destEP] + " bytes\n");
-						}
-					}
-				}
-			}
-			output.close();
-		}
-		catch (IOException e)
-		{
-			// ignore
-		}
-	}
+//	public void PrintToFile()
+//	{
+//		try
+//		{
+//			//Write arrays to file
+//			BufferedWriter output = new BufferedWriter(new FileWriter("calltable"));
+//			output.write("CALL TABLE FOR " + MainWindow.runObject[myRun].getFilename() + ".sts -\n");
+//			for (int sourceEP=0; sourceEP<numEPs; sourceEP++) {
+//				if (exists[sourceEP]) {
+//					output.write("\n\n");
+//					output.write(MainWindow.runObject[myRun].getEntryFullNameByIndex(sourceEP) + "[EPid #" +
+//							sourceEP + "]\n");
+//					for (int destEP=0; destEP<numEPs; destEP++) {
+//						if (msgCount[sourceEP][destEP] > 0) {
+//							output.write("    " + MainWindow.runObject[myRun].getEntryFullNameByIndex(destEP) + "[EPid #" + destEP + "] - " +
+//									msgCount[sourceEP][destEP] + " messages, " +
+//									byteSum[sourceEP][destEP] + " bytes\n");
+//						}
+//					}
+//				}
+//			}
+//			output.close();
+//		}
+//		catch (IOException e)
+//		{
+//			// ignore
+//		}
+//	}
 }

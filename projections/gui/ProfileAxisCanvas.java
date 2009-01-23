@@ -4,10 +4,7 @@ import java.awt.*;
 
 public class ProfileAxisCanvas extends Canvas
 {
-   /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 private ProfileData data;
    private Image offscreen;
    private FontMetrics fm;
@@ -69,30 +66,30 @@ private ProfileData data;
 		 }
 	  }
    }   
-   public void makeNewImage()
-   {
-	  offscreen = null;
-	  if(data.plist == null)
-		 return;
-	  
-	  int w = getSize().width;
-	  
-	  if(w > 0 && data.dch > 0)
-	  {
-		 offscreen = createImage(w, data.dch+30);
-
-		 if(offscreen == null)
-			return;
-		 
-		 Graphics og = offscreen.getGraphics();
-		 og.setClip(0, 0, w, data.dch);
-		 
-		 drawAxis(og);
-		 
-		 og.dispose();
-		 repaint(); 
-	  }
-   }   
+//   public void makeNewImage()
+//   {
+//	  offscreen = null;
+//	  if(data.plist == null)
+//		 return;
+//	  
+//	  int w = getSize().width;
+//	  
+//	  if(w > 0 && data.dch > 0)
+//	  {
+//		 offscreen = createImage(w, data.dch+30);
+//
+//		 if(offscreen == null)
+//			return;
+//		 
+//		 Graphics og = offscreen.getGraphics();
+//		 og.setClip(0, 0, w, data.dch);
+//		 
+//		 drawAxis(og);
+//		 
+//		 og.dispose();
+//		 repaint(); 
+//	  }
+//   }   
    public void paint(Graphics g)
    {
 	  if(offscreen != null)

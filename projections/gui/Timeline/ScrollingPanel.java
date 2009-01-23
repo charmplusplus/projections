@@ -11,8 +11,6 @@ import javax.swing.*;
  */
 public class ScrollingPanel extends JPanel  {
 
-	private static final long serialVersionUID = 1L;
-
 	JScrollPane scrollpane;
 		
 	JPanel mainPanel;
@@ -20,11 +18,6 @@ public class ScrollingPanel extends JPanel  {
 	LabelPanel labelPanel;
 	
 	Data data;
-	
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
 	
 	
 	/** Create the scrollable panel with the three provided panels. */
@@ -97,7 +90,6 @@ public class ScrollingPanel extends JPanel  {
 
 	/** A simple class for drawing the corners in the JScrollPane */
 	public class Corner extends JComponent {
-		private static final long serialVersionUID = 1L;
 		protected void paintComponent(Graphics g) {
 			g.setColor(data.getBackgroundColor());
 			g.fillRect(0,0,getWidth(),getHeight());
@@ -105,9 +97,9 @@ public class ScrollingPanel extends JPanel  {
 	}
 
 
-	Dimension getPreferredScrollableViewportSize(){
-		return getPreferredSize();	
-	}
-
+//	Dimension getPreferredScrollableViewportSize(){
+//		return getPreferredSize();	
+//	}
+//
 	
 };

@@ -16,6 +16,12 @@ import projections.analysis.ObjectId;
  * */
 public class ThreadMessageStructures extends Thread {
 
+	volatile boolean stop = false;
+	
+	public void stopThread(){
+		stop = true;
+	}
+	
 	Data data;
 	MessageStructures messageStructures;
 	
@@ -26,8 +32,7 @@ public class ThreadMessageStructures extends Thread {
 	
 	public void run() {
 		synchronized(messageStructures){
-			messageStructures.generate();
-			
+			messageStructures.generate(this);
 		}
     	 
      }

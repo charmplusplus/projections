@@ -17,12 +17,8 @@ import projections.gui.Timeline.NonScrollingPanel;
 
 public class NoiseMinerExemplarTimelineWindow extends JFrame {
 
-	JPanel wrapper;  //< A panel used to create a border and contain the following two panels
-	JPanel contents; //< The panel with the graphical representations of the timeline
 	JLabel explanation; //< The textual explanation at the top of the window
 	
-	private static final long serialVersionUID = 1L;
-
 	public NoiseMinerExemplarTimelineWindow(NoiseResult nr)  {
 		
 		JPanel wrapper = new JPanel();

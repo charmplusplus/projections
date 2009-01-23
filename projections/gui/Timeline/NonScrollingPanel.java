@@ -19,14 +19,6 @@ import projections.gui.OrderedIntList;
  */
 public class NonScrollingPanel extends JPanel implements MainHandler{
 
-	private static final long serialVersionUID = 1L;
-
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
-
-	
 	NonScrollingPanel thisPanel;
 	
 	long startTime;
@@ -92,10 +84,6 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		g.fillRect(0,0,getWidth(),getHeight());		
 	}
 	
-	
-	public void addProcessor(int p){
-		// do nothing, required by interface we implement
-	}
 	
 	/** Resize my panels(required by interface, called by data object) */
 	// The data object has been instructed to change the display width

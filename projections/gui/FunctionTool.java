@@ -22,10 +22,7 @@ import projections.analysis.*;
 public class FunctionTool extends GenericGraphWindow
     implements PopUpAble
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+  
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -46,8 +43,8 @@ public class FunctionTool extends GenericGraphWindow
 
     FunctionTool thisWindow;
 
-    public FunctionTool(MainWindow mainWindow, Integer myWindowID) {
-	super("Function tracing", mainWindow, myWindowID);
+    public FunctionTool(MainWindow mainWindow) {
+	super("Function tracing", mainWindow);
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
 	createLayout();
@@ -124,10 +121,6 @@ public class FunctionTool extends GenericGraphWindow
 		};
 	    worker.start();
 	}
-    }
-
-    public void showWindow() {
-	// do nothing for now
     }
 
     public void repaint() {

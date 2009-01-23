@@ -3,7 +3,6 @@ package projections.gui.Timeline;
 /** The reader threads for timeline */
 public class ThreadedFileReader extends Thread  {
 	
-	EntryMethodObject[][] tloArray;
 	int pe;
 	int p;
 	Data data;

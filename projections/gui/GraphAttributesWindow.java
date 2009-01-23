@@ -4,13 +4,9 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class GraphAttributesWindow extends ColorWindowFrame
+public class GraphAttributesWindow extends Frame
     implements ActionListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	private GraphData data;
     
@@ -29,7 +25,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
    
     public GraphAttributesWindow(Frame parent, GraphData data)
     {
-	super(parent);
+	super();
 	this.data = data;
 	
 	addWindowListener(new WindowAdapter()
@@ -323,7 +319,7 @@ public class GraphAttributesWindow extends ColorWindowFrame
 	  lhdr2.setFont(new Font("SansSerif", Font.BOLD, 12));
    
 	  
-	  LWPanel p3 = new LWPanel();
+	  JPanel p3 = new JPanel();
 	  sp.add(p3);
 	  p3.setLayout(gbl);
 	  

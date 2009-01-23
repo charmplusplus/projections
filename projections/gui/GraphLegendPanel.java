@@ -6,10 +6,6 @@ import java.awt.event.*;
 public class GraphLegendPanel extends Panel
     implements ActionListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -29,10 +25,6 @@ public class GraphLegendPanel extends Panel
     
     private class LegendCanvas extends Canvas
     {
-	/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
 	private FontMetrics fm;
 	private int textheight;
 	private ScrollPane sp;
@@ -232,12 +224,6 @@ public class GraphLegendPanel extends Panel
 	g.setColor(Color.black);
 	g.drawRect(0, 0, getSize().width - 1, getSize().height - 1);
 	super.paint(g);
-    }   
-
-    public void PrintLegend(Graphics pg, PrintJob pjob)
-    {
-	this.pjob = pjob;
-	listPanel.printAll(pg);  
     }   
 
     public void setGraphData(GraphData data)

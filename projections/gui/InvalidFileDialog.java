@@ -6,10 +6,7 @@ import java.awt.event.*;
 public class InvalidFileDialog extends Dialog
   implements ActionListener
 {
-  /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 
 public InvalidFileDialog(Frame parent, Exception e)
   {

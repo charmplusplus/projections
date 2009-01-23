@@ -6,22 +6,12 @@ import projections.gui.OrderedIntList;
 
 public class LogIndex extends ProjDefs {
 	
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
-	
 	public TreeMap peToIndex;
 	
 	private String filename;
 	
 	private LogLoader logloader;
-	
-	public LogIndex(String filename, LogLoader logloader){
-		this.filename = filename;
-		this.logloader = logloader;
-	}
-	
+		
 	
 	/** 
 	 * Create an index of each logfile, saving it into a resulting "*.index" file.
@@ -153,7 +143,7 @@ public class LogIndex extends ProjDefs {
 	}
 	
 
-	private void loadIndex(){
+//	private void loadIndex(){
 //		System.out.println("Attempting to open index file " + filename);
 //		
 //		try {
@@ -170,16 +160,15 @@ public class LogIndex extends ProjDefs {
 //		catch (Exception e) { 
 //			// Do nothing
 //		}
-
-	}
+//
+//	}
 	
 	
 	
-	/** 
-	 *  Lookup the offset in index file to a BEGIN_PROCESSING event before given timestamp
-	 * */
-	public long lookupIndexOffset(int pe, long timestamp){
-
+//	/** 
+//	 *  Lookup the offset in index file to a BEGIN_PROCESSING event before given timestamp
+//	 * */
+//	public long lookupIndexOffset(int pe, long timestamp){
 //		if(peToIndex.containsKey(pe)){
 //			TreeMap tm=(TreeMap)peToIndex.get(pe);
 //	
@@ -192,11 +181,8 @@ public class LogIndex extends ProjDefs {
 //			return foundOffset.longValue();
 //
 //		}
-		
-		return -1;	
-		
-			
-	}
+//		return -1;		
+//	}
 	
 }
 	

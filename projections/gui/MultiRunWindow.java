@@ -26,10 +26,6 @@ import javax.swing.*;
 public class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	MultiRunWindow thisWindow;
 
@@ -57,9 +53,9 @@ public class MultiRunWindow extends ProjectionsWindow
 	// do nothing. No initialization required.
     }
 
-    public MultiRunWindow(MainWindow parentWindow, Integer myWindowID) 
+    public MultiRunWindow(MainWindow parentWindow) 
     {
-	super(parentWindow, myWindowID);
+	super(parentWindow);
 	thisWindow = this;
 	setBackground(Color.lightGray);
 	showDialog();
@@ -72,8 +68,8 @@ public class MultiRunWindow extends ProjectionsWindow
 	showFileDialog();
     }
 
-    public void showWindow() {
-	showFileDialog();
+    public void showWindow() { 
+    	showFileDialog();
     }
 
     public void getDialogData() {
@@ -82,9 +78,9 @@ public class MultiRunWindow extends ProjectionsWindow
 
     public void close()
     {
-	setVisible(false);
-	dispose();
-	parentWindow.closeChildWindow(myWindowID);
+    	setVisible(false);
+    	dispose();
+    	parentWindow.closeChildWindow(this);
     }
 
     public void showFileDialog() {

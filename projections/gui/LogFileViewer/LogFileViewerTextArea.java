@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.gui.LogFileViewer;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -15,7 +15,7 @@ import javax.swing.text.StyleContext;
 
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
-import projections.analysis.ViewerEvent;
+import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 import projections.misc.LogLoadException;
 
@@ -31,7 +31,7 @@ import projections.misc.LogLoadException;
  *   string concatenation is too slow(each new string must copy the entire old 
  *   string into itself).
  *
- */
+ */ 
 
 
 public class LogFileViewerTextArea extends JPanel

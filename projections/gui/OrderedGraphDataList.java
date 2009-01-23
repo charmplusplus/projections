@@ -113,8 +113,8 @@ public class OrderedGraphDataList
    {
 	  pre = null;
    }   
-   public int size()
-   {
-	  return len;
-   }   
+//   public int size()
+//   {
+//	  return len;
+//   }   
 }

@@ -23,10 +23,6 @@ public class LabelPanel extends JPanel {
 	this(label, JLabel.RIGHT, fieldEntry);
     }
 
-    public JTextField getField() {
-	return field;
-    }
-
     private void createLayout() {
 	GridBagLayout gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();

@@ -184,90 +184,90 @@ public class Util
 		 e.printStackTrace();
 	  }
    }
-   public static void wallPaper(Component component, Graphics  g, Image image)
-   {
-	  Dimension compsize = component.getSize();
-	  Util.waitForImage(component, image);
-
-	  int patchW = image.getWidth(component);
-	  int patchH = image.getHeight(component);
-
-	  for(int r=0; r < compsize.width; r += patchW)
-	  {
-		 for(int c=0; c < compsize.height; c += patchH)
-			g.drawImage(image, r, c, component);
-	  }
-   }
+//   public static void wallPaper(Component component, Graphics  g, Image image)
+//   {
+//	  Dimension compsize = component.getSize();
+//	  Util.waitForImage(component, image);
+//
+//	  int patchW = image.getWidth(component);
+//	  int patchH = image.getHeight(component);
+//
+//	  for(int r=0; r < compsize.width; r += patchW)
+//	  {
+//		 for(int c=0; c < compsize.height; c += patchH)
+//			g.drawImage(image, r, c, component);
+//	  }
+//   }
 
     /**
      *  Added by Chee Wai Lee
      *  4/24/2002
-     *
+     * 
      *  For the purpose of applying sorting maps to various types of arrays.
      */
-    public static boolean[] applyMap(boolean[] dataArray, int[] map) {
-	if (map == null) {
-	    return dataArray;
-	} else {
-	    boolean returnArray[] = new boolean[dataArray.length];
-	    for (int i=0; i<returnArray.length; i++) {
-		returnArray[i] = dataArray[map[i]];
-	    }
-	    return returnArray;
-	}
-    }
+//    public static boolean[] applyMap(boolean[] dataArray, int[] map) {
+//	if (map == null) {
+//	    return dataArray;
+//	} else {
+//	    boolean returnArray[] = new boolean[dataArray.length];
+//	    for (int i=0; i<returnArray.length; i++) {
+//		returnArray[i] = dataArray[map[i]];
+//	    }
+//	    return returnArray;
+//	}
+//    }
 
-    public static Color[] applyMap(Color[] dataArray, int[] map) {
-	if (map == null) {
-	    return dataArray;
-	} else {
-	    Color returnArray[] = new Color[dataArray.length];
-	    for (int i=0; i<returnArray.length; i++) {
-		returnArray[i] = dataArray[map[i]];
-	    }
-	    return returnArray;
-	}
-    }
-
-    public static String[] applyMap(String[] dataArray, int[] map) {
-	if (map == null) {
-	    return dataArray;
-	} else {
-	    String returnArray[] = new String[dataArray.length];
-	    for (int i=0; i<returnArray.length; i++) {
-		returnArray[i] = dataArray[map[i]];
-	    }
-	    return returnArray;
-	}
-    }
-
-    public static double[][] applyMap(double[][] dataArray, int[] map) {
-	if (map == null) {
-	    return dataArray;
-	} else {
-	    double returnArray[][] = new double[dataArray.length][];
-	    for (int config=0; config<returnArray.length; config++) {
-		returnArray[config] = new double[dataArray[config].length];
-		for (int ep=0; ep<returnArray[config].length; ep++) {
-		    returnArray[config][ep] = dataArray[config][map[ep]];
-		}
-	    }
-	    return returnArray;
-	}
-    }
-
-    /**
-     *   pre-condition: filter1 and filter2 are of the same length
-     */
-    public static boolean[] orFilters(boolean[] filter1, boolean[] filter2) {
-	boolean newFilter[] = new boolean[filter1.length];
-
-	for (int i=0; i<newFilter.length; i++) {
-	    newFilter[i] = (filter1[i] || filter2[i]);
-	}
-	return newFilter;
-    }
-
+//    public static Color[] applyMap(Color[] dataArray, int[] map) {
+//	if (map == null) {
+//	    return dataArray;
+//	} else {
+//	    Color returnArray[] = new Color[dataArray.length];
+//	    for (int i=0; i<returnArray.length; i++) {
+//		returnArray[i] = dataArray[map[i]];
+//	    }
+//	    return returnArray;
+//	}
+//    }
+//
+//    public static String[] applyMap(String[] dataArray, int[] map) {
+//	if (map == null) {
+//	    return dataArray;
+//	} else {
+//	    String returnArray[] = new String[dataArray.length];
+//	    for (int i=0; i<returnArray.length; i++) {
+//		returnArray[i] = dataArray[map[i]];
+//	    }
+//	    return returnArray;
+//	}
+//    }
+//
+//    public static double[][] applyMap(double[][] dataArray, int[] map) {
+//	if (map == null) {
+//	    return dataArray;
+//	} else {
+//	    double returnArray[][] = new double[dataArray.length][];
+//	    for (int config=0; config<returnArray.length; config++) {
+//		returnArray[config] = new double[dataArray[config].length];
+//		for (int ep=0; ep<returnArray[config].length; ep++) {
+//		    returnArray[config][ep] = dataArray[config][map[ep]];
+//		}
+//	    }
+//	    return returnArray;
+//	}
+//    }
+//
+//    /**
+//     *   pre-condition: filter1 and filter2 are of the same length
+//     */
+//    public static boolean[] orFilters(boolean[] filter1, boolean[] filter2) {
+//	boolean newFilter[] = new boolean[filter1.length];
+//
+//	for (int i=0; i<newFilter.length; i++) {
+//	    newFilter[i] = (filter1[i] || filter2[i]);
+//	}
+//	return newFilter;
+//    }
+//
     /**
      *   pre-condition: filter1 and filter2 are of the same length
      */
@@ -365,24 +365,24 @@ public class Util
 	
     }
 
-    /**
-     *  New color map routines are a little messed up. Old routines
-     *  restored by Chee Wai 3/3/2005
-     */
-    public static void saveColors(Color[] colors, String Useless) 
-	throws IOException 
-    {
-        FileOutputStream fileStream = 
-            new FileOutputStream(MainWindow.runObject[myRun].getLogDirectory() +
-                                 File.separator +
-                                 "color.map");
-        ObjectOutputStream objStream =
-            new ObjectOutputStream(fileStream);
-        for (int i=0; i<colors.length; i++) {
-            objStream.writeObject(colors[i]);
-        }
-        objStream.close();
-    }
+//    /**
+//     *  New color map routines are a little messed up. Old routines
+//     *  restored by Chee Wai 3/3/2005
+//     */
+//    public static void saveColors(Color[] colors, String Useless) 
+//	throws IOException 
+//    {
+//        FileOutputStream fileStream = 
+//            new FileOutputStream(MainWindow.runObject[myRun].getLogDirectory() +
+//                                 File.separator +
+//                                 "color.map");
+//        ObjectOutputStream objStream =
+//            new ObjectOutputStream(fileStream);
+//        for (int i=0; i<colors.length; i++) {
+//            objStream.writeObject(colors[i]);
+//        }
+//        objStream.close();
+//    }
 
     public static void restoreColors(Color[] colors, String Useless)
         throws IOException, ClassNotFoundException
@@ -399,47 +399,49 @@ public class Util
         objStream.close();
     }
 
-     /**
-     *	Modified by Sharon Ma 03/01/03
-     *	Changed color.map to a readable format
-     */
-    public static void restoreColors(Color[] colors, String graphType, String filePath) throws IOException{
-	File filename;
-	if(filePath == null){
-		filename = new File("bin/color.map");}
-	else{
-		filename = new File(filePath);}
-	
-	boolean fileExists = filename.exists();
-	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
-	String tempString = new String();
-	
-	if(fileExists){
-		tempString = accessFile.readLine();
-		while(!(tempString.compareTo("null") == 0)){
-			if(tempString.compareTo(graphType) == 0){
-			StringTokenizer tokenizer = 
-				new StringTokenizer(accessFile.readLine(), " ;");
-			for (int i=0; i<colors.length; i++){
-				tempString = tokenizer.nextToken();
-				colors[i] = new Color(Integer.parseInt(tokenizer.nextToken()),
-							Integer.parseInt(tokenizer.nextToken()),
-							Integer.parseInt(tokenizer.nextToken()));
-			}
-			tempString = "null";
-			}
-			else{tempString = accessFile.readLine();}
-		}
-	}
-	else{
-		for (int i=0; i<colors.length; i++) {
-			colors[i] = MainWindow.runObject[myRun].getEntryColor(i);
-	   	}
-	}
-	
-	// update the restored color setting to bin/color.map
-	saveColors(colors, graphType, null);
-	
-	accessFile.close();
-    }
+//     /**
+//     *	Modified by Sharon Ma 03/01/03
+//     *	Changed color.map to a readable format
+//     */
+//    public static void restoreColors(Color[] colors, String graphType, String filePath) throws IOException{
+//	File filename;
+//	if(filePath == null){
+//		filename = new File("bin/color.map");}
+//	else{
+//		filename = new File(filePath);}
+//	
+//	boolean fileExists = filename.exists();
+//	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
+//	String tempString = new String();
+//	
+//	if(fileExists){
+//		tempString = accessFile.readLine();
+//		while(!(tempString.compareTo("null") == 0)){
+//			if(tempString.compareTo(graphType) == 0){
+//			StringTokenizer tokenizer = 
+//				new StringTokenizer(accessFile.readLine(), " ;");
+//			for (int i=0; i<colors.length; i++){
+//				tempString = tokenizer.nextToken();
+//				colors[i] = new Color(Integer.parseInt(tokenizer.nextToken()),
+//							Integer.parseInt(tokenizer.nextToken()),
+//							Integer.parseInt(tokenizer.nextToken()));
+//			}
+//			tempString = "null";
+//			}
+//			else{tempString = accessFile.readLine();}
+//		}
+//	}
+//	else{
+//		for (int i=0; i<colors.length; i++) {
+//			colors[i] = MainWindow.runObject[myRun].getEntryColor(i);
+//	   	}
+//	}
+//	
+//	// update the restored color setting to bin/color.map
+//	saveColors(colors, graphType, null);
+//	
+//	accessFile.close();
+//    }
+    
+    
 }

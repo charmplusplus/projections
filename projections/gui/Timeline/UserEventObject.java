@@ -14,8 +14,6 @@ import projections.gui.MainWindow;
 public class UserEventObject extends JComponent implements Comparable, MouseListener,  ActionListener
 {
 
-	private static final long serialVersionUID = 1L;
-
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
@@ -200,10 +198,6 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	
 	}
 
-	/** The position in the ordering of PEs displayed */
-	public int verticalDisplayPosition(){
-		return data.whichTimelineVerticalPosition(pe);		
-	}
 
 
 	public void setNestedRow(int row) {

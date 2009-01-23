@@ -1,4 +1,4 @@
-package projections.gui.Timeline;
+package projections.gui;
 
 import java.io.*;
 import java.awt.*;
@@ -6,15 +6,6 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import projections.analysis.*;
-import projections.gui.ColorManager;
-import projections.gui.ColorSelectable;
-import projections.gui.GenericGraphWindow;
-import projections.gui.IntervalRangeDialog;
-import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
-import projections.gui.SwingWorker;
-import projections.gui.U;
-import projections.gui.Util;
 import projections.misc.*;
 
 /**
@@ -27,10 +18,6 @@ import projections.misc.*;
 public class UserEventsWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	UserEventsWindow thisWindow;
 
@@ -58,21 +45,21 @@ public class UserEventsWindow extends GenericGraphWindow
     private long[][] numCalls;
     private Color[] graphColors;
     
-    public UserEventsWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections User Events Tool - " + 
-	      MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
-	// hardcode start. Usually derived from MainWindow.runObject[myRun].java
-	numActivities = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
-	activityNames = MainWindow.runObject[myRun].getUserEventNames();
-	// Normally would set activity names here.
-	// Normally would get color maps from MainWindow.runObject[myRun].java.
-	graphColors = ColorManager.createColorMap(numActivities);
+    public UserEventsWindow(MainWindow mainWindow) {
+    	super("Projections User Events Tool - " + 
+    			MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
+    	// hardcode start. Usually derived from MainWindow.runObject[myRun].java
+    	numActivities = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
+    	activityNames = MainWindow.runObject[myRun].getUserEventNames();
+    	// Normally would set activity names here.
+    	// Normally would get color maps from MainWindow.runObject[myRun].java.
+    	graphColors = ColorManager.createColorMap(numActivities);
 
-	createMenus();
-	createLayout();
-	pack();
-	thisWindow = this;
-	showDialog();
+    	createMenus();
+    	createLayout();
+    	pack();
+    	thisWindow = this;
+    	showDialog();
     }
 
     private void createLayout() {
@@ -242,10 +229,6 @@ public class UserEventsWindow extends GenericGraphWindow
 	setYAxis("Time (us)", "us");
 	setDataSource("User Events", graphData, graphColors, this);
 	refreshGraph();
-    }
-    
-    public void showWindow() {
-	// nothing for now
     }
 
     public void applyDialogColors() {

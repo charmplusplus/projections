@@ -7,15 +7,10 @@ import javax.swing.*;
 import java.text.*;
 
 import projections.analysis.*;
-import projections.guiUtils.*;
 
 public class CommTimeWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, ColorSelectable
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -107,8 +102,8 @@ public class CommTimeWindow extends GenericGraphWindow
 	processorList = MainWindow.runObject[myRun].getValidProcessorList();
     }
 
-    public CommTimeWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Communication vs Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
+    public CommTimeWindow(MainWindow mainWindow) {
+	super("Projections Communication vs Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here
@@ -348,10 +343,6 @@ public class CommTimeWindow extends GenericGraphWindow
 	super.setDialogData();
     }
     
-    public void showWindow() {
-	// do nothing for now
-    }
-    
     public void fillGraphData() {
     	// Utilize CallGraph.java in analysis folder
  	CallGraph cg = new CallGraph(startInterval, endInterval, 
@@ -566,7 +557,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    else if (b == loadColors) {
 		// load all entry point colors from disk
 		try {
-		    ColorManager.loadActivityColors(ActivityManager.PROJECTIONS, colorArray[0]);
+		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
 		    // silly inefficiency
 		    setOutputGraphData();
 		} 

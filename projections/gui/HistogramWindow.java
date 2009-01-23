@@ -19,10 +19,6 @@ import javax.swing.border.*;
 public class HistogramWindow extends GenericGraphWindow 
 implements ActionListener
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -72,9 +68,9 @@ implements ActionListener
 		super.windowInit();
 	}
 
-	public HistogramWindow(MainWindow mainWindow, Integer myWindowID)
+	public HistogramWindow(MainWindow mainWindow)
 	{
-		super("Projections Histograms", mainWindow, myWindowID);
+		super("Projections Histograms", mainWindow);
 		thisWindow = this;
 
 		binType = TYPE_TIME;
@@ -126,10 +122,6 @@ implements ActionListener
 			};
 			worker.start();
 		}
-	}
-
-	public void showWindow() {
-		// do nothing for now
 	}
 
 	public void getDialogData() {

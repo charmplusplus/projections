@@ -2,13 +2,9 @@ package projections.gui;
 
 import java.awt.*;
 
-class GrayLWPanel extends LWPanel
+class GrayLWPanel extends Panel
 {
-   /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
+ 
 public void paint(Graphics g)
    {
 	  g.setColor(Color.lightGray);

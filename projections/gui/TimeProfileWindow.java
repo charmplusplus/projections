@@ -6,7 +6,6 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import projections.analysis.*;
-import projections.guiUtils.*;
 /**
  *  TimeProfileWindow
  *  by Chee Wai Lee
@@ -17,10 +16,6 @@ import projections.guiUtils.*;
 public class TimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	TimeProfileWindow thisWindow;
 
@@ -86,8 +81,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 	processorList = MainWindow.runObject[myRun].getValidProcessorList();
     }
 
-    public TimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
+    public TimeProfileWindow(MainWindow mainWindow) {
+	super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
 	// here
@@ -108,7 +103,7 @@ public class TimeProfileWindow extends GenericGraphWindow
             ampiTraceOn = true;
         if(ampiTraceOn){
             tabPane = new JTabbedPane();
-            ampiGraphPanel = new AmpiTimeProfileWindow(mainWindow,myWindowID);
+            ampiGraphPanel = new AmpiTimeProfileWindow(mainWindow);
         }
 
 	createMenus();
@@ -287,10 +282,6 @@ public class TimeProfileWindow extends GenericGraphWindow
 	super.getDialogData();
     }
 
-    public void showWindow() {
-	// nothing for now
-    }
-
     void fillGraphData() {
 	// for now, just assume all processors are added to the mix.
 	// LogReader is BROKEN and cannot deal with partial data properly.
@@ -394,7 +385,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    } else if (b == loadColors) {
 		// load all entry point colors from disk
 		try {
-		    ColorManager.loadActivityColors(ActivityManager.PROJECTIONS, colorArray[0]);
+		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
 		    // silly inefficiency
 		    setOutputGraphData();
 		} catch (IOException exception) {

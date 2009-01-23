@@ -7,10 +7,6 @@ import javax.swing.*;
 public class AnimationWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -79,19 +75,15 @@ public class AnimationWindow extends ProjectionsWindow
         endTime = MainWindow.runObject[myRun].getTotalTime();
     }
   
-    public AnimationWindow(MainWindow mainWindow, Integer myWindowID)
+    public AnimationWindow(MainWindow mainWindow)
     {
-	super(mainWindow, myWindowID);
+	super(mainWindow);
 	setBackground(MainWindow.runObject[myRun].background);
 	setTitle("Projections Animation - " + MainWindow.runObject[myRun].getFilename() + ".sts");
           
 	thisWindow = this;
 	showDialog();
     }   
-
-    public void showWindow() {
-	// do nothing for now
-    }
 
     public void showDialog() {
 	if (dialog == null) {

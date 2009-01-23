@@ -11,10 +11,7 @@ import java.awt.event.*;
 public class ScaleSlider extends Canvas
    implements MouseMotionListener, MouseListener
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	private double min,value,max; //Smallest, current, and largest values
 	private double tickStart,tickSep;//First and distance between tick marks
 	private int orient;

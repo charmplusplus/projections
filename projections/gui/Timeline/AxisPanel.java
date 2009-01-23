@@ -51,13 +51,6 @@ public class AxisPanel extends JPanel
 	/** The distance the large tick marks extend from the horizontal line */
 	private int largeTickHalfLength = 5;
 
-	private static final long serialVersionUID = 1L;
-
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
-
 	private Data  data;
 
 	private DecimalFormat format_= new DecimalFormat();
@@ -74,16 +67,6 @@ public class AxisPanel extends JPanel
 		int preferredWidth = 200;
 		int preferredHeight = totalHeight();
 		return new Dimension(preferredWidth, preferredHeight);
-	}
-
-
-	// return the int value of the HSB to make the image start at the 
-	// requested time
-	public int calcHSBOffset(double startTime) {
-		double percentOffset = 
-			(startTime-data.beginTime())/(data.totalTime());
-		double actualOffset = percentOffset*(getWidth() - data.leftOffset()-data.rightOffset());
-		return (int)(actualOffset + data.leftOffset() + 0.5);
 	}
 
 	/** Paint the axis in its panel */

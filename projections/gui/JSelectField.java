@@ -7,10 +7,7 @@ import java.awt.event.*;
 
 public class JSelectField extends JTextField
 {
-   /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 private String lastValue;
    private int    lastCaretPosition;
 

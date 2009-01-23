@@ -9,10 +9,7 @@ public class AmpiProfileData
     // runs.
     int myRun = 0;
 
-   int vpw, vph;
-   int dcw, dch;
    int numPs;
-   int numFunc;
    int offset;
    OrderedIntList plist;
    OrderedIntList phaselist;

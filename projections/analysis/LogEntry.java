@@ -5,7 +5,7 @@ import projections.misc.*;
 /** A class representing an entry in a log */
 class LogEntry
 {
-	public int Replay, TransactionType, MsgType, Entry;
+	public int TransactionType, MsgType, Entry;
 	long Time;
 	int EventID, Pe;
 	int MsgLen;
@@ -86,7 +86,8 @@ class LogEntry
 		return memoryUsage;
 	}
 
-	public void setUserSupplied(int userSuppliedValue) {
-		userSupplied = new Integer(userSuppliedValue);
-	}
+//	public void setUserSupplied(int userSuppliedValue) {
+//		userSupplied = new Integer(userSuppliedValue);
+//	}
+
 }

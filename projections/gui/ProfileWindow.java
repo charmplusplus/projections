@@ -15,10 +15,6 @@ import projections.analysis.*;
 public class ProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	private static final int NUM_SYS_EPS = 3;
 
@@ -66,8 +62,8 @@ public class ProfileWindow extends ProjectionsWindow
 
     boolean ampiTraceOn = false;
 
-    public ProfileWindow(MainWindow parentWindow, Integer myWindowID){
-        super(parentWindow, myWindowID);
+    public ProfileWindow(MainWindow parentWindow){
+        super(parentWindow);
 	thisWindow = this;
         colorsSet = false;
         colors = null;
@@ -262,11 +258,6 @@ public class ProfileWindow extends ProjectionsWindow
 	dialog.setEndTime(data.endtime);
 	super.setDialogData();
     }
-
-    public void showWindow() {
-	// do nothing for now
-    }
-
 
     public void actionPerformed(ActionEvent evt){
         // get recorded values

@@ -65,10 +65,6 @@ public class ProjectionsStatistics {
     // Accessor methods (which also computes the appropriate 
     // derived statistics on demand from the accumulated data).
 
-    public long getCount() {
-	return count;
-    }
-
     public double getSum() {
 	return sum;
     }

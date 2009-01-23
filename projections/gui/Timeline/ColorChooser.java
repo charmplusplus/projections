@@ -19,18 +19,15 @@ import javax.swing.JColorChooser;
 
 import projections.gui.Analysis;
 import projections.gui.ColorPanel;
-import projections.gui.ColorWindowFrame;
-import projections.gui.LWPanel;
 import projections.gui.MainWindow;
 import projections.gui.Util;
 
 
 /** The color chooser for choosing the colors for each entry method (i think)*/
-public class ColorChooser extends ColorWindowFrame
+public class ColorChooser extends Frame
    implements ActionListener
 {
 
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -44,11 +41,9 @@ public class ColorChooser extends ColorWindowFrame
    private Button       bApply, bClose;
    
    
-   class GrayLWPanel extends LWPanel
+   class GrayLWPanel extends Panel
    {
        
-	private static final long serialVersionUID = 1L;
-
 	public void paint(Graphics g)
        {
 	   g.setColor(Color.lightGray);
@@ -63,7 +58,7 @@ public class ColorChooser extends ColorWindowFrame
 
     public ColorChooser(Frame parent, Data data, TimelineWindow parentTimelineWindow_)
     {
-	super(parent);
+	super();
 	parentTimelineWindow = parentTimelineWindow_;
 	this.data = data;
 	
@@ -148,7 +143,7 @@ public class ColorChooser extends ColorWindowFrame
 
 	cpEntry = new ColorPanel[MainWindow.runObject[myRun].getNumUserEntries()];
 	
-	LWPanel p1 = new LWPanel();
+	Panel p1 = new Panel();
 	p1.setLayout(gbl);
 	
 	int ypos = 0;

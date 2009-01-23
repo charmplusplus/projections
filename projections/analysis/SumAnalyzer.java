@@ -18,7 +18,6 @@ public class SumAnalyzer extends ProjDefs
 
     // Summary modes (so that SumAnalyzer, as a data manager, can make use
     // of one or more data modes).
-    public static final int NUM_MODES = 2;
     public static final int ACC_MODE = 0;
     public static final int NORMAL_MODE = 1;
 
@@ -47,15 +46,15 @@ public class SumAnalyzer extends ProjDefs
 
     // For now, the way to do the reading of super-summary files. It will
     // be incorporated into a better framework later.
-    public SumAnalyzer(StsReader stsReader, int mode) {
-	this.mode = mode;
-	accumulatedReader =
-	    new AccumulatedSummaryReader(MainWindow.runObject[myRun].getSumAccumulatedName(),
-					 "5.0");
-	TotalTime = (long)accumulatedReader.totalTime;
-	IntervalCount = (int)accumulatedReader.numIntervals;
-	IntervalSize = (long)accumulatedReader.intervalSize;
-    }
+//    public SumAnalyzer(StsReader stsReader, int mode) {
+//	this.mode = mode;
+//	accumulatedReader =
+//	    new AccumulatedSummaryReader(MainWindow.runObject[myRun].getSumAccumulatedName(),
+//					 "5.0");
+//	TotalTime = (long)accumulatedReader.totalTime;
+//	IntervalCount = (int)accumulatedReader.numIntervals;
+//	IntervalSize = (long)accumulatedReader.intervalSize;
+//    }
 
     /********************** State Variables *******************/
     public SumAnalyzer()
@@ -388,11 +387,6 @@ public class SumAnalyzer extends ProjDefs
 	return ChareTime;
     }
 
-    public int[][] getNumEntryMsgs()
-    {
-	return NumEntryMsgs;
-    }
-
     public long[][] getPhaseChareTime(int Phase)
     {
 	return PhaseChareTime[Phase];
@@ -401,11 +395,6 @@ public class SumAnalyzer extends ProjDefs
     public int getPhaseCount() 
     {
 	return PhaseCount;
-    }
-
-    public int[][] getPhaseNumEntryMsgs(int Phase)
-    {
-	return PhaseNumEntryMsgs[Phase];
     }
 
     /**

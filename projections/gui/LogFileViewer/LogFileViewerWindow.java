@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.gui.LogFileViewer;
 
 import java.util.*;
 import java.awt.*;
@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import projections.gui.*;
 import projections.misc.*;
 import projections.analysis.*;
 
@@ -30,9 +31,9 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	long endTime;
 
 	/** The method that gets called when the user selects this tool from the Projections menu */
-	public LogFileViewerWindow(MainWindow parentWindow, Integer myWindowID)
+	public LogFileViewerWindow(MainWindow parentWindow)
 	{
-		super(parentWindow, myWindowID);
+		super(parentWindow);
  
 		setTitle("Projections Log File Viewer - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 

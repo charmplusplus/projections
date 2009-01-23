@@ -18,10 +18,7 @@ import projections.gui.count.*;
 public class MultiRunTables 
     extends JTabbedPane
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	private MultiRunDataAnalyzer analysisModule;
 
     /**

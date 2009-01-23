@@ -3,14 +3,10 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import projections.guiUtils.*;
+
 
 public class OutlierDialog extends RangeDialog
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -42,7 +38,7 @@ public class OutlierDialog extends RangeDialog
 	// execution time
 	currentAttribute = 0;
 	// projections-based data
-	currentActivity = ActivityManager.PROJECTIONS;
+	currentActivity = Analysis.PROJECTIONS;
 	// initialize default threshold to display the top 10% deviants
 	// for # processors 256 or less. The top 20 otherwise.
 	if (MainWindow.runObject[myRun].getNumProcessors() <= 256) {
@@ -72,17 +68,17 @@ public class OutlierDialog extends RangeDialog
 			// ActivityManager.POSE_DOP) ||
 			// no function support for now either ... *sigh*
 			(activityList.getSelectedIndex() ==
-			 ActivityManager.FUNCTIONS) ||
+				Analysis.FUNCTIONS) ||
 			// no communication properties associated with user 
 			// events
 			((activityList.getSelectedIndex() == 
-			  ActivityManager.USER_EVENTS) &&
+				Analysis.USER_EVENTS) &&
 			 (attributeList.getSelectedIndex() >= 1))
 			) {
 			errorText.setText("ERROR: Attribute " +
 					  ((OutlierAnalysisWindow)parentWindow).attributes[0][attributeList.getSelectedIndex()] +
 					  " is incompatible with Activity " +
-					  ActivityManager.NAMES[activityList.getSelectedIndex()]);
+					  Analysis.NAMES[activityList.getSelectedIndex()]);
 			return;
 		    }
 		} else {
@@ -132,7 +128,7 @@ public class OutlierDialog extends RangeDialog
 	JLabel attributeLabel = new JLabel("Attribute: ", JLabel.RIGHT);
 	attributeList.addActionListener(this);
 
-	activityList = new JComboBox(ActivityManager.NAMES);
+	activityList = new JComboBox(Analysis.NAMES);
 	activityList.setSelectedIndex(currentActivity);
 	JLabel activityLabel = new JLabel("Activity: ", JLabel.RIGHT);
 	activityList.addActionListener(this);

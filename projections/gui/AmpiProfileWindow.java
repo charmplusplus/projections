@@ -15,10 +15,6 @@ import projections.analysis.*;
 public class AmpiProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -60,8 +56,8 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     boolean ampiTraceOn = false;
 
-    public AmpiProfileWindow(MainWindow parentWindow, Integer myWindowID){
-        super(parentWindow, myWindowID);
+    public AmpiProfileWindow(MainWindow parentWindow){
+        super(parentWindow);
 	colorsSet = false;
         colors = null;
 
@@ -256,10 +252,6 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	dialog.setStartTime(data.begintime);
 	dialog.setEndTime(data.endtime);
 	super.setDialogData();
-    }
-
-    public void showWindow() {
-	// do nothing for now
     }
 
 
@@ -780,17 +772,5 @@ public class AmpiProfileWindow extends ProjectionsWindow
         }
     }
 
-    public void MakePOArray(long bt, long et)
-    {
-    }
-
-    public int getHSBValue()
-    {
-        return 0;
-    }
-
-    public int getVSBValue()
-    {
-        return 0;
-    }
+  
 }

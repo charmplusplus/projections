@@ -10,7 +10,7 @@ import java.text.DecimalFormat;
 public abstract class Axis
 {
   public static final int DISCRETE = 1;
-  public static final int CONTINUOUS = 2;
+//  public static final int CONTINUOUS = 2;
 
   private static final int MAJOR_TICK_OFFSET = 4;
   private static final int MINOR_TICK_OFFSET = 2;

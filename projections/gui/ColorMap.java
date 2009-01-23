@@ -9,7 +9,6 @@ class ColorMap {
     int red[]=new int[256],
 	green[]=new int[256],
 	blue[]=new int[256];
-    ColorModel cm;
     boolean cm_cached=false;
     
     public void addBreak(int sDex,int sRed,int sGreen,int sBlue,
@@ -28,13 +27,13 @@ class ColorMap {
 	}
     }
     
-    public void addBreaks(int dex[],int r[],int g[],int b[])
-    {
-	int i;
-	for (i=1;i<dex.length;i++)
-	    addBreak(dex[i-1],r[i-1],g[i-1],b[i-1],
-		     dex[i],r[i],g[i],b[i]);
-    }
+//    public void addBreaks(int dex[],int r[],int g[],int b[])
+//    {
+//	int i;
+//	for (i=1;i<dex.length;i++)
+//	    addBreak(dex[i-1],r[i-1],g[i-1],b[i-1],
+//		     dex[i],r[i],g[i],b[i]);
+//    }
 	
     /**
      * Map this color index into an actual color, suitable
@@ -67,11 +66,12 @@ class ColorMap {
 	return cm;
     }
     */
-    public void initGrey()
-    {
-	int i;
-	cm_cached=false;
-	for (i=0;i<256;i++)
-	    red[i]=green[i]=blue[i]=(byte)(0xff&i);
-    }
+//    public void initGrey()
+//    {
+//	int i;
+//	cm_cached=false;
+//	for (i=0;i<256;i++)
+//	    red[i]=green[i]=blue[i]=(byte)(0xff&i);
+//    }
+
 }

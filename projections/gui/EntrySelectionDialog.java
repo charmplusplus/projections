@@ -17,13 +17,9 @@ import javax.swing.*;
  *  I favor for all toolkits in projections. That would involve changes to
  *  those toolkits (which is not desired now).
  */
-public class EntrySelectionDialog extends ColorWindowFrame 
+public class EntrySelectionDialog extends Frame 
    implements ActionListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	private ColorSelectable callbackTarget;
 
@@ -52,16 +48,6 @@ public class EntrySelectionDialog extends ColorWindowFrame
     /**
      *  This is a wrapper constructor for a non-callback based dialog.
      */
-    public EntrySelectionDialog(Frame parent,
-				String typeLabelStrings[],
-				boolean stateArray[][],
-				Color colorArray[][],
-				boolean existsArray[][],
-				String entryNames[])
-    {
-	this(parent, null, typeLabelStrings, stateArray, colorArray,
-	     existsArray, entryNames);
-    }
 
     public EntrySelectionDialog(Frame parent, 
 				ColorSelectable callbackTarget,
@@ -71,7 +57,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 				boolean existsArray[][],
 				String entryNames[])
     {
-	super(parent, true);
+	super();
 	this.callbackTarget = callbackTarget;
 	this.numTypes = typeLabelStrings.length;
 	this.typeLabelStrings = typeLabelStrings;
@@ -237,7 +223,7 @@ public class EntrySelectionDialog extends ColorWindowFrame
 	}
    
 	// Light Weight Panel - Do we really need this?  
-	LWPanel contentPanel = new LWPanel();
+	Panel contentPanel = new Panel();
 	sp.add(contentPanel);
 	contentPanel.setLayout(gbl);
 	  

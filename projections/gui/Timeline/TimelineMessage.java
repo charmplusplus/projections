@@ -55,10 +55,6 @@ public class TimelineMessage implements Comparable
 		this.destPEs = null;
 	}
 
-	public int getSenderEventID() {
-		return SenderEventID;
-	}
-
 	/** compare two timeline messages based on their source pe and their EventID */
 	public int compareTo(Object o) {
 		TimelineMessage other = (TimelineMessage)o;

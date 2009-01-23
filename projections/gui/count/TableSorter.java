@@ -37,10 +37,6 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
 public class TableSorter extends TableMap {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	int             indexes[];
     Vector          sortingColumns = new Vector();
     boolean         ascending = true;

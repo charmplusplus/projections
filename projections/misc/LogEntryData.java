@@ -68,38 +68,7 @@ public class LogEntryData extends ProjDefs
     public int lineNo;          // line number of the function call.
     public String funcName;     // the name of the function
 
-    
-    /* return the copy of the current object */ 
-    public LogEntryData copyOf(){
-	LogEntryData temp = new LogEntryData();
-	temp.type   = type;
-	temp.mtype  = mtype;
-	temp.time   = time;
-	temp.entry  = entry;
-	temp.event  = event;
-	temp.pe     = pe;
-	temp.msglen = msglen;
-	temp.sendTime = sendTime;
-	temp.recvTime = recvTime;
-	temp.id[0] = id[0];
-	temp.id[1] = id[1];
-	temp.id[2] = id[2];
-	temp.id[3] = id[3];
-	temp.cpuStartTime = cpuStartTime;
-	temp.cpuEndTime = cpuEndTime;
-	temp.numPerfCounts = numPerfCounts;
-	temp.perfCounts = new long[numPerfCounts];
-	for (int i=0; i<numPerfCounts; i++) {
-	    temp.perfCounts[i] = perfCounts[i];
-	}
-	temp.lineNo = lineNo;
-	temp.funcName = new String(funcName);
-	temp.userSupplied = userSupplied;
-	temp.memoryUsage = memoryUsage;
-	temp.note = note;
-	
-	return temp;
-    }
+
 
     public boolean isValid() {
 	return isValid;

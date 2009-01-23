@@ -15,7 +15,7 @@ import java.io.*;
  *  object creation time (which means the input can actually come from a
  *  networked stream instead of from just a file).
  *  
- *  
+ *   
  *
  */
 
@@ -386,68 +386,68 @@ implements PointCapableReader
 		}
 	}
 
-	public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
-	throws IOException, EOFException
-	{
-		LogEntryData data = new LogEntryData();
+//	public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
+//	throws IOException, EOFException
+//	{
+//		LogEntryData data = new LogEntryData();
+//
+//		while (true) {
+//			data = nextEventOnOrAfter(timestamp);
+//			if (data.type == eventType) {
+//				return data;
+//			}
+//		}
+//	}
 
-		while (true) {
-			data = nextEventOnOrAfter(timestamp);
-			if (data.type == eventType) {
-				return data;
-			}
-		}
-	}
+//	public LogEntryData nextBeginEvent()
+//	throws IOException, EOFException
+//	{
+//		LogEntryData data = new LogEntryData();
+//
+//		while (true) {
+//			data = nextEvent();
+//			if (data.isBeginType()) {
+//				return data;
+//			}
+//		}
+//	}
 
-	public LogEntryData nextBeginEvent()
-	throws IOException, EOFException
-	{
-		LogEntryData data = new LogEntryData();
+//	public void nextEndEvent(LogEntryData data)
+//	throws IOException, EOFException
+//	{
+//		while (true) {
+//			data = nextEvent();
+//			if (data.isEndType()) {
+//				return;
+//			}
+//		}
+//	}
+//
+//	public LogEntryData nextBeginEventOnOrAfter(long timestamp)
+//	throws IOException, EOFException
+//	{
+//		LogEntryData data = new LogEntryData();
+//
+//		while (true) {
+//			data = nextEventOnOrAfter(timestamp);
+//			if (data.isBeginType()) {
+//				return data;
+//			}
+//		}
+//	}
 
-		while (true) {
-			data = nextEvent();
-			if (data.isBeginType()) {
-				return data;
-			}
-		}
-	}
-
-	public void nextEndEvent(LogEntryData data)
-	throws IOException, EOFException
-	{
-		while (true) {
-			data = nextEvent();
-			if (data.isEndType()) {
-				return;
-			}
-		}
-	}
-
-	public LogEntryData nextBeginEventOnOrAfter(long timestamp)
-	throws IOException, EOFException
-	{
-		LogEntryData data = new LogEntryData();
-
-		while (true) {
-			data = nextEventOnOrAfter(timestamp);
-			if (data.isBeginType()) {
-				return data;
-			}
-		}
-	}
-
-	public LogEntryData nextEndEventOnOrAfter(long timestamp)
-	throws IOException, EOFException
-	{
-		LogEntryData data = new LogEntryData();
-
-		while (true) {
-			data = nextEventOnOrAfter(timestamp);
-			if (data.isEndType()) {
-				return data;
-			}
-		}
-	}
+//	public LogEntryData nextEndEventOnOrAfter(long timestamp)
+//	throws IOException, EOFException
+//	{
+//		LogEntryData data = new LogEntryData();
+//
+//		while (true) {
+//			data = nextEventOnOrAfter(timestamp);
+//			if (data.isEndType()) {
+//				return data;
+//			}
+//		}
+//	}
 
 	public LogEntryData getLastBE() {
 		if (lastBeginEvent.isValid()) {

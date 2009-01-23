@@ -24,48 +24,48 @@ public class ProjectionsFileMgr {
     }
   }
 
-  /** Constructor. files is a Vector of "File". */
-  public ProjectionsFileMgr(Vector files) 
-    throws IOException 
-  { 
-    stsFiles_ = new File[files.size()];
-    logFiles_ = new File[files.size()][];
-    for (int i=0; i<files.size(); i++) {
-      stsFiles_[i] = (File) files.elementAt(i);
-      logFiles_[i] = findFiles(stsFiles_[i].getCanonicalPath());
-    }
-  }
+//  /** Constructor. files is a Vector of "File". */
+//  public ProjectionsFileMgr(Vector files) 
+//    throws IOException 
+//  { 
+//    stsFiles_ = new File[files.size()];
+//    logFiles_ = new File[files.size()][];
+//    for (int i=0; i<files.size(); i++) {
+//      stsFiles_[i] = (File) files.elementAt(i);
+//      logFiles_[i] = findFiles(stsFiles_[i].getCanonicalPath());
+//    }
+//  }
 
-  /** Print out the files that were set. */
-  public void printSts() {
-    for (int i=0; i<stsFiles_.length; i++) { 
-      //System.out.println(stsFiles_[i].getCanonicalPath());
-      for (int j=0; j<logFiles_[i].length; j++) {
-	if (logFiles_[i] != null) {
-	  //System.out.println("  "+logFiles_[i][j].getCanonicalPath());
-	}
-      }
-    }
-  }
+//  /** Print out the files that were set. */
+//  public void printSts() {
+//    for (int i=0; i<stsFiles_.length; i++) { 
+//      //System.out.println(stsFiles_[i].getCanonicalPath());
+//      for (int j=0; j<logFiles_[i].length; j++) {
+//	if (logFiles_[i] != null) {
+//	  //System.out.println("  "+logFiles_[i][j].getCanonicalPath());
+//	}
+//      }
+//    }
+//  }
 
-  /** Return the sts file at index or null if no index. */
-  public File getStsFile(int index) {
-    if (stsFiles_ != null) { return stsFiles_[index]; }
-    else { return null; }
-  }
+//  /** Return the sts file at index or null if no index. */
+//  public File getStsFile(int index) {
+//    if (stsFiles_ != null) { return stsFiles_[index]; }
+//    else { return null; }
+//  }
 
-  /** Return the number of sts files or 0 if no files. */
-  public int getNumFiles() {
-    if (stsFiles_ != null) { return stsFiles_.length; }
-    else { return 0; }
-  }
+//  /** Return the number of sts files or 0 if no files. */
+//  public int getNumFiles() {
+//    if (stsFiles_ != null) { return stsFiles_.length; }
+//    else { return 0; }
+//  }
 
-  /** Return pointer to files that are associated with the stsFile at
-   *  index <idx>.  Can return null.  */
-  public File[] getLogFiles(int idx) {
-    if (logFiles_ != null) { return logFiles_[idx]; }
-    else { return null; }
-  }
+//  /** Return pointer to files that are associated with the stsFile at
+//   *  index <idx>.  Can return null.  */
+//  public File[] getLogFiles(int idx) {
+//    if (logFiles_ != null) { return logFiles_[idx]; }
+//    else { return null; }
+//  }
 
   /** Filter files in the directory and only get those logs associated with
    *  the STS file. */

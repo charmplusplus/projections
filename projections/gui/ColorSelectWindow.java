@@ -6,10 +6,7 @@ import java.awt.event.*;
 public class ColorSelectWindow extends Dialog
    implements AdjustmentListener, ActionListener
 {
-   /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 private Label lRed, lGreen, lBlue;
    private Scrollbar sbRed, sbGreen, sbBlue;
    private DisplayCanvas displayCanvas;
@@ -19,7 +16,7 @@ private Label lRed, lGreen, lBlue;
    private Color currentColor;      
    String title;
    private Panel p1, p2;
-   private ColorWindowFrame myParent;
+   private Frame myParent;
 
    private class DisplayCanvas extends Canvas
    {
@@ -92,7 +89,7 @@ private Label lRed, lGreen, lBlue;
 		 g.drawLine(w-1, h, w-1, 0);
 	  }
    }
-   public ColorSelectWindow(ColorWindowFrame parent, Color currentColor, String s)
+   public ColorSelectWindow(Frame parent, Color currentColor, String s)
    {
        super(parent);
        this.setModal(true);
@@ -176,7 +173,7 @@ private Label lRed, lGreen, lBlue;
 	  Button b = (Button)evt.getSource();
 	  if(b == bOK)
 	  {
-		 myParent.applyNewColor(currentColor);
+		 myParent.setBackground(currentColor);
 	  }   
 	  setVisible(false);
    }   

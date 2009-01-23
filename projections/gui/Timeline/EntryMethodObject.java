@@ -21,8 +21,6 @@ import javax.swing.*;
 public class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
 {
 
-	private static final long serialVersionUID = 1L;
-
 	private MessageWindow msgwindow;
 	private long beginTime, endTime, recvTime;
 	private long cpuTime;
@@ -48,9 +46,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 	/** Memory usage at some point in this entry method. Null if nonspecified */
 	Integer memoryUsage;
-	
-	/** Stores the creationMessage after it has been found by creationMessage() */
-	private TimelineMessage creationMessage;
 	
 	/** The duration of the visible portion of this event */
 	private double  usage;
@@ -255,13 +250,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 	}
 	
-	
-	
-	
-	public void CloseMessageWindow()
-	{
-		msgwindow = null;
-	}   
 
 	/** paint an entry method that tapers to a point at its left side */
 	private void drawLeftArrow(Graphics g, Color c, int startY, int h)
@@ -860,9 +848,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 	}   
 	
-	public int whichTimelineVerticalIndex(){
-		return data.whichTimelineVerticalPosition(pCurrent);
-	}
+//	public int whichTimelineVerticalIndex(){
+//		return data.whichTimelineVerticalPosition(pCurrent);
+//	}
 	
 
 	public void setPackUsage()
@@ -916,11 +904,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		// System.out.println(usage);
 	}
 
-
-
-	public int getEventID() {
-		return EventID;
-	}
 
 	public int compareTo(Object o) {
 		EntryMethodObject obj = (EntryMethodObject) o;

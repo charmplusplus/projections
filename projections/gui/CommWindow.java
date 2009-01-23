@@ -13,10 +13,6 @@ import projections.misc.LogEntryData;
 public class CommWindow extends GenericGraphWindow
 implements ItemListener, ActionListener, Clickable
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -60,8 +56,8 @@ implements ItemListener, ActionListener, Clickable
 		super.windowInit();
 	}
 
-	public CommWindow(MainWindow mainWindow, Integer myWindowID) {
-		super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
+	public CommWindow(MainWindow mainWindow) {
+		super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 		mainPanel = new JPanel();
 		setLayout(mainPanel);
 		//getContentPane().add(mainPanel);
@@ -210,29 +206,7 @@ implements ItemListener, ActionListener, Clickable
 	}
 
 	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-		if (parentWindow.childWindows[MainWindow.TIMELINE_WIN][0] !=
-			null) {
-			final int myX = xVal;
-			// potentially expensive, so apply SwingWorker to this
-			final SwingWorker worker =  new SwingWorker() {
-				public Object construct() {
-					((TimelineWindow)parentWindow.childWindows[MainWindow.TIMELINE_WIN][0]).addProcessor(myX);
-					return null;
-				}
-				public void finished() {
-					// GUI code after Long non-gui code.
-					// Which in this case, is nothing.
-				}
-			};
-			worker.start();
-		} else {
-			System.err.println("You wanted to load processor " +
-					xVal +
-					"'s data onto Timeline. However," +
-					"the ability to open a new " +
-					"timeline window from Communication Window " +
-			"is not supported yet!");
-		}
+		parentWindow.addProcessor(xVal);	
 	}
 
 	protected void createMenus(){
@@ -363,10 +337,6 @@ implements ItemListener, ActionListener, Clickable
 			};
 			worker.start();
 		}
-	}
-
-	public void showWindow() {
-		// do nothing for now
 	}
 
 	// reuse generic graph window's method

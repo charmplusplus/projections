@@ -25,8 +25,6 @@ import projections.gui.ProjectionsWindow;
  */
 public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 
-	private static final long serialVersionUID = 1L;
-
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
@@ -81,8 +79,8 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	
 
 	/** WHOLE CONSTRUCTOR IS NOT CALLED BEFORE windowInit() */
-	public TimelineWindow(MainWindow parentWindow, Integer myWindowID) {
-		super(parentWindow, myWindowID);
+	public TimelineWindow(MainWindow parentWindow) {
+		super(parentWindow);
 		
         thisWindow = this;
 		

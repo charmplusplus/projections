@@ -29,8 +29,6 @@ import java.text.*;
 public class WindowControls extends JPanel implements ActionListener,
 ItemListener {
 
-	private static final long serialVersionUID = 1L;
-
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
@@ -593,50 +591,6 @@ ItemListener {
 
 	}
 
-	public long getBeginTime() {
-		return data.beginTime();
-	}
-
-	public long getEndTime() {
-		return data.endTime();
-	}
-
-	public int[] getEntries() {
-		return data.entries();
-	}
-
-	public Color[] getEntryColors() {
-		if (data == null)
-			return null;
-		else
-			return data.entryColor();
-	}
-
-	public OrderedUsageList[] getEntryUsageData() {
-		if (data == null)
-			return null;
-		else
-			return data.entryUsageList;
-	}
-
-	public Color getGraphColor(int e) {
-		return MainWindow.runObject[myRun].getEntryColor(e);
-		// return parentWindow.getGraphColor(e);
-	}
-
-	public float[] getIdleUsageData() {
-		if (data == null)
-			return null;
-		else
-			return data.idleUsage;
-	}
-
-	public float[] getPackUsageData() {
-		if (data == null)
-			return null;
-		else
-			return data.packUsage;
-	}
 
 	public void itemStateChanged(ItemEvent evt) {
 		if (data == null)

@@ -22,14 +22,8 @@ import javax.swing.*;
  *  This is so it will stretch horizontally with the window.
  */
 
-public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener {
-
-	private static final long serialVersionUID = 1L;
-	
-	// Temporary hardcode. This variable will be assigned appropriate
-	// meaning in future versions of Projections that support multiple
-	// runs.
-	int myRun = 0;
+public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
+{
 	
 	int viewX, viewY;
 	
@@ -161,11 +155,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	public boolean getScrollableTracksViewportHeight(){
 		return false;
 	}
-
-	public Data getData() {
-		return data;
-	}
-
 
 	/** Handle dragging of panel if we are in a viewport */
 	public void mouseDragged(MouseEvent e) {

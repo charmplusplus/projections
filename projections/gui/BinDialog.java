@@ -21,10 +21,6 @@ import javax.swing.border.*;
  */
 public class BinDialog extends RangeDialog 
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	// GUI components
     protected JTabbedPane binPanel;
     protected JPanel timeBinPanel;

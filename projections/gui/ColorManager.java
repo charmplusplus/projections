@@ -3,7 +3,6 @@ package projections.gui;
 import java.io.*;
 import java.awt.*;
 
-import projections.guiUtils.*;
 
 /**
  *  ColorManager.java
@@ -28,7 +27,7 @@ public class ColorManager
     }
 
     public static Color[][] initializeColors() {
-	Color retColors[][] = new Color[ActivityManager.NUM_ACTIVITIES][];
+	Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];
 	for (int i=0; i<retColors.length; i++) {
 	    retColors[i] = 
 		createColorMap(MainWindow.runObject[myRun].getNumActivity(i));
@@ -41,7 +40,7 @@ public class ColorManager
     {
 	ObjectInputStream in =
 	    new ObjectInputStream(new FileInputStream(filename));
-	Color retColors[][] = new Color[ActivityManager.NUM_ACTIVITIES][];
+	Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];
 	String names[] = null;
 	Color tempColors[][] = null;
 	int index = 0;
@@ -71,7 +70,7 @@ public class ColorManager
 	    // single array format, so back-off to load that instead whilst
 	    // constructing the rest of the array from scratch.
 	    in.close();
-	    int activity = ActivityManager.PROJECTIONS;
+	    int activity = Analysis.PROJECTIONS;
 	    retColors[activity] =
 		new Color[MainWindow.runObject[myRun].getNumActivity(activity)];
 	    loadActivityColors(activity,retColors[activity]);
@@ -116,7 +115,7 @@ public class ColorManager
 	    System.err.println(e);
 	}
 	in.close();
-	if ((type >= 0) && (type < ActivityManager.NUM_ACTIVITIES)) {
+	if ((type >= 0) && (type < Analysis.NUM_ACTIVITIES)) {
 	    // Copy the individual colors. This is done so that every
 	    // tool can see those same colors.
 	    if (origColors.length == retColors[type].length) {
@@ -149,7 +148,7 @@ public class ColorManager
 	throws IOException
     {
 	Color retColors[] = null;
-	if (type == ActivityManager.PROJECTIONS) {
+	if (type == Analysis.PROJECTIONS) {
 	    ObjectInputStream in =
 		new ObjectInputStream(new FileInputStream(filename));
 	    try {
@@ -219,85 +218,88 @@ public class ColorManager
 	return colors;
     }
 
-    /**
-     *  Wrapper version for using a default weight assignment.
-     */
-    public static Color[] createColorMap(int numEPs, int epMap[]) {
-	int numSignificant = epMap.length;
-	int[] weights = new int[numSignificant];
-	
-	if (numSignificant > 0) {
-	    // default assignment of weights using an accelerating increment
-	    // method (acceleration = 2; initial value = 5)
-	    int acceleration = 2;
-	    int increment = 7;
-	    weights[numSignificant-1] = 5;
-	    for (int ep=numSignificant-2; ep>=0; ep--) {
-		weights[ep] = weights[ep+1] + increment;
-		increment += acceleration;
-	    }
-	}
-	return createColorMap(numEPs, epMap, weights);
-    }
+//    /**
+//     *  Wrapper version for using a default weight assignment.
+//     */
+//    public static Color[] createColorMap(int numEPs, int epMap[]) {
+//	int numSignificant = epMap.length;
+//	int[] weights = new int[numSignificant];
+//	
+//	if (numSignificant > 0) {
+//	    // default assignment of weights using an accelerating increment
+//	    // method (acceleration = 2; initial value = 5)
+//	    int acceleration = 2;
+//	    int increment = 7;
+//	    weights[numSignificant-1] = 5;
+//	    for (int ep=numSignificant-2; ep>=0; ep--) {
+//		weights[ep] = weights[ep+1] + increment;
+//		increment += acceleration;
+//	    }
+//	}
+//	return createColorMap(numEPs, epMap, weights);
+//    }
 
-    /**
-     *  A more advanced version of color assignment that takes a map
-     *  of significant entry methods in sorted order and assigns more
-     *  distinctly different (hue) colors to more significant entry
-     *  methods. Significance is assigned by the tool requesting the
-     *  color map. This scheme is still arbitrary.
-     *
-     *  numEPs give a total of color assignments required.
-     */
-    public static Color[] createColorMap(int numEPs, int epMap[], 
-					 int weights[]) {
-	Color[] colors = new Color[numEPs];
+//    /**
+//     *  A more advanced version of color assignment that takes a map
+//     *  of significant entry methods in sorted order and assigns more
+//     *  distinctly different (hue) colors to more significant entry
+//     *  methods. Significance is assigned by the tool requesting the
+//     *  color map. This scheme is still arbitrary.
+//     *
+//     *  numEPs give a total of color assignments required.
+//     */
+//    public static Color[] createColorMap(int numEPs, int epMap[], 
+//					 int weights[]) {
+//	Color[] colors = new Color[numEPs];
+//
+//	int numSignificant = epMap.length;
+//	// no significant values, so return uniform color map
+//	if (numSignificant == 0) {
+//	    return createColorMap(numEPs);
+//	}
+//	int total = 0;
+//	for (int ep=0; ep<numSignificant; ep++) {
+//	    total += weights[ep];
+//	}
+//	// a linear distribution segment of the remaining color space should 
+//	// not be larger than the smallest final hue segment assigned to a
+//	// significant ep. Formula: x >= 1.0/kc+1.0 where x is the hue space
+//	// allocated to significant eps, k is the % weight assigned to the
+//	// smallest significant ep and c is the number of insignificant eps.
+//	// x should be at least 66% of the hue space or it wouldn't make a
+//	// difference (when a small number of significant elements are
+//	// presented).
+//	double k = weights[numSignificant-1]/(double)total;
+//	int c = numEPs-numSignificant;
+//	double x = 1.0/(k*c + 1.0);
+//	if (x < 0.67) {
+//	    x = 0.67;
+//	}
+//
+//	double currentHue = 1.0;
+//	double saturation = 1.0;
+//	double brightness = 1.0;
+//	// assign colors to significant eps
+//	for (int ep=0; ep<numSignificant; ep++) {
+//	    colors[epMap[ep]] = Color.getHSBColor((float)currentHue, 
+//						  (float)saturation,
+//						  (float)brightness);
+//	    currentHue -= (weights[ep]/(double)total)*x;
+//	}
+//	// assign colors to all other eps
+//	double delta = currentHue/c;
+//	for (int ep=0; ep<numEPs; ep++) {
+//	    // needs assignment
+//	    if (colors[ep] == null) {
+//		colors[ep] = Color.getHSBColor((float)currentHue, 
+//					       (float)saturation,
+//					       (float)brightness);
+//		currentHue -= delta;
+//	    }
+//	}
+//	return colors;
+//    }
 
-	int numSignificant = epMap.length;
-	// no significant values, so return uniform color map
-	if (numSignificant == 0) {
-	    return createColorMap(numEPs);
-	}
-	int total = 0;
-	for (int ep=0; ep<numSignificant; ep++) {
-	    total += weights[ep];
-	}
-	// a linear distribution segment of the remaining color space should 
-	// not be larger than the smallest final hue segment assigned to a
-	// significant ep. Formula: x >= 1.0/kc+1.0 where x is the hue space
-	// allocated to significant eps, k is the % weight assigned to the
-	// smallest significant ep and c is the number of insignificant eps.
-	// x should be at least 66% of the hue space or it wouldn't make a
-	// difference (when a small number of significant elements are
-	// presented).
-	double k = weights[numSignificant-1]/(double)total;
-	int c = numEPs-numSignificant;
-	double x = 1.0/(k*c + 1.0);
-	if (x < 0.67) {
-	    x = 0.67;
-	}
 
-	double currentHue = 1.0;
-	double saturation = 1.0;
-	double brightness = 1.0;
-	// assign colors to significant eps
-	for (int ep=0; ep<numSignificant; ep++) {
-	    colors[epMap[ep]] = Color.getHSBColor((float)currentHue, 
-						  (float)saturation,
-						  (float)brightness);
-	    currentHue -= (weights[ep]/(double)total)*x;
-	}
-	// assign colors to all other eps
-	double delta = currentHue/c;
-	for (int ep=0; ep<numEPs; ep++) {
-	    // needs assignment
-	    if (colors[ep] == null) {
-		colors[ep] = Color.getHSBColor((float)currentHue, 
-					       (float)saturation,
-					       (float)brightness);
-		currentHue -= delta;
-	    }
-	}
-	return colors;
-    }
 }
+

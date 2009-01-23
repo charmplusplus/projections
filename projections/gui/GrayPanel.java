@@ -4,10 +4,7 @@ import java.awt.*;
 
 class GrayPanel extends Panel
 {
-   /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 public GrayPanel()
    {
 	  setBackground(Color.lightGray);

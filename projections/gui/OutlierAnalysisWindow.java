@@ -9,7 +9,6 @@ import javax.swing.*;
 
 import projections.analysis.*;
 import projections.gui.Timeline.TimelineWindow;
-import projections.guiUtils.*;
 import projections.misc.*;
 
 /**
@@ -22,10 +21,6 @@ public class OutlierAnalysisWindow extends GenericGraphWindow
 implements ActionListener, ItemListener, ColorSelectable,
 Clickable
 {
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	OutlierAnalysisWindow thisWindow;
 
@@ -70,11 +65,10 @@ Clickable
 	private Color[] graphColors;
 	public OrderedIntList outlierPEs;
 
-	DecimalFormat df = new DecimalFormat();
 
-	public OutlierAnalysisWindow(MainWindow mainWindow, Integer myWindowID) {
+	public OutlierAnalysisWindow(MainWindow mainWindow) {
 		super("Projections Outlier Analysis Tool - " + 
-				MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
+				MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 
 		createMenus();
 		createLayout();
@@ -88,7 +82,7 @@ Clickable
 
 			// This is still a hack, there might be differentiation in the
 			// online case.
-			currentActivity = ActivityManager.PROJECTIONS;
+			currentActivity = Analysis.PROJECTIONS;
 			// default to execution time. Again a hack.
 			currentAttribute = 0;
 			// finally, something that's not a hack
@@ -237,7 +231,7 @@ Clickable
 			GenericLogReader reader = 
 				new GenericLogReader(nextPe, MainWindow.runObject[myRun].getVersion());
 			try {
-				if (currentActivity == ActivityManager.USER_EVENTS) {
+				if (currentActivity == Analysis.USER_EVENTS) {
 					LogEntryData logData;
 					LogEntryData logDataEnd;
 
@@ -755,9 +749,6 @@ Clickable
 		refreshGraph();
 	}
 
-	public void showWindow() {
-		// nothing for now
-	}
 
 	public void applyDialogColors() {
 		setDataSource("Outliers", graphData, graphColors, this);
@@ -796,32 +787,7 @@ Clickable
 	}	
 
 	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-		// no response if the bars for average values are clicked
-		if (xVal >= 3) {
-			if (parentWindow.childWindows[MainWindow.TIMELINE_WIN][0] !=
-				null) {
-				final int myX = xVal;
-				// potentially expensive, so apply SwingWorker to this
-				final SwingWorker worker =  new SwingWorker() {
-					public Object construct() {
-						((TimelineWindow)parentWindow.childWindows[MainWindow.TIMELINE_WIN][0]).addProcessor(Integer.parseInt((String)outlierList.get(myX)));
-						return null;
-					}
-					public void finished() {
-						// GUI code after Long non-gui code.
-						// Which in this case, is nothing.
-					}
-				};
-				worker.start();
-			} else {
-				System.err.println("You wanted to load processor " +
-						(String)outlierList.get(xVal) +
-						"'s data onto Timeline. However," +
-						"the ability to open a new " +
-						"timeline window from Outlier Analysis " +
-				"is not supported yet!");
-			}
-		}
+		parentWindow.addProcessor(Integer.parseInt((String)outlierList.get(xVal)));
 	}
 
 	public void actionPerformed(ActionEvent e) {

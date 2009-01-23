@@ -10,17 +10,13 @@ import projections.misc.*;
 public class GraphWindow extends ProjectionsWindow
     implements ActionListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
 
-    GraphDisplayPanel      displayPanel;
+    GraphDisplayPanel      displayPanel; 
     GraphControlPanel      controlPanel;
     GraphLegendPanel       legendPanel;
     GraphData data;
@@ -36,9 +32,9 @@ public class GraphWindow extends ProjectionsWindow
     public static boolean dumpNow = false;
     public static int dumpCount = 0;
     
-    public GraphWindow(MainWindow parentWindow, Integer myWindowID)
+    public GraphWindow(MainWindow parentWindow)
     {
-	super(parentWindow, myWindowID);
+	super(parentWindow);
 
 	thisWindow = this;
 	setBackground(Color.lightGray);
@@ -155,18 +151,14 @@ public class GraphWindow extends ProjectionsWindow
 	setMenuBar(mbar);                                                     
     }   
 
-    public Color getGraphColor(int e)
-    {
-	if(data != null && data.userEntry != null)
-	    return data.userEntry[e][0].color;
-	else
-	    return null;
-    }   
+//    public Color getGraphColor(int e)
+//    {
+//	if(data != null && data.userEntry != null)
+//	    return data.userEntry[e][0].color;
+//	else
+//	    return null;
+//    }   
 
-    public long getIntervalSize()
-    {
-	return intervalsize;
-    }
    
     private void PrintGraph()
     {
@@ -251,9 +243,6 @@ public class GraphWindow extends ProjectionsWindow
 	}
     }
     
-    public void showWindow() {
-	// do nothing for now
-    }
     
     public void getDialogData() {
 	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;

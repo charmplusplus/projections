@@ -47,13 +47,6 @@ public class GenericSummaryReader
     // epData dimension 2 - indexed by tags (see above).
     public long epData[][];
 
-    // Mark pair information -- ignored (markedPairs added for completeness)
-    public int numMarkedPairs;
-
-    // markedPairs dim 1 - indexed by current pair counter
-    // markedPairs dim 2 - indexed by 0 or 1 (car or cadr).
-    public long markedPairs[][];
-
     // Phase information
     // phaseData dim 1 - indexed by current phase counter
     // phaseData dim 2 - indexed by entry point ID

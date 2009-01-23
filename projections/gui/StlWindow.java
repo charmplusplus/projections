@@ -33,10 +33,6 @@ public class StlWindow extends ProjectionsWindow
     implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
 	       ItemListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -48,7 +44,6 @@ public class StlWindow extends ProjectionsWindow
     StlPanel stl;
     private Label status;
     // Modified to display data by entry method color. Mode panel.
-    public static final int NUM_MODES = 2;
     public static final int MODE_UTILIZATION = 0;
     public static final int MODE_EP = 1;
 
@@ -75,9 +70,9 @@ public class StlWindow extends ProjectionsWindow
 	endTime = MainWindow.runObject[myRun].getTotalTime();
     }
 
-    public StlWindow(MainWindow mainWindow, Integer myWindowID)
+    public StlWindow(MainWindow mainWindow)
     {
-	super(mainWindow, myWindowID);
+	super(mainWindow);
 	thisWindow = this;
 
 	setForeground(Color.lightGray);
@@ -241,10 +236,7 @@ public class StlWindow extends ProjectionsWindow
 	    e.printStackTrace();
 	}
     }
-   
-    public void showWindow() {
-	// do nothing for now
-    }
+
 
     public void actionPerformed(ActionEvent evt)
     {

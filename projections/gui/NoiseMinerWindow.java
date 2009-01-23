@@ -52,7 +52,6 @@ public class NoiseMinerWindow extends ProjectionsWindow
 implements ItemListener
 {
 
-	private static final long serialVersionUID = 1L;
 
 	NoiseMinerWindow      thisWindow;    
 
@@ -88,8 +87,8 @@ implements ItemListener
 	protected void windowInit() {
 	}
 
-	public NoiseMinerWindow(MainWindow parentWindow, Integer myWindowID) {
-		super(parentWindow, myWindowID);
+	public NoiseMinerWindow(MainWindow parentWindow) {
+		super(parentWindow);
 		thisWindow = this;
 
 		setBackground(Color.lightGray);
@@ -265,10 +264,6 @@ implements ItemListener
 		super.setDialogData();	
 	}
 
-	public void showWindow() {
-	}
-
-	
 
 	/** A class that renders and handles events for the JButtons in our table */
 	class ButtonColumn extends AbstractCellEditor

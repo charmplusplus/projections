@@ -20,8 +20,6 @@ import javax.swing.*;
 
 public class MainPanelForeground extends JPanel {
 
-	private static final long serialVersionUID = 1L;
-	
 	Data data;
 		
 	public MainPanelForeground(Data data){

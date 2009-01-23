@@ -7,10 +7,7 @@ import java.awt.event.*;
 public class ColorPanel extends Canvas
    implements MouseListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	private int type;
     private int index;
 
@@ -43,30 +40,6 @@ public class ColorPanel extends Canvas
           addMouseListener(this);
    }
 
-   public ColorPanel(Color f, int w, int h)
-   {
-	  background = Color.black;
-	  foreground = f;
-	  this.w = w;
-	  this.h = h;
-	  addMouseListener(this);
-   }   
-   public ColorPanel(Color b, Color f)
-   {
-	  background = b;
-	  foreground = f;
-	  w = wDefault;
-	  h = hDefault;
-	  addMouseListener(this);
-   }   
-   public ColorPanel(Color b, Color f, int w, int h)
-   {
-	  this.w = w;
-	  this.h = h;
-	  background = b;
-	  foreground = f;
-	  addMouseListener(this);
-   }   
    public void addActionListener(ActionListener l)
    {
 	  actionListener = AWTEventMulticaster.add(actionListener, l);
@@ -143,10 +116,7 @@ public class ColorPanel extends Canvas
 		 actionListener.actionPerformed(ae);
 	  }
    }   
-   public void removeActionListener(ActionListener l)
-   {
-	  actionListener = AWTEventMulticaster.remove(actionListener, l);
-   }   
+
    public void setColor(Color c)
    {
 	  foreground = c;

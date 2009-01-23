@@ -12,10 +12,6 @@ public class PrintUtils
 	itemToBePrinted = component;
     }
 
-    public void setComponent(Component component) {
-	itemToBePrinted = component;
-    }
-
     public int print(Graphics g, PageFormat pf, int pageIndex) {     
 	// pageIndex 0 to 4 corresponds to page numbers 1 to 5.
 	if (pageIndex >= 1) {

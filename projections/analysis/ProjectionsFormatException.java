@@ -5,10 +5,7 @@ import java.io.*;
 public class ProjectionsFormatException 
     extends IOException
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
+
 	private String expectedVersion;
     private String reason;
 
@@ -17,13 +14,7 @@ public class ProjectionsFormatException
 	this.reason = reason;
     }
 
-    public String getExpectedVersion() {
-	return expectedVersion;
-    }
 
-    public String getReason() {
-	return reason;
-    }
 
     public String toString() {
 	return "[ver:" + expectedVersion + "] - " + reason;

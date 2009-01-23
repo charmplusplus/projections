@@ -2,16 +2,14 @@ package projections.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+
+import javax.swing.JOptionPane;
+
 import projections.misc.*;
 
 public class GraphControlPanel extends Panel
    implements ActionListener, ItemListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -34,7 +32,6 @@ public class GraphControlPanel extends Panel
    private Label        lSelect;
    private JSelectField  rangeField;
 
-   private ErrorDialog      errDlg;
    private OrderedIntList  origProcList;    // original proc list
    
    public GraphControlPanel()
@@ -72,9 +69,9 @@ public class GraphControlPanel extends Panel
 	  
 	  gbc.fill = GridBagConstraints.BOTH;
 	  
-	  LWPanel p1 = new LWPanel();
-	  LWPanel p2 = new LWPanel();
-	  LWPanel p3 = new LWPanel();
+	  Panel p1 = new Panel();
+	  Panel p2 = new Panel();
+	  Panel p3 = new Panel();
 
 	  p1.setLayout(gbl);
 	  p2.setLayout(gbl);
@@ -190,10 +187,12 @@ public class GraphControlPanel extends Panel
 		 data.processor.list   = rangeField.getValue(MainWindow.runObject[myRun].getNumProcessors());
 		 if (!origProcList.contains(data.processor.list)) {
 		   System.out.println("Invalid processor range. ");
-	  	   // create a error dialog
-		   if (errDlg == null)
-          	     errDlg = new ErrorDialog(data.graphWindow,"Processors Range Beyond Scope!");
-		   if (!errDlg.isShowing()) errDlg.setVisible(true);
+	  	   // create a error dialog   
+		   JOptionPane.showMessageDialog(this,
+				    "Processors Range Beyond Scope!",
+				    "Error",
+				    JOptionPane.ERROR_MESSAGE);
+
 		   rangeField.setText(origProcList.listToString());
 		   return;
 		 }

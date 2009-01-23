@@ -9,7 +9,7 @@ import java.util.Vector;
 import javax.swing.*;
 
 import projections.analysis.*;
-import projections.guiUtils.*;
+
 /**
  *  AmpiTimeProfileWindow
  *  by Chao Mei
@@ -23,10 +23,6 @@ import projections.guiUtils.*;
 public class AmpiTimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private AmpiTimeProfileWindow thisWindow = null;
     private EntrySelectionDialog entryDialog = null;
 
@@ -75,8 +71,8 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     //private boolean	   startFlag;
 
     
-    public AmpiTimeProfileWindow(MainWindow mainWindow, Integer myWindowID) {
-	super("Projections Time Profile Graph--AMPI - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow, myWindowID);
+    public AmpiTimeProfileWindow(MainWindow mainWindow) {
+	super("Projections Time Profile Graph--AMPI - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();	
         createLayout();
         thisWindow = this;
@@ -150,10 +146,6 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         }        
     }
 
-    public void showWindow() {
-	// nothing for now
-    }
-
     /**
      * procId: the processor ID
      * index: the order of this processor in the processorList
@@ -174,8 +166,6 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         processProfiles = new Vector[processorList.size()];        
     }
 
-    public void getRangeVals(){
-    }
 
     /**
      * After collecting functions' data, we should begin to create interval data for the graph
@@ -345,7 +335,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 	    } else if (b == loadColors) {
 		//load all entry point colors from disk
 		try {
-		    ColorManager.loadActivityColors(ActivityManager.PROJECTIONS, colorArray[0]);
+		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
 		    // silly inefficiency
 		    setOutputGraphData(false);
 		} catch (IOException exception) {

@@ -10,7 +10,6 @@ public class IntervalRangeDialog extends RangeDialog
     implements ActionListener, KeyListener, FocusListener
 {
 
-	private static final long serialVersionUID = 1L;
 
 	// Additional GUI objects
     JPanel sizePanel;

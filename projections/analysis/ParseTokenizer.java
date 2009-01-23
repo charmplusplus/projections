@@ -101,18 +101,18 @@ public class ParseTokenizer extends StreamTokenizer {
 	return (StreamTokenizer.TT_EOL == nextToken());
     }
 
-    /**
-     *  Checks if an EOL token is encountered. Token is pushed back if false.
-     *  Added by Chee Wai Lee 1/24/2004
-     */
-    public boolean testEOL()
-	throws IOException
-    {
-	if (StreamTokenizer.TT_EOL != nextToken()) {
-	    pushBack();
-	    return false;
-	} else {
-	    return true;
-	}
-    }
+//    /**
+//     *  Checks if an EOL token is encountered. Token is pushed back if false.
+//     *  Added by Chee Wai Lee 1/24/2004
+//     */
+//    public boolean testEOL()
+//	throws IOException
+//    {
+//	if (StreamTokenizer.TT_EOL != nextToken()) {
+//	    pushBack();
+//	    return false;
+//	} else {
+//	    return true;
+//	}
+//    }
 }

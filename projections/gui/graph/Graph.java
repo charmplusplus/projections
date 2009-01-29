@@ -43,6 +43,9 @@ public class Graph extends JPanel
     
     private static final double PI = Math.PI;
 
+    private Color foreground;
+    private Color background;
+    
     private Font font = null;
     private FontMetrics fm = null;
     
@@ -74,6 +77,7 @@ public class Graph extends JPanel
     private int bubbleXVal;
     private int bubbleYVal;
 
+    /** Special constructor. This can only be called from a projections tool!!! */
     public Graph()
     {
 	setPreferredSize(new Dimension(400,300));	
@@ -88,8 +92,38 @@ public class Graph extends JPanel
 	
 	addMouseMotionListener(this);
 	addMouseListener(this);
+	
+	background = MainWindow.runObject[myRun].background;
+	foreground = MainWindow.runObject[myRun].foreground;
+
     }
     
+
+    /** Generic constructor. This can only be called from things that are not projections tools!!! */
+    public Graph(Color background, Color foreground)
+    {
+	setPreferredSize(new Dimension(400,300));	
+	
+	GraphType = BAR;	   // default GraphType is BAR
+	GraphStacked = true;    // default GraphType is STACKED
+	stackArray = null;
+	dataSource = null;
+	
+	xscale = 1.0;
+	yscale = 1.0;
+	
+	addMouseMotionListener(this);
+	addMouseListener(this);
+	
+	this.background = background;
+	this.foreground = foreground;
+
+    }
+    
+    
+    
+    /** Special constructor. This can only be called from a projections tool!!! */
+
     public Graph(DataSource d, XAxis x, YAxis  y)
     {
 	// call default constructor
@@ -378,8 +412,8 @@ public class Graph extends JPanel
     {
 	Graphics2D g = (Graphics2D)_g;
 	
-	g.setBackground(MainWindow.runObject[myRun].background);
-	g.setColor(MainWindow.runObject[myRun].foreground);
+	g.setBackground(background);
+	g.setColor(foreground);
 
 	w = getWidth();
 	h = getHeight();

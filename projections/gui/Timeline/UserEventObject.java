@@ -52,28 +52,15 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	
 	/** Create a user event that is a note */
 	public UserEventObject(int pe, long t, String note) {
-		setFocusable(false); // optimization for speed
-		
+		setFocusable(false); // optimization for speed		
 		this.BeginTime=EndTime=t;
 		this.pe = pe;
-		setNote(note);
+		this.note = note;
 		addMouseListener(this);
 	}
 
-	/** Set the note, replacing any occurrences of <EP #> with the name of the entry point */
-	public void setNote(String s){
-		Analysis a = MainWindow.runObject[myRun];
-		String modified = s;
-		if(s.contains("<EP")){
-			int numEntries = a.getEntryCount();
-			for(int i=0; i<numEntries; i++){
-				String name = a.getEntryFullNameByID(i);
-				modified = modified.replace("<EP " + i + ">", name);
-			}		
-		}
-				
-		this.note = modified;
-	}
+
+	
 	
 	public String getName(){
 		if(note != null)

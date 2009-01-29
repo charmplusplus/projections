@@ -15,7 +15,6 @@ import java.io.*;
  *  object creation time (which means the input can actually come from a
  *  networked stream instead of from just a file).
  *  
- *   
  *
  */
 
@@ -31,15 +30,14 @@ implements PointCapableReader
 
 	private BufferedReader reader;
 	
-	// Technically, lastRecordedTime is not required, but because this
-	// class cannot control what client modules do to the "data" object
-	// passed in, it is much safer to record the lastRecordedTime locally.
-	//
-	private long lastRecordedTime = 0;
+	/** Technically, lastRecordedTime is not required, but because this 
+	 * class cannot control what client modules do to the "data" object 
+	 * passed in, it is much safer to record the lastRecordedTime locally. 
+	 */	
+	private long lastRecordedTime = 0; 
 
-	// Book-keeping data. Used for consistency when event-blocks happen
-	// to straddle user-specified time-boundaries.
-	//
+	/** Book-keeping data. Used for consistency when event-blocks 
+	 * happen to straddle user-specified time-boundaries. */
 	private LogEntryData lastBeginEvent = null;
 
 	private boolean endComputationOccurred;
@@ -77,11 +75,21 @@ implements PointCapableReader
 		return sourceFile.canRead();
 	}
 
-	public void readStaticData() {
-		// do nothing for now (since the original code ignored the header)
-		// **CW** must change later (for versioning control) of course ...
+	
+	/** Intepret a user's note string. For example, the user string could have substrings such as "<EP 10>" which should be replaced by the name of entry method 10. */
+	public String interpretNote(String input){
+		Analysis a = MainWindow.runObject[myRun];
+		String modified = input;
+		if(modified.contains("<EP")){
+			int numEntries = a.getEntryCount();
+			for(int i=0; i<numEntries; i++){
+				String name = a.getEntryFullNameByID(i);
+				modified = modified.replace("<EP " + i + ">", name);
+			}		
+		}
+		return modified;
 	}
-
+	
 
 	/** 
 	 * Create a new LogEntryData by reading/parsing the next line from the log 
@@ -92,8 +100,7 @@ implements PointCapableReader
 	 * If any problem is detected when reading within a line, an IOException is produced
 	 * 
 	 * */
-	public LogEntryData nextEvent() 
-	throws IOException, EOFException
+	public LogEntryData nextEvent() throws IOException, EOFException
 	{
 		LogEntryData data = new LogEntryData();
 
@@ -141,7 +148,7 @@ implements PointCapableReader
 		case USER_SUPPLIED_NOTE:
 			data.time = new Integer(parser.nextInt());
 			Integer strlen = new Integer(parser.nextInt());
-			data.note = new String(parser.restOfLine());
+			data.note = interpretNote(parser.restOfLine());
 			break;
 		case MEMORY_USAGE:
 			data.memoryUsage = new Integer(parser.nextInt());
@@ -335,15 +342,7 @@ implements PointCapableReader
 	}
 
 	/**
-	 *
-	 *  ***CURRENT IMP*** exponential search too hard, using sequential
-	 *
-	 *  eventOnOrAfter takes a timestamp and uses an exponential search 
-	 *  to locate the event. The trouble is that a seek backwards requires 
-	 *  resetting the stream.
-	 *
-	 *  It looks for recognized events. The current recognition scheme 
-	 *  overlooks a lot of important events!
+	 * Find the next event on or after the given timestamp. 
 	 *
 	 *  An EOFException indicates that no such event was found.
 	 */
@@ -372,7 +371,7 @@ implements PointCapableReader
 	}
 
 	/**
-	 *  nextEventOfType gets the next event of the eventType.
+	 *  Return the next log event with the given eventType.
 	 */
 	public LogEntryData nextEventOfType(int eventType) 
 	throws IOException, EOFException
@@ -386,69 +385,7 @@ implements PointCapableReader
 		}
 	}
 
-//	public LogEntryData nextEventOfTypeOnOrAfter(int eventType, long timestamp)
-//	throws IOException, EOFException
-//	{
-//		LogEntryData data = new LogEntryData();
-//
-//		while (true) {
-//			data = nextEventOnOrAfter(timestamp);
-//			if (data.type == eventType) {
-//				return data;
-//			}
-//		}
-//	}
-
-//	public LogEntryData nextBeginEvent()
-//	throws IOException, EOFException
-//	{
-//		LogEntryData data = new LogEntryData();
-//
-//		while (true) {
-//			data = nextEvent();
-//			if (data.isBeginType()) {
-//				return data;
-//			}
-//		}
-//	}
-
-//	public void nextEndEvent(LogEntryData data)
-//	throws IOException, EOFException
-//	{
-//		while (true) {
-//			data = nextEvent();
-//			if (data.isEndType()) {
-//				return;
-//			}
-//		}
-//	}
-//
-//	public LogEntryData nextBeginEventOnOrAfter(long timestamp)
-//	throws IOException, EOFException
-//	{
-//		LogEntryData data = new LogEntryData();
-//
-//		while (true) {
-//			data = nextEventOnOrAfter(timestamp);
-//			if (data.isBeginType()) {
-//				return data;
-//			}
-//		}
-//	}
-
-//	public LogEntryData nextEndEventOnOrAfter(long timestamp)
-//	throws IOException, EOFException
-//	{
-//		LogEntryData data = new LogEntryData();
-//
-//		while (true) {
-//			data = nextEventOnOrAfter(timestamp);
-//			if (data.isEndType()) {
-//				return data;
-//			}
-//		}
-//	}
-
+	
 	public LogEntryData getLastBE() {
 		if (lastBeginEvent.isValid()) {
 			return lastBeginEvent;
@@ -464,5 +401,6 @@ implements PointCapableReader
 			reader.close();
 		}
 	}
+
 
 }

@@ -2,7 +2,10 @@ package projections.SamplePlots;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -41,6 +44,7 @@ public class SamplePlottingMain {
 			createPlotInFrameJFreeChart();
 			createPlotInFrameGraph();
 	}
+
 	
 	
 	/** Create a window with a simple plot in it. Uses the publicly available jfreechart package. */
@@ -48,8 +52,8 @@ public class SamplePlottingMain {
 		
 		// create data
         XYSeries s = new XYSeries("All Event Types", true, false);
-        for(int i=0;i<10;i++){
-        	s.add(i,(i-5)*(i-5));
+        for(int i=0;i<20;i++){
+        	s.add(i,Math.random());
         }	
 
         // Create a dataset
@@ -58,7 +62,7 @@ public class SamplePlottingMain {
 
         // Create axis labels
         NumberAxis domainAxis = new NumberAxis("My X Axis Label");
-        domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());      
+        domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());       
         NumberAxis rangeAxis = new NumberAxis("My Y Axis Label");
 
         // Create renderer
@@ -78,6 +82,14 @@ public class SamplePlottingMain {
 		JFrame window = new JFrame("Plot Window jfreechart");
 		window.setLayout(new BorderLayout());
 		window.add(chartpanel, BorderLayout.CENTER);
+		
+		JButton mybutton = new JButton("Click Me");
+		window.add(mybutton, BorderLayout.SOUTH);
+				
+		MyActionHandler h =	new MyActionHandler(plot);
+
+		mybutton.addActionListener( h);
+		
 	
 		// Display the window	
 		window.pack();
@@ -94,15 +106,17 @@ public class SamplePlottingMain {
 		YAxis y=new YAxisFixed("My Y Axis Label", "u", 0);
 		
 		// create data
-		int[] data = new int[10];
-        for(int i=0;i<10;i++){
-        	data[i] = (i-5)*(i-5);
+		int[] data = new int[20];
+        for(int i=0;i<20;i++){
+        	data[i] = (int)(Math.random()*10.0);
         }	
 		DataSource d = new DataSource1D("Plot Name", data);
 		
 		
 		// Create a new graph
 		Graph g=new Graph(Color.white, Color.black);
+	
+		
 		
 		// Tell our graph to use our axis labels and our data
 		g.setData(d,x,y);

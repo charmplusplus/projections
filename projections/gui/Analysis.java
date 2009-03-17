@@ -363,7 +363,7 @@ public class Analysis {
 //	return logReaderIntervalSize;
 //    }
 
-    public double[] getSummaryAverageData() {
+    public double[][] getSummaryAverageData() {
 	return sumAnalyzer.getSummaryAverageData();
     }
 

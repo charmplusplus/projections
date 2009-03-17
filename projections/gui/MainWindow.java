@@ -247,7 +247,7 @@ implements ScalePanel.StatusDisplay
 				setTitle("Projections - " + newfile);
 				if (MainWindow.runObject[myRun].hasSummaryData()) {
 					//		MainWindow.runObject[myRun].loadSummaryData();	  
-					double[] data = MainWindow.runObject[myRun].getSummaryAverageData();
+					double[][] data = MainWindow.runObject[myRun].getSummaryAverageData();
 					long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
 					// if summary override, perform sanity check
 					if (ProjMain.SUM_OVERRIDE) {
@@ -280,53 +280,71 @@ implements ScalePanel.StatusDisplay
 						bestSize = (long)IntervalUtils.getBestIntervalSize(originalSize,data.length);
 					}
 					// default cases
-					double[] tempdata = data;
-					double[] newdata = data;
+					double[][] newdata;
 					if (bestSize != originalSize) {
-						// if there are changes    
+					        double[] timeData = new double[data.length];
+						double[] idleData = new double[data.length];
+						for (int i=0; i<data.length; i++) {
+						    timeData[i] = data[i][0];
+						    idleData[i] = data[i][1];
+						}
+						double[] tempTimeData;
+						double[] tempIdleData;
+					        // if there are changes    
 						// transform the data into absolute time first.
-						IntervalUtils.utilToTime(data,	  
+						IntervalUtils.utilToTime(timeData,	  
 								(double)originalSize);
-						tempdata =	       
-							IntervalUtils.rebin(data, originalSize,	 
-									(double)bestSize);
-						// transform the re-binned data to utilization.
-						IntervalUtils.timeToUtil(tempdata,	 
-								(double)bestSize);	 
+						IntervalUtils.utilToTime(idleData,	  
+								(double)originalSize);
+
+						// transform the re-binned data back to percentages.
+						tempTimeData = IntervalUtils.rebin(timeData, originalSize,	        
+										   (double)bestSize);
+						IntervalUtils.timeToUtil(tempTimeData,	 
+									 (double)bestSize);	 
+						tempIdleData = IntervalUtils.rebin(idleData, originalSize,	        
+										   (double)bestSize);
+						IntervalUtils.timeToUtil(tempIdleData,	 
+									 (double)bestSize);	 
 
 						// default case
-						newdata = tempdata;
+						newdata = new double[tempTimeData.length][2];
+						for (int i=0; i<tempTimeData.length; i++) {
+						    newdata[i][0] = tempTimeData[i];
+						    newdata[i][1] = tempIdleData[i];
+						}
 						// special case
 						if (ProjMain.SUM_OVERRIDE) {
-							newdata = new double[ProjMain.SUM_END_INT -
-							                     ProjMain.SUM_START_INT + 1];
-							for (int i=0; i<newdata.length; i++) {
-								newdata[i] = 
-									tempdata[i+ProjMain.SUM_START_INT];
-							}
+						    newdata = new double[ProjMain.SUM_END_INT -
+									 ProjMain.SUM_START_INT + 1][2];
+						    for (int i=0; i<newdata.length; i++) {
+							newdata[i][0] = tempTimeData[i+ProjMain.SUM_START_INT];
+							newdata[i][1] = tempIdleData[i+ProjMain.SUM_START_INT];
+						    }
 						}
 					} else {
-						if (ProjMain.SUM_OVERRIDE) {
-							newdata = new double[ProjMain.SUM_END_INT -
-							                     ProjMain.SUM_START_INT + 1];
-							for (int i=0; i<newdata.length; i++) {
-								newdata[i] = 
-									tempdata[i+ProjMain.SUM_START_INT];
-							}
+					    newdata = data;
+					    if (ProjMain.SUM_OVERRIDE) {
+						newdata = new double[ProjMain.SUM_END_INT -
+								     ProjMain.SUM_START_INT + 1][2];
+						for (int i=0; i<newdata.length; i++) {
+						    newdata[i][0] = data[i+ProjMain.SUM_START_INT][0];
+						    newdata[i][1] = data[i+ProjMain.SUM_START_INT][1];
 						}
+					    }
 					}
 					try {
-						dataDump = 
-							new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
-							"SummaryDump.out"));
-						dataDump.println("--- Summary Graph ---");
+					        dataDump = 
+						    new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
+										   "SummaryDump.out"));
+					        dataDump.println("--- Summary Graph ---");
 						for (int i=0; i<newdata.length; i++) {
 							if (ProjMain.SUM_OVERRIDE) {
 								dataDump.print(i+ProjMain.SUM_START_INT + " ");
 							} else {
 								dataDump.print(i + " ");
 							}
-							dataDump.println(newdata[i]);
+							dataDump.println(newdata[i][0]); // **CWL** Only Dump Util data for now.
 						}
 						dataDump.flush();
 					} catch (IOException e) {
@@ -336,16 +354,17 @@ implements ScalePanel.StatusDisplay
 						"Reason: ");
 						System.err.println(e);
 					}
-					sumDataSource = new SummaryDataSource(newdata);
 					if (ProjMain.SUM_OVERRIDE) {
 						sumXAxis =	    
 							new SummaryXAxis(ProjMain.SUM_START_INT,
 									ProjMain.SUM_END_INT,
 									ProjMain.SUM_INT_SIZE);
+						sumDataSource = new SummaryDataSource(newdata,ProjMain.SUM_START_INT);
 					} else {		  
 						sumXAxis =	    
 							new SummaryXAxis(0, newdata.length,	 
 									(long)bestSize);	  
+						sumDataSource = new SummaryDataSource(newdata,0);
 					}
 					sumYAxis = new SummaryYAxis();	 
 					graphPanel =

@@ -39,6 +39,8 @@ public class SumAnalyzer extends ProjDefs
     private int[][][] PhaseNumEntryMsgs;
     //Holds the second line of summary data
     private int[][] ProcessorUtilization; 
+    // Holds the seventh line of summary data
+    private int[][] IdlePercentage;
 
     private int mode = NORMAL_MODE;
 
@@ -62,7 +64,8 @@ public class SumAnalyzer extends ProjDefs
     {
 	int tokenType;
 	int CurrentUserEntry;
-	int nPe=1,numEntry=0,versionNum=0;
+	int nPe=1,numEntry=0;
+	double versionNum = 0.0;
 	IntervalCount=0;
 	TotalTime=0;
 	//ChareTime= new long [NumProcessors][NumUserEntries];			
@@ -100,7 +103,7 @@ public class SumAnalyzer extends ProjDefs
 	    tokenizer.wordChars('A','Z');
 	    //Read the first line (descriptive information)
 	    checkNextString("ver");
-	    versionNum = (int)nextNumber("Version Number");
+	    versionNum = (double)nextNumber("Version Number");
 	    int myProcessor=(int)nextNumber("processor number");
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
@@ -163,7 +166,7 @@ public class SumAnalyzer extends ProjDefs
 	    tokenizer.wordChars('A','Z');
 	    //Read the first line (descriptive information)
 	    checkNextString("ver");
-	    versionNum = (int)nextNumber("Version Number");
+	    versionNum = (double)nextNumber("Version Number");
 	    int myProcessor=(int)nextNumber("processor number");
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
@@ -181,17 +184,19 @@ public class SumAnalyzer extends ProjDefs
 		checkNextString("phases");
 		PhaseCount = (int)nextNumber("phases");
 	    } else {
-		PhaseCount = 1;
+		PhaseCount = 0;
 	    }
 	    if (StreamTokenizer.TT_EOL!=tokenizer.nextToken())
 		throw new SummaryFormatException("extra garbage at end of line 1");
 	    if (p==0) {
 		ProcessorUtilization = new int[nPe][];
+		IdlePercentage = new int[nPe][];
 		ChareTime= new long [nPe][numEntry];
 		NumEntryMsgs = new int [nPe][numEntry];
 		MaxEntryTime = new int [nPe][numEntry];
 	    }
 	    ProcessorUtilization[p] = new int[IntervalCount];
+	    IdlePercentage[p] = new int[IntervalCount];
 	    
 	    //Read the SECOND line (processor usage)
 	    int nUsageRead=0;
@@ -245,8 +250,8 @@ public class SumAnalyzer extends ProjDefs
 		}
 	    }
 	    if ((myCount*factor) != nUsageRead) {
-		System.err.println("numIntervals not agree" + 
-				   (myCount*factor) + "v.s. "+nUsageRead+"!");
+		System.err.println("numIntervals for Utilization do not agree: " + 
+				   (myCount*factor) + " v.s. "+nUsageRead+"!");
 	    }
 	    // Read in the THIRD line (time spent by entries)
 	    CurrentUserEntry = 0;
@@ -307,59 +312,128 @@ public class SumAnalyzer extends ProjDefs
 		if (StreamTokenizer.TT_EOL!=tokenType)
 		    throw new SummaryFormatException("extra garbage at end of line 5");
 	    }
-	    // Read in the SIXTH line (phase pairs)
-	    int NumberofPairs;
+	    if (versionNum > 3.0) {
+		// Read in the SIXTH line (phase pairs)
+		int NumberofPairs;
+		// **CW** for now, ignore the labels. Check to see if it is a label
+		// if yes, consume it. if not, push it back onto the stream.
+		if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+		    // do nothing. Label consumed.
+		    // System.out.println(tokenizer.sval + " read.");
+		} else {
+		    tokenizer.pushBack();
+		}
+		NumberofPairs = (int)nextNumber("Number of Marked Events");
+		for (int g=0; g<NumberofPairs; g++) {
+		    nextNumber("Number of Marked Events");
+		    nextNumber("Number of Marked Events");
+		}
+		//Make sure we're at the end of the line
+		if (StreamTokenizer.TT_EOL!=(tokenType=tokenizer.nextToken()))
+		    throw new SummaryFormatException("extra garbage at end of line 6");
+		if (PhaseCount > 1) {				
+		    if (p == 0) {
+			PhaseChareTime= new long [PhaseCount][nPe][numEntry];
+			PhaseNumEntryMsgs = new int [PhaseCount][nPe][numEntry];
+		    }
+		    for(int m=0; m<PhaseCount; m++) {		
+			CurrentUserEntry = 0;
+			tokenizer.nextToken();
+			tokenizer.nextToken();
+			while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) &&
+			       (numEntry>CurrentUserEntry)) {
+			    PhaseNumEntryMsgs[m][p][CurrentUserEntry] = 
+				(int)tokenizer.nval;
+			    CurrentUserEntry++;
+			}
+			// Make sure we're at the end of the line
+			if (StreamTokenizer.TT_EOL!=tokenType)
+			    throw new SummaryFormatException("extra garbage at end of line 3");
+			// Read in the FOURTH line
+			CurrentUserEntry = 0;
+			tokenizer.nextToken();
+			tokenizer.nextToken();
+			while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) &&
+			       (numEntry>CurrentUserEntry)) {
+			    PhaseChareTime[m][p][CurrentUserEntry] = 
+				(int)tokenizer.nval;
+			    CurrentUserEntry++;
+			}
+			//Make sure we're at the end of the line
+			if (StreamTokenizer.TT_EOL!=tokenType)
+			    throw new SummaryFormatException("extra garbage at end of line 4");
+		    }
+		}
+	    }
+
+	    //Read the SEVENTH line (processor usage)
 	    // **CW** for now, ignore the labels. Check to see if it is a label
 	    // if yes, consume it. if not, push it back onto the stream.
-	    if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
-		// do nothing. Label consumed.
-		// System.out.println(tokenizer.sval + " read.");
-	    } else {
-		tokenizer.pushBack();
-	    }
-	    NumberofPairs = (int)nextNumber("Number of Marked Events");
-	    // System.out.println("num pairs is " + NumberofPairs);
-	    for (int g=0; g<NumberofPairs; g++) {
-		nextNumber("Number of Marked Events");
-		nextNumber("Number of Marked Events");
-	    }
-	    //Make sure we're at the end of the line
-	    /* **CW** No need for that. Unlike the previous code where we
-	       use a while loop, here we know exactly what we want.
-	       if (StreamTokenizer.TT_EOL!=tokenType)
-	           throw new SummaryFormatException("extra garbage at end of line 6");
-	    */
-	    if (PhaseCount > 1) {				
-		if (p == 0) {
-		    PhaseChareTime= new long [PhaseCount][nPe][numEntry];
-		    PhaseNumEntryMsgs = new int [PhaseCount][nPe][numEntry];
+	    if (versionNum > 7.0) {
+		if ((StreamTokenizer.TT_WORD==
+		     (tokenType=tokenizer.nextToken()))) {
+		    // do nothing. Label consumed.
+		    // System.out.println(tokenizer.sval + " read.");
+		} else {
+		    tokenizer.pushBack();
 		}
-		for(int m=0; m<PhaseCount; m++) {		
-		    CurrentUserEntry = 0;
-		    tokenizer.nextToken();
-		    tokenizer.nextToken();
-		    while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) &&
-			   (numEntry>CurrentUserEntry)) {
-			PhaseNumEntryMsgs[m][p][CurrentUserEntry] = 
-			    (int)tokenizer.nval;
-			CurrentUserEntry++;
+		int nIdleRead=0;
+		// we perform on-the-fly expansion of larger interval sized
+		// data (ie. myIntervalSize > IntervalSize).
+		val = 0;
+		extraCount = 0;
+		while ((tokenType=tokenizer.nextToken()) != 
+		       StreamTokenizer.TT_EOL) {
+		    if (tokenType == StreamTokenizer.TT_NUMBER) {
+			val =  (int)tokenizer.nval;
+			for (int f=0; f<factor; f++) {
+			    IdlePercentage[p][nIdleRead++] = val;
+			}
+			if ((tokenType=tokenizer.nextToken()) == '+') {
+			    tokenType=tokenizer.nextToken();
+			    if (tokenType !=  StreamTokenizer.TT_NUMBER) {
+				System.out.println("Unrecorgnized syntax at " +
+						   "end of line 2");
+			    }
+			    extraCount = (int)tokenizer.nval;
+			    if (extraCount > myCount) {
+				System.err.println("["+p+"] Token read = [" +
+						   val + "+" + extraCount +
+						   "] is impossible as the " +
+						   "count is larger than " +
+						   "the total count of " + 
+						   myCount);
+				System.exit(-1);
+			    }
+			    for (int i=1; i<extraCount; i++) {
+				for (int f=0; f<factor; f++) {
+				    IdlePercentage[p][nIdleRead++] = val;
+				}
+			    }
+			} else {
+			    tokenizer.pushBack();
+			}
 		    }
-		    // Make sure we're at the end of the line
-		    if (StreamTokenizer.TT_EOL!=tokenType)
-			throw new SummaryFormatException("extra garbage at end of line 3");
-		    // Read in the FOURTH line
-		    CurrentUserEntry = 0;
-		    tokenizer.nextToken();
-		    tokenizer.nextToken();
-		    while ((StreamTokenizer.TT_NUMBER==(tokenType=tokenizer.nextToken())) &&
-			   (numEntry>CurrentUserEntry)) {
-			PhaseChareTime[m][p][CurrentUserEntry] = 
-			    (int)tokenizer.nval;
-			CurrentUserEntry++;
+		    if (nIdleRead > (myCount*factor)) {
+			System.err.println("[" + p + "] Corrupted data: " +
+					   "Number of datapoints read " +
+					   "exceeds " +
+					   "file recorded value of " + 
+					   myCount +
+					   "adjusted by factor " + factor);
+			System.err.print("The violating token is [" + val);
+			if (extraCount > 1) {
+			    System.err.println("+" + extraCount + "]");
+			} else {
+			    System.err.println("]");
+			}
+			System.exit(-1);
 		    }
-		    //Make sure we're at the end of the line
-		    if (StreamTokenizer.TT_EOL!=tokenType)
-			throw new SummaryFormatException("extra garbage at end of line 4");
+		}
+		if ((myCount*factor) != nIdleRead) {
+		    System.err.println("numIntervals for Idle do not agree: " + 
+				       (myCount*factor) + " v.s. "+
+				       nIdleRead+"!");
 		}
 	    }
 	    tokenizer = null;
@@ -457,28 +531,34 @@ public class SumAnalyzer extends ProjDefs
     /**
      *
      */
-    public double[] getSummaryAverageData() {
+    public double[][] getSummaryAverageData() {
 	if (mode == NORMAL_MODE) {
 	    int numProcessors = ProcessorUtilization.length;
-	    double[] ret = new double[IntervalCount];
+	    double[][] ret = new double[IntervalCount][2];
 	    for (int p=0; p<numProcessors; p++) {
 		for (int interval=0; interval<IntervalCount; interval++) {
-		    ret[interval] += ProcessorUtilization[p][interval];
+		    ret[interval][0] += ProcessorUtilization[p][interval];
+		    ret[interval][1] += IdlePercentage[p][interval];
 		}
 	    }
 	    for (int interval=0; interval<IntervalCount; interval++) {
-		ret[interval] /= numProcessors*1.0;
+		ret[interval][0] /= numProcessors*1.0;
+		ret[interval][1] /= numProcessors*1.0;
 	    }
 	    return ret;
 	} else if (mode == ACC_MODE) {
-	    double[] ret;
+	    double[][] ret;
 	    try {
 		accumulatedReader.loadIntervalData(0, IntervalCount-1);
 	    } catch (IOException e) {
 		System.err.println("Exception caught!");
 		System.exit(-1);
 	    }
-	    ret = accumulatedReader.getUtilData();
+	    double[] temp = accumulatedReader.getUtilData();
+	    ret = new double[temp.length][1];
+	    for (int interval = 0; interval<temp.length; interval++) {
+		ret[interval][0] = temp[interval];
+	    }
 	    return ret;
 	}
 	return null;

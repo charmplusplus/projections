@@ -42,6 +42,7 @@ public class GenericSummaryReader
 
     // processor utilization data
     public int processorUtil[];
+    public int idlePercent[];
 
     // epData dimension 1 - indexed by entry point ID (presumably)
     // epData dimension 2 - indexed by tags (see above).
@@ -114,6 +115,7 @@ public class GenericSummaryReader
 
 	// prepare to store summary data into arrays
 	processorUtil = new int[numIntervals];
+	idlePercent = new int[numIntervals];
 	epData = new long[numEPs][NUM_TAGS];
 
 	// Read the SECOND line (processor usage)
@@ -288,6 +290,39 @@ System.out.println(val+" "+tokenizer.nval);
 		if (StreamTokenizer.TT_EOL!=tokenType) {
 		    throw new IOException("extra stuff after (II) phase " + m);
 		}
+	    }
+	}
+
+	// Read in the SEVENTH line (version 7.1 Idle Time Percentages)
+	// **CW** for now, ignore the labels. Check to see if it is a label.
+	// if yes, consume it. if not, push it back onto the stream.
+	if (version >= 7.1) {
+	    if ((StreamTokenizer.TT_WORD==(tokenType=tokenizer.nextToken()))) {
+		// do nothing. Label consumed.
+	    } else {
+		tokenizer.pushBack();
+	    }
+	    int nIdleRead = 0;
+	    while ((tokenType=tokenizer.nextToken()) !=
+		   StreamTokenizer.TT_EOL && nIdleRead < numIntervals) {
+		if (tokenType == StreamTokenizer.TT_NUMBER) {
+		    int val =  (int)tokenizer.nval;
+			idlePercent[nIdleRead++] = val;
+			if ((tokenType=tokenizer.nextToken()) == '+') {
+			    tokenType=tokenizer.nextToken();
+			    if (tokenType !=  StreamTokenizer.TT_NUMBER)
+				System.out.println("Unrecorgnized syntax at end of line 2");
+			    for (int i=1; i<(int)tokenizer.nval; i++)
+				idlePercent[nIdleRead++] = val;
+			} else {
+			    tokenizer.pushBack();
+			}
+		} else {
+		    System.out.println("extra garbage at end of line 2");
+		}
+	    }
+	    if (numIntervals != nIdleRead)  {
+		throw new IOException("numIntervals not agree!");
 	    }
 	}
 	tokenizer = null;

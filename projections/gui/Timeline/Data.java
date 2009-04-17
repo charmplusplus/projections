@@ -485,10 +485,6 @@ public class Data
 		messageStructures.create(useHelperThreads);
 	
 	}
-	
-	public void decreaseScaleFactor(){
-		setScaleFactor( (float) ((int) (getScaleFactor() * 4) - 1) / 4 );
-	}
 
 	/** Relayout and repaint everything */
 	private void displayMustBeRedrawn(){
@@ -728,10 +724,23 @@ public class Data
 	public float getScaleFactor(){
 		return scaleFactor;
 	}
-
-	public void increaseScaleFactor(){
-		setScaleFactor( (float) ((int) (getScaleFactor() * 4) + 1) / 4 );
+	
+	/* Two clicks zooms by a factor of two: */
+	private float scaleChangeFactor = (float)Math.pow(2.0,1.0/2);
+	private float roundScale(float scl) {
+		int i=(int)(scl+0.5f);
+		if (Math.abs(i-scl)<0.01) return (float)i; /* round to int */
+		else return scl; /*  leave as float */
 	}
+	
+	public void increaseScaleFactor(){
+		setScaleFactor( roundScale( getScaleFactor() *  scaleChangeFactor ));
+	}
+	
+	public void decreaseScaleFactor(){
+		setScaleFactor( roundScale( getScaleFactor() / scaleChangeFactor ));
+	}
+	
 
 	
 	/**	 the width of the timeline portion that is drawn(fit so that labels are onscreen) */

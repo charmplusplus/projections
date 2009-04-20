@@ -2,6 +2,7 @@ package projections.gui.Timeline;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -16,60 +17,60 @@ import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JWindow;
+import javax.swing.border.Border;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 import projections.gui.MainWindow;
-import projections.gui.Timeline.ChooseUserEventsWindow.ColorRenderer;
 
-public class ChooseEntriesWindow extends JFrame
+public class ChooseUserEventsWindow extends JFrame
 {
 	Data data;
-	Hashtable<Integer, String> entryNames;
+	Hashtable<Integer, String> names;
 	Vector<Vector> tabledata;
 	Vector<String> columnNames;
 
-	ChooseEntriesWindow(Data _data){
+	ChooseUserEventsWindow(Data _data){
 		data = _data;
 		createLayout();
 	}
 
 	void createLayout(){
-		setTitle("Choose which entry methods are displayed");
-
+		setTitle("Choose which user events are displayed");
 
 		// create a table of the data
 		columnNames = new Vector();
 		columnNames.add(new String("Visible"));
-		columnNames.add(new String("Entry Method"));
+		columnNames.add(new String("User Event Name"));
 		columnNames.add(new String("ID"));
 		columnNames.add(new String("Color"));
 
 
 		tabledata  = new Vector();
 
-		entryNames =  data.getEntryNames();
+		names =  data.getUserEventNames();
 
-		Iterator<Integer> iter = entryNames.keySet().iterator();
+		Iterator<Integer> iter = names.keySet().iterator();
 		while(iter.hasNext()){
 			Integer id = iter.next();
-			String name = entryNames.get(id);
+			String name = names.get(id);
 			Vector tableRow = new Vector();
 			
 			Boolean b = data.entryIsVisibleID(id);
 
-			Color c = data.getEntryColor(id);
+			Color c = data.getUserEventColor(id);
 			
 			tableRow.add(b);
 			tableRow.add(name);
 			tableRow.add(id);
 			tableRow.add(c);
-
+			
 			tabledata.add(tableRow);
 		}
 
@@ -110,7 +111,7 @@ public class ChooseEntriesWindow extends JFrame
 		column.setPreferredWidth(50);
 
 	}
-
+	
 
 	class MyTableModel extends AbstractTableModel {
 
@@ -150,10 +151,10 @@ public class ChooseEntriesWindow extends JFrame
 
 				if(newValue){
 					// remove from list of disabled entry methods
-					data.makeEntryVisibleID(id);
+					data.makeUserEventVisibleID(id);
 				} else {
 					// add to list of disabled entry methods
-					data.makeEntryInvisibleID(id);
+					data.makeUserEventInvisibleID(id);
 				}				
 			}
 
@@ -163,8 +164,6 @@ public class ChooseEntriesWindow extends JFrame
 		}
 
 	}    
-	
-	
 
 	
     /// A simple color renderer
@@ -181,6 +180,9 @@ public class ChooseEntriesWindow extends JFrame
 			return this;
 		}
 	}
-
+	
+	
+	
+	
 
 }

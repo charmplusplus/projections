@@ -80,6 +80,7 @@ ItemListener {
 	private JMenuItem mUserEventReport;
 	private JMenuItem mDetermineTimeRangesUserSupplied;
 	private JMenuItem mShowHideEntries;
+	private JMenuItem mShowHideUserEvents;
 
 
 	public WindowControls(TimelineWindow parentWindow_,
@@ -294,10 +295,15 @@ ItemListener {
 		else if(evt.getSource() == 	mShowHideEntries){
 			ChooseEntriesWindow chooseEntriesWindow = new ChooseEntriesWindow(data);
 		}
+		
+		else if(evt.getSource() == 	mShowHideUserEvents){
+			ChooseUserEventsWindow chooseUserEventsWindow = new ChooseUserEventsWindow(data);
+		}
 
 		else if(evt.getSource() == mUserEventReport){
 			data.printUserEventInfo();
 		}
+		
 		else if(evt.getSource() == mDetermineTimeRangesUserSupplied){
 			UserSuppliedAnalyzer usa = new UserSuppliedAnalyzer(data);
 		}
@@ -452,6 +458,10 @@ ItemListener {
 		mShowHideEntries = new JMenuItem("Show & Hide Entry Methods");
 		mShowHideEntries.addActionListener(this);
 		experimentalMenu.add(mShowHideEntries);
+		
+		mShowHideUserEvents = new JMenuItem("Show & Hide User Events");
+		mShowHideUserEvents.addActionListener(this);
+		experimentalMenu.add(mShowHideUserEvents);
 		
 		mUserEventReport = new JMenuItem("User Event Reporting");
 		mUserEventReport.addActionListener(this);

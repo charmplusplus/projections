@@ -83,6 +83,7 @@ public class SamplePlottingMain {
 		window.setLayout(new BorderLayout());
 		window.add(chartpanel, BorderLayout.CENTER);
 		
+		
 		JButton mybutton = new JButton("Click Me");
 		window.add(mybutton, BorderLayout.SOUTH);
 				

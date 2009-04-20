@@ -128,6 +128,11 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 
+		if(data.userEventIsHiddenID(UserEventID)){
+			return;
+		}
+		
+		
 		if(data.showUserEvents()){
 			g.setColor(getColor());
 		

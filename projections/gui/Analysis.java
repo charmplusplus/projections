@@ -378,6 +378,7 @@ public class Analysis {
 	return null;
     }
 
+    
     public void setEntryColor(int entryIdx, Color color) {
 	if (entryIdx < getSts().getEntryCount()) {
 	    activeColorMap[entryIdx] = color;
@@ -792,7 +793,7 @@ public class Analysis {
 //    }
 
     
-    
+    /// Get user event color given one of the potentially sparse ids used provided by the program
     public Color getUserEventColor(int eventID) {
     	if (getSts() != null) { 
     		Integer idx = getSts().getUserEventIndex(eventID);

@@ -35,9 +35,9 @@ public abstract class YAxis
    *  The default is 1/100 the difference between getMax and getMin.
    *  e.g., 1.0 for discrete values.
    */
-  public double getDifference() {
-    return 0.01*(getMax()-getMin());
-  }
+//  public double getDifference() {
+//    return 0.01*(getMax()-getMin());
+//  }
 
   /**
    * Return the human-readable name for this value.

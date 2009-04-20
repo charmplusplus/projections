@@ -2,6 +2,7 @@ package projections.analysis;
 
 import java.io.*;
 import java.util.*;
+
 import projections.misc.*;
 
 /** 
@@ -47,13 +48,19 @@ public class StsReader extends ProjDefs
     private Hashtable entryIDToFlat = new Hashtable();
     
     
-    // User Event information
+    
+    /// A mapping from the sparse user supplied ids for the user events to a compact set of integers used for coloring the user events
+    private Hashtable<Integer, Integer> userEventIndices = new Hashtable();
+    /// Used to make values in userEventIndices unique
     private int userEventIndex = 0;
-    private Hashtable userEventIndices = new Hashtable();
-    // index by Integer, return String name
-    private Hashtable userEvents = new Hashtable();  
+
+    /// The user event names index by Integer
+    private Hashtable<Integer, String> userEvents = new Hashtable();  
+    /// The same user event names as in userEvents, but packed into an array in same manner
     private String userEventNames[];
 
+    
+    
     // AMPI Functions tracing
     private int functionEventIndex = 0;
     private Hashtable functionEventIndices = new Hashtable();
@@ -274,6 +281,12 @@ public class StsReader extends ProjDefs
 	// gets an array by logical (not user-given) index
 	return userEventNames;
     }
+    
+    public Hashtable<Integer, String> getUserEventNames2() {
+    	// gets an array by logical (not user-given) index
+    	return userEvents;
+    }
+    
 
     // *** function event accessors ***
     public int getNumFunctionEvents() {

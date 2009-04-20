@@ -102,6 +102,9 @@ public class Data
 	/** A set of entry point ids that should be hidden */
 	Set<Integer> hiddenEntryPoints;
 
+	/** A set of user events that should be hidden */
+	Set<Integer> hiddenUserEvents;
+
 	
 	/** Each value of the TreeMap is a TreeSet (sorted list) of EntryMethodObject's .
 	 *  Each key of the TreeMap is an Integer pe 
@@ -200,6 +203,7 @@ public class Data
 		messageStructures = new MessageStructures(this);
 		
 		hiddenEntryPoints = new TreeSet<Integer>();
+		hiddenUserEvents = new TreeSet<Integer>();
 
 		
 		oldBT = -1;
@@ -551,6 +555,15 @@ public class Data
 	public Color[] entryColor(){
 		return entryColor;
 	}
+
+	public Color getEntryColor(Integer id){
+		return MainWindow.runObject[myRun].getEntryColor(id);
+	}
+	
+	public Color getUserEventColor(Integer id){
+		return MainWindow.runObject[myRun].getUserEventColor(id);
+	}
+	
 	public Color getBackgroundColor(){
 		if(useCustomColors)
 			return customBackground;
@@ -1721,6 +1734,13 @@ public class Data
 		
 		return result;	
 	}
+	
+	
+	/** Produce a hashmap containing the ids and nicely mangled string names for each user event */
+	public Hashtable<Integer, String> getUserEventNames() {
+		return MainWindow.runObject[myRun].getSts().getUserEventNames2();
+	}
+
 
 	
 	/** Make visible the entry methods for this id */	
@@ -1734,6 +1754,19 @@ public class Data
 		hiddenEntryPoints.add(id);
 		this.displayMustBeRepainted();
 	}
+	
+
+	/** Make visible the entry methods for this id */	
+	public void makeUserEventVisibleID(Integer id) {
+		hiddenUserEvents.remove(id);
+		this.displayMustBeRepainted();
+	}	
+
+	/** Hide the entry methods for this id */
+	public void makeUserEventInvisibleID(Integer id) {
+		hiddenUserEvents.add(id);
+		this.displayMustBeRepainted();
+	}
 
 	public boolean entryIsHiddenID(Integer id) {
 		return hiddenEntryPoints.contains(id);
@@ -1741,6 +1774,14 @@ public class Data
 	
 	public boolean entryIsVisibleID(Integer id) {
 		return ! hiddenEntryPoints.contains(id);
+	}
+	
+	public boolean userEventIsHiddenID(Integer id) {
+		return hiddenUserEvents.contains(id);
+	}
+	
+	public boolean userEventIsVisibleID(Integer id) {
+		return ! hiddenUserEvents.contains(id);
 	}
 	
 	

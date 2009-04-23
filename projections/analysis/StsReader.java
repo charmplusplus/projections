@@ -39,23 +39,23 @@ public class StsReader extends ProjDefs
     private int entryIndex = 0; ///< The next available index
     
     /** index by Integer ID in STS file, return String name */
-    private Hashtable entryNames = new Hashtable(); 
+    private Hashtable<Integer, String> entryNames = new Hashtable<Integer, String>(); 
     /** index by Integer ID in STS file, return String name */
-    private Hashtable entryChareNames = new Hashtable(); 
+    private Hashtable<Integer, String>  entryChareNames = new Hashtable<Integer, String>(); 
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
-    private Hashtable entryFlatToID = new Hashtable();
+    private Hashtable<Integer, Integer>  entryFlatToID = new Hashtable<Integer, Integer>();
     /** keys are the IDs given in STS file, values are indexes into flat arrays */
-    private Hashtable entryIDToFlat = new Hashtable();
+    private Hashtable<Integer, Integer> entryIDToFlat = new Hashtable<Integer, Integer>();
     
     
     
     /// A mapping from the sparse user supplied ids for the user events to a compact set of integers used for coloring the user events
-    private Hashtable<Integer, Integer> userEventIndices = new Hashtable();
+    private Hashtable<Integer, Integer> userEventIndices = new Hashtable<Integer, Integer>();
     /// Used to make values in userEventIndices unique
     private int userEventIndex = 0;
 
     /// The user event names index by Integer
-    private Hashtable<Integer, String> userEvents = new Hashtable();  
+    private TreeMap<Integer, String> userEvents = new TreeMap<Integer, String>();  
     /// The same user event names as in userEvents, but packed into an array in same manner
     private String userEventNames[];
 
@@ -63,8 +63,8 @@ public class StsReader extends ProjDefs
     
     // AMPI Functions tracing
     private int functionEventIndex = 0;
-    private Hashtable functionEventIndices = new Hashtable();
-    private Hashtable functionEvents = new Hashtable();
+    private Hashtable<Integer, Integer> functionEventIndices = new Hashtable<Integer, Integer>();
+    private Hashtable<Integer, String> functionEvents = new Hashtable<Integer, String>();
     private String functionEventNames[];
     
     private int numPapiEvents;
@@ -229,19 +229,19 @@ public class StsReader extends ProjDefs
 
     
     public String getEntryNameByID(int ID) {
-    	return (String) getEntryNames().get(ID);
+    	return getEntryNames().get(ID);
     }   
     
     public String getEntryNameByIndex(int index) {
-    	return (String) getEntryNames().get(entryFlatToID.get(index));
+    	return getEntryNames().get(entryFlatToID.get(index));
     }   
     
     public String getEntryChareNameByID(int ID) {
-    	return (String) getEntryChareNames().get(ID);
+    	return getEntryChareNames().get(ID);
     }   
     
     public String getEntryChareNameByIndex(int index) {
-    	return (String) getEntryChareNames().get(entryFlatToID.get(index));
+    	return getEntryChareNames().get(entryFlatToID.get(index));
     }   
 
     public String getEntryFullNameByID(int ID) {
@@ -255,7 +255,7 @@ public class StsReader extends ProjDefs
 	public Integer getEntryIndex(Integer ID) {
 		if(ID<0)
     		return ID;
-		return (Integer)entryIDToFlat.get(ID);
+		return entryIDToFlat.get(ID);
 	}
        
     
@@ -267,14 +267,14 @@ public class StsReader extends ProjDefs
     public Integer getUserEventIndex(int eventID) {
 	Integer key = new Integer(eventID);
 	if(userEventIndices.containsKey(key))
-		return ((Integer)userEventIndices.get(key));
+		return (userEventIndices.get(key));
 	else
 		return null;
     }
 
     public String getUserEventName(int eventID) { 
 	Integer key = new Integer(eventID);
-	return (String) userEvents.get(key);
+	return userEvents.get(key);
     }
 
     public String[] getUserEventNames() {
@@ -282,7 +282,7 @@ public class StsReader extends ProjDefs
 	return userEventNames;
     }
     
-    public Hashtable<Integer, String> getUserEventNames2() {
+    public Map<Integer, String>  getUserEventNameMap() {
     	// gets an array by logical (not user-given) index
     	return userEvents;
     }
@@ -305,12 +305,12 @@ public class StsReader extends ProjDefs
 
     public int getFunctionEventIndex(int eventID) {
 	Integer key = new Integer(eventID);
-	return ((Integer)functionEventIndices.get(key)).intValue();
+	return (functionEventIndices.get(key)).intValue();
     }
 
     public String getFunctionEventDescriptor(int eventID) {
 	Integer key = new Integer(eventID);
-	return (String)functionEvents.get(key);
+	return functionEvents.get(key);
     }
 
     public String[] getFunctionEventDescriptors() {
@@ -333,12 +333,12 @@ public class StsReader extends ProjDefs
 	}
     }
 
-	public Hashtable getEntryNames() {
+	public Map<Integer, String>  getEntryNames() {
 		return entryNames;
 	}
 
 
-	public Hashtable getEntryChareNames() {
+	public Map<Integer, String>  getEntryChareNames() {
 		return entryChareNames;
 	}
 

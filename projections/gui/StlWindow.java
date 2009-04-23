@@ -171,7 +171,7 @@ public class StlWindow extends ProjectionsWindow
 	    horSize = endTime-startTime;
 	    if(horSize <= 0)
 		horSize = MainWindow.runObject[myRun].getTotalTime();
-	    verSize = (double)validPEs.size();
+	    verSize = validPEs.size();
 	}	 
 	scalePanel.setScales(horSize,verSize);
 	
@@ -208,7 +208,7 @@ public class StlWindow extends ProjectionsWindow
 	try {
 	    if (dialog == null) {
 		dialog = 
-		    new RangeDialog((ProjectionsWindow) this,
+		    new RangeDialog(this,
 				    "Select Range");
 	    } else {
 		setDialogData();

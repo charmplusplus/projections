@@ -126,7 +126,7 @@ public class AxisPanel extends JPanel
 
 	/** The number of tickmarks between the labeled big ticks */
 	public int labelIncrement() {
-		return (int) Util.getBestIncrement((int)(Math.ceil(data.maxLabelLen() / pixelsPerTickMark())));
+		return Util.getBestIncrement((int)(Math.ceil(data.maxLabelLen() / pixelsPerTickMark())));
 	}
 	
 	/** Number of microseconds per tickmark */

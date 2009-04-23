@@ -107,8 +107,8 @@ public class PieChartWindow extends Frame{
      * 
      */
     public void setSizes(){
-        int width = (int)(displayPanel.getSize().width);
-        int height = (int)(displayPanel.getSize().height);
+        int width = (displayPanel.getSize().width);
+        int height = (displayPanel.getSize().height);
 	
         if(width < height)
             diameter = width - leftBuf - rightBuf;

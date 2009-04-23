@@ -44,10 +44,10 @@ public class AnimationColorBarPanel extends Panel
 	g.drawString("0%",   20, (height+textheight)/2);
 	g.drawString("100%", width-20-textwidth100, (height+textheight)/2);
           
-	int cbwidth  = (int)(width - textwidth0 - textwidth100 - 60);
+	int cbwidth  = (width - textwidth0 - textwidth100 - 60);
 	int cbheight = 20;
           
-	float deltaH = (float)(H/cbwidth);
+	float deltaH = (H/cbwidth);
           
 	int leftoffset = 30 + textwidth0;
 	int topoffset  = (height - cbheight)/2;

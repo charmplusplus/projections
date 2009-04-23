@@ -98,7 +98,7 @@ public class GraphXAxisCanvas extends Canvas
 			  s = "" + pe;
 			}
 			else{
-			  double tickVal = ((double )(i*tickincrement+data.intervalStart)*data.interval.size)/(double )1000000;
+			  double tickVal = ((double )(i*tickincrement+data.intervalStart)*data.interval.size)/1000000;
 			  s = "" + tickVal;
 			 }
 			

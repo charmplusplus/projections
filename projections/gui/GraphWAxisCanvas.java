@@ -104,7 +104,7 @@ public class GraphWAxisCanvas extends Canvas
 		 g.dispose();
 	  }    
 	  
-	  deltay = (double)((h - data.offset - data.offset2) / 100.0);
+	  deltay = ((h - data.offset - data.offset2) / 100.0);
 	  labelincrement = (int)(Math.ceil((textheight + 10) / deltay));
 	  labelincrement = Util.getBestIncrement(labelincrement);
    

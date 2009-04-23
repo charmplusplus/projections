@@ -72,7 +72,7 @@ class AsciiLineParser {
 	}
 
 	final public int toDigit(char c) {
-		return ((int)c)-((int)'0');
+		return (c)-('0');
 	}
 
 }

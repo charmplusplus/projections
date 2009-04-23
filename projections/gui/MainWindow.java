@@ -252,8 +252,8 @@ implements ScalePanel.StatusDisplay
 					// if summary override, perform sanity check
 					if (ProjMain.SUM_OVERRIDE) {
 						if ((ProjMain.SUM_END_INT <= ProjMain.SUM_START_INT) ||
-								(((long)data.length * originalSize) <
-										((long)ProjMain.SUM_END_INT * ProjMain.SUM_INT_SIZE)))
+								((data.length * originalSize) <
+										(ProjMain.SUM_END_INT * ProjMain.SUM_INT_SIZE)))
 						{
 							// re-use defaults while printing warning message
 							System.out.println("Warning: Specified Summary " +
@@ -293,19 +293,19 @@ implements ScalePanel.StatusDisplay
 					        // if there are changes    
 						// transform the data into absolute time first.
 						IntervalUtils.utilToTime(timeData,	  
-								(double)originalSize);
+								originalSize);
 						IntervalUtils.utilToTime(idleData,	  
-								(double)originalSize);
+								originalSize);
 
 						// transform the re-binned data back to percentages.
 						tempTimeData = IntervalUtils.rebin(timeData, originalSize,	        
-										   (double)bestSize);
+										   bestSize);
 						IntervalUtils.timeToUtil(tempTimeData,	 
-									 (double)bestSize);	 
+									 bestSize);	 
 						tempIdleData = IntervalUtils.rebin(idleData, originalSize,	        
-										   (double)bestSize);
+										   bestSize);
 						IntervalUtils.timeToUtil(tempIdleData,	 
-									 (double)bestSize);	 
+									 bestSize);	 
 
 						// default case
 						newdata = new double[tempTimeData.length][2];
@@ -363,7 +363,7 @@ implements ScalePanel.StatusDisplay
 					} else {		  
 						sumXAxis =	    
 							new SummaryXAxis(0, newdata.length,	 
-									(long)bestSize);	  
+									bestSize);	  
 						sumDataSource = new SummaryDataSource(newdata,0);
 					}
 					sumYAxis = new SummaryYAxis();	 

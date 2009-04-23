@@ -116,7 +116,7 @@ public class CcsServer
 	    sock=sock_;
 	    salt=salt_;
 	}
-    };
+    }
     private Request lastRequest;
 
    /** Send a request to a Converse program.  This executes a CCS "handler"

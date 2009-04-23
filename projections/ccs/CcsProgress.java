@@ -9,4 +9,4 @@ package projections.ccs;
 
 public interface CcsProgress {
   public void setText(String s);
-};
+}

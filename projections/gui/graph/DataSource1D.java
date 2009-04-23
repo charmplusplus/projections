@@ -43,7 +43,7 @@ public class DataSource1D extends DataSource
   
   public void getValues(int index,double[] values)
   {
-    values[0]=(double)data[index];
+    values[0]=data[index];
   }
   
   public String[] getPopup(int xVal, int yVal){

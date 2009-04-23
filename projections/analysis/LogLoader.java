@@ -588,7 +588,7 @@ public class LogLoader extends ProjDefs
 	}
 
 	/** Read the timeline for a single PE and return the result as a Collection of TimelineEvent's */
-	public void createtimeline(int pe, long Begin, long End, List Timeline, Collection userEventVector)
+	public void createtimeline(int pe, long Begin, long End, List Timeline, Set<UserEventObject>  userEventVector)
 	throws LogLoadException
 	{
 		long BeginTime = 0;

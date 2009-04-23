@@ -193,11 +193,11 @@ public class GraphPanel extends JPanel
 	    // the which flag was set.
 	    if ((scaleX != oldScaleX) && (scaleX > 0.0)) {
 		scaleFieldX.setText("" + scaleX);
-		displayCanvas.setScaleX((double)scaleX); 
+		displayCanvas.setScaleX(scaleX); 
 	    }
 	    if ((scaleY != oldScaleY) && (scaleY > 0.0)) {
 		scaleFieldY.setText("" + scaleY);
-		displayCanvas.setScaleY((double)scaleY); 
+		displayCanvas.setScaleY(scaleY); 
 	    }
 	} else if (evt.getSource() instanceof JFloatTextField) {
 	    JFloatTextField field = (JFloatTextField)evt.getSource();
@@ -205,10 +205,10 @@ public class GraphPanel extends JPanel
 	    // hence the conservative approach.
 	    if (field == scaleFieldX) {
 		scaleX = oldScaleX;
-		displayCanvas.setScaleX((double)scaleX);
+		displayCanvas.setScaleX(scaleX);
 	    } else if (field == scaleFieldY) {
 		scaleY = oldScaleY;
-		displayCanvas.setScaleY((double)scaleY);
+		displayCanvas.setScaleY(scaleY);
 	    }
 	} else if (evt.getSource() instanceof JRadioButton) {
 	    if (evt.getActionCommand().equals("line")) {

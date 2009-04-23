@@ -37,7 +37,7 @@ public class KMeansClustering {
 		    maxVal = data[p][ep];
 		}
 	    }
-	    interval = ((double)(maxVal - minVal + 1))/numClusters;
+	    interval = ((maxVal - minVal + 1))/numClusters;
 	    for (int k=0; k<numClusters; k++) {
 		mean[k][ep] = (k+1)*interval - interval/2 + minVal;
 	    }

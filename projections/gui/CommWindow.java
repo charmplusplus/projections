@@ -29,7 +29,7 @@ implements ItemListener, ActionListener, Clickable
 	private double[][]  avgHopCount;
 	private double[][]  avgPeHopCount;
 
-	private ArrayList	histogram;
+	private ArrayList<Integer>	histogram;
 	private int[]	histArray;
 	private String 	currentArrayName;
 
@@ -356,7 +356,7 @@ implements ItemListener, ActionListener, Clickable
 
 		int numPe = peList.size();
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
-		histogram = new ArrayList();
+		histogram = new ArrayList<Integer>();
 
 		int curPeArrayIndex = 0;
 
@@ -445,18 +445,18 @@ implements ItemListener, ActionListener, Clickable
 		int max;
 		int min;
 		if(histogram.size()>0){
-			max = ((Integer)histogram.get(0)).intValue();
-			min = ((Integer)histogram.get(0)).intValue();
+			max = histogram.get(0).intValue();
+			min = histogram.get(0).intValue();
 		} else {
 			min = 0;
 			max = 0;
 		}
 
 		for(int k=1; k<histogram.size(); k++){
-			if(((Integer)histogram.get(k)).intValue() < min)
-				min = ((Integer)histogram.get(k)).intValue();
-			if(((Integer)histogram.get(k)).intValue() > max)
-				max = ((Integer)histogram.get(k)).intValue();
+			if((histogram.get(k)).intValue() < min)
+				min = (histogram.get(k)).intValue();
+			if((histogram.get(k)).intValue() > max)
+				max = (histogram.get(k)).intValue();
 		}
 
 		histArray = new int[max+1];
@@ -466,7 +466,7 @@ implements ItemListener, ActionListener, Clickable
 
 		int index;
 		for(int k=0; k<histogram.size(); k++){
-			index = ((Integer)histogram.get(k)).intValue();
+			index = (histogram.get(k)).intValue();
 			//System.out.println("index = "+ index);
 			histArray[index] += 1;
 		}

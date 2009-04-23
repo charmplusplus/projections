@@ -288,24 +288,24 @@ public class AmpiProfileWindow extends ProjectionsWindow
 		txtScaleX.setText("" + scaleX);
                 if(ampiTraceOn){
                     if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleX((double)scaleX);
+                        displayCanvas.setScaleX(scaleX);
                     } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleX((double)scaleX);
+                        ampiDisplayCanvas.setScaleX(scaleX);
                     }
                 } else {
-                    displayCanvas.setScaleX((double)scaleX);
+                    displayCanvas.setScaleX(scaleX);
                 }
 	    }
 	    if ((scaleY != oldScaleY) && (scaleY > 0.0)) {
 		txtScaleY.setText("" + scaleY);
                 if(ampiTraceOn){
                     if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleY((double)scaleY);
+                        displayCanvas.setScaleY(scaleY);
                     } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleY((double)scaleY);
+                        ampiDisplayCanvas.setScaleY(scaleY);
                     }
                 } else {
-                    displayCanvas.setScaleY((double)scaleY);
+                    displayCanvas.setScaleY(scaleY);
                 }
 	    }
 	} else if (evt.getSource() instanceof JFloatTextField) {
@@ -316,23 +316,23 @@ public class AmpiProfileWindow extends ProjectionsWindow
 		scaleX = oldScaleX;
 		if(ampiTraceOn){
                     if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleX((double)scaleX);
+                        displayCanvas.setScaleX(scaleX);
                     } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleX((double)scaleX);
+                        ampiDisplayCanvas.setScaleX(scaleX);
                     }
                 } else {
-                    displayCanvas.setScaleX((double)scaleX);
+                    displayCanvas.setScaleX(scaleX);
                 }
 	    } else if (field == txtScaleY) {
 		scaleY = oldScaleY;
 		if(ampiTraceOn){
                     if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleY((double)scaleY);
+                        displayCanvas.setScaleY(scaleY);
                     } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleY((double)scaleY);
+                        ampiDisplayCanvas.setScaleY(scaleY);
                     }
                 } else {
-                    displayCanvas.setScaleY((double)scaleY);
+                    displayCanvas.setScaleY(scaleY);
                 }
 	    }
 	} else if(evt.getSource() instanceof JMenuItem) {

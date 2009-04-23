@@ -106,7 +106,7 @@ public class RealDoubleFFT_Even extends RealDoubleFFT {
   /** Return the normalization factor.  
    * Multiply the elements of the backtransform'ed data to get the normalized inverse.*/
   public double normalization(){
-    return 2.0/((double) n); }
+    return 2.0/(n); }
 
   /** Compute the (nomalized) inverse FFT of data, leaving it in place.*/
   public void inverse (double data[]) {

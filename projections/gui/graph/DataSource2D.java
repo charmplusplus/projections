@@ -117,7 +117,7 @@ public class DataSource2D extends DataSource
     public void getValues(int index,double[] values)
     {
 	for(int j=0;j<data[index].length;j++)
-	    values[j]=(double)data[index][j];
+	    values[j]=data[index][j];
     }
 
     private double[][] intToDouble(int[][] data) {
@@ -127,7 +127,7 @@ public class DataSource2D extends DataSource
 	for (int i=0;i<data.length; i++) {
 	    retVal[i] = new double[data[i].length];
 	    for (int j=0;j<data[i].length;j++) {
-		retVal[i][j] = (double)data[i][j];
+		retVal[i][j] = data[i][j];
 	    }
 	}
 

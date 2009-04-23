@@ -50,7 +50,7 @@ public class ComplexDoubleFFT_Mixed extends ComplexDoubleFFT{
 
     factors = Factorize.factor(n, available_factors);
 
-    double d_theta = -2.0 * PI / ((double) n);
+    double d_theta = -2.0 * PI / (n);
     int product = 1;
     twiddle = new double[factors.length][][];
     for (int i = 0; i < factors.length; i++) {

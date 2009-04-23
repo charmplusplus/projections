@@ -32,7 +32,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	
 	private int pe;
 
-	private String note;
+	private String note = null;
 	
 	final static String popupChangeColor = "Change Color";
 
@@ -56,6 +56,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.BeginTime=EndTime=t;
 		this.pe = pe;
 		this.note = note;
+		this.UserEventID=-1;
 		addMouseListener(this);
 	}
 
@@ -86,6 +87,11 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
 		this.data = data;
 
+		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && note!=null)){
+			setBounds( 0, 0, 0, 0 );			
+			return;
+		}	
+		
 		int left = data.timeToScreenPixel(BeginTime, actualDisplayWidth);
 		int rightCoord = data.timeToScreenPixel(EndTime, actualDisplayWidth);
 
@@ -121,7 +127,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		else
 			setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>");
 			
-		this.setBounds( left, top, width, height );
+		setBounds( left, top, width, height );
 				
 	}
 

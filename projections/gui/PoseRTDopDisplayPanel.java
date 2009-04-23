@@ -49,7 +49,7 @@ public class PoseRTDopDisplayPanel extends JPanel
 					  U.t(intervalSize),
 					  "Time");
 	xaxis.setLimits((double)startInterval*intervalSize,
-			(double)intervalSize);
+			intervalSize);
 	YAxisAuto yaxis = new YAxisAuto("Number of Simultaneous Events",
 					"", datasource);
 	graph.setData(datasource,xaxis,yaxis);

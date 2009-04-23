@@ -102,7 +102,7 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 			// TODO Auto-generated method stub
 		}
 	
-	};
+	}
 
 
 }

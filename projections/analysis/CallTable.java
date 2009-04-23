@@ -98,7 +98,7 @@ public class CallTable extends ProjDefs
 							if (maxStats[sourceEP][destEP]<msglen)
 								maxStats[sourceEP][destEP] = msglen;
 							msgCount[sourceEP][destEP]++;
-							byteSum[sourceEP][destEP]+=(double)msglen;
+							byteSum[sourceEP][destEP]+=msglen;
 							sumSquares[sourceEP][destEP]+=(double)msglen*(double)msglen;
 							if (!exists[sourceEP])
 								exists[sourceEP]=true;
@@ -128,7 +128,7 @@ public class CallTable extends ProjDefs
 								if (maxStats[sourceEP][destEP]<msglen)
 									maxStats[sourceEP][destEP] = msglen;
 								msgCount[sourceEP][destEP]++;
-								byteSum[sourceEP][destEP]+=(double)msglen;
+								byteSum[sourceEP][destEP]+=msglen;
 								sumSquares[sourceEP][destEP]+=(double)msglen*(double)msglen;
 								if (!exists[sourceEP])
 									exists[sourceEP]=true;

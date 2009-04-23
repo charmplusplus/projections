@@ -1,7 +1,10 @@
 package projections.gui.Timeline;
 
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+
 import java.awt.event.*;
 
 import projections.analysis.*;
@@ -10,11 +13,7 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 
 import java.text.DecimalFormat;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import javax.swing.*;
 
@@ -65,7 +64,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private Data data = null;
 	
 	/** A set of TimelineMessage's */
-	public TreeSet messages;
+	public Set<TimelineMessage> messages;
 	
 	private PackTime[] packs;
 
@@ -78,7 +77,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private AmpiFunctionData funcData[];
 
 	public EntryMethodObject(Data data,  TimelineEvent tle, 
-			TreeSet msgs, PackTime[] packs,
+			TreeSet<TimelineMessage> msgs, PackTime[] packs,
 			int p1)
 	{
 		setFocusable(false); // optimization for speed
@@ -304,7 +303,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	}   
 	
 	/** Return a set of messages for this entry method */
-	public Set getMessages()
+	public Set<TimelineMessage> getMessages()
 	{
 		return messages;
 	}   
@@ -395,9 +394,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 * trace
 	 * 
 	 */
-	public HashSet traceBackwardDependencies(){
+	public Set<EntryMethodObject> traceBackwardDependencies(){
 		synchronized(data.messageStructures){
-			HashSet v = new HashSet();
+			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 			if(data.traceMessagesBackOnHover()){
 				EntryMethodObject obj = this;
 
@@ -411,7 +410,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 						TimelineMessage created_message = obj.creationMessage();
 						if(created_message != null){
 							// Find object that created the message
-							obj = (EntryMethodObject) data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
+							obj = data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
 							if(obj != null){
 								done = false;
 							}
@@ -430,10 +429,10 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 *  @note This uses an inefficient algorithm which could be sped up by using more suitable data structures
 	 *
 	 */
-	public HashSet traceForwardDependencies(){
-		HashSet v = new HashSet();
+	public Set<EntryMethodObject> traceForwardDependencies(){
+		HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 		
-		LinkedList<EntryMethodObject> toExamine = new LinkedList();
+		LinkedList<EntryMethodObject> toExamine = new LinkedList<EntryMethodObject>();
 		
 		toExamine.add(this);
 		
@@ -442,14 +441,14 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			v.add(current);
 						
 			// For all loaded EntryMethodObjects, see if they match any of the sends from this object
-			Iterator iter = data.allEntryMethodObjects.keySet().iterator();
+			Iterator<Integer> iter = data.allEntryMethodObjects.keySet().iterator();
 			while(iter.hasNext()){
-				Integer pe = (Integer) iter.next();
-				LinkedList entryMethods = (LinkedList)data.allEntryMethodObjects.get(pe);
+				Integer pe = iter.next();
+				List<EntryMethodObject> entryMethods = data.allEntryMethodObjects.get(pe);
 
-				Iterator j = entryMethods.iterator();
+				Iterator<EntryMethodObject> j = entryMethods.iterator();
 				while(j.hasNext()){
-					EntryMethodObject obj = (EntryMethodObject) j.next();
+					EntryMethodObject obj = j.next();
 
 					// If any of the messages sent by this object created the EntryMethodObject obj
 					TimelineMessage m = obj.creationMessage();
@@ -500,17 +499,23 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 		// Highlight the messages linked to this object
 		if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
-			Set fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
-			Set back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
-			
+						
+			Set<EntryMethodObject> fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
+			Set<EntryMethodObject> back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
+				
+			HashSet<Object> fwdGeneric = new HashSet<Object>();
+			HashSet<Object> backGeneric =  new HashSet<Object>();
+			fwdGeneric.addAll(fwd); // this function acts differently depending on data.traceMessagesForwardOnHover()
+			backGeneric.addAll(back); // this function acts differently depending on data.traceMessagesBackOnHover()
+						
 			// Highlight the forward and backward messages
 			data.clearMessageSendLines();
 			data.addMessageSendLine(back);
 			data.addMessageSendLineAlt(fwd);
 			
 			// highlight the objects as well
-			data.HighlightObjects(fwd);
-			data.HighlightObjects(back);
+			data.HighlightObjects(fwdGeneric);
+			data.HighlightObjects(backGeneric);
 			
 			needRepaint=true;
 		}
@@ -757,15 +762,15 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
 
 					// Compute the begin pixel coordinate relative to the Entry method object itself
-					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord;
+					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord - 1;
 
 					// Compute the end pixel coordinate relative to the containing panel
 					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
 
 					// Compute the end pixel coordinate relative to the Entry method object itself
-					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord;
+					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord - 1;
 
-					g.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (int)(packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
+					g.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
 
 				}
 			}
@@ -777,9 +782,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		{
 			g.setColor(getForeground());
 			
-			Iterator m = messages.iterator();
+			Iterator<TimelineMessage> m = messages.iterator();
 			while(m.hasNext()){
-				TimelineMessage msg = (TimelineMessage) m.next();
+				TimelineMessage msg = m.next();
 				long msgtime = msg.Time;
 				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
 				{
@@ -787,7 +792,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 					int msgPanelCoordX = data.timeToScreenPixelLeft(msgtime);
 
 					// Compute the pixel coordinate relative to the Entry method object itself
-					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
+					int msgObjectCoordX = msgPanelCoordX  - leftCoord - 1;
 
 					g.drawLine(msgObjectCoordX, verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
 
@@ -827,6 +832,13 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 	public void setLocationAndSize(int actualDisplayWidth)
 	{
+		
+		if(data.entryIsHiddenID(entry)){
+			setBounds( 0, 0, 0, 0 );			
+			return;
+		}	
+		
+		
 		leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
 		rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
 
@@ -837,6 +849,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			leftCoord = data.timeToScreenPixelLeft(data.beginTime(), actualDisplayWidth);
 		
 		int width = rightCoord-leftCoord+1;
+
+		if(width < 1)
+			width = 1;
 		
 		int singleTimelineH = data.singleTimelineHeight();
 		

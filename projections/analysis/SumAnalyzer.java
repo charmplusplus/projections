@@ -103,7 +103,7 @@ public class SumAnalyzer extends ProjDefs
 	    tokenizer.wordChars('A','Z');
 	    //Read the first line (descriptive information)
 	    checkNextString("ver");
-	    versionNum = (double)nextNumber("Version Number");
+	    versionNum = nextNumber("Version Number");
 	    int myProcessor=(int)nextNumber("processor number");
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
@@ -166,7 +166,7 @@ public class SumAnalyzer extends ProjDefs
 	    tokenizer.wordChars('A','Z');
 	    //Read the first line (descriptive information)
 	    checkNextString("ver");
-	    versionNum = (double)nextNumber("Version Number");
+	    versionNum = nextNumber("Version Number");
 	    int myProcessor=(int)nextNumber("processor number");
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
@@ -507,7 +507,7 @@ public class SumAnalyzer extends ProjDefs
 		if (ProcessorUtilization[p][interval] > 0) {
 		    IntervalUtils.fillIntervals(tempData[p],
 						outIntervalSize,
-						(long)intervalStart,
+						intervalStart,
 						interval*IntervalSize,
 						(interval+1)*IntervalSize,
 						IntervalUtils.utilToTime(ProcessorUtilization[p][interval],
@@ -521,7 +521,7 @@ public class SumAnalyzer extends ProjDefs
 	    for (int i=0; i<tempData[p].length; i++) {
 		tempData[p][i] = 
 		    IntervalUtils.timeToUtil(tempData[p][i],
-					     (double)outIntervalSize);
+					     outIntervalSize);
 		ret[p][i] = (int)tempData[p][i];
 	    }
 	}

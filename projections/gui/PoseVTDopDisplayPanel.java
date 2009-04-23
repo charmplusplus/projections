@@ -49,7 +49,7 @@ public class PoseVTDopDisplayPanel extends JPanel
 					  intervalSize,
 					  "");
 	xaxis.setLimits((double)startInterval*intervalSize,
-			(double)intervalSize);
+			intervalSize);
 	YAxisAuto yaxis = 
 	    new YAxisAuto("Number of Simultaneous Model Events",
 			  "", datasource);

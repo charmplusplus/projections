@@ -54,7 +54,7 @@ public class ComplexFloatFFT_Mixed extends ComplexFloatFFT{
 
     factors = Factorize.factor(n, available_factors);
 
-    double d_theta = -2.0 * PI / ((double) n);
+    double d_theta = -2.0 * PI / (n);
     int product = 1;
     twiddle = new float[factors.length][][];
     for (int i = 0; i < factors.length; i++) {

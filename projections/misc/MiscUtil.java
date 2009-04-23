@@ -45,7 +45,7 @@ public class MiscUtil {
      *  the cloning operation is not expected to be too expensive.
      */
     public static int[] getSortMap(int unsorted[]) {
-	int tempArray[] = (int [])(unsorted.clone());
+	int tempArray[] = (unsorted.clone());
 
 	return sortAndMap(tempArray);
     }
@@ -67,7 +67,7 @@ public class MiscUtil {
 	    throw new ArrayIndexOutOfBoundsException("Sizes do not match!");
 	}
 	
-	Object tempArray[] = (Object[])(targetArray.clone());
+	Object tempArray[] = (targetArray.clone());
 	for (int i=0; i<map.length; i++) {
 	    targetArray[i] = tempArray[map[i]];
 	}

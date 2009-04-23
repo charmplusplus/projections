@@ -235,7 +235,7 @@ public class Graph extends JPanel
      *  than ideal for the latter.
      */
     private int getXValue(int xPos) {
-   	if( (xPos > originX) && (xPos < (int)width+originX)) {
+   	if( (xPos > originX) && (xPos < width+originX)) {
 	    // get the expected value
 	    int displacement = xPos - originX;
 	    int expectedValue = (int)(displacement/pixelincrementX);
@@ -492,11 +492,11 @@ public class Graph extends JPanel
     	width = (int)((baseWidth-30-originX)*xscale);
 
 	// *NOTE* pixelincrementX = # pixels per value.
-	pixelincrementX = ((double)width)/maxvalueX;
+	pixelincrementX = (width)/maxvalueX;
 	setBestIncrements(X_AXIS, pixelincrementX, (int)maxvalueX);
 
 	// draw xAxis
-	g.drawLine(originX, originY, (int)width+originX, originY);
+	g.drawLine(originX, originY, width+originX, originY);
 
       	int mini = 0;
 	int maxi = (int)maxvalueX;
@@ -532,7 +532,7 @@ public class Graph extends JPanel
 	// draw yAxis
 	g.drawLine(originX, originY, originX , 30);
 	
-	pixelincrementY = (double)(originY-30) / maxvalueY;
+	pixelincrementY = (originY-30) / maxvalueY;
 	setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
 	int sw = fm.getHeight();
 	int cury;
@@ -624,7 +624,7 @@ public class Graph extends JPanel
 		// now display the graph
 		for(int k=0; k<numY; k++) {
 		    g.setColor(dataSource.getColor((int)temp[k][0]));
-		    y = (int)(originY-(int)(temp[k][1]*pixelincrementY));
+		    y = (originY-(int)(temp[k][1]*pixelincrementY));
 		    if (valuesPerTickX == 1) {
 			g.fillRect(originX + (int)(i*pixelincrementX +
 						   tickIncrementX/2 -
@@ -687,7 +687,7 @@ public class Graph extends JPanel
 	 
 	    for (int j=0; j<yValues; j++) {
 		g.setColor(dataSource.getColor(j));
-		y2[j] = (int) (originY - (int)(data[j]*pixelincrementY));
+		y2[j] = (originY - (int)(data[j]*pixelincrementY));
 		//is there any other condition that needs to be checked?
 		if(x1 != -1)	
 		    g.drawLine(x1,y1[j],x2,y2[j]);
@@ -733,7 +733,7 @@ public class Graph extends JPanel
 		// recomputation of the prefix sum each time we go through
 		// the Y values.
 		prefixSum(data);
-	    	yPixel = (int) (originY - (int)(data[layer]*pixelincrementY) +
+	    	yPixel = (originY - (int)(data[layer]*pixelincrementY) +
 				offsetY);
 
 		// if first point, add the baseline point before adding

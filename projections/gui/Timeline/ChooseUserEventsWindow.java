@@ -6,10 +6,12 @@ import java.awt.Graphics;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -32,7 +34,7 @@ import projections.gui.MainWindow;
 public class ChooseUserEventsWindow extends JFrame
 {
 	Data data;
-	Hashtable<Integer, String> names;
+	Map<Integer, String> names;
 	Vector<Vector> tabledata;
 	Vector<String> columnNames;
 
@@ -56,6 +58,19 @@ public class ChooseUserEventsWindow extends JFrame
 
 		names =  data.getUserEventNames();
 
+		// Add special purpose row for user supplied notes
+		{
+			Boolean b = true;
+			Vector tableRow = new Vector();
+			tableRow.add(b);
+			tableRow.add("User Supplied Notes");
+			tableRow.add("");
+			tableRow.add(Color.white);
+			tabledata.add(tableRow);
+		}
+		
+	
+		// Add rows in the table for each user event id
 		Iterator<Integer> iter = names.keySet().iterator();
 		while(iter.hasNext()){
 			Integer id = iter.next();
@@ -147,17 +162,26 @@ public class ChooseUserEventsWindow extends JFrame
 		public void setValueAt(Object value, int row, int col) {
 			if(col==0){
 				Boolean newValue = (Boolean) value;
-				Integer id = (Integer) tabledata.get(row).get(2);
 
-				if(newValue){
-					// remove from list of disabled entry methods
-					data.makeUserEventVisibleID(id);
-				} else {
-					// add to list of disabled entry methods
-					data.makeUserEventInvisibleID(id);
-				}				
+				if(row == 0){
+					// Show/Hide the user supplied notes
+					if(newValue){
+						data.makeUserSuppliedNotesVisible();
+					} else {
+						data.makeUserSuppliedNotesInvisible();
+					}		
+				} else { 
+					// Show/Hide the normal user events
+					Integer id = (Integer) tabledata.get(row).get(2);
+					if(newValue){
+						data.makeUserEventVisibleID(id);// remove from list of disabled entry methods
+					} else {
+						data.makeUserEventInvisibleID(id);// add to list of disabled entry methods
+					}		
+				}
+
 			}
-
+			
 			tabledata.get(row).set(col,value);
 			fireTableCellUpdated(row, col);
 

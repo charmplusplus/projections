@@ -1,5 +1,6 @@
 package projections.gui.Timeline;
 
+import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
@@ -84,7 +86,7 @@ public class Data
 	private int mostRecentScaledScreenWidth;
 	
 	/** The list of pes displayed, in display order*/
-	LinkedList peToLine;
+	LinkedList<Integer> peToLine;
 
 	/** If true, color entry method invocations by Object ID */
 	private boolean colorByObjectId;
@@ -105,18 +107,18 @@ public class Data
 	/** A set of user events that should be hidden */
 	Set<Integer> hiddenUserEvents;
 
+	private boolean hideUserSuppliedNotes = false;
 	
 	/** Each value of the TreeMap is a TreeSet (sorted list) of EntryMethodObject's .
 	 *  Each key of the TreeMap is an Integer pe 
 	 *  <Integer,LinkedList<EntryMethodObject> >
 	 */
-	public TreeMap allEntryMethodObjects;
+	public Map<Integer,List<EntryMethodObject> > allEntryMethodObjects = new TreeMap<Integer,List<EntryMethodObject> >();
 
 	/** Each value in this TreeMap is a TreeSet of UserEventObject's .
 	 *  Each key of the TreeMap is an Integer pe
-	 *  <Integer,LinkedList<UserEventObject> >
 	 */
-	public TreeMap<Integer, TreeSet <UserEventObject> > allUserEventObjects;
+	public Map<Integer, Set <UserEventObject> > allUserEventObjects = new TreeMap<Integer, Set <UserEventObject> >();
 
 
 	/** processor usage indexed by PE */
@@ -170,9 +172,9 @@ public class Data
 	}
 
 	/** A set of objects for which we draw their creation message lines */
-	public Set drawMessagesForTheseObjects;
+	public Set<EntryMethodObject> drawMessagesForTheseObjects;
 	/** A set of objects for which we draw their creation message lines in an alternate color */
-	public Set drawMessagesForTheseObjectsAlt;
+	public Set<EntryMethodObject> drawMessagesForTheseObjectsAlt;
 	
 		
 	private boolean useCustomColors=false;
@@ -198,7 +200,7 @@ public class Data
 		showIdle  = true;
 		showUserEvents = true;
 		
-		peToLine = new LinkedList();
+		peToLine = new LinkedList<Integer>();
 		
 		messageStructures = new MessageStructures(this);
 		
@@ -226,8 +228,8 @@ public class Data
 		beginTime = 0;
 		endTime = MainWindow.runObject[myRun].getTotalTime();
 
-		drawMessagesForTheseObjects = new HashSet();
-		drawMessagesForTheseObjectsAlt = new HashSet();
+		drawMessagesForTheseObjects = new HashSet<EntryMethodObject>();
+		drawMessagesForTheseObjectsAlt = new HashSet<EntryMethodObject>();
 				
 		allEntryMethodObjects = null;
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
@@ -236,7 +238,7 @@ public class Data
 		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
 
-		highlightedObjects = new HashSet();
+		highlightedObjects = new HashSet<Object>();
 		
 		colorByMemoryUsage = false;
 		colorByObjectId = false;
@@ -288,9 +290,9 @@ public class Data
 	public OrderedIntList processorListOrdered(){
 		OrderedIntList processorList = new OrderedIntList();
 
-		Iterator iter = peToLine.iterator();
+		Iterator<Integer> iter = peToLine.iterator();
 		while(iter.hasNext()){
-			Integer pe = (Integer) iter.next();
+			Integer pe = iter.next();
 			processorList.insert(pe);
 			System.out.println("processorList " + pe);
 		}
@@ -343,20 +345,19 @@ public class Data
 		// Can we reuse our already loaded data?
 		if(beginTime >= oldBT && endTime <= oldET){
 		
-			/** <Integer,LinkedList<EntryMethodObject>> */
-			TreeMap oldEntryMethodObjects = allEntryMethodObjects;
-			/** <Integer,LinkedList<UserEventObject>> */
-			TreeMap <Integer, TreeSet <UserEventObject> > oldUserEventObjects = allUserEventObjects;
+			Map<Integer, List<EntryMethodObject> > oldEntryMethodObjects = allEntryMethodObjects;
+
+			Map<Integer, Set <UserEventObject> > oldUserEventObjects = allUserEventObjects;
 			
-			allEntryMethodObjects = new TreeMap();
-			allUserEventObjects = new TreeMap();
+			allEntryMethodObjects = new TreeMap<Integer, List<EntryMethodObject>>();
+			allUserEventObjects = new TreeMap<Integer, Set<UserEventObject>>();
 
 			// Remove any unused objects from our data structures 
 			// (the components in the JPanel will be regenerated later from this updated list)
 		
-			Iterator peIter = peToLine.iterator();
+			Iterator<Integer> peIter = peToLine.iterator();
 			while(peIter.hasNext()){
-				Integer pe = (Integer) peIter.next();
+				Integer pe = peIter.next();
 					
 				if(oldEntryMethodObjects.containsKey(pe)){
 					// Reuse the already loaded data
@@ -365,10 +366,10 @@ public class Data
 
 					// Drop elements from mesgVector and allEntryMethodObjects outside range
 					if(allEntryMethodObjects.containsKey(pe)){
-						LinkedList objs = (LinkedList)allEntryMethodObjects.get(pe);
-						Iterator iter = objs.iterator();
+						List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
+						Iterator<EntryMethodObject> iter = objs.iterator();
 						while(iter.hasNext()){
-							EntryMethodObject obj = (EntryMethodObject) iter.next();
+							EntryMethodObject obj = iter.next();
 							if(obj.getEndTime() < beginTime || obj.getBeginTime() > endTime){
 								iter.remove();
 							}
@@ -378,9 +379,9 @@ public class Data
 					// Drop elements from userEventsArray outside range
 					if(allUserEventObjects.containsKey(pe)){
 
-						Iterator iter2 = allUserEventObjects.get(pe).iterator();
+						Iterator<UserEventObject> iter2 = allUserEventObjects.get(pe).iterator();
 						while(iter2.hasNext()){
-							UserEventObject obj = (UserEventObject) iter2.next();
+							UserEventObject obj = iter2.next();
 							if(obj.EndTime < beginTime || obj.BeginTime > endTime){
 								iter2.remove();
 							}
@@ -393,8 +394,8 @@ public class Data
 			
 		} else {
 			// We need to reload everything
-			allEntryMethodObjects = new TreeMap();
-			allUserEventObjects = new TreeMap();
+			allEntryMethodObjects = new TreeMap<Integer, List<EntryMethodObject>>();
+			allUserEventObjects = new TreeMap<Integer, Set<UserEventObject>>();
 		}
 		
 		oldBT = beginTime;
@@ -408,12 +409,12 @@ public class Data
 	
 			
 		// Create a list of worker threads
-		LinkedList readyReaders = new LinkedList();
+		LinkedList<ThreadedFileReader> readyReaders = new LinkedList<ThreadedFileReader>();
 		
-		Iterator peIter = peToLine.iterator();
+		Iterator<Integer> peIter = peToLine.iterator();
 		int pIdx=0;
 		while(peIter.hasNext()){
-			Integer pe = (Integer) peIter.next();
+			Integer pe = peIter.next();
 			if(!allEntryMethodObjects.containsKey(pe)) {
 				readyReaders.add(new ThreadedFileReader(pe,pIdx,this));
 			}
@@ -456,13 +457,13 @@ public class Data
 			packUsage[p] = 0;
 		}
 
-		Iterator pe_iter = allEntryMethodObjects.keySet().iterator();
+		Iterator<Integer> pe_iter = allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
-			Integer pe = (Integer)pe_iter.next();
-			LinkedList objs = (LinkedList)allEntryMethodObjects.get(pe);
-			Iterator obj_iter = objs.iterator();
+			Integer pe = pe_iter.next();
+			List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
+			Iterator<EntryMethodObject> obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
-				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+				EntryMethodObject obj = obj_iter.next();
 
 				float usage = obj.getUsage();
 				int entryIndex = obj.getEntryIndex();
@@ -528,14 +529,14 @@ public class Data
 	/** Add a set of new lines to the visualization representing the sending of a message.
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */
-	public void addMessageSendLineAlt(Set s) {
+	public void addMessageSendLineAlt(Set<EntryMethodObject> s) {
 		drawMessagesForTheseObjectsAlt.addAll(s);
 	}
 
 	/** Add a set of objects for which we want their creation messages to be displayed
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */
-	public void addMessageSendLine(Set s) {
+	public void addMessageSendLine(Set<EntryMethodObject> s) {
 		drawMessagesForTheseObjects.addAll(s);
 	}
 	
@@ -579,20 +580,16 @@ public class Data
 	 *  This function must be thread safe
 	 *  
 	 * */
-	void getData(Integer pe)  
+	void getData(Integer pe)
 	{
-		LinkedList tl = new LinkedList();
+		LinkedList<TimelineEvent> tl = new LinkedList<TimelineEvent>();
 		
-		/** Stores all user events from the currently loaded PE/time range. It must be sorted, 
+		/** Stores all user events from the currently loaded PE/time range. It must be sorted,
 		 *  so the nesting of bracketed user events can be efficiently processed.
 		 *  */
-		TreeSet userEvents= new TreeSet();
+		Set<UserEventObject> userEvents= new TreeSet<UserEventObject>();
 		
-		LinkedList perPEObjects = new LinkedList();
-		
-		if(perPEObjects == null){
-			System.err.println("perPEOBjects was not allocated successfully!!!!");
-		}
+		LinkedList<EntryMethodObject> perPEObjects = new LinkedList<EntryMethodObject>();
 		
 		
 		try {
@@ -618,20 +615,20 @@ public class Data
 		
 		
 		// proc timeline events
-		Iterator iter = tl.iterator();
+		Iterator<TimelineEvent> iter = tl.iterator();
 		while(iter.hasNext()){
 		
-			TimelineEvent tle = (TimelineEvent)iter.next();
+			TimelineEvent tle = iter.next();
 			
 			// Construct a list of messages sent by the object
-			Vector msglist = tle.MsgsSent;
-			TreeSet msgs = new TreeSet();
+			Vector<TimelineMessage> msglist = tle.MsgsSent;
+			TreeSet<TimelineMessage> msgs = new TreeSet<TimelineMessage>();
 			if(msglist!=null){
 				msgs.addAll( msglist );
 			}
 			
 			// Construct a list of message pack times for the object
-			Vector packlist = tle.PackTimes;
+			Vector<PackTime> packlist = tle.PackTimes;
 			int numpacks;
 			if (packlist == null) {
 				numpacks = 0;
@@ -640,34 +637,21 @@ public class Data
 			}
 			PackTime[] packs = new PackTime[numpacks];
 			for (int p=0; p<numpacks; p++) {
-				packs[p] = (PackTime)packlist.elementAt(p);
+				packs[p] = packlist.elementAt(p);
 			}
 		
-			// Create the object itself
-			if(tle==null){
-				System.out.println("tle is NULL");
-			}
-			if(msgs==null){
-				System.out.println("msgs is NULL");
-			}
-			if(pe==null){
-				System.out.println("pe is NULL");
-			}
-			if(perPEObjects==null){
-				System.out.println("perPEObjects is NULL");
-			}
-			
+		
 			EntryMethodObject obj = new EntryMethodObject(this, tle, msgs, packs, pe.intValue());
 			perPEObjects.add(obj);
 
-			if(tle!=null && tle.memoryUsage!=null){
+			if(tle.memoryUsage!=null){
 				if(tle.memoryUsage.longValue() > maxMemThisPE)
 					maxMemThisPE = tle.memoryUsage.longValue();
 				if(tle.memoryUsage.longValue() < minMemThisPE)
 					minMemThisPE = tle.memoryUsage.longValue();
 			}
 			
-			if(tle!=null && tle.UserSpecifiedData!=null){
+			if(tle.UserSpecifiedData!=null){
 				if(tle.UserSpecifiedData.intValue() > maxUserSuppliedThisPE)
 					maxUserSuppliedThisPE = tle.UserSpecifiedData.intValue();
 				if(tle.UserSpecifiedData.intValue() < minUserSuppliedThisPE)
@@ -685,7 +669,7 @@ public class Data
 	
 
 	/** Thread-safe storing of the userEvents and perPEObjects */
-	synchronized void getDataSyncSaveObjectLists(Integer pe, LinkedList perPEObjects, TreeSet userEvents )  
+	synchronized void getDataSyncSaveObjectLists(Integer pe, List<EntryMethodObject> perPEObjects, Set<UserEventObject> userEvents )  
 	{
 		// The user events are simply that which were produced by createtimeline
 		allUserEventObjects.put(pe,userEvents);
@@ -726,7 +710,7 @@ public class Data
 
 
 	public int getNumUserEvents() {
-		Iterator<TreeSet<UserEventObject>> iter = allUserEventObjects.values().iterator();
+		Iterator<Set<UserEventObject>> iter = allUserEventObjects.values().iterator();
 		int num = 0;
 		while(iter.hasNext()){
 			num += iter.next().size();
@@ -742,7 +726,7 @@ public class Data
 	private float scaleChangeFactor = (float)Math.pow(2.0,1.0/2);
 	private float roundScale(float scl) {
 		int i=(int)(scl+0.5f);
-		if (Math.abs(i-scl)<0.01) return (float)i; /* round to int */
+		if (Math.abs(i-scl)<0.01) return i; /* round to int */
 		else return scl; /*  leave as float */
 	}
 	
@@ -814,7 +798,7 @@ public class Data
 	 * 
 	 * */
 	public int scaledScreenWidth(int actualDisplayWidth){
-		mostRecentScaledScreenWidth = (int)((float)actualDisplayWidth * scaleFactor);
+		mostRecentScaledScreenWidth = (int)(actualDisplayWidth * scaleFactor);
 		return mostRecentScaledScreenWidth;
 	}
 
@@ -1015,8 +999,8 @@ public class Data
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
 	public int timeToScreenPixelRight(double time) {
-		double fractionAlongTimeAxis =  ((double) (time+0.5-beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)Math.floor((double)fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
+		double fractionAlongTimeAxis =  ((time+0.5-beginTime)) /((endTime-beginTime));
+		return offset() + (int)Math.floor(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel
@@ -1025,27 +1009,27 @@ public class Data
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
 	public int timeToScreenPixelLeft(double time) {
-		double fractionAlongTimeAxis =  ((time-0.5-(double)beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
+		double fractionAlongTimeAxis =  ((time-0.5-beginTime)) /((endTime-beginTime));
+		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 
 	
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixel(double time, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ((time-(double)beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
+		double fractionAlongTimeAxis =  ((time-beginTime)) /((endTime-beginTime));
+		return offset() + (int)(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixelLeft(double time, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ((time-0.5-(double)beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
+		double fractionAlongTimeAxis =  ((time-0.5-beginTime)) /((endTime-beginTime));
+		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the rightmost pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixelRight(double time, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ( (time+0.5-(double)beginTime)) /((double)(endTime-beginTime));
-		return offset() + (int)Math.floor(fractionAlongTimeAxis*(double)(assumedScreenWidth-2*offset()));
+		double fractionAlongTimeAxis =  ( (time+0.5-beginTime)) /((endTime-beginTime));
+		return offset() + (int)Math.floor(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 		
@@ -1122,7 +1106,7 @@ public class Data
 	/** A set of objects to highlight. The paintComponent() methods for the objects 
 	 * should paint themselves appropriately after determining if they are in this set 
 	 */
-	private Set highlightedObjects;
+	private Set<Object> highlightedObjects;
  	
 	/** Highlight the message links to the object upon mouseover */
 	private boolean traceMessagesBackOnHover;
@@ -1145,7 +1129,7 @@ public class Data
 	}
 	
 	/** Highlight the given set of timeline objects */
-	public void HighlightObjects(Set objects) {
+	public void HighlightObjects(Set<Object> objects) {
 		highlightedObjects.addAll(objects);
 	}
 
@@ -1289,13 +1273,13 @@ public class Data
 			int minDest = -1;
 			
 			// Iterate through all entry methods, and compare their execution times to the message send times
-			Iterator pe_iter = allEntryMethodObjects.keySet().iterator();
+			Iterator<Integer> pe_iter = allEntryMethodObjects.keySet().iterator();
 			while(pe_iter.hasNext()){
-				Integer pe =  (Integer) pe_iter.next();
-				LinkedList objs = (LinkedList)allEntryMethodObjects.get(pe);
-				Iterator obj_iter = objs.iterator();
+				Integer pe = pe_iter.next();
+				List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
+				Iterator<EntryMethodObject> obj_iter = objs.iterator();
 				while(obj_iter.hasNext()){ 
-					EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+					EntryMethodObject obj = obj_iter.next();
 					
 					TimelineMessage m = obj.creationMessage();
 					if(m!=null){
@@ -1333,15 +1317,15 @@ public class Data
 				
 
 			// Shift all events on the lagging pe	
-			Iterator iter = ((LinkedList)allEntryMethodObjects.get(laggingPE)).iterator();
+			Iterator<EntryMethodObject> iter = (allEntryMethodObjects.get(laggingPE)).iterator();
 			while(iter.hasNext()){
-				EntryMethodObject e = (EntryMethodObject) iter.next();
+				EntryMethodObject e = iter.next();
 				e.shiftTimesBy(shift);
 
 				// Shift all messages sent by the entry method
-				Iterator msg_iter = e.messages.iterator();
+				Iterator<TimelineMessage> msg_iter = e.messages.iterator();
 				while(msg_iter.hasNext()){
-					TimelineMessage msg = (TimelineMessage) msg_iter.next();
+					TimelineMessage msg = msg_iter.next();
 					msg.shiftTimesBy(shift);
 				}
 
@@ -1349,10 +1333,10 @@ public class Data
 
 			// Shift all user event objects on lagging pe
 	
-			iter = allUserEventObjects.get(laggingPE).iterator();
-			while(iter.hasNext()){
-				UserEventObject obj = (UserEventObject) iter.next();
-				obj.shiftTimesBy(shift);
+			Iterator<UserEventObject> iter2 = allUserEventObjects.get(laggingPE).iterator();
+			while(iter2.hasNext()){
+				UserEventObject u = iter2.next();
+				u.shiftTimesBy(shift);
 			}
 
 		}
@@ -1440,7 +1424,7 @@ public class Data
 	 * 
 	 */
 	public int whichPE(int verticalPosition) {
-		Integer which = (Integer) peToLine.get(verticalPosition);
+		Integer which = peToLine.get(verticalPosition);
 		return which;
 	}
 
@@ -1480,21 +1464,20 @@ public class Data
 
 		System.out.println("printUserEventInfo()");
 		
-		//		 <Integer, Long>
-		HashMap min = new HashMap();
-		HashMap max = new HashMap();
-		HashMap total = new HashMap();
-		HashMap count = new HashMap();
-		HashMap name = new HashMap();
+		HashMap<Integer, Long> min = new HashMap<Integer, Long>();
+		HashMap<Integer, Long> max = new HashMap<Integer, Long>();
+		HashMap<Integer, Long> total = new HashMap<Integer, Long>();
+		HashMap<Integer, Long> count = new HashMap<Integer, Long>();
+		HashMap<Integer, String> name = new HashMap<Integer, String>();
 
 		
-		Iterator iter = allUserEventObjects.keySet().iterator();
+		Iterator<Integer> iter = allUserEventObjects.keySet().iterator();
 		while(iter.hasNext()){
-			Integer pe = (Integer)iter.next();
+			Integer pe = iter.next();
 			
-			Iterator eventiter = allUserEventObjects.get(pe).iterator();
+			Iterator<UserEventObject> eventiter = allUserEventObjects.get(pe).iterator();
 			while(eventiter.hasNext()){
-				UserEventObject obj = (UserEventObject) eventiter.next();
+				UserEventObject obj = eventiter.next();
 				if(obj.Type == UserEventObject.PAIR){
 					long BeginTime = obj.BeginTime;
 					long EndTime = obj.EndTime;
@@ -1510,16 +1493,16 @@ public class Data
 						name.put(UserEventID, obj.getName());
 					} else {
 
-						if((Long)min.get(UserEventID) > duration){
+						if(min.get(UserEventID) > duration){
 							min.put(UserEventID, new Long(duration));
 						}
 
-						if((Long)max.get(UserEventID) < duration){
+						if(max.get(UserEventID) < duration){
 							max.put(UserEventID, new Long(duration));
 						}
 
-						total.put(UserEventID, (Long)total.get(UserEventID) + new Long(duration));
-						count.put(UserEventID, (Long)count.get(UserEventID) + new Long(1));
+						total.put(UserEventID, total.get(UserEventID) + new Long(duration));
+						count.put(UserEventID, count.get(UserEventID) + new Long(1));
 
 					}
 
@@ -1531,9 +1514,9 @@ public class Data
 		
 		iter = min.keySet().iterator();
 		while(iter.hasNext()){
-			Integer UserEventID = (Integer) iter.next();
+			Integer UserEventID = iter.next();
 
-			double avg = ((Long)total.get(UserEventID)).doubleValue() /	((Long)count.get(UserEventID)).doubleValue();
+			double avg = total.get(UserEventID).doubleValue() /	count.get(UserEventID).doubleValue();
 			
 			System.out.print("User Event #" + UserEventID + "  \"" + name.get(UserEventID) + "\"");
 			System.out.print("    count = " + count.get(UserEventID));
@@ -1560,11 +1543,11 @@ public class Data
 
 		int maxDepth = 0;
 		
-		Iterator iter = allUserEventObjects.keySet().iterator();
+		Iterator<Integer> iter = allUserEventObjects.keySet().iterator();
 		while(iter.hasNext()){
-			Integer pe = (Integer)iter.next();
+			Integer pe = iter.next();
 			
-			Stack <Long> activeEndTimes = new Stack();
+			Stack <Long> activeEndTimes = new Stack<Long>();
 			
 			// The iterator must go in order of start times(It will as long as allUserEventObjects.get(pe) is a TreeSet
 			Iterator eventiter = allUserEventObjects.get(pe).iterator();
@@ -1658,12 +1641,12 @@ public class Data
 
 	
 	public void dropPEsUnrelatedToPE(Integer pe) {
-		dropPEsUnrelatedToObjects((Collection<EntryMethodObject>)allEntryMethodObjects.get(pe));
+		dropPEsUnrelatedToObjects(allEntryMethodObjects.get(pe));
 	}
 	
 	public void dropPEsUnrelatedToObject(EntryMethodObject obj) {
 		System.out.println("dropPEsUnrelatedToObject()");
-		HashSet set = new HashSet();
+		HashSet<EntryMethodObject> set = new HashSet<EntryMethodObject>();
 		set.add(obj);
 		dropPEsUnrelatedToObjects(set);
 	}
@@ -1672,7 +1655,7 @@ public class Data
 
 	public void dropPEsUnrelatedToObjects(Collection<EntryMethodObject> objs) {
 		System.out.println("dropPEsUnrelatedToObjects()");
-		HashSet<EntryMethodObject> allRelatedEntries = new HashSet();
+		HashSet<EntryMethodObject> allRelatedEntries = new HashSet<EntryMethodObject>();
 
 		// Find all entry method invocations related to this one
 		Iterator<EntryMethodObject> objIter = objs.iterator();
@@ -1698,14 +1681,14 @@ public class Data
 	
 	
 	// Drop timelines from any PEs not in the provided list
-	void dropPEsNotInList(Set keepPEs){
+	void dropPEsNotInList(Set<Integer> keepPEs){
 		// Drop any PEs not in the list
-		HashSet currentPEs = new HashSet();
+		Set<Integer> currentPEs = new HashSet<Integer>();
 		currentPEs.addAll(peToLine);
 
-		Iterator currPEiter = currentPEs.iterator();
+		Iterator<Integer> currPEiter = currentPEs.iterator();
 		while(currPEiter.hasNext()){
-			Integer p = (Integer) currPEiter.next();
+			Integer p = currPEiter.next();
 			if(keepPEs.contains(p)){
 				// Keep this PE 
 			} else {
@@ -1721,14 +1704,14 @@ public class Data
 	/** Produce a hashmap containing the ids and nicely mangled string names for each entry method */
 	public Hashtable<Integer, String> getEntryNames() {
 		
-		Hashtable entryNames = MainWindow.runObject[myRun].getSts().getEntryNames();
-		Hashtable entryChareNames = MainWindow.runObject[myRun].getSts().getEntryChareNames();
+		Map<Integer, String> entryNames = MainWindow.runObject[myRun].getSts().getEntryNames();
+		Map<Integer, String> entryChareNames = MainWindow.runObject[myRun].getSts().getEntryChareNames();
 
 		Hashtable<Integer, String> result = new Hashtable<Integer, String>();
 		
-		Iterator iter = entryNames.keySet().iterator();
+		Iterator<Integer> iter = entryNames.keySet().iterator();
 		while(iter.hasNext()){
-			Integer id = (Integer) iter.next();
+			Integer id = iter.next();
 			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
 		}
 		
@@ -1737,8 +1720,8 @@ public class Data
 	
 	
 	/** Produce a hashmap containing the ids and nicely mangled string names for each user event */
-	public Hashtable<Integer, String> getUserEventNames() {
-		return MainWindow.runObject[myRun].getSts().getUserEventNames2();
+	public Map<Integer, String> getUserEventNames() {
+		return MainWindow.runObject[myRun].getSts().getUserEventNameMap();
 	}
 
 
@@ -1746,28 +1729,51 @@ public class Data
 	/** Make visible the entry methods for this id */	
 	public void makeEntryVisibleID(Integer id) {
 		hiddenEntryPoints.remove(id);
-		this.displayMustBeRepainted();
+		this.displayMustBeRedrawn();
 	}	
 
 	/** Hide the entry methods for this id */
 	public void makeEntryInvisibleID(Integer id) {
 		hiddenEntryPoints.add(id);
-		this.displayMustBeRepainted();
+		this.displayMustBeRedrawn();
 	}
 	
 
 	/** Make visible the entry methods for this id */	
 	public void makeUserEventVisibleID(Integer id) {
 		hiddenUserEvents.remove(id);
-		this.displayMustBeRepainted();
+		this.displayMustBeRedrawn();
 	}	
 
 	/** Hide the entry methods for this id */
 	public void makeUserEventInvisibleID(Integer id) {
 		hiddenUserEvents.add(id);
-		this.displayMustBeRepainted();
+		this.displayMustBeRedrawn();
 	}
 
+	
+	
+	
+	
+	public void makeUserSuppliedNotesVisible() {
+		hideUserSuppliedNotes = false;
+		this.displayMustBeRedrawn();
+	}	
+
+	public void makeUserSuppliedNotesInvisible() {
+		hideUserSuppliedNotes = true;
+		this.displayMustBeRedrawn();
+	}
+	
+	public boolean userSuppliedNotesVisible() {
+		return ! hideUserSuppliedNotes;	
+	}
+
+	public boolean userSuppliedNotesHidden() {
+		return hideUserSuppliedNotes;	
+	}
+
+	
 	public boolean entryIsHiddenID(Integer id) {
 		return hiddenEntryPoints.contains(id);
 	}

@@ -16,8 +16,8 @@ public long RecvTime;
     public int EntryPoint, SrcPe, MsgLen;
     public int EventID; //seq no of processor
     public ObjectId id;
-    public Vector MsgsSent;  // of class TimelineMessage
-    public Vector PackTimes; // of class PackTime
+    public Vector<TimelineMessage> MsgsSent; 
+    public Vector<PackTime> PackTimes;
     public int numPapiCounts = 0;
     public long papiCounts[];
     public Integer UserSpecifiedData;

@@ -72,7 +72,7 @@ public abstract class RealDoubleFFT {
   /** Return the normalization factor.  
    * Multiply the elements of the backtransform'ed data to get the normalized inverse.*/
   public double normalization(){
-    return 1.0/((double) n); }
+    return 1.0/(n); }
 
   /** Compute the (nomalized) inverse FFT of data, leaving it in place.*/
   public void inverse(double data[]) {

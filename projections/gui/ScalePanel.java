@@ -168,7 +168,7 @@ public class ScalePanel extends Panel
 			int start=(int)Math.ceil(pmin*scale);
 			int end=(int)Math.floor(pmax*scale);
 			float lengthScale=(float)(1-Math.log(plen*scale/per)/Math.log(10.0));
-			int nTicks=(int)(end-start+1);
+			int nTicks=(end-start+1);
 			float ticks[]=new float[3*nTicks];
 			for (int t=0;t<nTicks;t++) {
 				int i=start+t;

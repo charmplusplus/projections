@@ -57,10 +57,10 @@ public class MainLayout implements LayoutManager {
 
 			
 			if ( c instanceof EntryMethodObject ) {
-				((EntryMethodObject)c).setLocationAndSize((int)(width)); // setBounds on child
+				((EntryMethodObject)c).setLocationAndSize((width)); // setBounds on child
 			} 
 			else if ( c instanceof UserEventObject ) {
-				((UserEventObject)c).setLocationAndSize(data, (int)(width));	// setBounds on child	
+				((UserEventObject)c).setLocationAndSize(data, (width));	// setBounds on child	
 			} 
 			else if ( c instanceof MainPanelForeground ) {
 				((MainPanelForeground)c).setBounds(0, 0, width, height );

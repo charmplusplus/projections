@@ -440,7 +440,7 @@ public class ProfileGraph extends JPanel
 	pixelIncY = (double)canvasHeight / 100;
 	//setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
         int fH = fm.getHeight();
-        double cury = (double)originY;
+        double cury = originY;
         int unitW = 5;
         int tickW = 2;
         for(int i=0; i<=100; i++){

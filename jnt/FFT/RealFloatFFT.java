@@ -74,7 +74,7 @@ public abstract class RealFloatFFT {
   /** Return the normalization factor.  
    * Multiply the elements of the backtransform'ed data to get the normalized inverse.*/
   public float normalization(){
-    return 1.0f/((float) n); }
+    return 1.0f/(n); }
 
   /** Compute the (nomalized) inverse FFT of data, leaving it in place.*/
   public void inverse(float data[]) {

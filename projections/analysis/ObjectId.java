@@ -11,7 +11,7 @@ public ObjectId() {
 	 id[0] = id[1] = id[2] = id[3] = -1;
        }
 public ObjectId(ObjectId d) {
-	 if (d!=null) id = (int[])d.id.clone();
+	 if (d!=null) id = d.id.clone();
          else {
      	   id = new int[ID_SIZE];
 	   id[0] = id[1] = id[2] = id[3] = -1;

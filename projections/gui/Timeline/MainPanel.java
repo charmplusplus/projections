@@ -11,6 +11,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.TreeSet;
 
 import javax.swing.*;
@@ -110,12 +111,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// Add each user event 
 		/** <LinkedList<UserEventObject>> */
-		Iterator <TreeSet <UserEventObject> > iter = data.allUserEventObjects.values().iterator();
+		Iterator <Set <UserEventObject> > iter = data.allUserEventObjects.values().iterator();
 		while(iter.hasNext()){
 			/** <UserEventObject> */
 			Iterator <UserEventObject> ue_iter = iter.next().iterator();
 			while(ue_iter.hasNext()){
-				UserEventObject ueo = (UserEventObject) ue_iter.next();
+				UserEventObject ueo = ue_iter.next();
 				this.add(ueo);						
 			}
 		}

@@ -16,6 +16,11 @@ author = idooley2
         Ant based build system for Projections
     </description>
 
+
+    <property name="compile.debug"       value="false"/>
+    <property name="compile.deprecation" value="false"/>
+    <property name="compile.optimize"    value="true"/>
+
   <target name="cleanbuild" depends="clean,dist" description="Performing a fresh build" />
 
   <!-- Setup anything for the build -->
@@ -48,10 +53,15 @@ author = idooley2
   <!-- Compile the java code. Put class files into "build" directory -->
   <target name="compile" depends="init" description="compile the source" >
 
-	<javac sourcepath="" srcdir="." destdir="build" debug="true" debuglevel="lines,vars,source" >
-		  <classpath refid="build.classpath" />
-		<include name="**/*"/>
-    </javac>
+	<javac sourcepath="" 
+	       srcdir="." 
+	       destdir="build" 
+	       debug="${compile.debug}"
+	       deprecation="${compile.deprecation}"
+	       optimize="${compile.optimize}" >
+	  <classpath refid="build.classpath" />
+	  <include name="**/*"/>
+	</javac>
 
   </target>
 

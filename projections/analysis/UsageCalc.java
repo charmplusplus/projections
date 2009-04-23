@@ -65,11 +65,11 @@ public class UsageCalc extends ProjDefs
 			// BEGIN_PROCESSING event, if so ignore the entrypoint
 			if (curEntry != -1)		
 				data[0][curEntry] += 
-					(float )((time - startTime) - packtime - unpacktime);
+					((time - startTime) - packtime - unpacktime);
 			break;
 		case CREATION:
 			if(curEntry != -1){
-				data[1][curEntry] += (float)time;
+				data[1][curEntry] += time;
 			}
 			break;
 		case CREATION_MULTICAST:
@@ -80,7 +80,7 @@ public class UsageCalc extends ProjDefs
 			break;
 		case END_IDLE:
 			// +2 places Idle time at the top of the usage profile display
-			data[0][numUserEntries+2] += (float )(time - startTime);
+			data[0][numUserEntries+2] += (time - startTime);
 			break;
 		case BEGIN_PACK:
 			packstarttime = time;
@@ -89,7 +89,7 @@ public class UsageCalc extends ProjDefs
 			// Packing is the first non-entry data item to be displayed
 			// in the profile window.
 			packtime += time - packstarttime;
-			data[0][numUserEntries] += (float )(time - packstarttime);
+			data[0][numUserEntries] += (time - packstarttime);
 			/*
 	    System.out.println("pack time " + (float)(time-packstarttime) +
 			       " cumulative time " + data[0][numUserEntries]);
@@ -102,7 +102,7 @@ public class UsageCalc extends ProjDefs
 			// Unpacking is the second non-entry data item to be displayed
 			// in the profile window.
 			unpacktime += time - unpackstarttime;
-			data[0][numUserEntries+1] += (float)(time - unpackstarttime);
+			data[0][numUserEntries+1] += (time - unpackstarttime);
 			break;
 		default:
 			/*ignore it*/
@@ -206,7 +206,7 @@ public class UsageCalc extends ProjDefs
 
 		float accumulated = 0;
 		for (int j=1; j<numFunc; j++) { //Scale times to percent
-			data[j] = (float)(100.0*accTime[j])/(float)(endtime-begintime);
+			data[j] = (float)(100.0*accTime[j])/(endtime-begintime);
 			accumulated += data[j];
 		}
 		if(accumulated > 100){
@@ -326,9 +326,9 @@ public class UsageCalc extends ProjDefs
 			// data[1][j]);
 			data[0][j] = data[0][j] - data[1][j];
 			data[0][j] = 
-				(float )(100.0*data[0][j])/(float )(endTime-beginTime);
+				(float )(100.0*data[0][j])/(endTime-beginTime);
 			data[1][j] = 
-				(float )(100.0*data[1][j])/(float )(endTime-beginTime);
+				(float )(100.0*data[1][j])/(endTime-beginTime);
 		}
 		return data;
 	}

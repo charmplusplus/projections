@@ -25,6 +25,7 @@ import org.jfree.data.time.Year;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
+import projections.ccs.*;
 import projections.gui.graph.DataSource;
 import projections.gui.graph.DataSource1D;
 import projections.gui.graph.Graph;
@@ -37,11 +38,15 @@ import projections.gui.graph.YAxisFixed;
 
 public class StreamingTool {
 
+	
 	public static void main(String args[]){
 
-			System.out.println("Streaming Tool");
-			
+		System.out.println("Streaming Tool");
+		
+		new StreamingDataHandler();
+
 	}
+
 	
-	
+
 }

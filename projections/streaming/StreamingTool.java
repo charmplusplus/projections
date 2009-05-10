@@ -34,17 +34,16 @@ import projections.gui.graph.XAxisFixed;
 import projections.gui.graph.YAxis;
 import projections.gui.graph.YAxisFixed;
 
-/** A tool that will eventually use CCS to get data from a running parallel Charm++ program. */
-
+/** A tool that uses CCS to get data from a running parallel Charm++ program. */
 public class StreamingTool {
 
+	public StreamingTool(){
+		System.out.println("Streaming Tool");	
+		new StartupDialogBox();
+	}
 	
 	public static void main(String args[]){
-
-		System.out.println("Streaming Tool");
-		
-		new StreamingDataHandler();
-
+		new StreamingTool();
 	}
 
 	

@@ -17,6 +17,7 @@ import javax.swing.JRadioButtonMenuItem;
 import projections.analysis.ProjMain;
 import projections.gui.Timeline.TimelineWindow;
 import projections.gui.LogFileViewer.LogFileViewerWindow;
+import projections.streaming.StreamingTool;
 
 /* ***************************************************
  * MainMenuManager.java
@@ -82,6 +83,7 @@ implements ActionListener, ItemListener
 	private JMenuItem functionToolMenuItem;
 	private JMenuItem AMPIUsageProfileMenuItem;
 	private JMenuItem noiseMinerMenuItem;
+	private JMenuItem streamingMenuItem;
 
 
 	public MainMenuManager(JFrame parent) {
@@ -257,7 +259,8 @@ implements ActionListener, ItemListener
 		functionToolMenuItem = new JMenuItem("Function Tool");
 		AMPIUsageProfileMenuItem = new JMenuItem("AMPI Usage Profile");
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
-
+		streamingMenuItem = new JMenuItem("Streaming CCS Tool");
+		
 		graphMenuItem.addActionListener(this);
 		timelinesMenuItem.addActionListener(this);
 		usageProfileMenuItem.addActionListener(this);
@@ -275,7 +278,7 @@ implements ActionListener, ItemListener
 		functionToolMenuItem.addActionListener(this);
 		AMPIUsageProfileMenuItem.addActionListener(this);
 		noiseMinerMenuItem.addActionListener(this);
-
+		streamingMenuItem.addActionListener(this);
 
 		toolMenu.add(graphMenuItem);
 		toolMenu.add(timelinesMenuItem);
@@ -294,7 +297,8 @@ implements ActionListener, ItemListener
 		toolMenu.add(functionToolMenuItem);
 		toolMenu.add(AMPIUsageProfileMenuItem);
 		toolMenu.add(noiseMinerMenuItem);
-
+		toolMenu.add(streamingMenuItem);
+		
 		menubar.add(toolMenu);
 
 		parent.setJMenuBar(menubar);
@@ -382,6 +386,9 @@ implements ActionListener, ItemListener
 			
 			else if (mi == noiseMinerMenuItem)	
 				parent.openTool(new NoiseMinerWindow(parent) );
+			
+			else if (mi == streamingMenuItem)	
+				new StreamingTool();
 			
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);

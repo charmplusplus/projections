@@ -56,8 +56,8 @@ public class CcsThread implements Runnable {
 	
 	//Initialization just stashes info-- 
 	// real work starts when thread begins running.
-	private String hostName;
-        private int port;
+	private String hostName;	
+	private int port;
 
 	public CcsThread(CcsProgress status_,String hostName_,int port_) {
 		requests=new Stack();

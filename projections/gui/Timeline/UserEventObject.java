@@ -140,10 +140,23 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 		
 		if(data.showUserEvents()){
-			g.setColor(getColor());
+			Color c = getColor();
+			g.setColor(c);
 		
 			g.fillRect(0, 0, getWidth(), getHeight());
 						
+			
+			// Paint the left/right edges of the rectangle lighter/darker to help differentiate between adjacent same-colored objects
+			if(getWidth() > 1)
+			{	
+				g.setColor(c.brighter());
+				g.drawLine(0, 0, 0, getHeight());
+				g.setColor(c.darker());
+				g.drawLine(getWidth()-1, 0, getWidth()-1, getHeight()-1);
+			}
+			
+			
+			
 			// Draw the name of the user event
 			if(getName() != null){
 				int leftpad = 3;

@@ -28,6 +28,8 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		handlerStrings.add("CkPerfSummaryCcsClientCB uchar");
 		handlerStrings.add("CkPerfSumDetail uchar");
 		handlerStrings.add("CkPerfSumDetail compressed");
+		handlerStrings.add("CkPerfSumDetail compressed PE0");
+		
 		handlerComboBox = new JComboBox(handlerStrings);
 		handlerComboBox.setEditable(false);
 		handlerComboBox.setMaximumRowCount(handlerStrings.size());
@@ -97,7 +99,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			System.out.println("port: " + port);	
 			System.out.println("CCS Handler: " + ccsHandler);
 			
-			if(ccsHandler.equals("CkPerfSumDetail uchar") || ccsHandler.equals("CkPerfSumDetail compressed")){
+			if(ccsHandler.equals("CkPerfSumDetail uchar") || ccsHandler.equals("CkPerfSumDetail compressed") || ccsHandler.equals("CkPerfSumDetail compressed PE0")){
 				new MultiSeriesHandler(hostname, port, ccsHandler);
 			} else {
 				new SingleSeriesHandler(hostname, port, ccsHandler);

@@ -42,6 +42,8 @@ public class MultiSeriesHandler {
 	CategoryPlot plot;
 	DefaultCategoryDataset dataset;
 
+	private String chartTitle;
+	
 
 	public static int unsignedByteToInt(byte b) {
 		return (int) b & 0xFF;
@@ -54,8 +56,10 @@ public class MultiSeriesHandler {
 		}
 
 		public void setText(String s) {
-			System.out.println("CCS Message: " + s);
+			//			System.out.println("CCS Message: " + s);
 		}
+
+
 	}
 
 
@@ -70,7 +74,7 @@ public class MultiSeriesHandler {
 		public void handleReply(byte[] data){
 
 			if(data.length>1){
-				
+
 				if(ccsHandler.equals("CkPerfSumDetail uchar")){
 
 					int numData = 0;
@@ -98,7 +102,8 @@ public class MultiSeriesHandler {
 						double average = sums[e]/numBins;
 						double utilization = average / 2.0;
 						if(average > 0.0){
-							dataset.addValue(utilization, ""+e, xvalue );					
+							String stackCategory = ""+e;
+							dataset.addValue(utilization, stackCategory, xvalue );					
 							added = true;
 						}
 					}	
@@ -106,7 +111,7 @@ public class MultiSeriesHandler {
 						nextXValue ++;
 					}
 
-				} else if(ccsHandler.equals("CkPerfSumDetail compressed")) {
+				} else if(ccsHandler.equals("CkPerfSumDetail compressed") || ccsHandler.equals("CkPerfSumDetail compressed PE0")) {
 
 					int numData = 0;
 					double sum = 0.0;
@@ -118,7 +123,7 @@ public class MultiSeriesHandler {
 					for(int e=0;e<numEPs; e++){
 						sums[e] = 0.0;
 					}
-					
+
 					int numBins = 0;
 					int pos = 0;
 					while(pos < data.length-1){
@@ -135,14 +140,15 @@ public class MultiSeriesHandler {
 							// Because we are just averaging all the samples in the ccs message, we can just sum them here.
 							sums[ep] += utilization;
 							utilizationForThisBin += utilization;
+							//							System.out.println("ep="+ep+" utilization="+utilization);
 						}
-//						System.out.println("utilizationForThisBin="+utilizationForThisBin);
+						//						System.out.println("utilizationForThisBin="+utilizationForThisBin);
 					}
 
 					boolean added = false;
 					String xvalue = "" + nextXValue;
 					for(int e=0;e<numEPs; e++){
-						double average = sums[e]/numBins;
+						double average = (double)sums[e]/(double)numBins;
 						double utilization = average / 2.0;
 						if(average > 0.0){
 							dataset.addValue(utilization, ""+e, xvalue );					
@@ -152,18 +158,18 @@ public class MultiSeriesHandler {
 					if(added = true){
 						nextXValue ++;
 					}
-					
+
 				}
 
 				try {
-					Thread.sleep(100);
+					Thread.sleep(2000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
 
 			// Request more data
-			ccs.addRequest(this);
+			ccs.addRequest(this, true);
 		}
 
 
@@ -185,6 +191,15 @@ public class MultiSeriesHandler {
 		progressHandler h = new progressHandler();
 		ccs = new CcsThread(h,this.server,this.port);
 
+
+		if(ccsHandler.equals("CkPerfSumDetail uchar")) {
+			chartTitle = "Utilization Stacked by EP on Processor 0";
+		} else if (ccsHandler.equals("CkPerfSumDetail compressed")) {
+			chartTitle = "Utilization Stacked by EP All Processors";
+		} else if (ccsHandler.equals("CkPerfSumDetail compressed PE0")) {
+			chartTitle = "Utilization Stacked by EP on Processor 0";
+		}
+
 		createPlotInFrameJFreeChart();
 
 		/** Create first request */
@@ -204,9 +219,9 @@ public class MultiSeriesHandler {
 		dataset = new DefaultCategoryDataset();
 
 		JFreeChart chart = ChartFactory.createStackedAreaChart(
-				"Utilization Stacked by EP for Processor 0",      // chart title
-				"CCS Messages",                // domain axis label
-				"Utilization",                   // range axis label
+				chartTitle,
+				"CCS Reply Messages",                // domain axis label
+				"Average Utilization in the CCS request",                   // range axis label
 				dataset,                   // data
 				PlotOrientation.VERTICAL,  // orientation
 				true,                      // include legend
@@ -216,13 +231,14 @@ public class MultiSeriesHandler {
 
 		chart.setBackgroundPaint(Color.white);
 
+
 		plot = (CategoryPlot) chart.getPlot();
 
-	    CategoryAxis domainAxis = plot.getDomainAxis();
-        domainAxis.setLowerMargin(0.0);
-        domainAxis.setUpperMargin(0.0);
-        domainAxis.setCategoryMargin(0.0);
-        
+		CategoryAxis domainAxis = plot.getDomainAxis();
+		domainAxis.setLowerMargin(0.0);
+		domainAxis.setUpperMargin(0.0);
+		domainAxis.setCategoryMargin(0.0);
+
 		// Put the chart in a JPanel that we can use inside our program's GUI
 		ChartPanel chartpanel = new ChartPanel(chart);
 

@@ -26,14 +26,12 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		Vector<String> handlerStrings = new Vector<String>();
 		handlerStrings.add("CkPerfSummaryCcsClientCB");
 		handlerStrings.add("CkPerfSummaryCcsClientCB uchar");
-		handlerStrings.add("CkPerfSumDetail uchar");
 		handlerStrings.add("CkPerfSumDetail compressed");
-		handlerStrings.add("CkPerfSumDetail compressed PE0");
 		
 		handlerComboBox = new JComboBox(handlerStrings);
 		handlerComboBox.setEditable(false);
 		handlerComboBox.setMaximumRowCount(handlerStrings.size());
-		handlerComboBox.setSelectedIndex(3); // nothing selected at first	
+		handlerComboBox.setSelectedIndex(2); // nothing selected at first	
 		handlerRowPane.add(handlerLabel);
 		handlerRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
 		handlerRowPane.add(handlerComboBox);
@@ -99,7 +97,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			System.out.println("port: " + port);	
 			System.out.println("CCS Handler: " + ccsHandler);
 			
-			if(ccsHandler.equals("CkPerfSumDetail uchar") || ccsHandler.equals("CkPerfSumDetail compressed") || ccsHandler.equals("CkPerfSumDetail compressed PE0")){
+			if( ccsHandler.equals("CkPerfSumDetail compressed") ){
 				new MultiSeriesHandler(hostname, port, ccsHandler);
 			} else {
 				new SingleSeriesHandler(hostname, port, ccsHandler);

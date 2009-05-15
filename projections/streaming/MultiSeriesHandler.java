@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.Iterator;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -31,10 +32,6 @@ public class MultiSeriesHandler {
 
 	CcsThread ccs;
 
-	Vector<Float> averageTimes;         
-	Vector<Float> allTimes;
-
-
 	private String server;
 	private int port;
 	private String ccsHandler;
@@ -43,11 +40,6 @@ public class MultiSeriesHandler {
 	DefaultCategoryDataset dataset;
 
 	private String chartTitle;
-	
-
-	public static int unsignedByteToInt(byte b) {
-		return (int) b & 0xFF;
-	}
 
 
 	public class progressHandler implements CcsProgress {
@@ -58,7 +50,6 @@ public class MultiSeriesHandler {
 		public void setText(String s) {
 			//			System.out.println("CCS Message: " + s);
 		}
-
 
 	}
 
@@ -73,98 +64,106 @@ public class MultiSeriesHandler {
 
 		public void handleReply(byte[] data){
 
+			int unnecessaryRequests = 0; // Record how many times we requested something and got back nothing.
+
 			if(data.length>1){
 
-				if(ccsHandler.equals("CkPerfSumDetail uchar")){
+				if(ccsHandler.equals("CkPerfSumDetail compressed")) {
 
 					int numData = 0;
 					double sum = 0.0;
-					System.out.println("Received " + data.length + " byte data array");
+					System.out.println("\"CkPerfSumDetail compressed\" Received " + data.length + " byte data array");
 
-					int numEPs = unsignedByteToInt(data[0]);
-					int numBins = (data.length - 1) / numEPs;
-					System.out.println("Received " + numBins + " bins each with " + numEPs + "EPs");
+					int numEPs = 1000;	
+					int pos = 0;
 
-					double sums[] = new double[numEPs];
-					for(int e=0;e<numEPs; e++){
-						sums[e] = 0.0;
-					}
-
-					for(int i=0; i<numBins; i++){
-						for(int e=0;e<numEPs; e++){
-							sums[e] += unsignedByteToInt(data[1+i*numEPs+e]);						
-						}					
-					}
-
-					boolean added = false;
-					String xvalue = "" + nextXValue;
-					for(int e=0;e<numEPs; e++){
-						double average = sums[e]/numBins;
-						double utilization = average / 2.0;
-						if(average > 0.0){
-							String stackCategory = ""+e;
-							dataset.addValue(utilization, stackCategory, xvalue );					
-							added = true;
-						}
-					}	
-					if(added = true){
-						nextXValue ++;
-					}
-
-				} else if(ccsHandler.equals("CkPerfSumDetail compressed") || ccsHandler.equals("CkPerfSumDetail compressed PE0")) {
-
-					int numData = 0;
-					double sum = 0.0;
-					System.out.println("Received " + data.length + " byte data array");
 
 					// start parsing this array
-					int numEPs = 1024;
-					double sums[] = new double[1024];
-					for(int e=0;e<numEPs; e++){
-						sums[e] = 0.0;
-					}
+					int numBins = ByteParser.bytesToInt(data, pos);
+					pos += 4;
+					System.out.println("Number of bins in message = " + numBins);
 
-					int numBins = 0;
-					int pos = 0;
-					while(pos < data.length-1){
-						numBins ++;
-						int numEpForBin = unsignedByteToInt(data[pos]);
-						pos++;
-						double utilizationForThisBin = 0.0;
-						for(int i=0; i<numEpForBin; i++){
-							int ep = unsignedByteToInt(data[pos]);
-							pos++;
-							int utilization = unsignedByteToInt(data[pos]);
-							pos++;
+					if(numBins < 1){
+						unnecessaryRequests++; // Record how many times we requested something and got back nothing.
+					} else {
 
-							// Because we are just averaging all the samples in the ccs message, we can just sum them here.
-							sums[ep] += utilization;
-							utilizationForThisBin += utilization;
-							//							System.out.println("ep="+ep+" utilization="+utilization);
-						}
-						//						System.out.println("utilizationForThisBin="+utilizationForThisBin);
-					}
+						int numProcs = ByteParser.bytesToInt(data, pos);
+						pos += 4;
+						System.out.println("Number of processors contributing data in message = " + numProcs);
 
-					boolean added = false;
-					String xvalue = "" + nextXValue;
-					for(int e=0;e<numEPs; e++){
-						double average = (double)sums[e]/(double)numBins;
-						double utilization = average / 2.0;
-						if(average > 0.0){
-							dataset.addValue(utilization, ""+e, xvalue );					
-							added = true;
-						}
-					}	
-					if(added = true){
-						nextXValue ++;
-					}
+						int numBinsPerPlotSample = 100;
+						int binsRemaining = numBins;
+						int currentBin = 0;
+						while(binsRemaining>0){
 
+							double sums[] = new double[1024];
+							for(int e=0;e<numEPs; e++){
+								sums[e] = 0.0;
+							}
+							int samplesInThisBin = 0;
+							for(int b=0; b<numBinsPerPlotSample; b++){
+
+								if(pos+4 <= data.length){
+									
+									// Read the number of entries for this bin
+									int numEntries = ByteParser.bytesToShort(data, pos);
+									pos += 2;
+									
+									
+								//	System.out.print("Number of entries in bin " + b + " is " + numEntries + ": ");
+									
+									for(int e=0;e<numEntries;e++){
+										
+										int ep = ByteParser.bytesToShort(data, pos);
+										pos += 2;
+										
+										
+//										float u = ByteParser.bytesToFloat(data, pos);
+//										pos += 4;
+										float u = ByteParser.bytesToUnsignedChar(data, pos);
+										pos += 1;
+
+										
+										u = u / 2.5f; // The range of values supplied for u is 0 to 250.
+										
+//										System.out.print("("+ep+","+u+") ");
+										sums[ep] += u;
+										samplesInThisBin ++;
+									}
+//									System.out.println("");
+
+									binsRemaining--;
+								}
+							}
+
+							boolean added = false;
+							String xvalue = "" + nextXValue;
+							for(int e=0; e<numEPs; e++){
+								double utilization = (double)sums[e]/(double)samplesInThisBin;
+								if(utilization > 0.0){
+									dataset.addValue(utilization, ""+e, xvalue );
+									added = true;
+								}
+							}
+							if(added == true){
+								try {
+									Thread.sleep(50);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+								nextXValue ++;
+							}
+
+						}					}
 				}
 
-				try {
-					Thread.sleep(2000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
+				while(unnecessaryRequests>0){
+					try {
+						Thread.sleep(150);
+						unnecessaryRequests--;
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 
@@ -180,9 +179,6 @@ public class MultiSeriesHandler {
 	MultiSeriesHandler(String hostname, int port, String ccsHandler){
 
 		System.out.println("StreamingDataHandler constructor");
-
-		averageTimes = new Vector<Float>();
-		allTimes = new Vector<Float>();
 
 		this.server = hostname;
 		this.port = port;
@@ -220,8 +216,8 @@ public class MultiSeriesHandler {
 
 		JFreeChart chart = ChartFactory.createStackedAreaChart(
 				chartTitle,
-				"CCS Reply Messages",                // domain axis label
-				"Average Utilization in the CCS request",                   // range axis label
+				"",                // domain axis label
+				"Utilization Averaged Over Some # of Samples",                   // range axis label
 				dataset,                   // data
 				PlotOrientation.VERTICAL,  // orientation
 				true,                      // include legend

@@ -40,41 +40,7 @@ public class SingleSeriesHandler {
 	XYSeries dataSeries;
 	DefaultTableXYDataset dataset;
 	
-	public static double arr2double (byte[] arr, int start) {
-		int i = 0;
-		int len = 8;
-		int cnt = 0;
-		byte[] tmp = new byte[len];
-		for (i = start; i < (start + len); i++) {
-			tmp[cnt] = arr[i];
-			cnt++;
-		}
-		long accum = 0;
-		i = 0;
-		for ( int shiftBy = 0; shiftBy < 64; shiftBy += 8 ) {
-			accum |= ( (long)( tmp[i] & 0xff ) ) << shiftBy;
-			i++;
-		}
-
-		// Swap Endians if needed
-		long b0 = (accum >>  0) & 0xff;
-		long b1 = (accum >>  8) & 0xff;
-		long b2 = (accum >> 16) & 0xff;
-		long b3 = (accum >> 24) & 0xff;
-		long b4 = (accum >> 32) & 0xff;
-		long b5 = (accum >> 40) & 0xff;
-		long b6 = (accum >> 48) & 0xff;
-		long b7 = (accum >> 56) & 0xff;
-
-		long swapped =  b0 << 56 | b1 << 48 | b2 << 40 | b3 << 32 | b4 << 24 | b5 << 16 | b6 <<  8 | b7 ;
-
-		return Double.longBitsToDouble(swapped);
-	}
-
-	public static int unsignedByteToInt(byte b) {
-		return (int) b & 0xFF;
-	}
-
+	
 
 	public class progressHandler implements CcsProgress {
 		public progressHandler(){
@@ -96,14 +62,14 @@ public class SingleSeriesHandler {
 		public void handleReply(byte[] data){
 			int numData = 1;
 			double sum = 0.0;
-			System.out.println("Received " + data.length + " byte data array\n");
+			System.out.println("SingleSeriesHandler Received " + data.length + " byte data array\n");
 			int previousEntries = allTimes.size();
 
 			if(ccsHandler.equals("CkPerfSummaryCcsClientCB")){
 
 				numData = data.length / 8;
 				for(int i=0; i<numData; i++){
-					double v = arr2double (data, 8*i);
+					double v = ByteParser.bytesToDouble(data, 8*i);
 					sum += v;
 					if(v >= 0.0){
 						allTimes.add(new Float(v));
@@ -114,7 +80,7 @@ public class SingleSeriesHandler {
 
 				numData = data.length / 1;
 				for(int i=0; i<numData; i++){
-					Float v = new Float(unsignedByteToInt(data[i]));
+					Float v = new Float(ByteParser.unsignedByteToInt(data[i]));
 
 					// Range of values supplied by this ccs handler is 0 to 200. Convert to percentages.
 					v /= 2.0f;
@@ -145,7 +111,7 @@ public class SingleSeriesHandler {
 
 			}
 
-			float avg = (float) (sum / (float)numData);
+			float avg = (float) (sum / numData);
 
 			if(avg >= 0.0){
 				averageTimes.add(avg);
@@ -213,7 +179,7 @@ public class SingleSeriesHandler {
 					sum += allTimes.elementAt(i+j);
 					count++;
 				}
-				newDataSeries.add(i,sum/(double)count);
+				newDataSeries.add(i,sum/count);
 			}
 
 

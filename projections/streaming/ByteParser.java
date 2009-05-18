@@ -55,12 +55,11 @@ public class ByteParser {
 		return unsignedByteToInt(arr[start]);
 	}
 
-	public static int bytesToShort(byte[] arr, int start) {	
-		int len = 2;		
-		int result = 0;
-		for (int i = 0; i < len; i++) {
+	public static short bytesToShort(byte[] arr, int start) {	
+		int len = 2;	
+		short result = 0;
+		for (int i = 0; i < len; i++)
 			result |= ( (long)( arr[i+start] & 0xff ) ) << (i*8);
-		}
 		return result;
 	}
 

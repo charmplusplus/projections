@@ -25,8 +25,11 @@ import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
+import projections.SamplePlots.MyActionHandler;
+import projections.analysis.StsReader;
 import projections.ccs.CcsProgress;
 import projections.ccs.CcsThread;
+import projections.misc.LogLoadException;
 
 public class MultiSeriesHandler {
 
@@ -38,6 +41,14 @@ public class MultiSeriesHandler {
 
 	CategoryPlot plot;
 	DefaultCategoryDataset dataset;
+
+	StsReader sts;
+
+	/** A dataset that holds the sizes of the received messages */
+	DefaultTableXYDataset sizeDataset;
+	XYSeries sizeDataSeries;
+	XYPlot sizePlot;
+	int numSizesSoFar = 0;
 
 	private String chartTitle;
 
@@ -64,8 +75,6 @@ public class MultiSeriesHandler {
 
 		public void handleReply(byte[] data){
 
-			int unnecessaryRequests = 0; // Record how many times we requested something and got back nothing.
-
 			if(data.length>1){
 
 				if(ccsHandler.equals("CkPerfSumDetail compressed")) {
@@ -76,7 +85,7 @@ public class MultiSeriesHandler {
 
 					int numEPs = 1000;	
 					int pos = 0;
-
+					double totalSum = 0.0;
 
 					// start parsing this array
 					int numBins = ByteParser.bytesToInt(data, pos);
@@ -84,19 +93,21 @@ public class MultiSeriesHandler {
 					System.out.println("Number of bins in message = " + numBins);
 
 					if(numBins < 1){
-						unnecessaryRequests++; // Record how many times we requested something and got back nothing.
+						//						unnecessaryRequests++; // Record how many times we requested something and got back nothing.
 					} else {
+						sizeDataSeries.add(numSizesSoFar++, data.length);
 
 						int numProcs = ByteParser.bytesToInt(data, pos);
 						pos += 4;
 						System.out.println("Number of processors contributing data in message = " + numProcs);
 
-						int numBinsPerPlotSample = 100;
+						int numBinsPerPlotSample = 200;
 						int binsRemaining = numBins;
 						int currentBin = 0;
 						while(binsRemaining>0){
 
 							double sums[] = new double[1024];
+							double otherUtilization = 0.0;
 							for(int e=0;e<numEPs; e++){
 								sums[e] = 0.0;
 							}
@@ -104,34 +115,38 @@ public class MultiSeriesHandler {
 							for(int b=0; b<numBinsPerPlotSample; b++){
 
 								if(pos+4 <= data.length){
-									
+
 									// Read the number of entries for this bin
 									int numEntries = ByteParser.bytesToShort(data, pos);
 									pos += 2;
-									
-									
-								//	System.out.print("Number of entries in bin " + b + " is " + numEntries + ": ");
-									
+
+
+									//	System.out.print("Number of entries in bin " + b + " is " + numEntries + ": ");
+
 									for(int e=0;e<numEntries;e++){
-										
+
 										int ep = ByteParser.bytesToShort(data, pos);
 										pos += 2;
-										
-										
-//										float u = ByteParser.bytesToFloat(data, pos);
-//										pos += 4;
+
 										float u = ByteParser.bytesToUnsignedChar(data, pos);
 										pos += 1;
 
-										
-										u = u / 2.5f; // The range of values supplied for u is 0 to 250.
-										
-//										System.out.print("("+ep+","+u+") ");
-										sums[ep] += u;
-										samplesInThisBin ++;
-									}
-//									System.out.println("");
 
+										u = u / 2.5f; // The range of values supplied for u is 0 to 250.
+
+										totalSum += u;
+
+										if(ep >= 0 && ep < sums.length){
+											// Normal EP values
+											sums[ep] += u;
+										} else {
+											// Other category
+											otherUtilization += u;
+										}
+
+									}
+									
+									samplesInThisBin ++;
 									binsRemaining--;
 								}
 							}
@@ -141,29 +156,50 @@ public class MultiSeriesHandler {
 							for(int e=0; e<numEPs; e++){
 								double utilization = (double)sums[e]/(double)samplesInThisBin;
 								if(utilization > 0.0){
-									dataset.addValue(utilization, ""+e, xvalue );
+									String epName = sts.getEntryNameByID(e);
+									
+							        int p = epName.indexOf('('); // first occurrence of a '(' in the string
+							        epName = epName.substring(0, p);
+							        
+									System.out.println("name for " + e + " is " + epName);
+									if(epName != null)
+										dataset.addValue(utilization, epName, xvalue );
+									else
+										dataset.addValue(utilization, ""+e, xvalue );
+
 									added = true;
 								}
 							}
+							// Add an other category as well
+							double utilization = otherUtilization/(double)samplesInThisBin;
+							if(utilization > 0.0){
+								dataset.addValue(utilization, "Other", xvalue );
+								System.out.println("Adding other with utilization " + utilization + " and samplesInThisBin=" + samplesInThisBin);
+								added = true;
+							}
+
+
+
+
+							// advance to next x axis point
 							if(added == true){
-								try {
-									Thread.sleep(50);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
 								nextXValue ++;
 							}
 
-						}					}
+						}
+
+						double avg = totalSum/numBins;
+						System.out.println("Average Utilization=" + avg);
+
+					}
+
+
 				}
 
-				while(unnecessaryRequests>0){
-					try {
-						Thread.sleep(150);
-						unnecessaryRequests--;
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 
@@ -188,6 +224,17 @@ public class MultiSeriesHandler {
 		ccs = new CcsThread(h,this.server,this.port);
 
 
+		// try to load sts file
+		String filename = "/tmp/jacobi2d.sts";
+
+		try {
+			sts = new StsReader(filename);
+		} catch (LogLoadException e) {
+			System.out.println("Couldn't load sts file with name " + filename);
+		}
+
+
+
 		if(ccsHandler.equals("CkPerfSumDetail uchar")) {
 			chartTitle = "Utilization Stacked by EP on Processor 0";
 		} else if (ccsHandler.equals("CkPerfSumDetail compressed")) {
@@ -196,7 +243,8 @@ public class MultiSeriesHandler {
 			chartTitle = "Utilization Stacked by EP on Processor 0";
 		}
 
-		createPlotInFrameJFreeChart();
+		createStackedUtilizationChart();
+		createMessageSizeChart();
 
 		/** Create first request */
 		ccs.addRequest(new dataRequest());
@@ -210,7 +258,7 @@ public class MultiSeriesHandler {
 
 
 	/** Create a window with a simple plot in it. Uses the publicly available jfreechart package. */
-	public void createPlotInFrameJFreeChart(){
+	public void createStackedUtilizationChart(){
 
 		dataset = new DefaultCategoryDataset();
 
@@ -234,6 +282,8 @@ public class MultiSeriesHandler {
 		domainAxis.setLowerMargin(0.0);
 		domainAxis.setUpperMargin(0.0);
 		domainAxis.setCategoryMargin(0.0);
+		domainAxis.setAxisLineVisible(false);
+		domainAxis.setTickLabelsVisible(false);
 
 		// Put the chart in a JPanel that we can use inside our program's GUI
 		ChartPanel chartpanel = new ChartPanel(chart);
@@ -246,9 +296,55 @@ public class MultiSeriesHandler {
 
 		// Display the window	
 		window.pack();
+		window.setLocation(20,30);
 		window.setVisible(true);
 	}
 
 
+	/** Create a window with a simple plot in it. Uses the publicly available jfreechart package. */
+	public void createMessageSizeChart(){
+
+		sizeDataSeries = new XYSeries("CCS Reply Message Sizes", true, false);
+
+		// Create a dataset
+		DefaultTableXYDataset dataset = new DefaultTableXYDataset();
+		dataset.addSeries(sizeDataSeries);
+
+		// Create axis labels
+		NumberAxis domainAxis = new NumberAxis("CCS Non-Empty Reply Message");
+		domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());       
+		domainAxis.setAutoRange(true);
+		domainAxis.setAutoRangeIncludesZero(false);
+		NumberAxis rangeAxis = new NumberAxis("Size (Bytes)");
+		rangeAxis.setAutoRangeIncludesZero(false);
+
+		// Create renderer
+		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
+
+		// Create the plot, using the renderer and the dataset and the axis
+		XYPlot plot = new XYPlot(dataset, domainAxis, rangeAxis, renderer);
+
+		// Create a chart using the plot
+		JFreeChart chart = new JFreeChart("CCS Reply Message Sizes", plot);
+
+		// Put the chart in a JPanel that we can use inside our program's GUI
+		ChartPanel chartpanel = new ChartPanel(chart);
+
+		chart.setAntiAlias(true);
+		chart.setBackgroundPaint(Color.white);
+		chart.removeLegend();
+
+		// Put the chartpanel in a new window(JFrame)
+		JFrame window = new JFrame("Message Sizes");
+		window.setLayout(new BorderLayout());
+		window.add(chartpanel, BorderLayout.CENTER);
+
+
+		// Display the window	
+		window.pack();
+		window.setLocation(20,500);
+		window.setVisible(true);
+
+	}
 
 }

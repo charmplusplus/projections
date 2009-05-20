@@ -1,5 +1,12 @@
 package projections.streaming;
 
+
+
+
+
+
+
+/** This class should probably not exist. There is functionality in DataInputStream.java that is very similar to this */
 public class ByteParser {
 
 	public static int bytesToInt (byte[] arr, int start) {

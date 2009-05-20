@@ -15,6 +15,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 	JButton connectButton;
 	JTextField portTextField;
 	JTextField hostnameTextField;
+	JTextField stsFilenameTextField;
 	JComboBox handlerComboBox;
 	
 	StartupDialogBox(){
@@ -44,6 +45,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		hostnameRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
 		hostnameRowPane.add(hostnameTextField);
 
+		
 		JPanel portRowPane = new JPanel();
 		portRowPane.setLayout(new BoxLayout(portRowPane, BoxLayout.LINE_AXIS));
 		JLabel portLabel = new JLabel("CCS Port Number:");
@@ -52,6 +54,14 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		portRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
 		portRowPane.add(portTextField);
 
+		
+		JPanel stsFilenameRowPane = new JPanel();	
+		stsFilenameRowPane.setLayout(new BoxLayout(stsFilenameRowPane, BoxLayout.LINE_AXIS));
+		JLabel stsFilenameLabel = new JLabel("STS File containing Entry Point Names:");
+		stsFilenameTextField = new JTextField("");
+		stsFilenameRowPane.add(stsFilenameLabel);
+		stsFilenameRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		stsFilenameRowPane.add(stsFilenameTextField);
 		
 		
 		JPanel buttonRowPane = new JPanel();
@@ -74,6 +84,8 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		listPane.add(hostnameRowPane);
 		listPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		listPane.add(portRowPane);
+		listPane.add(Box.createRigidArea(new Dimension(0, 5)));
+		listPane.add(stsFilenameRowPane);
 		listPane.add(Box.createRigidArea(new Dimension(0, 20)));
 		listPane.add(buttonRowPane);
 
@@ -89,6 +101,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			
 			String hostname = hostnameTextField.getText();	
 			String portString = portTextField.getText();
+			String stsFilename = stsFilenameTextField.getText();
 			int port = new Integer(portString);
 			String ccsHandler = (String) handlerComboBox.getSelectedItem();
 			
@@ -98,7 +111,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			System.out.println("CCS Handler: " + ccsHandler);
 			
 			if( ccsHandler.equals("CkPerfSumDetail compressed") ){
-				new MultiSeriesHandler(hostname, port, ccsHandler);
+				new MultiSeriesHandler(hostname, port, ccsHandler, stsFilename);
 			} else {
 				new SingleSeriesHandler(hostname, port, ccsHandler);
 			}

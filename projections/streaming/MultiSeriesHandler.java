@@ -212,7 +212,7 @@ public class MultiSeriesHandler {
 
 
 	/** Constructor */	
-	MultiSeriesHandler(String hostname, int port, String ccsHandler){
+	MultiSeriesHandler(String hostname, int port, String ccsHandler, String filename){
 
 		System.out.println("StreamingDataHandler constructor");
 
@@ -223,9 +223,6 @@ public class MultiSeriesHandler {
 		progressHandler h = new progressHandler();
 		ccs = new CcsThread(h,this.server,this.port);
 
-
-		// try to load sts file
-		String filename = "/tmp/jacobi2d.sts";
 
 		try {
 			sts = new StsReader(filename);

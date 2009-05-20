@@ -66,15 +66,15 @@ public class SingleSeriesHandler {
 			int previousEntries = allTimes.size();
 
 			if(ccsHandler.equals("CkPerfSummaryCcsClientCB")){
-
-				numData = data.length / 8;
-				for(int i=0; i<numData; i++){
-					double v = ByteParser.bytesToDouble(data, 8*i);
-					sum += v;
-					if(v >= 0.0){
-						allTimes.add(new Float(v));
-					}
-				}
+//
+//				numData = data.length / 8;
+//				for(int i=0; i<numData; i++){
+//					double v = ByteParser.bytesToDouble(data, 8*i);
+//					sum += v;
+//					if(v >= 0.0){
+//						allTimes.add(new Float(v));
+//					}
+//				}
 
 			} else if(ccsHandler.equals("CkPerfSummaryCcsClientCB uchar")){
 

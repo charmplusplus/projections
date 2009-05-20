@@ -111,7 +111,7 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			System.out.println("CCS Handler: " + ccsHandler);
 			
 			if( ccsHandler.equals("CkPerfSumDetail compressed") ){
-				new MultiSeriesHandler(hostname, port, ccsHandler, stsFilename);
+				new MultiSeriesHandler(hostname, port, ccsHandler, stsFilename, false, false);
 			} else {
 				new SingleSeriesHandler(hostname, port, ccsHandler);
 			}

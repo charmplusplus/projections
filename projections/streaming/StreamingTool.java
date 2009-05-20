@@ -10,8 +10,7 @@ public class StreamingTool {
 
 	public static void main(String args[]){
 //		new MultiSeriesHandler("order.cs.uiuc.edu", 1234, "CkPerfSumDetail compressed", "/tmp/useWithCCSStreamingTool.sts");
-		new MultiSeriesHandler("localhost", 1234, "CkPerfSumDetail compressed", "/tmp/useWithCCSStreamingTool.sts");
-
+		new MultiSeriesHandler("localhost", 1234, "CkPerfSumDetail compressed", "/tmp/useWithCCSStreamingTool.sts", false, true);
 	}
 
 } 

@@ -8,6 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.TreeMap;
+import java.util.Vector;
 
 import javax.swing.JFrame;
 
@@ -19,6 +24,7 @@ import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.xy.DefaultTableXYDataset;
@@ -33,13 +39,11 @@ public class MultiSeriesHandler {
 
 	private CcsThread ccs;
 	private String ccsHandler;
-
-	private CategoryPlot plot;
-	private DefaultCategoryDataset dataset;
-
-	private boolean saveRepliesToFile = false;
-	private boolean loadRepliesFromFile = true;
 	
+	
+	private boolean saveRepliesToFile = false;
+	private boolean loadRepliesFromFile = false;
+
 	private FileOutputStream savedRepliesFileStream = null;
 	private ObjectOutputStream savedRepliesObjectOutStream;
 	private FileInputStream savedRepliesFileInputStream = null;
@@ -48,11 +52,30 @@ public class MultiSeriesHandler {
 
 	private StsReader sts;
 
-	/** A dataset that holds the sizes of the received messages */
+	/** A chart holds the sizes of the received messages */
 	DefaultTableXYDataset sizeDataset;
 	XYSeries sizeDataSeries;
 	XYPlot sizePlot;
 	int numSizesSoFar = 0;
+
+
+	/** A chart holding the scrolling stacked utilization  */
+	private JFreeChart scrollingChart;
+	private CategoryPlot scrollingPlot;
+
+
+	/** A chart holding the detailed utilization */
+	private JFreeChart detailedChart;
+	private CategoryPlot detailedPlot;
+
+
+	/** Store the portion of the dataset that is to be plotted */
+	TreeMap<Integer, TreeMap<String, Double> > streamingData;
+	ArrayList<String> categories;
+	Vector<byte[]> detailedData;
+
+	private int updateCount = 0;
+
 
 	private String chartTitle;
 
@@ -61,54 +84,60 @@ public class MultiSeriesHandler {
 
 	/** Constructor */	
 	MultiSeriesHandler(String hostname, int port, String ccsHandler, String filename, boolean saveRepliesToFile, boolean loadRepliesFromFile){
-	
+
+		streamingData = new TreeMap<Integer, TreeMap<String, Double> >();
+		categories = new ArrayList<String>();
+		detailedData = new Vector<byte[]>();
+
+
 		System.out.println("StreamingDataHandler constructor");
-	
+
 		this.saveRepliesToFile = saveRepliesToFile;
 		this.loadRepliesFromFile = loadRepliesFromFile;
-	
+
 		try {
 			sts = new StsReader(filename);
 		} catch (LogLoadException e) {
 			System.out.println("Couldn't load sts file with name " + filename);
 		}
-	
+
 		this.ccsHandler = ccsHandler;
-	
+
 		if(ccsHandler.equals("CkPerfSumDetail uchar")) {
 			chartTitle = "Utilization Stacked by EP on Processor 0";
 		} else if (ccsHandler.equals("CkPerfSumDetail compressed")) {
-			chartTitle = "Utilization Stacked by EP All Processors";
+			chartTitle = "Utilization Stacked by EP";
 		} else if (ccsHandler.equals("CkPerfSumDetail compressed PE0")) {
 			chartTitle = "Utilization Stacked by EP on Processor 0";
 		}
-	
+
+
 		createStackedUtilizationChart();
+		createDetailedUtilizationChart();
 		createMessageSizeChart();
-	
-	
+
 		if(loadRepliesFromFile){
+			System.out.println("Using previously saved data instead of CCS connection\n");
 			ReadDataFromFileDriver d = new ReadDataFromFileDriver();
-			d.driver();
+			d.run();
 		} else {
-	
-	
+			System.out.println("Using CCS to connect\n");
 			progressHandler h = new progressHandler();
 			ccs = new CcsThread(h,hostname,port);
-	
+
 			/** Create first request */
 			ccs.addRequest(new dataRequest());
-	
+
 		}
-	
+
 	}
 
 
 
 	/** A driver routine that pulls previously stored CCS replies from a file and feeds them to the plotting routines */
-	public class ReadDataFromFileDriver {
+	public class ReadDataFromFileDriver implements Runnable {
 
-		public void driver(){
+		private void driver(){
 			if(loadRepliesFromFile){
 				// open file
 				try {
@@ -130,6 +159,7 @@ public class MultiSeriesHandler {
 
 						if(data instanceof byte[] ){
 							processIncomingData((byte[]) data);
+							//							Thread.sleep(800);
 						} else {
 							System.err.println("Read incorrect type of object from file");								
 						}
@@ -140,6 +170,10 @@ public class MultiSeriesHandler {
 
 			}
 
+		}
+
+		public void run() {
+			driver();
 		}
 
 	}
@@ -159,8 +193,10 @@ public class MultiSeriesHandler {
 			super(ccsHandler,0);
 		}
 
-		/** handler incoming CCS responses, possibly saving the resuls for replaing later */
+		/** handler incoming CCS responses, possibly saving the results for replaying later */
 		public void handleReply(byte[] data){
+
+			System.out.println("handleReply(data.length="+data.length+")");
 
 			if(saveRepliesToFile){
 				// create a new file
@@ -185,41 +221,39 @@ public class MultiSeriesHandler {
 					e.printStackTrace();
 				}
 
+			} else {
+				//				System.out.println("before processIncomingData()");
+				processIncomingData(data);
+				//				System.out.println("after processIncomingData()");
 			}
 
-			processIncomingData(data);
+
+
+			updatePlots();
 
 			try {
-				Thread.sleep(100);
+				Thread.sleep(900);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 
 			// Request more data
+			//			System.out.println("Adding CCS request: " + ccs);
 			ccs.addRequest(this, true);
 		}
 	}
 
 
 
-
-
-
-	/** Generate the plot that will now be displayed */
-	public void updatePlot(){
-
-	}
-
-
 	/** Create a window with the stacked utilization plot in it. Uses the jfreechart package. */
-	public void createStackedUtilizationChart(){
+	public void createDetailedUtilizationChart(){
 
-		dataset = new DefaultCategoryDataset();
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
-		JFreeChart chart = ChartFactory.createStackedAreaChart(
+		detailedChart = ChartFactory.createStackedAreaChart(
 				chartTitle,
 				"",                // domain axis label
-				"Utilization Averaged Over Some # of Samples",                   // range axis label
+				"Percent Utilization",                   // range axis label
 				dataset,                   // data
 				PlotOrientation.VERTICAL,  // orientation
 				true,                      // include legend
@@ -227,12 +261,13 @@ public class MultiSeriesHandler {
 				false
 		);
 
-		chart.setBackgroundPaint(Color.white);
+		detailedChart.setBackgroundPaint(Color.white);
 
+		detailedPlot = (CategoryPlot) detailedChart.getPlot();
 
-		plot = (CategoryPlot) chart.getPlot();
+		//		CategoryItemRenderer renderer = plot.getRenderer();
 
-		CategoryAxis domainAxis = plot.getDomainAxis();
+		CategoryAxis domainAxis = detailedPlot.getDomainAxis();
 		domainAxis.setLowerMargin(0.0);
 		domainAxis.setUpperMargin(0.0);
 		domainAxis.setCategoryMargin(0.0);
@@ -240,7 +275,52 @@ public class MultiSeriesHandler {
 		domainAxis.setTickLabelsVisible(false);
 
 		// Put the chart in a JPanel that we can use inside our program's GUI
-		ChartPanel chartpanel = new ChartPanel(chart);
+		ChartPanel chartpanel = new ChartPanel(detailedChart);
+
+		// Put the chartpanel in a new window(JFrame)
+		JFrame window = new JFrame("Detailed Utilization Plot");
+		window.setLayout(new BorderLayout());
+		window.add(chartpanel, BorderLayout.CENTER);
+
+		// Display the window	
+		window.pack();
+		window.setLocation(500,500);
+		window.setVisible(true);
+	}
+
+
+
+	/** Create a window with the stacked utilization plot in it. Uses the jfreechart package. */
+	public void createStackedUtilizationChart(){
+
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+
+		scrollingChart = ChartFactory.createStackedAreaChart(
+				chartTitle,
+				"",                // domain axis label
+				"Percent Utilization",                   // range axis label
+				dataset,                   // data
+				PlotOrientation.VERTICAL,  // orientation
+				true,                      // include legend
+				true,
+				false
+		);
+
+		scrollingChart.setBackgroundPaint(Color.white);
+
+		scrollingPlot = (CategoryPlot) scrollingChart.getPlot();
+
+		//		CategoryItemRenderer renderer = plot.getRenderer();
+
+		CategoryAxis domainAxis = scrollingPlot.getDomainAxis();
+		domainAxis.setLowerMargin(0.0);
+		domainAxis.setUpperMargin(0.0);
+		domainAxis.setCategoryMargin(0.0);
+		domainAxis.setAxisLineVisible(false);
+		domainAxis.setTickLabelsVisible(false);
+
+		// Put the chart in a JPanel that we can use inside our program's GUI
+		ChartPanel chartpanel = new ChartPanel(scrollingChart);
 
 		// Put the chartpanel in a new window(JFrame)
 		JFrame window = new JFrame("Streaming Utilization Plot");
@@ -302,11 +382,185 @@ public class MultiSeriesHandler {
 	}
 
 
+	/** add a data point to the plot. updatePlot needs to be called after this */
+	void addDataPointToPlot(Double utilization, String epName, Integer nextXValue){
+		if(!categories.contains(epName)){
+			categories.add(epName);
+		}
+
+		if(streamingData.containsKey(nextXValue)){
+			TreeMap<String, Double> record = streamingData.get(nextXValue);
+			record.put(epName, utilization);
+		} else {
+			TreeMap<String, Double> record = new TreeMap();
+			record.put(epName, utilization);
+			streamingData.put(nextXValue, record);
+		}
+
+		// Remove old entries if we have too much data
+		if(streamingData.size() > 100){
+			Integer firstKey = streamingData.firstKey();
+			streamingData.remove(firstKey);
+		}
+
+	}
+
+
+
+
+
+
+
+	/** Update all the plots */		
+	void updatePlots(){
+		updateStreamingPlot();
+		updateCount ++;
+		if(updateCount % 20 == 0){
+			updateDetailedPlot();
+		}
+	}
+
+
+	void addKnownCategories(Integer xValue, DefaultCategoryDataset dataset){
+		dataset.addValue(0.0, "Other", xValue);
+		Iterator<String> categoryIter = categories.iterator();
+		while(categoryIter.hasNext()){
+			String c = categoryIter.next();
+			if(! c.equals("Other")){
+				dataset.addValue(0.0, c, xValue);
+			}
+		}
+	}
+
+
+	String getName(int ep, int numEPs){
+		String epName;
+		if(ep >= 0 && ep < numEPs){
+			if(sts == null){
+				return "" + ep;
+			} else {
+				epName = sts.getEntryNameByID(ep);
+				int p = epName.indexOf('('); // first occurrence of a '(' in the string
+				if(p>0){
+					epName = epName.substring(0, p);
+				}
+			}	
+		} else {
+			epName = "Other";
+		}
+		return epName;
+	}
+
+
+	void updateDetailedPlot(){
+
+		DefaultCategoryDataset newDataset = new DefaultCategoryDataset();
+
+		boolean firstTime = true;
+
+		if(detailedData.size() < 1)
+			return;
+
+		byte[] data = detailedData.lastElement();		
+
+		if(data.length<=1)
+			return;
+
+		System.out.println("Creating detailed plot for data in " + data.length + " byte array");
+
+		int pos = 0;
+
+		// start parsing this array
+		int numBins = ByteParser.bytesToInt(data, pos);
+		pos += 4;
+		System.out.println("detailed plot Number of bins in message = " + numBins);
+
+		if(numBins < 1)
+			return;
+
+		int numProcs = ByteParser.bytesToInt(data, pos);
+		pos += 4;
+		System.out.println("detailed plot Number of processors contributing data in message = " + numProcs);
+
+		int numBinsPerPlotSample = 100;
+		int currentBin = 0;
+		for(int b=0; b<numBins && b<250; b++){
+			if(pos+2>data.length)
+				return;
+
+			if(b==0)
+				addKnownCategories(new Integer(b), newDataset);
+
+
+			// Read the number of entries for this bin
+			int numEntries = ByteParser.bytesToShort(data, pos);
+			pos += 2;
+
+			for(int e=0;e<numEntries;e++){
+
+				int ep = ByteParser.bytesToShort(data, pos);
+				pos += 2;
+
+				float u = ByteParser.bytesToUnsignedChar(data, pos);
+				pos += 1;
+
+
+				u = u / 2.5f; // The range of values supplied for u is 0 to 250.
+
+				if(u > 0.0){
+					// add datapoint to plot
+					String epName = getName(ep,1000);
+					newDataset.addValue(u, epName, new Integer(b));
+				}
+
+			}
+		}
+		detailedPlot.setDataset(newDataset);
+	}
+
+
+	/** replace the streaming chart with a new updated version */
+	void updateStreamingPlot(){
+
+		DefaultCategoryDataset newDataset = new DefaultCategoryDataset();
+
+		//		TreeMap<Integer, TreeMap<String, Double> > plotData;
+
+		Iterator<Integer> stepIter = streamingData.keySet().iterator();
+		Integer xValue = new Integer(0);
+
+		boolean firstTime = true;
+
+		while(stepIter.hasNext()){
+			xValue = stepIter.next();
+
+			// Add all the known categories so that the colors do not change from previous times
+			if(firstTime){
+				addKnownCategories(xValue, newDataset);
+			}
+
+			TreeMap<String, Double> map = streamingData.get(xValue);
+			Iterator<String> entryIter = map.keySet().iterator();
+			while(entryIter.hasNext()){
+				String entryName = entryIter.next();
+				Double utilization = map.get(entryName);
+				newDataset.addValue(utilization, entryName, xValue);
+			}
+		}
+
+		// Add all entry name categories to the chart with 0 values;
+
+		//		System.out.println("categories sizes=" + categories.size());
+
+		scrollingPlot.setDataset(newDataset);
+	}
+
 
 	/** Deserialize the incoming CCS reply message and plot it */
 	void processIncomingData(byte[] data) {
-		System.out.println("processIncomingData(byte[] data) data.length=" + data.length);
-		
+		//		System.out.println("processIncomingData(byte[] data) data.length=" + data.length);
+		detailedData.add(data);
+
 		if(data.length>1){
 
 			if(ccsHandler.equals("CkPerfSumDetail compressed")) {
@@ -333,10 +587,11 @@ public class MultiSeriesHandler {
 					pos += 4;
 					System.out.println("Number of processors contributing data in message = " + numProcs);
 
-					int numBinsPerPlotSample = 200;
+					int numBinsPerPlotSample = 100;
 					int binsRemaining = numBins;
 					int currentBin = 0;
 					while(binsRemaining>0){
+						//						System.out.println("binsRemaining = " + binsRemaining);
 
 						double sums[] = new double[1024];
 						double otherUtilization = 0.0;
@@ -346,7 +601,7 @@ public class MultiSeriesHandler {
 						int samplesInThisBin = 0;
 						for(int b=0; b<numBinsPerPlotSample; b++){
 
-							if(pos+4 <= data.length){
+							if(pos+2 <= data.length){
 
 								// Read the number of entries for this bin
 								int numEntries = ByteParser.bytesToShort(data, pos);
@@ -384,7 +639,6 @@ public class MultiSeriesHandler {
 						}
 
 						boolean added = false;
-						String xvalue = "" + nextXValue;
 						for(int e=0; e<numEPs; e++){
 							double utilization = (double)sums[e]/(double)samplesInThisBin;
 							if(utilization > 0.0){
@@ -392,40 +646,53 @@ public class MultiSeriesHandler {
 								if(sts != null){
 									epName = sts.getEntryNameByID(e);
 									int p = epName.indexOf('('); // first occurrence of a '(' in the string
-									epName = epName.substring(0, p);
+									if(p>0){
+										epName = epName.substring(0, p);
+									}
 								}
 
 								//								System.out.println("name for " + e + " is " + epName);
 								if(epName != null)
-									dataset.addValue(utilization, epName, xvalue );
+									addDataPointToPlot(utilization, epName, nextXValue);
 								else
-									dataset.addValue(utilization, ""+e, xvalue );
+									addDataPointToPlot(utilization, ""+e, nextXValue);
+
 
 								added = true;
 							}
 						}
+
 						// Add an other category as well
 						double utilization = otherUtilization/(double)samplesInThisBin;
 						if(utilization > 0.0){
-							dataset.addValue(utilization, "Other", xvalue );
-							System.out.println("Adding other with utilization " + utilization + " and samplesInThisBin=" + samplesInThisBin);
+							addDataPointToPlot(utilization, "Other", nextXValue);
+							//							System.out.println("Adding other with utilization " + utilization + " and samplesInThisBin=" + samplesInThisBin);
 							added = true;
 						}
-
-
-
 
 						// advance to next x axis point
 						if(added == true){
 							nextXValue ++;
+
+							updatePlots();
+							try {
+								Thread.sleep(20);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+
 						}
+
+
 
 					}
 
 					double avg = totalSum/numBins;
-					System.out.println("Average Utilization=" + avg);
+					//					System.out.println("Average Utilization=" + avg);
 
 				}
+
+
 			}
 		}
 	}

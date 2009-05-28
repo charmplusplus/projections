@@ -3,13 +3,15 @@ package projections.streaming;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Vector;
 
 import javax.swing.*;
 
 
 @SuppressWarnings("serial")
-public class StartupDialogBox extends JFrame implements ActionListener {
+public class StartupDialogBox extends JFrame implements ActionListener, ItemListener {
 
 	JFrame dialogBox;
 	JButton connectButton;
@@ -17,6 +19,8 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 	JTextField hostnameTextField;
 	JTextField stsFilenameTextField;
 	JComboBox handlerComboBox;
+	JCheckBox saveRepliesCheckBox;
+	JCheckBox loadRepliesCheckBox;
 	
 	StartupDialogBox(){
 		dialogBox = new JFrame();
@@ -58,10 +62,32 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		JPanel stsFilenameRowPane = new JPanel();	
 		stsFilenameRowPane.setLayout(new BoxLayout(stsFilenameRowPane, BoxLayout.LINE_AXIS));
 		JLabel stsFilenameLabel = new JLabel("STS File containing Entry Point Names:");
-		stsFilenameTextField = new JTextField("");
+		stsFilenameTextField = new JTextField("/tmp/namd2.sts");
 		stsFilenameRowPane.add(stsFilenameLabel);
 		stsFilenameRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
 		stsFilenameRowPane.add(stsFilenameTextField);
+		
+		
+		
+
+		JPanel saveLoadRowPane = new JPanel();	
+		saveLoadRowPane.setLayout(new BoxLayout(saveLoadRowPane, BoxLayout.LINE_AXIS));
+		JLabel saveToFileLabel = new JLabel("Save CCS Replies To File:");
+		JLabel loadFromFileLabel = new JLabel("Load CCS Replies From File:");
+		saveRepliesCheckBox = new JCheckBox();
+		loadRepliesCheckBox = new JCheckBox();		
+		
+		saveRepliesCheckBox.addItemListener(this);
+		loadRepliesCheckBox.addItemListener(this);
+		
+		saveLoadRowPane.add(saveToFileLabel);
+		saveLoadRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		saveLoadRowPane.add(saveRepliesCheckBox);
+		saveLoadRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		saveLoadRowPane.add(loadFromFileLabel);
+		saveLoadRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
+		saveLoadRowPane.add(loadRepliesCheckBox);
+		saveLoadRowPane.add(Box.createRigidArea(new Dimension(10, 0)));
 		
 		
 		JPanel buttonRowPane = new JPanel();
@@ -86,6 +112,8 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 		listPane.add(portRowPane);
 		listPane.add(Box.createRigidArea(new Dimension(0, 5)));
 		listPane.add(stsFilenameRowPane);
+		listPane.add(Box.createRigidArea(new Dimension(0, 5)));
+		listPane.add(saveLoadRowPane);		
 		listPane.add(Box.createRigidArea(new Dimension(0, 20)));
 		listPane.add(buttonRowPane);
 
@@ -104,6 +132,10 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			String stsFilename = stsFilenameTextField.getText();
 			int port = new Integer(portString);
 			String ccsHandler = (String) handlerComboBox.getSelectedItem();
+
+			boolean saveReplies = saveRepliesCheckBox.isSelected();
+			boolean loadReplies = loadRepliesCheckBox.isSelected();
+			
 			
 			System.out.println("User supplied the following connection information:");
 			System.out.println("hostname: " + hostname);	
@@ -111,13 +143,25 @@ public class StartupDialogBox extends JFrame implements ActionListener {
 			System.out.println("CCS Handler: " + ccsHandler);
 			
 			if( ccsHandler.equals("CkPerfSumDetail compressed") ){
-				new MultiSeriesHandler(hostname, port, ccsHandler, stsFilename, false, false);
+				new MultiSeriesHandler(hostname, port, ccsHandler, stsFilename, saveReplies, loadReplies);
 			} else {
 				new SingleSeriesHandler(hostname, port, ccsHandler);
 			}
 			// close window
 			this.setVisible(false);
 			this.dispose();
+		}
+	}
+
+	public void itemStateChanged(ItemEvent e) {
+		if(e.getSource() == saveRepliesCheckBox){
+			if(saveRepliesCheckBox.isSelected()){
+				loadRepliesCheckBox.setSelected(false);
+			}
+		} else if(e.getSource() == loadRepliesCheckBox){
+			if(loadRepliesCheckBox.isSelected()){
+				saveRepliesCheckBox.setSelected(false);
+			}
 		}
 	}
 	

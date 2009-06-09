@@ -48,19 +48,14 @@ public class MainPanelForeground extends JPanel {
 					if(obj.creationMessage() != null){
 						int pCreation = obj.pCreation;
 						int pExecution = obj.pCurrent;
-						// Find the index for the PEs in the list of displayed PEs
-//						int startpe_index=data.whichTimelineVerticalPosition(pCreation);
-//						int endpe_index=data.whichTimelineVerticalPosition(pExecution);
-						
-//						data.dumpPEOrder();
 						
 						// Message Creation point
-						int x1 = data.timeToScreenPixelLeft(obj.creationMessage().Time, getWidth());			
+						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
 						double y1 = data.messageSendLocationY(pCreation);
 						// Message executed (entry method starts) 
-						int x2 =  data.timeToScreenPixel(obj.getBeginTime(), getWidth());
+						int x2 =  data.timeToScreenPixel(obj.getBeginTime());
 						double y2 = data.messageRecvLocationY(pExecution);
-						// I like painting a line :)
+
 						g.drawLine(x1,(int)y1,x2,(int)y2);
 					}
 				}

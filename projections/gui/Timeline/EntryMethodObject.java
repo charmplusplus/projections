@@ -789,10 +789,10 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
 				{
 					// Compute the pixel coordinate relative to the containing panel
-					int msgPanelCoordX = data.timeToScreenPixelLeft(msgtime);
+					int msgPanelCoordX = data.timeToScreenPixel(msgtime);
 
 					// Compute the pixel coordinate relative to the Entry method object itself
-					int msgObjectCoordX = msgPanelCoordX  - leftCoord - 1;
+					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
 
 					g.drawLine(msgObjectCoordX, verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
 

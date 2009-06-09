@@ -982,17 +982,8 @@ public class Data
 		return Math.round(beginTime + fractionAlongAxis*(endTime-beginTime));	
 	}
 
-//	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
-//	 * 
-//	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
-//	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
-//	 */
-//	public int timeToScreenPixel(double time) {
-//		double fractionAlongTimeAxis =  ((double) (time-beginTime)) /((double)(endTime-beginTime));
-//		return offset() + (int)Math.round(fractionAlongTimeAxis*(double)(mostRecentScaledScreenWidth-2*offset()));
-//	}
-//	
-	
+
+
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel
 	 * 
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
@@ -1013,6 +1004,12 @@ public class Data
 		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 
+
+	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
+	public int timeToScreenPixel(double time) {
+		double fractionAlongTimeAxis =  ((time-beginTime)) /((endTime-beginTime));
+		return offset() + (int)(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
+	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixel(double time, int assumedScreenWidth) {

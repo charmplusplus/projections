@@ -111,6 +111,16 @@ public class LogEntryData extends ProjDefs
 			return ( "<font size=+1 color=\"#880000\">BEGIN UNPACKING</font> a received message");
 		case ( ProjDefs.END_UNPACK ):
 			return ( "<font size=+1 color=\"#880000\">FINISHED UNPACKING</font> a received message");
+		case (ProjDefs.BEGIN_COMPUTATION):
+			return ( "<font size=+1 color=\"#888888\">BEGIN COMPUTATION</font>");
+		case (ProjDefs.END_COMPUTATION):
+			return ( "<font size=+1 color=\"#888888\">END COMPUTATION</font>");
+		case (ProjDefs.USER_EVENT_PAIR):
+			String name =  MainWindow.runObject[myRun].getUserEventName(userEventID);
+			return ( "<font color=\"#F7D331\">Bracketed User Event (comes in pairs)</font>: " + name);
+		case (ProjDefs.USER_EVENT):
+			String name2 =  MainWindow.runObject[myRun].getUserEventName(userEventID);
+			return ( "<font color=\"#F7D331\">User Event</font>: " + name2);
 		case ( ProjDefs.USER_SUPPLIED_NOTE):
 			if(note != null)
 				return ( "<font size=+1 color=\"#880000\">USER SUPPLIED NOTE:</font> " + note);

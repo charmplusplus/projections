@@ -67,11 +67,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(note != null)
 			return note;
 		
-		if(MainWindow.runObject[myRun].getUserEventName(UserEventID) == null){
-			return "";
-		} else {
-			return MainWindow.runObject[myRun].getUserEventName(UserEventID);
-		}
+		return MainWindow.runObject[myRun].getUserEventName(UserEventID);
 	}		
 	
 	public Color getColor(){	

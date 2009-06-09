@@ -723,11 +723,15 @@ public class Analysis {
     }
 
     public String getUserEventName(int eventID) {
-	return getSts().getUserEventName(eventID); 
-    }
-    
+    	String name = getSts().getUserEventName(eventID);
+    	if(name != null)
+    		return name;		 
+    	else
+    		return "";
+    }	
+
     public String[] getUserEventNames() {
-	return getSts().getUserEventNames();
+    	return getSts().getUserEventNames();
     }
 
 //    public int getNumPerfCounts() {

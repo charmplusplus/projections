@@ -284,7 +284,7 @@ public class MultiSeriesHandler {
 
 		// Display the window	
 		window.pack();
-		window.setLocation(500,500);
+		window.setLocation(720,30);
 		window.setVisible(true);
 	}
 

@@ -63,11 +63,31 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 
 	
 	
+	public UserEventObject(int pe, long t, int e, int event, int type, String note) {
+		setFocusable(false); // optimization for speed
+		this.Type=type;
+		this.BeginTime=EndTime=t;
+		this.UserEventID=e;
+		this.CharmEventID=event;
+		this.pe = pe;
+		this.note = note;
+
+		addMouseListener(this);
+	}
+
 	public String getName(){
-		if(note != null)
-			return note;
+		String name = "";
 		
-		return MainWindow.runObject[myRun].getUserEventName(UserEventID);
+		String userEventName = MainWindow.runObject[myRun].getUserEventName(UserEventID);
+		if(userEventName != null){
+			name += userEventName;
+			name += "\n";
+		}
+
+		if(note != null)
+			name += note;
+				
+		return name;
 	}		
 	
 	public Color getColor(){	
@@ -83,7 +103,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public void setLocationAndSize(Data data, int actualDisplayWidth) {
 		this.data = data;
 
-		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && note!=null)){
+		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && UserEventID==-1)){
 			setBounds( 0, 0, 0, 0 );			
 			return;
 		}	

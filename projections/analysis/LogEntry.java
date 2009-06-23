@@ -7,6 +7,7 @@ class LogEntry
 {
 	public int TransactionType, MsgType, Entry;
 	long Time;
+	long endTime;
 	int EventID, Pe;
 	int MsgLen;
 	ObjectId id;
@@ -37,7 +38,7 @@ class LogEntry
 
 
 	public LogEntry(LogEntryData data) {
-
+		endTime = data.endTime;
 		TransactionType = data.type;
 		MsgType = data.mtype;
 		Time = data.time;

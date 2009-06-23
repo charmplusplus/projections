@@ -63,7 +63,7 @@ public class ChooseUserEventsWindow extends JFrame
 			Boolean b = true;
 			Vector tableRow = new Vector();
 			tableRow.add(b);
-			tableRow.add("User Supplied Notes");
+			tableRow.add("Unspecified");
 			tableRow.add("");
 			tableRow.add(Color.white);
 			tabledata.add(tableRow);

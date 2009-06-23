@@ -23,6 +23,7 @@ public class LogEntryData extends ProjDefs
     public int type;	 // type of the event eg: BEGIN_PROCESSING	
     public int mtype;	 // determines
     public long time;	 // timestamp
+	public long endTime; // used for bracketed user supplied notes, and all bracketed events in the future
     public int entry;	 // EntryPoint number found in sts file
     public int event;	 // Unique sequence number assigned to CREATION Events 
     public int pe;	 // processor number where the event occurred
@@ -67,6 +68,7 @@ public class LogEntryData extends ProjDefs
     // "entry" in the case of functions will be the function ID.
     public int lineNo;          // line number of the function call.
     public String funcName;     // the name of the function
+
 
 
 

@@ -927,8 +927,11 @@ public class LogLoader extends ProjDefs
 						if(LE.userSuppliedValue() != null && lastBeginTimelineEvent!=null)
 							lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
 						break;
-				
-
+					case USER_SUPPLIED_BRACKETED_NOTE:
+						UserEventObject note2 = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.PAIR, LE.note);
+						note2.EndTime = LE.endTime;
+						userEventVector.add(note2);
+						break;
 					case MEMORY_USAGE:
 						if(LE.memoryUsage() != null && lastBeginTimelineEvent!=null)
 							lastBeginTimelineEvent.memoryUsage = LE.memoryUsage();

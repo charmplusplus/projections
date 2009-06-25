@@ -805,7 +805,8 @@ public class Data
 
 	/** The height of the panel that should be used to draw the timelines  */
 	public int screenHeight(){
-			return singleTimelineHeight()*numPs();
+			int paddingForScrollbar = 55;
+			return singleTimelineHeight()*numPs() + paddingForScrollbar;
 	}
 
 

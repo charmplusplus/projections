@@ -78,15 +78,20 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public String getName(){
 		String name = "";
 		
+		boolean addNewline = false;
+		
 		String userEventName = MainWindow.runObject[myRun].getUserEventName(UserEventID);
 		if(userEventName != null){
 			name += userEventName;
-			name += "\n";
+			addNewline = true;
 		}
 
-		if(note != null)
+		if(note != null){
+			if(addNewline)
+				name += "\n";	
 			name += note;
-				
+		}
+		
 		return name;
 	}		
 	

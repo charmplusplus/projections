@@ -20,15 +20,30 @@ public class LogEntryData extends ProjDefs
 	
     private boolean isValid = true;
 
-    public int type;	 // type of the event eg: BEGIN_PROCESSING	
-    public int mtype;	 // determines
-    public long time;	 // timestamp
-	public long endTime; // used for bracketed user supplied notes, and all bracketed events in the future
-    public int entry;	 // EntryPoint number found in sts file
-    public int event;	 // Unique sequence number assigned to CREATION Events 
-    public int pe;	 // processor number where the event occurred
-    public int numPEs;   // Number of processors a message was sent to.
-                         // Used for CREATION_BCAST and CREATION_MULTICAST
+    /** type of the event eg: BEGIN_PROCESSING	 */
+    public int type;	 	
+    
+    /** determines	 */
+    public int mtype;	 
+   
+    /** timestamp */
+    public long time;	 
+	
+    /** used for bracketed user supplied notes, and all bracketed events in the future */
+    public long endTime; 
+    
+    /** EntryPoint number found in sts file */
+    public int entry;	 
+    
+    /** Unique sequence number assigned to Events. This is a unique sequence number set by the sender for BEGIN_PROCESSING */
+    public int event;	 
+    
+    /** processor number where the event occurred */
+    public int pe;
+
+    /** Number of processors a message was sent to. Used for CREATION_BCAST and CREATION_MULTICAST */
+    public int numPEs;   
+
 
     // version 2.0 constructs
     public int msglen;	 // only for CREATION events
@@ -96,7 +111,7 @@ public class LogEntryData extends ProjDefs
 		case ( ProjDefs.CREATION_MULTICAST ):
 			return ( "<td><font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + numPEs + " processors");
 		case ( ProjDefs.BEGIN_PROCESSING ):
-			return ( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of message sent to <em>" + MainWindow.runObject[myRun].getEntryFullNameByID(entry)  + "</em> from processor " + pe);
+			return ( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of <em>" + MainWindow.runObject[myRun].getEntryFullNameByID(entry)  + "</em> from processor " + pe + " event=" + event);
 		case ( ProjDefs.END_PROCESSING ):
 			return ( "<font size=+1 color=\"#000088\">END PROCESSING</font> of message sent to <em>" + MainWindow.runObject[myRun].getEntryFullNameByID(entry)  + "</em> from processor " + pe);
 		case ( ProjDefs.ENQUEUE ):

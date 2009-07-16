@@ -3,6 +3,7 @@ package projections.gui.Timeline;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 
@@ -16,52 +17,58 @@ import javax.swing.*;
  */
 
 public class SaveImage {
-	
-	private JPanel view;
-	private BufferedImage image;
-	
-	/** Create the scrollable panel with the three provided panels. */
-	public SaveImage(JPanel view_) {
-		view = view_;
+
+
+	private BufferedImage generateImage(JPanel panelToRender){
+		//		 Create an image for the constructed panel.
+		int width = panelToRender.getWidth();
+		int height = panelToRender.getHeight();
+
+		System.out.println("Saving timeline image of size "+width+"x"+height);
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = image.createGraphics();
+		panelToRender.paint(g);
+		g.dispose();
+		return image;
 	}
 
-	private void generateImage(){
-//		 Create an image for the constructed panel.
-		int width = view.getWidth();
-        int height = view.getHeight();
+	public void saveImage(String filename, String format, RenderedImage image){
 
-        System.out.println("Saving timeline image of size "+width+"x"+height);
-        image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        Graphics2D g = image.createGraphics();
-        view.paint(g);
-        g.dispose();
+		try {
+			ImageIO.write(image, format, new File(filename));
+		}
+		catch(IOException ioe) {
+			System.out.println(ioe.getMessage());
+		}
 	}
-	
-//	public Image getImage(){
-//		generateImage();
-//		return image;
-//	}
-	
-	public void saveImagePNG(String filename){
-		generateImage();
+
+	public void saveToFileChooserSelection(JPanel panelToRender){
+		BufferedImage image = generateImage(panelToRender);
 		
-        try {
-          ImageIO.write(image, "png", new File(filename));
-        }
-        catch(IOException ioe) {
-          System.out.println(ioe.getMessage());
-        }
+		try{	
+			// Create a file chooser so the user can choose where to save the image
+			JFileChooser fc = new JFileChooser();
+			ImageFilter imageFilter = new ImageFilter();
+			fc.setFileFilter(imageFilter);
+			fc.setSelectedFile(new File("./TimelineScreenshot.png"));
+
+			int returnVal = fc.showSaveDialog(null);
+
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+
+				if(imageFilter.isJPEG(file))       		
+					saveImage(file.getCanonicalPath(), "jpg", image);
+
+				if(imageFilter.isPNG(file))       		
+					saveImage(file.getCanonicalPath(), "png", image);
+
+			} else {
+				// Save command cancelled by user
+			}
+		} catch (IOException e){
+			JOptionPane.showMessageDialog(null, this, "Error occurred while saving file:" + e.getLocalizedMessage(), 0);
+		}	
 	}
-	
-	public void saveImageJPEG(String filename){
-		generateImage();
-		
-        try {
-          ImageIO.write(image, "jpg", new File(filename));
-        }
-        catch(IOException ioe) {
-          System.out.println(ioe.getMessage());
-        }
-	}
-	
+
 }

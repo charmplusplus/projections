@@ -1,8 +1,10 @@
 package projections.gui.Timeline;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.*;
 import java.io.File;
@@ -61,6 +63,7 @@ ItemListener {
 	private JMenuItem mModifyRanges;
 
 	private JMenuItem mSaveScreenshot;
+	private JMenuItem mSaveFullTimeline;
 
 	private JMenuItem mSelectBGColor;
 	private JMenuItem mSelectFGColor;
@@ -217,34 +220,21 @@ ItemListener {
 
 		else if(evt.getSource() == mModifyRanges)
 			showDialog();
+		
+		else if(evt.getSource() == mSaveFullTimeline){
+			SaveImage p = new SaveImage();
+			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
+			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
+			// Create a panel that is rendered from the four panels we supply
+			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
+			// Save it to a file which is chosen by the user
+			p.saveToFileChooserSelection(gridPanel);
+		}
+		
 
 		else if(evt.getSource() == mSaveScreenshot){
-			try{
-				SaveImage p = new SaveImage(parentWindow.scrollingPanel);
-
-				// Create a file chooser so the user can choose where to save the image
-				JFileChooser fc = new JFileChooser();
-				ImageFilter imageFilter = new ImageFilter();
-				fc.setFileFilter(imageFilter);
-				fc.setSelectedFile(new File("./TimelineScreenshot.png"));
-
-				int returnVal = fc.showSaveDialog(parentWindow);
-
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File file = fc.getSelectedFile();
-
-					if(imageFilter.isJPEG(file))       		
-						p.saveImageJPEG(file.getCanonicalPath());
-
-					if(imageFilter.isPNG(file))       		
-						p.saveImagePNG(file.getCanonicalPath());
-
-				} else {
-					// Save command cancelled by user
-				}
-			} catch (IOException e){
-				JOptionPane.showMessageDialog(this, "Error occurred while saving file:" + e.getLocalizedMessage());
-			}
+			SaveImage p = new SaveImage();
+			p.saveToFileChooserSelection(parentWindow.scrollingPanel);
 		}
 
 		else if(evt.getSource() == mSelectBGColor)
@@ -379,9 +369,12 @@ ItemListener {
 
 		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Screenshot");
-		mSaveScreenshot = new JMenuItem("Save as JPG or PNG");
+		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
 		mSaveScreenshot.addActionListener(this);
 		saveMenu.add(mSaveScreenshot);
+		mSaveFullTimeline = new JMenuItem("Save All PE Timelines as JPG or PNG");
+		mSaveFullTimeline.addActionListener(this);
+		saveMenu.add(mSaveFullTimeline);
 		mbar.add(saveMenu);
 
 		// Color Menu

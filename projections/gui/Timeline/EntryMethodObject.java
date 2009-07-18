@@ -583,6 +583,9 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		return (entry==-1);
 	}
 	
+	public boolean isUnaccountedTime(){
+		return (entry == -2);
+	}
 
 	public void paintComponent(Graphics g)
 	{     

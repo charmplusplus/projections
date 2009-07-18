@@ -159,6 +159,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		mainPanel.loadTimelineObjects(false, this);
 	}
 	
+	
 	 /** Add a timeline to the Timeline visualization
      *  @note called by external tools
      *  @note Simply forwards request to 'data' object

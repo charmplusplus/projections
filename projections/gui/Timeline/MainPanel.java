@@ -89,8 +89,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			Iterator obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
 				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+
 				this.add(obj);
-			
+
 				// Register a mouse motion listener for dragging of the viewport
 
 				// Only register it if we have not already registered it
@@ -105,6 +106,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					obj.addMouseListener(this);
 					obj.addMouseMotionListener(this);
 				}
+
 			}
 
 		}
@@ -208,5 +210,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	public void mouseExited(MouseEvent e) {
 		// do nothing
 	}
+
 
 }

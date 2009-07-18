@@ -268,4 +268,18 @@ public class MessageStructures {
 		}
 	}
 
+	
+	public void clearAll(){
+		synchronized(this){
+			int pe = eventIDToMessageMap.length;
+			for(int i=0;i<pe;i++)
+				eventIDToMessageMap[i].clear();
+			for(int i=0;i<pe;i++)
+				eventIDToEntryMethodMap[i].clear();
+			messageToSendingObjectsMap.clear();
+			messageToExecutingObjectsMap.clear();
+			oidToEntryMethodObjectsMap.clear();
+		}		
+	}
+	
 }

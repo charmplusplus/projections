@@ -84,7 +84,10 @@ ItemListener {
 	private JMenuItem mDetermineTimeRangesUserSupplied;
 	private JMenuItem mShowHideEntries;
 	private JMenuItem mShowHideUserEvents;
-
+	
+	private JCheckBoxMenuItem cbDontLoadMessages;
+	private JCheckBoxMenuItem cbDontLoadIdle;
+	
 
 	public WindowControls(TimelineWindow parentWindow_,
 			Data data_) {
@@ -473,10 +476,22 @@ ItemListener {
 		mDetermineTimeRangesUserSupplied.addActionListener(this);
 		experimentalMenu.add(mDetermineTimeRangesUserSupplied);
 
+		
+		
+		JMenu submenu = new JMenu("Speed/Memory Enhancements:");
+		cbDontLoadMessages = new JCheckBoxMenuItem("Don't Load messages");
+		cbDontLoadMessages.setSelected(false);
+		cbDontLoadMessages.addItemListener(this);
+		submenu.add(cbDontLoadMessages);
+		cbDontLoadIdle = new JCheckBoxMenuItem("Don't Load Idle Time Blocks");
+		cbDontLoadIdle.setSelected(false);
+		cbDontLoadIdle.addItemListener(this);
+		submenu.add(cbDontLoadIdle);
+		experimentalMenu.add(submenu);
+
+		
 		mbar.add(experimentalMenu);
-
 		parentWindow.setJMenuBar(mbar);
-
 	}
 
 	public void userEventWindowSetData(){
@@ -622,6 +637,11 @@ ItemListener {
 		else if(c == cbNestedUserEvents)
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
 
+		else if(c == cbDontLoadIdle)
+			data.skipLoadingIdleRegions(evt.getStateChange() == ItemEvent.SELECTED);
+
+		else if(c == cbDontLoadMessages)
+			data.skipLoadingMessages(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);

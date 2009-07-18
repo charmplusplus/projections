@@ -157,6 +157,12 @@ public class Data
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
 	private boolean showPacks, showIdle, showMsgs, showUserEvents;
 
+	/** If these are true, we will not load the idle time regions in the timeline */
+	private boolean skipIdleRegions;
+
+	/** If these are true, we will not load the message send lines in the timeline */
+	private boolean skipLoadingMessages;
+	
 
 	/** The font used by the LabelPanel */
 	public Font labelFont;
@@ -247,6 +253,10 @@ public class Data
 		/// Default value for custom color (Normally not used)
 		customForeground = Color.white; 
 		customBackground = Color.black;
+		
+		skipIdleRegions = false;
+		skipLoadingMessages = false;
+
 		
 		// Get the list of PEs to display
 		loadGlobalPEList();
@@ -489,8 +499,24 @@ public class Data
 		// Spawn a thread that computes some secondary message related data structures
 		messageStructures.create(useHelperThreads);
 	
+		printNumLoadedObjects();
 	}
 
+	
+	
+	public void printNumLoadedObjects(){
+		int objCount = 0;
+		
+		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = iter.next();
+			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
+			objCount += list.size();
+		}
+		System.out.println("Displaying " + objCount + " objects in the timline visualization\n");
+	}
+	
+	
 	/** Relayout and repaint everything */
 	private void displayMustBeRedrawn(){
 		if(modificationHandler != null){
@@ -623,14 +649,14 @@ public class Data
 			// Construct a list of messages sent by the object
 			Vector<TimelineMessage> msglist = tle.MsgsSent;
 			TreeSet<TimelineMessage> msgs = new TreeSet<TimelineMessage>();
-			if(msglist!=null){
+			if(msglist!=null && (!skipLoadingMessages()) ){
 				msgs.addAll( msglist );
 			}
 			
 			// Construct a list of message pack times for the object
 			Vector<PackTime> packlist = tle.PackTimes;
 			int numpacks;
-			if (packlist == null) {
+			if (packlist == null || skipLoadingMessages() ) {
 				numpacks = 0;
 			} else {
 				numpacks = packlist.size();
@@ -642,8 +668,13 @@ public class Data
 		
 		
 			EntryMethodObject obj = new EntryMethodObject(this, tle, msgs, packs, pe.intValue());
-			perPEObjects.add(obj);
-
+			if((obj.isIdleEvent() || obj.isUnaccountedTime() ) && skipLoadingIdleRegions()){
+				// don't load this idle event because we are skipping them
+			} else {
+				perPEObjects.add(obj);
+			}
+			
+			
 			if(tle.memoryUsage!=null){
 				if(tle.memoryUsage.longValue() > maxMemThisPE)
 					maxMemThisPE = tle.memoryUsage.longValue();
@@ -1788,5 +1819,72 @@ public class Data
 		return ! hiddenUserEvents.contains(id);
 	}
 	
+	public void skipLoadingIdleRegions(boolean b) {
+		skipIdleRegions = b;
+		if(skipIdleRegions){
+			pruneOutIdleRegions();	
+		}
+	}
+
+	public void skipLoadingMessages(boolean b) {
+		skipLoadingMessages = b;
+		if(skipLoadingMessages){
+			pruneOutMessages();	
+		}
+	}
+
+	
+	/** Remove from allEntryMethodObjects any idle EntryMethodObjects */
+	private void pruneOutIdleRegions() {
+		System.out.println("pruneOutIdleRegions");
+		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = iter.next();
+			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
+			
+			Iterator<EntryMethodObject> iter2 = list.iterator();
+			while(iter2.hasNext()){
+				EntryMethodObject o = iter2.next();
+				if(o.isIdleEvent()){
+					iter2.remove();
+				}
+			}
+		}
+		
+		modificationHandler.notifyProcessorListHasChanged(); // Really it is the set of objects that has changed
+
+		displayMustBeRedrawn();
+		
+	}
+	
+	
+	private void pruneOutMessages() {
+		System.out.println("pruneOutMessages");
+		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
+		while(iter.hasNext()){
+			Integer pe = iter.next();
+			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
+			
+			Iterator<EntryMethodObject> iter2 = list.iterator();
+			while(iter2.hasNext()){
+				EntryMethodObject o = iter2.next();
+				o.messages = new TreeSet<TimelineMessage>();
+			}
+		
+		}
+		messageStructures.clearAll();
+		
+		clearMessageSendLines();
+
+		modificationHandler.notifyProcessorListHasChanged(); // Really it is the set of objects that has changed
+		
+		displayMustBeRedrawn();
+	}
+	public boolean skipLoadingIdleRegions() {
+		return skipIdleRegions;
+	}
+	public boolean skipLoadingMessages() {
+		return skipLoadingMessages;
+	}
 	
 }

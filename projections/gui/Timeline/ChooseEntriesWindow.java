@@ -1,7 +1,10 @@
 package projections.gui.Timeline;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -12,10 +15,12 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JWindow;
@@ -27,13 +32,17 @@ import javax.swing.table.TableColumn;
 import projections.gui.MainWindow;
 import projections.gui.Timeline.ChooseUserEventsWindow.ColorRenderer;
 
-public class ChooseEntriesWindow extends JFrame
+public class ChooseEntriesWindow extends JFrame 
 {
 	Data data;
 	Hashtable<Integer, String> entryNames;
 	Vector<Vector> tabledata;
 	Vector<String> columnNames;
 
+	JButton checkAll;
+	JButton uncheckAll;
+	
+	
 	ChooseEntriesWindow(Data _data){
 		data = _data;
 		createLayout();
@@ -41,7 +50,7 @@ public class ChooseEntriesWindow extends JFrame
 
 	void createLayout(){
 		setTitle("Choose which entry methods are displayed");
-
+		
 
 		// create a table of the data
 		columnNames = new Vector();
@@ -73,7 +82,7 @@ public class ChooseEntriesWindow extends JFrame
 			tabledata.add(tableRow);
 		}
 
-		MyTableModel tableModel = new MyTableModel();
+		MyTableModel tableModel = new MyTableModel(); 
 
 		JTable table = new JTable(tableModel);
 		initColumnSizes(table);
@@ -84,9 +93,24 @@ public class ChooseEntriesWindow extends JFrame
 		JScrollPane scroller = new JScrollPane(table);
 		scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new FlowLayout());
+		checkAll = new JButton("Show All");
+		uncheckAll = new JButton("Hide All");
+		checkAll.addActionListener(tableModel);
+		uncheckAll.addActionListener(tableModel);
+		buttonPanel.add(checkAll);
+		buttonPanel.add(uncheckAll);
+		
 		// put the scrollpane into our guiRoot
+		JPanel p = new JPanel();
+		p.setLayout(new BorderLayout());
+		
+		p.add(buttonPanel, BorderLayout.NORTH);
+		p.add(scroller, BorderLayout.CENTER);
 
-		this.setContentPane(scroller);
+		
+		this.setContentPane(p);
 
 		// Display it all
 
@@ -112,7 +136,7 @@ public class ChooseEntriesWindow extends JFrame
 	}
 
 
-	class MyTableModel extends AbstractTableModel {
+	class MyTableModel extends AbstractTableModel implements ActionListener{
 
 		public boolean isCellEditable(int row, int col) {
 			if (col >= 1) {
@@ -162,6 +186,36 @@ public class ChooseEntriesWindow extends JFrame
 
 		}
 
+			
+
+		public void actionPerformed(ActionEvent e) {
+			if(e.getSource() == checkAll){
+				Iterator<Vector> iter= tabledata.iterator();
+				while(iter.hasNext()){
+					Vector v = iter.next();
+					Integer id = (Integer) v.get(2);
+					// update the backing data for the table
+					v.set(0,true);				
+					// Update the visualization (but don't redraw yet)
+					data.makeEntryVisibleID(id, false);
+				}
+			} else {
+				Iterator<Vector> iter= tabledata.iterator();
+				while(iter.hasNext()){
+					Vector v = iter.next();
+					Integer id = (Integer) v.get(2);
+					// update the backing data for the table
+					v.set(0,false);
+					// Update the visualization (but don't redraw yet)
+					data.makeEntryInvisibleID(id, false);
+				}				
+			}
+			data.displayMustBeRedrawn();
+			fireTableDataChanged();
+			
+		}
+
+		
 	}    
 	
 	
@@ -181,6 +235,9 @@ public class ChooseEntriesWindow extends JFrame
 			return this;
 		}
 	}
+
+
+
 
 
 }

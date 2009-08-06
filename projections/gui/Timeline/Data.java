@@ -518,7 +518,7 @@ public class Data
 	
 	
 	/** Relayout and repaint everything */
-	private void displayMustBeRedrawn(){
+	public void displayMustBeRedrawn(){
 		if(modificationHandler != null){
 			modificationHandler.refreshDisplay(true);
 		}
@@ -1755,16 +1755,25 @@ public class Data
 
 
 	
+	public void makeEntryVisibleID(Integer id){		
+		makeEntryVisibleID(id, true);
+	}
+	public void makeEntryInvisibleID(Integer id){		
+		makeEntryInvisibleID(id, true);
+	}
+	
 	/** Make visible the entry methods for this id */	
-	public void makeEntryVisibleID(Integer id) {
+	public void makeEntryVisibleID(Integer id, boolean redraw) {
 		hiddenEntryPoints.remove(id);
-		this.displayMustBeRedrawn();
+		if(redraw)
+			this.displayMustBeRedrawn();
 	}	
 
 	/** Hide the entry methods for this id */
-	public void makeEntryInvisibleID(Integer id) {
+	public void makeEntryInvisibleID(Integer id, boolean redraw) {
 		hiddenEntryPoints.add(id);
-		this.displayMustBeRedrawn();
+		if(redraw)
+			this.displayMustBeRedrawn();
 	}
 	
 

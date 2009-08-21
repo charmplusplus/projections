@@ -96,6 +96,9 @@ public class Data
 
 	/** If true, color the entry method invocations by a user supplied parameter(like timestep) */
 	private boolean colorByUserSupplied;
+
+	/** If true, color the entry method invocations by their entry method id */
+	private boolean colorByEntryId;
 	
 	private int[]          entries;
 
@@ -329,12 +332,6 @@ public class Data
 	}
 
 
-	
-	public boolean colorbyObjectId(){
-		return colorByObjectId;
-	}
-
-	
 	
 	/** Load the initial array of timeline objects 
 	 *  
@@ -1247,6 +1244,7 @@ public class Data
 		colorByObjectId = false;
 		colorByMemoryUsage=false;
 		colorByUserSupplied=false;
+		colorByEntryId = false;
 		displayMustBeRepainted();
 	}
 
@@ -1256,6 +1254,7 @@ public class Data
 			colorByMemoryUsage=true;
 			colorByObjectId = false;
 			colorByUserSupplied=false;
+			colorByEntryId = false;
 			displayMustBeRepainted();
 		} else {
 			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() and gnu malloc in the application");
@@ -1268,16 +1267,47 @@ public class Data
 		colorByUserSupplied=true;
 		colorByObjectId = false;
 		colorByMemoryUsage=false;
+		colorByEntryId = false;
 		displayMustBeRepainted();
 	}
 
-	public void setColorByIndex() {
+	public void setColorByObjectID() {
 		colorByObjectId = true;
 		colorByMemoryUsage=false;
 		colorByUserSupplied=false;
+		colorByEntryId = false;
 		displayMustBeRepainted();
 	}
 	
+	
+	public void setColorByUserSuppliedAndObjID(int colorScheme) {
+		colorSchemeForUserSupplied=colorScheme;
+		colorByUserSupplied=true;
+		colorByObjectId = true;
+		colorByMemoryUsage=false;
+		colorByEntryId = false;
+		displayMustBeRepainted();
+	}
+	
+	public void setColorByUserSuppliedAndEID(int colorScheme) {
+		colorSchemeForUserSupplied=colorScheme;
+		colorByUserSupplied=true;
+		colorByObjectId = false;
+		colorByMemoryUsage=false;
+		colorByEntryId = true;
+		displayMustBeRepainted();
+	}
+	
+	
+	public boolean colorByEID() {
+		return colorByEntryId;
+	}
+	
+
+	public boolean colorByOID() {
+		return colorByObjectId;
+	}
+			
 	public boolean colorByUserSupplied() {
 		return colorByUserSupplied;
 	}

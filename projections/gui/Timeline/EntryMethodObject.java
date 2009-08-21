@@ -600,88 +600,14 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			return;
 		
 
-		Color c;
+		// Determine the base color
+		Color c = determineColor();
 
-		// Set the colors of the object
-		if (isIdleEvent()) { 
 
-			// Idle time regions are white on a dark background, or grey on a light background
-
-			Color bg = data.getBackgroundColor();
-
-			int brightness = bg.getRed() + bg.getGreen() + bg.getBlue();
-
-			if(brightness > (128*3)){
-				// bright background
-				c = bg.darker();
-			} else {
-				// dark background ( keep the same traditional look for the old folks ) 
-				c = Color.white;
-			}
-
-		} else if (entryIndex == -2) { // unknown domain
-			c = getBackground();
-		}  else {
-			c = data.entryColor()[entryIndex];
-			if (isFunction) {
-				c = MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
-			}
-		}
-		
-		
-		// grey out the objects with odd userSuppliedData value 
-		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.RandomColors){
-			if(userSuppliedData !=  null){
-				switch ((userSuppliedData.intValue()+5000)%10) {
-				 case 0: c = Color.green; break;
-				 case 1: c = Color.red; break;
-				 case 2: c = Color.blue; break;
-				 case 3: c = Color.yellow; break;
-				 case 4: c = Color.darkGray; break;
-				 case 5: c = Color.magenta; break;
-				 case 6: c = Color.cyan; break;
-				 case 7: c = Color.orange; break;
-				 case 8: c = Color.pink; break;
-				 case 9: c = Color.lightGray; break;
-				}
-			}
-		} else if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.BlueGradientColors){
-			if(userSuppliedData !=  null){
-				long value = userSuppliedData.longValue();
-				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);
-
-				c = Color.getHSBColor(0.25f-normalizedValue*0.75f, 1.0f, 1.0f); 
-			} 	
-		}
-		
-		// color the objects by memory usage 
-		if(data.colorByMemoryUsage()){
-			if(this.memoryUsage == null){
-				c = Color.darkGray;
-			}else{
-				// scale the memory usage to the interval [0,1]
-				float normalizedValue = (float)(memoryUsage.intValue() - data.minMem) / (float)(data.maxMem-data.minMem);
-				
-				if( normalizedValue<0.0 || normalizedValue>1.0 )
-					c = Color.darkGray;
-				else {
-//					System.out.println("memoryUsage="+memoryUsage.intValue()+"  m="+m);
-					c = Color.getHSBColor(0.2f-normalizedValue*0.25f, 1.0f, 1.0f); 
-				}
-			}
-			
-		}
-			
-		
-		// Sometimes Overrule the normal colors and use one based on the chare array index
-		if( ! isIdleEvent() && data.colorbyObjectId())
-			c = colorFromOID();
-	
-		// Dim this object if we want to focus on some objects(for some reason or another)
+		// Dim this object if we want to focus on some objects (for some reason or another)
 		if(data.isObjectDimmed(this))
 			c = c.darker().darker();
 		
-	
 			
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = getWidth();
@@ -804,35 +730,134 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}
 	}
 
-	/** Create a color based on the chare array index for the object executing this entry method */
-	private Color colorFromOID() {
+		
+	/**  Determine the color of the object */	
+	private Color determineColor() {
+		// First handle the simple cases of idle, unknown and function events
+		if (isIdleEvent()) { 	
+			// Idle time regions are white on a dark background, or grey on a light background
+			Color bg = data.getBackgroundColor();
+			int brightness = bg.getRed() + bg.getGreen() + bg.getBlue();
+			if(brightness > (128*3)){
+				// bright background
+				return bg.darker();
+			} else {
+				// dark background ( keep the same traditional look for the old folks ) 
+				return Color.white;
+			}
+		} else if (entryIndex == -2) { // unknown domain
+			return getBackground();
+		} else if (isFunction) {
+			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
+		}
 
-		// hashes of the object indices
-		int h1, h2, h3, h4;
-		
-		h1 = ((getTid().id[0]+2) * 7841) % 223;
-		h2 = ((getTid().id[1]+3) * 7841) % 223;
-		h3 = ((getTid().id[2]+5) * 7841) % 223;
-		h4 = ((getTid().id[3]+7) * 7841) % 223;
 
-		// This will give us a pretty crazy random bitpattern
-		int h5 = h1^h3^h2^h4;
-		h5 = h5 ^ (h5/1024);
+		// color the objects by memory usage with a nice green - red gradient
+		if(data.colorByMemoryUsage()){
+			if(this.memoryUsage == null){
+				return Color.darkGray;
+			}else{
+				// scale the memory usage to the interval [0,1]
+				float normalizedValue = (float)(memoryUsage.intValue() - data.minMem) / (float)(data.maxMem-data.minMem);
+				if( normalizedValue<0.0 || normalizedValue>1.0 )
+					return Color.darkGray;
+				else {
+					return Color.getHSBColor(0.2f-normalizedValue*0.25f, 1.0f, 1.0f); 
+				}
+			}
+		}
+
+
+		// color the objects by user supplied values with a nice blue gradient
+		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.BlueGradientColors){
+			if(userSuppliedData !=  null){
+				long value = userSuppliedData.longValue();
+				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);
+				return Color.getHSBColor(0.25f-normalizedValue*0.75f, 1.0f, 1.0f); 
+			} 	else {
+				return Color.darkGray;
+			}
+		}
+
 		
-		float h;   // Should range from 0.0 to 1.0
-		h = (h5 % 512) / 512.0f;
 		
-		float s = 1.0f;   // Should be 1.0
-				
-		float b = 1.0f;   // Should be 0.5 or 1.0
-		if((h5%2) == 0)
-			b = 1.0f;
-		else
-			b = 0.5f;
 		
-		return Color.getHSBColor(h, s, b);
+
+//		
+//			
+//		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.RandomColors){
+//			if(userSuppliedData !=  null){
+//				switch ((userSuppliedData.intValue()+5000)%10) {
+//				 case 0: c = Color.green; break;
+//				 case 1: c = Color.red; break;
+//				 case 2: c = Color.blue; break;
+//				 case 3: c = Color.yellow; break;
+//				 case 4: c = Color.darkGray; break;
+//				 case 5: c = Color.magenta; break;
+//				 case 6: c = Color.cyan; break;
+//				 case 7: c = Color.orange; break;
+//				 case 8: c = Color.pink; break;
+//				 case 9: c = Color.lightGray; break;
+//				}
+//			}
+//		}
+
+
+		// Sometimes Overrule the normal colors and use one based on the chare array index
+		if( data.colorByOID() || data.colorByUserSupplied() || data.colorByEID() ){
+
+			long color = 0;
+
+			if(data.colorByOID()){
+				// hashes of the object indices
+				int h1, h2, h3, h4;
+				h1 = (getTid().id[0] * 139) % 509;
+				h2 = (getTid().id[1] * 101) % 1039;
+				h3 = (getTid().id[2] * 67) % 1291;
+				h4 = (getTid().id[3] * 2789) % 1721;
+				color += h1^h3^h2^h4;
+			}
+
+
+			if(data.colorByEID()){
+				color += (entryIndex * 251) % 5113;
+			}
+
+
+			if(data.colorByUserSupplied() && userSuppliedData != null){
+				color += (userSuppliedData * 359) % 4903;
+			}
+
+
+			if(data.colorByMemoryUsage() && memoryUsage != null){
+				color += (memoryUsage * 6121) % 5953;
+			}
+
+			 // Should range from 0.0 to 2.0
+			 float h2 = ((color+512) % 512) / 256.0f;
+			 // Should range from 0.0 to 1.0
+			 float h = ((color+512) % 512) / 512.0f;
+
+			
+			
+			float s = 1.0f;   // Should be 1.0
+
+			float b = 1.0f;   // Should be 0.5 or 1.0
+
+			if(h2 > 1.0)
+				b = 0.6f;
+
+			return Color.getHSBColor(h, s, b);
+
+		} else {
+			return data.entryColor()[entryIndex];
+		}
+
+
 	}
 
+	
+	
 	public void setLocationAndSize(int actualDisplayWidth)
 	{
 		

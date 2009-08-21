@@ -74,9 +74,11 @@ ItemListener {
 	private JMenuItem mDefaultColors;
 
 	private JMenuItem mColorByDefault;
-	private JMenuItem mColorByEventIdx;
+	private JMenuItem mColorByObjectID;
 	private JMenuItem mColorByUserRandom;
 	private JMenuItem mColorByUserGradient;
+	private JMenuItem mColorByUserObjRandom;
+	private JMenuItem mColorByUserEIDRandom;
 	private JMenuItem mColorByMemUsage;
 
 	private JMenuItem mShiftTimelines;
@@ -270,8 +272,8 @@ ItemListener {
 		else if(evt.getSource() == mColorByDefault)
 			data.setColorByDefault();
 
-		else if(evt.getSource() == mColorByEventIdx)
-			data.setColorByIndex();
+		else if(evt.getSource() == mColorByObjectID)
+			data.setColorByObjectID();
 
 		else if(evt.getSource() == mColorByUserRandom)
 			data.setColorByUserSupplied(Data.RandomColors);
@@ -279,6 +281,12 @@ ItemListener {
 		else if(evt.getSource() == mColorByUserGradient)
 			data.setColorByUserSupplied(Data.BlueGradientColors);
 
+		else if(evt.getSource() == mColorByUserObjRandom)
+			data.setColorByUserSuppliedAndObjID(Data.RandomColors);
+
+		else if(evt.getSource() == mColorByUserEIDRandom)
+			data.setColorByUserSuppliedAndEID(Data.RandomColors);
+		
 		else if(evt.getSource() == mColorByMemUsage)
 			data.setColorByMemoryUsage();
 
@@ -392,9 +400,11 @@ ItemListener {
 		mDefaultColors = new JMenuItem("Default Entry Point Colors");
 
 		mColorByDefault = new JMenuItem("Color by Default");
-		mColorByEventIdx = new JMenuItem("Color by Event Index");
+		mColorByObjectID = new JMenuItem("Color by Object Index");
 		mColorByUserRandom = new JMenuItem("Color by User Supplied Parameter(timestep) with Disjoint Colors");
 		mColorByUserGradient = new JMenuItem("Color by User Supplied Parameter(timestep) with Gradient");
+		mColorByUserObjRandom = new JMenuItem("Color by User Supplied Parameter(timestep) + Object ID with Disjoint Colors");
+		mColorByUserEIDRandom =  new JMenuItem("Color by User Supplied Parameter(timestep) + Entry ID with Disjoint Colors");
 		mColorByMemUsage = new JMenuItem("Color by Memory Usage");
 
 		colorMenu.add(mSelectBGColor);
@@ -406,9 +416,11 @@ ItemListener {
 		colorMenu.add(mDefaultColors);
 		colorMenu.addSeparator();
 		colorMenu.add(mColorByDefault);
-		colorMenu.add(mColorByEventIdx);
+		colorMenu.add(mColorByObjectID);
 		colorMenu.add(mColorByUserRandom);
 		colorMenu.add(mColorByUserGradient);
+		colorMenu.add(mColorByUserObjRandom);
+		colorMenu.add(mColorByUserEIDRandom);
 		colorMenu.add(mColorByMemUsage);
 
 
@@ -419,11 +431,13 @@ ItemListener {
 		mRestoreColors.addActionListener(this);
 		mDefaultColors.addActionListener(this);
 		mColorByDefault.addActionListener(this);
-		mColorByEventIdx.addActionListener(this);
+		mColorByObjectID.addActionListener(this);
 		mColorByUserRandom.addActionListener(this);
+		mColorByUserObjRandom.addActionListener(this);
 		mColorByUserGradient.addActionListener(this);
 		mColorByMemUsage.addActionListener(this);
-
+		mColorByUserEIDRandom.addActionListener(this);
+		
 		mbar.add(colorMenu);
 
 
@@ -444,6 +458,27 @@ ItemListener {
 
 		mbar.add(tracingMenu);
 
+		// View Menu
+		JMenu viewMenu = new JMenu("View");
+
+		cbCompactView = new JCheckBoxMenuItem("Compact View");
+		cbCompactView.addItemListener(this);
+		viewMenu.add(cbCompactView);
+		
+		mShowHideEntries = new JMenuItem("Show & Hide Entry Methods");
+		mShowHideEntries.addActionListener(this);
+		viewMenu.add(mShowHideEntries);
+		
+		mShowHideUserEvents = new JMenuItem("Show & Hide User Events");
+		mShowHideUserEvents.addActionListener(this);
+		viewMenu.add(mShowHideUserEvents);
+		
+
+		cbNestedUserEvents = new JCheckBoxMenuItem("Show Nested Bracketed User Events");
+		cbNestedUserEvents.addItemListener(this);
+		viewMenu.add(cbNestedUserEvents);
+
+		mbar.add(viewMenu);
 
 		// Experimental Features Menu
 		JMenu experimentalMenu = new JMenu("Experimental Features");
@@ -451,26 +486,10 @@ ItemListener {
 		mShiftTimelines.addActionListener(this);
 		experimentalMenu.add(mShiftTimelines);
 
-		mShowHideEntries = new JMenuItem("Show & Hide Entry Methods");
-		mShowHideEntries.addActionListener(this);
-		experimentalMenu.add(mShowHideEntries);
-		
-		mShowHideUserEvents = new JMenuItem("Show & Hide User Events");
-		mShowHideUserEvents.addActionListener(this);
-		experimentalMenu.add(mShowHideUserEvents);
-		
 		mUserEventReport = new JMenuItem("User Event Reporting");
 		mUserEventReport.addActionListener(this);
 		experimentalMenu.add(mUserEventReport);
 	
-		cbCompactView = new JCheckBoxMenuItem("Compact View");
-		cbCompactView.addItemListener(this);
-		experimentalMenu.add(cbCompactView);
-
-		cbNestedUserEvents = new JCheckBoxMenuItem("Show Nested Bracketed User Events");
-		cbNestedUserEvents.addItemListener(this);
-		experimentalMenu.add(cbNestedUserEvents);
-
 
 		mDetermineTimeRangesUserSupplied = new JMenuItem("Determine Time Ranges for User Supplied Values");
 		mDetermineTimeRangesUserSupplied.addActionListener(this);

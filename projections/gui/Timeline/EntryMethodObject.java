@@ -752,7 +752,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}
 
 
-		// color the objects by memory usage with a nice green - red gradient
+		// color the objects by memory usage with a nice blue - red gradient
 		if(data.colorByMemoryUsage()){
 			if(this.memoryUsage == null){
 				return Color.darkGray;
@@ -762,7 +762,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				if( normalizedValue<0.0 || normalizedValue>1.0 )
 					return Color.darkGray;
 				else {
-					return Color.getHSBColor(0.2f-normalizedValue*0.25f, 1.0f, 1.0f); 
+					return Color.getHSBColor(0.6f-normalizedValue*0.65f, 1.0f, 1.0f); 
 				}
 			}
 		}

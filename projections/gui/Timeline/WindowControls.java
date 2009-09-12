@@ -405,7 +405,7 @@ ItemListener {
 		mColorByUserGradient = new JMenuItem("Color by User Supplied Parameter(timestep) with Gradient");
 		mColorByUserObjRandom = new JMenuItem("Color by User Supplied Parameter(timestep) + Object ID with Disjoint Colors");
 		mColorByUserEIDRandom =  new JMenuItem("Color by User Supplied Parameter(timestep) + Entry ID with Disjoint Colors");
-		mColorByMemUsage = new JMenuItem("Color by Memory Usage");
+		mColorByMemUsage = new JMenuItem("Color by Memory Usage ...");
 
 		colorMenu.add(mSelectBGColor);
 		colorMenu.add(mSelectFGColor);

@@ -152,8 +152,11 @@ public class Data
 	long oldET; 
 	
 	/** The miniumum and maximum memory usage that have been seen so far */
-	long minMem, maxMem;
+	private long minMem, maxMem;
 
+	/** The range of memory usage values that should be used when coloring based on mem usage */
+	private long minMemColorRange, maxMemColorRange;
+	
 	/** Stores various lookup tables for messages and associated entry points */
 	MessageStructures messageStructures;
 	
@@ -1251,15 +1254,21 @@ public class Data
 	/** Color the events by memory usage if possible */
 	public void setColorByMemoryUsage() {
 		if(memoryUsageValid()){
-			colorByMemoryUsage=true;
-			colorByObjectId = false;
-			colorByUserSupplied=false;
-			colorByEntryId = false;
-			displayMustBeRepainted();
+			/* Prompt for range of values to use for colors */
+			MemoryColorRangeChooser mcrc = new MemoryColorRangeChooser(this);
 		} else {
-			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() and gnu malloc in the application");
-		}
-		
+			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() in the application");
+		}		
+	}
+	
+	
+	/** After the user has chosen a memory range, then recolor stuff */
+	public void finalizeColorByMemoryUsage(){
+		colorByMemoryUsage=true;
+		colorByObjectId = false;
+		colorByUserSupplied=false;
+		colorByEntryId = false;
+		displayMustBeRepainted();
 	}
 
 	public void setColorByUserSupplied(int colorScheme) {
@@ -1924,6 +1933,37 @@ public class Data
 	}
 	public boolean skipLoadingMessages() {
 		return skipLoadingMessages;
+	}
+
+	public long minMemMB() {
+		return minMem / 1024 / 1024;
+	}
+
+	public long maxMemMB() {
+		return maxMem / 1024 / 1024;
+	}
+
+	public long minMemB() {
+		return minMem;
+	}
+
+	public long maxMemB() {
+		return maxMem;
+	}
+	
+
+	public long minMemBColorRange() {
+		return minMemColorRange;
+	}
+
+	public long maxMemBColorRange() {
+		return maxMemColorRange;
+	}
+
+	/** Set the memory usage range for the color gradient */
+	public void setMemColorRange(long minMemVal, long maxMemVal) {
+		minMemColorRange = minMemVal;
+		maxMemColorRange = maxMemVal;
 	}
 	
 }

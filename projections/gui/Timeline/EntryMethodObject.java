@@ -758,7 +758,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				return Color.darkGray;
 			}else{
 				// scale the memory usage to the interval [0,1]
-				float normalizedValue = (float)(memoryUsage.intValue() - data.minMem) / (float)(data.maxMem-data.minMem);
+				float normalizedValue = (float)(memoryUsage.intValue() - data.minMemBColorRange()) / (float)(data.maxMemBColorRange()-data.minMemBColorRange());
 				if( normalizedValue<0.0 || normalizedValue>1.0 )
 					return Color.darkGray;
 				else {

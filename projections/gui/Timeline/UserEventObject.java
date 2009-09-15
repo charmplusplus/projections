@@ -100,7 +100,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(c != null)
 			return c;
 		else 
-			return Color.white;
+			return data.getForegroundColor();
 	}
 	
 	

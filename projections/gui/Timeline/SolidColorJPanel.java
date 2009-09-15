@@ -22,6 +22,14 @@ public class SolidColorJPanel extends JPanel{
 	public int getHeight(){
 		return height;
 	}
+	
+	public int getDesiredWidth(){
+		return width;
+	}
+
+	public int getDesiredHeight(){
+		return height;
+	}
 
 	protected void paintComponent(Graphics g)
 	{

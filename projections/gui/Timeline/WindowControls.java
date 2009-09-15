@@ -64,7 +64,8 @@ ItemListener {
 
 	private JMenuItem mSaveScreenshot;
 	private JMenuItem mSaveFullTimeline;
-
+	private JMenuItem mSaveFullTimelineWhiteBG;
+	
 	private JMenuItem mSelectBGColor;
 	private JMenuItem mSelectFGColor;
 
@@ -233,7 +234,26 @@ ItemListener {
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
+			p.saveToFileChooserSelection(gridPanel);		
+		}
+
+		else if(evt.getSource() == mSaveFullTimelineWhiteBG){
+			Color oldBG = data.getBackgroundColor();
+			Color oldFG = data.getForegroundColor();
+			data.setForegroundColor(Color.black);
+			data.setBackgroundColor(Color.white);
+				
+			SaveImage p = new SaveImage();
+			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
+			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
+			// Create a panel that is rendered from the four panels we supply
+			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
+			// Save it to a file which is chosen by the user
 			p.saveToFileChooserSelection(gridPanel);
+
+			data.setForegroundColor(oldFG);
+			data.setBackgroundColor(oldBG);
+		
 		}
 		
 
@@ -387,7 +407,12 @@ ItemListener {
 		mSaveFullTimeline.addActionListener(this);
 		saveMenu.add(mSaveFullTimeline);
 		mbar.add(saveMenu);
+		mSaveFullTimelineWhiteBG = new JMenuItem("Save All PE Timelines as JPG or PNG on White Background");
+		mSaveFullTimelineWhiteBG.addActionListener(this);
+		saveMenu.add(mSaveFullTimelineWhiteBG);
 
+		
+		
 		// Color Menu
 		JMenu colorMenu = new JMenu("Colors");
 

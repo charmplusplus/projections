@@ -626,8 +626,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 		int left  = 0;
 		int right = rectWidth-1;
-
-
+			
+		
 		if(beginTime < data.beginTime())
 		{
 			drawLeftArrow(g, c, verticalInset, rectHeight);
@@ -746,7 +746,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				return Color.white;
 			}
 		} else if (entryIndex == -2) { // unknown domain
-			return getBackground();
+			return data.getBackgroundColor();
 		} else if (isFunction) {
 			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 		}

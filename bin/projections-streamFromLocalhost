@@ -1,0 +1,13 @@
+#!/bin/sh
+
+jarpath="`dirname $0`/projections.jar"
+
+if test -x /usr/bin/cygpath
+then 
+  if test "`uname -o`" = "Cygwin"
+  then
+    jarpath=`/usr/bin/cygpath -w -a $jarpath`
+  fi 
+fi
+
+java -d64 -Xms512M -Xmx5G -ms512M -mx5G -classpath $jarpath projections.streaming.StreamingTool $*

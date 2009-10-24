@@ -134,7 +134,7 @@ public class Analysis {
 
       rcReader = 
 	new ProjectionsConfigurationReader(filename);
-      FileUtils.detectFiles(getSts(), baseName);
+      FileUtils.detectFiles(getSts(), baseName);	
       
       // Projections Colors
       String colorsaved = 
@@ -936,11 +936,11 @@ public class Analysis {
     }
 
     public String getLogName(int pnum) {
-	return FileUtils.getFileName(baseName, pnum, ProjMain.LOG);
+	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.LOG);
     }   
 
     public String getSumName(int pnum) {
-	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMMARY);
+	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.SUMMARY);
     }   
     
 //    public String getSumAccumulatedName() {
@@ -948,11 +948,11 @@ public class Analysis {
 //    }
 
     public String getSumDetailName(int pnum) {
-	return FileUtils.getFileName(baseName, pnum, ProjMain.SUMDETAIL);
+	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.SUMDETAIL);
     }
 
     public String getPoseDopName(int pnum) {
-	return FileUtils.getFileName(baseName, pnum, ProjMain.DOP);
+	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.DOP);
     }
 
     public void closeRC() {

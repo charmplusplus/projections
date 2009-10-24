@@ -5,6 +5,9 @@ import java.io.*;
 import projections.analysis.*;
 import projections.gui.*;
 
+import java.util.TreeMap;
+import java.util.regex.Pattern;
+
 /**
  *  FileUtils.java
  *  7/21/2006
@@ -23,6 +26,7 @@ public class FileUtils {
 	private static String validPEStrings[];
 	private static boolean hasFiles[];
 
+	
 	public static String getBaseName(String filename) {
 		String baseName = null;
 		if (filename.endsWith(".sum.sts")) {
@@ -61,6 +65,7 @@ public class FileUtils {
 		}
 	}
 
+	/** Scan through all files in the directory, looking for things that might be log files. */
 	public static void detectFiles(StsReader sts, String baseName, int type) {
 		File testFile = null;
 
@@ -88,32 +93,30 @@ public class FileUtils {
 		}
 		String files[] = testFile.list();
 		for (int file=0; file<files.length; file++) {
-			if (files[file].endsWith(getTypeExtension(type)) && files[file].startsWith(prefix_s)) {	
-				hasFiles[type] = true;
-				int pe = -1;
-				int endIdx =
-					files[file].lastIndexOf(".");
-				if (endIdx != -1) {
-					int startIdx =
-						files[file].substring(0,endIdx).lastIndexOf(".");
-					if (startIdx != -1) {
-						if (startIdx+1 < endIdx) {
-							pe = Integer.parseInt(files[file].substring(startIdx+1, endIdx));
-						} else {
-							break;
-						}
-					} else {
-						// some junk file that's not actually a projections 
-						// log file despite having the correct extension.
-						break;
-					}
+			String filename = files[file];
+			String extension = getTypeExtension(type);
+
+			if(filename.startsWith(prefix_s)){
+				String[] splits = filename.split("\\.");
+				int numSplits = splits.length;
+
+				if(splits[numSplits-1].equals(extension) ){
+					int pe = Integer.parseInt(splits[numSplits-2]);
+					validPEs[type].insert(pe);
+					hasFiles[type] = true;
+//					System.out.println("Found " + extension + " for pe " + pe);
+				} else if(splits[numSplits-2].equals(extension)  &&  splits[numSplits-1].equals("gz") ){
+					int pe = Integer.parseInt(splits[numSplits-3]);
+					validPEs[type].insert(pe);
+					hasFiles[type] = true;
+	//				System.out.println("Found " + extension + ".gz for pe " + pe);
 				} else {
-					// some junk file that's not actually a projections log
-					// file despite having the correct extension.
-					break;
+					// The file does not appear to match the desired names
 				}
-				validPEs[type].insert(pe);
-			}
+
+			}	
+
+
 		}
 	}
 
@@ -137,9 +140,10 @@ public class FileUtils {
 	return hasFiles[ProjMain.DOP];
     }
 
-    public static String getFileName(String baseName, int pnum, int type) {
+    public static String getCanonicalFileName(String baseName, int pnum, int type){
     	return baseName + "." + pnum + "." + getTypeExtension(type);
     }
+
 
     public static String getSumAccumulatedName(String baseName) {
     	return baseName+".sum";

@@ -4,6 +4,7 @@ import projections.gui.*;
 import projections.misc.*;
 
 import java.io.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  *  Written by Chee Wai Lee  4/12/2002
@@ -42,37 +43,72 @@ implements PointCapableReader
 
 	private boolean endComputationOccurred;
 
+	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
 	public GenericLogReader(String filename, double Nversion) {
 		super(filename, String.valueOf(Nversion));
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);
 		endComputationOccurred = false;
+			
+		reader = createBufferedReader(filename); 
+		version = Nversion;
 		try {
-			reader = new BufferedReader(new FileReader(filename));
-			version = Nversion;
 			reader.readLine(); // skip over the header (already read)
 		} catch (IOException e) {
-			System.err.println("Error reading file " + filename);
-		}
+			System.err.println("Error reading file");
+		} 
+		
+		
 	}
 
+	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
 	public GenericLogReader(int peNum, double Nversion) {
 		super(MainWindow.runObject[myRun].getLogName(peNum), String.valueOf(Nversion));
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);
 		endComputationOccurred = false;
+		
+		reader = createBufferedReader(sourceString); 
+		version = Nversion;
 		try {
-			reader = new BufferedReader(new FileReader(sourceString));
-			version = Nversion;
 			reader.readLine(); // skip over the header (already read)
 		} catch (IOException e) {
-			System.err.println("Error reading file " + sourceString);
-		}
+			System.err.println("Error reading file");
+		} 
+
 	}
 
+
+	/** Try to load the log file or a corresponding compressed version ending in ".gz" */
+	public BufferedReader createBufferedReader(String filename) {
+		BufferedReader r = null;
+		try {
+			// Try loading the log file using its standard name
+			FileReader fr = new FileReader(filename);
+			r = new BufferedReader(fr);
+			
+		} catch (FileNotFoundException e) {
+			try{
+				// Try loading the gz version of the log file
+				String inFilename = filename + ".gz";
+				InputStream fis = new FileInputStream(inFilename);
+				InputStream gis = new GZIPInputStream(fis);
+				r = new BufferedReader(new InputStreamReader(gis));
+			} catch (IOException e2) {
+				System.err.println("Error reading file " + filename + ".gz");
+				return null;
+			}
+		}	
+		return r;
+
+	}
+	
+	
+	/** Check if the log file or a corresponding compressed version ending in ".gz" is readable */
 	protected boolean checkAvailable() {
 		File sourceFile = new File(sourceString);
-		return sourceFile.canRead();
+		File sourceFileGZ = new File(sourceString + ".gz");		
+		return sourceFile.canRead() || sourceFileGZ.canRead();
 	}
 
 	

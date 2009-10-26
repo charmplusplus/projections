@@ -41,17 +41,20 @@ Clickable
 	// **CW** Not so good for now, used by both Dialog and Window
 	public String attributes[][] = {
 			{ "Execution Time by Activity",
-				"Idle Time",
+				"Maximum Idle Time",
 				"Msgs Sent by Activity", 
-			"Bytes Sent by Activity" },
+			"Bytes Sent by Activity",
+			"Minimum Idle Time"},
 			{ "Execution Time (us)",
 				"Time (us)",
 				"Number of Messages",
-			"Number of Bytes" },
+			"Number of Bytes",
+			"Time (us)"},
 			{ "us",
 				"us",
 				"",
-			"" }
+			"" ,
+			""}
 	};
 
 	// derived data after analysis
@@ -183,7 +186,7 @@ Clickable
 		numActivities = MainWindow.runObject[myRun].getNumActivity(currentActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(currentActivity);
 		numSpecials = 0;
-		if (currentAttribute <= 1) {
+		if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 			// **CWL NOTE** - this is currently a hack until I can find a way
 			// to do this more cleanly!!!
 			//
@@ -291,7 +294,7 @@ Clickable
 							if (!markedBegin) {
 								markedBegin = true;
 							}
-							if (currentAttribute <= 1) {
+							if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 								// even if a previous begin is found, just
 								// overwrite the begin time, we're
 								// not expecting nesting here.
@@ -306,7 +309,7 @@ Clickable
 							isFirstEvent = false;
 							if (markedBegin) {
 								markedBegin = false;
-								if (currentAttribute <= 1) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 									tempData[count][logData.entry] +=
 										logData.time - beginBlockTime;
 								}
@@ -321,7 +324,7 @@ Clickable
 							// NOTE: This code assumes that IDLEs cannot
 							// possibly be nested inside of PROCESSING
 							// blocks (which should be true).
-							if (currentAttribute <= 1) {
+							if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 								beginBlockTime = logData.time;
 							}
 							break;
@@ -333,7 +336,7 @@ Clickable
 							// check pairing
 							if (markedIdle) {
 								markedIdle = false;
-								if (currentAttribute <= 1) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 									tempData[count][numActivities] +=
 										logData.time - beginBlockTime;
 								}
@@ -348,7 +351,7 @@ Clickable
 					case ProjDefs.END_PROCESSING:
 						// lastBE is empty by design in this case, so
 						// use beginBlockTime recorded from previously.
-						if (currentAttribute <= 1) {
+						if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 							tempData[count][logData.entry] +=
 								endTime - beginBlockTime;
 						}
@@ -356,7 +359,7 @@ Clickable
 					case ProjDefs.END_IDLE:
 						// lastBE is empty by design in this case, so
 						// use beginBlockTime recorded from previously.
-						if (currentAttribute <= 1) {
+						if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 							tempData[count][numActivities] +=
 								endTime - beginBlockTime;
 						}
@@ -374,13 +377,13 @@ Clickable
 							}
 							switch (beginEvent.type) {
 							case ProjDefs.BEGIN_PROCESSING:
-								if (currentAttribute <= 1) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 									tempData[count][beginEvent.entry] +=
 										endTime - beginBlockTime;
 								}
 								break;
 							case ProjDefs.BEGIN_IDLE:
-								if (currentAttribute == 1) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
 									tempData[count][numActivities] +=
 										endTime - beginBlockTime;
 								}
@@ -483,11 +486,18 @@ Clickable
 		// enough
 		// to discover outliers by merely sorting them, the mapping has
 		// to be preserved for display.
+		
+		// Maxmimum Black time, just use -1*sum(tempData[p][0...numActivities])
+		// Active Entry methods, use count( tempData[p][0...numActivities-1] > 0 )
+
 		for (int p=0; p<validPEs.size(); p++) {
 			// this is an initial hack.
 			if (currentAttribute == 1) {
 				// induce a sort by decreasing idle time
 				processorDiffs[p] -= tempData[p][numActivities];
+			} else if (currentAttribute == 4) {
+				// induce a sort by decreasing idle time
+				processorDiffs[p] += tempData[p][numActivities];
 			} else {
 				for (int act=0; act<numActivities; act++) {
 					processorDiffs[p] += 

@@ -1,6 +1,7 @@
 package projections.gui.Timeline;
 
 import java.text.DecimalFormat;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.Dimension;
@@ -10,6 +11,7 @@ import projections.gui.Util;
 
 import java.awt.FontMetrics;
 
+/** The class that draws the top time axis on the top of the timeline window */
 public class AxisPanel extends JPanel 
 {
 
@@ -66,7 +68,7 @@ public class AxisPanel extends JPanel
 	public Dimension getPreferredSize() {
 		int preferredWidth = 200;
 		int preferredHeight = totalHeight();
-		return new Dimension(preferredWidth, preferredHeight);
+		return new Dimension(preferredWidth, preferredHeight+40);
 	}
 
 	/** Paint the axis in its panel */
@@ -84,29 +86,40 @@ public class AxisPanel extends JPanel
 
 		int maxx = getWidth();
 
-		g.setColor(data.getForegroundColor());
-		g.drawLine(data.offset(), axispos(), maxx-data.offset(), axispos());
-
-		// Draw the tick marks and timestamps
-		for (int x=0; x<numIntervals(); x++) {
-			
-			/** the coordinate in the panel */
-			int curx = data.leftOffset() + (int)(x*pixelsPerTickMark()) ;
-
-			if (curx > maxx) {
-				break;
-			}
-			
-			if (x % labelIncrement() == 0) {  
-				String tmp = format_.format(data.screenToTime(curx));				
-				g.drawLine(curx, axispos()-largeTickHalfLength, curx, axispos() + largeTickHalfLength);
-				g.drawString(tmp, curx - fm.stringWidth(tmp)/2, textpos());
-			} else {
-				g.drawLine(curx, axispos()-smallTickHalfLength, curx, axispos()+smallTickHalfLength);
-			}
-			
-		}
+		// Determine the left and right pixel coordinates where we will be drawing the timeline
+		int xLeft = data.offset();
+		int xRight = maxx-data.offset();
 		
+		// Draw horizontal line
+		g.setColor(data.getForegroundColor());
+		g.drawLine(xLeft, axispos(), xRight, axispos());
+
+		
+		// Draw the big tick marks
+		for(int i=0;i<numBigTicks()+1;i++){
+		
+			double timeForTick = (startTimePretty()+i*smallTickTimeIncrement()*smallTicksPerBigTick());
+			int pixelForTickX = data.timeToScreenPixel(timeForTick);
+
+			if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
+				String tmp = format_.format(timeForTick);				
+				g.drawLine(pixelForTickX, axispos()-largeTickHalfLength, pixelForTickX, axispos() + largeTickHalfLength);
+				g.drawString(tmp, pixelForTickX - fm.stringWidth(tmp)/2, textpos());
+			}
+		}
+				
+		
+		// Draw the small tick marks
+		double timeForFirstBigTick = startTimePretty();
+		for(int i=0;i<numSmallTicks()+1;i++){
+			
+			double timeForTick = timeForFirstBigTick + i*smallTickTimeIncrement();
+			int pixelForTickX = data.timeToScreenPixel(timeForTick);
+			if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
+				g.drawLine(pixelForTickX, axispos()-smallTickHalfLength, pixelForTickX, axispos()+smallTickHalfLength);			
+			}
+		}
+				
 		
 		// Draw the label for the axis
 		g.drawString(axisLabel(), getWidth()/2 - fm.stringWidth(axisLabel())/2, axisLabelPositionY());
@@ -114,29 +127,53 @@ public class AxisPanel extends JPanel
 	}
 
 
+	/** Round the left offset to a multiple of the pretty timeIncrement() */
+	private long startTimePretty() {
+		return (long)Math.ceil(((long)data.startTime()/(long)smallTickTimeIncrement())*smallTickTimeIncrement());
+	}
+
 	public String axisLabel(){
 		return "Time In Microseconds";
 	}
 	
+
+	/** Number of microseconds per tickmark */
+	public int smallTickTimeIncrement(){
+		int actualDisplayWidth = getWidth();
+		double pixelPerMicrosecond =  (double) data.lineWidth(actualDisplayWidth) / data.totalTime();
+		double pixelsPerSmallTick = 5.0;
+		int microsecondPerTick = Util.getBestIncrement( (int) Math.ceil(pixelsPerSmallTick / pixelPerMicrosecond ) );
+		return microsecondPerTick;
+	}
+	
 	
 	/** The number of ticks we can display on the timeline in the given sized window */
-	public int numIntervals(){
-		return (int) Math.ceil(data.totalTime() / timeIncrement(getWidth())) + 1;
-	}   
+	public int numSmallIntervals(){
+		return (int) Math.ceil(data.totalTime() / smallTickTimeIncrement()) + 1;
+	}
 
+	public int numSmallTicks(){
+		return 1+numSmallIntervals();
+	}
+	
+	public int numBigIntervals(){
+		return numSmallIntervals() / smallTicksPerBigTick();
+	}
+	
+	public int numBigTicks(){
+		return 1 + numBigIntervals();
+	}
+	
+	/** number of pixels per tick mark */
+	public double pixelsPerTickMark(){
+		return  ((double) data.lineWidth(getWidth())) / ((double)numSmallIntervals());
+	}
+	
 	/** The number of tickmarks between the labeled big ticks */
-	public int labelIncrement() {
+	public int smallTicksPerBigTick() {
 		return Util.getBestIncrement((int)(Math.ceil(data.maxLabelLen() / pixelsPerTickMark())));
 	}
 	
-	/** Number of microseconds per tickmark */
-	public int timeIncrement(int actualDisplayWidth){
-		return Util.getBestIncrement( (int) Math.ceil(5 / ( (double) data.lineWidth(actualDisplayWidth) / data.totalTime() )  ) );
-	}
 
-	/** number of pixels per tick mark */
-	public double pixelsPerTickMark(){
-		return  ((double) data.lineWidth(getWidth())) / ((double)numIntervals());
-	}
 
 }

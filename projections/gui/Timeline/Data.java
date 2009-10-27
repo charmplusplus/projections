@@ -801,6 +801,7 @@ public class Data
 
 	}
 
+	/** return pixel offset for left margin */
 	public int leftOffset(){
 		return offset();
 	}

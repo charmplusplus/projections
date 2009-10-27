@@ -44,17 +44,26 @@ Clickable
 				"Maximum Idle Time",
 				"Msgs Sent by Activity", 
 			"Bytes Sent by Activity",
-			"Minimum Idle Time"},
+			"Minimum Idle Time",
+			"Active Entry Methods",
+			"Black Time",
+			"Average Grain Size"},
 			{ "Execution Time (us)",
 				"Time (us)",
 				"Number of Messages",
 			"Number of Bytes",
+			"Time (us)",
+			" ",
+			"Time (us)",
 			"Time (us)"},
 			{ "us",
 				"us",
 				"",
 			"" ,
-			""}
+			"us",
+			"",
+			"us",
+			"us"}
 	};
 
 	// derived data after analysis
@@ -186,17 +195,24 @@ Clickable
 		numActivities = MainWindow.runObject[myRun].getNumActivity(currentActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(currentActivity);
 		numSpecials = 0;
-		if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+		if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4 || currentAttribute == 5 || currentAttribute == 6 || currentAttribute == 7) {
 			// **CWL NOTE** - this is currently a hack until I can find a way
 			// to do this more cleanly!!!
 			//
 			// add Idle to the current set
 			numSpecials = 1;
+			if(currentAttribute == 6 || currentAttribute == 7){		
+				numSpecials = 2;
+			}
 			graphColors = new Color[numActivities+numSpecials];
 			for (int i=0;i<numActivities; i++) {
 				graphColors[i] = tempGraphColors[i];
 			}
 			graphColors[numActivities] = Color.white;
+			
+			if( currentAttribute == 6 ||currentAttribute == 7){							
+				graphColors[numActivities+1] = Color.yellow;
+			}
 		} else {
 			graphColors = tempGraphColors;
 		}
@@ -221,7 +237,7 @@ Clickable
 			if (progressBar.isCanceled()) {
 				return;
 			}
-			// Construct tempData (read) array here
+			// Construct tempData (read) array hereColorSelectable
 			//
 			// **NOTE** We really need a generic interface to a "data"
 			// object. Re-writing the reading code each time for each
@@ -294,7 +310,7 @@ Clickable
 							if (!markedBegin) {
 								markedBegin = true;
 							}
-							if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+							if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4|| currentAttribute == 5|| currentAttribute == 6|| currentAttribute == 7) {
 								// even if a previous begin is found, just
 								// overwrite the begin time, we're
 								// not expecting nesting here.
@@ -309,7 +325,7 @@ Clickable
 							isFirstEvent = false;
 							if (markedBegin) {
 								markedBegin = false;
-								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5||currentAttribute == 6|| currentAttribute == 7) {
 									tempData[count][logData.entry] +=
 										logData.time - beginBlockTime;
 								}
@@ -324,7 +340,7 @@ Clickable
 							// NOTE: This code assumes that IDLEs cannot
 							// possibly be nested inside of PROCESSING
 							// blocks (which should be true).
-							if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+							if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5|| currentAttribute == 6 || currentAttribute == 7) {
 								beginBlockTime = logData.time;
 							}
 							break;
@@ -336,7 +352,8 @@ Clickable
 							// check pairing
 							if (markedIdle) {
 								markedIdle = false;
-								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5||currentAttribute == 6 || currentAttribute == 7) {
+									
 									tempData[count][numActivities] +=
 										logData.time - beginBlockTime;
 								}
@@ -351,7 +368,7 @@ Clickable
 					case ProjDefs.END_PROCESSING:
 						// lastBE is empty by design in this case, so
 						// use beginBlockTime recorded from previously.
-						if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+						if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5||currentAttribute == 6 || currentAttribute == 7) {
 							tempData[count][logData.entry] +=
 								endTime - beginBlockTime;
 						}
@@ -359,7 +376,7 @@ Clickable
 					case ProjDefs.END_IDLE:
 						// lastBE is empty by design in this case, so
 						// use beginBlockTime recorded from previously.
-						if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+						if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5||currentAttribute == 6 || currentAttribute == 7) {
 							tempData[count][numActivities] +=
 								endTime - beginBlockTime;
 						}
@@ -377,13 +394,13 @@ Clickable
 							}
 							switch (beginEvent.type) {
 							case ProjDefs.BEGIN_PROCESSING:
-								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5||currentAttribute == 6 || currentAttribute == 7) {
 									tempData[count][beginEvent.entry] +=
 										endTime - beginBlockTime;
 								}
 								break;
 							case ProjDefs.BEGIN_IDLE:
-								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4) {
+								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4|| currentAttribute == 5|| currentAttribute == 6 || currentAttribute == 7) {
 									tempData[count][numActivities] +=
 										endTime - beginBlockTime;
 								}
@@ -468,6 +485,26 @@ Clickable
 			peNames[p] = Integer.toString(validPEs.nextElement());
 		}
 
+		for (int p=0; p<validPEs.size(); p++) {
+			if (currentAttribute == 6) {
+				double total_time = 0.0;
+				for(int iact = 0; iact<numActivities+1; iact++)
+					total_time += tempData[p][iact];			
+				tempData[p][numActivities+numSpecials-1] = endTime-startTime - total_time;			
+			}else if (currentAttribute == 7){
+				int __count_entries = 0;
+				for(int iact = 0; iact<numActivities; iact++)				//tempData[p][numActivities+numSpecials-1] = 0;//processorDiffs[p];
+					//System.out.println(" active methods" + processorDiffs[p] + "idle time=" + tempData[p][numActivities]);
+				{
+					if(tempData[p][iact] > 0)
+						__count_entries++;
+					tempData[p][numActivities+numSpecials-1] += tempData[p][iact];
+				}
+				if(__count_entries>0)
+					tempData[p][numActivities+numSpecials-1] /= __count_entries;			
+			}
+		}
+		
 		// pass #1, determine global average
 		for (int act=0; act<numActivities+numSpecials; act++) {
 			for (int p=0; p<validPEs.size(); p++) {
@@ -496,9 +533,21 @@ Clickable
 				// induce a sort by decreasing idle time
 				processorDiffs[p] -= tempData[p][numActivities];
 			} else if (currentAttribute == 4) {
-				// induce a sort by decreasing idle time
+				// induce a sort by increasing idle time
 				processorDiffs[p] += tempData[p][numActivities];
-			} else {
+			} else if (currentAttribute == 5) {
+				// active entry method
+				for(int iact = 0; iact<numActivities; iact++)
+				{
+					if(tempData[p][iact] > 0)
+						processorDiffs[p]++;				
+				}
+			}else if (currentAttribute == 6) {
+				//black time totaltime - entrytime-idle time
+				processorDiffs[p] = tempData[p][numActivities+numSpecials-1];
+			} else if(currentAttribute == 7) {
+				processorDiffs[p] = tempData[p][numActivities+numSpecials-1];							
+			}else {
 				for (int act=0; act<numActivities; act++) {
 					processorDiffs[p] += 
 						Math.abs(tempData[p][act] - tmpAvg[act]) *
@@ -784,7 +833,9 @@ Clickable
 		}
 		if ((yVal == numActivities)) {
 			rString[1] = "Activity: Idle Time";
-		} else {
+		} else if (yVal == numActivities+1){
+			rString[1] = attributes[0][currentAttribute];
+		}else {
 			rString[1] = "Activity: " + 
 			MainWindow.runObject[myRun].getActivityNameByIndex(currentActivity, yVal);
 		}

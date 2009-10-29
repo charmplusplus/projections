@@ -226,28 +226,29 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    progressBar.setNote("Reading");
 			    progressBar.setProgress(0);
 			    while (processorList.hasMoreElements()) {
-				nextPe = processorList.nextElement();
-				progressBar.setProgress(count);
-				progressBar.setNote("[PE: " + nextPe +
-						    " ] Reading Data.");
-				if (progressBar.isCanceled()) {
-				    return null;
+                    nextPe = processorList.nextElement();
+                    progressBar.setProgress(count);
+                    progressBar.setNote("[PE: " + nextPe +
+                        " ] Reading Data.");
+                    if (progressBar.isCanceled()) {
+                        return null;
 				}
 				// inefficient, but temporary workaround
-				OrderedIntList tempList = 
-				    new OrderedIntList();
-				tempList.insert(nextPe);
-				MainWindow.runObject[myRun].LoadGraphData(intervalSize,
-						       startInterval,
-						       endInterval,
-						       true, tempList);
-                                if(ampiTraceOn){
-                                    ampiGraphPanel.createAMPITimeProfileData(nextPe, count);
-                                }
-				fillGraphData();
-				count++;
-			    }
-			    progressBar.close();
+				
+                        OrderedIntList tempList = 
+                            new OrderedIntList();
+                        tempList.insert(nextPe);
+                        MainWindow.runObject[myRun].LoadGraphData(intervalSize,
+                            startInterval,
+                            endInterval,
+                            true, tempList);
+                        if(ampiTraceOn){
+                            ampiGraphPanel.createAMPITimeProfileData(nextPe, count);
+                        }
+                        fillGraphData();
+                        count++;
+                }
+                progressBar.close();
 			    // set the exists array to accept non-zero 
 			    // entries only have initial state also 
 			    // display all existing data. Only do this 
@@ -301,31 +302,18 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    int[][] entryData = MainWindow.runObject[myRun].getUserEntryData(ep, LogReader.TIME);
 	    for (int interval=0; interval<graphData.length; interval++) {
 		graphData[interval][ep] += entryData[0][interval];
+        graphData[interval][numEPs] -= entryData[0][interval]; // overhead = -work time
 	    }
 	}
 	
 
 	//YS add for idle time SYS_IDLE=2
 	int[][] idleData = MainWindow.runObject[myRun].getSystemUsageData(2); //percent
-    System.out.println("idle time= ");
     for (int interval=0; interval<graphData.length; interval++) {
     		graphData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
-            System.out.print( idleData[0][interval]+"  ");
+            graphData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
+            graphData[interval][numEPs] += intervalSize;  
     }
-   System.out.println("====================="); 
-    //YS overhead
-    for(int interval=0; interval<graphData.length; interval++)
-    {
-    	for (int ep=0; ep<numEPs; ep++) // all work time
-    	{
-    		graphData[interval][numEPs] += graphData[interval][ep];
-    	}
-    	graphData[interval][numEPs] += graphData[interval][numEPs+1]; // worktime+idle time
-    	
-    	graphData[interval][numEPs] = intervalSize - graphData[interval][numEPs];
-    }
-    
-    System.out.println("YS Debug: intervalSize="+intervalSize + "idle time 0" + graphData[0][numEPs+1] + "\t overhead=" + graphData[0][numEPs]);
 
     }
 
@@ -393,15 +381,6 @@ public class TimeProfileWindow extends GenericGraphWindow
 		}
 	    }
 	}
-//	
-//	if(yVal == outputData[xVal].length -2)
-//	{
-//		epName = "Overhead";
-//	}else if(yVal == outputData[xVal].length -1)
-//	{
-//		epName = "Idle time";
-//	}
-
 	String[] rString = new String[4];
 	
 	rString[0] = "Time Interval: " + 
@@ -409,7 +388,19 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    U.t((xVal+startInterval+1)*intervalSize);
 	rString[1] = "Chare Name: " + epClassName;
 	rString[2] = "Entry Method: " + epName;
-	rString[3] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
+    rString[3] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
+    //deal with idle and overhead time
+    if(yVal == outputData[xVal].length -2)
+	{
+        rString[1] = "";
+        rString[2] = "Overhead";
+        rString[3] = "Time = " + U.t((long)(outputData[xVal][yVal]));
+	}else if(yVal == outputData[xVal].length -1)
+	{
+        rString[1] = "";
+        rString[2] = "Idle time";
+        rString[3] = "Time = " + U.t((long)(outputData[xVal][yVal]));
+	}
 	return rString;
     }	
 

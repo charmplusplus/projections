@@ -43,6 +43,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 
     // data required for entry selection dialog
     int numEPs;
+    //YSun add
+    int special;
     private String typeLabelNames[] = {"Entry Points"};
     boolean stateArray[][];
     boolean existsArray[][];
@@ -85,16 +87,22 @@ public class TimeProfileWindow extends GenericGraphWindow
 	super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
-	// here
+	// here overhead, idle time
+	special = 2;
 	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
-	stateArray = new boolean[1][numEPs];
-	existsArray = new boolean[1][numEPs];
+	stateArray = new boolean[1][numEPs+special];
+	existsArray = new boolean[1][numEPs+special];
 	colorArray = new Color[1][];
 	colorArray[0] = MainWindow.runObject[myRun].getColorMap();
-	entryNames = new String[numEPs];
+	entryNames = new String[numEPs+special];
 	for (int ep=0; ep<numEPs; ep++) {
 	    entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 	}
+	//YSun idle time
+	//for(int ep = numEPs; ep<numEPs+special; ep++)
+	entryNames[numEPs] = "Overhead";
+	entryNames[numEPs+1] = "Idle time";
+		
 	mainPanel = new JPanel();
     	getContentPane().add(mainPanel);
 
@@ -207,7 +215,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    int nextPe = 0;
 			    int count = 0;
 			    int numIntervals = endInterval-startInterval+1;
-			    graphData = new double[numIntervals][numEPs];
+			    //entry number + idle
+			    graphData = new double[numIntervals][numEPs+special];
 			    long progressStart = System.currentTimeMillis();
 			    ProgressMonitor progressBar =
 				new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
@@ -244,7 +253,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    // display all existing data. Only do this 
 			    // once in the beginning
 			    if (startFlag) {
-				for (int ep=0; ep<numEPs; ep++) {
+				for (int ep=0; ep<numEPs+special; ep++) {
 				    for (int interval=0; 
 					 interval<endInterval-startInterval+1;
 					 interval++) {
@@ -294,6 +303,30 @@ public class TimeProfileWindow extends GenericGraphWindow
 		graphData[interval][ep] += entryData[0][interval];
 	    }
 	}
+	
+
+	//YS add for idle time SYS_IDLE=2
+	int[][] idleData = MainWindow.runObject[myRun].getSystemUsageData(2); //percent
+    System.out.println("idle time= ");
+    for (int interval=0; interval<graphData.length; interval++) {
+    		graphData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
+            System.out.print( idleData[0][interval]+"  ");
+    }
+   System.out.println("====================="); 
+    //YS overhead
+    for(int interval=0; interval<graphData.length; interval++)
+    {
+    	for (int ep=0; ep<numEPs; ep++) // all work time
+    	{
+    		graphData[interval][numEPs] += graphData[interval][ep];
+    	}
+    	graphData[interval][numEPs] += graphData[interval][numEPs+1]; // worktime+idle time
+    	
+    	graphData[interval][numEPs] = intervalSize - graphData[interval][numEPs];
+    }
+    
+    System.out.println("YS Debug: intervalSize="+intervalSize + "idle time 0" + graphData[0][numEPs+1] + "\t overhead=" + graphData[0][numEPs]);
+
     }
 
     public void applyDialogColors() {
@@ -303,7 +336,7 @@ public class TimeProfileWindow extends GenericGraphWindow
     void setOutputGraphData() {
 	// need first pass to decide the size of the outputdata
 	int outSize = 0;
-	for (int ep=0; ep<numEPs; ep++) {
+	for (int ep=0; ep<numEPs+special; ep++) {
 	    if (stateArray[0][ep]) {
 		outSize++;
 	    }
@@ -319,12 +352,18 @@ public class TimeProfileWindow extends GenericGraphWindow
 		new Color[outSize];
 	    for (int i=0; i<numIntervals; i++) {
 		int count = 0;
-		for (int ep=0; ep<numEPs; ep++) {
+		for (int ep=0; ep<numEPs+special; ep++) {
 		    if (stateArray[0][ep]) {
 			outputData[i][count] = graphData[i][ep];
-			outColors[count++] = colorArray[0][ep];
+			if(ep == numEPs)
+				outColors[count++] = Color.black;
+			else if (ep == numEPs+1)
+				outColors[count++] = Color.white;
+			else
+				outColors[count++] = colorArray[0][ep];
 		    }
 		}
+
 	    }
 	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
 		     startInterval, 1.0);
@@ -340,6 +379,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	    return null;
 	}
 
+	/******************* YSun change here */
 	// find the ep corresponding to the yVal
 	int count = 0;
 	String epName = "";
@@ -353,6 +393,14 @@ public class TimeProfileWindow extends GenericGraphWindow
 		}
 	    }
 	}
+//	
+//	if(yVal == outputData[xVal].length -2)
+//	{
+//		epName = "Overhead";
+//	}else if(yVal == outputData[xVal].length -1)
+//	{
+//		epName = "Idle time";
+//	}
 
 	String[] rString = new String[4];
 	

@@ -46,7 +46,7 @@ Clickable
 			"Bytes Sent by Activity",
 			"Minimum Idle Time",
 			"Active Entry Methods",
-			"Black Time",
+			"Overhead",
 			"Average Grain Size"},
 			{ "Execution Time (us)",
 				"Time (us)",

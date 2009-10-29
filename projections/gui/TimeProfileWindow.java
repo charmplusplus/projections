@@ -17,6 +17,8 @@ public class TimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
 
+	int YS_PECount = 0;
+	
 	TimeProfileWindow thisWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
@@ -225,6 +227,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 						    processorList.size());
 			    progressBar.setNote("Reading");
 			    progressBar.setProgress(0);
+			    
 			    while (processorList.hasMoreElements()) {
                     nextPe = processorList.nextElement();
                     progressBar.setProgress(count);
@@ -247,6 +250,7 @@ public class TimeProfileWindow extends GenericGraphWindow
                         }
                         fillGraphData();
                         count++;
+                        YS_PECount++;
                 }
                 progressBar.close();
 			    // set the exists array to accept non-zero 
@@ -313,6 +317,7 @@ public class TimeProfileWindow extends GenericGraphWindow
     		graphData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
             graphData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
             graphData[interval][numEPs] += intervalSize;  
+
     }
 
     }

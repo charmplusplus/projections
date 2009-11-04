@@ -588,7 +588,7 @@ public class LogLoader extends ProjDefs
 	}
 
 	/** Read the timeline for a single PE and return the result as a Collection of TimelineEvent's */
-	public void createtimeline(int pe, long Begin, long End, List Timeline, Set<UserEventObject>  userEventVector)
+	public void createtimeline(int pe, long Begin, long End, LinkedList<TimelineEvent> Timeline, Set<UserEventObject>  userEventVector, long minEntryDuration)
 	throws LogLoadException
 	{
 		long BeginTime = 0;
@@ -747,6 +747,11 @@ public class LogLoader extends ProjDefs
 						// timeline event.
 						if (TE != null) {
 							TE.EndTime = LE.Time - BeginTime;
+							// If the entry was not long enough, remove it from the timeline
+							if(TE.EndTime - TE.BeginTime < minEntryDuration){
+								Timeline.removeLast();
+							}
+							
 						}
 
 						// Phase 2: Handle current function. Note that the
@@ -770,6 +775,12 @@ public class LogLoader extends ProjDefs
 						if (TE != null) {
 							TE.EndTime = LE.Time - BeginTime;
 							cstack.pop(TE.id.id[0], TE.id.id[1], TE.id.id[2]);
+							
+							// If the entry was not long enough, remove it from the timeline
+							if(TE.EndTime - TE.BeginTime < minEntryDuration){
+								Timeline.removeLast();
+							}
+							
 						}
 						TE = null;
 
@@ -796,7 +807,7 @@ public class LogLoader extends ProjDefs
 									enclosingDummy.cpuEnd,
 									enclosingDummy.numPapiCounts,
 									enclosingDummy.papiCounts);
-							Timeline.add(TE);
+								Timeline.add(TE);
 						} else {
 							// "create" previous function on stack.
 							TE = new TimelineEvent();
@@ -819,6 +830,10 @@ public class LogLoader extends ProjDefs
 							// the prior begin processing event.
 							if (TE != null) {
 								TE.EndTime = LE.Time - BeginTime;
+								// If the entry was not long enough, remove it from the timeline
+								if(TE.EndTime - TE.BeginTime < minEntryDuration){
+									Timeline.removeLast();
+								}
 							}
 							TE = null;
 						}
@@ -877,11 +892,16 @@ public class LogLoader extends ProjDefs
 						if ((lastBeginEvent != null) &&
 								(lastBeginEvent.TransactionType==BEGIN_PROCESSING) &&
 								(lastBeginEvent.Entry == LE.Entry)) {
+
 							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
 									LE.Time-BeginTime,
 									lastBeginEvent.Entry,
 									lastBeginEvent.Pe);
-							Timeline.add(TE);
+
+							if(LE.Time - lastBeginEvent.Time >= minEntryDuration){
+								// Just don't add this event if it is too small. We need to create the event because other following entries might refer to it???
+								Timeline.add(TE);
+							}
 							TE = null;
 							isProcessing = false;
 							break;
@@ -902,6 +922,10 @@ public class LogLoader extends ProjDefs
 								// end previous function's timeline event.
 								if (TE != null) {
 									TE.EndTime = LE.Time - BeginTime;
+									// If the entry was not long enough, remove it from the timeline
+									if(TE.EndTime - TE.BeginTime < minEntryDuration){
+										Timeline.removeLast();
+									}
 								}
 								TE = null;
 								enclosingDummy = null;
@@ -913,6 +937,10 @@ public class LogLoader extends ProjDefs
 						if (TE != null) {
 							TE.EndTime = LE.Time - BeginTime;
 							TE.cpuEnd = LE.cpuEnd;
+							// If the entry was not long enough, remove it from the timeline
+							if(TE.EndTime - TE.BeginTime < minEntryDuration){
+								Timeline.removeLast();
+							}
 							for (int i=0; i<LE.numPapiCounts; i++) {
 								TE.papiCounts[i] = LE.papiCounts[i] -
 								TE.papiCounts[i];
@@ -1160,6 +1188,10 @@ public class LogLoader extends ProjDefs
 						lastBeginEvent = null;
 						if (TE != null) {   
 							TE.EndTime = LE.Time - BeginTime;
+							// If the entry was not long enough, remove it from the timeline
+							if(TE.EndTime - TE.BeginTime < minEntryDuration){
+								Timeline.removeLast();
+							}
 						}
 						TE=null;
 						break;
@@ -1182,6 +1214,10 @@ public class LogLoader extends ProjDefs
 				if (LE.Entry != -1) {
 					if (LE.TransactionType == END_PROCESSING) {
 						TE.EndTime = LE.Time - BeginTime;
+						// If the entry was not long enough, remove it from the timeline
+						if(TE.EndTime - TE.BeginTime < minEntryDuration){
+							Timeline.removeLast();
+						}
 						TE=null;
 					}
 				}
@@ -1189,7 +1225,7 @@ public class LogLoader extends ProjDefs
 				LE = new LogEntry(data);
 			}
 		} catch (EOFException e) { 
-			/*ignore*/ 
+			/* Reached end of the log file */ 
 		} catch (FileNotFoundException E) {
 			System.out.println("ERROR: couldn't open file " + 
 					MainWindow.runObject[myRun].getLogName(pe));

@@ -1,6 +1,9 @@
 package projections.gui;
 import javax.swing.*;
+
 import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
@@ -19,10 +22,20 @@ import projections.analysis.*;
  *  subclass of ProjectionsWindow in order to present a range input
  *  dialog box to the user.
  *
- *  This dialog box is designed to maintain old information as long
- *  as it was not destroyed and garbage collected.
- *
- *  Added a history combo box - 8/20/2002
+ *  
+ *  @note (idooley2 2009) This class needs a good rewrite. There is no reason that 
+ *  other classes should be deriving from this class. The other classes
+ *  should just provide a JPanel containing their specific input
+ *  components. If verification of those fields is required, those
+ *  classes should register their own listeners and should just call
+ *  a single method in this class to specify that the fields are not
+ *  yet verified. Furthermore, there is no reason to have an update
+ *  button here. To start fixing this, I'm making it possible to 
+ *  specify a panel with additional stuff that is incorporated into this 
+ *  one. In the future, the other classes deriving from this should switch
+ *  to doing the same. Then this wonky inheritance mechanism can be
+ *  eliminated.
+ *  
  */
 
 public class RangeDialog extends JDialog
@@ -43,6 +56,9 @@ public class RangeDialog extends JDialog
     // inheritable GUI objects
     JPanel mainPanel, historyPanel, buttonPanel;
 
+    /** A JPanel containing any other input components required by the tool using this dialog box */
+    JPanel toolSpecificPanel;
+    
     JSelectField processorsField;
     JTimeTextField startTimeField;
     JTimeTextField endTimeField;
@@ -85,8 +101,8 @@ public class RangeDialog extends JDialog
      */
     public RangeDialog(ProjectionsWindow parentWindow,
 		       String titleString,
-		       boolean disableRange) {
-	this(parentWindow, titleString);
+		       boolean disableRange, JPanel toolSpecificPanel) {
+	this(parentWindow, titleString, null);
 	this.disableRange = disableRange;
     }
 
@@ -94,12 +110,17 @@ public class RangeDialog extends JDialog
      *  Constructor. Creation of the dialog object should be separate from
      *  the GUI layout. This allows for the proper inheritance from this
      *  base class.
+     *  
+     *  If a tool wants to provide its own extra input items, they should 
+     *  be put inside a JPanel passed in as toolSpecificPanel.
+     *  
      */
     public RangeDialog(ProjectionsWindow parentWindow, 
-		       String titleString)
+		       String titleString, JPanel toolSpecificPanel)
     {
 	super(parentWindow, titleString, true);
 	this.parentWindow = parentWindow;
+	this.toolSpecificPanel = toolSpecificPanel;
 
 	// the only purpose of numProcessors is to determine the limit
 	// of the processor list.
@@ -121,67 +142,75 @@ public class RangeDialog extends JDialog
      */
     public void actionPerformed(ActionEvent evt)
     {
-	if (evt.getSource() instanceof JButton) {
-	    JButton b = (JButton) evt.getSource();
-	    
-	    if(b == bOK) {
-		// point user to an inconsistent field.
-		JTextField someField = checkConsistent();
-		if (someField != null) {
-		    someField.selectAll();
-		    someField.requestFocus();
-		    return;
-		} else {
-		   dialogState = DIALOG_OK;	// set local variable state 
-		}
-		setVisible(false);
-	    } else if (b == bUpdate) {
-		// update all text fields.
-		updateData(processorsField);
-		updateData(startTimeField);
-		updateData(endTimeField);
-		return;	// CHECK this return
-	    }else if (b == bCancel){
-		dialogState = DIALOG_CANCELLED;
-		setVisible(false);
-	    } else if (b == bAddToHistory) {
-		long start = startTimeField.getValue();
-		long end = endTimeField.getValue();
-		history.add(start, end);
-		String historyString = U.t(start) + " to " + U.t(end);
-		historyList.insertItemAt(historyString,0);
-		historyList.setSelectedIndex(0);
-	    } else if (b == bRemoveFromHistory) {
-		int selected = historyList.getSelectedIndex();
-		if (selected != -1) {
-		    history.remove(selected);
-		    historyList.removeItemAt(selected);
-		}
-	    } else if (b == bSaveHistory) {
-		try {
-		    history.save();
-		} catch (IOException e) {
-		    System.err.println("Save Error: " + e.toString());
-		}
-	    }
-	} else if (evt.getSource() instanceof JTextField) {
-	    // perform an update in response to an "Enter" action event
-	    // since the Enter key is typically hit after some keyboard
-	    // input.
-	    updateData((JTextField)evt.getSource());
-	    bOK.setEnabled(true);
-	} else if (evt.getSource() instanceof JComboBox) {
-	    JComboBox item = (JComboBox)evt.getSource();
-	    if (item == historyList) {
-		int selection = historyList.getSelectedIndex();
-		if (selection == -1) {
-		    return;
-		}
-		startTimeField.setValue(history.getStartValue(selection));
-		endTimeField.setValue(history.getEndValue(selection));
-	    }
-	}
-    }   
+    	if (evt.getSource() == bOK) {   
+    		// point user to an inconsistent field.
+    		JTextField someField = checkConsistent();
+    		if (someField != null) {
+    			someField.selectAll();
+    			someField.requestFocus();
+    			return;
+    		} else {
+    			dialogState = DIALOG_OK;	// set local variable state 
+    		}
+    		setVisible(false);
+    	}  
+
+    	else if (evt.getSource()  == bUpdate) {
+    		// update all text fields.
+    		updateData(processorsField);
+    		updateData(startTimeField);
+    		updateData(endTimeField);
+    		return;	// CHECK this return
+    	}	
+
+    	else if (evt.getSource()  == bCancel) {
+    		dialogState = DIALOG_CANCELLED;
+    		setVisible(false);
+    	} 
+
+    	else if (evt.getSource()  == bAddToHistory) {
+    		long start = startTimeField.getValue();
+    		long end = endTimeField.getValue();
+    		history.add(start, end);
+    		String historyString = U.t(start) + " to " + U.t(end);
+    		historyList.insertItemAt(historyString,0);
+    		historyList.setSelectedIndex(0);
+    	} 
+    	
+    	else if (evt.getSource()  == bRemoveFromHistory) {
+    		int selected = historyList.getSelectedIndex();
+    		if (selected != -1) {
+    			history.remove(selected);
+    			historyList.removeItemAt(selected);
+    		}
+    	}
+
+    	else if (evt.getSource()  == bSaveHistory) {
+    		try {
+    			history.save();
+    		} catch (IOException e) {
+    			System.err.println("Error saving history to disk: " + e.toString());
+    		}
+    	}
+
+    	else if (evt.getSource()  == historyList) {
+    		int selection = historyList.getSelectedIndex();
+    		if (selection == -1) {
+    			return;
+    		}
+    		startTimeField.setValue(history.getStartValue(selection));
+    		endTimeField.setValue(history.getEndValue(selection));
+    	}
+    
+    	else if (evt.getSource() instanceof JTextField) {
+    		// perform an update in response to an "Enter" action event
+    		// since the Enter key is typically hit after some keyboard
+    		// input.
+    		updateData((JTextField)evt.getSource());
+    		bOK.setEnabled(true);
+    	} 
+    	
+    }
     
     public void focusGained(FocusEvent evt) {
 	// do nothing
@@ -259,13 +288,28 @@ public class RangeDialog extends JDialog
 		    }
 		});
 	    mainPanel = createMainLayout();
+	    mainPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+
 	    historyPanel = createHistoryLayout();
-	    buttonPanel = createButtonLayout();
+	    historyPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 	    
-	    this.getContentPane().setLayout(new BorderLayout());
-	    this.getContentPane().add(mainPanel, BorderLayout.NORTH);
-	    this.getContentPane().add(historyPanel, BorderLayout.CENTER);
-	    this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+	    buttonPanel = createButtonLayout();
+	    buttonPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+	    
+	    Container p = this.getContentPane();
+	    
+	    // Layout this dialog box as a series of JPanels flowing downwards
+	    p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
+	    p.add(mainPanel);
+	    p.add(historyPanel);
+	    if(toolSpecificPanel != null){    	
+	    	toolSpecificPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+	    	p.add(Box.createRigidArea(new Dimension(0,10))); // add some vertical padding
+	    	p.add(toolSpecificPanel);
+	    	p.add(Box.createRigidArea(new Dimension(0,10))); // add some vertical padding
+	    }
+	    p.add(buttonPanel);
+
 	    layoutComplete = true;
 	    pack();
 	    setResizable(false);

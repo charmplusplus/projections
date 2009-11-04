@@ -33,7 +33,7 @@ public class OutlierDialog extends RangeDialog
     // This dialog is specially tied to OutlierAnalysisWindow only
     public OutlierDialog(OutlierAnalysisWindow mainWindow,
 			 String titleString) {
-	super(mainWindow, titleString);
+	super(mainWindow, titleString, null);
 
 	// execution time
 	currentAttribute = 0;

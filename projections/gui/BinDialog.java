@@ -61,7 +61,7 @@ public class BinDialog extends RangeDialog
 
     public BinDialog(ProjectionsWindow mainWindow,
 			 String titleString) {
-	super(mainWindow, titleString);
+	super(mainWindow, titleString, null);
 	// default values for time 1ms to 100ms
 	timeNumBins = 100;
 	timeBinSize = 1000;

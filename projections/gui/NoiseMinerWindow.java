@@ -129,7 +129,7 @@ implements ItemListener
 
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new RangeDialog(this, "select Range");
+			dialog = new RangeDialog(this, "select Range", null);
 		}
 		else {
 			setDialogData();

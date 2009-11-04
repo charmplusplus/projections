@@ -208,8 +208,7 @@ public class StlWindow extends ProjectionsWindow
 	try {
 	    if (dialog == null) {
 		dialog = 
-		    new RangeDialog(this,
-				    "Select Range");
+		    new RangeDialog(this, "Select Range", null);
 	    } else {
 		setDialogData();
 	    }

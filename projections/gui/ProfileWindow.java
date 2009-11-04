@@ -220,9 +220,9 @@ public class ProfileWindow extends ProjectionsWindow
     public void showDialog(){
 	if (dialog == null) {
 	    if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
-		dialog = new RangeDialog(this, "Usage Profile", true);
+		dialog = new RangeDialog(this, "Usage Profile", true, null);
 	    } else {
-		dialog = new RangeDialog(this, "Usage Profile");
+		dialog = new RangeDialog(this, "Usage Profile", null);
 	    }
 	} else {
 	    setDialogData();

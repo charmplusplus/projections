@@ -109,11 +109,65 @@ ItemListener {
 		userEventWindow = new UserEventWindow(cbUserTable);
 
 	}
+	
+
+	
+	public JCheckBox dialogEnableEntryFiltering;
+	public JTextField dialogMinEntryFiltering;
+	public JCheckBox dialogEnableIdleFiltering;
+	public JCheckBox dialogEnableMsgFiltering;
+	
+	/** Create a panel of input items specific to the timeline tool */
+	public JPanel toolSpecificDialogPanel(){
+		JPanel p = new JPanel();
+	    p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
+	    
+	    // Create a JPanel for filtering out small entry methods
+	    JPanel p1 = new JPanel();
+	    p1.setLayout(new BoxLayout(p1, BoxLayout.LINE_AXIS));
+	    dialogEnableEntryFiltering = new JCheckBox();
+	    p1.add(dialogEnableEntryFiltering);
+	    p1.add(new JLabel("Filter out entries shorter than"));
+	    dialogMinEntryFiltering = new JTextField(7);
+	    dialogMinEntryFiltering.setText("30");
+		dialogMinEntryFiltering.setEditable(false);
+	    p1.add(dialogMinEntryFiltering);
+	    p1.add(new JLabel("us"));
+	    p1.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
+	    p1.add(Box.createHorizontalGlue());
+	    dialogEnableEntryFiltering.addItemListener(this);
+
+	    // Create a JPanel for filtering out idle time
+	    JPanel p2 = new JPanel();
+	    p2.setLayout(new BorderLayout());
+	    dialogEnableIdleFiltering = new JCheckBox();
+	    p2.add(dialogEnableIdleFiltering, BorderLayout.WEST);
+	    p2.add(new JLabel("Filter out idle time regions"), BorderLayout.CENTER);
+	    
+	    // Create a JPanel for filtering out messages
+	    JPanel p3 = new JPanel();
+	    p3.setLayout(new BorderLayout());
+	    dialogEnableMsgFiltering = new JCheckBox();
+	    p3.add(dialogEnableMsgFiltering, BorderLayout.WEST);
+	    p3.add(new JLabel("Filter out messages"), BorderLayout.CENTER);
+	    
+	    // Put the various rows into the panel
+	    p.add(p1);
+	    p.add(p2);
+	    p.add(p3);
+
+		return p;
+	}
+
+	
+	
 	public void showDialog() {
 
 		if (parentWindow.dialog == null) {
+			JPanel toolSpecificPanel = toolSpecificDialogPanel();
+			
 			parentWindow.dialog = new RangeDialog(parentWindow,
-			"Select Timeline Range");
+			"Select Timeline Range", toolSpecificPanel);
 		} else {
 			parentWindow.setDialogData();
 		}
@@ -125,6 +179,14 @@ ItemListener {
 				// the main window visible after it has finished loading
 				final SwingWorker worker = new SwingWorker() {
 					public Object construct() {
+						
+						parentWindow.data.skipLoadingIdleRegions(dialogEnableIdleFiltering.isSelected(), false);
+						parentWindow.data.skipLoadingMessages(dialogEnableMsgFiltering.isSelected(), false);
+						if(dialogEnableEntryFiltering.isSelected()){
+							String s = dialogMinEntryFiltering.getText();
+							data.setFilterEntryShorterThan(Integer.parseInt(s));
+						}
+						
 						parentWindow.mainPanel.loadTimelineObjects(true, null);
 						cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 						return null;
@@ -655,6 +717,13 @@ ItemListener {
 
 
 	public void itemStateChanged(ItemEvent evt) {
+		
+		if(evt.getSource() == dialogEnableEntryFiltering){
+			dialogMinEntryFiltering.setEditable(dialogEnableEntryFiltering.isSelected());
+			return;
+		}
+		
+		
 		if (data == null)
 			return;
 
@@ -682,10 +751,10 @@ ItemListener {
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if(c == cbDontLoadIdle)
-			data.skipLoadingIdleRegions(evt.getStateChange() == ItemEvent.SELECTED);
+			data.skipLoadingIdleRegions(evt.getStateChange() == ItemEvent.SELECTED, true);
 
 		else if(c == cbDontLoadMessages)
-			data.skipLoadingMessages(evt.getStateChange() == ItemEvent.SELECTED);
+			data.skipLoadingMessages(evt.getStateChange() == ItemEvent.SELECTED, true);
 
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);

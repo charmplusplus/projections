@@ -20,7 +20,7 @@ public class AxisPanel extends JPanel
 		if(data.useMinimalView())
 			return axispos()+largeTickHalfLength;
 		else
-			return 14+10+axispos()+largeTickHalfLength;
+			return 14+axispos()+largeTickHalfLength;
 	}
 	
 	/** Distance from top to the horizontal line **/
@@ -68,7 +68,7 @@ public class AxisPanel extends JPanel
 	public Dimension getPreferredSize() {
 		int preferredWidth = 200;
 		int preferredHeight = totalHeight();
-		return new Dimension(preferredWidth, preferredHeight+40);
+		return new Dimension(preferredWidth, preferredHeight);
 	}
 
 	/** Paint the axis in its panel */

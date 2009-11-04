@@ -27,7 +27,7 @@ public class IntervalRangeDialog extends RangeDialog
     public IntervalRangeDialog(ProjectionsWindow parentWindow,
 			       String titleString)
     {
-	super(parentWindow, titleString);
+	super(parentWindow, titleString, null);
 	long initialIntervalSize = 1000;
 	validIntervals = totalValidTime/initialIntervalSize;
 	if (totalValidTime%initialIntervalSize != 0) {

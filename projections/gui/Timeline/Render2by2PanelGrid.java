@@ -29,7 +29,6 @@ public class Render2by2PanelGrid extends JPanel {
 			int width = panelToRender.getWidth();
 			int height = panelToRender.getHeight();
 
-//			System.out.println("generating image for one panel of size "+width+"x"+height);
 			BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g = image.createGraphics();
 			panelToRender.paint(g);
@@ -45,13 +44,10 @@ public class Render2by2PanelGrid extends JPanel {
 		NE = generateImage(NEpanel);
 		SW = generateImage(SWpanel);
 		SE = generateImage(SEpanel);
-
 		widthWest = SW.getWidth();
 		widthEast = SE.getWidth();
 		heightNorth = NE.getHeight();
 		heightSouth = SE.getHeight();
-
-	//	System.out.println("FullTimelinePanel dimensions (" + widthWest + "+" + widthEast + ")x("+ heightNorth + "+" + heightSouth + ")");
 	}
 
 	public int getWidth(){

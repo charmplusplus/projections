@@ -169,6 +169,8 @@ public class Data
 	/** If these are true, we will not load the message send lines in the timeline */
 	private boolean skipLoadingMessages;
 	
+	/** Only load entry methods that have  at least this duration */
+	private int minEntryDuration;
 
 	/** The font used by the LabelPanel */
 	public Font labelFont;
@@ -262,7 +264,7 @@ public class Data
 		
 		skipIdleRegions = false;
 		skipLoadingMessages = false;
-
+		minEntryDuration = 0;
 		
 		// Get the list of PEs to display
 		loadGlobalPEList();
@@ -343,7 +345,7 @@ public class Data
 	 *        data will be retrieved using getData()
 	 *        which calls createTL() 
 	 *        
-	 * If the message send lines are needed immedeately, no helper threads should be used(race condition)
+	 * If the message send lines are needed immediately, no helper threads should be used(race condition)
 	 *        
 	 */
 	public void createTLOArray(boolean useHelperThreads, Component rootWindow)
@@ -513,7 +515,7 @@ public class Data
 			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
 			objCount += list.size();
 		}
-		System.out.println("Displaying " + objCount + " objects in the timline visualization\n");
+		System.out.println("Displaying " + objCount + " entry method objects in the timeline visualization\n");
 	}
 	
 	
@@ -620,7 +622,7 @@ public class Data
 		
 		try {
 			if (MainWindow.runObject[myRun].hasLogData()) {
-				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), beginTime, endTime, tl, userEvents);
+				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), beginTime, endTime, tl, userEvents, minEntryDuration);
 			} else {
 				System.err.println("createTL: No log files available!");
 				return;
@@ -837,7 +839,7 @@ public class Data
 
 	/** The height of the panel that should be used to draw the timelines  */
 	public int screenHeight(){
-			int paddingForScrollbar = 55;
+			int paddingForScrollbar = 25;
 			return singleTimelineHeight()*numPs() + paddingForScrollbar;
 	}
 
@@ -1868,16 +1870,16 @@ public class Data
 		return ! hiddenUserEvents.contains(id);
 	}
 	
-	public void skipLoadingIdleRegions(boolean b) {
+	public void skipLoadingIdleRegions(boolean b, boolean filterAlreadyLoaded) {
 		skipIdleRegions = b;
-		if(skipIdleRegions){
+		if(skipIdleRegions && filterAlreadyLoaded){
 			pruneOutIdleRegions();	
 		}
 	}
 
-	public void skipLoadingMessages(boolean b) {
+	public void skipLoadingMessages(boolean b, boolean filterAlreadyLoaded) {
 		skipLoadingMessages = b;
-		if(skipLoadingMessages){
+		if(skipLoadingMessages && filterAlreadyLoaded){
 			pruneOutMessages();	
 		}
 	}
@@ -1965,6 +1967,10 @@ public class Data
 	public void setMemColorRange(long minMemVal, long maxMemVal) {
 		minMemColorRange = minMemVal;
 		maxMemColorRange = maxMemVal;
+	}
+	
+	public void setFilterEntryShorterThan(int minimumEntryDuration) {
+		minEntryDuration = minimumEntryDuration;
 	}
 	
 }

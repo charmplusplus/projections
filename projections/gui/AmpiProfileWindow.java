@@ -212,9 +212,9 @@ public class AmpiProfileWindow extends ProjectionsWindow
     public void showDialog(){
     	if (dialog == null) {
     		if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
-    			dialog = new RangeDialogNew(this, "AMPI Usage Profile", null, true);
+    			dialog = new RangeDialog(this, "AMPI Usage Profile", null, true);
     		} else {
-    			dialog = new RangeDialogNew(this, "AMPI Usage Profile", null, false);
+    			dialog = new RangeDialog(this, "AMPI Usage Profile", null, false);
     		}
     	} 
 

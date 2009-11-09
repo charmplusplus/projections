@@ -4,7 +4,7 @@ import javax.swing.*;
 
 import projections.gui.JTimeTextField;
 import projections.gui.RangeDialogExtensionPanel;
-import projections.gui.RangeDialogNew;
+import projections.gui.RangeDialog;
 
 import java.awt.BorderLayout;
 import java.awt.Insets;
@@ -25,7 +25,7 @@ public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel imple
 	
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialogNew parent;
+	RangeDialog parent;
 
 	// dialog parameter variables
 	public long intervalSize;
@@ -80,7 +80,7 @@ public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel imple
 	}
 	
 
-	public void setParentDialogBox(RangeDialogNew parent) {
+	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;	
 	}
 

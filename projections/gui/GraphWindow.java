@@ -197,7 +197,7 @@ public class GraphWindow extends ProjectionsWindow
     {
 	if (dialog == null) {
 		intervalPanel = new IntervalChooserPanel();    	
-		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);
+		dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
 	}
 	
 	dialog.displayDialog();

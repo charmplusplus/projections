@@ -98,7 +98,7 @@ implements ActionListener
 	{
 		if (dialog == null) {
 			binpanel = new BinDialogPanel();
-			dialog = new RangeDialogNew(this, "Select Histogram Time Range", binpanel, false);
+			dialog = new RangeDialog(this, "Select Histogram Time Range", binpanel, false);
 		}
 		
 		dialog.displayDialog();

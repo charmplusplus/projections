@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 public abstract class RangeDialogExtensionPanel extends JPanel {
 
 	/** Record a reference to the parent dialog box into which I will be inserted. */
-	public abstract void setParentDialogBox(RangeDialogNew parent);
+	public abstract void setParentDialogBox(RangeDialog parent);
 
 	/** After the parent dialog box has setup its fields, the inserted box can derive any values it needs */
 	public abstract void setInitialFields();

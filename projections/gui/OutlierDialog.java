@@ -33,7 +33,7 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 	
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialogNew parent;
+	RangeDialog parent;
 	
 	public OutlierDialog(String[] attributes) {
 
@@ -196,7 +196,7 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 
 	}
 
-	public void setParentDialogBox(RangeDialogNew parent) {
+	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;
 
 		attributeList.addActionListener(parent);

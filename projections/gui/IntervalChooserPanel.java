@@ -20,7 +20,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 	JLabel endIntervalLabel;
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialogNew parent;
+	RangeDialog parent;
 
 	// dialog parameter variables
 	public long intervalSize;
@@ -52,7 +52,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 
 	}
 
-	public void setParentDialogBox(RangeDialogNew parent) {
+	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;	
 		sizeField.addActionListener(parent);
 		sizeField.addKeyListener(parent);

@@ -44,7 +44,7 @@ public abstract class ProjectionsWindow
     protected MainWindow parentWindow;
 
     // NOTE: There NEED NOT be a dialog.
-    public RangeDialogNew dialog;
+    public RangeDialog dialog;
     
 
     /**

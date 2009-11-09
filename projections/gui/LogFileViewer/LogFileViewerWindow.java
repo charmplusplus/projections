@@ -84,7 +84,7 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new RangeDialogNew(this, "select Range", null, false);
+			dialog = new RangeDialog(this, "select Range", null, false);
 		}
 		
 		dialog.displayDialog();

@@ -19,7 +19,6 @@ import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
 import projections.gui.RangeDialog;
-import projections.gui.RangeDialogNew;
 import projections.gui.Util;
 
 import java.text.*;
@@ -38,7 +37,7 @@ ItemListener {
 	int myRun = 0;
 
 	private TimlineRangeDialogExtension toolSpecificDialogPanel;
-	private RangeDialogNew dialog;
+	private RangeDialog dialog;
 
 	Data data;
 
@@ -118,7 +117,7 @@ ItemListener {
 	public void showDialog() {
 		if(dialog == null){
 			toolSpecificDialogPanel = new TimlineRangeDialogExtension();    	
-			dialog = new RangeDialogNew(parentWindow, "Select Range For Timeline", toolSpecificDialogPanel, false);
+			dialog = new RangeDialog(parentWindow, "Select Range For Timeline", toolSpecificDialogPanel, false);
 		}
 		
 		dialog.displayDialog();

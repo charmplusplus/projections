@@ -129,7 +129,7 @@ implements ItemListener
 
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new RangeDialogNew(this, "Select Time Range & Processors", null, false);
+			dialog = new RangeDialog(this, "Select Time Range & Processors", null, false);
 		}
 
 		dialog.displayDialog();

@@ -19,7 +19,7 @@ import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.RangeDialogExtensionPanel;
-import projections.gui.RangeDialogNew;
+import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
 
@@ -221,7 +221,7 @@ public class TimeProfileWindow extends GenericGraphWindow
     	
 	if (dialog == null) {
 		intervalPanel = new IntervalChooserPanel();
-		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);
+		dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
 	}
 
 	dialog.displayDialog();

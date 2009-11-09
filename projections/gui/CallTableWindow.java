@@ -86,7 +86,7 @@ public class CallTableWindow extends ProjectionsWindow
     
     public void showDialog() {
 	if (dialog == null) {
-		dialog = new RangeDialogNew(this, "select Range", null, false);
+		dialog = new RangeDialog(this, "select Range", null, false);
 	}
 	
 	dialog.displayDialog();

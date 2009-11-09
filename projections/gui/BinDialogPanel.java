@@ -50,7 +50,7 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 	protected JLongTextField msgMinBinSizeField;
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialogNew parent;
+	RangeDialog parent;
 
 
 	public BinDialogPanel() {
@@ -196,7 +196,7 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 		updateFields();
 	}
 
-	public void setParentDialogBox(RangeDialogNew parent) {
+	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;
 		timeNumBinsField.addActionListener(parent);
 		timeNumBinsField.addKeyListener(parent);

@@ -91,7 +91,7 @@ public class AnimationWindow extends ProjectionsWindow
     public void showDialog() {
 	if (dialog == null) {
 		intervalPanel = new IntervalChooserPanel();    	
-		dialog = new RangeDialogNew(this, "Select Animation Range", intervalPanel, false);
+		dialog = new RangeDialog(this, "Select Animation Range", intervalPanel, false);
 	} 
 
 	dialog.displayDialog();

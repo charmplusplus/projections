@@ -150,7 +150,7 @@ Clickable
 	public void showDialog() {
 		if (dialog == null) {
 			outlierDialogPanel = new OutlierDialog(attributes[0]);
-			dialog = new RangeDialogNew(this, "Select Range", outlierDialogPanel, false);
+			dialog = new RangeDialog(this, "Select Range", outlierDialogPanel, false);
 		}
 
 		dialog.displayDialog();

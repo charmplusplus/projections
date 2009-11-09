@@ -3,6 +3,7 @@ package projections.gui;
 import javax.swing.*;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Insets;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
@@ -24,7 +25,8 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 
 	// dialog parameter variables
 	public long intervalSize;
-
+	JLabel sizeLabel;
+	
 	public IntervalChooserPanel() {
 
 		GridBagLayout gbl      = new GridBagLayout();
@@ -35,7 +37,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 		// create interval size panel
 
 		this.setLayout(gbl);
-		JLabel sizeLabel = new JLabel("Interval Size :", JLabel.LEFT);
+		sizeLabel = new JLabel("Interval Size :", JLabel.LEFT);
 		sizeField = new JTimeTextField(1000, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
 
 		validIntervalsLabel = new JLabel("", JLabel.LEFT);
@@ -68,37 +70,49 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 		updateFields();
 	}
 
-	/** derive all the values from the integer in sizeField */	
+	/** derive all the values from the integer in sizeField */
 	public void updateFields(){
+		validIntervalsLabel.setText("Total Valid Number of Intervals : " + getNumValidIntervals());
+		startIntervalLabel.setText("Start Interval : "+getStartInterval() );
+		endIntervalLabel.setText("End Interval : " + getEndInterval() );
 
-		long temp = sizeField.getValue();
-		long startInterval = parent.getStartTime()/temp;
-		long endInterval = parent.getEndTime()/temp;
-		long validIntervals = parent.getSelectedTotalTime()/temp;
-		if (parent.getSelectedTotalTime()%temp != 0) {
-			validIntervals++;
+		if(getNumSelectedIntervals() < 25){
+			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
+			numIntervalsLabel.setForeground(Color.red);
+		} else {
+			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
 		}
-
-		validIntervalsLabel.setText("Total Valid Number of " +
-				"Intervals : " +
-				validIntervals);
-		numIntervalsLabel.setText("Selected Number of Intervals : " +
-				(endInterval - startInterval + 1));
-		startIntervalLabel.setText("Start Interval : "+startInterval);
-		endIntervalLabel.setText("End Interval : " + endInterval);
-
+	
 	}
 
+	private long getNumValidIntervals(){
+		long validIntervals = parent.getTotalTime()/sizeField.getValue();
+		if (parent.getSelectedTotalTime()%sizeField.getValue() != 0) {
+			validIntervals++;
+		}
+		return validIntervals;
+	}
+	
+	private long getNumSelectedIntervals(){
+		return getEndInterval() - getStartInterval() + 1;
+	}
 
 	public boolean isInputValid() {
-		// interval size should not be less than or equal to zero us.
-		// it should also not be larger than the selected time range.
+		
 		if (sizeField.getValue() <= 0 || sizeField.getValue() > parent.getTotalTime()) 	{
+			// interval size should not be less than or equal to zero us.
+			// it should also not be larger than the selected time range.
+			sizeLabel.setForeground(Color.red);
+			sizeField.setForeground(Color.red);
 			sizeField.requestFocus();
 			return false;
-		}
-		else
-			return true;
+		} 
+				
+		// reset to the normal colors
+		numIntervalsLabel.setForeground(Color.black);
+		sizeLabel.setForeground(Color.black);
+		sizeField.setForeground(Color.black);
+		return true;
 	}
 
 	

@@ -237,6 +237,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 					startInterval, endInterval, intervalSize, processorList);
 		}
 
+		
 		final SwingWorker worker =  new SwingWorker() {
 		    public Object doInBackground() {
 
@@ -272,7 +273,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 
 			    	
 			    	// Pass this list of threads to a class that manages/runs the threads nicely
-			    	ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, null);
+			    	ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, thisWindow);
 			    	threadManager.runThreads();
 
 			    	Date time3  = new Date();
@@ -298,20 +299,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    	System.out.println("Time to accumulate results : " + ((double)(time4.getTime() - time3.getTime())/1000.0) + "sec");
 			    	System.out.println("Logs loaded per second : " + (numProcessors / totalTime) );
 
-			    	
-			    	
-			    	
-			    	// Probably should verify that logReaderIntervalSize is the same in all these
-			    	Iterator<ThreadedFileReader> iter = readyReaders.iterator();
-			    	ThreadedFileReader r1 = iter.next();
-			    	long firstLogReaderIntervalSize = r1.logReaderIntervalSize;
-			    	while(iter.hasNext()){
-			    		ThreadedFileReader r2 = iter.next();
-			    		if(firstLogReaderIntervalSize != r2.logReaderIntervalSize){
-			    			System.err.println("threaded log reader is broken");
-			    		}
-			    	}
-			    	    	
+			    			    	    	
 			    }
 			    else if( MainWindow.runObject[myRun].hasSumFiles()){
 			    	// Do serial file reading because all we have is the sum files	    	

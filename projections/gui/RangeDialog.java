@@ -393,30 +393,38 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		// start time cannot be greater or equal to end time
 		if (getStartTime() >= getEndTime()) {
 			startTextLabel.setForeground(Color.red);
+			startTimeField.setForeground(Color.red);
 			endTextLabel.setForeground(Color.red);
+			endTimeField.setForeground(Color.red);
 			return false;
 		}
 		// starting time cannot be less than zero
 		if (getStartTime() < 0) {
 			startTextLabel.setForeground(Color.red);
+			startTimeField.setForeground(Color.red);
 			return false;
 		}
 		
 		// ending time cannot be greater than total time
 		if (getEndTime() > getTotalTime()) {
 			endTextLabel.setForeground(Color.red);
+			endTimeField.setForeground(Color.red);
 			return false;
 		}
 				
 		if(! processorsField.rangeVerifier.verify(processorsField) ){
 			processorTextLabel.setForeground(Color.red);
+			processorsField.setForeground(Color.red);
 			return false;
 		}
 				
 		// Then the input is valid, so clear any of the red text 
 		startTextLabel.setForeground(Color.black);
+		startTimeField.setForeground(Color.black);
 		endTextLabel.setForeground(Color.black);
+		endTimeField.setForeground(Color.black);
 		processorTextLabel.setForeground(Color.black);
+		processorsField.setForeground(Color.black);
 
 		
 		if(toolSpecificPanel!=null){

@@ -208,7 +208,14 @@ public class LogReader
 	    break;
 	case END_IDLE:
 	    if (interval >= intervalStart && interval <= intervalEnd) {
-		addToInterval((int)(time-startTime),interval,false);
+	    	//	YSun fixed a bug where idle percent > 100%  :
+	    	if(time-startTime > intervalSize) {
+	    		startTime = interval * intervalSize;
+	    		addToInterval((int)(time-startTime),interval,false);
+	    	} else {
+	    		addToInterval((int)(time-startTime),interval,false);
+	    	} 
+	    
 	    }
 	    processing--;
 	    break;

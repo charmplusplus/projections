@@ -146,45 +146,34 @@ Clickable
 		setJMenuBar(mbar);
 	}
 
+	OutlierDialog outlierDialogPanel;
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new OutlierDialog(this, "Select Range");
-		} else {
-			setDialogData();
+			outlierDialogPanel = new OutlierDialog(attributes[0]);
+			dialog = new RangeDialogNew(this, "Select Range", outlierDialogPanel, false);
 		}
+
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-			getDialogData();
-			if (dialog.isModified()) {
-				thisWindow.setVisible(false);
-				loadData();
-			}
+			thisWindow.setVisible(false);
+			loadData();
 		}
 	}
 
-	public void getDialogData() {
-		OutlierDialog mydialog = (OutlierDialog)dialog;
-
-		threshold = mydialog.threshold;
-		k = mydialog.k;
-		currentActivity = mydialog.currentActivity;
-		currentAttribute = mydialog.currentAttribute;
-		super.getDialogData();
-	}
 
 	private void loadData() {
 		final SwingWorker worker =  new SwingWorker() {
-			public Object construct() {
+			public Object doInBackground() {
 				constructToolData();
 				return null;
 			}
-			public void finished() {
+			public void done() {
 				// GUI code after Long non-gui code (above) is done.
 				setGraphSpecificData();
 				thisWindow.setVisible(true);
 			}
 		};
-		worker.start();
+		worker.execute();
 	}
 
 	void constructToolData() {
@@ -632,16 +621,16 @@ Clickable
 
 	private void loadOnlineData() {
 		final SwingWorker worker = new SwingWorker() {
-			public Object construct() {
+			public Object doInBackground() {
 				readOutlierStats();
 				return null;
 			}
-			public void finished() {
+			public void done() {
 				setGraphSpecificData();
 				thisWindow.setVisible(true);
 			}
 		};
-		worker.start();
+		worker.execute();
 	}
 
 	// This method will read the stats file generated during online

@@ -5,6 +5,8 @@ import java.awt.event.*;
 import java.awt.print.*;
 import java.io.*;
 
+import javax.swing.SwingWorker;
+
 import projections.misc.*;
 
 public class GraphWindow extends ProjectionsWindow
@@ -15,7 +17,7 @@ public class GraphWindow extends ProjectionsWindow
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
-
+    
     GraphDisplayPanel      displayPanel; 
     GraphControlPanel      controlPanel;
     GraphLegendPanel       legendPanel;
@@ -25,7 +27,9 @@ public class GraphWindow extends ProjectionsWindow
 
     int intervalStart;
     int intervalEnd;
-    private long endTime;
+    IntervalChooserPanel intervalPanel;
+
+	private long endTime;
 
     long intervalsize;
     OrderedIntList processorList;
@@ -188,74 +192,66 @@ public class GraphWindow extends ProjectionsWindow
 	data.displayPanel = displayPanel;
 	data.legendPanel  = legendPanel;
     }   
-
+    
     public void showDialog()
     {
 	if (dialog == null) {
-	    dialog = new IntervalRangeDialog(this, "Graph Window");
-	} else {
-	    // we are guaranteed a set of parameters stored in dialog.
-	    setDialogData();
+		intervalPanel = new IntervalChooserPanel();    	
+		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);
 	}
+	
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
-	    getDialogData();
-	    if (dialog.isModified()) {
+
+		intervalsize = intervalPanel.getIntervalSize();
+		intervalStart = (int)intervalPanel.getStartInterval();
+		intervalEnd = (int)intervalPanel.getEndInterval();
+		processorList = dialog.getValidProcessors();
+
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		final SwingWorker worker = new SwingWorker() {
-			public Object construct() {
-			    MainWindow.runObject[myRun].LoadGraphData(intervalsize, 
-						   intervalStart, intervalEnd,
-						   true, processorList);
-			    // got rid of the old optimization that new data 
-			    // is only created if the start and end points of 
-			    // the range is modified. This will, of course, 
-			    // have to be restored, but in a far more elegant 
-			    // way than currently allowed.
-			    data = new GraphData(intervalsize, 
-						 intervalStart, intervalEnd,
-						 processorList);
-			    return null;
+			public Object doInBackground() {
+				MainWindow.runObject[myRun].LoadGraphData(intervalsize, 
+						intervalStart, intervalEnd,
+						true, processorList);
+				// got rid of the old optimization that new data 
+				// is only created if the start and end points of 
+				// the range is modified. This will, of course, 
+				// have to be restored, but in a far more elegant 
+				// way than currently allowed.
+				data = new GraphData(intervalsize, 
+						intervalStart, intervalEnd,
+						processorList);
+				return null;
 			}
-			public void finished() {
-			    thisWindow.setChildDatas();
-			    /* also need to close and free legendPanel */
-			    if (legendPanel!=null) 
-				legendPanel.closeAttributesWindow();
-			    
-			    controlPanel.setXMode(data.xmode);
-			    controlPanel.setYMode(data.ymode);
-			    
-			    legendPanel.UpdateLegend();
-			    displayPanel.setAllBounds();
-			    displayPanel.UpdateDisplay(); 
-			    
-			    thisWindow.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-			    thisWindow.setVisible(true);
+			public void done() {
+				thisWindow.setChildDatas();
+				/* also need to close and free legendPanel */
+				if (legendPanel!=null) 
+					legendPanel.closeAttributesWindow();
+
+				controlPanel.setXMode(data.xmode);
+				controlPanel.setYMode(data.ymode);
+
+				legendPanel.UpdateLegend();
+				displayPanel.setAllBounds();
+				displayPanel.UpdateDisplay(); 
+
+				thisWindow.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				thisWindow.setVisible(true);
 			}
-		    };
-		worker.start();
-	    } else {
-		setVisible(true);
-	    }
+		};
+		worker.execute();
+	    
 	} else {
 	    return;
 	}
     }
-    
-    
+
+
     public void getDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	intervalsize = dialog.getIntervalSize();
-	intervalStart = (int)dialog.getStartInterval();
-	intervalEnd = (int)dialog.getEndInterval();
-	processorList = dialog.getValidProcessors();
+ 
     }
 
-    public void setDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	dialog.setIntervalSize(intervalsize);
-	dialog.setValidProcessors(processorList);
-	super.setDialogData();
-    }
+ 
 }

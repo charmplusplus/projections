@@ -107,12 +107,10 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		thisWindow.getContentPane().add(scrollingPanel, BorderLayout.CENTER);
 		thisWindow.getContentPane().add(controls, BorderLayout.SOUTH);
 		
-		setTitle("Projections Timelines - "
-				+ MainWindow.runObject[myRun].getFilename() + ".sts");
+		setTitle("Projections Timelines - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 		controls.CreateMenus();
 
 		showDialog();
-		
 	}
 
 	
@@ -131,18 +129,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		controls.userEventWindowSetData();
 	}
 
-	
-	protected void getDialogData(){
-		data.setProcessorList(dialog.getValidProcessors());
-        data.setRange(dialog.getStartTime(),dialog.getEndTime());
-	}
-	
-    public void setDialogData() {
-    	dialog.setValidProcessors(data.processorListOrdered());
-    	dialog.setStartTime(data.startTime());
-    	dialog.setEndTime(data.endTime());
-    	super.setDialogData();
-    }
 	
  	protected void windowInit() {
 		data = new Data(this);		

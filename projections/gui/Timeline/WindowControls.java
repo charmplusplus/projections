@@ -14,11 +14,12 @@ import java.net.URL;
 import javax.swing.*;
 
 import projections.gui.FloatJTextField;
+import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
 import projections.gui.RangeDialog;
-import projections.gui.SwingWorker;
+import projections.gui.RangeDialogNew;
 import projections.gui.Util;
 
 import java.text.*;
@@ -36,11 +37,14 @@ ItemListener {
 	// runs.
 	int myRun = 0;
 
-	private TimelineWindow parentWindow;
-
-	private ColorChooser colorWindow;
+	private TimlineRangeDialogExtension toolSpecificDialogPanel;
+	private RangeDialogNew dialog;
 
 	Data data;
+
+	private TimelineWindow parentWindow;
+
+    private ColorChooser colorWindow;
 
 	// basic zoom controls
 	private JButton bDecrease, bIncrease, bReset;
@@ -111,99 +115,50 @@ ItemListener {
 	}
 	
 
-	
-	public JCheckBox dialogEnableEntryFiltering;
-	public JTextField dialogMinEntryFiltering;
-	public JCheckBox dialogEnableIdleFiltering;
-	public JCheckBox dialogEnableMsgFiltering;
-	
-	/** Create a panel of input items specific to the timeline tool */
-	public JPanel toolSpecificDialogPanel(){
-		JPanel p = new JPanel();
-	    p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
-	    
-	    // Create a JPanel for filtering out small entry methods
-	    JPanel p1 = new JPanel();
-	    p1.setLayout(new BoxLayout(p1, BoxLayout.LINE_AXIS));
-	    dialogEnableEntryFiltering = new JCheckBox();
-	    p1.add(dialogEnableEntryFiltering);
-	    p1.add(new JLabel("Filter out entries shorter than"));
-	    dialogMinEntryFiltering = new JTextField(7);
-	    dialogMinEntryFiltering.setText("30");
-		dialogMinEntryFiltering.setEditable(false);
-	    p1.add(dialogMinEntryFiltering);
-	    p1.add(new JLabel("us"));
-	    p1.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
-	    p1.add(Box.createHorizontalGlue());
-	    dialogEnableEntryFiltering.addItemListener(this);
+	public void showDialog() {
+		if(dialog == null){
+			toolSpecificDialogPanel = new TimlineRangeDialogExtension();    	
+			dialog = new RangeDialogNew(parentWindow, "Select Range For Timeline", toolSpecificDialogPanel, false);
+		}
+		
+		dialog.displayDialog();
+		if (!dialog.isCancelled()) {
+			
+			data.setProcessorList(dialog.getValidProcessors());
+	        data.setRange(dialog.getStartTime(),dialog.getEndTime());
 
-	    // Create a JPanel for filtering out idle time
-	    JPanel p2 = new JPanel();
-	    p2.setLayout(new BorderLayout());
-	    dialogEnableIdleFiltering = new JCheckBox();
-	    p2.add(dialogEnableIdleFiltering, BorderLayout.WEST);
-	    p2.add(new JLabel("Filter out idle time regions"), BorderLayout.CENTER);
-	    
-	    // Create a JPanel for filtering out messages
-	    JPanel p3 = new JPanel();
-	    p3.setLayout(new BorderLayout());
-	    dialogEnableMsgFiltering = new JCheckBox();
-	    p3.add(dialogEnableMsgFiltering, BorderLayout.WEST);
-	    p3.add(new JLabel("Filter out messages"), BorderLayout.CENTER);
-	    
-	    // Put the various rows into the panel
-	    p.add(p1);
-	    p.add(p2);
-	    p.add(p3);
+			
 
-		return p;
+			// Create a worker that will load the trace logs and then will make 
+			// the main window visible after it has finished loading
+			final SwingWorker worker = new SwingWorker() {
+				public Object doInBackground() {
+
+					parentWindow.data.skipLoadingIdleRegions(toolSpecificDialogPanel.dialogEnableIdleFiltering.isSelected(), false);
+					parentWindow.data.skipLoadingMessages(toolSpecificDialogPanel.dialogEnableMsgFiltering.isSelected(), false);
+					if(toolSpecificDialogPanel.dialogEnableEntryFiltering.isSelected()){
+						data.setFilterEntryShorterThan(toolSpecificDialogPanel.dialogMinEntryFiltering.getValue());
+					}
+
+					parentWindow.mainPanel.loadTimelineObjects(true, null);
+					cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
+					return null;
+				}
+
+				public void done() {
+					// Here we are basically at startup after the dialog window and the trace log has been read
+					//						parentWindow.setSize(1000, 600);
+					parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
+					parentWindow.invalidate();
+					parentWindow.setVisible(true);
+				}
+			};
+			worker.execute();
+		}
 	}
 
-	
-	
-	public void showDialog() {
-
-		if (parentWindow.dialog == null) {
-			JPanel toolSpecificPanel = toolSpecificDialogPanel();
-			
-			parentWindow.dialog = new RangeDialog(parentWindow,
-			"Select Timeline Range", toolSpecificPanel);
-		} else {
-			parentWindow.setDialogData();
-		}
-		parentWindow.dialog.displayDialog();
-		if (!parentWindow.dialog.isCancelled()) {
-			parentWindow.getDialogData();
-			if (parentWindow.dialog.isModified()) {
-				// Create a worker that will load the trace logs and then will make 
-				// the main window visible after it has finished loading
-				final SwingWorker worker = new SwingWorker() {
-					public Object construct() {
-						
-						parentWindow.data.skipLoadingIdleRegions(dialogEnableIdleFiltering.isSelected(), false);
-						parentWindow.data.skipLoadingMessages(dialogEnableMsgFiltering.isSelected(), false);
-						if(dialogEnableEntryFiltering.isSelected()){
-							String s = dialogMinEntryFiltering.getText();
-							data.setFilterEntryShorterThan(Integer.parseInt(s));
-						}
-						
-						parentWindow.mainPanel.loadTimelineObjects(true, null);
-						cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
-						return null;
-					}
-
-					public void finished() {
-						// Here we are basically at startup after the dialog window and the trace log has been read
-						//						parentWindow.setSize(1000, 600);
-						parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-						parentWindow.setVisible(true);
-					}
-				};
-				worker.start();
-			} else {
-				parentWindow.setVisible(true);
-			}
-		}
+	private void setDialogData() {
+		
 	}
 
 	public void setHighlightTime(double time) {
@@ -717,12 +672,6 @@ ItemListener {
 
 
 	public void itemStateChanged(ItemEvent evt) {
-		
-		if(evt.getSource() == dialogEnableEntryFiltering){
-			dialogMinEntryFiltering.setEditable(dialogEnableEntryFiltering.isSelected());
-			return;
-		}
-		
 		
 		if (data == null)
 			return;

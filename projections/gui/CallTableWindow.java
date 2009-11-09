@@ -16,7 +16,7 @@ public class CallTableWindow extends ProjectionsWindow
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
-
+    
     CallTableTextArea    textArea;
     private Label                lTitle;
     private Panel                titlePanel;
@@ -86,28 +86,28 @@ public class CallTableWindow extends ProjectionsWindow
     
     public void showDialog() {
 	if (dialog == null) {
-	    dialog = new RangeDialog(this, "select Range", null);
+		dialog = new RangeDialogNew(this, "select Range", null, false);
 	}
-	else {
-	    setDialogData();
-	}
+	
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
-	    getDialogData();
-	    final SwingWorker worker = new SwingWorker() {
-		    public Object construct() {
-		        ct = new CallTable(startTime, endTime, validPEs);
-		        ct.GatherData(thisWindow);
-		        textArea.setText(ct.getCallTableText(epDetailToggle, statsToggle));
-		        return null;
-		    }
-		    public void finished() {
-		    }
-	    };
-	    worker.start();
+		validPEs = dialog.getValidProcessors();
+		startTime = dialog.getStartTime();
+		endTime = dialog.getEndTime();
+		final SwingWorker worker = new SwingWorker() {
+			public Object doInBackground() {
+				ct = new CallTable(startTime, endTime, validPEs);
+				ct.GatherData(thisWindow);
+				textArea.setText(ct.getCallTableText(epDetailToggle, statsToggle));
+				return null;
+			}
+			public void done() {
+			}
+		};
+		worker.execute();
 	}
     }
-    
+
     protected void createMenus(){
         JMenuBar mbar = new JMenuBar();
         mbar.add(Util.makeJMenu("File", new Object[]
@@ -213,17 +213,5 @@ public class CallTableWindow extends ProjectionsWindow
 	}
     }
 
-    public void getDialogData() {
-	validPEs = dialog.getValidProcessors();
-	startTime = dialog.getStartTime();
-	endTime = dialog.getEndTime();
-    }
-
-    public void setDialogData() {
-	dialog.setValidProcessors(validPEs);
-	dialog.setStartTime(startTime);
-	dialog.setEndTime(endTime);
-	super.setDialogData();
-    }
 
 }

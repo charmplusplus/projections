@@ -15,7 +15,6 @@ public class ProfileData
    int offset;
    OrderedIntList plist;
    OrderedIntList phaselist;
-   String         pstring;
    long begintime, endtime;
    
    public ProfileData(ProfileWindow profileWindow)
@@ -32,7 +31,6 @@ public class ProfileData
 	  	begintime = 0;
 	  	endtime   = MainWindow.runObject[myRun].getTotalTime();}
 	  
-	  pstring   = "0";
 	  offset    = 10;
 	  plist     = null;
 	  phaselist = null;

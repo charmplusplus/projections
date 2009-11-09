@@ -78,7 +78,6 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
 	// acquire starting data from Analysis
 	data.plist = MainWindow.runObject[myRun].getValidProcessorList();
-	data.pstring = MainWindow.runObject[myRun].getValidProcessorString();
 	data.begintime = 0;
 	data.endtime = MainWindow.runObject[myRun].getTotalTime();
     }
@@ -211,50 +210,37 @@ public class AmpiProfileWindow extends ProjectionsWindow
     }
 
     public void showDialog(){
-	if (dialog == null) {
-	    if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
-		dialog = new RangeDialog(this, "AMPI Usage Profile", true, null);
-	    } else {
-		dialog = new RangeDialog(this, "AMPI Usage Profile", null);
-	    }
-	} else {
-	    setDialogData();
-	}
+    	if (dialog == null) {
+    		if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
+    			dialog = new RangeDialogNew(this, "AMPI Usage Profile", null, true);
+    		} else {
+    			dialog = new RangeDialogNew(this, "AMPI Usage Profile", null, false);
+    		}
+    	} 
 
-	dialog.displayDialog();
-        if (!dialog.isCancelled()) {
-	    getDialogData();
-	    final Thread t = new Thread() {
-                    public void run() {
-			readAmpiUsageData();
-                        //setDisplayProfileData();
-                        if (ampiTraceOn) {
-                            setDisplayProfileData();
-			    setAmpiDisplayProfileData();
-			}
-			setLocationRelativeTo(parentWindow);
-                        setVisible(true);
-                    }
-		};
-	    t.start();
-	}
+    	dialog.displayDialog();
+    	if (!dialog.isCancelled()) {
+    		data.plist = dialog.getValidProcessors();
+    		data.begintime = dialog.getStartTime();
+    		data.endtime = dialog.getEndTime();
+
+    		final Thread t = new Thread() {
+    			public void run() {
+    				readAmpiUsageData();
+    				//setDisplayProfileData();
+    				if (ampiTraceOn) {
+    					setDisplayProfileData();
+    					setAmpiDisplayProfileData();
+    				}
+    				setLocationRelativeTo(parentWindow);
+    				setVisible(true);
+    			}
+    		};
+    		t.start();
+    	}
     }
 
-    public void getDialogData() {
-	data.plist = dialog.getValidProcessors();
-	data.pstring = dialog.getValidProcessorString();
-	data.begintime = dialog.getStartTime();
-	data.endtime = dialog.getEndTime();
-    }
-
-    public void setDialogData() {
-	dialog.setValidProcessors(data.plist);
-	dialog.setStartTime(data.begintime);
-	dialog.setEndTime(data.endtime);
-	super.setDialogData();
-    }
-
-
+    
     public void actionPerformed(ActionEvent evt){
         // get recorded values
 	float oldScaleX = txtScaleX.getValue();
@@ -617,7 +603,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
         //set ampi's profile graph parameters!
         String[] gTitles = new String[2];
-        gTitles[0] = "Profile of Usage per Functions in AMPI programs "+data.pstring;
+        gTitles[0] = "Profile of Usage per Functions in AMPI programs "+data.plist.listToString();
         gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
         ampiDisplayCanvas.setGraphTiltes(gTitles);
 
@@ -642,7 +628,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
 
         String[] gTitles = new String[2];
-        gTitles[0] = "Profile of Usage for Processors "+data.pstring;
+        gTitles[0] = "Profile of Usage for Processors "+data.plist.listToString();
         gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
         displayCanvas.setGraphTiltes(gTitles);
 

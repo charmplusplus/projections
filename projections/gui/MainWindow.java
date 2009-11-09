@@ -227,7 +227,7 @@ implements ScalePanel.StatusDisplay
 		graphPanel = null;
 
 		final SwingWorker worker = new SwingWorker() {
-			public Object construct() {
+			public Object doInBackground() {
 				try {
 					MainWindow.runObject[myRun].initAnalysis(newfile, 
 							thisWindow);
@@ -243,7 +243,7 @@ implements ScalePanel.StatusDisplay
 				}
 				return null;
 			}
-			public void finished() {
+			public void done() {
 				setTitle("Projections - " + newfile);
 				if (MainWindow.runObject[myRun].hasSummaryData()) {
 					//		MainWindow.runObject[myRun].loadSummaryData();	  
@@ -385,7 +385,7 @@ implements ScalePanel.StatusDisplay
 				 */
 			}
 		};
-		worker.start();
+		worker.execute();
 	}
 
 	/* called by the childWindows to remove references to themselves */

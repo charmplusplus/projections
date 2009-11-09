@@ -16,10 +16,13 @@ public class AnimationWindow extends ProjectionsWindow
     private AnimationColorBarPanel colorbarPanel;
     AnimationDisplayPanel  displayPanel;
     AnimationWindow thisWindow;
+   
     
     JMenuBar mbar = new JMenuBar();
 
-    private Button bPlusOne, bMinusOne, bAuto;
+    IntervalChooserPanel intervalPanel;
+
+	private Button bPlusOne, bMinusOne, bAuto;
     private Button setRanges;
     private JTimeTextField delayField;
     private Panel statusPanel;
@@ -87,55 +90,38 @@ public class AnimationWindow extends ProjectionsWindow
 
     public void showDialog() {
 	if (dialog == null) {
-            dialog = new IntervalRangeDialog(this, "Select Animation Range");
-	} else {
-	    setDialogData();
+		intervalPanel = new IntervalChooserPanel();    	
+		dialog = new RangeDialogNew(this, "Select Animation Range", intervalPanel, false);
+	} 
+
+	dialog.displayDialog();
+	if (!dialog.isCancelled()){
+		intervalSize = intervalPanel.getIntervalSize();
+		validPEs = dialog.getValidProcessors();
+		startTime = dialog.getStartTime();
+		endTime = dialog.getEndTime();
+		final SwingWorker worker =  new SwingWorker() {
+			public Object doInBackground() {
+				if (thisWindow.layoutComplete) {
+					displayPanel.setParameters();
+					slider.setValues(0, 1, 0, displayPanel.getNumI());
+				} else {
+					createMenus();
+					createLayout();
+				}
+				return null;
+			}
+			public void done() {
+				if (thisWindow.layoutComplete) {
+					pack();
+					thisWindow.setVisible(true);
+				} else {
+					thisWindow.repaint();
+				}
+			}
+		};
+		worker.execute();
 	}
-        dialog.displayDialog();
-        if (!dialog.isCancelled()){
-            getDialogData();
-            final SwingWorker worker =  new SwingWorker() {
-                    public Object construct() {
-			if (thisWindow.layoutComplete) {
-			    if (dialog.isModified()) {
-				displayPanel.setParameters();
-				slider.setValues(0, 1, 0,
-						 displayPanel.getNumI());
-			    }
-			} else {
-			    createMenus();
-			    createLayout();
-			}
-                        return null;
-                    }
-                    public void finished() {
-			if (thisWindow.layoutComplete) {
-			    pack();
-			    thisWindow.setVisible(true);
-			} else {
-			    thisWindow.repaint();
-			}
-                    }
-                };
-            worker.start();
-        }
-    }
-
-    public void getDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	intervalSize = dialog.getIntervalSize();
-	validPEs = dialog.getValidProcessors();
-        startTime = dialog.getStartTime();
-        endTime = dialog.getEndTime();
-    }
-
-    public void setDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	dialog.setIntervalSize(intervalSize);
-	dialog.setValidProcessors(validPEs);
-	dialog.setStartTime(startTime);
-	dialog.setEndTime(endTime);
-	super.setDialogData();
     }
 
     public void actionPerformed(ActionEvent evt)

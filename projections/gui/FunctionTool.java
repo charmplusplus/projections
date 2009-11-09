@@ -28,6 +28,9 @@ public class FunctionTool extends GenericGraphWindow
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
+    
+    
+
 
     // local GUI components
     private JPanel mainPanel;
@@ -101,25 +104,24 @@ public class FunctionTool extends GenericGraphWindow
 
     public void showDialog() {
 	if (dialog == null) {
-	    dialog = new RangeDialog(this, "select Range", null);
-	} else {
-	    setDialogData();
+		dialog = new RangeDialogNew(this, "select Range", null, false);
 	}
+	
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
-	    getDialogData();
+
 	    final SwingWorker worker =  new SwingWorker() {
-		    public Object construct() {
-			getData();
-			return null;
-		    }
-		    public void finished() {
-			setGraphSpecificData();
-			thisWindow.setVisible(true);
-			thisWindow.repaint();
-		    }
-		};
-	    worker.start();
+	    	public Object doInBackground() {
+	    		getData();
+	    		return null;
+	    	}
+	    	public void done() {
+	    		setGraphSpecificData();
+	    		thisWindow.setVisible(true);
+	    		thisWindow.repaint();
+	    	}
+	    };
+	    worker.execute();
 	}
     }
 

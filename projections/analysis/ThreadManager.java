@@ -31,7 +31,7 @@ public class ThreadManager {
 		this.description = description;
 		this.numInitialThreads = threads.size();
 		this.parentWindow = guiRoot;
-		this.numConcurrentThreads = 16;
+		this.numConcurrentThreads = 20;
 	}
 
 
@@ -90,7 +90,7 @@ public class ThreadManager {
 			//------------------------------------
 			// wait on the threads to complete
 			iter = spawnedReaders.iterator();
-			int waitMillis = 1000; // wait for 1000 ms for the first thread, and 1 ms for each additional thread
+			int waitMillis = 200; // wait for 1000 ms for the first thread, and 1 ms for each additional thread
 			while(iter.hasNext()){
 				r = (Thread) iter.next();
 				try {

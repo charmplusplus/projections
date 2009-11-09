@@ -24,7 +24,9 @@ public class CommTimeWindow extends GenericGraphWindow
     private EntrySelectionDialog entryDialog;
         
     private JPanel	   mainPanel;
-    private JPanel	   graphPanel;
+    IntervalChooserPanel intervalPanel;
+
+	private JPanel	   graphPanel;
     private JPanel	   checkBoxPanel;
     private JPanel         controlPanel;
     
@@ -85,21 +87,21 @@ public class CommTimeWindow extends GenericGraphWindow
     
     // format for output
     private DecimalFormat  _format;
-            
+
     protected void windowInit() {
-        // acquire data using parent class
-	super.windowInit();
-	
-	intervalSize = 1000; // default 1ms 
-	startInterval = 0;
-	if (endTime%intervalSize == 0) {
-	    endInterval = (int)(endTime/intervalSize - 1);
-	} 
-	else {
-	    endInterval = (int)(endTime/intervalSize);
-	}
-	numIntervals = endInterval-startInterval+1;
-	processorList = MainWindow.runObject[myRun].getValidProcessorList();
+    	// acquire data using parent class
+    	super.windowInit();
+
+    	intervalSize = 1000; // default 1ms 
+    	startInterval = 0;
+    	if (endTime%intervalSize == 0) {
+    		endInterval = (int)(endTime/intervalSize - 1);
+    	}
+    	else {
+    		endInterval = (int)(endTime/intervalSize);
+    	}
+    	numIntervals = endInterval-startInterval+1;
+    	processorList = MainWindow.runObject[myRun].getValidProcessorList();
     }
 
     public CommTimeWindow(MainWindow mainWindow) {
@@ -298,50 +300,38 @@ public class CommTimeWindow extends GenericGraphWindow
 	setXAxis("Time", "");
 	setYAxis("Count", "");
     }
-
+    
     public void showDialog() {
-	if (dialog == null) {
-	    dialog = new IntervalRangeDialog(this, "select Range");
+	if (dialog == null) {    
+		intervalPanel = new IntervalChooserPanel();    	
+		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);
 	}
-	else {
-	    setDialogData();
-	}
+	
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
-	    getDialogData();
-	    final SwingWorker worker =  new SwingWorker() {
-		    public Object construct() {
-		        fillGraphData();
-		        return null;
-		    }
-		    public void finished() {
-		        setOutputGraphData();
-			Checkbox cb = cbg.getSelectedCheckbox();
-			setCheckboxData(cb);
-			thisWindow.setVisible(true);
-		        thisWindow.repaint();
-	            }
-	    };
-	    worker.start();
+		intervalSize = intervalPanel.getIntervalSize();
+    	startInterval = (int)intervalPanel.getStartInterval();
+    	endInterval = (int)intervalPanel.getEndInterval();
+    	numIntervals = endInterval-startInterval+1;
+    	processorList = dialog.getValidProcessors();
+
+		final SwingWorker worker =  new SwingWorker() {
+			public Object doInBackground() {
+				fillGraphData();
+				return null;
+			}
+			public void done() {
+				setOutputGraphData();
+				Checkbox cb = cbg.getSelectedCheckbox();
+				setCheckboxData(cb);
+				thisWindow.setVisible(true);
+				thisWindow.repaint();
+			}
+		};
+		worker.execute();
 	}
     }
-    
-    public void getDialogData() {
-	//super.getDialogData();
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	intervalSize = dialog.getIntervalSize();
-	startInterval = (int)dialog.getStartInterval();
-	endInterval = (int)dialog.getEndInterval();
-	numIntervals = endInterval-startInterval+1;
-	processorList = dialog.getValidProcessors();
-    }
 
-    public void setDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	dialog.setIntervalSize(intervalSize);
-	dialog.setValidProcessors(processorList);
-	super.setDialogData();
-    }
     
     public void fillGraphData() {
     	// Utilize CallGraph.java in analysis folder

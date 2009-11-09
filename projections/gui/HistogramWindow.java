@@ -37,6 +37,9 @@ implements ActionListener
 	JRadioButton msgSizeBinButton;
 	ButtonGroup binTypeGroup;
 
+	
+	BinDialogPanel binpanel;
+	
 	// Data maintained by HistogramWindow
 	// countData is indexed by type, then by bin index followed by ep id.
 	// NOTE: bin indices need not be of the same size
@@ -54,7 +57,6 @@ implements ActionListener
 
 	HistogramWindow thisWindow;
 
-	boolean newDialog; // a temporary hack
 	private DecimalFormat _format;
 
 	protected void windowInit() {
@@ -95,57 +97,36 @@ implements ActionListener
 	public void showDialog()
 	{
 		if (dialog == null) {
-			dialog = 
-				new BinDialog(this, "Select Histogram Time Range");
-			newDialog = true;
-		} else {
-			setDialogData();
-			newDialog = false;
+			binpanel = new BinDialogPanel();
+			dialog = new RangeDialogNew(this, "Select Histogram Time Range", binpanel, false);
 		}
+		
 		dialog.displayDialog();
 		if (!dialog.isCancelled()) {
-			getDialogData();
+			timeNumBins = binpanel.getTimeNumBins();
+			timeBinSize = binpanel.getTimeBinSize();
+			timeMinBinSize = binpanel.getTimeMinBinSize();
+			msgNumBins = binpanel.getMsgNumBins();
+			msgBinSize = binpanel.getMsgBinSize();
+			msgMinBinSize = binpanel.getMsgMinBinSize();
+			
 			final SwingWorker worker = new SwingWorker() {
-				public Object construct() {
-					if (dialog.isModified()) {
-						counts = thisWindow.getCounts();
-					} else if (newDialog) { // temp hack
-						counts = thisWindow.getCounts();
-					}
+				public Object doInBackground() {
+					counts = thisWindow.getCounts();
 					return null;
 				}
-				public void finished() {
+				protected void done() {
 					setGraphSpecificData();
 					refreshGraph();
 					thisWindow.setVisible(true);
 				}
 			};
-			worker.start();
+			worker.execute();
 		}
 	}
 
-	public void getDialogData() {
-		BinDialog dialog = (BinDialog)this.dialog;
-		timeNumBins = dialog.getTimeNumBins();
-		timeBinSize = dialog.getTimeBinSize();
-		timeMinBinSize = dialog.getTimeMinBinSize();
-		msgNumBins = dialog.getMsgNumBins();
-		msgBinSize = dialog.getMsgBinSize();
-		msgMinBinSize = dialog.getMsgMinBinSize();
-		// use GenericGraphWindow's method for the rest.
-		super.getDialogData();
-	}
 
-	public void setDialogData() {
-		BinDialog dialog = (BinDialog)this.dialog;
-		dialog.setTimeBinSize(timeBinSize);
-		dialog.setTimeNumBins(timeNumBins);
-		dialog.setTimeMinBinSize(timeMinBinSize);
-		dialog.setMsgBinSize(msgBinSize);
-		dialog.setMsgNumBins(msgNumBins);
-		dialog.setMsgMinBinSize(msgMinBinSize);
-		super.setDialogData();
-	}
+
 
 	public void actionPerformed(ActionEvent evt)
 	{
@@ -155,45 +136,34 @@ implements ActionListener
 				showDialog();
 			else if(m.getText().equals("Close"))
 				close();
-		} else if (evt.getSource() instanceof JRadioButton) {
-			JRadioButton b = (JRadioButton)evt.getSource();
-			if (b.getActionCommand().equals("Execution Time")) {
-				// small optimization
-				if (binType != TYPE_TIME) {
-					final SwingWorker worker = new SwingWorker() {
-						public Object construct() {
-							binType = TYPE_TIME;
-							setGraphSpecificData();
-							refreshGraph();
-							return null;
-						}
-						public void finished() {
-						}
-					};
-					worker.start();
+		} else if (evt.getSource()  == timeBinButton) {
+			final SwingWorker worker = new SwingWorker() {
+				public Object doInBackground() {
+					binType = TYPE_TIME;
+					setGraphSpecificData();
+					refreshGraph();
+					return null;
 				}
-			} else if (b.getActionCommand().equals("Message Size")) {
-				if (binType != TYPE_MSG_SIZE) {
-					final SwingWorker worker = new SwingWorker() {
-						public Object construct() {
-							binType = TYPE_MSG_SIZE;
-							setGraphSpecificData();
-							refreshGraph();
-							return null;
-						}
-						public void finished() {
-						}
-					};
-					worker.start();
+				public void done() {
 				}
-			}
-		} else if (evt.getSource() instanceof JButton) {
-			JButton b = (JButton)evt.getSource();
-			if (b.getText().equals("Select Entries")) {
-				System.out.println("selecting entries for display");
-			} else if (b.getText().equals("Out-of-Range EPs")) {
-				System.out.println("Showing out of range entries");
-			}
+			};
+			worker.execute();
+		} else if (evt.getSource()  ==  msgSizeBinButton) {
+			final SwingWorker worker = new SwingWorker() {
+				public Object doInBackground() {
+					binType = TYPE_MSG_SIZE;
+					setGraphSpecificData();
+					refreshGraph();
+					return null;
+				}
+				public void done() {
+				}
+			};
+			worker.execute();
+		} else if (evt.getSource() == entrySelectionButton) {
+			System.out.println("selecting entries for display");
+		} else if (evt.getSource() == epTableButton) {
+			System.out.println("Showing out of range entries");
 		}
 	} 
 

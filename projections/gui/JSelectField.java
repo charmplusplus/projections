@@ -10,11 +10,13 @@ public class JSelectField extends JTextField
 
 private String lastValue;
    private int    lastCaretPosition;
-
+   public RangeVerifier rangeVerifier;
+   
    public JSelectField(String defval, int size)
    {
 	  super(defval, size);
-          setInputVerifier(new RangeVerifier());  
+	  rangeVerifier =  new RangeVerifier();
+	  setInputVerifier(rangeVerifier);  
 	  lastValue = "" + defval;
    } 
   
@@ -170,6 +172,11 @@ private String lastValue;
 
 	return tmpList;
     }   
+    
+
+    public OrderedIntList getValue() {
+ 	   return getValue(Integer.MAX_VALUE);
+    }  
 
     /* verify if the input characters are valid or not */
 
@@ -190,5 +197,7 @@ private String lastValue;
    public void textValueChanged(TextEvent evt)
    {
           checkValue();
-   }  
+   }
+
+
 }

@@ -44,7 +44,8 @@ public abstract class ProjectionsWindow
     protected MainWindow parentWindow;
 
     // NOTE: There NEED NOT be a dialog.
-    public RangeDialog dialog;
+    public RangeDialogNew dialog;
+    
 
     /**
      *  All implementing classes MUST use windowInit() to set up
@@ -73,46 +74,6 @@ public abstract class ProjectionsWindow
      */
     protected abstract void showDialog();
 
-    
-    /**
-     *  Must implement code to set parameter data to the window
-     *  (more specifically the tool) via the dialog. Because of the
-     *  arbitrary nature of parameter data in projections, this has
-     *  to be in the form of global variables:
-     *  e.g.     getDialogData() {
-     *              validPEs = dialog.validPEs;
-     *              startTime = dialog.startTime;
-     *              endTime = dialog.endTime;
-     *           }
-     *
-     *  This is intended to be used after the showDialog code.
-     *  e.g.     showDialog();
-     *           if (!dialog.isCancelled()) {
-     *             getDialogData();
-     *             ... blah blah blah ...
-     *           }
-     */
-    protected abstract void getDialogData();
-
-
-    /**
-     *  Subclasses of ProjectionsWindow are *expected* to set the
-     *  dialog's parameter variables by either (or both):
-     *
-     *  1) using the dialog's accessors.
-     *  2) directly setting the dialog's public parameter variables.
-     *
-     *  The exact manner this is done will depend on how the dialog
-     *  is actually implemented.
-     *
-     *  This should be done before calling super.setDialogData();
-     *
-     */
-    protected void setDialogData() {
-	if (dialog != null) {
-	    dialog.updateFields();
-	}
-    }
 
 
     public ProjectionsWindow(MainWindow parentWindow) {

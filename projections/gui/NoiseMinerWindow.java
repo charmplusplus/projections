@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
@@ -52,9 +53,8 @@ public class NoiseMinerWindow extends ProjectionsWindow
 implements ItemListener
 {
 
-
 	NoiseMinerWindow      thisWindow;    
-
+	
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
@@ -129,16 +129,18 @@ implements ItemListener
 
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new RangeDialog(this, "select Range", null);
+			dialog = new RangeDialogNew(this, "Select Time Range & Processors", null, false);
 		}
-		else {
-			setDialogData();
-		}
+
 		dialog.displayDialog();
 		if (!dialog.isCancelled()) {
-			getDialogData();
+
+			validPEs = dialog.getValidProcessors();
+			startTime = dialog.getStartTime();
+			endTime = dialog.getEndTime();
+			
 			final SwingWorker worker = new SwingWorker() {
-				public Object construct() {
+				public Object doInBackground() {
 					noiseMiner = new NoiseMiner(startTime, endTime, validPEs);
 					noiseMiner.gatherData(thisWindow);
 					mainText.setText(noiseMiner.getText());
@@ -147,11 +149,11 @@ implements ItemListener
 					return null;
 				}
 				
-				public void finished() {
+				public void done() {
 //					System.out.println("displayDialog finished()");
 				}
 			};
-			worker.start();
+			worker.execute();
 		}
 	}
 	
@@ -250,19 +252,6 @@ implements ItemListener
 	public void itemStateChanged(ItemEvent ae){
 	}
 
-
-	public void getDialogData() {
-		validPEs = dialog.getValidProcessors();
-		startTime = dialog.getStartTime();
-		endTime = dialog.getEndTime();
-	}
-
-	public void setDialogData() {
-		dialog.setValidProcessors(validPEs);
-		dialog.setStartTime(startTime);
-		dialog.setEndTime(endTime);
-		super.setDialogData();	
-	}
 
 
 	/** A class that renders and handles events for the JButtons in our table */

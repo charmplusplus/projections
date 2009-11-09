@@ -272,18 +272,18 @@ public class StlPanel extends ScalePanel.Child
 	    if (newEPData) {
 		parentWindow.setVisible(false);
 		final SwingWorker worker = new SwingWorker() {
-			public Object construct() {
+			public Object doInBackground() {
 			    setEPData();
 			    newEPData = false;
 			    return null;
 			}
-			public void finished() {
+			public void done() {
 			    parentWindow.setVisible(true);
 			    applyColorMap(entryData, true);
 			    repaint();
 			}
 		    };
-		worker.start();
+		worker.execute();
 	    } else {
 		applyColorMap(entryData, true);
 		repaint();

@@ -28,6 +28,7 @@ import java.awt.event.MouseListener;
 import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.SwingWorker;
 
 public class StlWindow extends ProjectionsWindow
     implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
@@ -205,35 +206,35 @@ public class StlWindow extends ProjectionsWindow
 
     public void showDialog()
     {
-	try {
-	    if (dialog == null) {
-		dialog = 
-		    new RangeDialog(this, "Select Range", null);
-	    } else {
-		setDialogData();
-	    }
-	    dialog.displayDialog();
-	    if (!dialog.isCancelled()) {
-		getDialogData();
-		final SwingWorker worker = new SwingWorker() {
-			public Object construct() {
-			    thisWindow.setVisible(false);
-			    thisWindow.setStlPanelData();
-			    stl.resetMode();
-			    utilizationMode.setSelected(true);
-			    stl.setData(validPEs,startTime,endTime); 
-			    return null;
-			}
-			public void finished() {
-			    thisWindow.setVisible(true);
-			    thisWindow.repaint();
-			}
-		    };
-		worker.start();
-	    }
-	} catch (Exception e) { 
-	    e.printStackTrace();
-	}
+    	try {
+    		if (dialog == null) {
+    			dialog = new RangeDialogNew(this, "Select Range", null, false);
+    		}
+
+    		dialog.displayDialog();
+    		if (!dialog.isCancelled()) {
+    			validPEs = dialog.getValidProcessors();
+    			startTime = dialog.getStartTime();
+    			endTime = dialog.getEndTime();
+    			final SwingWorker worker = new SwingWorker() {
+    				public Object doInBackground() {
+    					thisWindow.setVisible(false);
+    					thisWindow.setStlPanelData();
+    					stl.resetMode();
+    					utilizationMode.setSelected(true);
+    					stl.setData(validPEs,startTime,endTime); 
+    					return null;
+    				}
+    				public void done() {
+    					thisWindow.setVisible(true);
+    					thisWindow.repaint();
+    				}
+    			};
+    			worker.execute();
+    		}
+    	} catch (Exception e) { 
+    		e.printStackTrace();
+    	}
     }
 
 
@@ -287,16 +288,6 @@ public class StlWindow extends ProjectionsWindow
    	status.setText(msg);
     }
    
-    public void getDialogData() {
-	validPEs = dialog.getValidProcessors();
-	startTime = dialog.getStartTime();
-	endTime = dialog.getEndTime();
-    }
 
-    public void setDialogData() {
-	dialog.setValidProcessors(validPEs);
-	dialog.setStartTime(startTime);
-	dialog.setEndTime(endTime);
-	super.setDialogData();
-    }
+   
 }

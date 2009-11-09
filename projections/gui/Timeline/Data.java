@@ -170,7 +170,7 @@ public class Data
 	private boolean skipLoadingMessages;
 	
 	/** Only load entry methods that have  at least this duration */
-	private int minEntryDuration;
+	private long minEntryDuration;
 
 	/** The font used by the LabelPanel */
 	public Font labelFont;
@@ -1969,8 +1969,8 @@ public class Data
 		maxMemColorRange = maxMemVal;
 	}
 	
-	public void setFilterEntryShorterThan(int minimumEntryDuration) {
-		minEntryDuration = minimumEntryDuration;
+	public void setFilterEntryShorterThan(long l) {
+		minEntryDuration = l;
 	}
 	
 }

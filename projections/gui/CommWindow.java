@@ -301,15 +301,14 @@ implements ItemListener, ActionListener, Clickable
 
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new RangeDialog(this, "select Range", null);
-		} else {
-			setDialogData();
+			dialog = new RangeDialogNew(this, "select Range", null, false);
 		}
+
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-			getDialogData();
+
 			final SwingWorker worker =  new SwingWorker() {
-				public Object construct() {
+				public Object doInBackground() {
 					sentMsgCount = new double[validPEs.size()][];
 					sentByteCount = new double[validPEs.size()][];
 					receivedMsgCount = new double[validPEs.size()][];
@@ -324,7 +323,7 @@ implements ItemListener, ActionListener, Clickable
 					getData();
 					return null;
 				}
-				public void finished() {
+				public void done() {
 					// setDataSource("Histogram", histArray, thisWindow);
 					setDataSource("Communications", sentMsgCount, 
 							thisWindow);
@@ -335,19 +334,10 @@ implements ItemListener, ActionListener, Clickable
 					thisWindow.repaint();
 				}
 			};
-			worker.start();
+			worker.execute();
 		}
 	}
 
-	// reuse generic graph window's method
-	public void getDialogData() {
-		super.getDialogData();
-	}
-
-	// reuse generic graph window's method
-	public void setDialogData() {
-		super.setDialogData();
-	}
 
 	public void getData(){
 		GenericLogReader glr;

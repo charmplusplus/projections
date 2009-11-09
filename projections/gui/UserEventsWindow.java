@@ -29,7 +29,9 @@ public class UserEventsWindow extends GenericGraphWindow
     private JPanel mainPanel;
     private JPanel controlPanel;
 
-    // data used for intervalgraphdialog
+    IntervalChooserPanel intervalPanel;
+
+	// data used for intervalgraphdialog
     int startInterval;
     int endInterval;
     long intervalSize;
@@ -103,48 +105,35 @@ public class UserEventsWindow extends GenericGraphWindow
                                 null, this));
         setJMenuBar(mbar);
     }
-    
+
     public void showDialog() {
-	if (dialog == null) {
-	    dialog = new IntervalRangeDialog(this, "Select Range");
-	} else {
-	    setDialogData();
-	}
-	dialog.displayDialog();
-	if (!dialog.isCancelled()){
-	    getDialogData();
-	    final SwingWorker worker =  new SwingWorker() {
-		    public Object construct() {
-			if (dialog.isModified()) {
-			    // Long non-gui (except progress) code here.
-			    constructToolData();
-			}
-			return null;
-		    }
-		    public void finished() {
-			// GUI code after Long non-gui code (above) is done.
-			setGraphSpecificData();
-			thisWindow.setVisible(true);                        
-		    }
-		};
-	    worker.start();
-	}
-    }
+    	if (dialog == null) {
+    		intervalPanel = new IntervalChooserPanel();    	
+    		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);    
+    	}
 
-    public void getDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	intervalSize = dialog.getIntervalSize();
-	startInterval = (int)dialog.getStartInterval();
-	endInterval = (int)dialog.getEndInterval();
-	processorList = dialog.getValidProcessors();
-	super.getDialogData();
-    }
-
-    public void setDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	dialog.setIntervalSize(intervalSize);
-	dialog.setValidProcessors(processorList);
-	super.setDialogData();
+    	dialog.displayDialog();
+    	if (!dialog.isCancelled()){
+    		intervalSize = intervalPanel.getIntervalSize();
+    		startInterval = (int)intervalPanel.getStartInterval();
+    		endInterval = (int)intervalPanel.getEndInterval();
+    		processorList = dialog.getValidProcessors();
+    		final SwingWorker worker =  new SwingWorker() {
+    			public Object doInBackground() {
+    				if (true) {
+    					// Long non-gui (except progress) code here.
+    					constructToolData();
+    				}
+    				return null;
+    			}
+    			public void done() {
+    				// GUI code after Long non-gui code (above) is done.
+    				setGraphSpecificData();
+    				thisWindow.setVisible(true);                        
+    			}
+    		};
+    		worker.execute();
+    	}
     }
 
     void constructToolData() {

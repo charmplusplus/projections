@@ -45,7 +45,9 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     long intervalSize; //in terms of microseconds!
     OrderedIntList processorList;    
     Vector[] processProfiles = null; //every vector element is an instance of AmpiProcessProfile
-        
+
+    // The tool specific GUI for the dialog
+    private IntervalChooserPanel intervalPanel;
 
     // data required for entry selection dialog
     private int numFunctions;
@@ -117,33 +119,20 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 	setYAxis("Function execution time", "us");
     }    
 
-    public void getDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-        intervalSize = dialog.getIntervalSize();
-        startInterval = (int)dialog.getStartInterval();
-        endInterval = (int)dialog.getEndInterval();
-        processorList = dialog.getValidProcessors();
-        processProfiles = new Vector[processorList.size()];
-        super.getDialogData();
-    }
-
-    public void setDialogData() {
-        IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-        dialog.setIntervalSize(intervalSize);
-        dialog.setValidProcessors(processorList);
-        super.setDialogData();
-    }
-
     public void showDialog() {
-	if (dialog == null) {
-	    dialog = new IntervalRangeDialog(this, "Select Range");
-	} else {
-	    setDialogData();
-	}
-	dialog.displayDialog();
-	if (!dialog.isCancelled()){
-            getDialogData();            
-        }        
+    	if (dialog == null) {
+    		intervalPanel = new IntervalChooserPanel();    	
+    		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);
+    	} 
+
+    	dialog.displayDialog();
+    	if (!dialog.isCancelled()){
+    		intervalSize = intervalPanel.getIntervalSize();
+    		startInterval = (int)intervalPanel.getStartInterval();
+    		endInterval = (int)intervalPanel.getEndInterval();
+    		processorList = dialog.getValidProcessors();
+    		processProfiles = new Vector[processorList.size()];
+    	}        
     }
 
     /**
@@ -157,8 +146,8 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     }
     
     public void getRangeVals(long beginT, long endT, int beginI, int endI, long iSize, OrderedIntList procList){
-        startTime = beginT;
-        endTime = endT;
+//        startTime = beginT;
+//        endTime = endT;
         startInterval = beginI;
         endInterval = endI;
         intervalSize = iSize;

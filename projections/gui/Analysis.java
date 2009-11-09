@@ -4,6 +4,8 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.SwingWorker;
+
 import projections.analysis.*;
 import projections.misc.*;
 
@@ -39,7 +41,7 @@ public class Analysis {
   
   public LogLoader logLoader;  //Only for .log files
   
-  private SumAnalyzer sumAnalyzer; //Only for .sum files
+  public SumAnalyzer sumAnalyzer; //Only for .sum files
   
   PoseDopReader dopReader; //Only for .poselog files
   
@@ -47,15 +49,19 @@ public class Analysis {
 
   private String baseName;
   
+  
+  /** Stores previous selections from a range dialog box from all tools */
+  public RangeDialogPersistantData persistantRangeData; 
+  
   // The total time (maxed) of a run across all processors.
   private long totalTime = 0;
   long poseTotalTime = 0;
   long poseTotalVirtualTime = 0;
   
   /******************* Graphs ***************/
-  private int[][][] systemUsageData;
-  private int[][][][] systemMsgsData;
-  private int[][][][] userEntryData;
+  public int[][][] systemUsageData;
+  public int[][][][] systemMsgsData;
+  public int[][][][] userEntryData;
   
   // stupid hack to compensate for the fact that LogReaders are never
   // maintained inside Analysis.
@@ -169,6 +175,11 @@ public class Analysis {
 
       // Flush any updated RC data to disk
       rcReader.writeFile();
+      
+      // Create a structure to store selected ranges from all the dialog boxes in all the tools
+      persistantRangeData = new RangeDialogPersistantData(getValidProcessorList(), 0, getTotalTime());
+      
+      
     } catch (LogLoadException e) {
       // if sts reader could not be created because of a log load
       // exception, forward the error as an IOException.
@@ -228,22 +239,19 @@ public class Analysis {
       poseTotalTime = rcReader.RC_POSE_REAL_TIME.longValue();
       poseTotalVirtualTime = rcReader.RC_POSE_VIRT_TIME.longValue();
     } else {
-      if (hasPoseDopFiles()) {
-	final SwingWorker worker = new SwingWorker() {
-	    public Object construct() {
-	      poseTotalTime = dopReader.getTotalRealTime();
-	      poseTotalVirtualTime = 
-		dopReader.getTotalVirtualTime();
-	      rcReader.setValue("RC_POSE_REAL_TIME", new Long(poseTotalTime));
-	      rcReader.setValue("RC_POSE_VIRT_TIME", new Long(poseTotalVirtualTime));
-	      return null;
-	    }
-	    public void finished() {
-	      // nothing to do
-	    }
-	  };
-	worker.start();
-      }
+    	if (hasPoseDopFiles()) {
+    		final SwingWorker worker = new SwingWorker() {
+    			public Object doInBackground() {
+    				poseTotalTime = dopReader.getTotalRealTime();
+    				poseTotalVirtualTime = dopReader.getTotalVirtualTime();
+    				return null;
+    			}
+    			public void done() {
+    				rcReader.setValue("RC_POSE_REAL_TIME", new Long(poseTotalTime));
+    				rcReader.setValue("RC_POSE_VIRT_TIME", new Long(poseTotalVirtualTime));	    }
+    		};
+    		worker.execute();
+    	}
     }
   }
   
@@ -457,10 +465,11 @@ public class Analysis {
 
 
     /**
-       replace LoadGraphData(), with one more parameter containing
-       a list of processors to read.
-       Two more parameters - intervalStart and intervalEnd added.
-    */
+     *  Load graph data for one or more processors.
+     * 
+     *  A parallel version of this has been created in projections.TimeProfile.ThreadedFileReader
+     *
+     */
     public void LoadGraphData(long intervalSize, 
 			      int intervalStart, int intervalEnd,
 			      boolean byEntryPoint, 
@@ -491,17 +500,6 @@ public class Analysis {
 	}
     }
     
-//    /**
-//     *  **CW** Time to stop being stupid and use the new summary reader
-//     *  and gain more control over the reading process.
-//     */
-//    public void loadSummaryData(long intervalSize,
-//				int intervalStart, int intervalEnd) {
-//	systemUsageData = new int[3][][];
-//	systemUsageData[1] = 
-//	    sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd, 
-//					   intervalSize);
-//    }
 
     // yet another version of summary load for processor subsets.
     public void loadSummaryData(long intervalSize, 
@@ -963,11 +961,11 @@ public class Analysis {
 
     // ************** Internal Data file(s) management routines ********
 
-    private boolean hasLogFiles() {
+    public boolean hasLogFiles() {
 	return FileUtils.hasLogFiles();
     }   
 
-    private boolean hasSumFiles() {
+    public boolean hasSumFiles() {
 	return FileUtils.hasSumFiles();
     }
    
@@ -975,7 +973,7 @@ public class Analysis {
 	return FileUtils.hasSumAccumulatedFile();
     }
 
-    private boolean hasSumDetailFiles() {
+    public boolean hasSumDetailFiles() {
 	return FileUtils.hasSumDetailFiles();
     }
 

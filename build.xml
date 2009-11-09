@@ -17,9 +17,9 @@ author = idooley2
     </description>
 
 
-    <property name="compile.debug"       value="false"/>
+    <property name="compile.debug"       value="true"/>
     <property name="compile.deprecation" value="false"/>
-    <property name="compile.optimize"    value="true"/>
+    <property name="compile.optimize"    value="false"/>
 
   <target name="cleanbuild" depends="clean,dist" description="Performing a fresh build" />
 

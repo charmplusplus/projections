@@ -3,9 +3,10 @@ import javax.swing.*;
 
 /** This class is meant to be used by any dialog taking time interval as input
 *   It validates the input data to be in us, ms or s
-*   Using JTextField instead of TextField as in TimeTextField 
+*   
 *   Uses Swing Input Verifier class(available from java 1.3) instead of KeyListener for validating input
-*   java 1.4 has better textfield validation
+* 	@todo convert this to a JFormattedTextField
+*
 */
 
 public class JTimeTextField extends JTextField

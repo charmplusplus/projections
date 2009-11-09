@@ -97,7 +97,7 @@ public class MultiRunWindow extends ProjectionsWindow
      */
     public void dialogCallback() {
 	final SwingWorker worker = new SwingWorker() {
-		public Object construct() {
+		public Object doInBackground() {
 		    try {
 			data = 
 			    new MultiRunData(fc.userSelect_returnVal);
@@ -113,7 +113,7 @@ public class MultiRunWindow extends ProjectionsWindow
 		    }
 		    return null;
 		}
-		public void finished() {
+		public void done() {
 		    // set up the window GUI for display
 		    thisWindow.createLayout();
 		    thisWindow.pack();
@@ -121,7 +121,7 @@ public class MultiRunWindow extends ProjectionsWindow
 		    thisWindow.setVisible(true);
 		}
 	    };
-	worker.start();
+	worker.execute();
     }
 
     void createLayout()

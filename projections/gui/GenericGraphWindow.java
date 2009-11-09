@@ -29,7 +29,7 @@ public abstract class GenericGraphWindow
     // meaning in future versions of Projections that support multiple
     // runs.
     static int myRun = 0;
-
+   
     // inheritable GUI objects
     protected GraphPanel graphPanel;
     protected Graph graphCanvas;
@@ -54,9 +54,9 @@ public abstract class GenericGraphWindow
     public long endTime;
 
     protected void windowInit() {
-	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
-	startTime = 0;
-	endTime = MainWindow.runObject[myRun].getTotalTime();
+    	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
+    	startTime = 0;
+    	endTime = MainWindow.runObject[myRun].getTotalTime();
     }
 
     // constructor 
@@ -106,19 +106,7 @@ public abstract class GenericGraphWindow
 //	}
 //    }
 
-    protected void getDialogData() {
-	validPEs = dialog.getValidProcessors();
-	startTime = dialog.getStartTime();
-	endTime = dialog.getEndTime();
-    }
-
-    protected void setDialogData() {
-	dialog.setValidProcessors(validPEs);
-	dialog.setStartTime(startTime);
-	dialog.setEndTime(endTime);
-	super.setDialogData();
-    }
-
+  
     protected void setXAxis(String title,String units){
 	xAxis = new XAxisFixed(title,units);	
     }

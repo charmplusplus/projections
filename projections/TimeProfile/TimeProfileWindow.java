@@ -1,11 +1,28 @@
-package projections.gui;
+package projections.TimeProfile;
 
 import java.io.*;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
 import projections.analysis.*;
+import projections.gui.AmpiTimeProfileWindow;
+import projections.gui.Analysis;
+import projections.gui.ColorManager;
+import projections.gui.ColorSelectable;
+import projections.gui.EntrySelectionDialog;
+import projections.gui.GenericGraphWindow;
+import projections.gui.IntervalChooserPanel;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.RangeDialogExtensionPanel;
+import projections.gui.RangeDialogNew;
+import projections.gui.U;
+import projections.gui.Util;
+
 /**
  *  TimeProfileWindow
  *  by Chee Wai Lee
@@ -16,8 +33,6 @@ import projections.analysis.*;
 public class TimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
-
-	int YS_PECount = 0;
 	
 	TimeProfileWindow thisWindow;
 
@@ -33,6 +48,8 @@ public class TimeProfileWindow extends GenericGraphWindow
     private JButton epSelection;
     private JButton setRanges;
 
+    private IntervalChooserPanel intervalPanel;
+    
     // **CW** this really should be a default button with ProjectionsWindow
     private JButton saveColors;
     private JButton loadColors;
@@ -46,7 +63,6 @@ public class TimeProfileWindow extends GenericGraphWindow
     // data required for entry selection dialog
     int numEPs;
     //YSun add
-    int special;
     private String typeLabelNames[] = {"Entry Points"};
     boolean stateArray[][];
     boolean existsArray[][];
@@ -71,6 +87,12 @@ public class TimeProfileWindow extends GenericGraphWindow
     protected int ampiPanelTabIndex;
     protected int epPanelTabIndex;
 
+    
+	// the following data are statically known and can be initialized
+	// here overhead, idle time
+    private final int special = 2;
+    
+    
     protected void windowInit() {
 	// acquire data using parent class
 	super.windowInit();
@@ -88,9 +110,7 @@ public class TimeProfileWindow extends GenericGraphWindow
     public TimeProfileWindow(MainWindow mainWindow) {
 	super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();
-	// the following data are statically known and can be initialized
-	// here overhead, idle time
-	special = 2;
+
 	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	stateArray = new boolean[1][numEPs+special];
 	existsArray = new boolean[1][numEPs+special];
@@ -198,62 +218,152 @@ public class TimeProfileWindow extends GenericGraphWindow
     }
 
     public void showDialog() {
+    	
 	if (dialog == null) {
-	    dialog = new IntervalRangeDialog(this, "Select Range");
+		intervalPanel = new IntervalChooserPanel();
+		dialog = new RangeDialogNew(this, "Select Range", intervalPanel, false);
 	}
+
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
-	    getDialogData();
+		intervalSize = intervalPanel.getIntervalSize();
+		startInterval = (int)intervalPanel.getStartInterval();
+		endInterval = (int)intervalPanel.getEndInterval();
+		processorList = dialog.getValidProcessors();
 
-            //set range values for time profile window
-            if(ampiTraceOn){
-                ampiGraphPanel.getRangeVals(dialog.getStartTime(),dialog.getEndTime(),
-                                            startInterval, endInterval, intervalSize, processorList);
-            }
+		//set range values for time profile window
+		if(ampiTraceOn){
+			ampiGraphPanel.getRangeVals(dialog.getStartTime(),dialog.getEndTime(),
+					startInterval, endInterval, intervalSize, processorList);
+		}
 
-	    final SwingWorker worker =  new SwingWorker() {
-		    public Object construct() {
-			if (dialog.isModified()) {
-			    int nextPe = 0;
-			    int count = 0;
-			    int numIntervals = endInterval-startInterval+1;
-			    //entry number + idle
-			    graphData = new double[numIntervals][numEPs+special];
-			    long progressStart = System.currentTimeMillis();
-			    ProgressMonitor progressBar =
-				new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
-						    "Reading log files",
-						    "", 0,
-						    processorList.size());
-			    progressBar.setNote("Reading");
-			    progressBar.setProgress(0);
-			    
-			    while (processorList.hasMoreElements()) {
-                    nextPe = processorList.nextElement();
-                    progressBar.setProgress(count);
-                    progressBar.setNote("[PE: " + nextPe +
-                        " ] Reading Data.");
-                    if (progressBar.isCanceled()) {
-                        return null;
+		final SwingWorker worker =  new SwingWorker() {
+		    public Object doInBackground() {
+
+				int numIntervals = endInterval-startInterval+1; 
+			    graphData = new double[numIntervals][numEPs+special]; //entry number + idle
+
+		    	int numProcessors = processorList.size();
+		    	int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
+		    	
+			    if( MainWindow.runObject[myRun].hasLogFiles() || MainWindow.runObject[myRun].hasSumDetailFiles() ) {
+				    // Do parallel loading unless all we have is the sum files (which we will just do in serial)
+
+			    	Date time1  = new Date();
+
+			    	// Create a list of worker threads
+			    	LinkedList<ThreadedFileReader> readyReaders = new LinkedList<ThreadedFileReader>();
+
+			    	// Create multiple result arrays to reduce contention for accumulating
+			    	int numResultAccumulators = 8;
+			    	double[][][] graphDataAccumulators = new double[numResultAccumulators][numIntervals][numEPs+special];
+				 
+	
+			    	int pIdx=0;		
+			    	while (processorList.hasMoreElements()) {
+			    		int nextPe = processorList.nextElement();
+			    		readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
+			    					startInterval, endInterval, ampiTraceOn, 
+			    					numIntervals, numUserEntries, numProcessors, numEPs, graphDataAccumulators[pIdx%numResultAccumulators]) );
+			    		pIdx++;
+			    	}
+
+			    	Date time2  = new Date();
+
+			    	
+			    	// Pass this list of threads to a class that manages/runs the threads nicely
+			    	ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, null);
+			    	threadManager.runThreads();
+
+			    	Date time3  = new Date();
+
+			    	
+			    	// Merge resulting graphData structures together.
+			    	for(int a=0; a< numResultAccumulators; a++){
+			    		for(int i=0;i<numIntervals;i++){
+			    			for(int j=0;j<numEPs+special;j++){
+			    				graphData[i][j] += graphDataAccumulators[a][i][j];
+			    			}
+			    		}	
+			    	}
+
+			    	Date time4  = new Date();
+			    	
+			    	double totalTime = ((time4.getTime() - time1.getTime())/1000.0);
+			    	System.out.println("Time to read " + threadManager.numInitialThreads +  
+			    			" input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + 
+			    			totalTime + "sec");
+			    	System.out.println("Time to setup threads : " + ((time2.getTime() - time1.getTime())/1000.0) + "sec");
+			    	System.out.println("Time to run threads : " + ((double)(time3.getTime() - time2.getTime())/1000.0) + "sec");
+			    	System.out.println("Time to accumulate results : " + ((double)(time4.getTime() - time3.getTime())/1000.0) + "sec");
+			    	System.out.println("Logs loaded per second : " + (numProcessors / totalTime) );
+
+			    	
+			    	
+			    	
+			    	// Probably should verify that logReaderIntervalSize is the same in all these
+			    	Iterator<ThreadedFileReader> iter = readyReaders.iterator();
+			    	ThreadedFileReader r1 = iter.next();
+			    	long firstLogReaderIntervalSize = r1.logReaderIntervalSize;
+			    	while(iter.hasNext()){
+			    		ThreadedFileReader r2 = iter.next();
+			    		if(firstLogReaderIntervalSize != r2.logReaderIntervalSize){
+			    			System.err.println("threaded log reader is broken");
+			    		}
+			    	}
+			    	    	
+			    }
+			    else if( MainWindow.runObject[myRun].hasSumFiles()){
+			    	// Do serial file reading because all we have is the sum files	    	
+			    	
+			    	// The data we use is
+				    // 	systemUsageData[2][*][*]
+				    // userEntryData[*][LogReader.TIME][*][*]
+
+			    	int[][][]  systemUsageData = new int[3][][];
+			    	systemUsageData[2] = new int[numProcessors][];
+
+//			    	int[][][][] systemMsgsData = new int[5][3][numProcessors][];
+			    	int[][][][] systemMsgsData = null;
+
+			    	int[][][][] userEntryData  = new int[numUserEntries][][][];
+			    	for(int n=0;n<numUserEntries;n++){
+			    		userEntryData[n]  = new int[3][][];
+			    		userEntryData[n][LogReader.TIME] = new int[numProcessors][];
+			    	}
+			    	
+			    	int[][] temp = MainWindow.runObject[myRun].sumAnalyzer.getSystemUsageData(startInterval, endInterval, intervalSize);
+			    	processorList.reset();
+			    	systemUsageData[1] = new int[processorList.size()][endInterval-startInterval+1];
+			    	for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
+			    		systemUsageData[1][pIdx] = temp[processorList.nextElement()];
+			    	} 
+
+
+			    	// Extract data and put it into the graph
+			    	for(int peIdx=0; peIdx< numProcessors; peIdx++){
+			    		for (int ep=0; ep<numEPs; ep++) {
+			    			int[][] entryData = userEntryData[ep][LogReader.TIME];
+			    			for (int interval=0; interval<numIntervals; interval++) {
+			    				graphData[interval][ep] += entryData[peIdx][interval];
+			    				graphData[interval][numEPs] -= entryData[peIdx][interval]; // overhead = -work time
+			    			}
+			    		}
+
+			    		//YS add for idle time SYS_IDLE=2
+			    		int[][] idleData = systemUsageData[2]; //percent
+			    		for (int interval=0; interval<numIntervals; interval++) {
+			    			if(idleData[peIdx] != null && idleData[peIdx].length>interval){
+			    				graphData[interval][numEPs+1] += idleData[peIdx][interval] * 0.01 * intervalSize;
+			    				graphData[interval][numEPs] -= idleData[peIdx][interval] * 0.01 * intervalSize; //overhead = - idle time
+			    				graphData[interval][numEPs] += intervalSize;  
+			    			}
+			    		}
+			    	}					
 				}
-				// inefficient, but temporary workaround
+				    
 				
-                        OrderedIntList tempList = 
-                            new OrderedIntList();
-                        tempList.insert(nextPe);
-                        MainWindow.runObject[myRun].LoadGraphData(intervalSize,
-                            startInterval,
-                            endInterval,
-                            true, tempList);
-                        if(ampiTraceOn){
-                            ampiGraphPanel.createAMPITimeProfileData(nextPe, count);
-                        }
-                        fillGraphData();
-                        count++;
-                        YS_PECount++;
-                }
-                progressBar.close();
-			    // set the exists array to accept non-zero 
+                // set the exists array to accept non-zero 
 			    // entries only have initial state also 
 			    // display all existing data. Only do this 
 			    // once in the beginning
@@ -272,10 +382,10 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    }
 			    if (startFlag)
 				startFlag = false;
-			}
+			
 			return null;
 		    }
-		    public void finished() {
+		    public void done() {
 			setOutputGraphData();
                         if(ampiTraceOn){
                             ampiGraphPanel.setOutputGraphData(true);
@@ -283,44 +393,11 @@ public class TimeProfileWindow extends GenericGraphWindow
 			thisWindow.setVisible(true);                        
 		    }
 		};
-	    worker.start();
+	    worker.execute();
 	}
     }
 
-    public void getDialogData() {
-	IntervalRangeDialog dialog = (IntervalRangeDialog)this.dialog;
-	intervalSize = dialog.getIntervalSize();
-	startInterval = (int)dialog.getStartInterval();
-	endInterval = (int)dialog.getEndInterval();
-	processorList = dialog.getValidProcessors();
-	super.getDialogData();
-    }
-
-    void fillGraphData() {
-	// for now, just assume all processors are added to the mix.
-	// LogReader is BROKEN and cannot deal with partial data properly.
-	// Any current attempts to fix this will cause GraphWindow to fail
-	// when partial data is actually read.
-
-	for (int ep=0; ep<numEPs; ep++) {
-	    int[][] entryData = MainWindow.runObject[myRun].getUserEntryData(ep, LogReader.TIME);
-	    for (int interval=0; interval<graphData.length; interval++) {
-		graphData[interval][ep] += entryData[0][interval];
-        graphData[interval][numEPs] -= entryData[0][interval]; // overhead = -work time
-	    }
-	}
-	
-
-	//YS add for idle time SYS_IDLE=2
-	int[][] idleData = MainWindow.runObject[myRun].getSystemUsageData(2); //percent
-    for (int interval=0; interval<graphData.length; interval++) {
-    		graphData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
-            graphData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
-            graphData[interval][numEPs] += intervalSize;  
-
-    }
-
-    }
+  
 
     public void applyDialogColors() {
 	setOutputGraphData();

@@ -84,10 +84,7 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	
 	public void showDialog() {
 		if (dialog == null) {
-			dialog = new RangeDialog(this, "select Range", null);
-		}
-		else {
-			setDialogData();
+			dialog = new RangeDialogNew(this, "select Range", null, false);
 		}
 		
 		dialog.displayDialog();
@@ -96,8 +93,10 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 			// At this point the user has provided a time range and list of PEs in the dialog box 
 			
 			// get the time range and PE list from the dialog box
-			getDialogData();
-
+			validPEs = dialog.getValidProcessors();
+			startTime = dialog.getStartTime();
+			endTime = dialog.getEndTime();
+			
 			// because it may take a while to load the data, turn on the waiting cursor
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
@@ -137,20 +136,5 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	public void showWindow() {
 		// do nothing for now.
 	}
-
-	
-	public void getDialogData() {
-		validPEs = dialog.getValidProcessors();
-		startTime = dialog.getStartTime();
-		endTime = dialog.getEndTime();
-	}
-
-	public void setDialogData() {
-		dialog.setValidProcessors(validPEs);
-		dialog.setStartTime(startTime);
-		dialog.setEndTime(endTime);
-		super.setDialogData();	
-	}
-
 
 }

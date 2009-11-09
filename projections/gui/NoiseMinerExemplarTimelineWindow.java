@@ -10,6 +10,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
 import projections.analysis.TimelineEvent;
 import projections.analysis.NoiseMiner.EventWindow;
 import projections.analysis.NoiseMiner.NoiseResult;

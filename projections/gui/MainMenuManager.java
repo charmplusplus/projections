@@ -14,9 +14,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
 
+import projections.TimeProfile.TimeProfileWindow;
 import projections.analysis.ProjMain;
-import projections.gui.Timeline.TimelineWindow;
 import projections.gui.LogFileViewer.LogFileViewerWindow;
+import projections.gui.Timeline.TimelineWindow;
 import projections.streaming.StreamingTool;
 
 /* ***************************************************

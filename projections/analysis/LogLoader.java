@@ -1110,7 +1110,7 @@ public class LogLoader extends ProjDefs
 								//If the log is loaded somewhere in the middle where
 								//user event happens before a timeline event, then the
 								//timeline vector would be empty
-								TimelineEvent curLastOne = (TimelineEvent) Timeline.get(Timeline.size()-1);
+								TimelineEvent curLastOne = Timeline.get(Timeline.size()-1);
 								long tleBeginTime = curLastOne.BeginTime;
 								//System.out.println("TLE's begin: "+tleBeginTime+" user's begin: "+userEvent.BeginTime);
 								if(tleBeginTime <= userEventObject.BeginTime && 

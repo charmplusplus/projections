@@ -144,7 +144,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	public void notifyProcessorListHasChanged() {
 		mainPanel.loadTimelineObjects(false, this);
 	}
-	
+
 	
 	 /** Add a timeline to the Timeline visualization
      *  @note called by external tools

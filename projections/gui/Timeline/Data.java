@@ -279,8 +279,16 @@ public class Data
 			peToLine.addLast(p);
 			modificationHandler.notifyProcessorListHasChanged();
 		}
+		
+		storeRangeToPersistantStorage();
 	}
 	
+
+	/** If the timeline tool chooses a new time range or set of processors, then we should store the new configuration for use in future dialog boxes */
+	public void storeRangeToPersistantStorage(){
+		MainWindow.runObject[myRun].persistantRangeData.update(beginTime(), endTime(), processorListOrdered());
+	}
+
 
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
 	public void setProcessorList(OrderedIntList processorList){
@@ -312,7 +320,6 @@ public class Data
 		while(iter.hasNext()){
 			Integer pe = iter.next();
 			processorList.insert(pe);
-			System.out.println("processorList " + pe);
 		}
 
 		return processorList;
@@ -876,10 +883,7 @@ public class Data
 		modificationHandler = rh;
 		displayMustBeRedrawn();
 	}
-	
-//	public void setProcessorList(OrderedIntList procs){
-//		
-//	}
+
 
 	/** Choose a new time range to display. 
 	 * 	Scale will be reset to zero, and
@@ -888,12 +892,14 @@ public class Data
 		this.beginTime = beginTime;
 		this.endTime = endTime;
 		setScaleFactor(1.0f);
+		storeRangeToPersistantStorage();
 	}
 
 
 	public void setRange(long beginTime, long endTime){
 		this.beginTime = beginTime;
 		this.endTime = endTime;
+		storeRangeToPersistantStorage();
 	}
 
 	/** Set the scale factor. This will cause the handler to layout and repaint panels and update buttons */

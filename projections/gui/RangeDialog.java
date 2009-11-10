@@ -189,10 +189,16 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		/** Store the newly chosen time/PE range */
 		if(dialogState != DIALOG_CANCELLED){
 			// Store this new time range for future use by this or other dialog boxes
-			MainWindow.runObject[myRun].persistantRangeData.update(startTimeField.getValue(), endTimeField.getValue(), processorsField.getValue() );
+			storeRangeToPersistantStorage();
 		}
 	
 	}
+	
+	
+	public void storeRangeToPersistantStorage(){
+		MainWindow.runObject[myRun].persistantRangeData.update(startTimeField.getValue(), endTimeField.getValue(), processorsField.getValue());
+	}
+	
 
 	/** Load the previously used time/PE range */
 	private void initializeData(){

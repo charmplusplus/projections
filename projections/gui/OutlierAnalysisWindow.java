@@ -41,10 +41,10 @@ Clickable
 	// **CW** Not so good for now, used by both Dialog and Window
 	public String attributes[][] = {
 			{ "Execution Time by Activity",
-				"Maximum Idle Time",
+				"Minimum Idle Time",
 				"Msgs Sent by Activity", 
 			"Bytes Sent by Activity",
-			"Minimum Idle Time",
+			"Maximum Idle Time",
 			"Active Entry Methods",
 			"Overhead",
 			"Average Grain Size"},
@@ -79,7 +79,7 @@ Clickable
 
 
 	public OutlierAnalysisWindow(MainWindow mainWindow) {
-		super("Projections Outlier Analysis Tool - " + 
+		super("Projections Extrema Analysis Tool - " + 
 				MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 
 		createMenus();

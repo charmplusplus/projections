@@ -255,7 +255,7 @@ implements ActionListener, ItemListener
 		animationMenuItem = new JMenuItem("Animation");
 		timeProfileGraphMenuItem = new JMenuItem("Time Profile Graph");
 		userEventsMenuItem = new JMenuItem("User Events");
-		outlierAnalysisMenuItem = new JMenuItem("Outlier Analysis");
+		outlierAnalysisMenuItem = new JMenuItem("Extrema Analysis");
 		multirunAnalysisMenuItem = new JMenuItem("Multirun Analysis");
 		functionToolMenuItem = new JMenuItem("Function Tool");
 		AMPIUsageProfileMenuItem = new JMenuItem("AMPI Usage Profile");

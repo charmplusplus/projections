@@ -130,7 +130,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     		intervalSize = intervalPanel.getIntervalSize();
     		startInterval = (int)intervalPanel.getStartInterval();
     		endInterval = (int)intervalPanel.getEndInterval();
-    		processorList = dialog.getValidProcessors();
+    		processorList = dialog.getSelectedProcessors();
     		processProfiles = new Vector[processorList.size()];
     	}        
     }

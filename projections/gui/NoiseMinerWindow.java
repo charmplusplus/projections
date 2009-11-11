@@ -75,17 +75,11 @@ implements ItemListener
 	JTextArea   mainText;
 	private JScrollPane	mainTextScroller;
 
-	public OrderedIntList        validPEs;
-	public long                  startTime;
-	public long                  endTime;
-
 	NoiseMiner			noiseMiner;
 
 	public String buttonColumnTitle;
 	public int numColumns;
 	
-	protected void windowInit() {
-	}
 
 	public NoiseMinerWindow(MainWindow parentWindow) {
 		super(parentWindow);
@@ -135,9 +129,9 @@ implements ItemListener
 		dialog.displayDialog();
 		if (!dialog.isCancelled()) {
 
-			validPEs = dialog.getValidProcessors();
-			startTime = dialog.getStartTime();
-			endTime = dialog.getEndTime();
+			final OrderedIntList validPEs = dialog.getSelectedProcessors();
+			final long startTime = dialog.getStartTime();
+			final long endTime = dialog.getEndTime();
 			
 			final SwingWorker worker = new SwingWorker() {
 				public Object doInBackground() {

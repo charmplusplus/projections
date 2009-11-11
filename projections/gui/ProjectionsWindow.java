@@ -43,26 +43,11 @@ public abstract class ProjectionsWindow
      */
     protected MainWindow parentWindow;
 
-    // NOTE: There NEED NOT be a dialog.
+    
+    /** Each window has a dialog box associated with it */
     public RangeDialog dialog;
     
-
-    /**
-     *  All implementing classes MUST use windowInit() to set up
-     *  ProjectionWindow's default parameters. These values will
-     *  then be passed on to any dialog creation.
-     *
-     *  IMPLEMENTATION NOTE:
-     *  The implementing class can choose to either allow the parent
-     *  class to dictate default values or set it's own default
-     *  parameter values.
-     *  
-     *  DANGER NOTE:
-     *  windowInit() is called at the beginning of the class's constructor
-     *  
-     */
-    protected abstract void windowInit();
-
+    
     /**
      *  Must implement code to show the dialog box and handle
      *  the return values. There NEED NOT be a dialog.
@@ -75,11 +60,12 @@ public abstract class ProjectionsWindow
     protected abstract void showDialog();
 
 
-
+    /** Simply call the parent's constructor that sets an empty window title and listens for the window closing. */	
     public ProjectionsWindow(MainWindow parentWindow) {
     	this("", parentWindow);
     }
 
+    /** Simply set the window title and listen for the window closing. */	
     public ProjectionsWindow(String title, MainWindow parentWindow) {
     	this.parentWindow = parentWindow;
     	setTitle(title);
@@ -88,8 +74,6 @@ public abstract class ProjectionsWindow
     			close();
     		}
     	});
-    	// FIXME:  Dangerous because we call a subclass's method before the associated object has been fully constructed(we are still in the constructor here
-    	windowInit(); 
     }
 
     public void setLayout(JPanel mainPanel) {

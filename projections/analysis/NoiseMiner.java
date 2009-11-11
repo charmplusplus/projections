@@ -5,6 +5,7 @@ import projections.gui.*;
 import projections.gui.Timeline.ThreadedFileReader;
 
 import java.io.*;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.List;
 
@@ -104,12 +105,12 @@ public class NoiseMiner extends ProjDefs
 		}
 		
 		public String toString(){
+			DecimalFormat format = new DecimalFormat();
+			format.setMaximumFractionDigits(2);
 			if(d > 1000.0){
-//				return String.format("%.2f(ms)", d/1000.0 );
-				return ""+(d/1000.0)+"(ms)";
+				return ""+ format.format(d/1000.0)+"(ms)";
 			} else {
-//				return String.format("%.2f(us)", d );
-				return ""+d+"(us)";
+				return ""+format.format(d)+"(us)";
 			}
 			
 		}
@@ -738,16 +739,24 @@ public class NoiseMiner extends ProjDefs
 		
 		peList.reset();
 		int numPs = peList.size();
-			
-		// Create a list of worker threads
+				
+		// Create a list of worker threads	
 		LinkedList<NoiseMinerThread> readyReaders = new LinkedList<NoiseMinerThread>();
 		
 		for (int p=0; p<numPs; p++) {
 			int pe = peList.nextElement();
 			readyReaders.add(new NoiseMinerThread(pe, MainWindow.runObject[myRun], this));
 		}	
-
-		ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, parent);
+		
+		// Determine a component to show the progress bar with
+		Component guiRootForProgressBar = null;
+		if(parent!=null && parent.isVisible()) {
+			guiRootForProgressBar = parent;
+		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+		}
+		
+		ThreadManager threadManager = new ThreadManager("Loading Noise Miner in Parallel", readyReaders, guiRootForProgressBar);
 		threadManager.runThreads();
 
 		// Retrieve results for each PE

@@ -55,7 +55,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	
     /** called when the display must be redrawn, sometimes as a callback from data object */
 	public void refreshDisplay(boolean doRevalidate){
-
 		// Set the values from the buttons
 		if(data.selectionValid()){
 			controls.setSelectedTime(data.leftSelectionTime(),data.rightSelectionTime());
@@ -76,16 +75,12 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		scrollingPanel.refreshDisplay(doRevalidate);
 	}
 	
-	
-
-	/** WHOLE CONSTRUCTOR IS NOT CALLED BEFORE windowInit() */
 	public TimelineWindow(MainWindow parentWindow) {
 		super(parentWindow);
 		
         thisWindow = this;
 		
 		data = new Data(this);
-		
 		data.guiRoot(this);
 		
 		labelPanel = new LabelPanel(data);
@@ -109,7 +104,10 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		setTitle("Projections Timelines - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 		controls.CreateMenus();
-
+		
+		data.setProcessorList(MainWindow.runObject[myRun].getValidProcessorList());
+		data.setRange(0, MainWindow.runObject[myRun].getTotalTime());		
+		
 		showDialog();
 	}
 
@@ -127,13 +125,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	/** Set the values in the User Event Table window */
 	public void setData(Data data){
 		controls.userEventWindowSetData();
-	}
-
-	
- 	protected void windowInit() {
-		data = new Data(this);		
-		data.setProcessorList(MainWindow.runObject[myRun].getValidProcessorList());
-		data.setRange(0, MainWindow.runObject[myRun].getTotalTime());
 	}
 
  	

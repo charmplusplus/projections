@@ -180,18 +180,18 @@ private String lastValue;
 
     /* verify if the input characters are valid or not */
 
-   class RangeVerifier extends InputVerifier {
-     public boolean verify(JComponent input) {
-       JTextField tf = (JTextField) input;
-       String procRange = tf.getText();
-       for(int i=0; i<procRange.length(); i++)
-       {
-	char ch = procRange.charAt(i);
-        if(!(('0' <= ch && ch <= '9') || ch=='-' || ch==',' || ch==':' || Character.isISOControl(ch)))
-		return false;
-       }
-       return true;
-     }
+    class RangeVerifier extends InputVerifier {
+    	public boolean verify(JComponent input) {
+    		JTextField tf = (JTextField) input;
+    		String procRange = tf.getText();
+    		for(int i=0; i<procRange.length(); i++)
+    		{
+    			char ch = procRange.charAt(i);
+    			if(!(('0' <= ch && ch <= '9') || ch=='-' || ch==',' || ch==':' || Character.isISOControl(ch)))
+    				return false;
+    		}
+    		return true;
+    	}
    }
 
    public void textValueChanged(TextEvent evt)

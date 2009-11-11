@@ -78,18 +78,13 @@ public class ProfileWindow extends ProjectionsWindow
 	CreateMenus();
 	CreateLayout();
 	pack();
-	showDialog();
-    }
-
-    protected void windowInit() {
+	
 	// get new data object
 	data = new ProfileData(this);
 
-	// acquire starting data from Analysis
-	data.plist = MainWindow.runObject[myRun].getValidProcessorList();
-	data.begintime = 0;
-	data.endtime = MainWindow.runObject[myRun].getTotalTime();
+	showDialog();
     }
+
 
     private void CreateMenus(){
 	JMenuBar mbar = new JMenuBar();
@@ -227,7 +222,7 @@ public class ProfileWindow extends ProjectionsWindow
 
     	dialog.displayDialog();
     	if (!dialog.isCancelled()) {
-    		data.plist = dialog.getValidProcessors();
+    		data.plist = dialog.getSelectedProcessors();
     		data.begintime = dialog.getStartTime();
     		data.endtime = dialog.getEndTime();
     		final Thread t = new Thread() {

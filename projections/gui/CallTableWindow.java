@@ -44,27 +44,24 @@ public class CallTableWindow extends ProjectionsWindow
     
     boolean              epDetailToggle;
     boolean              statsToggle;
-    
-    protected void windowInit() {
-        // acquire data using parent class
-    }
+  
 
     public CallTableWindow(MainWindow parentWindow ) {
-	super(parentWindow);
-	thisWindow = this;
-	
-	setBackground(Color.lightGray);
-	setTitle("Projections Call Table - " + MainWindow.runObject[myRun].getFilename() + ".sts");
-	
-	mainPanel = new JPanel();
-	epDetailToggle = false;
-	statsToggle = false;
-	setLayout(mainPanel);
-	createMenus();
-	CreateLayout();
-	pack();
-	showDialog();
-	setVisible(true);
+    	super(parentWindow);
+    	thisWindow = this;
+
+    	setBackground(Color.lightGray);
+    	setTitle("Projections Call Table - " + MainWindow.runObject[myRun].getFilename() + ".sts");
+
+    	mainPanel = new JPanel();
+    	epDetailToggle = false;
+    	statsToggle = false;
+    	setLayout(mainPanel);
+    	createMenus();
+    	CreateLayout();
+    	pack();
+    	showDialog();
+    	setVisible(true);
     }
 
     public void actionPerformed(ActionEvent e)
@@ -91,7 +88,7 @@ public class CallTableWindow extends ProjectionsWindow
 	
 	dialog.displayDialog();
 	if (!dialog.isCancelled()) {
-		validPEs = dialog.getValidProcessors();
+		validPEs = dialog.getSelectedProcessors();
 		startTime = dialog.getStartTime();
 		endTime = dialog.getEndTime();
 		final SwingWorker worker = new SwingWorker() {

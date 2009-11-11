@@ -27,7 +27,12 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 	public long intervalSize;
 	JLabel sizeLabel;
 	
+
 	public IntervalChooserPanel() {
+		this(1000);
+	}
+	
+	public IntervalChooserPanel(long defaultIntervalSize) {
 
 		GridBagLayout gbl      = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -38,7 +43,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 
 		this.setLayout(gbl);
 		sizeLabel = new JLabel("Interval Size :", JLabel.LEFT);
-		sizeField = new JTimeTextField(1000, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
+		sizeField = new JTimeTextField(defaultIntervalSize, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
 
 		validIntervalsLabel = new JLabel("", JLabel.LEFT);
 		numIntervalsLabel = new JLabel("", JLabel.LEFT);
@@ -54,6 +59,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 
 	}
 
+
 	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;	
 		sizeField.addActionListener(parent);
@@ -62,11 +68,6 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 	}
 
 	public void setInitialFields(){
-		// Initially we should have about 200 intervals
-		long initialIntervals = 200;
-		long timePerInterval = parent.getSelectedTotalTime()/initialIntervals;
-		sizeField.setValue(timePerInterval);
-
 		updateFields();
 	}
 

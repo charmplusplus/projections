@@ -628,7 +628,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		int right = rectWidth-1;
 			
 		
-		if(beginTime < data.beginTime())
+		if(beginTime < data.startTime())
 		{
 			drawLeftArrow(g, c, verticalInset, rectHeight);
 			rectWidth -= 5;
@@ -684,7 +684,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				long packBeginTime = packs[p].BeginTime;
 				long packEndTime = packs[p].EndTime;
 
-				if(packEndTime >= data.beginTime() && packBeginTime <= data.endTime())
+				if(packEndTime >= data.startTime() && packBeginTime <= data.endTime())
 				{
 
 					// Compute the begin pixel coordinate relative to the containing panel
@@ -715,7 +715,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			while(m.hasNext()){
 				TimelineMessage msg = m.next();
 				long msgtime = msg.Time;
-				if(msgtime >= data.beginTime() && msgtime <= data.endTime())
+				if(msgtime >= data.startTime() && msgtime <= data.endTime())
 				{
 					// Compute the pixel coordinate relative to the containing panel
 					int msgPanelCoordX = data.timeToScreenPixel(msgtime);
@@ -873,8 +873,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		if(endTime > data.endTime())
 			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
 
-		if(beginTime < data.beginTime())
-			leftCoord = data.timeToScreenPixelLeft(data.beginTime(), actualDisplayWidth);
+		if(beginTime < data.startTime())
+			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
 		
 		int width = rightCoord-leftCoord+1;
 
@@ -905,13 +905,13 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			{
 				// packtime += packs[p].EndTime - packs[p].BeginTime + 1;
 				packtime += packs[p].EndTime - packs[p].BeginTime;
-				if(packs[p].BeginTime < data.beginTime())
-					packtime -= (data.beginTime() - packs[p].BeginTime);
+				if(packs[p].BeginTime < data.startTime())
+					packtime -= (data.startTime() - packs[p].BeginTime);
 				if(packs[p].EndTime > data.endTime())
 					packtime -= (packs[p].EndTime - data.endTime());
 			}
 			packusage = packtime * 100;
-			packusage /= (data.endTime() - data.beginTime());
+			packusage /= (data.endTime() - data.startTime());
 		}
 	}   
 
@@ -933,8 +933,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		//	  System.out.println("Raw usage : " + usage);
 
-		if (beginTime < data.beginTime()) {
-			usage -= (data.beginTime() - beginTime);
+		if (beginTime < data.startTime()) {
+			usage -= (data.startTime() - beginTime);
 		}
 		if (endTime > data.endTime()) {
 			usage -= (endTime - data.endTime());
@@ -942,7 +942,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		//	  System.out.println("Final usage : " + usage);
 		//	  System.out.println();
 
-		usage /= (data.endTime() - data.beginTime());
+		usage /= (data.endTime() - data.startTime());
 		usage *= 100;
 		// System.out.println(usage);
 	}

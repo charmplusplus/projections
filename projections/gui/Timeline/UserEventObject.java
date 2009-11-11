@@ -119,8 +119,8 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(EndTime > data.endTime())
 			rightCoord = data.timeToScreenPixel(data.endTime(), actualDisplayWidth) - 5;
 
-		if(BeginTime < data.beginTime())
-			left = data.timeToScreenPixel(data.beginTime(), actualDisplayWidth) + 5;
+		if(BeginTime < data.startTime())
+			left = data.timeToScreenPixel(data.startTime(), actualDisplayWidth) + 5;
 		
 		int width = rightCoord-left+1;
 		

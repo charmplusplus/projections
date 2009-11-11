@@ -35,7 +35,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 {
 	
 	TimeProfileWindow thisWindow;
-
+	MainWindow mainWindow;
+	
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
@@ -54,10 +55,13 @@ public class TimeProfileWindow extends GenericGraphWindow
     private JButton saveColors;
     private JButton loadColors;
 
-    // data used for intervalgraphdialog
-    int startInterval;
-    int endInterval;
     long intervalSize;
+
+	int startInterval;
+
+	int endInterval;
+
+	// data used for intervalgraphdialog
     OrderedIntList processorList;
 
     // data required for entry selection dialog
@@ -91,26 +95,13 @@ public class TimeProfileWindow extends GenericGraphWindow
 	// the following data are statically known and can be initialized
 	// here overhead, idle time
     private final int special = 2;
-    
-    
-    protected void windowInit() {
-	// acquire data using parent class
-	super.windowInit();
-
-	intervalSize = 1000; // default 1ms 
-	startInterval = 0;
-	if (endTime%intervalSize == 0) {
-	    endInterval = (int)(endTime/intervalSize - 1);
-	} else {
-	    endInterval = (int)(endTime/intervalSize);
-	}
-	processorList = MainWindow.runObject[myRun].getValidProcessorList();
-    }
 
     public TimeProfileWindow(MainWindow mainWindow) {
 	super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();
 
+	this.mainWindow = mainWindow;
+	
 	numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 	stateArray = new boolean[1][numEPs+special];
 	existsArray = new boolean[1][numEPs+special];
@@ -217,6 +208,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 	setYAxis("Entry point execution time", "us");
     }
 
+
     public void showDialog() {
     	
 	if (dialog == null) {
@@ -229,7 +221,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 		intervalSize = intervalPanel.getIntervalSize();
 		startInterval = (int)intervalPanel.getStartInterval();
 		endInterval = (int)intervalPanel.getEndInterval();
-		processorList = dialog.getValidProcessors();
+		processorList = dialog.getSelectedProcessors();
 
 		//set range values for time profile window
 		if(ampiTraceOn){
@@ -248,7 +240,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 		    	int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
 		    	
 			    if( MainWindow.runObject[myRun].hasLogFiles() || MainWindow.runObject[myRun].hasSumDetailFiles() ) {
-				    // Do parallel loading unless all we have is the sum files (which we will just do in serial)
+				    // Do parallel loading because we have full logs
 
 			    	Date time1  = new Date();
 
@@ -272,8 +264,18 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    	Date time2  = new Date();
 
 			    	
+			    	// Determine a component to show the progress bar with
+					Component guiRootForProgressBar = null;
+					if(thisWindow!=null && thisWindow.isVisible()) {
+						guiRootForProgressBar = thisWindow;
+					} else if(mainWindow!=null && mainWindow.isVisible()){
+						guiRootForProgressBar = mainWindow;
+					} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+						guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+					}
+			    	
 			    	// Pass this list of threads to a class that manages/runs the threads nicely
-			    	ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, thisWindow);
+			    	ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar);
 			    	threadManager.runThreads();
 
 			    	Date time3  = new Date();
@@ -294,11 +296,10 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    	System.out.println("Time to read " + threadManager.numInitialThreads +  
 			    			" input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + 
 			    			totalTime + "sec");
-			    	System.out.println("Time to setup threads : " + ((time2.getTime() - time1.getTime())/1000.0) + "sec");
-			    	System.out.println("Time to run threads : " + ((double)(time3.getTime() - time2.getTime())/1000.0) + "sec");
-			    	System.out.println("Time to accumulate results : " + ((double)(time4.getTime() - time3.getTime())/1000.0) + "sec");
-			    	System.out.println("Logs loaded per second : " + (numProcessors / totalTime) );
-
+//			    	System.out.println("Time to setup threads : " + ((time2.getTime() - time1.getTime())/1000.0) + "sec");
+//			    	System.out.println("Time to load logs : " + ((double)(time3.getTime() - time2.getTime())/1000.0) + "sec");
+//			    	System.out.println("Time to accumulate results : " + ((double)(time4.getTime() - time3.getTime())/1000.0) + "sec");
+//			    	System.out.println("Logs loaded per second : " + (numProcessors / totalTime) );
 			    			    	    	
 			    }
 			    else if( MainWindow.runObject[myRun].hasSumFiles()){

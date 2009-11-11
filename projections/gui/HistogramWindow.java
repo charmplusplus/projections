@@ -13,8 +13,6 @@ import javax.swing.border.*;
  *  HistogramWindow
  *  modified by Chee Wai Lee
  *  2/23/2005
- *  - Defaults to visualizing time-based histograms. User can switch
- *    to msg-size based histograms.
  */
 public class HistogramWindow extends GenericGraphWindow 
 implements ActionListener
@@ -25,9 +23,9 @@ implements ActionListener
 	// runs.
 	int myRun = 0;
 
-	private static final int NUM_TYPES = 2;
-	private static final int TYPE_TIME = 0;
-	private static final int TYPE_MSG_SIZE = 1;
+	public static final int NUM_TYPES = 2;
+	public static final int TYPE_TIME = 0;
+	public static final int TYPE_MSG_SIZE = 1;
 
 	// Gui components
 	JButton entrySelectionButton;
@@ -46,8 +44,6 @@ implements ActionListener
 	double[][][] counts;
 	int binType;
 
-	// variables (in addition to those in the super class) 
-	// to be set by BinDialog.
 	public int timeNumBins;
 	public long timeBinSize;
 	public long timeMinBinSize;
@@ -59,16 +55,6 @@ implements ActionListener
 
 	private DecimalFormat _format;
 
-	protected void windowInit() {
-		timeNumBins = 100;  // default to 100 bins
-		timeBinSize = 1000; // 1ms default bin size
-		timeMinBinSize = 0; // default, look at all bins
-		msgNumBins = 200;   // default to 200 bins
-		msgBinSize = 100;  // 100 bytes default bin size
-		msgMinBinSize = 0; // default, look at all bins
-		// use GenericGraphWindow's method for the rest.
-		super.windowInit();
-	}
 
 	public HistogramWindow(MainWindow mainWindow)
 	{
@@ -90,6 +76,8 @@ implements ActionListener
 	public void close(){
 		super.close();
 	}
+	
+
 
 	/* 
 	 *  Show the BinDialog 
@@ -103,19 +91,24 @@ implements ActionListener
 		
 		dialog.displayDialog();
 		if (!dialog.isCancelled()) {
-			timeNumBins = binpanel.getTimeNumBins();
-			timeBinSize = binpanel.getTimeBinSize();
-			timeMinBinSize = binpanel.getTimeMinBinSize();
-			msgNumBins = binpanel.getMsgNumBins();
-			msgBinSize = binpanel.getMsgBinSize();
-			msgMinBinSize = binpanel.getMsgMinBinSize();
-			
 			final SwingWorker worker = new SwingWorker() {
 				public Object doInBackground() {
-					counts = thisWindow.getCounts();
+					timeNumBins = binpanel.getTimeNumBins();
+					timeBinSize = binpanel.getTimeBinSize();
+					timeMinBinSize = binpanel.getTimeMinBinSize();
+					msgNumBins = binpanel.getMsgNumBins();
+					msgBinSize = binpanel.getMsgBinSize();
+					msgMinBinSize = binpanel.getMsgMinBinSize();
+					binType = binpanel.getSelectedType();
+					counts = thisWindow.getCounts(dialog.getStartTime(), dialog.getEndTime(), dialog.getSelectedProcessors());
 					return null;
 				}
 				protected void done() {
+					// Make the gui status reflect what was chosen in the dialog box
+					if(binType == TYPE_MSG_SIZE)
+						msgSizeBinButton.setSelected(true);
+					else
+						timeBinButton.setSelected(true);			
 					setGraphSpecificData();
 					refreshGraph();
 					thisWindow.setVisible(true);
@@ -137,35 +130,20 @@ implements ActionListener
 			else if(m.getText().equals("Close"))
 				close();
 		} else if (evt.getSource()  == timeBinButton) {
-			final SwingWorker worker = new SwingWorker() {
-				public Object doInBackground() {
-					binType = TYPE_TIME;
-					setGraphSpecificData();
-					refreshGraph();
-					return null;
-				}
-				public void done() {
-				}
-			};
-			worker.execute();
+			binType = TYPE_TIME;
+			setGraphSpecificData();
+			refreshGraph();
 		} else if (evt.getSource()  ==  msgSizeBinButton) {
-			final SwingWorker worker = new SwingWorker() {
-				public Object doInBackground() {
-					binType = TYPE_MSG_SIZE;
-					setGraphSpecificData();
-					refreshGraph();
-					return null;
-				}
-				public void done() {
-				}
-			};
-			worker.execute();
+			binType = TYPE_MSG_SIZE;
+			setGraphSpecificData();
+			refreshGraph();
 		} else if (evt.getSource() == entrySelectionButton) {
 			System.out.println("selecting entries for display");
 		} else if (evt.getSource() == epTableButton) {
 			System.out.println("Showing out of range entries");
 		}
-	} 
+	}
+	
 
 	protected JPanel getMainPanel()
 	{
@@ -199,8 +177,8 @@ implements ActionListener
 
 		buttonPanel.add(timeBinButton);
 		buttonPanel.add(msgSizeBinButton);
-		buttonPanel.add(entrySelectionButton);
-		buttonPanel.add(epTableButton);
+//		buttonPanel.add(entrySelectionButton);
+//		buttonPanel.add(epTableButton);
 
 		Util.gblAdd(mainPanel, graphPanel,  gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(mainPanel, buttonPanel, gbc, 0,1, 1,1, 0,0);
@@ -210,18 +188,13 @@ implements ActionListener
 
 	protected void setGraphSpecificData(){
 		if (binType == TYPE_TIME) {
-			setXAxis("Bin Interval Size (" + U.t(timeBinSize) + ")", 
-					"Time", timeMinBinSize, timeBinSize);
+			setXAxis("Bin Interval Size (" + U.t(timeBinSize) + ")", "Time", timeMinBinSize, timeBinSize);
 			setYAxis("Number of Occurrences", "");
-			setDataSource("Histogram", counts[TYPE_TIME], 
-					thisWindow);
+			setDataSource("Histogram", counts[TYPE_TIME], thisWindow);
 		} else if (binType == TYPE_MSG_SIZE) {
-			setXAxis("Bin Interval Size (" + 
-					_format.format(msgBinSize) + " bytes)", 
-					"", msgMinBinSize, msgBinSize);
+			setXAxis("Bin Interval Size (" +  _format.format(msgBinSize) + " bytes)",  "", msgMinBinSize, msgBinSize);
 			setYAxis("Number of Occurrences", "");
-			setDataSource("Histogram", counts[TYPE_MSG_SIZE], 
-					thisWindow);
+			setDataSource("Histogram", counts[TYPE_MSG_SIZE], thisWindow);
 		}
 	}
 
@@ -272,7 +245,7 @@ implements ActionListener
 		return bubbleText;
 	}
 
-	double[][][] getCounts()
+	double[][][] getCounts(long startTime, long endTime, OrderedIntList pes)
 	{
 		// Variables for use with the analysis
 		long executionTime;
@@ -281,7 +254,6 @@ implements ActionListener
 
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 
-		OrderedIntList tmpPEs = validPEs.copyOf();
 		GenericLogReader r;
 		double[][][] countData = new double[NUM_TYPES][][];
 
@@ -292,21 +264,17 @@ implements ActionListener
 
 		// for maintaining "begin" entries for the data type we
 		// wish to monitor.
-		LogEntryData[] typeLogs
-		= new LogEntryData[NUM_TYPES];
+		LogEntryData[] typeLogs = new LogEntryData[NUM_TYPES];
 		for (int i=0; i<NUM_TYPES; i++) {
 			typeLogs[i] = new LogEntryData();
 		}
 		// for maintaining interval-based events 
-		boolean[] isActive
-		= new boolean[NUM_TYPES];
+		boolean[] isActive = new boolean[NUM_TYPES];
 
-		ProgressMonitor progressBar = 
-			new ProgressMonitor(this, "Reading log files",
-					"", 0, tmpPEs.size());
+		ProgressMonitor progressBar = new ProgressMonitor(this, "Reading log files", "", 0, pes.size());
 		int curPeCount = 0;
-		while (tmpPEs.hasMoreElements()) {
-			int pe = tmpPEs.nextElement();
+		while (pes.hasMoreElements()) {
+			int pe = pes.nextElement();
 			if (!progressBar.isCanceled()) {
 				progressBar.setNote("[PE: " + pe + " ] Reading data.");
 				progressBar.setProgress(curPeCount);
@@ -364,8 +332,7 @@ implements ActionListener
 								if (targetBin >= timeNumBins) {
 									targetBin = timeNumBins;
 								}
-								countData[TYPE_TIME][targetBin][logdata.entry]
-								                                += 1.0;
+								countData[TYPE_TIME][targetBin][logdata.entry] += 1.0;
 							}
 							isActive[TYPE_TIME] = false;
 						}
@@ -393,7 +360,7 @@ implements ActionListener
 			} catch(EOFException e) {
 				// do nothing just reached end-of-file
 			} catch(Exception e) {
-				System.out.println("Exception " + e);
+				System.err.println("Exception " + e);
 				e.printStackTrace();
 				System.exit(-1);
 			}

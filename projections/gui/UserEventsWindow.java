@@ -117,7 +117,7 @@ public class UserEventsWindow extends GenericGraphWindow
     		intervalSize = intervalPanel.getIntervalSize();
     		startInterval = (int)intervalPanel.getStartInterval();
     		endInterval = (int)intervalPanel.getEndInterval();
-    		processorList = dialog.getValidProcessors();
+    		processorList = dialog.getSelectedProcessors();
     		final SwingWorker worker =  new SwingWorker() {
     			public Object doInBackground() {
     				if (true) {

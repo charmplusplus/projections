@@ -49,7 +49,7 @@ implements ScalePanel.StatusDisplay
 	public static PrintWriter dataDump = null;
 
 	// for SwingWorker to work
-	MainWindow thisWindow;
+	MainWindow mainWindow;
 
 	// The Analysis object from which tools derive their performance
 	// data from. This is temporarily a one-element array.
@@ -74,7 +74,7 @@ implements ScalePanel.StatusDisplay
 
 	public MainWindow()
 	{
-		thisWindow = this;
+		mainWindow = this;
 
 		// Get information from ProjMain
 		CUR_VERSION = ProjMain.CUR_VERSION;
@@ -230,15 +230,15 @@ implements ScalePanel.StatusDisplay
 			public Object doInBackground() {
 				try {
 					MainWindow.runObject[myRun].initAnalysis(newfile, 
-							thisWindow);
+							mainWindow);
 				} catch (IOException e) {
 					InvalidFileDialog ifd =
-						new InvalidFileDialog(thisWindow, e);
+						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
 				} catch (StringIndexOutOfBoundsException e) {
 					e.printStackTrace();
 					InvalidFileDialog ifd =
-						new InvalidFileDialog(thisWindow, e);
+						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
 				}
 				return null;

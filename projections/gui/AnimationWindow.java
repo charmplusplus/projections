@@ -40,7 +40,7 @@ public class AnimationWindow extends ProjectionsWindow
 
     // basic parameter variables consistent with IntervalRangeDialog
     public long intervalSize;
-    public OrderedIntList validPEs;
+    public OrderedIntList selectedPEs;
     public long startTime;
     public long endTime;
     
@@ -70,13 +70,7 @@ public class AnimationWindow extends ProjectionsWindow
 	}  
     }       
 
-    protected void windowInit() {
-	// acquire data from Analysis
-	intervalSize = 1000; // default to 1ms
-	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
-        startTime = 0;
-        endTime = MainWindow.runObject[myRun].getTotalTime();
-    }
+   
   
     public AnimationWindow(MainWindow mainWindow)
     {
@@ -85,43 +79,44 @@ public class AnimationWindow extends ProjectionsWindow
 	setTitle("Projections Animation - " + MainWindow.runObject[myRun].getFilename() + ".sts");
           
 	thisWindow = this;
+
 	showDialog();
     }   
 
     public void showDialog() {
-	if (dialog == null) {
-		intervalPanel = new IntervalChooserPanel();    	
-		dialog = new RangeDialog(this, "Select Animation Range", intervalPanel, false);
-	} 
+    	if (dialog == null) {
+    		intervalPanel = new IntervalChooserPanel(1000);  // default to 1ms   	
+    		dialog = new RangeDialog(this, "Select Animation Range", intervalPanel, false);
+    	} 
 
-	dialog.displayDialog();
-	if (!dialog.isCancelled()){
-		intervalSize = intervalPanel.getIntervalSize();
-		validPEs = dialog.getValidProcessors();
-		startTime = dialog.getStartTime();
-		endTime = dialog.getEndTime();
-		final SwingWorker worker =  new SwingWorker() {
-			public Object doInBackground() {
-				if (thisWindow.layoutComplete) {
-					displayPanel.setParameters();
-					slider.setValues(0, 1, 0, displayPanel.getNumI());
-				} else {
-					createMenus();
-					createLayout();
-				}
-				return null;
-			}
-			public void done() {
-				if (thisWindow.layoutComplete) {
-					pack();
-					thisWindow.setVisible(true);
-				} else {
-					thisWindow.repaint();
-				}
-			}
-		};
-		worker.execute();
-	}
+    	dialog.displayDialog();
+    	if (!dialog.isCancelled()){
+    		intervalSize = intervalPanel.getIntervalSize();
+    		selectedPEs = dialog.getSelectedProcessors();
+    		startTime = dialog.getStartTime();
+    		endTime = dialog.getEndTime();
+    		final SwingWorker worker =  new SwingWorker() {
+    			public Object doInBackground() {
+    				if (thisWindow.layoutComplete) {
+    					displayPanel.setParameters();
+    					slider.setValues(0, 1, 0, displayPanel.getNumI());
+    				} else {
+    					createMenus();
+    					createLayout();
+    				}
+    				return null;
+    			}
+    			public void done() {
+    				if (thisWindow.layoutComplete) {
+    					pack();
+    					thisWindow.setVisible(true);
+    				} else {
+    					thisWindow.repaint();
+    				}
+    			}
+    		};
+    		worker.execute();
+    	}
     }
 
     public void actionPerformed(ActionEvent evt)

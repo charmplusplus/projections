@@ -123,7 +123,7 @@ ItemListener {
 		dialog.displayDialog();
 		if (!dialog.isCancelled()) {
 			
-			data.setProcessorList(dialog.getValidProcessors());
+			data.setProcessorList(dialog.getSelectedProcessors());
 	        data.setRange(dialog.getStartTime(),dialog.getEndTime());
 
 			
@@ -139,7 +139,7 @@ ItemListener {
 						data.setFilterEntryShorterThan(toolSpecificDialogPanel.dialogMinEntryFiltering.getValue());
 					}
 
-					parentWindow.mainPanel.loadTimelineObjects(true, null);
+					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow);
 					cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 					return null;
 				}
@@ -156,9 +156,6 @@ ItemListener {
 		}
 	}
 
-	private void setDialogData() {
-		
-	}
 
 	public void setHighlightTime(double time) {
 		highlightTime.setText(format.format(time));
@@ -198,7 +195,7 @@ ItemListener {
 			unsetSelectedTime();
 			// Set scroll to the place we want
 			data.setPreferredViewTimeCenter((selectionStartTime+selectionEndTime) / 2.0);
-			data.setScaleFactor( (float) ((data.endTime() - data.beginTime()) / (selectionEndTime -
+			data.setScaleFactor( (float) ((data.endTime() - data.startTime()) / (selectionEndTime -
 					selectionStartTime)) );
 		}
 	}
@@ -213,8 +210,8 @@ ItemListener {
 			data.invalidateSelection();
 			unsetSelectedTime();
 
-			if (startTime < data.beginTime()) { // This seems unlikely to happen
-				startTime = data.beginTime();
+			if (startTime < data.startTime()) { // This seems unlikely to happen
+				startTime = data.startTime();
 			}
 			if (endTime > data.endTime()) { // This seems unlikely to happen
 				endTime = data.endTime();
@@ -224,7 +221,7 @@ ItemListener {
 
 			scaleField.setText("" + 1.0);	
 
-			parentWindow.mainPanel.loadTimelineObjects(true, null);
+			parentWindow.mainPanel.loadTimelineObjects(true, parentWindow);
 
 			cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 

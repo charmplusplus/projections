@@ -41,33 +41,35 @@ Clickable
 	// **CW** Not so good for now, used by both Dialog and Window
 	public String attributes[][] = {
 			{ "Execution Time by Activity",
-				"Minimum Idle Time",
+				"Least Idle Time",
 				"Msgs Sent by Activity", 
-			"Bytes Sent by Activity",
-			"Maximum Idle Time",
-			"Active Entry Methods",
-			"Overhead",
+				"Bytes Sent by Activity",
+				"Most Idle Time",
+				"Active Entry Methods",
+				"Overhead",
 			"Average Grain Size"},
 			{ "Execution Time (us)",
 				"Time (us)",
 				"Number of Messages",
-			"Number of Bytes",
-			"Time (us)",
-			" ",
-			"Time (us)",
+				"Number of Bytes",
+				"Time (us)",
+				" ",
+				"Time (us)",
 			"Time (us)"},
 			{ "us",
 				"us",
 				"",
-			"" ,
-			"us",
-			"",
-			"us",
+				"" ,
+				"us",
+				"",
+				"us",
 			"us"}
 	};
 
 	// derived data after analysis
 	LinkedList outlierList;
+
+	OrderedIntList peList;
 
 	// meta data variables
 	// These will be determined at load time.
@@ -89,7 +91,7 @@ Clickable
 		// special behavior if initially used (to load the raw 
 		// online-generated outlier information). Quick and dirty, use
 		// static variables ... not possible if multiple runs are supported.
-		if (MainWindow.runObject[myRun].rcReader.RC_OUTLIER_FILTERED.booleanValue()) {
+		if (MainWindow.runObject[myRun].rcReader.RC_OUTLIER_FILTERED) {
 			// get necessary parameters (normally from dialog)
 
 			// This is still a hack, there might be differentiation in the
@@ -98,23 +100,16 @@ Clickable
 			// default to execution time. Again a hack.
 			currentAttribute = 0;
 			// finally, something that's not a hack
-			validPEs = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.LOG);
+			peList = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.LOG);
 			outlierPEs = new OrderedIntList();
-			// these might change later when online time ranges are
-			// permitted.
-			startTime = 0;
-			endTime = MainWindow.runObject[myRun].getTotalTime();
-			if (MainWindow.runObject[myRun].getNumProcessors() <= 256) {
-				threshold = (int)Math.ceil(0.1*MainWindow.runObject[myRun].getNumProcessors());
-			} else {
-				threshold = 20;
-			}
+			
 
 			// Now, read the generated outlier stats, rankings and the top
 			// [threshold] log files
-			loadOnlineData();
+			loadOnlineData(0, MainWindow.runObject[myRun].getTotalTime());
 		} else {
 			showDialog();
+			
 		}
 	}
 
@@ -150,21 +145,24 @@ Clickable
 	public void showDialog() {
 		if (dialog == null) {
 			outlierDialogPanel = new OutlierDialog(attributes[0]);
-			dialog = new RangeDialog(this, "Select Range", outlierDialogPanel, false);
+			dialog = new RangeDialog(this, "Select Time Range", outlierDialogPanel, false);
 		}
-
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
+			threshold = outlierDialogPanel.getThreshold();
+			currentActivity = outlierDialogPanel.getCurrentActivity();
+			currentAttribute = outlierDialogPanel.getCurrentAttribute();
+			k = outlierDialogPanel.getK();
 			thisWindow.setVisible(false);
-			loadData();
+			loadData(dialog.getStartTime(), dialog.getEndTime());
 		}
 	}
 
 
-	private void loadData() {
+	private void loadData(final long startTime, final long endTime) {
 		final SwingWorker worker =  new SwingWorker() {
 			public Object doInBackground() {
-				constructToolData();
+				constructToolData(startTime, endTime);
 				return null;
 			}
 			public void done() {
@@ -176,7 +174,7 @@ Clickable
 		worker.execute();
 	}
 
-	void constructToolData() {
+	void constructToolData(final  long startTime, final long endTime) {
 		// construct the necessary meta-data given the selected activity
 		// type.
 		double[][] tempData;
@@ -198,28 +196,29 @@ Clickable
 				graphColors[i] = tempGraphColors[i];
 			}
 			graphColors[numActivities] = Color.white;
-			
+
 			if( currentAttribute == 6 ||currentAttribute == 7){							
 				graphColors[numActivities+1] = Color.yellow;
 			}
 		} else {
 			graphColors = tempGraphColors;
 		}
-		tempData = 
-			new double[validPEs.size()][numActivities+numSpecials];
+
+		OrderedIntList peList = dialog.getSelectedProcessors();
+		tempData = new double[peList.size()][numActivities+numSpecials];
 		int nextPe = 0;
 		int count = 0;
 		ProgressMonitor progressBar =
 			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
 					"Reading log files",
 					"", 0,
-					validPEs.size());
+					peList.size());
 		progressBar.setNote("Reading");
 		progressBar.setProgress(0);
 		// this reset is required because this code is called multiple times!
-		validPEs.reset();
-		while (validPEs.hasMoreElements()) {
-			nextPe = validPEs.nextElement();
+		peList.reset();
+		while (peList.hasMoreElements()) {
+			nextPe = peList.nextElement();
 			progressBar.setProgress(count);
 			progressBar.setNote("[PE: " + nextPe +
 			" ] Reading Data.");
@@ -245,7 +244,7 @@ Clickable
 
 					logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 					logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR );
-					
+
 					while (logData.time < startTime) {
 						logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 						logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR );
@@ -255,8 +254,7 @@ Clickable
 						// process pair read previously
 						eventIndex = 
 							MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID);
-						tempData[count][eventIndex] +=
-							logDataEnd.time - logData.time;
+						tempData[count][eventIndex] += logDataEnd.time - logData.time;
 						logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 						logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR );
 						if (logDataEnd.time > endTime) {
@@ -342,7 +340,7 @@ Clickable
 							if (markedIdle) {
 								markedIdle = false;
 								if (currentAttribute == 0 || currentAttribute == 1 || currentAttribute == 4||  currentAttribute == 5||currentAttribute == 6 || currentAttribute == 7) {
-									
+
 									tempData[count][numActivities] +=
 										logData.time - beginBlockTime;
 								}
@@ -419,23 +417,26 @@ Clickable
 
 		// **CW** Use tempData as source to compute clusters using k
 		// from the dialog.
-
 		int clusterMap[] = new int[tempData.length];
 		double distanceFromClusterMean[] = new double[tempData.length];
-		// long time = System.currentTimeMillis();
-		KMeansClustering.kMeans(tempData, k, clusterMap, 
-				distanceFromClusterMean);
+
+		KMeansClustering.kMeans(tempData, k, clusterMap, distanceFromClusterMean);
+
 		// Construct average data for each cluster. If cluster is empty,
 		// it will be ignored.
 		double clusterAverage[][] = new double[k][tempData[0].length];
 		int clusterCounts[] = new int[k];
 		int numNonZero = 0;
+
 		for (int p=0; p<tempData.length; p++) {
 			for (int ep=0; ep<tempData[p].length; ep++) {
-				clusterAverage[clusterMap[p]][ep] += tempData[p][ep];
+				double v = tempData[p][ep];
+				clusterAverage[clusterMap[p]][ep] += v;
 				clusterCounts[clusterMap[p]]++;
 			}
 		}
+
+
 		for (int k=0; k<this.k; k++) {
 			if (clusterCounts[k] > 0) {
 				for (int ep=0; ep<clusterAverage[k].length; ep++) {
@@ -444,6 +445,7 @@ Clickable
 				numNonZero++;
 			}
 		}
+
 
 		/*
 	System.out.println("Time taken for processing [" + tempData.length +
@@ -463,18 +465,18 @@ Clickable
 		// we know tmpOut has at least x slots. graphData is not ready
 		// to be initialized until we know the number of Outliers.
 		double[] tmpAvg = new double[numActivities+numSpecials];
-		double[] processorDiffs = new double[validPEs.size()];
-		int[] sortedMap = new int[validPEs.size()];
-		String[] peNames = new String[validPEs.size()];
+		double[] processorDiffs = new double[peList.size()];
+		int[] sortedMap = new int[peList.size()];
+		String[] peNames = new String[peList.size()];
 
 		// initialize sortedMap (maps indices to indices)
-		validPEs.reset();
-		for (int p=0; p<validPEs.size(); p++) {
+		peList.reset();
+		for (int p=0; p<peList.size(); p++) {
 			sortedMap[p] = p;
-			peNames[p] = Integer.toString(validPEs.nextElement());
+			peNames[p] = Integer.toString(peList.nextElement());
 		}
 
-		for (int p=0; p<validPEs.size(); p++) {
+		for (int p=0; p<peList.size(); p++) {
 			if (currentAttribute == 6) {
 				double total_time = 0.0;
 				for(int iact = 0; iact<numActivities+1; iact++)
@@ -493,10 +495,10 @@ Clickable
 					tempData[p][numActivities+numSpecials-1] /= __count_entries;			
 			}
 		}
-		
+
 		// pass #1, determine global average
 		for (int act=0; act<numActivities+numSpecials; act++) {
-			for (int p=0; p<validPEs.size(); p++) {
+			for (int p=0; p<peList.size(); p++) {
 				/*
 		if (tempData[p][act] > 0) {
 		    System.out.println("["+p+"] " + tempData[p][act]);
@@ -504,7 +506,7 @@ Clickable
 				 */
 				tmpAvg[act] += tempData[p][act];
 			}
-			tmpAvg[act] /= validPEs.size();
+			tmpAvg[act] /= peList.size();
 		}
 
 		// pass #2, determine outliers by ranking them by distance from
@@ -512,11 +514,11 @@ Clickable
 		// enough
 		// to discover outliers by merely sorting them, the mapping has
 		// to be preserved for display.
-		
+
 		// Maxmimum Black time, just use -1*sum(tempData[p][0...numActivities])
 		// Active Entry methods, use count( tempData[p][0...numActivities-1] > 0 )
 
-		for (int p=0; p<validPEs.size(); p++) {
+		for (int p=0; p<peList.size(); p++) {
 			// this is an initial hack.
 			if (currentAttribute == 1) {
 				// induce a sort by decreasing idle time
@@ -544,8 +546,10 @@ Clickable
 				}
 			}
 		}
+
+
 		// bubble sort it.
-		for (int p=validPEs.size()-1; p>0; p--) {
+		for (int p=peList.size()-1; p>0; p--) {
 			for (int i=0; i<p; i++) {
 				if (processorDiffs[i+1] < processorDiffs[i]) {
 					double temp = processorDiffs[i+1];
@@ -557,9 +561,10 @@ Clickable
 				}
 			}
 		}
+
 		// take the top threshold processors, create the final array
 		// and copy the data in.
-		int offset = validPEs.size()-threshold;
+		int offset = peList.size()-threshold;
 		graphData = 
 			new double[threshold+3+numNonZero][numActivities+numSpecials];
 		outlierList = new LinkedList();
@@ -570,7 +575,6 @@ Clickable
 			}
 			// add to outlier list reverse sorted by significance
 			outlierList.add(peNames[sortedMap[i+offset]]);
-			// System.out.println(peNames[sortedMap[i+offset]]);
 		}
 		// fill in cluster representative data
 		int minDistanceIndex[] = new int[k];
@@ -593,7 +597,6 @@ Clickable
 						tempData[minDistanceIndex[k]][act];
 				}
 				outlierList.addFirst("C"+k+"R"+minDistanceIndex[k]);
-				// System.out.println(minDistanceIndex[k]);
 				clusterIndex++;
 			}
 		}
@@ -606,23 +609,25 @@ Clickable
 			if (offset != 0) {
 				graphData[1][act] /= offset;
 			}
-			for (int i=offset; i<validPEs.size(); i++) {
+			for (int i=offset; i<peList.size(); i++) {
 				graphData[2][act] += tempData[sortedMap[i]][act];
 			}
 			if (threshold != 0) {
 				graphData[2][act] /= threshold;
 			}
 		}
+
 		// add the 3 special entries
 		outlierList.addFirst("Out.");
 		outlierList.addFirst("Non.");
 		outlierList.addFirst("Avg");
+
 	}
 
-	private void loadOnlineData() {
+	private void loadOnlineData(final long startTime, final long endTime) {
 		final SwingWorker worker = new SwingWorker() {
 			public Object doInBackground() {
-				readOutlierStats();
+				readOutlierStats(startTime, endTime);
 				return null;
 			}
 			public void done() {
@@ -636,7 +641,7 @@ Clickable
 	// This method will read the stats file generated during online
 	// outlier analysis which will then determine which processor's
 	// log data to read.
-	void readOutlierStats() {
+	void readOutlierStats(final long startTime, final long endTime) {
 		Color[] tempGraphColors;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(currentActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(currentActivity);
@@ -668,8 +673,8 @@ Clickable
 			statsLine = InFile.readLine();
 			st = new StringTokenizer(statsLine);
 			int offset = 0;
-			if (validPEs.size() > threshold) {
-				offset = validPEs.size() - threshold;
+			if (peList.size() > threshold) {
+				offset = peList.size() - threshold;
 			}
 			int nextPe = 0;
 			ProgressMonitor progressBar =
@@ -698,7 +703,7 @@ Clickable
 				if (progressBar.isCanceled()) {
 					return;
 				}
-				readOnlineOutlierProcessor(nextPe,i+3);
+				readOnlineOutlierProcessor(nextPe,i+3, startTime, endTime);
 			}
 			progressBar.close();
 		} catch (IOException e) {
@@ -723,7 +728,7 @@ Clickable
 		}
 	}
 
-	private void readOnlineOutlierProcessor(int pe, int index) {
+	private void readOnlineOutlierProcessor(int pe, int index, final long startTime, final long endTime) {
 		GenericLogReader reader = 
 			new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		try {
@@ -788,10 +793,10 @@ Clickable
 	}
 
 	protected void setGraphSpecificData() {
-		setXAxis("Outliers", outlierList);
+		setXAxis("Extrema", outlierList);
 		setYAxis(attributes[1][currentAttribute], 
 				attributes[2][currentAttribute]);
-		setDataSource("Outliers: " + attributes[0][currentAttribute] +
+		setDataSource("Extrema: " + attributes[0][currentAttribute] +
 				" (Threshold = " + threshold + 
 				" processors)", graphData, graphColors, this);
 		refreshGraph();
@@ -817,8 +822,7 @@ Clickable
 		} else if (xVal == 2) {
 			rString[0] = "Outlier Average";
 		} else {
-			rString[0] = "Outlier Processor " + 
-			(String)outlierList.get(xVal);
+			rString[0] = "Outlier Processor " +  (String)outlierList.get(xVal);
 		}
 		if ((yVal == numActivities)) {
 			rString[1] = "Activity: Idle Time";
@@ -834,10 +838,12 @@ Clickable
 			rString[2] = U.t((long)(graphData[xVal][yVal]));
 		}
 		return rString;
-	}	
+	}
 
 	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-		parentWindow.addProcessor(Integer.parseInt((String)outlierList.get(xVal)));
+		/** only try to load bars that represent PEs */
+		if(xVal > 2)
+			parentWindow.addProcessor(Integer.parseInt((String)outlierList.get(xVal)));
 	}
 
 	public void actionPerformed(ActionEvent e) {

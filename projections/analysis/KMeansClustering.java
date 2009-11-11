@@ -46,7 +46,7 @@ public class KMeansClustering {
 	// Main Algorithm Loop
 	while (checkMean(mean, oldMean)) {
 	    // printMean(mean);
-	    
+		
 	    // assign samples
 	    double minDist;
 	    int minSample;
@@ -115,17 +115,22 @@ public class KMeansClustering {
     // Checks for change and at the same time, update oldMeans as a 
     // side-effect
     public static boolean checkMean(double mean[][], double oldMean[][]) {
-	boolean returnVal = false;
-	// compare the contents of mean and oldMean
-	for (int k=0; k<mean.length; k++) {
-	    for (int ep=0; ep<mean[k].length; ep++) {
-		if (mean[k][ep] != oldMean[k][ep]) {
-		    returnVal = true;
-		    oldMean[k][ep] = mean[k][ep];
-		}
-	    }
-	}
-	return returnVal;
+    	if(mean == null)
+    		System.err.println("mean == null");
+    	if(oldMean == null)
+    		System.err.println("oldMean == null");
+    	
+    	boolean returnVal = false;
+    	// compare the contents of mean and oldMean
+    	for (int k=0; k<mean.length; k++) {
+    		for (int ep=0; ep<mean[k].length; ep++) {
+    			if (mean[k][ep] != oldMean[k][ep]) {
+    				returnVal = true;
+    				oldMean[k][ep] = mean[k][ep];
+    			}
+    		}
+    	}
+    	return returnVal;
     }
     
     public static void printMean(double mean[][]) {

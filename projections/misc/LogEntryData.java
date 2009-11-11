@@ -109,7 +109,7 @@ public class LogEntryData extends ProjDefs
 				return ( "<font size=+1 color=\"#666600\">NODEGROUP BROADCAST</font> (" + numPEs + " processors)");
 			}
 		case ( ProjDefs.CREATION_MULTICAST ):
-			return ( "<td><font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + numPEs + " processors");
+			return ( "<font size=+1 color=\"#666600\">MULTICAST</font> message sent to " + numPEs + " processors");
 		case ( ProjDefs.BEGIN_PROCESSING ):
 			return ( "<font size=+1 color=\"#000088\">BEGIN PROCESSING</font> of <em>" + MainWindow.runObject[myRun].getEntryFullNameByID(entry)  + "</em> from processor " + pe + " event=" + event);
 		case ( ProjDefs.END_PROCESSING ):

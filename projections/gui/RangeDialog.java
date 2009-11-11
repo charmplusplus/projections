@@ -84,7 +84,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	// flags
 	private boolean layoutComplete = false;
 	int dialogState;
-	private boolean disableRange = false;
+	private boolean disableTimeRange = false;
 
 	private int numProcessors;
 
@@ -97,11 +97,11 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	 *  be put inside a RangeDialogExtensionPanel (basically a JPanel) passed in as toolSpecificPanel.
 	 *  
 	 */
-	public RangeDialog(ProjectionsWindow parentWindow, String titleString, RangeDialogExtensionPanel toolSpecificPanel, boolean disableRange)
+	public RangeDialog(ProjectionsWindow parentWindow, String titleString, RangeDialogExtensionPanel toolSpecificPanel, boolean disableTimeRange)
 	{
 		super(parentWindow, titleString, true);
 		this.parentWindow = parentWindow;
-		this.disableRange = disableRange;
+		this.disableTimeRange = disableTimeRange;
 
 		if(toolSpecificPanel != null){
 			this.toolSpecificPanel = toolSpecificPanel;
@@ -243,7 +243,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		processorsPanel = new JPanel();
 		processorsPanel.setLayout(gbl);
 		validProcessorsLabel = new JLabel("Valid Processors = " + 
-				MainWindow.runObject[myRun].persistantRangeData.plist.listToString(),
+				MainWindow.runObject[myRun].getValidProcessorString(),
 				JLabel.LEFT);
 		processorTextLabel = new JLabel("Processors :", JLabel.LEFT);
 		processorsField = new JSelectField(MainWindow.runObject[myRun].getValidProcessorString(), 12);
@@ -271,7 +271,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
 		totalTimeLabel = new JLabel(U.t(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
 
-		if (disableRange) {
+		if (disableTimeRange) {
 			startTimeField.setEnabled(false);	    
 			endTimeField.setEnabled(false);
 		} else {
@@ -299,7 +299,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 				gbc, 0,2, 1,1, 1,1);
 		Util.gblAdd(timePanel, totalTimeLabel,
 				gbc, 1,2, 3,1, 1,1);
-		if (disableRange) {
+		if (disableTimeRange) {
 			Util.gblAdd(timePanel, new JLabel("Summary data compatible only " +
 			"with full time range."),
 			gbc, 0,3, 4,1, 1,1);
@@ -366,7 +366,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		bRemoveFromHistory = new JButton("Remove selected History");
 		bSaveHistory = new JButton("Save History to Disk");
 
-		if (disableRange) {
+		if (disableTimeRange) {
 			historyList.setEnabled(false);
 			bAddToHistory.setEnabled(false);
 			bRemoveFromHistory.setEnabled(false);
@@ -477,14 +477,19 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	}
 
 
-	public void setValidProcessors(OrderedIntList validPEs) {
+	public void setSelectedProcessors(OrderedIntList validPEs) {
 		processorsField.setText(validPEs.listToString());		
 		someInputChanged();
 	}
 
 
-	public OrderedIntList getValidProcessors() {
-		return processorsField.getValue(Integer.MAX_VALUE);
+	public OrderedIntList getSelectedProcessors() {
+		return processorsField.getValue();
+	}
+	
+	
+	public int getNumSelectedProcessors(){
+		return processorsField.getValue().size();
 	}
 
 

@@ -25,7 +25,7 @@ import javax.swing.border.*;
 public class BinDialogPanel extends RangeDialogExtensionPanel 
 {
 	// GUI components
-	protected JTabbedPane binPanel;
+	protected JTabbedPane tabbedPane;
 	protected JPanel timeBinPanel;
 	protected JPanel msgBinPanel;
 
@@ -110,12 +110,12 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 		Util.gblAdd(msgBinPanel, msgMinBinSizeField, gbc, 1,1, 2,1, 1,1);
 		Util.gblAdd(msgBinPanel, msgBinRangeLabel,   gbc, 0,2, 4,1, 1,1);
 
-		binPanel = new JTabbedPane();
-		binPanel.addTab("Time", null, timeBinPanel, "Time-based bins");
-		binPanel.addTab("Msgs", null, msgBinPanel, "Message Sizes");
+		tabbedPane = new JTabbedPane();
+		tabbedPane.addTab("Time", null, timeBinPanel, "Time-based bins");
+		tabbedPane.addTab("Msgs", null, msgBinPanel, "Message Sizes");
 
 		this.setLayout(new BorderLayout());
-		this.add(binPanel, BorderLayout.CENTER);
+		this.add(tabbedPane, BorderLayout.CENTER);
 
 	}
 
@@ -236,5 +236,14 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 						msgNumBinsField.getValue() *
 						msgBinSizeField.getValue()) + " bytes.");
 
+	}
+
+
+	public int getSelectedType() {
+		if(tabbedPane.getSelectedComponent() == timeBinPanel){
+			return HistogramWindow.TYPE_TIME;
+		} else {
+			return HistogramWindow.TYPE_MSG_SIZE;
+		}
 	}
 }

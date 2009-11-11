@@ -39,7 +39,7 @@ public class NoiseMinerThread extends Thread {
 
 	public void run() {
 		
-		System.out.println("PE " + pe + " loading");
+//		System.out.println("PE " + pe + " loading");
 		
 		GenericLogReader LogFile;
 		LogEntryData logdata = new LogEntryData();
@@ -190,7 +190,7 @@ public class NoiseMinerThread extends Thread {
 			
 		h=null;
 		h_pe = null;
-		System.out.println("PE " + pe + " done");
+//		System.out.println("PE " + pe + " done");
 	}
 
 	public void setPe(int pe) {

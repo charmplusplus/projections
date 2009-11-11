@@ -137,7 +137,7 @@ public class Data
 	OrderedUsageList[] entryUsageList;
 
 	/** The start time for the time range. */
-	private long beginTime; 
+	private long startTime; 
 
 	/** The end time for the time range. */
 	private long endTime;
@@ -239,7 +239,7 @@ public class Data
 		 *  It is modified by Window when the user enters a new 
 		 *  value in the "select ranges" dialog box.
 		 */
-		beginTime = 0;
+		startTime = 0;
 		endTime = MainWindow.runObject[myRun].getTotalTime();
 
 		drawMessagesForTheseObjects = new HashSet<EntryMethodObject>();
@@ -273,20 +273,23 @@ public class Data
 	/** 
 	 * Add the data for a new processor to this visualization
 	 */
-	public void addProcessor(int pCreation){
-		Integer p = new Integer(pCreation);
+	public void addProcessor(int pe){
+		System.out.println("Add processor " + pe);
+		Integer p = new Integer(pe);
 		if(!peToLine.contains(p)){
 			peToLine.addLast(p);
+			System.out.println("Add processor " + pe + " to peToLine size=" + peToLine.size() );
 			modificationHandler.notifyProcessorListHasChanged();
+			storeRangeToPersistantStorage();
+			displayMustBeRedrawn();
 		}
 		
-		storeRangeToPersistantStorage();
 	}
 	
 
 	/** If the timeline tool chooses a new time range or set of processors, then we should store the new configuration for use in future dialog boxes */
 	public void storeRangeToPersistantStorage(){
-		MainWindow.runObject[myRun].persistantRangeData.update(beginTime(), endTime(), processorListOrdered());
+		MainWindow.runObject[myRun].persistantRangeData.update(startTime(), endTime(), processorListOrdered());
 	}
 
 
@@ -339,8 +342,8 @@ public class Data
 	}
 
 
-	public long beginTime(){
-		return beginTime;
+	public long startTime(){
+		return startTime;
 	}
 
 
@@ -362,7 +365,7 @@ public class Data
 		messageStructures.kill();
 		
 		// Can we reuse our already loaded data?
-		if(beginTime >= oldBT && endTime <= oldET){
+		if(startTime >= oldBT && endTime <= oldET){
 		
 			Map<Integer, List<EntryMethodObject> > oldEntryMethodObjects = allEntryMethodObjects;
 
@@ -389,7 +392,7 @@ public class Data
 						Iterator<EntryMethodObject> iter = objs.iterator();
 						while(iter.hasNext()){
 							EntryMethodObject obj = iter.next();
-							if(obj.getEndTime() < beginTime || obj.getBeginTime() > endTime){
+							if(obj.getEndTime() < startTime || obj.getBeginTime() > endTime){
 								iter.remove();
 							}
 						}
@@ -401,7 +404,7 @@ public class Data
 						Iterator<UserEventObject> iter2 = allUserEventObjects.get(pe).iterator();
 						while(iter2.hasNext()){
 							UserEventObject obj = iter2.next();
-							if(obj.EndTime < beginTime || obj.BeginTime > endTime){
+							if(obj.EndTime < startTime || obj.BeginTime > endTime){
 								iter2.remove();
 							}
 						}
@@ -417,7 +420,7 @@ public class Data
 			allUserEventObjects = new TreeMap<Integer, Set<UserEventObject>>();
 		}
 		
-		oldBT = beginTime;
+		oldBT = startTime;
 		oldET = endTime;
 		
 		
@@ -440,11 +443,16 @@ public class Data
 			pIdx++;
 		}
 	
+		// Determine a component to show the progress bar with
+		Component guiRootForProgressBar = null;
+		if(rootWindow!=null && rootWindow.isVisible()) {
+			guiRootForProgressBar = rootWindow;
+		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+		}
+
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		if(rootWindow==null)
-			rootWindow = MainWindow.runObject[myRun].guiRoot;
-		
-		ThreadManager threadManager = new ThreadManager("Loading Files in Parallel", readyReaders, rootWindow);
+		ThreadManager threadManager = new ThreadManager("Loading Timeline in Parallel", readyReaders, guiRootForProgressBar);
 		threadManager.runThreads();
 
 		
@@ -629,7 +637,7 @@ public class Data
 		
 		try {
 			if (MainWindow.runObject[myRun].hasLogData()) {
-				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), beginTime, endTime, tl, userEvents, minEntryDuration);
+				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), startTime, endTime, tl, userEvents, minEntryDuration);
 			} else {
 				System.err.println("createTL: No log files available!");
 				return;
@@ -889,7 +897,7 @@ public class Data
 	 * 	Scale will be reset to zero, and
 	 *  the old range will be recorded */
 	public void setNewRange(long beginTime, long endTime) {
-		this.beginTime = beginTime;
+		this.startTime = beginTime;
 		this.endTime = endTime;
 		setScaleFactor(1.0f);
 		storeRangeToPersistantStorage();
@@ -897,7 +905,7 @@ public class Data
 
 
 	public void setRange(long beginTime, long endTime){
-		this.beginTime = beginTime;
+		this.startTime = beginTime;
 		this.endTime = endTime;
 		storeRangeToPersistantStorage();
 	}
@@ -912,14 +920,9 @@ public class Data
 	}
 
 
-	/** an alias for beginTime() */
-	public long startTime(){
-		return beginTime();
-	}
-
 
 	public long totalTime(){
-		return endTime-beginTime;
+		return endTime-startTime;
 	}
 
 
@@ -932,7 +935,8 @@ public class Data
 	 */
 	private int selection1=-1, selection2=-1;
 	private int highlight=-1;
-
+	private long selectcount = 0;
+	
 	public boolean selectionValid(){
 		return (selection1>=0 && selection2>=0 && selection1!=selection2);
 	}
@@ -1020,7 +1024,7 @@ public class Data
 		double fractionAlongAxis = ((double) (xPixelCoord-leftOffset())) /
 		((double)(mostRecentScaledScreenWidth-2*offset()));
 
-		return Math.round(beginTime + fractionAlongAxis*(endTime-beginTime));	
+		return Math.round(startTime + fractionAlongAxis*(endTime-startTime));	
 	}
 
 
@@ -1031,7 +1035,7 @@ public class Data
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
 	public int timeToScreenPixelRight(double time) {
-		double fractionAlongTimeAxis =  ((time+0.5-beginTime)) /((endTime-beginTime));
+		double fractionAlongTimeAxis =  ((time+0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.floor(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 	
@@ -1041,32 +1045,32 @@ public class Data
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
 	public int timeToScreenPixelLeft(double time) {
-		double fractionAlongTimeAxis =  ((time-0.5-beginTime)) /((endTime-beginTime));
+		double fractionAlongTimeAxis =  ((time-0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 
 
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixel(double time) {
-		double fractionAlongTimeAxis =  ((time-beginTime)) /((endTime-beginTime));
+		double fractionAlongTimeAxis =  ((time-startTime)) /((endTime-startTime));
 		return offset() + (int)(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixel(double time, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ((time-beginTime)) /((endTime-beginTime));
+		double fractionAlongTimeAxis =  ((time-startTime)) /((endTime-startTime));
 		return offset() + (int)(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixelLeft(double time, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ((time-0.5-beginTime)) /((endTime-beginTime));
+		double fractionAlongTimeAxis =  ((time-0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the rightmost pixel for this time if a microsecond is longer than one pixel */
 	public int timeToScreenPixelRight(double time, int assumedScreenWidth) {
-		double fractionAlongTimeAxis =  ( (time+0.5-beginTime)) /((endTime-beginTime));
+		double fractionAlongTimeAxis =  ( (time+0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.floor(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
@@ -1074,7 +1078,7 @@ public class Data
 
 	/** Set the preferred position for the horizontal view or scrollbar  */
 	public void setPreferredViewTimeCenter(double time) {
-		if(time > beginTime && time < endTime)
+		if(time > startTime && time < endTime)
 			preferredViewTime = time;
 	}
 
@@ -1775,6 +1779,8 @@ public class Data
 		}
 		
 		modificationHandler.notifyProcessorListHasChanged();
+		displayMustBeRedrawn();
+
 	}
 
 	
@@ -1909,7 +1915,6 @@ public class Data
 		}
 		
 		modificationHandler.notifyProcessorListHasChanged(); // Really it is the set of objects that has changed
-
 		displayMustBeRedrawn();
 		
 	}
@@ -1934,7 +1939,6 @@ public class Data
 		clearMessageSendLines();
 
 		modificationHandler.notifyProcessorListHasChanged(); // Really it is the set of objects that has changed
-		
 		displayMustBeRedrawn();
 	}
 	public boolean skipLoadingIdleRegions() {

@@ -69,19 +69,14 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	CreateMenus();
 	CreateLayout();
 	pack();
-	showDialog();
-    }
-
-    protected void windowInit() {
+	
 	// get new data object
 	data = new AmpiProfileData(this);
 
-	// acquire starting data from Analysis
-	data.plist = MainWindow.runObject[myRun].getValidProcessorList();
-	data.begintime = 0;
-	data.endtime = MainWindow.runObject[myRun].getTotalTime();
+	showDialog();
     }
 
+    
     private void CreateMenus(){
 	JMenuBar mbar = new JMenuBar();
 	mbar.add(Util.makeJMenu("File", new Object[]
@@ -220,7 +215,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     	dialog.displayDialog();
     	if (!dialog.isCancelled()) {
-    		data.plist = dialog.getValidProcessors();
+    		data.plist = dialog.getSelectedProcessors();
     		data.begintime = dialog.getStartTime();
     		data.endtime = dialog.getEndTime();
 

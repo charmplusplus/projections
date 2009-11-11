@@ -93,7 +93,7 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 			// At this point the user has provided a time range and list of PEs in the dialog box 
 			
 			// get the time range and PE list from the dialog box
-			validPEs = dialog.getValidProcessors();
+			validPEs = dialog.getSelectedProcessors();
 			startTime = dialog.getStartTime();
 			endTime = dialog.getEndTime();
 			
@@ -126,11 +126,6 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 		}
 	}
 	
-	
-	/** A function required for ProjectionsWindow interface. We just ignore it */
-	protected void windowInit() {
-		// do nothing, no parameters need to be set.
-	}
 	
 	/** A function required for ProjectionsWindow interface. We just ignore it */
 	public void showWindow() {

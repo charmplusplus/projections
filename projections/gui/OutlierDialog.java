@@ -12,35 +12,27 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	// GUI components
-	protected JPanel outlierPanel;
-	protected JComboBox attributeList;
-	protected JComboBox activityList;
-	protected JIntTextField thresholdField;
-	protected JIntTextField kField;
+	private JPanel outlierPanel;
+	private JComboBox attributeList;
+	private JComboBox activityList;
+	private JIntTextField thresholdField;
+	private JIntTextField kField;
 	private JTextArea errorText;
 
-	// Dialog attributes
-	protected int currentAttribute;
-	protected int currentActivity;
-	protected int k;
-
-	private int lastAttribute = -1;
-	private int lastActivity = -1;
-
+	JLabel attributeLabel;
+	JLabel activityLabel;
+	JLabel thresholdPost;
+	JLabel thresholdLabel;
 	
-
+	
 	// A reference to the parent dialog box that I'm extending
-	RangeDialog parent;
+	private RangeDialog parent;
 	
 	public OutlierDialog(String[] attributes) {
 
-		// execution time
-		currentAttribute = 0;
-		// projections-based data
-		currentActivity = Analysis.PROJECTIONS;
 		// initialize default threshold to display the top 10% deviants
 		// for # processors 256 or less. The top 20 otherwise.
 		int threshold;
@@ -49,10 +41,8 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 		} else {
 			threshold = 20;
 		}
-		// initialize k-means choice of k to be default to 5
-		k = 5;
 		
-	
+			
 		GridBagLayout gbl      = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
@@ -62,26 +52,27 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 		outlierPanel.setLayout(gbl);
 
 		attributeList = new JComboBox(attributes);
-		attributeList.setSelectedIndex(currentAttribute);
-		JLabel attributeLabel = new JLabel("Attribute: ", JLabel.RIGHT);
+		attributeList.setSelectedIndex(0);
+		attributeLabel = new JLabel("Attribute: ", JLabel.RIGHT);
 
 		activityList = new JComboBox(Analysis.NAMES);
-		activityList.setSelectedIndex(currentActivity);
-		JLabel activityLabel = new JLabel("Activity: ", JLabel.RIGHT);
+		activityList.setSelectedIndex(0);
+		activityLabel = new JLabel("Activity: ", JLabel.RIGHT);
 		
-		JLabel thresholdLabel = new JLabel("Outlier Threshold: ", 
-				JLabel.RIGHT);
+		thresholdLabel = new JLabel("Extrema Threshold: ", JLabel.RIGHT);
 		thresholdField = new JIntTextField(threshold, 8);
-		JLabel thresholdPost = new JLabel("Processors", JLabel.LEFT);
+		thresholdPost = new JLabel("Processors", JLabel.LEFT);
 		
 
 		JLabel kLabel = new JLabel("Number of Clusters: ", JLabel.RIGHT);
-		kField = new JIntTextField(k, 3);
+		// initialize k-means choice of k to be default to 5
+		kField = new JIntTextField(5, 3);
 
 		errorText = new JTextArea();
 		errorText.setRows(3);
-		errorText.setEnabled(false);
+		errorText.setEditable(false);
 		errorText.setLineWrap(true);
+		errorText.setWrapStyleWord(true);
 		errorText.setForeground(Color.red);
 		JScrollPane scrollText = 
 			new JScrollPane(errorText,
@@ -102,100 +93,41 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 	}
 		
 
-	public int getActivityListSelection(){
-		return activityList.getSelectedIndex();
-	}
-
-	public int getAttributeListSelection(){
-		return attributeList.getSelectedIndex();
-	}
-
-	public int getThreshold(){
-		return thresholdField.getValue();
-	}
-	
-	
-
 	public boolean isInputValid() {
 		
-//		
-//		
-//		if ((thresholdField.getValue() < 0) ||
-//				(thresholdField.getValue() >
-//				processorsField.getValue(MainWindow.runObject[myRun].getNumProcessors()).size())) {
-//			return thresholdField;
-//		}
-//		
-//		
-//		
-//		
-//		if (evt.getSource() instanceof JButton) {
-//			JButton b = (JButton) evt.getSource();
-//			if (b == bOK) {
-//				// This part is extremely unique to this dialog
-//				// and really should be fixed as part of an overall
-//				// dialog strategy
-//				if ((activityList.getSelectedIndex() >= 0) &&
-//						(attributeList.getSelectedIndex() >= 0)) {
-//					// filter out the options that may not work with 
-//					// each other
-//					if ( // **FIXME** Find a way to get around having to 
-//							// hardcode
-//							// pose dop activities have no meaning here
-//							//(activityList.getSelectedIndex() == 
-//							// ActivityManager.POSE_DOP) ||
-//							// no function support for now either ... *sigh*
-//							(activityList.getSelectedIndex() ==
-//								Analysis.FUNCTIONS) ||
-//								// no communication properties associated with user 
-//								// events
-//								((activityList.getSelectedIndex() == 
-//									Analysis.USER_EVENTS) &&
-//									(attributeList.getSelectedIndex() >= 1))
-//					) {
-//						errorText.setText("ERROR: Attribute " +
-//								((OutlierAnalysisWindow)parentWindow).attributes[0][attributeList.getSelectedIndex()] +
-//								" is incompatible with Activity " +
-//								Analysis.NAMES[activityList.getSelectedIndex()]);
-//						return;
-//					}
-//				} else {
-//					errorText.setText("ERROR: no valid Attribute or " +
-//					"Activity selection!");
-//					return;
-//				}
-//				// point user to an inconsistent field.
-//				JTextField someField = checkConsistent();
-//				if (someField != null) {
-//					someField.selectAll();
-//					someField.requestFocus();
-//					return;
-//				}
-//			} else if (b == bUpdate) {
-//				// update all text fields
-//				updateData(thresholdField);
-//				updateData(kField);
-//			}
-//		} else if (evt.getSource() instanceof JComboBox) {
-//			JComboBox item = (JComboBox)evt.getSource();
-//			if (item == attributeList) {
-//				currentAttribute = item.getSelectedIndex();
-//			} else if (item == activityList) {
-//				currentActivity = item.getSelectedIndex();
-//			}
-//		}
-//		
-//		
-//		
-//		
+		// don't check how many PEs are in the list because it takes too long.
+				
+		if ((thresholdField.getValue() < 0) ) {
+			thresholdField.setForeground(Color.red);
+			return false;
+		}
+
 		
+		if ( activityList.getSelectedIndex() == Analysis.FUNCTIONS && attributeList.getSelectedIndex() >= 1 ) {
+			attributeLabel.setForeground(Color.red);
+			activityLabel.setForeground(Color.red);
+			errorText.setForeground(Color.red);
+			errorText.setText("ERROR: Attribute " +	attributeList.getSelectedItem() +
+					" is incompatible with Activity " + activityList.getSelectedItem() );
+			return false;
+		}
+
+		
+		// Everything is valid, so clear all warning messages
+		errorText.setText("");
+		attributeLabel.setForeground(Color.black);
+		activityLabel.setForeground(Color.black);
+		thresholdField.setForeground(Color.black);
 		return true;
+		
 	}
 
+	
 	public void setInitialFields() {
-
+		// do nothing
 	}
 
+	
 	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;
 
@@ -218,6 +150,31 @@ public class OutlierDialog extends RangeDialogExtensionPanel
 	}
 
 	public void updateFields() {
-		
+//	
+//		System.out.println("updateFields currentActivity=" + getCurrentActivity() );
+//		System.out.println("updateFields currentAttribute=" + getCurrentAttribute() );
+//		System.out.println("updateFields k=" + getK() );
+//		
 	}
+	
+
+
+	public int getThreshold(){
+		return thresholdField.getValue();
+	}
+
+	int getCurrentAttribute(){
+		return attributeList.getSelectedIndex();
+	}
+
+
+	int getCurrentActivity(){
+		return activityList.getSelectedIndex();
+	}
+
+	int getK(){
+		return kField.getValue(); 
+	}
+
+	
 }

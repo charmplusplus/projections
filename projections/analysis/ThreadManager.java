@@ -23,21 +23,21 @@ public class ThreadManager {
 
 	public int numConcurrentThreads;
 
-	private Component parentWindow;
+	private Component guiRootForProgressBar;
 
 	public ThreadManager(String description, List threads, Component guiRoot){
 		this.threads = new LinkedList();
 		this.threads.addAll(threads);
 		this.description = description;
 		this.numInitialThreads = threads.size();
-		this.parentWindow = guiRoot;
+		this.guiRootForProgressBar = guiRoot;
 		this.numConcurrentThreads = 20;
 	}
 
 
 	public void runThreads(){
 
-		ProgressMonitor progressBar = new ProgressMonitor(parentWindow, description,"", 0, numInitialThreads);
+		ProgressMonitor progressBar = new ProgressMonitor(guiRootForProgressBar, description,"", 0, numInitialThreads);
 		progressBar.setMillisToPopup(10);
 		progressBar.setMillisToDecideToPopup(10);
 		progressBar.setProgress(0);

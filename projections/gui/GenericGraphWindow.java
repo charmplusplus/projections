@@ -48,16 +48,6 @@ public abstract class GenericGraphWindow
     protected JMenuBar menuBar  = new JMenuBar();
     protected JMenu    fileMenu = new JMenu("File");
     
-    // basic parameter variables consistent with RangeDialog
-    public OrderedIntList validPEs;
-    public long startTime;
-    public long endTime;
-
-    protected void windowInit() {
-    	validPEs = MainWindow.runObject[myRun].getValidProcessorList();
-    	startTime = 0;
-    	endTime = MainWindow.runObject[myRun].getTotalTime();
-    }
 
     // constructor 
     public GenericGraphWindow(String title, 

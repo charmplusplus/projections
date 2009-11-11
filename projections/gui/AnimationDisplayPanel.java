@@ -187,7 +187,7 @@ public class AnimationDisplayPanel extends Panel
 	    // need to translate curP to actual PE number
 	    int count = 0;
 	    int pe = 0;
-	    OrderedIntList validPEs = animationWindow.validPEs;
+	    OrderedIntList validPEs = animationWindow.selectedPEs;
 	    validPEs.reset();
 	    while (count <= curP) {
 		pe = validPEs.nextElement();
@@ -230,13 +230,13 @@ public class AnimationDisplayPanel extends Panel
 
     public void setParameters()
     {
-	OrderedIntList validPEs = animationWindow.validPEs;
-	numPs = validPEs.size();
+	OrderedIntList selectedPEs = animationWindow.selectedPEs;
+	numPs = selectedPEs.size();
 	Isize = animationWindow.intervalSize;
 	data = getAnimationData(Isize,
 				animationWindow.startTime, 
 				animationWindow.endTime,
-				validPEs);
+				selectedPEs);
 	numIs = data[0].length;
 	if (numIs > 0) {
 	    curI = 0;

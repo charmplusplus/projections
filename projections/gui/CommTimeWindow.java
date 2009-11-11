@@ -88,21 +88,6 @@ public class CommTimeWindow extends GenericGraphWindow
     // format for output
     private DecimalFormat  _format;
 
-    protected void windowInit() {
-    	// acquire data using parent class
-    	super.windowInit();
-
-    	intervalSize = 1000; // default 1ms 
-    	startInterval = 0;
-    	if (endTime%intervalSize == 0) {
-    		endInterval = (int)(endTime/intervalSize - 1);
-    	}
-    	else {
-    		endInterval = (int)(endTime/intervalSize);
-    	}
-    	numIntervals = endInterval-startInterval+1;
-    	processorList = MainWindow.runObject[myRun].getValidProcessorList();
-    }
 
     public CommTimeWindow(MainWindow mainWindow) {
 	super("Projections Communication vs Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
@@ -303,7 +288,7 @@ public class CommTimeWindow extends GenericGraphWindow
     
     public void showDialog() {
 	if (dialog == null) {    
-		intervalPanel = new IntervalChooserPanel();    	
+		intervalPanel = new IntervalChooserPanel(1000);    	// default 1ms interval width
 		dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
 	}
 	
@@ -313,8 +298,8 @@ public class CommTimeWindow extends GenericGraphWindow
     	startInterval = (int)intervalPanel.getStartInterval();
     	endInterval = (int)intervalPanel.getEndInterval();
     	numIntervals = endInterval-startInterval+1;
-    	processorList = dialog.getValidProcessors();
-
+    	processorList = dialog.getSelectedProcessors();
+    	
 		final SwingWorker worker =  new SwingWorker() {
 			public Object doInBackground() {
 				fillGraphData();

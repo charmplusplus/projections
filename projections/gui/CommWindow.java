@@ -51,10 +51,6 @@ implements ItemListener, ActionListener, Clickable
 
 	OrderedIntList peList;
 
-	protected void windowInit() {
-		// parameter initialization is completely handled by GenericGraphWindow
-		super.windowInit();
-	}
 
 	public CommWindow(MainWindow mainWindow) {
 		super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
@@ -299,6 +295,7 @@ implements ItemListener, ActionListener, Clickable
 		// for GenericGraphWindow.
 	}
 
+	
 	public void showDialog() {
 		if (dialog == null) {
 			dialog = new RangeDialog(this, "select Range", null, false);
@@ -306,27 +303,14 @@ implements ItemListener, ActionListener, Clickable
 
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-
+			
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
-					sentMsgCount = new double[validPEs.size()][];
-					sentByteCount = new double[validPEs.size()][];
-					receivedMsgCount = new double[validPEs.size()][];
-					receivedByteCount = new double[validPEs.size()][];
-					exclusiveRecv = new double[validPEs.size()][];
-					exclusiveBytesRecv = new double[validPEs.size()][];
-					if (MainWindow.BLUEGENE) {
-						hopCount = new int[validPEs.size()][];
-					} else {
-						hopCount = null;
-					}
-					getData();
+					getData(dialog.getStartTime(), dialog.getEndTime(), dialog.getSelectedProcessors());
 					return null;
 				}
 				public void done() {
-					// setDataSource("Histogram", histArray, thisWindow);
-					setDataSource("Communications", sentMsgCount, 
-							thisWindow);
+					setDataSource("Communications", sentMsgCount, thisWindow);
 					setPopupText("sentMsgCount");
 					setYAxis("Messages Sent", "");
 					setXAxis("Processor", peList);
@@ -339,10 +323,20 @@ implements ItemListener, ActionListener, Clickable
 	}
 
 
-	public void getData(){
-		GenericLogReader glr;
+	public void getData(long startTime, long endTime, OrderedIntList pes){
+		sentMsgCount = new double[pes.size()][];
+		sentByteCount = new double[pes.size()][];
+		receivedMsgCount = new double[pes.size()][];
+		receivedByteCount = new double[pes.size()][];
+		exclusiveRecv = new double[pes.size()][];
+		exclusiveBytesRecv = new double[pes.size()][];
+		if (MainWindow.BLUEGENE) {
+			hopCount = new int[pes.size()][];
+		} else {
+			hopCount = null;
+		}
 
-		peList = validPEs.copyOf();
+		peList = pes.copyOf();
 
 		int numPe = peList.size();
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
@@ -363,7 +357,7 @@ implements ItemListener, ActionListener, Clickable
 				progressBar.close();
 				return;
 			}
-			glr = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+			GenericLogReader glr = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
 					MainWindow.runObject[myRun].getVersion());
 			try {
 				sentMsgCount[curPeArrayIndex] = new double[numEPs];

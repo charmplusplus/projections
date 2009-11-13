@@ -1,6 +1,8 @@
 package projections.gui;
 
 import javax.swing.*;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -8,12 +10,15 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.*;
 
 import java.io.*;
+import java.util.Vector;
 
 import projections.analysis.*;
+import projections.misc.LogEntryData;
 
 /**
  *  RangeDialogNew
@@ -56,9 +61,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	private static final int DIALOG_CANCELLED = 1;
 
 	private ProjectionsWindow parentWindow;
-
+	private RangeDialog thisDialog;
+	
 	// inheritable GUI objects
-	private JPanel mainPanel, historyPanel, buttonPanel;
+	private JPanel mainPanel, historyPanel, buttonPanel, stepsPanel;
 
 	/** A JPanel containing any other input components required by the tool using this dialog box */
 	private RangeDialogExtensionPanel toolSpecificPanel;
@@ -73,11 +79,13 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	private JComboBox historyList;
 	private JButton bAddToHistory, bRemoveFromHistory, bSaveHistory;
 
+	private JButton loadUserNotesButton;
+
 	// private GUI objects
 	private JLabel startTextLabel, endTextLabel, totalTimeTextLabel, processorTextLabel;
 	private JLabel totalTimeLabel, validTimeRangeLabel, validProcessorsLabel;
 
-	
+
 	// history variables
 	private RangeHistory history;
 
@@ -102,12 +110,13 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		super(parentWindow, titleString, true);
 		this.parentWindow = parentWindow;
 		this.disableTimeRange = disableTimeRange;
-
+		thisDialog = this;
+		
 		if(toolSpecificPanel != null){
 			this.toolSpecificPanel = toolSpecificPanel;
 			toolSpecificPanel.setParentDialogBox(this);
 		}
-		
+
 		history = new RangeHistory(MainWindow.runObject[myRun].getLogDirectory() +
 				File.separator);
 		this.setModal(true);
@@ -117,10 +126,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 
 	/** Called whenever any input item changes, either in this dialog box, or its possibly extended tool specific JPanel */
 	public void someInputChanged() {
-//		System.out.println("Something changed. We should update everything, and enable/disable the OK button");
+		//		System.out.println("Something changed. We should update everything, and enable/disable the OK button");
 
 		if(isInputValid()){
-//			System.out.println("Input is valid");
+			//			System.out.println("Input is valid");
 			totalTimeLabel.setText(U.t(getSelectedTotalTime()));
 			if(toolSpecificPanel != null){
 				toolSpecificPanel.updateFields();
@@ -129,12 +138,12 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			bAddToHistory.setEnabled(true);
 			bRemoveFromHistory.setEnabled(true);
 		} else {
-//			System.out.println("Input is NOT valid");
+			//			System.out.println("Input is NOT valid");
 			bOK.setEnabled(false);
 			bAddToHistory.setEnabled(false);
 			bRemoveFromHistory.setEnabled(false);
 		}
-		
+
 	}	
 
 
@@ -149,15 +158,18 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 					setVisible(false);
 				}
 			});
-			
+
 			mainPanel = createMainLayout();
 			mainPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
 			historyPanel = createHistoryLayout();
-			historyPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+			historyPanel.setBorder(BorderFactory.createEmptyBorder(15,5,5,5));
 
 			buttonPanel = createButtonLayout();
 			buttonPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
+
+			stepsPanel = createloadStepsLayout();
+			stepsPanel.setBorder(BorderFactory.createEmptyBorder(15,5,5,5));
 
 			Container p = this.getContentPane();
 
@@ -165,6 +177,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
 			p.add(mainPanel);
 			p.add(historyPanel);
+			p.add(stepsPanel);
 			if(toolSpecificPanel != null){    	
 				toolSpecificPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 				p.add(Box.createRigidArea(new Dimension(0,10))); // add some vertical padding
@@ -176,7 +189,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			layoutComplete = true;
 			setResizable(true);
 		}
-	
+
 		initializeData();
 		initializeToolSpecificData();
 		pack();
@@ -185,20 +198,20 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 
 
 		// This is after the dialog box is closed:
-		
+
 		/** Store the newly chosen time/PE range */
 		if(dialogState != DIALOG_CANCELLED){
 			// Store this new time range for future use by this or other dialog boxes
 			storeRangeToPersistantStorage();
 		}
-	
+
 	}
-	
-	
+
+
 	public void storeRangeToPersistantStorage(){
 		MainWindow.runObject[myRun].persistantRangeData.update(startTimeField.getValue(), endTimeField.getValue(), processorsField.getValue());
 	}
-	
+
 
 	/** Load the previously used time/PE range */
 	private void initializeData(){
@@ -232,7 +245,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	JPanel createMainLayout() {
 
 		JPanel inputPanel = new JPanel();
-		
+
 		// Standard Layout behavior for all subcomponents
 		GridBagLayout      gbl = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -251,7 +264,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		processorsField.addActionListener(this);
 		processorsField.addKeyListener(this);
 		processorsField.addFocusListener(this);
-		
+
 		// layout
 		Util.gblAdd(processorsPanel, validProcessorsLabel, gbc, 0,0, 2,1, 1,1);
 		Util.gblAdd(processorsPanel, processorTextLabel, gbc, 0,1, 1,1, 1,1);
@@ -366,6 +379,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		bRemoveFromHistory = new JButton("Remove selected History");
 		bSaveHistory = new JButton("Save History to Disk");
 
+
 		if (disableTimeRange) {
 			historyList.setEnabled(false);
 			bAddToHistory.setEnabled(false);
@@ -392,6 +406,17 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		return historyPanel;
 	}
 
+	private JPanel createloadStepsLayout() {
+		JPanel loadStepsPanel = new JPanel();
+		loadStepsPanel.setLayout(new BorderLayout());
+		loadUserNotesButton = new JButton("Find annotated timesteps");
+		loadUserNotesButton.addActionListener(this);
+		loadUserNotesButton.setToolTipText("Choose start/end times from a list of user supplied notes on PE 0 that contain \"***\".");
+		loadStepsPanel.add(loadUserNotesButton, BorderLayout.WEST);
+		return loadStepsPanel;	
+	}
+
+
 
 	/** Check for validity of the input fields in this dialog box and any contained tool-specific Jpanel */
 	boolean isInputValid(){
@@ -410,20 +435,20 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			startTimeField.setForeground(Color.red);
 			return false;
 		}
-		
+
 		// ending time cannot be greater than total time
 		if (getEndTime() > getTotalTime()) {
 			endTextLabel.setForeground(Color.red);
 			endTimeField.setForeground(Color.red);
 			return false;
 		}
-				
+
 		if(! processorsField.rangeVerifier.verify(processorsField) ){
 			processorTextLabel.setForeground(Color.red);
 			processorsField.setForeground(Color.red);
 			return false;
 		}
-				
+
 		// Then the input is valid, so clear any of the red text 
 		startTextLabel.setForeground(Color.black);
 		startTimeField.setForeground(Color.black);
@@ -432,7 +457,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		processorTextLabel.setForeground(Color.black);
 		processorsField.setForeground(Color.black);
 
-		
+
 		if(toolSpecificPanel!=null){
 			return toolSpecificPanel.isInputValid();	
 		} else {
@@ -449,14 +474,14 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		return (dialogState == DIALOG_CANCELLED);
 	}
 
-	
+
 	public long getStartTime() {
 		return startTimeField.getValue();
 	}
 
 	public void setStartTime(long startTime) {
-//		startTimeField.setValue(startTime);
-//		someInputChanged();
+		startTimeField.setValue(startTime);
+		someInputChanged();
 	}
 
 	public long getEndTime() {
@@ -471,7 +496,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	public long getSelectedTotalTime(){
 		return getEndTime()-getStartTime();
 	}
-	
+
 	public long getTotalTime(){
 		return MainWindow.runObject[myRun].getTotalTime();
 	}
@@ -486,8 +511,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	public OrderedIntList getSelectedProcessors() {
 		return processorsField.getValue();
 	}
-	
-	
+
+
 	public int getNumSelectedProcessors(){
 		return processorsField.getValue().size();
 	}
@@ -507,7 +532,19 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			return;
 		}
 
-		else if (evt.getSource()  == bAddToHistory) {
+		else if (evt.getSource() == loadUserNotesButton){
+			stepsPanel.removeAll();
+			JProgressBar progressBar;
+			progressBar = new JProgressBar();
+			progressBar.setIndeterminate(true);
+			stepsPanel.add(new JLabel("Now Loading User Notes..."), BorderLayout.CENTER);
+			stepsPanel.add(progressBar, BorderLayout.EAST);
+			stepsPanel.invalidate();
+			pack();
+			determineStepsFromPEZero();			
+		}
+
+		else if (evt.getSource() == bAddToHistory) {
 			long start = getStartTime();
 			long end = getEndTime();
 			history.add(start, end);
@@ -544,30 +581,155 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		someInputChanged();
 	}
 
-	public void focusGained(FocusEvent evt) {
-		someInputChanged();
+	Vector<String> availableStepStrings;
+	Vector<Long> availableStepTimes;
+	Vector<JMenuItem> availableStepMenuItems;
+
+	private void determineStepsFromPEZero() {
+
+		if (!(MainWindow.runObject[myRun].hasLogData())){
+			stepsPanel.removeAll();
+			stepsPanel.add(new JLabel("No log data available"), BorderLayout.CENTER);
+			stepsPanel.invalidate();
+			pack();
+		}
+
+		// Labels containing the user notes found in the log
+		availableStepStrings = new Vector<String>();
+		availableStepTimes = new Vector<Long>();
+		availableStepMenuItems = new Vector<JMenuItem>();
+		
+		availableStepStrings.add("Beginning");
+		availableStepTimes.add((long)0);
+
+		
+		final SwingWorker worker =  new SwingWorker() {
+			public Object doInBackground() {
+				try {	  
+					int PE = 0;
+					GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
+
+					while (true) {
+						LogEntryData data = reader.nextEvent();
+
+						if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
+							String note = data.note;
+							if(data.note.contains("***")){
+								String pruned = data.note.replace("*** ", "");
+								availableStepStrings.add(pruned);
+								availableStepTimes.add(data.time);
+							}
+						}
+					}
+
+				} catch (Exception e) {
+
+					availableStepStrings.add("End");
+					availableStepTimes.add(MainWindow.runObject[myRun].getTotalTime());
+
+					for(int i=0; i<availableStepStrings.size(); i++){
+						System.out.println(" " + availableStepTimes.get(i) + " is step " + availableStepStrings.get(i));
+					}
+
+				}
+				return null;
+			}
+			
+		    public void done() {
+		    	stepsPanel.removeAll();
+					    	
+		    	// Create the first drop down menu
+		    	JComboBox popupStart = new JComboBox(availableStepStrings);
+		    	popupStart.setSelectedIndex(0);
+		    	popupStart.setEditable(false);
+		    	PopupHandler phStart = new PopupHandler();
+		    	phStart.useForStartTime();
+		    	popupStart.addActionListener(phStart);
+		    	
+		    	// Create the second drop down menu
+		    	JComboBox popupEnd = new JComboBox(availableStepStrings);
+		    	popupEnd.setSelectedIndex(availableStepStrings.size()-1);
+		    	popupEnd.setEditable(false);
+		    	PopupHandler phEnd = new PopupHandler();
+		    	phEnd.useForEndTime();
+		    	popupEnd.addActionListener(phEnd);
+
+		    	// Assemble these drop down manus with some labels into stepsPanel		    	
+		    	stepsPanel.setLayout(new GridBagLayout());
+		    	GridBagConstraints gbc = new GridBagConstraints();    	
+		    	Util.gblAdd(stepsPanel, new JLabel("Choose a start time:",JLabel.RIGHT), gbc, 0, 0, 1,1, 1,1, 1,1,1,1);
+		    	Util.gblAdd(stepsPanel, popupStart, gbc, 1, 0, 1,1, 1,1, 1,1,1,1);
+		    	Util.gblAdd(stepsPanel, new JLabel("Choose an end time:",JLabel.RIGHT), gbc, 0, 1, 1,1, 1,1, 1,1,1,1);
+		    	Util.gblAdd(stepsPanel, popupEnd, gbc, 1, 1, 1,1, 1,1, 1,1,1,1);
+		    			
+				stepsPanel.invalidate();
+				pack();
+		    }
+		};
+
+		worker.execute();
+		
 	}
 
-	public void focusLost(FocusEvent evt) {
-		someInputChanged();
-	}
-
-	public void keyPressed(KeyEvent evt) {
-		someInputChanged();
-	}
-
-	public void keyReleased(KeyEvent evt) {
-		someInputChanged();
-	}
-
-	public void keyTyped(KeyEvent e) {
-		someInputChanged();
-	}
-
-	public void itemStateChanged(ItemEvent e) {
-		someInputChanged();
-	}
 
 	
+	public final class PopupHandler implements ActionListener {
+
+		boolean useForStart = false;
+		boolean useForEnd = false;
+		
+		public void actionPerformed(ActionEvent e) {
+			JComboBox cb = (JComboBox) e.getSource();
+			int menuIndex = cb.getSelectedIndex();			
+			System.out.println("You selected menu item index:" + menuIndex);
+			
+			if(useForStart){
+				setStartTime(availableStepTimes.get(menuIndex));				
+			} 
+
+			if(useForEnd){
+				setEndTime(availableStepTimes.get(menuIndex));				
+			}
+		}
+
+		public void useForEndTime() {
+			useForEnd = true;
+			useForStart = false;
+		}
+
+		public void useForStartTime() {
+			useForEnd = false;
+			useForStart = true;
+		}
+	}
+	
+
+
+
+public void focusGained(FocusEvent evt) {
+	someInputChanged();
+}
+
+public void focusLost(FocusEvent evt) {
+	someInputChanged();
+}
+
+public void keyPressed(KeyEvent evt) {
+	someInputChanged();
+}
+
+public void keyReleased(KeyEvent evt) {
+	someInputChanged();
+}
+
+public void keyTyped(KeyEvent e) {
+	someInputChanged();
+}
+
+public void itemStateChanged(ItemEvent e) {
+	someInputChanged();
+}
+
+
 }
 

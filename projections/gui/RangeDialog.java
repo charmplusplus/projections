@@ -582,8 +582,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	}
 
 	Vector<String> availableStepStrings;
+	Vector<String> availableStepStringsEnd;
 	Vector<Long> availableStepTimes;
-	Vector<JMenuItem> availableStepMenuItems;
 
 	private void determineStepsFromPEZero() {
 
@@ -597,7 +597,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		// Labels containing the user notes found in the log
 		availableStepStrings = new Vector<String>();
 		availableStepTimes = new Vector<Long>();
-		availableStepMenuItems = new Vector<JMenuItem>();
 		
 		availableStepStrings.add("Beginning");
 		availableStepTimes.add((long)0);
@@ -609,6 +608,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 					int PE = 0;
 					GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
 
+					int c = 0;
 					while (true) {
 						LogEntryData data = reader.nextEvent();
 
@@ -616,7 +616,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 							String note = data.note;
 							if(data.note.contains("***")){
 								String pruned = data.note.replace("*** ", "");
-								availableStepStrings.add(pruned);
+								availableStepStrings.add("" + (c++) + ": " + pruned);
 								availableStepTimes.add(data.time);
 							}
 						}
@@ -624,12 +624,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 
 				} catch (Exception e) {
 
-					availableStepStrings.add("End");
+					availableStepStrings.add(new String("End"));
 					availableStepTimes.add(MainWindow.runObject[myRun].getTotalTime());
-
-					for(int i=0; i<availableStepStrings.size(); i++){
-						System.out.println(" " + availableStepTimes.get(i) + " is step " + availableStepStrings.get(i));
-					}
 
 				}
 				return null;
@@ -645,7 +641,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		    	PopupHandler phStart = new PopupHandler();
 		    	phStart.useForStartTime();
 		    	popupStart.addActionListener(phStart);
-		    	
+		    	   	
 		    	// Create the second drop down menu
 		    	JComboBox popupEnd = new JComboBox(availableStepStrings);
 		    	popupEnd.setSelectedIndex(availableStepStrings.size()-1);
@@ -681,11 +677,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		public void actionPerformed(ActionEvent e) {
 			JComboBox cb = (JComboBox) e.getSource();
 			int menuIndex = cb.getSelectedIndex();			
-			System.out.println("You selected menu item index:" + menuIndex);
 			
 			if(useForStart){
 				setStartTime(availableStepTimes.get(menuIndex));				
-			} 
+			}
 
 			if(useForEnd){
 				setEndTime(availableStepTimes.get(menuIndex));				
@@ -703,8 +698,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		}
 	}
 	
-
-
 
 public void focusGained(FocusEvent evt) {
 	someInputChanged();

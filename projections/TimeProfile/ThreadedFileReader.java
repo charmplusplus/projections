@@ -48,7 +48,7 @@ public class ThreadedFileReader extends Thread  {
 		this.numEPs = numEPs;
 	}
 
-	
+
 	public void run() { 
 		OrderedIntList tempList = new OrderedIntList();
 		tempList.insert(pe);
@@ -88,7 +88,7 @@ public class ThreadedFileReader extends Thread  {
 		if( MainWindow.runObject[myRun].hasLogFiles()) { // .log files
 			logReader.read(intervalSize, 
 					intervalStart, intervalEnd,
-					byEntryPoint, processorList);
+					byEntryPoint, processorList, false);
 			mySystemUsageData = logReader.getSystemUsageData();
 			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();

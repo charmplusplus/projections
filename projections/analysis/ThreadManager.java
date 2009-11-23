@@ -8,15 +8,15 @@ import java.util.List;
 import javax.swing.ProgressMonitor;
 
 
-/** This class manages a pool of worker threads, updating a progress bar as thrads complete. 
+/** This class manages a pool of worker threads, updating a progress bar as threads complete. 
  * 
- * The class must be provided with a list of threads 
+ * The class must be provided with a list of threads. 
  * 
  * */
 public class ThreadManager {
 
 	/** A copy of the list of threads */
-	private LinkedList threads;
+	private LinkedList<Thread> threadsToRun;
 	public int numInitialThreads;
 
 	private String description;
@@ -25,15 +25,18 @@ public class ThreadManager {
 
 	private Component guiRootForProgressBar;
 
-	public ThreadManager(String description, List threads, Component guiRoot){
-		this.threads = new LinkedList();
-		this.threads.addAll(threads);
+	public ThreadManager(String description, List<Thread> threads, Component guiRoot){
+		this.threadsToRun = new LinkedList<Thread>();
+		this.threadsToRun.addAll(threads);
 		this.description = description;
 		this.numInitialThreads = threads.size();
 		this.guiRootForProgressBar = guiRoot;
-		this.numConcurrentThreads = 20;
-	}
 
+		int numProcs = Runtime.getRuntime().availableProcessors();
+        System.out.println("Number of processors available to the Java Virtual Machine: " + numProcs);		
+		numConcurrentThreads = numProcs*2;
+	}
+	
 
 	public void runThreads(){
 
@@ -42,31 +45,32 @@ public class ThreadManager {
 		progressBar.setMillisToDecideToPopup(10);
 		progressBar.setProgress(0);
 
-		int totalToLoad = threads.size();
+		int totalToLoad = threadsToRun.size();
 		progressBar.setMaximum(totalToLoad);
 
 		if(totalToLoad < numConcurrentThreads){
 			numConcurrentThreads = totalToLoad;
 		}
 
-		Iterator iter;
+		Iterator<Thread> iter;
 		
 		// execute reader threads, a few at a time, until all have executed
-		LinkedList spawnedReaders = new LinkedList();
-		while(threads.size() > 0 || spawnedReaders.size() > 0){
-
+		LinkedList<Thread> spawnedReaders = new LinkedList<Thread>();
+		while(threadsToRun.size() > 0 || spawnedReaders.size() > 0){
+			
 			//------------------------------------
-			// spawn some threads
+			// spawn as many threads as needed to keep 
+			// numConcurrentThreads running at once
 			Thread r;
-			while(threads.size()>0 && spawnedReaders.size()<numConcurrentThreads){
-				r =  (Thread) ( threads).removeFirst(); // retrieve and remove from list
+			while(threadsToRun.size()>0 && spawnedReaders.size()<numConcurrentThreads){
+				r =  (Thread) ( threadsToRun).removeFirst(); // retrieve and remove from list
 				spawnedReaders.add(r);
 				r.start(); // will cause the run method to be executed
 			}
 
 			//------------------------------------
 			// update the progress bar
-			int doneCount = totalToLoad-threads.size()-spawnedReaders.size();
+			int doneCount = totalToLoad-threadsToRun.size()-spawnedReaders.size();
 			if (!progressBar.isCanceled()) {
 				progressBar.setNote(doneCount+ " of " + totalToLoad);
 				progressBar.setProgress(doneCount);
@@ -85,12 +89,12 @@ public class ThreadManager {
 				}
 				break;
 			}
-
+			
 			
 			//------------------------------------
 			// wait on the threads to complete
 			iter = spawnedReaders.iterator();
-			int waitMillis = 200; // wait for 1000 ms for the first thread, and 1 ms for each additional thread
+			int waitMillis = 50;
 			while(iter.hasNext()){
 				r = (Thread) iter.next();
 				try {

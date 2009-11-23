@@ -741,7 +741,7 @@ public class NoiseMiner extends ProjDefs
 		int numPs = peList.size();
 				
 		// Create a list of worker threads	
-		LinkedList<NoiseMinerThread> readyReaders = new LinkedList<NoiseMinerThread>();
+		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 		
 		for (int p=0; p<numPs; p++) {
 			int pe = peList.nextElement();
@@ -769,9 +769,9 @@ public class NoiseMiner extends ProjDefs
 		LinkedList<NoiseResult> results = new LinkedList<NoiseResult>();
 		
 		
-		Iterator<NoiseMinerThread> iter = readyReaders.iterator();
+		Iterator<Thread> iter = readyReaders.iterator();
 		while(iter.hasNext()) {
-			NoiseMinerThread thread = iter.next();
+			NoiseMinerThread thread = (NoiseMinerThread) iter.next();
 			results.addAll(thread.results);
 			for(int i=0;i<numDisplayBins;i++){
 				histogramToDisplay[i] += thread.histogramToDisplay[i];

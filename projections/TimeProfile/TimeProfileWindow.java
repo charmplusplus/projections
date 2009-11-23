@@ -245,7 +245,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 			    	Date time1  = new Date();
 
 			    	// Create a list of worker threads
-			    	LinkedList<ThreadedFileReader> readyReaders = new LinkedList<ThreadedFileReader>();
+			    	LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 
 			    	// Create multiple result arrays to reduce contention for accumulating
 			    	int numResultAccumulators = 8;

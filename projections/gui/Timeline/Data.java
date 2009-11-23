@@ -431,7 +431,7 @@ public class Data
 	
 			
 		// Create a list of worker threads
-		LinkedList<ThreadedFileReader> readyReaders = new LinkedList<ThreadedFileReader>();
+		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 		
 		Iterator<Integer> peIter = peToLine.iterator();
 		int pIdx=0;

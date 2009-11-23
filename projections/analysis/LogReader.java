@@ -251,12 +251,12 @@ public class LogReader
     }
 
     /**
-       read log file, with one more parameter containing 
-       a list of processors to read.
+       Read log files for a list of processors.
     */
     public void read(long reqIntervalSize,
 		     int NintervalStart, int NintervalEnd,
-		     boolean NbyEntryPoint, OrderedIntList processorList)
+		     boolean NbyEntryPoint, OrderedIntList processorList,
+		     boolean showProgress)
     {
 	numProcessors = MainWindow.runObject[myRun].getNumProcessors();
 	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
@@ -267,21 +267,25 @@ public class LogReader
 	byEntryPoint=NbyEntryPoint;
 
 	// assume full range of processor if null
-        if (processorList == null) {
-	    processorList = new OrderedIntList();
-	    for (int pe=0; pe<numProcessors; pe++) {
-		processorList.insert(pe);
-	    }
-        } else {
-	    // **CW** required to set numProcessors to the correct values.
-	    numProcessors = processorList.size();
+	if (processorList == null) {
+		processorList = new OrderedIntList();
+		for (int pe=0; pe<numProcessors; pe++) {
+			processorList.insert(pe);
+		}
+	} else {
+		// **CW** required to set numProcessors to the correct values.
+		numProcessors = processorList.size();
 	}
 
-	ProgressMonitor progressBar = 
-	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading log files",
-				"", 0, numProcessors);
-	progressBar.setNote("Allocating Global Memory");
-	progressBar.setProgress(0);
+    ProgressMonitor progressBar=null;
+    if(showProgress){
+    	progressBar = 
+    		new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading log files",
+    				"", 0, numProcessors);
+    	progressBar.setNote("Allocating Global Memory");
+    	progressBar.setProgress(0);
+    }
+
 	sysUsgData = new int[3][numProcessors][];
 	if (byEntryPoint) {
 	    userEntries = new 
@@ -292,20 +296,25 @@ public class LogReader
  	int curPe = processorList.nextElement();
 	curPeIdx = 0;
 	for (;curPe!=-1; curPe=processorList.nextElement()) {
-	    progressBar.setProgress(curPeIdx);
-	    progressBar.setNote("[PE: " + curPe + " ] Allocating Memory.");
+		if(showProgress){
+			progressBar.setProgress(curPeIdx);
+			progressBar.setNote("[PE: " + curPe + " ] Allocating Memory.");
+		}
 
 	    // gzheng: allocate sysUsgData only when needed.
 	    sysUsgData[0][curPeIdx] = new int [numIntervals+1];
 	    sysUsgData[1][curPeIdx] = new int [numIntervals+1];
 	    sysUsgData[2][curPeIdx] = new int [numIntervals+1];
-	    progressBar.setNote("[PE: " + curPe + " ] Reading data.");
-	    if (progressBar.isCanceled()) {
-		// clear all data and return
-		userEntries = null;
-		categorized = null;
-		sysUsgData = null;
-		return;
+	    
+	    if(showProgress){
+	    	progressBar.setNote("[PE: " + curPe + " ] Reading data.");
+	    	if (progressBar.isCanceled()) {
+	    		// clear all data and return
+	    		userEntries = null;
+	    		categorized = null;
+	    		sysUsgData = null; 
+	    		return;
+	    	}
 	    }
 	    processing = 0;
 	    interval = 0;
@@ -388,7 +397,9 @@ public class LogReader
             }
 	    curPeIdx++;
 	} // for loop
-	progressBar.close();
+	if(showProgress){
+		progressBar.close();
+	}
     }
 
     //Convert system usage and idle time from us to percent of an interval

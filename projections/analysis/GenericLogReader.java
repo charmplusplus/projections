@@ -26,7 +26,10 @@ implements PointCapableReader
 	// meaning in future versions of Projections that support multiple
 	// runs.
 	static int myRun = 0;
-
+	
+	/** How many bytes should be read at a time from the file. This should be big enough to keep the disks from seeking. */
+	public int bufferSize = 2*1024*1024;
+	
 	private double version;
 
 	private BufferedReader reader;
@@ -56,8 +59,7 @@ implements PointCapableReader
 			reader.readLine(); // skip over the header (already read)
 		} catch (IOException e) {
 			System.err.println("Error reading file");
-		} 
-		
+		}
 		
 	}
 
@@ -85,7 +87,7 @@ implements PointCapableReader
 		try {
 			// Try loading the log file using its standard name
 			FileReader fr = new FileReader(filename);
-			r = new BufferedReader(fr);
+			r = new BufferedReader(fr, bufferSize);
 			
 		} catch (FileNotFoundException e) {
 			try{
@@ -93,7 +95,7 @@ implements PointCapableReader
 				String inFilename = filename + ".gz";
 				InputStream fis = new FileInputStream(inFilename);
 				InputStream gis = new GZIPInputStream(fis);
-				r = new BufferedReader(new InputStreamReader(gis));
+				r = new BufferedReader(new InputStreamReader(gis), bufferSize);
 			} catch (IOException e2) {
 				System.err.println("Error reading file " + filename + ".gz");
 				return null;

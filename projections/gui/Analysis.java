@@ -467,7 +467,8 @@ public class Analysis {
     /**
      *  Load graph data for one or more processors.
      * 
-     *  A parallel version of this has been created in projections.TimeProfile.ThreadedFileReader
+     *  A parallel version of this has been created in projections.TimeProfile.ThreadedFileReader. 
+     *  For other tools that need to be parallel, use that reader, or create a similar one.
      *
      */
     public void LoadGraphData(long intervalSize, 
@@ -479,7 +480,7 @@ public class Analysis {
 	    LogReader logReader = new LogReader();
 	    logReader.read(intervalSize, 
 			   intervalStart, intervalEnd,
-			   byEntryPoint, processorList);
+			   byEntryPoint, processorList, true);
 	    systemUsageData = logReader.getSystemUsageData();
 	    systemMsgsData = logReader.getSystemMsgs();
 	    userEntryData = logReader.getUserEntries();

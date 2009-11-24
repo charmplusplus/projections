@@ -1,9 +1,10 @@
-package projections.gui;
+package projections.Overview;
 
 /**
- * Small Time Line (Stl) Display Panel
+ * Overview, aka Small Time Line (Stl) Display Panel
  * Orion Sky Lawlor, olawlor@acm.org, 2/9/2001
- *
+ * Isaac, 2009
+ * 
  * A Stl compresses an entire parallel run into a single
  * image by coding processor utilization as color.
  * Since images are assembled pixel-by-pixel, this is
@@ -30,9 +31,18 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
 
-public class StlWindow extends ProjectionsWindow
-implements MouseListener, ActionListener, ScalePanel.StatusDisplay, 
-ItemListener
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.ProjectionsWindow;
+import projections.gui.RangeDialog;
+import projections.gui.ScalePanel;
+import projections.gui.ScaleSlider;
+import projections.gui.Util;
+import projections.gui.ScalePanel.StatusDisplay;
+import projections.gui.ColorMap;
+
+public class OverviewWindow extends ProjectionsWindow
+implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -42,25 +52,18 @@ ItemListener
 
 	private ScaleSlider hor,ver;
 	private ScalePanel scalePanel;
-	StlPanel stl;
+	OverviewPanel stl;
 	private Label status;
 	// Modified to display data by entry method color. Mode panel.
 	public static final int MODE_UTILIZATION = 0;
 	public static final int MODE_EP = 1;
 
-	private int mode = MODE_UTILIZATION;
-
-	private JPanel modePanel;
-	private ButtonGroup modeGroup;
-	JRadioButton utilizationMode;
-	private JRadioButton epMode;
-
 	private ColorMap utilColorMap;
 
-	StlWindow thisWindow;
+	OverviewWindow thisWindow;
 
 	
-	public StlWindow(MainWindow mainWindow)
+	public OverviewWindow(MainWindow mainWindow)
 	{
 		super(mainWindow);
 		thisWindow = this;
@@ -95,7 +98,7 @@ ItemListener
 		ver=new ScaleSlider(Scrollbar.VERTICAL);
 		ver.addMouseListener(this);
 
-		stl=new StlPanel(thisWindow);
+		stl=new OverviewPanel(thisWindow);
 		scalePanel=new ScalePanel(hor,ver,stl);
 
 		gbc.fill = GridBagConstraints.BOTH;
@@ -106,27 +109,8 @@ ItemListener
 		Util.gblAdd(displayPanel, hor,        gbc, 0,1, 1,1, 1,0);
 		Util.gblAdd(displayPanel, status,     gbc, 0,2, 1,1, 1,0);
 
-		// create mode panel
-		modePanel = new JPanel();
-		modeGroup = new ButtonGroup();
-		utilizationMode = new JRadioButton("Utilization", true);
-		utilizationMode.addItemListener(this);
-		epMode = new JRadioButton("By EP Colors", false);
-		epMode.addItemListener(this);
-		modeGroup.add(utilizationMode);
-		modeGroup.add(epMode);
-
-		if (!MainWindow.runObject[myRun].hasLogData()) {
-			epMode.setEnabled(false);
-		}
-
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		Util.gblAdd(modePanel, utilizationMode, gbc, 0,0, 1,1, 1,1, 1,1,1,1);
-		Util.gblAdd(modePanel, epMode,          gbc, 1,0, 1,1, 1,1, 1,1,1,1);
-
 		gbc.fill = GridBagConstraints.BOTH;
 		Util.gblAdd(windowPane, displayPanel, gbc, 0,0, 1,1, 1,1, 1,1,1,1);
-		Util.gblAdd(windowPane, modePanel,    gbc, 0,1, 1,1, 1,0, 1,1,1,1);
 		scalePanel.setStatusDisplay(this);
 
 		// Establishing the Utilization-only color map. 
@@ -192,26 +176,32 @@ ItemListener
 		                                            }, this));
 		setMenuBar(mbar);
 	} 
+	
+	RangeDialogExtension toolSpecificPanel;
 
 	public void showDialog()
 	{
 		try {
 			if (dialog == null) {
-				dialog = new RangeDialog(this, "Select Range", null, false);
+				toolSpecificPanel = new RangeDialogExtension();
+				dialog = new RangeDialog(this, "Select Range", toolSpecificPanel, false);
 			}
-
 			dialog.displayDialog();
 			if (!dialog.isCancelled()) {
 				final OrderedIntList pes = dialog.getSelectedProcessors();
 				final long startTime = dialog.getStartTime();
 				final long endTime = dialog.getEndTime();
+				thisWindow.setVisible(false);
+				thisWindow.setStlPanelData(startTime, endTime, pes);
+
 				final SwingWorker worker = new SwingWorker() {
 					public Object doInBackground() {
-						thisWindow.setVisible(false);
-						thisWindow.setStlPanelData(startTime, endTime, pes);
-						stl.resetMode();
-						utilizationMode.setSelected(true);
-						stl.setData(pes,startTime,endTime); 
+						stl.setRanges(pes,startTime,endTime);
+						if(toolSpecificPanel.isModeEP()){
+							stl.loadEPData();
+						} else if(toolSpecificPanel.isModeUtilization()){
+							stl.loadUtilizationData();
+						}
 						return null;
 					}
 					public void done() {
@@ -240,19 +230,6 @@ ItemListener
 			}
 		}
 	}  
-
-	public void itemStateChanged(ItemEvent evt) {
-		if (evt.getStateChange() == ItemEvent.SELECTED) {
-			JRadioButton button = (JRadioButton)evt.getItemSelectable();
-			if (button == utilizationMode) {
-				mode = MODE_UTILIZATION;
-			} else if (button == epMode) {
-				mode = MODE_EP;
-			}
-			// handle the effects of a mode change
-			stl.setMode(mode);
-		}
-	}
 
 	public void mouseClicked(MouseEvent evt) {
 	}

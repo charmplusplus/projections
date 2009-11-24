@@ -14,6 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
 
+import projections.Overview.OverviewWindow;
 import projections.TimeProfile.TimeProfileWindow;
 import projections.analysis.ProjMain;
 import projections.gui.LogFileViewer.LogFileViewerWindow;
@@ -362,7 +363,7 @@ implements ActionListener, ItemListener
 				parent.openTool(new HistogramWindow(parent) );
 			
 			else if (mi == overviewMenuItem)	
-				parent.openTool(new StlWindow(parent) );
+				parent.openTool(new OverviewWindow(parent) );
 			
 			else if (mi == animationMenuItem)	
 				parent.openTool(new AnimationWindow(parent) );

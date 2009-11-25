@@ -1,8 +1,15 @@
-package projections.gui;
+package projections.ExtremaTool;
 
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+
+import projections.gui.Analysis;
+import projections.gui.JIntTextField;
+import projections.gui.MainWindow;
+import projections.gui.RangeDialog;
+import projections.gui.RangeDialogExtensionPanel;
+import projections.gui.Util;
 
 /** The dialog input panel for the  OutlierAnalysisWindow */
 

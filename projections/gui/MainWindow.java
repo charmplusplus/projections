@@ -86,6 +86,10 @@ implements ScalePanel.StatusDisplay
 		// static screen information.
 		ScreenInfo.init();
 
+		int numProcs = Runtime.getRuntime().availableProcessors();
+		System.out.println("Number of processors available to the Java Virtual Machine: " + numProcs);		
+
+		
 		addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)

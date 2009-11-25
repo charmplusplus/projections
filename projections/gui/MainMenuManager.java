@@ -14,11 +14,13 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
 
+import projections.ExtremaTool.OutlierAnalysisWindow;
 import projections.Overview.OverviewWindow;
 import projections.TimeProfile.TimeProfileWindow;
 import projections.analysis.ProjMain;
 import projections.gui.LogFileViewer.LogFileViewerWindow;
 import projections.gui.Timeline.TimelineWindow;
+import projections.gui.TimelineRendered.RenderedPE;
 import projections.streaming.StreamingTool;
 
 /* ***************************************************
@@ -70,6 +72,7 @@ implements ActionListener, ItemListener
 
 	// The menu items for each tool in the tool menu
 	private JMenuItem timelinesMenuItem;
+	private JMenuItem renderedTimelinesMenuItem;
 	private JMenuItem usageProfileMenuItem;
 	private JMenuItem communicationMenuItem;
 	private JMenuItem communicationVsTimeMenuItem;
@@ -108,6 +111,7 @@ implements ActionListener, ItemListener
 			useStandardColorsMenuItem.setEnabled(false);
 			
 			graphMenuItem.setEnabled(false);
+			renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(false);
 			communicationMenuItem.setEnabled(false);
@@ -140,6 +144,7 @@ implements ActionListener, ItemListener
 			useStandardColorsMenuItem.setEnabled(false);
 			
 			graphMenuItem.setEnabled(true);
+			renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(true);
 			communicationMenuItem.setEnabled(false);
@@ -171,6 +176,7 @@ implements ActionListener, ItemListener
 			useStandardColorsMenuItem.setEnabled(false);	
 
 			graphMenuItem.setEnabled(true);
+			renderedTimelinesMenuItem.setEnabled(true);
 			timelinesMenuItem.setEnabled(true);
 			usageProfileMenuItem.setEnabled(true);
 			communicationMenuItem.setEnabled(true);
@@ -246,6 +252,7 @@ implements ActionListener, ItemListener
 
 		graphMenuItem = new JMenuItem("Graphs");
 		timelinesMenuItem = new JMenuItem("Timelines");
+		renderedTimelinesMenuItem = new JMenuItem("Timelines - rendered to image");
 		usageProfileMenuItem = new JMenuItem("Usage Profile");
 		communicationMenuItem = new JMenuItem("Communication");
 		communicationVsTimeMenuItem = new JMenuItem("Communication vs Time");
@@ -265,6 +272,7 @@ implements ActionListener, ItemListener
 		
 		graphMenuItem.addActionListener(this);
 		timelinesMenuItem.addActionListener(this);
+		renderedTimelinesMenuItem.addActionListener(this);
 		usageProfileMenuItem.addActionListener(this);
 		communicationMenuItem.addActionListener(this);
 		communicationVsTimeMenuItem.addActionListener(this);
@@ -284,6 +292,7 @@ implements ActionListener, ItemListener
 
 		toolMenu.add(graphMenuItem);
 		toolMenu.add(timelinesMenuItem);
+		toolMenu.add(renderedTimelinesMenuItem);
 		toolMenu.add(usageProfileMenuItem);
 		toolMenu.add(communicationMenuItem);
 		toolMenu.add(communicationVsTimeMenuItem);
@@ -343,6 +352,9 @@ implements ActionListener, ItemListener
 			
 			else if (mi == timelinesMenuItem)
 				parent.openTool(new TimelineWindow(parent) );
+
+			else if (mi == renderedTimelinesMenuItem)
+				parent.openTool(new RenderedPE(parent) );
 			
 			else if (mi == usageProfileMenuItem)
 				parent.openTool(new ProfileWindow(parent) );

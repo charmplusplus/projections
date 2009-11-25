@@ -19,7 +19,7 @@ import javax.swing.*;
 public class SaveImage {
 
 
-	private BufferedImage generateImage(JPanel panelToRender){
+	public BufferedImage generateImage(JPanel panelToRender){
 		//		 Create an image for the constructed panel.
 		int width = panelToRender.getWidth();
 		int height = panelToRender.getHeight();

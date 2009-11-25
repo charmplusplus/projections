@@ -73,7 +73,6 @@ public class NoiseMinerExemplarTimelineWindow extends JFrame {
 
 				int PE = e.SrcPe;
 //				System.out.println("PE="+PE+"  Event time = "+e.BeginTime+"-"+e.EndTime + " displaying "+startTime+"-"+endTime);
-
 	
 				NonScrollingPanel tfp = new NonScrollingPanel(startTime, endTime, PE, Color.white, Color.black, true);
 				contents.add(tfp);

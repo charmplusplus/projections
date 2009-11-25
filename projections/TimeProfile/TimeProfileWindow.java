@@ -275,7 +275,7 @@ public class TimeProfileWindow extends GenericGraphWindow
 					}
 			    	
 			    	// Pass this list of threads to a class that manages/runs the threads nicely
-			    	ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar);
+			    	ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
 			    	threadManager.runThreads();
 
 			    	Date time3  = new Date();

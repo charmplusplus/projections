@@ -47,7 +47,7 @@ public class LogLoader extends ProjDefs
 			}
 	
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Computing End Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot);
+		ThreadManager threadManager = new ThreadManager("Computing End Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot, true);
 		threadManager.runThreads();
 
 		

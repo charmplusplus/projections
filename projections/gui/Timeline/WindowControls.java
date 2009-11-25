@@ -139,14 +139,13 @@ ItemListener {
 						data.setFilterEntryShorterThan(toolSpecificDialogPanel.dialogMinEntryFiltering.getValue());
 					}
 
-					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow);
+					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
 					cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 					return null;
 				}
 
 				public void done() {
 					// Here we are basically at startup after the dialog window and the trace log has been read
-					//						parentWindow.setSize(1000, 600);
 					parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 					parentWindow.invalidate();
 					parentWindow.setVisible(true);
@@ -221,7 +220,7 @@ ItemListener {
 
 			scaleField.setText("" + 1.0);	
 
-			parentWindow.mainPanel.loadTimelineObjects(true, parentWindow);
+			parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
 
 			cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
 
@@ -412,7 +411,7 @@ ItemListener {
 		mbar.add(toolsMenu);
 
 		// Screenshot Menu
-		JMenu saveMenu = new JMenu("Screenshot");
+		JMenu saveMenu = new JMenu("Save To Image");
 		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
 		mSaveScreenshot.addActionListener(this);
 		saveMenu.add(mSaveScreenshot);

@@ -349,6 +349,7 @@ public class Data
 
 	
 	/** Load the initial array of timeline objects 
+	 * @param showProgress 
 	 *  
 	 *  @note if a new processor has been added, then 
 	 *  	  this will not be called. the new proc's
@@ -358,7 +359,7 @@ public class Data
 	 * If the message send lines are needed immediately, no helper threads should be used(race condition)
 	 *        
 	 */
-	public void createTLOArray(boolean useHelperThreads, Component rootWindow)
+	public void createTLOArray(boolean useHelperThreads, Component rootWindow, boolean showProgress)
 	{
 		
 		// Kill off the secondary processing threads if needed
@@ -452,7 +453,7 @@ public class Data
 		}
 
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Timeline in Parallel", readyReaders, guiRootForProgressBar);
+		ThreadManager threadManager = new ThreadManager("Loading Timeline in Parallel", readyReaders, guiRootForProgressBar, showProgress);
 		threadManager.runThreads();
 
 		

@@ -756,7 +756,7 @@ public class NoiseMiner extends ProjDefs
 			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
 		}
 		
-		ThreadManager threadManager = new ThreadManager("Loading Noise Miner in Parallel", readyReaders, guiRootForProgressBar);
+		ThreadManager threadManager = new ThreadManager("Loading Noise Miner in Parallel", readyReaders, guiRootForProgressBar, true);
 		threadManager.runThreads();
 
 		// Retrieve results for each PE

@@ -68,14 +68,14 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	 *  
 	 * @note This was formerly called procRangeDialog()
 	 */
-	public void loadTimelineObjects(boolean useHelperThreads, Component rootWindow) {
+	public void loadTimelineObjects(boolean useHelperThreads, Component rootWindow, boolean showProgress) {
 		
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 		
 		this.removeAll();
-		data.createTLOArray(useHelperThreads, rootWindow);
+		data.createTLOArray(useHelperThreads, rootWindow, showProgress);
 
 		// Add the panel which will draw the message send lines on top of everything else
 		add(new MainPanelForeground(data));

@@ -20,7 +20,7 @@ import projections.TimeProfile.TimeProfileWindow;
 import projections.analysis.ProjMain;
 import projections.gui.LogFileViewer.LogFileViewerWindow;
 import projections.gui.Timeline.TimelineWindow;
-import projections.gui.TimelineRendered.RenderedPE;
+import projections.gui.TimelineRendered.TimelineRenderedWindow;
 import projections.streaming.StreamingTool;
 
 /* ***************************************************
@@ -354,7 +354,7 @@ implements ActionListener, ItemListener
 				parent.openTool(new TimelineWindow(parent) );
 
 			else if (mi == renderedTimelinesMenuItem)
-				parent.openTool(new RenderedPE(parent) );
+				parent.openTool(new TimelineRenderedWindow(parent) );
 			
 			else if (mi == usageProfileMenuItem)
 				parent.openTool(new ProfileWindow(parent) );

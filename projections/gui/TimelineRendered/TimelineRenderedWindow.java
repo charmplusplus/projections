@@ -42,7 +42,7 @@ import projections.gui.Timeline.MainPanel;
 import projections.gui.Timeline.NonScrollingLayout;
 import projections.gui.Timeline.SaveImage;
 
-public class RenderedPE extends ProjectionsWindow implements MainHandler {
+public class TimelineRenderedWindow extends ProjectionsWindow implements MainHandler {
 
 	Color backgroundColor;
 	Color foregroundColor;
@@ -53,7 +53,7 @@ public class RenderedPE extends ProjectionsWindow implements MainHandler {
 	
 	JPanel combinedTimelinesPanel;
 	
-	public RenderedPE(MainWindow parentWindow) {
+	public TimelineRenderedWindow(MainWindow parentWindow) {
 		super(parentWindow);
 		createMenus();
 		

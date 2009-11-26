@@ -54,7 +54,8 @@ public class TimeProfileWindow extends GenericGraphWindow
     // **CW** this really should be a default button with ProjectionsWindow
     private JButton saveColors;
     private JButton loadColors;
-
+    private JButton bAnalyzeSlopes;
+    
     long intervalSize;
 
 	int startInterval;
@@ -175,12 +176,16 @@ public class TimeProfileWindow extends GenericGraphWindow
 	saveColors.addActionListener(this);
 	loadColors = new JButton("Load Entry Colors");
 	loadColors.addActionListener(this);
+	bAnalyzeSlopes = new JButton("Analyze slope");
+	bAnalyzeSlopes.setToolTipText("Select a point on the graph to measure the slope");
+	bAnalyzeSlopes.addActionListener(this);
 	controlPanel = new JPanel();
 	controlPanel.setLayout(gbl);
-	Util.gblAdd(controlPanel, epSelection, gbc, 0,0, 1,1, 0,0);
-	Util.gblAdd(controlPanel, setRanges,   gbc, 1,0, 1,1, 0,0);
-	Util.gblAdd(controlPanel, saveColors,  gbc, 2,0, 1,1, 0,0);
-	Util.gblAdd(controlPanel, loadColors,  gbc, 3,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, setRanges,      gbc, 1,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, saveColors,     gbc, 2,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, loadColors,     gbc, 3,0, 1,1, 0,0);
+	Util.gblAdd(controlPanel, bAnalyzeSlopes, gbc, 4,0, 1,1, 0,0);
 
         if(ampiTraceOn){            
             epPanel = new JPanel();
@@ -476,39 +481,44 @@ public class TimeProfileWindow extends GenericGraphWindow
     }	
 
     public void actionPerformed(ActionEvent e) {
-	if (e.getSource() instanceof JButton) {
-	    JButton b = (JButton)e.getSource();
-	    if (b == epSelection) {
-		if (entryDialog == null) {
-		    entryDialog = 
-			new EntrySelectionDialog(this, this,
-						 typeLabelNames,
-						 stateArray,colorArray,
-						 existsArray,entryNames);
-		}
-		entryDialog.showDialog();
-	    } else if (b == setRanges) {
-		showDialog();
-	    } else if (b == saveColors) {
-		// save all entry point colors to disk
-		MainWindow.runObject[myRun].saveColors();
-	    } else if (b == loadColors) {
-		// load all entry point colors from disk
-		try {
-		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
-		    // silly inefficiency
-		    setOutputGraphData();
-		} catch (IOException exception) {
-		    System.err.println("Failed to load colors!!");
-		}
-	    }
-        } else if (e.getSource() instanceof JMenuItem) {
-            String arg = ((JMenuItem)e.getSource()).getText();
-            if (arg.equals("Close")) {
-                close();
-            } else if(arg.equals("Select Processors")) {
-                showDialog();
-            }
-        }
+    	if (e.getSource() == epSelection) {
+    		if (entryDialog == null) {
+    			entryDialog = 
+    				new EntrySelectionDialog(this, this,
+    						typeLabelNames,
+    						stateArray,colorArray,
+    						existsArray,entryNames);
+    		}
+    		entryDialog.showDialog();
+    	} else if (e.getSource() == bAnalyzeSlopes) {
+    		analyzeSlopes();
+    	} else if (e.getSource() == setRanges) {
+    		showDialog();
+    	} else if (e.getSource() == saveColors) {
+    		// save all entry point colors to disk
+    		MainWindow.runObject[myRun].saveColors();
+    	} else if (e.getSource() == loadColors) {
+    		// load all entry point colors from disk
+    		try {
+    			ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
+    			// silly inefficiency
+    			setOutputGraphData();
+    		} catch (IOException exception) {
+    			System.err.println("Failed to load colors!!");
+    		}
+    	} else if (e.getSource() instanceof JMenuItem) {
+    		String arg = ((JMenuItem)e.getSource()).getText();
+    		if (arg.equals("Close")) {
+    			close();
+    		} else if(arg.equals("Select Processors")) {
+    			showDialog();
+    		}
+    	}
     }
+
+	private void analyzeSlopes() {
+		System.out.println("Clicked analyze slopes");
+		graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+		
+	}
 }

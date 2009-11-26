@@ -231,23 +231,25 @@ public class Graph extends JPanel
      *  than ideal for the latter.
      */
     private int getXValue(int xPos) {
-   	if( (xPos > originX) && (xPos < width+originX)) {
-	    // get the expected value
-	    int displacement = xPos - originX;
-	    int expectedValue = (int)(displacement/pixelincrementX);
-	    int x1; 
-	    x1 = originX + (int)(expectedValue*pixelincrementX) +
-		(int)(pixelincrementX/2);
-	    if ((GraphType == BAR) ||
-		(GraphType == AREA)) {
-		// now find out if it the mouse actually falls 
-		// onto the drawn bar
-		if ((xPos > x1-(barWidth/2)) && (xPos < x1+(barWidth/2))) {
-		    return expectedValue;
-		}
-	    } 
-	}
-	return -1;
+    	if( (xPos > originX) && (xPos < width+originX)) {
+    		// get the expected value
+    		int displacement = xPos - originX;
+    		int whichBar = (int)(displacement/pixelincrementX);
+    		double x1 = originX + (whichBar*pixelincrementX) + (pixelincrementX/2.0);
+    		if ((GraphType == BAR) || (GraphType == AREA)) {
+            	long lowerPixelForBar = Math.round(x1-(barWidth/2.0));
+            	long upperPixelForBar = Math.round(x1+(barWidth/2.0));
+            	// The math here isn't quite right, so lets just account for that here.
+            	if ( xPos < lowerPixelForBar){
+            		return whichBar-1;
+            	} else if ( xPos > upperPixelForBar) {
+    				return whichBar+1;
+    			} else{
+    				return whichBar;
+    			}
+    		} 
+    	}	
+    	return -1;
     }
 	
     /**
@@ -313,6 +315,8 @@ public class Graph extends JPanel
     	int xVal = getXValue(x);
     	int yVal = getYValue(xVal, y);
 
+    	System.out.println("mouseClick at " + x + "," + y + " translates to " + xVal + ", " + yVal);
+    	
     	// if either x or y is available, support the click
     	// but the client tool is going to have to deal with
     	// it
@@ -404,7 +408,7 @@ public class Graph extends JPanel
     }
 
     public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-	dataSource.toolClickResponse(e, xVal, yVal);
+    	dataSource.toolClickResponse(e, xVal, yVal);
     }
 
     private void drawDisplay(Graphics _g)

@@ -53,6 +53,10 @@ public class LabelPanel extends JPanel implements MouseListener, MouseMotionList
 
 	protected void paintComponent(Graphics g)
 	{
+		// Let UI delegate paint first 
+		// (including background filling, if I'm opaque)
+		super.paintComponent(g); 
+		// paint my contents next....
 
 		g.setFont(data.labelFont);
 		FontMetrics fm = g.getFontMetrics();

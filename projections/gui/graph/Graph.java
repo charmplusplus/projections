@@ -10,10 +10,6 @@ import javax.swing.event.*;
 public class Graph extends JPanel 
     implements MouseInputListener
 {
-    /**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -280,15 +276,18 @@ public class Graph extends JPanel
     }
 
     // ***** Painting Routines *****
-    
-    public void paint(Graphics g)
-    {
-	if (font == null) {
-	    font = new Font("Times New Roman",Font.BOLD,FONT_SIZE);
-	    g.setFont(font);
-	    fm = g.getFontMetrics(font);
-	}
-	drawDisplay(g);
+    protected void paintComponent(Graphics g) {
+	    // Let UI delegate paint first 
+	    // (including background filling, if I'm opaque)
+	    super.paintComponent(g); 
+	    // paint my contents next....
+
+	    if (font == null) {
+    		font = new Font("Times New Roman",Font.BOLD,FONT_SIZE);
+    		g.setFont(font);
+    		fm = g.getFontMetrics(font);
+    	}
+    	drawDisplay(g);
     }
 
     public void print(Graphics pg)
@@ -308,18 +307,18 @@ public class Graph extends JPanel
     }
 
     public void mouseClicked(MouseEvent e) {
-	int x = e.getX();
+    	int x = e.getX();
     	int y = e.getY();
 
-	int xVal = getXValue(x);
-	int yVal = getYValue(xVal, y);
+    	int xVal = getXValue(x);
+    	int yVal = getYValue(xVal, y);
 
-	// if either x or y is available, support the click
-	// but the client tool is going to have to deal with
-	// it
-	if ((xVal > -1) || (yVal > -1)) {
-	    toolClickResponse(e, xVal, yVal);
-	} 
+    	// if either x or y is available, support the click
+    	// but the client tool is going to have to deal with
+    	// it
+    	if ((xVal > -1) || (yVal > -1)) {
+    		toolClickResponse(e, xVal, yVal);
+    	} 
     }
 
     public void mouseEntered(MouseEvent e) {

@@ -33,8 +33,11 @@ public class SolidColorJPanel extends JPanel{
 
 	protected void paintComponent(Graphics g)
 	{
-		System.out.println("Painting SolidColorJPanel with color=" + color + "getWidth()=" + getWidth() + " getHeight()" + getHeight() );
-		g.setColor(color);
+		// Let UI delegate paint first 
+	    // (including background filling, if I'm opaque)
+	    super.paintComponent(g); 
+	    // paint my contents next....
+	    g.setColor(color);
 		g.fillRect(0, 0, getWidth(), getHeight());
 	}
 }

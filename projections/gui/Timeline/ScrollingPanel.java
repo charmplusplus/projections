@@ -91,6 +91,10 @@ public class ScrollingPanel extends JPanel  {
 	/** A simple class for drawing the corners in the JScrollPane */
 	public class Corner extends JComponent {
 		protected void paintComponent(Graphics g) {
+			// Let UI delegate paint first 
+		    // (including background filling, if I'm opaque)
+		    super.paintComponent(g); 
+		    // paint my contents next....
 			g.setColor(data.getBackgroundColor());
 			g.fillRect(0,0,getWidth(),getHeight());
 		}

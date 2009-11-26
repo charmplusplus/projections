@@ -80,6 +80,10 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 
 
 	public void paintComponent(Graphics g){
+		// Let UI delegate paint first 
+	    // (including background filling, if I'm opaque)
+	    super.paintComponent(g); 
+	    // paint my contents next....
 		g.setColor(data.getBackgroundColor());
 		g.fillRect(0,0,getWidth(),getHeight());		
 	}

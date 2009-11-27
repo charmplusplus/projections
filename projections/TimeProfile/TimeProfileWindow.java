@@ -6,11 +6,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.*;
 
 import projections.analysis.*;
 import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Analysis;
+import projections.gui.Clickable;
 import projections.gui.ColorManager;
 import projections.gui.ColorSelectable;
 import projections.gui.EntrySelectionDialog;
@@ -26,12 +28,13 @@ import projections.gui.Util;
 /**
  *  TimeProfileWindow
  *  by Chee Wai Lee
- *
+ *	updated by Isaac Dooley
+ *	
  *  Will replace The old GraphWindow class once a framework for displaying
  *  Legends are in place (and probably replace the name)
  */
 public class TimeProfileWindow extends GenericGraphWindow
-    implements ActionListener, ColorSelectable
+    implements ActionListener, ColorSelectable, Clickable
 {
 	
 	TimeProfileWindow thisWindow;
@@ -516,9 +519,51 @@ public class TimeProfileWindow extends GenericGraphWindow
     	}
     }
 
+    boolean waitingForAnalyzeSlopesClick = false;
+    
 	private void analyzeSlopes() {
-		System.out.println("Clicked analyze slopes");
-		graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
-		
+		waitingForAnalyzeSlopesClick = true;
+		graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));	
 	}
+
+	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+		if(waitingForAnalyzeSlopesClick){
+			waitingForAnalyzeSlopesClick = false;
+			graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));	
+			
+			// extract the curve that sits:
+			// above the EP utilization + overhead 
+			// but below the idle time
+			int numIntervals = endInterval-startInterval+1; 
+			double[] nonIdle = new double[numIntervals];
+			for(int i=0; i<numIntervals; i++){
+				nonIdle[i] = 0.0;
+				for(int ep=0; ep<numEPs+1; ep++){
+					nonIdle[i] += graphData[i][ep];
+				}
+			}
+			
+			// Sum up values to find total for the bar where the user clicked
+			double total = 0.0;
+			for(int ep=0; ep<graphData[xVal].length; ep++){
+				total += graphData[xVal][ep];
+			}			
+			
+			// Lookup the y value on this curve for where the user clicked
+			double y = nonIdle[xVal];
+			
+			double slopeA = (nonIdle[xVal+1] - nonIdle[xVal-1])/2.0;
+			double slopeB = (nonIdle[xVal+2] - nonIdle[xVal-2])/4.0;
+			double slopeC = (slopeA+slopeB)/2.0;
+
+			// And to get some y=mx+b style coefficients, we need to do a little math:
+			double[] coefficients = new double[2];
+			coefficients[0] = -1.0*slopeC*xVal+y; // y intercept of line
+			coefficients[1] = slopeC;
+			
+			graphCanvas.addPolynomial(coefficients);
+			
+		}
+	}
+
 }

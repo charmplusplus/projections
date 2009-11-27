@@ -96,11 +96,8 @@ public class DataSource2D extends DataSource
     }
 
     public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-	if (parent == null) {
-	    // no parent, do nothing.
-	} else if (parent instanceof Clickable) {
-	    ((Clickable)parent).toolClickResponse(e, xVal, yVal);
-	}
+    	if (parent != null && parent instanceof Clickable) 
+    		((Clickable)parent).toolClickResponse(e, xVal, yVal);
     }
 
     public String getTitle() {

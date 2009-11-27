@@ -72,6 +72,12 @@ public class Graph extends JPanel
     private Bubble bubble;
     private int bubbleXVal;
     private int bubbleYVal;
+    
+    // Coefficients that describe a polynomial to plot on top of the chart data
+    // y = polynomialToOverlay[2]*x^2 +  polynomialToOverlay[1]*x^1 +  polynomialToOverlay[0]*x^0
+    // The y values are of the same units as the y values in the data source
+    // The x values are measured in terms of the bin/interval indices
+    private double[] polynomialToOverlay;
 
     /** Special constructor. This can only be called from a projections tool!!! */
     public Graph()
@@ -314,8 +320,6 @@ public class Graph extends JPanel
 
     	int xVal = getXValue(x);
     	int yVal = getYValue(xVal, y);
-
-    	System.out.println("mouseClick at " + x + "," + y + " translates to " + xVal + ", " + yVal);
     	
     	// if either x or y is available, support the click
     	// but the client tool is going to have to deal with
@@ -421,7 +425,7 @@ public class Graph extends JPanel
 	w = getWidth();
 	h = getHeight();
 	g.clearRect(0, 0, w, h);
-
+	
 	// if there's nothing to draw, don't draw anything!!!
 	if (dataSource == null) {
 	    return;
@@ -487,6 +491,8 @@ public class Graph extends JPanel
 		drawLineGraph(g);
 	    }
 	}
+	
+	
     }
 
     private void drawXAxis(Graphics2D g) {
@@ -554,95 +560,138 @@ public class Graph extends JPanel
 	}
     }
 
+    private void drawOverlayedPolynomial(Graphics2D g) {
+    	// Plot the polynomial
+    	if(polynomialToOverlay != null && polynomialToOverlay.length>0){
+    		for(int x=0; x< getWidth(); x++){
+    			g.setColor(Color.orange);
+
+    			//    bar i center pixel coordinate:	
+    			//       	originX + (int)(i*pixelincrementX)
+    			//		
+    			//    pixel x equates to bar:
+    			//          (x-originX)/pixelincrementX
+
+    			int x1_px = x;
+    			double x1 = ((double)(x1_px-originX))/pixelincrementX;
+
+    			int x2_px = x+1;
+    			double x2 = ((double)(x2_px-originX))/pixelincrementX;
+
+    			double y1 = 0.0;
+    			double y2 = 0.0;
+    			for(int d=0; d<polynomialToOverlay.length; d++){
+    				y1 += polynomialToOverlay[d]*Math.pow(x1,d);
+    				y2 += polynomialToOverlay[d]*Math.pow(x2,d);
+    			}
+
+    			int y1_px = originY - (int)(y1*pixelincrementY);
+    			int y2_px = originY - (int)(y2*pixelincrementY);
+
+    			g.setStroke(new BasicStroke(4f));
+    			g.setColor(Color.orange);
+    			Object oldHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    			g.drawLine(x1_px, y1_px, x2_px, y2_px);
+    			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
+
+
+    		}
+    	}
+
+    }
+
+    
+    
     private void drawBarGraph(Graphics2D g) {
-	int numX = dataSource.getIndexCount();
-	int numY = dataSource.getValueCount();
-	double [] data = new double[numY];
+    	int numX = dataSource.getIndexCount();
+    	int numY = dataSource.getValueCount();
+    	double [] data = new double[numY];
 
-	// Determine barWidth from tickIncrementX. If each value can be
-	// represented by each tick AND there is enough pixel resolution
-	// for each bar, we set the width of the visual bar to be 80% of
-	// the tick distance.
-	if ((valuesPerTickX == 1) && (tickIncrementX >= 3.0)) {
-	    barWidth = 0.8*tickIncrementX;
-	} else {
-	    barWidth = 1.0;
-	}
+    	// Determine barWidth from tickIncrementX. If each value can be
+    	// represented by each tick AND there is enough pixel resolution
+    	// for each bar, we set the width of the visual bar to be 80% of
+    	// the tick distance.
+    	if ((valuesPerTickX == 1) && (tickIncrementX >= 3.0)) {
+    		barWidth = 0.8*tickIncrementX;
+    	} else {
+    		barWidth = 1.0;
+    	}
 
-	// NO OPTIMIZATION simple draw. Every value gets drawn on screen.
-	for (int i=0; i<numX; i++) {
-	    dataSource.getValues(i, data);
-	    if (GraphStacked) {
-		int y = 0;
-		for (int k=0; k<numY; k++) {
-		    // calculating lowerbound of box, which StackArray
-		    // allready contains
-		    y = originY - (int)(stackArray[i][k]*pixelincrementY);
-		    g.setColor(dataSource.getColor(k));
-		    // using data[i] to get the height of this bar
-		    if (valuesPerTickX == 1) {
-			g.fillRect(originX + (int)(i*pixelincrementX +
-						   tickIncrementX/2 -
-						   barWidth/2), y,
-				   (int)barWidth,
-				   (int)(data[k]*pixelincrementY));
-				   
-		    } else {
-			g.fillRect(originX + (int)(i*pixelincrementX), y, 
-				   (int)((i+1)*pixelincrementX) - 
-				   (int)(i*pixelincrementX), 
-				   (int)(data[k]*pixelincrementY));
-		    }
-		}
-	    } else {
-		// unstacked.. sort the values and then display them
-		int maxIndex=0;
-		int y = 0;
-		double maxValue=0;
-		// one col to retain color (actual index) information
-		// and the other to hold the actual data
-		double [][] temp = new double[numY][2];
-		for (int k=0;k<numY;k++) {	
-		    temp[k][0] = k;
-		    temp[k][1] = data[k];
-		}
-		for (int k=0; k<numY; k++) {
-		    maxValue = temp[k][1];
-		    maxIndex = k;
-		    for (int j=k;j<numY;j++) {
-			if (temp[j][1]>maxValue) {
-			    maxIndex = j;
-			    maxValue = temp[j][1];
-			}
-		    }
-		    int t = (int)temp[k][0];
-		    double t2 = temp[k][1];
+    	// NO OPTIMIZATION simple draw. Every value gets drawn on screen.
+    	for (int i=0; i<numX; i++) {
+    		dataSource.getValues(i, data);
+    		if (GraphStacked) {
+    			int y = 0;
+    			for (int k=0; k<numY; k++) {
+    				// calculating lowerbound of box, which StackArray
+    				// allready contains
+    				y = originY - (int)(stackArray[i][k]*pixelincrementY);
+    				g.setColor(dataSource.getColor(k));
+    				// using data[i] to get the height of this bar
+    				if (valuesPerTickX == 1) {
+    					g.fillRect(originX + (int)(i*pixelincrementX +
+    							tickIncrementX/2 -
+    							barWidth/2), y,
+    							(int)barWidth,
+    							(int)(data[k]*pixelincrementY));
 
-		    temp[k][0] = temp[maxIndex][0];
-		    //swap the contents of maxValue with the ith value
-		    temp[k][1] = maxValue;
-		    temp[maxIndex][0] = t;
-		    temp[maxIndex][1] = t2;
-		}
-		// now display the graph
-		for(int k=0; k<numY; k++) {
-		    g.setColor(dataSource.getColor((int)temp[k][0]));
-		    y = (originY-(int)(temp[k][1]*pixelincrementY));
-		    if (valuesPerTickX == 1) {
-			g.fillRect(originX + (int)(i*pixelincrementX +
-						   tickIncrementX/2 -
-						   barWidth/2), y,
-				   (int)barWidth,
-				   (int)(temp[k][1]*pixelincrementY));
-		    } else {				   
-			g.fillRect(originX + (int)(i*pixelincrementX), y,
-				   (int)((i+1)*pixelincrementX) -
-				   (int)(i*pixelincrementX),
-				   (int)(temp[k][1]*pixelincrementY));
-		    }
-		}
-	    }
-		/*  ** UNUSED for now **
+    				} else {
+    					g.fillRect(originX + (int)(i*pixelincrementX), y, 
+    							(int)((i+1)*pixelincrementX) - 
+    							(int)(i*pixelincrementX), 
+    							(int)(data[k]*pixelincrementY));
+    				}
+    			}
+    		} else {
+    			// unstacked.. sort the values and then display them
+    			int maxIndex=0;
+    			int y = 0;
+    			double maxValue=0;
+    			// one col to retain color (actual index) information
+    			// and the other to hold the actual data
+    			double [][] temp = new double[numY][2];
+    			for (int k=0;k<numY;k++) {	
+    				temp[k][0] = k;
+    				temp[k][1] = data[k];
+    			}
+    			for (int k=0; k<numY; k++) {
+    				maxValue = temp[k][1];
+    				maxIndex = k;
+    				for (int j=k;j<numY;j++) {
+    					if (temp[j][1]>maxValue) {
+    						maxIndex = j;
+    						maxValue = temp[j][1];
+    					}
+    				}
+    				int t = (int)temp[k][0];
+    				double t2 = temp[k][1];
+
+    				temp[k][0] = temp[maxIndex][0];
+    				//swap the contents of maxValue with the ith value
+    				temp[k][1] = maxValue;
+    				temp[maxIndex][0] = t;
+    				temp[maxIndex][1] = t2;
+    			}
+    			// now display the graph
+    			for(int k=0; k<numY; k++) {
+    				g.setColor(dataSource.getColor((int)temp[k][0]));
+    				y = (originY-(int)(temp[k][1]*pixelincrementY));
+    				if (valuesPerTickX == 1) {
+    					g.fillRect(originX + (int)(i*pixelincrementX +
+    							tickIncrementX/2 -
+    							barWidth/2), y,
+    							(int)barWidth,
+    							(int)(temp[k][1]*pixelincrementY));
+    				} else {				   
+    					g.fillRect(originX + (int)(i*pixelincrementX), y,
+    							(int)((i+1)*pixelincrementX) -
+    							(int)(i*pixelincrementX),
+    							(int)(temp[k][1]*pixelincrementY));
+    				}
+    			}
+    		}
+    		/*  ** UNUSED for now **
 		    whether it is single should be orthogonal to stacking.
 	    } else {
 		// single.. display average value
@@ -658,8 +707,10 @@ public class Graph extends JPanel
 			   (int)(i*pixelincrementX),
 			   (int)(sum*pixelincrementY));
 	    }		
-		*/
-	}
+    		 */
+    	}
+    	
+    	drawOverlayedPolynomial(g);
     }
 	
     public void drawLineGraph(Graphics2D g) {
@@ -698,6 +749,8 @@ public class Graph extends JPanel
 	    }
 	    x1 = x2;
 	}
+
+	drawOverlayedPolynomial(g);
     }
 
     public void drawAreaGraph(Graphics2D g) {
@@ -761,6 +814,8 @@ public class Graph extends JPanel
 	    g.setColor(Color.black);
 	    g.draw(polygon);
 	}
+
+	drawOverlayedPolynomial(g);
     }
 
     // in-place computation of the prefix sum
@@ -887,4 +942,25 @@ public class Graph extends JPanel
         f.setTitle("Projections");
         f.setVisible(true);
     }
+    
+    /** Add a polynomial that ought to be plotted on top of the other chart data.
+     *  This probably only makes sense for a 2-D XY plot. 
+     *   
+     *   For example, if you want a quadratic function provide an array of length 3:
+     *   y = polynomialToOverlay[2]*x^2 +  polynomialToOverlay[1]*x^1 +  polynomialToOverlay[0]*x^0
+     *   
+     *   The y values are treated the same as the y values in the data source
+     *   The x values are measured in terms of the bin/interval indices
+     */
+    public void addPolynomial(double[] coefficients){
+    	polynomialToOverlay = coefficients.clone();
+    	repaint();
+    }
+    
+    public void clearPolynomial(){
+    	polynomialToOverlay = null;
+    	repaint();
+    }
+    
+    
 }

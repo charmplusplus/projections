@@ -3,7 +3,9 @@ package projections.gui;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Bubble extends Window
+import javax.swing.JWindow;
+
+public class Bubble extends JWindow
 implements MouseListener
 {
 
@@ -14,7 +16,6 @@ implements MouseListener
 	public Bubble(Component c, String[] s)
 	{
 		super(getFrame(c));
-
 		text = s;
 
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -27,15 +28,14 @@ implements MouseListener
 		setBackground(new Color(255, 255, 200));
 		setForeground(Color.black);
 		setSize(getPreferredSize());
-	}   
+	}  
+	
 	static Frame getFrame(Component c)
 	{
 		Frame f = null;
-
 		while((c = c.getParent()) != null)
 			if(c instanceof Frame)
 				f = (Frame)c;
-
 		return f;
 	}   
 
@@ -99,6 +99,7 @@ implements MouseListener
 
 		return new Dimension(w, h);
 	}   
+	
 	public void paint(Graphics g)
 	{
 		if(text == null) 
@@ -112,7 +113,6 @@ implements MouseListener
 
 		int sh = fm.getHeight() + 2;   
 
-
 		g.setColor(Color.black);
 		g.drawRect(0, 0, w-1, h-1);
 
@@ -120,11 +120,13 @@ implements MouseListener
 
 		for(int i=0; i<text.length; i++)
 			g.drawString(text[i], 4, (i+1)*sh );    
-	}   
+	}
 
 	public void setVisible(boolean state)
 	{
 		pack();
 		super.setVisible(state);
-	}   
+	}
+	
+	
 }

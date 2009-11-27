@@ -721,6 +721,10 @@ Clickable
 			parentWindow.addProcessor(Integer.parseInt((String)outlierList.get(xVal)));
 	}
 
+
+	public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
+	}
+	
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
@@ -735,5 +739,7 @@ Clickable
 	public void itemStateChanged(ItemEvent e) {
 		// do nothing.
 	}
+
+
 
 }

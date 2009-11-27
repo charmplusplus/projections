@@ -205,6 +205,9 @@ implements ItemListener, ActionListener, Clickable
 		parentWindow.addProcessor(xVal);	
 	}
 
+	public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
+	}
+
 	protected void createMenus(){
 		JMenuBar mbar = new JMenuBar();
 		mbar.add(Util.makeJMenu("File", new Object[]

@@ -100,6 +100,13 @@ public class DataSource2D extends DataSource
     		((Clickable)parent).toolClickResponse(e, xVal, yVal);
     }
 
+    public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
+    	if (parent != null && parent instanceof Clickable) 
+    		((Clickable)parent).toolClickResponse(e, xVal, yVal);
+    }
+    
+    
+    
     public String getTitle() {
 	return title;
     }

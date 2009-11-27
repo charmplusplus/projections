@@ -314,20 +314,6 @@ public class Graph extends JPanel
 	MainWindow.runObject[myRun].foreground = oldForeground;
     }
 
-    public void mouseClicked(MouseEvent e) {
-    	int x = e.getX();
-    	int y = e.getY();
-
-    	int xVal = getXValue(x);
-    	int yVal = getYValue(xVal, y);
-    	
-    	// if either x or y is available, support the click
-    	// but the client tool is going to have to deal with
-    	// it
-    	if ((xVal > -1) || (yVal > -1)) {
-    		toolClickResponse(e, xVal, yVal);
-    	} 
-    }
 
     public void mouseEntered(MouseEvent e) {
     } 
@@ -341,20 +327,40 @@ public class Graph extends JPanel
     public void mouseReleased(MouseEvent e) {
     }
 
-    public void mouseMoved(MouseEvent e) {
-	int x = e.getX();
-    	int y = e.getY();
-	
-	int xVal = getXValue(x);
-	int yVal = getYValue(xVal, y);
 
-	if((xVal > -1) && (yVal > -1)) {
-	    showPopup(xVal, yVal, x, y);
-	} else if (bubble != null) {
-	    bubble.setVisible(false);
-	    bubble.dispose();
-	    bubble = null;
-	}
+    public void mouseClicked(MouseEvent e) {
+    	int x = e.getX();
+    	int y = e.getY();
+
+    	int xVal = getXValue(x);
+    	int yVal = getYValue(xVal, y);
+
+    	// if either x or y is available, support the click
+    	// but the client tool is going to have to deal with
+    	// it
+    	if ((xVal > -1) || (yVal > -1)) {
+        	dataSource.toolClickResponse(e, xVal, yVal);
+    	}
+    }
+
+    public void mouseMoved(MouseEvent e) {
+    	int x = e.getX();
+    	int y = e.getY();
+    	int xVal = getXValue(x);
+    	int yVal = getYValue(xVal, y);
+
+    	if((xVal > -1) && (yVal > -1)) {
+    		showPopup(xVal, yVal, x, y);
+    	} else if (bubble != null) {
+    		bubble.setVisible(false);
+    		bubble.dispose();
+    		bubble = null;
+    	}
+
+    	if ((xVal > -1) || (yVal > -1)) {
+    		dataSource.toolMouseMovedResponse(e, xVal, yVal);
+    	}
+
     }
 
     public void mouseDragged(MouseEvent e) {
@@ -385,35 +391,33 @@ public class Graph extends JPanel
 
     public void showPopup(int xVal, int yVal, int xPos, int yPos){
 
-	Point offset = getBubbleOffset();
-	String text[] = dataSource.getPopup(xVal, yVal);
-	if (text == null) {
-	    return;
-	}
-	// old popup still exists, but mouse has moved over a new 
-	// section that has its own popup
-	if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
-	    bubble.setVisible(false);
-	    bubble.dispose();
-	    bubble = null;
-	}
-	
-	if (bubble == null) {
-	    if (GraphStacked) {
-		bubble = new Bubble(this, text);
-		bubble.setLocation(xPos+offset.x, yPos+offset.y);
-		bubble.setVisible(true);
-		bubbleXVal = xVal;
-		bubbleYVal = yVal;
-	    } else {
-		// do nothing
-	    }
-	}
+    	Point offset = getBubbleOffset();
+    	String text[] = dataSource.getPopup(xVal, yVal);
+    	if (text == null) {
+    		return;
+    	}
+    	    	
+    	// old popup still exists, but mouse has moved over a new 
+    	// section that has its own popup
+    	if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
+    		bubble.setVisible(false);
+    		bubble.dispose();
+    		bubble = null;
+    	}
+
+    	if (bubble == null) {
+    		if (GraphStacked) {
+    			bubble = new Bubble(this, text);
+    			bubble.setLocation(xPos+offset.x, yPos+offset.y);
+    			bubble.setVisible(true);
+    			bubbleXVal = xVal;
+    			bubbleYVal = yVal;
+    		} else {
+    			// do nothing
+    		}
+    	}
     }
 
-    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-    	dataSource.toolClickResponse(e, xVal, yVal);
-    }
 
     private void drawDisplay(Graphics _g)
     {

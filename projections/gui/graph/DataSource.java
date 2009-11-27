@@ -51,6 +51,15 @@ public abstract class DataSource
     }
 
     /**
+     * Allows a tool to respond to a mouse movement in the graph class.
+     * This abstract class will implement a null response, actual
+     * DataSources will call their parent tools' actions.
+     */
+	public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
+		// do nothing. Please override.		
+	}
+
+	/**
      * Return the Color of this value.
      *  The valNo passed in is between 0 and getValueCount()-1, inclusive.
      *  The default is to cycle through red, green, blue, and gray.

@@ -1,6 +1,7 @@
 package projections.analysis;
 
 import java.awt.Component;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -42,6 +43,9 @@ public class ThreadManager {
 
 	public void runThreads(){
 
+		Date startReadingTime  = new Date();
+		
+		
 		ProgressMonitor progressBar=null;
 		if(showProgress){
 			progressBar = new ProgressMonitor(guiRootForProgressBar, description,"", 0, numInitialThreads);
@@ -121,6 +125,9 @@ public class ThreadManager {
 			}
 
 		}
+		
+		Date endReadingTime  = new Date();
+		System.out.println("Time to read " + numInitialThreads +  " input files(using " + numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
 
 		if(showProgress){
 			progressBar.close();

@@ -56,9 +56,6 @@ public class OverviewPanel extends ScalePanel.Child
 	int desiredIntervals;
 	int numEPs;
 
-	// Optimization to prevent the reloading of expensive EP-based data.
-	private OrderedIntList oldPEList = new OrderedIntList();
-
 	private ColorMap colorMap;
 
 	private int mode;
@@ -88,7 +85,7 @@ public class OverviewPanel extends ScalePanel.Child
 				pe = selectedPEs.nextElement();
 				count++;
 			}
-			int numEP = MainWindow.runObject[myRun].getNumUserEntries();
+//			int numEP = MainWindow.runObject[myRun].getNumUserEntries();
 			int interval = (int)(t/intervalSize);
 
 			long  timedisplay = t+startTime;
@@ -120,7 +117,7 @@ public class OverviewPanel extends ScalePanel.Child
 	// Draw yourself into (0,0,w,h) in the given graphics,
 	// scaling your output coordinates via the given axes.
 	public void paint(RepaintRequest req) {
-		double proc2pix=req.y(1)-req.y(0);//Pixels per processor
+//		double proc2pix=req.y(1)-req.y(0);//Pixels per processor
 		double time2pix=req.x(1)-req.x(0);//Pixels per microsecond
 		double pix2time=1.0/time2pix;
 

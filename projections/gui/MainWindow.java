@@ -172,7 +172,7 @@ implements ScalePanel.StatusDisplay
 	 */
 	public void changeBackground()
 	{
-		JColorChooser colorWindow = new JColorChooser();
+//		JColorChooser colorWindow = new JColorChooser();
 		Color returnColor =
 			JColorChooser.showDialog(this, "Background Color",
 					MainWindow.runObject[myRun].background);
@@ -184,7 +184,7 @@ implements ScalePanel.StatusDisplay
 
 	public void changeForeground()
 	{
-		JColorChooser colorWindow = new JColorChooser();
+//		JColorChooser colorWindow = new JColorChooser();
 		Color returnColor =
 			JColorChooser.showDialog(this, "Foreground Color",
 					MainWindow.runObject[myRun].foreground);

@@ -320,7 +320,7 @@ public class Util
 	boolean fileExists = filename.exists();
 	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
 
-	String tempString = new String();
+//	String tempString = new String();
 	
 	//If more graphs are created put them here
 	int numOfGraph=1;
@@ -356,7 +356,7 @@ public class Util
 			lineNumber = 3*i+1;
 			//Go to the correct line number to output
 			for(int k=0; k<lineNumber; k++)
-				tempString = accessFile.readLine(); 
+				accessFile.readLine(); 
 			
 			for (int j=0; j<colors.length; j++) {
 	    			accessFile.writeBytes(j + " ");

@@ -100,7 +100,7 @@ public class StsReader extends ProjDefs
 	try {
 	    BufferedReader InFile = 
 		new BufferedReader(new InputStreamReader(new FileInputStream(FileName)));
-	    int ID,ChareID,MsgID;
+	    int ID,ChareID;
 	    String Line,Name;
 	    while ((Line = InFile.readLine()) != null) {
 		StringTokenizer st = new StringTokenizer(Line);
@@ -129,7 +129,7 @@ public class StsReader extends ProjDefs
 		    ChareList[ID].Type       = new String(s1);
 		    ClassNames[ID]      = ChareList[ID].Name;
 		} else if (s1.equals("ENTRY")) {
-			String Type    = st.nextToken();
+			st.nextToken(); // type
 			ID      = Integer.parseInt(st.nextToken());
 			StringBuffer nameBuf=new StringBuffer(st.nextToken());
 			Name = nameBuf.toString();
@@ -145,7 +145,7 @@ public class StsReader extends ProjDefs
 			}
 			Name    = nameBuf.toString();
 			ChareID = Integer.parseInt(st.nextToken());
-			MsgID   = Integer.parseInt(st.nextToken());
+			st.nextToken(); // msgid
 
 			entryFlatToID.put(entryIndex, ID);
 			entryIDToFlat.put(ID,entryIndex);

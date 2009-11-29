@@ -454,8 +454,6 @@ public class MultiSeriesHandler {
 
 		DefaultCategoryDataset newDataset = new DefaultCategoryDataset();
 
-		boolean firstTime = true;
-
 		if(detailedData.size() < 1)
 			return;
 
@@ -480,8 +478,7 @@ public class MultiSeriesHandler {
 		pos += 4;
 		System.out.println("detailed plot Number of processors contributing data in message = " + numProcs);
 
-		int numBinsPerPlotSample = 100;
-		int currentBin = 0;
+//		int numBinsPerPlotSample = 100;
 		for(int b=0; b<numBins && b<250; b++){
 			if(pos+2>data.length)
 				return;
@@ -563,8 +560,6 @@ public class MultiSeriesHandler {
 
 			if(ccsHandler.equals("CkPerfSumDetail compressed")) {
 
-				int numData = 0;
-				double sum = 0.0;
 				System.out.println("\"CkPerfSumDetail compressed\" Received " + data.length + " byte data array");
 
 				int numEPs = 1000;	
@@ -587,7 +582,6 @@ public class MultiSeriesHandler {
 
 					int numBinsPerPlotSample = 100;
 					int binsRemaining = numBins;
-					int currentBin = 0;
 					while(binsRemaining>0){
 						//						System.out.println("binsRemaining = " + binsRemaining);
 
@@ -685,7 +679,7 @@ public class MultiSeriesHandler {
 
 					}
 
-					double avg = totalSum/numBins;
+//					double avg = totalSum/numBins;
 					//					System.out.println("Average Utilization=" + avg);
 
 				}

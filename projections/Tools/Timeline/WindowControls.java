@@ -247,13 +247,12 @@ ItemListener {
 			showDialog();
 		
 		else if(evt.getSource() == mSaveFullTimeline){
-			JPanelToImage p = new JPanelToImage();
 			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
 			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
-			p.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");		
+			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");		
 		}
 
 		else if(evt.getSource() == mSaveFullTimelineWhiteBG){
@@ -262,13 +261,12 @@ ItemListener {
 			data.setForegroundColor(Color.black);
 			data.setBackgroundColor(Color.white);
 				
-			JPanelToImage p = new JPanelToImage();
 			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
 			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
-			p.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");
+			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 
 			data.setForegroundColor(oldFG);
 			data.setBackgroundColor(oldBG);
@@ -277,8 +275,7 @@ ItemListener {
 		
 
 		else if(evt.getSource() == mSaveScreenshot){
-			JPanelToImage p = new JPanelToImage();
-			p.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.png");
+			JPanelToImage.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 		}
 
 		else if(evt.getSource() == mSelectBGColor)
@@ -333,11 +330,11 @@ ItemListener {
 			data.fixTachyons();
 		
 		else if(evt.getSource() == 	mShowHideEntries){
-			ChooseEntriesWindow chooseEntriesWindow = new ChooseEntriesWindow(data);
+			new ChooseEntriesWindow(data);
 		}
 		
 		else if(evt.getSource() == 	mShowHideUserEvents){
-			ChooseUserEventsWindow chooseUserEventsWindow = new ChooseUserEventsWindow(data);
+			new ChooseUserEventsWindow(data);
 		}
 
 		else if(evt.getSource() == mUserEventReport){
@@ -345,7 +342,7 @@ ItemListener {
 		}
 		
 		else if(evt.getSource() == mDetermineTimeRangesUserSupplied){
-			UserSuppliedAnalyzer usa = new UserSuppliedAnalyzer(data);
+			new UserSuppliedAnalyzer(data);
 		}
 
 		else if (evt.getSource()  == bZoomSelected) {

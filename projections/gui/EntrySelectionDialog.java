@@ -123,7 +123,7 @@ public class EntrySelectionDialog extends Frame
 		new ColorSelectWindow(this, selectedCP.getColor(),
 				      selectTitle);
 	    */
-	    JColorChooser colorWindow = new JColorChooser();
+//	    JColorChooser colorWindow = new JColorChooser();
 	    Color returnColor =
 		JColorChooser.showDialog(this, selectTitle,
 				       selectedCP.getColor());

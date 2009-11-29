@@ -36,9 +36,7 @@ public class LogLoader extends ProjDefs
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
 	public long determineEndTime(OrderedIntList validPEs)
 	{
-		
-		int nPe=validPEs.size();
-		
+				
 		//==========================================	
 		// Do multithreaded file reading
 

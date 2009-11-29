@@ -894,7 +894,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		if(width < 1)
 			width = 1;
 		
-		int singleTimelineH = data.singleTimelineHeight();
+//		int singleTimelineH = data.singleTimelineHeight();
 		
 //		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
 //				width, singleTimelineH);

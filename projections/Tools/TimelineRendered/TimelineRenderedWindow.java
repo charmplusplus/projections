@@ -136,8 +136,6 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 				pIdx++;
 			}
 
-			Date time2  = new Date();
-
 			// Determine a component to show the progress bar with
 			Component guiRootForProgressBar = null;
 

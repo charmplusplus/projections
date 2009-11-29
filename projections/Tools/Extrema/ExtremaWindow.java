@@ -31,7 +31,6 @@ import projections.analysis.KMeansClustering;
 import projections.analysis.ProjDefs;
 import projections.analysis.ProjMain;
 import projections.analysis.ThreadManager;
-import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.ColorSelectable;
 import projections.gui.GenericGraphWindow;
@@ -126,14 +125,6 @@ Clickable
 		// online-generated outlier information). Quick and dirty, use
 		// static variables ... not possible if multiple runs are supported.
 		if (MainWindow.runObject[myRun].rcReader.RC_OUTLIER_FILTERED) {
-			// get necessary parameters (normally from dialog)
-
-			// This is still a hack, there might be differentiation in the
-			// online case.
-			int defaultActivity = Analysis.PROJECTIONS;
-			// default to execution time. Again a hack.
-			int defaultAttribute = 0;
-
 			// Now, read the generated outlier stats, rankings and the top
 			// [threshold] log files
 			loadOnlineData(0, MainWindow.runObject[myRun].getTotalTime());
@@ -268,7 +259,6 @@ Clickable
 		OrderedIntList selectedPEs = dialog.getSelectedProcessors().copyOf();
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
-		int count = 0;
 
 		// Create a list of worker threads
 		LinkedList<Thread> readyReaders = new LinkedList<Thread>();

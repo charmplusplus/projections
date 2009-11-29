@@ -3,7 +3,7 @@ package projections.gui;
 public class OrderedUsageList
 {
 	private Link head;
-	private Link tail;
+//	private Link tail;
 	private Link pre;
 	private int len;
 	class Link
@@ -13,58 +13,8 @@ public class OrderedUsageList
 		Link next;
 		Link(float u, int e, Link n) {usage = u; entry = e; next = n;}
 	}   
-//	public void combineLists()
-//	{
-//		if ((tail2 != null)&&(tail !=null))
-//		{
-//			tail2.next = head;
-//			head = head2;
-//		}
-//		else if (tail2 != null)
-//		{
-//			tail = tail2;
-//			head = head2;
-//		}
-//		head2 = null;
-//		tail2 = null;
-//	}
-//	public int currentEntry()
-//	{
-//		Link cur = nextLink();
-//		if(cur == null)
-//			return -1;
-//		else
-//			return cur.entry;
-//	}   
-//	public float currentUsage()
-//	{
-//		Link cur = nextLink();
-//		if(cur == null)
-//			return -1;
-//		else 
-//			return cur.usage;
-//	}   
-//	public boolean hasMoreElements()
-//	{
-//		return nextLink() != null;
-//	}   
-	// ADDED FUNCTION HeadEntryNum()
-	// Returns the first entry number and then moves the head 
-	// pointer to point to the next element of the list 
-	// Basically removing the first element of the list
-//	public int HeadEntryNum()
-//	{
-//		if (head == null)
-//			return -1;
-//		else 
-//		{ int returnval = head.entry; 
-//		if (head.next == null)
-//			removeAll();
-//		else
-//			head = head.next;
-//		return returnval;
-//		}
-//	}
+
+
 	public void insert(float u, int e)
 	{
 		Link newLink;
@@ -83,12 +33,12 @@ public class OrderedUsageList
 			if(head == null)
 			{
 				head = newLink;
-				tail = newLink;
+//				tail = newLink;
 			}
 			else
 			{
 				pre.next = newLink;
-				tail = newLink;
+//				tail = newLink;
 			}
 			len++;
 		}

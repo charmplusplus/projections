@@ -22,8 +22,6 @@ import javax.swing.Scrollable;
 public class LayeredPanel extends JPanel  implements Scrollable
 {
 	
-	private Data data; // Probably unneeded, but I think the layout manager may use this
-	
 	JLayeredPane jLayeredPane = null;
 	
 	JPanel mainPanel=null;
@@ -31,7 +29,6 @@ public class LayeredPanel extends JPanel  implements Scrollable
 	
 	public LayeredPanel(Data data, JPanel main, JPanel overlay, LayoutManager lay)
 	{
-		this.data = data;
 		this.mainPanel = main;
 		this.overlayPanel = overlay;
 		

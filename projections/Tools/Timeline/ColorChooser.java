@@ -115,7 +115,7 @@ public class ColorChooser extends Frame
 		    s = MainWindow.runObject[myRun].getEntryNameByIndex(e);
 		}
 	    }
-	    JColorChooser colorWindow = new JColorChooser();
+//	    JColorChooser colorWindow = new JColorChooser();
 	    Color returnColor =
 		JColorChooser.showDialog(this, s,
 				       selectedCP.getColor());

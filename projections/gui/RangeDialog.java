@@ -78,7 +78,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	private static final int DIALOG_CANCELLED = 1;
 
 	private ProjectionsWindow parentWindow;
-	private RangeDialog thisDialog;
 	
 	// inheritable GUI objects
 	private JPanel mainPanel, historyPanel, buttonPanel, stepsPanel;
@@ -111,8 +110,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	int dialogState;
 	private boolean disableTimeRange = false;
 
-	private int numProcessors;
-
 	/**
 	 *  Constructor. Creation of the dialog object should be separate from
 	 *  the GUI layout. This allows for the proper inheritance from this
@@ -127,7 +124,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		super(parentWindow, titleString, true);
 		this.parentWindow = parentWindow;
 		this.disableTimeRange = disableTimeRange;
-		thisDialog = this;
 		
 		if(toolSpecificPanel != null){
 			this.toolSpecificPanel = toolSpecificPanel;
@@ -630,7 +626,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 						LogEntryData data = reader.nextEvent();
 
 						if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
-							String note = data.note;
+//							String note = data.note;
 							if(data.note.contains("***")){
 								String pruned = data.note.replace("*** ", "");
 								availableStepStrings.add("" + (c++) + ": " + pruned);

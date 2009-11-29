@@ -75,7 +75,6 @@ public class PoseDopReader
 	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Computing End Times",
 				"", 0, numProcessors);
 	validPEs.reset();
-	long eventCount = 0;
 	curPe = validPEs.nextElement();
 	while (curPe != -1) {
 	    progressBar.setProgress(curPeIdx);
@@ -147,8 +146,6 @@ public class PoseDopReader
 	int tempRealData[][] = new int[NUM_SIM_STATES][10000000];
 	int tempVirtData[] = new int[10000000];
 	int realState;
-
-	long eventCount = 0;
 
 	ProgressMonitor progressBar = 
 	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Reading dop files",

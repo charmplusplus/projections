@@ -20,7 +20,6 @@ package projections.analysis;
 public abstract class ProjectionsReader
 extends ProjDefs
 { 
-	private boolean available;
 	protected String expectedVersion = null;
 
 	// this can be any identifying string - full path name (default),
@@ -40,7 +39,7 @@ extends ProjDefs
 	public ProjectionsReader(String sourceString, String versionOverride) {
 		expectedVersion = versionOverride;
 		this.sourceString = sourceString;
-		available = checkAvailable();
+		checkAvailable();
 	}
 
 	/**

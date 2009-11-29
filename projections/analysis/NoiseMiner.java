@@ -38,8 +38,6 @@ public class NoiseMiner extends ProjDefs
     // runs.
     int myRun = 0;
 
-	private int numPe;		     //Number of processors
-
 	private long startTime;	     //Interval begin
 	private long endTime;	     //Interval end
 	private OrderedIntList peList;   //List of processors
@@ -97,16 +95,16 @@ public class NoiseMiner extends ProjDefs
 		public void set_us(double p){
 			d = p;
 		}
-		public void set(Duration p){
-			d = p.d;
-		}
+//		public void set(Duration p){
+//			d = p.d;
+//		}
 		public double us(){
 			return d;
 		}
-		public double ms(){
-			return d/1000.0;
-		}
-		
+//		public double ms(){
+//			return d/1000.0;
+//		}
+//		
 		public String toString(){
 			DecimalFormat format = new DecimalFormat();
 			format.setMaximumFractionDigits(2);
@@ -121,16 +119,16 @@ public class NoiseMiner extends ProjDefs
 		public void add(Time p){
 			d += p.d;
 		}
-		
-		/** add a given amount of microseconds to this Duration */
-		public void add_us(double p){
-			d += p;
-		}
-		
-		/** add a given amount of microseconds to this Duration */
-		public void add_us(long p){
-			d += p;
-		}
+//		
+//		/** add a given amount of microseconds to this Duration */
+//		public void add_us(double p){
+//			d += p;
+//		}
+//		
+//		/** add a given amount of microseconds to this Duration */
+//		public void add_us(long p){
+//			d += p;
+//		}
 			
 	}
 
@@ -700,7 +698,6 @@ public class NoiseMiner extends ProjDefs
 	{
 		//Initialize class variables
 		peList = processorList;
-		numPe = peList.size();
 		setStartTime(startInterval);
 		setEndTime(endInterval);
 
@@ -880,7 +877,7 @@ public class NoiseMiner extends ProjDefs
 
 		// scan through results to find only the ones with periodicity close to or longer than the OS time quanta
 
-		int numResultRows = finalResults.size();
+//		int numResultRows = finalResults.size();
 
 		Vector<Vector<Object>> resultTable = new Vector<Vector<Object>>();
 

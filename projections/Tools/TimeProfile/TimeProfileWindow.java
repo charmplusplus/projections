@@ -292,9 +292,6 @@ implements ActionListener, ColorSelectable, Clickable
 							pIdx++;
 						}
 
-						Date time2  = new Date();
-
-
 						// Determine a component to show the progress bar with
 						Component guiRootForProgressBar = null;
 						if(thisWindow!=null && thisWindow.isVisible()) {
@@ -308,8 +305,6 @@ implements ActionListener, ColorSelectable, Clickable
 						// Pass this list of threads to a class that manages/runs the threads nicely
 						ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
 						threadManager.runThreads();
-
-						Date time3  = new Date();
 
 
 						// Merge resulting graphData structures together.
@@ -344,7 +339,7 @@ implements ActionListener, ColorSelectable, Clickable
 						systemUsageData[2] = new int[numProcessors][];
 
 						//			    	int[][][][] systemMsgsData = new int[5][3][numProcessors][];
-						int[][][][] systemMsgsData = null;
+//						int[][][][] systemMsgsData = null;
 
 						int[][][][] userEntryData  = new int[numUserEntries][][][];
 						for(int n=0;n<numUserEntries;n++){

@@ -21,7 +21,7 @@ public class PieChartWindow extends Frame{
     // runs.
     int myRun = 0;
 
-    private MainWindow      mainWindow;
+//    private MainWindow      mainWindow;
     MyPanel         displayPanel;
     float[]         data;
     int             dataLen;
@@ -66,8 +66,7 @@ public class PieChartWindow extends Frame{
      * Creates the window and initializes data
      */
     
-    public PieChartWindow(MainWindow mainWindow, float[] data, int dataLen, float thresh, Color[] colors){
-	this.mainWindow = mainWindow;
+    public PieChartWindow(float[] data, int dataLen, float thresh, Color[] colors){
         this.data = data;
         this.dataLen = dataLen;
         this.thresh = thresh;

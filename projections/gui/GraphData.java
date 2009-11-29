@@ -212,7 +212,7 @@ public class GraphData
 
     private int setCurIData(ZItem item)
     {
-	int element, count;
+	int count;
 	int max = 0;
 	for (int i=intervalStart; i<=intervalEnd;i++) {
 	    item.curIData[i-intervalStart] = 0;
@@ -224,7 +224,7 @@ public class GraphData
 	    count = 0;
 	    processor.list.reset();
 	    int peIdx = 0;
-	    while ((element = processor.list.nextElement()) >= 0) {
+	    while (processor.list.nextElement() >= 0) {
 		// systemUsageData can be null
 	    	if (item.data[peIdx]==null) {
 		    continue;

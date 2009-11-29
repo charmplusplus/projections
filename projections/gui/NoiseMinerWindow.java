@@ -202,7 +202,6 @@ implements ItemListener
 
 	private void CreateLayout()
 	{  
-		JPanel noiseMinerResultPanel = new JPanel();
 
 		DefaultTableModel tableModel = new DefaultTableModel(columnNames, 0);
 

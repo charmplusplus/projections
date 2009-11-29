@@ -457,12 +457,9 @@ public class MultiRunDataAnalyzer {
 
 	// returning category names
 	int numNoChange = categories[dataType][CAT_EP_NO_CHANGE].size();
-	int numInsignificant = 
-	    categories[dataType][CAT_EP_INSIGNIFICANT].size();
-	int numChanged =
-	    categories[dataType][CAT_EP_CHANGE].size();
-	int numOverhead =
-	    categories[dataType][CAT_OVERHEAD_IDLE].size();
+//	int numInsignificant = categories[dataType][CAT_EP_INSIGNIFICANT].size();
+	int numChanged = categories[dataType][CAT_EP_CHANGE].size();
+//	int numOverhead = categories[dataType][CAT_OVERHEAD_IDLE].size();
 	int category = 0;
 	if (yVal < numNoChange) {
 	    category = CAT_EP_NO_CHANGE;

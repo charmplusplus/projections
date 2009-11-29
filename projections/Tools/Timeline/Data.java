@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -427,7 +426,6 @@ public class Data
 		//==========================================	
 		// Do multithreaded file reading
 
-		Date startReadingTime  = new Date();
 	
 			
 		// Create a list of worker threads
@@ -460,11 +458,6 @@ public class Data
 		
 		//==========================================	
 		//  Perform some post processing
-		
-//		if(threadManager.numInitialThreads > 0){
-//			Date endReadingTime  = new Date();
-//			System.out.println("Time to read " + threadManager.numInitialThreads +  " input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
-//		}
 			
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
@@ -1265,7 +1258,7 @@ public class Data
 	public void setColorByMemoryUsage() {
 		if(memoryUsageValid()){
 			/* Prompt for range of values to use for colors */
-			MemoryColorRangeChooser mcrc = new MemoryColorRangeChooser(this);
+			new MemoryColorRangeChooser(this);
 		} else {
 			modificationHandler.displayWarning("No memory usage entries found. Use traceMemoryUsage() in the application");
 		}		
@@ -1347,7 +1340,7 @@ public class Data
 		for(int iteration = 0; iteration < numIterations; iteration++){
 
 			long minLatency = Integer.MAX_VALUE;
-			int minSender = -1;
+//			int minSender = -1;
 			int minDest = -1;
 			
 			// Iterate through all entry methods, and compare their execution times to the message send times
@@ -1366,12 +1359,12 @@ public class Data
 
 						long latency = executeTime - sendTime;
 
-						int senderPE = m.srcPE;
+//						int senderPE = m.srcPE;
 						int executingPE = obj.pCurrent;
 
 						if(minLatency> latency ){
 							minLatency = latency;
-							minSender = senderPE;
+//							minSender = senderPE;
 							minDest = executingPE;	
 						}
 					}

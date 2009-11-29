@@ -43,7 +43,7 @@ public class ProjectionsConfigurationReader
   public ProjectionsConfigurationReader(String filename)
   {
     baseName = FileUtils.getBaseName(filename);
-    String logDirectory = FileUtils.dirFromFile(filename);
+//    String logDirectory = FileUtils.dirFromFile(filename);
     configurationName = baseName + ".projrc";
     dirty = false;
     try {

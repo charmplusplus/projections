@@ -26,8 +26,6 @@ public class GraphDisplayCanvas extends Canvas
    {
 	  int h = getSize().height;
 	  
-	  int element;
-//	  int count;
 	  int y = 0;
 
 	  if (data.xmode == GraphData.PROCESSOR) {
@@ -158,7 +156,7 @@ public class GraphDisplayCanvas extends Canvas
 
     private void drawItemLine(Graphics g, ZItem item)
     {
-	int element, x1, x2, y1, y2;
+	int  x1, x2, y1, y2;
 	g.setColor(item.color);
 	x1 = y1 = -1;
 	

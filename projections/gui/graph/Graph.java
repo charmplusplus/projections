@@ -85,7 +85,7 @@ public class Graph extends JPanel
     private double maxvalueY;
 
     private Bubble bubble;
-    private boolean showBubble;
+    private boolean showBubble = true;
     private int bubbleXVal;
     private int bubbleYVal;
     

@@ -12,13 +12,11 @@ public class MessageWindow extends JFrame
    implements ActionListener
 {
 
-	private EntryMethodObject obj;
 	private MessagePanel canvas;
 	private ScrollPane sp;
    
    public MessageWindow(EntryMethodObject obj)
    {
-	  this.obj  = obj;
 
 	  setTitle("Timeline Entry Details");
  

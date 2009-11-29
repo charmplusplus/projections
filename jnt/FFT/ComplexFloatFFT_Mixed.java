@@ -188,7 +188,7 @@ public class ComplexFloatFFT_Mixed extends ComplexFloatFFT{
       int m = n / factor;
       int q = n / product;
       int product_1 = product / factor;
-      int jump = (factor - 1) * product_1;
+//      int jump = (factor - 1) * product_1;
 
       float tau = (float)(sign * Math.sqrt(3.0) / 2.0);
       int di = istride * m;
@@ -259,7 +259,7 @@ public class ComplexFloatFFT_Mixed extends ComplexFloatFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
+//    int jump = (factor - 1) * p_1;
 
     int i = in0, j = out0;
     int di = istride * m;
@@ -343,7 +343,7 @@ public class ComplexFloatFFT_Mixed extends ComplexFloatFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
+//    int jump = (factor - 1) * p_1;
 
     float tau = (float)(Math.sqrt (5.0) / 4.0);
     float sin_2pi_by_5 =  (float)(sign * Math.sin (2.0 * PI / 5.0));
@@ -469,7 +469,7 @@ public class ComplexFloatFFT_Mixed extends ComplexFloatFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
+//    int jump = (factor - 1) * p_1;
 
     float tau = (float)(sign * Math.sqrt (3.0) / 2.0);
     int i = in0, j = out0;
@@ -610,7 +610,7 @@ public class ComplexFloatFFT_Mixed extends ComplexFloatFFT{
     int m = n / factor;
     int q = n / product;
     int p_1 = product / factor;
-    int jump = (factor - 1) * p_1;
+//    int jump = (factor - 1) * p_1;
 
     float c1 = (float)Math.cos(1.0 * 2.0 * PI / 7.0);
     float c2 = (float)Math.cos(2.0 * 2.0 * PI / 7.0);

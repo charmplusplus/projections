@@ -108,12 +108,12 @@ public class SumAnalyzer extends ProjDefs
 	    //Read the first line (descriptive information)
 	    checkNextString("ver");
 	    versionNum = nextNumber("Version Number");
-	    int myProcessor=(int)nextNumber("processor number");
+	    nextNumber("processor number");
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
 	    int myCount= (int)nextNumber("count");
 	    checkNextString("ep");
-	    int numEPs = (int)nextNumber("ep"); // do nothing with this.
+	    nextNumber("ep"); // do nothing with this.
 	    checkNextString("interval");
 	    double interval=nextScientific("intervalsize"); 
 	    long myIntervalSize = (long)Math.floor(interval*1000000);
@@ -171,7 +171,7 @@ public class SumAnalyzer extends ProjDefs
 	    //Read the first line (descriptive information)
 	    checkNextString("ver");
 	    versionNum = nextNumber("Version Number");
-	    int myProcessor=(int)nextNumber("processor number");
+	    nextNumber("processor number");
 	    nPe=(int)nextNumber("number of processors");
 	    checkNextString("count");
 	    int myCount= (int)nextNumber("count");

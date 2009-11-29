@@ -137,8 +137,6 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
     private void CreateLayout(){
 
-        JPanel wholePanel = new JPanel();
-
         GridBagLayout gbl = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -584,15 +582,15 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
         String[] xNames = new String[numFunc-1];
 //        Vector ampiProcess = null;
-        int pCnt=0;
+//        int pCnt=0;
 
 	// [numFunc-1][1]
         float[][] ampiDataSrc = new float[numFunc-1][];
         String[][] ampiFuncNameMap = new String[numFunc-1][];
 	double avgScale=1.0/numPes;
 
-        long totalExecTime = data.endtime - data.begintime;
-	long totalExecTimeAll = totalExecTime * data.numPs;
+//        long totalExecTime = data.endtime - data.begintime;
+//	long totalExecTimeAll = totalExecTime * data.numPs;
 
 	// first compute summed usage across processors
 	for(int i=1;i<numFunc;i++){
@@ -670,7 +668,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         dataSource = new float[procCnt+1][];
         colorMap = new int[procCnt+1][];
         nameMap = new String[procCnt+1][];
-	long totalExecTime = data.endtime - data.begintime;
+//	long totalExecTime = data.endtime - data.begintime;
 
 	avgData = new float[numFunc+1];
         for (int i =0;i<numFunc+1;i++) {
@@ -757,7 +755,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 
         int funcIdx;
         float usage;
-        String[] funcNames = MainWindow.runObject[myRun].getFunctionNames();
+//        String[] funcNames = MainWindow.runObject[myRun].getFunctionNames();
         for(funcIdx=0; funcIdx<numFunc+1; funcIdx++){
             usage = rawData[funcIdx+1];
             if(usage<=0) continue;

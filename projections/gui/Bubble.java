@@ -6,8 +6,6 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
@@ -25,11 +23,6 @@ implements MouseListener
 	{
 		super(getFrame(c));
 		text = s;
-
-		GridBagConstraints gbc = new GridBagConstraints();
-		GridBagLayout gbl = new GridBagLayout();
-
-		gbc.fill = GridBagConstraints.BOTH;
 
 		addMouseListener(this);
 

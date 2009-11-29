@@ -194,7 +194,7 @@ implements PointCapableReader
 			break;
 		case USER_SUPPLIED_NOTE:
 			data.time = new Integer(parser.nextInt());
-			Integer strlen = new Integer(parser.nextInt());
+			parser.nextInt(); // strlen
 			data.note = interpretNote(parser.restOfLine());
 			break;
 		case USER_SUPPLIED_BRACKETED_NOTE:
@@ -202,7 +202,7 @@ implements PointCapableReader
 			data.endTime = new Integer(parser.nextInt());
 			data.userEventID = parser.nextInt();
 			data.entry = data.userEventID;
-			Integer strlen2 = new Integer(parser.nextInt());
+			parser.nextInt(); // strlen
 			data.note = interpretNote(parser.restOfLine());
 			break;
 		case MEMORY_USAGE:

@@ -317,7 +317,7 @@ implements ActionListener, ItemListener
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
 			JMenuItem mi = (JMenuItem)e.getSource();
-			String arg = mi.getText();
+//			String arg = mi.getText();
 
 			if(mi == fileOpenMenuItem)
 				parent.showOpenFileDialog();

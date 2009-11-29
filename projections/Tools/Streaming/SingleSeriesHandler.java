@@ -26,7 +26,6 @@ public class SingleSeriesHandler {
 	XYPlot plot;
 
 	private String server;
-	private int port;
 	private String ccsHandler;
 
 	static boolean REDO_DISPLAY_EACH_TIME = false;
@@ -136,7 +135,6 @@ public class SingleSeriesHandler {
 		allTimes = new Vector<Float>();
 
 		this.server = hostname;
-		this.port = port;
 		this.ccsHandler = ccsHandler;
 
 		progressHandler h = new progressHandler();

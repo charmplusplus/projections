@@ -93,7 +93,7 @@ public class GraphAttributesWindow extends Frame
 	       colorSelectWindow.show();
 	       }
 	    */
-	    JColorChooser colorWindow = new JColorChooser();
+//	    JColorChooser colorWindow = new JColorChooser();
 	    Color returnColor =
 		JColorChooser.showDialog(this, s,
 				       selectedCP.getColor());

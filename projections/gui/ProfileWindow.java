@@ -143,8 +143,6 @@ public class ProfileWindow extends ProjectionsWindow
 
     private void CreateLayout(){
 
-        JPanel wholePanel = new JPanel();
-
         GridBagLayout gbl = new GridBagLayout();
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.BOTH;
@@ -341,20 +339,17 @@ public class ProfileWindow extends ProjectionsWindow
 	    if (arg.equals("Close")) {
 		close();
 	    } else if(arg.equals("Select Processors")) {
-		showDialog();
+	    	showDialog();
 	    } else if(arg.equals("Pie Chart")){
-                pieChartWindow =
-		    new PieChartWindow(parentWindow, avgData[0],
-				       avgData[0].length, thresh, colors);
-
-            } else if(arg.equals("Change Colors")) {
-                showChangeColorDialog();
-            } else if (arg.equals("Usage Table")){
-                showUsageTable();
-            } else if (arg.equals("Usage Profile")) {
-                showAMPIUsageProfile();
-            }
-        }
+	    	pieChartWindow = new PieChartWindow(avgData[0], avgData[0].length, thresh, colors);
+	    } else if(arg.equals("Change Colors")) {
+	    	showChangeColorDialog();
+	    } else if (arg.equals("Usage Table")){
+	    	showUsageTable();
+	    } else if (arg.equals("Usage Profile")) {
+	    	showAMPIUsageProfile();
+	    }
+	}
 
     }
 

@@ -18,6 +18,7 @@ import projections.gui.ColorSelectable;
 import projections.gui.EntrySelectionDialog;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.RangeDialogExtensionPanel;
@@ -592,7 +593,7 @@ implements ActionListener, ColorSelectable, Clickable
 		
 		if(displaySlopes){
 			// create a screenshot of the 
-
+			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.png");
 		}
 		
 	}

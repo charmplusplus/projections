@@ -1,6 +1,7 @@
 package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
@@ -47,17 +48,17 @@ public class LayeredPanel extends JPanel  implements Scrollable
 	}   
 
 	public void repaint(){
+		super.repaint();
 		if(mainPanel != null)
 			mainPanel.repaint();
 		if(overlayPanel != null)
 			overlayPanel.repaint();
 		if(jLayeredPane != null)
 			jLayeredPane.repaint();
-		
 	}
 
 	public void paintComponent(Graphics g) {
-		super.paintComponent(g);	
+		super.paintComponent(g);
 	}
 
 	

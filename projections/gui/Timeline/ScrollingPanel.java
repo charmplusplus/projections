@@ -1,6 +1,7 @@
 package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import javax.swing.*;
@@ -9,11 +10,11 @@ import javax.swing.*;
  * A scrolling panel that holds all the graphical pieces of the visualization
  * 
  */
-public class ScrollingPanel extends JPanel  {
+public class ScrollingPanel extends JPanel {
 
 	JScrollPane scrollpane;
 		
-	JPanel mainPanel;
+	MainPanel mainPanel;
 	LayeredPanel axisPanel;
 	LabelPanel labelPanel;
 	
@@ -21,7 +22,7 @@ public class ScrollingPanel extends JPanel  {
 	
 	
 	/** Create the scrollable panel with the three provided panels. */
-	public ScrollingPanel(Data data_, JPanel mainPanel_, LayeredPanel axisPanel_, LabelPanel labelPanel_) {
+	public ScrollingPanel(Data data_, MainPanel mainPanel_, LayeredPanel axisPanel_, LabelPanel labelPanel_) {
  
 		data=data_;
 		mainPanel=mainPanel_;
@@ -38,13 +39,18 @@ public class ScrollingPanel extends JPanel  {
 		scrollpane.setViewportView(mainPanel);
 		scrollpane.setRowHeaderView(labelPanel);
 		scrollpane.setColumnHeaderView(axisPanel);
-		
 			
 		scrollpane.setCorner(JScrollPane.UPPER_LEFT_CORNER, new Corner());
 		scrollpane.setCorner(JScrollPane.LOWER_LEFT_CORNER, new Corner());
 		scrollpane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, new Corner());
 		scrollpane.setCorner(JScrollPane.LOWER_RIGHT_CORNER, new Corner());
 
+		scrollpane.setOpaque(true);
+		scrollpane.setBackground(data.getBackgroundColor());
+
+		scrollpane.getHorizontalScrollBar().setBackground(data.getBackgroundColor());
+		scrollpane.getHorizontalScrollBar().setOpaque(true);
+		
 		this.setLayout(new BorderLayout());
 		this.add(scrollpane, BorderLayout.CENTER);
 		
@@ -69,7 +75,7 @@ public class ScrollingPanel extends JPanel  {
 	// The scale factor or window size has likely changed.
 	// Do not call data.setScreenWidth() in here
 	void refreshDisplay(boolean doRevalidate){
-
+		
 		if(doRevalidate){
 			data.invalidateSelection();
 			this.revalidate();
@@ -87,7 +93,6 @@ public class ScrollingPanel extends JPanel  {
 
 	}
 
-
 	/** A simple class for drawing the corners in the JScrollPane */
 	public class Corner extends JComponent {
 		protected void paintComponent(Graphics g) {
@@ -99,11 +104,15 @@ public class ScrollingPanel extends JPanel  {
 			g.fillRect(0,0,getWidth(),getHeight());
 		}
 	}
-
-
-//	Dimension getPreferredScrollableViewportSize(){
-//		return getPreferredSize();	
+	
+//	/** Paint the panel */
+//	@Override public void paintComponent(Graphics g) {
+//		System.out.println("paintComponent ScrollingPanel");
+//		super.paintComponent(g);
 //	}
 //
+//	@Override public void update(Graphics g){
+//		paintComponent(g);
+//	}
 	
 }

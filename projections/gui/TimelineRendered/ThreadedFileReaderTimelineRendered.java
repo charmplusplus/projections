@@ -10,12 +10,12 @@ import javax.swing.JLabel;
 
 import projections.analysis.IntervalData;
 import projections.analysis.LogReader;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.Timeline.Data;
 import projections.gui.Timeline.MainHandler;
 import projections.gui.Timeline.MainPanel;
-import projections.gui.Timeline.SaveImage;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
 public class ThreadedFileReaderTimelineRendered extends Thread implements MainHandler {
@@ -63,7 +63,7 @@ public class ThreadedFileReaderTimelineRendered extends Thread implements MainHa
 		displayPanel.revalidate();
 		displayPanel.doLayout();
 
-		SaveImage si = new SaveImage();
+		JPanelToImage si = new JPanelToImage();
 		image = si.generateImage(displayPanel);
 		
 		System.out.println("Created image for PE " + PE);

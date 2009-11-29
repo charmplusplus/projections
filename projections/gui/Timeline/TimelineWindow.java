@@ -1,6 +1,7 @@
 package projections.gui.Timeline;
 
 import java.awt.BorderLayout;
+import java.awt.Graphics;
 
 import javax.swing.JOptionPane;
 
@@ -91,6 +92,8 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		AxisLayout lay = new AxisLayout(data,ap);
 		// Create the layered panel containing our layers
 		axisPanel = new LayeredPanel(data,ap,op,lay);
+		ap.setOpaque(false);
+		op.setOpaque(false);
 		
 		mainPanel = new MainPanel(data, this);
 		
@@ -151,5 +154,5 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		JOptionPane.showMessageDialog(this, message, "Warning", JOptionPane.WARNING_MESSAGE);
 	}
 	
- 	
+	 	
 }

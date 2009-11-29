@@ -29,6 +29,7 @@ import javax.swing.SwingWorker;
 import projections.analysis.LogReader;
 import projections.analysis.ThreadManager;
 import projections.gui.IntervalChooserPanel;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
@@ -40,7 +41,6 @@ import projections.gui.Timeline.LabelPanel;
 import projections.gui.Timeline.MainHandler;
 import projections.gui.Timeline.MainPanel;
 import projections.gui.Timeline.NonScrollingLayout;
-import projections.gui.Timeline.SaveImage;
 
 public class TimelineRenderedWindow extends ProjectionsWindow implements MainHandler {
 
@@ -89,8 +89,8 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == mSave){
-				SaveImage si = new SaveImage();
-				si.saveToFileChooserSelection(combinedTimelinesPanel);
+				JPanelToImage si = new JPanelToImage();
+				si.saveToFileChooserSelection(combinedTimelinesPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 			}
 			
 		}

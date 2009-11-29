@@ -456,6 +456,8 @@ public class Data
 		ThreadManager threadManager = new ThreadManager("Loading Timeline in Parallel", readyReaders, guiRootForProgressBar, showProgress);
 		threadManager.runThreads();
 
+		if(memoryUsageValid())
+			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
 		
 		//==========================================	
 		//  Perform some post processing
@@ -739,9 +741,6 @@ public class Data
 			minUserSupplied = minUserSuppliedThisPE;
 		if(maxUserSuppliedThisPE > maxUserSupplied)
 			maxUserSupplied = maxUserSuppliedThisPE;
-
-		if(memoryUsageValid())
-			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");
 	}
 
 	

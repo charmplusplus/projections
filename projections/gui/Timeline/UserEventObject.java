@@ -46,7 +46,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.UserEventID=e;
 		this.CharmEventID=event;
 		this.pe = pe;
-		
+		setOpaque(false);
 		addMouseListener(this);
 	}
 	
@@ -57,6 +57,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.pe = pe;
 		this.note = note;
 		this.UserEventID=-1;
+		setOpaque(false);
 		addMouseListener(this);
 	}
 

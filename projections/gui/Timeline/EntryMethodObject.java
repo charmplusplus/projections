@@ -82,6 +82,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	{
 		setFocusable(false); // optimization for speed
 		setVisible(true);
+		setOpaque(false);
+
 		
 		setBackground(MainWindow.runObject[data.myRun].background);
 		setForeground(MainWindow.runObject[data.myRun].foreground);

@@ -24,6 +24,7 @@ public class MainPanelForeground extends JPanel {
 		
 	public MainPanelForeground(Data data){
 		this.data = data;
+		setOpaque(false);
 	}
 	
 
@@ -34,7 +35,7 @@ public class MainPanelForeground extends JPanel {
 		super.paintComponent(g); 
 		// paint the message send lines	
 		paintMessageSendLines(g, data.getMessageColor(), data.drawMessagesForTheseObjects);
-		paintMessageSendLines(g, data.getMessageAltColor(), data.drawMessagesForTheseObjectsAlt);
+		paintMessageSendLines(g, data.getMessageAltColor(), data.drawMessagesForTheseObjectsAlt);	
 	}
 
 

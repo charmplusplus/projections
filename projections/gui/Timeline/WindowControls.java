@@ -15,6 +15,7 @@ import javax.swing.*;
 
 import projections.gui.FloatJTextField;
 import projections.gui.IntervalChooserPanel;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
@@ -240,13 +241,13 @@ ItemListener {
 			showDialog();
 		
 		else if(evt.getSource() == mSaveFullTimeline){
-			SaveImage p = new SaveImage();
+			JPanelToImage p = new JPanelToImage();
 			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
 			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
-			p.saveToFileChooserSelection(gridPanel);		
+			p.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");		
 		}
 
 		else if(evt.getSource() == mSaveFullTimelineWhiteBG){
@@ -255,13 +256,13 @@ ItemListener {
 			data.setForegroundColor(Color.black);
 			data.setBackgroundColor(Color.white);
 				
-			SaveImage p = new SaveImage();
+			JPanelToImage p = new JPanelToImage();
 			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
 			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
-			p.saveToFileChooserSelection(gridPanel);
+			p.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 
 			data.setForegroundColor(oldFG);
 			data.setBackgroundColor(oldBG);
@@ -270,8 +271,8 @@ ItemListener {
 		
 
 		else if(evt.getSource() == mSaveScreenshot){
-			SaveImage p = new SaveImage();
-			p.saveToFileChooserSelection(parentWindow.scrollingPanel);
+			JPanelToImage p = new JPanelToImage();
+			p.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 		}
 
 		else if(evt.getSource() == mSelectBGColor)

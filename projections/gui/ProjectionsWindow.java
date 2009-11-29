@@ -24,8 +24,7 @@ import java.awt.*;
  *
  */
 
-public abstract class ProjectionsWindow
-extends JFrame
+public abstract class ProjectionsWindow extends JFrame
 implements ActionListener
 {
 	private Button window[];

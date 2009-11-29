@@ -1,5 +1,6 @@
 package projections.gui.Timeline;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Graphics;
@@ -54,7 +55,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		g.setColor(data.getBackgroundColor());
-		g.fillRect(0, 0, getWidth(), getHeight());
+		g.fillRect(0, 0, getWidth(), getHeight());		
 	}
 
 

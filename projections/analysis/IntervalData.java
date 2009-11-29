@@ -1,9 +1,11 @@
 package projections.analysis;
 
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Vector;
 
-import projections.gui.*;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
 
 /**
  *  IntervalData represents the abstraction for interval-based data

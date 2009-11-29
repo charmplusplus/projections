@@ -1,13 +1,25 @@
 package projections.gui;
 
-import java.awt.*;
-import java.io.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.io.File;
+import java.io.IOException;
+import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
-import projections.analysis.*;
-import projections.misc.*;
+import projections.analysis.IntervalData;
+import projections.analysis.LogLoader;
+import projections.analysis.LogReader;
+import projections.analysis.PoseDopReader;
+import projections.analysis.ProjMain;
+import projections.analysis.ProjectionsConfigurationReader;
+import projections.analysis.StsReader;
+import projections.analysis.SumAnalyzer;
+import projections.analysis.UsageCalc;
+import projections.misc.FileUtils;
+import projections.misc.LogLoadException;
+import projections.misc.SummaryFormatException;
 
 /**
  *  Analysis
@@ -63,9 +75,6 @@ public class Analysis {
   public int[][][][] systemMsgsData;
   public int[][][][] userEntryData;
   
-  // stupid hack to compensate for the fact that LogReaders are never
-  // maintained inside Analysis.
-  private long logReaderIntervalSize = -1;
   
   /****************** Jump from Timeline to graphs ******/
   // Used for storing user defined startTime and endTime when jumping from
@@ -484,7 +493,7 @@ public class Analysis {
 	    systemUsageData = logReader.getSystemUsageData();
 	    systemMsgsData = logReader.getSystemMsgs();
 	    userEntryData = logReader.getUserEntries();
-	    logReaderIntervalSize = logReader.getIntervalSize();
+//	    logReaderIntervalSize = logReader.getIntervalSize();
 	} else if (hasSumDetailFiles()) {
 	    IntervalData intervalData = new IntervalData();
 	    intervalData.loadIntervalData(intervalSize, intervalStart,

@@ -1,7 +1,10 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.TextField;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.TextEvent;
+import java.awt.event.TextListener;
 
 public class FloatTextField extends TextField
     implements TextListener

@@ -1,8 +1,15 @@
 package projections.Tools.Extrema;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 import projections.gui.Analysis;
 import projections.gui.JIntTextField;
@@ -34,9 +41,6 @@ public class ExtremaDialogExtension extends RangeDialogExtensionPanel
 	JLabel thresholdPost;
 	JLabel thresholdLabel;
 	
-	
-	// A reference to the parent dialog box that I'm extending
-	private RangeDialog parent;
 	
 	public ExtremaDialogExtension(String[] attributes) {
 
@@ -136,7 +140,6 @@ public class ExtremaDialogExtension extends RangeDialogExtensionPanel
 
 	
 	public void setParentDialogBox(RangeDialog parent) {
-		this.parent = parent;
 
 		attributeList.addActionListener(parent);
 		attributeList.addKeyListener(parent);

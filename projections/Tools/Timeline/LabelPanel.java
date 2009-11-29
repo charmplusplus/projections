@@ -1,16 +1,16 @@
 package projections.Tools.Timeline;
 
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Graphics;
-import java.awt.Dimension;
-import javax.swing.*;
-
-import java.awt.FontMetrics;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+
+import javax.swing.JPanel;
 
 /** Draws the left column of the timeline view. The labels such as "PE 0", "PE 1" */
 public class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {

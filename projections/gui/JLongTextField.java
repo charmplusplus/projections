@@ -1,7 +1,10 @@
 package projections.gui;
 
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.TextEvent;
+
+import javax.swing.JTextField;
 
 public class JLongTextField extends JTextField
 {

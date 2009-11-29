@@ -3,7 +3,8 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import javax.swing.*;
+
+import javax.swing.JPanel;
 
 /**
  */

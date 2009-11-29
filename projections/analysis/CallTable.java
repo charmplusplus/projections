@@ -1,12 +1,15 @@
 package projections.analysis;
 
-import projections.misc.*;
-import projections.gui.*;
-import java.io.*;
-import java.util.*;
-import java.text.*;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.util.Stack;
+
+import javax.swing.ProgressMonitor;
+
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.misc.LogEntryData;
 
 public class CallTable extends ProjDefs
 {

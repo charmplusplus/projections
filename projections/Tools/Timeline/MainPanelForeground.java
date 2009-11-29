@@ -5,7 +5,7 @@ import java.awt.Graphics;
 import java.util.Iterator;
 import java.util.Set;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 
 
 /** This class displays lines for each message send.

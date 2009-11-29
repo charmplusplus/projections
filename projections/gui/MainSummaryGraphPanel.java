@@ -1,12 +1,17 @@
 package projections.gui;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.net.URL;
 
-import java.net.*;
-import java.io.*;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 
-import projections.analysis.*;
+import projections.analysis.ProjMain;
 
 /* **************************************************
  * MainSummaryGraphPanel.java

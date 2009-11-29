@@ -1,8 +1,17 @@
 package projections.gui;
 
-import projections.misc.*;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.ItemSelectable;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+
+import projections.misc.MultiRunData;
 
 public class MultiRunControlPanel extends JPanel
 {

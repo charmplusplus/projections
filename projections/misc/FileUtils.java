@@ -1,12 +1,10 @@
 package projections.misc;
 
-import java.io.*;
+import java.io.File;
 
-import projections.analysis.*;
-import projections.gui.*;
-
-import java.util.TreeMap;
-import java.util.regex.Pattern;
+import projections.analysis.ProjMain;
+import projections.analysis.StsReader;
+import projections.gui.OrderedIntList;
 
 /**
  *  FileUtils.java

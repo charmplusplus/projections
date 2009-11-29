@@ -2,15 +2,11 @@ package projections.Tools.Extrema;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.Iterator;
 
 import projections.analysis.GenericLogReader;
-import projections.analysis.IntervalData;
-import projections.analysis.LogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.Analysis;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.misc.LogEntryData;
 
 

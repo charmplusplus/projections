@@ -1,11 +1,15 @@
 package projections.analysis;
 
-import projections.gui.graph.*;
-import projections.gui.*;
-import projections.misc.*;
+import java.awt.Color;
+import java.util.Vector;
 
-import java.util.*;
-import java.awt.*; // unfortunate!!!
+import projections.gui.ColorManager;
+import projections.gui.U;
+import projections.gui.graph.MultiRunDataSource;
+import projections.gui.graph.MultiRunXAxis;
+import projections.gui.graph.MultiRunYAxis;
+import projections.misc.MultiRunData;
+import projections.misc.ProjectionsStatistics;
 
 /**
  *  Written by Chee Wai Lee

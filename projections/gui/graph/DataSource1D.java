@@ -4,7 +4,8 @@
  */
 
 package projections.gui.graph;
-import projections.gui.*;
+import projections.gui.GenericGraphWindow;
+import projections.gui.PopUpAble;
 
 public class DataSource1D extends DataSource
 {

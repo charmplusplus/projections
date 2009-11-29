@@ -1,7 +1,10 @@
 package projections.gui;
 
-import javax.swing.*;
-import java.awt.event.*;
+import java.awt.event.TextEvent;
+
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
 /** This class is used for the input of processor range
 *   validates for proper range */
 

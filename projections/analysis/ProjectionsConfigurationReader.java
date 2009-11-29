@@ -1,10 +1,19 @@
 package projections.analysis;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
 
-import projections.misc.*;
+import projections.misc.FileUtils;
+import projections.misc.LogLoadException;
 
 /** 
  *  ProjectionsConfigurationReader.java

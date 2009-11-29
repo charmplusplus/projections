@@ -1,16 +1,18 @@
 package projections.Tools.Timeline;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import projections.gui.JTimeTextField;
-import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.RangeDialog;
-
-import java.awt.BorderLayout;
-import java.awt.Insets;
-import java.awt.GridBagLayout;
-import java.awt.GridBagConstraints;
-import java.awt.event.*;
+import projections.gui.RangeDialogExtensionPanel;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by providing the granularity at which the time range should be discretized. */
 public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener

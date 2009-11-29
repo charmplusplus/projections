@@ -1,13 +1,14 @@
 package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.awt.Dimension;
 
-import javax.swing.*;
+import javax.swing.JLayeredPane;
+import javax.swing.JPanel;
+import javax.swing.Scrollable;
 
 /** A scrollable layered panel which will contain a main panel and one or more overlay layers
  * 

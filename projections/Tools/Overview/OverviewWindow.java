@@ -21,16 +21,13 @@ import java.awt.MenuItem;
 import java.awt.Scrollbar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.ButtonGroup;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
 
+import projections.gui.ColorMap;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
@@ -38,8 +35,6 @@ import projections.gui.RangeDialog;
 import projections.gui.ScalePanel;
 import projections.gui.ScaleSlider;
 import projections.gui.Util;
-import projections.gui.ScalePanel.StatusDisplay;
-import projections.gui.ColorMap;
 
 public class OverviewWindow extends ProjectionsWindow
 implements MouseListener, ActionListener, ScalePanel.StatusDisplay

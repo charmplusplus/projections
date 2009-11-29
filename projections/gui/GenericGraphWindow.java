@@ -1,9 +1,23 @@
 package projections.gui;
-import projections.gui.graph.*;
-
-import java.util.*;
 import java.awt.Color;
-import javax.swing.*;
+import java.util.LinkedList;
+
+import javax.swing.BoxLayout;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JPanel;
+
+import projections.gui.graph.DataSource;
+import projections.gui.graph.DataSource2D;
+import projections.gui.graph.Graph;
+import projections.gui.graph.GraphPanel;
+import projections.gui.graph.XAxis;
+import projections.gui.graph.XAxisDiscrete;
+import projections.gui.graph.XAxisDiscreteOrdered;
+import projections.gui.graph.XAxisFixed;
+import projections.gui.graph.YAxis;
+import projections.gui.graph.YAxisAuto;
+import projections.gui.graph.YAxisFixed;
 
 /**
  *  GenericGraphWindow

@@ -2,6 +2,7 @@ package projections.Tools.Timeline;
 
 import java.awt.Color;
 import java.awt.Graphics;
+
 import javax.swing.JPanel;
 
 /** A jpanel that is a specified size and color */

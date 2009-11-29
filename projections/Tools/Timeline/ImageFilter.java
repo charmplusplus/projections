@@ -6,7 +6,8 @@
 package projections.Tools.Timeline;
 
 import java.io.File;
-import javax.swing.filechooser.*; 
+
+import javax.swing.filechooser.FileFilter;
 
 /** A file filter that only allows jpeg, jpg, or png file extensions */
 public class ImageFilter extends FileFilter {

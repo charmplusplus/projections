@@ -1,8 +1,10 @@
 package projections.analysis;
 
-import java.io.*;
-import projections.gui.*;
-import projections.misc.*;
+import java.io.EOFException;
+import java.io.IOException;
+
+import projections.gui.MainWindow;
+import projections.misc.LogEntryData;
 
 public class UsageCalc extends ProjDefs
 {

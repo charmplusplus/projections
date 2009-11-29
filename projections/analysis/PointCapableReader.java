@@ -1,8 +1,9 @@
 package projections.analysis;
 
-import projections.misc.*;
+import java.io.EOFException;
+import java.io.IOException;
 
-import java.io.*;
+import projections.misc.LogEntryData;
 
 public interface PointCapableReader {
     

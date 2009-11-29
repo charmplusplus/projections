@@ -4,9 +4,12 @@
 
 package projections.gui.graph;
 
-import projections.gui.*;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
 import java.text.DecimalFormat;
+
+import projections.gui.Clickable;
+import projections.gui.PopUpAble;
+import projections.gui.ResponsiveToMouse;
 
 public class DataSource2D extends DataSource
 {

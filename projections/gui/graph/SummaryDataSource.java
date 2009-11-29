@@ -1,8 +1,9 @@
 package projections.gui.graph;
 
-import projections.gui.*;
 import java.awt.Color;
 import java.text.DecimalFormat;
+
+import projections.gui.MainWindow;
 
 public class SummaryDataSource extends DataSource
 {

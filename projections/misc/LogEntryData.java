@@ -1,7 +1,6 @@
 package projections.misc;
 
 import projections.analysis.ProjDefs;
-import projections.analysis.ProjectionsReader;
 import projections.gui.MainWindow;
 
 /**

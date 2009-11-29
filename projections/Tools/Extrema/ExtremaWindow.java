@@ -1,16 +1,36 @@
 package projections.Tools.Extrema;
 
-import java.io.*;
-import java.util.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.DecimalFormat;
-import java.awt.event.*;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.StringTokenizer;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 
-import projections.Tools.TimeProfile.ThreadedFileReader;
-import projections.Tools.Timeline.TimelineWindow;
-import projections.analysis.*;
+import projections.analysis.GenericLogReader;
+import projections.analysis.KMeansClustering;
+import projections.analysis.ProjDefs;
+import projections.analysis.ProjMain;
+import projections.analysis.ThreadManager;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.ColorSelectable;
@@ -20,7 +40,7 @@ import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
-import projections.misc.*;
+import projections.misc.LogEntryData;
 
 /**
  *  OutlierAnalysisWindow

@@ -1,10 +1,19 @@
 package projections.analysis;
 
-import projections.gui.*;
-import projections.misc.*;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
+
+import projections.gui.Analysis;
+import projections.gui.MainWindow;
+import projections.misc.LogEntryData;
 
 /**
  *  Written by Chee Wai Lee  4/12/2002

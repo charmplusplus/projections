@@ -1,6 +1,8 @@
 package projections.gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Panel;
 
 class GrayPanel extends Panel
 {

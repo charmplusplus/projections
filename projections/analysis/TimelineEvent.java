@@ -1,7 +1,7 @@
 package projections.analysis;
 
-import java.util.*;
-import java.lang.Comparable;
+import java.util.Stack;
+import java.util.Vector;
 
 import projections.Tools.Timeline.TimelineMessage;
 

@@ -1,13 +1,26 @@
 package projections.gui;
-import projections.misc.LogEntryData;
-import projections.analysis.*;
-
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.EOFException;
 import java.text.DecimalFormat;
-import java.io.*;
-import javax.swing.*;
-import javax.swing.border.*;
+
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+
+import projections.analysis.GenericLogReader;
+import projections.analysis.ProjDefs;
+import projections.misc.LogEntryData;
 
 /**
  *  HistogramWindow

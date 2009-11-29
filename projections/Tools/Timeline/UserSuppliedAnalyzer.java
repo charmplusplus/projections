@@ -8,14 +8,9 @@ import java.util.Vector;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
-
-import projections.analysis.NoiseMiner.NoiseResultButton;
-import projections.gui.MainWindow;
 
 
 /** A class that analyzes the user supplied data ranges, and displays a table of the results */

@@ -1,7 +1,12 @@
 package projections.gui;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.MediaTracker;
+
+import javax.swing.JPanel;
 
 public class BackGroundImagePanel extends JPanel {
   

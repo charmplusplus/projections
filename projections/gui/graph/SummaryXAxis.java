@@ -1,6 +1,6 @@
 package projections.gui.graph;
 
-import projections.gui.*;
+import projections.gui.U;
 
 public class SummaryXAxis extends XAxis
 {

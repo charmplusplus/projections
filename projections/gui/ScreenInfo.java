@@ -1,6 +1,9 @@
 package projections.gui;
 
-import java.awt.*;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 
 /**
  *  Written by Chee Wai Lee

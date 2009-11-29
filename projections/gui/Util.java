@@ -1,11 +1,27 @@
 package projections.gui;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import java.util.StringTokenizer;
-import java.lang.Integer;
+import java.awt.CheckboxMenuItem;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.MediaTracker;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.RandomAccessFile;
+
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JRadioButtonMenuItem;
 
 
 public class Util

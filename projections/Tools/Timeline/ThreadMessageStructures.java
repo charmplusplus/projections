@@ -1,10 +1,5 @@
 package projections.Tools.Timeline;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.TreeSet;
-
-import projections.analysis.ObjectId;
 
 
 /**  A thread that will fill in the MessageStructures data .

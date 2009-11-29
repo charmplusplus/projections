@@ -3,7 +3,6 @@ package projections.gui;
 /*
 	Color Map wrapper class-Orion Lawlor, 10/10/98
 */
-import java.awt.image.*;
 
 public class ColorMap {
     int red[]=new int[256],

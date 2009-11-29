@@ -1,13 +1,8 @@
 package projections.Tools.TimelineRendered;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -17,7 +12,6 @@ import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -26,15 +20,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
-import projections.Tools.Timeline.AxisPanel;
 import projections.Tools.Timeline.Data;
-import projections.Tools.Timeline.LabelPanel;
 import projections.Tools.Timeline.MainHandler;
-import projections.Tools.Timeline.MainPanel;
-import projections.Tools.Timeline.NonScrollingLayout;
-import projections.analysis.LogReader;
 import projections.analysis.ThreadManager;
-import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;

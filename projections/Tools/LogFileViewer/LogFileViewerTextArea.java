@@ -1,23 +1,16 @@
 package projections.Tools.LogFileViewer;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.util.Vector;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextPane;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
-import javax.swing.text.StyleContext;
 
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
-import projections.misc.LogLoadException;
 
 
 /** This class displays a log file as html formatted text inside a JPanel 

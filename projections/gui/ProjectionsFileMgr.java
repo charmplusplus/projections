@@ -1,7 +1,7 @@
 package projections.gui;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.FilenameFilter;
 
 /** Joshua Mostkoff Unger, unger1@uiuc.edu
  *  Parallel Programming Laboratory

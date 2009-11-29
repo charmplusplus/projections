@@ -1,16 +1,34 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.text.*;
-import java.util.*;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.Enumeration;
+import java.util.Stack;
+import java.util.Vector;
 
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
-//import org.apache.xpath.operations.And;
-
-import projections.analysis.*;
+import projections.analysis.AmpiFunctionData;
+import projections.analysis.AmpiProcessProfile;
+import projections.analysis.UsageCalc;
 
 public class AmpiProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener

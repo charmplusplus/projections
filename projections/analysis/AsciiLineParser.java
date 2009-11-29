@@ -8,11 +8,7 @@ Similar to StreamTokenizer, but about 10x faster.
 Will not work properly with true Unicode files--
 only basic ASCII.
 */
-import java.io.BufferedReader;
-import java.io.EOFException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.Reader;
 
 
 /** A little class that can pull integers and strings out of a String  */

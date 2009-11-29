@@ -1,14 +1,28 @@
 package projections.gui;
 
-import projections.gui.graph.*;
-import projections.misc.*;
-import projections.analysis.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.IOException;
 
-import java.io.*;
-import java.awt.*;
-import java.awt.event.*;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.SwingWorker;
 
-import javax.swing.*;
+import projections.analysis.MultiRunDataAnalyzer;
+import projections.gui.graph.Graph;
+import projections.gui.graph.GraphPanel;
+import projections.gui.graph.MultiRunDataSource;
+import projections.gui.graph.MultiRunXAxis;
+import projections.gui.graph.MultiRunYAxis;
+import projections.misc.MultiRunData;
 
 /**
  *  Written by Chee Wai Lee

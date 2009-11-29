@@ -2,8 +2,6 @@ package projections.analysis;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.util.StringTokenizer;
 
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;

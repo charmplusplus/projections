@@ -1,13 +1,26 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.print.*;
-import java.io.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.print.PageFormat;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.swing.SwingWorker;
 
-import projections.misc.*;
+import projections.misc.PrintUtils;
 
 public class GraphWindow extends ProjectionsWindow
 implements ActionListener

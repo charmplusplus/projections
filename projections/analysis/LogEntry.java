@@ -1,6 +1,6 @@
 package projections.analysis;
 
-import projections.misc.*;
+import projections.misc.LogEntryData;
 
 /** A class representing an entry in a log */
 class LogEntry

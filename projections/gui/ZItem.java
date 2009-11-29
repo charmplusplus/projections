@@ -1,6 +1,6 @@
 package projections.gui;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class ZItem
 {

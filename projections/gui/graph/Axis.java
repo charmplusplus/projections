@@ -4,7 +4,9 @@
  */
 
 package projections.gui.graph;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.text.DecimalFormat;
 
 public abstract class Axis

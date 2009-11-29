@@ -1,10 +1,13 @@
 package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics;
-import javax.swing.*;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JViewport;
+import javax.swing.ToolTipManager;
 
 /**
  * A scrolling panel that holds all the graphical pieces of the visualization

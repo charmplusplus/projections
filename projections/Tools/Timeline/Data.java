@@ -1,6 +1,8 @@
 package projections.Tools.Timeline;
 
-import java.util.AbstractMap;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -15,11 +17,8 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
-import javax.swing.*;
 
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Color;
+import javax.swing.ToolTipManager;
 
 import projections.analysis.PackTime;
 import projections.analysis.ThreadManager;
@@ -27,7 +26,7 @@ import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
-import projections.misc.*;
+import projections.misc.LogLoadException;
 
 
 /**
@@ -935,7 +934,6 @@ public class Data
 	 */
 	private int selection1=-1, selection2=-1;
 	private int highlight=-1;
-	private long selectcount = 0;
 	
 	public boolean selectionValid(){
 		return (selection1>=0 && selection2>=0 && selection1!=selection2);
@@ -1162,7 +1160,6 @@ public class Data
 	/** Should we use a very compact view, with no message sends, or user events */
 	private boolean useCompactView;
 
-	private Component guiRoot;
 	int colorSchemeForUserSupplied;
 	
 	/** Clear any highlights created by HighlightObjects() */
@@ -1465,11 +1462,7 @@ public class Data
 	public boolean useCompactView() {
 		return useCompactView;
 	}
-	
-	
-	public void guiRoot(TimelineWindow timelineWindow) {
-		guiRoot = timelineWindow;
-	}
+
 	
 	
 	/** Determines which vertical position represents PE */

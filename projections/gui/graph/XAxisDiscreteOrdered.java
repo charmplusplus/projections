@@ -1,6 +1,6 @@
 package projections.gui.graph;
 
-import projections.gui.*;
+import projections.gui.OrderedIntList;
 
 public class XAxisDiscreteOrdered
     extends XAxis

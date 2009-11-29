@@ -1,7 +1,11 @@
 package projections.analysis;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StreamTokenizer;
+import java.util.Vector;
 
 /** 
  *  Written by Chee Wai Lee

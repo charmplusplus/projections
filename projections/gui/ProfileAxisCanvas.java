@@ -1,6 +1,10 @@
 package projections.gui;
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Image;
 
 public class ProfileAxisCanvas extends Canvas
 {

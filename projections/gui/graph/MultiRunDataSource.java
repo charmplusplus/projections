@@ -1,8 +1,8 @@
 package projections.gui.graph;
 
-import projections.analysis.*;
-
 import java.awt.Color;
+
+import projections.analysis.MultiRunDataAnalyzer;
 
 /**
  *

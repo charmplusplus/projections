@@ -4,18 +4,29 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.text.DecimalFormat;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
-import java.awt.event.*;
+import javax.swing.JColorChooser;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
-import projections.analysis.*;
-import projections.gui.Analysis;
+import projections.analysis.AmpiFunctionData;
+import projections.analysis.ObjectId;
+import projections.analysis.PackTime;
+import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.U;
-
-import java.text.DecimalFormat;
-import java.util.*;
-
-import javax.swing.*;
 
 public class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
 {

@@ -1,6 +1,7 @@
 package projections.analysis;
 
-import java.util.*;
+import java.util.Hashtable;
+import java.util.Stack;
 
 /**
  *  CallStackManager is essentially an interface to projections to 

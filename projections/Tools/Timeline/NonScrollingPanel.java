@@ -2,7 +2,8 @@ package projections.Tools.Timeline;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import javax.swing.*;
+
+import javax.swing.JPanel;
 
 import projections.gui.OrderedIntList;
 

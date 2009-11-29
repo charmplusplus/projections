@@ -1,7 +1,7 @@
 package projections.analysis;
 import java.util.Vector;
 
-import projections.gui.*;
+import projections.gui.MainWindow;
 
 public class AmpiFunctionData {
     // Temporary hardcode. This variable will be assigned appropriate

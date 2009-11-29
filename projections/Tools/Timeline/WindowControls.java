@@ -1,28 +1,34 @@
 package projections.Tools.Timeline;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.Rectangle;
+import java.awt.GridBagLayout;
 import java.awt.Toolkit;
-import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.net.URL;
+import java.text.DecimalFormat;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JColorChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 
 import projections.gui.FloatJTextField;
-import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
-import projections.gui.OrderedUsageList;
 import projections.gui.RangeDialog;
 import projections.gui.Util;
-
-import java.text.*;
 
 /**
  * A panel that contains all the buttons and labels and things at the bottom of

@@ -1,9 +1,16 @@
 package projections.gui.graph;
 
-import projections.gui.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
-import java.awt.*;
-import java.awt.event.*;
+import projections.gui.Util;
 
 public class LegendCanvas extends Canvas
     implements MouseListener, ActionListener

@@ -1,5 +1,7 @@
 package projections.gui;
-import javax.swing.*;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
 
 /** This class is meant to be used by any dialog taking time interval as input
 *   It validates the input data to be in us, ms or s

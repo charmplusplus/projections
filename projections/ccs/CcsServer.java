@@ -14,9 +14,14 @@ Orion Sky Lawlor, olawlor@acm.org, 10/15/2000
    version of CcsServer that does not live in the charm/ directory */
 package projections.ccs;
 
-import java.net.*;
-import java.io.*;
-//import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 
 /** 

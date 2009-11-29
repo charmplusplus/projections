@@ -8,8 +8,14 @@ package projections.gui;
  * Orion Sky Lawlor, 2/10/2001
  */
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Panel;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.Vector;
 
 public class ScalePanel extends Panel

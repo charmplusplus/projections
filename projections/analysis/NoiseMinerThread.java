@@ -6,16 +6,12 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeMap;
 
-import javax.swing.ProgressMonitor;
-
-import projections.analysis.NoiseMiner.Duration;
 import projections.analysis.NoiseMiner.Cluster;
+import projections.analysis.NoiseMiner.Duration;
 import projections.analysis.NoiseMiner.Event;
 import projections.analysis.NoiseMiner.EventWindow;
 import projections.analysis.NoiseMiner.Histogram;
-import projections.analysis.NoiseMiner.NoiseResult;
 import projections.gui.Analysis;
-import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
 public class NoiseMinerThread extends Thread {

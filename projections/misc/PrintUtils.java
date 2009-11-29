@@ -1,7 +1,11 @@
 package projections.misc;
 
-import java.awt.*;
-import java.awt.print.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
 
 public class PrintUtils 
     implements Printable 

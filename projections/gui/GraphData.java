@@ -1,6 +1,6 @@
 package projections.gui;
 
-import java.awt.*;
+import java.awt.Color;
 
 /**
  *  GraphData holds the data for Graph

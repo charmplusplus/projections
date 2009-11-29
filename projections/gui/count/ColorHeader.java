@@ -1,8 +1,14 @@
 package projections.gui.count;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.table.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.ComponentOrientation;
+
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 
 // Modified from code from http://www.chka.de/swing/table/faq.html
 public class ColorHeader extends DefaultTableCellRenderer

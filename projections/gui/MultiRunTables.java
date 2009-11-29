@@ -1,11 +1,18 @@
 package projections.gui;
 
-import java.awt.*;
-import javax.swing.*;
-import javax.swing.table.*;
-import projections.misc.*;
-import projections.analysis.*;
-import projections.gui.count.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+
+import projections.analysis.MultiRunDataAnalyzer;
+import projections.gui.count.TableSorter;
+import projections.misc.MultiRunTableModel;
 
 /**
  *  Responsible for displaying multiple-run projections data in a 2D tabulated

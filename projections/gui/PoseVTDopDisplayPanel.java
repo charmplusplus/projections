@@ -1,9 +1,16 @@
 package projections.gui;
 
-import projections.gui.graph.*;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 
-import java.awt.*;
-import javax.swing.*;
+import javax.swing.JPanel;
+
+import projections.gui.graph.DataSource1D;
+import projections.gui.graph.Graph;
+import projections.gui.graph.GraphPanel;
+import projections.gui.graph.XAxisFixed;
+import projections.gui.graph.YAxisAuto;
 
 public class PoseVTDopDisplayPanel extends JPanel
     implements PopUpAble

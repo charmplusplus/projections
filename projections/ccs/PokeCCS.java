@@ -4,10 +4,7 @@
  */
 package projections.ccs;
 
-import java.io.*;
-
-import projections.ccs.CcsServer;
-//import java.util.*;
+import java.io.IOException;
 
 public class PokeCCS
 {

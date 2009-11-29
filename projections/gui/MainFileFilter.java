@@ -1,6 +1,6 @@
 package projections.gui;
 
-import java.io.*;
+import java.io.File;
 
 public class MainFileFilter 
     extends javax.swing.filechooser.FileFilter

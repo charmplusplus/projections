@@ -1,13 +1,21 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.io.EOFException;
+import java.io.IOException;
 
-import java.io.*;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 
-import projections.misc.*;
-import projections.analysis.*;
+import projections.analysis.CallStackManager;
+import projections.analysis.GenericLogReader;
+import projections.analysis.ProjDefs;
+import projections.misc.LogEntryData;
 
 /**
  *  FunctionTool.java

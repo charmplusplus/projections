@@ -1,6 +1,5 @@
 package projections.analysis;
 
-import java.io.*;
 
 /**
  *  The base class for all future projections readers. It provides basic

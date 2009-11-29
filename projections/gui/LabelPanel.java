@@ -1,7 +1,11 @@
 package projections.gui;
 
-import java.awt.*;
-import javax.swing.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  *  LabelPanel is a representation of commonly used label-field pairs 

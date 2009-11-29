@@ -1,37 +1,17 @@
 package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
-import java.util.Collection;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.JWindow;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-
-import projections.Tools.Timeline.ChooseUserEventsWindow.ColorRenderer;
-import projections.gui.MainWindow;
 
 public class MemoryColorRangeChooser extends JFrame implements ActionListener 
 {

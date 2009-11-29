@@ -5,8 +5,15 @@ package projections.gui;
  * slowly adjust them.  Similar to java.awt.Scrollbar.
  * Orion Sky Lawlor, olawlor@acm.org, 2/9/2001
  */
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Scrollbar;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 
 public class ScaleSlider extends Canvas
    implements MouseMotionListener, MouseListener

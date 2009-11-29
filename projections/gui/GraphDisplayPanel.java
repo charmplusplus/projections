@@ -1,8 +1,26 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.print.*;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.CheckboxGroup;
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Scrollbar;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.print.PrinterGraphics;
 
 public class GraphDisplayPanel extends Container
    implements ActionListener, ItemListener, AdjustmentListener

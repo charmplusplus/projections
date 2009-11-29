@@ -1,8 +1,14 @@
 package projections.gui;
 
-import javax.swing.*;
-import javax.swing.event.*;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /* ********************************************************
  * MainRunStatusPanel.java

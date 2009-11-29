@@ -1,21 +1,21 @@
 package projections.Tools.Timeline;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Dimension;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.TreeSet;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JViewport;
+import javax.swing.Scrollable;
 
 
 /** This class displays the timeline background and horizontal lines

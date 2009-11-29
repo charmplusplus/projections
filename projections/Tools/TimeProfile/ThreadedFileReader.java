@@ -1,7 +1,5 @@
 package projections.Tools.TimeProfile;
 
-import java.util.Iterator;
-
 import projections.analysis.IntervalData;
 import projections.analysis.LogReader;
 import projections.gui.MainWindow;

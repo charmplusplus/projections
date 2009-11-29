@@ -1,17 +1,20 @@
 package projections.analysis;
 
-import projections.misc.*;
-import projections.Tools.Timeline.ThreadedFileReader;
-import projections.gui.*;
-
-import java.io.*;
+import java.awt.Component;
 import java.text.DecimalFormat;
-import java.util.*;
-import java.util.List;
-
-import javax.swing.*;
-import java.awt.*;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeSet;
+import java.util.Vector;
+
+import javax.swing.JButton;
+
+import projections.gui.MainWindow;
+import projections.gui.NoiseMinerExemplarTimelineWindow;
+import projections.gui.OrderedIntList;
 
 
 /**
@@ -75,18 +78,18 @@ public class NoiseMiner extends ProjDefs
 		public Time(){	
 			d = 0.0;
 		}
-		
-		public Time(long us){
-			d = us;
-		}
-		
-		public Time(Time p){
-			d = p.d;
-		}
-		
-		public Time(double us){
-			d = us;
-		}
+//		
+//		public Time(long us){
+//			d = us;
+//		}
+//		
+//		public Time(Time p){
+//			d = p.d;
+//		}
+//
+//		public Time(double us){
+//			d = us;
+//		}
 		
 		public void set_ms(double p){
 			d = p * 1000.0;

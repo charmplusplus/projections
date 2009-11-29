@@ -1,14 +1,18 @@
 package projections.Tools.Timeline;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import javax.swing.*;
+import javax.swing.JColorChooser;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
-import projections.gui.Analysis;
 import projections.gui.MainWindow;
 
 public class UserEventObject extends JComponent implements Comparable, MouseListener,  ActionListener

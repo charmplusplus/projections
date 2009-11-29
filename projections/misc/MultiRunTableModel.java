@@ -1,8 +1,8 @@
 package projections.misc;
 
-import javax.swing.table.*;
+import javax.swing.table.AbstractTableModel;
 
-import projections.analysis.*;
+import projections.analysis.MultiRunDataAnalyzer;
 
 /**
  *  This class serves as a table model manipulator. It acquires its data

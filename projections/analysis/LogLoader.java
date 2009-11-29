@@ -1,16 +1,23 @@
 package projections.analysis;
 
 
-import java.io.*;
-import java.util.*;
+import java.io.EOFException;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.Set;
+import java.util.Stack;
+import java.util.Vector;
 
-import javax.swing.*;
-
-import projections.Tools.Timeline.ThreadedFileReader;
 import projections.Tools.Timeline.TimelineMessage;
 import projections.Tools.Timeline.UserEventObject;
-import projections.gui.*;
-import projections.misc.*;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.misc.LogEntryData;
+import projections.misc.LogLoadException;
 
 /** This class reads in .log files and turns them into a timeline.  */
 public class LogLoader extends ProjDefs
@@ -25,8 +32,6 @@ public class LogLoader extends ProjDefs
 		
 	public final boolean useTimeIndexes = false;
 	
-	private LogIndex index;
-
 	
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
 	public long determineEndTime(OrderedIntList validPEs)

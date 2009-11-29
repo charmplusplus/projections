@@ -1,11 +1,13 @@
 package projections.analysis;
 
-import projections.misc.*;
-import projections.gui.*;
+import java.awt.Component;
+import java.io.IOException;
 
-import java.io.*;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ProgressMonitor;
+
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.misc.LogEntryData;
 
 /**
  *  Written by Samir Mirza

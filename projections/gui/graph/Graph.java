@@ -1,11 +1,26 @@
 package projections.gui.graph;
 
-import projections.gui.*; 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Polygon;
+import java.awt.RenderingHints;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.event.MouseInputListener;
+
+import projections.gui.Bubble;
+import projections.gui.MainWindow;
  
 public class Graph extends JPanel 
     implements MouseInputListener

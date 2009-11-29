@@ -14,7 +14,7 @@ package projections.gui.graph;
 
 
 import java.awt.Color;
-import java.awt.event.*;
+import java.awt.event.MouseEvent;
 
 public abstract class DataSource
 {

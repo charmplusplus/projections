@@ -1,6 +1,6 @@
 package projections.analysis;
 
-import java.io.*;
+import java.io.IOException;
 
 public interface IntervalCapableReader {
 

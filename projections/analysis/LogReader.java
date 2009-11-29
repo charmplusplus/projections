@@ -1,10 +1,13 @@
 package projections.analysis;
 
-import java.io.*;
-import javax.swing.*;
+import java.io.EOFException;
+import java.io.IOException;
 
-import projections.misc.*;
-import projections.gui.*;
+import javax.swing.ProgressMonitor;
+
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.misc.LogEntryData;
 
 public class LogReader 
     extends ProjDefs

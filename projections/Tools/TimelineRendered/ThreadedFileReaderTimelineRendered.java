@@ -2,7 +2,6 @@ package projections.Tools.TimelineRendered;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.Iterator;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -11,10 +10,7 @@ import javax.swing.JLabel;
 import projections.Tools.Timeline.Data;
 import projections.Tools.Timeline.MainHandler;
 import projections.Tools.Timeline.MainPanel;
-import projections.analysis.IntervalData;
-import projections.analysis.LogReader;
 import projections.gui.JPanelToImage;
-import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */

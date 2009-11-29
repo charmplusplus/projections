@@ -1,10 +1,17 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.text.DecimalFormat;
-import javax.swing.*;
-import javax.swing.border.*;
+
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 
 /**
  *  BinDialog

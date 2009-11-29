@@ -6,10 +6,9 @@ by Orion Lawlor, olawlor@acm.org, 6/14/2001
 */
 package projections.ccs;
 
-import java.util.Stack;
-import java.io.*;
+import java.io.IOException;
 import java.net.UnknownHostException;
-//import java.awt.Label;
+import java.util.Stack;
 
 public class CcsThread implements Runnable {
 

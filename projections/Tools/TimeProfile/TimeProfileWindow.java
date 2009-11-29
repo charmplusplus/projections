@@ -1,15 +1,28 @@
 package projections.Tools.TimeProfile;
 
-import java.io.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
-import java.awt.*;
-import java.awt.event.*;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.SwingWorker;
 
-import projections.analysis.*;
+import projections.analysis.LogReader;
+import projections.analysis.ThreadManager;
 import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
@@ -21,7 +34,6 @@ import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
-import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;

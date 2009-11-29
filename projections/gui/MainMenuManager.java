@@ -1,18 +1,14 @@
 package projections.gui;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JRadioButtonMenuItem;
-
 
 import projections.Tools.Extrema.ExtremaWindow;
 import projections.Tools.LogFileViewer.LogFileViewerWindow;

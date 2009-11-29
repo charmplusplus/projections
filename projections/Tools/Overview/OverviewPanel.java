@@ -12,18 +12,18 @@ value is the integer percent CPU utilization from 0..100.
 
 Orion Sky Lawlor, olawlor@acm.org, 2/12/2001
  */
-import java.awt.*;
-import java.awt.image.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.image.MemoryImageSource;
 
-import projections.analysis.*;
+import javax.swing.ProgressMonitor;
+
+import projections.analysis.LogReader;
 import projections.gui.ColorMap;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.ScalePanel;
 import projections.gui.U;
-import projections.gui.ScalePanel.Child;
-import projections.gui.ScalePanel.Child.RepaintRequest;
 
 public class OverviewPanel extends ScalePanel.Child
 {
@@ -149,8 +149,8 @@ public class OverviewPanel extends ScalePanel.Child
 			if (wid>0 && ht>0) 
 			{//Write data to offscreen buffer
 				int[] offBuf=new int[wid*ht];
-				int proc_min=(int)Math.floor(pl);
-				int proc_max=(int)Math.ceil(ph);
+//				int proc_min=(int)Math.floor(pl);
+//				int proc_max=(int)Math.ceil(ph);
 				selectedPEs.reset();
 				int proc;
 				int p =0;

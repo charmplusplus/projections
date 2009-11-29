@@ -1,9 +1,13 @@
 package projections.analysis;
 
-import java.io.*;
-import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
-import projections.gui.*;
+import javax.swing.ProgressMonitor;
+
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
 
 public class PoseDopReader
 {

@@ -2,29 +2,15 @@ package projections.SamplePlots;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 
-
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.axis.LogAxis;
 import org.jfree.chart.axis.NumberAxis;
-import org.jfree.chart.axis.NumberTickUnit;
-import org.jfree.chart.axis.TickUnits;
-import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
-import org.jfree.chart.renderer.xy.XYBarRenderer;
-import org.jfree.data.statistics.HistogramDataset;
-import org.jfree.data.time.RegularTimePeriod;
-import org.jfree.data.time.TimeTableXYDataset;
-import org.jfree.data.time.Year;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 

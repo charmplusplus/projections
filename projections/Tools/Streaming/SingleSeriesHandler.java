@@ -1,24 +1,18 @@
 package projections.Tools.Streaming;
 
 import java.awt.BorderLayout;
-import java.io.ByteArrayInputStream;
-import java.io.DataInputStream;
-import java.util.Iterator;
 import java.util.Vector;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
-import projections.SamplePlots.MyActionHandler;
 import projections.ccs.CcsProgress;
 import projections.ccs.CcsThread;
 

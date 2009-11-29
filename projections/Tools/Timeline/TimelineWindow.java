@@ -1,7 +1,6 @@
 package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
-import java.awt.Graphics;
 
 import javax.swing.JOptionPane;
 
@@ -82,7 +81,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
         thisWindow = this;
 		
 		data = new Data(this);
-		data.guiRoot(this);
 		
 		labelPanel = new LabelPanel(data);
 		

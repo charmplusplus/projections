@@ -1,6 +1,7 @@
 package projections.gui.graph;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 public class XAxisDiscrete
     extends XAxis

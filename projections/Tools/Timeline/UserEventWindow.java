@@ -1,16 +1,26 @@
 package projections.Tools.Timeline;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import javax.swing.table.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.util.Iterator;
-import java.util.LinkedList;
 
-import projections.gui.count.TableSorter;
+import javax.swing.JCheckBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.WindowConstants;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableColumn;
+
 import projections.gui.FormattedNumber;
-import projections.gui.OrderedIntList;
+import projections.gui.count.TableSorter;
 
 /** Joshua Mostkoff Unger
  *  Parallel Programming Laboratory

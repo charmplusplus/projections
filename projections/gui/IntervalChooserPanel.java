@@ -1,13 +1,11 @@
 package projections.gui;
 
-import javax.swing.*;
-
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Insets;
-import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
-import java.awt.event.*;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+
+import javax.swing.JLabel;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by providing the granularity at which the time range should be discretized. */
 public class IntervalChooserPanel extends RangeDialogExtensionPanel

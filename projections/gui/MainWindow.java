@@ -1,18 +1,34 @@
 package projections.gui;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-
-import java.io.*;
-import java.lang.reflect.*;
-import java.net.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Label;
+import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.TreeSet;
 
-import projections.analysis.*;
-import projections.gui.graph.*;
+import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.SwingWorker;
+
+import projections.analysis.IntervalUtils;
+import projections.analysis.ProjMain;
+import projections.gui.graph.Graph;
+import projections.gui.graph.GraphPanel;
+import projections.gui.graph.SummaryDataSource;
+import projections.gui.graph.SummaryXAxis;
+import projections.gui.graph.SummaryYAxis;
 
 public class MainWindow extends JFrame
 implements ScalePanel.StatusDisplay
@@ -431,11 +447,7 @@ implements ScalePanel.StatusDisplay
 	}
 
 	/** Keep a reference to a newly opened tool window  */
-	public void openTool(ProjectionsWindow w){	
-		Iterator<ProjectionsWindow> iter = openToolWindows.iterator();
-		while(iter.hasNext()){
-			ProjectionsWindow i = iter.next();
-		}
+	public void openTool(ProjectionsWindow w){
 		openToolWindows.add(w);
 	}
 

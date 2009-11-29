@@ -1,15 +1,14 @@
 package projections.Tools.Timeline;
 
-import java.text.DecimalFormat;
-import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.Dimension;
-import javax.swing.*;
+import java.text.DecimalFormat;
+
+import javax.swing.JPanel;
 
 import projections.gui.Util;
-
-import java.awt.FontMetrics;
 
 /** The class that draws the top time axis on the top of the timeline window */
 public class AxisPanel extends JPanel 

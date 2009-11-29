@@ -1,17 +1,19 @@
 package projections.Tools.LogFileViewer;
 
-import java.util.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
-import projections.gui.*;
-import projections.misc.*;
-import projections.analysis.*;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.ProjectionsWindow;
+import projections.gui.RangeDialog;
 
 public class LogFileViewerWindow extends ProjectionsWindow implements ActionListener
 {

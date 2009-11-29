@@ -1,17 +1,18 @@
 package projections.Tools.Timeline;
 
 
-import javax.swing.border.*;
-
-import java.awt.LayoutManager;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Insets;
+import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.Insets;
 import java.io.Serializable;
 
-import javax.swing.*;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.ScrollPaneLayout;
+import javax.swing.border.Border;
 
 /**
  * A layout manager that correctly lays out a JScrollPane for our timeline view

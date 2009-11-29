@@ -1,10 +1,14 @@
 package projections.analysis;
 
-import java.io.*;
-import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.StreamTokenizer;
 
-import projections.gui.*;
-import projections.misc.*;
+import javax.swing.ProgressMonitor;
+
+import projections.gui.MainWindow;
+import projections.misc.SummaryFormatException;
 
 /** This class reads and analyzes .sum files.
  */

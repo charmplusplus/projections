@@ -1,6 +1,6 @@
 package projections.analysis;
 
-import java.util.*;
+import java.util.Stack;
 
 /**
  * This class contains information related with ampi usage profile
@@ -10,7 +10,7 @@ import java.util.*;
 public class AmpiProcessProfile {
     /* The accumlated execution time */ 
     private long accExecTime;
-    private long beginTime;
+//    private long beginTime;
 
     /*
      * The process id is same with tuple int field in the raw data 
@@ -37,7 +37,7 @@ public class AmpiProcessProfile {
 
     public AmpiProcessProfile(long beginTime, ObjectId id) {
 	accExecTime = 0;
-	this.beginTime = beginTime;
+//	this.beginTime = beginTime;
 	processID = id;
 	auxCallFuncStack = new Stack();
 	callFuncStack = new Stack();

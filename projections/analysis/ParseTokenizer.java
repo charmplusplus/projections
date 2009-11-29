@@ -1,6 +1,8 @@
 package projections.analysis;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StreamTokenizer;
 
 /** 
  *  Joshua Mostkoff Unger, unger1@uiuc.edu

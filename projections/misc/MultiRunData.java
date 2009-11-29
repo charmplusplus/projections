@@ -1,10 +1,15 @@
 package projections.misc;
 
-import projections.analysis.*;
-import projections.gui.*;
+import java.io.File;
+import java.io.IOException;
 
-import java.io.*;
-import javax.swing.*;
+import javax.swing.ProgressMonitor;
+
+import projections.analysis.GenericSummaryReader;
+import projections.analysis.ProjMain;
+import projections.analysis.StsReader;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
 
 /**
  *

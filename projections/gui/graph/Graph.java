@@ -269,19 +269,20 @@ public class Graph extends JPanel
      *  Hence, the array looping code is adequate for now.
      */
     private int getYValue(int xVal, int yPos) {
-	if ((xVal >= 0) && 
-	    (yPos < originY) && (yPos > 30) && 
-	    (stackArray != null)) {
-	    int numY = dataSource.getValueCount();
-	    int y;
-	    for (int k=0; k<numY; k++) {
-		y = originY - (int)(stackArray[xVal][k]*pixelincrementY);
-		if (yPos > y) {
-		    return k;
-		}
-	    }
-	}	
-	return -1;
+    	if ( (xVal >= 0)  &&
+    		 (yPos < originY) && (yPos > 30) && 
+    		 (stackArray != null) && 
+    		 (xVal < stackArray.length) ) {
+    		int numY = dataSource.getValueCount();
+    		int y;
+    		for (int k=0; k<numY; k++) {
+    			y = originY - (int)(stackArray[xVal][k]*pixelincrementY);
+    			if (yPos > y) {
+    				return k;
+    			}
+    		}
+    	}	
+    	return -1;
     }
 
     // ***** Painting Routines *****
@@ -572,8 +573,32 @@ public class Graph extends JPanel
     private void drawOverlayedPolynomial(Graphics2D g) {
     	// Plot the polynomial
     	if(polynomialToOverlay != null && polynomialToOverlay.length>0){
+
+			g.setColor(Color.orange);
+    		
+    		String info = " ";
+			for(int d=polynomialToOverlay.length-1; d>=0; d--){
+				info += polynomialToOverlay[d] ;
+				
+				if(d==0)
+					info += "";
+				else if(d==1)
+					info += " x";
+				else
+					info += " x^" + d;
+					
+				
+				if(d>0)
+					info += " + ";
+			}
+			g.drawString(info, w-fm.stringWidth(info) - 50 ,  20 );
+
+			g.setStroke(new BasicStroke(4f));
+			g.setColor(Color.orange);
+			Object oldHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		
     		for(int x=0; x< getWidth(); x++){
-    			g.setColor(Color.orange);
 
     			//    bar i center pixel coordinate:	
     			//       	originX + (int)(i*pixelincrementX)
@@ -597,16 +622,21 @@ public class Graph extends JPanel
     			int y1_px = originY - (int)(y1*pixelincrementY);
     			int y2_px = originY - (int)(y2*pixelincrementY);
 
-    			g.setStroke(new BasicStroke(4f));
-    			g.setColor(Color.orange);
-    			Object oldHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
-    			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    			g.drawLine(x1_px, y1_px, x2_px, y2_px);
-    			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
-
+    			if(  y1_px < (originY+2) && 
+    				 y2_px < (originY+2) && 
+    				 y1_px > (30-2) && 
+    				 y2_px > (30-2) &&
+    				 x1_px > originX-2 &&
+    				 x2_px > originX-2 &&
+    				 x1_px < (width+originX+2) &&
+    				 x2_px < (width+originX+2)) {
+    				g.drawLine(x1_px, y1_px, x2_px, y2_px);
+    			}
 
     		}
+    		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
     	}
+
 
     }
 

@@ -509,10 +509,10 @@ implements ActionListener, ColorSelectable, Clickable
 				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));	
 			} else {
 				displaySlopes = false;
-				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));	
+				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));	
 			}
 		} else if (e.getSource() == hideMouseoversCheckBox) {
-			this.graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
+			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
 		} else if (e.getSource() == setRanges) {
 			showDialog();
 		} else if (e.getSource() == saveColors) {
@@ -583,16 +583,18 @@ implements ActionListener, ColorSelectable, Clickable
 
 
 	public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
-		System.out.println("TimeProfileWindow toolMouseMovedResponse");
 		if(displaySlopes){
 			createPolynomial(xVal, yVal);
 		}
 	}	
 
 	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+		
 		if(displaySlopes){
-			createPolynomial(xVal, yVal);
+			// create a screenshot of the 
+
 		}
+		
 	}
 
 }

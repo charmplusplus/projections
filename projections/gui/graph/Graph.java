@@ -70,6 +70,7 @@ public class Graph extends JPanel
     private double maxvalueY;
 
     private Bubble bubble;
+    private boolean showBubble;
     private int bubbleXVal;
     private int bubbleYVal;
     
@@ -351,10 +352,8 @@ public class Graph extends JPanel
 
     	if((xVal > -1) && (yVal > -1)) {
     		showPopup(xVal, yVal, x, y);
-    	} else if (bubble != null) {
-    		bubble.setVisible(false);
-    		bubble.dispose();
-    		bubble = null;
+    	} else {
+    		disposeOfBubble();
     	}
 
     	if ((xVal > -1) || (yVal > -1)) {
@@ -397,15 +396,12 @@ public class Graph extends JPanel
     		return;
     	}
     	    	
-    	// old popup still exists, but mouse has moved over a new 
-    	// section that has its own popup
-    	if (bubble != null && (bubbleXVal != xVal || bubbleYVal != yVal)){
-    		bubble.setVisible(false);
-    		bubble.dispose();
-    		bubble = null;
+    	// dispose of any old popup because mouse has moved away 
+    	if (bubbleXVal != xVal || bubbleYVal != yVal){
+    		disposeOfBubble();
     	}
 
-    	if (bubble == null) {
+    	if (bubble == null && showBubble) {
     		if (GraphStacked) {
     			bubble = new Bubble(this, text);
     			bubble.setLocation(xPos+offset.x, yPos+offset.y);
@@ -415,6 +411,15 @@ public class Graph extends JPanel
     		} else {
     			// do nothing
     		}
+    	}
+    }
+    
+    /** Dispose of displayed bubble if one exists */
+    private void disposeOfBubble(){
+    	if(bubble != null){
+    		bubble.setVisible(false);
+    		bubble.dispose();
+    		bubble = null;
     	}
     }
 
@@ -966,5 +971,12 @@ public class Graph extends JPanel
     	repaint();
     }
     
+    /** enable/disable displaying of bubbles */
+    public void showBubble(boolean displayBubbles){
+    	showBubble = displayBubbles;
+    	if(! showBubble){
+    		disposeOfBubble();
+    	}
+    }
     
 }

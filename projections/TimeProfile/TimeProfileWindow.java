@@ -58,6 +58,7 @@ implements ActionListener, ColorSelectable, Clickable
 	private JButton saveColors;
 	private JButton loadColors;
 	private JCheckBox analyzeSlopesCheckBox;
+	private JCheckBox hideMouseoversCheckBox;
 
 	long intervalSize;
 
@@ -179,9 +180,16 @@ implements ActionListener, ColorSelectable, Clickable
 		saveColors.addActionListener(this);
 		loadColors = new JButton("Load Entry Colors");
 		loadColors.addActionListener(this);
+		
 		analyzeSlopesCheckBox = new JCheckBox("Analyze slope");
 		analyzeSlopesCheckBox.setToolTipText("Select a point on the graph to measure the slope");
 		analyzeSlopesCheckBox.addActionListener(this);
+
+		hideMouseoversCheckBox = new JCheckBox("Hide Mouseovers");
+		hideMouseoversCheckBox.setSelected(false);
+		hideMouseoversCheckBox.setToolTipText("Disable the displaying of information associated with the data under the mouse pointer.");
+		hideMouseoversCheckBox.addActionListener(this);
+		
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
@@ -189,7 +197,9 @@ implements ActionListener, ColorSelectable, Clickable
 		Util.gblAdd(controlPanel, saveColors,     gbc, 2,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, loadColors,     gbc, 3,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 
+		
 		if(ampiTraceOn){            
 			epPanel = new JPanel();
 			epPanel.setLayout(gbl);
@@ -501,6 +511,8 @@ implements ActionListener, ColorSelectable, Clickable
 				displaySlopes = false;
 				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));	
 			}
+		} else if (e.getSource() == hideMouseoversCheckBox) {
+			this.graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
 		} else if (e.getSource() == setRanges) {
 			showDialog();
 		} else if (e.getSource() == saveColors) {

@@ -17,6 +17,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.SwingWorker;
 
@@ -77,8 +78,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == mSave){
-				JPanelToImage si = new JPanelToImage();
-				si.saveToFileChooserSelection(combinedTimelinesPanel, "Save Timeline Image", "./TimelineScreenshot.png");
+				JPanelToImage.saveToFileChooserSelection(combinedTimelinesPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 			}
 			
 		}
@@ -172,8 +172,10 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 
 					// put it in a scrolling pane
 					JScrollPane scrollpane = new JScrollPane(combinedTimelinesPanel);
-					scrollpane.setPreferredSize(new Dimension(width+scrollpane.getVerticalScrollBar().WIDTH,
-							totalHeight + scrollpane.getHorizontalScrollBar().HEIGHT));
+					scrollpane.getVerticalScrollBar();
+					scrollpane.getHorizontalScrollBar();
+					scrollpane.setPreferredSize(new Dimension(width+JScrollBar.WIDTH,
+							totalHeight + JScrollBar.HEIGHT));
 
 					setLayout(scrollpane);
 					pack();

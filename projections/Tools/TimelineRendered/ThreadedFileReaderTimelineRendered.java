@@ -59,8 +59,7 @@ public class ThreadedFileReaderTimelineRendered extends Thread implements MainHa
 		displayPanel.revalidate();
 		displayPanel.doLayout();
 
-		JPanelToImage si = new JPanelToImage();
-		image = si.generateImage(displayPanel);
+		image = JPanelToImage.generateImage(displayPanel);
 		
 		System.out.println("Created image for PE " + PE);
 		

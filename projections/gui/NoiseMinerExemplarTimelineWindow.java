@@ -11,10 +11,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import projections.Tools.Timeline.NonScrollingPanel;
 import projections.analysis.TimelineEvent;
 import projections.analysis.NoiseMiner.EventWindow;
 import projections.analysis.NoiseMiner.NoiseResult;
-import projections.gui.Timeline.NonScrollingPanel;
 
 public class NoiseMinerExemplarTimelineWindow extends JFrame {
 

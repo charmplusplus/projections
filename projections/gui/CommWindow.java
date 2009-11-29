@@ -6,8 +6,8 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import javax.swing.*;
 
+import projections.Tools.Timeline.TimelineWindow;
 import projections.analysis.*;
-import projections.gui.Timeline.TimelineWindow;
 import projections.misc.LogEntryData;
 
 public class CommWindow extends GenericGraphWindow

@@ -14,14 +14,14 @@ import javax.swing.JMenuItem;
 import javax.swing.JRadioButtonMenuItem;
 
 
-import projections.ExtremaTool.OutlierAnalysisWindow;
-import projections.Overview.OverviewWindow;
-import projections.TimeProfile.TimeProfileWindow;
+import projections.Tools.Extrema.ExtremaWindow;
+import projections.Tools.LogFileViewer.LogFileViewerWindow;
+import projections.Tools.Overview.OverviewWindow;
+import projections.Tools.Streaming.StreamingTool;
+import projections.Tools.TimeProfile.TimeProfileWindow;
+import projections.Tools.Timeline.TimelineWindow;
+import projections.Tools.TimelineRendered.TimelineRenderedWindow;
 import projections.analysis.ProjMain;
-import projections.gui.LogFileViewer.LogFileViewerWindow;
-import projections.gui.Timeline.TimelineWindow;
-import projections.gui.TimelineRendered.TimelineRenderedWindow;
-import projections.streaming.StreamingTool;
 
 /* ***************************************************
  * MainMenuManager.java
@@ -387,7 +387,7 @@ implements ActionListener, ItemListener
 				parent.openTool(new UserEventsWindow(parent) );
 			
 			else if (mi == outlierAnalysisMenuItem)	
-				parent.openTool(new OutlierAnalysisWindow(parent) );
+				parent.openTool(new ExtremaWindow(parent) );
 			
 			else if (mi == multirunAnalysisMenuItem)	
 				parent.openTool(new MultiRunWindow(parent) );

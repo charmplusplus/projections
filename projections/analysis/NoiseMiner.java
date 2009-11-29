@@ -1,8 +1,8 @@
 package projections.analysis;
 
 import projections.misc.*;
+import projections.Tools.Timeline.ThreadedFileReader;
 import projections.gui.*;
-import projections.gui.Timeline.ThreadedFileReader;
 
 import java.io.*;
 import java.text.DecimalFormat;

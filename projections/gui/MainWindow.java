@@ -195,8 +195,8 @@ implements ScalePanel.StatusDisplay
 			ProjectionsWindow w = iter.next();
 			if (w instanceof GraphWindow) {
 				((GraphWindow)w).refreshDisplay();
-			} else if (w instanceof projections.gui.Timeline.TimelineWindow) {
-				((projections.gui.Timeline.TimelineWindow)w).refreshDisplay(false);
+			} else if (w instanceof projections.Tools.Timeline.TimelineWindow) {
+				((projections.Tools.Timeline.TimelineWindow)w).refreshDisplay(false);
 			} else { 
 				w.repaint();
 			}

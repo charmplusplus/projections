@@ -3,7 +3,7 @@ package projections.analysis;
 import java.util.*;
 import java.lang.Comparable;
 
-import projections.gui.Timeline.TimelineMessage;
+import projections.Tools.Timeline.TimelineMessage;
 
 /** A class that represents an event from the log, Eventually an EntryMethod object or UserEventObject will be created from this data */
 public class TimelineEvent implements Comparable

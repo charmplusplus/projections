@@ -11,7 +11,7 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-import projections.gui.Timeline.ImageFilter;
+import projections.Tools.Timeline.ImageFilter;
 
 /**
  * Renders & Saves images for any displayed JPanel. The JPanel must already be layed out.

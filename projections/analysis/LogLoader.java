@@ -6,10 +6,10 @@ import java.util.*;
 
 import javax.swing.*;
 
+import projections.Tools.Timeline.ThreadedFileReader;
+import projections.Tools.Timeline.TimelineMessage;
+import projections.Tools.Timeline.UserEventObject;
 import projections.gui.*;
-import projections.gui.Timeline.ThreadedFileReader;
-import projections.gui.Timeline.TimelineMessage;
-import projections.gui.Timeline.UserEventObject;
 import projections.misc.*;
 
 /** This class reads in .log files and turns them into a timeline.  */

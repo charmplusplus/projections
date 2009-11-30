@@ -90,7 +90,9 @@ public class DataSource2D extends DataSource
     				} else {
     					text[offset+2] = "No Average";
     				}
-    				text[offset+3] = "Total: " + total;
+					DecimalFormat df = new DecimalFormat();
+					df.setMaximumFractionDigits(2);
+    				text[offset+3] = "Total: " + df.format(total);
     			}
     			return text;
     		}

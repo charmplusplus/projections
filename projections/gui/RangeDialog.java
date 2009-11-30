@@ -140,7 +140,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 
 		if(isInputValid()){
 			//			System.out.println("Input is valid");
-			totalTimeLabel.setText(U.t(getSelectedTotalTime()));
+			totalTimeLabel.setText(U.humanReadableString(getSelectedTotalTime()));
 			if(toolSpecificPanel != null){
 				toolSpecificPanel.updateFields();
 			}
@@ -275,15 +275,15 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		timePanel = new JPanel();
 		timePanel.setLayout(gbl);
 		validTimeRangeLabel = new JLabel("Valid Time Range = " +
-				U.t(0) + " to " +
-				U.t(MainWindow.runObject[myRun].getTotalTime()), 
+				U.humanReadableString(0) + " to " +
+				U.humanReadableString(MainWindow.runObject[myRun].getTotalTime()), 
 				JLabel.LEFT);
 		startTextLabel = new JLabel("Start Time :", JLabel.LEFT);
 		startTimeField = new TimeTextField(" ", 12);
 		endTextLabel = new JLabel("End Time :", JLabel.LEFT);
 		endTimeField = new TimeTextField(" ", 12);
 		totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
-		totalTimeLabel = new JLabel(U.t(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
+		totalTimeLabel = new JLabel(U.humanReadableString(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
 
 		if (disableTimeRange) {
 			startTimeField.setEnabled(false);	    
@@ -535,7 +535,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			long start = getStartTime();
 			long end = getEndTime();
 			history.add(start, end);
-			String historyString = U.t(start) + " to " + U.t(end);
+			String historyString = U.humanReadableString(start) + " to " + U.humanReadableString(end);
 			historyList.insertItemAt(historyString,0);
 			historyList.setSelectedIndex(0);
 		} 

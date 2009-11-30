@@ -14,6 +14,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.text.DecimalFormat;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -46,20 +47,18 @@ public class Graph extends JPanel
     private DataSource dataSource;
     private XAxis xAxis;
     private YAxis yAxis;
-    private int originX;
-    private int originY;
     private double xscale, yscale;
     
-    private static final int FONT_SIZE = 12;   
-    
-    private static final double PI = Math.PI;
-
+      
     private Color foreground;
     private Color background;
     
-    private Font font = null;
-    private FontMetrics fm = null;
-    
+    private Font fontTitles;
+    private Font fontLabels;
+    private FontMetrics fmTitles;
+    private FontMetrics fmLabels;
+
+
     // number of pixels per value
     double pixelincrementX, pixelincrementY;
     // number of pixels per tick
@@ -74,12 +73,9 @@ public class Graph extends JPanel
     // for stacked data
     private double[][] stackArray;
     private double maxSumY;
-
-    private int width;
-    private int w,h;
-
-    private int baseWidth = -1;
-    private int baseHeight = -1;
+  
+    
+    private final int spaceBetweenYValuesAndAxis = 10;
     
     private double maxvalueX;
     private double maxvalueY;
@@ -99,7 +95,8 @@ public class Graph extends JPanel
     public Graph()
     {
 	setPreferredSize(new Dimension(400,300));	
-	
+	initFonts();
+
 	GraphType = BAR;	   // default GraphType is BAR
 	GraphStacked = true;    // default GraphType is STACKED
 	stackArray = null;
@@ -121,7 +118,8 @@ public class Graph extends JPanel
     public Graph(Color background, Color foreground)
     {
 	setPreferredSize(new Dimension(400,300));	
-	
+	initFonts();
+
 	GraphType = BAR;	   // default GraphType is BAR
 	GraphStacked = true;    // default GraphType is STACKED
 	stackArray = null;
@@ -136,8 +134,9 @@ public class Graph extends JPanel
 	this.background = background;
 	this.foreground = foreground;
 
+	
+	
     }
-    
     
     
     /** Special constructor. This can only be called from a projections tool!!! */
@@ -146,13 +145,25 @@ public class Graph extends JPanel
     {
 	// call default constructor
 	this();
-	
+	initFonts();
+
 	xAxis = x;
 	yAxis = y;
 	dataSource = d;
 	createStackArray();
     }
 
+    
+    
+    private void initFonts(){
+    	// The font used for the Chart title and x and y axis titles:
+    	fontTitles = new Font("SansSerif",Font.BOLD, 16);
+
+    	// The font used for the numbers on the x and y axes:
+    	fontLabels = new Font("SansSerif",Font.PLAIN,12);
+    }
+    
+    
     public Dimension getMinimumSize() {
 	return new Dimension(400,300);
     }
@@ -185,34 +196,34 @@ public class Graph extends JPanel
 
     public void setData(DataSource d, XAxis x, YAxis  y)
     {
-        xAxis = x;
-        yAxis = y;
-        dataSource = d;
-	createStackArray();
-	repaint();
+    	xAxis = x;
+    	yAxis = y;
+    	dataSource = d;
+    	createStackArray();
+    	repaint();
     }
 
     public void setData(DataSource d)
     {
-        dataSource = d;
-	createStackArray();
-	repaint();
+    	dataSource = d;
+    	createStackArray();
+    	repaint();
     }
 
     public void setScaleX(double val) {
-	xscale = val;
-	setPreferredSize(new Dimension((int)(baseWidth*xscale),
-				       (int)(baseHeight*yscale)));
-	revalidate();
-	repaint();
+    	xscale = val;
+    	setPreferredSize(new Dimension((int)(baseWidth()*xscale),
+    			(int)(baseHeight()*yscale)));
+    	revalidate();
+    	repaint();
     }
 
     public void setScaleY(double val) {
-	yscale = val;
-	setPreferredSize(new Dimension((int)(baseWidth*xscale),
-				       (int)(baseHeight*yscale)));
-	revalidate();
-	repaint();
+    	yscale = val;
+    	setPreferredSize(new Dimension((int)(baseWidth()*xscale),
+    			(int)(baseHeight()*yscale)));
+    	revalidate();
+    	repaint();
     }
 
     private void createStackArray() {
@@ -253,11 +264,11 @@ public class Graph extends JPanel
      *  than ideal for the latter.
      */
     private int getXValue(int xPos) {
-    	if( (xPos > originX) && (xPos < width+originX)) {
+    	if( (xPos > originX()) && (xPos < availableWidth()+originX())) {
     		// get the expected value
-    		int displacement = xPos - originX;
+    		int displacement = xPos - originX();
     		int whichBar = (int)(displacement/pixelincrementX);
-    		double x1 = originX + (whichBar*pixelincrementX) + (pixelincrementX/2.0);
+    		double x1 = originX() + (whichBar*pixelincrementX) + (pixelincrementX/2.0);
     		if ((GraphType == BAR) || (GraphType == AREA)) {
             	long lowerPixelForBar = Math.round(x1-(barWidth/2.0));
             	long upperPixelForBar = Math.round(x1+(barWidth/2.0));
@@ -285,13 +296,13 @@ public class Graph extends JPanel
      */
     private int getYValue(int xVal, int yPos) {
     	if ( (xVal >= 0)  &&
-    		 (yPos < originY) && (yPos > 30) && 
-    		 (stackArray != null) && 
-    		 (xVal < stackArray.length) ) {
+    			(yPos < originY()) && (yPos > topMargin()) && 
+    			(stackArray != null) && 
+    			(xVal < stackArray.length) ) {
     		int numY = dataSource.getValueCount();
     		int y;
     		for (int k=0; k<numY; k++) {
-    			y = originY - (int)(stackArray[xVal][k]*pixelincrementY);
+    			y = originY() - (int)(stackArray[xVal][k]*pixelincrementY);
     			if (yPos > y) {
     				return k;
     			}
@@ -302,31 +313,20 @@ public class Graph extends JPanel
 
     // ***** Painting Routines *****
     protected void paintComponent(Graphics g) {
-	    // Let UI delegate paint first 
-	    // (including background filling, if I'm opaque)
-	    super.paintComponent(g); 
-	    // paint my contents next....
+	    super.paintComponent(g);    
+    	fmLabels = g.getFontMetrics(fontLabels);
+    	fmTitles = g.getFontMetrics(fontTitles);
 
-	    if (font == null) {
-    		font = new Font("Times New Roman",Font.BOLD,FONT_SIZE);
-    		g.setFont(font);
-    		fm = g.getFontMetrics(font);
-    	}
-    	drawDisplay(g);
+    	drawDisplay((Graphics2D) g);
     }
 
     public void print(Graphics pg)
     {
-	if (font == null) {
-	    font = new Font("Times New Roman",Font.BOLD,FONT_SIZE);
-	    pg.setFont(font);
-	    fm = pg.getFontMetrics(font);
-	}
 	Color oldBackground = MainWindow.runObject[myRun].background;
 	Color oldForeground = MainWindow.runObject[myRun].foreground;
 	MainWindow.runObject[myRun].background = Color.white;
 	MainWindow.runObject[myRun].foreground = Color.black;
-	drawDisplay(pg);
+	drawDisplay((Graphics2D) pg);
 	MainWindow.runObject[myRun].background = oldBackground;
 	MainWindow.runObject[myRun].foreground = oldForeground;
     }
@@ -440,51 +440,40 @@ public class Graph extends JPanel
     }
 
 
-    private void drawDisplay(Graphics _g)
+    private void drawDisplay(Graphics2D g)
     {
-	Graphics2D g = (Graphics2D)_g;
 	
 	g.setBackground(background);
 	g.setColor(foreground);
 
-	w = getWidth();
-	h = getHeight();
-	g.clearRect(0, 0, w, h);
+	g.clearRect(0, 0, getWidth(), getHeight());
 	
 	// if there's nothing to draw, don't draw anything!!!
 	if (dataSource == null) {
 	    return;
 	}
-	
-	// xOffset and yOffsets are determined by the scrollbars that *may*
-	// be asked to control this drawing component.
-	// **CW** not active as of now.
-	int xOffset = 0;
-	int yOffset = 0;
 
-	// baseWidth is whatever the width of the parent window at the time.
-	// xscale will control just how much more of the graph one can see.
-	baseWidth = getParent().getWidth();
-	baseHeight = getParent().getHeight();
 
 	String title = xAxis.getTitle();
+	g.setFont(fontTitles);
+
 	g.drawString(title,
-		     (w-fm.stringWidth(title))/2 + xOffset, 
-		     h - 10 + yOffset);
+		     (getWidth()-fmTitles.stringWidth(title))/2, 
+		      xAxisTitleBaseline() );
     
 	// display Graph title
 	title = dataSource.getTitle();
 	g.drawString(title,
-		     (w-fm.stringWidth(title))/2 + xOffset, 
-		     10 + fm.getHeight() + yOffset);
+		     (getWidth()-fmTitles.stringWidth(title))/2, 
+		     chartTitleBaseline() );
 
 	// display yAxis title
 	title = yAxis.getTitle();
-	g.rotate(-PI/2);
+	g.rotate(-Math.PI/2);
 	g.drawString(title, 
-		     -(h+fm.stringWidth(title))/2 + yOffset, 
-		     fm.getHeight() + xOffset);
-	g.rotate(PI/2);
+		     -(getHeight()+fmTitles.stringWidth(title))/2, 
+		     fmTitles.getHeight() );
+	g.rotate(Math.PI/2);
 
 	// total number of x values
 	maxvalueX = dataSource.getIndexCount();
@@ -497,40 +486,30 @@ public class Graph extends JPanel
 	    maxvalueY = yAxis.getMax();                               
 	}
 
-	originX = fm.getHeight()*2 + 
-	    fm.stringWidth(""+(long)maxvalueY);
-	/*  This is silly, we never wanna draw non-marked y values.
-	originX = fm.getHeight()*2 + 
-	    fm.stringWidth(yAxis.getValueName(maxvalueY));
-	*/
-	originY = h - (30 + fm.getHeight()*2);
-
 	if ((xAxis != null) && (yAxis != null)) {
-	    drawXAxis(g);
-	    drawYAxis(g);
-	    if (GraphType == BAR) {
-		drawBarGraph(g);
-	    } else if (GraphType == AREA) {
-		drawAreaGraph(g);
-	    } else {
-		drawLineGraph(g);
-	    }
+		drawXAxis(g);
+		drawYAxis(g);
+		if (GraphType == BAR) {
+			drawBarGraph(g);
+		} else if (GraphType == AREA) {
+			drawAreaGraph(g);
+		} else {
+			drawLineGraph(g);
+		}
 	}
-	
-	
+
+
     }
 
-    private void drawXAxis(Graphics2D g) {
 
-	// width available for drawing the graph
-    	width = (int)((baseWidth-30-originX)*xscale);
+	private void drawXAxis(Graphics2D g) {
 
 	// *NOTE* pixelincrementX = # pixels per value.
-	pixelincrementX = (width)/maxvalueX;
+	pixelincrementX = availableWidth()/maxvalueX;
 	setBestIncrements(X_AXIS, pixelincrementX, (int)maxvalueX);
 
 	// draw xAxis
-	g.drawLine(originX, originY, width+originX, originY);
+	g.drawLine(originX(), originY(), availableWidth()+originX(), originY());
 
       	int mini = 0;
 	int maxi = (int)maxvalueX;
@@ -538,75 +517,102 @@ public class Graph extends JPanel
 	int curx;
 	String s;
 
+	g.setFont(fontLabels);
+	
 	// drawing xAxis divisions
 	// based on the prior algorithm, it is guaranteed that the number of
 	// iterations is finite since the number of pixels per tick will
 	// never be allowed to be too small.
 	for (int i=mini;i<maxi; i+=valuesPerTickX) {
-	    curx = originX + (int)(i*pixelincrementX);
-	    // don't attempt to adjust the tick positions midway unless we're
-	    // on a one-to-one mapping.
-	    if (valuesPerTickX == 1) {
-		curx += (int)(tickIncrementX / 2);
-	    }
-	    // labels have higher lines.
-	    if (i % valuesPerLabelX == 0) {
-         	g.drawLine(curx, originY+5, curx, originY-5);
-		s = xAxis.getIndexName(i);
-		g.drawString(s, curx-fm.stringWidth(s)/2, originY + 10 + 
-			     fm.getHeight());
-	    } else {
-         	g.drawLine(curx, originY+2, curx, originY-2);
-	    }
+		curx = originX() + (int)(i*pixelincrementX);
+		// don't attempt to adjust the tick positions midway unless we're
+		// on a one-to-one mapping.
+		if (valuesPerTickX == 1) {
+			curx += (int)(tickIncrementX / 2);
+		}
+		// labels have higher lines.
+		if (i % valuesPerLabelX == 0) {
+			g.drawLine(curx, originY()+5, curx, originY()-5);
+			s = xAxis.getIndexName(i);
+			g.drawString(s, curx-fmLabels.stringWidth(s)/2, xAxisValuesBaseline() );
+		} else {
+			g.drawLine(curx, originY()+2, curx, originY()-2);
+		}
 	}
-    }
+	}
 
     private void drawYAxis(Graphics2D g) {
 
-	// draw yAxis
-	g.drawLine(originX, originY, originX , 30);
-	
-	pixelincrementY = (originY-30) / maxvalueY;
-	setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
-	int sw = fm.getHeight();
-	int cury;
-	String yLabel;
-	// drawing yAxis divisions
-      	for (long i=0; i<=maxvalueY; i+=valuesPerTickY) {
-	    cury = originY - (int)(i*pixelincrementY);
-            if (i % valuesPerLabelY == 0) {
-		g.drawLine(originX+5, cury, originX-5,cury);
-		yLabel = "" + i; 
-		g.drawString(yLabel, originX-fm.stringWidth(yLabel)-5, 
-			     cury + sw/2);
-	    } else {
-            	g.drawLine(originX+2, cury, originX-2, cury);
-	    }
-	}
+    	// draw yAxis
+    	g.drawLine(originX()-1, originY(), originX()-1 , topMargin());
+
+    	g.setFont(fontLabels);
+    	
+    	pixelincrementY = (originY()-topMargin()) / maxvalueY;
+    	setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
+    	
+    	FontMetrics fm = g.getFontMetrics(fontLabels);
+    	
+    	int sw = fm.getHeight();
+    	int cury;
+    	String yLabel;
+    	// drawing yAxis divisions
+    	for (long i=0; i<=maxvalueY; i+=valuesPerTickY) {
+    		cury = originY() - (int)(i*pixelincrementY);
+    		if (i % valuesPerLabelY == 0) {
+    			g.drawLine(originX()+5-1, cury, originX()-5-1,cury);
+    			yLabel = "" + i; 
+    			g.drawString(yLabel, originX()-1-fm.stringWidth(yLabel)-spaceBetweenYValuesAndAxis, 
+    					cury + sw/2);
+    		} else {
+    			g.drawLine(originX()+2-1, cury, originX()-2-1, cury);
+    		}
+    	}
     }
 
     private void drawOverlayedPolynomial(Graphics2D g) {
     	// Plot the polynomial
     	if(polynomialToOverlay != null && polynomialToOverlay.length>0){
 
+    		DecimalFormat format = new DecimalFormat();
+    		format.setMinimumFractionDigits(0);
+    		format.setMaximumFractionDigits(2);
+    		
 			g.setColor(Color.orange);
     		
     		String info = " ";
+    		
+    		if(polynomialToOverlay[polynomialToOverlay.length-1]<0.0)
+    			info += "- ";
+
 			for(int d=polynomialToOverlay.length-1; d>=0; d--){
-				info += polynomialToOverlay[d] ;
+				
+				double val = polynomialToOverlay[d];
+				if(val >= 0.0){
+					info += format.format(val);
+				} else {
+					info += format.format(-val);
+				}
 				
 				if(d==0)
 					info += "";
 				else if(d==1)
 					info += " x";
 				else
-					info += " x^" + d;
+					info += " x^" + format.format(d);
 					
 				
-				if(d>0)
-					info += " + ";
+				if(d>0){
+					if(polynomialToOverlay[d-1]>=0.0)
+						info += " + ";
+					else
+						info += " - ";
+				}
 			}
-			g.drawString(info, w-fm.stringWidth(info) - 50 ,  20 );
+			
+	    	FontMetrics fm = g.getFontMetrics(fontTitles);
+	    	g.setFont(fontTitles);
+	    	g.drawString(info, getWidth()-fm.stringWidth(info) - 50 ,  20 );
 
 			g.setStroke(new BasicStroke(4f));
 			g.setColor(Color.orange);
@@ -616,16 +622,16 @@ public class Graph extends JPanel
     		for(int x=0; x< getWidth(); x++){
 
     			//    bar i center pixel coordinate:	
-    			//       	originX + (int)(i*pixelincrementX)
+    			//       	originX() + (int)(i*pixelincrementX)
     			//		
     			//    pixel x equates to bar:
-    			//          (x-originX)/pixelincrementX
+    			//          (x-originX())/pixelincrementX
 
     			int x1_px = x;
-    			double x1 = ((double)(x1_px-originX))/pixelincrementX;
+    			double x1 = ((double)(x1_px-originX()))/pixelincrementX;
 
     			int x2_px = x+1;
-    			double x2 = ((double)(x2_px-originX))/pixelincrementX;
+    			double x2 = ((double)(x2_px-originX()))/pixelincrementX;
 
     			double y1 = 0.0;
     			double y2 = 0.0;
@@ -634,17 +640,17 @@ public class Graph extends JPanel
     				y2 += polynomialToOverlay[d]*Math.pow(x2,d);
     			}
 
-    			int y1_px = originY - (int)(y1*pixelincrementY);
-    			int y2_px = originY - (int)(y2*pixelincrementY);
+    			int y1_px = originY() - (int)(y1*pixelincrementY);
+    			int y2_px = originY() - (int)(y2*pixelincrementY);
 
-    			if(  y1_px < (originY+2) && 
-    				 y2_px < (originY+2) && 
-    				 y1_px > (30-2) && 
-    				 y2_px > (30-2) &&
-    				 x1_px > originX-2 &&
-    				 x2_px > originX-2 &&
-    				 x1_px < (width+originX+2) &&
-    				 x2_px < (width+originX+2)) {
+    			if(  y1_px < (originY()+2) && 
+    				 y2_px < (originY()+2) && 
+    				 y1_px > (topMargin()-2) && 
+    				 y2_px > (topMargin()-2) &&
+    				 x1_px > originX()-2 &&
+    				 x2_px > originX()-2 &&
+    				 x1_px < (availableWidth()+originX()+2) &&
+    				 x2_px < (availableWidth()+originX()+2)) {
     				g.drawLine(x1_px, y1_px, x2_px, y2_px);
     			}
 
@@ -680,18 +686,18 @@ public class Graph extends JPanel
     			for (int k=0; k<numY; k++) {
     				// calculating lowerbound of box, which StackArray
     				// allready contains
-    				y = originY - (int)(stackArray[i][k]*pixelincrementY);
+    				y = originY() - (int)(stackArray[i][k]*pixelincrementY);
     				g.setColor(dataSource.getColor(k));
     				// using data[i] to get the height of this bar
     				if (valuesPerTickX == 1) {
-    					g.fillRect(originX + (int)(i*pixelincrementX +
+    					g.fillRect(originX() + (int)(i*pixelincrementX +
     							tickIncrementX/2 -
     							barWidth/2), y,
     							(int)barWidth,
     							(int)(data[k]*pixelincrementY));
 
     				} else {
-    					g.fillRect(originX + (int)(i*pixelincrementX), y, 
+    					g.fillRect(originX() + (int)(i*pixelincrementX), y, 
     							(int)((i+1)*pixelincrementX) - 
     							(int)(i*pixelincrementX), 
     							(int)(data[k]*pixelincrementY));
@@ -730,15 +736,15 @@ public class Graph extends JPanel
     			// now display the graph
     			for(int k=0; k<numY; k++) {
     				g.setColor(dataSource.getColor((int)temp[k][0]));
-    				y = (originY-(int)(temp[k][1]*pixelincrementY));
+    				y = (originY()-(int)(temp[k][1]*pixelincrementY));
     				if (valuesPerTickX == 1) {
-    					g.fillRect(originX + (int)(i*pixelincrementX +
+    					g.fillRect(originX() + (int)(i*pixelincrementX +
     							tickIncrementX/2 -
     							barWidth/2), y,
     							(int)barWidth,
     							(int)(temp[k][1]*pixelincrementY));
     				} else {				   
-    					g.fillRect(originX + (int)(i*pixelincrementX), y,
+    					g.fillRect(originX() + (int)(i*pixelincrementX), y,
     							(int)((i+1)*pixelincrementX) -
     							(int)(i*pixelincrementX),
     							(int)(temp[k][1]*pixelincrementY));
@@ -755,8 +761,8 @@ public class Graph extends JPanel
 		    sum += data[j];
 		}
 		sum /= numY;
-		y = (int)(originY - (int)(sum*pixelincrementY));
-		g.fillRect(originX + (int)(i*pixelincrementX),y,
+		y = (int)(originY() - (int)(sum*pixelincrementY));
+		g.fillRect(originX() + (int)(i*pixelincrementX),y,
 			   (int)((i+1)*pixelincrementX) -
 			   (int)(i*pixelincrementX),
 			   (int)(sum*pixelincrementY));
@@ -790,12 +796,12 @@ public class Graph extends JPanel
 		dataSource.getValues(i,data);
 	    }
 	    //calculate x value
-	    x2 = originX + (int)(i*pixelincrementX) + 
+	    x2 = originX() + (int)(i*pixelincrementX) + 
 		(int)(pixelincrementX/2);    
 	 
 	    for (int j=0; j<yValues; j++) {
 		g.setColor(dataSource.getColor(j));
-		y2[j] = (originY - (int)(data[j]*pixelincrementY));
+		y2[j] = (originY() - (int)(data[j]*pixelincrementY));
 		//is there any other condition that needs to be checked?
 		if(x1 != -1)	
 		    g.drawLine(x1,y1[j],x2,y2[j]);
@@ -837,20 +843,20 @@ public class Graph extends JPanel
 		dataSource.getValues(idx,data);
 
 		//calculate x & y pixel values
-		xPixel = originX + (int)(idx*pixelincrementX) + 
+		xPixel = originX() + (int)(idx*pixelincrementX) + 
 		    (int)(pixelincrementX/2);    
 		// **CW** NOTE will need some refactoring to prevent
 		// recomputation of the prefix sum each time we go through
 		// the Y values.
 		prefixSum(data);
-	    	yPixel = (originY - (int)(data[layer]*pixelincrementY) +
+	    	yPixel = (originY() - (int)(data[layer]*pixelincrementY) +
 				offsetY);
 
 		// if first point, add the baseline point before adding
 		// the first point.
 		if (idx == 0) {
 		    // just so it does not overwrite the Axis line.
-		    polygon.addPoint(xPixel, originY+offsetY);
+		    polygon.addPoint(xPixel, originY()+offsetY);
 		}
 		// add new point to polygon
 		polygon.addPoint(xPixel, yPixel);
@@ -858,7 +864,7 @@ public class Graph extends JPanel
 		// the last point.
 		if (idx == xValues-1) {
 		    // just so it does not overwrite the Axis line.
-		    polygon.addPoint(xPixel, originY+offsetY);
+		    polygon.addPoint(xPixel, originY()+offsetY);
 		}
 	    }
 	    // draw the filled polygon.
@@ -898,12 +904,12 @@ public class Graph extends JPanel
 
 	int labelWidth = 0;
 	while (true) {
-	    if (axis == X_AXIS) {
-		labelWidth = 
-		    fm.stringWidth(xAxis.getIndexName((int)(maxValue-1)));
-	    } else {
-		labelWidth = fm.getHeight();
-	    }
+	
+    	if (axis == X_AXIS) {
+    		labelWidth = fmLabels.stringWidth(xAxis.getIndexName((int)(maxValue-1)));
+    	} else {
+    		labelWidth = fmLabels.getHeight();
+    	}
 	    // is the number of pixels to display a label too small?
 	    if (labelWidth > (pixelsPerValue*labelValue*0.8)) {
 		labelValue = getNextLabelValue(index);
@@ -1024,4 +1030,60 @@ public class Graph extends JPanel
     	}
     }
     
+    
+	/** Return the width of the parent window. xscale will control just how much more of the graph one can see. */
+	int baseWidth(){
+		return getParent().getWidth();
+	}
+
+	int baseHeight(){
+		return getParent().getHeight();
+	}
+
+	/** The x pixel coordinate of the bottom left intersection of the axis lines */
+	int originX(){
+		return fmLabels.stringWidth(""+(long)maxvalueY) + spaceBetweenYValuesAndAxis + fmLabels.getHeight()*2;
+	}
+
+	/** The y pixel coordinate of the bottom left intersection of the axis lines */
+	int	originY(){
+		return xAxisTitleBaseline() - fmLabels.getHeight() - spaceBetweenXValuesAndLabel() - fmLabels.getHeight() - spaceBetweenAxisAndXValues();
+	}
+	
+	int availableWidth(){
+		// width available for drawing the graph
+		int rightMargin = 40;
+		return (int)((baseWidth()-rightMargin-originX())*xscale);
+	}
+
+	/** Return the number of pixels at the top above the top of the y axis. The chart title is drawn in this region. */
+	int topMargin(){
+		return 30 + fmTitles.getHeight();
+	}
+	
+	/** The y pixel coordinate of the baseline for the chart title displayed at the top of the chart */
+    private int chartTitleBaseline() {
+		int pxAboveTopOfText = (topMargin() - fmTitles.getHeight()) / 2;
+		return pxAboveTopOfText + fmTitles.getHeight();
+	}
+
+   private int xAxisTitleBaseline() {
+		int pxBelowText = 5;
+		return getHeight() - pxBelowText;  	   
+   }
+
+   private int xAxisValuesBaseline() {
+	   return originY() + spaceBetweenAxisAndXValues() + fmLabels.getHeight();  	   
+   }
+   
+
+   private int spaceBetweenAxisAndXValues(){
+	   return 10;
+   }
+
+   int spaceBetweenXValuesAndLabel(){
+	   return 10;
+   }
+
+
 }

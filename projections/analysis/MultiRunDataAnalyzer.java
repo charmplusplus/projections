@@ -486,7 +486,7 @@ public class MultiRunDataAnalyzer {
 	switch (dataType) {
 	case MultiRunData.TYPE_TIME:
 	    returnStrings[3] = "Exec Time: " + 
-		U.t((long)outputData[xVal][yVal]);
+		U.humanReadableString((long)outputData[xVal][yVal]);
 	    break;
 	case MultiRunData.TYPE_TIMES_CALLED:
 	    returnStrings[3] = "Times called: " + (long)outputData[xVal][yVal];

@@ -47,13 +47,13 @@ public class PoseRTDopDisplayPanel extends JPanel
 			     int startInterval, int endInterval) {
 	DataSource2D datasource = 
 	    new DataSource2D("Degree of Parallism: " +
-			     U.t(startInterval*intervalSize) +
+			     U.humanReadableString(startInterval*intervalSize) +
 			     " to " +
-			     U.t(endInterval*intervalSize),
+			     U.humanReadableString(endInterval*intervalSize),
 			     data, this);
 	datasource.setColors(new Color[] { Color.green, Color.blue });
 	XAxisFixed xaxis = new XAxisFixed("Time: interval size = " +
-					  U.t(intervalSize),
+					  U.humanReadableString(intervalSize),
 					  "Time");
 	xaxis.setLimits((double)startInterval*intervalSize,
 			intervalSize);

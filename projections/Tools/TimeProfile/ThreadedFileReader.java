@@ -107,6 +107,7 @@ public class ThreadedFileReader extends Thread  {
 
 		accumulateIntoShared();
 	
+		
 		// Release any unneeded memory	
 		mySystemUsageData = null; 
 		mySystemMsgsData = null;

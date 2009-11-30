@@ -243,7 +243,7 @@ public class UserEventsWindow extends GenericGraphWindow
 	String[] rString = new String[3];
 	
 	rString[0] = "Name: " + activityNames[yVal];
-	rString[1] = "Time Spent: " + U.t((long)(graphData[xVal][yVal]));
+	rString[1] = "Time Spent: " + U.humanReadableString((long)(graphData[xVal][yVal]));
 	rString[2] = "Count: " + numCalls[xVal][yVal];
 	return rString;
     }	

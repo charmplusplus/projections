@@ -10,7 +10,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
-import java.util.Date;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
@@ -74,11 +73,11 @@ implements ActionListener, ColorSelectable, Clickable
 	private JCheckBox hideMouseoversCheckBox;
 
 	long intervalSize;
-
 	int startInterval;
-
 	int endInterval;
 
+	long startTime;
+	
 	// data used for intervalgraphdialog
 	OrderedIntList processorList;
 
@@ -116,8 +115,7 @@ implements ActionListener, ColorSelectable, Clickable
 
 	public TimeProfileWindow(MainWindow mainWindow) {
 		super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
-		setGraphSpecificData();
-
+		
 		this.mainWindow = mainWindow;
 
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
@@ -235,8 +233,7 @@ implements ActionListener, ColorSelectable, Clickable
 	}
 
 	public void setGraphSpecificData() {
-		setXAxis("Time in us","");
-		setYAxis("Entry point execution time", "us");
+	
 	}
 
 
@@ -253,7 +250,8 @@ implements ActionListener, ColorSelectable, Clickable
 			startInterval = (int)intervalPanel.getStartInterval();
 			endInterval = (int)intervalPanel.getEndInterval();
 			processorList = dialog.getSelectedProcessors();
-
+			startTime = dialog.getStartTime();
+			
 			//set range values for time profile window
 			if(ampiTraceOn){
 				ampiGraphPanel.getRangeVals(dialog.getStartTime(),dialog.getEndTime(),
@@ -272,8 +270,6 @@ implements ActionListener, ColorSelectable, Clickable
 
 					if( MainWindow.runObject[myRun].hasLogFiles() || MainWindow.runObject[myRun].hasSumDetailFiles() ) {
 						// Do parallel loading because we have full logs
-
-						Date time1  = new Date();
 
 						// Create a list of worker threads
 						LinkedList<Thread> readyReaders = new LinkedList<Thread>();
@@ -316,16 +312,6 @@ implements ActionListener, ColorSelectable, Clickable
 							}	
 						}
 
-						Date time4  = new Date();
-
-						double totalTime = ((time4.getTime() - time1.getTime())/1000.0);
-						System.out.println("Time to read " + threadManager.numInitialThreads +  
-								" input files(using " + threadManager.numConcurrentThreads + " concurrent threads): " + 
-								totalTime + "sec");
-						//			    	System.out.println("Time to setup threads : " + ((time2.getTime() - time1.getTime())/1000.0) + "sec");
-						//			    	System.out.println("Time to load logs : " + ((double)(time3.getTime() - time2.getTime())/1000.0) + "sec");
-						//			    	System.out.println("Time to accumulate results : " + ((double)(time4.getTime() - time3.getTime())/1000.0) + "sec");
-						//			    	System.out.println("Logs loaded per second : " + (numProcessors / totalTime) );
 
 					}
 					else if( MainWindow.runObject[myRun].hasSumFiles()){
@@ -376,8 +362,39 @@ implements ActionListener, ColorSelectable, Clickable
 							}
 						}					
 					}
+					
+					// Scale raw data into percents
+					for (int interval=0; interval<graphData.length; interval++) {
+						for(int e=0; e< graphData[interval].length; e++){
+							graphData[interval][e] = graphData[interval][e] * 100.0 / ((double)intervalSize * (double)numProcessors);		
+						}
+					}
+					
+					// Filter Out any bad data
+					for (int interval=0; interval<graphData.length; interval++) {
+						boolean valid = true;
+						double sumForInterval = 0.0;
+						for(int e=0; e< graphData[interval].length; e++){
+							sumForInterval += graphData[interval][e];
+							if(graphData[interval][e] < 0.0){
+								valid = false;
+							}
+						}
+						if(sumForInterval > 105.0){
+							valid = false;
+						}
 
+						if(!valid){
+							System.err.println("Time Profile found bad data for interval " + interval + ". The data for bad intervals will be zero-ed out. This problem is either a log file corruption issue, or a bug in Projections.");
+							for(int e=0; e< graphData[interval].length; e++){
+								graphData[interval][e] = 0.0;
+							}
+						}
+						
+					}
 
+					
+					
 					// set the exists array to accept non-zero 
 					// entries only have initial state also 
 					// display all existing data. Only do this 
@@ -450,10 +467,9 @@ implements ActionListener, ColorSelectable, Clickable
 				}
 
 			}
-			setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
-					startInterval, 1.0);
-			setYAxis("Entry point execution time", "us");
-			setDataSource("Time Profile Graph", outputData, 
+			setYAxis("Percentage Utilization", "%");		
+			setXAxis("Time", "Time", startTime, intervalSize);
+			setDataSource("Time Profile", outputData, 
 					outColors, thisWindow);
 			refreshGraph();
 		}
@@ -481,22 +497,22 @@ implements ActionListener, ColorSelectable, Clickable
 		String[] rString = new String[4];
 
 		rString[0] = "Time Interval: " + 
-		U.t((xVal+startInterval)*intervalSize) + " to " +
-		U.t((xVal+startInterval+1)*intervalSize);
+		U.humanReadableString((xVal+startInterval)*intervalSize) + " to " +
+		U.humanReadableString((xVal+startInterval+1)*intervalSize);
 		rString[1] = "Chare Name: " + epClassName;
 		rString[2] = "Entry Method: " + epName;
-		rString[3] = "Execution Time = " + U.t((long)(outputData[xVal][yVal]));
+		rString[3] = "Execution Time = " + U.humanReadableString((long)(outputData[xVal][yVal]));
 		//deal with idle and overhead time
 		if(yVal == outputData[xVal].length -2)
 		{
 			rString[1] = "";
 			rString[2] = "Overhead";
-			rString[3] = "Time = " + U.t((long)(outputData[xVal][yVal]));
+			rString[3] = "Time = " + U.humanReadableString((long)(outputData[xVal][yVal]));
 		}else if(yVal == outputData[xVal].length -1)
 		{
 			rString[1] = "";
 			rString[2] = "Idle time";
-			rString[3] = "Time = " + U.t((long)(outputData[xVal][yVal]));
+			rString[3] = "Time = " + U.humanReadableString((long)(outputData[xVal][yVal]));
 		}
 		return rString;
 	}	

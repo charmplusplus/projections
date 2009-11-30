@@ -201,7 +201,7 @@ implements ActionListener
 
 	protected void setGraphSpecificData(){
 		if (binType == TYPE_TIME) {
-			setXAxis("Bin Interval Size (" + U.t(timeBinSize) + ")", "Time", timeMinBinSize, timeBinSize);
+			setXAxis("Bin Interval Size (" + U.humanReadableString(timeBinSize) + ")", "Time", timeMinBinSize, timeBinSize);
 			setYAxis("Number of Occurrences", "");
 			setDataSource("Histogram", counts[TYPE_TIME], thisWindow);
 		} else if (binType == TYPE_MSG_SIZE) {
@@ -231,10 +231,10 @@ implements ActionListener
 		bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
 		bubbleText[1] = "Count: " + counts[TYPE_TIME][xVal][yVal];
 		if (xVal < timeNumBins) {
-			bubbleText[2] = "Bin: " + U.t(xVal*timeBinSize+timeMinBinSize) +
-			" to " + U.t((xVal+1)*timeBinSize+timeMinBinSize);
+			bubbleText[2] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
+			" to " + U.humanReadableString((xVal+1)*timeBinSize+timeMinBinSize);
 		} else {
-			bubbleText[2] = "Bin: > " + U.t(timeNumBins*timeBinSize+
+			bubbleText[2] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
 					timeMinBinSize);
 		}
 		return bubbleText;

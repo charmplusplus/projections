@@ -17,7 +17,7 @@ public class SummaryXAxis extends XAxis
     *  e.g., "Processor Number", or "Time Interval"
     */
    public String getTitle() {
-       return "Time Interval (" + U.t(intervalSize) + ")";
+       return "Time Interval (" + U.humanReadableString(intervalSize) + ")";
    }
 
    /**

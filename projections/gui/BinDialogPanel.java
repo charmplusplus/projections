@@ -228,9 +228,9 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 	public void updateFields() {
 
 		timeBinRangeLabel.setText("Bin size ranges from : " +
-				U.t(timeMinBinSizeField.getValue()) +
+				U.humanReadableString(timeMinBinSizeField.getValue()) +
 				" to " +
-				U.t(timeMinBinSizeField.getValue() +
+				U.humanReadableString(timeMinBinSizeField.getValue() +
 						timeNumBinsField.getValue() *
 						timeBinSizeField.getValue()));
 

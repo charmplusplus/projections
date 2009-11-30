@@ -33,9 +33,9 @@ public class RangeHistory
 		historyStringVector = new Vector();
 		for (int i=0; i<rangeSet.size()/2; i++) {
 		    String historyString = 
-			U.t(((Long)rangeSet.elementAt(i*2)).longValue()) + 
+			U.humanReadableString(((Long)rangeSet.elementAt(i*2)).longValue()) + 
 			" to " + 
-			U.t(((Long)rangeSet.elementAt(i*2+1)).longValue());
+			U.humanReadableString(((Long)rangeSet.elementAt(i*2+1)).longValue());
 		    historyStringVector.add(historyString);
 		}
 	    } catch (IOException e) {

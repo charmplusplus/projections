@@ -283,7 +283,7 @@ public class AnimationWindow extends ProjectionsWindow
 	    status = "";
 	} else {
 	    status = "Processor " + p + ": Usage = " + u + 
-		"% at " + U.t(startTime + i*intervalSize);
+		"% at " + U.humanReadableString(startTime + i*intervalSize);
 	}
 	lStatus.setText(status);
 	lStatus.invalidate();
@@ -293,8 +293,8 @@ public class AnimationWindow extends ProjectionsWindow
     public void setTitleInfo(int i)
     {
 	String title = "Processor Usage at " + 
-	    U.t(startTime + i*intervalSize) +
-	    "(" + U.t(intervalSize) + " step)";
+	    U.humanReadableString(startTime + i*intervalSize) +
+	    "(" + U.humanReadableString(intervalSize) + " step)";
 	lTitle.setText(title);
 	lTitle.invalidate();
 	titlePanel.validate();

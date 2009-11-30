@@ -98,21 +98,9 @@ implements PopUpAble
 		return mainPanel;
 	}
 
-	//    // set Graph Specific data
-	//    // **CW** 12/01/2003 - a more appropriate name
-	//    protected void setStackGraph(boolean isSet) {
-	//	if (graphCanvas != null) {
-	//	    graphCanvas.setStackGraph(isSet);
-	//	} else {
-	//	    // issue warning.
-	//	    System.err.println("Warning: The graph canvas has not yet been " +
-	//			       "initialized! Ignoring request.");
-	//	}
-	//    }
-
 
 	protected void setXAxis(String title,String units){
-		xAxis = new XAxisFixed(title,units);	
+		xAxis = new XAxisFixed(title,units);
 	}
 
 	//  This is used for an X Axis that has discrete, non-contigious values.
@@ -140,8 +128,7 @@ implements PopUpAble
 		xAxis = new XAxisDiscrete(title, discreteList);
 	}
 
-	protected void setXAxis(String title, String units, double startValue, 
-			double multiplier) {
+	protected void setXAxis(String title, String units, double startValue, double multiplier) {
 		xAxis = new XAxisFixed(title,units);	
 		((XAxisFixed)xAxis).setLimits(startValue,multiplier);
 	}
@@ -196,13 +183,14 @@ implements PopUpAble
 		dataSource = new DataSource2D(title,data, parent);
 		dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
 		if(yAxis != null)
-			yAxis = 
-				new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+			yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
 	}
 	// refresh graph
 	protected void refreshGraph(){    
-		graphCanvas.setData(dataSource,xAxis,yAxis);
-		graphCanvas.repaint();
+		if(graphCanvas!=null){
+			graphCanvas.setData(dataSource,xAxis,yAxis);
+			graphCanvas.repaint();
+		}
 	}
 }
 

@@ -223,7 +223,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    setDataSource("Communication vs Time", sentMsgOutput, 
 			  outColors, this);
 	    setPopupText("sentMsgCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Messages Sent", "");
 	    super.refreshGraph();
@@ -232,7 +232,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    setDataSource("Communication vs Time", sentByteOutput, 
 			  outColors, this);
 	    setPopupText("sentByteCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Bytes Sent", "");
 	    super.refreshGraph();
@@ -241,7 +241,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    setDataSource("Communication vs Time", receivedMsgOutput, 
 			  outColors, this);
 	    setPopupText("receivedMsgCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Messages Received", "");
 	    super.refreshGraph();
@@ -250,7 +250,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    setDataSource("Communication vs Time", receivedByteOutput, 
 			  outColors, this);
 	    setPopupText("receivedByteCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Bytes Received", "");
 	    super.refreshGraph();
@@ -277,7 +277,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    setDataSource("Communication vs Time", receivedExternalMsgOutput,
 			  outColors, this);
 	    setPopupText("receivedExternalMsgCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Messages Received Externally", "");
 	    super.refreshGraph();
@@ -286,7 +286,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    setDataSource("Communication vs Time", receivedExternalByteOutput,
 			  outColors, this);
 	    setPopupText("receivedExternalByteCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	    setYAxis("Bytes Received Externally", "");
 	    super.refreshGraph();
@@ -463,8 +463,8 @@ public class CommTimeWindow extends GenericGraphWindow
 	String[] rString = new String[4];
 	
         rString[0] = "Time Interval: " +
-            U.t((xVal+startInterval)*intervalSize) + " to " +
-            U.t((xVal+startInterval+1)*intervalSize);
+            U.humanReadableString((xVal+startInterval)*intervalSize) + " to " +
+            U.humanReadableString((xVal+startInterval+1)*intervalSize);
 
 	if (currentArrayName.equals("sentMsgCount")) {
 	    rString[1] = "Dest. Chare: " + epClassName;

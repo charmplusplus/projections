@@ -720,7 +720,7 @@ Clickable
 		if (selectedActivity >= 2) {
 			rString[2] = df.format(graphData[xVal][yVal]) + "";
 		} else {
-			rString[2] = U.t((long)(graphData[xVal][yVal]));
+			rString[2] = U.humanReadableString((long)(graphData[xVal][yVal]));
 		}
 		return rString;
 	}

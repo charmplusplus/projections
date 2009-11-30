@@ -93,7 +93,7 @@ public class OverviewPanel extends ScalePanel.Child
 				return "Processor " + pe + 
 				": Usage = " + utilData[p][interval]+"%" +
 				" IDLE = " + idleData[p][interval]+"%" +
-				" at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
+				" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
 			} else {
 				if (interval >= entryData[p].length) {
 					return "some bug has occurred"; // strange bug.
@@ -101,13 +101,13 @@ public class OverviewPanel extends ScalePanel.Child
 				if (entryData[p][interval] > 0) {
 					return "Processor "+pe+": Usage = "+
 					utilData[p][interval]+"%"+
-					" at "+U.t(timedisplay)+" ("+timedisplay+" us)." +
+					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us)." +
 					" EP = " + 
 					MainWindow.runObject[myRun].getEntryNameByIndex(entryData[p][interval]);
 				} else {
 					return "Processor "+pe+": Usage = "+
 					utilData[p][interval]+"%"+
-					" at "+U.t(timedisplay)+" ("+timedisplay+" us). ";
+					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
 				}
 			}
 		}

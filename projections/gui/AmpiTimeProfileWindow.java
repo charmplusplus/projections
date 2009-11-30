@@ -264,7 +264,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         if(reCompute)
             fillGraphData();        
 
-        setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
+        setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	setYAxis("AMPI function Execution Time (intervals)", "");
 	setDataSource("Time Profile Graph", outputData, 

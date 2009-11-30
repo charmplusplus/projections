@@ -164,7 +164,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			infoString += "<i>Function</i>: " + MainWindow.runObject[data.myRun].getFunctionName(entry) + "<br>";
 			infoString += "<i>Begin Time</i>: " + format_.format(beginTime) + "<br>";
 			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
-			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
+			infoString += "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>";
 			infoString += "<i>Msgs created</i>: " + messages.size() + "<br>";
 			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
 			infoString += "<hr><br><i>Function Callstack</i>:<br>";
@@ -193,12 +193,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				infoString +=  " (" + format_.format(cpuEnd) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Total Time</i>: " + U.t(endTime-beginTime);
+			infoString +=  "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime);
 			if (cpuTime > 0)
-				infoString +=  " (" + U.t(cpuTime) + ")";
+				infoString +=  " (" + U.humanReadableString(cpuTime) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Packing</i>: " + U.t(packtime);
+			infoString +=  "<i>Packing</i>: " + U.humanReadableString(packtime);
 			if (packtime > 0)
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";
@@ -223,7 +223,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 			infoString += "<b>Idle Time</b><br><br>";
 			infoString += "<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>";
 			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
-			infoString += "<i>Total Time</i>: " + U.t(endTime-beginTime) + "<br>";
+			infoString += "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>";
 		} else if (entry == -2) {
 			infoString += "<i>Unaccounted Time</i>" + "<br>";
 			
@@ -237,12 +237,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 				infoString +=  " (" + format_.format(cpuEnd) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Total Time</i>: " + U.t(endTime-beginTime);
+			infoString +=  "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime);
 			if (cpuTime > 0) 
 				infoString +=  " (" + (cpuTime) + ")";
 			infoString += "<br>";
 			
-			infoString +=  "<i>Packing</i>: " + U.t(packtime);
+			infoString +=  "<i>Packing</i>: " + U.humanReadableString(packtime);
 			if (packtime > 0) 
 				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
 			infoString += "<br>";

@@ -56,11 +56,11 @@ public class U
       given in microseconds. 02/23/2005 - **CW** added default
       wrapper with 3 dec pl.
     */
-    public static String t(long us) {
-	return t(us, 3);
+    public static String humanReadableString(long us) {
+	return humanReadableString(us, 3);
     }
 
-    public static String t(long us, int places)
+    public static String humanReadableString(long us, int places)
     {
 	if (us<0) return us+"us";
 	if (us==0) return "0";

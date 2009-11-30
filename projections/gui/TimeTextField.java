@@ -16,7 +16,7 @@ public class TimeTextField extends JTextField
 
 	public TimeTextField(long defval, int size)
     {
-	this(U.t(defval),size);
+	this(U.humanReadableString(defval),size);
     }   
     
     public TimeTextField(String defval, int size)
@@ -34,7 +34,7 @@ public class TimeTextField extends JTextField
     }
 
     public void setText(String text) {
-	super.setText(U.t(U.fromT(text)));
+	super.setText(U.humanReadableString(U.fromT(text)));
     }   
     
     /* if the data entered in the text field is of invalid format

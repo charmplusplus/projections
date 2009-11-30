@@ -518,6 +518,7 @@ implements ActionListener, ColorSelectable, Clickable
 			} else {
 				displaySlopes = false;
 				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));	
+				graphCanvas.clearPolynomial();
 			}
 		} else if (e.getSource() == hideMouseoversCheckBox) {
 			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());

@@ -37,7 +37,7 @@ public class AnimationWindow extends ProjectionsWindow
 
 	private Button bPlusOne, bMinusOne, bAuto;
     private Button setRanges;
-    private JTimeTextField delayField;
+    private TimeTextField delayField;
     private Panel statusPanel;
     private Panel titlePanel; 
     
@@ -225,7 +225,7 @@ public class AnimationWindow extends ProjectionsWindow
           
 	redrawDelay=500;  // default delay value
 	lDelay = new Label("Frame Refresh Delay:", Label.CENTER);
-	delayField = new JTimeTextField("500 ms", 8);
+	delayField = new TimeTextField("500 ms", 8);
 	delayField.addActionListener(this);
 	
 	//sharon implementing slider bar

@@ -10,7 +10,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import projections.gui.JTimeTextField;
+import projections.gui.TimeTextField;
 import projections.gui.RangeDialog;
 import projections.gui.RangeDialogExtensionPanel;
 
@@ -20,7 +20,7 @@ public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel imple
 
 	// Additional GUI objects
 	public JCheckBox dialogEnableEntryFiltering;
-	public JTimeTextField dialogMinEntryFiltering;
+	public TimeTextField dialogMinEntryFiltering;
 
 	public JCheckBox dialogEnableIdleFiltering;
 	public JCheckBox dialogEnableMsgFiltering;
@@ -44,7 +44,7 @@ public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel imple
 		    dialogEnableEntryFiltering = new JCheckBox();
 		    p1.add(dialogEnableEntryFiltering);
 		    p1.add(new JLabel("Filter out entries shorter than"));
-		    dialogMinEntryFiltering = new JTimeTextField("30us", 7);
+		    dialogMinEntryFiltering = new TimeTextField("30us", 7);
 			dialogMinEntryFiltering.setEditable(false);
 		    p1.add(dialogMinEntryFiltering);
 		    p1.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge

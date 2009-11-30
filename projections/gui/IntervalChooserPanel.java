@@ -12,7 +12,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 {
 
 	// Additional GUI objects
-	JTimeTextField sizeField;
+	TimeTextField sizeField;
 	JLabel numIntervalsLabel;
 	JLabel validIntervalsLabel;
 	JLabel startIntervalLabel;
@@ -41,7 +41,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 
 		this.setLayout(gbl);
 		sizeLabel = new JLabel("Interval Size :", JLabel.LEFT);
-		sizeField = new JTimeTextField(defaultIntervalSize, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
+		sizeField = new TimeTextField(defaultIntervalSize, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
 
 		validIntervalsLabel = new JLabel("", JLabel.LEFT);
 		numIntervalsLabel = new JLabel("", JLabel.LEFT);

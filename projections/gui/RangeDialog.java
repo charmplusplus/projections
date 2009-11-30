@@ -86,8 +86,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	private RangeDialogExtensionPanel toolSpecificPanel;
 
 	private JSelectField processorsField;
-	private JTimeTextField startTimeField;
-	private JTimeTextField endTimeField;
+	private TimeTextField startTimeField;
+	private TimeTextField endTimeField;
 
 	private JPanel timePanel, processorsPanel;
 	private JButton bOK, bCancel;
@@ -111,9 +111,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	private boolean disableTimeRange = false;
 
 	/**
-	 *  Constructor. Creation of the dialog object should be separate from
-	 *  the GUI layout. This allows for the proper inheritance from this
-	 *  base class.
+	 *  Constructor.
 	 *  
 	 *  If a tool wants to provide its own extra input items, they should 
 	 *  be put inside a RangeDialogExtensionPanel (basically a JPanel) passed in as toolSpecificPanel.
@@ -181,6 +179,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			buttonPanel = createButtonLayout();
 			buttonPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
+			getRootPane().setDefaultButton(bOK);
+			
 			stepsPanel = createloadStepsLayout();
 			stepsPanel.setBorder(BorderFactory.createEmptyBorder(15,5,5,5));
 
@@ -243,17 +243,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	/**
 	 *  createMainLayout creates the layout for basic time and processor
 	 *  range specification.
-	 *
-	 *  INHERITANCE NOTE:
-	 *  Subclasses should call super.createMainLayout to acquire the 
-	 *  default panels generated for the basic GUI. These panels can then
-	 *  be integrated into the panel being constructed by the subclass's
-	 *  createMainLayout method.
-	 *
-	 *  However, if the desire is to construct a brand new layout, this
-	 *  method should be OVERRIDDEN. The programmer would then have to
-	 *  use the inheritable references to the fields and his/her own 
-	 *  label objects to construct the layout.
 	 */
 	JPanel createMainLayout() {
 
@@ -275,7 +264,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		processorsField = new JSelectField(MainWindow.runObject[myRun].getValidProcessorString(), 12);
 		// set listeners
 		processorsField.addActionListener(this);
-		processorsField.addKeyListener(this);
+//		processorsField.addKeyListener(this);
 		processorsField.addFocusListener(this);
 
 		// layout
@@ -291,9 +280,9 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 				U.t(MainWindow.runObject[myRun].getTotalTime()), 
 				JLabel.LEFT);
 		startTextLabel = new JLabel("Start Time :", JLabel.LEFT);
-		startTimeField = new JTimeTextField(" ", 12);
+		startTimeField = new TimeTextField(" ", 12);
 		endTextLabel = new JLabel("End Time :", JLabel.LEFT);
-		endTimeField = new JTimeTextField(" ", 12);
+		endTimeField = new TimeTextField(" ", 12);
 		totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
 		totalTimeLabel = new JLabel(U.t(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
 
@@ -304,8 +293,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			// set listeners
 			startTimeField.addActionListener(this);
 			endTimeField.addActionListener(this);
-			startTimeField.addKeyListener(this);
-			endTimeField.addKeyListener(this);
+//			startTimeField.addKeyListener(this);
+//			endTimeField.addKeyListener(this);
 			startTimeField.addFocusListener(this);
 			endTimeField.addFocusListener(this);
 		}
@@ -342,18 +331,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 	}
 
 	/**
-	 *  createButtonLayout creates the layout for basic control buttons.
-	 *
-	 *  INHERITANCE NOTE:
-	 *  Subclasses should call super.createButtonLayout to acquire the 
-	 *  default panels generated for the basic GUI. These panels can then
-	 *  be integrated into the panel being constructed by the subclass's
-	 *  createButtonLayout method.
-	 *
-	 *  However, if the desire is to construct a brand new layout, this
-	 *  method should be OVERRIDDEN. The programmer would then have to
-	 *  use the inheritable references to the buttons and his/her own 
-	 *  button objects to construct the layout.
+	 *  Creates the layout for basic control buttons.
 	 */
 	JPanel createButtonLayout() {
 		JPanel buttonPanel = new JPanel();
@@ -370,9 +348,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		return buttonPanel;
 	}
 
-	/**
-	 *  createHistoryLayout is not intended to be inherited by subclasses.
-	 */
 	private JPanel createHistoryLayout() {
 		// Standard Layout behavior for all subcomponents
 		GridBagLayout      gbl = new GridBagLayout();

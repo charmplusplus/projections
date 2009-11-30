@@ -43,8 +43,8 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 	protected JLabel timeBinRangeLabel;
 
 	protected JIntTextField timeNumBinsField;
-	protected JTimeTextField timeBinSizeField;
-	protected JTimeTextField timeMinBinSizeField;
+	protected TimeTextField timeBinSizeField;
+	protected TimeTextField timeMinBinSizeField;
 
 	// Message-based bins
 	protected JLabel msgNumBinsLabel;
@@ -76,10 +76,10 @@ public class BinDialogPanel extends RangeDialogExtensionPanel
 		timeNumBinsField = new JIntTextField(-1, 5);
 
 		timeBinSizeLabel = new JLabel("Time Bin Size:", JLabel.LEFT);
-		timeBinSizeField = new JTimeTextField(-1, 12);
+		timeBinSizeField = new TimeTextField(-1, 12);
 
 		timeMinBinSizeLabel = new JLabel("Starting Bin Size:", JLabel.LEFT);
-		timeMinBinSizeField = new JTimeTextField(-1, 12);
+		timeMinBinSizeField = new TimeTextField(-1, 12);
 
 		timeBinRangeLabel = new JLabel("", JLabel.LEFT);
 

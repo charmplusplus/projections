@@ -11,15 +11,15 @@ import javax.swing.JTextField;
 *
 */
 
-public class JTimeTextField extends JTextField
+public class TimeTextField extends JTextField
 {   
 
-	public JTimeTextField(long defval, int size)
+	public TimeTextField(long defval, int size)
     {
 	this(U.t(defval),size);
     }   
     
-    public JTimeTextField(String defval, int size)
+    public TimeTextField(String defval, int size)
     {
 	super(defval, size);
 	setInputVerifier(new TimeFieldVerifier());

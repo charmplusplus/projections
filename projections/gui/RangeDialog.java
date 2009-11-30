@@ -42,12 +42,12 @@ import projections.misc.LogEntryData;
  *  written by Chee Wai Lee 6/28/2002
  *  rewritten by Isaac Dooley 10/9/2009
  *
- *  This class is the main dialog box presented by each of the tools when 
+ *  This class is the dialog box presented by each of the tools when 
  *  requesting a time range and list of PEs to load.
  *  
  *  If the tool has its own specific set of additional GUI input components,
  *  the tool should create a class extending RangeDialogExtensionPanel that provides
- *  the GUI components (which can have anything in it). The class derives from JPanel,
+ *  the GUI components (which can be anything). The class derives from JPanel,
  *  so all the components ought to be added into the class instance itself. A few
  *  simple methods must be implemented for the class for verifying its input data,
  *  for setting its initial data after the other stuff in this RangeDialog class has
@@ -60,7 +60,6 @@ import projections.misc.LogEntryData;
  *  
  *  To make the time ranges chosen by the user be available in all dialog boxes, 
  *  an instance of RangeDialogPersistantData is used by all dialog boxes.
- *  
  *  
  */
 
@@ -264,7 +263,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		processorsField = new JSelectField(MainWindow.runObject[myRun].getValidProcessorString(), 12);
 		// set listeners
 		processorsField.addActionListener(this);
-//		processorsField.addKeyListener(this);
+		processorsField.addKeyListener(this);
 		processorsField.addFocusListener(this);
 
 		// layout
@@ -293,8 +292,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 			// set listeners
 			startTimeField.addActionListener(this);
 			endTimeField.addActionListener(this);
-//			startTimeField.addKeyListener(this);
-//			endTimeField.addKeyListener(this);
+			startTimeField.addKeyListener(this);
+			endTimeField.addKeyListener(this);
 			startTimeField.addFocusListener(this);
 			endTimeField.addFocusListener(this);
 		}
@@ -601,7 +600,6 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 						LogEntryData data = reader.nextEvent();
 
 						if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
-//							String note = data.note;
 							if(data.note.contains("***")){
 								String pruned = data.note.replace("*** ", "");
 								availableStepStrings.add("" + (c++) + ": " + pruned);
@@ -701,9 +699,18 @@ public void keyPressed(KeyEvent evt) {
 
 public void keyReleased(KeyEvent evt) {
 	someInputChanged();
+
+	// If we just got an enter key, then if we have valid input, finish!
+	if(evt.getKeyCode() == KeyEvent.VK_ENTER){
+		if(isInputValid()){
+			dialogState = DIALOG_OK;
+			setVisible(false);
+		}
+	}
+
 }
 
-public void keyTyped(KeyEvent e) {
+public void keyTyped(KeyEvent evt) {
 	someInputChanged();
 }
 

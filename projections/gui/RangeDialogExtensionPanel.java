@@ -2,7 +2,14 @@ package projections.gui;
 
 import javax.swing.JPanel;
 
-/** An interface for any class that can provide an extra bit of GUI input contained within the range dialog box displayed to the user */
+/** An interface for any class that can provide an extra bit of GUI input contained within the range dialog box displayed to the user 
+ * 
+ * 	Any text fields in the panel should register listeners with the parent:
+ * 		textField.addActionListener(parent);
+ *		textField.addKeyListener(parent);
+ *		textField.addFocusListener(parent);
+ * 
+ * */
 
 public abstract class RangeDialogExtensionPanel extends JPanel {
 

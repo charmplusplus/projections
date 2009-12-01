@@ -3,6 +3,10 @@ package projections.Tools.Extrema;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -20,6 +24,7 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 
 import javax.swing.JButton;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -34,6 +39,7 @@ import projections.analysis.ThreadManager;
 import projections.gui.Clickable;
 import projections.gui.ColorSelectable;
 import projections.gui.GenericGraphWindow;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
@@ -70,6 +76,10 @@ Clickable
 	private int selectedAttribute;
 
 
+	private JMenuItem mWhiteBG;
+	private JMenuItem mBlackBG;
+	private JMenuItem mSaveScreenshot;
+
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
 	public String attributes[][] = {
@@ -82,10 +92,10 @@ Clickable
 				"Overhead",
 			"Average Grain Size"},
 			{ "Execution Time (us)",
-				"Time (us)",
+				"Utilization Percentage",
 				"Number of Messages",
 				"Number of Bytes",
-				"Time (us)",
+				"Utilization Percentage",
 				" ",
 				"Time (us)",
 			"Time (us)"},
@@ -107,7 +117,7 @@ Clickable
 	private int numActivities;
 	private int numSpecials;
 	private double[][] graphData;
-	private Color[] graphColors;
+	private Paint[] graphColors;
 	private LinkedList<Integer> outlierPEs;
 
 
@@ -136,14 +146,18 @@ Clickable
 	JButton bAddToTimelineJButton;
 
 	private void createLayout() {
-		mainPanel = getMainPanel();
-		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(mainPanel, BorderLayout.CENTER);
-		bAddToTimelineJButton =  new JButton("Add Extrema PEs to Timeline");
+		bAddToTimelineJButton =  new JButton("Add Top 5 Extrema PEs to Timeline");
 		bAddToTimelineJButton.setToolTipText("The Timeline Tool must already be open!");
 		bAddToTimelineJButton.addActionListener(new buttonHandler());
-		getContentPane().add(bAddToTimelineJButton, BorderLayout.SOUTH);
-
+		
+		GridBagConstraints gbc = new GridBagConstraints();
+		GridBagLayout gbl = new GridBagLayout();
+		gbc.fill = GridBagConstraints.BOTH;
+		getContentPane().setLayout(gbl);
+		Util.gblAdd(getContentPane(), getMainPanel(),    gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(getContentPane(), bAddToTimelineJButton,      gbc, 0,1, 1,1, 0,0);
+		gbc.fill = GridBagConstraints.NONE;
+		Util.gblAdd(getContentPane(), bAddToTimelineJButton,      gbc, 0,1, 1,1, 0,0);
 	}
 
 
@@ -153,10 +167,12 @@ Clickable
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			int count = 0;
 			if(e.getSource() == bAddToTimelineJButton){
 				// load each outlier PE into the Timeline Window
 				Iterator<Integer> iter2 = outlierPEs.iterator();
-				while(iter2.hasNext()){
+				while(iter2.hasNext() && count < 5){
+					count++;
 					int pe = iter2.next();
 					parentWindow.addProcessor(pe);
 				}
@@ -176,17 +192,24 @@ Clickable
 				"Close"
 		                                           },
 		                                           null, this));
-		mbar.add(Util.makeJMenu("Tools", new Object[]
-		                                            {
-				"Change Colors",
-		                                            },
-		                                            null, this));
-		mbar.add(Util.makeJMenu("Help", new Object[]
-		                                           {
-				"Index",
-				"About"
-		                                           },
-		                                           null, this));
+		// Color Scheme Menu
+		JMenu mColors = new JMenu("Color Scheme");
+		mWhiteBG = new JMenuItem("White background");
+		mBlackBG = new JMenuItem("Black background");
+		mWhiteBG.addActionListener(this);
+		mBlackBG.addActionListener(this);
+		mColors.add(mWhiteBG);
+		mColors.add(mBlackBG);
+		mbar.add(mColors);
+
+		
+		// Screenshot Menu
+		JMenu saveMenu = new JMenu("Save To Image");
+		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
+		mSaveScreenshot.addActionListener(this);
+		saveMenu.add(mSaveScreenshot);
+		mbar.add(saveMenu);
+		
 		setJMenuBar(mbar);
 	}
 
@@ -213,6 +236,7 @@ Clickable
 				}
 				public void done() {
 					// GUI code after Long non-gui code (above) is done.
+					
 					setGraphSpecificData();
 					thisWindow.setVisible(true);
 				}
@@ -228,7 +252,7 @@ Clickable
 		// construct the necessary meta-data given the selected activity
 		// type.
 		double[][] tempData;
-		Color[] tempGraphColors;
+		Paint[] tempGraphColors;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(selectedActivity);
 		numSpecials = 0;
@@ -242,11 +266,11 @@ Clickable
 			if(selectedAttribute == 6 || selectedAttribute == 7){		
 				numSpecials = 2;
 			}
-			graphColors = new Color[numActivities+numSpecials];
+			graphColors = new Paint[numActivities+numSpecials];
 			for (int i=0;i<numActivities; i++) {
 				graphColors[i] = tempGraphColors[i];
 			}
-			graphColors[numActivities] = Color.white;
+			graphColors[numActivities] = MainWindow.runObject[myRun].getIdleColor();
 
 			if( selectedAttribute == 6 ||selectedAttribute == 7){							
 				graphColors[numActivities+1] = Color.yellow;
@@ -530,11 +554,11 @@ Clickable
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(selectedActivity);
 		numSpecials = 1;
-		graphColors = new Color[numActivities+numSpecials];
+		graphColors = new Paint[numActivities+numSpecials];
 		for (int i=0;i<numActivities; i++) {
 			graphColors[i] = tempGraphColors[i];
 		}
-		graphColors[numActivities] = Color.white;
+		graphColors[numActivities] = MainWindow.runObject[myRun].getIdleColor();
 
 		graphData = new double[threshold+3][numActivities+numSpecials];
 
@@ -678,12 +702,13 @@ Clickable
 	}
 
 	protected void setGraphSpecificData() {
-		setXAxis("Extrema", outlierList);
+		
+		setXAxis("Notable PEs (cluster representatives and Extrema)", outlierList);
 		setYAxis(attributes[1][selectedAttribute], 
 				attributes[2][selectedAttribute]);
 		setDataSource("Extrema: " + attributes[0][selectedAttribute] +
-				" (Threshold = " + threshold + 
-				" processors)", graphData, graphColors, this);
+				" (" + threshold + 
+				" Extrema PEs)", graphData, graphColors, this);
 		refreshGraph();
 	}
 
@@ -736,7 +761,17 @@ Clickable
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JMenuItem) {
+		if (e.getSource() == mWhiteBG) {
+			MainWindow.runObject[myRun].background = Color.white;
+			MainWindow.runObject[myRun].foreground = Color.black;
+			graphCanvas.repaint();
+		} else if (e.getSource() == mBlackBG){
+			MainWindow.runObject[myRun].background = Color.black;
+			MainWindow.runObject[myRun].foreground = Color.white;
+			graphCanvas.repaint();
+		} else if(e.getSource() == mSaveScreenshot){
+			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Time Profile", "./TimeProfileImage.png");
+		} else if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {
 				close();

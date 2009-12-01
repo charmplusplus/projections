@@ -3,6 +3,8 @@ package projections.Tools.Extrema;
 import java.io.EOFException;
 import java.io.IOException;
 
+import javax.swing.JMenuItem;
+
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.Analysis;
@@ -232,6 +234,13 @@ public class ExtremaReaderThread extends Thread  {
 			System.err.println(e);
 		}
 		
+		
+		if(selectedAttribute == 1 || selectedAttribute == 4){
+			// Scale raw data into percentages
+			for(int e=0; e< myData.length; e++){
+				myData[e] = myData[e] * 100.0 / (double)(endTime - startTime);
+			}
+		}
 		
 	}
 	

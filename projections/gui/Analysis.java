@@ -2,6 +2,8 @@ package projections.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.GradientPaint;
+import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
@@ -827,45 +829,6 @@ public class Analysis {
 
     
     
-    // *** Derived Data accessors ***
-
-    // *** "Projected" sum detail data accessors ***
-    // These methods return a collapsed (accumulated across one or more
-    // dimensions) part of the sum detail data.
-//
-//    /**
-//     *  This version of getDataSummedAcrossProcessors outputs a 2D array
-//     *  of double values with the first dimension indexed by ep id and
-//     *  the second dimension indexed by interval id.
-//     *
-//     *  This should be slightly more efficient when acquiring data for
-//     *  the full range of EPs.
-//     */
-//    public double[][] getDataSummedAcrossProcessors(int type,
-//							   OrderedIntList pes,
-//							   int startInterval,
-//							   int endInterval) {
-//	return intervalData.getDataSummedAcrossProcessors(type, pes,
-//							  startInterval,
-//							  endInterval);
-//    }
-//
-//    /**
-//     *  getDataSummedAcrossProcessors outputs a vector of double[] with
-//     *  the vector representing possibly non-contigious EPs. The arrays
-//     *  are indexed by interval id.
-//     */
-//    public Vector getDataSummedAcrossProcessors(int type,
-//						       OrderedIntList pes,
-//						       int startInterval,
-//						       int endInterval,
-//						       OrderedIntList eps) {
-//	return intervalData.getDataSummedAcrossProcessors(type, pes,
-//							  startInterval,
-//							  endInterval,
-//							  eps);
-//    }
-
     public Color[] getColorMap(int activityType) {
 	return activityColors[activityType];
     }
@@ -998,5 +961,15 @@ public class Analysis {
 	public StsReader getSts() {
 		return sts;
 	}
-    
+
+
+	public Paint getIdleColor() {
+		return new GradientPaint(0, 0, Color.white, 10, 10, new Color(200,200,200), true);
+	}
+
+	public Paint getOverheadColor() {
+		return new GradientPaint(0, 10, Color.black, 10, 0, new Color(50,50,50), true);
+	}
+	
+	
 }

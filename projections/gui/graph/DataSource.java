@@ -14,12 +14,15 @@ package projections.gui.graph;
 
 
 import java.awt.Color;
+import java.awt.Paint;
 import java.awt.event.MouseEvent;
 
 public abstract class DataSource
 {
-    protected Color colors[];
 
+    private Paint[] paints;
+
+	
     /**
      * Return a human-readable string to describe this data.
      *  e.g., "Usage Profile"
@@ -67,27 +70,28 @@ public abstract class DataSource
      *
      *  **CW** added code that allows the setting of colors.
      */
-    public Color getColor(int valNo) {
-	try {
-	    if (colors != null) {
-		return colors[valNo];
-	    } else {
-		throw new Exception();
-	    }
-	} catch (Exception e) {
-	    switch (valNo%4) {
-	    case 0: return Color.red;
-	    case 1: return Color.green;
-	    case 2: return Color.blue;
-	    case 3: return Color.gray;
-	    }
-	    return Color.green;/*<- for whining compilers*/
+	public Paint getColor(int valNo) {
+		try {
+			if (paints != null && paints.length > valNo) {
+				return paints[valNo];
+			} else {
+				throw new Exception();
+			}
+		} catch (Exception e) {
+			switch (valNo%4) {
+			case 0: return Color.red;
+			case 1: return Color.green;
+			case 2: return Color.blue;
+			case 3: return Color.gray;
+			}
+			return Color.green;/*<- for whining compilers*/
+		}
 	}
-    }
-    
-    public void setColors(Color colors[]) {
-	this.colors = colors;
-    }
+
+	public void setColors(Paint paints[]) {
+		this.paints = paints;
+	}
+
 
     /**
      *  Return the values associated with this index.

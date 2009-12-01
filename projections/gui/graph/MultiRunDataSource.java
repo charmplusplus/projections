@@ -1,6 +1,7 @@
 package projections.gui.graph;
 
 import java.awt.Color;
+import java.awt.Paint;
 
 import projections.analysis.MultiRunDataAnalyzer;
 
@@ -80,7 +81,7 @@ public class MultiRunDataSource extends DataSource
      *  Return the color associated with the Y value index
      *
      */
-    public Color getColor(int valNo) {
+    public Paint getColor(int valNo) {
 	// if no color map defined, use the superclass's predefined
 	// getColor method.
 	if (colorMap == null) {
@@ -93,10 +94,10 @@ public class MultiRunDataSource extends DataSource
      *  Create the specified Color Map
      *
      */
-    public Color[] getColorMap() {
+    public Paint[] getColorMap() {
 	// need to construct from defaults
 	if (colorMap == null) {
-	    Color newMap[] = new Color[getValueCount()];
+	    Paint newMap[] = new Color[getValueCount()];
 	    for (int i=0; i<newMap.length; i++) {
 		newMap[i] = super.getColor(i);
 	    }

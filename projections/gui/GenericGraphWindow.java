@@ -1,5 +1,6 @@
 package projections.gui;
 import java.awt.Color;
+import java.awt.Paint;
 import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
@@ -141,27 +142,10 @@ implements PopUpAble
 			yAxis = new YAxisFixed(title,units,0);	
 	}
 
-	// whenever datasource changes, yaxis needs to be changed too
-	//    protected void setDataSource(String title, int [] data){
-	//	dataSource = new DataSource1D(title,data);
-	//	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-	//	if(yAxis != null)
-	//	    yAxis = 
-	//		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-	//    }
-
-	//    protected void setDataSource(String title, double [][] data){
-	//	dataSource = new DataSource2D(title,data);
-	//	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-	//	if(yAxis != null)
-	//	    yAxis = 
-	//		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-	//    }
-
 	// This should be the correct way of setting a data source with a partial
 	// set of colors
 	protected void setDataSource(String title, double data[][], 
-			Color colorMap[],
+			Paint colorMap[],
 			GenericGraphWindow parent) {
 		dataSource = new DataSource2D(title, data, parent);
 		dataSource.setColors(colorMap);
@@ -170,14 +154,6 @@ implements PopUpAble
 				new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
 		}
 	}
-
-	//    protected void setDataSource(String title, int [] data, GenericGraphWindow parent){
-	//	dataSource = new DataSource1D(title,data,parent);
-	//	dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-	//	if(yAxis != null)
-	//	    yAxis = 
-	//		new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
-	//    }
 
 	protected void setDataSource(String title, double [][] data, GenericGraphWindow parent){
 		dataSource = new DataSource2D(title,data, parent);

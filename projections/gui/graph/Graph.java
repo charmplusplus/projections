@@ -8,6 +8,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.RenderingHints;
@@ -53,9 +54,11 @@ public class Graph extends JPanel
     private Color foreground;
     private Color background;
     
-    private Font fontTitles;
+    private Font fontAxisTitles;
+    private Font fontChartTitle;
     private Font fontLabels;
-    private FontMetrics fmTitles;
+    private FontMetrics fmAxisTitles;
+    private FontMetrics fmChartTitle;
     private FontMetrics fmLabels;
 
 
@@ -107,37 +110,7 @@ public class Graph extends JPanel
 	
 	addMouseMotionListener(this);
 	addMouseListener(this);
-	
-	background = MainWindow.runObject[myRun].background;
-	foreground = MainWindow.runObject[myRun].foreground;
-
     }
-    
-
-    /** Generic constructor. This can only be called from things that are not projections tools!!! */
-    public Graph(Color background, Color foreground)
-    {
-	setPreferredSize(new Dimension(400,300));	
-	initFonts();
-
-	GraphType = BAR;	   // default GraphType is BAR
-	GraphStacked = true;    // default GraphType is STACKED
-	stackArray = null;
-	dataSource = null;
-	
-	xscale = 1.0;
-	yscale = 1.0;
-	
-	addMouseMotionListener(this);
-	addMouseListener(this);
-	
-	this.background = background;
-	this.foreground = foreground;
-
-	
-	
-    }
-    
     
     /** Special constructor. This can only be called from a projections tool!!! */
 
@@ -156,8 +129,11 @@ public class Graph extends JPanel
     
     
     private void initFonts(){
-    	// The font used for the Chart title and x and y axis titles:
-    	fontTitles = new Font("SansSerif",Font.BOLD, 16);
+    	// The font used for the Chart title 
+    	fontChartTitle = new Font("SansSerif",Font.BOLD, 24);
+    	
+    	// The font used for the x and y axis titles:
+    	fontAxisTitles = new Font("SansSerif",Font.BOLD, 16);
 
     	// The font used for the numbers on the x and y axes:
     	fontLabels = new Font("SansSerif",Font.PLAIN,12);
@@ -315,8 +291,9 @@ public class Graph extends JPanel
     protected void paintComponent(Graphics g) {
 	    super.paintComponent(g);    
     	fmLabels = g.getFontMetrics(fontLabels);
-    	fmTitles = g.getFontMetrics(fontTitles);
-
+    	fmAxisTitles = g.getFontMetrics(fontAxisTitles);
+    	fmChartTitle = g.getFontMetrics(fontChartTitle);
+    	
     	drawDisplay((Graphics2D) g);
     }
 
@@ -442,38 +419,44 @@ public class Graph extends JPanel
 
     private void drawDisplay(Graphics2D g)
     {
-	
-	g.setBackground(background);
-	g.setColor(foreground);
 
-	g.clearRect(0, 0, getWidth(), getHeight());
-	
-	// if there's nothing to draw, don't draw anything!!!
-	if (dataSource == null) {
-	    return;
-	}
+    	Color background = MainWindow.runObject[myRun].background;
+    	Color foreground = MainWindow.runObject[myRun].foreground;
+
+    	g.setBackground(background);
+    	g.setColor(foreground);
+
+    	g.clearRect(0, 0, getWidth(), getHeight());
+
+    	// if there's nothing to draw, don't draw anything!!!
+    	if (dataSource == null) {
+    		return;
+    	}
 
 
-	String title = xAxis.getTitle();
-	g.setFont(fontTitles);
+    	// display Graph title
+    	String graphTitle = dataSource.getTitle();
+    	g.setFont(fontChartTitle);
+    	g.drawString(graphTitle,
+    			(getWidth()-fmChartTitle.stringWidth(graphTitle))/2, 
+    			chartTitleBaseline() );
 
-	g.drawString(title,
-		     (getWidth()-fmTitles.stringWidth(title))/2, 
-		      xAxisTitleBaseline() );
-    
-	// display Graph title
-	title = dataSource.getTitle();
-	g.drawString(title,
-		     (getWidth()-fmTitles.stringWidth(title))/2, 
-		     chartTitleBaseline() );
+    	// display xAxis title
+    	String xTitle = xAxis.getTitle();
+    	g.setFont(fontAxisTitles);
+    	g.drawString(xTitle,
+    			(getWidth()-fmAxisTitles.stringWidth(xTitle))/2, 
+    			xAxisTitleBaseline() );
 
-	// display yAxis title
-	title = yAxis.getTitle();
-	g.rotate(-Math.PI/2);
-	g.drawString(title, 
-		     -(getHeight()+fmTitles.stringWidth(title))/2, 
-		     fmTitles.getHeight() );
-	g.rotate(Math.PI/2);
+
+    	// display yAxis title
+    	String yTitle = yAxis.getTitle();
+    	g.setFont(fontAxisTitles);
+    	g.rotate(-Math.PI/2);
+    	g.drawString(yTitle, 
+    			-(getHeight()+fmAxisTitles.stringWidth(yTitle))/2, 
+    			fmAxisTitles.getHeight() );
+    	g.rotate(Math.PI/2);
 
 	// total number of x values
 	maxvalueX = dataSource.getIndexCount();
@@ -610,8 +593,8 @@ public class Graph extends JPanel
 				}
 			}
 			
-	    	FontMetrics fm = g.getFontMetrics(fontTitles);
-	    	g.setFont(fontTitles);
+	    	FontMetrics fm = g.getFontMetrics(fontAxisTitles);
+	    	g.setFont(fontAxisTitles);
 	    	g.drawString(info, getWidth()-fm.stringWidth(info) - 50 ,  20 );
 
 			g.setStroke(new BasicStroke(4f));
@@ -687,7 +670,9 @@ public class Graph extends JPanel
     				// calculating lowerbound of box, which StackArray
     				// allready contains
     				y = originY() - (int)(stackArray[i][k]*pixelincrementY);
-    				g.setColor(dataSource.getColor(k));
+    				
+    				g.setPaint(dataSource.getColor(k));
+    				
     				// using data[i] to get the height of this bar
     				if (valuesPerTickX == 1) {
     					g.fillRect(originX() + (int)(i*pixelincrementX +
@@ -735,7 +720,7 @@ public class Graph extends JPanel
     			}
     			// now display the graph
     			for(int k=0; k<numY; k++) {
-    				g.setColor(dataSource.getColor((int)temp[k][0]));
+    				g.setPaint(dataSource.getColor((int)temp[k][0]));
     				y = (originY()-(int)(temp[k][1]*pixelincrementY));
     				if (valuesPerTickX == 1) {
     					g.fillRect(originX() + (int)(i*pixelincrementX +
@@ -800,7 +785,7 @@ public class Graph extends JPanel
 		(int)(pixelincrementX/2);    
 	 
 	    for (int j=0; j<yValues; j++) {
-		g.setColor(dataSource.getColor(j));
+		g.setPaint(dataSource.getColor(j));
 		y2[j] = (originY() - (int)(data[j]*pixelincrementY));
 		//is there any other condition that needs to be checked?
 		if(x1 != -1)	
@@ -868,7 +853,7 @@ public class Graph extends JPanel
 		}
 	    }
 	    // draw the filled polygon.
-	    g.setColor(dataSource.getColor(layer));
+	    g.setPaint(dataSource.getColor(layer));
 	    g.fill(polygon);
 	    // draw a black outline.
 	    g.setColor(Color.black);
@@ -1058,13 +1043,13 @@ public class Graph extends JPanel
 
 	/** Return the number of pixels at the top above the top of the y axis. The chart title is drawn in this region. */
 	int topMargin(){
-		return 30 + fmTitles.getHeight();
+		return 30 + fmChartTitle.getHeight();
 	}
 	
 	/** The y pixel coordinate of the baseline for the chart title displayed at the top of the chart */
     private int chartTitleBaseline() {
-		int pxAboveTopOfText = (topMargin() - fmTitles.getHeight()) / 2;
-		return pxAboveTopOfText + fmTitles.getHeight();
+		int pxAboveTopOfText = (topMargin() - fmChartTitle.getHeight()) / 2;
+		return pxAboveTopOfText + fmChartTitle.getHeight();
 	}
 
    private int xAxisTitleBaseline() {

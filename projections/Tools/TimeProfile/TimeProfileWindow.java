@@ -3,17 +3,26 @@ package projections.Tools.TimeProfile;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.GradientPaint;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.LinearGradientPaint;
+import java.awt.Paint;
+import java.awt.Rectangle;
+import java.awt.TexturePaint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -69,9 +78,13 @@ implements ActionListener, ColorSelectable, Clickable
 	// **CW** this really should be a default button with ProjectionsWindow
 	private JButton saveColors;
 	private JButton loadColors;
+	private JMenuItem mWhiteBG;
+	private JMenuItem mBlackBG;
+	private JMenuItem mSaveScreenshot;
+
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
-
+	
 	long intervalSize;
 	int startInterval;
 	int endInterval;
@@ -95,7 +108,7 @@ implements ActionListener, ColorSelectable, Clickable
 
 	// output arrays
 	private double[][] outputData;
-	private Color[] outColors;
+	private Paint[] outColors;
 
 	// flag signifying callgraph has just begun
 	boolean	   startFlag;
@@ -161,17 +174,25 @@ implements ActionListener, ColorSelectable, Clickable
 				"Close"
 		                                           },
 		                                           null, this));
-		//        mbar.add(Util.makeJMenu("Tools", new Object[]
-		//            {
-		//                "Change Colors",
-		//            },
-		//                                null, this));
-		//        mbar.add(Util.makeJMenu("Help", new Object[]
-		//            {
-		//                "Index",
-		//                                    "About"
-		//            },
-		//                                null, this));
+
+		// Color Scheme Menu
+		JMenu mColors = new JMenu("Color Scheme");
+		mWhiteBG = new JMenuItem("White background");
+		mBlackBG = new JMenuItem("Black background");
+		mWhiteBG.addActionListener(this);
+		mBlackBG.addActionListener(this);
+		mColors.add(mWhiteBG);
+		mColors.add(mBlackBG);
+		mbar.add(mColors);
+
+		
+		// Screenshot Menu
+		JMenu saveMenu = new JMenu("Save To Image");
+		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
+		mSaveScreenshot.addActionListener(this);
+		saveMenu.add(mSaveScreenshot);
+		mbar.add(saveMenu);
+
 		setJMenuBar(mbar);
 	}
 
@@ -448,19 +469,20 @@ implements ActionListener, ColorSelectable, Clickable
 		} else {
 			// actually create and fill the data and color array
 			int numIntervals = endInterval-startInterval+1;
-			outputData = 
-				new double[numIntervals][outSize];
-			outColors =
-				new Color[outSize];
+			outputData = new double[numIntervals][outSize];
+			outColors = new Paint[outSize];
 			for (int i=0; i<numIntervals; i++) {
 				int count = 0;
 				for (int ep=0; ep<numEPs+special; ep++) {
 					if (stateArray[0][ep]) {
 						outputData[i][count] = graphData[i][ep];
-						if(ep == numEPs)
-							outColors[count++] = Color.black;
-						else if (ep == numEPs+1)
-							outColors[count++] = Color.white;
+						if(ep == numEPs){
+//							outColors[count++] = Color.black;
+							outColors[count++] = new GradientPaint(0, 10, Color.black, 10, 0, new Color(50,50,50), true);
+						}
+						else if (ep == numEPs+1){
+							outColors[count++] = new GradientPaint(0, 0, Color.white, 10, 10, new Color(200,200,200), true);
+						}
 						else
 							outColors[count++] = colorArray[0][ep];
 					}
@@ -468,9 +490,9 @@ implements ActionListener, ColorSelectable, Clickable
 
 			}
 			setYAxis("Percentage Utilization", "%");		
-			setXAxis("Time", "Time", startTime, intervalSize);
-			setDataSource("Time Profile", outputData, 
-					outColors, thisWindow);
+			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
+			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
+			setDataSource("Time Profile", outputData, outColors, thisWindow);
 			refreshGraph();
 		}
 	}
@@ -552,6 +574,16 @@ implements ActionListener, ColorSelectable, Clickable
 			} catch (IOException exception) {
 				System.err.println("Failed to load colors!!");
 			}
+		} else if (e.getSource() == mWhiteBG) {
+			MainWindow.runObject[myRun].background = Color.white;
+			MainWindow.runObject[myRun].foreground = Color.black;
+			graphCanvas.repaint();
+		} else if (e.getSource() == mBlackBG){
+			MainWindow.runObject[myRun].background = Color.black;
+			MainWindow.runObject[myRun].foreground = Color.white;
+			graphCanvas.repaint();
+		} else if(e.getSource() == mSaveScreenshot){
+			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Time Profile", "./TimeProfileImage.png");
 		} else if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {

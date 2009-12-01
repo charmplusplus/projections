@@ -40,7 +40,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 		// create interval size panel
 
 		this.setLayout(gbl);
-		sizeLabel = new JLabel("Interval Size :", JLabel.LEFT);
+		sizeLabel = new JLabel("Interval Size (Resolution) :", JLabel.LEFT);
 		sizeField = new TimeTextField(defaultIntervalSize, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
 
 		validIntervalsLabel = new JLabel("", JLabel.LEFT);

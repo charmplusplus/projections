@@ -101,7 +101,7 @@ public class SamplePlottingMain {
 		
 		
 		// Create a new graph
-		Graph g=new Graph(Color.white, Color.black);
+		Graph g=new Graph();
 	
 		
 		

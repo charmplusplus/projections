@@ -40,14 +40,14 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 		super.paintComponent(g);
 
 		if(data.selectionValid()){
-			g.setColor(Color.white);
+			g.setColor(data.getForegroundColor());
 			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
 			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
 		}
 
 		if(data.highlightValid()){
 			// Draw vertical line
-			g.setColor(Color.white);
+			g.setColor(data.getForegroundColor());
 			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
 		}
 		

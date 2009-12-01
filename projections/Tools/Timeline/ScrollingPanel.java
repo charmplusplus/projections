@@ -1,6 +1,7 @@
 package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Graphics;
 
 import javax.swing.JComponent;
@@ -33,7 +34,7 @@ public class ScrollingPanel extends JPanel {
 		labelPanel=labelPanel_;	
 
 		scrollpane = new JScrollPane();
-		scrollpane.setLayout(new projections.Tools.Timeline.TimelineScrollPaneLayout(data));
+		scrollpane.setLayout(new TimelineScrollPaneLayout(data));
 		
 		mainPanel.setAutoscrolls(false);
 		labelPanel.setAutoscrolls(false);
@@ -48,14 +49,13 @@ public class ScrollingPanel extends JPanel {
 		scrollpane.setCorner(JScrollPane.UPPER_RIGHT_CORNER, new Corner());
 		scrollpane.setCorner(JScrollPane.LOWER_RIGHT_CORNER, new Corner());
 
-		scrollpane.setOpaque(true);
 		scrollpane.setBackground(data.getBackgroundColor());
 
 		scrollpane.getHorizontalScrollBar().setBackground(data.getBackgroundColor());
 		scrollpane.getHorizontalScrollBar().setOpaque(true);
 		
-		this.setLayout(new BorderLayout());
-		this.add(scrollpane, BorderLayout.CENTER);
+		setLayout(new BorderLayout());
+		add(scrollpane, BorderLayout.CENTER);
 		
 		scrollpane.getViewport().setBackground(data.getBackgroundColor());
 		scrollpane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // This should be tuned for performance
@@ -71,6 +71,12 @@ public class ScrollingPanel extends JPanel {
 	}
 	
 	
+	
+	void updateBackgroundColor(){
+		System.out.println("Updating scrolling panel background color to " + data.getBackgroundColor() );
+		this.setBackground(data.getBackgroundColor());
+		scrollpane.setBackground(data.getBackgroundColor());
+	}
 	
 
 	/** Resize my panels(required by interface, called by data object) */
@@ -108,11 +114,20 @@ public class ScrollingPanel extends JPanel {
 		}
 	}
 	
+	
 //	/** Paint the panel */
 //	@Override public void paintComponent(Graphics g) {
 //		System.out.println("paintComponent ScrollingPanel");
 //		super.paintComponent(g);
+//	
+//		scrollpane.paintComponents(g);
+//		
+//		g.setColor(Color.yellow);
+//		g.fillRect(0,0, getWidth(), getHeight());
+//		
 //	}
+//		
+//	
 //
 //	@Override public void update(Graphics g){
 //		paintComponent(g);

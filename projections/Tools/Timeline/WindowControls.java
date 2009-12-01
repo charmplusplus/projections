@@ -76,8 +76,8 @@ ItemListener {
 	private JMenuItem mSaveFullTimeline;
 	private JMenuItem mSaveFullTimelineWhiteBG;
 	
-	private JMenuItem mSelectBGColor;
-	private JMenuItem mSelectFGColor;
+	private JMenuItem mWhiteBG;
+	private JMenuItem mBlackBG;
 
 	private JMenuItem mChangeColors;
 	private JMenuItem mSaveColors;
@@ -278,11 +278,14 @@ ItemListener {
 			JPanelToImage.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 		}
 
-		else if(evt.getSource() == mSelectBGColor)
-			selectBackgroundColor();
-
-		else if(evt.getSource() == 	mSelectFGColor)
-			selectForegroundColor();
+		else if(evt.getSource() == mWhiteBG){
+			data.setBackgroundColor(Color.white);
+			data.setForegroundColor(Color.black);
+		}
+		else if(evt.getSource() == 	mBlackBG){
+			data.setBackgroundColor(Color.black);
+			data.setForegroundColor(Color.white);
+		}
 
 		else if(evt.getSource() == mChangeColors)
 			ShowColorWindow();
@@ -432,9 +435,9 @@ ItemListener {
 		// Color Menu
 		JMenu colorMenu = new JMenu("Colors");
 
-		mSelectBGColor = new JMenuItem("Select Background Color");
-		mSelectFGColor = new JMenuItem("Select Foreground Color");
-
+		mWhiteBG = new JMenuItem("White background");
+		mBlackBG = new JMenuItem("Black background");
+	
 		mChangeColors = new JMenuItem("Change Entry Point Colors");
 		mSaveColors = new JMenuItem("Save Entry Point Colors");
 		mRestoreColors = new JMenuItem("Restore Entry Point Colors");
@@ -448,8 +451,8 @@ ItemListener {
 		mColorByUserEIDRandom =  new JMenuItem("Color by User Supplied Parameter(timestep) + Entry ID with Disjoint Colors");
 		mColorByMemUsage = new JMenuItem("Color by Memory Usage ...");
 
-		colorMenu.add(mSelectBGColor);
-		colorMenu.add(mSelectFGColor);
+		colorMenu.add(mWhiteBG);
+		colorMenu.add(mBlackBG);
 		colorMenu.addSeparator();
 		colorMenu.add(mChangeColors);
 		colorMenu.add(mSaveColors);
@@ -465,8 +468,8 @@ ItemListener {
 		colorMenu.add(mColorByMemUsage);
 
 
-		mSelectBGColor.addActionListener(this);
-		mSelectFGColor.addActionListener(this);
+		mWhiteBG.addActionListener(this);
+		mBlackBG.addActionListener(this);
 		mChangeColors.addActionListener(this);
 		mSaveColors.addActionListener(this);
 		mRestoreColors.addActionListener(this);

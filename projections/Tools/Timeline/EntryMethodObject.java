@@ -4,6 +4,8 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -264,36 +266,53 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 
 	/** paint an entry method that tapers to a point at its left side */
-	private void drawLeftArrow(Graphics g, Color c, int startY, int h)
+	private void drawLeftArrow(Graphics2D g, Paint c, int startY, int h)
 	{
 		int[] xpts = {5, 0, 5};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
-		g.setColor(c);
+		g.setPaint(c);
 		g.fillPolygon(xpts, ypts, 3);
 
-		g.setColor(c.brighter());
+
+		g.setPaint(brighter(c));
 		g.drawLine(xpts[0], ypts[0], xpts[1], ypts[1]);
 
-		g.setColor(c.darker());
+		g.setPaint(darker(c));
 		g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);   
 	}   
 	
 	/** paint an entry method that tapers to a point at its right side */
-	private void drawRightArrow(Graphics g, Color c, int startY, int h, int right)
+	private void drawRightArrow(Graphics2D g, Paint c, int startY, int h, int right)
 	{
 		int[] xpts = {right-6, right, right-6};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
-		g.setColor(c);
+		g.setPaint(c);
 		g.fillPolygon(xpts, ypts, 3);
 
-		g.setColor(c.brighter());
+		g.setPaint(brighter(c));
 		g.drawLine(xpts[0], ypts[0], xpts[1], ypts[1]);
 
-		g.setColor(c.darker());
+		g.setPaint(darker(c));
 		g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);
-	}   
+	}
+	
+	
+	private Paint darker(Paint c){
+		if(c instanceof Color)
+			return ((Color)c).darker();
+		else
+			return c;
+	}
+	
+	private Paint brighter(Paint c){
+		if(c instanceof Color)
+			return ((Color)c).brighter();
+		else
+			return c;
+	}
+	
 
 	public long getBeginTime()
 	{
@@ -313,7 +332,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	public int getEntryIndex()
 	{
 		return MainWindow.runObject[data.myRun].getEntryIndex(entry);
-	}   
+	}
 	
 	/** Return a set of messages for this entry method */
 	public Set<TimelineMessage> getMessages()
@@ -604,6 +623,8 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	{     
 		super.paintComponent(g);
 		
+		Graphics2D g2d = (Graphics2D) g;
+			
 		// If this is an idle time region, we may not display it
 		if 	(isIdleEvent() && data.showIdle() == false) 
 			return;
@@ -614,12 +635,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 
 		// Determine the base color
-		Color c = determineColor();
-
+		Paint c = determineColor();
 
 		// Dim this object if we want to focus on some objects (for some reason or another)
-		if(data.isObjectDimmed(this))
-			c = c.darker().darker();
+		if(data.isObjectDimmed(this)){
+			c = darker(darker(c));
+		}
 		
 			
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
@@ -643,36 +664,36 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		
 		if(beginTime < data.startTime())
 		{
-			drawLeftArrow(g, c, verticalInset, rectHeight);
+			drawLeftArrow(g2d, c, verticalInset, rectHeight);
 			rectWidth -= 5;
 			left = 5;
 		}
 
 		if(endTime > data.endTime())
 		{
-			drawRightArrow(g, c, verticalInset, rectHeight, rectWidth);
+			drawRightArrow(g2d, c, verticalInset, rectHeight, rectWidth);
 			rectWidth -= 5;
 			right = rectWidth-6;
 		}
 
 		// Paint the main rectangle for the object, as long as it is not a skinny idle event
-		g.setColor(c);
+		g2d.setPaint(c);
 		if(rectWidth > 1 || entryIndex!=-1)
-			g.fillRect(left, verticalInset, rectWidth, rectHeight);
+			g2d.fillRect(left, verticalInset, rectWidth, rectHeight);
 
 
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
 		if(rectWidth > 2 && !data.colorByMemoryUsage())
 		{
-			g.setColor(c.brighter());
-			g.drawLine(left, verticalInset, right, verticalInset);
+			g2d.setPaint(brighter(c));			
+			g2d.drawLine(left, verticalInset, right, verticalInset);
 			if(left == 0)
-				g.drawLine(0, verticalInset, 0, verticalInset+rectHeight-1);
+				g2d.drawLine(0, verticalInset, 0, verticalInset+rectHeight-1);
 
-			g.setColor(c.darker());
-			g.drawLine(left, verticalInset+rectHeight-1, right, verticalInset+rectHeight-1);
+			g2d.setPaint(darker(c));
+			g2d.drawLine(left, verticalInset+rectHeight-1, right, verticalInset+rectHeight-1);
 			if(right == rectWidth-1)
-				g.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
+				g2d.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
 		}
 
 
@@ -745,21 +766,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		
 	/**  Determine the color of the object */	
-	private Color determineColor() {
+	private Paint determineColor() {
 		// First handle the simple cases of idle, unknown and function events
 		if (isIdleEvent()) { 	
-			// Idle time regions are white on a dark background, or grey on a light background
-			Color bg = data.getBackgroundColor();
-			int brightness = bg.getRed() + bg.getGreen() + bg.getBlue();
-			if(brightness > (128*3)){
-				// bright background
-				return bg.darker();
-			} else {
-				// dark background ( keep the same traditional look for the old folks ) 
-				return Color.white;
-			}
+			return MainWindow.runObject[data.myRun].getIdleColor();
 		} else if (entryIndex == -2) { // unknown domain
-			return data.getBackgroundColor();
+			return MainWindow.runObject[data.myRun].getOverheadColor();
 		} else if (isFunction) {
 			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 		}

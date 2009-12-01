@@ -1,6 +1,7 @@
 package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.swing.JOptionPane;
 
@@ -71,6 +72,8 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		controls.updateScaleField();
 		
+		scrollingPanel.updateBackgroundColor();
+		
 		// Revalidate/Repaint
 		scrollingPanel.refreshDisplay(doRevalidate);
 	}
@@ -98,7 +101,9 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		scrollingPanel = new ScrollingPanel(data, mainPanel, axisPanel, labelPanel);
 		
 		controls = new WindowControls(this, data);
-
+		
+		scrollingPanel.updateBackgroundColor();
+				
 		thisWindow.getContentPane().setLayout(new BorderLayout());	
 		thisWindow.getContentPane().add(scrollingPanel, BorderLayout.CENTER);
 		thisWindow.getContentPane().add(controls, BorderLayout.SOUTH);

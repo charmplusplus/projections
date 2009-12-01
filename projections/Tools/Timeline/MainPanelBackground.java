@@ -34,7 +34,7 @@ public class MainPanelBackground extends JPanel {
 			g.fillRect(data.leftSelection(), 0,  data.rightSelection()-data.leftSelection(), getHeight()-1);
 			
 			// Draw vertical lines at the selection boundaries
-			g.setColor(Color.white);
+			g.setColor(data.getForegroundColor());
 			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
 			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
 		}
@@ -42,7 +42,7 @@ public class MainPanelBackground extends JPanel {
 		// Paint the highlight where the mouse cursor was last seen
 		if(data.highlightValid()){
 			// Draw vertical line
-			g.setColor(Color.white);
+			g.setColor(data.getForegroundColor());
 			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
 		}
 		

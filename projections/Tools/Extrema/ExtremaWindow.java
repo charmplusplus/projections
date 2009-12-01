@@ -703,7 +703,7 @@ Clickable
 
 	protected void setGraphSpecificData() {
 		
-		setXAxis("Notable PEs (cluster representatives and Extrema)", outlierList);
+		setXAxis("Notable PEs (Cluster Representatives and Extrema)", outlierList);
 		setYAxis(attributes[1][selectedAttribute], 
 				attributes[2][selectedAttribute]);
 		setDataSource("Extrema: " + attributes[0][selectedAttribute] +

@@ -14,9 +14,9 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 	// Additional GUI objects
 	TimeTextField sizeField;
 	JLabel numIntervalsLabel;
-	JLabel validIntervalsLabel;
-	JLabel startIntervalLabel;
-	JLabel endIntervalLabel;
+//	JLabel validIntervalsLabel;
+//	JLabel startIntervalLabel;
+//	JLabel endIntervalLabel;
 
 	// A reference to the parent dialog box that I'm extending
 	RangeDialog parent;
@@ -43,17 +43,17 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 		sizeLabel = new JLabel("Interval Size (Resolution) :", JLabel.LEFT);
 		sizeField = new TimeTextField(defaultIntervalSize, 12); // will verify the the time is a valid time format before allowing the user to get out of the input box
 
-		validIntervalsLabel = new JLabel("", JLabel.LEFT);
 		numIntervalsLabel = new JLabel("", JLabel.LEFT);
-		startIntervalLabel = new JLabel("", JLabel.LEFT);
-		endIntervalLabel = new JLabel("", JLabel.LEFT);
+//		validIntervalsLabel = new JLabel("", JLabel.LEFT);
+//		startIntervalLabel = new JLabel("", JLabel.LEFT);
+//		endIntervalLabel = new JLabel("", JLabel.LEFT);
 
 		Util.gblAdd(this, sizeLabel, gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(this, sizeField, gbc, 1,0, 1,1, 1,1);
 		Util.gblAdd(this, numIntervalsLabel, gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(this, validIntervalsLabel, gbc, 0,2, 1,1, 1,1);
-		Util.gblAdd(this, startIntervalLabel, gbc, 0,3, 1,1, 1,1);
-		Util.gblAdd(this, endIntervalLabel, gbc, 1,3, 1,1, 1,1);
+//		Util.gblAdd(this, validIntervalsLabel, gbc, 0,2, 1,1, 1,1);
+//		Util.gblAdd(this, startIntervalLabel, gbc, 0,3, 1,1, 1,1);
+//		Util.gblAdd(this, endIntervalLabel, gbc, 1,3, 1,1, 1,1);
 
 	}
 
@@ -71,9 +71,9 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 
 	/** derive all the values from the integer in sizeField */
 	public void updateFields(){
-		validIntervalsLabel.setText("Total Valid Number of Intervals : " + getNumValidIntervals());
-		startIntervalLabel.setText("Start Interval : "+getStartInterval() );
-		endIntervalLabel.setText("End Interval : " + getEndInterval() );
+//		validIntervalsLabel.setText("Total Valid Number of Intervals : " + getNumValidIntervals());
+//		startIntervalLabel.setText("Start Interval : "+getStartInterval() );
+//		endIntervalLabel.setText("End Interval : " + getEndInterval() );
 
 		if(getNumSelectedIntervals() < 25){
 			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );

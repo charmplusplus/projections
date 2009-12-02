@@ -275,10 +275,10 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		g.fillPolygon(xpts, ypts, 3);
 
 
-		g.setPaint(brighter(c));
+		g.setPaint(makeMoreLikeForeground(c));
 		g.drawLine(xpts[0], ypts[0], xpts[1], ypts[1]);
 
-		g.setPaint(darker(c));
+		g.setPaint(makeMoreLikeBackground(c));
 		g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);   
 	}   
 	
@@ -291,27 +291,39 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		g.setPaint(c);
 		g.fillPolygon(xpts, ypts, 3);
 
-		g.setPaint(brighter(c));
+		g.setPaint(makeMoreLikeForeground(c));
 		g.drawLine(xpts[0], ypts[0], xpts[1], ypts[1]);
 
-		g.setPaint(darker(c));
+		g.setPaint(makeMoreLikeBackground(c));
 		g.drawLine(xpts[1], ypts[1], xpts[2], ypts[2]);
 	}
 	
 	
-	private Paint darker(Paint c){
+	private Paint makeMoreLikeBackground(Paint c){
+		Color other = getBackground();
 		if(c instanceof Color)
-			return ((Color)c).darker();
+			return mixColors((Color)c, other, 0.8f);
+		else
+			return c;		
+	}
+	
+	private Paint makeMoreLikeForeground(Paint c){
+		Color other = getForeground();
+		if(c instanceof Color)
+			return mixColors((Color)c, other, 0.8f);
 		else
 			return c;
 	}
 	
-	private Paint brighter(Paint c){
-		if(c instanceof Color)
-			return ((Color)c).brighter();
-		else
-			return c;
+	private Color mixColors(Color a, Color b, float ratio){
+		double mixRatio = 0.5; // fraction of input one
+		float red = (float) (ratio*a.getRed()+(1.0-ratio)*b.getRed());
+		float green = (float) (ratio*a.getGreen()+(1.0-ratio)*b.getGreen());
+		float blue = (float) (ratio*a.getBlue()+(1.0-ratio)*b.getBlue());	
+
+		return new Color(red/256.0f, green/256.0f, blue/256.0f);		
 	}
+	
 	
 
 	public long getBeginTime()
@@ -639,7 +651,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 
 		// Dim this object if we want to focus on some objects (for some reason or another)
 		if(data.isObjectDimmed(this)){
-			c = darker(darker(c));
+			c = makeMoreLikeBackground(c);
 		}
 		
 			
@@ -685,12 +697,12 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
 		if(rectWidth > 2 && !data.colorByMemoryUsage())
 		{
-			g2d.setPaint(brighter(c));			
+			g2d.setPaint(makeMoreLikeForeground(c));			
 			g2d.drawLine(left, verticalInset, right, verticalInset);
 			if(left == 0)
 				g2d.drawLine(0, verticalInset, 0, verticalInset+rectHeight-1);
 
-			g2d.setPaint(darker(c));
+			g2d.setPaint(makeMoreLikeBackground(c));
 			g2d.drawLine(left, verticalInset+rectHeight-1, right, verticalInset+rectHeight-1);
 			if(right == rectWidth-1)
 				g2d.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);

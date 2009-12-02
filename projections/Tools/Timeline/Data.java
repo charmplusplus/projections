@@ -1227,7 +1227,7 @@ public class Data
 	}
 	
 	public Color getMessageColor() {
-		return Color.white;
+		return getForegroundColor();
 	}
 	
 	public Color getMessageAltColor() {

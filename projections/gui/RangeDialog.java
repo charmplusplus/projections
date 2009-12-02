@@ -15,6 +15,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -64,7 +66,7 @@ import projections.misc.LogEntryData;
  */
 
 public final class RangeDialog extends JDialog
-implements ActionListener, KeyListener, FocusListener, ItemListener
+implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListener
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -259,6 +261,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener
 		validProcessorsLabel = new JLabel("Valid Processors = " + 
 				MainWindow.runObject[myRun].getValidProcessorString(),
 				JLabel.LEFT);
+		validProcessorsLabel.addMouseListener(this);
 		processorTextLabel = new JLabel("Processors :", JLabel.LEFT);
 		processorsField = new JSelectField(MainWindow.runObject[myRun].getValidProcessorString(), 12);
 		// set listeners
@@ -715,6 +718,34 @@ public void keyTyped(KeyEvent evt) {
 }
 
 public void itemStateChanged(ItemEvent e) {
+	someInputChanged();
+}
+
+
+public void mouseClicked(MouseEvent e) {
+	if(e.getSource() == validProcessorsLabel){
+		processorsField.setText(MainWindow.runObject[myRun].getValidProcessorString());
+	}
+	someInputChanged();
+}
+
+
+public void mouseEntered(MouseEvent e) {
+	someInputChanged();
+}
+
+
+public void mouseExited(MouseEvent e) {
+	someInputChanged();
+}
+
+
+public void mousePressed(MouseEvent e) {
+	someInputChanged();
+}
+
+
+public void mouseReleased(MouseEvent e) {
 	someInputChanged();
 }
 

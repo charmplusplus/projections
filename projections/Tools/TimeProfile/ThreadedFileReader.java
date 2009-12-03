@@ -105,6 +105,7 @@ public class ThreadedFileReader extends Thread  {
 			System.err.println("Error: No data Files found!!");
 		}
 
+		
 		accumulateIntoShared();
 	
 		
@@ -127,6 +128,7 @@ public class ThreadedFileReader extends Thread  {
 				for (int interval=0; interval<numIntervals; interval++) {
 					graphData[interval][ep] += entryData[0][interval];
 					graphData[interval][numEPs] -= entryData[0][interval]; // overhead = -work time
+										
 				}
 			}
 
@@ -134,6 +136,10 @@ public class ThreadedFileReader extends Thread  {
 			int[][] idleData = mySystemUsageData[2]; //percent
 			for (int interval=0; interval<numIntervals; interval++) {
 				if(idleData[0] != null && idleData[0].length>interval){
+					if(idleData[0][interval] > 100.0){
+						System.out.println("Idle time of" + idleData[0][interval] + " on PE " + pe + " is > 100.0  in interval " + interval);
+					}
+					
 					graphData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
 					graphData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
 					graphData[interval][numEPs] += intervalSize;  

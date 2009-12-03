@@ -51,8 +51,8 @@ import projections.gui.Util;
  *  by Chee Wai Lee
  *	updated by Isaac Dooley
  *	
- *  Will replace The old GraphWindow class once a framework for displaying
- *  Legends are in place (and probably replace the name)
+ * @todo Add a legend
+ * 
  */
 public class TimeProfileWindow extends GenericGraphWindow
 implements ActionListener, ColorSelectable, Clickable
@@ -413,8 +413,6 @@ implements ActionListener, ColorSelectable, Clickable
 						}
 						
 					}
-
-					
 					
 					// set the exists array to accept non-zero 
 					// entries only have initial state also 

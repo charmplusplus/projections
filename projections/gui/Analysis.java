@@ -964,11 +964,11 @@ public class Analysis {
 
 
 	public Paint getIdleColor() {
-		return new GradientPaint(0, 0, Color.white, 10, 10, new Color(200,200,200), true);
+		return new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
 	}
 
 	public Paint getOverheadColor() {
-		return new GradientPaint(0, 10, Color.black, 10, 0, new Color(50,50,50), true);
+		return new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
 	}
 	
 	

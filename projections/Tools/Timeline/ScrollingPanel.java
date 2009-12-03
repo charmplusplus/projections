@@ -73,7 +73,6 @@ public class ScrollingPanel extends JPanel {
 	
 	
 	void updateBackgroundColor(){
-		System.out.println("Updating scrolling panel background color to " + data.getBackgroundColor() );
 		this.setBackground(data.getBackgroundColor());
 		scrollpane.setBackground(data.getBackgroundColor());
 	}

@@ -281,6 +281,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 				U.humanReadableString(0) + " to " +
 				U.humanReadableString(MainWindow.runObject[myRun].getTotalTime()), 
 				JLabel.LEFT);
+		validTimeRangeLabel.addMouseListener(this);
 		startTextLabel = new JLabel("Start Time :", JLabel.LEFT);
 		startTimeField = new TimeTextField(" ", 12);
 		endTextLabel = new JLabel("End Time :", JLabel.LEFT);
@@ -725,6 +726,9 @@ public void itemStateChanged(ItemEvent e) {
 public void mouseClicked(MouseEvent e) {
 	if(e.getSource() == validProcessorsLabel){
 		processorsField.setText(MainWindow.runObject[myRun].getValidProcessorString());
+	} else if(e.getSource() == validTimeRangeLabel){
+		startTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.begintime);
+		endTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.endtime);
 	}
 	someInputChanged();
 }

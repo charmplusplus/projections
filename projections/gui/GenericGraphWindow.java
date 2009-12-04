@@ -1,5 +1,4 @@
 package projections.gui;
-import java.awt.Color;
 import java.awt.Paint;
 import java.util.LinkedList;
 

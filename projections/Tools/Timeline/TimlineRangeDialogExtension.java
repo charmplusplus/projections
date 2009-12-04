@@ -10,9 +10,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import projections.gui.TimeTextField;
 import projections.gui.RangeDialog;
 import projections.gui.RangeDialogExtensionPanel;
+import projections.gui.TimeTextField;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by providing the granularity at which the time range should be discretized. */
 public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener

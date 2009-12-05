@@ -1,7 +1,6 @@
 
 package projections.Tools.Timeline;
 
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Graphics;
 import java.awt.event.ComponentEvent;

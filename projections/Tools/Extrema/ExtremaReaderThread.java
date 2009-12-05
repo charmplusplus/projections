@@ -3,8 +3,6 @@ package projections.Tools.Extrema;
 import java.io.EOFException;
 import java.io.IOException;
 
-import javax.swing.JMenuItem;
-
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.Analysis;

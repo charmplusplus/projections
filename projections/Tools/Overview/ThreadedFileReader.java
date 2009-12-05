@@ -1,4 +1,4 @@
-package projections.Tools.TimeProfile;
+package projections.Tools.Overview;
 
 import projections.analysis.IntervalData;
 import projections.analysis.LogReader;
@@ -20,22 +20,18 @@ public class ThreadedFileReader extends Thread  {
 	int[][][][] mySystemMsgsData; // [categoryIdx][type][][]
 	int[][][][] myUserEntryData; // [ep idx][type][pe][]
 	
-	double[][] graphData;
-	
 	long logReaderIntervalSize;
 	
-	/** Construct a file reading thread that will measure utilization data 
-	 *  for each interval associated with each EP, Idle, or Overhead. 
+	int entryData[]; //[desiredIntervals]  which EP is most prevalent in each interval
+	
+	
+	/** Construct a file reading thread that will determine the best EP representative for each interval
 	 *  
-	 *  graphData[interval][0 to (numEP-1)] contain time spent in the EPs.
-	 *  graphData[interval][numEP] contains overhead time.
-	 *  graphData[interval][numEP] contains idle time.
-	 *  
-	 *  The resulting output data will be accumulated into the array specified in a synchronized manner
+	 *  The resulting output data will be assigned into the array specified in a synchronized manner
 	 *  
 	 *  */
 	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, 
-			boolean ampiTraceOn, double[][] graphData){
+			boolean ampiTraceOn, int[] entryData){
 		this.pe = pe;
 		this.p = p;
 		this.intervalSize = intervalSize;
@@ -43,7 +39,7 @@ public class ThreadedFileReader extends Thread  {
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
 		this.ampiTraceOn = ampiTraceOn;
-		this.graphData = graphData;
+		this.entryData = entryData;
 	}
 
 
@@ -89,60 +85,69 @@ public class ThreadedFileReader extends Thread  {
 			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();
 			logReaderIntervalSize = logReader.getIntervalSize();
-		} else if (MainWindow.runObject[myRun].hasSumDetailFiles()) {
-			IntervalData intervalData = new IntervalData();
-			intervalData.loadIntervalData(intervalSize, intervalStart,
-					intervalEnd, byEntryPoint,
-					processorList);
-			mySystemUsageData = intervalData.getSystemUsageData();
-			mySystemMsgsData = intervalData.getSystemMsgs();
-			myUserEntryData = intervalData.getUserEntries();
-		} else if (MainWindow.runObject[myRun].hasSumFiles()) { // no log files, so load .sum files
-			System.err.println("Error: This case should never be reached ?!");
 		} else {
 			System.err.println("Error: No data Files found!!");
 		}
+		
 
 		
-		accumulateIntoShared();
-			
+		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+		int numIntervals = endInterval-startInterval;
+		
+		double[][] utilData = new double[numIntervals][numEPs+2];
+	
+		// Extract data and put it into the graph
+		for (int ep=0; ep<numEPs; ep++) {
+			int[][] entryData = myUserEntryData[ep][LogReader.TIME];
+			for (int interval=0; interval<numIntervals; interval++) {
+				utilData[interval][ep] += entryData[0][interval];
+				utilData[interval][numEPs] -= entryData[0][interval]; // overhead = -work time										
+			}
+		}
+
+		// Idle time SYS_IDLE=2
+		int[][] idleData = mySystemUsageData[2]; //percent
+		for (int interval=0; interval<numIntervals; interval++) {
+			if(idleData[0] != null && idleData[0].length>interval){				
+				utilData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
+				utilData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
+				utilData[interval][numEPs] += intervalSize; // overhead
+			}
+		}
+		
+		
+		// Now find the most commonly occurring EP for each interval
+		int temp[] = new int[numIntervals];
+		
+		for(int i=0; i<numIntervals; i++){
+			// find max
+			int maxEP = 0;
+			double maxVal = utilData[i][0];
+			for(int j=0; j<numEPs+2; j++) {
+				if(utilData[i][j]>maxVal) {
+					maxVal = utilData[i][j];
+					maxEP = j;
+				}
+			}						
+			temp[i] = maxEP;
+		}
+		
+		
+		synchronized (entryData) {
+			for(int i=0; i<numIntervals; i++){
+				entryData[i] = temp[i];
+			}			
+		}
+
 		// Release any unneeded memory	
+		utilData = null;
+		temp = null;
 		mySystemUsageData = null; 
 		mySystemMsgsData = null;
 		myUserEntryData = null;
 	}
 	
 	
-	/** A threadsafe way for accumulating results into graphData. */
-	private void accumulateIntoShared(){
-
-		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
-		int numIntervals = endInterval-startInterval+1;
-
-		// Accumulate results into the shared array "graphData"
-		synchronized (graphData) {
-			
-			// Extract data and put it into the graph
-			for (int ep=0; ep<numEPs; ep++) {
-				int[][] entryData = myUserEntryData[ep][LogReader.TIME];
-				for (int interval=0; interval<numIntervals; interval++) {
-					graphData[interval][ep] += entryData[0][interval];
-					graphData[interval][numEPs] -= entryData[0][interval]; // overhead = -work time										
-				}
-			}
-
-			// Idle time SYS_IDLE=2
-			int[][] idleData = mySystemUsageData[2]; //percent
-			for (int interval=0; interval<numIntervals; interval++) {
-				if(idleData[0] != null && idleData[0].length>interval){				
-					graphData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
-					graphData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
-					graphData[interval][numEPs] += intervalSize;  
-				}
-			}
-
-		}
-	}
 
 }
 

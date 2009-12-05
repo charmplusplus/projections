@@ -235,7 +235,14 @@ public class ExtremaReaderThread extends Thread  {
 		}
 		
 		
-		if(selectedAttribute == 1 || selectedAttribute == 4){
+		// compute overhead time
+		myData[numActivities+1] = endTime - startTime;
+		for(int e=0; e<numActivities+1; e++){
+			myData[numActivities+1] -= myData[e];
+		}
+		
+		
+		if(selectedAttribute == ExtremaWindow.ATTR_LEASTIDLE || selectedAttribute == ExtremaWindow.ATTR_MOSTIDLE){
 			// Scale raw data into percentages
 			for(int e=0; e< myData.length; e++){
 				myData[e] = myData[e] * 100.0 / (double)(endTime - startTime);

@@ -13,12 +13,15 @@ value is the integer percent CPU utilization from 0..100.
 Orion Sky Lawlor, olawlor@acm.org, 2/12/2001
  */
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Image;
 import java.awt.image.MemoryImageSource;
+import java.util.LinkedList;
 
 import javax.swing.ProgressMonitor;
 
 import projections.analysis.LogReader;
+import projections.analysis.ThreadManager;
 import projections.gui.ColorMap;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -53,7 +56,6 @@ public class OverviewPanel extends ScalePanel.Child
 	private long startTime,endTime;
 	int startInterval;
 	int endInterval;
-	int desiredIntervals;
 	int numEPs;
 
 	private ColorMap colorMap;
@@ -85,7 +87,7 @@ public class OverviewPanel extends ScalePanel.Child
 				pe = selectedPEs.nextElement();
 				count++;
 			}
-//			int numEP = MainWindow.runObject[myRun].getNumUserEntries();
+			//			int numEP = MainWindow.runObject[myRun].getNumUserEntries();
 			int interval = (int)(t/intervalSize);
 
 			long  timedisplay = t+startTime;
@@ -94,21 +96,21 @@ public class OverviewPanel extends ScalePanel.Child
 				": Usage = " + utilData[p][interval]+"%" +
 				" IDLE = " + idleData[p][interval]+"%" +
 				" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
-			} else {
-				if (interval >= entryData[p].length) {
-					return "some bug has occurred"; // strange bug.
-				}
-				if (entryData[p][interval] > 0) {
-					return "Processor "+pe+": Usage = "+
-					utilData[p][interval]+"%"+
-					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us)." +
-					" EP = " + 
-					MainWindow.runObject[myRun].getEntryNameByIndex(entryData[p][interval]);
-				} else {
-					return "Processor "+pe+": Usage = "+
-					utilData[p][interval]+"%"+
-					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
-				}
+			} else if(mode == OverviewWindow.MODE_EP) {
+				//				if (interval >= entryData[p].length) {
+				//					return "some bug has occurred"; // strange bug.
+				//				}
+				//				if (entryData[p][interval] > 0) {
+				//					return "Processor "+pe+": Usage = "+
+				//					utilData[p][interval]+"%"+
+				//					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us)." +
+				//					" EP = " + 
+				//					MainWindow.runObject[myRun].getEntryNameByIndex(entryData[p][interval]);
+				//				} else {
+				//					return "Processor "+pe+": Usage = "+
+				//					utilData[p][interval]+"%"+
+				//					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
+				return "No implementation of getPointInfo()";
 			}
 		}
 		return "";
@@ -248,10 +250,18 @@ public class OverviewPanel extends ScalePanel.Child
 		} else {
 			int numPE = data.length;
 			int numIntervals = data[numPE-1].length;
+			System.out.println("Final data is of size " + numPE + " by " + numIntervals);
 			colors = new int[numPE][numIntervals];
 			for (int pe=0;pe<numPE;pe++) {
 				for (int interval=0; interval<numIntervals; interval++) {
-					if (data[pe][interval] > 0) {
+					if (data[pe][interval] == numEPs){
+						// overhead
+						colors[pe][interval] = Color.black.getRGB();
+					} else if (data[pe][interval] == numEPs+1){
+						// idle
+						colors[pe][interval] = Color.white.getRGB();
+					} else if (data[pe][interval] > 0) {
+						// normal EP
 						colors[pe][interval] =
 							MainWindow.runObject[myRun].getEntryColor(data[pe][interval]).getRGB();
 					} else {
@@ -261,6 +271,12 @@ public class OverviewPanel extends ScalePanel.Child
 				}
 			}
 		}
+		
+//		// Save to image if the user wants
+//		ImageIcon imageIcon = new ImageIcon();
+//		
+		
+		
 	}
 
 	private long totalTime() {
@@ -273,6 +289,8 @@ public class OverviewPanel extends ScalePanel.Child
 		this.selectedPEs = selectedPEs;
 		this.startTime = startTime;
 		this.endTime = endTime;
+
+		int desiredIntervals;
 
 		// necessary for t < 7000
 		if (totalTime() < 7000) {
@@ -347,8 +365,6 @@ public class OverviewPanel extends ScalePanel.Child
 	}
 
 	/** Load utilization using Analysis.LoadGraphData() and a second manual scan through the logs. 
-	 * 
-	 * @todo fix this function to have it do a single pass through the log files.
 	 */
 	public void loadEPData() {
 		if (!MainWindow.runObject[myRun].hasLogData()) {
@@ -358,57 +374,28 @@ public class OverviewPanel extends ScalePanel.Child
 
 		mode = OverviewWindow.MODE_EP;
 
-		// Load the graph data that we need:
-		MainWindow.runObject[myRun].LoadGraphData(intervalSize,
-				startInterval, endInterval, false, selectedPEs);
-		// Get the arrays that were just loaded
-		utilData = MainWindow.runObject[myRun].getSystemUsageData(LogReader.SYS_CPU);
-		idleData = MainWindow.runObject[myRun].getSystemUsageData(LogReader.SYS_IDLE);
+		// Create a list of worker threads
+		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 
+		// Create an array that will store the resulting data
+		int special = 2;
+		int numPEs = selectedPEs.size();
 
-		// Then load the EP data
-		ProgressMonitor progressBar =
-			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Building EP Data",
-					"", 0, selectedPEs.size());
-		progressBar.setNote("Building EP Data");
-		progressBar.setProgress(0);
+		int numIntervals = endInterval - startInterval;
+		entryData = new int[selectedPEs.size()][numIntervals];
 
-
-		int[][] temp = new int[selectedPEs.size()][]; // [pe][interval]
-		int[][] max = 
-			new int[selectedPEs.size()][desiredIntervals];  // [pe][interval]
-		entryData =
-			new int[selectedPEs.size()][desiredIntervals];
-		int curPeIdx = 0;
-		int curPE = 0;
-		selectedPEs.reset();
+		int pIdx=0;		
 		while (selectedPEs.hasMoreElements()) {
-			curPE = selectedPEs.nextElement();
-			OrderedIntList curPEList = new OrderedIntList();
-			curPEList.insert(curPE);
-			progressBar.setProgress(curPeIdx);
-			progressBar.setNote("[PE: " + curPE + " ( " +
-					curPeIdx + " of " +
-					selectedPEs.size()+") ] Acummulating Data");
-			MainWindow.runObject[myRun].LoadGraphData(intervalSize,
-					startInterval, endInterval, true,
-					curPEList);
-			for (int ep=0; ep<numEPs; ep++) {
-				temp[curPeIdx] = 
-					MainWindow.runObject[myRun].getUserEntryData(ep, LogReader.TIME)[0];
-				// find max so far for each valid interval
-				for (int i=0; 
-				(i<temp[curPeIdx].length) && (i<desiredIntervals); 
-				i++) {
-					if (temp[curPeIdx][i] > max[curPeIdx][i]) {
-						max[curPeIdx][i] = temp[curPeIdx][i];
-						entryData[curPeIdx][i] = ep;
-					}
-				}
-			}
-			curPeIdx++;
+			int nextPe = selectedPEs.nextElement();
+			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
+					startInterval, endInterval, false, entryData[pIdx]) );
+			pIdx++;
 		}
-		progressBar.close();
+
+		
+		// Pass this list of threads to a class that manages/runs the threads nicely
+		ThreadManager threadManager = new ThreadManager("Loading Overview in Parallel", readyReaders, this, true);
+		threadManager.runThreads();
 
 		applyColorMap(entryData, true);
 		repaint();

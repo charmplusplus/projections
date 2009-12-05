@@ -85,8 +85,8 @@ Clickable
 	public String attributes[][] = {
 			{ "Execution Time by Activity",
 				"Least Idle Time",
-				"Msgs Sent by Activity", 
-				"Bytes Sent by Activity",
+				"Msgs Sent by Activity <not yet implemented>", 
+				"Bytes Sent by Activity  <not yet implemented>",
 				"Most Idle Time",
 				"Active Entry Methods",
 				"Overhead",
@@ -109,6 +109,16 @@ Clickable
 			"us"}
 	};
 
+	public final static int ATTR_EXECUTIONTIME = 0;
+	public final static int ATTR_LEASTIDLE = 1;
+	public final static int ATTR_MSGSSENT = 2;
+	public final static int ATTR_BYTESSENT = 3;
+	public final static int ATTR_MOSTIDLE = 4;
+	public final static int ATTR_ACTIVEENTRY = 5;
+	public final static int ATTR_OVERHEAD = 6;
+	public final static int ATTR_GRAINSIZE = 7;
+
+		
 	// derived data after analysis
 	LinkedList outlierList;
 
@@ -252,38 +262,27 @@ Clickable
 		// construct the necessary meta-data given the selected activity
 		// type.
 		double[][] tempData;
-		Paint[] tempGraphColors;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
-		tempGraphColors = MainWindow.runObject[myRun].getColorMap(selectedActivity);
 		numSpecials = 0;
+		
 
-		if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4 || selectedAttribute == 5 || selectedAttribute == 6 || selectedAttribute == 7) {
-			// **CWL NOTE** - this is currently a hack until I can find a way
-			// to do this more cleanly!!!
-			//
-			// add Idle to the current set
-			numSpecials = 1;
-			if(selectedAttribute == 6 || selectedAttribute == 7){		
-				numSpecials = 2;
-			}
-			graphColors = new Paint[numActivities+numSpecials];
-			for (int i=0;i<numActivities; i++) {
-				graphColors[i] = tempGraphColors[i];
-			}
-			graphColors[numActivities] = MainWindow.runObject[myRun].getIdleColor();
-
-			if( selectedAttribute == 6 ||selectedAttribute == 7){							
-				graphColors[numActivities+1] = Color.yellow;
-			}
-		} else {
-			graphColors = tempGraphColors;
+		// Idle and overhead are always added to the chart.
+		numSpecials = 2;
+		graphColors = new Paint[numActivities+numSpecials];
+		for (int i=0;i<numActivities; i++) {
+			graphColors[i] = MainWindow.runObject[myRun].getColorMap(selectedActivity)[i];
 		}
+		graphColors[numActivities] = MainWindow.runObject[myRun].getOverheadColor();
+		graphColors[numActivities+1] = MainWindow.runObject[myRun].getIdleColor();
+	
 		int numActivityPlusSpecial = numActivities+numSpecials;
 
 		OrderedIntList selectedPEs = dialog.getSelectedProcessors().copyOf();
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
 
+		
+		
 		// Create a list of worker threads
 		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 
@@ -351,13 +350,6 @@ Clickable
 		}
 
 
-		/*
-	System.out.println("Time taken for processing [" + tempData.length +
-			   " processors] = " + 
-			   (System.currentTimeMillis() - time) +
-			   " ms");
-		 */
-
 		// Now Analyze the data for outliers.
 		// the final graph has 3 extra x-axis slots for 
 		// 1) overall average
@@ -372,7 +364,9 @@ Clickable
 		double[] processorDiffs = new double[selectedPEs.size()];
 		int[] sortedMap = new int[selectedPEs.size()];
 		String[] peNames = new String[selectedPEs.size()];
-
+		double [] grainSize = new double[selectedPEs.size()];
+		
+		
 		// initialize sortedMap (maps indices to indices)
 		selectedPEs.reset();
 		for (int p=0; p<selectedPEs.size(); p++) {
@@ -381,33 +375,24 @@ Clickable
 		}
 
 		for (int p=0; p<selectedPEs.size(); p++) {
-			if (selectedAttribute == 6) {
-				double total_time = 0.0;
-				for(int iact = 0; iact<numActivities+1; iact++)
-					total_time += tempData[p][iact];			
-				tempData[p][numActivities+numSpecials-1] = endTime-startTime - total_time;			
-			}else if (selectedAttribute == 7){
+			if (selectedAttribute == ATTR_GRAINSIZE){
 				int __count_entries = 0;
 				for(int iact = 0; iact<numActivities; iact++)				//tempData[p][numActivities+numSpecials-1] = 0;//processorDiffs[p];
 					//System.out.println(" active methods" + processorDiffs[p] + "idle time=" + tempData[p][numActivities]);
 				{
 					if(tempData[p][iact] > 0)
 						__count_entries++;
-					tempData[p][numActivities+numSpecials-1] += tempData[p][iact];
+					grainSize[p] += tempData[p][iact];
 				}
 				if(__count_entries>0)
-					tempData[p][numActivities+numSpecials-1] /= __count_entries;			
+					grainSize[p] /= __count_entries;			
 			}
 		}
 
+		
 		// pass #1, determine global average
 		for (int act=0; act<numActivities+numSpecials; act++) {
 			for (int p=0; p<selectedPEs.size(); p++) {
-				/*
-		if (tempData[p][act] > 0) {
-		    System.out.println("["+p+"] " + tempData[p][act]);
-		}
-				 */
 				tmpAvg[act] += tempData[p][act];
 			}
 			tmpAvg[act] /= selectedPEs.size();
@@ -419,37 +404,32 @@ Clickable
 		// to discover outliers by merely sorting them, the mapping has
 		// to be preserved for display.
 
-		// Maxmimum Black time, just use -1*sum(tempData[p][0...numActivities])
-		// Active Entry methods, use count( tempData[p][0...numActivities-1] > 0 )
-
 		for (int p=0; p<selectedPEs.size(); p++) {
 			// this is an initial hack.
-			if (selectedAttribute == 1) {
+			if (selectedAttribute == ATTR_LEASTIDLE) {
 				// induce a sort by decreasing idle time
-				processorDiffs[p] -= tempData[p][numActivities];
-			} else if (selectedAttribute == 4) {
+				processorDiffs[p] -= tempData[p][numActivities+1];
+			} else if (selectedAttribute == ATTR_MOSTIDLE) {
 				// induce a sort by increasing idle time
-				processorDiffs[p] += tempData[p][numActivities];
-			} else if (selectedAttribute == 5) {
+				processorDiffs[p] += tempData[p][numActivities+1];
+			} else if (selectedAttribute == ATTR_ACTIVEENTRY) {
 				// active entry method
-				for(int iact = 0; iact<numActivities; iact++)
-				{
+				for(int iact = 0; iact<numActivities; iact++) {
 					if(tempData[p][iact] > 0)
-						processorDiffs[p]++;				
+						processorDiffs[p]++;			
 				}
-			}else if (selectedAttribute == 6) {
+			}else if (selectedAttribute == ATTR_OVERHEAD) {
 				//black time totaltime - entrytime-idle time
-				processorDiffs[p] = tempData[p][numActivityPlusSpecial-1];
-			} else if(selectedAttribute == 7) {
-				processorDiffs[p] = tempData[p][numActivityPlusSpecial-1];							
-			}else {
+				processorDiffs[p] = tempData[p][numActivities];
+			} else if(selectedAttribute == ATTR_GRAINSIZE) {
+				processorDiffs[p] = grainSize[p];
+			}else { //  ATTR_EXECUTIONTIME  ATTR_MSGSSENT  ATTR_BYTESSENT
 				for (int act=0; act<numActivities; act++) {
-					processorDiffs[p] += 
-						Math.abs(tempData[p][act] - tmpAvg[act]) *
-						tmpAvg[act];
+					processorDiffs[p] += Math.abs(tempData[p][act] - tmpAvg[act]) * tmpAvg[act];
 				}
 			}
 		}
+
 
 
 		// bubble sort it.
@@ -702,7 +682,6 @@ Clickable
 	}
 
 	protected void setGraphSpecificData() {
-		
 		setXAxis("Notable PEs (Cluster Representatives and Extrema)", outlierList);
 		setYAxis(attributes[1][selectedAttribute], 
 				attributes[2][selectedAttribute]);
@@ -734,11 +713,11 @@ Clickable
 		} else {
 			rString[0] = "Outlier Processor " +  (String)outlierList.get(xVal);
 		}
-		if ((yVal == numActivities)) {
-			rString[1] = "Activity: Idle Time";
+		if (yVal == numActivities) {
+			rString[1] = "Overhead";
 		} else if (yVal == numActivities+1){
-			rString[1] = attributes[0][selectedAttribute];
-		}else {
+			rString[1] = "Idle";
+		} else {
 			rString[1] = "Activity: " + 
 			MainWindow.runObject[myRun].getActivityNameByIndex(selectedActivity, yVal);
 		}

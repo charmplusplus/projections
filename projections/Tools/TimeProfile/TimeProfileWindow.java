@@ -305,7 +305,7 @@ implements ActionListener, ColorSelectable, Clickable
 							int nextPe = processorList.nextElement();
 							readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
 									startInterval, endInterval, ampiTraceOn, 
-									numIntervals, numUserEntries, numProcessors, numEPs, graphDataAccumulators[pIdx%numResultAccumulators]) );
+									graphDataAccumulators[pIdx%numResultAccumulators]) );
 							pIdx++;
 						}
 

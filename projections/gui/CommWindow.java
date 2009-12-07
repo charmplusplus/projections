@@ -373,7 +373,7 @@ implements ItemListener, ActionListener, Clickable
 				progressBar.close();
 				return;
 			}
-			GenericLogReader glr = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+			GenericLogReader glr = new GenericLogReader(pe,
 					MainWindow.runObject[myRun].getVersion());
 			try {
 				sentMsgCount[curPeArrayIndex] = new double[numEPs];

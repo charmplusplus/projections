@@ -75,7 +75,7 @@ public class CallGraph extends ProjDefs
 				progressBar.close();
 				break;
 			}
-			LogFile = new GenericLogReader(MainWindow.runObject[myRun].getLogName(currPe), MainWindow.runObject[myRun].getVersion());
+			LogFile = new GenericLogReader(currPe, MainWindow.runObject[myRun].getVersion());
 
 			try
 			{

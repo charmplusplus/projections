@@ -36,7 +36,7 @@ public class ThreadManager {
 		this.guiRootForProgressBar = guiRoot;
 		this.showProgress = showProgress;
 
-		int numProcs = Runtime.getRuntime().availableProcessors();
+		int numProcs = Runtime.getRuntime().availableProcessors()*1;
 		numConcurrentThreads = numProcs;
 	}
 
@@ -81,9 +81,8 @@ public class ThreadManager {
 
 			//------------------------------------
 			// update the progress bar
-			int doneCount = totalToLoad-threadsToRun.size()-spawnedReaders.size();
-
 			if(showProgress){
+				int doneCount = totalToLoad-threadsToRun.size()-spawnedReaders.size();
 				if (!progressBar.isCanceled()) {
 					progressBar.setNote(doneCount+ " of " + totalToLoad);
 					progressBar.setProgress(doneCount);
@@ -108,16 +107,14 @@ public class ThreadManager {
 			//------------------------------------
 			// wait on the threads to complete
 			iter = spawnedReaders.iterator();
-			int waitMillis = 50;
 			while(iter.hasNext()){
 				r = (Thread) iter.next();
 				try {
-					r.join(waitMillis);
-					waitMillis = 1;
+					r.join(0);
 					if(! r.isAlive()) {
 						// Thread Finished
 						iter.remove();
-					} 
+					}
 				}
 				catch (InterruptedException e) {
 					throw new RuntimeException("Thread was interrupted. This should not ever occur");

@@ -17,7 +17,7 @@ public class ThreadedFileReader extends Thread  {
 	boolean ampiTraceOn;
 
 	int[][][] mySystemUsageData;   // [type][pe list index][interval]
-	int[][][][] mySystemMsgsData;  // [categoryIdx][type][][]
+//	int[][][][] mySystemMsgsData;  // [categoryIdx][type][][]
 	int[][][][] myUserEntryData;   // [ep idx][type][pe][]
 	
 	long logReaderIntervalSize;
@@ -85,14 +85,13 @@ public class ThreadedFileReader extends Thread  {
 					intervalStart, intervalEnd,
 					byEntryPoint, processorList, false);
 			mySystemUsageData = logReader.getSystemUsageData();
-			mySystemMsgsData = logReader.getSystemMsgs();
+//			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();
 			logReaderIntervalSize = logReader.getIntervalSize();
 		} else {
 			System.err.println("Error: No data Files found!!");
 		}
 		
-
 		
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		int numIntervals = endInterval-startInterval;
@@ -126,8 +125,7 @@ public class ThreadedFileReader extends Thread  {
 		}
 		
 		// Now find the most commonly occurring EP for each interval
-		int temp[] = new int[numIntervals];
-		
+			
 		for(int i=0; i<numIntervals; i++){
 			// find max
 			int maxEP = 0;
@@ -137,20 +135,14 @@ public class ThreadedFileReader extends Thread  {
 					maxVal = utilData[i][j];
 					maxEP = j;
 				}
-			}						
-			temp[i] = maxEP;
+			}				
+			entryData[i] = maxEP;
 		}
-
-		
-		for(int i=0; i<numIntervals; i++){
-			entryData[i] = temp[i];
-		}			
 
 		// Release any unneeded memory	
 		utilData = null;
-		temp = null;
 		mySystemUsageData = null; 
-		mySystemMsgsData = null;
+//		mySystemMsgsData = null;
 		myUserEntryData = null;
 	}
 	

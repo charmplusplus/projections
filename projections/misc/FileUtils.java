@@ -47,6 +47,17 @@ public class FileUtils {
 		return(".");	// present directory
 	}
 
+	
+	public static String withoutDir(String filename) {
+		// pre condition - filename is a full path name
+		int index = filename.lastIndexOf(File.separator);
+		if (index != -1) {
+			return filename.substring(index,filename.length());
+		}
+		return(filename);
+	}
+
+	
 	public static void detectFiles(StsReader sts, String baseName) {
 		// determine if any of the data files exist.
 		// We assume they are automatically valid and this is reflected

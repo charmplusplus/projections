@@ -13,17 +13,17 @@ public class LogLoaderEndTimeThread  extends Thread {
 	public String logName;
 	public Long result;
 	int myRun = 0;
+	int pe;
 
-	public LogLoaderEndTimeThread(String  _logName) {
+	public LogLoaderEndTimeThread(int pe) {
 		result = new Long(0);
-		logName = _logName;
-		myRun = 0;
+		this.pe = pe;
 	}
 
 	/** Find the end time for the given logfile	*/
 	public void run() {
 		try {	  
-			GenericLogReader reader = new GenericLogReader(logName, MainWindow.runObject[myRun].getVersion());
+			GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 			while (true) {
 				LogEntryData data = reader.nextEvent();
 				if (data.time > result)

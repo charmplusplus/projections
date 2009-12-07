@@ -295,7 +295,7 @@ implements ActionListener
 				progressBar.close();
 			}
 			curPeCount++;
-			r = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+			r = new GenericLogReader(pe,
 					MainWindow.runObject[myRun].getVersion());
 			try {
 				LogEntryData logdata = r.nextEventOnOrAfter(startTime);

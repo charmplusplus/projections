@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
+import projections.analysis.GenericLogReaderBalancer;
 import projections.analysis.IntervalData;
 import projections.analysis.LogLoader;
 import projections.analysis.LogReader;
@@ -54,6 +55,10 @@ public class Analysis {
   private StsReader sts;
   
   public LogLoader logLoader;  //Only for .log files
+  
+  /** A load balancer that allows multiple GenericLogReader's to access multiple directories containing the copies of the log files */
+  public GenericLogReaderBalancer loadBalancer;
+
   
   public SumAnalyzer sumAnalyzer; //Only for .sum files
   
@@ -114,6 +119,7 @@ public class Analysis {
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
     // constructor until multiple run data is supported.
+	  loadBalancer = new GenericLogReaderBalancer();
   }
   
   
@@ -133,73 +139,76 @@ public class Analysis {
    */    
   public void initAnalysis(String filename, Component rootComponent) 
     throws IOException 
-  {
-    guiRoot = rootComponent;
-    try {
-      baseName = FileUtils.getBaseName(filename);
-      setSts(new StsReader(filename));
-      
-      // Version Check (Kind of a hack, since the format of the Sts file
-      // can change between versions.
-      if (getSts().getVersion() > MainWindow.CUR_VERSION) {
-	System.err.println("Projections Version [" + MainWindow.CUR_VERSION +
-			   "] unable to handle files of Version [" +
-			   getSts().getVersion() + "].");
-	System.err.println("Exiting.");
-	System.exit(-1);
-      }
+    {
+	  guiRoot = rootComponent;
+	  try {
+		  baseName = FileUtils.getBaseName(filename);
+		  setSts(new StsReader(filename));
 
-      rcReader = 
-	new ProjectionsConfigurationReader(filename);
-      FileUtils.detectFiles(getSts(), baseName);	
-      
-      // Projections Colors
-      String colorsaved = 
-	getLogDirectory() + File.separator + "savedcolors.prj";
-      initColors(colorsaved);
+		  // Version Check (Kind of a hack, since the format of the Sts file
+		  // can change between versions.
+		  if (getSts().getVersion() > MainWindow.CUR_VERSION) {
+			  System.err.println("Projections Version [" + MainWindow.CUR_VERSION +
+					  "] unable to handle files of Version [" +
+					  getSts().getVersion() + "].");
+			  System.err.println("Exiting.");
+			  System.exit(-1);
+		  }
 
-      // Build Summary Data
-      if (hasSumFiles()) {
-	sumAnalyzer = null;
-	sumAnalyzer = new SumAnalyzer();
-      }
+		  rcReader = 
+			  new ProjectionsConfigurationReader(filename);
+		  FileUtils.detectFiles(getSts(), baseName);	
 
-      // Build Summary Detail Data
-      if (hasSumDetailFiles()) {
-	if (intervalData == null) {
-	  intervalData = new IntervalData();
-	}
-      }
+		  // Projections Colors
+		  String colorsaved = 
+			  getLogDirectory() + File.separator + "savedcolors.prj";
+		  initColors(colorsaved);
 
-      // Initialize Log Data
-      if (hasLogFiles()) {
-	logLoader = new LogLoader();
-      }
+		  // Build Summary Data
+		  if (hasSumFiles()) {
+			  sumAnalyzer = null;
+			  sumAnalyzer = new SumAnalyzer();
+		  }
 
-      // Build POSE dop Data
-      if (hasPoseDopFiles()) {
-	dopReader = new PoseDopReader();
-      }
-      
-      // Determine End Time
-      findEndTime();
+		  // Build Summary Detail Data
+		  if (hasSumDetailFiles()) {
+			  if (intervalData == null) {
+				  intervalData = new IntervalData();
+			  }
+		  }
 
-      // Flush any updated RC data to disk
-      rcReader.writeFile();
-      
-      // Create a structure to store selected ranges from all the dialog boxes in all the tools
-      persistantRangeData = new RangeDialogPersistantData(getValidProcessorList(), 0, getTotalTime());
-      
-      
-    } catch (LogLoadException e) {
-      // if sts reader could not be created because of a log load
-      // exception, forward the error as an IOException.
-      // LogLoadException is a silly exception in the first place!
-      throw new IOException(e.toString());
-    } catch (SummaryFormatException e) {
-      throw new IOException(e.toString());
+		  // Initialize Log Data
+		  if (hasLogFiles()) {
+			  logLoader = new LogLoader();
+		  }
+
+		  // Build POSE dop Data
+		  if (hasPoseDopFiles()) {
+			  dopReader = new PoseDopReader();
+		  }
+
+		  // Determine End Time
+		  findEndTime();
+
+		  // Flush any updated RC data to disk
+		  rcReader.writeFile();
+
+		  // Create a structure to store selected ranges from all the dialog boxes in all the tools
+		  persistantRangeData = new RangeDialogPersistantData(getValidProcessorList(), 0, getTotalTime());
+
+
+	  } catch (LogLoadException e) {
+		  // if sts reader could not be created because of a log load
+		  // exception, forward the error as an IOException.
+		  // LogLoadException is a silly exception in the first place!
+		  throw new IOException(e.toString());
+	  } catch (SummaryFormatException e) {
+		  throw new IOException(e.toString());
+	  }
+	  
+	  loadBalancer.init();
+	  
     }
-  }
 
   private void findEndTime() {
     // If the Configuration file has saved data, then use it!
@@ -611,6 +620,10 @@ public class Analysis {
     public String getLogDirectory() {
     	return FileUtils.dirFromFile(baseName);
     }
+    
+    public String getLogWithoutExtensionOrDirectory() {
+    	return FileUtils.withoutDir(baseName);
+    }
 
     public String getFilename() { 
     	return baseName;
@@ -909,6 +922,7 @@ public class Analysis {
     public String getLogName(int pnum) {
 	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.LOG);
     }   
+    
 
     public String getSumName(int pnum) {
 	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.SUMMARY);

@@ -2,6 +2,7 @@ package projections.analysis;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.Date;
 
 import javax.swing.ProgressMonitor;
 
@@ -56,7 +57,6 @@ public class LogReader
 
     // **CW** 8/23/2005 Make LogReader use GenericLogReader instead
     private LogEntryData curData;
-    private GenericLogReader reader;
 
     public long getIntervalSize() {
 	return intervalSize;
@@ -308,7 +308,8 @@ public class LogReader
 
     		int nLines = 2;
 
-    		reader = new GenericLogReader(curPe, MainWindow.runObject[myRun].getVersion());
+    		GenericLogReader reader = new GenericLogReader(curPe, MainWindow.runObject[myRun].getVersion());
+    		
     		boolean isProcessing = false;
     		try { 
     			while (true) { //EOFException will terminate loop
@@ -392,11 +393,14 @@ public class LogReader
 
     //Convert system usage and idle time from us to percent of an interval
     private void rescale() {
-    	for(int pp=0; pp< sysUsgData[SYS_CPU].length; pp++){
-    		for(int i=0; i<sysUsgData[SYS_CPU][pp].length; i++){
+    	int l = sysUsgData[SYS_CPU].length;
+    	for(int pp=0; pp< l; pp++){
+    		int l1 = sysUsgData[SYS_CPU][pp].length;
+    		for(int i=0; i<l1; i++){
     			sysUsgData[SYS_CPU][pp][i] =	(int)(sysUsgData[SYS_CPU ][pp][i]*100/intervalSize);
     		}
-    		for(int i=0; i<sysUsgData[SYS_IDLE][pp].length; i++){
+    		int l2 = sysUsgData[SYS_IDLE][pp].length;
+    		for(int i=0; i<l2; i++){
     			sysUsgData[SYS_IDLE][pp][i] =	(int)(sysUsgData[SYS_IDLE][pp][i]*100/intervalSize);
     		}    
     	}

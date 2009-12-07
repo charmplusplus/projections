@@ -47,9 +47,9 @@ class AsciiLineParser {
     	return line.substring(pos);
     }
 
-	
-	final public int nextInt() throws IOException {return (int)nextLong();}
-	
+//	
+//	final public int nextInt() throws IOException {return (int)nextLong();}
+//	
 	//Read a positive long from the current file 
 	//With version 7.0, negative numbers have to be
 	//  properly handled as well.

@@ -61,7 +61,7 @@ public class NoiseMinerThread extends Thread {
 		h = new TreeMap();
 			
 		
-		LogFile = new GenericLogReader(analysis.getLogName(getPe()), analysis.getVersion());
+		LogFile = new GenericLogReader(getPe(), analysis.getVersion());
 
 		try {
 

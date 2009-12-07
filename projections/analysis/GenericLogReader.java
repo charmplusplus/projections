@@ -36,8 +36,8 @@ implements PointCapableReader
 	// runs.
 	static int myRun = 0;
 	
-	/** How many bytes should be read at a time from the file. This should be big enough to keep the disks from seeking. */
-	public int bufferSize = 2*1024*1024;
+	/** How many bytes should be read at a time from the file. This should be big enough to keep the disks from thrashing. */
+	public int bufferSize = 256*1024;
 	
 	private double version;
 
@@ -54,27 +54,15 @@ implements PointCapableReader
 	private LogEntryData lastBeginEvent = null;
 
 	private boolean endComputationOccurred;
-
-	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
-	public GenericLogReader(String filename, double Nversion) {
-		super(filename, String.valueOf(Nversion));
-		lastBeginEvent = new LogEntryData();
-		lastBeginEvent.setValid(false);
-		endComputationOccurred = false;
-			
-		reader = createBufferedReader(filename); 
-		version = Nversion;
-		try {
-			reader.readLine(); // skip over the header (already read)
-		} catch (IOException e) {
-			System.err.println("Error reading file");
-		}
+	
 		
-	}
-
 	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
 	public GenericLogReader(int peNum, double Nversion) {
-		super(MainWindow.runObject[myRun].getLogName(peNum), String.valueOf(Nversion));
+		super("", String.valueOf(Nversion));
+		
+		sourceString = MainWindow.runObject[myRun].loadBalancer.acquireLogName(peNum);
+//		System.out.println("Acquired: " + sourceString);
+		
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);
 		endComputationOccurred = false;
@@ -153,7 +141,7 @@ implements PointCapableReader
 
 		String line = reader.readLine();
 		AsciiLineParser parser = new AsciiLineParser(line);
-
+		
 		// If actually at end of file
 		if(line == null){
 			// Generate a fake END_COMPUTATION if no legitimate one was found
@@ -169,53 +157,52 @@ implements PointCapableReader
 			} else {
 				throw new EOFException();
 			}
-		}		
+		}
 
-
-		data.type = parser.nextInt();
+		data.type = (int) parser.nextLong();
 		switch (data.type) {
 		case BEGIN_IDLE:
 			lastBeginEvent.time = data.time = parser.nextLong();
-			lastBeginEvent.pe = data.pe = parser.nextInt();
+			lastBeginEvent.pe = data.pe = (int) parser.nextLong();
 			lastBeginEvent.setValid(true);
 			break;
 		case END_IDLE: 
 			data.time = parser.nextLong();
-			data.pe = parser.nextInt();
+			data.pe = (int) parser.nextLong();
 			lastBeginEvent.setValid(false);
 			break;
 		case BEGIN_PACK: case END_PACK:
 		case BEGIN_UNPACK: case END_UNPACK:
 			data.time = parser.nextLong();
-			data.pe = parser.nextInt();
+			data.pe = (int) parser.nextLong();
 			break;
 		case USER_SUPPLIED:
-			data.userSupplied = new Integer(parser.nextInt());
+			data.userSupplied = new Integer((int) parser.nextLong());
 			break;
 		case USER_SUPPLIED_NOTE:
-			data.time = new Integer(parser.nextInt());
-			parser.nextInt(); // strlen
+			data.time = new Integer((int) parser.nextLong());
+			parser.nextLong(); // strlen
 			data.note = interpretNote(parser.restOfLine());
 			break;
 		case USER_SUPPLIED_BRACKETED_NOTE:
-			data.time = new Integer(parser.nextInt());
-			data.endTime = new Integer(parser.nextInt());
-			data.userEventID = parser.nextInt();
+			data.time = parser.nextLong();
+			data.endTime = parser.nextLong();
+			data.userEventID = (int) parser.nextLong();
 			data.entry = data.userEventID;
-			parser.nextInt(); // strlen
+			parser.nextLong(); // strlen
 			data.note = interpretNote(parser.restOfLine());
 			break;
 		case MEMORY_USAGE:
-			data.memoryUsage = new Integer(parser.nextInt());
+			data.memoryUsage = new Integer((int) parser.nextLong());
 			break;
 		case CREATION:
-			data.mtype = parser.nextInt();
-			data.entry = parser.nextInt();
+			data.mtype = (int) parser.nextLong();
+			data.entry = (int) parser.nextLong();
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			if (version >= 2.0) {
-				data.msglen = parser.nextInt();
+				data.msglen = (int) parser.nextLong();
 			} else {
 				data.msglen = -1;
 			}
@@ -224,61 +211,61 @@ implements PointCapableReader
 			}
 			break;
 		case CREATION_BCAST:
-			data.mtype = parser.nextInt();
-			data.entry = parser.nextInt();
+			data.mtype = (int) parser.nextLong();
+			data.entry = (int) parser.nextLong();
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			if (version >= 2.0) {
-				data.msglen = parser.nextInt();
+				data.msglen = (int) parser.nextLong();
 			} else {
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
 				data.sendTime = parser.nextLong();
 			}
-			data.numPEs = parser.nextInt();
+			data.numPEs = (int) parser.nextLong();
 			break;
 		case CREATION_MULTICAST:
-			data.mtype = parser.nextInt();
-			data.entry = parser.nextInt();
+			data.mtype = (int) parser.nextLong();
+			data.entry = (int) parser.nextLong();
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			if (version >= 2.0) {
-				data.msglen = parser.nextInt();
+				data.msglen = (int) parser.nextLong();
 			} else {
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
 				data.sendTime = parser.nextLong();
 			}
-			data.numPEs = parser.nextInt();
+			data.numPEs = (int) parser.nextLong();
 			data.destPEs = new int[data.numPEs];
 			for (int i=0;i<data.numPEs;i++) {
-				data.destPEs[i] = parser.nextInt();
+				data.destPEs[i] = (int) parser.nextLong();
 			}
 			break;
 		case BEGIN_PROCESSING: 
-			lastBeginEvent.mtype = data.mtype = parser.nextInt();
-			lastBeginEvent.entry = data.entry = parser.nextInt();
+			lastBeginEvent.mtype = data.mtype = (int) parser.nextLong();
+			lastBeginEvent.entry = data.entry = (int) parser.nextLong();
 			lastBeginEvent.time = data.time = parser.nextLong();
-			lastBeginEvent.event = data.event = parser.nextInt();
-			lastBeginEvent.pe = data.pe = parser.nextInt();
+			lastBeginEvent.event = data.event = (int) parser.nextLong();
+			lastBeginEvent.pe = data.pe = (int) parser.nextLong();
 			if (version >= 2.0) {
-				lastBeginEvent.msglen = data.msglen = parser.nextInt();
+				lastBeginEvent.msglen = data.msglen = (int) parser.nextLong();
 			} else {
 				lastBeginEvent.msglen = data.msglen = -1;
 			}
 			if (version >= 4.0) {
 				lastBeginEvent.recvTime = data.recvTime = 
 					parser.nextLong();
-				lastBeginEvent.id[0] = data.id[0] = parser.nextInt();
-				lastBeginEvent.id[1] = data.id[1] = parser.nextInt();
-				lastBeginEvent.id[2] = data.id[2] = parser.nextInt();
+				lastBeginEvent.id[0] = data.id[0] = (int) parser.nextLong();
+				lastBeginEvent.id[1] = data.id[1] = (int) parser.nextLong();
+				lastBeginEvent.id[2] = data.id[2] = (int) parser.nextLong();
 			}
 			if (version >= 7.0) {
-				lastBeginEvent.id[3] = data.id[3] = parser.nextInt();
+				lastBeginEvent.id[3] = data.id[3] = (int) parser.nextLong();
 			}
 			if (version >= 6.5) {
 				lastBeginEvent.cpuStartTime = data.cpuStartTime = 
@@ -286,7 +273,7 @@ implements PointCapableReader
 			}
 			if (version >= 6.6) {
 				lastBeginEvent.numPerfCounts = data.numPerfCounts = 
-					parser.nextInt();
+					(int) parser.nextLong();
 				lastBeginEvent.perfCounts = new long[data.numPerfCounts];
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
@@ -297,13 +284,13 @@ implements PointCapableReader
 			lastBeginEvent.setValid(true);
 			break;
 		case END_PROCESSING:
-			data.mtype = parser.nextInt();
-			data.entry = parser.nextInt();
+			data.mtype = (int) parser.nextLong();
+			data.entry = (int) parser.nextLong();
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			if (version >= 2.0) {
-				data.msglen = parser.nextInt();
+				data.msglen = (int) parser.nextLong();
 			} else {
 				data.msglen = -1;
 			}
@@ -311,7 +298,7 @@ implements PointCapableReader
 				data.cpuEndTime = parser.nextLong();
 			}
 			if (version >= 6.6) {
-				data.numPerfCounts = parser.nextInt();
+				data.numPerfCounts = (int) parser.nextLong();
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
 					data.perfCounts[i] = parser.nextLong();
@@ -337,31 +324,31 @@ implements PointCapableReader
 			break;
 		case BEGIN_FUNC:
 			data.time = parser.nextLong();
-			data.entry = parser.nextInt();
-			data.lineNo = parser.nextInt();
+			data.entry = (int) parser.nextLong();
+			data.lineNo = (int) parser.nextLong();
 			data.funcName = parser.restOfLine();
 			break;
 		case END_FUNC:
 			data.time = parser.nextLong();
-			data.entry = parser.nextInt();
+			data.entry = (int) parser.nextLong();
 			break;
 		case MESSAGE_RECV:
-			data.mtype = parser.nextInt();
+			data.mtype = (int) parser.nextLong();
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
-			data.msglen = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
+			data.msglen = (int) parser.nextLong();
 			break;
 		case ENQUEUE: case DEQUEUE:
-			data.mtype = parser.nextInt();
+			data.mtype = (int) parser.nextLong();
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			break;
 		case BEGIN_INTERRUPT: case END_INTERRUPT:
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			break;
 		case BEGIN_COMPUTATION:
 			data.time = parser.nextLong();
@@ -371,18 +358,18 @@ implements PointCapableReader
 			endComputationOccurred = true;
 			break;
 		case USER_EVENT:
-			data.userEventID = parser.nextInt();
+			data.userEventID = (int) parser.nextLong();
 			data.entry = data.userEventID; 
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			break;
 		case USER_EVENT_PAIR:
-			data.userEventID = parser.nextInt();
+			data.userEventID = (int) parser.nextLong();
 			data.entry = data.userEventID;
 			data.time = parser.nextLong();
-			data.event = parser.nextInt();
-			data.pe = parser.nextInt();
+			data.event = (int) parser.nextLong();
+			data.pe = (int) parser.nextLong();
 			break;
 		default:
 			data.type = -1;
@@ -402,13 +389,6 @@ implements PointCapableReader
 	 *  An EOFException indicates that no such event was found.
 	 */
 	public LogEntryData nextEventOnOrAfter(long timestamp) 
-	throws IOException, EOFException
-	{
-		return seqLookForNextEventOnOrAfter(timestamp);
-	}
-
-	// More precisely, the next RECOGNIZED event
-	private LogEntryData seqLookForNextEventOnOrAfter(long timestamp)
 	throws IOException, EOFException
 	{
 		LogEntryData data = new LogEntryData();
@@ -449,9 +429,9 @@ implements PointCapableReader
 	}
 
 
-	public void close()
-	throws IOException
-	{
+	public void close() throws IOException {
+		MainWindow.runObject[myRun].loadBalancer.releaseLogName(sourceString);
+
 		if (reader != null) {
 			reader.close();
 		}

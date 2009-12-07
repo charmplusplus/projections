@@ -46,7 +46,7 @@ public class LogLoader extends ProjDefs
  		validPEs.reset();
  		while (validPEs.hasMoreElements()) {
  				int pe = validPEs.nextElement();
-				workerThreads.add(new LogLoaderEndTimeThread( MainWindow.runObject[myRun].getLogName(pe)) );
+				workerThreads.add(new LogLoaderEndTimeThread(pe) );
 			}
 	
 		// Pass this list of threads to a class that manages/runs the threads nicely

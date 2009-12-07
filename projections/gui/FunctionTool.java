@@ -167,7 +167,7 @@ public class FunctionTool extends GenericGraphWindow
 		    progressBar.close();
 		    return;
 		}
-		reader = new GenericLogReader(MainWindow.runObject[myRun].getLogName(pe),
+		reader = new GenericLogReader(pe,
 					      MainWindow.runObject[myRun].getVersion());
 		double lastFuncTime = 0.0;
 		Integer stackEntry;

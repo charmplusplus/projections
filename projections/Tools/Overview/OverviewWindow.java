@@ -24,7 +24,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
+import javax.swing.ButtonGroup;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
 
 import projections.gui.ColorMap;
@@ -46,6 +49,10 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 	int myRun = 0;
 
 	private ScaleSlider hor,ver;
+	JRadioButton colorByEntryMethod;
+
+	JRadioButton colorByUtil;
+
 	private ScalePanel scalePanel;
 	OverviewPanel stl;
 	private Label status;
@@ -107,6 +114,26 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		gbc.fill = GridBagConstraints.BOTH;
 		Util.gblAdd(windowPane, displayPanel, gbc, 0,0, 1,1, 1,1, 1,1,1,1);
 		scalePanel.setStatusDisplay(this);
+		
+		
+		colorByEntryMethod = new JRadioButton("Entry Method");
+		colorByUtil = new JRadioButton("Utilization");
+		colorByEntryMethod.setSelected(true);
+	    //Group the radio buttons.
+	    ButtonGroup group = new ButtonGroup();
+	    group.add(colorByEntryMethod);
+	    group.add(colorByUtil);
+	    colorByEntryMethod.addActionListener(this);
+	    colorByUtil.addActionListener(this);
+	    JPanel radioPanel = new JPanel();
+	    radioPanel.setLayout(new GridBagLayout());   
+		Util.gblAdd(radioPanel, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(radioPanel, colorByEntryMethod, gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(radioPanel, colorByUtil, gbc, 2,0, 1,1, 1,1);
+		
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		Util.gblAdd(windowPane, radioPanel, gbc, 0,3, 1,1, 0,0, 1,1,1,1);
+
 
 		// Establishing the Utilization-only color map. 
 		// This never changes from the get-go, so there's no reason (like 
@@ -192,11 +219,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 				final SwingWorker worker = new SwingWorker() {
 					public Object doInBackground() {
 						stl.setRanges(pes,startTime,endTime);
-						if(toolSpecificPanel.isModeEP()){
-							stl.loadEPData(toolSpecificPanel.cbGenerateImage.isSelected());
-						} else if(toolSpecificPanel.isModeUtilization()){
-							stl.loadUtilizationData(toolSpecificPanel.cbGenerateImage.isSelected());
-						}
+						stl.loadData(toolSpecificPanel.cbGenerateImage.isSelected());
 						return null;
 					}
 					public void done() {
@@ -214,7 +237,11 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 
 	public void actionPerformed(ActionEvent evt)
 	{
-		if (evt.getSource() instanceof MenuItem) {
+		if (evt.getSource() == colorByEntryMethod){
+			stl.colorByEntry();
+		} else if (evt.getSource() == colorByUtil){
+			stl.colorByUtil();
+		} else if (evt.getSource() instanceof MenuItem) {
 			MenuItem mi = (MenuItem)evt.getSource();
 			String arg = mi.getLabel();
 			if(arg.equals("Close"))  {
@@ -224,6 +251,8 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 				showDialog();
 			}
 		}
+		
+		
 	}  
 
 	public void mouseClicked(MouseEvent evt) {

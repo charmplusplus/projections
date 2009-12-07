@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
+import javax.swing.SwingWorker;
 
 import projections.Tools.Timeline.ImageFilter;
 import projections.analysis.LogReader;
@@ -51,15 +52,10 @@ public class OverviewPanel extends ScalePanel.Child
 
 	int[][] entryData;   // [pe][interval]
 
-	// utilData (for utilization based visualization)
-	// dimension 0 - indexed by processor index
-	// dimension 1 - indexed by interval index
-	private int[][] utilData;
-
 	// idleData & mergedData (for supporting - utilization for now - 
 	// the other two data formats)
-	private int[][] idleData;
-	private int[][] mergedData;
+	private int[][] idleData; // [processor idx][interval]
+	private int[][] utilData; // [processor idx][interval]
 
 	private int[][] colors; //The color per processor per interval
 	private int intervalSize;//Length of an interval, in microseconds
@@ -106,31 +102,45 @@ public class OverviewPanel extends ScalePanel.Child
 			int interval = (int)(t/intervalSize);
 
 			long  timedisplay = t+startTime;
+			if (interval >= entryData[p].length) {
+				return "some bug has occurred"; // strange bug.
+			}
 			if (mode == OverviewWindow.MODE_UTILIZATION) {
 				return "Processor " + pe + 
 				": Usage = " + utilData[p][interval]+"%" +
 				" IDLE = " + idleData[p][interval]+"%" +
 				" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
 			} else if(mode == OverviewWindow.MODE_EP) {
-				//				if (interval >= entryData[p].length) {
-				//					return "some bug has occurred"; // strange bug.
-				//				}
-				//				if (entryData[p][interval] > 0) {
-				//					return "Processor "+pe+": Usage = "+
-				//					utilData[p][interval]+"%"+
-				//					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us)." +
-				//					" EP = " + 
-				//					MainWindow.runObject[myRun].getEntryNameByIndex(entryData[p][interval]);
-				//				} else {
-				//					return "Processor "+pe+": Usage = "+
-				//					utilData[p][interval]+"%"+
-				//					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
-				return "No implementation of getPointInfo()";
+				if (entryData[p][interval] > 0) {
+					return "Processor "+pe+": Usage = "+
+					utilData[p][interval]+"%"+
+					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us)." +
+					" EP = " + 
+					entryName(entryData[p][interval]);
+				} else {
+					return "Processor "+pe+": Usage = "+
+					utilData[p][interval]+"%"+
+					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
+				}
 			}
 		}
 		return "";
 	}
 
+	String entryName(int entry){
+		String entryName;
+		if(entry < numEPs) {
+			return MainWindow.runObject[myRun].getEntryNameByIndex(entry);
+		} else if(entry == numEPs) {
+			return "Overhead";
+		} else if(entry == numEPs+1) {
+			return "Idle";
+		} else {
+			return "";
+		}
+	}
+	
+	
 	// Draw yourself into (0,0,w,h) in the given graphics,
 	// scaling your output coordinates via the given axes.
 	public void paint(RepaintRequest req) {
@@ -265,7 +275,6 @@ public class OverviewPanel extends ScalePanel.Child
 		} else {
 			int numPE = data.length;
 			int numIntervals = data[numPE-1].length;
-			System.out.println("Final data is of size " + numPE + " by " + numIntervals);
 			colors = new int[numPE][numIntervals];
 			for (int pe=0;pe<numPE;pe++) {
 				for (int interval=0; interval<numIntervals; interval++) {
@@ -287,6 +296,8 @@ public class OverviewPanel extends ScalePanel.Child
 			}
 		}
 				
+		repaint();
+		
 		// If desired, save the full image to a file
 		if(saveImage){
 			int numPE = colors.length;
@@ -302,7 +313,8 @@ public class OverviewPanel extends ScalePanel.Child
 			}
 			g.dispose();
 			JPanelToImage.saveToFileChooserSelection(image, "Save Overview to PNG or JPG",  "Overview.png");
-		}		
+		}
+				
 	}
 
 	private long totalTime() {
@@ -340,71 +352,20 @@ public class OverviewPanel extends ScalePanel.Child
 
 	}
 
-	/** Load utilization using Analysis.LoadGraphData()  
-	 * @param b */
-	public void loadUtilizationData(boolean b){
-		mode = OverviewWindow.MODE_UTILIZATION;
-		selectedPEs.reset();
-		this.saveImage = saveImage;
-
-		// Load the graph data that we need:
-		MainWindow.runObject[myRun].LoadGraphData(intervalSize,
-				startInterval, endInterval, false, selectedPEs);
-		// Get the arrays that were just loaded
-		utilData = MainWindow.runObject[myRun].getSystemUsageData(LogReader.SYS_CPU);
-		idleData = MainWindow.runObject[myRun].getSystemUsageData(LogReader.SYS_IDLE);
-
-
-		// **CW** Silly hack because MainWindow.runObject[myRun].getSystemUsageData returns
-		// null when LogReader.SYS_IDLE is not available. Create an
-		// empty array - do a proper fix if this becomes a memory issue.
-		if (idleData == null) {
-			idleData = new int[utilData.length][utilData[0].length];
-		}
-		mergedData =  new int[utilData.length][utilData[0].length];
-
-		// merge the two data into utilData
-		for (int i=0; i<utilData.length; i++) {
-			for (int j=0; j<utilData[i].length; j++) {
-				// I only wish to see idle data if there is no
-				// utilization data.
-				if (utilData[i][j] == 0) {
-					// 101 is the starting range for idle color
-					// representation. However, we want non-idle
-					// scenarios to remain "black".
-					if (idleData[i][j] > 0) {
-						/* Idle data is broken for some reason
-						 * Dis-abling until a fix can be acquired
-			 mergedData[i][j] = 101 + idleData[i][j];
-						 */
-						mergedData[i][j] = 0;
-					} else {
-						mergedData[i][j] = 0;
-					}
-				} else {
-					mergedData[i][j] = utilData[i][j]; 
-				}
-			}
-		}
-
-		applyColorMap(mergedData, false);
-		selectedPEs.reset();
-		repaint();
-	}
-
-	/** Load utilization using Analysis.LoadGraphData() and a second manual scan through the logs. 
-	 * @param saveImage 
-	 */
-	public void loadEPData(boolean saveImage) {
+	/** For each processor, load an array specifying which entry method 
+	 *  is most prominent in each interval, and also the utilization 
+	 *  for each interval */
+	
+	public void loadData(boolean saveImage) {
 		if (!MainWindow.runObject[myRun].hasLogData()) {
 			System.err.println("No log files are available.");
+			JOptionPane.showMessageDialog(null, "No log files are available.");
 			return;
 		}
 
 		this.saveImage = saveImage;
-		
 		mode = OverviewWindow.MODE_EP;
-
+	
 		// Create a list of worker threads
 		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 
@@ -413,22 +374,49 @@ public class OverviewPanel extends ScalePanel.Child
 		int numPEs = selectedPEs.size();
 
 		int numIntervals = endInterval - startInterval;
+		
 		entryData = new int[selectedPEs.size()][numIntervals];
-
+		float[][] utilizationData = new float[selectedPEs.size()][numIntervals];
+		
 		int pIdx=0;		
+		selectedPEs.reset();
 		while (selectedPEs.hasMoreElements()) {
 			int nextPe = selectedPEs.nextElement();
 			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
-					startInterval, endInterval, false, entryData[pIdx]) );
+					startInterval, endInterval, false, entryData[pIdx], utilizationData[pIdx]) );
 			pIdx++;
 		}
-
 		
 		// Pass this list of threads to a class that manages/runs the threads nicely
 		ThreadManager threadManager = new ThreadManager("Loading Overview in Parallel", readyReaders, this, true);
 		threadManager.runThreads();
+		
+		// For historical reasons, we use a utilization range of 0 to 100
+		utilData = new int[utilizationData.length][utilizationData[0].length];
 
-		applyColorMap(entryData, true);
-		repaint();
+		for (int i=0; i<utilizationData.length; i++) {
+			for (int j=0; j<utilizationData[i].length; j++) {
+				utilData[i][j] = (int) (100.0f * utilizationData[i][j]);
+			}
+		}
+		
+		// dispose of unneeded utilizationData
+		utilizationData = null;
+	
+		// We default to coloring by entry method
+		colorByEntry();
+		
 	}
+
+	public void colorByEntry() {
+		mode = OverviewWindow.MODE_EP;
+		applyColorMap(entryData, true);
+	}
+
+	public void colorByUtil() {
+		mode = OverviewWindow.MODE_UTILIZATION;
+		applyColorMap(utilData, false);
+	}
+	
+	
 }

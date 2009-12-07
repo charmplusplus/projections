@@ -240,7 +240,11 @@ public class StsReader extends ProjDefs
     }   
     
     public String getEntryNameByIndex(int index) {
-    	return getEntryNames().get(entryFlatToID.get(index));
+    	if(entryFlatToID.containsKey(index)){
+    		return getEntryNames().get(entryFlatToID.get(index));
+    	} else {
+    		return "Unknown";
+    	}
     }   
     
     public String getEntryChareNameByID(int ID) {

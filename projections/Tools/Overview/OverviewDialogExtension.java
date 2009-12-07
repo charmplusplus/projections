@@ -24,8 +24,6 @@ public class OverviewDialogExtension extends RangeDialogExtensionPanel implement
 	// Additional GUI objects
 
 	private ButtonGroup modeGroup;
-	private JRadioButton utilizationMode;
-	private JRadioButton epMode;
 	public JCheckBox cbGenerateImage;
 	
 	// A reference to the parent dialog box that I'm extending
@@ -36,32 +34,14 @@ public class OverviewDialogExtension extends RangeDialogExtensionPanel implement
 	public OverviewDialogExtension() {
 
 			// create mode panel
-			modeGroup = new ButtonGroup();
-			utilizationMode = new JRadioButton("Utilization", true);
-			utilizationMode.addItemListener(this);
-			epMode = new JRadioButton("Entry Method", false);
-			epMode.addItemListener(this);
-			modeGroup.add(utilizationMode);
-			modeGroup.add(epMode);
-			
-			if (!MainWindow.runObject[myRun].hasLogData()) {
-				epMode.setEnabled(false);
-			}
-		   
-
 			GridBagLayout      gbl = new GridBagLayout();
 			GridBagConstraints gbc = new GridBagConstraints();
 			this.setLayout(gbl);
-			gbc.fill = GridBagConstraints.HORIZONTAL;
-			Util.gblAdd(this, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
-			Util.gblAdd(this, utilizationMode, gbc, 1,0, 1,1, 1,1);
-			Util.gblAdd(this, epMode, gbc, 2,0, 1,1, 1,1);
-					
+
 			cbGenerateImage = new JCheckBox("Save a Screenshot Once Loaded");
 			cbGenerateImage.setSelected(false);
 			
-			Util.gblAdd(this, cbGenerateImage, gbc, 0,1, 1,1, 1,1);
-
+			Util.gblAdd(this, cbGenerateImage, gbc, 0,0, 1,1, 1,1);
 
 	}
 	
@@ -73,14 +53,6 @@ public class OverviewDialogExtension extends RangeDialogExtensionPanel implement
 
 	public void setParentDialogBox(RangeDialog parent) {
 		this.parent = parent;	
-	}
-
-	public boolean isModeEP(){
-		return epMode.isSelected();
-	}
-
-	public boolean isModeUtilization(){
-		return utilizationMode.isSelected();
 	}
 
 	public boolean isInputValid() {

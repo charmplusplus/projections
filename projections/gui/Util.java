@@ -47,7 +47,7 @@ public class Util
     public static void gblAdd(Container target, Component c,
 			      GridBagConstraints gbc,
 			      int x, int y, int dx, int dy, int wx, int wy,
-			      int I1, int I2, int I3, int I4)
+			      int insetTop, int insetLeft, int insetBottom, int insetRight)
     {
 	Insets oldInsets = gbc.insets;
 	gbc.gridx = x;
@@ -56,7 +56,7 @@ public class Util
 	gbc.gridheight = dy;
 	gbc.weightx = wx;
 	gbc.weighty = wy;
-	gbc.insets = new Insets(I1, I2, I3, I4);
+	gbc.insets = new Insets(insetTop, insetLeft, insetBottom, insetRight);
 	target.add(c, gbc);
 	gbc.insets = oldInsets;
     }

@@ -17,21 +17,23 @@ public class ThreadedFileReader extends Thread  {
 	boolean ampiTraceOn;
 
 	int[][][] mySystemUsageData;   // [type][pe list index][interval]
-	int[][][][] mySystemMsgsData; // [categoryIdx][type][][]
-	int[][][][] myUserEntryData; // [ep idx][type][pe][]
+	int[][][][] mySystemMsgsData;  // [categoryIdx][type][][]
+	int[][][][] myUserEntryData;   // [ep idx][type][pe][]
 	
 	long logReaderIntervalSize;
 	
-	int entryData[]; //[desiredIntervals]  which EP is most prevalent in each interval
-	
+	int entryData[];       // [interval]  which EP is most prevalent in each interval
+	float utilizationData[]; // [interval]  Utilization for each interval
+
 	
 	/** Construct a file reading thread that will determine the best EP representative for each interval
 	 *  
-	 *  The resulting output data will be assigned into the array specified in a synchronized manner
+	 *  The resulting output data will be assigned into the array specified without synchronization
+	 * @param utilizationData 
 	 *  
 	 *  */
 	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, 
-			boolean ampiTraceOn, int[] entryData){
+			boolean ampiTraceOn, int[] entryData, float[] utilizationData){
 		this.pe = pe;
 		this.p = p;
 		this.intervalSize = intervalSize;
@@ -40,6 +42,7 @@ public class ThreadedFileReader extends Thread  {
 		this.endInterval = endInterval;
 		this.ampiTraceOn = ampiTraceOn;
 		this.entryData = entryData;
+		this.utilizationData = utilizationData;
 	}
 
 
@@ -101,7 +104,7 @@ public class ThreadedFileReader extends Thread  {
 			int[][] entryData = myUserEntryData[ep][LogReader.TIME];
 			for (int interval=0; interval<numIntervals; interval++) {
 				utilData[interval][ep] += entryData[0][interval];
-				utilData[interval][numEPs] -= entryData[0][interval]; // overhead = -work time										
+				utilData[interval][numEPs] -= entryData[0][interval]; // overhead -= work time										
 			}
 		}
 
@@ -109,12 +112,18 @@ public class ThreadedFileReader extends Thread  {
 		int[][] idleData = mySystemUsageData[2]; //percent
 		for (int interval=0; interval<numIntervals; interval++) {
 			if(idleData[0] != null && idleData[0].length>interval){				
-				utilData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize;
-				utilData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead = - idle time
+				utilData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize; // idle
+				utilData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead -= idle time
 				utilData[interval][numEPs] += intervalSize; // overhead
 			}
 		}
 		
+		
+		// Condense the utilization data down
+		for(int i=0; i<numIntervals; i++){
+			// Because we have already computed the overhead time. The utilization is 1.0 - overhead - idle
+			utilizationData[i] = (float) (1.0 - (utilData[i][numEPs] + utilData[i][numEPs+1])/(double)intervalSize);
+		}
 		
 		// Now find the most commonly occurring EP for each interval
 		int temp[] = new int[numIntervals];
@@ -131,13 +140,11 @@ public class ThreadedFileReader extends Thread  {
 			}						
 			temp[i] = maxEP;
 		}
+
 		
-		
-		synchronized (entryData) {
-			for(int i=0; i<numIntervals; i++){
-				entryData[i] = temp[i];
-			}			
-		}
+		for(int i=0; i<numIntervals; i++){
+			entryData[i] = temp[i];
+		}			
 
 		// Release any unneeded memory	
 		utilData = null;

@@ -53,7 +53,11 @@ public class JPanelToImage {
 	/** Generate an image of the panel and save it into a file chosen by the user in a file chooser dialog box. */
 	public static void saveToFileChooserSelection(JPanel panelToRender, String dialogTitle, String defaultFilename){
 		BufferedImage image = generateImage(panelToRender);
-		
+		saveToFileChooserSelection(image, dialogTitle, defaultFilename);
+	}
+	
+	/** Generate an image of the panel and save it into a file chosen by the user in a file chooser dialog box. */
+	public static void saveToFileChooserSelection(BufferedImage image, String dialogTitle, String defaultFilename){
 		try{	
 			// Create a small JPanel with a preview of the image
 			ImageIcon icon;
@@ -64,7 +68,6 @@ public class JPanelToImage {
 				// Wide images should be scaled to be 200 px wide
 				icon = new ImageIcon(image.getScaledInstance(200, -1, Image.SCALE_SMOOTH ));
 			}
-
 			
 			JLabel miniPicture = new JLabel(icon);			
 			JPanel previewPanel = new JPanel();
@@ -98,7 +101,6 @@ public class JPanelToImage {
 			JOptionPane.showMessageDialog(null, null, "Error occurred while saving file:" + e.getLocalizedMessage(), 0);
 		}	
 	}
-	
 	
 
 }

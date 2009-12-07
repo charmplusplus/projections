@@ -172,13 +172,13 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		setMenuBar(mbar);
 	} 
 	
-	RangeDialogExtension toolSpecificPanel;
+	OverviewDialogExtension toolSpecificPanel;
 
 	public void showDialog()
 	{
 		try {
 			if (dialog == null) {
-				toolSpecificPanel = new RangeDialogExtension();
+				toolSpecificPanel = new OverviewDialogExtension();
 				dialog = new RangeDialog(this, "Select Range", toolSpecificPanel, false);
 			}
 			dialog.displayDialog();
@@ -193,9 +193,9 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 					public Object doInBackground() {
 						stl.setRanges(pes,startTime,endTime);
 						if(toolSpecificPanel.isModeEP()){
-							stl.loadEPData();
+							stl.loadEPData(toolSpecificPanel.cbGenerateImage.isSelected());
 						} else if(toolSpecificPanel.isModeUtilization()){
-							stl.loadUtilizationData();
+							stl.loadUtilizationData(toolSpecificPanel.cbGenerateImage.isSelected());
 						}
 						return null;
 					}

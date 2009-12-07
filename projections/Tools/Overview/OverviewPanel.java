@@ -12,17 +12,30 @@ value is the integer percent CPU utilization from 0..100.
 
 Orion Sky Lawlor, olawlor@acm.org, 2/12/2001
  */
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
+import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 
+import projections.Tools.Timeline.ImageFilter;
 import projections.analysis.LogReader;
 import projections.analysis.ThreadManager;
 import projections.gui.ColorMap;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.ScalePanel;
@@ -58,6 +71,8 @@ public class OverviewPanel extends ScalePanel.Child
 	int endInterval;
 	int numEPs;
 
+	boolean saveImage;
+	
 	private ColorMap colorMap;
 
 	private int mode;
@@ -271,12 +286,23 @@ public class OverviewPanel extends ScalePanel.Child
 				}
 			}
 		}
-		
-//		// Save to image if the user wants
-//		ImageIcon imageIcon = new ImageIcon();
-//		
-		
-		
+				
+		// If desired, save the full image to a file
+		if(saveImage){
+			int numPE = colors.length;
+			int numIntervals = colors[numPE-1].length;
+			BufferedImage image = new BufferedImage(numIntervals, numPE, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = image.createGraphics();
+			for(int y=0;y<numPE;y++) {
+				for(int x=0;x<numIntervals;x++) {
+					Color c = new Color(colors[y][x]);
+					g.setColor(c);
+					g.fillRect(x, y, 1,1);
+				}
+			}
+			g.dispose();
+			JPanelToImage.saveToFileChooserSelection(image, "Save Overview to PNG or JPG",  "Overview.png");
+		}		
 	}
 
 	private long totalTime() {
@@ -314,10 +340,12 @@ public class OverviewPanel extends ScalePanel.Child
 
 	}
 
-	/** Load utilization using Analysis.LoadGraphData()  */
-	public void loadUtilizationData(){
+	/** Load utilization using Analysis.LoadGraphData()  
+	 * @param b */
+	public void loadUtilizationData(boolean b){
 		mode = OverviewWindow.MODE_UTILIZATION;
 		selectedPEs.reset();
+		this.saveImage = saveImage;
 
 		// Load the graph data that we need:
 		MainWindow.runObject[myRun].LoadGraphData(intervalSize,
@@ -365,13 +393,16 @@ public class OverviewPanel extends ScalePanel.Child
 	}
 
 	/** Load utilization using Analysis.LoadGraphData() and a second manual scan through the logs. 
+	 * @param saveImage 
 	 */
-	public void loadEPData() {
+	public void loadEPData(boolean saveImage) {
 		if (!MainWindow.runObject[myRun].hasLogData()) {
 			System.err.println("No log files are available.");
 			return;
 		}
 
+		this.saveImage = saveImage;
+		
 		mode = OverviewWindow.MODE_EP;
 
 		// Create a list of worker threads

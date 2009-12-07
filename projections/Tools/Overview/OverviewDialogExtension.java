@@ -6,6 +6,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 
@@ -15,7 +16,7 @@ import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.Util;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by providing the granularity at which the time range should be discretized. */
-public class RangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener
+public class OverviewDialogExtension extends RangeDialogExtensionPanel implements ItemListener
 {
 	
 	int myRun = 0;
@@ -25,13 +26,14 @@ public class RangeDialogExtension extends RangeDialogExtensionPanel implements I
 	private ButtonGroup modeGroup;
 	private JRadioButton utilizationMode;
 	private JRadioButton epMode;
-
+	public JCheckBox cbGenerateImage;
+	
 	// A reference to the parent dialog box that I'm extending
 	RangeDialog parent;
 
 
 	/** Create a panel of input items specific to the timeline tool */
-	public RangeDialogExtension() {
+	public OverviewDialogExtension() {
 
 			// create mode panel
 			modeGroup = new ButtonGroup();
@@ -54,6 +56,12 @@ public class RangeDialogExtension extends RangeDialogExtensionPanel implements I
 			Util.gblAdd(this, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
 			Util.gblAdd(this, utilizationMode, gbc, 1,0, 1,1, 1,1);
 			Util.gblAdd(this, epMode, gbc, 2,0, 1,1, 1,1);
+					
+			cbGenerateImage = new JCheckBox("Save a Screenshot Once Loaded");
+			cbGenerateImage.setSelected(false);
+			
+			Util.gblAdd(this, cbGenerateImage, gbc, 0,1, 1,1, 1,1);
+
 
 	}
 	

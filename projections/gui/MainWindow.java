@@ -209,9 +209,7 @@ implements ScalePanel.StatusDisplay
 		Iterator<ProjectionsWindow> iter = openToolWindows.iterator();
 		while(iter.hasNext()){
 			ProjectionsWindow w = iter.next();
-			if (w instanceof GraphWindow) {
-				((GraphWindow)w).refreshDisplay();
-			} else if (w instanceof projections.Tools.Timeline.TimelineWindow) {
+			if (w instanceof projections.Tools.Timeline.TimelineWindow) {
 				((projections.Tools.Timeline.TimelineWindow)w).refreshDisplay(false);
 			} else { 
 				w.repaint();

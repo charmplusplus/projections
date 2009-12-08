@@ -10,9 +10,7 @@ public class AmpiProfileData
     int myRun = 0;
 
    int numPs;
-   int offset;
    OrderedIntList plist;
-   OrderedIntList phaselist;
    long begintime, endtime;
    
    public AmpiProfileData(AmpiProfileWindow profileWindow)
@@ -29,8 +27,6 @@ public class AmpiProfileData
 	  	begintime = 0;
 	  	endtime   = MainWindow.runObject[myRun].getTotalTime();}
 	  
-	  offset    = 10;
 	  plist     = null;
-	  phaselist = null;
    }   
 }

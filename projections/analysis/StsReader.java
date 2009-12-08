@@ -38,7 +38,7 @@ public class StsReader extends ProjDefs
 
     // Sts data
     private String ClassNames[];    // indexed by chare id
-    private Chare ChareList[];
+//    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
  
     
@@ -113,7 +113,7 @@ public class StsReader extends ProjDefs
 		    NumPe = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
-		    ChareList   = new Chare[TotalChares];
+//		    ChareList   = new Chare[TotalChares];
 		    ClassNames  = new String[TotalChares];
 		} else if (s1.equals("TOTAL_EPS")) {
 		    EntryCount   = Integer.parseInt(st.nextToken());
@@ -122,12 +122,13 @@ public class StsReader extends ProjDefs
 		    MsgTable  = new long[TotalMsgs];
 		} else if (s1.equals("CHARE") || Line.equals("BOC")) {
 		    ID = Integer.parseInt(st.nextToken());
-		    ChareList[ID]            = new Chare();
-		    ChareList[ID].ChareID    = ID;
-		    ChareList[ID].NumEntries = 0;
-		    ChareList[ID].Name       = st.nextToken();
-		    ChareList[ID].Type       = new String(s1);
-		    ClassNames[ID]      = ChareList[ID].Name;
+		    String name = st.nextToken();
+//		    ChareList[ID]            = new Chare();
+//		    ChareList[ID].ChareID    = ID;
+//		    ChareList[ID].NumEntries = 0;
+//		    ChareList[ID].Name       = name;
+//		    ChareList[ID].Type       = new String(s1);
+		    ClassNames[ID]      = name;
 		} else if (s1.equals("ENTRY")) {
 			st.nextToken(); // type
 			ID      = Integer.parseInt(st.nextToken());

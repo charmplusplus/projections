@@ -43,8 +43,6 @@ implements ActionListener, ItemListener
 	private JMenu preferencesMenu;
 	private JMenu toolMenu;
 
-	private JMenuItem graphMenuItem;
-
 
 	//    private static final int NUM_STATES = 4;
 	private static final int NO_DATA = 0;
@@ -106,7 +104,6 @@ implements ActionListener, ItemListener
 			useGrayscaleColorsMenuItem.setEnabled(false);	
 			useStandardColorsMenuItem.setEnabled(false);
 			
-			graphMenuItem.setEnabled(false);
 			renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(false);
@@ -139,7 +136,6 @@ implements ActionListener, ItemListener
 			useGrayscaleColorsMenuItem.setEnabled(false);	
 			useStandardColorsMenuItem.setEnabled(false);
 			
-			graphMenuItem.setEnabled(true);
 			renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(true);
@@ -171,7 +167,6 @@ implements ActionListener, ItemListener
 			useGrayscaleColorsMenuItem.setEnabled(false);	
 			useStandardColorsMenuItem.setEnabled(false);	
 
-			graphMenuItem.setEnabled(true);
 			renderedTimelinesMenuItem.setEnabled(true);
 			timelinesMenuItem.setEnabled(true);
 			usageProfileMenuItem.setEnabled(true);
@@ -246,7 +241,6 @@ implements ActionListener, ItemListener
 		// TOOLS MENU
 		toolMenu = new JMenu("Tools");
 
-		graphMenuItem = new JMenuItem("Graphs");
 		timelinesMenuItem = new JMenuItem("Timelines");
 		renderedTimelinesMenuItem = new JMenuItem("Timelines - rendered to image");
 		usageProfileMenuItem = new JMenuItem("Usage Profile");
@@ -266,7 +260,6 @@ implements ActionListener, ItemListener
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
 		streamingMenuItem = new JMenuItem("Streaming CCS Tool");
 		
-		graphMenuItem.addActionListener(this);
 		timelinesMenuItem.addActionListener(this);
 		renderedTimelinesMenuItem.addActionListener(this);
 		usageProfileMenuItem.addActionListener(this);
@@ -286,7 +279,6 @@ implements ActionListener, ItemListener
 		noiseMinerMenuItem.addActionListener(this);
 		streamingMenuItem.addActionListener(this);
 
-		toolMenu.add(graphMenuItem);
 		toolMenu.add(timelinesMenuItem);
 		toolMenu.add(renderedTimelinesMenuItem);
 		toolMenu.add(usageProfileMenuItem);
@@ -342,10 +334,7 @@ implements ActionListener, ItemListener
 			
 			else if (mi == useStandardColorsMenuItem)
 				parent.setFullColor();
-			
-			else if (mi == graphMenuItem)
-				parent.openTool(new GraphWindow(parent) );
-			
+		
 			else if (mi == timelinesMenuItem)
 				parent.openTool(new TimelineWindow(parent) );
 

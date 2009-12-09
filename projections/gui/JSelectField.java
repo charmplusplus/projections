@@ -1,7 +1,5 @@
 package projections.gui;
 
-import java.awt.event.TextEvent;
-
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
@@ -11,62 +9,62 @@ import javax.swing.JTextField;
 public class JSelectField extends JTextField
 {
 
-private String lastValue;
-   private int    lastCaretPosition;
-   public RangeVerifier rangeVerifier;
+	private String lastValue;
+	//   private int    lastCaretPosition;
+	public RangeVerifier rangeVerifier;
    
-   public JSelectField(String defval, int size)
+   protected JSelectField(String defval, int size)
    {
 	  super(defval, size);
 	  rangeVerifier =  new RangeVerifier();
 	  setInputVerifier(rangeVerifier);  
 	  lastValue = "" + defval;
    } 
-  
-   private void checkValue()
-   {
-	  String tmp = getText();
-	  int l = tmp.length();
-	  
-	  if(l > 0)
-	  {
-		 char c = tmp.charAt(l-1);
-		 if(l==1)
-		 {
-			if(!(c >= '0' && c <= '9'))
-			{
-			   setText(lastValue);
-			   setCaretPosition(lastCaretPosition);
-			}
-		 }
-		 else
-		 {
-			char d = tmp.charAt(l-2);   
-			if(c=='-' || c==',' || c==':')
-			{
-			   if(!(d >= '0' && d <= '9'))
-			   {
-				  setText(lastValue);
-				  setCaretPosition(lastCaretPosition);
-			   }
-			   else if(c=='-' && 
-					  (tmp.substring(0,l-1).lastIndexOf("-") > tmp.substring(0,l-1).lastIndexOf(",")))
-			   {
-				  setText(lastValue);
-				  setCaretPosition(lastCaretPosition);
-			   }
-                           else if (c==':' && 
-					  (tmp.substring(0,l-1).lastIndexOf("-") < tmp.substring(0,l-1).lastIndexOf(",")))
-			   {
-				  setText(lastValue);
-				  setCaretPosition(lastCaretPosition);
-			   }
-			}        
-		 }     
-	  }
- 
-	  lastValue = tmp; 
-   }   
+//  
+//   private void checkValue()
+//   {
+//	  String tmp = getText();
+//	  int l = tmp.length();
+//	  
+//	  if(l > 0)
+//	  {
+//		 char c = tmp.charAt(l-1);
+//		 if(l==1)
+//		 {
+//			if(!(c >= '0' && c <= '9'))
+//			{
+//			   setText(lastValue);
+//			   setCaretPosition(lastCaretPosition);
+//			}
+//		 }
+//		 else
+//		 {
+//			char d = tmp.charAt(l-2);   
+//			if(c=='-' || c==',' || c==':')
+//			{
+//			   if(!(d >= '0' && d <= '9'))
+//			   {
+//				  setText(lastValue);
+//				  setCaretPosition(lastCaretPosition);
+//			   }
+//			   else if(c=='-' && 
+//					  (tmp.substring(0,l-1).lastIndexOf("-") > tmp.substring(0,l-1).lastIndexOf(",")))
+//			   {
+//				  setText(lastValue);
+//				  setCaretPosition(lastCaretPosition);
+//			   }
+//                           else if (c==':' && 
+//					  (tmp.substring(0,l-1).lastIndexOf("-") < tmp.substring(0,l-1).lastIndexOf(",")))
+//			   {
+//				  setText(lastValue);
+//				  setCaretPosition(lastCaretPosition);
+//			   }
+//			}        
+//		 }     
+//	  }
+// 
+//	  lastValue = tmp; 
+//   }   
    private String cleanItUp(String old)
    {
 	  String tmp = "";
@@ -81,7 +79,7 @@ private String lastValue;
 	  return tmp;
    }   
 
-    public OrderedIntList getValue(int limit)
+    private OrderedIntList getValue(int limit)
     {  
 	limit--;
 
@@ -196,11 +194,5 @@ private String lastValue;
     		return true;
     	}
    }
-
-   public void textValueChanged(TextEvent evt)
-   {
-          checkValue();
-   }
-
 
 }

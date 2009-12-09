@@ -1,6 +1,5 @@
 package projections.Tools.Overview;
 
-import projections.analysis.IntervalData;
 import projections.analysis.LogReader;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -9,18 +8,18 @@ import projections.gui.OrderedIntList;
 public class ThreadedFileReader extends Thread  {
 
 	int pe;
-	int p;  // Which index am I into the flattened array of potentially sparse pe's
+//	int p;  // Which index am I into the flattened array of potentially sparse pe's
 	long intervalSize;
 	int myRun;
 	int startInterval;
 	int endInterval;
-	boolean ampiTraceOn;
+//	boolean ampiTraceOn;
 
 	int[][][] mySystemUsageData;   // [type][pe list index][interval]
 //	int[][][][] mySystemMsgsData;  // [categoryIdx][type][][]
 	int[][][][] myUserEntryData;   // [ep idx][type][pe][]
 	
-	long logReaderIntervalSize;
+//	long logReaderIntervalSize;
 	
 	int entryData[];       // [interval]  which EP is most prevalent in each interval
 	float utilizationData[]; // [interval]  Utilization for each interval
@@ -32,15 +31,14 @@ public class ThreadedFileReader extends Thread  {
 	 * @param utilizationData 
 	 *  
 	 *  */
-	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, 
-			boolean ampiTraceOn, int[] entryData, float[] utilizationData){
+	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData){
 		this.pe = pe;
-		this.p = p;
+//		this.p = p;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
-		this.ampiTraceOn = ampiTraceOn;
+//		this.ampiTraceOn = ampiTraceOn;
 		this.entryData = entryData;
 		this.utilizationData = utilizationData;
 	}
@@ -87,7 +85,7 @@ public class ThreadedFileReader extends Thread  {
 			mySystemUsageData = logReader.getSystemUsageData();
 //			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();
-			logReaderIntervalSize = logReader.getIntervalSize();
+//			logReaderIntervalSize = logReader.getIntervalSize();
 		} else {
 			System.err.println("Error: No data Files found!!");
 		}

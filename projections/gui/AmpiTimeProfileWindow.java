@@ -144,7 +144,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
      * procId: the processor ID
      * index: the order of this processor in the processorList
      */
-    public void createAMPITimeProfileData(int procId, int index){        
+    private void createAMPITimeProfileData(int procId, int index){        
         processProfiles[index] = new Vector();
         //currently read all log data thus obtaining the time profile across the whole timeline!
         MainWindow.runObject[myRun].createAMPITimeProfile(procId,0,MainWindow.runObject[myRun].getTotalTime(), processProfiles[index]);

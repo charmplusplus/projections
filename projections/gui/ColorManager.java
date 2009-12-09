@@ -26,11 +26,11 @@ public class ColorManager
 
     private static String filename = null;
 
-    public static void setDefaultLocation(String fname) {
+    protected static void setDefaultLocation(String fname) {
 	filename = fname;
     }
 
-    public static Color[][] initializeColors() {
+    protected static Color[][] initializeColors() {
 	Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];
 	for (int i=0; i<retColors.length; i++) {
 	    retColors[i] = 
@@ -39,7 +39,7 @@ public class ColorManager
 	return retColors;
     }
 
-    public static Color[][] initializeColors(String filename)
+    protected static Color[][] initializeColors(String filename)
 	throws IOException
     {
 	ObjectInputStream in =
@@ -148,7 +148,7 @@ public class ColorManager
      *  This should not be required except if a different color set is
      *  required.
      */
-    public static Color[] loadActivityColorsFallback(int type) 
+    private static Color[] loadActivityColorsFallback(int type) 
 	throws IOException
     {
 	Color retColors[] = null;
@@ -175,7 +175,7 @@ public class ColorManager
 	return retColors;
     }
 
-    public static void saveColors(Color colors[][]) 
+    protected static void saveColors(Color colors[][]) 
     {
 	try {
 	    ObjectOutputStream out =
@@ -191,7 +191,7 @@ public class ColorManager
 
     /** ************** COLOR CREATION ROUTINES **************** */
 
-    public static Color[] createGrayscaleColorMap(int numColors) {
+    protected static Color[] createGrayscaleColorMap(int numColors) {
 	Color[] colors = new Color[numColors];
 	float H = (float)1.0;
 	float S = (float)0.0;

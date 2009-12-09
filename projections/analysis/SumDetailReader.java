@@ -37,9 +37,6 @@ public class SumDetailReader extends ProjectionsReader
     public static final int NUM_MSGS = 1;
 
     // header values
-    public double versionNum;
-    public int myPE;
-    public int numPE;
     public int numIntervals;
     public int numEPs;
     public double intervalSize;
@@ -67,56 +64,57 @@ public class SumDetailReader extends ProjectionsReader
 	return sourceFile.canRead();
     }
 
-    protected void readStaticData() 
-	throws IOException
-    {
-	reader = new BufferedReader(new FileReader(sourceString));
-	// Set up the tokenizer  
-	tokenizer=new ParseTokenizer(reader);
-	tokenizer.parseNumbers();
-	tokenizer.eolIsSignificant(true);
-	tokenizer.whitespaceChars('/','/'); 
-	tokenizer.whitespaceChars(':',':');
-	tokenizer.whitespaceChars('[','[');
-	tokenizer.whitespaceChars(']',']');
-	tokenizer.wordChars('a','z');
-	tokenizer.wordChars('A','Z');
-	tokenizer.wordChars('+','+');
+//    protected void readStaticData() 
+//	throws IOException
+//    {
+//	reader = new BufferedReader(new FileReader(sourceString));
+//	// Set up the tokenizer  
+//	tokenizer=new ParseTokenizer(reader);
+//	tokenizer.parseNumbers();
+//	tokenizer.eolIsSignificant(true);
+//	tokenizer.whitespaceChars('/','/'); 
+//	tokenizer.whitespaceChars(':',':');
+//	tokenizer.whitespaceChars('[','[');
+//	tokenizer.whitespaceChars(']',']');
+//	tokenizer.wordChars('a','z');
+//	tokenizer.wordChars('A','Z');
+//	tokenizer.wordChars('+','+');
+//
+//	// Read the first line (Header information)
+//	tokenizer.checkNextString("ver");
+//	versionNum = tokenizer.nextNumber("Version Number");
+//	/* **CW** It is still unclear how we should handle versioning
+//	 *	  in projections. This feature is tentatively dropped.
+//	 */
+//	/*
+//	if (versionNum != Double.parseDouble(expectedVersion)) {
+//	    throw new ProjectionsFormatException(expectedVersion,
+//						 "File version [" + 
+//						 versionNum + "] conflicts " +
+//						 "with expected version.");
+//	}
+//	*/
+//	tokenizer.checkNextString("cpu");
+//	myPE = (int)tokenizer.nextNumber("processor number");
+//	numPE = (int)tokenizer.nextNumber("number of processors");
+//	tokenizer.checkNextString("numIntervals");
+//	numIntervals = (int)tokenizer.nextNumber("numIntervals");
+//	tokenizer.checkNextString("numEPs");
+//	numEPs = (int)tokenizer.nextNumber("number of entry methods");
+//	tokenizer.checkNextString("intervalSize");
+//	intervalSize = 
+//	    tokenizer.nextScientific("processor usage sample interval"); 
+//	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+//	    throw new ProjectionsFormatException(expectedVersion, 
+//						 "extra garbage at end of " +
+//						 "header line");
+//	}
+//
+//	reader.close();
+//	reader = null;
+//    }
 
-	// Read the first line (Header information)
-	tokenizer.checkNextString("ver");
-	versionNum = tokenizer.nextNumber("Version Number");
-	/* **CW** It is still unclear how we should handle versioning
-	 *	  in projections. This feature is tentatively dropped.
-	 */
-	/*
-	if (versionNum != Double.parseDouble(expectedVersion)) {
-	    throw new ProjectionsFormatException(expectedVersion,
-						 "File version [" + 
-						 versionNum + "] conflicts " +
-						 "with expected version.");
-	}
-	*/
-	tokenizer.checkNextString("cpu");
-	myPE = (int)tokenizer.nextNumber("processor number");
-	numPE = (int)tokenizer.nextNumber("number of processors");
-	tokenizer.checkNextString("numIntervals");
-	numIntervals = (int)tokenizer.nextNumber("numIntervals");
-	tokenizer.checkNextString("numEPs");
-	numEPs = (int)tokenizer.nextNumber("number of entry methods");
-	tokenizer.checkNextString("intervalSize");
-	intervalSize = 
-	    tokenizer.nextScientific("processor usage sample interval"); 
-	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
-	    throw new ProjectionsFormatException(expectedVersion, 
-						 "extra garbage at end of " +
-						 "header line");
-	}
-
-	reader.close();
-	reader = null;
-    }
-
+    
     protected void read() 
 	throws IOException
     {

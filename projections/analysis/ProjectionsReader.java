@@ -42,17 +42,6 @@ extends ProjDefs
 		checkAvailable();
 	}
 
-	/**
-	 *  Wrapper constructor that sets the expectedVersion variable for data
-	 *  files that have no self-identifying version data (as with many of
-	 *  the older versions of projections logs).
-	 *
-	 *  If the implementing reader encounters a file that identifies itself
-	 *  otherwise, a ProjectionsFormatException is thrown.
-	 */
-	public ProjectionsReader(String sourceString) {
-		this(sourceString, null);
-	}
 
 	/**
 	 *  Implementing Subclasses should implement the code for determining

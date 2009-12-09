@@ -8,10 +8,9 @@ public class OrderedUsageList
 	private int len;
 	class Link
 	{
-		int entry;
 		float usage;
 		Link next;
-		Link(float u, int e, Link n) {usage = u; entry = e; next = n;}
+		private Link(float u, int e, Link n) {usage = u; next = n;}
 	}   
 
 
@@ -120,7 +119,7 @@ public class OrderedUsageList
 //		tail = null;
 //		len = 0;
 //	}   
-	public void reset()
+	private void reset()
 	{
 		pre = null;
 	}   

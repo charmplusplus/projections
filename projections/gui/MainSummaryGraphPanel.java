@@ -22,7 +22,7 @@ import projections.analysis.ProjMain;
  *
  * **************************************************/
 
-public class MainSummaryGraphPanel extends JTabbedPane {
+class MainSummaryGraphPanel extends JTabbedPane {
     // it is initially empty and is added to by MainWindow's open file(s)
     // menu option.
 
@@ -75,7 +75,7 @@ public class MainSummaryGraphPanel extends JTabbedPane {
 	parent.validate();
     }
 
-    public void removeCurrent() {
+    private void removeCurrent() {
 	remove(getSelectedIndex());
 	if (getTabCount() == 0) {
 	    setEmpty();

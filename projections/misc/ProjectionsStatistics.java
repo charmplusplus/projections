@@ -107,10 +107,10 @@ public class ProjectionsStatistics {
 	return java.lang.Math.sqrt(variance);
     }
 
-    /**
-     *   See comments on getVariance(double mean)
-     */
-    public double getStdDeviation(double variance) {
-	return java.lang.Math.sqrt(variance);
-    }
+//    /**
+//     *   See comments on getVariance(double mean)
+//     */
+//    public double getStdDeviation(double variance) {
+//	return java.lang.Math.sqrt(variance);
+//    }
 }

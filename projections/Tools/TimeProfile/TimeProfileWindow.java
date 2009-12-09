@@ -111,8 +111,8 @@ implements ActionListener, ColorSelectable, Clickable
 	AmpiTimeProfileWindow ampiGraphPanel = null;
 	private JPanel epPanel = null;
 	boolean ampiTraceOn = false;
-	protected int ampiPanelTabIndex;
-	protected int epPanelTabIndex;
+//	protected int ampiPanelTabIndex;
+//	protected int epPanelTabIndex;
 
 
 	// the following data are statically known and can be initialized
@@ -235,8 +235,8 @@ implements ActionListener, ColorSelectable, Clickable
 			JPanel ampiPanel = ampiGraphPanel.getAmpiMainPanel();
 			tabPane.add("Entry Points", epPanel);
 			tabPane.add("AMPI Functions", ampiPanel);
-			epPanelTabIndex = tabPane.indexOfComponent(epPanel);
-			ampiPanelTabIndex = tabPane.indexOfComponent(ampiPanel);
+//			epPanelTabIndex = tabPane.indexOfComponent(epPanel);
+//			ampiPanelTabIndex = tabPane.indexOfComponent(ampiPanel);
 			mainPanel.setLayout(new GridLayout(1,1));
 			mainPanel.add(tabPane);
 		} else {

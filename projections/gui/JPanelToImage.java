@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -41,7 +40,7 @@ public class JPanelToImage {
 	}
 
 	/** Save an image into a file. */
-	public static void saveImage(String filename, String format, RenderedImage image){
+	private static void saveImage(String filename, String format, RenderedImage image){
 
 		try {
 			ImageIO.write(image, format, new File(filename));

@@ -27,7 +27,7 @@ public class ColorPanel extends Canvas
    
    private ActionListener actionListener = null;
 
-   public ColorPanel(int type, int index, Color f)
+   protected ColorPanel(int type, int index, Color f)
    {
        this.type = type;
        this.index = index;
@@ -115,7 +115,7 @@ public class ColorPanel extends Canvas
 		 g.drawRect(5, 5, w-10, h-10);
 	  }   
    }   
-   public void processActionEvent()
+   private void processActionEvent()
    {
 	  if(actionListener != null)
 	  {

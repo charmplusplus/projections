@@ -55,7 +55,7 @@ public class AnimationDisplayPanel extends Panel
    
     private AnimationWindow animationWindow;
    
-    public AnimationDisplayPanel(AnimationWindow animationWindow)
+    protected AnimationDisplayPanel(AnimationWindow animationWindow)
     {
 	this.animationWindow = animationWindow;
 	setBackground(MainWindow.runObject[myRun].background);
@@ -127,7 +127,7 @@ public class AnimationDisplayPanel extends Panel
     public Dimension getMinimumSize() {return new Dimension(150,100);}   
     public Dimension getPreferredSize() {return new Dimension(550,400);}   
 
-    public void makeNextImage(Graphics g, int I)
+    private void makeNextImage(Graphics g, int I)
     {
 	int tothoffset = phoffset + hoffset;
 	int totvoffset = pvoffset + voffset;
@@ -238,7 +238,7 @@ public class AnimationDisplayPanel extends Panel
 	repaint();        
     }   
 
-    public void setParameters()
+    protected void setParameters()
     {
 	OrderedIntList selectedPEs = animationWindow.selectedPEs;
 	numPs = selectedPEs.size();
@@ -271,7 +271,7 @@ public class AnimationDisplayPanel extends Panel
 	}   
     }   
 
-    public int[][] getAnimationData(long intervalSize, 
+    private int[][] getAnimationData(long intervalSize, 
 				    long startTime, long endTime, 
 				    OrderedIntList desiredPEs) {
 	if (intervalSize >= endTime-startTime) {

@@ -24,7 +24,8 @@ import projections.gui.OrderedIntList;
  *
  */
 
-public class MultiRunData 
+@SuppressWarnings("ucd")
+public class MultiRunData
 {
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple

@@ -137,7 +137,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 
 	/** Called whenever any input item changes, either in this dialog box, or its possibly extended tool specific JPanel */
-	public void someInputChanged() {
+	protected void someInputChanged() {
 		//		System.out.println("Something changed. We should update everything, and enable/disable the OK button");
 
 		if(isInputValid()){
@@ -222,7 +222,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	}
 
 
-	public void storeRangeToPersistantStorage(){
+	private void storeRangeToPersistantStorage(){
 		MainWindow.runObject[myRun].persistantRangeData.update(startTimeField.getValue(), endTimeField.getValue(), processorsField.getValue());
 	}
 
@@ -245,7 +245,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	 *  createMainLayout creates the layout for basic time and processor
 	 *  range specification.
 	 */
-	JPanel createMainLayout() {
+	private JPanel createMainLayout() {
 
 		JPanel inputPanel = new JPanel();
 
@@ -336,7 +336,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	/**
 	 *  Creates the layout for basic control buttons.
 	 */
-	JPanel createButtonLayout() {
+	private JPanel createButtonLayout() {
 		JPanel buttonPanel = new JPanel();
 
 		bOK     = new JButton("OK");
@@ -410,7 +410,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 
 	/** Check for validity of the input fields in this dialog box and any contained tool-specific Jpanel */
-	boolean isInputValid(){
+	private boolean isInputValid(){
 
 		// start time cannot be greater or equal to end time
 		if (getStartTime() >= getEndTime()) {
@@ -573,7 +573,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	}
 
 	Vector<String> availableStepStrings;
-	Vector<String> availableStepStringsEnd;
+//	Vector<String> availableStepStringsEnd;
 	Vector<Long> availableStepTimes;
 
 	private void determineStepsFromPEZero() {
@@ -677,12 +677,12 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			}
 		}
 
-		public void useForEndTime() {
+		private void useForEndTime() {
 			useForEnd = true;
 			useForStart = false;
 		}
 
-		public void useForStartTime() {
+		private void useForStartTime() {
 			useForEnd = false;
 			useForStart = true;
 		}

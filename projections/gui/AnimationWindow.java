@@ -85,7 +85,7 @@ public class AnimationWindow extends ProjectionsWindow
 
    
   
-    public AnimationWindow(MainWindow mainWindow)
+    protected AnimationWindow(MainWindow mainWindow)
     {
 	super(mainWindow);
 	setBackground(MainWindow.runObject[myRun].background);
@@ -177,14 +177,14 @@ public class AnimationWindow extends ProjectionsWindow
 	}
     }
 
-    void changeCurI(int i)
+    private void changeCurI(int i)
     {
 	displayPanel.setCurI(i);
 	setTitleInfo(displayPanel.getCurI()); 
 	slider.setValue(i);
     }   
 
-    protected void createMenus(){
+    private void createMenus(){
         mbar.add(Util.makeJMenu("File", new Object[]
             {
                 "Select Processors",
@@ -206,7 +206,7 @@ public class AnimationWindow extends ProjectionsWindow
         setJMenuBar(mbar);
     }
 
-    void createLayout()
+    private void createLayout()
     {
 	Panel mainPanel     = new Panel();
 	titlePanel    = new Panel();
@@ -276,7 +276,7 @@ public class AnimationWindow extends ProjectionsWindow
 	layoutComplete = true;
     }   
 
-    public void setStatusInfo(int p, int i, int u)
+    protected void setStatusInfo(int p, int i, int u)
     {
 	String status;
 	if (p < 0) {

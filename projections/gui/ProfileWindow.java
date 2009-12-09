@@ -29,7 +29,7 @@ import javax.swing.event.ChangeListener;
 import projections.analysis.AmpiFunctionData;
 import projections.analysis.AmpiProcessProfile;
 
-public class ProfileWindow extends ProjectionsWindow
+class ProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
 
@@ -39,8 +39,6 @@ public class ProfileWindow extends ProjectionsWindow
     // meaning in future versions of Projections that support multiple
     // runs.
     int myRun = 0;
-
-    public ProfileWindow thisWindow;
 
     private ProfileData data;
     private boolean colorsSet;
@@ -72,7 +70,7 @@ public class ProfileWindow extends ProjectionsWindow
     //usage greater than "thresh" will be displayed!
     private float thresh;
 
-    public PieChartWindow pieChartWindow;
+//    public PieChartWindow pieChartWindow;
     private float[][] avgData;
 
     private EntrySelectionDialog entryDialog;
@@ -81,7 +79,7 @@ public class ProfileWindow extends ProjectionsWindow
 
     public ProfileWindow(MainWindow parentWindow){
         super(parentWindow);
-	thisWindow = this;
+
         colorsSet = false;
         colors = null;
 
@@ -341,7 +339,7 @@ public class ProfileWindow extends ProjectionsWindow
 	    } else if(arg.equals("Select Processors")) {
 	    	showDialog();
 	    } else if(arg.equals("Pie Chart")){
-	    	pieChartWindow = new PieChartWindow(avgData[0], avgData[0].length, thresh, colors);
+	    	new PieChartWindow(avgData[0], avgData[0].length, thresh, colors);
 	    } else if(arg.equals("Change Colors")) {
 	    	showChangeColorDialog();
 	    } else if (arg.equals("Usage Table")){
@@ -374,7 +372,7 @@ public class ProfileWindow extends ProjectionsWindow
         displayCanvas.repaint();
     }
 
-    public void showChangeColorDialog() {
+    private void showChangeColorDialog() {
         int noEPs = MainWindow.runObject[myRun].getNumUserEntries();
         if (entryDialog == null) {
             String typeLabelStrings[] = {"Entry Points"};
@@ -553,7 +551,7 @@ public class ProfileWindow extends ProjectionsWindow
 
     }
 
-    void setAmpiDisplayProfileData(){
+    private void setAmpiDisplayProfileData(){
 
         String[] xNames = new String[data.plist.size()];
 
@@ -624,7 +622,7 @@ public class ProfileWindow extends ProjectionsWindow
         ampiDisplayCanvas.repaint();
     }
 
-    void setDisplayProfileData(){
+    private void setDisplayProfileData(){
         createDisplayDataSource();
 
         //testing the data sources
@@ -779,7 +777,7 @@ public class ProfileWindow extends ProjectionsWindow
 	progressBar.close();
     }
 
-    public void createSingleProcSource(float[][] rawData, int procNum){
+    private void createSingleProcSource(float[][] rawData, int procNum){
         //fisrt compute number of significant sections
         int numSigSections = 0;
         for(int i=0; i<rawData[0].length; i++){
@@ -861,17 +859,4 @@ public class ProfileWindow extends ProjectionsWindow
         }
     }
 
-    public void MakePOArray(long bt, long et)
-    {
-    }
-
-    public int getHSBValue()
-    {
-        return 0;
-    }
-
-    public int getVSBValue()
-    {
-        return 0;
-    }
 }

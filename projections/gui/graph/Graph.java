@@ -32,10 +32,10 @@ public class Graph extends JPanel
     // runs.
     int myRun = 0;
 
-    public static final int STACKED   = 0;  // type of the bar graph
-    public static final int UNSTACKED = 1;  // single, multiple or stacked
+//    public static final int STACKED   = 0;  // type of the bar graph
+//    public static final int UNSTACKED = 1;  // single, multiple or stacked
     public static final int AREA      = 2;  // Area graph (stacked)
-    public static final int SINGLE    = 3;  // take the average of all y-values
+//    public static final int SINGLE    = 3;  // take the average of all y-values
     public static final int BAR       = 4;  // Graph type, bar graph
     public static final int LINE      = 5;  // or line graph
 
@@ -50,9 +50,6 @@ public class Graph extends JPanel
     private double xscale, yscale;
     
       
-    private Color foreground;
-    private Color background;
-    
     private Font fontAxisTitles;
     private Font fontChartTitle;
     private Font fontLabels;
@@ -64,7 +61,7 @@ public class Graph extends JPanel
     // number of pixels per value
     double pixelincrementX, pixelincrementY;
     // number of pixels per tick
-    double tickIncrementX, tickIncrementY;
+    double tickIncrementX;
 
     // "best" values to be derived from pixelincrements
     long valuesPerTickX, valuesPerLabelX;
@@ -380,7 +377,7 @@ public class Graph extends JPanel
 	return new Point(xOffset,yOffset);
     }
 
-    public void showPopup(int xVal, int yVal, int xPos, int yPos){
+    private void showPopup(int xVal, int yVal, int xPos, int yPos){
 
     	Point offset = getBubbleOffset();
     	String text[] = dataSource.getPopup(xVal, yVal);
@@ -757,7 +754,7 @@ public class Graph extends JPanel
     	drawOverlayedPolynomial(g);
     }
 	
-    public void drawLineGraph(Graphics2D g) {
+    private void drawLineGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount();
 	double [] data = new double[yValues];
@@ -797,7 +794,7 @@ public class Graph extends JPanel
 	drawOverlayedPolynomial(g);
     }
 
-    public void drawAreaGraph(Graphics2D g) {
+    private void drawAreaGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount(); // no. of y values for each x
 	double data[] = new double[yValues];
@@ -912,7 +909,7 @@ public class Graph extends JPanel
 			valuesPerTickX = tickValue;
 			valuesPerLabelX = labelValue;
 		    } else if (axis == Y_AXIS) {
-			tickIncrementY = tickValue*pixelsPerValue;
+//			tickIncrementY = tickValue*pixelsPerValue;
 			valuesPerTickY = tickValue;
 			valuesPerLabelY = labelValue;
 		    }
@@ -1016,32 +1013,32 @@ public class Graph extends JPanel
     
     
 	/** Return the width of the parent window. xscale will control just how much more of the graph one can see. */
-	int baseWidth(){
+    private int baseWidth(){
 		return getParent().getWidth();
 	}
 
-	int baseHeight(){
+	private int baseHeight(){
 		return getParent().getHeight();
 	}
 
 	/** The x pixel coordinate of the bottom left intersection of the axis lines */
-	int originX(){
+	private int originX(){
 		return fmLabels.stringWidth(""+(long)maxvalueY) + spaceBetweenYValuesAndAxis + fmLabels.getHeight()*2;
 	}
 
 	/** The y pixel coordinate of the bottom left intersection of the axis lines */
-	int	originY(){
+	private int	originY(){
 		return xAxisTitleBaseline() - fmLabels.getHeight() - spaceBetweenXValuesAndLabel() - fmLabels.getHeight() - spaceBetweenAxisAndXValues();
 	}
 	
-	int availableWidth(){
+	private int availableWidth(){
 		// width available for drawing the graph
 		int rightMargin = 40;
 		return (int)((baseWidth()-rightMargin-originX())*xscale);
 	}
 
 	/** Return the number of pixels at the top above the top of the y axis. The chart title is drawn in this region. */
-	int topMargin(){
+	private int topMargin(){
 		return 30 + fmChartTitle.getHeight();
 	}
 	
@@ -1065,7 +1062,7 @@ public class Graph extends JPanel
 	   return 10;
    }
 
-   int spaceBetweenXValuesAndLabel(){
+   private int spaceBetweenXValuesAndLabel(){
 	   return 10;
    }
 

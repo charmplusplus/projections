@@ -19,7 +19,6 @@ public class ExtremaReaderThread extends Thread  {
 	static int myRun = 0;
 	
 	int pe;
-	int p;  // Which index am I into the flattened array of potentially sparse pe's
 	long startTime;
 	long endTime;
 	int numActivities;
@@ -33,7 +32,7 @@ public class ExtremaReaderThread extends Thread  {
 	
 	public ExtremaReaderThread(int pe, int p, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
 		this.pe = pe;
-		this.p = p;
+//		this.p = p;
 		this.startTime = startTime2;
 		this.endTime = endTime2;
 		this.numActivities = numActivities;

@@ -39,16 +39,16 @@ public class MiscUtil {
 	return map;
     }
 
-    /**
-     *  This method returns only the sort mapping but will not modify the
-     *  input array. getSortMap is intended to work with small arrays, so
-     *  the cloning operation is not expected to be too expensive.
-     */
-    public static int[] getSortMap(int unsorted[]) {
-	int tempArray[] = (unsorted.clone());
-
-	return sortAndMap(tempArray);
-    }
+//    /**
+//     *  This method returns only the sort mapping but will not modify the
+//     *  input array. getSortMap is intended to work with small arrays, so
+//     *  the cloning operation is not expected to be too expensive.
+//     */
+//    public static int[] getSortMap(int unsorted[]) {
+//	int tempArray[] = (unsorted.clone());
+//
+//	return sortAndMap(tempArray);
+//    }
 
     /**
      *  Actually applying a given map to an array of the correct size.

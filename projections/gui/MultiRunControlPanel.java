@@ -13,7 +13,7 @@ import javax.swing.JRadioButton;
 
 import projections.misc.MultiRunData;
 
-public class MultiRunControlPanel extends JPanel
+class MultiRunControlPanel extends JPanel
 {
 
 	private ButtonGroup dataTypeModes;

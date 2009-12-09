@@ -54,7 +54,7 @@ public class FunctionTool extends GenericGraphWindow
 
     FunctionTool thisWindow;
 
-    public FunctionTool(MainWindow mainWindow) {
+    protected FunctionTool(MainWindow mainWindow) {
 	super("Function tracing", mainWindow);
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
@@ -69,7 +69,7 @@ public class FunctionTool extends GenericGraphWindow
 	currentArrayName = input;
     }
 
-    protected void createLayout() {
+    private void createLayout() {
 	GridBagConstraints gbc = new GridBagConstraints();
 	GridBagLayout gbl = new GridBagLayout();
 
@@ -137,7 +137,7 @@ public class FunctionTool extends GenericGraphWindow
 	super.refreshGraph();
     }
 
-    void getData() {
+    private void getData() {
 	// setup the reader to read all data.
 	GenericLogReader reader;
 	LogEntryData logEntry = new LogEntryData();

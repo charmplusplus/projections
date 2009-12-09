@@ -28,11 +28,11 @@ public class OrderedIntList
     
     class Link
     {
-	int data;
-	Link next;
-	Link(int d, Link n) {
-	    data = d; next = n;
-	}
+    	int data;
+    	Link next;
+    	private Link(int d, Link n) {
+    		data = d; next = n;
+    	}
     }  
 
     public boolean isEmpty() {
@@ -77,14 +77,14 @@ public class OrderedIntList
 //    	return returnValue;
 //    }
 
-    public int currentElement()
-    {
-	Link cur = nextLink();
-	if(cur == null)
-	    return -1;
-	else
-	    return cur.data;   
-    }   
+//    public int currentElement()
+//    {
+//	Link cur = nextLink();
+//	if(cur == null)
+//	    return -1;
+//	else
+//	    return cur.data;   
+//    }   
 
     public boolean equals(OrderedIntList otherlist)
     {
@@ -111,40 +111,40 @@ public class OrderedIntList
 	return nextLink() != null;
     }   
 
-    /**
-       return true if this list contain otherlist
-    */
-    public boolean contains(OrderedIntList otherlist)
-    {
-	if (otherlist == null) return true;
-	if (otherlist.size() > size()) return false;
-	reset();
-	otherlist.reset();
-	int e, me;
-	while((e = otherlist.nextElement()) != -1) {
-	    while (e != (me = nextElement())) {
-		if (me == -1) {
-		    return false;
-		}
-	    }
-	}
-	return true;
-    }
+//    /**
+//       return true if this list contain otherlist
+//    */
+//    public boolean contains(OrderedIntList otherlist)
+//    {
+//	if (otherlist == null) return true;
+//	if (otherlist.size() > size()) return false;
+//	reset();
+//	otherlist.reset();
+//	int e, me;
+//	while((e = otherlist.nextElement()) != -1) {
+//	    while (e != (me = nextElement())) {
+//		if (me == -1) {
+//		    return false;
+//		}
+//	    }
+//	}
+//	return true;
+//    }
 
     /**
-       return true if this list has ele
-    */
-    public boolean contains(int eleValue)
-    {
-	int me;
-	reset();
-	while((me = nextElement()) != -1) {
-	    if (me == eleValue) {
-		return true;
-	    }
-	}
-	return false;
-    }
+//       return true if this list has ele
+//    */
+//    public boolean contains(int eleValue)
+//    {
+//	int me;
+//	reset();
+//	while((me = nextElement()) != -1) {
+//	    if (me == eleValue) {
+//		return true;
+//	    }
+//	}
+//	return false;
+//    }
 
 //    public void remove(int eleValue) {
 //    	int me;
@@ -288,7 +288,7 @@ public class OrderedIntList
 //    	reset();
 //    }   
 
-    public void removeAll()
+    protected void removeAll()
     { 
 	len = 0;
 	head = null;

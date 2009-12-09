@@ -34,6 +34,8 @@ public class ProjectionsFileChooser
     JList        list_     = null;   // stores found files
     int          listSize_ = 0;      // size of list_
 //	private Wait         wait_     = new Wait(true); // true if dialog waiting
+
+    @SuppressWarnings("ucd")
     ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
 
     // Allow file chooser to select multiple files
@@ -53,7 +55,7 @@ public class ProjectionsFileChooser
      *  <type> should be ProjectionFileChooser.MULTIPLE_FILES or
      *                ProjectionFileChooser.SINGLE_FILE. 
      */
-    public ProjectionsFileChooser(Frame owner, String title, int type)
+    protected ProjectionsFileChooser(Frame owner, String title, int type)
     {
 	if (!(type == MULTIPLE_FILES || type == SINGLE_FILE)) {
 	    System.err.println("ProjectionFileChooser must init with:\n"+
@@ -79,7 +81,7 @@ public class ProjectionsFileChooser
 //	return fileMgr_.getNumFiles();
 //    }
 
-    public int showDialog() {
+    protected int showDialog() {
 	int returnVal = fChoose_.showDialog(null, "Open/Search");
 	try {
 	    if (returnVal == JFileChooser.APPROVE_OPTION) {

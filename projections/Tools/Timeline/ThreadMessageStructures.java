@@ -17,12 +17,10 @@ public class ThreadMessageStructures extends Thread {
 		stop = true;
 	}
 	
-	Data data;
 	MessageStructures messageStructures;
 	
 	public ThreadMessageStructures(MessageStructures messageStructures){
 		this.messageStructures = messageStructures;
-		this.data = messageStructures.data;
 	}
 	
 	public void run() {

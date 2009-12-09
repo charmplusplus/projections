@@ -163,7 +163,7 @@ public class EntrySelectionDialog extends Frame
 	}           
     }   
 
-    void closeDialog()
+    private void closeDialog()
     {
 	// this is essentially a cancellation command.
 

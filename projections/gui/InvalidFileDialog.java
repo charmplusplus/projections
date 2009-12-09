@@ -10,12 +10,12 @@ import java.awt.TextArea;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class InvalidFileDialog extends Dialog
+class InvalidFileDialog extends Dialog
   implements ActionListener
 {
 
 
-public InvalidFileDialog(Frame parent, Exception e)
+	protected InvalidFileDialog(Frame parent, Exception e)
   {
     super(parent, "ERROR", true);
     

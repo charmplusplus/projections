@@ -20,12 +20,12 @@ import javax.swing.JPanel;
 public class AxisLayout implements LayoutManager {
 
 	JPanel sizingPanel;
-	Data data;
+//	Data data;
 	
 	/** Layout that respects the size of the parent container */
 	public AxisLayout(Data data, JPanel sizingPanel) {
 		this.sizingPanel = sizingPanel;
-		this.data = data;
+//		this.data = data;
 	}
 	
 

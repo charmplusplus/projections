@@ -89,12 +89,12 @@ public class ProfileGraph extends JPanel
 	addMouseMotionListener(this);
     }
 
-    public ProfileGraph(String[] titles){
-        this();
-        graphTitles = titles;
-    }
+//    public ProfileGraph(String[] titles){
+//        this();
+//        graphTitles = titles;
+//    }
 
-    public void setXAxis(String title, String unit, String[] names) {
+    protected void setXAxis(String title, String unit, String[] names) {
         xTitle = title;
         xNames = names;
     }
@@ -113,7 +113,7 @@ public class ProfileGraph extends JPanel
 
 
     // ***** API Interface to the control panel *****
-    public void setDisplayDataSource(float[][] d, int[][] cMap, 
+    protected void setDisplayDataSource(float[][] d, int[][] cMap, 
 				     Color[] c, String[][] n){
         dataSource = d;
         colorsMap = cMap;
@@ -260,7 +260,7 @@ public class ProfileGraph extends JPanel
 	return new Point(xOffset,yOffset);
     }
 
-    public void showPopup(int xVal, int yVal, int xPos, int yPos){        
+    private void showPopup(int xVal, int yVal, int xPos, int yPos){        
 	Point offset = getBubbleOffset();
 	//String text[] = dataSource.getPopup(xVal, yVal);
         String[] text = new String[2];

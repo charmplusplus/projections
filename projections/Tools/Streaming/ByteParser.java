@@ -18,18 +18,18 @@ public class ByteParser {
 		}
 		return result;
 	}
-
-	public static long bytesToLong (byte[] arr, int start) {
-		int len = 8;	
-		long result = 0;	
-		for (int i = 0; i < len; i++) {
-			if(swapEndians)
-				result |= ( (long)( arr[i+start] & 0xff ) ) << ((len-i-1)*8);
-			else
-				result |= ( (long)( arr[i+start] & 0xff ) ) << (i*8);
-		}
-		return result;
-	}
+//
+//	public static long bytesToLong (byte[] arr, int start) {
+//		int len = 8;	
+//		long result = 0;	
+//		for (int i = 0; i < len; i++) {
+//			if(swapEndians)
+//				result |= ( (long)( arr[i+start] & 0xff ) ) << ((len-i-1)*8);
+//			else
+//				result |= ( (long)( arr[i+start] & 0xff ) ) << (i*8);
+//		}
+//		return result;
+//	}
 
 
 	// These shouldn't be used because we can't swap the endianness yet

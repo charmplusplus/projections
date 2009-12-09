@@ -25,7 +25,6 @@ import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
@@ -63,8 +62,6 @@ Clickable
 	// runs.
 	static int myRun = 0;
 
-	private JPanel mainPanel;
-
 	// private dialog data
 	private int threshold;
 	private int k;
@@ -81,7 +78,7 @@ Clickable
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
 	public String attributes[][] = {
-			{ "Execution Time by Activity",
+			{ "Execution Time by Activity <not yet implemented>",
 				"Least Idle Time",
 				"Msgs Sent by Activity <not yet implemented>", 
 				"Bytes Sent by Activity  <not yet implemented>",
@@ -107,10 +104,10 @@ Clickable
 			"us"}
 	};
 
-	public final static int ATTR_EXECUTIONTIME = 0;
+//	public final static int ATTR_EXECUTIONTIME = 0;
 	public final static int ATTR_LEASTIDLE = 1;
-	public final static int ATTR_MSGSSENT = 2;
-	public final static int ATTR_BYTESSENT = 3;
+//	public final static int ATTR_MSGSSENT = 2;
+//	public final static int ATTR_BYTESSENT = 3;
 	public final static int ATTR_MOSTIDLE = 4;
 	public final static int ATTR_ACTIVEENTRY = 5;
 	public final static int ATTR_OVERHEAD = 6;

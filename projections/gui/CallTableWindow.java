@@ -61,7 +61,7 @@ public class CallTableWindow extends ProjectionsWindow
     boolean              statsToggle;
   
 
-    public CallTableWindow(MainWindow parentWindow ) {
+    protected CallTableWindow(MainWindow parentWindow ) {
     	super(parentWindow);
     	thisWindow = this;
 
@@ -120,7 +120,7 @@ public class CallTableWindow extends ProjectionsWindow
 	}
     }
 
-    protected void createMenus(){
+    private void createMenus(){
         JMenuBar mbar = new JMenuBar();
         mbar.add(Util.makeJMenu("File", new Object[]
             {

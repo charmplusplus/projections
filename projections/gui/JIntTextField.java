@@ -2,7 +2,6 @@ package projections.gui;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.TextEvent;
 
 import javax.swing.JTextField;
 
@@ -77,9 +76,9 @@ private String lastValue;
 	setText(String.valueOf(num));
 	checkValue();
     }
-
-   public void textValueChanged(TextEvent evt)
-   {
-	  checkValue();
-   }   
+//
+//   public void textValueChanged(TextEvent evt)
+//   {
+//	  checkValue();
+//   }   
 }

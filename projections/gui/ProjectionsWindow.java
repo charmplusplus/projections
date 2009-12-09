@@ -66,7 +66,7 @@ implements ActionListener
 	}
 
 	/** Simply set the window title and listen for the window closing. */	
-	public ProjectionsWindow(String title, MainWindow parentWindow) {
+	protected ProjectionsWindow(String title, MainWindow parentWindow) {
 		this.parentWindow = parentWindow;
 		setTitle(title);
 		addWindowListener(new WindowAdapter() {

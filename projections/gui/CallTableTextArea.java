@@ -130,7 +130,7 @@ public class CallTableTextArea extends Panel
 	  
 	  og.drawImage(offscreen, 0,0,w,h+titleheight, 0,0,w,h+titleheight, null);    
    }   
-   public void setBounds()
+   private void setBounds()
    {
 	 
 	  if(fm == null)

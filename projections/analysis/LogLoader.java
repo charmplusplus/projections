@@ -30,8 +30,6 @@ public class LogLoader extends ProjDefs
 	private boolean isProcessing = false;
 	boolean ampiTraceOn = false;
 		
-	public final boolean useTimeIndexes = false;
-	
 	
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
 	public long determineEndTime(OrderedIntList validPEs)
@@ -993,7 +991,7 @@ public class LogLoader extends ProjDefs
 							Timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(pe, TE.EventID, LE.Time - BeginTime,
+						TM = new TimelineMessage(pe, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID);
 						TE.addMessage(TM);
@@ -1026,7 +1024,7 @@ public class LogLoader extends ProjDefs
 							Timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(pe, TE.EventID, LE.Time - BeginTime,
+						TM = new TimelineMessage(pe, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID, LE.numPEs);
 						TE.addMessage(TM);
@@ -1058,7 +1056,7 @@ public class LogLoader extends ProjDefs
 							Timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(pe, TE.EventID, LE.Time - BeginTime,
+						TM = new TimelineMessage(pe, LE.Time - BeginTime,
 								LE.Entry, LE.MsgLen,
 								LE.EventID, LE.destPEs);
 						TE.addMessage(TM);
@@ -1238,51 +1236,51 @@ public class LogLoader extends ProjDefs
 		}
 		return;
 	}
-
-
-	public long searchtimeline(int PeNum, int Entry, int Num)
-	throws LogLoadException
-	{
-		long BeginTime = 0;
-		long           Count = 0;
-		LogEntry       LE     = null;
-
-		GenericLogReader reader;
-		LogEntryData data;
-
-		// open the file
-		try {
-			System.gc();
-			reader = new GenericLogReader(PeNum, MainWindow.runObject[myRun].getVersion());
-			data = new LogEntryData();
-
-			//Throws EOFException at end of file
-			while(true) {
-				data = reader.nextEvent();
-				LE = new LogEntry(data);
-				if (LE.Entry == -1) {
-					continue;
-				}
-				if ((LE.Entry == Entry) && 
-						(LE.TransactionType == BEGIN_PROCESSING)) {
-					Count++;
-				}
-				if (Count > Num) {
-					break;
-				}
-			}
-		} catch (FileNotFoundException E) {
-			System.out.println("ERROR: couldn't open file " + 
-					MainWindow.runObject[myRun].getLogName(PeNum));
-		} catch (EOFException E) {
-			/*ignore*/
-		} catch (IOException E) {
-			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
-					LogLoadException.READ);
-		}  
-		//	assert(LE != null);
-		return LE.Time - BeginTime;
-	}   
+//
+//
+//	public long searchtimeline(int PeNum, int Entry, int Num)
+//	throws LogLoadException
+//	{
+//		long BeginTime = 0;
+//		long           Count = 0;
+//		LogEntry       LE     = null;
+//
+//		GenericLogReader reader;
+//		LogEntryData data;
+//
+//		// open the file
+//		try {
+//			System.gc();
+//			reader = new GenericLogReader(PeNum, MainWindow.runObject[myRun].getVersion());
+//			data = new LogEntryData();
+//
+//			//Throws EOFException at end of file
+//			while(true) {
+//				data = reader.nextEvent();
+//				LE = new LogEntry(data);
+//				if (LE.Entry == -1) {
+//					continue;
+//				}
+//				if ((LE.Entry == Entry) && 
+//						(LE.TransactionType == BEGIN_PROCESSING)) {
+//					Count++;
+//				}
+//				if (Count > Num) {
+//					break;
+//				}
+//			}
+//		} catch (FileNotFoundException E) {
+//			System.out.println("ERROR: couldn't open file " + 
+//					MainWindow.runObject[myRun].getLogName(PeNum));
+//		} catch (EOFException E) {
+//			/*ignore*/
+//		} catch (IOException E) {
+//			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
+//					LogLoadException.READ);
+//		}  
+//		//	assert(LE != null);
+//		return LE.Time - BeginTime;
+//	}   
 
 //	public void createTimeIndexes(OrderedIntList processorList) {
 //		if(index == null){

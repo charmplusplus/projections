@@ -133,6 +133,7 @@ public class NoiseMiner extends ProjDefs
 	}
 
 	/** essentially an alias to Time class */
+	@SuppressWarnings("ucd")
 	public class Duration extends Time{
 		public Duration(){	
 			d = 0.0;
@@ -443,7 +444,7 @@ public class NoiseMiner extends ProjDefs
 		private ArrayList<Cluster> clusters; // For each cluster in this histogram
 		private ArrayList<Cluster> clustersNormalized; // For each cluster in this histogram
 
-
+		@SuppressWarnings("ucd")
 		public int countEvents(){
 			int c=0;
 			for(int i=0;i<getNbins();i++){
@@ -456,20 +457,27 @@ public class NoiseMiner extends ProjDefs
 			return clustersNormalized;
 		}
 
+		@SuppressWarnings("ucd")
 		public ArrayList<Cluster> clusters(){
 			return clusters;
 		}
 
+		@SuppressWarnings("ucd")
 		public Cluster primaryNoise(){
 			return clustersNormalized.get(1);
 		}
+		
+		@SuppressWarnings("ucd")
 		public boolean hasPrimaryNoise(){
 			return (clustersNormalized.size()>1);
 		}
 
+		@SuppressWarnings("ucd")
 		public Cluster secondaryNoise(){
 			return clustersNormalized.get(2);
 		}
+		
+		@SuppressWarnings("ucd")
 		public boolean hasSecondaryNoise(){
 			return (clustersNormalized.size()>2);
 		}
@@ -641,27 +649,33 @@ public class NoiseMiner extends ProjDefs
 			return result;
 		}
 
+		@SuppressWarnings("ucd")
 		public String clusters_toString(){
 			return clusters_toString(clusters);
 		}
 
+		@SuppressWarnings("ucd")
 		public String clusters_toString_Normalized(){
 			return clusters_toString(clustersNormalized);
 		}
 
 
+		@SuppressWarnings("ucd")
 		public Duration binCenter(int whichBin){
 			return new Duration((whichBin+0.5)*binWidth.us());
 		}
 
+		@SuppressWarnings("ucd")
 		public Duration binLowerBound(int whichBin){
 			return new Duration(whichBin*binWidth.us());
 		}
 
+		@SuppressWarnings("ucd")
 		public Duration binUpperBound(int whichBin){
 			return new Duration((whichBin+0.5)*binWidth.us());
 		}
 
+		@SuppressWarnings("ucd")
 		public int findFirstLocalMax(){
 			long previous = bin_count[0];
 			long current = bin_count[1];
@@ -682,13 +696,10 @@ public class NoiseMiner extends ProjDefs
 			return i;
 		}
 
-	
-
+		@SuppressWarnings("ucd")
 		public long getBin_count(int bin) {
 			return bin_count[bin];
 		}
-
-
 
 	}
 
@@ -849,6 +860,7 @@ public class NoiseMiner extends ProjDefs
 			events.merge(ew);
 		}
 	
+		@SuppressWarnings("ucd")
 		public void merge(Cluster c){
 			sum.add(c.sum);
 			count += c.count;
@@ -950,7 +962,7 @@ public class NoiseMiner extends ProjDefs
 		return nbins;
 	}
 
-
+	@SuppressWarnings("ucd")
 	public Duration binWidth(){
 		return binWidth;
 	}

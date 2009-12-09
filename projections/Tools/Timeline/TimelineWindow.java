@@ -116,12 +116,6 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		showDialog();
 	}
 
-	
-	
-	protected void showWindow(){
-		// do nothing		
-	}
-
 
 	protected void showDialog() {
 		controls.showDialog();

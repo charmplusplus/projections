@@ -2,7 +2,7 @@ package projections.gui;
 
 import java.io.File;
 
-public class MainFileFilter 
+class MainFileFilter 
     extends javax.swing.filechooser.FileFilter
 {
     public boolean accept(File dir) {

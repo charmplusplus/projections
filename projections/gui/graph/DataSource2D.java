@@ -18,7 +18,7 @@ public class DataSource2D extends DataSource
     private int xValues;
     private ResponsiveToMouse parent;
     
-    public DataSource2D(String title_, double[][] data_) {
+    protected DataSource2D(String title_, double[][] data_) {
 	title=title_;
 	data=data_;
 	xValues = data.length;
@@ -32,21 +32,15 @@ public class DataSource2D extends DataSource
 	parent=parent_;
 	xValues = data.length;
     }
-  
-    public DataSource2D(String title_, int[][] data_) {
-	title=title_;
-	data=intToDouble(data_);
-	xValues = data.length;
-	parent = null;
-    }
-  
-    public DataSource2D(String title_, int[][] data_,
-			ResponsiveToMouse parent_) {
-	title=title_;
-	data=intToDouble(data_);
-	parent=parent_;
-	xValues = data.length;
-    }
+
+//  
+//    public DataSource2D(String title_, int[][] data_,
+//			ResponsiveToMouse parent_) {
+//	title=title_;
+//	data=intToDouble(data_);
+//	parent=parent_;
+//	xValues = data.length;
+//    }
 
     public String[] getPopup(int xVal, int yVal) {
     	int NUM_EXTRA_LINES = 4;
@@ -132,17 +126,18 @@ public class DataSource2D extends DataSource
 	    values[j]=data[index][j];
     }
 
-    private double[][] intToDouble(int[][] data) {
-	double[][] retVal;
-
-	retVal = new double[data.length][];
-	for (int i=0;i<data.length; i++) {
-	    retVal[i] = new double[data[i].length];
-	    for (int j=0;j<data[i].length;j++) {
-		retVal[i][j] = data[i][j];
-	    }
-	}
-
-	return retVal;
-    }
+//    private double[][] intToDouble(int[][] data) {
+//	double[][] retVal;
+//
+//	retVal = new double[data.length][];
+//	for (int i=0;i<data.length; i++) {
+//	    retVal[i] = new double[data[i].length];
+//	    for (int j=0;j<data[i].length;j++) {
+//		retVal[i][j] = data[i][j];
+//	    }
+//	}
+//
+//	return retVal;
+//    }
+    
 }

@@ -58,7 +58,7 @@ public class UserEventsWindow extends GenericGraphWindow
     private long[][] numCalls;
     private Color[] graphColors;
     
-    public UserEventsWindow(MainWindow mainWindow) {
+    protected UserEventsWindow(MainWindow mainWindow) {
     	super("Projections User Events Tool - " + 
     			MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
     	// hardcode start. Usually derived from MainWindow.runObject[myRun].java
@@ -147,7 +147,7 @@ public class UserEventsWindow extends GenericGraphWindow
     	}
     }
 
-    void constructToolData() {
+    private void constructToolData() {
 	int nextPe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =

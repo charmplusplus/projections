@@ -22,7 +22,6 @@ import javax.swing.JTextField;
 @SuppressWarnings("serial")
 public class StartupDialogBox extends JFrame implements ActionListener, ItemListener {
 
-	JFrame dialogBox;
 	JButton connectButton;
 	JTextField portTextField;
 	JTextField hostnameTextField;
@@ -32,7 +31,6 @@ public class StartupDialogBox extends JFrame implements ActionListener, ItemList
 	JCheckBox loadRepliesCheckBox;
 	
 	StartupDialogBox(){
-		dialogBox = new JFrame();
 
 		JPanel handlerRowPane = new JPanel();
 		handlerRowPane.setLayout(new BoxLayout(handlerRowPane, BoxLayout.LINE_AXIS));

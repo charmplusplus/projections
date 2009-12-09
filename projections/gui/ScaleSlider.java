@@ -25,7 +25,7 @@ public class ScaleSlider extends Canvas
 	private ValueListener myListener;
 	
 	//This is quite like AdjustmentListener
-	public static interface ValueListener {
+	static interface ValueListener {
 		public void sliderChanged(ScaleSlider src);
 	}
 	

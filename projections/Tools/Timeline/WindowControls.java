@@ -15,7 +15,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JColorChooser;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -726,15 +725,15 @@ ItemListener {
 
 	}
 
-	private void selectBackgroundColor(){
-		Color c = JColorChooser.showDialog(parentWindow, "Choose Background Color", data.getBackgroundColor()); 
-		data.setBackgroundColor(c);
-	}
-
-	private void selectForegroundColor(){
-		Color c = JColorChooser.showDialog(parentWindow, "Choose Foreground Color", data.getForegroundColor()); 
-		data.setForegroundColor(c);
-	}
+//	private void selectBackgroundColor(){
+//		Color c = JColorChooser.showDialog(parentWindow, "Choose Background Color", data.getBackgroundColor()); 
+//		data.setBackgroundColor(c);
+//	}
+//
+//	private void selectForegroundColor(){
+//		Color c = JColorChooser.showDialog(parentWindow, "Choose Foreground Color", data.getForegroundColor()); 
+//		data.setForegroundColor(c);
+//	}
 
 	private void ShowColorWindow() {
 		if (colorWindow == null)

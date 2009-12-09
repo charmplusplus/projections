@@ -65,7 +65,7 @@ implements ItemListener, ActionListener, Clickable
 	OrderedIntList peList;
 
 
-	public CommWindow(MainWindow mainWindow) {
+	protected CommWindow(MainWindow mainWindow) {
 		super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 		mainPanel = new JPanel();
 		setLayout(mainPanel);
@@ -162,7 +162,7 @@ implements ItemListener, ActionListener, Clickable
 		}
 	}
 
-	void setPopupText(String input){
+	private void setPopupText(String input){
 		currentArrayName = input;
 	}
 
@@ -244,7 +244,7 @@ implements ItemListener, ActionListener, Clickable
 		setJMenuBar(mbar);
 	}
 
-	protected void createLayout() {
+	private void createLayout() {
 		GridBagConstraints gbc = new GridBagConstraints();
 		GridBagLayout gbl = new GridBagLayout();
 
@@ -339,7 +339,7 @@ implements ItemListener, ActionListener, Clickable
 	}
 
 
-	public void getData(long startTime, long endTime, OrderedIntList pes){
+	private void getData(long startTime, long endTime, OrderedIntList pes){
 		sentMsgCount = new double[pes.size()][];
 		sentByteCount = new double[pes.size()][];
 		receivedMsgCount = new double[pes.size()][];
@@ -574,7 +574,7 @@ implements ItemListener, ActionListener, Clickable
 		return returnValue;
 	}
 
-	public static int[] peToTripleA(int pe) {
+	private static int[] peToTripleA(int pe) {
 		int returnTriple[] = new int[3];
 		int BG[] = {8, 8, 16};
 
@@ -599,7 +599,7 @@ implements ItemListener, ActionListener, Clickable
 		return returnTriple;
 	}
 
-	public static int manhattenDistanceA(int srcPe, int destPe) {
+	private static int manhattenDistanceA(int srcPe, int destPe) {
 		int distance = 0;
 		int dimDistance = 0;
 		int BG[] = {8, 8, 16};

@@ -2,7 +2,6 @@ package projections.gui;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.TextEvent;
 
 import javax.swing.JTextField;
 
@@ -62,7 +61,7 @@ public class JFloatTextField extends JTextField
 	}
     }   
 
-    public void textValueChanged(TextEvent evt) {
-	checkValue();
-    }   
+//    public void textValueChanged(TextEvent evt) {
+//	checkValue();
+//    }   
 }

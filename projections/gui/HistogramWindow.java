@@ -69,7 +69,7 @@ implements ActionListener
 	private DecimalFormat _format;
 
 
-	public HistogramWindow(MainWindow mainWindow)
+	protected HistogramWindow(MainWindow mainWindow)
 	{
 		super("Projections Histograms", mainWindow);
 		thisWindow = this;
@@ -258,7 +258,7 @@ implements ActionListener
 		return bubbleText;
 	}
 
-	double[][][] getCounts(long startTime, long endTime, OrderedIntList pes)
+	private double[][][] getCounts(long startTime, long endTime, OrderedIntList pes)
 	{
 		// Variables for use with the analysis
 		long executionTime;

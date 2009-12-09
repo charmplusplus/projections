@@ -107,12 +107,6 @@ public abstract class DataSource
      */
     public abstract void getValues(int index, double[] values);
   
-    /**
-     *  The user just clicked at this location on this bar.
-     *  The default is to ignore the click.
-     */
-    public void mouseClicked(int index,int valNo,double value,
-			     java.awt.event.MouseEvent evt)
-    {}
+
 }
 

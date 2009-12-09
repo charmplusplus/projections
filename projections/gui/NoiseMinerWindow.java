@@ -38,7 +38,7 @@ import projections.analysis.NoiseMiner.NoiseResultButton;
  *  @author Isaac Dooley
  */
 
-public class NoiseMinerWindow extends ProjectionsWindow
+class NoiseMinerWindow extends ProjectionsWindow
 implements ItemListener
 {
 
@@ -185,7 +185,7 @@ implements ItemListener
 		
 	}
 
-	void addResultsToTable(Vector data){
+	private void addResultsToTable(Vector data){
 
 		tableModel = new DefaultTableModel(data, columnNames);
 		table.setModel(tableModel);

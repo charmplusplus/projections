@@ -53,7 +53,7 @@ public class TableSorter extends TableMap {
         reallocateIndexes(); 
     }
 
-    public int compareRowsByColumn(int row1, int row2, int column) {
+    private int compareRowsByColumn(int row1, int row2, int column) {
         Class type = model.getColumnClass(column);
         TableModel data = model;
 
@@ -149,7 +149,7 @@ public class TableSorter extends TableMap {
         }
     }
 
-    public int compare(int row1, int row2) {
+    private int compare(int row1, int row2) {
         compares++;
         for (int level = 0; level < sortingColumns.size(); level++) {
             Integer column = (Integer)sortingColumns.elementAt(level);
@@ -161,7 +161,7 @@ public class TableSorter extends TableMap {
         return 0;
     }
 
-    public void reallocateIndexes() {
+    private void reallocateIndexes() {
         int rowCount = model.getRowCount();
 
         // Set up a new array of indexes with the right number of elements
@@ -181,13 +181,13 @@ public class TableSorter extends TableMap {
         super.tableChanged(e);
     }
 
-    public void checkModel() {
+    private void checkModel() {
         if (indexes.length != model.getRowCount()) {
             System.err.println("Sorter not informed of a change in model.");
         }
     }
 
-    public void sort(Object sender) {
+    private void sort(Object sender) {
         checkModel();
 
         compares = 0;
@@ -197,15 +197,15 @@ public class TableSorter extends TableMap {
         //System.out.println("Compares: "+compares);
     }
 
-    public void n2sort() {
-        for (int i = 0; i < getRowCount(); i++) {
-            for (int j = i+1; j < getRowCount(); j++) {
-                if (compare(indexes[i], indexes[j]) == -1) {
-                    swap(i, j);
-                }
-            }
-        }
-    }
+//    public void n2sort() {
+//        for (int i = 0; i < getRowCount(); i++) {
+//            for (int j = i+1; j < getRowCount(); j++) {
+//                if (compare(indexes[i], indexes[j]) == -1) {
+//                    swap(i, j);
+//                }
+//            }
+//        }
+//    }
 
     // This is a home-grown implementation which we have not had time
     // to research - it may perform poorly in some circumstances. It
@@ -214,7 +214,7 @@ public class TableSorter extends TableMap {
     // arrays. The number of compares appears to vary between N-1 and
     // NlogN depending on the initial order but the main reason for
     // using it here is that, unlike qsort, it is stable.
-    public void shuttlesort(int from[], int to[], int low, int high) {
+    private void shuttlesort(int from[], int to[], int low, int high) {
         if (high - low < 2) {
             return;
         }
@@ -258,12 +258,12 @@ public class TableSorter extends TableMap {
             }
         }
     }
-
-    public void swap(int i, int j) {
-        int tmp = indexes[i];
-        indexes[i] = indexes[j];
-        indexes[j] = tmp;
-    }
+//
+//    public void swap(int i, int j) {
+//        int tmp = indexes[i];
+//        indexes[i] = indexes[j];
+//        indexes[j] = tmp;
+//    }
 
     // The mapping only affects the contents of the data rows.
     // Pass all requests to these rows through the mapping array: "indexes".
@@ -278,7 +278,7 @@ public class TableSorter extends TableMap {
         model.setValueAt(aValue, indexes[aRow], aColumn);
     }
 
-    public void sortByColumn(int column, boolean ascending) {
+    private void sortByColumn(int column, boolean ascending) {
         this.ascending = ascending;
         sortingColumns.removeAllElements();
         sortingColumns.addElement(new Integer(column));
@@ -291,14 +291,14 @@ public class TableSorter extends TableMap {
       return indexes[originalRow];
     }
 
-    /** JMU mod: Write over the orignalIndices and return it, map from
-     *  original indices to sorted table indices. */
-    public int[] mapRows(int[] originalIndices) {
-      for (int i=0; i<originalIndices.length; i++) {
-	originalIndices[i] = indexes[originalIndices[i]];
-      }
-      return originalIndices;
-    }
+//    /** JMU mod: Write over the orignalIndices and return it, map from
+//     *  original indices to sorted table indices. */
+//    public int[] mapRows(int[] originalIndices) {
+//      for (int i=0; i<originalIndices.length; i++) {
+//	originalIndices[i] = indexes[originalIndices[i]];
+//      }
+//      return originalIndices;
+//    }
 
     // There is no-where else to put this. 
     // Add a mouse listener to the Table to trigger a table sort 

@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Hashtable;
-import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -16,12 +14,6 @@ import javax.swing.JTextField;
 public class MemoryColorRangeChooser extends JFrame implements ActionListener 
 {
 	Data data;
-	Hashtable<Integer, String> entryNames;
-	Vector<Vector> tabledata;
-	Vector<String> columnNames;
-
-	JButton checkAll;
-	JButton uncheckAll;
 	
 	JTextField minField;
 	JTextField maxField;

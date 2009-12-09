@@ -22,7 +22,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 	RangeDialog parent;
 
 	// dialog parameter variables
-	public long intervalSize;
+
 	JLabel sizeLabel;
 	
 
@@ -30,7 +30,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 		this(1000);
 	}
 	
-	public IntervalChooserPanel(long defaultIntervalSize) {
+	protected IntervalChooserPanel(long defaultIntervalSize) {
 
 		GridBagLayout gbl      = new GridBagLayout();
 		GridBagConstraints gbc = new GridBagConstraints();
@@ -84,14 +84,14 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 	
 	}
 
-	private long getNumValidIntervals(){
-		long validIntervals = parent.getTotalTime()/sizeField.getValue();
-		if (parent.getSelectedTotalTime()%sizeField.getValue() != 0) {
-			validIntervals++;
-		}
-		return validIntervals;
-	}
-	
+//	private long getNumValidIntervals(){
+//		long validIntervals = parent.getTotalTime()/sizeField.getValue();
+//		if (parent.getSelectedTotalTime()%sizeField.getValue() != 0) {
+//			validIntervals++;
+//		}
+//		return validIntervals;
+//	}
+//	
 	private long getNumSelectedIntervals(){
 		return getEndInterval() - getStartInterval() + 1;
 	}
@@ -122,10 +122,6 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 		return sizeField.getValue();
 	}
 
-	public void setIntervalSize(long size) {
-		this.intervalSize = size;
-		parent.someInputChanged();
-	}
 
 	public long getStartInterval() {
 		return parent.getStartTime()/sizeField.getValue();

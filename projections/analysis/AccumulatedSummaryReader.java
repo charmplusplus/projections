@@ -46,60 +46,56 @@ public class AccumulatedSummaryReader extends ProjectionsReader
 	return sourceFile.canRead();
     }
 
-    protected void readStaticData() 
-	throws IOException
-    {
-	BufferedReader reader =
-	    new BufferedReader(new FileReader(sourceString));
-	ParseTokenizer tokenizer = initNewTokenizer(reader);
-	
-	// all IOExceptions here are caused by ParseTokenizer and hence
-	// if they are caught, become a ProjectionsFormatException since
-	// parsing failed.
-	try {
-	    // begin parsing the first line (header) of the summary file
-	    tokenizer.checkNextString("ver");
-	    double tempVersionNum = tokenizer.nextNumber("Version");
-	    // **CW** tentatively, the version check is a numeric check.
-	    // It is conceivable that the version tag need not be numeric.
-	    if (tempVersionNum != Double.parseDouble(expectedVersion)) {
-		throw new ProjectionsFormatException(expectedVersion,
-						     "Expected version does " +
-						     "not match one read on " +
-						     "file!");
-	    }
-
-	    tokenizer.checkNextString("pes");
-	    numProcessors = (int)tokenizer.nextNumber("Total Number of " +
-						      "Processors");
-	    tokenizer.checkNextString("count");
-	    numIntervals = (long)tokenizer.nextNumber("Number of Intervals");
-	    tokenizer.checkNextString("interval");
-	    intervalSize = tokenizer.nextScientific("Interval Size") *
-		1000000;  // convert from seconds to usecs
-	    
-	    // derived data
-	    totalTime = numIntervals*intervalSize;
-
-	    // check for extra stuff at the end of this line
-	    if (!tokenizer.isEOL()) {
-		throw new ProjectionsFormatException(expectedVersion,
-						     "Extra Stuff at the " +
-						     "end of header line.");
-	    }
-	} catch (IOException e) {
-	    throw new ProjectionsFormatException(expectedVersion,
-						 e.toString());
-	}
-	// now we are done with the header. Close the reader.
-	reader.close();
-    }
-    
-    public void reset()
-    {
-	// do nothing. This reader is not intended to work in a resetable
-	// fashion.
-    }
+//    protected void readStaticData() 
+//	throws IOException
+//    {
+//	BufferedReader reader =
+//	    new BufferedReader(new FileReader(sourceString));
+//	ParseTokenizer tokenizer = initNewTokenizer(reader);
+//	
+//	// all IOExceptions here are caused by ParseTokenizer and hence
+//	// if they are caught, become a ProjectionsFormatException since
+//	// parsing failed.
+//	try {
+//	    // begin parsing the first line (header) of the summary file
+//	    tokenizer.checkNextString("ver");
+//	    double tempVersionNum = tokenizer.nextNumber("Version");
+//	    // **CW** tentatively, the version check is a numeric check.
+//	    // It is conceivable that the version tag need not be numeric.
+//	    if (tempVersionNum != Double.parseDouble(expectedVersion)) {
+//		throw new ProjectionsFormatException(expectedVersion,
+//						     "Expected version does " +
+//						     "not match one read on " +
+//						     "file!");
+//	    }
+//
+//	    tokenizer.checkNextString("pes");
+//	    numProcessors = (int)tokenizer.nextNumber("Total Number of " +
+//						      "Processors");
+//	    tokenizer.checkNextString("count");
+//	    numIntervals = (long)tokenizer.nextNumber("Number of Intervals");
+//	    tokenizer.checkNextString("interval");
+//	    intervalSize = tokenizer.nextScientific("Interval Size") *
+//		1000000;  // convert from seconds to usecs
+//	    
+//	    // derived data
+//	    totalTime = numIntervals*intervalSize;
+//
+//	    // check for extra stuff at the end of this line
+//	    if (!tokenizer.isEOL()) {
+//		throw new ProjectionsFormatException(expectedVersion,
+//						     "Extra Stuff at the " +
+//						     "end of header line.");
+//	    }
+//	} catch (IOException e) {
+//	    throw new ProjectionsFormatException(expectedVersion,
+//						 e.toString());
+//	}
+//	// now we are done with the header. Close the reader.
+//	reader.close();
+//    }
+//    
+ 
 
     private ParseTokenizer initNewTokenizer(Reader reader) {
 	ParseTokenizer tokenizer;

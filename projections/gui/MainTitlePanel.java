@@ -14,7 +14,7 @@ private FontMetrics fm;
    private int sw, sh;
    private String s;
    
-   public MainTitlePanel(MainWindow mainWindow)
+   protected MainTitlePanel(MainWindow mainWindow)
    {
 	  setBackground(Color.black);
 	  s = "PROJECTIONS";

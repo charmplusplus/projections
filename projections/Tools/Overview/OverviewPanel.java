@@ -12,28 +12,15 @@ value is the integer percent CPU utilization from 0..100.
 
 Orion Sky Lawlor, olawlor@acm.org, 2/12/2001
  */
-import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
-import java.io.File;
-import java.io.IOException;
 import java.util.LinkedList;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.ProgressMonitor;
-import javax.swing.SwingWorker;
 
-import projections.Tools.Timeline.ImageFilter;
-import projections.analysis.LogReader;
 import projections.analysis.ThreadManager;
 import projections.gui.ColorMap;
 import projections.gui.JPanelToImage;
@@ -73,12 +60,12 @@ public class OverviewPanel extends ScalePanel.Child
 
 	private int mode;
 
-	boolean newEPData = true;
+//	boolean newEPData = true;
 
-	OverviewWindow parentWindow = null;
+//	OverviewWindow parentWindow = null;
 
 	public OverviewPanel(OverviewWindow parentWindow) {
-		this.parentWindow = parentWindow;
+//		this.parentWindow = parentWindow;
 	}
 
 	//Return a string describing the given panel location
@@ -128,7 +115,6 @@ public class OverviewPanel extends ScalePanel.Child
 	}
 
 	String entryName(int entry){
-		String entryName;
 		if(entry < numEPs) {
 			return MainWindow.runObject[myRun].getEntryNameByIndex(entry);
 		} else if(entry == numEPs) {
@@ -369,9 +355,7 @@ public class OverviewPanel extends ScalePanel.Child
 		// Create a list of worker threads
 		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 
-		// Create an array that will store the resulting data
-		int special = 2;
-		int numPEs = selectedPEs.size();
+		selectedPEs.size();
 
 		int numIntervals = endInterval - startInterval;
 		
@@ -383,7 +367,7 @@ public class OverviewPanel extends ScalePanel.Child
 		while (selectedPEs.hasMoreElements()) {
 			int nextPe = selectedPEs.nextElement();
 			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
-					startInterval, endInterval, false, entryData[pIdx], utilizationData[pIdx]) );
+					startInterval, endInterval, entryData[pIdx], utilizationData[pIdx]) );
 			pIdx++;
 		}
 		

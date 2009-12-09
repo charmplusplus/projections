@@ -33,7 +33,7 @@ public class ScalePanel extends Panel
 			public int w,h;//Size of graphics port above
 			private ScalePanel.Axis hor,ver;//Scaling factors
 			
-			public RepaintRequest(Graphics Ng,int Nw,int Nh,
+			private RepaintRequest(Graphics Ng,int Nw,int Nh,
 				ScalePanel.Axis Nhor,ScalePanel.Axis Nver)
 			{
 				g=Ng; w=Nw;h=Nh;
@@ -60,7 +60,7 @@ public class ScalePanel extends Panel
 		}
 		//Add this parent to our list
 		private Vector parents=new Vector();
-		public void addParent(ScalePanel p) {
+		private void addParent(ScalePanel p) {
 			parents.insertElementAt(p,parents.size());
 		}
 		//We get redrawn by requesting all our parents to redraw
@@ -82,11 +82,11 @@ public class ScalePanel extends Panel
 		private double zoomCenter;//Norm. screen point-- zoom about this point
 		
 		//Map panel to screen coordinates
-		public double p2s(double p) {return screen*(p2scale*p+p2off);}
+		private double p2s(double p) {return screen*(p2scale*p+p2off);}
 		//Map screen to panel coordinates
-		public double s2p(double s) {return s2scale*(s*screenInv)+s2off;}
+		private double s2p(double s) {return s2scale*(s*screenInv)+s2off;}
 		
-		public Axis(ScaleSlider sl,String myDir)
+		private Axis(ScaleSlider sl,String myDir)
 		{
 			sl.setValueListener(this);
 			direction=myDir;
@@ -116,7 +116,7 @@ public class ScalePanel extends Panel
 		 *   s2scale'=1.0/nz;
 		 *   fix*s2scale'+s2off' == s2scale*fix+s2off
 		 */
-		public void setZoom(double nz,double fix)
+		private void setZoom(double nz,double fix)
 		{
 			p2scale=nz;
 			s2off=s2scale*fix+s2off-fix/nz;
@@ -128,14 +128,14 @@ public class ScalePanel extends Panel
 		 *   is now mapped to by screen point delta.
 		 *  Scale factors are unchanged.
 		 */
-		public void scroll(double delta)
+		private void scroll(double delta)
 		{
 			double dn=delta*screenInv;//Normalize shift
 			s2off-=dn*s2scale;
 			p2off=-s2off/s2scale;
 		}
 		//Show the current zoom status
-		public void zoomStatus(String middle)
+		private void zoomStatus(String middle)
 		{
 			status(direction+" zoom is "+middle+p2scale);
 		}
@@ -159,7 +159,7 @@ public class ScalePanel extends Panel
 		 * The ticks should lie at the nice decimals in panel coords.
 		 *Return screen location (pixels)/length (fraction)/label (panel coord) triplets
 		 */
-		public float[] getTicks(double smin,double smax)
+		private float[] getTicks(double smin,double smax)
 		{
 			double per=7.0;//Minimum number of ticks per axis
 			
@@ -322,7 +322,7 @@ public class ScalePanel extends Panel
 		hor.setScale(hVal);ver.setScale(vVal);
 	}
 	public void setStatusDisplay(StatusDisplay s) {statusDisplay=s;}
-	void status(String msg) {
+	private void status(String msg) {
 		if (statusDisplay!=null) statusDisplay.setStatus(msg);
 	}
 	//Convert this scale factor into a type suitable for the sliders

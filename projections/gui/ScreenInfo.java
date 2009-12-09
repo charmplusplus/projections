@@ -26,7 +26,7 @@ public class ScreenInfo
     private static GraphicsConfiguration gc;
     private static Rectangle bounds;
 
-    public static void init() {
+    protected static void init() {
 	ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 	gd = ge.getDefaultScreenDevice();
 	gc = gd.getDefaultConfiguration();

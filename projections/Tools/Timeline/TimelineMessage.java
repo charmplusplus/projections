@@ -13,7 +13,7 @@ public class TimelineMessage implements Comparable
 	
 	public int EventID;
 	
-	public int SenderEventID;
+//	public int SenderEventID;
 
 	private int destPEs[];
 	private int numPEs;
@@ -23,13 +23,12 @@ public class TimelineMessage implements Comparable
 	/** A messages sent from srcPE, with eventid EventID */
 
 	/** Single message constructor */
-	public TimelineMessage(int srcPE, int senderEventID, long t,int e,int mlen,int EventID) {
-		this(srcPE, senderEventID, t, e, mlen, EventID, null);
+	public TimelineMessage(int srcPE, long t,int e,int mlen,int EventID) {
+		this(srcPE, t, e, mlen, EventID, null);
 	}
 
 	/** Multicast Constructor */
-	public TimelineMessage(int srcPE, int senderEventID, long t, int e, int mlen, int EventID, int destPEs[]) {
-		this.SenderEventID=senderEventID;
+	public TimelineMessage(int srcPE, long t, int e, int mlen, int EventID, int destPEs[]) {
 		this.srcPE = srcPE;
 		Time=t;
 		Entry=e;
@@ -44,8 +43,7 @@ public class TimelineMessage implements Comparable
 	}
 
 	/** Broadcast Constructor */
-	public TimelineMessage(int srcPE, int senderEventID, long t, int e, int mlen, int EventID, int numPEs) {
-		this.SenderEventID=senderEventID;
+	public TimelineMessage(int srcPE, long t, int e, int mlen, int EventID, int numPEs) {
 		Time=t;
 		this.srcPE = srcPE;
 		Entry=e;

@@ -7,7 +7,7 @@ public class U
 	Parse a human-readable time, given by default in microseconds but
 	with possible suffixes "ms" (milliseconds) or "s" (seconds).
 	*/
-	public static long fromT(String t)
+	protected static long fromT(String t)
 	{
 		double mantissa,conv=1.0;//Conversion factor to microseconds
 		int tr=0;
@@ -25,15 +25,18 @@ public class U
 		}
 		return (long)(mantissa*conv);
 	}
-	//Makes i an "even" integer-- a near multiple of 10, or 5, or 25
-	public static long makeEven(long i) {
-		if (i>1000)
-		  return (i/1000)*1000;
-                else if (i>10)
-		  return (i/10)*10;
-                else 
-		  return i;
-	}
+
+//	//Makes i an "even" integer-- a near multiple of 10, or 5, or 25
+//	public static long makeEven(long i) {
+//		if (i>1000)
+//		  return (i/1000)*1000;
+//                else if (i>10)
+//		  return (i/10)*10;
+//                else 
+//		  return i;
+//	}
+	
+	
 	//Print nDec digits of the decimal expansion of
 	// the fraction part of d (which must be positive).
 	private final static String printDecimals(double d,int nDec)
@@ -71,11 +74,7 @@ public class U
 	    printDecimals(us*0.000001,places)+"s";
     }
 
-    public static int bestNumPlaces(long start, long skip, int num) {
-	return 0;
-    }
-
-    public static int numUselessZeros(long number) {
+    private static int numUselessZeros(long number) {
 	int count = 0;
 	while (true) {
 	    if (number%10 > 0) {

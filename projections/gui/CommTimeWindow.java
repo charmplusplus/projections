@@ -102,7 +102,7 @@ public class CommTimeWindow extends GenericGraphWindow
     private DecimalFormat  _format;
 
 
-    public CommTimeWindow(MainWindow mainWindow) {
+    protected CommTimeWindow(MainWindow mainWindow) {
 	super("Projections Communication vs Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 	setGraphSpecificData();
 	// the following data are statically known and can be initialized
@@ -152,7 +152,7 @@ public class CommTimeWindow extends GenericGraphWindow
         setJMenuBar(mbar);
     }
 
-    protected void createLayout() {
+    private void createLayout() {
 	GridBagConstraints gbc = new GridBagConstraints();
 	GridBagLayout gbl = new GridBagLayout();
 
@@ -331,7 +331,7 @@ public class CommTimeWindow extends GenericGraphWindow
     }
 
     
-    public void fillGraphData() {
+    private void fillGraphData() {
     	// Utilize CallGraph.java in analysis folder
  	CallGraph cg = new CallGraph(startInterval, endInterval, 
 	                             intervalSize, processorList);
@@ -388,7 +388,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	repaint();
     }    
     
-    void setOutputGraphData() {
+    private void setOutputGraphData() {
 	// need first pass to decide the size of the outputdata
 	int outSize = 0;
 	for (int ep=0; ep<numEPs; ep++) {

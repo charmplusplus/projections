@@ -37,7 +37,7 @@ import projections.misc.MultiRunData;
  *
  */
 
-public class MultiRunWindow extends ProjectionsWindow
+class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
 
@@ -64,7 +64,7 @@ public class MultiRunWindow extends ProjectionsWindow
     int selectedDataType;
 
 
-    public MultiRunWindow(MainWindow parentWindow) 
+    protected MultiRunWindow(MainWindow parentWindow) 
     {
 	super(parentWindow);
 	thisWindow = this;
@@ -76,28 +76,17 @@ public class MultiRunWindow extends ProjectionsWindow
      *  The MultiRunWindow is one of the special tools uses its own dialog.
      */
     public void showDialog() {
-	showFileDialog();
-    }
+    	fc = new ProjectionsFileChooser(this, "Multirun Analysis",
+    			ProjectionsFileChooser.MULTIPLE_FILES);
+    	fc.showDialog();
+}
 
-    public void showWindow() { 
-    	showFileDialog();
-    }
-
-    public void getDialogData() {
-	// do nothing since it will not use dialog.
-    }
-
+    
     public void close()
     {
     	setVisible(false);
     	dispose();
     	parentWindow.closeChildWindow(this);
-    }
-
-    public void showFileDialog() {
-	fc = new ProjectionsFileChooser(this, "Multirun Analysis",
-					ProjectionsFileChooser.MULTIPLE_FILES);
-	fc.showDialog();
     }
 
     /**
@@ -135,7 +124,7 @@ public class MultiRunWindow extends ProjectionsWindow
 	worker.execute();
     }
 
-    void createLayout()
+    private void createLayout()
     {
 	mainPanel = new JPanel();
 	mainPanel.setBackground(Color.gray);
@@ -160,7 +149,7 @@ public class MultiRunWindow extends ProjectionsWindow
      *  from the createLayout code but yet creates 2 GUI components to
      *  be used in createLayout.
      */
-    void createDisplayPanels() {
+    private void createDisplayPanels() {
 	// for graph mode
 	MultiRunDataSource dataSource = 
 	    analyzer.getDataSource(selectedDataType);

@@ -5,9 +5,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
-import java.awt.Image;
 import java.awt.Insets;
-import java.awt.MediaTracker;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.event.ActionListener;
@@ -16,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.RandomAccessFile;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -187,19 +184,7 @@ public class Util
 	return m;
     }
 
-   public static void waitForImage(Component component, Image image)
-   {
-	  MediaTracker tracker = new MediaTracker(component);
-	  try
-	  {
-		 tracker.addImage(image, 0);
-		 tracker.waitForID(0);
-	  }
-	  catch(InterruptedException e)
-	  {
-		 e.printStackTrace();
-	  }
-   }
+  
 //   public static void wallPaper(Component component, Graphics  g, Image image)
 //   {
 //	  Dimension compsize = component.getSize();
@@ -284,121 +269,18 @@ public class Util
 //	return newFilter;
 //    }
 //
-    /**
-     *   pre-condition: filter1 and filter2 are of the same length
-     */
-    public static boolean[] andFilters(boolean[] filter1, boolean[] filter2) {
-	boolean newFilter[] = new boolean[filter1.length];
-
-	for (int i=0; i<newFilter.length; i++) {
-	    newFilter[i] = (filter1[i] && filter2[i]);
-	}
-	return newFilter;
-    }
-
-    /**
-     *	Modified by Sharon Ma 03/01/03
-     *	Changed color.map to a readable format
-     *  Separate saved data for each graph view
-     */
-    public static void saveColors(Color[] colors, String graphType, String filePath) throws IOException {
-	
-	// **sharon** somehow MainWindow.runObject[myRun].getLogDirectory() returns null
-	//File filename = new File(MainWindow.runObject[myRun].getLogDirectory() +
-	//			 File.separator +
-	//			 "color.map");
-	
-	// loop twice: once to save to pathPath, once to save to color.map
-	
-	File filename = new File("bin/color.map");
-	int again;
-	if(filePath == null) {again = 0;}
-	else                {again = 1;}
-	
-	do{
-	
-	boolean fileExists = filename.exists();
-	RandomAccessFile accessFile = new RandomAccessFile(filename, "rw");
-
-//	String tempString = new String();
-	
-	//If more graphs are created put them here
-	int numOfGraph=1;
-	String[] typeArray = new String[numOfGraph];
-	typeArray[0] = "Timeline Graph";
-	
-	
-	if(!fileExists){
-		//Output graph names and default color
-		for(int i=0; i<numOfGraph;i++){
-			accessFile.writeBytes(typeArray[i] + "\n");
-			for(int j=0; j<colors.length; j++){
-				accessFile.writeBytes(j + " ");
-	    			accessFile.writeBytes(String.valueOf(MainWindow.runObject[myRun].getEntryColor(j).getRed()));
-	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(String.valueOf(MainWindow.runObject[myRun].getEntryColor(j).getGreen()));
-	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(String.valueOf(MainWindow.runObject[myRun].getEntryColor(j).getBlue()));
-	    			accessFile.writeBytes(";     ");
-			}
-			accessFile.writeBytes("                    ");
-			accessFile.writeBytes("\n");
-			accessFile.writeBytes("\n");
-		}
-	}
-	
-	long tempLong = 0;
-	accessFile.seek(tempLong);
-	int lineNumber;
-	
-	for(int i=0; i<numOfGraph; i++){
-		if(graphType.compareTo(typeArray[i]) == 0){
-			lineNumber = 3*i+1;
-			//Go to the correct line number to output
-			for(int k=0; k<lineNumber; k++)
-				accessFile.readLine(); 
-			
-			for (int j=0; j<colors.length; j++) {
-	    			accessFile.writeBytes(j + " ");
-	    			accessFile.writeBytes(String.valueOf(colors[j].getRed()));
-	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(String.valueOf(colors[j].getGreen()));
-	    			accessFile.writeBytes(" ");
-	    			accessFile.writeBytes(String.valueOf(colors[j].getBlue()));
-	    			accessFile.writeBytes(";     ");
-			}
-		}
-	}
-	
-	if (filePath != null) { filename = new File(filePath); }
-	again--;
-	
-	accessFile.close();
-	
-	}while(again >= 0);
-	
-	
-	
-    }
-
 //    /**
-//     *  New color map routines are a little messed up. Old routines
-//     *  restored by Chee Wai 3/3/2005
+//     *   pre-condition: filter1 and filter2 are of the same length
 //     */
-//    public static void saveColors(Color[] colors, String Useless) 
-//	throws IOException 
-//    {
-//        FileOutputStream fileStream = 
-//            new FileOutputStream(MainWindow.runObject[myRun].getLogDirectory() +
-//                                 File.separator +
-//                                 "color.map");
-//        ObjectOutputStream objStream =
-//            new ObjectOutputStream(fileStream);
-//        for (int i=0; i<colors.length; i++) {
-//            objStream.writeObject(colors[i]);
-//        }
-//        objStream.close();
+//    public static boolean[] andFilters(boolean[] filter1, boolean[] filter2) {
+//	boolean newFilter[] = new boolean[filter1.length];
+//
+//	for (int i=0; i<newFilter.length; i++) {
+//	    newFilter[i] = (filter1[i] && filter2[i]);
+//	}
+//	return newFilter;
 //    }
+
 
     public static void restoreColors(Color[] colors, String Useless)
         throws IOException, ClassNotFoundException

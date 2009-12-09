@@ -8,13 +8,11 @@ public class ColorMap {
     int red[]=new int[256],
 	green[]=new int[256],
 	blue[]=new int[256];
-    boolean cm_cached=false;
     
     public void addBreak(int sDex,int sRed,int sGreen,int sBlue,
 			 int eDex,int eRed,int eGreen,int eBlue)
     {
 	int i;
-	cm_cached=false;
 	eRed-=sRed;
 	eGreen-=sGreen;
 	eBlue-=sBlue;

@@ -13,7 +13,7 @@ public class BackGroundImagePanel extends JPanel {
 	private Image bgimage = null;
     private boolean tile;
 
-    public BackGroundImagePanel(Image bgimage, boolean tile) {
+    protected BackGroundImagePanel(Image bgimage, boolean tile) {
 	this.bgimage = bgimage;
 	this.tile = tile;
     }
@@ -21,7 +21,7 @@ public class BackGroundImagePanel extends JPanel {
     /**
      *  Wrapper constructor. Default to tiling.
      */
-    public BackGroundImagePanel(Image bgimage) {
+    protected BackGroundImagePanel(Image bgimage) {
 	this(bgimage, true);
     }
 

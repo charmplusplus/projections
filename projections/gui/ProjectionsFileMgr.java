@@ -14,7 +14,7 @@ public class ProjectionsFileMgr {
   // WHAT IF NO ASSOCIATED LOG FILES?!?
 
   /** Constructor. */
-  public ProjectionsFileMgr(String[] fileNames) 
+	protected ProjectionsFileMgr(String[] fileNames) 
   { 
     stsFiles_ = new File[fileNames.length];
     logFiles_ = new File[fileNames.length][];

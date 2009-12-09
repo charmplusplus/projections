@@ -316,7 +316,6 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	}
 	
 	private Color mixColors(Color a, Color b, float ratio){
-		double mixRatio = 0.5; // fraction of input one
 		float red = (float) (ratio*a.getRed()+(1.0-ratio)*b.getRed());
 		float green = (float) (ratio*a.getGreen()+(1.0-ratio)*b.getGreen());
 		float blue = (float) (ratio*a.getBlue()+(1.0-ratio)*b.getBlue());	

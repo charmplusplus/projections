@@ -127,11 +127,5 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 			
 		}
 	}
-	
-	
-	/** A function required for ProjectionsWindow interface. We just ignore it */
-	public void showWindow() {
-		// do nothing for now.
-	}
 
 }

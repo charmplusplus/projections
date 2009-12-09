@@ -3,9 +3,7 @@ package projections.analysis;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
 
-import projections.gui.Analysis;
 import projections.gui.MainWindow;
 import projections.misc.FileUtils;
 

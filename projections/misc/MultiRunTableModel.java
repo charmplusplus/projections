@@ -14,7 +14,7 @@ public class MultiRunTableModel
 
 	private static final long serialVersionUID = 1L;
 
-	protected String tableName;
+//	protected String tableName;
     private MultiRunDataAnalyzer analysisModule;
     // This is the category type the associated JTable is supposed to
     // visualize.
@@ -24,7 +24,7 @@ public class MultiRunTableModel
     public MultiRunTableModel(String tableName,
 			      MultiRunDataAnalyzer analysisModule,
 			      int dataType, int category) {
-	this.tableName = tableName;
+//	this.tableName = tableName;
 	this.analysisModule = analysisModule;
 	this.dataType = dataType;
 	this.category = category;

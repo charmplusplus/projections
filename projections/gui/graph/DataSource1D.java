@@ -22,20 +22,14 @@ public class DataSource1D extends DataSource
     data=data_;
 	 parent=null;
   }
-  
-  public DataSource1D(String title_,int[] data_, GenericGraphWindow parent_) {
-    title=title_;
-    data=data_;
-	 parent=parent_;
-  }
 
-    // **CW** Hack-a-di-doo-doo
-    public DataSource1D(String title, int[] data, PopUpAble parent) {
-	this.title = title;
-	this.data = data;
-	popParent = parent;
-	usePopUpAbleParent = true;
-    }
+//    // **CW** Hack-a-di-doo-doo
+//    public DataSource1D(String title, int[] data, PopUpAble parent) {
+//	this.title = title;
+//	this.data = data;
+//	popParent = parent;
+//	usePopUpAbleParent = true;
+//    }
 
   public String getTitle() {return title;}
 

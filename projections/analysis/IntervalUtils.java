@@ -309,13 +309,13 @@ public class IntervalUtils {
 	return rebin(data, originalSize, newNumIntervals);
     }
 
-    /**
-     *  Simple method for tools that need to know the absolute time bin a
-     *  time value falls into given the interval size.
-     */
-    public static int getBin(long intervalSize, long time) {
-	return (int)(time/intervalSize);
-    }
+//    /**
+//     *  Simple method for tools that need to know the absolute time bin a
+//     *  time value falls into given the interval size.
+//     */
+//    public static int getBin(long intervalSize, long time) {
+//	return (int)(time/intervalSize);
+//    }
 
 
     /**

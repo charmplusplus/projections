@@ -133,17 +133,17 @@ public class KMeansClustering {
     	return returnVal;
     }
     
-    public static void printMean(double mean[][]) {
-	System.out.println("Mean:");
-	System.out.println("-----");
-	for (int k=0; k<mean.length; k++) {
-	    System.out.print("[" + k + "]; (");
-	    for (int ep=0; ep<mean[k].length; ep++) {
-		System.out.print(" " + mean[k][ep]);
-	    }
-	    System.out.println(" )");
-	}
-    }
+//    public static void printMean(double mean[][]) {
+//	System.out.println("Mean:");
+//	System.out.println("-----");
+//	for (int k=0; k<mean.length; k++) {
+//	    System.out.print("[" + k + "]; (");
+//	    for (int ep=0; ep<mean[k].length; ep++) {
+//		System.out.print(" " + mean[k][ep]);
+//	    }
+//	    System.out.println(" )");
+//	}
+//    }
     
     public static void outputResults(int clusterMap[], int numClusters) {
 	System.out.println("Cluster Map:");

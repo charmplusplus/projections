@@ -66,7 +66,7 @@ public class PieChartWindow extends Frame{
      * Creates the window and initializes data
      */
     
-    public PieChartWindow(float[] data, int dataLen, float thresh, Color[] colors){
+    protected PieChartWindow(float[] data, int dataLen, float thresh, Color[] colors){
         this.data = data;
         this.dataLen = dataLen;
         this.thresh = thresh;
@@ -107,7 +107,7 @@ public class PieChartWindow extends Frame{
      *
      */
     
-    public void close(){
+    private void close(){
         setVisible(false);
         dispose();
     }
@@ -116,7 +116,7 @@ public class PieChartWindow extends Frame{
      * calculates size of pie chart using the buffers defined in the constructor
      * 
      */
-    public void setSizes(){
+    private void setSizes(){
         int width = (displayPanel.getSize().width);
         int height = (displayPanel.getSize().height);
 	
@@ -143,7 +143,7 @@ public class PieChartWindow extends Frame{
     public class MyPanel extends Panel implements MouseMotionListener{
 		private PieChartWindow pcw;
 	
-        public MyPanel(PieChartWindow pcw){
+        private MyPanel(PieChartWindow pcw){
             addMouseMotionListener(this);
             this.pcw = pcw;
         }

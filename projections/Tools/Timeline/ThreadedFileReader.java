@@ -4,13 +4,13 @@ package projections.Tools.Timeline;
 public class ThreadedFileReader extends Thread  {
 	
 	int pe;
-	int p;
+//	int p;
 	Data data;
 	
 	public ThreadedFileReader(int pe, int p, Data data){
 		this.data = data;
 		this.pe = pe;
-		this.p = p;
+//		this.p = p;
 	}
 	
      public void run() {

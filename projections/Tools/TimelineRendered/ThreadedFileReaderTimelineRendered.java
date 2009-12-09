@@ -1,11 +1,6 @@
 package projections.Tools.TimelineRendered;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import projections.Tools.Timeline.Data;
 import projections.Tools.Timeline.MainHandler;
@@ -66,15 +61,6 @@ public class ThreadedFileReaderTimelineRendered extends Thread implements MainHa
 		data = null;
 	}
 
-	
-	public void displayResults(){
-		JLabel lbl = new JLabel(new ImageIcon(image));
-		JFrame f = new JFrame();
-		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(lbl, BorderLayout.CENTER);
-		f.pack();
-		f.setVisible(true);
-	}
 	
 	public void displayWarning(String message) {
 		// do nothing

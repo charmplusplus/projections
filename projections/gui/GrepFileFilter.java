@@ -5,7 +5,7 @@ import java.io.File;
 /** Simple class to use in JFileChooser */
 public class GrepFileFilter extends javax.swing.filechooser.FileFilter {
   /** Contructor */
-  public GrepFileFilter(String grep, String description) { 
+	protected GrepFileFilter(String grep, String description) { 
     grep_ = grep; 
     description_ = (description==null) ?
       "GrepFileFilter (*"+grep_+"*)" : description; 

@@ -8,7 +8,7 @@ public class RangeDialogPersistantData {
 	public long begintime;
 	public long endtime;
 
-	public RangeDialogPersistantData(OrderedIntList plist, long begintime, long endtime){
+	protected RangeDialogPersistantData(OrderedIntList plist, long begintime, long endtime){
 		this.plist = plist;
 		this.begintime = begintime;
 		this.endtime = endtime;

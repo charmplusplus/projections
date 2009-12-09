@@ -5,14 +5,13 @@ import projections.misc.LogEntryData;
 /** A class representing an entry in a log */
 class LogEntry
 {
-	public int TransactionType, MsgType, Entry;
+	public int TransactionType, Entry;
 	long Time;
 	long endTime;
 	int EventID, Pe;
 	int MsgLen;
 	ObjectId id;
 	long recvTime;
-	long sendTime;
 	int numPEs;
 	int destPEs[];
 	long cpuBegin, cpuEnd;
@@ -40,13 +39,11 @@ class LogEntry
 	public LogEntry(LogEntryData data) {
 		endTime = data.endTime;
 		TransactionType = data.type;
-		MsgType = data.mtype;
 		Time = data.time;
 		Entry = data.entry;
 		EventID = data.event;
 		Pe = data.pe;
 		MsgLen = data.msglen;
-		sendTime = data.sendTime;
 		recvTime = data.recvTime;
 		id = new ObjectId(data.id[0],data.id[1],data.id[2],data.id[3]);
 		userSupplied = data.userSupplied;

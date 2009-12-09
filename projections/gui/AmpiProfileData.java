@@ -2,7 +2,7 @@ package projections.gui;
 
 public class AmpiProfileData
 {
-   AmpiProfileWindow profileWindow;
+//   AmpiProfileWindow profileWindow;
    
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -13,10 +13,10 @@ public class AmpiProfileData
    OrderedIntList plist;
    long begintime, endtime;
    
-   public AmpiProfileData(AmpiProfileWindow profileWindow)
+   protected AmpiProfileData(AmpiProfileWindow profileWindow)
    {
 	  
-	  this.profileWindow = profileWindow;
+//	  this.profileWindow = profileWindow;
 	  numPs     = MainWindow.runObject[myRun].getNumProcessors();
 	  
 	  if(MainWindow.runObject[myRun].checkJTimeAvailable() == true) { 

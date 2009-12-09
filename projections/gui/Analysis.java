@@ -79,8 +79,8 @@ public class Analysis {
   
   /******************* Graphs ***************/
   public int[][][] systemUsageData;
-  public int[][][][] systemMsgsData;
-  public int[][][][] userEntryData;
+//  public int[][][][] systemMsgsData;
+//  public int[][][][] userEntryData;
   
   
   /****************** Jump from Timeline to graphs ******/
@@ -111,10 +111,9 @@ public class Analysis {
   new Color[NUM_ACTIVITIES][];
   
   private Color[] grayColors;
-  private Color[] grayUserEventColors;
+//  private Color[] grayUserEventColors;
   
   private Color[] activeColorMap;
-  protected Color[] activeUserColorMap;
   
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
@@ -137,7 +136,7 @@ public class Analysis {
    *  3) total time of the run should be known.
    *
    */    
-  public void initAnalysis(String filename, Component rootComponent) 
+  protected void initAnalysis(String filename, Component rootComponent) 
     throws IOException 
     {
 	  guiRoot = rootComponent;
@@ -296,17 +295,15 @@ public class Analysis {
     functionColors = activityColors[FUNCTIONS];
     grayColors = 
       ColorManager.createGrayscaleColorMap(getSts().getEntryCount());
-    grayUserEventColors = 
-      ColorManager.createGrayscaleColorMap(getSts().getNumUserDefinedEvents());
+//    grayUserEventColors = ColorManager.createGrayscaleColorMap(getSts().getNumUserDefinedEvents());
     // default to full colors
     activeColorMap = entryColors;
-    activeUserColorMap = userEventColors;
   }
     
   /**
    * Creating AMPI usage profile
    */
-  public void createAMPIUsage(int procId, long beginTime, 
+  protected void createAMPIUsage(int procId, long beginTime, 
 			      long endTime, Vector procThdVec){
     try {
       if (hasLogFiles()) {
@@ -325,7 +322,7 @@ public class Analysis {
     /**
      * Create AMPI Functions' Time profile
      */
-    public void createAMPITimeProfile(int procId, long beginTime, 
+  protected void createAMPITimeProfile(int procId, long beginTime, 
 					     long endTime, Vector procThdVec){
         try {
 	    if (hasLogFiles()) {
@@ -348,20 +345,13 @@ public class Analysis {
 //	return 0;
 //    }
 
-    /**
-     *  categoryIdx (see LogReader) refers to the category of system messages
-     *  that are logged. type refers to the time of data (eg. time) logged.
-     *  note that "type" here is different from "type" in getSystemUsageData.
-     */
-    public int[][] getSystemMsgsData(int categoryIdx, int type) {
-	return systemMsgsData[categoryIdx][type];
-    }
+
 
     /**
      *  "type" here refers to the type of usage data (ie. Idle, System Queue
      *  length or CPU usage).
      */
-    public int[][] getSystemUsageData(int type) {
+  protected int[][] getSystemUsageData(int type) {
 	return systemUsageData[type];
     }
 
@@ -424,7 +414,7 @@ public class Analysis {
 	
 	The returned values are in percent CPU time spent. 
     */
-    public float[][] GetUsageData(int pnum, long begintime, 
+    protected float[][] GetUsageData(int pnum, long begintime, 
 					 long endtime, OrderedIntList phases) {
 	if( hasLogFiles()) { //.log files
 	    UsageCalc u=new UsageCalc();
@@ -462,26 +452,26 @@ public class Analysis {
 	return ret;
     }
     
-    // a == entry point index, t == type of data
-    public int[][] getUserEntryData( int a, int t ) {
-	return userEntryData[ a ][ t ];
-    }
+//    // a == entry point index, t == type of data
+//    public int[][] getUserEntryData( int a, int t ) {
+//	return userEntryData[ a ][ t ];
+//    }
 
-    public boolean hasSystemMsgsData( int a, int t ) {
-	if (systemMsgsData==null) return false;
-	return null!=systemMsgsData[a][t];
-    }
+//    public boolean hasSystemMsgsData( int a, int t ) {
+//	if (systemMsgsData==null) return false;
+//	return null!=systemMsgsData[a][t];
+//    }
 
-    /**
-       check if one user entry data of type t is there.
-    */
-    public boolean hasUserEntryData( int a, int t ) {
-	if (userEntryData==null) return false;
-	if (userEntryData[a][t] == null) return false;
-	for (int pe=0; pe<getNumProcessors(); pe++)
-	    if (userEntryData[a][t][pe] != null) return true;
-	return false;
-    }
+//    /**
+//       check if one user entry data of type t is there.
+//    */
+//    public boolean hasUserEntryData( int a, int t ) {
+//	if (userEntryData==null) return false;
+//	if (userEntryData[a][t] == null) return false;
+//	for (int pe=0; pe<getNumProcessors(); pe++)
+//	    if (userEntryData[a][t][pe] != null) return true;
+//	return false;
+//    }
 
 
     /**
@@ -491,7 +481,7 @@ public class Analysis {
      *  For other tools that need to be parallel, use that reader, or create a similar one.
      *
      */
-    public void LoadGraphData(long intervalSize, 
+    protected void LoadGraphData(long intervalSize, 
 			      int intervalStart, int intervalEnd,
 			      boolean byEntryPoint, 
 			      OrderedIntList processorList) 
@@ -502,8 +492,8 @@ public class Analysis {
 			   intervalStart, intervalEnd,
 			   byEntryPoint, processorList, true);
 	    systemUsageData = logReader.getSystemUsageData();
-	    systemMsgsData = logReader.getSystemMsgs();
-	    userEntryData = logReader.getUserEntries();
+//	    systemMsgsData = logReader.getSystemMsgs();
+//	    userEntryData = logReader.getUserEntries();
 //	    logReaderIntervalSize = logReader.getIntervalSize();
 	} else if (hasSumDetailFiles()) {
 	    IntervalData intervalData = new IntervalData();
@@ -511,8 +501,8 @@ public class Analysis {
 					  intervalEnd, byEntryPoint,
 					  processorList);
 	    systemUsageData = intervalData.getSystemUsageData();
-	    systemMsgsData = intervalData.getSystemMsgs();
-	    userEntryData = intervalData.getUserEntries();
+//	    systemMsgsData = intervalData.getSystemMsgs();
+//	    userEntryData = intervalData.getUserEntries();
 	} else if (hasSumFiles()) { // no log files, so load .sum files
 	    loadSummaryData(intervalSize, intervalStart, intervalEnd,
 			    processorList);
@@ -523,7 +513,7 @@ public class Analysis {
     
 
     // yet another version of summary load for processor subsets.
-    public void loadSummaryData(long intervalSize, 
+    private void loadSummaryData(long intervalSize, 
 				int intervalStart, int intervalEnd,
 				OrderedIntList processorList) {
 	systemUsageData = new int[3][][];
@@ -601,7 +591,7 @@ public class Analysis {
     }
 
     // *** Data File-related accessors (from sts reader) ***
-    public boolean hasSummaryData() {
+    protected boolean hasSummaryData() {
 	return (hasSumFiles() || hasSumAccumulatedFile());
     }
 
@@ -631,7 +621,7 @@ public class Analysis {
     
     // *** Activity Management *** */
 
-    public int stringToActivity(String name) {
+    protected int stringToActivity(String name) {
 	if (name.equals("PROJECTIONS")) {
 	    return PROJECTIONS;
 	} else if (name.equals("USER_EVENTS")) {
@@ -657,19 +647,6 @@ public class Analysis {
 	return 0;
     }
 
-    // This version takes the event id (as logged, which may not be
-    // contigious) and gets the name.
-    public String getActivityNameByID(int type, int id) {
-	switch (type) {
-	case PROJECTIONS:
-	    return getEntryNameByID(id);
-	case USER_EVENTS:
-	    return getUserEventName(id);
-	case FUNCTIONS:
-	    return getFunctionName(id);
-	}
-	return "";
-    }
 
     // This version takes the contigious index used by many projections
     // tools and gets the name.
@@ -719,10 +696,10 @@ public class Analysis {
     public String getEntryNameByID(int ID) {
     	return getSts().getEntryNameByID(ID);
     }
-
-    public String getEntryChareNameByID(int ID) {
-    	return getSts().getEntryChareNameByID(ID);
-    }
+//
+//    public String getEntryChareNameByID(int ID) {
+//    	return getSts().getEntryChareNameByID(ID);
+//    }
 
     /** Return the name specified in the STS file for the event with ID, as specified in STS file */
     public String getEntryFullNameByID(int ID) {
@@ -850,22 +827,20 @@ public class Analysis {
 	return activeColorMap;
     }
 
-    public void setFullColor() {
+    protected void setFullColor() {
 	activeColorMap = entryColors;
-	activeUserColorMap = userEventColors;
-    }
+	  }
 
-    public void setGrayscale() {
+    protected void setGrayscale() {
 	activeColorMap = grayColors;
-	activeUserColorMap = grayUserEventColors;
-    }
+	}
 
     /** jTimeAvailable(), getJStartTime(), getJEndTime()
      *  Used for storing user defined startTime and endTime 
      *	when jumping from TimelineWindow to other graphs
      */
     public void setJTimeAvailable(boolean jBoo) { jTimeAvailable = jBoo; }
-    public boolean checkJTimeAvailable()        { return jTimeAvailable; }
+    protected boolean checkJTimeAvailable()        { return jTimeAvailable; }
 //    public void setJTime(long start, long end)  { jStartTime = start;
 //    							 jEndTime = end; }
     public long getJStart()                     { return jStartTime; }
@@ -877,7 +852,7 @@ public class Analysis {
 //    }
 
     // ************** Public Accessors to File Information *************
-    public String getValidProcessorString(int type) {
+    private String getValidProcessorString(int type) {
 	return FileUtils.getValidProcessorString(type);
     }
 
@@ -940,7 +915,7 @@ public class Analysis {
 	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.DOP);
     }
 
-    public void closeRC() {
+    protected void closeRC() {
 	if (rcReader != null) {
 	    rcReader.close();
 	}

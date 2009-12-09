@@ -2,7 +2,6 @@ package projections.analysis;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.Date;
 
 import javax.swing.ProgressMonitor;
 

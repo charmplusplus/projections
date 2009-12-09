@@ -31,7 +31,7 @@ implements MouseListener
 		setSize(getPreferredSize());
 	}  
 	
-	static Frame getFrame(Component c)
+	private static Frame getFrame(Component c)
 	{
 		Frame f = null;
 		while((c = c.getParent()) != null)

@@ -27,10 +27,7 @@ public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel imple
 	
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialog parent;
-
-	// dialog parameter variables
-	public long intervalSize;
+	//	RangeDialog parent;
 
 	/** Create a panel of input items specific to the timeline tool */
 	public TimlineRangeDialogExtension() {
@@ -83,7 +80,7 @@ public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel imple
 	
 
 	public void setParentDialogBox(RangeDialog parent) {
-		this.parent = parent;	
+//		this.parent = parent;	
 	}
 
 

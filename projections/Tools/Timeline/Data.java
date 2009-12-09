@@ -1843,9 +1843,9 @@ public class Data
 		this.displayMustBeRedrawn();
 	}
 	
-	public boolean userSuppliedNotesVisible() {
-		return ! hideUserSuppliedNotes;	
-	}
+//	public boolean userSuppliedNotesVisible() {
+//		return ! hideUserSuppliedNotes;	
+//	}
 
 	public boolean userSuppliedNotesHidden() {
 		return hideUserSuppliedNotes;	
@@ -1862,10 +1862,6 @@ public class Data
 	
 	public boolean userEventIsHiddenID(Integer id) {
 		return hiddenUserEvents.contains(id);
-	}
-	
-	public boolean userEventIsVisibleID(Integer id) {
-		return ! hiddenUserEvents.contains(id);
 	}
 	
 	public void skipLoadingIdleRegions(boolean b, boolean filterAlreadyLoaded) {
@@ -1940,16 +1936,7 @@ public class Data
 
 	public long maxMemMB() {
 		return maxMem / 1024 / 1024;
-	}
-
-	public long minMemB() {
-		return minMem;
-	}
-
-	public long maxMemB() {
-		return maxMem;
-	}
-	
+	}	
 
 	public long minMemBColorRange() {
 		return minMemColorRange;

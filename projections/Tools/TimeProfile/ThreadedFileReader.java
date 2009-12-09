@@ -9,20 +9,20 @@ import projections.gui.OrderedIntList;
 public class ThreadedFileReader extends Thread  {
 
 	int pe;
-	int p;  // Which index am I into the flattened array of potentially sparse pe's
+//	int p;  // Which index am I into the flattened array of potentially sparse pe's
 	long intervalSize;
 	int myRun;
 	int startInterval;
 	int endInterval;
-	boolean ampiTraceOn;
+//	boolean ampiTraceOn;
 
 	int[][][] mySystemUsageData;   // [type][pe list index][interval]
-	int[][][][] mySystemMsgsData; // [categoryIdx][type][][]
+//	int[][][][] mySystemMsgsData; // [categoryIdx][type][][]
 	int[][][][] myUserEntryData; // [ep idx][type][pe][]
 	
 	double[][] graphData;
 	
-	long logReaderIntervalSize;
+//	long logReaderIntervalSize;
 	
 	/** Construct a file reading thread that will measure utilization data 
 	 *  for each interval associated with each EP, Idle, or Overhead. 
@@ -37,12 +37,12 @@ public class ThreadedFileReader extends Thread  {
 	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, 
 			boolean ampiTraceOn, double[][] graphData){
 		this.pe = pe;
-		this.p = p;
+//		this.p = p;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
-		this.ampiTraceOn = ampiTraceOn;
+//		this.ampiTraceOn = ampiTraceOn;
 		this.graphData = graphData;
 	}
 
@@ -86,16 +86,16 @@ public class ThreadedFileReader extends Thread  {
 					intervalStart, intervalEnd,
 					byEntryPoint, processorList, false);
 			mySystemUsageData = logReader.getSystemUsageData();
-			mySystemMsgsData = logReader.getSystemMsgs();
+//			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();
-			logReaderIntervalSize = logReader.getIntervalSize();
+//			logReaderIntervalSize = logReader.getIntervalSize();
 		} else if (MainWindow.runObject[myRun].hasSumDetailFiles()) {
 			IntervalData intervalData = new IntervalData();
 			intervalData.loadIntervalData(intervalSize, intervalStart,
 					intervalEnd, byEntryPoint,
 					processorList);
 			mySystemUsageData = intervalData.getSystemUsageData();
-			mySystemMsgsData = intervalData.getSystemMsgs();
+//			mySystemMsgsData = intervalData.getSystemMsgs();
 			myUserEntryData = intervalData.getUserEntries();
 		} else if (MainWindow.runObject[myRun].hasSumFiles()) { // no log files, so load .sum files
 			System.err.println("Error: This case should never be reached ?!");
@@ -108,7 +108,7 @@ public class ThreadedFileReader extends Thread  {
 			
 		// Release any unneeded memory	
 		mySystemUsageData = null; 
-		mySystemMsgsData = null;
+//		mySystemMsgsData = null;
 		myUserEntryData = null;
 	}
 	

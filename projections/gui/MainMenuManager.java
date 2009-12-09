@@ -85,12 +85,12 @@ implements ActionListener, ItemListener
 	private JMenuItem streamingMenuItem;
 
 
-	public MainMenuManager(JFrame parent) {
+	protected MainMenuManager(JFrame parent) {
 		this.parent = (MainWindow)parent;
 		createMenus();
 	}
 
-	void stateChanged(int state) {
+	private void stateChanged(int state) {
 		switch (state) {
 		case NO_DATA :
 			
@@ -399,15 +399,15 @@ implements ActionListener, ItemListener
 	}
 
 	// Interface methods to MainWindow
-	public void fileOpened() {
+	protected void fileOpened() {
 		stateChanged(OPENED_FILES);
 	}
 
-	public void lastFileClosed() {
+	protected void lastFileClosed() {
 		stateChanged(NO_DATA);
 	}
 
-	public void summaryOnly() {
+	protected void summaryOnly() {
 		stateChanged(OPENED_SUMMARY);
 	}
 

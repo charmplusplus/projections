@@ -51,9 +51,9 @@ public class MultiSeriesHandler {
 	private StsReader sts;
 
 	/** A chart holds the sizes of the received messages */
-	DefaultTableXYDataset sizeDataset;
+//	DefaultTableXYDataset sizeDataset;
 	XYSeries sizeDataSeries;
-	XYPlot sizePlot;
+//	XYPlot sizePlot;
 	int numSizesSoFar = 0;
 
 

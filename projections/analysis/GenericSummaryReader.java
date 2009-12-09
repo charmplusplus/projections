@@ -34,8 +34,6 @@ public class GenericSummaryReader
 
     // header values
     public int versionNum;
-    public int myPE;
-    public int numPE;
     public int numIntervals;
     public int numEPs;  // bizzare ... already found in .sts file
     public double intervalSize;
@@ -97,8 +95,8 @@ public class GenericSummaryReader
 	//Read the first line (Header information)
 	tokenizer.checkNextString("ver");
 	versionNum = (int)tokenizer.nextNumber("Version Number");
-	myPE = (int)tokenizer.nextNumber("processor number");
-	numPE = (int)tokenizer.nextNumber("number of processors");
+	tokenizer.nextNumber("processor number");
+	tokenizer.nextNumber("number of processors");
 	tokenizer.checkNextString("count");
 	numIntervals = (int)tokenizer.nextNumber("count");
 	tokenizer.checkNextString("ep");

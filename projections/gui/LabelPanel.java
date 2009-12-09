@@ -17,7 +17,7 @@ public class LabelPanel extends JPanel {
 	JTextField field;
     JLabel label;
 
-    public LabelPanel(String label, int alignment, JTextField fieldEntry) {
+    private LabelPanel(String label, int alignment, JTextField fieldEntry) {
 	this.label = new JLabel(label, alignment);
 	field = fieldEntry;
 	createLayout();

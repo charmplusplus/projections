@@ -30,7 +30,7 @@ import projections.analysis.AmpiFunctionData;
 import projections.analysis.AmpiProcessProfile;
 import projections.analysis.UsageCalc;
 
-public class AmpiProfileWindow extends ProjectionsWindow
+class AmpiProfileWindow extends ProjectionsWindow
     implements ActionListener, ColorSelectable, ChangeListener
 {
 
@@ -375,7 +375,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         displayCanvas.repaint();
     }
 
-    public void showChangeColorDialog() {
+    private void showChangeColorDialog() {
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
         if (entryDialog == null) {
             String typeLabelStrings[] = {"Functions"};
@@ -550,7 +550,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         profileFrame.setVisible(true);
    }
 
-    void readAmpiUsageData(){
+    private void readAmpiUsageData(){
 	int numPes = data.plist.size();
 	accTime = new float[numPes][]; //[numFunc+1] and we need [1..numFunc-1]
 	int progressCount = 0;
@@ -576,7 +576,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	progressBar.close();
     }
 
-    void setAmpiDisplayProfileData(){
+    private void setAmpiDisplayProfileData(){
 //        int curPe = -1;
 	int numPes = data.plist.size();
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
@@ -624,7 +624,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
         ampiDisplayCanvas.repaint();
     }
 
-    void setDisplayProfileData(){
+    private void setDisplayProfileData(){
         createDisplayDataSource();
 
         //testing the data sources
@@ -738,7 +738,7 @@ public class AmpiProfileWindow extends ProjectionsWindow
 	progressBar.close();
     }
 
-    public void createSingleProcSource(float[] rawData, int procNum){
+    private void createSingleProcSource(float[] rawData, int procNum){
         //fisrt compute number of significant sections
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents()-1;
         float[] dSrc = new float[numFunc+1];

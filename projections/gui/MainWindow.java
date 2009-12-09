@@ -170,7 +170,7 @@ implements ScalePanel.StatusDisplay
 	/**
 	 *   Menu interface - changing background and foreground colors
 	 */
-	public void changeBackground()
+	protected void changeBackground()
 	{
 //		JColorChooser colorWindow = new JColorChooser();
 		Color returnColor =
@@ -182,7 +182,7 @@ implements ScalePanel.StatusDisplay
 		}
 	}
 
-	public void changeForeground()
+	protected void changeForeground()
 	{
 //		JColorChooser colorWindow = new JColorChooser();
 		Color returnColor =
@@ -194,12 +194,12 @@ implements ScalePanel.StatusDisplay
 		}
 	}
 
-	public void setGrayscale() {
+	protected void setGrayscale() {
 		MainWindow.runObject[myRun].setGrayscale();
 		repaintAllWindows();
 	}
 
-	public void setFullColor() {
+	protected void setFullColor() {
 		MainWindow.runObject[myRun].setFullColor();
 		repaintAllWindows();
 	}
@@ -220,7 +220,7 @@ implements ScalePanel.StatusDisplay
 	}
 
 
-	public void showOpenFileDialog()
+	protected void showOpenFileDialog()
 	{
 		// create a file chooser with current directory set to "."
 		JFileChooser d = new JFileChooser(System.getProperty("user.dir"));
@@ -407,7 +407,7 @@ implements ScalePanel.StatusDisplay
 	}
 
 	/* called by the childWindows to remove references to themselves */
-	public void closeChildWindow(ProjectionsWindow child)
+	protected void closeChildWindow(ProjectionsWindow child)
 	{	
 		System.out.println("Removing window from openToolWindows");
 		openToolWindows.remove(child);
@@ -419,7 +419,7 @@ implements ScalePanel.StatusDisplay
 		MainWindow.runObject[myRun].closeRC();
 	}
 
-	public void closeAll() {
+	protected void closeAll() {
 		summaryGraphPanel.removeAll();
 		menuManager.lastFileClosed();
 		MainWindow.runObject[myRun].closeRC();
@@ -440,12 +440,12 @@ implements ScalePanel.StatusDisplay
 	}
 
 
-	public void closeCurrent() {
+	protected void closeCurrent() {
 		closeAll();	
 	}
 
 	/** Keep a reference to a newly opened tool window  */
-	public void openTool(ProjectionsWindow w){
+	protected void openTool(ProjectionsWindow w){
 		openToolWindows.add(w);
 	}
 

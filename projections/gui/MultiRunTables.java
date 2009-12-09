@@ -34,7 +34,7 @@ public class MultiRunTables
      *  It can, and should be, generalized to an inheritable abstract/super
      *  class) is then expected to fill it in using makeTable.
      */
-    public MultiRunTables(int defaultDataType,
+	protected MultiRunTables(int defaultDataType,
 			  MultiRunDataAnalyzer analysisModule) {
 	this.analysisModule = analysisModule;
 	// based on the analysisModule supplied, create all the tabs
@@ -64,7 +64,7 @@ public class MultiRunTables
     /**
      *  Convenience method for creating a new table in a new tab.
      */
-    public void makeTable(String name, String toolTip, Color color,
+    private void makeTable(String name, String toolTip, Color color,
 			  int dataType, int category) {
 	MultiRunTableModel tableModel =
 	    new MultiRunTableModel(name, analysisModule, dataType, category);

@@ -19,13 +19,6 @@ public class MultiRunYAxis
 	max = Nmax;
     }
 
-    public MultiRunYAxis(int Nmode, String Ntitle, double Nmax, double Nmin) {
-	mode = Nmode;
-	title = Ntitle;
-	max = Nmax;
-	min = Nmin;
-    }
-
     /**
      * Return a human-readable string to describe this axis.
      *  e.g., "CPU Utilization(%)", or "Queue Length"

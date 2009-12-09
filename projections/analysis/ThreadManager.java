@@ -49,8 +49,8 @@ public class ThreadManager {
 		ProgressMonitor progressBar=null;
 		if(showProgress){
 			progressBar = new ProgressMonitor(guiRootForProgressBar, description,"", 0, numInitialThreads);
-			progressBar.setMillisToPopup(10);
-			progressBar.setMillisToDecideToPopup(10);
+			progressBar.setMillisToPopup(0);
+			progressBar.setMillisToDecideToPopup(0);
 			progressBar.setProgress(0);
 		}
 
@@ -107,10 +107,10 @@ public class ThreadManager {
 			//------------------------------------
 			// wait on the threads to complete
 			iter = spawnedReaders.iterator();
-			while(iter.hasNext()){
+			if(iter.hasNext()){
 				r = (Thread) iter.next();
 				try {
-					r.join(0);
+					r.join(10);
 					if(! r.isAlive()) {
 						// Thread Finished
 						iter.remove();

@@ -162,7 +162,17 @@ public class ProjMain {
 
     	// Load Data if specified on command line
     	if (loadSts!=null) { 
-    		mainWindow.openFile(loadSts); 
+	    // Isaac has added code that require full path names later.
+	    //   Use a heuristic to determine if loadSts is an absolute
+	    //   path. If not, prefix it with the current working 
+	    //   directory.
+	    String curDir = System.getProperty("user.dir");
+	    int index = loadSts.lastIndexOf(File.separator);
+	    if (index == 0) {
+		mainWindow.openFile(loadSts); 
+	    } else {
+		mainWindow.openFile(curDir + File.separator + loadSts); 
+	    }
     	}
     }
 }

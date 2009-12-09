@@ -36,7 +36,7 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 
 	Data data;
 
-	public TimelineScrollPaneLayout(Data data){
+	protected TimelineScrollPaneLayout(Data data){
 		this.data = data;
 		vsbPolicy = VERTICAL_SCROLLBAR_ALWAYS;
 		hsbPolicy = HORIZONTAL_SCROLLBAR_ALWAYS;

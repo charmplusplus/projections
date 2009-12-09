@@ -19,7 +19,7 @@ public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMoti
 
 	private Data  data;
 
-	public AxisOverlayPanel(Data data)
+	protected AxisOverlayPanel(Data data)
 	{
 		this.data = data;
 		thisPanel = this;

@@ -13,13 +13,13 @@ public class ThreadMessageStructures extends Thread {
 
 	volatile boolean stop = false;
 	
-	public void stopThread(){
+	protected void stopThread(){
 		stop = true;
 	}
 	
 	MessageStructures messageStructures;
 	
-	public ThreadMessageStructures(MessageStructures messageStructures){
+	protected ThreadMessageStructures(MessageStructures messageStructures){
 		this.messageStructures = messageStructures;
 	}
 	

@@ -25,7 +25,7 @@ public class ScrollingPanel extends JPanel {
 	
 	
 	/** Create the scrollable panel with the three provided panels. */
-	public ScrollingPanel(Data data_, MainPanel mainPanel_, LayeredPanel axisPanel_, LabelPanel labelPanel_) {
+	protected ScrollingPanel(Data data_, MainPanel mainPanel_, LayeredPanel axisPanel_, LabelPanel labelPanel_) {
  
 		data=data_;
 		mainPanel=mainPanel_;

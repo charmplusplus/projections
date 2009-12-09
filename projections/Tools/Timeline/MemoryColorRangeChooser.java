@@ -24,7 +24,7 @@ public class MemoryColorRangeChooser extends JFrame implements ActionListener
 		createLayout();
 	}
 
-	void createLayout(){
+	private void createLayout(){
 		setTitle("Specify a range for use in coloring the entry methods:");
 		
 		JPanel rangeChooserPanel = new JPanel();

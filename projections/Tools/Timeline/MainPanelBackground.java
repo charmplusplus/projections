@@ -13,7 +13,7 @@ public class MainPanelBackground extends JPanel {
 
 	Data data;
 		
-	public MainPanelBackground(Data data){
+	protected MainPanelBackground(Data data){
 		this.data = data;
 	}
 	

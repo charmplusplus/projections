@@ -56,7 +56,7 @@ public class ColorChooser extends Frame
        }   
    }   
 
-    public ColorChooser(Frame parent, Data data, TimelineWindow parentTimelineWindow_)
+   protected ColorChooser(Frame parent, Data data, TimelineWindow parentTimelineWindow_)
     {
 	super();
 	parentTimelineWindow = parentTimelineWindow_;
@@ -125,7 +125,7 @@ public class ColorChooser extends Frame
 	} 
     }   
 
-    void Close() 
+    private void Close() 
     {
 	setVisible(false);
 	parentTimelineWindow.controls.CloseColorWindow();

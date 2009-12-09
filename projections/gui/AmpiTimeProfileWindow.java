@@ -150,7 +150,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         MainWindow.runObject[myRun].createAMPITimeProfile(procId,0,MainWindow.runObject[myRun].getTotalTime(), processProfiles[index]);
     }
     
-    public void getRangeVals(long beginT, long endT, int beginI, int endI, long iSize, OrderedIntList procList){
+    public void getRangeVals(long endT, int beginI, int endI, long iSize, OrderedIntList procList){
 //        startTime = beginT;
 //        endTime = endT;
         startInterval = beginI;

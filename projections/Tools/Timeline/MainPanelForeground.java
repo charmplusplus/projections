@@ -22,7 +22,7 @@ public class MainPanelForeground extends JPanel {
 
 	Data data;
 		
-	public MainPanelForeground(Data data){
+	protected MainPanelForeground(Data data){
 		this.data = data;
 		setOpaque(false);
 	}
@@ -40,7 +40,7 @@ public class MainPanelForeground extends JPanel {
 
 
 	
-	public void paintMessageSendLines(Graphics g, Color c, Set drawMessagesForObjects){
+	private void paintMessageSendLines(Graphics g, Color c, Set drawMessagesForObjects){
 		// paint the message send lines
 		if (drawMessagesForObjects.size()>0) {
 			g.setColor(c);

@@ -35,7 +35,7 @@ public class Render2by2PanelGrid extends JPanel {
 		}
 	}
 
-	public Render2by2PanelGrid(JPanel NWpanel, JPanel NEpanel, JPanel SWpanel, JPanel SEpanel){
+	protected Render2by2PanelGrid(JPanel NWpanel, JPanel NEpanel, JPanel SWpanel, JPanel SEpanel){
 		NW = generateImage(NWpanel);
 		NE = generateImage(NEpanel);
 		SW = generateImage(SWpanel);

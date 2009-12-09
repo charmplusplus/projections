@@ -42,7 +42,7 @@ public class MessageStructures {
 	/** A worker thread that creates those data structures */
 	private ThreadMessageStructures secondaryWorkers;
 
-	public MessageStructures(Data data){
+	protected MessageStructures(Data data){
 		this.data = data;
 		init();
 	}
@@ -71,7 +71,7 @@ public class MessageStructures {
 	/** Spawn a thread that will fill in the data structures. It is unlikely in the visualization that these 
 	 * structures will be needed early on. Due to the mutual exclusion synchronization on this object,
 	 *  all threads that eventually need the data will block until the data has been produced */
-	public void create(boolean useSeparateThread){
+	protected void create(boolean useSeparateThread){
 		// Create the secondary structures for efficient accessing of messages
 		init();
 		secondaryWorkers = new ThreadMessageStructures(this);
@@ -124,7 +124,7 @@ public class MessageStructures {
 		this.messageToSendingObjectsMap = messageToSendingObjectsMap;
 	}
 
-	public void kill() {
+	protected void kill() {
 		if(secondaryWorkers != null){
 			secondaryWorkers.stopThread();
 			secondaryWorkers = null;
@@ -132,7 +132,7 @@ public class MessageStructures {
 		init();
 	}
 
-	public void generate(ThreadMessageStructures structures){
+	protected void generate(ThreadMessageStructures structures){
 
 		// TODO These are computed anytime a new range or pe is loaded. Make faster by just adding in the new PEs portion
 		/** Create a mapping from EventIDs on each pe to messages */
@@ -268,7 +268,7 @@ public class MessageStructures {
 	}
 
 	
-	public void clearAll(){
+	protected void clearAll(){
 		synchronized(this){
 			int pe = eventIDToMessageMap.length;
 			for(int i=0;i<pe;i++)

@@ -15,7 +15,7 @@ public class MessageWindow extends JFrame
 	private MessagePanel canvas;
 	private ScrollPane sp;
    
-   public MessageWindow(EntryMethodObject obj)
+	protected MessageWindow(EntryMethodObject obj)
    {
 
 	  setTitle("Timeline Entry Details");

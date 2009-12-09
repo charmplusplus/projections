@@ -179,7 +179,7 @@ public class Data
 	private boolean useMinimalView=false;
 
 	/** If set to true we should try to use minimal margins and simpler text */
-	public boolean useMinimalView(){
+	protected boolean useMinimalView(){
 		return useMinimalView;
 	}
 
@@ -271,7 +271,7 @@ public class Data
 	/** 
 	 * Add the data for a new processor to this visualization
 	 */
-	public void addProcessor(int pe){
+	protected void addProcessor(int pe){
 		System.out.println("Add processor " + pe);
 		Integer p = new Integer(pe);
 		if(!peToLine.contains(p)){
@@ -286,7 +286,7 @@ public class Data
 	
 
 	/** If the timeline tool chooses a new time range or set of processors, then we should store the new configuration for use in future dialog boxes */
-	public void storeRangeToPersistantStorage(){
+	private void storeRangeToPersistantStorage(){
 		MainWindow.runObject[myRun].persistantRangeData.update(startTime(), endTime(), processorListOrdered());
 	}
 
@@ -314,7 +314,7 @@ public class Data
 	
 
 	/** Get the set of PEs as an OrderedIntList. The internal storage for the PE list is not a sorted list. */
-	public OrderedIntList processorListOrdered(){
+	private OrderedIntList processorListOrdered(){
 		OrderedIntList processorList = new OrderedIntList();
 
 		Iterator<Integer> iter = peToLine.iterator();
@@ -330,7 +330,7 @@ public class Data
 	
 	
 	/** Change the font sizes used */
-	public void setFontSizes(int labelFontSize, int axisFontSize, boolean useBoldForLabel){
+	protected void setFontSizes(int labelFontSize, int axisFontSize, boolean useBoldForLabel){
 		if(useBoldForLabel)
 			labelFont = new Font("SansSerif", Font.BOLD, labelFontSize); 
 		else
@@ -340,7 +340,7 @@ public class Data
 	}
 
 
-	public long startTime(){
+	protected long startTime(){
 		return startTime;
 	}
 
@@ -357,7 +357,7 @@ public class Data
 	 * If the message send lines are needed immediately, no helper threads should be used(race condition)
 	 *        
 	 */
-	public void createTLOArray(boolean useHelperThreads, Component rootWindow, boolean showProgress)
+	protected void createTLOArray(boolean useHelperThreads, Component rootWindow, boolean showProgress)
 	{
 		
 		// Kill off the secondary processing threads if needed
@@ -516,7 +516,7 @@ public class Data
 
 	
 	
-	public void printNumLoadedObjects(){
+	private void printNumLoadedObjects(){
 		int objCount = 0;
 		
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
@@ -530,14 +530,14 @@ public class Data
 	
 	
 	/** Relayout and repaint everything */
-	public void displayMustBeRedrawn(){
+	protected void displayMustBeRedrawn(){
 		if(modificationHandler != null){
 			modificationHandler.refreshDisplay(true);
 		}
 	}
 
 	/** repaint everything */
-	public void displayMustBeRepainted(){
+	protected void displayMustBeRepainted(){
 		if(modificationHandler != null){
 			modificationHandler.refreshDisplay(false);
 		}
@@ -545,7 +545,7 @@ public class Data
 
 	
 	/** Add or Remove a new line to the visualization representing the sending of a message */
-	public void toggleMessageSendLine(EntryMethodObject obj) {
+	private void toggleMessageSendLine(EntryMethodObject obj) {
 		
 		TimelineMessage created_message = obj.creationMessage();
 
@@ -567,39 +567,39 @@ public class Data
 	/** Add a set of new lines to the visualization representing the sending of a message.
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */
-	public void addMessageSendLineAlt(Set<EntryMethodObject> s) {
+	protected void addMessageSendLineAlt(Set<EntryMethodObject> s) {
 		drawMessagesForTheseObjectsAlt.addAll(s);
 	}
 
 	/** Add a set of objects for which we want their creation messages to be displayed
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */
-	public void addMessageSendLine(Set<EntryMethodObject> s) {
+	protected void addMessageSendLine(Set<EntryMethodObject> s) {
 		drawMessagesForTheseObjects.addAll(s);
 	}
 	
 	
-	public void clearMessageSendLines() {
+	protected void clearMessageSendLines() {
 		drawMessagesForTheseObjects.clear();
 		drawMessagesForTheseObjectsAlt.clear();
 	}
 	
 	
-	public long endTime(){
+	protected long endTime(){
 		return endTime;
 	}
-	public int[] entries(){
+	protected int[] entries(){
 		return entries;
 	}
-	public Color[] entryColor(){
+	protected Color[] entryColor(){
 		return entryColor;
 	}
 
-	public Color getEntryColor(Integer id){
+	protected Color getEntryColor(Integer id){
 		return MainWindow.runObject[myRun].getEntryColor(id);
 	}
 	
-	public Color getUserEventColor(Integer id){
+	protected Color getUserEventColor(Integer id){
 		return MainWindow.runObject[myRun].getUserEventColor(id);
 	}
 	
@@ -712,7 +712,7 @@ public class Data
 	
 
 	/** Thread-safe storing of the userEvents and perPEObjects */
-	synchronized void getDataSyncSaveObjectLists(Integer pe, List<EntryMethodObject> perPEObjects, Set<UserEventObject> userEvents )  
+	synchronized private void getDataSyncSaveObjectLists(Integer pe, List<EntryMethodObject> perPEObjects, Set<UserEventObject> userEvents )  
 	{
 		// The user events are simply that which were produced by createtimeline
 		allUserEventObjects.put(pe,userEvents);
@@ -721,7 +721,7 @@ public class Data
 	}
 	
 	/** Thread safe updating of the memory and user supplied ranges */
-	synchronized void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE, long minUserSuppliedThisPE, long maxUserSuppliedThisPE)  
+	synchronized private void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE, long minUserSuppliedThisPE, long maxUserSuppliedThisPE)  
 	{
 		if(minMemThisPE < minMem)
 			minMem = minMemThisPE;
@@ -770,31 +770,31 @@ public class Data
 		else return scl; /*  leave as float */
 	}
 	
-	public void increaseScaleFactor(){
+	protected void increaseScaleFactor(){
 		setScaleFactor( roundScale( getScaleFactor() *  scaleChangeFactor ));
 	}
 	
-	public void decreaseScaleFactor(){
+	protected void decreaseScaleFactor(){
 		setScaleFactor( roundScale( getScaleFactor() / scaleChangeFactor ));
 	}
 	
 
 	
 	/**	 the width of the timeline portion that is drawn(fit so that labels are onscreen) */
-	public int lineWidth(int actualDisplayWidth) {
+	protected int lineWidth(int actualDisplayWidth) {
 		return actualDisplayWidth - 2*offset();
 	}
 
-	public int maxLabelLen(){
+	protected int maxLabelLen(){
 		return 70;
 	}   
 
 	/** Number of processors in the processor List */
-	public int numPs(){
+	protected int numPs(){
 		return peToLine.size();
 	}
 	/** The maximum processor index in the processor list, or -1 if null processor list */
-	public int numPEs(){
+	protected int numPEs(){
 		return MainWindow.runObject[myRun].getNumProcessors();		
 	}	
 
@@ -802,7 +802,7 @@ public class Data
 	 * Needed because text labels may extend before and 
 	 * after the painted line 
 	 */
-	public int offset(){
+	protected int offset(){
 		if(useMinimalView())
 			return maxLabelLen()/2;
 		else
@@ -811,19 +811,19 @@ public class Data
 	}
 
 	/** return pixel offset for left margin */
-	public int leftOffset(){
+	private int leftOffset(){
 		return offset();
 	}
 
 
-	public int topOffset(){
+	private int topOffset(){
 		if(useMinimalView() || useCompactView())
 			return 1;
 		else
 			return 4;
 	}
 	
-	public int bottomOffset(){
+	private int bottomOffset(){
 		if(useMinimalView() || useCompactView())
 			return 1;
 		else
@@ -838,21 +838,21 @@ public class Data
 	 * of the screen.
 	 * 
 	 * */
-	public int scaledScreenWidth(int actualDisplayWidth){
+	protected int scaledScreenWidth(int actualDisplayWidth){
 		mostRecentScaledScreenWidth = (int)(actualDisplayWidth * scaleFactor);
 		return mostRecentScaledScreenWidth;
 	}
 
 
 	/** The height of the panel that should be used to draw the timelines  */
-	public int screenHeight(){
+	protected int screenHeight(){
 			int paddingForScrollbar = 25;
 			return singleTimelineHeight()*numPs() + paddingForScrollbar;
 	}
 
 
 	/** The height of the timeline event object rectangles */
-	public int barheight(){
+	protected int barheight(){
 		if(useCompactView())
 			return 12;
 		else
@@ -867,7 +867,7 @@ public class Data
 	
 	
 	/** get the height of each user event rectangle */
-	public int userEventRectHeight(){
+	protected int userEventRectHeight(){
 		if(useCompactView())
 			return 0;
 		else if (this.drawNestedUserEventRows)
@@ -888,7 +888,7 @@ public class Data
 	/** Choose a new time range to display. 
 	 * 	Scale will be reset to zero, and
 	 *  the old range will be recorded */
-	public void setNewRange(long beginTime, long endTime) {
+	protected void setNewRange(long beginTime, long endTime) {
 		this.startTime = beginTime;
 		this.endTime = endTime;
 		setScaleFactor(1.0f);
@@ -913,7 +913,7 @@ public class Data
 
 
 
-	public long totalTime(){
+	protected long totalTime(){
 		return endTime-startTime;
 	}
 
@@ -928,11 +928,11 @@ public class Data
 	private int selection1=-1, selection2=-1;
 	private int highlight=-1;
 	
-	public boolean selectionValid(){
+	protected boolean selectionValid(){
 		return (selection1>=0 && selection2>=0 && selection1!=selection2);
 	}
 
-	public boolean highlightValid(){
+	protected boolean highlightValid(){
 		return (highlight>=0);
 	}
 
@@ -941,7 +941,7 @@ public class Data
 	 * @note Call this when a window resizes or the selection no longer should be displayed
 	 * 
 	 */
-	public void invalidateSelection(){
+	protected void invalidateSelection(){
 		selection1=-1;
 		selection2=-1;
 		modificationHandler.refreshDisplay(false);
@@ -952,7 +952,7 @@ public class Data
 	 * 
 	 * @note This should only be called if selectionValid() already returns true
 	 * */
-	public int leftSelection(){
+	protected int leftSelection(){
 		if(selection1 < selection2)
 			return selection1;
 		else
@@ -963,7 +963,7 @@ public class Data
 	 * 
 	 * @note This should only be called if selectionValid() already returns true
 	 * */
-	public int rightSelection(){
+	protected int rightSelection(){
 		if(selection1 < selection2)
 			return selection2;
 		else
@@ -985,24 +985,24 @@ public class Data
 		if(selectionValid())
 			modificationHandler.refreshDisplay(false);
 	}
-	public void removeHighlight() {
+	protected void removeHighlight() {
 		highlight = -1;
 		modificationHandler.refreshDisplay(false);
 	}
-	public void setHighlight(int x) {
+	protected void setHighlight(int x) {
 		highlight = x;
 		modificationHandler.refreshDisplay(false);
 	}
-	public int getHighlight() {
+	protected int getHighlight() {
 		return highlight;
 	}
-	public double getHighlightTime() {
+	protected double getHighlightTime() {
 		return screenToTime(getHighlight());
 	}
-	public double leftSelectionTime() {
+	protected double leftSelectionTime() {
 		return screenToTime(leftSelection());
 	}
-	public double rightSelectionTime() {
+	protected double rightSelectionTime() {
 		return screenToTime(rightSelection());
 	}
 
@@ -1011,7 +1011,7 @@ public class Data
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	public long screenToTime(int xPixelCoord){
+	private long screenToTime(int xPixelCoord){
 		double fractionAlongAxis = ((double) (xPixelCoord-leftOffset())) /
 		((double)(mostRecentScaledScreenWidth-2*offset()));
 
@@ -1025,7 +1025,7 @@ public class Data
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	public int timeToScreenPixelRight(double time) {
+	protected int timeToScreenPixelRight(double time) {
 		double fractionAlongTimeAxis =  ((time+0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.floor(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
@@ -1035,32 +1035,32 @@ public class Data
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	public int timeToScreenPixelLeft(double time) {
+	protected int timeToScreenPixelLeft(double time) {
 		double fractionAlongTimeAxis =  ((time-0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 
 
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
-	public int timeToScreenPixel(double time) {
+	protected int timeToScreenPixel(double time) {
 		double fractionAlongTimeAxis =  ((time-startTime)) /((endTime-startTime));
 		return offset() + (int)(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
-	public int timeToScreenPixel(double time, int assumedScreenWidth) {
+	protected int timeToScreenPixel(double time, int assumedScreenWidth) {
 		double fractionAlongTimeAxis =  ((time-startTime)) /((endTime-startTime));
 		return offset() + (int)(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel */
-	public int timeToScreenPixelLeft(double time, int assumedScreenWidth) {
+	protected int timeToScreenPixelLeft(double time, int assumedScreenWidth) {
 		double fractionAlongTimeAxis =  ((time-0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
 	
 	/** Convert time to screen coordinate, The returned pixel is the rightmost pixel for this time if a microsecond is longer than one pixel */
-	public int timeToScreenPixelRight(double time, int assumedScreenWidth) {
+	protected int timeToScreenPixelRight(double time, int assumedScreenWidth) {
 		double fractionAlongTimeAxis =  ( (time+0.5-startTime)) /((endTime-startTime));
 		return offset() + (int)Math.floor(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
 	}
@@ -1076,7 +1076,7 @@ public class Data
 	/** Get the preferred position for the horizontal view in screen pixels.
 	 	@note must be called after scaledScreenWidth(newWidth)
 	 */
-	public int getNewPreferredViewCenter(int newScreenWidth){
+	protected int getNewPreferredViewCenter(int newScreenWidth){
 		double value = preferredViewTime;
 		int coord = timeToScreenPixel(value,newScreenWidth);
 		return coord;
@@ -1084,11 +1084,11 @@ public class Data
 
 	
 	/** Discard the previously stored desired view. Does NOT reset the view */
-	public void resetPreferredView(){
+	protected void resetPreferredView(){
 		preferredViewTime = -1.0;
 	}	
 	
-	public boolean hasNewPreferredView(){
+	protected boolean hasNewPreferredView(){
 		if (preferredViewTime >= 0.0 && scaleFactor > 1.0)
 			return true;
 		else
@@ -1107,15 +1107,15 @@ public class Data
 	
 	private boolean keepViewCentered = false;
 	/** Request that the layout manager not change the scrollbar position, but rather keep it centered on the same location */ 
-	public void keepViewCentered(boolean b){
+	protected void keepViewCentered(boolean b){
 		keepViewCentered = b;
 	}	
-	public boolean keepViewCentered() {
+	protected boolean keepViewCentered() {
 		return keepViewCentered;
 	}
 	
 	/** The height of the little line below the entry method designating a message send */
-	public int messageSendHeight() {
+	protected int messageSendHeight() {
 		if(this.useCompactView()){
 			return 0;
 		} else {
@@ -1123,12 +1123,12 @@ public class Data
 		}
 	}
 	/** The height of the rectangle that displays the message pack time below the entry method */
-	public int messagePackHeight() {
+	protected int messagePackHeight() {
 		return 3;
 	}
 	
 	/** Do something when the user right clicks on an entry method object */
-	public void clickTraceSender(EntryMethodObject obj) {
+	protected void clickTraceSender(EntryMethodObject obj) {
 		if(! useMinimalView()){
 			addProcessor(obj.pCreation);
 			toggleMessageSendLine(obj);
@@ -1156,12 +1156,12 @@ public class Data
 	int colorSchemeForUserSupplied;
 	
 	/** Clear any highlights created by HighlightObjects() */
-	public void clearObjectHighlights() {
+	protected void clearObjectHighlights() {
 		highlightedObjects.clear();
 	}
 	
 	/** Highlight the given set of timeline objects */
-	public void HighlightObjects(Set<Object> objects) {
+	protected void HighlightObjects(Set<Object> objects) {
 		highlightedObjects.addAll(objects);
 	}
 
@@ -1169,22 +1169,22 @@ public class Data
 	 * If there are any objects set to be highlighted, 
 	 * all others will be dimmed 
 	 */
-	public boolean isObjectDimmed(Object o){
+	protected boolean isObjectDimmed(Object o){
 		if(highlightedObjects.size() == 0)
 			return false;
 		else
 			return ! highlightedObjects.contains(o);
 	}
 	
-	public boolean traceMessagesBackOnHover() {
+	protected boolean traceMessagesBackOnHover() {
 		return traceMessagesBackOnHover;
 	}
 	
-	public boolean traceMessagesForwardOnHover() {
+	protected boolean traceMessagesForwardOnHover() {
 		return traceMessagesForwardOnHover;
 	}
 	
-	public boolean traceOIDOnHover() {
+	protected boolean traceOIDOnHover() {
 		return traceOIDOnHover;
 	}
 	
@@ -1215,13 +1215,13 @@ public class Data
 	}
 	
 	
-	public void SetToolTipDelaySmall() {
+	protected void SetToolTipDelaySmall() {
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(600000);	
 	}
 	
 
-	public void SetToolTipDelayLarge() {
+	private void SetToolTipDelayLarge() {
 		ToolTipManager.sharedInstance().setInitialDelay(2000);
 		ToolTipManager.sharedInstance().setDismissDelay(10000);	
 	}
@@ -1234,11 +1234,11 @@ public class Data
 		return Color.yellow;
 	}
 
-	public void showUserEvents(boolean b) {
+	protected void showUserEvents(boolean b) {
 		showUserEvents = b;
 	}
 
-	public boolean showUserEvents() {
+	protected boolean showUserEvents() {
 		if(useCompactView())
 			return false;
 		else
@@ -1246,7 +1246,7 @@ public class Data
 	}
 
 	
-	public void setColorByDefault() {
+	protected void setColorByDefault() {
 		colorByObjectId = false;
 		colorByMemoryUsage=false;
 		colorByUserSupplied=false;
@@ -1255,7 +1255,7 @@ public class Data
 	}
 
 	/** Color the events by memory usage if possible */
-	public void setColorByMemoryUsage() {
+	protected void setColorByMemoryUsage() {
 		if(memoryUsageValid()){
 			/* Prompt for range of values to use for colors */
 			new MemoryColorRangeChooser(this);
@@ -1266,7 +1266,7 @@ public class Data
 	
 	
 	/** After the user has chosen a memory range, then recolor stuff */
-	public void finalizeColorByMemoryUsage(){
+	protected void finalizeColorByMemoryUsage(){
 		colorByMemoryUsage=true;
 		colorByObjectId = false;
 		colorByUserSupplied=false;
@@ -1283,7 +1283,7 @@ public class Data
 		displayMustBeRepainted();
 	}
 
-	public void setColorByObjectID() {
+	protected void setColorByObjectID() {
 		colorByObjectId = true;
 		colorByMemoryUsage=false;
 		colorByUserSupplied=false;
@@ -1311,25 +1311,25 @@ public class Data
 	}
 	
 	
-	public boolean colorByEID() {
+	protected boolean colorByEID() {
 		return colorByEntryId;
 	}
 	
 
-	public boolean colorByOID() {
+	protected boolean colorByOID() {
 		return colorByObjectId;
 	}
 			
-	public boolean colorByUserSupplied() {
+	protected boolean colorByUserSupplied() {
 		return colorByUserSupplied;
 	}
 	
-	public boolean colorByMemoryUsage() {
+	protected boolean colorByMemoryUsage() {
 		return colorByMemoryUsage;
 	}
 	
 	/** Fixup the messages that were sent back in time, breaking the causality assumptions many hold to be true */
-	public void fixTachyons() {
+	protected void fixTachyons() {
 		System.out.println("The fix tachyons feature is still experimental. It will probably not work well if new processors are loaded, or ranges are changed");
 		
 		int numIterations = 100;
@@ -1420,7 +1420,7 @@ public class Data
 	}
 
 	/** Should the message pack time regions be displayed */
-	public boolean showPacks() {
+	protected boolean showPacks() {
 		if(useCompactView())
 			return false;
 		else
@@ -1428,7 +1428,7 @@ public class Data
 	}
 
 	/** Should the message send points be displayed */
-	public boolean showMsgs() {
+	protected boolean showMsgs() {
 		if(useCompactView())
 			return false;
 		else
@@ -1436,30 +1436,30 @@ public class Data
 	}
 	
 	/** Should the idle regions be displayed */
-	public boolean showIdle() {
+	protected boolean showIdle() {
 		return showIdle;
 	}
 	
-	public void showIdle(boolean b) {
+	protected void showIdle(boolean b) {
 		showIdle = b;
 	}
 	
-	public void showPacks(boolean b) {
+	protected void showPacks(boolean b) {
 		showPacks = b;
 	}
 	
-	public void showMsgs(boolean b) {
+	protected void showMsgs(boolean b) {
 		showMsgs = b;
 	}
 	
-	public boolean useCompactView() {
+	protected boolean useCompactView() {
 		return useCompactView;
 	}
 
 	
 	
 	/** Determines which vertical position represents PE */
-	public int whichTimelineVerticalPosition(int PE) {
+	private int whichTimelineVerticalPosition(int PE) {
 		if(peToLine==null){
 			throw new RuntimeException("peToLine is null");
 		}
@@ -1490,13 +1490,13 @@ public class Data
 	 * @note this may be slow, don't call frequently
 	 * 
 	 */
-	public int whichPE(int verticalPosition) {
+	protected int whichPE(int verticalPosition) {
 		Integer which = peToLine.get(verticalPosition);
 		return which;
 	}
 
 
-	public void movePEToLine(int PE, int newPos){
+	protected void movePEToLine(int PE, int newPos){
 		Integer p = new Integer(PE);
 		peToLine.remove(p);
 		peToLine.add(newPos, p);
@@ -1527,7 +1527,7 @@ public class Data
 	
 	
 	
-	public void printUserEventInfo(){
+	protected void printUserEventInfo(){
 
 		System.out.println("printUserEventInfo()");
 		
@@ -1603,7 +1603,7 @@ public class Data
 	 * 
 	 *  Determine the depth for each User Event, and store it in the event itself.
 	 */
-	public int determineUserEventNestings(){
+	private int determineUserEventNestings(){
 		
 		// create a stack of endtimes
 		
@@ -1649,7 +1649,7 @@ public class Data
 	}
 
 	/** Enable or disable the displaying of multiple rows of nested user events */
-	public void showNestedUserEvents(boolean b) {
+	protected void showNestedUserEvents(boolean b) {
 		
 		drawNestedUserEventRows = b;
 		if(b == true){
@@ -1671,47 +1671,47 @@ public class Data
 	}
 
 	/** The pixel offset for the top of the entry method from the top of a single PE's timeline */
-	public int entryMethodLocationTop(int pe) {
+	protected int entryMethodLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
 	}
 	
 	/** The pixel height of the entry method object. This includes just the rectangular region and the descending message sends */
-	public int entryMethodLocationHeight() {
+	protected int entryMethodLocationHeight() {
 		return barheight()+messageSendHeight();
 	}
 
-	public int userEventLocationTop(int pe) {
+	private int userEventLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset();
 	}
 
-	public int userEventLocationBottom(int pe) {
+	protected int userEventLocationBottom(int pe) {
 		return userEventLocationTop(pe) + userEventRectHeight();
 	}
 	
-	public int horizontalLineLocationTop(int i) {
+	protected int horizontalLineLocationTop(int i) {
 		return singleTimelineHeight()*i + topOffset() + userEventRectHeight() + (barheight()/2);		
 	}
 	
 	/** The message send tick mark bottom point*/
-	public int messageSendLocationY(int pe) {
+	protected int messageSendLocationY(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight() + barheight()+this.messageSendHeight();
 	}
 	
 	/** The message send tick mark bottom point*/
-	public int messageRecvLocationY(int pe) {
+	protected int messageRecvLocationY(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
 	}
 
 	
-	public void dropPEsUnrelatedToPE(Integer pe) {
+	protected void dropPEsUnrelatedToPE(Integer pe) {
 		dropPEsUnrelatedToObjects(allEntryMethodObjects.get(pe));
 	}
 	
-	public void dropPEsUnrelatedToObject(EntryMethodObject obj) {
+	protected void dropPEsUnrelatedToObject(EntryMethodObject obj) {
 		System.out.println("dropPEsUnrelatedToObject()");
 		HashSet<EntryMethodObject> set = new HashSet<EntryMethodObject>();
 		set.add(obj);
@@ -1720,7 +1720,7 @@ public class Data
 	
 	
 
-	public void dropPEsUnrelatedToObjects(Collection<EntryMethodObject> objs) {
+	private void dropPEsUnrelatedToObjects(Collection<EntryMethodObject> objs) {
 		System.out.println("dropPEsUnrelatedToObjects()");
 		HashSet<EntryMethodObject> allRelatedEntries = new HashSet<EntryMethodObject>();
 
@@ -1748,7 +1748,7 @@ public class Data
 	
 	
 	// Drop timelines from any PEs not in the provided list
-	void dropPEsNotInList(Set<Integer> keepPEs){
+	private void dropPEsNotInList(Set<Integer> keepPEs){
 		// Drop any PEs not in the list
 		Set<Integer> currentPEs = new HashSet<Integer>();
 		currentPEs.addAll(peToLine);
@@ -1795,22 +1795,22 @@ public class Data
 
 
 	
-	public void makeEntryVisibleID(Integer id){		
+	protected void makeEntryVisibleID(Integer id){		
 		makeEntryVisibleID(id, true);
 	}
-	public void makeEntryInvisibleID(Integer id){		
+	protected void makeEntryInvisibleID(Integer id){		
 		makeEntryInvisibleID(id, true);
 	}
 	
 	/** Make visible the entry methods for this id */	
-	public void makeEntryVisibleID(Integer id, boolean redraw) {
+	protected void makeEntryVisibleID(Integer id, boolean redraw) {
 		hiddenEntryPoints.remove(id);
 		if(redraw)
 			this.displayMustBeRedrawn();
 	}	
 
 	/** Hide the entry methods for this id */
-	public void makeEntryInvisibleID(Integer id, boolean redraw) {
+	protected void makeEntryInvisibleID(Integer id, boolean redraw) {
 		hiddenEntryPoints.add(id);
 		if(redraw)
 			this.displayMustBeRedrawn();
@@ -1818,13 +1818,13 @@ public class Data
 	
 
 	/** Make visible the entry methods for this id */	
-	public void makeUserEventVisibleID(Integer id) {
+	protected void makeUserEventVisibleID(Integer id) {
 		hiddenUserEvents.remove(id);
 		this.displayMustBeRedrawn();
 	}	
 
 	/** Hide the entry methods for this id */
-	public void makeUserEventInvisibleID(Integer id) {
+	protected void makeUserEventInvisibleID(Integer id) {
 		hiddenUserEvents.add(id);
 		this.displayMustBeRedrawn();
 	}
@@ -1833,12 +1833,12 @@ public class Data
 	
 	
 	
-	public void makeUserSuppliedNotesVisible() {
+	protected void makeUserSuppliedNotesVisible() {
 		hideUserSuppliedNotes = false;
 		this.displayMustBeRedrawn();
 	}	
 
-	public void makeUserSuppliedNotesInvisible() {
+	protected void makeUserSuppliedNotesInvisible() {
 		hideUserSuppliedNotes = true;
 		this.displayMustBeRedrawn();
 	}
@@ -1847,31 +1847,31 @@ public class Data
 //		return ! hideUserSuppliedNotes;	
 //	}
 
-	public boolean userSuppliedNotesHidden() {
+	protected boolean userSuppliedNotesHidden() {
 		return hideUserSuppliedNotes;	
 	}
 
 	
-	public boolean entryIsHiddenID(Integer id) {
+	protected boolean entryIsHiddenID(Integer id) {
 		return hiddenEntryPoints.contains(id);
 	}
 	
-	public boolean entryIsVisibleID(Integer id) {
+	protected boolean entryIsVisibleID(Integer id) {
 		return ! hiddenEntryPoints.contains(id);
 	}
 	
-	public boolean userEventIsHiddenID(Integer id) {
+	protected boolean userEventIsHiddenID(Integer id) {
 		return hiddenUserEvents.contains(id);
 	}
 	
-	public void skipLoadingIdleRegions(boolean b, boolean filterAlreadyLoaded) {
+	protected void skipLoadingIdleRegions(boolean b, boolean filterAlreadyLoaded) {
 		skipIdleRegions = b;
 		if(skipIdleRegions && filterAlreadyLoaded){
 			pruneOutIdleRegions();	
 		}
 	}
 
-	public void skipLoadingMessages(boolean b, boolean filterAlreadyLoaded) {
+	protected void skipLoadingMessages(boolean b, boolean filterAlreadyLoaded) {
 		skipLoadingMessages = b;
 		if(skipLoadingMessages && filterAlreadyLoaded){
 			pruneOutMessages();	
@@ -1923,36 +1923,36 @@ public class Data
 		modificationHandler.notifyProcessorListHasChanged(); // Really it is the set of objects that has changed
 		displayMustBeRedrawn();
 	}
-	public boolean skipLoadingIdleRegions() {
+	private boolean skipLoadingIdleRegions() {
 		return skipIdleRegions;
 	}
-	public boolean skipLoadingMessages() {
+	private boolean skipLoadingMessages() {
 		return skipLoadingMessages;
 	}
 
-	public long minMemMB() {
+	protected long minMemMB() {
 		return minMem / 1024 / 1024;
 	}
 
-	public long maxMemMB() {
+	protected long maxMemMB() {
 		return maxMem / 1024 / 1024;
 	}	
 
-	public long minMemBColorRange() {
+	protected long minMemBColorRange() {
 		return minMemColorRange;
 	}
 
-	public long maxMemBColorRange() {
+	protected long maxMemBColorRange() {
 		return maxMemColorRange;
 	}
 
 	/** Set the memory usage range for the color gradient */
-	public void setMemColorRange(long minMemVal, long maxMemVal) {
+	protected void setMemColorRange(long minMemVal, long maxMemVal) {
 		minMemColorRange = minMemVal;
 		maxMemColorRange = maxMemVal;
 	}
 	
-	public void setFilterEntryShorterThan(long l) {
+	protected void setFilterEntryShorterThan(long l) {
 		minEntryDuration = l;
 	}
 	

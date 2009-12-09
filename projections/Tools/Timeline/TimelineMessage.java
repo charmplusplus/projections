@@ -64,7 +64,7 @@ public class TimelineMessage implements Comparable
 		}
 	}
 	
-	public String destination(int totalPE){
+	protected String destination(int totalPE){
 		if(isMulticast()){
 			String ds = "";
 			for(int i=0;i<numPEs;i++){
@@ -100,7 +100,7 @@ public class TimelineMessage implements Comparable
 		return (numPEs==0);
 	}
 
-	public void shiftTimesBy(long shift) {
+	protected void shiftTimesBy(long shift) {
 		Time += shift;
 	}
 	

@@ -10,7 +10,7 @@ public class SolidColorJPanel extends JPanel{
 	int width, height;
 	Color color;
 	
-	public SolidColorJPanel(Color c, int w, int h){
+	protected SolidColorJPanel(Color c, int w, int h){
 		width = w;
 		height = h;
 		color = c;

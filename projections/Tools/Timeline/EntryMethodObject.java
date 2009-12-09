@@ -89,7 +89,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	private static DecimalFormat format_ = new DecimalFormat();
 	private AmpiFunctionData funcData[];
 
-	public EntryMethodObject(Data data,  TimelineEvent tle, 
+	protected EntryMethodObject(Data data,  TimelineEvent tle, 
 			TreeSet<TimelineMessage> msgs, PackTime[] packs,
 			int p1)
 	{
@@ -154,7 +154,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 	
 	/** Set the tooltip to a nicely formatted representation of this object */
-	public void updateToolTipText(){
+	private void updateToolTipText(){
 
 		// Construct a nice informative html formatted string about this entry method object. 
 		// This string is displayed on mouseover(by setting it as this component's tooltip)
@@ -437,7 +437,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 * trace
 	 * 
 	 */
-	public Set<EntryMethodObject> traceBackwardDependencies(){
+	protected Set<EntryMethodObject> traceBackwardDependencies(){
 		synchronized(data.messageStructures){
 			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 			if(data.traceMessagesBackOnHover()){
@@ -472,7 +472,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	 *  @note This uses an inefficient algorithm which could be sped up by using more suitable data structures
 	 *
 	 */
-	public Set<EntryMethodObject> traceForwardDependencies(){
+	protected Set<EntryMethodObject> traceForwardDependencies(){
 		HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 		
 		LinkedList<EntryMethodObject> toExamine = new LinkedList<EntryMethodObject>();
@@ -516,7 +516,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	
 	
 	/** Return the message that caused the entry method to execute. Complexity=O(1) time */
-	public TimelineMessage creationMessage(){
+	protected TimelineMessage creationMessage(){
 		synchronized(data.messageStructures){
 			if(data == null)
 				return null;
@@ -932,7 +932,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 //	}
 	
 
-	public void setPackUsage()
+	private void setPackUsage()
 	{
 		packtime = 0;
 		if(packs != null)
@@ -951,7 +951,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 		}
 	}   
 
-	public void setUsage()
+	private void setUsage()
 	{
 		//       System.out.println(beginTime + " " + endTime + " " +
 		//			  data.beginTime + " " + data.endTime);
@@ -999,7 +999,7 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	}
 
 	/** Shift all the times associated with this entry method by given amount */
-	public void shiftTimesBy(long s){
+	protected void shiftTimesBy(long s){
 		beginTime += s;
 		endTime += s;
 		recvTime += s;

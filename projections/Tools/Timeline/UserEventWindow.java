@@ -155,7 +155,7 @@ public class UserEventWindow extends JFrame
 	}
 
 	/** Constructor. */
-	public UserEventWindow(JCheckBox c) { 
+	protected UserEventWindow(JCheckBox c) { 
 
 		super("User Event Window");
 

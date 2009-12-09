@@ -31,7 +31,7 @@ public class AxisPanel extends JPanel
 	}
 	
 	/** Distance from top to the bottom of the text label */
-	public int axisLabelPositionY(){
+	private int axisLabelPositionY(){
 		if(data.useMinimalView())
 			return 0;
 		else
@@ -56,7 +56,7 @@ public class AxisPanel extends JPanel
 
 	private DecimalFormat format_= new DecimalFormat();
 
-	public AxisPanel(Data data)
+	protected AxisPanel(Data data)
 	{
 		this.data = data;
 		format_.setGroupingUsed(true);
@@ -131,13 +131,13 @@ public class AxisPanel extends JPanel
 		return (long)Math.ceil(((long)data.startTime()/(long)smallTickTimeIncrement())*smallTickTimeIncrement());
 	}
 
-	public String axisLabel(){
+	private String axisLabel(){
 		return "Time In Microseconds";
 	}
 	
 
 	/** Number of microseconds per tickmark */
-	public int smallTickTimeIncrement(){
+	private int smallTickTimeIncrement(){
 		int actualDisplayWidth = getWidth();
 		double pixelPerMicrosecond =  (double) data.lineWidth(actualDisplayWidth) / data.totalTime();
 		double pixelsPerSmallTick = 5.0;
@@ -147,29 +147,29 @@ public class AxisPanel extends JPanel
 	
 	
 	/** The number of ticks we can display on the timeline in the given sized window */
-	public int numSmallIntervals(){
+	private int numSmallIntervals(){
 		return (int) Math.ceil(data.totalTime() / smallTickTimeIncrement()) + 1;
 	}
 
-	public int numSmallTicks(){
+	private int numSmallTicks(){
 		return 1+numSmallIntervals();
 	}
 	
-	public int numBigIntervals(){
+	private int numBigIntervals(){
 		return numSmallIntervals() / smallTicksPerBigTick();
 	}
 	
-	public int numBigTicks(){
+	private int numBigTicks(){
 		return 1 + numBigIntervals();
 	}
 	
 	/** number of pixels per tick mark */
-	public double pixelsPerTickMark(){
+	private double pixelsPerTickMark(){
 		return  ((double) data.lineWidth(getWidth())) / ((double)numSmallIntervals());
 	}
 	
 	/** The number of tickmarks between the labeled big ticks */
-	public int smallTicksPerBigTick() {
+	private int smallTicksPerBigTick() {
 		return Util.getBestIncrement((int)(Math.ceil(data.maxLabelLen() / pixelsPerTickMark())));
 	}
 	

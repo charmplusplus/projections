@@ -20,7 +20,7 @@ public class MainLayout implements LayoutManager {
 	private Data data; // desired sizes are in here
 
 	/** Layout that respects the size of the parent container */
-	public MainLayout(Data data_) {
+	protected MainLayout(Data data_) {
 		data = data_;
 	}
 

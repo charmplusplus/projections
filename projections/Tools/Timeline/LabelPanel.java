@@ -23,7 +23,7 @@ public class LabelPanel extends JPanel implements MouseListener, MouseMotionList
 	int clickedOnPE;
 	Point mouseLast;
 	
-	public LabelPanel(Data data)
+	protected LabelPanel(Data data)
 	{
 		setOpaque(true);	
 		this.data = data;

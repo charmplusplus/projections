@@ -35,7 +35,7 @@ public class ThreadedFileReader extends Thread  {
 	 *  
 	 *  */
 	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, 
-			boolean ampiTraceOn, double[][] graphData){
+			double[][] graphData){
 		this.pe = pe;
 //		this.p = p;
 		this.intervalSize = intervalSize;

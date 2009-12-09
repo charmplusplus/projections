@@ -268,7 +268,7 @@ implements ActionListener, ColorSelectable, Clickable
 			
 			//set range values for time profile window
 			if(ampiTraceOn){
-				ampiGraphPanel.getRangeVals(dialog.getStartTime(),dialog.getEndTime(),
+				ampiGraphPanel.getRangeVals(dialog.getEndTime(),
 						startInterval, endInterval, intervalSize, processorList);
 			}
 
@@ -297,7 +297,7 @@ implements ActionListener, ColorSelectable, Clickable
 						while (processorList.hasMoreElements()) {
 							int nextPe = processorList.nextElement();
 							readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
-									startInterval, endInterval, ampiTraceOn, 
+									startInterval, endInterval, 
 									graphDataAccumulators[pIdx%numResultAccumulators]) );
 							pIdx++;
 						}

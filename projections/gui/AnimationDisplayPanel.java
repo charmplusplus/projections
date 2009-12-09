@@ -100,7 +100,7 @@ public class AnimationDisplayPanel extends Panel
 	setParameters(); 
     }
 
-    void clearScreen()
+    private void clearScreen()
     {
 	if (offscreen == null) {
 	    return;

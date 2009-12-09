@@ -24,7 +24,7 @@ public class UserSuppliedAnalyzer extends JFrame {
 	}
 	
 
-	void createLayout(){
+	private void createLayout(){
 		setTitle("Analysis of user supplied values(timesteps)");
 
 		TreeMap parameterMinTime = new TreeMap();

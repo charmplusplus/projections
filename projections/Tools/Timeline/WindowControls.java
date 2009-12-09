@@ -101,7 +101,7 @@ ItemListener {
 	private JCheckBoxMenuItem cbDontLoadIdle;
 	
 
-	public WindowControls(TimelineWindow parentWindow_,
+	protected WindowControls(TimelineWindow parentWindow_,
 			Data data_) {
 
 		data = data_;
@@ -120,7 +120,7 @@ ItemListener {
 	}
 	
 
-	public void showDialog() {
+	protected void showDialog() {
 		if(dialog == null){
 			toolSpecificDialogPanel = new TimlineRangeDialogExtension();    	
 			dialog = new RangeDialog(parentWindow, "Select Range For Timeline", toolSpecificDialogPanel, false);
@@ -166,11 +166,11 @@ ItemListener {
 		highlightTime.setText(format.format(time));
 	}
 
-	public void unsetHighlightTime() {
+	protected void unsetHighlightTime() {
 		highlightTime.setText("");
 	}
 
-	public void setSelectedTime(double time1, double time2) {
+	protected void setSelectedTime(double time1, double time2) {
 		selectionBeginTime.setText(format.format(time1));
 		selectionEndTime.setText(format.format(time2));
 		format.setMinimumFractionDigits(3);
@@ -182,7 +182,7 @@ ItemListener {
 		bLoadSelected.setEnabled(true);
 	}
 
-	public void unsetSelectedTime() {
+	protected void unsetSelectedTime() {
 		selectionBeginTime.setText("");
 		selectionEndTime.setText("");
 		selectionDiff.setText("");
@@ -192,7 +192,7 @@ ItemListener {
 
 
 
-	public void zoomSelected() {
+	private void zoomSelected() {
 		if (data.selectionValid()) {
 			double selectionStartTime = data.leftSelectionTime();
 			double selectionEndTime = data.rightSelectionTime();
@@ -206,7 +206,7 @@ ItemListener {
 	}
 
 	/** Load a new time region */
-	public void loadSelected() {
+	private void loadSelected() {
 		if (data.selectionValid()) {
 
 			double startTime = data.leftSelectionTime();
@@ -399,7 +399,7 @@ ItemListener {
 
 
 
-	public void CreateMenus() {
+	protected void CreateMenus() {
 		JMenuBar mbar = new JMenuBar();
 
 		// File Menu
@@ -556,7 +556,7 @@ ItemListener {
 		parentWindow.setJMenuBar(mbar);
 	}
 
-	public void userEventWindowSetData(){
+	protected void userEventWindowSetData(){
 		userEventWindow.setData(data);
 	}
 
@@ -741,12 +741,12 @@ ItemListener {
 		colorWindow.setVisible(true);
 	}
 
-	public void CloseColorWindow() {
+	protected void CloseColorWindow() {
 		colorWindow = null;
 	}
 
 	/** Update the value in the scale factor label with the value in our data object */
-	public void updateScaleField() {
+	protected void updateScaleField() {
 		scaleField.setText("" + data.getScaleFactor());
 	}
 

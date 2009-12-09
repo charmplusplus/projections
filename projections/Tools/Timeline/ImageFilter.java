@@ -59,7 +59,7 @@ public class ImageFilter extends FileFilter {
     /*
      * Get the extension of a file.
      */
-    public static String getExtension(File f) {
+    private static String getExtension(File f) {
         String ext = null;
         String s = f.getName();
         int i = s.lastIndexOf('.');

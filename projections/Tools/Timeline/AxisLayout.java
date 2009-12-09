@@ -23,7 +23,7 @@ public class AxisLayout implements LayoutManager {
 //	Data data;
 	
 	/** Layout that respects the size of the parent container */
-	public AxisLayout(Data data, JPanel sizingPanel) {
+	protected AxisLayout(Data data, JPanel sizingPanel) {
 		this.sizingPanel = sizingPanel;
 //		this.data = data;
 	}

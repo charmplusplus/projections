@@ -36,7 +36,7 @@ public class ChooseEntriesWindow extends JFrame
 		createLayout();
 	}
 
-	void createLayout(){
+	private void createLayout(){
 		setTitle("Choose which entry methods are displayed");
 		
 
@@ -212,7 +212,7 @@ public class ChooseEntriesWindow extends JFrame
     /// A simple color renderer
 	public class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
-		public ColorRenderer(boolean isBordered) {
+		private ColorRenderer(boolean isBordered) {
 			setOpaque(true);
 		}
 		public Component getTableCellRendererComponent(

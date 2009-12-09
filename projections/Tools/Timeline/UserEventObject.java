@@ -110,7 +110,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	
 	
 	/** Called by the layout manager to put this in the right place */
-	public void setLocationAndSize(Data data, int actualDisplayWidth) {
+	protected void setLocationAndSize(Data data, int actualDisplayWidth) {
 		this.data = data;
 
 		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && UserEventID==-1)){
@@ -212,7 +212,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		
 	}
 
-	public void shiftTimesBy(long shift) {
+	protected void shiftTimesBy(long shift) {
 		BeginTime += shift;
 		EndTime += shift;
 	}

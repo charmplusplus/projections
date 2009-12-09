@@ -1,11 +1,11 @@
 package projections.Tools.Timeline;
 
 /** The reader threads for timeline */
-public class ThreadedFileReader extends Thread  {
+class ThreadedFileReader extends Thread  {
 	
-	int pe;
+	private int pe;
 //	int p;
-	Data data;
+	private Data data;
 	
 	protected ThreadedFileReader(int pe, Data data){
 		this.data = data;

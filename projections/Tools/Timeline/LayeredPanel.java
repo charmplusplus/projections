@@ -19,13 +19,13 @@ import javax.swing.Scrollable;
  * 
  */
 
-public class LayeredPanel extends JPanel  implements Scrollable
+class LayeredPanel extends JPanel  implements Scrollable
 {
 	
-	JLayeredPane jLayeredPane = null;
+	private JLayeredPane jLayeredPane = null;
 	
-	JPanel mainPanel=null;
-	JPanel overlayPanel=null;
+	private JPanel mainPanel=null;
+	private JPanel overlayPanel=null;
 	
 	protected LayeredPanel(JPanel main, JPanel overlay, LayoutManager lay)
 	{

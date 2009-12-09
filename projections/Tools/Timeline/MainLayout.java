@@ -15,7 +15,7 @@ import java.awt.LayoutManager;
  * The layoutManager for the MainPanel 
  *
  */
-public class MainLayout implements LayoutManager {
+class MainLayout implements LayoutManager {
 
 	private Data data; // desired sizes are in here
 

@@ -284,7 +284,7 @@ public class Graph extends JPanel
     }
 
     // ***** Painting Routines *****
-    protected void paintComponent(Graphics g) {
+    public void paintComponent(Graphics g) {
 	    super.paintComponent(g);    
     	fmLabels = g.getFontMetrics(fontLabels);
     	fmAxisTitles = g.getFontMetrics(fontAxisTitles);

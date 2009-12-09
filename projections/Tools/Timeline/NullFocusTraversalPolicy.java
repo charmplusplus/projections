@@ -11,7 +11,7 @@ import java.awt.Container;
  *  @author idooley2
  *  */
 
-public class NullFocusTraversalPolicy extends java.awt.FocusTraversalPolicy{
+class NullFocusTraversalPolicy extends java.awt.FocusTraversalPolicy{
 
 	public Component getComponentAfter(Container container, Component component) {
 		return null;

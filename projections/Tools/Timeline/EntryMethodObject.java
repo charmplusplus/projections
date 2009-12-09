@@ -57,7 +57,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	Integer userSuppliedData;
 	
 	/** Memory usage at some point in this entry method. Null if nonspecified */
-	Integer memoryUsage;
+	private Integer memoryUsage;
 	
 	/** The duration of the visible portion of this event */
 	private double  usage;
@@ -77,7 +77,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private Data data = null;
 	
 	/** A set of TimelineMessage's */
-	public Set<TimelineMessage> messages;
+	protected Set<TimelineMessage> messages;
 	
 	private PackTime[] packs;
 

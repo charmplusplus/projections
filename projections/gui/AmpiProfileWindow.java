@@ -37,7 +37,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
     private AmpiProfileData data;
     private boolean colorsSet;
@@ -74,7 +74,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
     boolean ampiTraceOn = false;
 
-    public AmpiProfileWindow(MainWindow parentWindow){
+    protected AmpiProfileWindow(MainWindow parentWindow){
         super(parentWindow);
 	colorsSet = false;
         colors = null;

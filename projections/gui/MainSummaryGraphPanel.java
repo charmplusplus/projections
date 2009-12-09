@@ -33,7 +33,7 @@ class MainSummaryGraphPanel extends JTabbedPane {
     private Image bgimage;
     private JPanel fillerPanel;
 
-    public MainSummaryGraphPanel(MainWindow parent,
+    protected MainSummaryGraphPanel(MainWindow parent,
 				 MainRunStatusPanel statusPanel) {
 	super();
 	this.parent = parent;

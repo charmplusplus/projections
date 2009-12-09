@@ -13,13 +13,13 @@ import javax.swing.ToolTipManager;
  * A scrolling panel that holds all the graphical pieces of the visualization
  * 
  */
-public class ScrollingPanel extends JPanel {
+class ScrollingPanel extends JPanel {
 
-	JScrollPane scrollpane;
+	private JScrollPane scrollpane;
 		
-	MainPanel mainPanel;
-	LayeredPanel axisPanel;
-	LabelPanel labelPanel;
+	private MainPanel mainPanel;
+	private LayeredPanel axisPanel;
+	private LabelPanel labelPanel;
 	
 	Data data;
 	
@@ -101,8 +101,8 @@ public class ScrollingPanel extends JPanel {
 	}
 
 	/** A simple class for drawing the corners in the JScrollPane */
-	public class Corner extends JComponent {
-		protected void paintComponent(Graphics g) {
+	class Corner extends JComponent {
+		public void paintComponent(Graphics g) {
 			// Let UI delegate paint first 
 		    // (including background filling, if I'm opaque)
 		    super.paintComponent(g); 

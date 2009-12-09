@@ -27,10 +27,10 @@ import javax.swing.Scrollable;
 public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
 {
 	
-	int viewX, viewY;
+	private int viewX, viewY;
 	
-	Data data;
-	MainHandler handler;
+	private Data data;
+	private MainHandler handler;
 	
 	
 	public MainPanel(Data data, MainHandler handler){
@@ -52,7 +52,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	}
 
 	/** Paint the panel, filling the entire panel's width */
-	protected void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 //		g.setColor(data.getBackgroundColor());
 //		g.fillRect(0, 0, getWidth(), getHeight());		

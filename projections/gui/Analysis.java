@@ -78,7 +78,7 @@ public class Analysis {
   long poseTotalVirtualTime = 0;
   
   /******************* Graphs ***************/
-  public int[][][] systemUsageData;
+  private int[][][] systemUsageData;
 //  public int[][][][] systemMsgsData;
 //  public int[][][][] userEntryData;
   

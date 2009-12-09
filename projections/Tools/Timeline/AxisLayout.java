@@ -19,7 +19,7 @@ import javax.swing.JPanel;
  */
 class AxisLayout implements LayoutManager {
 
-	JPanel sizingPanel;
+	private JPanel sizingPanel;
 	
 	/** Layout that respects the size of the parent container */
 	protected AxisLayout(JPanel sizingPanel) {

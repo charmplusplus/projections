@@ -20,11 +20,11 @@ import projections.gui.OrderedIntList;
  */
 public class NonScrollingPanel extends JPanel implements MainHandler{
 
-	NonScrollingPanel thisPanel;
+	private NonScrollingPanel thisPanel;
 	
-	long startTime;
-	long endTime;
-	int PE;
+	private long startTime;
+	private long endTime;
+	private int PE;
 
 	private MainPanel displayPanel;
 	private LabelPanel labelPanel;

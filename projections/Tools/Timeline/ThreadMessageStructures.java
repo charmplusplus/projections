@@ -9,7 +9,7 @@ package projections.Tools.Timeline;
  *   
  *  @author idooley2
  * */
-public class ThreadMessageStructures extends Thread {
+class ThreadMessageStructures extends Thread {
 
 	volatile boolean stop = false;
 	
@@ -17,7 +17,7 @@ public class ThreadMessageStructures extends Thread {
 		stop = true;
 	}
 	
-	MessageStructures messageStructures;
+	private MessageStructures messageStructures;
 	
 	protected ThreadMessageStructures(MessageStructures messageStructures){
 		this.messageStructures = messageStructures;

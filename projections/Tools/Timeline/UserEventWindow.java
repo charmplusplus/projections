@@ -28,7 +28,7 @@ import projections.gui.count.TableSorter;
  *  UserEventWindow displays the UserEvents for the timeline 
  *  currently being viewed and manages their display.
  */
-public class UserEventWindow extends JFrame
+class UserEventWindow extends JFrame
 {
 
 	private Color BACKGROUND = Color.black;
@@ -36,11 +36,11 @@ public class UserEventWindow extends JFrame
 
 	// set the ints to have commas in appropriate places
 	static DecimalFormat format_ = null;
-	JCheckBox             checkbox_;  // when closing, set to false
-	Object[][]        events_ = null;
-	Integer[] pes;
+	private JCheckBox             checkbox_;  // when closing, set to false
+	private Object[][]        events_ = null;
+	private Integer[] pes;
 	private JTabbedPane          tabbedPane_ = new JTabbedPane();
-	TableSorter[]        sorter_ = null;
+	private TableSorter[]        sorter_ = null;
 
 	private DefaultTableCellRenderer rightJustify_ = 
 		new DefaultTableCellRenderer();
@@ -48,7 +48,7 @@ public class UserEventWindow extends JFrame
 	private class NameRenderer extends DefaultTableCellRenderer {
 
 		private int index_;
-		public NameRenderer(int index) { index_ = index; }
+		protected NameRenderer(int index) { index_ = index; }
 		public Component getTableCellRendererComponent(
 				JTable table, Object value, boolean selected, boolean focused, 
 				int row, int column)
@@ -66,7 +66,7 @@ public class UserEventWindow extends JFrame
 	private class UserEventTable extends AbstractTableModel {
 		private int index_ = -1;
 
-		public UserEventTable(int i) { index_ = i; }
+		protected UserEventTable(int i) { index_ = i; }
 		public int getColumnCount() { return 4; }
 		public int getRowCount() { 
 			if (events_ != null && events_[index_] != null) { 

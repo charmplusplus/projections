@@ -39,11 +39,11 @@ public class ProjectionsFileChooser
     ProjectionsFileMgr fileMgr_ = null; //based on sts,get helper files
 
     // Allow file chooser to select multiple files
-    public static final int MULTIPLE_FILES = 1;
+    protected static final int MULTIPLE_FILES = 1;
     // Restrict file chooser to just single file
     private static final int SINGLE_FILE    = 2;
     // File Name returned by userSubSelect
-    public String[] userSelect_returnVal;
+    protected String[] userSelect_returnVal;
     // Selected File indices in UserSubSelect
     // Had to do this because these are set in the 
     // ActionListener for JButton in dialog_

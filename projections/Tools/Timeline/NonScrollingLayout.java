@@ -12,7 +12,7 @@ import java.awt.LayoutManager;
  * The layoutManager for the NonScrollingPanel 
  *
  */
-public class NonScrollingLayout implements LayoutManager {
+class NonScrollingLayout implements LayoutManager {
 
 	private AxisPanel axisPanel = null;
 	private LabelPanel labelPanel = null;

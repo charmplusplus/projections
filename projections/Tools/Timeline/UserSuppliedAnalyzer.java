@@ -14,8 +14,8 @@ import javax.swing.table.DefaultTableModel;
 
 
 /** A class that analyzes the user supplied data ranges, and displays a table of the results */
-public class UserSuppliedAnalyzer extends JFrame {
-	Data data;
+class UserSuppliedAnalyzer extends JFrame {
+	private Data data;
 	
 	
 	UserSuppliedAnalyzer(Data data){

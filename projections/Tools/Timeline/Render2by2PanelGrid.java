@@ -8,16 +8,16 @@ import javax.swing.JPanel;
 
 
 /** A class that renders a JPanel that is composed of images rendered from 4 other panels in a 2x2 grid */
-public class Render2by2PanelGrid extends JPanel {
-	BufferedImage NW;
-	BufferedImage NE;
-	BufferedImage SW;
-	BufferedImage SE;
+class Render2by2PanelGrid extends JPanel {
+	private BufferedImage NW;
+	private BufferedImage NE;
+	private BufferedImage SW;
+	private BufferedImage SE;
 
-	int widthWest;
-	int widthEast;
-	int heightNorth;
-	int heightSouth;
+	private int widthWest;
+	private int widthEast;
+	private int heightNorth;
+	private int heightSouth;
 
 	private BufferedImage generateImage(JPanel panelToRender){
 		if(panelToRender != null){
@@ -56,7 +56,7 @@ public class Render2by2PanelGrid extends JPanel {
 
 
 	/** Paint the saved image representations of all 4 panels */
-	protected void paintComponent(Graphics g)
+	public void paintComponent(Graphics g)
 	{
 		super.paintComponent(g);
 		g.drawImage(NW, 0, 0, null);

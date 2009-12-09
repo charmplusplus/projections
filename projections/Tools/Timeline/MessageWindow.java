@@ -8,7 +8,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
 
-public class MessageWindow extends JFrame
+class MessageWindow extends JFrame
    implements ActionListener
 {
 

@@ -30,11 +30,11 @@ import javax.swing.border.Border;
  * @author idooley2
  * 
  */
-public class TimelineScrollPaneLayout extends ScrollPaneLayout
+class TimelineScrollPaneLayout extends ScrollPaneLayout
 implements LayoutManager, ScrollPaneConstants, Serializable
 {
 
-	Data data;
+	private Data data;
 
 	protected TimelineScrollPaneLayout(Data data){
 		this.data = data;

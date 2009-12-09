@@ -21,12 +21,12 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 
 	public static final int SINGLE=1;   // if this just marks one point in time
 	public static final int PAIR=2;  // if this has a begin and end point
 
-	public int    Type;         // should be SINGLE or PAIR
+	protected int    Type;         // should be SINGLE or PAIR
 	public long   BeginTime;    // Begin Time
 	public long   EndTime;      // End Time
 	public int    UserEventID;  // The user supplied value used to distinguish different types of user events
@@ -38,7 +38,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 
 	private String note = null;
 	
-	final static String popupChangeColor = "Change Color";
+	private final static String popupChangeColor = "Change Color";
 
 	/** If displaying nested user events in multiple rows, use this value to determine the row in which we draw this event */
 	private int nestedRow;

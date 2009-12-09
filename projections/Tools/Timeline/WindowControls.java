@@ -34,13 +34,13 @@ import projections.gui.Util;
  * the timeline tool. It also handles all the events.
  * 
  */
-public class WindowControls extends JPanel implements ActionListener,
+class WindowControls extends JPanel implements ActionListener,
 ItemListener {
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	private TimlineRangeDialogExtension toolSpecificDialogPanel;
 	private RangeDialog dialog;

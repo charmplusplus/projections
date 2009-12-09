@@ -18,9 +18,9 @@ import javax.swing.JPanel;
  *
  */
 
-public class MainPanelForeground extends JPanel {
+class MainPanelForeground extends JPanel {
 
-	Data data;
+	private Data data;
 		
 	protected MainPanelForeground(Data data){
 		this.data = data;
@@ -29,7 +29,7 @@ public class MainPanelForeground extends JPanel {
 	
 
 	/** Paint the panel, filling the entire panel's width */
-	protected void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) {
 		// Let UI delegate paint first 
 		// (including background filling, if I'm opaque)
 		super.paintComponent(g); 

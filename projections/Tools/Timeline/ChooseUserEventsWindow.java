@@ -16,10 +16,10 @@ import javax.swing.table.TableColumn;
 
 class ChooseUserEventsWindow extends JFrame
 {
-	Data data;
-	Map<Integer, String> names;
-	Vector<Vector> tabledata;
-	Vector<String> columnNames;
+	private Data data;
+	private Map<Integer, String> names;
+	private Vector<Vector> tabledata;
+	private Vector<String> columnNames;
 
 	ChooseUserEventsWindow(Data _data){
 		data = _data;
@@ -174,7 +174,7 @@ class ChooseUserEventsWindow extends JFrame
 
 	
     /// A simple color renderer
-	public class ColorRenderer extends JLabel
+	class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
 		private ColorRenderer() {
 			setOpaque(true);

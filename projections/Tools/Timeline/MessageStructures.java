@@ -18,9 +18,9 @@ import projections.analysis.ObjectId;
  * @author idooley2
  * 
  * */
-public class MessageStructures {
+class MessageStructures {
 
-	Data data;
+	private Data data;
 
 	// TODO update each of these first two members to make them not require space proportional to PE.
 

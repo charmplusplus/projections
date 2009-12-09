@@ -13,15 +13,15 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
 /** Draws the left column of the timeline view. The labels such as "PE 0", "PE 1" */
-public class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
+class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 
 	// TODO: create a component for each displayed PE which contains 
 	// a tooltip showing the confusing "(23, 20)" portion of the display
 		
 	private Data data;
 
-	int clickedOnPE;
-	Point mouseLast;
+	private int clickedOnPE;
+	private Point mouseLast;
 	
 	protected LabelPanel(Data data)
 	{
@@ -51,7 +51,7 @@ public class LabelPanel extends JPanel implements MouseListener, MouseMotionList
 	}	
 
 
-	protected void paintComponent(Graphics g)
+	public void paintComponent(Graphics g)
 	{
 		// Let UI delegate paint first 
 		// (including background filling, if I'm opaque)

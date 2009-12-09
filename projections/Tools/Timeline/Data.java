@@ -84,7 +84,7 @@ public class Data
 	private int mostRecentScaledScreenWidth;
 	
 	/** The list of pes displayed, in display order*/
-	LinkedList<Integer> peToLine;
+	private LinkedList<Integer> peToLine;
 
 	/** If true, color entry method invocations by Object ID */
 	private boolean colorByObjectId;
@@ -103,10 +103,10 @@ public class Data
 	private Color[]        entryColor;
 
 	/** A set of entry point ids that should be hidden */
-	Set<Integer> hiddenEntryPoints;
+	private Set<Integer> hiddenEntryPoints;
 
 	/** A set of user events that should be hidden */
-	Set<Integer> hiddenUserEvents;
+	private Set<Integer> hiddenUserEvents;
 
 	private boolean hideUserSuppliedNotes = false;
 	
@@ -114,12 +114,12 @@ public class Data
 	 *  Each key of the TreeMap is an Integer pe 
 	 *  <Integer,LinkedList<EntryMethodObject> >
 	 */
-	public Map<Integer,List<EntryMethodObject> > allEntryMethodObjects = new TreeMap<Integer,List<EntryMethodObject> >();
+	protected Map<Integer,List<EntryMethodObject> > allEntryMethodObjects = new TreeMap<Integer,List<EntryMethodObject> >();
 
 	/** Each value in this TreeMap is a TreeSet of UserEventObject's .
 	 *  Each key of the TreeMap is an Integer pe
 	 */
-	public Map<Integer, Set <UserEventObject> > allUserEventObjects = new TreeMap<Integer, Set <UserEventObject> >();
+	protected Map<Integer, Set <UserEventObject> > allUserEventObjects = new TreeMap<Integer, Set <UserEventObject> >();
 
 
 	/** processor usage indexed by PE */
@@ -129,10 +129,10 @@ public class Data
 	float[] idleUsage;
 
 	/** pack usage indexed by PE */
-	float[] packUsage;
+	private float[] packUsage;
 
 	/** entry usage list indexed by PE */
-	OrderedUsageList[] entryUsageList;
+	private OrderedUsageList[] entryUsageList;
 
 	/** The start time for the time range. */
 	private long startTime; 
@@ -145,9 +145,9 @@ public class Data
 		can just take a subset of our data instead of reloading it
 		from the logs
 	*/
-	long oldBT;
+	private long oldBT;
 	/** The old end time */
-	long oldET; 
+	private long oldET; 
 	
 	/** The miniumum and maximum memory usage that have been seen so far */
 	private long minMem, maxMem;
@@ -171,9 +171,9 @@ public class Data
 	private long minEntryDuration;
 
 	/** The font used by the LabelPanel */
-	public Font labelFont;
+	protected Font labelFont;
 	/** The font used by the time labels on the TimelineAxisCanvas */
-	public Font axisFont;
+	protected Font axisFont;
 
 	/** If set to true we should try to use minimal margins around our drawings. */
 	private boolean useMinimalView=false;
@@ -184,9 +184,9 @@ public class Data
 	}
 
 	/** A set of objects for which we draw their creation message lines */
-	public Set<EntryMethodObject> drawMessagesForTheseObjects;
+	protected Set<EntryMethodObject> drawMessagesForTheseObjects;
 	/** A set of objects for which we draw their creation message lines in an alternate color */
-	public Set<EntryMethodObject> drawMessagesForTheseObjectsAlt;
+	protected Set<EntryMethodObject> drawMessagesForTheseObjectsAlt;
 	
 		
 	private boolean useCustomColors=false;
@@ -197,8 +197,8 @@ public class Data
 
 	private int numUserEventRows = 1;
 	boolean drawNestedUserEventRows = false;
-	public long minUserSupplied = 0;
-	public long maxUserSupplied = 0;
+	protected long minUserSupplied = 0;
+	protected long maxUserSupplied = 0;
 	
 	/** A constructor that takes in a TimelineContainer(for handling some events) 
 	 *  and provides sensible default values for various parameters 

@@ -6,9 +6,9 @@ import java.awt.Graphics;
 import javax.swing.JPanel;
 
 /** A jpanel that is a specified size and color */
-public class SolidColorJPanel extends JPanel{
-	int width, height;
-	Color color;
+class SolidColorJPanel extends JPanel{
+	private int width, height;
+	private Color color;
 	
 	protected SolidColorJPanel(Color c, int w, int h){
 		width = w;
@@ -32,7 +32,7 @@ public class SolidColorJPanel extends JPanel{
 		return height;
 	}
 
-	protected void paintComponent(Graphics g)
+public void paintComponent(Graphics g)
 	{
 		// Let UI delegate paint first 
 	    // (including background filling, if I'm opaque)

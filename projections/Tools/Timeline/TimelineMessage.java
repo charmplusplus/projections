@@ -4,21 +4,21 @@ package projections.Tools.Timeline;
 public class TimelineMessage implements Comparable
 {
 	/** Message send time */
-	public long Time;
+	protected long Time;
 	
-	public int Entry;
+	protected int Entry;
 	
 	/** Message Length */
-	public int MsgLen;
+	protected int MsgLen;
 	
-	public int EventID;
+	protected int EventID;
 	
 //	public int SenderEventID;
 
 	private int destPEs[];
 	private int numPEs;
 
-	public int srcPE;
+	protected int srcPE;
 
 	/** A messages sent from srcPE, with eventid EventID */
 

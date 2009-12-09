@@ -9,16 +9,16 @@ import javax.swing.JPanel;
 /**
  */
 
-public class MainPanelBackground extends JPanel {
+class MainPanelBackground extends JPanel {
 
-	Data data;
+	private Data data;
 		
 	protected MainPanelBackground(Data data){
 		this.data = data;
 	}
 	
 	/** Paint the panel, filling the entire panel's width */
-	protected void paintComponent(Graphics g) {
+	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		
 		int width = getWidth();

@@ -30,7 +30,7 @@ class CallTableWindow extends ProjectionsWindow
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
     
     CallTableTextArea    textArea;
     private Label                lTitle;

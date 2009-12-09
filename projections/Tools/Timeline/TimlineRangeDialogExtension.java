@@ -15,15 +15,15 @@ import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.TimeTextField;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by providing the granularity at which the time range should be discretized. */
-public class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener
+class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener
 {
 
 	// Additional GUI objects
-	public JCheckBox dialogEnableEntryFiltering;
-	public TimeTextField dialogMinEntryFiltering;
+	protected JCheckBox dialogEnableEntryFiltering;
+	protected TimeTextField dialogMinEntryFiltering;
 
-	public JCheckBox dialogEnableIdleFiltering;
-	public JCheckBox dialogEnableMsgFiltering;
+	protected JCheckBox dialogEnableIdleFiltering;
+	protected JCheckBox dialogEnableMsgFiltering;
 	
 
 	// A reference to the parent dialog box that I'm extending

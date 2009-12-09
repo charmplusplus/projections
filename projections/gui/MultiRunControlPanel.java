@@ -23,7 +23,7 @@ class MultiRunControlPanel extends JPanel
     private JButton displayTable;
     private JButton done;
 
-    public MultiRunControlPanel(MultiRunWindow mainWindow, int defaultDataType)
+    protected MultiRunControlPanel(MultiRunWindow mainWindow, int defaultDataType)
     {
 	setBackground(Color.lightGray);
 

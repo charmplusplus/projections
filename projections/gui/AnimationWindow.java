@@ -24,16 +24,16 @@ class AnimationWindow extends ProjectionsWindow
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
     private AnimationColorBarPanel colorbarPanel;
     AnimationDisplayPanel  displayPanel;
     AnimationWindow thisWindow;
    
     
-    JMenuBar mbar = new JMenuBar();
+    private JMenuBar mbar = new JMenuBar();
 
-    IntervalChooserPanel intervalPanel;
+    private IntervalChooserPanel intervalPanel;
 
 	private Button bPlusOne, bMinusOne, bAuto;
     private Button setRanges;
@@ -52,10 +52,10 @@ class AnimationWindow extends ProjectionsWindow
     boolean layoutComplete = false;
 
     // basic parameter variables consistent with IntervalRangeDialog
-    public long intervalSize;
-    public OrderedIntList selectedPEs;
-    public long startTime;
-    public long endTime;
+    protected long intervalSize;
+    protected OrderedIntList selectedPEs;
+    protected long startTime;
+    protected long endTime;
     
     class AnimateThread extends Thread
     {

@@ -22,13 +22,13 @@ import javax.swing.table.TableColumn;
 
 class ChooseEntriesWindow extends JFrame 
 {
-	Data data;
-	Hashtable<Integer, String> entryNames;
-	Vector<Vector> tabledata;
-	Vector<String> columnNames;
+	private Data data;
+	private Hashtable<Integer, String> entryNames;
+	private Vector<Vector> tabledata;
+	private Vector<String> columnNames;
 
-	JButton checkAll;
-	JButton uncheckAll;
+	private JButton checkAll;
+	private JButton uncheckAll;
 	
 	
 	ChooseEntriesWindow(Data _data){
@@ -210,7 +210,7 @@ class ChooseEntriesWindow extends JFrame
 
 	
     /// A simple color renderer
-	public class ColorRenderer extends JLabel
+	class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
 		private ColorRenderer() {
 			setOpaque(true);

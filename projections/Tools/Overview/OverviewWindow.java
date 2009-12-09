@@ -46,19 +46,19 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	private ScaleSlider hor,ver;
-	JRadioButton colorByEntryMethod;
+	private JRadioButton colorByEntryMethod;
 
-	JRadioButton colorByUtil;
+	private JRadioButton colorByUtil;
 
 	private ScalePanel scalePanel;
 	OverviewPanel stl;
 	private Label status;
 	// Modified to display data by entry method color. Mode panel.
-	public static final int MODE_UTILIZATION = 0;
-	public static final int MODE_EP = 1;
+	protected static final int MODE_UTILIZATION = 0;
+	protected static final int MODE_EP = 1;
 
 	private ColorMap utilColorMap;
 

@@ -28,26 +28,26 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	
 	/** The panel that ties together three other panels with some scrollbars
 	 * @note internally it contains a JScrollPane with a custom layout manager */
-	public ScrollingPanel scrollingPanel;
+	protected ScrollingPanel scrollingPanel;
 	
 	/** The panel on the left that displays strings like "PE 0 (20%,40%)" */
-	public LabelPanel labelPanel;
+	protected LabelPanel labelPanel;
 	/** The panel on top that draws a scale for the time dimension */
-	public LayeredPanel axisPanel; 
+	protected LayeredPanel axisPanel; 
 	/** The panel that draws the main portion of the window, the timelines */
-	public MainPanel mainPanel;
+	protected MainPanel mainPanel;
 	
 		
 	/** The JPanel containing all the buttons and labels */
-	public WindowControls controls;
+	protected WindowControls controls;
 	
 	/** A reference to this object for use by event listener inner classes */
-	TimelineWindow thisWindow;
+	private TimelineWindow thisWindow;
 
 	/** A structure that stores the information necessary to render everything */
     Data data;

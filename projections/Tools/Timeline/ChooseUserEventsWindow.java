@@ -14,7 +14,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-public class ChooseUserEventsWindow extends JFrame
+class ChooseUserEventsWindow extends JFrame
 {
 	Data data;
 	Map<Integer, String> names;

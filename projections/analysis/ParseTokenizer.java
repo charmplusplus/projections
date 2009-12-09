@@ -12,17 +12,17 @@ import java.io.StreamTokenizer;
  *  isn't duplicated . 
  */
 
-public class ParseTokenizer extends StreamTokenizer {
+class ParseTokenizer extends StreamTokenizer {
  
     /** Constructor. */
-    public ParseTokenizer(Reader r) { 
+	protected ParseTokenizer(Reader r) { 
 	super(r); 
     }
 
     /** 
      *  Throw IOException if expected isn't the next token. 
      */
-    public void checkNextString(String expected)
+	protected void checkNextString(String expected)
 	throws IOException
     {
 	String ret=nextString(expected);
@@ -34,7 +34,7 @@ public class ParseTokenizer extends StreamTokenizer {
     /** 
      *  Return next number or throw IOException 
      */
-    public double nextNumber(String description)
+    protected double nextNumber(String description)
 	throws IOException
     {
 	if (StreamTokenizer.TT_NUMBER != nextToken()) {
@@ -48,7 +48,7 @@ public class ParseTokenizer extends StreamTokenizer {
      *  Return next number number (assuming scientific notation) or throw 
      *  IOException. 
      */
-    public double nextScientific(String description)
+    protected double nextScientific(String description)
 	throws IOException
     {
 	double mantissa = nextNumber(description+" mantissa");
@@ -71,7 +71,7 @@ public class ParseTokenizer extends StreamTokenizer {
     /** 
      *  Return next string or throw IOException if next token isn't string. 
      */
-    public String nextString(String description)
+    private String nextString(String description)
 	throws IOException
     {
 	if (StreamTokenizer.TT_WORD != nextToken()) {
@@ -85,7 +85,7 @@ public class ParseTokenizer extends StreamTokenizer {
      *  Skips a line of data. 
      *  Added by Chee Wai Lee 1/23/2004
      */
-    public void skipLine()
+    protected void skipLine()
 	throws IOException
     {
 	while (!isEOL()) {

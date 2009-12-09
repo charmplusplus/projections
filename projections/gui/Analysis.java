@@ -91,7 +91,7 @@ public class Analysis {
 
   /** ************** Constants ********************** */
   
-  public static final int NUM_ACTIVITIES = 4;
+  protected static final int NUM_ACTIVITIES = 4;
   public static final int PROJECTIONS = 0;
   public static final int USER_EVENTS = 1;
   public static final int FUNCTIONS = 2;

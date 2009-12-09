@@ -17,7 +17,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingWorker;
 
-public class AnimationWindow extends ProjectionsWindow
+class AnimationWindow extends ProjectionsWindow
    implements ActionListener, AdjustmentListener
 {
 

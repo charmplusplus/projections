@@ -237,7 +237,7 @@ public class StsReader extends ProjDefs
     	}
     }   
     
-    public String getEntryChareNameByID(int ID) {
+    private String getEntryChareNameByID(int ID) {
     	return getEntryChareNames().get(ID);
     }   
     

@@ -6,7 +6,7 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Panel;
 
-public class AnimationColorBarPanel extends Panel
+class AnimationColorBarPanel extends Panel
 {
 	private float MAXHUE = (float)0.65;
     private FontMetrics fm;

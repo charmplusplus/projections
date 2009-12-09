@@ -6,21 +6,21 @@ import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
-public class ThreadedFileReader extends Thread  {
+ class ThreadedFileReader extends Thread  {
 
-	int pe;
+	private int pe;
 //	int p;  // Which index am I into the flattened array of potentially sparse pe's
-	long intervalSize;
-	int myRun;
-	int startInterval;
-	int endInterval;
+	private long intervalSize;
+	private int myRun;
+	private int startInterval;
+	private int endInterval;
 //	boolean ampiTraceOn;
 
-	int[][][] mySystemUsageData;   // [type][pe list index][interval]
+	private int[][][] mySystemUsageData;   // [type][pe list index][interval]
 //	int[][][][] mySystemMsgsData; // [categoryIdx][type][][]
-	int[][][][] myUserEntryData; // [ep idx][type][pe][]
+	private int[][][][] myUserEntryData; // [ep idx][type][pe][]
 	
-	double[][] graphData;
+	private double[][] graphData;
 	
 //	long logReaderIntervalSize;
 	
@@ -34,7 +34,7 @@ public class ThreadedFileReader extends Thread  {
 	 *  The resulting output data will be accumulated into the array specified in a synchronized manner
 	 *  
 	 *  */
-	public ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, 
+	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, 
 			double[][] graphData){
 		this.pe = pe;
 		this.intervalSize = intervalSize;
@@ -71,7 +71,7 @@ public class ThreadedFileReader extends Thread  {
 	 * If this class is extended for other tools, this might need to be handled differently.
 	 *  
 	 */
-	public void LoadGraphDataForOnePe(long intervalSize, 
+	private void LoadGraphDataForOnePe(long intervalSize, 
 			int intervalStart, int intervalEnd,
 			boolean byEntryPoint, 
 			int pe) 

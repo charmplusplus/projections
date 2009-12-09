@@ -35,7 +35,7 @@ public class IntervalUtils {
      *    (eg. into absolute time) is hence required for data of that 
      *    sort prior to the use of this method.
      */
-    public static void fillIntervals(double destData[], long destSize,
+    protected static void fillIntervals(double destData[], long destSize,
 				     long destStartInterval,
 				     long sourceStartTime, 
 				     long sourceEndTime, 
@@ -172,7 +172,7 @@ public class IntervalUtils {
      *  Convenience method for Utilization (%) to Absolute time transformation
      *  for individual data elements.
      */
-    public static double utilToTime(double utilization, double timeRange) {
+    protected static double utilToTime(double utilization, double timeRange) {
 	return (utilization*timeRange)/100;
     }
 
@@ -180,7 +180,7 @@ public class IntervalUtils {
      *  Convenience method for Absolute time to Utilization (%) transformation
      *  for individual data elements.
      */
-    public static double timeToUtil(double time, double timeRange) {
+    protected static double timeToUtil(double time, double timeRange) {
 	return (time/timeRange)*100;
     }
 
@@ -250,7 +250,7 @@ public class IntervalUtils {
      *  NOTE: This method does not perform the rebin operation in-place
      *    and is NOT intended to be used for super-large arrays.
      */
-    public static double[] rebin(double data[], double originalSize,
+    private static double[] rebin(double data[], double originalSize,
 				 int newNumIntervals) {
 	double returnArray[];
 	returnArray = new double[newNumIntervals];
@@ -321,7 +321,7 @@ public class IntervalUtils {
     /**
      *   Testing method, please do not use.
      */
-    public static void printArray(double data[]) {
+    private static void printArray(double data[]) {
 	for (int i=0; i<data.length; i++) {
 	    System.out.print(data[i] + " ");
 	}

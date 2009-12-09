@@ -34,10 +34,10 @@ implements PointCapableReader
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 	
 	/** How many bytes should be read at a time from the file. This should be big enough to keep the disks from thrashing. */
-	public int bufferSize = 256*1024;
+	private int bufferSize = 256*1024;
 	
 	private double version;
 
@@ -79,7 +79,7 @@ implements PointCapableReader
 
 
 	/** Try to load the log file or a corresponding compressed version ending in ".gz" */
-	public BufferedReader createBufferedReader(String filename) {
+	private BufferedReader createBufferedReader(String filename) {
 		BufferedReader r = null;
 		try {
 			// Try loading the log file using its standard name
@@ -112,7 +112,7 @@ implements PointCapableReader
 
 	
 	/** Intepret a user's note string. For example, the user string could have substrings such as "<EP 10>" which should be replaced by the name of entry method 10. */
-	public String interpretNote(String input){
+	private String interpretNote(String input){
 		Analysis a = MainWindow.runObject[myRun];
 		String modified = input;
 		if(modified.contains("<EP")){

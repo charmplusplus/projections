@@ -9,9 +9,9 @@ import projections.misc.FileUtils;
 
 /** A class that provides the directory paths to the GenericLogReader class, load balancing between them. */
 public class GenericLogReaderBalancer {
-	int myRun = 0;
+	private int myRun = 0;
 	
-	Map<String, Integer> directories; //< Number of open files for each directory
+	private Map<String, Integer> directories; //< Number of open files for each directory
 	
 	public GenericLogReaderBalancer(){
 		directories = new TreeMap();
@@ -22,7 +22,7 @@ public class GenericLogReaderBalancer {
 //		directories.put("/expand/home/idooley2/ProjectionsLogs/W256_MIN_TOPO_8192VN/", new Integer(0));
 	}
 	
-	public String acquireLogName(int pe){
+	protected String acquireLogName(int pe){
 		int minOpenFound = Integer.MAX_VALUE;
 		String minOpenBaseName = "";
 		synchronized(directories){
@@ -41,7 +41,7 @@ public class GenericLogReaderBalancer {
 		return FileUtils.getCanonicalFileName(minOpenBaseName, pe, ProjMain.LOG);
 	}
 
-	public void releaseLogName(String logName){
+	protected void releaseLogName(String logName){
 		synchronized(directories){
 			String dir = FileUtils.dirFromFile(logName);
 			Integer count = directories.get(dir);

@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import projections.gui.Util;
 
 /** The class that draws the top time axis on the top of the timeline window */
-public class AxisPanel extends JPanel 
+class AxisPanel extends JPanel 
 {
 
 	/** Desired height of the whole JPanel */

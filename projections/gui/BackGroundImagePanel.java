@@ -8,7 +8,7 @@ import java.awt.MediaTracker;
 
 import javax.swing.JPanel;
 
-public class BackGroundImagePanel extends JPanel {
+class BackGroundImagePanel extends JPanel {
   
 	private Image bgimage = null;
     private boolean tile;

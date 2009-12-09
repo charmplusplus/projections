@@ -15,24 +15,24 @@ public class LogReader
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
     //sysUsgData[SYS_Q] is length of message queue
-    public static final int SYS_Q=0; 
+    private static final int SYS_Q=0; 
     //sysUsgData[SYS_CPU] is percent processing time
-    public static final int SYS_CPU=1; 
+    private static final int SYS_CPU=1; 
     //sysUsgData[SYS_IDLE] is percent idle time
-    public static final int SYS_IDLE=2; 
+    private static final int SYS_IDLE=2; 
     
     //Magic entry method (indicates "idle")
-    public static final int IDLE_ENTRY=-1;
-    public static final int NO_ENTRY=-100;
+    private static final int IDLE_ENTRY=-1;
+    private static final int NO_ENTRY=-100;
 
     
     //Number of creations bin 
-    public static final int CREATE=0; 
+    private static final int CREATE=0; 
     //Number of invocations bin
-    public static final int PROCESS=1; 
+    private static final int PROCESS=1; 
     //Time (us) spent processing bin
     public static final int TIME=2; 
 

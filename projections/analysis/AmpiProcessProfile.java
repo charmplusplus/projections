@@ -25,7 +25,7 @@ public class AmpiProcessProfile {
      * the final functions call stack.
      * Every object in the stack is of class AmpiFunctionData
      */
-    Stack auxCallFuncStack;  
+    private Stack auxCallFuncStack;  
 
     /*
      * This stack contains the functions call within this process.
@@ -33,9 +33,9 @@ public class AmpiProcessProfile {
      * higher one encloses the lower one. 
      * Every object in the stack is of class AmpiFunctionData
      */
-    Stack callFuncStack;
+    private Stack callFuncStack;
 
-    public AmpiProcessProfile(ObjectId id) {
+    protected AmpiProcessProfile(ObjectId id) {
 	accExecTime = 0;
 //	this.beginTime = beginTime;
 	processID = id;
@@ -43,10 +43,10 @@ public class AmpiProcessProfile {
 	callFuncStack = new Stack();
     }
 
-    public void incrAccExecTime(long t) { accExecTime += t; }
+    protected void incrAccExecTime(long t) { accExecTime += t; }
     public long getAccExecTime() { return accExecTime; }
 
-    public Object toHashKey(){
+    protected Object toHashKey(){
         return processID.id[0]+":"+processID.id[1]+":"+processID.id[2];
     }
 

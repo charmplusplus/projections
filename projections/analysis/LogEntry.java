@@ -5,7 +5,8 @@ import projections.misc.LogEntryData;
 /** A class representing an entry in a log */
 class LogEntry
 {
-	public int TransactionType, Entry;
+	protected int TransactionType;
+	protected int Entry;
 	long Time;
 	long endTime;
 	int EventID, Pe;
@@ -18,8 +19,8 @@ class LogEntry
 	// PAPI entries/information
 	int numPapiCounts;
 	long papiCounts[];
-	Integer userSupplied;
-	Integer memoryUsage;
+	private Integer userSupplied;
+	private Integer memoryUsage;
 
 	// AMPI function tracing. The duplication is unfortunate but required.
 	int FunctionID;
@@ -27,7 +28,7 @@ class LogEntry
 
 	String note;
 
-	public void setAmpiData(int functionID, int lineNo, 
+	private void setAmpiData(int functionID, int lineNo, 
 			String sourceFileName) {
 		ampiData = new AmpiFunctionData();
 		ampiData.FunctionID = functionID;
@@ -36,7 +37,7 @@ class LogEntry
 	}
 
 
-	public LogEntry(LogEntryData data) {
+	protected LogEntry(LogEntryData data) {
 		endTime = data.endTime;
 		TransactionType = data.type;
 		Time = data.time;
@@ -76,11 +77,11 @@ class LogEntry
 
 	}
 
-	public Integer userSuppliedValue() {
+	protected Integer userSuppliedValue() {
 		return userSupplied;
 	}
 
-	public Integer memoryUsage() {
+	protected Integer memoryUsage() {
 		return memoryUsage;
 	}
 

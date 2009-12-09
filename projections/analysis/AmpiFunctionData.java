@@ -7,7 +7,7 @@ public class AmpiFunctionData {
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    static int myRun = 0;
+    private static int myRun = 0;
 
     // AMPI function tracing
     public int FunctionID, LineNo;
@@ -34,10 +34,10 @@ public class AmpiFunctionData {
 //        execIntervals = new Vector();
 //    }
 
-    public void incrAccExecTime(long t) { accExecTime += t; }
+    protected void incrAccExecTime(long t) { accExecTime += t; }
     public long getAccExecTime() { return accExecTime; }
 
-    public void incrAccExecTimeNow (long now) { accExecTime += now-lastBeginTime; }
+    protected void incrAccExecTimeNow (long now) { accExecTime += now-lastBeginTime; }
     public void setLastBeginTime(long t) { lastBeginTime = t; }
 
     public String toString(){
@@ -45,7 +45,7 @@ public class AmpiFunctionData {
     }
 
 
-    public void insertExecInterval(AmpiFuncExecInterval interval){
+    protected void insertExecInterval(AmpiFuncExecInterval interval){
         execIntervals.add(interval);
     }
 
@@ -66,7 +66,7 @@ public class AmpiFunctionData {
         public long startTimestamp;
         public long endTimestamp;
 
-        public AmpiFuncExecInterval(long begin, long end){
+        protected AmpiFuncExecInterval(long begin, long end){
             startTimestamp = begin;
             endTimestamp = end;
         }

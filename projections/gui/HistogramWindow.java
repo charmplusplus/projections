@@ -34,14 +34,14 @@ implements ActionListener
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
-	public static final int NUM_TYPES = 2;
-	public static final int TYPE_TIME = 0;
-	public static final int TYPE_MSG_SIZE = 1;
+	private static final int NUM_TYPES = 2;
+	protected static final int TYPE_TIME = 0;
+	protected static final int TYPE_MSG_SIZE = 1;
 
 	// Gui components
-	JButton entrySelectionButton;
+	private JButton entrySelectionButton;
 	JButton epTableButton;
 
 	JRadioButton timeBinButton;

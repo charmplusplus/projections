@@ -36,7 +36,7 @@ implements ScalePanel.StatusDisplay
 
 	/* **** Temporary hardcode for the number of runs supported
        in Projections **** */
-	protected static final int NUM_RUNS = 1;
+	private static final int NUM_RUNS = 1;
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple

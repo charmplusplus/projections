@@ -60,8 +60,8 @@ import projections.misc.LogLoadException;
 
 public class Data
 {
-	public static final int BlueGradientColors = 0;
-	public static final int RandomColors = 1;
+	protected static final int BlueGradientColors = 0;
+	protected static final int RandomColors = 1;
 
 	// meaning in future versions of Projections that support multiple
 	// Temporary hardcode. This variable will be assigned appropriate

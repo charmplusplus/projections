@@ -5,7 +5,7 @@ import java.io.IOException;
 
 import projections.misc.LogEntryData;
 
-public interface PointCapableReader {
+interface PointCapableReader {
     
     public LogEntryData nextEvent()
         throws IOException, EOFException;

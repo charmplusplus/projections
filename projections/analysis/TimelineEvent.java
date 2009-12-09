@@ -34,9 +34,9 @@ public long RecvTime;
     //associated with this timelineevent. The motivation to add this is to 
     //know the Compute ID in NAMD when creating the timeline view. --Chao Mei
     public String userEventName;
-    public static final int USEREVENTMAXGAP=3;
+    protected static final int USEREVENTMAXGAP=3;
 
-    public void setDefaultValues(){
+    private void setDefaultValues(){
     	BeginTime = -1;
     	EndTime = -1;
     	RecvTime = -1;
@@ -56,7 +56,7 @@ public long RecvTime;
     
 
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
+    protected TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r, 
 		     ObjectId d,int eventid, long cpubegin, long cpuend, 
 		     int numPapiCounts, long papiCounts[])
 {
@@ -80,7 +80,7 @@ public TimelineEvent(){
 	setDefaultValues();
 }
 
-public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
+protected TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 {
 	setDefaultValues();
 	BeginTime=bt; EndTime=et;
@@ -88,7 +88,7 @@ public TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 
 	userEventName = null;
 }
-public TimelineEvent(long bt,long et, int ep,int pe)
+protected TimelineEvent(long bt,long et, int ep,int pe)
 {
 	setDefaultValues();
 	BeginTime=bt; EndTime=et;
@@ -96,12 +96,12 @@ public TimelineEvent(long bt,long et, int ep,int pe)
 
 	userEventName = null;
 }
-public void addMessage(TimelineMessage m)
+protected void addMessage(TimelineMessage m)
 {
 	if (MsgsSent==null) MsgsSent=new Vector();
 	MsgsSent.addElement(m);
 }
-public void addPack(PackTime p)
+protected void addPack(PackTime p)
 {
 	if (PackTimes==null) PackTimes=new Vector();
 	PackTimes.addElement(p);

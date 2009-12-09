@@ -11,7 +11,7 @@ import projections.misc.LogEntryData;
 
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
-public class ExtremaReaderThread extends Thread  {
+class ExtremaReaderThread extends Thread  {
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -30,7 +30,7 @@ public class ExtremaReaderThread extends Thread  {
 	double[] myData;
 
 	
-	public ExtremaReaderThread(int pe, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
+	protected ExtremaReaderThread(int pe, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
 		this.pe = pe;
 		this.startTime = startTime2;
 		this.endTime = endTime2;

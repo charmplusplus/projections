@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Vector;
 
+import projections.analysis.SumDetailReader.RLEBlock;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 
@@ -23,13 +24,13 @@ public class IntervalData
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
     // Types of information available for IntervalData. Some may be supported
     // only by a subset of the possible sources of data. This subset support
     // should, as far as possible, be avoided.
-    public static final int TYPE_TIME = 0;
-    public static final int TYPE_NUM_MSGS = 1;
+    private static final int TYPE_TIME = 0;
+    private static final int TYPE_NUM_MSGS = 1;
 
     // associated readers
     private static SumDetailReader summaryDetails[];
@@ -173,11 +174,12 @@ public class IntervalData
 	return userEntryData;
     }
 
+    
     /**
      *  This is an old API for tools that require the data in expanded
      *  format. 
      */
-    public double[][] getData(int pe, int type) {
+    private double[][] getData(int pe, int type) {
 	double returnData[][] = new double[numEPs][numIntervals];
 	for (int ep=0; ep<numEPs; ep++) {
 	    Iterator blockIterator = rawData[type][pe][ep].iterator();
@@ -197,7 +199,7 @@ public class IntervalData
      *  This is a general method that offers flexibility in choosing
      *  interval bin sizes and time ranges.
      */
-    public double[][] getData(int pe, int type, long destIntervalSize,
+    private double[][] getData(int pe, int type, long destIntervalSize,
 			      int destIntervalStart, int numDestIntervals) {
 
 	// No interval size differences. Either use whatever is returned

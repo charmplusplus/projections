@@ -21,7 +21,7 @@ import javax.swing.SwingWorker;
 
 import projections.analysis.CallGraph;
 
-public class CommTimeWindow extends GenericGraphWindow
+class CommTimeWindow extends GenericGraphWindow
     implements ItemListener, ActionListener, ColorSelectable
 {
 

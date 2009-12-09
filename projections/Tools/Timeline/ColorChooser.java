@@ -24,7 +24,7 @@ import projections.gui.Util;
 
 
 /** The color chooser for choosing the colors for each entry method (i think)*/
-public class ColorChooser extends Frame
+class ColorChooser extends Frame
    implements ActionListener
 {
 

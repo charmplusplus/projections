@@ -14,7 +14,7 @@ import projections.analysis.NoiseMiner.Histogram;
 import projections.gui.Analysis;
 import projections.misc.LogEntryData;
 
-public class NoiseMinerThread extends Thread {
+class NoiseMinerThread extends Thread {
 	private int pe;
 	private TreeMap h;
 	private Analysis analysis;
@@ -23,11 +23,11 @@ public class NoiseMinerThread extends Thread {
 	private	Histogram h_pe;
 	
 	/** The results for one PE. After this thread has run, this should be merged together with those from other PEs */
-	public LinkedList results;
-	public long [] histogramToDisplay;
+	protected LinkedList results;
+	protected long [] histogramToDisplay;
 	
 	
-	public NoiseMinerThread(int pe, Analysis analysis, NoiseMiner parent){
+	protected NoiseMinerThread(int pe, Analysis analysis, NoiseMiner parent){
 		this.setPe(pe);
 		this.analysis = analysis;
 		this.parent = parent;

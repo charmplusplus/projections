@@ -20,7 +20,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
-public class ChooseEntriesWindow extends JFrame 
+class ChooseEntriesWindow extends JFrame 
 {
 	Data data;
 	Hashtable<Integer, String> entryNames;

@@ -14,7 +14,7 @@ public class PoseDopReader
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+   private int myRun = 0;
 
     // This is a simple data indexed by interval id
 //    private static final int NUM_SIM_STATES = 2;

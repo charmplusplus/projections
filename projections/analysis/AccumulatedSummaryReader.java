@@ -19,19 +19,19 @@ import java.io.Reader;
  *  the 128K processor bluegene/L and 1 million-processor bluegene Cyclops
  *  machines.
  */
-public class AccumulatedSummaryReader extends ProjectionsReader
+class AccumulatedSummaryReader extends ProjectionsReader
     implements IntervalCapableReader
 {
     // Static Data items
-    public int numProcessors;
-    public long numIntervals;
-    public double intervalSize;
-    public double totalTime;
+	private int numProcessors;
+    private long numIntervals;
+    private double intervalSize;
+    private double totalTime;
 
     // Interval Data
     private double utilization[];  // indexed by interval number
 
-    public AccumulatedSummaryReader(String filename, String version) {
+    private AccumulatedSummaryReader(String filename, String version) {
 	super(filename, version);
     }
    

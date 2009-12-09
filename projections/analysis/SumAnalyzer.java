@@ -18,12 +18,12 @@ public class SumAnalyzer extends ProjDefs
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
     // Summary modes (so that SumAnalyzer, as a data manager, can make use
     // of one or more data modes).
-    public static final int ACC_MODE = 0;
-    public static final int NORMAL_MODE = 1;
+    private static final int ACC_MODE = 0;
+    private static final int NORMAL_MODE = 1;
 
     private StreamTokenizer tokenizer;
     // Holds the total time (in microseconds) spent executing messages

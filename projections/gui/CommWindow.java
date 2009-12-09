@@ -23,22 +23,22 @@ import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.misc.LogEntryData;
 
-public class CommWindow extends GenericGraphWindow
+class CommWindow extends GenericGraphWindow
 implements ItemListener, ActionListener, Clickable
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 
-	double[][] 	sentMsgCount;
-	double[][] 	sentByteCount;
-	double[][] 	receivedMsgCount;
-	double[][] 	receivedByteCount;
-	double[][]	exclusiveRecv;
-	double[][]	exclusiveBytesRecv;
-	int[][]     hopCount;
+	private double[][] 	sentMsgCount;
+	private double[][] 	sentByteCount;
+	private double[][] 	receivedMsgCount;
+	private double[][] 	receivedByteCount;
+	private double[][]	exclusiveRecv;
+	private double[][]	exclusiveBytesRecv;
+	private int[][]     hopCount;
 	private double[][]  avgHopCount;
 	private double[][]  avgPeHopCount;
 

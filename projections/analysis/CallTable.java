@@ -16,7 +16,7 @@ public class CallTable extends ProjDefs
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	private int numPe;		     //Number of processors
 	private int numEPs;	   	     //Number of entry methods

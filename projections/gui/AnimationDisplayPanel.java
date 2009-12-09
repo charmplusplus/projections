@@ -13,14 +13,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-public class AnimationDisplayPanel extends Panel
+class AnimationDisplayPanel extends Panel
     implements MouseMotionListener , MouseListener
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
     private float MAXHUE = (float)0.65;
     int numPs = -1;

@@ -2,7 +2,7 @@ package projections.analysis;
 
 import java.io.IOException;
 
-public interface IntervalCapableReader {
+interface IntervalCapableReader {
 
     /**
      *  getIntervalSize acquires the natural interval size of the

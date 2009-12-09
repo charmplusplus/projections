@@ -114,7 +114,7 @@ public class KMeansClustering {
     
     // Checks for change and at the same time, update oldMeans as a 
     // side-effect
-    public static boolean checkMean(double mean[][], double oldMean[][]) {
+    private static boolean checkMean(double mean[][], double oldMean[][]) {
     	if(mean == null)
     		System.err.println("mean == null");
     	if(oldMean == null)
@@ -145,7 +145,7 @@ public class KMeansClustering {
 //	}
 //    }
     
-    public static void outputResults(int clusterMap[], int numClusters) {
+    private static void outputResults(int clusterMap[], int numClusters) {
 	System.out.println("Cluster Map:");
 	System.out.println("------------");
 	for (int k=0; k<numClusters; k++) {

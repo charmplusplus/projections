@@ -30,20 +30,20 @@ public class GenericSummaryReader
     // array.
     public static final int TOTAL_TIME = 0;
     public static final int NUM_MSGS = 1;
-    public static final int MAX_TIME = 2;
+    private static final int MAX_TIME = 2;
 
     // header values
-    public int versionNum;
+    private int versionNum;
     public int numIntervals;
-    public int numEPs;  // bizzare ... already found in .sts file
+    private int numEPs;  // bizzare ... already found in .sts file
     public double intervalSize;
-    public int numPhases;
+    private int numPhases;
 
     // Data values
 
     // processor utilization data
-    public int processorUtil[];
-    public int idlePercent[];
+    private int processorUtil[];
+    private int idlePercent[];
 
     // epData dimension 1 - indexed by entry point ID (presumably)
     // epData dimension 2 - indexed by tags (see above).
@@ -53,10 +53,10 @@ public class GenericSummaryReader
     // phaseData dim 1 - indexed by current phase counter
     // phaseData dim 2 - indexed by entry point ID
     // phaseData dim 3 - indexed by tags (see above).
-    public long phaseData[][][];
+    private long phaseData[][][];
 
     // private miscellaneous data
-    protected double version;
+    private double version;
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
     private int tokenType;
@@ -78,7 +78,7 @@ public class GenericSummaryReader
 
     // Methods to parse the summary file
 
-    public void read()
+    private void read()
 	throws IOException
     {
 	//Set up the tokenizer  **GLOBAL** yucks!

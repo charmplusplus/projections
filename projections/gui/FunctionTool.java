@@ -27,7 +27,7 @@ import projections.misc.LogEntryData;
  *  for all activities.
  *
  */
-public class FunctionTool extends GenericGraphWindow
+class FunctionTool extends GenericGraphWindow
     implements PopUpAble
 {
   

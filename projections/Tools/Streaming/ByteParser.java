@@ -3,7 +3,7 @@ package projections.Tools.Streaming;
 
 
 /** This class should probably not exist. There is functionality in DataInputStream.java that is very similar to this */
-public class ByteParser {
+class ByteParser {
 
 	private final static boolean swapEndians = false;
 

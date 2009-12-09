@@ -13,7 +13,7 @@ public class CallStackManager extends Hashtable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	Stack activeStack;
+	private Stack activeStack;
 
     // Public interface to CallStackManager
     public void push(Object data, int id1, int id2, int id3) {
@@ -53,7 +53,7 @@ public class CallStackManager extends Hashtable {
      *  Acquire a copy of the current stack. This does not have to
      *  be a deep copy.
      */
-    public Stack getStack(int id1, int id2, int id3) {
+    protected Stack getStack(int id1, int id2, int id3) {
 	activeStack = (Stack)get(tripleToKey(id1, id2, id3));
 	if (activeStack == null) {
 	    return null;

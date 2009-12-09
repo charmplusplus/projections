@@ -54,7 +54,7 @@ public class ProjectionsConfigurationReader
     }
   }
 
-  public void readfile() 
+  private void readfile() 
     throws LogLoadException
   {
     try {

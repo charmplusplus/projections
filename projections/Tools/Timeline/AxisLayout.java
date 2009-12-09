@@ -17,7 +17,7 @@ import javax.swing.JPanel;
  *  All children are positioned at 0,0 and 
  *  
  */
-public class AxisLayout implements LayoutManager {
+class AxisLayout implements LayoutManager {
 
 	JPanel sizingPanel;
 	

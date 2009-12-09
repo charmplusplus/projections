@@ -24,22 +24,22 @@ import java.util.Vector;
  *              the time Graph is presented with the data for rendering.
  */
 
-public class SumDetailReader extends ProjectionsReader
+class SumDetailReader extends ProjectionsReader
     implements IntervalCapableReader
 {
     // public static meta-tags - used to allocate space in the data array
     // based on the number of tags.
-    public static final int NUM_TAGS = 2;
+    protected static final int NUM_TAGS = 2;
 
     // public static tags - used to access the appropriate part of the
     // array.
-    public static final int TOTAL_TIME = 0;
-    public static final int NUM_MSGS = 1;
+    private static final int TOTAL_TIME = 0;
+    private static final int NUM_MSGS = 1;
 
     // header values
-    public int numIntervals;
-    public int numEPs;
-    public double intervalSize;
+    private int numIntervals;
+    private int numEPs;
+    private double intervalSize;
 
     // Compressed Data
     // A Vector of RLEBlocks for each Type, EP combination
@@ -50,7 +50,7 @@ public class SumDetailReader extends ProjectionsReader
 
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
-    public SumDetailReader(String filename, double Nversion)
+    protected SumDetailReader(String filename, double Nversion)
     {
 	super(filename, String.valueOf(Nversion));
     }
@@ -169,6 +169,13 @@ public class SumDetailReader extends ProjectionsReader
 	reader = null;
     }
 
+    
+    class RLEBlock {
+        int count = 0;
+        double value = 0.0;
+    }
+
+    
 
     private void buildTable(int type) 
 	throws IOException
@@ -250,7 +257,7 @@ public class SumDetailReader extends ProjectionsReader
 	return numIntervals;
     }
 
-    public Vector[] getData(int type) {
+    protected Vector[] getData(int type) {
 	return rawData[type];
     }
 }

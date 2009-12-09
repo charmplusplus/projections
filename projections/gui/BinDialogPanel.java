@@ -29,35 +29,35 @@ import javax.swing.border.TitledBorder;
  *  
  *  All data is stored inside the text fields.
  */
-public class BinDialogPanel extends RangeDialogExtensionPanel 
+class BinDialogPanel extends RangeDialogExtensionPanel 
 {
 	// GUI components
-	protected JTabbedPane tabbedPane;
-	protected JPanel timeBinPanel;
-	protected JPanel msgBinPanel;
+	private JTabbedPane tabbedPane;
+	private JPanel timeBinPanel;
+	private JPanel msgBinPanel;
 
 	// Time-based bins
-	protected JLabel timeNumBinsLabel;
-	protected JLabel timeBinSizeLabel;
-	protected JLabel timeMinBinSizeLabel;
-	protected JLabel timeBinRangeLabel;
+	private JLabel timeNumBinsLabel;
+	private JLabel timeBinSizeLabel;
+	private JLabel timeMinBinSizeLabel;
+	private JLabel timeBinRangeLabel;
 
-	protected JIntTextField timeNumBinsField;
-	protected TimeTextField timeBinSizeField;
-	protected TimeTextField timeMinBinSizeField;
+	private JIntTextField timeNumBinsField;
+	private TimeTextField timeBinSizeField;
+	private TimeTextField timeMinBinSizeField;
 
 	// Message-based bins
-	protected JLabel msgNumBinsLabel;
-	protected JLabel msgBinSizeLabel;
-	protected JLabel msgMinBinSizeLabel;
-	protected JLabel msgBinRangeLabel;
+	private JLabel msgNumBinsLabel;
+	private JLabel msgBinSizeLabel;
+	private JLabel msgMinBinSizeLabel;
+	private JLabel msgBinRangeLabel;
 
-	protected JIntTextField msgNumBinsField;
-	protected JLongTextField msgBinSizeField;
-	protected JLongTextField msgMinBinSizeField;
+	private JIntTextField msgNumBinsField;
+	private JLongTextField msgBinSizeField;
+	private JLongTextField msgMinBinSizeField;
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialog parent;
+	private RangeDialog parent;
 
 
 	public BinDialogPanel() {

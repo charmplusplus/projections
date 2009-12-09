@@ -30,7 +30,7 @@ import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.U;
 
-public class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
+class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
 {
 
 	private MessageWindow msgwindow;
@@ -46,11 +46,11 @@ public class EntryMethodObject extends JComponent implements Comparable, MouseLi
 	int pCreation;
 	
 	
-	final static String popupChangeColor = "Change Entry Point Color";
-	final static String popupShowDetails = "Show details";
-	final static String popupTraceSender = "Trace message to sender";
-	final static String popupDropPEsForObject = "Drop all PEs unrelated to this entry method";
-	final static String popupDropPEsForPE = "Drop all PEs unrelated to entry methods on this PE";
+	private final static String popupChangeColor = "Change Entry Point Color";
+	private final static String popupShowDetails = "Show details";
+	private final static String popupTraceSender = "Trace message to sender";
+	private final static String popupDropPEsForObject = "Drop all PEs unrelated to this entry method";
+	private final static String popupDropPEsForPE = "Drop all PEs unrelated to entry methods on this PE";
 	
 	
 	/** Data specified by the user, likely a timestep. Null if nonspecified */

@@ -50,7 +50,7 @@ public class ProjMain {
 
     private static MainWindow mainWindow = null;
 
-    public static void help()
+    private static void help()
     {
 	System.out.println();
 	System.out.println("Usage: projections [options] [sts-filename]");

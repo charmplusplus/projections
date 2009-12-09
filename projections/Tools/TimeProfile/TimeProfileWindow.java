@@ -57,7 +57,7 @@ implements ActionListener, ColorSelectable, Clickable
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 
 	private EntrySelectionDialog entryDialog;
 
@@ -78,11 +78,13 @@ implements ActionListener, ColorSelectable, Clickable
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
 	
-	long intervalSize;
-	int startInterval;
-	int endInterval;
+	private long intervalSize;
+	private int startInterval;
+	private int endInterval;
 
-	long startTime;
+	private long startTime;
+	
+	private boolean displaySlopes = false;
 	
 	// data used for intervalgraphdialog
 	OrderedIntList processorList;
@@ -583,7 +585,6 @@ implements ActionListener, ColorSelectable, Clickable
 		}
 	}
 
-	boolean displaySlopes = false;
 
 
 	private void createPolynomial(int xVal, int yVal){

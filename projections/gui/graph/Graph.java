@@ -30,17 +30,17 @@ public class Graph extends JPanel
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
 
 //    public static final int STACKED   = 0;  // type of the bar graph
 //    public static final int UNSTACKED = 1;  // single, multiple or stacked
-    public static final int AREA      = 2;  // Area graph (stacked)
+    protected static final int AREA      = 2;  // Area graph (stacked)
 //    public static final int SINGLE    = 3;  // take the average of all y-values
-    public static final int BAR       = 4;  // Graph type, bar graph
-    public static final int LINE      = 5;  // or line graph
+    protected static final int BAR       = 4;  // Graph type, bar graph
+    protected static final int LINE      = 5;  // or line graph
 
-    public static final int X_AXIS = 0;
-    public static final int Y_AXIS = 1;
+    private static final int X_AXIS = 0;
+    private static final int Y_AXIS = 1;
     
     private int GraphType;
     private boolean GraphStacked;

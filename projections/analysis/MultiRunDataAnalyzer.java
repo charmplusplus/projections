@@ -43,8 +43,8 @@ public class MultiRunDataAnalyzer {
 
     // accompanying static fields for extraTable. The information is
     // publically published for use by the GUI and Data Analyzer(s).
-    public static final int NUM_EXTR_ENTRIES = 1;
-    public static final int EXTR_OVERHEAD = 0;
+    private static final int NUM_EXTR_ENTRIES = 1;
+    private static final int EXTR_OVERHEAD = 0;
 
     private static final String extraNames[] =
     {"Idle Time and System Overhead"};
@@ -95,7 +95,7 @@ public class MultiRunDataAnalyzer {
 //    private ProjectionsStatistics numCallsStats;
 
     // OUTPUT data array
-    double outputData[][];
+    private double outputData[][];
     
     public MultiRunDataAnalyzer(MultiRunData data) {
 
@@ -154,7 +154,7 @@ public class MultiRunDataAnalyzer {
 	}
     }
 
-    public void computeExtraInformation() {
+    private void computeExtraInformation() {
 	// Overhead + Idle time
 	// initialize structure
 	extraTable = 
@@ -169,7 +169,7 @@ public class MultiRunDataAnalyzer {
 	}
     }
 
-    public void computeExtraDerivedInformation() {
+    private void computeExtraDerivedInformation() {
 	// To be implemented if statistical information is
 	// desired for the extra information. In this case, it
 	// is a little tough to get that information.
@@ -217,7 +217,7 @@ public class MultiRunDataAnalyzer {
 	}
     }
 
-    public void categorize(int dataType) {
+    private void categorize(int dataType) {
 	// first, categorize the application's EPs
 	for (int ep=0; ep<numEPs; ep++) {
 	    // TEST #1 - Significance

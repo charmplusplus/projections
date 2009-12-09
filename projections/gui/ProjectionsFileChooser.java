@@ -41,7 +41,7 @@ public class ProjectionsFileChooser
     // Allow file chooser to select multiple files
     public static final int MULTIPLE_FILES = 1;
     // Restrict file chooser to just single file
-    public static final int SINGLE_FILE    = 2;
+    private static final int SINGLE_FILE    = 2;
     // File Name returned by userSubSelect
     public String[] userSelect_returnVal;
     // Selected File indices in UserSubSelect

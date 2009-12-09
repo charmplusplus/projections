@@ -105,17 +105,17 @@ Clickable
 	};
 
 //	public final static int ATTR_EXECUTIONTIME = 0;
-	public final static int ATTR_LEASTIDLE = 1;
+	protected final static int ATTR_LEASTIDLE = 1;
 //	public final static int ATTR_MSGSSENT = 2;
 //	public final static int ATTR_BYTESSENT = 3;
-	public final static int ATTR_MOSTIDLE = 4;
-	public final static int ATTR_ACTIVEENTRY = 5;
-	public final static int ATTR_OVERHEAD = 6;
-	public final static int ATTR_GRAINSIZE = 7;
+	protected final static int ATTR_MOSTIDLE = 4;
+	private final static int ATTR_ACTIVEENTRY = 5;
+	private final static int ATTR_OVERHEAD = 6;
+	private final static int ATTR_GRAINSIZE = 7;
 
 		
 	// derived data after analysis
-	LinkedList outlierList;
+	private LinkedList outlierList;
 
 	// meta data variables
 	// These will be determined at load time.

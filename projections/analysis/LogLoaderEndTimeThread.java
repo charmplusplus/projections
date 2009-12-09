@@ -8,14 +8,14 @@ import projections.misc.LogEntryData;
 
 
 /** This thread's run() method will lookup the endtime for an input log file */
-public class LogLoaderEndTimeThread  extends Thread {
+class LogLoaderEndTimeThread  extends Thread {
 
-	public String logName;
-	public Long result;
-	int myRun = 0;
-	int pe;
+	private String logName;
+	protected Long result;
+	private int myRun = 0;
+	private int pe;
 
-	public LogLoaderEndTimeThread(int pe) {
+	protected LogLoaderEndTimeThread(int pe) {
 		result = new Long(0);
 		this.pe = pe;
 	}

@@ -12,7 +12,7 @@ import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-public class CallTableTextArea extends Panel
+class CallTableTextArea extends Panel
    implements AdjustmentListener
 {
 

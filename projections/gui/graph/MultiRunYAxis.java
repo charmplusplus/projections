@@ -6,7 +6,7 @@ public class MultiRunYAxis
     // mode constants
     public static final int TIME = 1;
     public static final int MSG = 2;
-    public static final int FP_NUMBER = 3;
+    private static final int FP_NUMBER = 3;
 
     private int mode = TIME; // default
     private String title;

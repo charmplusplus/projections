@@ -25,10 +25,10 @@ public class LogLoader extends ProjDefs
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	private boolean isProcessing = false;
-	boolean ampiTraceOn = false;
+	private boolean ampiTraceOn = false;
 		
 	
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */

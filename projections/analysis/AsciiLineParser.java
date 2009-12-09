@@ -15,17 +15,17 @@ import java.io.IOException;
 class AsciiLineParser {
 	
 	/// The next position in the string
-	int pos;
+	private int pos;
 	
-	String line;
+	private String line;
 	
-	public AsciiLineParser(String _line){
+	protected AsciiLineParser(String _line){
 		line = _line;
 		pos = 0;
 	}
 	
 	    
-	final public boolean isSpace(char c) {
+	final private boolean isSpace(char c) {
 		return c==' '||c=='\n'||c=='\t';
 	}
 
@@ -43,7 +43,7 @@ class AsciiLineParser {
 		}
 	}
 
-	public String restOfLine() {
+	protected String restOfLine() {
     	return line.substring(pos);
     }
 
@@ -53,7 +53,7 @@ class AsciiLineParser {
 	//Read a positive long from the current file 
 	//With version 7.0, negative numbers have to be
 	//  properly handled as well.
-	final public long nextLong() throws IOException {
+	protected final long nextLong() throws IOException {
 	  int multiplier = 1;
 	  char c;
 	  while (isSpace(c=nextChar())) {}
@@ -67,7 +67,7 @@ class AsciiLineParser {
 	  return ret*multiplier;
 	}
 
-	final public int toDigit(char c) {
+	final private int toDigit(char c) {
 		return (c)-('0');
 	}
 

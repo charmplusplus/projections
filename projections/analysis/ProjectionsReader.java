@@ -17,7 +17,7 @@ package projections.analysis;
  *  Each Reader is meant to be used for each file, typically a processor.
  *
  */
-public abstract class ProjectionsReader
+abstract class ProjectionsReader
 extends ProjDefs
 { 
 	protected String expectedVersion = null;
@@ -36,7 +36,7 @@ extends ProjDefs
 	 *  by the subclass' constructor. The default constructor will
 	 *  only perform the necessary checks.
 	 */
-	public ProjectionsReader(String sourceString, String versionOverride) {
+	protected ProjectionsReader(String sourceString, String versionOverride) {
 		expectedVersion = versionOverride;
 		this.sourceString = sourceString;
 		checkAvailable();

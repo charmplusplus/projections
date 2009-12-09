@@ -12,7 +12,7 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 
 /** A class that handles the mouse events and painting of a user selection over the axis */
-public class AxisOverlayPanel extends JPanel implements MouseListener, MouseMotionListener
+class AxisOverlayPanel extends JPanel implements MouseListener, MouseMotionListener
 { 
 	
 	private AxisOverlayPanel thisPanel;

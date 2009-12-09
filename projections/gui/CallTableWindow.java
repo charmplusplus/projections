@@ -21,7 +21,7 @@ import javax.swing.SwingWorker;
 
 import projections.analysis.CallTable;
 
-public class CallTableWindow extends ProjectionsWindow
+class CallTableWindow extends ProjectionsWindow
     implements ItemListener
 {
 

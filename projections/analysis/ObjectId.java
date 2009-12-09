@@ -17,7 +17,7 @@ public ObjectId(ObjectId d) {
 	   id[0] = id[1] = id[2] = id[3] = -1;
 	 }
        }
-public ObjectId(int d0, int d1, int d2, int aid) {
+protected ObjectId(int d0, int d1, int d2, int aid) {
      	 id = new int[ID_SIZE];
 	 id[0] = d0; id[1] = d1; id[2] = d2; id[3] = aid;
        }

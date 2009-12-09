@@ -19,7 +19,7 @@ public class RangeHistory
     private int numEntries;
     private Vector rangeSet;
 
-    Vector historyStringVector;
+    private Vector historyStringVector;
 
     public RangeHistory(String logDirectory) 
     {

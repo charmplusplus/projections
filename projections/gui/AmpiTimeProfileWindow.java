@@ -34,7 +34,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    static int myRun = 0;
+    private static int myRun = 0;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
@@ -45,11 +45,11 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 
 
     // data used for intervalgraphdialog
-    int startInterval;
-    int endInterval;
-    long intervalSize; //in terms of microseconds!
-    OrderedIntList processorList;    
-    Vector[] processProfiles = null; //every vector element is an instance of AmpiProcessProfile
+    private int startInterval;
+    private int endInterval;
+    private long intervalSize; //in terms of microseconds!
+    private OrderedIntList processorList;    
+    private Vector[] processProfiles = null; //every vector element is an instance of AmpiProcessProfile
 
     // The tool specific GUI for the dialog
     private IntervalChooserPanel intervalPanel;

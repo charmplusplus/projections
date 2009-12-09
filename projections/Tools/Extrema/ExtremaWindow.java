@@ -261,8 +261,6 @@ Clickable
 		// type.
 		double[][] tempData;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
-		numSpecials = 0;
-		
 
 		// Idle and overhead are always added to the chart.
 		numSpecials = 2;
@@ -279,8 +277,6 @@ Clickable
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
 
-		
-		
 		// Create a list of worker threads
 		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
 
@@ -316,77 +312,38 @@ Clickable
 			pIdx2++;
 		}
 
-		// **CW** Use tempData as source to compute clusters using k
-		// from the dialog.
-		int clusterMap[] = new int[numPEs];
-		double distanceFromClusterMean[] = new double[numPEs];
+		// Compute Extrema elements depending on attribute type.
+		// 
+		// The final graph has 3 extra x-axis slots for 
+		// 0) global average
+		// 1) non-outlier average
+		// 2) outlier average
 
-		KMeansClustering.kMeans(tempData, k, clusterMap, distanceFromClusterMean);
-
-		// Construct average data for each cluster. If cluster is empty,
-		// it will be ignored.
-		double clusterAverage[][] = new double[k][numActivityPlusSpecial];
-		int clusterCounts[] = new int[k];
-		int numNonZero = 0;
-
-		for (int p=0; p<numPEs; p++) {
-			for (int ep=0; ep<tempData[p].length; ep++) {
-				double v = tempData[p][ep];
-				clusterAverage[clusterMap[p]][ep] += v;
-				clusterCounts[clusterMap[p]]++;
-			}
-		}
-
-
-		for (int myk=0; myk<k; myk++) {
-			if (clusterCounts[myk] > 0) {
-				for (int ep=0; ep<clusterAverage[myk].length; ep++) {
-					clusterAverage[myk][ep] /= clusterCounts[myk];
-				}
-				numNonZero++;
-			}
-		}
-
-
-		// Now Analyze the data for outliers.
-		// the final graph has 3 extra x-axis slots for 
-		// 1) overall average
-		// 2) non-outlier average
-		// 3) outlier average
-		//
-		// In addition, there will be numNonZero cluster averages.
-
-		// we know tmpOut has at least x slots. graphData is not ready
-		// to be initialized until we know the number of Outliers.
 		double[] tmpAvg = new double[numActivities+numSpecials];
 		double[] processorDiffs = new double[selectedPEs.size()];
-		int[] sortedMap = new int[selectedPEs.size()];
 		String[] peNames = new String[selectedPEs.size()];
 		double [] grainSize = new double[selectedPEs.size()];
 		
-		
-		// initialize sortedMap (maps indices to indices)
+		int[] sortedMap = new int[threshold];
+
+		// **CWL** hack to deal with the difference between the way
+		//   the reader reads data and the way we use the data.
+		for (int p=0; p<tempData.length; p++) {
+		    // swap the IDLE and OVERHEAD positions
+		    double temp;
+		    temp = tempData[p][numActivities+1];
+		    tempData[p][numActivities+1] = tempData[p][numActivities];
+		    tempData[p][numActivities] = temp;
+		}
+
+		// initialize processor names
 		selectedPEs.reset();
 		for (int p=0; p<selectedPEs.size(); p++) {
-			sortedMap[p] = p;
-			peNames[p] = Integer.toString(selectedPEs.nextElement());
+		    peNames[p] = Integer.toString(selectedPEs.nextElement());
 		}
 
-		for (int p=0; p<selectedPEs.size(); p++) {
-			if (selectedAttribute == ATTR_GRAINSIZE){
-				int __count_entries = 0;
-				for(int iact = 0; iact<numActivities; iact++)
-				{
-					if(tempData[p][iact] > 0)
-						__count_entries++;
-					grainSize[p] += tempData[p][iact];
-				}
-				if(__count_entries>0)
-					grainSize[p] /= __count_entries;			
-			}
-		}
+		// ********* Generate graph data **********
 
-		
 		// pass #1, determine global average
 		for (int act=0; act<numActivities+numSpecials; act++) {
 			for (int p=0; p<selectedPEs.size(); p++) {
@@ -395,86 +352,54 @@ Clickable
 			tmpAvg[act] /= selectedPEs.size();
 		}
 
-		// pass #2, determine outliers by ranking them by distance from
-		// average. Weight that by the global average values. It is not 
-		// enough
-		// to discover outliers by merely sorting them, the mapping has
-		// to be preserved for display.
+		// pass #2, determine extrema (some attributes rely on
+		//   tmpAvg calculated in pass #1).
+		// Output = sortedMap
+		computeExtremaMap(selectedAttribute,
+				  tempData, tmpAvg,
+				  numActivities, k, sortedMap);
 
-		for (int p=0; p<selectedPEs.size(); p++) {
-			// this is an initial hack.
-			if (selectedAttribute == ATTR_LEASTIDLE) {
-				// induce a sort by decreasing idle time
-				processorDiffs[p] -= tempData[p][numActivities+1];
-			} else if (selectedAttribute == ATTR_MOSTIDLE) {
-				// induce a sort by increasing idle time
-				processorDiffs[p] += tempData[p][numActivities+1];
-			} else if (selectedAttribute == ATTR_ACTIVEENTRY) {
-				// active entry method
-				for(int iact = 0; iact<numActivities; iact++) {
-					if(tempData[p][iact] > 0)
-						processorDiffs[p]++;			
-				}
-			}else if (selectedAttribute == ATTR_OVERHEAD) {
-				//black time totaltime - entrytime-idle time
-				processorDiffs[p] = tempData[p][numActivities];
-			} else if(selectedAttribute == ATTR_GRAINSIZE) {
-				processorDiffs[p] = grainSize[p];
-			}else { //  ATTR_CLUSTERING  ATTR_MSGSSENT  ATTR_BYTESSENT
-				for (int act=0; act<numActivities; act++) {
-					processorDiffs[p] += Math.abs(tempData[p][act] - tmpAvg[act]) * tmpAvg[act];
-				}
-			}
-		}
-
-
-
-		// bubble sort it.
-		for (int p=selectedPEs.size()-1; p>0; p--) {
-			for (int i=0; i<p; i++) {
-				if (processorDiffs[i+1] < processorDiffs[i]) {
-					double temp = processorDiffs[i+1];
-					processorDiffs[i+1] = processorDiffs[i];
-					processorDiffs[i] = temp;
-					int tempI = sortedMap[i+1];
-					sortedMap[i+1] = sortedMap[i];
-					sortedMap[i] = tempI;
-				}
-			}
-		}
-
-		// take the top threshold processors, create the final array
+		// take sortedMap to create the final array
 		// and copy the data in.
-		int offset = selectedPEs.size()-threshold;
 		graphData = new double[threshold+3][numActivities+numSpecials];
 		outlierList = new LinkedList();
 		for (int ii=0; ii<threshold; ii++) {
-			for (int act=0; act<numActivities+numSpecials; act++) {
-				graphData[ii+3][act] = tempData[sortedMap[ii+offset]][act];
-			}
-			// add to outlier list reverse sorted by significance
-			int p = sortedMap[ii+offset];		
-			String name = peNames[p];
-			outlierList.add(name);
-			Integer ival = Integer.parseInt(name);
-			outlierPEs.add(ival);
+		    int p = sortedMap[ii];		
+		    for (int act=0; act<numActivities+numSpecials; act++) {
+			graphData[ii+3][act] = tempData[p][act];
+		    }
+		    // add to outlier list reverse sorted by significance
+		    String name = peNames[p];
+		    outlierList.add(name);
+		    Integer ival = Integer.parseInt(name);
+		    outlierPEs.add(ival);
 		}
 
-
+		// fill global average bar
 		graphData[0] = tmpAvg;
+		// fill extrema average bar (but do not compute average yet)
 		for (int act=0; act<numActivities+numSpecials; act++) {
-			for (int i=0; i<offset; i++) {
-				graphData[1][act] += tempData[sortedMap[i]][act];
-			}
-			if (offset != 0) {
-				graphData[1][act] /= offset;
-			}
-			for (int i=offset; i<selectedPEs.size(); i++) {
-				graphData[2][act] += tempData[sortedMap[i]][act];
-			}
-			if (threshold != 0) {
-				graphData[2][act] /= threshold;
-			}
+		    for (int i=0; i<threshold; i++) {
+			graphData[2][act] += tempData[sortedMap[i]][act];
+		    }
+		}
+		// fill non-extrema average bar
+		for (int act=0; act<numActivities+numSpecials; act++) {
+		    graphData[1][act] += graphData[0][act]*selectedPEs.size() -
+			graphData[2][act];
+		    if (graphData[1][act] < 0) {
+			graphData[1][act] = 0.0;
+		    }
+		}
+		// now compute the average for extrema and non-extrema
+		int offset = selectedPEs.size() - threshold;
+		for (int act=0; act<numActivities+numSpecials; act++) {
+		    if (offset != 0) {
+			graphData[1][act] /= offset;
+		    }
+		    if (threshold != 0) {
+			graphData[2][act] /= threshold;
+		    }
 		}
 
 		// add the 3 special entries
@@ -483,6 +408,305 @@ Clickable
 		outlierList.addFirst("Avg");
 
 	}
+
+    // Output: sortedMap[] where sortedMap.length = threshold.
+    private void computeExtremaMap(int selectedAttribute,
+				   double data[][], 
+				   double tmpAvg[],
+				   int numActivities, int k,
+				   int sortedMap[]) {
+	int numPEs = data.length;
+	int threshold = sortedMap.length;
+	int offset = numPEs - threshold;
+
+	switch (selectedAttribute) {
+	case ATTR_CLUSTERING: {
+	    int clusterMap[] = new int[numPEs];
+
+	    /* **CWL** This modification is used so the data agrees with
+	       the results generated for my thesis. In this case, the
+	       overhead value is ignored. Eventually, it is expected that
+	       either Idle or Overhead will be eliminated as a result of
+	       metric reduction due to correlation.
+
+	    double modifiedData[][] = new double[numPEs][numActivities+1];
+	    for (int p=0; p<numPEs; p++) {
+		for (int act=0; act<numActivities; act++) {
+		    modifiedData[p][act] = data[p][act];
+		}
+		modifiedData[p][numActivities] = data[p][numActivities+1];
+	    }
+	    */
+
+	    double distanceFromClusterMean[] = new double[numPEs];
+	    KMeansClustering.kMeans(data, k, clusterMap, 
+				    distanceFromClusterMean);
+	    selectRepresentatives(clusterMap, distanceFromClusterMean,
+				  sortedMap);
+	    break;
+	}
+	case ATTR_LEASTIDLE: {
+	    double processorDiffs[] = new double[numPEs];
+	    for (int p=0; p<numPEs; p++) {
+		// induce a sort by decreasing idle time
+		processorDiffs[p] = -data[p][numActivities+1];
+	    }
+	    int fullMap[] = new int[numPEs];
+	    for (int i=0; i<numPEs; i++) {
+		fullMap[i] = i;
+	    }
+	    bubbleSort(processorDiffs, fullMap);
+	    // trim to threshold
+	    for (int i=0; i<threshold; i++) {
+		sortedMap[i] = fullMap[i+offset];
+	    }
+	    break;
+	}
+	case ATTR_MOSTIDLE: {
+	    double processorDiffs[] = new double[numPEs];
+	    for (int p=0; p<numPEs; p++) {
+		// induce a sort by increasing idle time
+		processorDiffs[p] = data[p][numActivities+1];
+	    }
+	    int fullMap[] = new int[numPEs];
+	    for (int i=0; i<numPEs; i++) {
+		fullMap[i] = i;
+	    }
+	    bubbleSort(processorDiffs, fullMap);
+	    // trim to threshold
+	    for (int i=0; i<threshold; i++) {
+		sortedMap[i] = fullMap[i+offset];
+	    }
+	    break;
+	}
+	case ATTR_ACTIVEENTRY: {
+	    double processorDiffs[] = new double[numPEs];
+	    for (int p=0; p<numPEs; p++) {
+		// active entry method
+		for (int iact = 0; iact<numActivities; iact++) {
+		    if (data[p][iact] > 0)
+			processorDiffs[p]++;			
+		}
+	    }
+	    int fullMap[] = new int[numPEs];
+	    for (int i=0; i<numPEs; i++) {
+		fullMap[i] = i;
+	    }
+	    bubbleSort(processorDiffs, fullMap);
+	    // trim to threshold
+	    for (int i=0; i<threshold; i++) {
+		sortedMap[i] = fullMap[i+offset];
+	    }
+	    break;
+	}
+	case ATTR_OVERHEAD: {
+	    double processorDiffs[] = new double[numPEs];
+	    for (int p=0; p<numPEs; p++) {
+		//black time totaltime - entrytime-idle time
+		processorDiffs[p] = data[p][numActivities];
+	    }
+	    int fullMap[] = new int[numPEs];
+	    for (int i=0; i<numPEs; i++) {
+		fullMap[i] = i;
+	    }
+	    bubbleSort(processorDiffs, fullMap);
+	    // trim to threshold
+	    for (int i=0; i<threshold; i++) {
+		sortedMap[i] = fullMap[i+offset];
+	    }
+	    break;
+	}
+	case ATTR_GRAINSIZE: {
+	    double grainSize[] = new double[numPEs];
+	    for (int p=0; p<numPEs; p++) {
+		int __count_entries = 0;
+		for (int iact = 0; iact<numActivities; iact++) {
+		    if (data[p][iact] > 0)
+			__count_entries++;
+		    grainSize[p] += data[p][iact];
+		}
+		if (__count_entries>0)
+		    grainSize[p] /= __count_entries;			
+	    }
+	    int fullMap[] = new int[numPEs];
+	    for (int i=0; i<numPEs; i++) {
+		fullMap[i] = i;
+	    }
+	    bubbleSort(grainSize, fullMap);
+	    // trim to threshold
+	    for (int i=0; i<threshold; i++) {
+		sortedMap[i] = fullMap[i+offset];
+	    }
+	    break;
+	}
+	case ATTR_MSGSSENT: // fall thru
+	case ATTR_BYTESSENT: {
+	    double processorDiffs[] = new double[numPEs];
+	    for (int p=0; p<numPEs; p++) {
+		for (int act=0; act<numActivities; act++) {
+		    processorDiffs[p] += 
+			Math.abs(data[p][act] - tmpAvg[act]) * tmpAvg[act];
+		}
+	    }
+	    int fullMap[] = new int[numPEs];
+	    for (int i=0; i<numPEs; i++) {
+		fullMap[i] = i;
+	    }
+	    bubbleSort(processorDiffs, fullMap);
+	    // trim to threshold
+	    for (int i=0; i<threshold; i++) {
+		sortedMap[i] = fullMap[i+offset];
+	    }
+	    break;
+	}
+	}
+    }
+
+    // select the representatives given clusters discovered by the
+    //     the kMeans algorithm. The "sorted" map is output as
+    //     sortedMap.
+    private void selectRepresentatives(int clusterMap[],
+				       double distanceFromClusterMean[],
+				       int sortedMap[]) {
+	int clusterCounts[] = new int[this.k];
+	int numNonZero = 0;
+	int numElements = clusterMap.length;
+	int threshold = sortedMap.length;
+
+	for (int p=0; p<numElements; p++) {
+	    clusterCounts[clusterMap[p]]++;
+	}
+	for (int k=0; k<this.k; k++) {
+	    if (clusterCounts[k] > 0) {
+		numNonZero++;
+	    }
+	}
+
+	/*
+	for (int p=0; p<numElements; p++) {
+	    System.out.println("["+p+"] " + distanceFromClusterMean[p]);
+	}
+	*/
+
+	// Distributing choices
+	int numLeft = threshold; // book-keeping variable
+	int numReps = 0;
+	int numOutliers = 0;
+	// handle de-generate choices
+	if (threshold > numNonZero) {
+	    numReps = numNonZero;
+	    numOutliers = threshold - numNonZero; 
+	} else {
+	    numReps = threshold;
+	    numOutliers = 0;
+	}
+	int clusterRepCounts[] = new int[this.k];
+
+	// Each non-empty cluster gets a representative (except for
+	//   de-generate user choices)
+	for (int k=0; k<this.k; k++) {
+	    if ((numLeft > 0) && (clusterCounts[k] > 0)) {
+		clusterRepCounts[k]++;
+		numLeft--;
+	    }
+	}
+
+	double clusterOutlierFractions[] = new double[this.k];
+	int clusterOutlierCounts[] = new int[this.k];
+	// Split up the outliers amongst the non empty clusters by proportion
+	//   (approximately)
+	for (int k=0; k<this.k; k++) {
+	    if (clusterCounts[k] > 0) {
+		clusterOutlierFractions[k] += 
+		    numOutliers*(clusterCounts[k]/
+				 (double)(numElements - numNonZero));
+		// pick out the whole numbers
+		clusterOutlierCounts[k] +=
+		    (int)Math.floor(clusterOutlierFractions[k]);
+		numLeft -= clusterOutlierCounts[k];
+	    }
+	}
+	// Sanity Check
+	if (numLeft > numNonZero) {
+	    System.err.println("Error in cluster count division! " +
+			       "Number left = " + numLeft + " with " +
+			       numNonZero + " non-empty clusters.");
+	    System.exit(-1);
+	}
+	// Distribute the leftovers to non-empty clusters on a 
+	//    first-come-first-serve basis (not the best)
+	for (int k=0; k<this.k; k++) {
+	    if ((numLeft > 0) && (clusterCounts[k] > 0)) {
+		clusterOutlierCounts[k]++;
+		numLeft--;
+	    }
+	}
+	
+	// Now (bubble) sort the distances
+	double distances[] = new double[numElements];
+	int distancePeMap[] = new int[numElements];
+	for (int p=0; p<numElements; p++) {
+	    distances[p] = distanceFromClusterMean[p];
+	    distancePeMap[p] = p;
+	}
+	bubbleSort(distances, distancePeMap);
+
+	// Pick out the representatives from the sorted distances
+	int sortedMapIdx = 0;
+	for (int p=0; p<numElements; p++) {
+	    int k = clusterMap[distancePeMap[p]];
+	    if (clusterRepCounts[k] > 0) {
+		sortedMap[sortedMapIdx++] = distancePeMap[p];
+		clusterRepCounts[k]--;
+	    }
+	}
+
+	// Pick out the outliers from the sorted distances
+	sortedMapIdx = threshold-1;
+	for (int p=numElements-1; p>=0; p--) {
+	    int k = clusterMap[distancePeMap[p]];
+	    if (clusterOutlierCounts[k] > 0) {
+		sortedMap[sortedMapIdx--] = distancePeMap[p];
+		clusterOutlierCounts[k]--;
+	    }
+	}
+
+	/*
+	for (int i=0; i<threshold; i++) {
+	    System.out.println(sortedMap[i]);
+	}
+	*/
+    }
+
+    // data remains unchanged. map is modified.
+    // Both data and map must have been initialized prior to invocation.
+    private void bubbleSort(double data[], int map[]) {
+	int numElements = data.length;
+	if (numElements != map.length) {
+	    System.err.println("Error: Extrema Tool - attempt to sort " +
+			       "incompatible data. Please contact devs.");
+	    System.exit(-1);
+	}
+
+	// make a copy of the original data
+	double tmpData[] = new double[numElements];
+	for (int i=0; i<numElements; i++) {
+	    tmpData[i] = data[i];
+	}
+
+	for (int elt=numElements-1; elt>0; elt--) {
+	    for (int i=0; i<elt; i++) {
+		if (tmpData[i+1] < tmpData[i]) {
+		    double temp = tmpData[i+1];
+		    tmpData[i+1] = tmpData[i];
+		    tmpData[i] = temp;
+		    int tempI = map[i+1];
+		    map[i+1] = map[i];
+		    map[i] = tempI;
+		}
+	    }
+	}
+    }
 
 	private void loadOnlineData(final long startTime, final long endTime) {
 		final SwingWorker worker = new SwingWorker() {

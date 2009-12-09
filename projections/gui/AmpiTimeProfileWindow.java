@@ -150,9 +150,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         MainWindow.runObject[myRun].createAMPITimeProfile(procId,0,MainWindow.runObject[myRun].getTotalTime(), processProfiles[index]);
     }
     
-    public void getRangeVals(long endT, int beginI, int endI, long iSize, OrderedIntList procList){
-//        startTime = beginT;
-//        endTime = endT;
+    public void getRangeVals(int beginI, int endI, long iSize, OrderedIntList procList){
         startInterval = beginI;
         endInterval = endI;
         intervalSize = iSize;
@@ -306,7 +304,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 	    if (b == epSelection) {
 		if (entryDialog == null) {
 		    entryDialog = 
-			new EntrySelectionDialog(this, this,
+			new EntrySelectionDialog(this,
 						 typeLabelNames,
 						 stateArray,colorArray,
 						 existsArray,funcNames);

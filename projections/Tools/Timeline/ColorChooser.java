@@ -56,7 +56,7 @@ public class ColorChooser extends Frame
        }   
    }   
 
-   protected ColorChooser(Frame parent, Data data, TimelineWindow parentTimelineWindow_)
+   protected ColorChooser(Data data, TimelineWindow parentTimelineWindow_)
     {
 	super();
 	parentTimelineWindow = parentTimelineWindow_;

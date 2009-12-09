@@ -392,14 +392,12 @@ implements ActionListener
 				           {
 				"Select Entry Points"
 				           },
-				           null,
 				           this);
 		menuBar.add(Util.makeJMenu("View", 
 				new Object[]
 				           {
 				new JCheckBoxMenuItem("Show Longest EPs",true)
 				           },
-				           null,
 				           this));
 		super.createMenus();
 	}

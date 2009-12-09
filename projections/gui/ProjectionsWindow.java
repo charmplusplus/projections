@@ -103,7 +103,7 @@ implements ActionListener
 	}
 
 	/** A method to be overridden by any subclasses that wish to be able to have a new PE loaded from within another tool. */
-	public void addProcessor(int pe) {
+	public void addProcessor(@SuppressWarnings("unused") int pe) {
 	}
 
 

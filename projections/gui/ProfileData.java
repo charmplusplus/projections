@@ -12,7 +12,7 @@ public class ProfileData
    OrderedIntList phaselist;
    long begintime, endtime;
    
-   protected ProfileData(ProfileWindow profileWindow)
+   protected ProfileData()
    {
 	  
 	  numPs     = MainWindow.runObject[myRun].getNumProcessors();

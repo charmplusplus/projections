@@ -123,8 +123,7 @@ public class LogLoader extends ProjDefs
 				if(curEntry.TransactionType==BEGIN_PROCESSING 
 						&& curEntry.Entry!=-1
 						&& curEntry.Time >= beginTime){
-					curProcessing = new AmpiProcessProfile(curEntry.Time, 
-							curEntry.id);
+					curProcessing = new AmpiProcessProfile(curEntry.id);
 					break;
 				}
 			}
@@ -164,8 +163,7 @@ public class LogLoader extends ProjDefs
 						// check whether it is the same
 						// processing that has been stored in the "procThdMap"
 						AmpiProcessProfile tmp = 
-							new AmpiProcessProfile(curEntry.Time, 
-									curEntry.id);
+							new AmpiProcessProfile(curEntry.id);
 						AmpiProcessProfile storedProfile = 
 							(AmpiProcessProfile)procThdMap.get(tmp.toHashKey());
 						curProcessing = 
@@ -304,8 +302,7 @@ public class LogLoader extends ProjDefs
 			System.out.println("ERROR: couldn't open file " + 
 					MainWindow.runObject[myRun].getLogName(procId));
 		} catch (IOException E) {
-			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(procId), 
-					LogLoadException.READ);
+			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(procId));
 		}
 
 		// finally select the processes that have functions and 
@@ -390,7 +387,7 @@ public class LogLoader extends ProjDefs
 						&& curEntry.Entry!=-1
 						&& curEntry.Time >= beginTime) {
 					curProcessing = 
-						new AmpiProcessProfile(curEntry.Time, curEntry.id);
+						new AmpiProcessProfile(curEntry.id);
 					break;
 				}
 			}
@@ -430,8 +427,7 @@ public class LogLoader extends ProjDefs
 						// whether it is the same
 						// processing that has been stored in the "procThdMap"
 						AmpiProcessProfile tmp = 
-							new AmpiProcessProfile(curEntry.Time, 
-									curEntry.id);
+							new AmpiProcessProfile(curEntry.id);
 						AmpiProcessProfile storedProfile = 
 							(AmpiProcessProfile)procThdMap.get(tmp.toHashKey());
 						curProcessing = 
@@ -573,8 +569,7 @@ public class LogLoader extends ProjDefs
 			System.out.println("ERROR: couldn't open file " + 
 					MainWindow.runObject[myRun].getLogName(procId));
 		} catch (IOException E) {
-			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(procId), 
-					LogLoadException.READ);
+			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(procId));
 		}
 
 		// finally select the processes that have functions and push 
@@ -1231,8 +1226,7 @@ public class LogLoader extends ProjDefs
 			System.out.println("ERROR: couldn't open file " + 
 					MainWindow.runObject[myRun].getLogName(pe));
 		} catch (IOException E) {
-			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(pe), 
-					LogLoadException.READ);
+			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(pe));
 		}
 		return;
 	}

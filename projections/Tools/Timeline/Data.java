@@ -436,7 +436,7 @@ public class Data
 		while(peIter.hasNext()){
 			Integer pe = peIter.next();
 			if(!allEntryMethodObjects.containsKey(pe)) {
-				readyReaders.add(new ThreadedFileReader(pe,pIdx,this));
+				readyReaders.add(new ThreadedFileReader(pe,this));
 			}
 			pIdx++;
 		}
@@ -503,7 +503,7 @@ public class Data
 			entryUsageList[pe.intValue()] = new OrderedUsageList();
 			for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 				if (entryUsageArray[i] > 0) {
-					entryUsageList[pe.intValue()].insert(entryUsageArray[i], i);
+					entryUsageList[pe.intValue()].insert(entryUsageArray[i]);
 				}
 			}      
 		} 

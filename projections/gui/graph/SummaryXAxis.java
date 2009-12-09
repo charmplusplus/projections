@@ -7,7 +7,7 @@ public class SummaryXAxis extends XAxis
     private long intervalSize;
     private int start;
 
-    public SummaryXAxis(int start, int end, long intervalSize) {
+    public SummaryXAxis(int start, long intervalSize) {
 	this.start = start;
 	this.intervalSize = intervalSize;
     }

@@ -89,7 +89,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 	pack();
 	
 	// get new data object
-	data = new AmpiProfileData(this);
+	data = new AmpiProfileData();
 
 	showDialog();
     }
@@ -104,7 +104,7 @@ class AmpiProfileWindow extends ProjectionsWindow
                                     null,
                                     "Close"
                                 },
-                                null, this));
+                                this));
         if(ampiTraceOn){
 	    /*
             mbar.add(Util.makeJMenu("Tools", new Object[]
@@ -123,7 +123,7 @@ class AmpiProfileWindow extends ProjectionsWindow
                                     "Change Colors",
                                     "Usage Table" 
                                 },
-                                null, this));
+                                this));
         }
 
 	mbar.add(Util.makeJMenu("Help", new Object[]
@@ -131,7 +131,7 @@ class AmpiProfileWindow extends ProjectionsWindow
                                     "Index",
                                     "About"
                                 },
-                                null, this));
+                                this));
 	setJMenuBar(mbar);
     }
 
@@ -412,7 +412,7 @@ class AmpiProfileWindow extends ProjectionsWindow
             Color[][] newColors = new Color[1][];
             newColors[0] = colors;
 
-            entryDialog = new EntrySelectionDialog(this, this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
+            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
 	}
         entryDialog.showDialog();
     }
@@ -618,7 +618,7 @@ class AmpiProfileWindow extends ProjectionsWindow
         gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
         ampiDisplayCanvas.setGraphTiltes(gTitles);
 
-        ampiDisplayCanvas.setXAxis("","",xNames);
+        ampiDisplayCanvas.setXAxis("",xNames);
         ampiDisplayCanvas.setYAxis("Usage Percent % (over processor)");
         ampiDisplayCanvas.setDisplayDataSource(ampiDataSrc, ampiFuncColorMap, ampiFuncColors, ampiFuncNameMap);
         ampiDisplayCanvas.repaint();
@@ -653,7 +653,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
         procNames = xNames; //store this in order for the usage of usage table
 
-        displayCanvas.setXAxis("","",xNames);
+        displayCanvas.setXAxis("",xNames);
         displayCanvas.setYAxis("Usage Percent %");
         displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
         displayCanvas.repaint();
@@ -711,7 +711,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
 	// Phase 2: create display data source
         //first create average one
-        createSingleProcSource(avgData,-1);
+        createSingleProcSource(avgData);
         dataSource[0] = sDataSrc;
         colorMap[0] = sColorMap;
         nameMap[0] = sNameMap;
@@ -727,7 +727,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 	    } else {
 		break;
 	    }
-	    createSingleProcSource(accTime[progressCount], curPe);
+	    createSingleProcSource(accTime[progressCount]);
 
             //The 0 column is left for the average one
             progressCount++;
@@ -738,7 +738,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 	progressBar.close();
     }
 
-    private void createSingleProcSource(float[] rawData, int procNum){
+    private void createSingleProcSource(float[] rawData){
         //fisrt compute number of significant sections
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents()-1;
         float[] dSrc = new float[numFunc+1];

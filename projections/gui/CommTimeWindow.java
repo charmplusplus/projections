@@ -137,18 +137,18 @@ public class CommTimeWindow extends GenericGraphWindow
                                     null,
                                     "Close"
                                 },
-                                null, this));
+                                this));
 	mbar.add(Util.makeJMenu("Tools", new Object[]
 	                        {
 		                    "Change Colors",
 	                        },
-                                null, this));
+                                this));
         mbar.add(Util.makeJMenu("Help", new Object[]
                                 {
                                     "Index",
                                     "About"
                                 },
-                                null, this));
+                                this));
         setJMenuBar(mbar);
     }
 
@@ -525,7 +525,7 @@ public class CommTimeWindow extends GenericGraphWindow
 	    if (b == epSelection) {
 		if (entryDialog == null) {
 		    entryDialog = 
-			new EntrySelectionDialog(this, this,
+			new EntrySelectionDialog(this,
 						 typeLabelNames,
 						 stateArray,colorArray,
 						 existsArray,entryNames);

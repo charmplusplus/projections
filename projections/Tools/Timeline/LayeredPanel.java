@@ -27,7 +27,7 @@ public class LayeredPanel extends JPanel  implements Scrollable
 	JPanel mainPanel=null;
 	JPanel overlayPanel=null;
 	
-	protected LayeredPanel(Data data, JPanel main, JPanel overlay, LayoutManager lay)
+	protected LayeredPanel(JPanel main, JPanel overlay, LayoutManager lay)
 	{
 		this.mainPanel = main;
 		this.overlayPanel = overlay;

@@ -156,7 +156,7 @@ public class Analysis {
 
 		  rcReader = 
 			  new ProjectionsConfigurationReader(filename);
-		  FileUtils.detectFiles(getSts(), baseName);	
+		  FileUtils.detectFiles(baseName);	
 
 		  // Projections Colors
 		  String colorsaved = 

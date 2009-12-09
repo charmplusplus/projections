@@ -89,9 +89,9 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		// Construct the various layers, and the layout manager
 		AxisPanel ap = new AxisPanel(data);
 		AxisOverlayPanel op = new AxisOverlayPanel(data);
-		AxisLayout lay = new AxisLayout(data,ap);
+		AxisLayout lay = new AxisLayout(ap);
 		// Create the layered panel containing our layers
-		axisPanel = new LayeredPanel(data,ap,op,lay);
+		axisPanel = new LayeredPanel(ap,op,lay);
 		ap.setOpaque(false);
 		op.setOpaque(false);
 		

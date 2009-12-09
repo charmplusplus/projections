@@ -128,7 +128,7 @@ implements ItemListener
 					noiseMiner.gatherData(thisWindow);
 					mainText.setText(noiseMiner.getText());
 					addResultsToTable(noiseMiner.getResultsTable());
-					addDataToHistogram(noiseMiner.usPerDisplayBin(), noiseMiner.histogramToDisplay);
+					addDataToHistogram(noiseMiner.histogramToDisplay);
 					return null;
 				}
 				
@@ -142,7 +142,7 @@ implements ItemListener
 	
 	
 	
-	private void addDataToHistogram(double binwidth_us, long[] data) {
+	private void addDataToHistogram(long[] data) {
 			
 		/* Generate a nice looking histogram plot */
 

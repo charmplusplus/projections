@@ -30,9 +30,8 @@ public class ExtremaReaderThread extends Thread  {
 	double[] myData;
 
 	
-	public ExtremaReaderThread(int pe, int p, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
+	public ExtremaReaderThread(int pe, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
 		this.pe = pe;
-//		this.p = p;
 		this.startTime = startTime2;
 		this.endTime = endTime2;
 		this.numActivities = numActivities;

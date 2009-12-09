@@ -118,8 +118,7 @@ public class Util
 
     /* Swing version of the above function */
     /* Modified by Chao Mei for adding support for sublevel menus */
-    public static JMenu makeJMenu(Object parent, Object[] items,
-				  boolean[] enabled, Object target)
+    public static JMenu makeJMenu(Object parent, Object[] items, Object target)
     {
 	JMenu m = null;
 	if (parent instanceof JMenu)
@@ -282,7 +281,7 @@ public class Util
 //    }
 
 
-    public static void restoreColors(Color[] colors, String Useless)
+    public static void restoreColors(Color[] colors)
         throws IOException, ClassNotFoundException
     {
         FileInputStream fileStream =

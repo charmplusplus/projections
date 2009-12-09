@@ -151,7 +151,7 @@ implements ScalePanel.StatusDisplay
 		gbc.fill = GridBagConstraints.BOTH;
 		background.setLayout(gbl);
 
-		titlePanel  = new MainTitlePanel(this);
+		titlePanel  = new MainTitlePanel();
 		runStatusPanel = new MainRunStatusPanel();
 		summaryGraphPanel = new MainSummaryGraphPanel(this, runStatusPanel);
 
@@ -375,13 +375,11 @@ implements ScalePanel.StatusDisplay
 					if (ProjMain.SUM_OVERRIDE) {
 						sumXAxis =	    
 							new SummaryXAxis(ProjMain.SUM_START_INT,
-									ProjMain.SUM_END_INT,
 									ProjMain.SUM_INT_SIZE);
 						sumDataSource = new SummaryDataSource(newdata,ProjMain.SUM_START_INT);
 					} else {		  
 						sumXAxis =	    
-							new SummaryXAxis(0, newdata.length,	 
-									bestSize);	  
+							new SummaryXAxis(0,	bestSize);	  
 						sumDataSource = new SummaryDataSource(newdata,0);
 					}
 					sumYAxis = new SummaryYAxis();	 

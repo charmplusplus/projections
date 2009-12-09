@@ -21,8 +21,7 @@ public class MultiRunTableModel
     private int category;
     private int dataType;
 
-    public MultiRunTableModel(String tableName,
-			      MultiRunDataAnalyzer analysisModule,
+    public MultiRunTableModel( MultiRunDataAnalyzer analysisModule,
 			      int dataType, int category) {
 //	this.tableName = tableName;
 	this.analysisModule = analysisModule;
@@ -57,14 +56,14 @@ public class MultiRunTableModel
      *  accordingly.
      */
     public int getColumnCount() {
-	return analysisModule.getNumColumns(dataType, category);
+	return analysisModule.getNumColumns();
     }
 
     /**
      *  For populating the header row of the table.
      */
     public String getColumnName(int columnIndex) {
-	return analysisModule.getColumnName(dataType, category, columnIndex);
+	return analysisModule.getColumnName( columnIndex);
     }
 
     /**

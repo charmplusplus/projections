@@ -94,7 +94,7 @@ public class ProfileGraph extends JPanel
 //        graphTitles = titles;
 //    }
 
-    protected void setXAxis(String title, String unit, String[] names) {
+    protected void setXAxis(String title, String[] names) {
         xTitle = title;
         xNames = names;
     }

@@ -79,7 +79,6 @@ implements PopUpAble
 				"Set Range",
 				"Close"
 				           },
-				           null,
 				           this);
 		setJMenuBar(menuBar);
 	}

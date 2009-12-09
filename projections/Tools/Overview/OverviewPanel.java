@@ -60,12 +60,7 @@ public class OverviewPanel extends ScalePanel.Child
 
 	private int mode;
 
-//	boolean newEPData = true;
-
-//	OverviewWindow parentWindow = null;
-
-	public OverviewPanel(OverviewWindow parentWindow) {
-//		this.parentWindow = parentWindow;
+	public OverviewPanel() {
 	}
 
 	//Return a string describing the given panel location
@@ -366,7 +361,7 @@ public class OverviewPanel extends ScalePanel.Child
 		selectedPEs.reset();
 		while (selectedPEs.hasMoreElements()) {
 			int nextPe = selectedPEs.nextElement();
-			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
+			readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, myRun, 
 					startInterval, endInterval, entryData[pIdx], utilizationData[pIdx]) );
 			pIdx++;
 		}

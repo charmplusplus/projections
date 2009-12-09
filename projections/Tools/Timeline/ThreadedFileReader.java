@@ -7,10 +7,9 @@ public class ThreadedFileReader extends Thread  {
 //	int p;
 	Data data;
 	
-	protected ThreadedFileReader(int pe, int p, Data data){
+	protected ThreadedFileReader(int pe, Data data){
 		this.data = data;
 		this.pe = pe;
-//		this.p = p;
 	}
 	
      public void run() {

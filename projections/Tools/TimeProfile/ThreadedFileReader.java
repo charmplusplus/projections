@@ -34,10 +34,9 @@ public class ThreadedFileReader extends Thread  {
 	 *  The resulting output data will be accumulated into the array specified in a synchronized manner
 	 *  
 	 *  */
-	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, 
+	public ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, 
 			double[][] graphData){
 		this.pe = pe;
-//		this.p = p;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
 		this.startInterval = startInterval;

@@ -100,7 +100,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		ver=new ScaleSlider(Scrollbar.VERTICAL);
 		ver.addMouseListener(this);
 
-		stl=new OverviewPanel(thisWindow);
+		stl=new OverviewPanel();
 		scalePanel=new ScalePanel(hor,ver,stl);
 
 		gbc.fill = GridBagConstraints.BOTH;

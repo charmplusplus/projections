@@ -77,7 +77,7 @@ public class ChooseUserEventsWindow extends JFrame
 		JTable table = new JTable(tableModel);
 		initColumnSizes(table);
 
-		table.setDefaultRenderer(Color.class, new ColorRenderer(true));
+		table.setDefaultRenderer(Color.class, new ColorRenderer());
 		
 		// put the table into a scrollpane
 		JScrollPane scroller = new JScrollPane(table);
@@ -176,7 +176,7 @@ public class ChooseUserEventsWindow extends JFrame
     /// A simple color renderer
 	public class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
-		private ColorRenderer(boolean isBordered) {
+		private ColorRenderer() {
 			setOpaque(true);
 		}
 		public Component getTableCellRendererComponent(

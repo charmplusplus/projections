@@ -11,7 +11,7 @@ public class LogLoadException extends java.io.IOException
 //	int Operation;
 //	String FileName;
 
-	public LogLoadException (String File, int Op)
+	public LogLoadException (@SuppressWarnings("unused") String File)
 	{
 		super ("ERROR:  couldn't process file.");
 //		FileName = File;

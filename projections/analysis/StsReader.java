@@ -77,24 +77,13 @@ public class StsReader extends ProjDefs
     private int numPapiEvents;
     private String papiEventNames[];
 
-    /**
-     *  Basically a hack to allow multirun tool to bypass the 
-     *  ActivityManager and it's use of Analysis.java. Hence this
-     *  wrapper is used for normal tools.
-     */
-    public StsReader(String FileName) 
-	throws LogLoadException
-    {
-	this(FileName, false);
-    }
-
     /** 
      *  The StsReader constructor reads the .sts file indicated.
      *  @exception LogLoadException if an error occurs while reading in the
      *      the state file
      *  Pre-condition: FileName is the full pathname of the sts file.
      */
-    public StsReader(String FileName, boolean isMultirun) 
+    public StsReader(String FileName) 
 	throws LogLoadException   
     {
 	try {
@@ -207,9 +196,9 @@ public class StsReader extends ProjDefs
 		
 	    InFile.close();
 	} catch (FileNotFoundException e) {
-	    throw new LogLoadException (FileName, LogLoadException.OPEN);
+	    throw new LogLoadException (FileName);
 	} catch (IOException e) {
-	    throw new LogLoadException (FileName, LogLoadException.READ);
+	    throw new LogLoadException (FileName);
 	}
     }
 

@@ -131,8 +131,7 @@ public class ProjectionsConfigurationReader
 	System.err.println(ioException.toString());
       }
     } catch (IOException e) {
-      throw new LogLoadException (configurationName, 
-				  LogLoadException.READ);
+      throw new LogLoadException (configurationName);
     }
   }
   
@@ -162,11 +161,9 @@ public class ProjectionsConfigurationReader
 	}
 	writer.close();
       } catch (FileNotFoundException e) {
-	throw new LogLoadException (configurationName, 
-				    LogLoadException.OPEN);
+	throw new LogLoadException (configurationName);
       } catch (IOException e) {
-	throw new LogLoadException (configurationName, 
-				    LogLoadException.WRITE);
+	throw new LogLoadException (configurationName);
       }
     } else {
       return;

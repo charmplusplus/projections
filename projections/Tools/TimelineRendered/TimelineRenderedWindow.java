@@ -58,7 +58,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	                null,
 	                                    "Close"
 	            },
-	                                null, this));
+	                                this));
 	        
 	        
 	        

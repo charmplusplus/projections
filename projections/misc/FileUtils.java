@@ -3,7 +3,6 @@ package projections.misc;
 import java.io.File;
 
 import projections.analysis.ProjMain;
-import projections.analysis.StsReader;
 import projections.gui.OrderedIntList;
 
 /**
@@ -58,7 +57,7 @@ public class FileUtils {
 	}
 
 	
-	public static void detectFiles(StsReader sts, String baseName) {
+	public static void detectFiles(String baseName) {
 		// determine if any of the data files exist.
 		// We assume they are automatically valid and this is reflected
 		// in the validPEs. 
@@ -69,13 +68,13 @@ public class FileUtils {
 		for (int type=0; type<ProjMain.NUM_TYPES; type++) {
 			validPEs[type] = new OrderedIntList();
 
-			detectFiles(sts, baseName, type);
+			detectFiles(baseName, type);
 			validPEStrings[type] = validPEs[type].listToString();
 		}
 	}
 
 	/** Scan through all files in the directory, looking for things that might be log files. */
-	public static void detectFiles(StsReader sts, String baseName, int type) {
+	public static void detectFiles(String baseName, int type) {
 		File testFile = null;
 
 		// special condition for SUMACC (and any future, single-file

@@ -95,7 +95,7 @@ class ProfileWindow extends ProjectionsWindow
 	pack();
 	
 	// get new data object
-	data = new ProfileData(this);
+	data = new ProfileData();
 
 	showDialog();
     }
@@ -110,7 +110,7 @@ class ProfileWindow extends ProjectionsWindow
                                     null,
                                     "Close"
                                 },
-                                null, this));
+                                this));
         if(ampiTraceOn){
             mbar.add(Util.makeJMenu("Tools", new Object[]
                                 {
@@ -119,7 +119,7 @@ class ProfileWindow extends ProjectionsWindow
                                     "Usage Table",
                                     new String[] {"AMPI", "Usage Profile"}
                                 },
-                                null, this));
+                                this));
         } else{
             mbar.add(Util.makeJMenu("Tools", new Object[]
                                 {
@@ -127,7 +127,7 @@ class ProfileWindow extends ProjectionsWindow
                                     "Change Colors",
                                     "Usage Table"
                                 },
-                                null, this));
+                                this));
         }
 
 	mbar.add(Util.makeJMenu("Help", new Object[]
@@ -135,7 +135,7 @@ class ProfileWindow extends ProjectionsWindow
                                     "Index",
                                     "About"
                                 },
-                                null, this));
+                                this));
 	setJMenuBar(mbar);
     }
 
@@ -412,7 +412,7 @@ class ProfileWindow extends ProjectionsWindow
             Color[][] newColors = new Color[1][];
             newColors[0] = colors;
 
-            entryDialog = new EntrySelectionDialog(this, this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
+            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
         }
         entryDialog.showDialog();
     }
@@ -616,7 +616,7 @@ class ProfileWindow extends ProjectionsWindow
         gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
         ampiDisplayCanvas.setGraphTiltes(gTitles);
 
-        ampiDisplayCanvas.setXAxis("","",xNames);
+        ampiDisplayCanvas.setXAxis("",xNames);
         ampiDisplayCanvas.setYAxis("Usage Percent % (over processor)");
         ampiDisplayCanvas.setDisplayDataSource(ampiDataSrc, ampiFuncColorMap, ampiFuncColors, ampiFuncNameMap);
         ampiDisplayCanvas.repaint();
@@ -651,7 +651,7 @@ class ProfileWindow extends ProjectionsWindow
 
         procNames = xNames; //store this in order for the usage of usage table
 
-        displayCanvas.setXAxis("","",xNames);
+        displayCanvas.setXAxis("",xNames);
         displayCanvas.setYAxis("Usage Percent %");
         displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
         displayCanvas.repaint();

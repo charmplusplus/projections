@@ -196,7 +196,7 @@ Clickable
 				null,
 				"Close"
 		                                           },
-		                                           null, this));
+		                                           this));
 		// Color Scheme Menu
 		JMenu mColors = new JMenu("Color Scheme");
 		mWhiteBG = new JMenuItem("White background");
@@ -285,7 +285,7 @@ Clickable
 		selectedPEs.reset();
 		while (selectedPEs.hasMoreElements()) {
 			int nextPe = selectedPEs.nextElement();
-			readyReaders.add( new ExtremaReaderThread(nextPe, pIdx, startTime, endTime, 
+			readyReaders.add( new ExtremaReaderThread(nextPe, startTime, endTime, 
 					numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
 			pIdx++;
 		}

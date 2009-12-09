@@ -166,7 +166,7 @@ implements ActionListener, ColorSelectable, Clickable
 				null,
 				"Close"
 		                                           },
-		                                           null, this));
+		                                           this));
 
 		// Color Scheme Menu
 		JMenu mColors = new JMenu("Color Scheme");
@@ -268,8 +268,7 @@ implements ActionListener, ColorSelectable, Clickable
 			
 			//set range values for time profile window
 			if(ampiTraceOn){
-				ampiGraphPanel.getRangeVals(dialog.getEndTime(),
-						startInterval, endInterval, intervalSize, processorList);
+				ampiGraphPanel.getRangeVals(startInterval, endInterval, intervalSize, processorList);
 			}
 
 
@@ -296,7 +295,7 @@ implements ActionListener, ColorSelectable, Clickable
 						int pIdx=0;		
 						while (processorList.hasMoreElements()) {
 							int nextPe = processorList.nextElement();
-							readyReaders.add( new ThreadedFileReader(nextPe, pIdx, intervalSize, myRun, 
+							readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, myRun, 
 									startInterval, endInterval, 
 									graphDataAccumulators[pIdx%numResultAccumulators]) );
 							pIdx++;
@@ -533,7 +532,7 @@ implements ActionListener, ColorSelectable, Clickable
 		if (e.getSource() == epSelection) {
 			if (entryDialog == null) {
 				entryDialog = 
-					new EntrySelectionDialog(this, this,
+					new EntrySelectionDialog(this,
 							typeLabelNames,
 							stateArray,colorArray,
 							existsArray,entryNames);

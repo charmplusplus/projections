@@ -64,8 +64,7 @@ public class EntrySelectionDialog extends Frame
      *  This is a wrapper constructor for a non-callback based dialog.
      */
 
-    public EntrySelectionDialog(Frame parent, 
-				ColorSelectable callbackTarget,
+    public EntrySelectionDialog( ColorSelectable callbackTarget,
 				String typeLabelStrings[],
 				boolean stateArray[][],
 				Color colorArray[][],

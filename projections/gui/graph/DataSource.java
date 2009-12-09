@@ -49,7 +49,7 @@ public abstract class DataSource
      * This abstract class will implement a null response, actual
      * DataSources will call their parent tools' actions.
      */
-    public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
+    public void toolClickResponse(@SuppressWarnings("unused") MouseEvent e, @SuppressWarnings("unused") int xVal, @SuppressWarnings("unused") int yVal) {
 	// do nothing. Please override.
     }
 
@@ -58,7 +58,7 @@ public abstract class DataSource
      * This abstract class will implement a null response, actual
      * DataSources will call their parent tools' actions.
      */
-	public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
+	public void toolMouseMovedResponse(@SuppressWarnings("unused") MouseEvent e, @SuppressWarnings("unused") int xVal, @SuppressWarnings("unused") int yVal) {
 		// do nothing. Please override.		
 	}
 

@@ -13,7 +13,7 @@ public class AmpiProfileData
    OrderedIntList plist;
    long begintime, endtime;
    
-   protected AmpiProfileData(AmpiProfileWindow profileWindow)
+   protected AmpiProfileData()
    {
 	  
 //	  this.profileWindow = profileWindow;

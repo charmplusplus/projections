@@ -110,7 +110,7 @@ public class MultiRunData
 	    // of the Analysis static object).
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
-		    new StsReader(listOfStsFilenames[run],true);
+		    new StsReader(listOfStsFilenames[run]);
 		pesPerRun[run] = stsReaders[run].getProcessorCount();
 	    }
 	    // ensure that both the stsReaders array and pesPerRun array

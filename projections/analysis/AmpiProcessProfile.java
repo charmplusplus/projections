@@ -35,7 +35,7 @@ public class AmpiProcessProfile {
      */
     Stack callFuncStack;
 
-    public AmpiProcessProfile(long beginTime, ObjectId id) {
+    public AmpiProcessProfile(ObjectId id) {
 	accExecTime = 0;
 //	this.beginTime = beginTime;
 	processID = id;

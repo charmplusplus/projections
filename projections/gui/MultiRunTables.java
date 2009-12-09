@@ -67,7 +67,7 @@ public class MultiRunTables
     private void makeTable(String name, String toolTip, Color color,
 			  int dataType, int category) {
 	MultiRunTableModel tableModel =
-	    new MultiRunTableModel(name, analysisModule, dataType, category);
+	    new MultiRunTableModel(analysisModule, dataType, category);
 	// use Josh's modified Model manipulator for sorting columns.
 	TableSorter sorter = new TableSorter(tableModel);
 	JTable table = new JTable(sorter);

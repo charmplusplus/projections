@@ -10,11 +10,11 @@ public class OrderedUsageList
 	{
 		float usage;
 		Link next;
-		private Link(float u, int e, Link n) {usage = u; next = n;}
+		private Link(float u, Link n) {usage = u; next = n;}
 	}   
 
 
-	public void insert(float u, int e)
+	public void insert(float u)
 	{
 		Link newLink;
 		reset();
@@ -28,7 +28,7 @@ public class OrderedUsageList
 
 		if(tmp == null)
 		{
-			newLink = new Link(u, e, tmp);
+			newLink = new Link(u,  tmp);
 			if(head == null)
 			{
 				head = newLink;
@@ -43,7 +43,7 @@ public class OrderedUsageList
 		}
 		else
 		{      
-			newLink = new Link(u, e, tmp);
+			newLink = new Link(u, tmp);
 			if(head == tmp)
 				head = newLink;
 			else

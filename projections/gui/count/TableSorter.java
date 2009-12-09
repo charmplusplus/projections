@@ -187,7 +187,7 @@ public class TableSorter extends TableMap {
         }
     }
 
-    private void sort(Object sender) {
+    private void sort() {
         checkModel();
 
         compares = 0;
@@ -282,7 +282,7 @@ public class TableSorter extends TableMap {
         this.ascending = ascending;
         sortingColumns.removeAllElements();
         sortingColumns.addElement(new Integer(column));
-        sort(this);
+        sort();
         super.tableChanged(new TableModelEvent(this)); 
     }
 

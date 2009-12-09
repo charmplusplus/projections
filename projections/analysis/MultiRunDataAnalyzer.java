@@ -318,12 +318,12 @@ public class MultiRunDataAnalyzer {
      *  is to provide the flexibility to return additional columns
      *  depending on the data type or category type.
      */
-    public int getNumColumns(int dataType, int categoryIndex) {
-	// we need one additional column for the entry point names.
-	return numRuns+1;
+    public int getNumColumns() {
+    	// we need one additional column for the entry point names.
+    	return numRuns+1;
     }
 
-    public String getColumnName(int dataType, int categoryIndex, int col) {
+    public String getColumnName(int col) {
 	// first column is always the entry point name
 	if (col == 0) {
 	    return "Entry Point Name";
@@ -401,8 +401,8 @@ public class MultiRunDataAnalyzer {
 
 	// **CW** 0 will be replaced by an appropriate static
 	// constants.
-	computeOutputArray(outputData, dataType, 0);
-	colorMap = computeColorMap(numYvalues, dataType, 0);
+	computeOutputArray(outputData, dataType);
+	colorMap = computeColorMap(numYvalues, dataType);
 	
 	return new MultiRunDataSource(this,
 				      outputData,
@@ -512,7 +512,7 @@ public class MultiRunDataAnalyzer {
      *  Only Insignificant EPs will be presented as a unified group
      *  (they are usually zeros).
      */
-    private void computeOutputArray(double data[][],int dataType,int scheme) {
+    private void computeOutputArray(double data[][],int dataType) {
 	// fill the appropriate parts of dataTable and extraTable into data
 	// this process is broken into a phase for each category.
 	int entry = 0;
@@ -571,7 +571,7 @@ public class MultiRunDataAnalyzer {
      *  The default scheme is to color Insignificant EPs gray, Overhead
      *  white and leave every other EP colored (but kept in position).
      */
-    private Color[] computeColorMap(int numColors, int dataType, int scheme) {
+    private Color[] computeColorMap(int numColors, int dataType) {
 	// Ask the runObjects for a simple (for now) colormap.
 	// Then overwrite the slot for insignificant and overhead colors
 	Color colorMap[] = new Color[numColors];

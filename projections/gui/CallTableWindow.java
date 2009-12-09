@@ -128,18 +128,18 @@ public class CallTableWindow extends ProjectionsWindow
                 null,
                                     "Close"
             },
-                                null, this));
+                                this));
         mbar.add(Util.makeJMenu("Tools", new Object[]
             {
                 "Change Colors",
             },
-                                null, this));
+                                this));
         mbar.add(Util.makeJMenu("Help", new Object[]
             {
                 "Index",
                                     "About"
             },
-                                null, this));
+                                this));
         setJMenuBar(mbar);
     }
 

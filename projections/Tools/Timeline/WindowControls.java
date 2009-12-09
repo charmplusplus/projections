@@ -294,7 +294,7 @@ ItemListener {
 
 		else if(evt.getSource() == mRestoreColors){
 			try {
-				Util.restoreColors(data.entryColor(), "Timeline Graph");
+				Util.restoreColors(data.entryColor());
 				parentWindow.refreshDisplay(false);
 			} catch (Exception e) {
 				System.err.println("Attempt to read from color.map failed");
@@ -737,7 +737,7 @@ ItemListener {
 
 	private void ShowColorWindow() {
 		if (colorWindow == null)
-			colorWindow = new ColorChooser(parentWindow, data, parentWindow);
+			colorWindow = new ColorChooser(data, parentWindow);
 		colorWindow.setVisible(true);
 	}
 

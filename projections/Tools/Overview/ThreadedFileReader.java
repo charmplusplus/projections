@@ -31,9 +31,8 @@ public class ThreadedFileReader extends Thread  {
 	 * @param utilizationData 
 	 *  
 	 *  */
-	public ThreadedFileReader(int pe, int p, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData){
+	public ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData){
 		this.pe = pe;
-//		this.p = p;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
 		this.startInterval = startInterval;

@@ -81,7 +81,7 @@ Clickable
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
 	public String attributes[][] = {
-			{ "Execution Time by Activity",
+			{ "Extrema by Clustering",
 				"Least Idle Time",
 				"Msgs Sent by Activity <not yet implemented>", 
 				"Bytes Sent by Activity  <not yet implemented>",
@@ -107,7 +107,7 @@ Clickable
 			"us"}
 	};
 
-	public final static int ATTR_EXECUTIONTIME = 0;
+	public final static int ATTR_CLUSTERING = 0;
 	public final static int ATTR_LEASTIDLE = 1;
 	public final static int ATTR_MSGSSENT = 2;
 	public final static int ATTR_BYTESSENT = 3;
@@ -420,7 +420,7 @@ Clickable
 				processorDiffs[p] = tempData[p][numActivities];
 			} else if(selectedAttribute == ATTR_GRAINSIZE) {
 				processorDiffs[p] = grainSize[p];
-			}else { //  ATTR_EXECUTIONTIME  ATTR_MSGSSENT  ATTR_BYTESSENT
+			}else { //  ATTR_CLUSTERING  ATTR_MSGSSENT  ATTR_BYTESSENT
 				for (int act=0; act<numActivities; act++) {
 					processorDiffs[p] += Math.abs(tempData[p][act] - tmpAvg[act]) * tmpAvg[act];
 				}

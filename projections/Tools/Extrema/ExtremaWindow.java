@@ -375,8 +375,7 @@ Clickable
 		for (int p=0; p<selectedPEs.size(); p++) {
 			if (selectedAttribute == ATTR_GRAINSIZE){
 				int __count_entries = 0;
-				for(int iact = 0; iact<numActivities; iact++)				//tempData[p][numActivities+numSpecials-1] = 0;//processorDiffs[p];
-					//System.out.println(" active methods" + processorDiffs[p] + "idle time=" + tempData[p][numActivities]);
+				for(int iact = 0; iact<numActivities; iact++)
 				{
 					if(tempData[p][iact] > 0)
 						__count_entries++;
@@ -447,11 +446,11 @@ Clickable
 		// take the top threshold processors, create the final array
 		// and copy the data in.
 		int offset = selectedPEs.size()-threshold;
-		graphData = new double[threshold+3+numNonZero][numActivities+numSpecials];
+		graphData = new double[threshold+3][numActivities+numSpecials];
 		outlierList = new LinkedList();
 		for (int ii=0; ii<threshold; ii++) {
 			for (int act=0; act<numActivities+numSpecials; act++) {
-				graphData[ii+3+numNonZero][act] = tempData[sortedMap[ii+offset]][act];
+				graphData[ii+3][act] = tempData[sortedMap[ii+offset]][act];
 			}
 			// add to outlier list reverse sorted by significance
 			int p = sortedMap[ii+offset];		
@@ -461,31 +460,6 @@ Clickable
 			outlierPEs.add(ival);
 		}
 
-
-		// fill in cluster representative data
-		int minDistanceIndex[] = new int[k];
-		double minDistanceFromClusterMean[] = new double[k];
-		for (int k=0; k<this.k; k++) {
-			minDistanceFromClusterMean[k] = Double.MAX_VALUE;
-			minDistanceIndex[k] = -1;
-		}
-		for (int p=0; p<distanceFromClusterMean.length; p++) {
-			if (distanceFromClusterMean[p] <= 
-				minDistanceFromClusterMean[clusterMap[p]]) {
-				minDistanceIndex[clusterMap[p]] = p;
-			}
-		}
-		int clusterIndex = 0;
-		for (int k=0; k<this.k; k++) {
-			if (minDistanceIndex[k] != -1) {
-				for (int act=0; act<numActivities+numSpecials; act++) {
-					graphData[3+clusterIndex][act] = 
-						tempData[minDistanceIndex[k]][act];
-				}
-				outlierList.addFirst("C"+k+"R"+minDistanceIndex[k]);
-				clusterIndex++;
-			}
-		}
 
 		graphData[0] = tmpAvg;
 		for (int act=0; act<numActivities+numSpecials; act++) {

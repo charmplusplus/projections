@@ -28,7 +28,7 @@ class CommTimeWindow extends GenericGraphWindow
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    static int myRun = 0;
+	private static int myRun = 0;
 
     // Sent External code commented out and may be implemented later
 
@@ -37,7 +37,7 @@ class CommTimeWindow extends GenericGraphWindow
     private EntrySelectionDialog entryDialog;
         
     private JPanel	   mainPanel;
-    IntervalChooserPanel intervalPanel;
+    private IntervalChooserPanel intervalPanel;
 
 	private JPanel	   graphPanel;
     private JPanel	   checkBoxPanel;

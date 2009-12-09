@@ -5,7 +5,7 @@ package projections.gui;
 */
 
 public class ColorMap {
-    int red[]=new int[256],
+	private int red[]=new int[256],
 	green[]=new int[256],
 	blue[]=new int[256];
     

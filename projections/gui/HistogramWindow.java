@@ -27,7 +27,7 @@ import projections.misc.LogEntryData;
  *  modified by Chee Wai Lee
  *  2/23/2005
  */
-public class HistogramWindow extends GenericGraphWindow 
+class HistogramWindow extends GenericGraphWindow 
 implements ActionListener
 {
 
@@ -42,11 +42,11 @@ implements ActionListener
 
 	// Gui components
 	private JButton entrySelectionButton;
-	JButton epTableButton;
+	private JButton epTableButton;
 
 	JRadioButton timeBinButton;
 	JRadioButton msgSizeBinButton;
-	ButtonGroup binTypeGroup;
+	private ButtonGroup binTypeGroup;
 
 	
 	BinDialogPanel binpanel;
@@ -57,12 +57,12 @@ implements ActionListener
 	double[][][] counts;
 	int binType;
 
-	public int timeNumBins;
-	public long timeBinSize;
-	public long timeMinBinSize;
-	public int msgNumBins;
-	public long msgBinSize;
-	public long msgMinBinSize;
+	protected int timeNumBins;
+	protected long timeBinSize;
+	protected long timeMinBinSize;
+	protected int msgNumBins;
+	protected long msgBinSize;
+	protected long msgMinBinSize;
 
 	HistogramWindow thisWindow;
 

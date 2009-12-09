@@ -67,7 +67,7 @@ class MultiRunControlPanel extends JPanel
      *  Returns the index of the selected radio button for types.
      *  A -1 is returned if nothing matches.
      */
-    public int getSelectedIdx(ItemSelectable item) {
+    protected int getSelectedIdx(ItemSelectable item) {
 	JRadioButton dataTypeButton = (JRadioButton)item;
 	for (int type=0; type<MultiRunData.NUM_TYPES; type++) {
 	    if (dataTypeButton == dataTypeButtons[type]) {

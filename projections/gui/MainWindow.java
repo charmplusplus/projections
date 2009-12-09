@@ -54,15 +54,15 @@ implements ScalePanel.StatusDisplay
 	// Runtime flags -
 	// **CW** Note: These are now tentatively mirrored from ProjMain
 	// until the new interface can be cleanly handled by other tools.
-	public static double CUR_VERSION;
+	protected static double CUR_VERSION;
 	public static boolean IGNORE_IDLE;
-	public static boolean BLUEGENE;
-	public static int BLUEGENE_SIZE[];
-	public static boolean PRINT_USAGE;
+	protected static boolean BLUEGENE;
+	protected static int BLUEGENE_SIZE[];
+	protected static boolean PRINT_USAGE;
 
 	// **CW** a semi-permanent hack to provide a file onto which raw data
 	// dumps may be written for further processing by other graphing tools.
-	public static PrintWriter dataDump = null;
+	protected static PrintWriter dataDump = null;
 
 	// for SwingWorker to work
 	MainWindow mainWindow;
@@ -74,15 +74,15 @@ implements ScalePanel.StatusDisplay
 	// components associated with the main window
 	private MainTitlePanel        titlePanel;
 	private BackGroundImagePanel  background;
-	public MainMenuManager       menuManager;
-	public MainSummaryGraphPanel summaryGraphPanel;
+	protected MainMenuManager       menuManager;
+	protected MainSummaryGraphPanel summaryGraphPanel;
 	private MainRunStatusPanel    runStatusPanel;
 
 	// these should become arrays for future tabbed multirun functionality.
-	public SummaryDataSource    sumDataSource;
-	public SummaryXAxis         sumXAxis;
-	public SummaryYAxis         sumYAxis;
-	public GraphPanel           graphPanel;
+	protected SummaryDataSource    sumDataSource;
+	protected SummaryXAxis         sumXAxis;
+	protected SummaryYAxis         sumYAxis;
+	protected GraphPanel           graphPanel;
 	private Label                status;
 	private Image bgimage;
 	private GridBagConstraints gbc;

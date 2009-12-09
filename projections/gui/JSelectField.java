@@ -6,12 +6,12 @@ import javax.swing.JTextField;
 /** This class is used for the input of processor range
 *   validates for proper range */
 
-public class JSelectField extends JTextField
+class JSelectField extends JTextField
 {
 
 	private String lastValue;
 	//   private int    lastCaretPosition;
-	public RangeVerifier rangeVerifier;
+	protected RangeVerifier rangeVerifier;
    
    protected JSelectField(String defval, int size)
    {

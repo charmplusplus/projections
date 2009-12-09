@@ -140,7 +140,7 @@ public class PieChartWindow extends Frame{
     }
 
 
-    public class MyPanel extends Panel implements MouseMotionListener{
+    class MyPanel extends Panel implements MouseMotionListener{
 		private PieChartWindow pcw;
 	
         private MyPanel(PieChartWindow pcw){

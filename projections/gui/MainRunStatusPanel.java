@@ -23,14 +23,14 @@ import javax.swing.event.ChangeListener;
  *
  * ********************************************************/
 
-public class MainRunStatusPanel extends JPanel 
+class MainRunStatusPanel extends JPanel 
     implements ChangeListener
 {
 
-	JTextField statusField;
-    JLabel statusLabel;
+	private JTextField statusField;
+	private JLabel statusLabel;
 
-    int tabIndex = 0;
+	private int tabIndex = 0;
 
     public MainRunStatusPanel() {
 	createLayout();

@@ -35,7 +35,7 @@ class FunctionTool extends GenericGraphWindow
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+	private int myRun = 0;
     
     
 

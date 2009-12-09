@@ -58,8 +58,8 @@ class MultiRunWindow extends ProjectionsWindow
 
     // Layout variables. In this case, we want to keep them because we
     // will be switching between the table and graph view continuously.
-    GridBagLayout      gbl;
-    GridBagConstraints gbc;
+    private GridBagLayout      gbl;
+    private GridBagConstraints gbc;
 
     int selectedDataType;
 
@@ -95,7 +95,7 @@ class MultiRunWindow extends ProjectionsWindow
      *  will required the following method to be implemented from which
      *  ProjectionsFileChooser may call.
      */
-    public void dialogCallback() {
+    protected void dialogCallback() {
 	final SwingWorker worker = new SwingWorker() {
 		public Object doInBackground() {
 		    try {

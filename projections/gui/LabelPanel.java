@@ -14,8 +14,8 @@ import javax.swing.JTextField;
 
 public class LabelPanel extends JPanel {
 
-	JTextField field;
-    JLabel label;
+	private JTextField field;
+	private JLabel label;
 
     private LabelPanel(String label, int alignment, JTextField fieldEntry) {
 	this.label = new JLabel(label, alignment);

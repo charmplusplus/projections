@@ -42,10 +42,10 @@ implements PopUpAble
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 
 	// inheritable GUI objects
-	protected GraphPanel graphPanel;
+	private GraphPanel graphPanel;
 	protected Graph graphCanvas;
 
 
@@ -54,9 +54,9 @@ implements PopUpAble
 	protected abstract void setGraphSpecificData();
 
 	// Graph specific data, so that implementation can be changed if required
-	protected DataSource dataSource;
+	private DataSource dataSource;
 	protected XAxis xAxis;
-	protected YAxis yAxis;
+	private YAxis yAxis;
 
 	// assuming all projections graph windows need a menu bar and a file menu
 	protected JMenuBar menuBar  = new JMenuBar();

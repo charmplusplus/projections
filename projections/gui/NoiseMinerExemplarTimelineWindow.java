@@ -18,7 +18,7 @@ import projections.analysis.NoiseMiner.NoiseResult;
 
 public class NoiseMinerExemplarTimelineWindow extends JFrame {
 
-	JLabel explanation; //< The textual explanation at the top of the window
+	private JLabel explanation; //< The textual explanation at the top of the window
 	
 	public NoiseMinerExemplarTimelineWindow(NoiseResult nr)  {
 		

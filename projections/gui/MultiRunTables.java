@@ -22,7 +22,7 @@ import projections.misc.MultiRunTableModel;
  *  categories) nor allow the user to add new categories. These can, however,
  *  be incorporated in future, more general, versions.
  */
-public class MultiRunTables 
+class MultiRunTables 
     extends JTabbedPane
 {
 

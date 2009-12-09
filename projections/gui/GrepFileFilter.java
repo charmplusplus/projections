@@ -3,7 +3,7 @@ package projections.gui;
 import java.io.File;
 
 /** Simple class to use in JFileChooser */
-public class GrepFileFilter extends javax.swing.filechooser.FileFilter {
+class GrepFileFilter extends javax.swing.filechooser.FileFilter {
   /** Contructor */
 	protected GrepFileFilter(String grep, String description) { 
     grep_ = grep; 

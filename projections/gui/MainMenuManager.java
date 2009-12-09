@@ -34,7 +34,7 @@ import projections.analysis.ProjMain;
  *
  * ***************************************************/
 
-public class MainMenuManager
+class MainMenuManager
 implements ActionListener, ItemListener
 {
 	private JMenuBar menubar;

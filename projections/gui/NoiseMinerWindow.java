@@ -47,7 +47,7 @@ implements ItemListener
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	private JPanel	         mainPanel;
 	private JPanel           controlPanel;
@@ -66,11 +66,11 @@ implements ItemListener
 
 	NoiseMiner			noiseMiner;
 
-	public String buttonColumnTitle;
-	public int numColumns;
+	protected String buttonColumnTitle;
+	protected int numColumns;
 	
 
-	public NoiseMinerWindow(MainWindow parentWindow) {
+	protected NoiseMinerWindow(MainWindow parentWindow) {
 		super(parentWindow);
 		thisWindow = this;
 

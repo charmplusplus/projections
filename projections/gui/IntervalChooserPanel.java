@@ -12,18 +12,18 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel
 {
 
 	// Additional GUI objects
-	TimeTextField sizeField;
-	JLabel numIntervalsLabel;
+	private TimeTextField sizeField;
+	private JLabel numIntervalsLabel;
 //	JLabel validIntervalsLabel;
 //	JLabel startIntervalLabel;
 //	JLabel endIntervalLabel;
 
 	// A reference to the parent dialog box that I'm extending
-	RangeDialog parent;
+	private RangeDialog parent;
 
 	// dialog parameter variables
 
-	JLabel sizeLabel;
+	private JLabel sizeLabel;
 	
 
 	public IntervalChooserPanel() {

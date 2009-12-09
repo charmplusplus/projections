@@ -51,9 +51,9 @@ class CallTableWindow extends ProjectionsWindow
     private Checkbox		 statsOn;
     private Checkbox		 statsOff;
     
-    public OrderedIntList        validPEs;
-    public long                  startTime;
-    public long                  endTime;
+    protected OrderedIntList        validPEs;
+    protected long                  startTime;
+    protected long                  endTime;
     
     CallTable            ct;
     

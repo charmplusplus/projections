@@ -26,27 +26,27 @@ import projections.misc.LogEntryData;
  *  Will replace The old GraphWindow class once a framework for displaying
  *  Legends are in place (and probably replace the name)
  */
-public class UserEventsWindow extends GenericGraphWindow
+class UserEventsWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
 
-	UserEventsWindow thisWindow;
+	private UserEventsWindow thisWindow;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    static int myRun = 0;
+    private static int myRun = 0;
 
     private JPanel mainPanel;
     private JPanel controlPanel;
 
-    IntervalChooserPanel intervalPanel;
+    private IntervalChooserPanel intervalPanel;
 
 	// data used for intervalgraphdialog
-    int startInterval;
-    int endInterval;
-    long intervalSize;
-    OrderedIntList processorList;
+    private int startInterval;
+    private int endInterval;
+    private long intervalSize;
+    private OrderedIntList processorList;
 
     // meta data variables
     private int numActivities;

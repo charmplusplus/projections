@@ -60,9 +60,9 @@ implements ItemListener, ActionListener, Clickable
 	private Checkbox    hopCountCB;
 	private Checkbox    peHopCountCB;
 
-	CommWindow  thisWindow;
+	private CommWindow  thisWindow;
 
-	OrderedIntList peList;
+	private OrderedIntList peList;
 
 
 	protected CommWindow(MainWindow mainWindow) {

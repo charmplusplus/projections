@@ -5,8 +5,8 @@ import projections.gui.OrderedIntList;
 public class XAxisDiscreteOrdered
     extends XAxis
 {
-    String title;
-    int discreteList[];
+    private String title;
+    private int discreteList[];
     
     public XAxisDiscreteOrdered(String title, OrderedIntList discreteList) {
 	this.title = title;

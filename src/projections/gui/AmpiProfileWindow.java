@@ -72,7 +72,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
     private EntrySelectionDialog entryDialog;
 
-    boolean ampiTraceOn = false;
+    private boolean ampiTraceOn = false;
 
     protected AmpiProfileWindow(MainWindow parentWindow){
         super(parentWindow);

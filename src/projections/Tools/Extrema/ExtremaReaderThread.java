@@ -16,16 +16,16 @@ class ExtremaReaderThread extends Thread  {
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 	
-	int pe;
-	long startTime;
-	long endTime;
-	int numActivities;
-	int numActivityPlusSpecial;
+	private int pe;
+	private long startTime;
+	private long endTime;
+	private int numActivities;
+	private int numActivityPlusSpecial;
 	
-	int selectedActivity;
-	int selectedAttribute;
+	private int selectedActivity;
+	private int selectedAttribute;
 	
 	double[] myData;
 

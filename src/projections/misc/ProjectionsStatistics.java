@@ -14,7 +14,7 @@ public class ProjectionsStatistics {
     private long count;
     private double sum;
     private double sumOfSquares;
-    protected double max;
+    private double max;
     private double min;
 
     public ProjectionsStatistics() {

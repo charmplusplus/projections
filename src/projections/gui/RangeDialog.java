@@ -108,7 +108,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 	// flags
 	private boolean layoutComplete = false;
-	int dialogState;
+	private int dialogState;
 	private boolean disableTimeRange = false;
 
 	/**
@@ -574,7 +574,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 	private Vector<String> availableStepStrings;
 //	Vector<String> availableStepStringsEnd;
-	Vector<Long> availableStepTimes;
+	private Vector<Long> availableStepTimes;
 
 	private void determineStepsFromPEZero() {
 
@@ -659,10 +659,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 
 	
-	public final class PopupHandler implements ActionListener {
+	private final class PopupHandler implements ActionListener {
 
 		private boolean useForStart = false;
-		boolean useForEnd = false;
+		private boolean useForEnd = false;
 		
 		public void actionPerformed(ActionEvent e) {
 			JComboBox cb = (JComboBox) e.getSource();

@@ -6,10 +6,10 @@ public class OrderedUsageList
 //	private Link tail;
 	private Link pre;
 	private int len;
-	class Link
+	private class Link
 	{
-		float usage;
-		Link next;
+		private float usage;
+		private Link next;
 		private Link(float u, Link n) {usage = u; next = n;}
 	}   
 

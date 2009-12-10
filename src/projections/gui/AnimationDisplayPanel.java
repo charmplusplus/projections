@@ -23,18 +23,18 @@ class AnimationDisplayPanel extends Panel
 	private int myRun = 0;
 
     private float MAXHUE = (float)0.65;
-    int numPs = -1;
+    private int numPs = -1;
     private int numIs = -1;
-    int pwidth;
-    int pheight;
-    int numrows;
-    int numcols;
+    private int pwidth;
+    private int pheight;
+    private int numrows;
+    private int numcols;
     private int pold = -1;
-    int phoffset;
-    int pvoffset;
-    int hoffset;
-    int voffset;
-    float psize = (float)0.75;
+    private int phoffset;
+    private int pvoffset;
+    private int hoffset;
+    private int voffset;
+    private float psize = (float)0.75;
     private float fontOffset = (float)0.90;
     private FontMetrics fm = null;
     private Font font = null;
@@ -46,12 +46,12 @@ class AnimationDisplayPanel extends Panel
     private int curP = -1;
     private long Isize = 0; //Interval length, microseconds
     private int[][] data;
-    Image offscreen;
+    private Image offscreen;
    
     private Color[] colors;
    
-    int w;
-	int h;
+    private int w;
+	private int h;
    
     private AnimationWindow animationWindow;
    

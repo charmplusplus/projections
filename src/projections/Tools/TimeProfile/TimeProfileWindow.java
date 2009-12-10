@@ -51,8 +51,8 @@ public class TimeProfileWindow extends GenericGraphWindow
 implements ActionListener, ColorSelectable, Clickable
 {
 
-	TimeProfileWindow thisWindow;
-	MainWindow mainWindow;
+	private TimeProfileWindow thisWindow;
+	private MainWindow mainWindow;
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -87,32 +87,32 @@ implements ActionListener, ColorSelectable, Clickable
 	private boolean displaySlopes = false;
 	
 	// data used for intervalgraphdialog
-	OrderedIntList processorList;
+	private OrderedIntList processorList;
 
 	// data required for entry selection dialog
-	int numEPs;
+	private int numEPs;
 	//YSun add
 	private String typeLabelNames[] = {"Entry Points"};
-	boolean stateArray[][];
-	boolean existsArray[][];
+	private boolean stateArray[][];
+	private boolean existsArray[][];
 	private Color colorArray[][];
 	private String entryNames[];
 
 	// stored raw data
-	double[][] graphData;
+	private double[][] graphData;
 
 	// output arrays
 	private double[][] outputData;
 	private Paint[] outColors;
 
 	// flag signifying callgraph has just begun
-	boolean	   startFlag;
+	private boolean	   startFlag;
 
 	//Chao Mei: variables related with ampi time profile    
 	private JTabbedPane tabPane = null;
-	AmpiTimeProfileWindow ampiGraphPanel = null;
+	private AmpiTimeProfileWindow ampiGraphPanel = null;
 	private JPanel epPanel = null;
-	boolean ampiTraceOn = false;
+	private boolean ampiTraceOn = false;
 //	protected int ampiPanelTabIndex;
 //	protected int epPanelTabIndex;
 
@@ -448,7 +448,7 @@ implements ActionListener, ColorSelectable, Clickable
 		setOutputGraphData();
 	}
 
-	void setOutputGraphData() {
+	private void setOutputGraphData() {
 		// need first pass to decide the size of the outputdata
 		int outSize = 0;
 		for (int ep=0; ep<numEPs+special; ep++) {

@@ -16,10 +16,10 @@ import java.awt.Rectangle;
  *  systems.
  *  
  */
-public class ScreenInfo
+class ScreenInfo
 {
-    public static int screenHeight;
-    public static int screenWidth;
+    protected static int screenHeight;
+    protected static int screenWidth;
 
     private static GraphicsEnvironment ge;
     private static GraphicsDevice gd;

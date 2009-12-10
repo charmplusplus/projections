@@ -7,10 +7,10 @@ import org.jfree.chart.plot.XYPlot;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
-public class MyActionHandler implements ActionListener {
-	XYPlot plot;
+class MyActionHandler implements ActionListener {
+	private XYPlot plot;
 
-		public MyActionHandler(XYPlot plot) {
+		protected MyActionHandler(XYPlot plot) {
 			this.plot = plot;
 		}
 

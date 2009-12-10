@@ -52,7 +52,7 @@ class FunctionTool extends GenericGraphWindow
     private double timeData[][];
     private String currentArrayName = "";
 
-    FunctionTool thisWindow;
+    private FunctionTool thisWindow;
 
     protected FunctionTool(MainWindow mainWindow) {
 	super("Function tracing", mainWindow);

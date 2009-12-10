@@ -39,7 +39,7 @@ class ExtremaDialogExtension extends RangeDialogExtensionPanel
 	private JLabel attributeLabel;
 	private JLabel activityLabel;
 	private JLabel thresholdPost;
-	protected JLabel thresholdLabel;
+	private JLabel thresholdLabel;
 	
 	
 	public ExtremaDialogExtension(String[] attributes) {

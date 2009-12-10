@@ -41,7 +41,7 @@ class MultiRunWindow extends ProjectionsWindow
     implements ActionListener, ItemListener
 {
 
-	MultiRunWindow thisWindow;
+	private MultiRunWindow thisWindow;
 
     // Gui components
     private MultiRunControlPanel controlPanel;
@@ -49,10 +49,10 @@ class MultiRunWindow extends ProjectionsWindow
     private JDialog tablesWindow;
     private GraphPanel graphPanel;
     private Graph graphCanvas;
-    ProjectionsFileChooser fc;
+    private ProjectionsFileChooser fc;
 
-    MultiRunData data;
-    MultiRunDataAnalyzer analyzer;
+    private MultiRunData data;
+    private MultiRunDataAnalyzer analyzer;
 
     private JPanel mainPanel;
 
@@ -61,7 +61,7 @@ class MultiRunWindow extends ProjectionsWindow
     private GridBagLayout      gbl;
     private GridBagConstraints gbc;
 
-    int selectedDataType;
+    private int selectedDataType;
 
 
     protected MultiRunWindow(MainWindow parentWindow) 

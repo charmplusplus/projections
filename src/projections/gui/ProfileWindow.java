@@ -38,7 +38,7 @@ class ProfileWindow extends ProjectionsWindow
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+    private int myRun = 0;
 
     private ProfileData data;
     private boolean colorsSet;
@@ -75,7 +75,7 @@ class ProfileWindow extends ProjectionsWindow
 
     private EntrySelectionDialog entryDialog;
 
-    boolean ampiTraceOn = false;
+    private boolean ampiTraceOn = false;
 
     public ProfileWindow(MainWindow parentWindow){
         super(parentWindow);

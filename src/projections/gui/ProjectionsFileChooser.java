@@ -25,14 +25,14 @@ import javax.swing.WindowConstants;
  *  ProjectionsFileChooser lets the user pick a directory or files, and
  *  then lets the user pick from all the sts files found in all the subdirs. 
  */
-public class ProjectionsFileChooser
+class ProjectionsFileChooser
 {
-    Frame        owner_    = null;   // for making things modal
+    private Frame        owner_    = null;   // for making things modal
     private String       title_    = null;   // base title for dialogs
     private JFileChooser fChoose_  = null;   // user picks dirs to search
-    JDialog      dialog_   = null;   // user picks files to use
-    JList        list_     = null;   // stores found files
-    int          listSize_ = 0;      // size of list_
+    private JDialog      dialog_   = null;   // user picks files to use
+    private JList        list_     = null;   // stores found files
+    private int          listSize_ = 0;      // size of list_
 //	private Wait         wait_     = new Wait(true); // true if dialog waiting
 
     @SuppressWarnings("ucd")
@@ -47,7 +47,7 @@ public class ProjectionsFileChooser
     // Selected File indices in UserSubSelect
     // Had to do this because these are set in the 
     // ActionListener for JButton in dialog_
-    public int [] userSelect_selected;
+    private int [] userSelect_selected;
 
 
     /** 

@@ -9,7 +9,7 @@ public class JLongTextField extends JTextField
 {
 
 	private String lastValue;
-    int    lastCaretPosition;
+    private int    lastCaretPosition;
     
     public JLongTextField(long defval, int size)
     {

@@ -11,7 +11,7 @@ class JSelectField extends JTextField
 
 	private String lastValue;
 	//   private int    lastCaretPosition;
-	protected RangeVerifier rangeVerifier;
+	public RangeVerifier rangeVerifier;
    
    protected JSelectField(String defval, int size)
    {

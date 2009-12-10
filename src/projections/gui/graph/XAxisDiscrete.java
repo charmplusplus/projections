@@ -6,8 +6,8 @@ import java.util.ListIterator;
 public class XAxisDiscrete
     extends XAxis
 {
-    String title;
-    String discreteNames[];
+    private String title;
+    private String discreteNames[];
     
     public XAxisDiscrete(String title, LinkedList discreteList) {
 	this.title = title;

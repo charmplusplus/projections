@@ -26,10 +26,10 @@ public class OrderedIntList
     private Link pre;
     private int len;
     
-    class Link
+    private class Link
     {
-    	int data;
-    	Link next;
+    	private int data;
+    	private Link next;
     	private Link(int d, Link n) {
     		data = d; next = n;
     	}

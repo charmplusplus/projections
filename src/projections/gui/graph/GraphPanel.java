@@ -40,7 +40,7 @@ public class GraphPanel extends JPanel
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    static int myRun = 0;
+    private static int myRun = 0;
 
     private JPanel mainPanel; 
     private JScrollPane displayPanel;

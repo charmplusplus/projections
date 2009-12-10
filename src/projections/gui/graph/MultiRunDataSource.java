@@ -17,11 +17,11 @@ import projections.analysis.MultiRunDataAnalyzer;
 public class MultiRunDataSource extends DataSource
 {
     // actual data definitions
-    double dataValues[][];
-    int dataType;                // type of associated multirun data
-    Color colorMap[]=null;       // colors associated with each value
-    String title;
-    MultiRunDataAnalyzer parent;
+    private double dataValues[][];
+    private int dataType;                // type of associated multirun data
+    private Color colorMap[]=null;       // colors associated with each value
+    private String title;
+    private MultiRunDataAnalyzer parent;
 
     /**
      *  Constructor. Ndata and NcolorMap are expected to be allocated

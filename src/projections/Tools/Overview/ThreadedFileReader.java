@@ -12,7 +12,7 @@ class ThreadedFileReader extends Thread  {
 	private long intervalSize;
 	private int myRun;
 	private int startInterval;
-	int endInterval;
+	private int endInterval;
 //	boolean ampiTraceOn;
 
 	private int[][][] mySystemUsageData;   // [type][pe list index][interval]
@@ -22,7 +22,7 @@ class ThreadedFileReader extends Thread  {
 //	long logReaderIntervalSize;
 	
 	private int entryData[];       // [interval]  which EP is most prevalent in each interval
-	float utilizationData[]; // [interval]  Utilization for each interval
+	private float utilizationData[]; // [interval]  Utilization for each interval
 
 	
 	/** Construct a file reading thread that will determine the best EP representative for each interval

@@ -74,7 +74,7 @@ public class FileUtils {
 	}
 
 	/** Scan through all files in the directory, looking for things that might be log files. */
-	public static void detectFiles(String baseName, int type) {
+	private static void detectFiles(String baseName, int type) {
 		File testFile = null;
 
 		// special condition for SUMACC (and any future, single-file
@@ -153,11 +153,11 @@ public class FileUtils {
     }
 
 
-    public static String getSumAccumulatedName(String baseName) {
+    private static String getSumAccumulatedName(String baseName) {
     	return baseName+".sum";
     }
 
-    public static String getTypeExtension(int type) {
+    private static String getTypeExtension(int type) {
 	String fileExt = null;
 	switch (type) {
 	case ProjMain.SUMMARY:

@@ -20,17 +20,17 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 	
-	JTabbedPane tabbedPane;
+	private JTabbedPane tabbedPane;
 	
 	/** A button that can be used to choose a different processor's log file */
 	private JButton bOpen;
 	
 	/** Remember what the user put in the dialog box */
-	OrderedIntList validPEs;
-	long startTime;
-	long endTime;
+	private OrderedIntList validPEs;
+	private long startTime;
+	private long endTime;
 
 	/** The method that gets called when the user selects this tool from the Projections menu */
 	public LogFileViewerWindow(MainWindow parentWindow)

@@ -15,7 +15,7 @@ import projections.gui.MainWindow;
 public class LogEntryData extends ProjDefs
 {
 	
-	static public int myRun = 0;
+	static private int myRun = 0;
 	
     private boolean isValid = true;
 

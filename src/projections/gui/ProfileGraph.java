@@ -21,19 +21,19 @@ import javax.swing.JPanel;
  * string must be displayed! 
  * Originated from Graph.java
  */
-public class ProfileGraph extends JPanel 
+class ProfileGraph extends JPanel 
     implements MouseMotionListener
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+    private int myRun = 0;
 
     //Data source: display profile data such as float[][]
     //For convinience, currently set type to float[][]
     //dataSource[x][y] indicates the section y on bar x should have this amount of usage
-    float[][] dataSource;
+    private float[][] dataSource;
     //colorsPool[x][y] indicates the section y on bar x should use this color
     private int[][] colorsMap;
     private Color[] colorsPool;

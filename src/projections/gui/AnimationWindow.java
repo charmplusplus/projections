@@ -27,8 +27,8 @@ class AnimationWindow extends ProjectionsWindow
 	private int myRun = 0;
 
     private AnimationColorBarPanel colorbarPanel;
-    AnimationDisplayPanel  displayPanel;
-    AnimationWindow thisWindow;
+    private AnimationDisplayPanel  displayPanel;
+    private AnimationWindow thisWindow;
    
     
     private JMenuBar mbar = new JMenuBar();
@@ -43,13 +43,13 @@ class AnimationWindow extends ProjectionsWindow
     
     //private Label lTitle, lStatus;
     private Label lTitle, lStatus, lDelay;
-    Scrollbar slider;
+    private Scrollbar slider;
     
-    int redrawDelay; //Real time between frames (ms)
-    boolean keepAnimating;
+    private int redrawDelay; //Real time between frames (ms)
+    private boolean keepAnimating;
     private AnimateThread thread;
 
-    boolean layoutComplete = false;
+    private boolean layoutComplete = false;
 
     // basic parameter variables consistent with IntervalRangeDialog
     protected long intervalSize;
@@ -57,7 +57,7 @@ class AnimationWindow extends ProjectionsWindow
     protected long startTime;
     protected long endTime;
     
-    class AnimateThread extends Thread
+    private class AnimateThread extends Thread
     {
 	public AnimateThread()
 	{

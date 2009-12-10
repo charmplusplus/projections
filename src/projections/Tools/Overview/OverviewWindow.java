@@ -158,7 +158,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		stl.setColorMap(utilColorMap);
 	}  
 
-	void setStlPanelData(long startTime, long endTime, OrderedIntList pes){
+	private void setStlPanelData(long startTime, long endTime, OrderedIntList pes){
 		double horSize, verSize;
 		if (pes == null) {
 			horSize=MainWindow.runObject[myRun].getTotalTime();

@@ -42,7 +42,7 @@ class NoiseMinerWindow extends ProjectionsWindow
 implements ItemListener
 {
 
-	NoiseMinerWindow      thisWindow;    
+	private NoiseMinerWindow      thisWindow;    
 	
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -61,13 +61,13 @@ implements ItemListener
 
 	private JButton              setRanges;
 
-	JTextArea   mainText;
+	private JTextArea   mainText;
 	private JScrollPane	mainTextScroller;
 
-	NoiseMiner			noiseMiner;
+	private NoiseMiner			noiseMiner;
 
-	protected String buttonColumnTitle;
-	protected int numColumns;
+	private String buttonColumnTitle;
+	private int numColumns;
 	
 
 	protected NoiseMinerWindow(MainWindow parentWindow) {
@@ -237,14 +237,14 @@ implements ItemListener
 
 
 	/** A class that renders and handles events for the JButtons in our table */
-	class ButtonColumn extends AbstractCellEditor
+	private class ButtonColumn extends AbstractCellEditor
 	implements TableCellRenderer, TableCellEditor, ActionListener
 	{
 
 		/** A button which is shown when the clicking occurs on the object. The table thinks I'm editing that cell, but really I'm just displaying a similar JButton */
-		JButton editButton;
+		private JButton editButton;
 		/** A reference to the original object which is stored while editing(displaying editButton) */
-		Object editObject=null;
+		private Object editObject=null;
 
 		public ButtonColumn()
 		{

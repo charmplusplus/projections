@@ -253,7 +253,7 @@ Clickable
 	}
 
 
-	void constructToolData(final  long startTime, final long endTime ) {
+	private void constructToolData(final  long startTime, final long endTime ) {
 		// construct the necessary meta-data given the selected activity
 		// type.
 		double[][] tempData;
@@ -524,7 +524,7 @@ Clickable
 	// This method will read the stats file generated during online
 	// outlier analysis which will then determine which processor's
 	// log data to read.
-	void readOutlierStats(final long startTime, final long endTime) {
+	private void readOutlierStats(final long startTime, final long endTime) {
 		Color[] tempGraphColors;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(selectedActivity);

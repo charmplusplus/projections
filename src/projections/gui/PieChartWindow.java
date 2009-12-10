@@ -14,47 +14,47 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-public class PieChartWindow extends Frame{
+class PieChartWindow extends Frame{
 
 	// Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
-    int myRun = 0;
+    private int myRun = 0;
 
 //    private MainWindow      mainWindow;
-    MyPanel         displayPanel;
-    float[]         data;
-    int             dataLen;
-    float           thresh;
-    int[][]         arc;        // An array of arcs, storing its starting degree, ending degree and index in data that it correlates to
-    int             numArcs;
-    Color[]         colors;
-    int             leftBuf;
+    private MyPanel         displayPanel;
+    private float[]         data;
+    private int             dataLen;
+    private float           thresh;
+    private int[][]         arc;        // An array of arcs, storing its starting degree, ending degree and index in data that it correlates to
+    private int             numArcs;
+    private Color[]         colors;
+    private int             leftBuf;
 	private int rightBuf;
-	int topBuf;
+	private int topBuf;
 	private int bottomBuf;
-    String[][]      names;
+    private String[][]      names;
 
     // PieChart Values
-    int             diameter;
-    int             centerX;
-	int centerY;
-	int 			numEntries;
+    private int             diameter;
+    private int             centerX;
+	private int centerY;
+	private int 			numEntries;
 
     // Flags
-    int             outOfRadius;
-    int             hasChanged;
+    private int             outOfRadius;
+    private int             hasChanged;
     
     // Cursor values
-    int 			currX;
-	int currY;
-    int 			dist;
-    int 			degree;
-    int 			currArcIndex;
+    private int 			currX;
+	private int currY;
+    private int 			dist;
+    private int 			degree;
+    private int 			currArcIndex;
 	
     // Bubble values
-    Bubble			bubble;
-    String[]		bString;
+    private Bubble			bubble;
+    private String[]		bString;
 
     /* PieChartWindow Constructor
      * inputs
@@ -140,7 +140,7 @@ public class PieChartWindow extends Frame{
     }
 
 
-    class MyPanel extends Panel implements MouseMotionListener{
+    private class MyPanel extends Panel implements MouseMotionListener{
 		private PieChartWindow pcw;
 	
         private MyPanel(PieChartWindow pcw){

@@ -170,13 +170,13 @@ public class NoiseMiner extends ProjDefs
 	 * <Integer>
 	 *  */
 	public class NoiseResult implements Comparable{
-		protected TreeSet<Integer> pes; // list of processors on which the event occurs
+		private TreeSet<Integer> pes; // list of processors on which the event occurs
 		public Duration duration; // The amount of time spend in the noise
 		public long occurrences; // The number of times this event occurred
 		public EventWindow ew; 
 		
 		
-		protected Duration period(){
+		private Duration period(){
 			return ew.period();
 		}
 		  
@@ -189,7 +189,7 @@ public class NoiseMiner extends ProjDefs
 			occurrences = o;
 		}
 
-		protected String pe_toString(){
+		private String pe_toString(){
 			String s = "";
 			Iterator<Integer> itr = pes.iterator();
 			while(itr.hasNext()){
@@ -203,14 +203,14 @@ public class NoiseMiner extends ProjDefs
 		}
 
 		/** A distance measure between this and another NoiseResult. Incorporates the duration */
-		protected double distance(NoiseResult nr){
+		private double distance(NoiseResult nr){
 			double result = 0.0;
 //			result += 0.1 * (Math.abs((double)periodicity.us() - (double)nr.periodicity.us()) / Math.max((double)periodicity.us(),(double)nr.periodicity.us()));
 			result += 1.0 * (Math.abs(duration.us() - nr.duration.us()) / Math.max(duration.us(),nr.duration.us()));
 			return result;
 		}
 
-		protected void merge(NoiseResult nr){
+		private void merge(NoiseResult nr){
 			pes.addAll(nr.pes);
 			duration.set_us((duration.us() * occurrences + nr.duration.us() * nr.occurrences) / (occurrences+nr.occurrences));
 			occurrences += nr.occurrences;
@@ -280,20 +280,20 @@ public class NoiseMiner extends ProjDefs
 		public TreeSet<TimelineEvent> occurrences; // essentially a sorted list or heap
 		private int max;
 
-		EventWindow(int maxSize){
+		private EventWindow(int maxSize){
 			occurrences = new TreeSet<TimelineEvent>();
 			max = maxSize;
 		}
 
 		/** Need to keep track of the time, duration, and event id, PE of the event, not just the time */
-		protected void insert(TimelineEvent e){
+		private void insert(TimelineEvent e){
 			occurrences.add(e);
 			if(occurrences.size() > max){
 				occurrences.remove(occurrences.first());
 			}
 		}
 
-		protected void merge(EventWindow ew){
+		private void merge(EventWindow ew){
 			Iterator<TimelineEvent> itr = ew.occurrences.iterator();
 			while(itr.hasNext()){
 				TimelineEvent v =  itr.next();
@@ -317,7 +317,7 @@ public class NoiseMiner extends ProjDefs
 		}
 
 		/** find the average period between the events in the window */
-		protected Duration period(){
+		private Duration period(){
 			Duration d = new Duration();
 			d.set_us((getLast().BeginTime-getFirst().BeginTime) / occurrences.size());
 			return d;
@@ -430,7 +430,7 @@ public class NoiseMiner extends ProjDefs
 
 	class Histogram{
 		protected long bin_count[]; //< The number of values that fall in each bin
-		protected Duration bin_sum[]; //< The sum of all values that fall in each bin
+		private Duration bin_sum[]; //< The sum of all values that fall in each bin
 
 		private EventWindow bin_window[]; //< A list of recent events in each bin
 		
@@ -639,7 +639,7 @@ public class NoiseMiner extends ProjDefs
 		}
 
 
-		protected String clusters_toString(List<Cluster> clusters){
+		private String clusters_toString(List<Cluster> clusters){
 			String result = "";
 			Iterator<Cluster> i = clusters.listIterator();
 			while(i.hasNext()){
@@ -721,8 +721,8 @@ public class NoiseMiner extends ProjDefs
 	
 
 	class Event implements Comparable {
-		protected int event;
-		protected int userEvent;
+		private int event;
+		private int userEvent;
 
 		protected Event(int e, int u){
 			event = e;
@@ -814,9 +814,9 @@ public class NoiseMiner extends ProjDefs
 	
 	/** An extended JButton that also contains a reference to some NoiseMiner results */
 	public class NoiseResultButton extends JButton {
-		protected NoiseResult nr;
+		private NoiseResult nr;
 
-		protected NoiseResultButton(String label, NoiseResult nr){
+		private NoiseResultButton(String label, NoiseResult nr){
 			super(label);
 			this.nr = nr;
 		}
@@ -835,7 +835,7 @@ public class NoiseMiner extends ProjDefs
 		private long count;
 		EventWindow events;
 	
-		Cluster(Duration s, long c, EventWindow ew){
+		private Cluster(Duration s, long c, EventWindow ew){
 			sum = new Duration(s);
 			count=c;
 //			assert(c>=0);
@@ -843,7 +843,7 @@ public class NoiseMiner extends ProjDefs
 			events.merge(ew);
 		}
 		
-		Cluster(double s_us, long c, EventWindow ew){
+		private Cluster(double s_us, long c, EventWindow ew){
 //			assert s_us>=0 : ("s_us=" + s_us);
 			sum= new Duration(s_us);
 			count=c;
@@ -853,7 +853,7 @@ public class NoiseMiner extends ProjDefs
 		}
 		
 		
-		protected void merge(Duration s, long c, EventWindow ew){
+		private void merge(Duration s, long c, EventWindow ew){
 			sum.add(s);
 			count += c;
 //			assert(c>=0);
@@ -877,7 +877,7 @@ public class NoiseMiner extends ProjDefs
 //			assert(count>=0);
 			return count;
 		}
-		Duration sum(){
+		private Duration sum(){
 //			assert(sum.d>=0.0);
 			return sum;
 		}

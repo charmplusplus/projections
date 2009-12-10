@@ -29,15 +29,15 @@ import projections.gui.OrderedIntList;
 import projections.gui.ScalePanel;
 import projections.gui.U;
 
-public class OverviewPanel extends ScalePanel.Child
+class OverviewPanel extends ScalePanel.Child
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
-	int[][] entryData;   // [pe][interval]
+	private int[][] entryData;   // [pe][interval]
 
 	// idleData & mergedData (for supporting - utilization for now - 
 	// the other two data formats)
@@ -50,11 +50,11 @@ public class OverviewPanel extends ScalePanel.Child
 	private int nPe;//Number of processors
 	private OrderedIntList selectedPEs;
 	private long startTime,endTime;
-	int startInterval;
-	int endInterval;
-	int numEPs;
+	private int startInterval;
+	private int endInterval;
+	private int numEPs;
 
-	boolean saveImage;
+	private boolean saveImage;
 	
 	private ColorMap colorMap;
 
@@ -109,7 +109,7 @@ public class OverviewPanel extends ScalePanel.Child
 		return "";
 	}
 
-	String entryName(int entry){
+	private String entryName(int entry){
 		if(entry < numEPs) {
 			return MainWindow.runObject[myRun].getEntryNameByIndex(entry);
 		} else if(entry == numEPs) {
@@ -225,7 +225,7 @@ public class OverviewPanel extends ScalePanel.Child
 		colorMap=cm;
 	}
 
-	void applyColorMap(int [][]data, boolean entryBased) {
+	private void applyColorMap(int [][]data, boolean entryBased) {
 		if (!entryBased) {
 			/**
 			 * Convert processor usage (0..100) to color values.
@@ -303,7 +303,7 @@ public class OverviewPanel extends ScalePanel.Child
 	}
 
 	/** Setup the time ranges before loading the EP or utilization data */
-	public void setRanges(OrderedIntList selectedPEs, long startTime, long endTime)
+	protected void setRanges(OrderedIntList selectedPEs, long startTime, long endTime)
 	{
 		this.selectedPEs = selectedPEs;
 		this.startTime = startTime;
@@ -337,7 +337,7 @@ public class OverviewPanel extends ScalePanel.Child
 	 *  is most prominent in each interval, and also the utilization 
 	 *  for each interval */
 	
-	public void loadData(boolean saveImage) {
+	protected void loadData(boolean saveImage) {
 		if (!MainWindow.runObject[myRun].hasLogData()) {
 			System.err.println("No log files are available.");
 			JOptionPane.showMessageDialog(null, "No log files are available.");
@@ -387,12 +387,12 @@ public class OverviewPanel extends ScalePanel.Child
 		
 	}
 
-	public void colorByEntry() {
+	protected void colorByEntry() {
 		mode = OverviewWindow.MODE_EP;
 		applyColorMap(entryData, true);
 	}
 
-	public void colorByUtil() {
+	protected void colorByUtil() {
 		mode = OverviewWindow.MODE_UTILIZATION;
 		applyColorMap(utilData, false);
 	}

@@ -54,7 +54,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 	private JRadioButton colorByUtil;
 
 	private ScalePanel scalePanel;
-	OverviewPanel stl;
+	private OverviewPanel stl;
 	private Label status;
 	// Modified to display data by entry method color. Mode panel.
 	protected static final int MODE_UTILIZATION = 0;
@@ -62,7 +62,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 
 	private ColorMap utilColorMap;
 
-	OverviewWindow thisWindow;
+	private OverviewWindow thisWindow;
 
 	
 	public OverviewWindow(MainWindow mainWindow)
@@ -199,7 +199,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		setMenuBar(mbar);
 	} 
 	
-	OverviewDialogExtension toolSpecificPanel;
+	private OverviewDialogExtension toolSpecificPanel;
 
 	public void showDialog()
 	{

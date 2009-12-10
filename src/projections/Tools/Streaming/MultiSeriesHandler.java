@@ -33,7 +33,7 @@ import projections.ccs.CcsProgress;
 import projections.ccs.CcsThread;
 import projections.misc.LogLoadException;
 
-public class MultiSeriesHandler {
+class MultiSeriesHandler {
 
 	private CcsThread ccs;
 	private String ccsHandler;
@@ -51,10 +51,10 @@ public class MultiSeriesHandler {
 	private StsReader sts;
 
 	/** A chart holds the sizes of the received messages */
-//	DefaultTableXYDataset sizeDataset;
+private //	DefaultTableXYDataset sizeDataset;
 	XYSeries sizeDataSeries;
 //	XYPlot sizePlot;
-	int numSizesSoFar = 0;
+	private int numSizesSoFar = 0;
 
 
 	/** A chart holding the scrolling stacked utilization  */
@@ -68,8 +68,8 @@ public class MultiSeriesHandler {
 
 
 	/** Store the portion of the dataset that is to be plotted */
-	TreeMap<Integer, TreeMap<String, Double> > streamingData;
-	ArrayList<String> categories;
+	private TreeMap<Integer, TreeMap<String, Double> > streamingData;
+	private ArrayList<String> categories;
 	Vector<byte[]> detailedData;
 
 	private int updateCount = 0;
@@ -133,7 +133,7 @@ public class MultiSeriesHandler {
 
 
 	/** A driver routine that pulls previously stored CCS replies from a file and feeds them to the plotting routines */
-	public class ReadDataFromFileDriver implements Runnable {
+	private class ReadDataFromFileDriver implements Runnable {
 
 		private void driver(){
 			if(loadRepliesFromFile){
@@ -178,7 +178,7 @@ public class MultiSeriesHandler {
 
 
 	/** An unused handler for CCS progress messages. */
-	public class progressHandler implements CcsProgress {
+	private class progressHandler implements CcsProgress {
 		public progressHandler(){ }
 		public void setText(String s) {	}
 	}
@@ -244,7 +244,7 @@ public class MultiSeriesHandler {
 
 
 	/** Create a window with the stacked utilization plot in it. Uses the jfreechart package. */
-	public void createDetailedUtilizationChart(){
+	private void createDetailedUtilizationChart(){
 
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -289,7 +289,7 @@ public class MultiSeriesHandler {
 
 
 	/** Create a window with the stacked utilization plot in it. Uses the jfreechart package. */
-	public void createStackedUtilizationChart(){
+	private void createStackedUtilizationChart(){
 
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 
@@ -334,7 +334,7 @@ public class MultiSeriesHandler {
 
 
 	/** Create a window and plot for the message sizes. */
-	public void createMessageSizeChart(){
+	private void createMessageSizeChart(){
 
 		sizeDataSeries = new XYSeries("CCS Reply Message Sizes", true, false);
 
@@ -381,7 +381,7 @@ public class MultiSeriesHandler {
 
 
 	/** add a data point to the plot. updatePlot needs to be called after this */
-	void addDataPointToPlot(Double utilization, String epName, Integer nextXValue){
+	private void addDataPointToPlot(Double utilization, String epName, Integer nextXValue){
 		if(!categories.contains(epName)){
 			categories.add(epName);
 		}
@@ -410,7 +410,7 @@ public class MultiSeriesHandler {
 
 
 	/** Update all the plots */		
-	void updatePlots(){
+	private void updatePlots(){
 		updateStreamingPlot();
 		updateCount ++;
 		if(updateCount % 20 == 0){
@@ -419,7 +419,7 @@ public class MultiSeriesHandler {
 	}
 
 
-	void addKnownCategories(Integer xValue, DefaultCategoryDataset dataset){
+	private void addKnownCategories(Integer xValue, DefaultCategoryDataset dataset){
 		dataset.addValue(0.0, "Other", xValue);
 		Iterator<String> categoryIter = categories.iterator();
 		while(categoryIter.hasNext()){
@@ -431,7 +431,7 @@ public class MultiSeriesHandler {
 	}
 
 
-	String getName(int ep, int numEPs){
+	private String getName(int ep, int numEPs){
 		String epName;
 		if(ep >= 0 && ep < numEPs){
 			if(sts == null){
@@ -515,7 +515,7 @@ public class MultiSeriesHandler {
 
 
 	/** replace the streaming chart with a new updated version */
-	void updateStreamingPlot(){
+	private void updateStreamingPlot(){
 
 		DefaultCategoryDataset newDataset = new DefaultCategoryDataset();
 
@@ -552,7 +552,7 @@ public class MultiSeriesHandler {
 
 
 	/** Deserialize the incoming CCS reply message and plot it */
-	void processIncomingData(byte[] data) {
+	private void processIncomingData(byte[] data) {
 		//		System.out.println("processIncomingData(byte[] data) data.length=" + data.length);
 		detailedData.add(data);
 

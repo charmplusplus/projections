@@ -16,22 +16,22 @@ import org.jfree.data.xy.XYSeries;
 import projections.ccs.CcsProgress;
 import projections.ccs.CcsThread;
 
-public class SingleSeriesHandler {
+class SingleSeriesHandler {
 
-	CcsThread ccs;
+	private CcsThread ccs;
 
-	Vector<Float> averageTimes;
-	Vector<Float> allTimes;
+	private Vector<Float> averageTimes;
+	private Vector<Float> allTimes;
 
-	XYPlot plot;
+	private XYPlot plot;
 
 	private String server;
 	private String ccsHandler;
 
-	static boolean REDO_DISPLAY_EACH_TIME = false;
+	private static boolean REDO_DISPLAY_EACH_TIME = false;
 
-	XYSeries dataSeries;
-	DefaultTableXYDataset dataset;
+	private XYSeries dataSeries;
+	private DefaultTableXYDataset dataset;
 	
 	
 
@@ -148,7 +148,7 @@ public class SingleSeriesHandler {
 	}
 
 	/** Generate the plot that will now be displayed */
-	public void updatePlot(){
+	private void updatePlot(){
 
 		if(REDO_DISPLAY_EACH_TIME){
 
@@ -185,7 +185,7 @@ public class SingleSeriesHandler {
 
 
 	/** Create a window with a simple plot in it. Uses the publicly available jfreechart package. */
-	public void createPlotInFrameJFreeChart(){
+	private void createPlotInFrameJFreeChart(){
 		dataset = new DefaultTableXYDataset();
 
 		if(! REDO_DISPLAY_EACH_TIME){

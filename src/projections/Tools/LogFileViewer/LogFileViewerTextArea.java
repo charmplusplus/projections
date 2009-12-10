@@ -27,13 +27,13 @@ import projections.misc.LogEntryData;
  */ 
 
 
-public class LogFileViewerTextArea extends JPanel
+class LogFileViewerTextArea extends JPanel
 {
 
-	static int myRun = 0;
+	private static int myRun = 0;
 
-	public JTextPane textPane;
-	public JScrollPane scrollPane;
+	private JTextPane textPane;
+	private JScrollPane scrollPane;
 
 
 	public LogFileViewerTextArea() {
@@ -58,7 +58,7 @@ public class LogFileViewerTextArea extends JPanel
 	
 	
  
-	public void setPE(int PE, long startTime, long endTime) {
+	protected void setPE(int PE, long startTime, long endTime) {
  
 		if (!(MainWindow.runObject[myRun].hasLogData())){
 			textPane.setText("<h1>ERROR: Don't have any log data</h1>");

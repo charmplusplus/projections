@@ -55,12 +55,12 @@ implements ActionListener, ItemListener, ColorSelectable,
 Clickable
 {
 
-	ExtremaWindow thisWindow;
+	private ExtremaWindow thisWindow;
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	static int myRun = 0;
+	private static int myRun = 0;
 
 	// private dialog data
 	private int threshold;
@@ -77,7 +77,7 @@ Clickable
 
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
-	public String attributes[][] = {
+	private String attributes[][] = {
 			{ "Execution Time by Activity <not yet implemented>",
 				"Least Idle Time",
 				"Msgs Sent by Activity <not yet implemented>", 
@@ -114,6 +114,8 @@ Clickable
 	private final static int ATTR_GRAINSIZE = 7;
 
 		
+	private JButton bAddToTimelineJButton;
+
 	// derived data after analysis
 	private LinkedList outlierList;
 
@@ -147,8 +149,6 @@ Clickable
 			showDialog();
 		}
 	}
-
-	JButton bAddToTimelineJButton;
 
 	private void createLayout() {
 		bAddToTimelineJButton =  new JButton("Add Top 5 Extrema PEs to Timeline");
@@ -218,7 +218,7 @@ Clickable
 		setJMenuBar(mbar);
 	}
 
-	ExtremaDialogExtension outlierDialogPanel;
+	private ExtremaDialogExtension outlierDialogPanel;
 
 
 	public void showDialog() {

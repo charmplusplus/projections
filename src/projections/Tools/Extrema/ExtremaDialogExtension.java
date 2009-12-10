@@ -20,7 +20,7 @@ import projections.gui.Util;
 
 /** The dialog input panel for the  OutlierAnalysisWindow */
 
-public class ExtremaDialogExtension extends RangeDialogExtensionPanel
+class ExtremaDialogExtension extends RangeDialogExtensionPanel
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -36,10 +36,10 @@ public class ExtremaDialogExtension extends RangeDialogExtensionPanel
 	private JIntTextField kField;
 	private JTextArea errorText;
 
-	JLabel attributeLabel;
-	JLabel activityLabel;
-	JLabel thresholdPost;
-	JLabel thresholdLabel;
+	private JLabel attributeLabel;
+	private JLabel activityLabel;
+	private JLabel thresholdPost;
+	protected JLabel thresholdLabel;
 	
 	
 	public ExtremaDialogExtension(String[] attributes) {

@@ -12,12 +12,12 @@ import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.Util;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by providing the granularity at which the time range should be discretized. */
-public class OverviewDialogExtension extends RangeDialogExtensionPanel implements ItemListener
+class OverviewDialogExtension extends RangeDialogExtensionPanel implements ItemListener
 {
 
 	// Additional GUI objects
 
-	public JCheckBox cbGenerateImage;
+	protected JCheckBox cbGenerateImage;
 	
 	// A reference to the parent dialog box that I'm extending
 //	RangeDialog parent;

@@ -11,11 +11,11 @@ package projections.misc;
 public class ProjectionsStatistics {
 
     // "temporaries" for one set of data
-    protected long count;
-    protected double sum;
-    protected double sumOfSquares;
+    private long count;
+    private double sum;
+    private double sumOfSquares;
     protected double max;
-    protected double min;
+    private double min;
 
     public ProjectionsStatistics() {
     }

@@ -72,7 +72,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	// Constant variables
 	private static final int DIALOG_OK = 0;
@@ -572,7 +572,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		someInputChanged();
 	}
 
-	Vector<String> availableStepStrings;
+	private Vector<String> availableStepStrings;
 //	Vector<String> availableStepStringsEnd;
 	Vector<Long> availableStepTimes;
 
@@ -661,7 +661,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	
 	public final class PopupHandler implements ActionListener {
 
-		boolean useForStart = false;
+		private boolean useForStart = false;
 		boolean useForEnd = false;
 		
 		public void actionPerformed(ActionEvent e) {

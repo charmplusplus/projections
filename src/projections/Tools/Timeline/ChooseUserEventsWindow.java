@@ -111,7 +111,7 @@ class ChooseUserEventsWindow extends JFrame
 	}
 	
 
-	class MyTableModel extends AbstractTableModel {
+	private class MyTableModel extends AbstractTableModel {
 
 		public boolean isCellEditable(int row, int col) {
 			if (col >= 1) {
@@ -174,7 +174,7 @@ class ChooseUserEventsWindow extends JFrame
 
 	
     /// A simple color renderer
-	class ColorRenderer extends JLabel
+	private class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
 		private ColorRenderer() {
 			setOpaque(true);

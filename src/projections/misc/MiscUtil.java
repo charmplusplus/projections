@@ -1,13 +1,13 @@
 package projections.misc;
 
-public class MiscUtil {
+class MiscUtil {
     /**
      *  The sort method returns the mapping resulting from the sorting of 
      *  "unsorted". A simple bubble sort algorithm is used since this 
      *  mapping feature is unlikely to be used in large data sets.
      *  As a side effect, the input array also becomes sorted.
      */ 
-    public static int[] sortAndMap(int unsorted[]) {
+    protected static int[] sortAndMap(int unsorted[]) {
 	int map[];
 	int length;
 	int temp;
@@ -62,7 +62,7 @@ public class MiscUtil {
      *  Uses on primitive arrays should first convert it to objects and
      *  then back again.
      */
-    public static void applyMap(Object targetArray[], int map[]) {
+    protected static void applyMap(Object targetArray[], int map[]) {
 	if (targetArray.length != map.length) {
 	    throw new ArrayIndexOutOfBoundsException("Sizes do not match!");
 	}

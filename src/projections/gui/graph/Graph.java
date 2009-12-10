@@ -59,13 +59,13 @@ public class Graph extends JPanel
 
 
     // number of pixels per value
-    double pixelincrementX, pixelincrementY;
+    private double pixelincrementX, pixelincrementY;
     // number of pixels per tick
-    double tickIncrementX;
+    private double tickIncrementX;
 
     // "best" values to be derived from pixelincrements
-    long valuesPerTickX, valuesPerLabelX;
-    long valuesPerTickY, valuesPerLabelY;
+    private long valuesPerTickX, valuesPerLabelX;
+    private long valuesPerTickY, valuesPerLabelY;
 
     private double barWidth;
 

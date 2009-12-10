@@ -5,23 +5,23 @@ import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
-public class ThreadedFileReader extends Thread  {
+class ThreadedFileReader extends Thread  {
 
-	int pe;
+	private int pe;
 //	int p;  // Which index am I into the flattened array of potentially sparse pe's
-	long intervalSize;
-	int myRun;
-	int startInterval;
+	private long intervalSize;
+	private int myRun;
+	private int startInterval;
 	int endInterval;
 //	boolean ampiTraceOn;
 
-	int[][][] mySystemUsageData;   // [type][pe list index][interval]
+	private int[][][] mySystemUsageData;   // [type][pe list index][interval]
 //	int[][][][] mySystemMsgsData;  // [categoryIdx][type][][]
-	int[][][][] myUserEntryData;   // [ep idx][type][pe][]
+	private int[][][][] myUserEntryData;   // [ep idx][type][pe][]
 	
 //	long logReaderIntervalSize;
 	
-	int entryData[];       // [interval]  which EP is most prevalent in each interval
+	private int entryData[];       // [interval]  which EP is most prevalent in each interval
 	float utilizationData[]; // [interval]  Utilization for each interval
 
 	
@@ -31,7 +31,7 @@ public class ThreadedFileReader extends Thread  {
 	 * @param utilizationData 
 	 *  
 	 *  */
-	public ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData){
+	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData){
 		this.pe = pe;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
@@ -68,7 +68,7 @@ public class ThreadedFileReader extends Thread  {
 	 * If this class is extended for other tools, this might need to be handled differently.
 	 *  
 	 */
-	public void LoadGraphDataForOnePe(long intervalSize, 
+	private void LoadGraphDataForOnePe(long intervalSize, 
 			int intervalStart, int intervalEnd,
 			boolean byEntryPoint, 
 			int pe) 

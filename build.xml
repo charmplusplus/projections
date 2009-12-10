@@ -34,10 +34,10 @@ author = idooley2
 	<property name="jfreechart.version" value="1.0.9" />
 	<property name="jcommon.name" value="jcommon" />
 	<property name="jcommon.version" value="1.0.12" />
-	<property name="jfreechart.jar" value="lib/${jfreechart.name}-${jfreechart.version}.jar" />
-	<property name="jfreechart-experimental.jar" value="lib/${jfreechart.name}-${jfreechart.version}-experimental.jar" />
-	<property name="jcommon.jar" value="lib/${jcommon.name}-${jcommon.version}.jar"/>
-	<property name="itext.jar" value="lib/itext-2.0.6.jar"/>
+	<property name="jfreechart.jar" value="src/${jfreechart.name}-${jfreechart.version}.jar" />
+	<property name="jfreechart-experimental.jar" value="src/${jfreechart.name}-${jfreechart.version}-experimental.jar" />
+	<property name="jcommon.jar" value="src/${jcommon.name}-${jcommon.version}.jar"/>
+	<property name="itext.jar" value="src/itext-2.0.6.jar"/>
 		  
   	
   	<path id="build.classpath">
@@ -54,12 +54,12 @@ author = idooley2
   <target name="compile" depends="init" description="compile the source" >
 
 	<javac sourcepath="" 
-	       srcdir="." 
+	       srcdir="src" 
 	       destdir="build" 
 	       debug="${compile.debug}"
 	       deprecation="${compile.deprecation}"
-	       target="1.5"
-	       source="1.5"
+	       target="1.6"
+	       source="1.6"
 	       optimize="${compile.optimize}" >
 	  <classpath refid="build.classpath" />
 	  <include name="**/*"/>
@@ -73,10 +73,10 @@ author = idooley2
    
     <!-- Copy images over -->
     <mkdir dir="build/projections/images"/>
-    <copy file="projections/images/bgimage.jpg" tofile="build/projections/images/bgimage.jpg" />
-    <copy file="projections/images/ZoomIn24.gif" tofile="build/projections/images/ZoomIn24.gif" />
-    <copy file="projections/images/ZoomOut24.gif" tofile="build/projections/images/ZoomOut24.gif" />
-    <copy file="projections/images/noSummary.jpg" tofile="build/projections/images/noSummary.jpg" />
+    <copy file="src/projections/images/bgimage.jpg" tofile="build/projections/images/bgimage.jpg" />
+    <copy file="src/projections/images/ZoomIn24.gif" tofile="build/projections/images/ZoomIn24.gif" />
+    <copy file="src/projections/images/ZoomOut24.gif" tofile="build/projections/images/ZoomOut24.gif" />
+    <copy file="src/projections/images/noSummary.jpg" tofile="build/projections/images/noSummary.jpg" />
     <jar jarfile="bin/projections.jar" basedir="build">
 		<zipfileset src="${jfreechart.jar}"/>
 		<zipfileset src="${jfreechart-experimental.jar}"/>

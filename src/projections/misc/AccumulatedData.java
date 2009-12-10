@@ -1,8 +1,8 @@
 
 // UNUSED FILE -- says Isaac
 
+package projections.misc;
 
-//package projections.misc;
 //
 //import projections.gui.*;
 //import projections.analysis.*;

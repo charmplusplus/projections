@@ -92,6 +92,11 @@ author = idooley2
     <!-- Delete the build directory -->
     <delete dir="build"/>
     <delete file="bin/projections.jar"/>
+
+    <delete>
+            <fileset dir="." includes="**/*.class"/>
+   </delete>
+
   </target>
 
 

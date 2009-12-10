@@ -35,10 +35,10 @@ import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
 
 public class TableSorter extends TableMap {
-	int             indexes[];
-    Vector          sortingColumns = new Vector();
-    boolean         ascending = true;
-    int compares;
+	private int             indexes[];
+    private Vector          sortingColumns = new Vector();
+    private boolean         ascending = true;
+    private int compares;
 
     public TableSorter() {
         indexes = new int[0]; // for consistency

@@ -86,7 +86,7 @@ class AxisOverlayPanel extends JPanel implements MouseListener, MouseMotionListe
 	}
 
 
-	class MyListener implements ComponentListener {
+	private class MyListener implements ComponentListener {
 
 		public void componentHidden(ComponentEvent e) {
 			// TODO Auto-generated method stub

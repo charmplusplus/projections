@@ -1956,4 +1956,11 @@ public class Data
 		minEntryDuration = l;
 	}
 	
+	public void displayLegend() {
+ 		if(memoryUsageValid()){
+			new MemoryLegend(this);
+		}
+
+	}
+	
 }

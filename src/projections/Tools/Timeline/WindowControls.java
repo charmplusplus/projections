@@ -101,6 +101,8 @@ ItemListener {
 	private JCheckBoxMenuItem cbDontLoadIdle;
 	
 
+	private JMenuItem mDisplayLegend;
+	
 	protected WindowControls(TimelineWindow parentWindow_,
 			Data data_) {
 
@@ -343,6 +345,10 @@ ItemListener {
 			data.printUserEventInfo();
 		}
 		
+		else if(evt.getSource() == mDisplayLegend){
+			data.displayLegend();
+		}
+		
 		else if(evt.getSource() == mDetermineTimeRangesUserSupplied){
 			new UserSuppliedAnalyzer(data);
 		}
@@ -521,6 +527,10 @@ ItemListener {
 		cbNestedUserEvents.addItemListener(this);
 		viewMenu.add(cbNestedUserEvents);
 
+		mDisplayLegend = new JMenuItem("Display Legend");
+		mDisplayLegend.addActionListener(this);
+		viewMenu.add(mDisplayLegend);
+		
 		mbar.add(viewMenu);
 
 		// Experimental Features Menu

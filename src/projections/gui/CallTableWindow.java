@@ -25,14 +25,14 @@ class CallTableWindow extends ProjectionsWindow
     implements ItemListener
 {
 
-	CallTableWindow      thisWindow;    
+	private CallTableWindow      thisWindow;    
     
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
 	private int myRun = 0;
     
-    CallTableTextArea    textArea;
+    private CallTableTextArea    textArea;
     private Label                lTitle;
     private Panel                titlePanel;
 
@@ -51,14 +51,14 @@ class CallTableWindow extends ProjectionsWindow
     private Checkbox		 statsOn;
     private Checkbox		 statsOff;
     
-    protected OrderedIntList        validPEs;
-    protected long                  startTime;
-    protected long                  endTime;
+    private OrderedIntList        validPEs;
+    private long                  startTime;
+    private long                  endTime;
     
-    CallTable            ct;
+    private CallTable            ct;
     
-    boolean              epDetailToggle;
-    boolean              statsToggle;
+    private boolean              epDetailToggle;
+    private boolean              statsToggle;
   
 
     protected CallTableWindow(MainWindow parentWindow ) {

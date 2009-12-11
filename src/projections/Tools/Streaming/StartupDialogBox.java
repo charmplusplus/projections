@@ -19,16 +19,15 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 
-@SuppressWarnings("serial")
-public class StartupDialogBox extends JFrame implements ActionListener, ItemListener {
+@SuppressWarnings("serial") class StartupDialogBox extends JFrame implements ActionListener, ItemListener {
 
 	JButton connectButton;
-	JTextField portTextField;
-	JTextField hostnameTextField;
-	JTextField stsFilenameTextField;
-	JComboBox handlerComboBox;
-	JCheckBox saveRepliesCheckBox;
-	JCheckBox loadRepliesCheckBox;
+	private JTextField portTextField;
+	private JTextField hostnameTextField;
+	private JTextField stsFilenameTextField;
+	private JComboBox handlerComboBox;
+	private JCheckBox saveRepliesCheckBox;
+	private JCheckBox loadRepliesCheckBox;
 	
 	StartupDialogBox(){
 

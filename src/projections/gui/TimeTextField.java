@@ -42,7 +42,7 @@ public class TimeTextField extends JTextField
     // this input is passed to 'U' class later which interprets any 
     // other illegal value as 0
 
-    class TimeFieldVerifier extends InputVerifier {
+    private class TimeFieldVerifier extends InputVerifier {
 	public boolean verify(JComponent input) {
 	    JTextField tf = (JTextField) input;
 	    String time = tf.getText();

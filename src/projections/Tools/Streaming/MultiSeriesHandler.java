@@ -70,7 +70,7 @@ private //	DefaultTableXYDataset sizeDataset;
 	/** Store the portion of the dataset that is to be plotted */
 	private TreeMap<Integer, TreeMap<String, Double> > streamingData;
 	private ArrayList<String> categories;
-	Vector<byte[]> detailedData;
+	private Vector<byte[]> detailedData;
 
 	private int updateCount = 0;
 
@@ -450,7 +450,7 @@ private //	DefaultTableXYDataset sizeDataset;
 	}
 
 
-	void updateDetailedPlot(){
+	private void updateDetailedPlot(){
 
 		DefaultCategoryDataset newDataset = new DefaultCategoryDataset();
 

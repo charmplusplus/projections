@@ -74,7 +74,7 @@ public class ScalePanel extends Panel
 	 * It maintains its direction's zoom slider and the scaling 
 	 * factors.
 	 */
-	public class Axis implements ScaleSlider.ValueListener {
+	private class Axis implements ScaleSlider.ValueListener {
 		private String direction;//"Horizontal" or "Vertical", for status reports
 		private double screen,screenInv;//Length of screen
 		private double p2scale,p2off;//Panel->norm. screen conversion

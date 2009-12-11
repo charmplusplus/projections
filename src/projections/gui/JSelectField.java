@@ -181,7 +181,7 @@ class JSelectField extends JTextField
 
     /* verify if the input characters are valid or not */
 
-    class RangeVerifier extends InputVerifier {
+    class RangeVerifier extends InputVerifier { // NO_UCD
     	public boolean verify(JComponent input) {
     		JTextField tf = (JTextField) input;
     		String procRange = tf.getText();

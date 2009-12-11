@@ -9,7 +9,7 @@ import java.io.FilenameFilter;
  *  ProjectionsFileMgr is given a list of sts fileNames, and it looks through
  *  the directory and tries to find the associated projection log files for 
  *  each sts file. */
-public class ProjectionsFileMgr {
+class ProjectionsFileMgr {
   // WHAT IF sts NOT IN CORRECT POSITION
   // WHAT IF NO ASSOCIATED LOG FILES?!?
 
@@ -111,7 +111,7 @@ public class ProjectionsFileMgr {
   private File[]   stsFiles_ = null;  // array of sts files (passed in)
   private File[][] logFiles_ = null;  // for each sts file, the associated logs
 
-  String base_ = null;       // use temporarily while processing filenames
-  String extention_ = null;  // use temporarily while processing filenames
+  private String base_ = null;       // use temporarily while processing filenames
+  private String extention_ = null;  // use temporarily while processing filenames
 }
 

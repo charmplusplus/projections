@@ -2,7 +2,7 @@ package projections.gui;
 
 
 /** Store data that is used by the range dialog boxes for all the tools */
-public class RangeDialogPersistantData {
+public class RangeDialogPersistantData { // NO_UCD
 
 	protected OrderedIntList plist;
 	protected long begintime;

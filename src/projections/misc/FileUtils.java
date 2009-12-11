@@ -26,6 +26,7 @@ public class FileUtils {
 	
 	public static String getBaseName(String filename) {
 		String baseName = null;
+		System.out.println("filename = " + filename);
 		if (filename.endsWith(".sum.sts")) {
 			baseName = filename.substring(0, filename.length()-8);
 		} else if (filename.endsWith(".sts")) {
@@ -40,10 +41,10 @@ public class FileUtils {
 	public static String dirFromFile(String filename) {
 		// pre condition - filename is a full path name
 		int index = filename.lastIndexOf(File.separator);
-		if (index != -1) {
+		if (index > -1) {
 			return filename.substring(0,index);
 		}
-		return(".");	// present directory
+		return("./");	// present directory
 	}
 
 	

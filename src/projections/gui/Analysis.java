@@ -66,7 +66,7 @@ public class Analysis {
   
   private IntervalData intervalData; // interval-based data
 
-  private String baseName;
+  private String baseName; 
   
   
   /** Stores previous selections from a range dialog box from all tools */
@@ -142,6 +142,8 @@ public class Analysis {
 	  guiRoot = rootComponent;
 	  try {
 		  baseName = FileUtils.getBaseName(filename);
+		  loadBalancer.init();
+
 		  setSts(new StsReader(filename));
 
 		  // Version Check (Kind of a hack, since the format of the Sts file
@@ -205,7 +207,6 @@ public class Analysis {
 		  throw new IOException(e.toString());
 	  }
 	  
-	  loadBalancer.init();
 	  
     }
 

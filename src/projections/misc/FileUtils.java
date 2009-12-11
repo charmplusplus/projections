@@ -26,7 +26,6 @@ public class FileUtils {
 	
 	public static String getBaseName(String filename) {
 		String baseName = null;
-		System.out.println("filename = " + filename);
 		if (filename.endsWith(".sum.sts")) {
 			baseName = filename.substring(0, filename.length()-8);
 		} else if (filename.endsWith(".sts")) {

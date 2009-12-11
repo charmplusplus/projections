@@ -7,6 +7,7 @@ import java.awt.event.ItemListener;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -24,11 +25,17 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 
 	protected JCheckBox dialogEnableIdleFiltering;
 	protected JCheckBox dialogEnableMsgFiltering;
+	protected JCheckBox dialogEnableUserEventFiltering;
+
 	
-
-	// A reference to the parent dialog box that I'm extending
-	//	RangeDialog parent;
-
+	class LeftAlignedPanel extends JPanel {
+		LeftAlignedPanel(JComponent c){
+		    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
+		    add(c);
+		    add(Box.createHorizontalGlue());
+		}
+	}
+	
 	/** Create a panel of input items specific to the timeline tool */
 	public TimlineRangeDialogExtension() {
 
@@ -48,24 +55,18 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		    p1.add(Box.createHorizontalGlue());
 		    dialogEnableEntryFiltering.addItemListener(this);
 
-		    // Create a JPanel for filtering out idle time
-		    JPanel p2 = new JPanel();
-		    p2.setLayout(new BorderLayout());
-		    dialogEnableIdleFiltering = new JCheckBox();
-		    p2.add(dialogEnableIdleFiltering, BorderLayout.WEST);
-		    p2.add(new JLabel("Filter out idle time regions"), BorderLayout.CENTER);
+		    dialogEnableIdleFiltering = new JCheckBox("Filter out idle time regions");
 		    
-		    // Create a JPanel for filtering out messages
-		    JPanel p3 = new JPanel();
-		    p3.setLayout(new BorderLayout());
-		    dialogEnableMsgFiltering = new JCheckBox();
-		    p3.add(dialogEnableMsgFiltering, BorderLayout.WEST);
-		    p3.add(new JLabel("Filter out messages"), BorderLayout.CENTER);
+		    dialogEnableMsgFiltering = new JCheckBox("Filter out messages");
+		    
+		    dialogEnableUserEventFiltering = new JCheckBox("Filter out user events");
 		    
 		    // Put the various rows into the panel
 		    p.add(p1);
-		    p.add(p2);
-		    p.add(p3);
+		    p.add(new LeftAlignedPanel(dialogEnableIdleFiltering));
+		    p.add(new LeftAlignedPanel(dialogEnableMsgFiltering));
+		    p.add(new LeftAlignedPanel(dialogEnableUserEventFiltering));
+
 
 	}
 	

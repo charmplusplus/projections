@@ -161,11 +161,14 @@ public class Data
 	/** Determine whether pack times, idle regions, or message send ticks should be displayed */		
 	private boolean showPacks, showIdle, showMsgs, showUserEvents;
 
-	/** If these are true, we will not load the idle time regions in the timeline */
+	/** If true, we will not load the idle time regions in the timeline */
 	private boolean skipIdleRegions;
 
-	/** If these are true, we will not load the message send lines in the timeline */
+	/** If true, we will not load the message send lines in the timeline */
 	private boolean skipLoadingMessages;
+	
+	/** If true, we will not load the user events in the timeline */
+	private boolean skipLoadingUserEvents;
 	
 	/** Only load entry methods that have  at least this duration */
 	private long minEntryDuration;
@@ -262,6 +265,7 @@ public class Data
 		
 		skipIdleRegions = false;
 		skipLoadingMessages = false;
+		skipLoadingUserEvents = false;
 		minEntryDuration = 0;
 		
 		// Get the list of PEs to display
@@ -640,6 +644,11 @@ public class Data
 		} catch (LogLoadException e) {
 			System.err.println("LOG LOAD EXCEPTION");
 			return;
+		}
+		
+		
+		if(skipLoadingUserEvents()){
+			userEvents.clear();
 		}
 		
 		// Save perPEObjects and userEvents
@@ -1876,6 +1885,14 @@ public class Data
 		if(skipLoadingMessages && filterAlreadyLoaded){
 			pruneOutMessages();	
 		}
+	}
+	
+	protected void skipLoadingUserEvents(boolean b) {
+		skipLoadingUserEvents = b;
+	}
+	
+	protected boolean skipLoadingUserEvents(){
+		return skipLoadingUserEvents;
 	}
 
 	

@@ -146,6 +146,7 @@ ItemListener {
 					if(toolSpecificDialogPanel.dialogEnableEntryFiltering.isSelected()){
 						data.setFilterEntryShorterThan(toolSpecificDialogPanel.dialogMinEntryFiltering.getValue());
 					}
+					parentWindow.data.skipLoadingUserEvents(toolSpecificDialogPanel.dialogEnableUserEventFiltering.isSelected());
 
 					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
 					cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");

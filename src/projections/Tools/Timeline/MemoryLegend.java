@@ -14,6 +14,7 @@ import javax.swing.JLabel;
 
 import projections.gui.JPanelToImage;
 
+/** Display a legend for the memory usage colors in a new window (clickable to save image to file) */
 class MemoryLegend implements MouseListener {
 	BufferedImage image;
 	

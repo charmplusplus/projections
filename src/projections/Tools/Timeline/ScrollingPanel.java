@@ -21,7 +21,7 @@ class ScrollingPanel extends JPanel {
 	private LayeredPanel axisPanel;
 	private LabelPanel labelPanel;
 	
-	Data data;
+	private Data data;
 	
 	
 	/** Create the scrollable panel with the three provided panels. */
@@ -101,7 +101,7 @@ class ScrollingPanel extends JPanel {
 	}
 
 	/** A simple class for drawing the corners in the JScrollPane */
-	class Corner extends JComponent {
+	private class Corner extends JComponent {
 		public void paintComponent(Graphics g) {
 			// Let UI delegate paint first 
 		    // (including background filling, if I'm opaque)

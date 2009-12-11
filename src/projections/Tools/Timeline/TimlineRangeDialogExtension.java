@@ -1,6 +1,5 @@
 package projections.Tools.Timeline;
 
-import java.awt.BorderLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -28,8 +27,8 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 	protected JCheckBox dialogEnableUserEventFiltering;
 
 	
-	class LeftAlignedPanel extends JPanel {
-		LeftAlignedPanel(JComponent c){
+	private class LeftAlignedPanel extends JPanel {
+		private LeftAlignedPanel(JComponent c){
 		    setLayout(new BoxLayout(this, BoxLayout.LINE_AXIS));
 		    add(c);
 		    add(Box.createHorizontalGlue());

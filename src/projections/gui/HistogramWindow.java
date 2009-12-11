@@ -44,27 +44,27 @@ implements ActionListener
 	private JButton entrySelectionButton;
 	private JButton epTableButton;
 
-	JRadioButton timeBinButton;
-	JRadioButton msgSizeBinButton;
+	private JRadioButton timeBinButton;
+	private JRadioButton msgSizeBinButton;
 	private ButtonGroup binTypeGroup;
 
 	
-	BinDialogPanel binpanel;
+	private BinDialogPanel binpanel;
 	
 	// Data maintained by HistogramWindow
 	// countData is indexed by type, then by bin index followed by ep id.
 	// NOTE: bin indices need not be of the same size
-	double[][][] counts;
-	int binType;
+	private double[][][] counts;
+	private int binType;
 
-	protected int timeNumBins;
-	protected long timeBinSize;
-	protected long timeMinBinSize;
-	protected int msgNumBins;
-	protected long msgBinSize;
-	protected long msgMinBinSize;
+	private int timeNumBins;
+	private long timeBinSize;
+	private long timeMinBinSize;
+	private int msgNumBins;
+	private long msgBinSize;
+	private long msgMinBinSize;
 
-	HistogramWindow thisWindow;
+	private HistogramWindow thisWindow;
 
 	private DecimalFormat _format;
 

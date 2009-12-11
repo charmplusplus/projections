@@ -32,7 +32,7 @@ class CommTimeWindow extends GenericGraphWindow
 
     // Sent External code commented out and may be implemented later
 
-    CommTimeWindow      thisWindow;    
+    private CommTimeWindow      thisWindow;    
 
     private EntrySelectionDialog entryDialog;
         
@@ -48,7 +48,7 @@ class CommTimeWindow extends GenericGraphWindow
     private JButton        saveColors;
     private JButton        loadColors;
     
-    CheckboxGroup  cbg;
+    private CheckboxGroup  cbg;
     private Checkbox	   sentMsgs;
     private Checkbox	   sentBytes;
     private Checkbox	   receivedMsgs;

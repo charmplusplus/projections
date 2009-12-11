@@ -21,7 +21,7 @@ import javax.swing.JTextField;
 
 @SuppressWarnings("serial") class StartupDialogBox extends JFrame implements ActionListener, ItemListener {
 
-	JButton connectButton;
+	private JButton connectButton;
 	private JTextField portTextField;
 	private JTextField hostnameTextField;
 	private JTextField stsFilenameTextField;

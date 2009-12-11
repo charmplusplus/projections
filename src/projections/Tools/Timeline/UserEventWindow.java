@@ -35,7 +35,7 @@ class UserEventWindow extends JFrame
 	private Color FOREGROUND = Color.white;
 
 	// set the ints to have commas in appropriate places
-	static DecimalFormat format_ = null;
+	private static DecimalFormat format_ = null;
 	private JCheckBox             checkbox_;  // when closing, set to false
 	private Object[][]        events_ = null;
 	private Integer[] pes;

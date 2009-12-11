@@ -41,7 +41,7 @@ implements ScalePanel.StatusDisplay
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
-	int myRun = 0;
+	private int myRun = 0;
 
 	/* **** Static setup data for windows ***** */
 	protected static final int NUM_WINDOWS = 18;
@@ -62,10 +62,10 @@ implements ScalePanel.StatusDisplay
 
 	// **CW** a semi-permanent hack to provide a file onto which raw data
 	// dumps may be written for further processing by other graphing tools.
-	protected static PrintWriter dataDump = null;
+	private static PrintWriter dataDump = null;
 
 	// for SwingWorker to work
-	MainWindow mainWindow;
+	private MainWindow mainWindow;
 
 	// The Analysis object from which tools derive their performance
 	// data from. This is temporarily a one-element array.
@@ -74,15 +74,15 @@ implements ScalePanel.StatusDisplay
 	// components associated with the main window
 	private MainTitlePanel        titlePanel;
 	private BackGroundImagePanel  background;
-	protected MainMenuManager       menuManager;
-	protected MainSummaryGraphPanel summaryGraphPanel;
+	private MainMenuManager       menuManager;
+	private MainSummaryGraphPanel summaryGraphPanel;
 	private MainRunStatusPanel    runStatusPanel;
 
 	// these should become arrays for future tabbed multirun functionality.
-	protected SummaryDataSource    sumDataSource;
-	protected SummaryXAxis         sumXAxis;
-	protected SummaryYAxis         sumYAxis;
-	protected GraphPanel           graphPanel;
+	private SummaryDataSource    sumDataSource;
+	private SummaryXAxis         sumXAxis;
+	private SummaryYAxis         sumYAxis;
+	private GraphPanel           graphPanel;
 	private Label                status;
 	private Image bgimage;
 	private GridBagConstraints gbc;

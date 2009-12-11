@@ -33,14 +33,14 @@ import projections.gui.Util;
 
 public class TimelineRenderedWindow extends ProjectionsWindow implements MainHandler {
 
-	Color backgroundColor;
-	Color foregroundColor;
-	int width;
-	int height;
+	private Color backgroundColor;
+	private Color foregroundColor;
+	private int width;
+	private int height;
 	
-	JMenuItem mSave;
+	private JMenuItem mSave;
 	
-	JPanel combinedTimelinesPanel;
+	private JPanel combinedTimelinesPanel;
 	
 	public TimelineRenderedWindow(MainWindow parentWindow) {
 		super(parentWindow);
@@ -50,7 +50,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	}
 
 	
-	  protected void createMenus(){
+	  private void createMenus(){
 	        JMenuBar mbar = new JMenuBar();
 	        mbar.add(Util.makeJMenu("File", new Object[]
 	            {
@@ -74,7 +74,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	    }
 
 	
-	public class menuHandler implements ActionListener  {
+	private class menuHandler implements ActionListener  {
 
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == mSave){

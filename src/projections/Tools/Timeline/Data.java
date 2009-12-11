@@ -1891,7 +1891,7 @@ public class Data
 		skipLoadingUserEvents = b;
 	}
 	
-	protected boolean skipLoadingUserEvents(){
+	private boolean skipLoadingUserEvents(){
 		return skipLoadingUserEvents;
 	}
 
@@ -1973,7 +1973,7 @@ public class Data
 		minEntryDuration = l;
 	}
 	
-	public void displayLegend() {
+	protected void displayLegend() {
  		if(memoryUsageValid()){
 			new MemoryLegend(this);
 		}

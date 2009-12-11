@@ -95,7 +95,7 @@ public class KMeansClustering {
 	outputResults(clusterMap, numClusters, distanceFromClusterMean, false);
     }
     
-    public static boolean isConverged(boolean clusterChange[]) {
+    private static boolean isConverged(boolean clusterChange[]) {
 	for (int k=0; k<clusterChange.length; k++) {
 	    if (clusterChange[k]) {
 		return false;
@@ -104,36 +104,36 @@ public class KMeansClustering {
 	return true;
     }
 
-    public static void setCentroidDiagonal(double centroid[][], 
-					   int numClusters,
-					   double data[][]) {
-	// Place initial mean values O(ep * p)
-	double minVal;
-	double maxVal;
-	double interval;
-	
-	int numProcs = data.length;
-	int numEPs = data[0].length;
+//    public static void setCentroidDiagonal(double centroid[][], 
+//					   int numClusters,
+//					   double data[][]) {
+//	// Place initial mean values O(ep * p)
+//	double minVal;
+//	double maxVal;
+//	double interval;
+//	
+//	int numProcs = data.length;
+//	int numEPs = data[0].length;
+//
+//	for (int ep=0; ep<numEPs; ep++) {
+//	    minVal = Double.MAX_VALUE;
+//	    maxVal = Double.MIN_VALUE;
+//	    for (int p=0; p<numProcs; p++) {
+//		if (data[p][ep] < minVal) {
+//		    minVal = data[p][ep];
+//		}
+//		if (data[p][ep] > maxVal) {
+//		    maxVal = data[p][ep];
+//		}
+//	    }
+//	    interval = ((maxVal - minVal + 1))/numClusters;
+//	    for (int k=0; k<numClusters; k++) {
+//		centroid[k][ep] = (k+1)*interval - interval/2 + minVal;
+//	    }
+//	}
+//    }
 
-	for (int ep=0; ep<numEPs; ep++) {
-	    minVal = Double.MAX_VALUE;
-	    maxVal = Double.MIN_VALUE;
-	    for (int p=0; p<numProcs; p++) {
-		if (data[p][ep] < minVal) {
-		    minVal = data[p][ep];
-		}
-		if (data[p][ep] > maxVal) {
-		    maxVal = data[p][ep];
-		}
-	    }
-	    interval = ((maxVal - minVal + 1))/numClusters;
-	    for (int k=0; k<numClusters; k++) {
-		centroid[k][ep] = (k+1)*interval - interval/2 + minVal;
-	    }
-	}
-    }
-
-    public static void setCentroidRandom(double centroid[][],
+    private static void setCentroidRandom(double centroid[][],
 					 int numClusters,
 					 double data[][]) {
 	int numProcs = data.length;
@@ -169,7 +169,7 @@ public class KMeansClustering {
     // The regular min-max normalization removes an important absolute-value 
     //    bias required to recognize performance problems from the same 
     //    metric domain.
-    public static double[][] normalize(double data[][]) {
+    private static double[][] normalize(double data[][]) {
 	double normalized[][] = new double[data.length][data[0].length];
 	// assume same length when normalizing.
 	for (int metric=0; metric<data[0].length; metric++) {
@@ -188,47 +188,47 @@ public class KMeansClustering {
 	return normalized;
     }
 
-    public static double[][] normalizeRelative(double data[][]) {
-	double normalized[][] = new double[data.length][data[0].length];
-	// assume same length when normalizing.
-	for (int metric=0; metric<data[0].length; metric++) {
-	    double min = Double.MAX_VALUE;
-	    double max = Double.MIN_VALUE;
-	    // pass #1 - find min and max
-	    for (int p=0; p<data.length; p++) {
-		if (data[p][metric] < min) {
-		    min = data[p][metric];
-		}
-		if (data[p][metric] > max) {
-		    max = data[p][metric];
-		}
-	    }
-	    // pass #2 - normalize
-	    for (int p=0; p<data.length; p++) {
-		if ((max - min) > 0) {
-		    normalized[p][metric] = 
-			(data[p][metric] - min)/(max - min);
-		} else {
-		    normalized[p][metric] = 0;
-		}
-	    }
-	}
-	return normalized;
-    }
+//    public static double[][] normalizeRelative(double data[][]) {
+//	double normalized[][] = new double[data.length][data[0].length];
+//	// assume same length when normalizing.
+//	for (int metric=0; metric<data[0].length; metric++) {
+//	    double min = Double.MAX_VALUE;
+//	    double max = Double.MIN_VALUE;
+//	    // pass #1 - find min and max
+//	    for (int p=0; p<data.length; p++) {
+//		if (data[p][metric] < min) {
+//		    min = data[p][metric];
+//		}
+//		if (data[p][metric] > max) {
+//		    max = data[p][metric];
+//		}
+//	    }
+//	    // pass #2 - normalize
+//	    for (int p=0; p<data.length; p++) {
+//		if ((max - min) > 0) {
+//		    normalized[p][metric] = 
+//			(data[p][metric] - min)/(max - min);
+//		} else {
+//		    normalized[p][metric] = 0;
+//		}
+//	    }
+//	}
+//	return normalized;
+//    }
     
-    public static void printMean(double mean[][]) {
-	System.out.println("Mean:");
-	System.out.println("-----");
-	for (int k=0; k<mean.length; k++) {
-	    System.out.print("[" + k + "]; (");
-	    for (int ep=0; ep<mean[k].length; ep++) {
-		System.out.print(" " + mean[k][ep]);
-	    }
-	    System.out.println(" )");
-	}
-    }
+//    public static void printMean(double mean[][]) {
+//	System.out.println("Mean:");
+//	System.out.println("-----");
+//	for (int k=0; k<mean.length; k++) {
+//	    System.out.print("[" + k + "]; (");
+//	    for (int ep=0; ep<mean[k].length; ep++) {
+//		System.out.print(" " + mean[k][ep]);
+//	    }
+//	    System.out.println(" )");
+//	}
+//    }
     
-    public static void outputResults(int clusterMap[], int numClusters,
+    private static void outputResults(int clusterMap[], int numClusters,
 				     double distanceFromClusterMean[],
 				     boolean outputDetails) {
 	// Calculate Quality Measure = Sum of Cluster Radii

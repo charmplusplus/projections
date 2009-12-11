@@ -35,7 +35,7 @@ class SingleSeriesHandler {
 	
 	
 
-	public class progressHandler implements CcsProgress {
+	private class progressHandler implements CcsProgress {
 		public progressHandler(){
 
 		}

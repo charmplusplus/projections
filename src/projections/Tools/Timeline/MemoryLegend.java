@@ -16,7 +16,7 @@ import projections.gui.JPanelToImage;
 
 /** Display a legend for the memory usage colors in a new window (clickable to save image to file) */
 class MemoryLegend implements MouseListener {
-	BufferedImage image;
+	private BufferedImage image;
 	
 	MemoryLegend(Data data){
 	
@@ -73,32 +73,32 @@ class MemoryLegend implements MouseListener {
 			
 	}
 	
-	int barTopMargin(){
+	private int barTopMargin(){
 		return 20;
 	}
 
-	int barBottomMargin(){
+	private int barBottomMargin(){
 		return 40;
 	}
 
-	int barLeftMargin(){
+	private int barLeftMargin(){
 		return 175;
 	}
 
-	int barRightMargin(){
+	private int barRightMargin(){
 		return 75;
 	}
 
 	
-	int bottomLabelBaseline(){
+	private int bottomLabelBaseline(){
 		return getHeight()-10;
 	}
 	
-	int getWidth(){
+	private int getWidth(){
 		return 600;
 	}
 	
-	int getHeight(){
+	private int getHeight(){
 		return 100;
 	}
 

@@ -41,7 +41,7 @@ class ColorChooser extends Frame
    private Button       bApply, bClose;
    
    
-   class GrayLWPanel extends Panel
+   private class GrayLWPanel extends Panel
    {
        
 	public void paint(Graphics g)

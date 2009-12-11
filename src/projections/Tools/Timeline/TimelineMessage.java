@@ -18,7 +18,7 @@ public class TimelineMessage implements Comparable
 	private int destPEs[];
 	private int numPEs;
 
-	protected int srcPE;
+	private int srcPE;
 
 	/** A messages sent from srcPE, with eventid EventID */
 

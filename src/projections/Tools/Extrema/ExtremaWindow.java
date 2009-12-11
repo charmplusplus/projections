@@ -25,7 +25,6 @@ import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
@@ -56,7 +55,7 @@ implements ActionListener, ItemListener, ColorSelectable,
 Clickable
 {
 
-	ExtremaWindow thisWindow;
+	private ExtremaWindow thisWindow;
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -78,7 +77,7 @@ Clickable
 
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
-	public String attributes[][] = {
+	private String attributes[][] = {
 			{ "Extrema by Clustering",
 				"Least Idle Time",
 				"Msgs Sent by Activity <not yet implemented>", 
@@ -105,14 +104,14 @@ Clickable
 			"us"}
 	};
 
-	public final static int ATTR_CLUSTERING = 0;
-	public final static int ATTR_LEASTIDLE = 1;
-	public final static int ATTR_MSGSSENT = 2;
-	public final static int ATTR_BYTESSENT = 3;
-	public final static int ATTR_MOSTIDLE = 4;
-	public final static int ATTR_ACTIVEENTRY = 5;
-	public final static int ATTR_OVERHEAD = 6;
-	public final static int ATTR_GRAINSIZE = 7;
+	private final static int ATTR_CLUSTERING = 0;
+	protected final static int ATTR_LEASTIDLE = 1;
+	private final static int ATTR_MSGSSENT = 2;
+	private final static int ATTR_BYTESSENT = 3;
+	protected final static int ATTR_MOSTIDLE = 4;
+	private final static int ATTR_ACTIVEENTRY = 5;
+	private final static int ATTR_OVERHEAD = 6;
+	private final static int ATTR_GRAINSIZE = 7;
 
 		
 	// derived data after analysis
@@ -149,7 +148,7 @@ Clickable
 		}
 	}
 
-	JButton bAddToTimelineJButton;
+	private JButton bAddToTimelineJButton;
 
 	private void createLayout() {
 		bAddToTimelineJButton =  new JButton("Add Top 5 Extrema PEs to Timeline");
@@ -219,7 +218,7 @@ Clickable
 		setJMenuBar(mbar);
 	}
 
-	ExtremaDialogExtension outlierDialogPanel;
+	private ExtremaDialogExtension outlierDialogPanel;
 
 
 	public void showDialog() {
@@ -254,7 +253,7 @@ Clickable
 	}
 
 
-	void constructToolData(final  long startTime, final long endTime ) {
+	private void constructToolData(final  long startTime, final long endTime ) {
 		// construct the necessary meta-data given the selected activity
 		// type.
 		double[][] tempData;
@@ -318,9 +317,9 @@ Clickable
 		// 2) outlier average
 
 		double[] tmpAvg = new double[numActivities+numSpecials];
-		double[] processorDiffs = new double[selectedPEs.size()];
+//		double[] processorDiffs = new double[selectedPEs.size()];
 		String[] peNames = new String[selectedPEs.size()];
-		double [] grainSize = new double[selectedPEs.size()];
+//		double [] grainSize = new double[selectedPEs.size()];
 		
 		int[] sortedMap = new int[threshold];
 
@@ -588,14 +587,14 @@ Clickable
 
 	// Distributing choices
 	int numLeft = threshold; // book-keeping variable
-	int numReps = 0;
+//	int numReps = 0;
 	int numOutliers = 0;
 	// handle de-generate choices
 	if (threshold > numNonZero) {
-	    numReps = numNonZero;
+//	    numReps = numNonZero;
 	    numOutliers = threshold - numNonZero; 
 	} else {
-	    numReps = threshold;
+//	    numReps = threshold;
 	    numOutliers = 0;
 	}
 	int clusterRepCounts[] = new int[this.k];
@@ -723,7 +722,7 @@ Clickable
 	// This method will read the stats file generated during online
 	// outlier analysis which will then determine which processor's
 	// log data to read.
-	void readOutlierStats(final long startTime, final long endTime) {
+	private void readOutlierStats(final long startTime, final long endTime) {
 		Color[] tempGraphColors;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
 		tempGraphColors = MainWindow.runObject[myRun].getColorMap(selectedActivity);

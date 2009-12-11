@@ -124,7 +124,7 @@ class ChooseEntriesWindow extends JFrame
 	}
 
 
-	class MyTableModel extends AbstractTableModel implements ActionListener{
+	private class MyTableModel extends AbstractTableModel implements ActionListener{
 
 		public boolean isCellEditable(int row, int col) {
 			if (col >= 1) {
@@ -210,7 +210,7 @@ class ChooseEntriesWindow extends JFrame
 
 	
     /// A simple color renderer
-	class ColorRenderer extends JLabel
+	private class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
 		private ColorRenderer() {
 			setOpaque(true);

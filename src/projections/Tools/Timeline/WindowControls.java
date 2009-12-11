@@ -45,7 +45,7 @@ ItemListener {
 	private TimlineRangeDialogExtension toolSpecificDialogPanel;
 	private RangeDialog dialog;
 
-	Data data;
+	private Data data;
 
 	private TimelineWindow parentWindow;
 

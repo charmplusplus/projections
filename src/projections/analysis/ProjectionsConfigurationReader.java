@@ -55,119 +55,121 @@ public class ProjectionsConfigurationReader
   }
 
   private void readfile() 
-    throws LogLoadException
+  throws LogLoadException
   {
-    try {
-      BufferedReader InFile = 
-	new BufferedReader(new InputStreamReader(new FileInputStream(configurationName)));
-      String Line;
-      while ((Line = InFile.readLine()) != null) {
-	StringTokenizer st = new StringTokenizer(Line);
-	String s1 = "";
-	try {
-	  s1 = st.nextToken();
-	} catch (NoSuchElementException e) {
-	  // empty line, just continue
-	  break;
-	}
-	String tempStr = "";
-	// All rc descriptors must start with this string
-	if (!s1.startsWith("RC_")) {
-	  System.err.println("Warning: Key [" + s1 + "] does not " +
-			     "start with RC_ and is rejected.");
-	  continue;
-	}
-	try {
-	  Field rcField =
-	    this.getClass().getField(s1);
-	  // The configuration variables must either support the
-	  // valueOf(String) method or be String-compatible.
-	  // Failure to support valueOf is caught by the exception
-	  // NoSuchMethodException and is an internal error (i.e.
-	  // a member of the development team used an incompatible
-	  // type)
 	  try {
-	    tempStr = st.nextToken();
-	  } catch (NoSuchElementException e) {
-	    // no value, so assign the empty string.
-	    tempStr = "";
+		  BufferedReader InFile = new BufferedReader(new InputStreamReader(new FileInputStream(configurationName)));
+		  String Line;
+		  while ((Line = InFile.readLine()) != null) {
+			  StringTokenizer st = new StringTokenizer(Line);
+			  String s1 = "";
+			  try {
+				  s1 = st.nextToken();
+			  } catch (NoSuchElementException e) {
+				  // empty line, just continue
+				  break;
+			  }
+			  String tempStr = "";
+			  // All rc descriptors must start with this string
+			  if (!s1.startsWith("RC_")) {
+				  System.err.println("Warning: Key [" + s1 + "] does not " +
+				  "start with RC_ and is rejected.");
+				  continue;
+			  }
+			  try {
+				  Field rcField =
+					  this.getClass().getField(s1);
+				  // The configuration variables must either support the
+				  // valueOf(String) method or be String-compatible.
+				  // Failure to support valueOf is caught by the exception
+				  // NoSuchMethodException and is an internal error (i.e.
+				  // a member of the development team used an incompatible
+				  // type)
+				  try {
+					  tempStr = st.nextToken();
+				  } catch (NoSuchElementException e) {
+					  // no value, so assign the empty string.
+					  tempStr = "";
+				  }
+				  if (Class.forName("java.lang.String").equals(rcField.getType())) {
+					  rcField.set(this, tempStr);
+				  } else {
+					  rcField.set(this,
+							  rcField.getType().getMethod("valueOf", new Class[] {
+									  Class.forName("java.lang.String")
+							  }
+							  ).invoke(null,new Object[] {
+									  tempStr
+							  }));
+				  }
+			  } catch (NoSuchFieldException e) {
+				  System.err.println("Warning: Key [" + s1 + "] is " +
+						  "not supported on this version " +
+				  "of Projections!");
+			  } catch (Exception e) {
+				  // for ClassNotFoundException, NoSuchMethodException,
+				  //     IllegalAccessException & SecurityException
+				  System.err.println("Internal Error: Encountered when " +
+						  "attempting to assign value [" +
+						  tempStr + "] to configuration key [" +
+						  s1 + "] Please report to " +
+				  "developers!");
+				  System.err.println(e.toString());
+				  System.exit(-1);
+			  }
+		  }
+		  InFile.close();
+	  } catch (FileNotFoundException e) {
+		  // no previous rc file. Create new file.
+	  } catch (IOException e) {
+		  throw new LogLoadException (configurationName);
 	  }
-	  if (Class.forName("java.lang.String").equals(rcField.getType())) {
-	    rcField.set(this, tempStr);
-	  } else {
-	    rcField.set(this,
-			rcField.getType().getMethod("valueOf", new Class[] {
-			  Class.forName("java.lang.String")
-			}
-						    ).invoke(null,new Object[] {
-						      tempStr
-						    }));
-	  }
-	} catch (NoSuchFieldException e) {
-	  System.err.println("Warning: Key [" + s1 + "] is " +
-			     "not supported on this version " +
-			     "of Projections!");
-	} catch (Exception e) {
-	  // for ClassNotFoundException, NoSuchMethodException,
-	  //     IllegalAccessException & SecurityException
-	  System.err.println("Internal Error: Encountered when " +
-			     "attempting to assign value [" +
-			     tempStr + "] to configuration key [" +
-			     s1 + "] Please report to " +
-			     "developers!");
-	  System.err.println(e.toString());
-	  System.exit(-1);
-	}
-      }
-      InFile.close();
-    } catch (FileNotFoundException e) {
-      // no previous rc file. Create new file.
-      try {
-	File newRc = new File(configurationName);
-	newRc.createNewFile();
-      } catch (IOException ioException) {
-	System.err.println("WARNING: Unable to write to rc file [" +
-			   configurationName + "]. Reason: ");
-	System.err.println(ioException.toString());
-      }
-    } catch (IOException e) {
-      throw new LogLoadException (configurationName);
-    }
   }
   
   public void writeFile() 
-    throws LogLoadException
+  throws LogLoadException
   {
-    if (dirty) {
-      try {
-	PrintWriter writer =
-	  new PrintWriter(new FileWriter(configurationName));
-	try {
-	  Field rcFields[] =
-	    this.getClass().getFields();
-	  for (int field=0; field<rcFields.length; field++) {
-	    String fieldname = rcFields[field].getName();
-	    if (fieldname.startsWith("RC_")) {
-	      writer.println(fieldname + " " + 
-			     rcFields[field].get(this).toString());
-	    }
+
+	  // Generate a string that will be written into the file
+	  String filedata = "";
+	  try {
+		  Field rcFields[] = this.getClass().getFields();
+		  for (int field=0; field<rcFields.length; field++) {
+			  String fieldname = rcFields[field].getName();
+			  if (fieldname.startsWith("RC_")) {
+				  filedata += "" + fieldname + " " + rcFields[field].get(this).toString() + "\n";
+			  }
+		  }
+	  } catch (IllegalArgumentException e) {
+		  System.err.println("Internal Error: Cannot write configuration (.projrc) file. Please report to developers!");
+		  System.err.println(e.toString());
+		  System.exit(-1);
+	  } catch (IllegalAccessException e) {
+		  System.err.println("Internal Error: Cannot write configuration (.projrc) file. Please report to developers!");
+		  System.err.println(e.toString());
+		  System.exit(-1);
 	  }
-	} catch (Exception e) {
-	  System.err.println("Internal Error: Cannot write " +
-			     "configuration file. Please " +
-			     "report to developers!");
-	  System.err.println(e.toString());
-	  System.exit(-1);
-	}
-	writer.close();
-      } catch (FileNotFoundException e) {
-	throw new LogLoadException (configurationName);
-      } catch (IOException e) {
-	throw new LogLoadException (configurationName);
-      }
-    } else {
-      return;
-    }
+
+	  
+	  // Write the string into the file 
+	  if (dirty && filedata.length()>0) {  
+		  try {
+			  PrintWriter writer =  new PrintWriter(new FileWriter(configurationName));
+			  try {
+				  writer.print(filedata);
+			  } catch (Exception e) {
+				  System.err.println("Internal Error: Cannot write configuration (.projrc) file. Please report to developers!");
+				  System.err.println(e.toString());
+				  System.exit(-1);
+			  }
+			  writer.close();
+		  } catch (FileNotFoundException e) {
+			  throw new LogLoadException (configurationName);
+		  } catch (IOException e) {
+			  throw new LogLoadException (configurationName);
+		  }
+	  }
+	  
   }
   
   public void setValue(String key, Object value) {

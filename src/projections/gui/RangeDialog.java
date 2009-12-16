@@ -89,7 +89,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private JSelectField processorsField;
 	private TimeTextField startTimeField;
 	private TimeTextField endTimeField;
-
+	
 	private JPanel timePanel, processorsPanel;
 	private JButton bOK, bCancel;
 
@@ -727,8 +727,8 @@ public void mouseClicked(MouseEvent e) {
 	if(e.getSource() == validProcessorsLabel){
 		processorsField.setText(MainWindow.runObject[myRun].getValidProcessorString());
 	} else if(e.getSource() == validTimeRangeLabel){
-		startTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.begintime);
-		endTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.endtime);
+		startTimeField.setValue(0);
+		endTimeField.setValue(MainWindow.runObject[myRun].getTotalTime());
 	}
 	someInputChanged();
 }

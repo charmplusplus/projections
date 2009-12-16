@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.Tools.NoiseMiner;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -11,10 +11,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import projections.Tools.NoiseMiner.NoiseMiner.EventWindow;
+import projections.Tools.NoiseMiner.NoiseMiner.NoiseResult;
 import projections.Tools.Timeline.NonScrollingPanel;
 import projections.analysis.TimelineEvent;
-import projections.analysis.NoiseMiner.EventWindow;
-import projections.analysis.NoiseMiner.NoiseResult;
 
 public class NoiseMinerExemplarTimelineWindow extends JFrame {
 

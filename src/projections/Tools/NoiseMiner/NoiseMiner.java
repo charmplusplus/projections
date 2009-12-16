@@ -1,4 +1,4 @@
-package projections.analysis;
+package projections.Tools.NoiseMiner;
 
 import java.awt.Component;
 import java.text.DecimalFormat;
@@ -12,9 +12,12 @@ import java.util.Vector;
 
 import javax.swing.JButton;
 
+import projections.analysis.ProjDefs;
+import projections.analysis.ThreadManager;
+import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
-import projections.gui.NoiseMinerExemplarTimelineWindow;
 import projections.gui.OrderedIntList;
+import projections.misc.MiscUtil;
 
 
 /**
@@ -226,14 +229,8 @@ public class NoiseMiner extends ProjDefs
 //			double d = nr.duration.us()*nr.occurrences-duration.us()*occurrences;
 			double d = nr.duration.us()*Math.log(nr.occurrences)-duration.us()*Math.log(nr.occurrences);
 			
-			if(d<0){
-				return -1;
-			} else if(d>0) {
-				return 1;
-			} else {
-				return 0;
-			}
-
+			return MiscUtil.sign(d);
+			
 		}
 
 	}
@@ -732,9 +729,9 @@ public class NoiseMiner extends ProjDefs
 		public int compareTo(Object o) {
 			Event other = (Event) o;
 			if(event == other.event){
-				return userEvent - other.userEvent;
+				return MiscUtil.sign(userEvent - other.userEvent);
 			} else {
-				return event - other.event;
+				return MiscUtil.sign(event - other.event);
 			}
 			
 		}

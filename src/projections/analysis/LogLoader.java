@@ -957,7 +957,7 @@ public class LogLoader extends ProjDefs
 						userEventVector.add(note2);
 						break;
 					case MEMORY_USAGE:
-						if(LE.memoryUsage() != null && lastBeginTimelineEvent!=null)
+						if(LE.memoryUsage() != 0 && lastBeginTimelineEvent!=null)
 							lastBeginTimelineEvent.memoryUsage = LE.memoryUsage();
 						break;
 						

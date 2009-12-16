@@ -14,8 +14,6 @@ class ProjectionsFormatException
 	this.reason = reason;
     }
 
-
-
     public String toString() {
 	return "[ver:" + expectedVersion + "] - " + reason;
     }

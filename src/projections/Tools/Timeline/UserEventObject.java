@@ -14,6 +14,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
 import projections.gui.MainWindow;
+import projections.misc.MiscUtil;
 
 public class UserEventObject extends JComponent implements Comparable, MouseListener,  ActionListener
 {
@@ -223,19 +224,17 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 			return pe - ueo.pe;
 		}
 		else if (BeginTime != ueo.BeginTime) {
-			return (int) (BeginTime - ueo.BeginTime);
+			return MiscUtil.sign(BeginTime - ueo.BeginTime);	
 		} else if (EndTime != ueo.EndTime) {
-			return (int) (ueo.EndTime - EndTime);
+			return MiscUtil.sign(ueo.EndTime - EndTime);
 		} else if (this != ueo) {
-			return this.UserEventID - ueo.UserEventID;
+			return MiscUtil.sign(this.UserEventID - ueo.UserEventID);
 		} else {
 			System.err.println("ERROR: compareTo not working correctly for class UserEventObject");
 			return 0;
 		}
 	
 	}
-
-
 
 	public void setNestedRow(int row) {
 		nestedRow = row;

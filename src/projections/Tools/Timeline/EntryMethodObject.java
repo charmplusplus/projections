@@ -29,6 +29,7 @@ import projections.analysis.PackTime;
 import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.U;
+import projections.misc.MiscUtil;
 
 class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
 {
@@ -57,7 +58,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	Integer userSuppliedData;
 	
 	/** Memory usage at some point in this entry method. Null if nonspecified */
-	private Integer memoryUsage;
+	private long memoryUsage;
 	
 	/** The duration of the visible portion of this event */
 	private double  usage;
@@ -256,8 +257,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			infoString += "<i>User Supplied Parameter(timestep):</i> " + userSuppliedData.intValue() + "<br>";
 		}
 			
-		if(memoryUsage != null){
-			infoString += "<i>Memory Usage:</i> " + memoryUsage.intValue()/1024/1024 + " MB<br>";
+		if(memoryUsage != 0){
+			infoString += "<i>Memory Usage:</i> " + memoryUsage/1024/1024 + " MB<br>";
 		}
 		
 		setToolTipText("<html><body>" + infoString + "</html></body>");
@@ -790,11 +791,11 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 		// color the objects by memory usage with a nice blue - red gradient
 		if(data.colorByMemoryUsage()){
-			if(this.memoryUsage == null){
+			if(this.memoryUsage == 0){
 				return Color.darkGray;
 			}else{
 				// scale the memory usage to the interval [0,1]
-				float normalizedValue = (float)(memoryUsage.intValue() - data.minMemBColorRange()) / (float)(data.maxMemBColorRange()-data.minMemBColorRange());
+				float normalizedValue = (float)(memoryUsage - data.minMemBColorRange()) / (float)(data.maxMemBColorRange()-data.minMemBColorRange());
 				if( normalizedValue<0.0 || normalizedValue>1.0 )
 					return Color.darkGray;
 				else {
@@ -865,7 +866,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			}
 
 
-			if(data.colorByMemoryUsage() && memoryUsage != null){
+			if(data.colorByMemoryUsage() && memoryUsage != 0){
 				color += (memoryUsage * 6121) % 5953;
 			}
 
@@ -987,11 +988,11 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	public int compareTo(Object o) {
 		EntryMethodObject obj = (EntryMethodObject) o;
 		if(pCreation != obj.pCreation)
-			return pCreation-obj.pCreation;
+			return MiscUtil.sign(pCreation-obj.pCreation);
 		else if(pCurrent != obj.pCurrent)
-			return pCurrent - obj.pCurrent;
+			return MiscUtil.sign(pCurrent - obj.pCurrent);
 		else
-			return EventID - obj.EventID;
+			return MiscUtil.sign(EventID - obj.EventID);
 	}
 
 	public ObjectId getTid() {

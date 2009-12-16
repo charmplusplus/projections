@@ -12,6 +12,7 @@ import javax.swing.JMenuItem;
 
 import projections.Tools.Extrema.ExtremaWindow;
 import projections.Tools.LogFileViewer.LogFileViewerWindow;
+import projections.Tools.NoiseMiner.NoiseMinerWindow;
 import projections.Tools.Overview.OverviewWindow;
 import projections.Tools.Streaming.StreamingTool;
 import projections.Tools.TimeProfile.TimeProfileWindow;

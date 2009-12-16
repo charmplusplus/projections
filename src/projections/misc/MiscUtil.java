@@ -1,6 +1,29 @@
 package projections.misc;
 
-class MiscUtil {
+public class MiscUtil {
+		
+	/** return -1, 0, or 1 if the input value is negative, 0, or positive */
+	public final static int sign(long l){
+		if(l < 0)
+			return -1;
+		else if(l>0)
+			return 1;
+		else
+			return 0;
+	}
+
+	/** return -1, 0, or 1 if the input value is negative, 0, or positive */
+	public final static int sign(double l){
+		if(l < 0.0)
+			return -1;
+		else if(l>0.0)
+			return 1;
+		else
+			return 0;
+	}
+
+	
+	
     /**
      *  The sort method returns the mapping resulting from the sorting of 
      *  "unsorted". A simple bubble sort algorithm is used since this 

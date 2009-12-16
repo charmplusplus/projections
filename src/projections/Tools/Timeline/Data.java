@@ -696,11 +696,11 @@ public class Data
 			}
 			
 			
-			if(tle.memoryUsage!=null){
-				if(tle.memoryUsage.longValue() > maxMemThisPE)
-					maxMemThisPE = tle.memoryUsage.longValue();
-				if(tle.memoryUsage.longValue() < minMemThisPE)
-					minMemThisPE = tle.memoryUsage.longValue();
+			if(tle.memoryUsage!=0){
+				if(tle.memoryUsage > maxMemThisPE)
+					maxMemThisPE = tle.memoryUsage;
+				if(tle.memoryUsage < minMemThisPE)
+					minMemThisPE = tle.memoryUsage;
 			}
 			
 			if(tle.UserSpecifiedData!=null){

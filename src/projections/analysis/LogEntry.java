@@ -20,7 +20,7 @@ class LogEntry
 	int numPapiCounts;
 	long papiCounts[];
 	private Integer userSupplied;
-	private Integer memoryUsage;
+	private long memoryUsage;
 
 	// AMPI function tracing. The duplication is unfortunate but required.
 	int FunctionID;
@@ -81,7 +81,7 @@ class LogEntry
 		return userSupplied;
 	}
 
-	protected Integer memoryUsage() {
+	protected long memoryUsage() {
 		return memoryUsage;
 	}
 

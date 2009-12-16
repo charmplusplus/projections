@@ -180,7 +180,7 @@ implements PointCapableReader
 			data.userSupplied = new Integer((int) parser.nextLong());
 			break;
 		case USER_SUPPLIED_NOTE:
-			data.time = new Integer((int) parser.nextLong());
+			data.time = parser.nextLong();
 			parser.nextLong(); // strlen
 			data.note = interpretNote(parser.restOfLine());
 			break;
@@ -193,7 +193,7 @@ implements PointCapableReader
 			data.note = interpretNote(parser.restOfLine());
 			break;
 		case MEMORY_USAGE:
-			data.memoryUsage = new Integer((int) parser.nextLong());
+			data.memoryUsage = parser.nextLong();
 			break;
 		case CREATION:
 			data.mtype = (int) parser.nextLong();

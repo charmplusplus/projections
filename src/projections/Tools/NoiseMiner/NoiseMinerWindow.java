@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.Tools.NoiseMiner;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -29,8 +29,11 @@ import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
 import org.jfree.data.xy.DefaultTableXYDataset;
 import org.jfree.data.xy.XYSeries;
 
-import projections.analysis.NoiseMiner;
-import projections.analysis.NoiseMiner.NoiseResultButton;
+import projections.Tools.NoiseMiner.NoiseMiner.NoiseResultButton;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.ProjectionsWindow;
+import projections.gui.RangeDialog;
 
 
 /**
@@ -38,7 +41,7 @@ import projections.analysis.NoiseMiner.NoiseResultButton;
  *  @author Isaac Dooley
  */
 
-class NoiseMinerWindow extends ProjectionsWindow
+public class NoiseMinerWindow extends ProjectionsWindow
 implements ItemListener
 {
 
@@ -70,7 +73,7 @@ implements ItemListener
 	private int numColumns;
 	
 
-	protected NoiseMinerWindow(MainWindow parentWindow) {
+	public NoiseMinerWindow(MainWindow parentWindow) {
 		super(parentWindow);
 		thisWindow = this;
 

@@ -1,5 +1,7 @@
 package projections.Tools.Timeline;
 
+import projections.misc.MiscUtil;
+
 
 public class TimelineMessage implements Comparable
 {
@@ -58,9 +60,9 @@ public class TimelineMessage implements Comparable
 		TimelineMessage other = (TimelineMessage)o;
 
 		if(srcPE == other.srcPE){
-			return EventID - other.EventID;
+			return MiscUtil.sign(EventID - other.EventID);
 		} else {
-			return srcPE-other.srcPE;
+			return MiscUtil.sign(srcPE-other.srcPE);
 		}
 	}
 	

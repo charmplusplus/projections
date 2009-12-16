@@ -4,6 +4,7 @@ import java.util.Stack;
 import java.util.Vector;
 
 import projections.Tools.Timeline.TimelineMessage;
+import projections.misc.MiscUtil;
 
 /** A class that represents an event from the log, Eventually an EntryMethod object or UserEventObject will be created from this data */
 public class TimelineEvent implements Comparable
@@ -21,7 +22,7 @@ public long RecvTime;
     public int numPapiCounts = 0;
     public long papiCounts[];
     public Integer UserSpecifiedData;
-    public Integer memoryUsage;
+    public long memoryUsage;
     
     public boolean isFunction = false;
     public Stack callStack;
@@ -88,7 +89,7 @@ protected TimelineEvent(long bt,long et, int ep,int pe, int mlen)
 
 	userEventName = null;
 }
-protected TimelineEvent(long bt,long et, int ep,int pe)
+public TimelineEvent(long bt,long et, int ep,int pe)
 {
 	setDefaultValues();
 	BeginTime=bt; EndTime=et;
@@ -108,6 +109,6 @@ protected void addPack(PackTime p)
 }
 
 public int compareTo(Object o) {
-	return (int)(this.BeginTime - ((TimelineEvent)o).BeginTime );
+	return MiscUtil.sign(this.BeginTime - ((TimelineEvent)o).BeginTime);
 }
 }

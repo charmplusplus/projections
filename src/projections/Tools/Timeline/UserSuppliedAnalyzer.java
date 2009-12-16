@@ -27,8 +27,8 @@ class UserSuppliedAnalyzer extends JFrame {
 	private void createLayout(){
 		setTitle("Analysis of user supplied values(timesteps)");
 
-		TreeMap parameterMinTime = new TreeMap();
-		TreeMap parameterMaxTime = new TreeMap();
+		TreeMap<Integer, Long> parameterMinTime = new TreeMap();
+		TreeMap<Integer, Long> parameterMaxTime = new TreeMap();
 		
 		
 		/* TreeMap<Integer,LinkedList<EntryMethodObject> > */ 
@@ -46,21 +46,21 @@ class UserSuppliedAnalyzer extends JFrame {
 				if(param != null){
 					if(parameterMinTime.containsKey(param)){
 						// update the minimum seen for the user supplied parameter param
-						Integer oldval = (Integer) parameterMinTime.get(param);
+						Long oldval = parameterMinTime.get(param);
 						if(start < oldval){
-							parameterMinTime.put(param, new Integer((int) start));
+							parameterMinTime.put(param, new Long(start));
 						}
 
 						// update the maximum seen for the user supplied parameter param
-						oldval = (Integer) parameterMaxTime.get(param);
+						oldval = parameterMaxTime.get(param);
 						if(end > oldval){
-							parameterMaxTime.put(param, new Integer((int) end));
+							parameterMaxTime.put(param, new Long(end));
 						}						
 					}
 					else {
 						// first time we see the values, just insert them
-						parameterMinTime.put(param, new Integer((int) start));
-						parameterMaxTime.put(param, new Integer((int) end));
+						parameterMinTime.put(param, new Long(start));
+						parameterMaxTime.put(param, new Long(end));
 					}
 				}
 
@@ -83,12 +83,12 @@ class UserSuppliedAnalyzer extends JFrame {
 
 		
 		Iterator i = parameterMinTime.keySet().iterator();
-		Integer prevMin=null;
-		Integer prevMax=null;
+		Long prevMin=null;
+		Long prevMax=null;
 		while(i.hasNext()){
 			Integer param = (Integer) i.next();
-			Integer min = (Integer) parameterMinTime.get(param);
-			Integer max = (Integer) parameterMaxTime.get(param);			
+			Long min = parameterMinTime.get(param);
+			Long max = parameterMaxTime.get(param);
 			Vector row = new Vector();
 			row.add(param);
 			row.add(min);

@@ -66,7 +66,7 @@ public class LogEntryData extends ProjDefs
 
     public Integer userSupplied;
     
-    public Integer memoryUsage;
+    public long memoryUsage;
     
     /// An arbitrary string provided by the user. Should be displayed as a user event
 	public String note;

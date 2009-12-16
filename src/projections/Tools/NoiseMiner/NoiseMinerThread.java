@@ -1,4 +1,4 @@
-package projections.analysis;
+package projections.Tools.NoiseMiner;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -6,11 +6,14 @@ import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.TreeMap;
 
-import projections.analysis.NoiseMiner.Cluster;
-import projections.analysis.NoiseMiner.Duration;
-import projections.analysis.NoiseMiner.Event;
-import projections.analysis.NoiseMiner.EventWindow;
-import projections.analysis.NoiseMiner.Histogram;
+import projections.Tools.NoiseMiner.NoiseMiner.Cluster;
+import projections.Tools.NoiseMiner.NoiseMiner.Duration;
+import projections.Tools.NoiseMiner.NoiseMiner.Event;
+import projections.Tools.NoiseMiner.NoiseMiner.EventWindow;
+import projections.Tools.NoiseMiner.NoiseMiner.Histogram;
+import projections.analysis.GenericLogReader;
+import projections.analysis.ProjDefs;
+import projections.analysis.TimelineEvent;
 import projections.gui.Analysis;
 import projections.misc.LogEntryData;
 

@@ -154,6 +154,7 @@ implements PointCapableReader
 				data.type = END_COMPUTATION;
 				data.time = lastRecordedTime;
 				System.err.println("[" + sourceString + "] WARNING: Partial or Corrupted Projections log. Faked END_COMPUTATION entry added for last recorded time of " +	data.time);
+				return data;
 			} else {
 				throw new EOFException();
 			}

@@ -144,6 +144,7 @@ implements PointCapableReader
 		
 		// If actually at end of file
 		if(line == null){
+			System.out.println("nextEvent() line=null");
 			// Generate a fake END_COMPUTATION if no legitimate one was found
 			// Otherwise, signal that we have reached end of file by throwing an EOFException
 			if (! endComputationOccurred){
@@ -195,6 +196,7 @@ implements PointCapableReader
 			break;
 		case MEMORY_USAGE:
 			data.memoryUsage = parser.nextLong();
+			data.time = parser.nextLong();
 			break;
 		case CREATION:
 			data.mtype = (int) parser.nextLong();

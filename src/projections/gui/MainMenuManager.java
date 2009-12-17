@@ -12,6 +12,7 @@ import javax.swing.JMenuItem;
 
 import projections.Tools.Extrema.ExtremaWindow;
 import projections.Tools.LogFileViewer.LogFileViewerWindow;
+import projections.Tools.MemoryUsage.MemoryUsageWindow;
 import projections.Tools.NoiseMiner.NoiseMinerWindow;
 import projections.Tools.Overview.OverviewWindow;
 import projections.Tools.Streaming.StreamingTool;
@@ -84,6 +85,7 @@ implements ActionListener, ItemListener
 	private JMenuItem AMPIUsageProfileMenuItem;
 	private JMenuItem noiseMinerMenuItem;
 	private JMenuItem streamingMenuItem;
+	private JMenuItem memoryUsageMenuItem;
 
 
 	protected MainMenuManager(JFrame parent) {
@@ -122,7 +124,7 @@ implements ActionListener, ItemListener
 			functionToolMenuItem.setEnabled(false);
 			AMPIUsageProfileMenuItem.setEnabled(false);
 			noiseMinerMenuItem.setEnabled(false);
-
+			memoryUsageMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_SUMMARY:
@@ -154,7 +156,8 @@ implements ActionListener, ItemListener
 			functionToolMenuItem.setEnabled(false);
 			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
-
+			memoryUsageMenuItem.setEnabled(true);
+			
 			break;
 		case OPENED_FILES :
 
@@ -185,7 +188,8 @@ implements ActionListener, ItemListener
 			functionToolMenuItem.setEnabled(true);
 			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
-
+			memoryUsageMenuItem.setEnabled(true);
+			
 			break;
 		}
 	}
@@ -259,7 +263,8 @@ implements ActionListener, ItemListener
 		functionToolMenuItem = new JMenuItem("Function Tool");
 		AMPIUsageProfileMenuItem = new JMenuItem("AMPI Usage Profile");
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
-		streamingMenuItem = new JMenuItem("Streaming CCS Tool");
+		streamingMenuItem = new JMenuItem("Streaming CCS");
+		memoryUsageMenuItem = new JMenuItem("Memory Usage");
 		
 		timelinesMenuItem.addActionListener(this);
 		renderedTimelinesMenuItem.addActionListener(this);
@@ -279,7 +284,8 @@ implements ActionListener, ItemListener
 		AMPIUsageProfileMenuItem.addActionListener(this);
 		noiseMinerMenuItem.addActionListener(this);
 		streamingMenuItem.addActionListener(this);
-
+		memoryUsageMenuItem.addActionListener(this);
+		
 		toolMenu.add(timelinesMenuItem);
 		toolMenu.add(renderedTimelinesMenuItem);
 		toolMenu.add(usageProfileMenuItem);
@@ -298,6 +304,7 @@ implements ActionListener, ItemListener
 		toolMenu.add(AMPIUsageProfileMenuItem);
 		toolMenu.add(noiseMinerMenuItem);
 		toolMenu.add(streamingMenuItem);
+		toolMenu.add(memoryUsageMenuItem);
 		
 		menubar.add(toolMenu);
 
@@ -386,6 +393,9 @@ implements ActionListener, ItemListener
 			
 			else if (mi == noiseMinerMenuItem)	
 				parent.openTool(new NoiseMinerWindow(parent) );
+			
+			else if (mi == memoryUsageMenuItem)
+				parent.openTool(new MemoryUsageWindow(parent) );
 			
 			else if (mi == streamingMenuItem)	
 				new StreamingTool();

@@ -40,7 +40,7 @@ public static final int END_FUNC                 = 23;
 protected static final int USER_SUPPLIED            = 26;
 
 /** A record for the memory usage */
-protected static final int MEMORY_USAGE            = 27;
+public static final int MEMORY_USAGE            = 27;
 
 /** A record for a user supplied string */
 public static final int USER_SUPPLIED_NOTE            = 28;

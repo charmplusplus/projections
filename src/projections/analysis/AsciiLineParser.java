@@ -54,17 +54,23 @@ class AsciiLineParser {
 	//With version 7.0, negative numbers have to be
 	//  properly handled as well.
 	protected final long nextLong() throws IOException {
-	  int multiplier = 1;
-	  char c;
-	  while (isSpace(c=nextChar())) {}
-	  if (c == '-') {
-	    multiplier = -1;
-	    c=nextChar();
-	  }
-	  long ret=toDigit(c);
-	  while (!isSpace(c=nextChar())) 
-	    ret=10*ret+toDigit(c);
-	  return ret*multiplier;
+		if(line == null){
+			System.err.println("ERROR in nextLong()  line == null");
+		}
+
+		int multiplier = 1;
+		char c;
+		while (isSpace(c=nextChar())) {}
+		if (c == '-') {
+			multiplier = -1;
+			c=nextChar();
+		}
+		long ret=toDigit(c);
+		while (!isSpace(c=nextChar())) 
+			ret=10*ret+toDigit(c);
+		return ret*multiplier;
+
+
 	}
 
 	final private int toDigit(char c) {

@@ -46,10 +46,14 @@ class ThreadedFileReader extends Thread  {
 		// First take data and put it into intervals.
 		double maxUsage[] = new double[numIntervals];
 
-
+		int count = 0;
 		try {
 			while (true) {
+//				System.out.println("c before " + (count));
 				LogEntryData data = reader.nextEvent();
+//				System.out.println("c after " + (count));
+				count++;
+
 				double memMB = (double)data.memoryUsage / 1048576.0;
 				int interval = (int) (data.time / intervalSize);			
 
@@ -62,8 +66,10 @@ class ThreadedFileReader extends Thread  {
 		}
 		catch (EOFException e) {
 			// Done reading file
+//			System.out.println("EOFException c after " + (count));
 		} catch (IOException e) {
 			// Error reading file
+//			System.out.println("IOException c after " + (count));
 		}
 
 

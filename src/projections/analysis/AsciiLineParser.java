@@ -35,8 +35,9 @@ class AsciiLineParser {
 		if(pos > line.length()){
 			throw new IOException();
 		} else if(pos == line.length()){
+			pos++;
 			return '\n';
-		} else {
+ 		} else {
 			char c = line.charAt(pos);
 			pos++;
 			return c;
@@ -47,15 +48,13 @@ class AsciiLineParser {
     	return line.substring(pos);
     }
 
-//	
-//	final public int nextInt() throws IOException {return (int)nextLong();}
-//	
+
 	//Read a positive long from the current file 
 	//With version 7.0, negative numbers have to be
 	//  properly handled as well.
 	protected final long nextLong() throws IOException {
 		if(line == null){
-			System.err.println("ERROR in nextLong()  line == null");
+			throw new IOException();
 		}
 
 		int multiplier = 1;
@@ -69,8 +68,6 @@ class AsciiLineParser {
 		while (!isSpace(c=nextChar())) 
 			ret=10*ret+toDigit(c);
 		return ret*multiplier;
-
-
 	}
 
 	final private int toDigit(char c) {

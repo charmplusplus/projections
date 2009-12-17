@@ -141,24 +141,21 @@ implements PointCapableReader
 
 		String line = reader.readLine();
 		AsciiLineParser parser = new AsciiLineParser(line);
-		
-		// If actually at end of file
+
+		// We can't keep reading once we've past the END_COMPUTATION record
+		if(endComputationOccurred){
+			throw new EOFException();
+		}
+
+		// If at end of file and we haven't seen an END_COMPUTATION yet
 		if(line == null){
-			System.out.println("nextEvent() line=null");
 			// Generate a fake END_COMPUTATION if no legitimate one was found
-			// Otherwise, signal that we have reached end of file by throwing an EOFException
-			if (! endComputationOccurred){
-				// Fake an END_COMPUTATION event. This should *NEVER* be
-				// silent!!! A Warning *MUST* be sounded.
-				// This is to deal with partial truncated projections logs.
-				endComputationOccurred = true;
-				data.type = END_COMPUTATION;
-				data.time = lastRecordedTime;
-				System.err.println("[" + sourceString + "] WARNING: Partial or Corrupted Projections log. Faked END_COMPUTATION entry added for last recorded time of " +	data.time);
-				return data;
-			} else {
-				throw new EOFException();
-			}
+			// This is to deal with partial truncated projections logs.
+			endComputationOccurred = true;
+			data.type = END_COMPUTATION;
+			data.time = lastRecordedTime;
+			System.err.println("[" + sourceString + "] WARNING: Partial or Corrupted Projections log. Faked END_COMPUTATION entry added for last recorded time of " +	data.time);
+			return data;			
 		}
 
 		data.type = (int) parser.nextLong();
@@ -183,8 +180,9 @@ implements PointCapableReader
 			break;
 		case USER_SUPPLIED_NOTE:
 			data.time = parser.nextLong();
-			parser.nextLong(); // strlen
-			data.note = interpretNote(parser.restOfLine());
+			long l = parser.nextLong(); // strlen
+			String r = parser.restOfLine();
+			data.note = interpretNote(r);
 			break;
 		case USER_SUPPLIED_BRACKETED_NOTE:
 			data.time = parser.nextLong();

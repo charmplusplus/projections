@@ -1,13 +1,10 @@
 package projections.gui;
 
-import java.awt.CheckboxMenuItem;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
-import java.awt.Menu;
-import java.awt.MenuItem;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -73,48 +70,6 @@ public class Util
     	}
     	return best;
     }
-
-    // do not remove yet - still being used by various windows
-    // remove only after the whole of projections is converted to swing.
-    // Chee Wai - 10/29/2002
-    public static Menu makeMenu(Object parent, Object[] items, Object target)
-    {
-	  Menu m = null;
-	  if (parent instanceof Menu)
-		 m = (Menu)parent;
-	  else if (parent instanceof String)
-		 m = new Menu((String)parent);
-	  else
-		 return null;
-
-	  for (int i = 0; i < items.length; i++)
-	  {
-		 if (items[i] instanceof String)
-		 {
-			MenuItem mi = new MenuItem((String)items[i]);
-			if (target instanceof ActionListener)
-			   mi.addActionListener((ActionListener)target);
-			m.add(mi);
-		 }
-		 else if (items[i] instanceof CheckboxMenuItem && target instanceof ItemListener)
-		 {
-			CheckboxMenuItem cmi = (CheckboxMenuItem)items[i];
-			cmi.addItemListener((ItemListener)target);
-			m.add(cmi);
-		 }
-		 else if (items[i] instanceof MenuItem)
-		 {
-			MenuItem mi = (MenuItem)items[i];
-			if (target instanceof ActionListener)
-			   mi.addActionListener((ActionListener)target);
-			m.add(mi);
-		 }
-		 else if (items[i] == null)
-			m.addSeparator();
-	  }
-
-	  return m;
-   }
 
     /* Swing version of the above function */
     /* Modified by Chao Mei for adding support for sublevel menus */

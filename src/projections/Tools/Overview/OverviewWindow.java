@@ -16,8 +16,6 @@ import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Label;
-import java.awt.MenuBar;
-import java.awt.MenuItem;
 import java.awt.Scrollbar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,6 +24,8 @@ import java.awt.event.MouseListener;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
@@ -186,17 +186,10 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 
 	private void createMenus()
 	{
-		MenuBar mbar = new MenuBar();
-
-		mbar.add(Util.makeMenu("File", new Object[]
-		                                          {
-				"Close"
-		                                          }, this));
-		mbar.add(Util.makeMenu("Modify", new Object[]
-		                                            {
-				"Set Range"
-		                                            }, this));
-		setMenuBar(mbar);
+		JMenuBar mbar = new JMenuBar();
+		mbar.add(Util.makeJMenu("File", new Object[] { "Close" }, this));
+		mbar.add(Util.makeJMenu("Modify", new Object[] { "Set Range" }, this));
+		setJMenuBar(mbar);
 	} 
 	
 	private OverviewDialogExtension toolSpecificPanel;
@@ -241,9 +234,9 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 			stl.colorByEntry();
 		} else if (evt.getSource() == colorByUtil){
 			stl.colorByUtil();
-		} else if (evt.getSource() instanceof MenuItem) {
-			MenuItem mi = (MenuItem)evt.getSource();
-			String arg = mi.getLabel();
+		} else if (evt.getSource() instanceof JMenuItem) {
+			JMenuItem mi = (JMenuItem)evt.getSource();
+			String arg = mi.getText();
 			if(arg.equals("Close"))  {
 				close();
 			}
@@ -251,7 +244,6 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 				showDialog();
 			}
 		}
-		
 		
 	}  
 

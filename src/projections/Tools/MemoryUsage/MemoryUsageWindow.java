@@ -1,21 +1,20 @@
 package projections.Tools.MemoryUsage;
 
-
-
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.MenuBar;
-import java.awt.Stroke;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
@@ -38,7 +37,6 @@ import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
-import projections.gui.Util;
 import projections.misc.LogEntryData;
 
 public class MemoryUsageWindow extends ProjectionsWindow {
@@ -54,7 +52,8 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private MemoryUsageWindow thisWindow;
 	private MainWindow mainWindow;
 	private long intervalSize;
-
+	private JMenuBar mbar;
+	
 	Vector<String> availableStepStrings;
 	Vector<Long> availableStepTimes;
 	
@@ -80,17 +79,16 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 	private void createMenus()
 	{
-		MenuBar mbar = new MenuBar();
+		mbar = new JMenuBar();
 
-		mbar.add(Util.makeMenu("File", new Object[]
-		                                          {
-				"Close"
-		                                          }, this));
-		mbar.add(Util.makeMenu("Modify", new Object[]
-		                                            {
-				"Set Range"
-		                                            }, this));
-		setMenuBar(mbar);
+		JMenu m1 = new JMenu("Phase Information");
+		JMenuItem mi1 = new JMenuItem("Display Phase Information");
+		m1.add(mi1);
+
+		mbar.add(new JMenu("File"));
+		mbar.add(m1);
+		
+		setJMenuBar(mbar);
 	} 
 
 	public void showDialog()
@@ -130,7 +128,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 
 	private void createPlot() {
-		thisWindow.setVisible(false);
+		setVisible(false);
 
 		Iterator<Long> pes = memorySamples.keySet().iterator();
 		XYSeriesCollection seriesCollection = new XYSeriesCollection();
@@ -148,10 +146,11 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			windowPane.removeAll();
 			windowPane.setLayout(new BorderLayout());
 			windowPane.add(new JLabel("No memory log entries found!"), BorderLayout.CENTER);
-			thisWindow.setSize(400,400);
-			thisWindow.validate();
-			thisWindow.repaint();
-			thisWindow.setVisible(true);
+			setJMenuBar(mbar);
+			setSize(400,400);
+			validate();
+			repaint();
+			setVisible(true);
 			return;
 		}
 
@@ -192,7 +191,8 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		windowPane.removeAll();
 		windowPane.setLayout(new BorderLayout());
 		windowPane.add(chartpanel, BorderLayout.CENTER);
-
+		thisWindow.setJMenuBar(mbar);
+		
 		thisWindow.pack();
 		thisWindow.setVisible(true);
 	}

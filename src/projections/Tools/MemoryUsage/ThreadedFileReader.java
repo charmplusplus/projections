@@ -2,7 +2,6 @@ package projections.Tools.MemoryUsage;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.util.TreeMap;
 
 import org.jfree.data.xy.XYSeries;
 
@@ -35,10 +34,7 @@ class ThreadedFileReader extends Thread  {
 		this.endInterval = endInterval;
 	}
 
-	private TreeMap<Long,Long> memorySamples;
-
 	public void run() { 
-		memorySamples = new TreeMap<Long,Long>();
 		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 
 		int numIntervals = (int) (endInterval - startInterval);

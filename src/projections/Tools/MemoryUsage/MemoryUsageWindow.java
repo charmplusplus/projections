@@ -11,14 +11,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtilities;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.xy.XYSeries;
@@ -32,13 +30,6 @@ import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
-import projections.gui.graph.DataSource;
-import projections.gui.graph.DataSource1D;
-import projections.gui.graph.Graph;
-import projections.gui.graph.XAxis;
-import projections.gui.graph.XAxisFixed;
-import projections.gui.graph.YAxis;
-import projections.gui.graph.YAxisFixed;
 
 public class MemoryUsageWindow extends ProjectionsWindow {
 

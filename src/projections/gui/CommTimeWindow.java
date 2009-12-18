@@ -301,7 +301,7 @@ class CommTimeWindow extends GenericGraphWindow
     
     public void showDialog() {
 	if (dialog == null) {    
-		intervalPanel = new IntervalChooserPanel(1000);    	// default 1ms interval width
+		intervalPanel = new IntervalChooserPanel();
 		dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
 	}
 	

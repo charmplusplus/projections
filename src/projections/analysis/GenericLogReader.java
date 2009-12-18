@@ -180,7 +180,7 @@ implements PointCapableReader
 			break;
 		case USER_SUPPLIED_NOTE:
 			data.time = parser.nextLong();
-			long l = parser.nextLong(); // strlen
+			parser.nextLong(); // strlen
 			String r = parser.restOfLine();
 			data.note = interpretNote(r);
 			break;

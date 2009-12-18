@@ -6,16 +6,22 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 
 import org.jfree.chart.ChartFactory;
@@ -53,10 +59,11 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private MainWindow mainWindow;
 	private long intervalSize;
 	private JMenuBar mbar;
-	
-	Vector<String> availableStepStrings;
-	Vector<Long> availableStepTimes;
-	
+	private JMenuItem mShowPhaseInfo;
+
+	public Vector<String> availableStepStrings;
+	public Vector<Long> availableStepTimes;
+
 	IntervalChooserPanel intervalPanel;
 
 	public MemoryUsageWindow(MainWindow mainWindow)
@@ -76,18 +83,49 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	}
 
 
+	private class PhaseInformationDisplay implements ActionListener{
+		PhaseInformationDisplay(){ }
+
+		public void actionPerformed(ActionEvent e) {
+			String info = "";
+			for(int i=0;i<availableStepTimes.size(); i++){
+				info += "" + projections.gui.U.humanReadableString(availableStepTimes.elementAt(i)) + "\t" + availableStepStrings.elementAt(i) + "\n";
+			}
+			System.out.println("Phase Info:\n" + info + "\n");
+
+			JFrame f = new JFrame();
+
+			JTextArea textArea = new JTextArea(info);
+			textArea.setFont(new Font("Arial", Font.PLAIN, 16));
+			textArea.setLineWrap(true);
+			textArea.setWrapStyleWord(true);
+
+			JScrollPane areaScrollPane = new JScrollPane(textArea);
+			areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+			areaScrollPane.setPreferredSize(new Dimension(900, 600));
+
+			f.getContentPane().setLayout(new BorderLayout());
+			f.getContentPane().add(areaScrollPane, BorderLayout.CENTER);
+			f.setTitle("Phase Information:");
+			f.pack();
+			f.setVisible(true);
+
+		}
+
+	}
 
 	private void createMenus()
 	{
 		mbar = new JMenuBar();
 
 		JMenu m1 = new JMenu("Phase Information");
-		JMenuItem mi1 = new JMenuItem("Display Phase Information");
-		m1.add(mi1);
+		mShowPhaseInfo = new JMenuItem("Display Phase Information");
+		m1.add(mShowPhaseInfo);
+		mShowPhaseInfo.addActionListener(new PhaseInformationDisplay());
 
 		mbar.add(new JMenu("File"));
 		mbar.add(m1);
-		
+
 		setJMenuBar(mbar);
 	} 
 
@@ -177,7 +215,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		determineStepsFromPEZero();
 		for(int i=0; i<availableStepTimes.size(); i++){
 			ValueMarker m = new ValueMarker(availableStepTimes.elementAt(i), Color.darkGray, new BasicStroke(2.0f) );
-//			m.setLabel(this.availableStepStrings.elementAt(i));
+			//			m.setLabel(this.availableStepStrings.elementAt(i));
 			plot.addDomainMarker(m);
 		}
 
@@ -192,7 +230,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		windowPane.setLayout(new BorderLayout());
 		windowPane.add(chartpanel, BorderLayout.CENTER);
 		thisWindow.setJMenuBar(mbar);
-		
+
 		thisWindow.pack();
 		thisWindow.setVisible(true);
 	}
@@ -238,7 +276,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 	}
 
-	
+
 	private Vector<Long> determineStepsFromPEZero() {
 		// Labels containing the user notes found in the log
 		availableStepStrings = new Vector<String>();

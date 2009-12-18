@@ -2,14 +2,18 @@ package projections.Tools.MemoryUsage;
 
 
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.MenuBar;
+import java.awt.Stroke;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
+import java.util.Vector;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -19,9 +23,14 @@ import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.plot.ValueMarker;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import projections.analysis.GenericLogReader;
+import projections.analysis.ProjDefs;
 import projections.analysis.ThreadManager;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
@@ -30,6 +39,7 @@ import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
+import projections.misc.LogEntryData;
 
 public class MemoryUsageWindow extends ProjectionsWindow {
 
@@ -44,6 +54,9 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private MemoryUsageWindow thisWindow;
 	private MainWindow mainWindow;
 	private long intervalSize;
+
+	Vector<String> availableStepStrings;
+	Vector<Long> availableStepTimes;
 	
 	IntervalChooserPanel intervalPanel;
 
@@ -79,7 +92,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		                                            }, this));
 		setMenuBar(mbar);
 	} 
-	
+
 	public void showDialog()
 	{
 		try {
@@ -95,7 +108,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 				intervalSize = intervalPanel.getIntervalSize();
 				final long startInterval = intervalPanel.getStartInterval();
 				final long endInterval = intervalPanel.getEndInterval();
-				
+
 				final SwingWorker worker = new SwingWorker() {
 					public Object doInBackground() {
 						// Load memory usages here
@@ -141,8 +154,8 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			thisWindow.setVisible(true);
 			return;
 		}
-		
-		JFreeChart chart = ChartFactory.createXYLineChart(
+
+		JFreeChart chart = ChartFactory.createScatterPlot(
 				"Memory Usage (at " + U.humanReadableString(intervalSize) + " resolution)",
 				"Time (us)",
 				"MB",
@@ -153,18 +166,34 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 				false
 		) ;
 
+
+		XYDotRenderer renderer = new XYDotRenderer();
+		renderer.setDotWidth(2);
+		renderer.setDotHeight(2);
+		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setRenderer(renderer);
+
+
+		// Add markers to mark each iteration:
+		determineStepsFromPEZero();
+		for(int i=0; i<availableStepTimes.size(); i++){
+			ValueMarker m = new ValueMarker(availableStepTimes.elementAt(i), Color.darkGray, new BasicStroke(2.0f) );
+//			m.setLabel(this.availableStepStrings.elementAt(i));
+			plot.addDomainMarker(m);
+		}
+
 		// Put the chart in a JPanel that we can use inside our program's GUI
 		ChartPanel chartpanel = new ChartPanel(chart);
 		chart.setBackgroundPaint(Color.white);
+
+		chartpanel.setPreferredSize(new Dimension(1100,700));
 
 		Container windowPane = thisWindow.getContentPane();
 		windowPane.removeAll();
 		windowPane.setLayout(new BorderLayout());
 		windowPane.add(chartpanel, BorderLayout.CENTER);
 
-		thisWindow.setSize(1000,800);
-		thisWindow.validate();
-		thisWindow.repaint();
+		thisWindow.pack();
 		thisWindow.setVisible(true);
 	}
 
@@ -206,6 +235,40 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 
 		}
+
+	}
+
+	
+	private Vector<Long> determineStepsFromPEZero() {
+		// Labels containing the user notes found in the log
+		availableStepStrings = new Vector<String>();
+		availableStepTimes = new Vector<Long>();
+
+		if (!(MainWindow.runObject[myRun].hasLogData())){
+			return availableStepTimes;
+		}
+
+		try{
+			int PE = 0;
+			GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
+
+			int c = 0;
+			while (true) {
+				LogEntryData data = reader.nextEvent();
+
+				if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
+					if(data.note.contains("***")){
+						String pruned = data.note.replace("*** ", "");
+						availableStepStrings.add("" + (c++) + ": " + pruned);
+						availableStepTimes.add(data.time);
+					}
+				}
+			}
+
+		} catch (Exception e) {
+		}
+
+		return availableStepTimes;
 
 	}
 

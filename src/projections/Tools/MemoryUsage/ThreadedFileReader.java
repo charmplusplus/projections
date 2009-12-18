@@ -73,9 +73,11 @@ class ThreadedFileReader extends Thread  {
 		series = new XYSeries("PE " + pe);
 
 		for(int i=0;i<numIntervals;i++){
+			long time = (startInterval + i) * intervalSize +  (intervalSize/2);
 			if(maxUsage[i] > 0){
-				long time = (startInterval + i) * intervalSize +  (intervalSize/2);
 				series.add(time, maxUsage[i]);
+			} else {
+				series.add(time,null);
 			}
 		}
 

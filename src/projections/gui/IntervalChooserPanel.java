@@ -48,6 +48,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 
 	private void createLayout(boolean manuallySpecify){
 		this.removeAll();
+		System.out.println("createLayout(manuallySpecify=" + manuallySpecify + ")");
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
@@ -63,10 +64,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 			Util.gblAdd(this, numIntervalsLabel, gbc, 0,2, 1,1, 1,1);	
 		}
 
-		if(parent != null && parent.isVisible()){
-			parent.pack();
-		}
-
+		repackParentWindow();
 	}
 
 
@@ -90,34 +88,42 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 			sizeField.setText(U.humanReadableString(duration/DEFAULT_NUM_INTERVALS));
 		}
 
-
-		if(getNumSelectedIntervals() < 25){
-			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
-			numIntervalsLabel.setForeground(Color.red);
-		} else {
-			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
-		}
+		numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
 
 	}
 
+	
+	private void repackParentWindow(){
+		if(parent != null && parent.isVisible()){
+			parent.pack();
+		}
+	}
 
 	private long getNumSelectedIntervals(){
 		return getEndInterval() - getStartInterval() + 1;
 	}
 
 	public boolean isInputValid() {
+		
+		// This one is just a warning, so don't return false
+		if(getNumSelectedIntervals() < 25){
+			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
+			numIntervalsLabel.setForeground(Color.red);
+		} else {
+			numIntervalsLabel.setForeground(Color.black);
+		}
 
+		
+		// This is an actual error, so return false
 		if (sizeField.getValue() <= 0 || sizeField.getValue() > parent.getTotalTime()) 	{
 			// interval size should not be less than or equal to zero us.
 			// it should also not be larger than the selected time range.
 			sizeLabel.setForeground(Color.red);
 			sizeField.setForeground(Color.red);
-			sizeField.requestFocus();
 			return false;
 		} 
 
 		// reset to the normal colors
-		numIntervalsLabel.setForeground(Color.black);
 		sizeLabel.setForeground(Color.black);
 		sizeField.setForeground(Color.black);
 		return true;

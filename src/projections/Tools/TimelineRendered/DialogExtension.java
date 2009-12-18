@@ -1,4 +1,4 @@
-package projections.Tools.Timeline;
+package projections.Tools.TimelineRendered;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -9,14 +9,14 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import projections.gui.RangeDialog;
 import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.TimeTextField;
 
-/** A JPanel that can be used to extend the standard RangeDialog dialog box by adding GUI components for filtering out data. */
-class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener
-{
+
+public class DialogExtension extends RangeDialogExtensionPanel implements ItemListener {
 
 	// Additional GUI objects
 	protected JCheckBox dialogEnableEntryFiltering;
@@ -25,6 +25,8 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 	protected JCheckBox dialogEnableIdleFiltering;
 	protected JCheckBox dialogEnableMsgFiltering;
 	protected JCheckBox dialogEnableUserEventFiltering;
+	
+	protected JTextField dialogWidth;
 
 	
 	private class LeftAlignedPanel extends JPanel {
@@ -36,7 +38,7 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 	}
 	
 	/** Create a panel of input items specific to the timeline tool */
-	public TimlineRangeDialogExtension() {
+	public DialogExtension() {
 
 			JPanel p = this;
 		    p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
@@ -60,11 +62,24 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		    
 		    dialogEnableUserEventFiltering = new JCheckBox("Filter out user events");
 		    
+		    
+		    
+		    JPanel p2 = new JPanel();
+		    p2.setLayout(new BoxLayout(p2, BoxLayout.LINE_AXIS));
+		    p2.add(new JLabel("Width of rendered image: "));
+		    dialogWidth = new JTextField("2000");
+		    p2.add(dialogWidth);
+		    p2.add(new JLabel(" pixels"));
+		    p2.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
+		    p2.add(Box.createHorizontalGlue());
+
+		    
 		    // Put the various rows into the panel
 		    p.add(p1);
 		    p.add(new LeftAlignedPanel(dialogEnableIdleFiltering));
 		    p.add(new LeftAlignedPanel(dialogEnableMsgFiltering));
 		    p.add(new LeftAlignedPanel(dialogEnableUserEventFiltering));
+		    p.add(p2);
 
 
 	}

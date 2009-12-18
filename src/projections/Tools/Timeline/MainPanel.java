@@ -59,6 +59,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	}
 
 
+	public void disposeOfStructures(){
+		handler = null;
+		removeAll();
+		data.disposeOfStructures();
+	}
+	
 	
 	/** 
 	 * Load or Reload the timeline objects from the data object's tloArray.

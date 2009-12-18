@@ -41,7 +41,9 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	private JMenuItem mSave;
 	
 	private JPanel combinedTimelinesPanel;
-	
+
+	DialogExtension toolSpecificPanel;
+
 	public TimelineRenderedWindow(MainWindow parentWindow) {
 		super(parentWindow);
 		createMenus();
@@ -105,12 +107,14 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	public void displayWarning(String message) {
 		// Do nothing
 	}
-
+	
+	
 
 	protected void showDialog() {
 
 		if (dialog == null) {
-			dialog = new RangeDialog(this, "Select Range", null, false);
+			toolSpecificPanel = new DialogExtension();
+			dialog = new RangeDialog(this, "Select Range", toolSpecificPanel, false);
 		}
 
 		dialog.displayDialog();
@@ -121,7 +125,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			long endTime = dialog.getEndTime();
 			backgroundColor = Color.white;
 			foregroundColor = Color.black;
-			width = 1000;
+			width = Integer.parseInt(toolSpecificPanel.dialogWidth.getText());
 			
 			final Date time1  = new Date();
 

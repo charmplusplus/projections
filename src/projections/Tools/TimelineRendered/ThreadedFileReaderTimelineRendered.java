@@ -57,8 +57,18 @@ class ThreadedFileReaderTimelineRendered extends Thread implements MainHandler {
 		image = JPanelToImage.generateImage(displayPanel);
 		
 		System.out.println("Created image for PE " + PE);
-		
+
+		displayPanel.disposeOfStructures();
+		data.disposeOfStructures();
+		displayPanel = null;
 		data = null;
+		
+		long aGB = 1024*1024*1024;
+		if(Runtime.getRuntime().freeMemory() < aGB){
+			System.out.println("Calling garbage collector");
+			Runtime.getRuntime().gc();
+		}
+		
 	}
 
 	

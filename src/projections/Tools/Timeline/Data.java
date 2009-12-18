@@ -305,14 +305,17 @@ public class Data
 			Integer pe = new Integer(p);
 			peToLine.addLast(pe);
 			line ++;
-			p = processorList.nextElement();
+			if(processorList.hasMoreElements())
+				p = processorList.nextElement();
+			else
+				p = -1;
 		}
 	}
 
 
 	/** Load the set of PEs found in MainWindow.runObject[myRun].getValidProcessorList() */
 	private void loadGlobalPEList(){
-		OrderedIntList processorList = MainWindow.runObject[myRun].getValidProcessorList();
+		OrderedIntList processorList = MainWindow.runObject[myRun].getValidProcessorList().copyOf();
 		setProcessorList(processorList);
 	}
 	
@@ -1979,5 +1982,27 @@ public class Data
 		}
 
 	}
+	
+	public void finalize() throws Throwable
+	{
+		disposeOfStructures();
+		super.finalize(); //not necessary if extending Object.
+	} 
+	
+	public void disposeOfStructures()
+	{
+		entries = null;
+		entryColor = null;
+		hiddenEntryPoints = null;
+		allEntryMethodObjects = null;
+		allUserEventObjects = null;
+		processorUsage = null;
+		packUsage = null;
+		entryUsageList = null;
+		messageStructures = null;
+		drawMessagesForTheseObjects = null;
+		drawMessagesForTheseObjectsAlt = null;
+	} 
+	
 	
 }

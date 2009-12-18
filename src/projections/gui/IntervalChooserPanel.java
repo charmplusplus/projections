@@ -48,7 +48,6 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 
 	private void createLayout(boolean manuallySpecify){
 		this.removeAll();
-		System.out.println("createLayout(manuallySpecify=" + manuallySpecify + ")");
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;

@@ -58,8 +58,32 @@ public class Graph extends JPanel
     private FontMetrics fmLabels;
 
 
-    // number of pixels per value
-    private double pixelincrementX, pixelincrementY;
+    // number of pixels per bar
+    private double pixelincrementX(){
+    	return availableWidth() / maxvalueX();    	
+    }
+
+
+    private double pixelincrementY(){
+    	return (originY()-topMargin()) / maxvalueY();
+    }
+    
+    private double maxvalueX(){
+    	return dataSource.getIndexCount();
+    }
+    
+    private double maxvalueY(){
+    	// get max y Value
+    	if (((GraphType == BAR) && GraphStacked) || 
+    			((GraphType == LINE) && GraphStacked) || 
+    			(GraphType == AREA)) {
+    		return maxSumY;
+    	} else {
+    		return yAxis.getMax();                               
+    	}    
+    }
+    
+    
     // number of pixels per tick
     private double tickIncrementX;
 
@@ -75,9 +99,6 @@ public class Graph extends JPanel
   
     
     private final int spaceBetweenYValuesAndAxis = 10;
-    
-    private double maxvalueX;
-    private double maxvalueY;
 
     private Bubble bubble;
     private boolean showBubble = true;
@@ -144,15 +165,12 @@ public class Graph extends JPanel
 
     public void setGraphType(int type)
     {
-	if ((type == LINE) || (type == BAR)) {
-	    GraphType = type;      // set the Graphtype to LINE or BAR 
-	    repaint();
-	} else if (type == AREA) {
-	    GraphType = type;
-	    repaint();
-	} else {
-	     //unknown graph type.. do nothing ; draw a bargraph
-	}
+    	if (type == LINE || type == BAR || type == AREA) {
+    		GraphType = type;      // set the Graphtype to LINE or BAR 
+    	} else {
+    		//unknown graph type.. do nothing ; draw a bargraph
+    	}
+    	repaint();
     }
 
     public int getGraphType()
@@ -239,8 +257,8 @@ public class Graph extends JPanel
     	if( (xPos > originX()) && (xPos < availableWidth()+originX())) {
     		// get the expected value
     		int displacement = xPos - originX();
-    		int whichBar = (int)(displacement/pixelincrementX);
-    		double x1 = originX() + (whichBar*pixelincrementX) + (pixelincrementX/2.0);
+    		int whichBar = (int)(displacement/pixelincrementX());
+    		double x1 = originX() + (whichBar*pixelincrementX()) + (pixelincrementX()/2.0);
     		if ((GraphType == BAR) || (GraphType == AREA)) {
             	long lowerPixelForBar = Math.round(x1-(barWidth/2.0));
             	long upperPixelForBar = Math.round(x1+(barWidth/2.0));
@@ -274,7 +292,7 @@ public class Graph extends JPanel
     		int numY = dataSource.getValueCount();
     		int y;
     		for (int k=0; k<numY; k++) {
-    			y = originY() - (int)(stackArray[xVal][k]*pixelincrementY);
+    			y = originY() - (int)(stackArray[xVal][k]*pixelincrementY());
     			if (yPos > y) {
     				return k;
     			}
@@ -455,19 +473,14 @@ public class Graph extends JPanel
     	g.rotate(Math.PI/2);
 
 	// total number of x values
-	maxvalueX = dataSource.getIndexCount();
-	// get max y Value
-	if (((GraphType == BAR) && GraphStacked) || 
-	    ((GraphType == LINE) && GraphStacked) || 
-	    (GraphType == AREA)) {
-	    maxvalueY = maxSumY;
-	} else {
-	    maxvalueY = yAxis.getMax();                               
-	}
+
+  
 
 	if ((xAxis != null) && (yAxis != null)) {
-		drawXAxis(g);
-		drawYAxis(g);
+		
+    	setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
+    	setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
+		
 		if (GraphType == BAR) {
 			drawBarGraph(g);
 		} else if (GraphType == AREA) {
@@ -475,76 +488,71 @@ public class Graph extends JPanel
 		} else {
 			drawLineGraph(g);
 		}
+		
+		drawXAxis(g);
+		drawYAxis(g);
 	}
 
 
     }
 
+    
+    
 
-	private void drawXAxis(Graphics2D g) {
+    private void drawXAxis(Graphics2D g) {
+    	g.setColor(MainWindow.runObject[myRun].foreground);
 
-	// *NOTE* pixelincrementX = # pixels per value.
-	pixelincrementX = availableWidth()/maxvalueX;
-	setBestIncrements(X_AXIS, pixelincrementX, (int)maxvalueX);
+    	// draw xAxis
+    	g.drawLine(originX(), originY(), availableWidth()+originX(), originY());
 
-	// draw xAxis
-	g.drawLine(originX(), originY(), availableWidth()+originX(), originY());
+    	int mini = 0;
+    	int maxi = (int)maxvalueX();
 
-      	int mini = 0;
-	int maxi = (int)maxvalueX;
+    	g.setFont(fontLabels);
 
-	int curx;
-	String s;
-
-	g.setFont(fontLabels);
-	
-	// drawing xAxis divisions
-	// based on the prior algorithm, it is guaranteed that the number of
-	// iterations is finite since the number of pixels per tick will
-	// never be allowed to be too small.
-	for (int i=mini;i<maxi; i+=valuesPerTickX) {
-		curx = originX() + (int)(i*pixelincrementX);
-		// don't attempt to adjust the tick positions midway unless we're
-		// on a one-to-one mapping.
-		if (valuesPerTickX == 1) {
-			curx += (int)(tickIncrementX / 2);
-		}
-		// labels have higher lines.
-		if (i % valuesPerLabelX == 0) {
-			g.drawLine(curx, originY()+5, curx, originY()-5);
-			s = xAxis.getIndexName(i);
-			g.drawString(s, curx-fmLabels.stringWidth(s)/2, xAxisValuesBaseline() );
-		} else {
-			g.drawLine(curx, originY()+2, curx, originY()-2);
-		}
-	}
-	}
+    	// drawing xAxis divisions
+    	// based on the prior algorithm, it is guaranteed that the number of
+    	// iterations is finite since the number of pixels per tick will
+    	// never be allowed to be too small.
+    	for (int i=mini;i<maxi; i+=valuesPerTickX) {
+    		int curx = originX() + (int)(i*pixelincrementX());
+    		// don't attempt to adjust the tick positions midway unless we're
+    		// on a one-to-one mapping.
+    		if (valuesPerTickX == 1) {
+    			curx += (int)(tickIncrementX / 2);
+    		}
+    		// labels have higher lines.
+    		if (i % valuesPerLabelX == 0) {
+    			g.drawLine(curx, originY()+5, curx, originY());
+    			String s = xAxis.getIndexName(i);
+    			g.drawString(s, curx-fmLabels.stringWidth(s)/2, xAxisValuesBaseline() );
+    		} else {
+    			g.drawLine(curx, originY()+2, curx, originY());
+    		}
+    	}
+    }
 
     private void drawYAxis(Graphics2D g) {
+    	g.setColor(MainWindow.runObject[myRun].foreground);
 
     	// draw yAxis
     	g.drawLine(originX()-1, originY(), originX()-1 , topMargin());
 
     	g.setFont(fontLabels);
-    	
-    	pixelincrementY = (originY()-topMargin()) / maxvalueY;
-    	setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
-    	
+        	
     	FontMetrics fm = g.getFontMetrics(fontLabels);
-    	
     	int sw = fm.getHeight();
-    	int cury;
-    	String yLabel;
+
     	// drawing yAxis divisions
-    	for (long i=0; i<=maxvalueY; i+=valuesPerTickY) {
-    		cury = originY() - (int)(i*pixelincrementY);
+    	for (long i=0; i<=maxvalueY(); i+=valuesPerTickY) {
+    		int cury = originY() - (int)(i*pixelincrementY());
     		if (i % valuesPerLabelY == 0) {
-    			g.drawLine(originX()+5-1, cury, originX()-5-1,cury);
-    			yLabel = "" + i; 
-    			g.drawString(yLabel, originX()-1-fm.stringWidth(yLabel)-spaceBetweenYValuesAndAxis, 
+    			g.drawLine(originX()-1, cury, originX()-5-1,cury);
+    			String yLabel = "" + i; 
+    	    	g.drawString(yLabel, originX()-1-fm.stringWidth(yLabel)-spaceBetweenYValuesAndAxis, 
     					cury + sw/2);
     		} else {
-    			g.drawLine(originX()+2-1, cury, originX()-2-1, cury);
+    			g.drawLine(originX()-1, cury, originX()-2-1, cury);
     		}
     	}
     }
@@ -607,10 +615,10 @@ public class Graph extends JPanel
     			//          (x-originX())/pixelincrementX
 
     			int x1_px = x;
-    			double x1 = ((double)(x1_px-originX()))/pixelincrementX;
+    			double x1 = ((double)(x1_px-originX()))/pixelincrementX();
 
     			int x2_px = x+1;
-    			double x2 = ((double)(x2_px-originX()))/pixelincrementX;
+    			double x2 = ((double)(x2_px-originX()))/pixelincrementX();
 
     			double y1 = 0.0;
     			double y2 = 0.0;
@@ -619,8 +627,8 @@ public class Graph extends JPanel
     				y2 += polynomialToOverlay[d]*Math.pow(x2,d);
     			}
 
-    			int y1_px = originY() - (int)(y1*pixelincrementY);
-    			int y2_px = originY() - (int)(y2*pixelincrementY);
+    			int y1_px = originY() - (int)(y1*pixelincrementY());
+    			int y2_px = originY() - (int)(y2*pixelincrementY());
 
     			if(  y1_px < (originY()+2) && 
     				 y2_px < (originY()+2) && 
@@ -657,7 +665,6 @@ public class Graph extends JPanel
     		barWidth = 1.0;
     	}
 
-    	// NO OPTIMIZATION simple draw. Every value gets drawn on screen.
     	for (int i=0; i<numX; i++) {
     		dataSource.getValues(i, data);
     		if (GraphStacked) {
@@ -665,23 +672,23 @@ public class Graph extends JPanel
     			for (int k=0; k<numY; k++) {
     				// calculating lowerbound of box, which StackArray
     				// allready contains
-    				y = originY() - (int)(stackArray[i][k]*pixelincrementY);
+    				y = originY() - (int)(stackArray[i][k]*pixelincrementY());
     				
     				g.setPaint(dataSource.getColor(k));
     				
     				// using data[i] to get the height of this bar
     				if (valuesPerTickX == 1) {
-    					g.fillRect(originX() + (int)(i*pixelincrementX +
+    					g.fillRect(originX() + (int)(i*pixelincrementX() +
     							tickIncrementX/2 -
     							barWidth/2), y,
     							(int)barWidth,
-    							(int)(data[k]*pixelincrementY));
+    							(int)(data[k]*pixelincrementY()));
 
     				} else {
-    					g.fillRect(originX() + (int)(i*pixelincrementX), y, 
-    							(int)((i+1)*pixelincrementX) - 
-    							(int)(i*pixelincrementX), 
-    							(int)(data[k]*pixelincrementY));
+    					g.fillRect(originX() + (int)(i*pixelincrementX()), y, 
+    							(int)((i+1)*pixelincrementX()) - 
+    							(int)(i*pixelincrementX()), 
+    							(int)(data[k]*pixelincrementY()));
     				}
     			}
     		} else {
@@ -717,18 +724,18 @@ public class Graph extends JPanel
     			// now display the graph
     			for(int k=0; k<numY; k++) {
     				g.setPaint(dataSource.getColor((int)temp[k][0]));
-    				y = (originY()-(int)(temp[k][1]*pixelincrementY));
+    				y = (originY()-(int)(temp[k][1]*pixelincrementY()));
     				if (valuesPerTickX == 1) {
-    					g.fillRect(originX() + (int)(i*pixelincrementX +
+    					g.fillRect(originX() + (int)(i*pixelincrementX() +
     							tickIncrementX/2 -
     							barWidth/2), y,
     							(int)barWidth,
-    							(int)(temp[k][1]*pixelincrementY));
+    							(int)(temp[k][1]*pixelincrementY()));
     				} else {				   
-    					g.fillRect(originX() + (int)(i*pixelincrementX), y,
-    							(int)((i+1)*pixelincrementX) -
-    							(int)(i*pixelincrementX),
-    							(int)(temp[k][1]*pixelincrementY));
+    					g.fillRect(originX() + (int)(i*pixelincrementX()), y,
+    							(int)((i+1)*pixelincrementX()) -
+    							(int)(i*pixelincrementX()),
+    							(int)(temp[k][1]*pixelincrementY()));
     				}
     			}
     		}
@@ -777,12 +784,12 @@ public class Graph extends JPanel
 		dataSource.getValues(i,data);
 	    }
 	    //calculate x value
-	    x2 = originX() + (int)(i*pixelincrementX) + 
-		(int)(pixelincrementX/2);    
+	    x2 = originX() + (int)(i*pixelincrementX()) + 
+		(int)(pixelincrementX()/2);    
 	 
 	    for (int j=0; j<yValues; j++) {
 		g.setPaint(dataSource.getColor(j));
-		y2[j] = (originY() - (int)(data[j]*pixelincrementY));
+		y2[j] = (originY() - (int)(data[j]*pixelincrementY()));
 		//is there any other condition that needs to be checked?
 		if(x1 != -1)	
 		    g.drawLine(x1,y1[j],x2,y2[j]);
@@ -812,10 +819,6 @@ public class Graph extends JPanel
 	    int xPixel; 
 	    int yPixel;
 
-	    // offsetY is meant to allow the area graph to not draw over
-	    // the origin line.
-	    int offsetY = -2;
-
 	    for (int idx=0; idx<xValues; idx++) {
 		// get the y values given the x value
 		// **CW** NOTE to self: This is silly. Why do I have to
@@ -824,20 +827,19 @@ public class Graph extends JPanel
 		dataSource.getValues(idx,data);
 
 		//calculate x & y pixel values
-		xPixel = originX() + (int)(idx*pixelincrementX) + 
-		    (int)(pixelincrementX/2);    
+		xPixel = originX() + (int)(idx*pixelincrementX()) + 
+		    (int)(pixelincrementX()/2);    
 		// **CW** NOTE will need some refactoring to prevent
 		// recomputation of the prefix sum each time we go through
 		// the Y values.
 		prefixSum(data);
-	    	yPixel = (originY() - (int)(data[layer]*pixelincrementY) +
-				offsetY);
+	    	yPixel = (originY() - (int)(data[layer]*pixelincrementY()) );
 
 		// if first point, add the baseline point before adding
 		// the first point.
 		if (idx == 0) {
 		    // just so it does not overwrite the Axis line.
-		    polygon.addPoint(xPixel, originY()+offsetY);
+		    polygon.addPoint(xPixel, originY());
 		}
 		// add new point to polygon
 		polygon.addPoint(xPixel, yPixel);
@@ -845,7 +847,7 @@ public class Graph extends JPanel
 		// the last point.
 		if (idx == xValues-1) {
 		    // just so it does not overwrite the Axis line.
-		    polygon.addPoint(xPixel, originY()+offsetY);
+		    polygon.addPoint(xPixel, originY());
 		}
 	    }
 	    // draw the filled polygon.
@@ -1023,7 +1025,7 @@ public class Graph extends JPanel
 
 	/** The x pixel coordinate of the bottom left intersection of the axis lines */
 	private int originX(){
-		return fmLabels.stringWidth(""+(long)maxvalueY) + spaceBetweenYValuesAndAxis + fmLabels.getHeight()*2;
+		return fmLabels.stringWidth(""+(long)maxvalueY()) + spaceBetweenYValuesAndAxis + fmLabels.getHeight()*2;
 	}
 
 	/** The y pixel coordinate of the bottom left intersection of the axis lines */

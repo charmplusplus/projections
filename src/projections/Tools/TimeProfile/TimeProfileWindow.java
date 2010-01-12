@@ -74,6 +74,7 @@ implements ActionListener, ColorSelectable, Clickable
 	private JMenuItem mWhiteBG;
 	private JMenuItem mBlackBG;
 	private JMenuItem mSaveScreenshot;
+	private JMenuItem mDisplayLegend;
 
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
@@ -188,6 +189,13 @@ implements ActionListener, ColorSelectable, Clickable
 		saveMenu.add(mSaveScreenshot);
 		mbar.add(saveMenu);
 
+		
+		JMenu legendMenu = new JMenu("Legend");
+		mDisplayLegend = new JMenuItem("Display Legend");
+		mDisplayLegend.addActionListener(this);
+		legendMenu.add(mDisplayLegend);
+		mbar.add(legendMenu);
+		
 		setJMenuBar(mbar);
 	}
 
@@ -575,6 +583,8 @@ implements ActionListener, ColorSelectable, Clickable
 			graphCanvas.repaint();
 		} else if(e.getSource() == mSaveScreenshot){
 			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Time Profile", "./TimeProfileImage.png");
+		} else if(e.getSource() == mDisplayLegend){
+			new Legend();
 		} else if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {

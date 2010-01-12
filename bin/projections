@@ -12,4 +12,4 @@ fi
 
 #java -Xms4G -Xmx4G -ms4G -mx4G -XX:+UseParallelGC -classpath $jarpath projections.analysis.ProjMain $*
 #java -d64 -Xms512M -Xmx3G -ms512M -mx3G -classpath $jarpath projections.analysis.ProjMain $*
-java -Xms512M -ms512M -classpath $jarpath projections.analysis.ProjMain $*
+java -classpath $jarpath projections.analysis.ProjMain $*

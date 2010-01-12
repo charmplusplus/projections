@@ -10,15 +10,18 @@ import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JScrollPane;
 
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 
-/** Display a legend for the memory usage colors in a new window (clickable to save image to file) */
+/** Display a legend in a new window (clickable to save image to file) */
 class Legend implements MouseListener {
 	private BufferedImage image;
 	Paint fgColor;
@@ -29,36 +32,70 @@ class Legend implements MouseListener {
 	// runs.
 	private static int myRun = 0;
 	
+	Vector<String> names;
+	Vector<Paint> paints;
 	
-	Legend(){
+	Font namesFont;
+	Font legendFont;
 	
+	Legend( String title, Vector<String> names, Vector<Paint> paints){
+		this.names = names;
+		this.paints = paints;
+		
+		namesFont = new Font("SansSerif", Font.PLAIN, fontSizeNames() ); 
+		legendFont = new Font("SansSerif", Font.BOLD, fontSizeLegend() ); 
+		
 		// Create an image
 		image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = image.createGraphics();
-		FontMetrics fm = g.getFontMetrics();
 
 		bgColor = MainWindow.runObject[myRun].background;
 		fgColor = MainWindow.runObject[myRun].foreground;
-		
-		
+				
 		// Clear Background
 		g.setPaint(bgColor);
 		g.fillRect(0,0,getWidth(), getHeight());
-		
+		g.setPaint(fgColor);
+		g.drawRect(0,0,getWidth()-1, getHeight()-1);
+	
+	
 		// draw "Legend:"
-		String s = "Legend:";
-		Font legendFont = new Font("SansSerif", Font.PLAIN, 30); 
 		g.setPaint(fgColor);
 		g.setFont(legendFont);
-		int fw = fm.stringWidth(s);
-		g.drawString(s, (getWidth()-fw)/2, 10);
+		FontMetrics fm = g.getFontMetrics();
+		int fw = fm.stringWidth(title);
+		g.drawString(title, (getWidth()-fw)/2, baselineLegend() );
 
+		
+		// Draw in the names of the entry methods
+		g.setFont(namesFont);
+
+		for(int i=0; i<names.size(); i++){
+			String name = names.get(i);
+			Paint paint = paints.get(i);
+			
+			int topPixel = topMargin() + i*lineSpacingNames();
+			int textBaseline = topPixel + lineSpacingNames()/2 + fontSizeNames()/2;
+			
+			// Draw colored box
+			g.setPaint(paint);
+			g.fillRect(getWidth()-rightMargin()-boxMarginR()-boxWidth(),topPixel+boxMarginsTB(),boxWidth(), lineSpacingNames()-boxMarginsTB()*2);
+
+			// Draw entry method name
+			g.setPaint(fgColor);
+			g.drawString(name, leftMargin(), textBaseline );
+		
+		}
+		
+		
 		
 		
 		// Display the thing
 		ImageIcon imageIcon = new ImageIcon(image);
 		JFrame f = new JFrame();
 		JLabel l = new JLabel(imageIcon);
+		
+				
 		l.addMouseListener(this);
 		f.getContentPane().add(l);
 		f.pack();
@@ -67,15 +104,76 @@ class Legend implements MouseListener {
 		g.dispose();
 			
 	}
+
+	private int fontSizeLegend(){
+		return 30;
+	}
+
+	private int baselineLegend(){
+		return (topMargin()+fontSizeLegend())/2;
+	}
 	
+	/// Space reserved at top for the title
+	private int topMargin(){
+		return (int) (1.5 * fontSizeLegend());
+	}
+	
+	private int fontSizeNames(){
+		return 14;
+	}
+
+	private int leftMargin(){
+		return 5;
+	}
+
+	private int rightMargin(){
+		return 5;
+	}
+
+	/// Top and bottom margins for the box
+	private int boxMarginsTB(){
+		return 3;
+	}
+
+	/// Left and right margins for the box
+	private int boxMarginL(){
+		return 15;
+	}
+
+	private int boxMarginR(){
+		return 5;
+	}
 
 	
+	private int boxWidth(){
+		return 25;
+	}
+
+	
+	/// Space allocated vertically for each name&box
+	private int lineSpacingNames(){
+		return fontSizeNames() + 10;
+	}
+	
+	
 	private int getWidth(){
-		return 600;
+		// Make a fake image to determine font sizing
+		BufferedImage img = new BufferedImage(100,100, BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = img.createGraphics();
+		g.setFont(namesFont);
+		FontMetrics fm = g.getFontMetrics();
+		
+		int maxw = 0;
+		for(int i=0; i<names.size(); i++){
+			int w = fm.stringWidth(names.get(i));
+			if(w > maxw)
+				maxw = w;
+		}
+		return leftMargin() + maxw + boxMarginL() + boxWidth() + boxMarginR() + rightMargin();
 	}
 	
 	private int getHeight(){
-		return 500;
+		return topMargin() + lineSpacingNames() * names.size();
 	}
 
 

@@ -686,6 +686,16 @@ public class Analysis {
     	return getSts().getEntryNameByIndex(epIdx);
     }
 
+    public String getShortenedEntryNameByIndex(int epIdx) {
+    	String full = getSts().getEntryNameByIndex(epIdx);
+    	int i = full.indexOf("(");
+    	if(i!=-1){
+    		return full.substring(0,i);
+    	} else {
+    		return full;
+    	}
+    }
+    
     public String getEntryChareNameByIndex(int epIdx) {
     	return getSts().getEntryChareNameByIndex(epIdx);
     }

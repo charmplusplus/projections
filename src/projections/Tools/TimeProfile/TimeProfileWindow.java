@@ -11,7 +11,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Vector;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -43,8 +46,6 @@ import projections.gui.Util;
  *  TimeProfileWindow
  *  by Chee Wai Lee
  *	updated by Isaac Dooley
- *	
- * @todo Add a legend
  * 
  */
 public class TimeProfileWindow extends GenericGraphWindow
@@ -75,18 +76,19 @@ implements ActionListener, ColorSelectable, Clickable
 	private JMenuItem mBlackBG;
 	private JMenuItem mSaveScreenshot;
 	private JMenuItem mDisplayLegend;
+	private JMenuItem mDisplayLegendFull;
 
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
-	
+
 	private long intervalSize;
 	private int startInterval;
 	private int endInterval;
 
 	private long startTime;
-	
+
 	private boolean displaySlopes = false;
-	
+
 	// data used for intervalgraphdialog
 	private OrderedIntList processorList;
 
@@ -114,8 +116,8 @@ implements ActionListener, ColorSelectable, Clickable
 	private AmpiTimeProfileWindow ampiGraphPanel = null;
 	private JPanel epPanel = null;
 	private boolean ampiTraceOn = false;
-//	protected int ampiPanelTabIndex;
-//	protected int epPanelTabIndex;
+	//	protected int ampiPanelTabIndex;
+	//	protected int epPanelTabIndex;
 
 
 	// the following data are statically known and can be initialized
@@ -124,22 +126,24 @@ implements ActionListener, ColorSelectable, Clickable
 
 	public TimeProfileWindow(MainWindow mainWindow) {
 		super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
-		
+
 		this.mainWindow = mainWindow;
 
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		stateArray = new boolean[1][numEPs+special];
 		existsArray = new boolean[1][numEPs+special];
 		colorArray = new Color[1][];
-		colorArray[0] = MainWindow.runObject[myRun].getColorMap();
+		colorArray[0] = MainWindow.runObject[myRun].getColorMap();		
 		entryNames = new String[numEPs+special];
 		for (int ep=0; ep<numEPs; ep++) {
 			entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 		}
 		//YSun idle time
 		//for(int ep = numEPs; ep<numEPs+special; ep++)
+
 		entryNames[numEPs] = "Overhead";
 		entryNames[numEPs+1] = "Idle time";
+
 
 		mainPanel = new JPanel();
 		getContentPane().add(mainPanel);
@@ -181,7 +185,7 @@ implements ActionListener, ColorSelectable, Clickable
 		mColors.add(mBlackBG);
 		mbar.add(mColors);
 
-		
+
 		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Save To Image");
 		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
@@ -189,13 +193,17 @@ implements ActionListener, ColorSelectable, Clickable
 		saveMenu.add(mSaveScreenshot);
 		mbar.add(saveMenu);
 
-		
+
 		JMenu legendMenu = new JMenu("Legend");
 		mDisplayLegend = new JMenuItem("Display Legend");
 		mDisplayLegend.addActionListener(this);
 		legendMenu.add(mDisplayLegend);
+		mDisplayLegendFull = new JMenuItem("Display Legend with Full EP Names");
+		mDisplayLegendFull.addActionListener(this);
+		legendMenu.add(mDisplayLegendFull);
+
 		mbar.add(legendMenu);
-		
+
 		setJMenuBar(mbar);
 	}
 
@@ -215,7 +223,7 @@ implements ActionListener, ColorSelectable, Clickable
 		saveColors.addActionListener(this);
 		loadColors = new JButton("Load Entry Colors");
 		loadColors.addActionListener(this);
-		
+
 		analyzeSlopesCheckBox = new JCheckBox("Analyze slope");
 		analyzeSlopesCheckBox.setToolTipText("Select a point on the graph to measure the slope");
 		analyzeSlopesCheckBox.addActionListener(this);
@@ -224,7 +232,7 @@ implements ActionListener, ColorSelectable, Clickable
 		hideMouseoversCheckBox.setSelected(false);
 		hideMouseoversCheckBox.setToolTipText("Disable the displaying of information associated with the data under the mouse pointer.");
 		hideMouseoversCheckBox.addActionListener(this);
-		
+
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
@@ -234,7 +242,7 @@ implements ActionListener, ColorSelectable, Clickable
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 
-		
+
 		if(ampiTraceOn){            
 			epPanel = new JPanel();
 			epPanel.setLayout(gbl);
@@ -245,8 +253,8 @@ implements ActionListener, ColorSelectable, Clickable
 			JPanel ampiPanel = ampiGraphPanel.getAmpiMainPanel();
 			tabPane.add("Entry Points", epPanel);
 			tabPane.add("AMPI Functions", ampiPanel);
-//			epPanelTabIndex = tabPane.indexOfComponent(epPanel);
-//			ampiPanelTabIndex = tabPane.indexOfComponent(ampiPanel);
+			//			epPanelTabIndex = tabPane.indexOfComponent(epPanel);
+			//			ampiPanelTabIndex = tabPane.indexOfComponent(ampiPanel);
 			mainPanel.setLayout(new GridLayout(1,1));
 			mainPanel.add(tabPane);
 		} else {
@@ -257,9 +265,83 @@ implements ActionListener, ColorSelectable, Clickable
 	}
 
 	public void setGraphSpecificData() {
-	
+
 	}
 
+
+	class SortableEPs implements Comparable{
+		double value;
+		String name;
+		Paint paint;
+
+		SortableEPs(double value, String name, Paint paint){
+			this.value = value;
+			this.name = name;
+			this.paint = paint;
+		}
+
+		public int compareTo(Object o) {
+			SortableEPs other = (SortableEPs) o;
+			if(other.value < value)
+				return -1;
+			else if(other.value > value)
+				return 1;
+			else 
+				return other.name.compareTo(name);
+		}
+
+	}
+
+	public void generateLegend(boolean useShortenedNames){
+
+		List<SortableEPs> l = new Vector<SortableEPs>();
+
+		// Accumulate data shown in graph
+		double[] sums = new double[numEPs+2];
+		double grandTotal = 0.0;
+		for(int i=0; i<graphData.length; i++){
+			for(int ep=0; ep<graphData[i].length; ep++){
+				sums[ep] += graphData[i][ep];
+				grandTotal += graphData[i][ep];
+			}
+		}
+
+
+		// Put data into list	
+		for (int ep=0; ep<numEPs; ep++) {
+			if(useShortenedNames)
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getShortenedEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
+			else
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
+
+		}
+
+		l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor()));
+		l.add(new SortableEPs(sums[numEPs+1], "Idle Time", MainWindow.runObject[myRun].getIdleColor()));
+
+
+		// sort list 
+		java.util.Collections.sort(l);
+
+
+		// Extract data from list into structures for legend
+		Vector<String>  names = new Vector<String>();			
+		Vector<Paint>  paints = new Vector<Paint>();				
+
+		Iterator<SortableEPs> iter = l.iterator();
+		while(iter.hasNext()){
+			SortableEPs s = iter.next();
+			if(s.value > grandTotal * 0.005){
+				names.add(s.name);
+				paints.add(s.paint);
+			}
+		}
+
+
+		// Display the legend
+		new Legend("Legend", names, paints);
+
+	}
 
 	public void showDialog() {
 
@@ -275,7 +357,7 @@ implements ActionListener, ColorSelectable, Clickable
 			endInterval = (int)intervalPanel.getEndInterval();
 			processorList = dialog.getSelectedProcessors();
 			startTime = dialog.getStartTime();
-			
+
 			//set range values for time profile window
 			if(ampiTraceOn){
 				ampiGraphPanel.getRangeVals(startInterval, endInterval, intervalSize, processorList);
@@ -348,7 +430,7 @@ implements ActionListener, ColorSelectable, Clickable
 						systemUsageData[2] = new int[numProcessors][];
 
 						//			    	int[][][][] systemMsgsData = new int[5][3][numProcessors][];
-//						int[][][][] systemMsgsData = null;
+						//						int[][][][] systemMsgsData = null;
 
 						int[][][][] userEntryData  = new int[numUserEntries][][][];
 						for(int n=0;n<numUserEntries;n++){
@@ -385,14 +467,14 @@ implements ActionListener, ColorSelectable, Clickable
 							}
 						}					
 					}
-					
+
 					// Scale raw data into percents
 					for (int interval=0; interval<graphData.length; interval++) {
 						for(int e=0; e< graphData[interval].length; e++){
 							graphData[interval][e] = graphData[interval][e] * 100.0 / ((double)intervalSize * (double)numProcessors);		
 						}
 					}
-					
+
 					// Filter Out any bad data
 					for (int interval=0; interval<graphData.length; interval++) {
 						boolean valid = true;
@@ -413,9 +495,9 @@ implements ActionListener, ColorSelectable, Clickable
 								graphData[interval][e] = 0.0;
 							}
 						}
-						
+
 					}
-					
+
 					// set the exists array to accept non-zero 
 					// entries only have initial state also 
 					// display all existing data. Only do this 
@@ -584,7 +666,9 @@ implements ActionListener, ColorSelectable, Clickable
 		} else if(e.getSource() == mSaveScreenshot){
 			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Time Profile", "./TimeProfileImage.png");
 		} else if(e.getSource() == mDisplayLegend){
-			new Legend();
+			generateLegend(true);
+		} else if(e.getSource() == mDisplayLegendFull){
+			generateLegend(false);
 		} else if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {
@@ -597,6 +681,7 @@ implements ActionListener, ColorSelectable, Clickable
 
 
 
+
 	private void createPolynomial(int xVal, int yVal){
 		int numIntervals = endInterval-startInterval+1; 
 
@@ -604,7 +689,7 @@ implements ActionListener, ColorSelectable, Clickable
 		if(xVal < 2 || yVal < 0 || xVal >= numIntervals-2){
 			return;
 		}
-		
+
 		// extract the curve that sits:
 		// above the EP utilization + overhead 
 		// but below the idle time
@@ -646,12 +731,12 @@ implements ActionListener, ColorSelectable, Clickable
 	}	
 
 	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-		
+
 		if(displaySlopes){
 			// create a screenshot of the 
 			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.png");
 		}
-		
+
 	}
 
 }

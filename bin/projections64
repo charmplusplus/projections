@@ -1,0 +1,15 @@
+#!/bin/sh
+
+jarpath="`dirname $0`/projections.jar"
+
+if test -x /usr/bin/cygpath
+then 
+  if test "`uname -o`" = "Cygwin"
+  then
+    jarpath=`/usr/bin/cygpath -w -a $jarpath`
+  fi 
+fi
+
+#java -Xms4G -Xmx4G -ms4G -mx4G -XX:+UseParallelGC -classpath $jarpath projections.analysis.ProjMain $*
+java -d64 -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain $*
+#java -classpath $jarpath projections.analysis.ProjMain $*

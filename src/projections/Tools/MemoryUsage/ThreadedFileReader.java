@@ -19,6 +19,7 @@ class ThreadedFileReader extends Thread  {
 	long intervalSize;
 	long startInterval;
 	long endInterval;
+	double timeScalingFactor;
 
 	/** Construct a file reading thread that will determine the best EP representative for each interval
 	 *  
@@ -26,12 +27,13 @@ class ThreadedFileReader extends Thread  {
 	 * @param utilizationData 
 	 *  
 	 *  */
-	protected ThreadedFileReader(int pe, int myRun, long intervalSize, long startInterval, long endInterval){
+	protected ThreadedFileReader(int pe, int myRun, long intervalSize, long startInterval, long endInterval, double timeScalingFactor){
 		this.pe = pe;
 		this.myRun = myRun;
 		this.intervalSize = intervalSize;
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
+		this.timeScalingFactor = timeScalingFactor;
 	}
 
 	public void run() { 
@@ -75,9 +77,9 @@ class ThreadedFileReader extends Thread  {
 		for(int i=0;i<numIntervals;i++){
 			long time = (startInterval + i) * intervalSize +  (intervalSize/2);
 			if(maxUsage[i] > 0){
-				series.add(time, maxUsage[i]);
+				series.add(time * timeScalingFactor, maxUsage[i]);
 			} else {
-				series.add(time,null);
+				series.add(time * timeScalingFactor,null);
 			}
 		}
 

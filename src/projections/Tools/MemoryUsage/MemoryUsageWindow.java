@@ -65,6 +65,9 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	public Vector<Long> availableStepTimes;
 
 	IntervalChooserPanel intervalPanel;
+	
+	double timeScalingFactor = 1.0;
+	String timeUnits = "us-default";
 
 	public MemoryUsageWindow(MainWindow mainWindow)
 	{
@@ -139,8 +142,6 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			dialog.displayDialog();
 			if (!dialog.isCancelled()) {
 				final OrderedIntList pes = dialog.getSelectedProcessors();
-				final long startTime = dialog.getStartTime();
-				final long endTime = dialog.getEndTime();
 				intervalSize = intervalPanel.getIntervalSize();
 				final long startInterval = intervalPanel.getStartInterval();
 				final long endInterval = intervalPanel.getEndInterval();
@@ -148,7 +149,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 				final SwingWorker worker = new SwingWorker() {
 					public Object doInBackground() {
 						// Load memory usages here
-						thisWindow.loadData(startTime, endTime, pes, intervalSize, startInterval, endInterval);
+						thisWindow.loadData(pes, intervalSize, startInterval, endInterval);
 						return null;
 					}
 
@@ -194,7 +195,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 		JFreeChart chart = ChartFactory.createScatterPlot(
 				"Memory Usage (at " + U.humanReadableString(intervalSize) + " resolution)",
-				"Time (us)",
+				"Time (" + timeUnits + ")",
 				"MB",
 				seriesCollection,
 				PlotOrientation.VERTICAL,
@@ -208,13 +209,16 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		renderer.setDotWidth(2);
 		renderer.setDotHeight(2);
 		XYPlot plot = (XYPlot) chart.getPlot();
+		plot.setDomainGridlinesVisible(false);  
+		plot.setRangeGridlinesVisible(true);  
 		plot.setRenderer(renderer);
 
+		
 
 		// Add markers to mark each iteration:
 		determineStepsFromPEZero();
 		for(int i=0; i<availableStepTimes.size(); i++){
-			ValueMarker m = new ValueMarker(availableStepTimes.elementAt(i), Color.darkGray, new BasicStroke(2.0f) );
+			ValueMarker m = new ValueMarker(availableStepTimes.elementAt(i) * timeScalingFactor, Color.black, new BasicStroke(1.0f) );
 			//			m.setLabel(this.availableStepStrings.elementAt(i));
 			plot.addDomainMarker(m);
 		}
@@ -236,8 +240,25 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	}
 
 
-	private void loadData(final long startTime, final long endTime, final OrderedIntList processorList, long intervalSize, long startInterval, long endInterval) {
-
+	private void loadData(final OrderedIntList processorList, long intervalSize, long startInterval, long endInterval) {
+		
+		// Determine how to scale the x axis values&units
+		double timeSpan = (endInterval - startInterval) * intervalSize;
+		if(timeSpan > 1000000*5){
+			// units should be seconds
+			timeScalingFactor = 0.000001;
+			timeUnits = "s";	
+		} else if (timeSpan > 1000 * 5){
+			// units should be ms
+			timeScalingFactor = 0.001;
+			timeUnits = "ms";
+		} else {
+			// units should be us
+			timeScalingFactor = 1.0;
+			timeUnits = "us";
+		}
+		
+		
 		if( MainWindow.runObject[myRun].hasLogFiles() || MainWindow.runObject[myRun].hasSumDetailFiles() ) {
 			// Do parallel loading because we have full logs
 
@@ -246,7 +267,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 			while (processorList.hasMoreElements()) {
 				int nextPe = processorList.nextElement();
-				readyReaders.add( new ThreadedFileReader(nextPe, myRun, intervalSize, startInterval, endInterval));
+				readyReaders.add( new ThreadedFileReader(nextPe, myRun, intervalSize, startInterval, endInterval, timeScalingFactor));
 			}
 
 			// Determine a component to show the progress bar with

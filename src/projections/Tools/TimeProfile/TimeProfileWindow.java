@@ -142,7 +142,7 @@ implements ActionListener, ColorSelectable, Clickable
 		//for(int ep = numEPs; ep<numEPs+special; ep++)
 
 		entryNames[numEPs] = "Overhead";
-		entryNames[numEPs+1] = "Idle time";
+		entryNames[numEPs+1] = "Idle";
 
 
 		mainPanel = new JPanel();
@@ -310,14 +310,14 @@ implements ActionListener, ColorSelectable, Clickable
 		// Put data into list	
 		for (int ep=0; ep<numEPs; ep++) {
 			if(useShortenedNames)
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getShortenedEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
 			else
 				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
 
 		}
 
 		l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor()));
-		l.add(new SortableEPs(sums[numEPs+1], "Idle Time", MainWindow.runObject[myRun].getIdleColor()));
+		l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor()));
 
 
 		// sort list 

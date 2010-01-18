@@ -686,8 +686,10 @@ public class Analysis {
     	return getSts().getEntryNameByIndex(epIdx);
     }
 
-    public String getShortenedEntryNameByIndex(int epIdx) {
+    /** Generate a shortened prettier version of the entry name, excluding the parameter list */
+    public String getPrettyEntryNameByIndex(int epIdx) {
     	String full = getSts().getEntryNameByIndex(epIdx);
+    	full = full.replace("_", " ");
     	int i = full.indexOf("(");
     	if(i!=-1){
     		return full.substring(0,i);

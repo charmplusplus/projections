@@ -38,7 +38,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 
 		numIntervalsLabel = new JLabel(" ", JLabel.LEFT);
 		numIntervalsLabel.setBorder(BorderFactory.createEmptyBorder(3, 40, 3, 3));
-		
+
 		t = new JCheckBox("Manually Specify Resolution (# of intervals):");
 		t.setSelected(false);
 		t.addItemListener(this);
@@ -91,7 +91,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 
 	}
 
-	
+
 	private void repackParentWindow(){
 		if(parent != null && parent.isVisible()){
 			parent.pack();
@@ -103,7 +103,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 	}
 
 	public boolean isInputValid() {
-		
+
 		// This one is just a warning, so don't return false
 		if(getNumSelectedIntervals() < 25){
 			numIntervalsLabel.setText("Selected Number of Intervals : " + getNumSelectedIntervals() );
@@ -112,7 +112,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 			numIntervalsLabel.setForeground(Color.black);
 		}
 
-		
+
 		// This is an actual error, so return false
 		if (sizeField.getValue() <= 0 || sizeField.getValue() > parent.getTotalTime()) 	{
 			// interval size should not be less than or equal to zero us.
@@ -138,11 +138,19 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 
 
 	public long getStartInterval() {
-		return parent.getStartTime()/sizeField.getValue();
+		if(sizeField.getValue() > 0){
+			return parent.getStartTime()/sizeField.getValue();
+		} else {
+			return 0;
+		}
 	}
 
 	public long getEndInterval() {
-		return parent.getEndTime()/sizeField.getValue();
+		if(sizeField.getValue() > 0){
+			return parent.getEndTime()/sizeField.getValue();
+		} else {
+			return 0;
+		}	
 	}
 
 	public void itemStateChanged(ItemEvent e) {

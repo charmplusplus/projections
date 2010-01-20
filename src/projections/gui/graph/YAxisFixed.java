@@ -33,7 +33,8 @@ public class YAxisFixed extends YAxis
 			k = U.truncateTrailingZeroPeriod(k);
 			return "" + k + "K";
 		} else {
-			return ""+value;
+			String v = ""+value;
+			return U.truncateTrailingZeroPeriod(v);
 		}
 	}
 }

@@ -57,6 +57,8 @@ public class Graph extends JPanel
     private FontMetrics fmChartTitle;
     private FontMetrics fmLabels;
 
+    // Computed width of largest y axis label. The largest value is not necessarily the longest string
+    int maxYLabelWidth = 0;
 
     // number of pixels per bar
     private double pixelincrementX(){
@@ -311,18 +313,7 @@ public class Graph extends JPanel
     	drawDisplay((Graphics2D) g);
     }
 
-    public void print(Graphics pg)
-    {
-	Color oldBackground = MainWindow.runObject[myRun].background;
-	Color oldForeground = MainWindow.runObject[myRun].foreground;
-	MainWindow.runObject[myRun].background = Color.white;
-	MainWindow.runObject[myRun].foreground = Color.black;
-	drawDisplay((Graphics2D) pg);
-	MainWindow.runObject[myRun].background = oldBackground;
-	MainWindow.runObject[myRun].foreground = oldForeground;
-    }
-
-
+   
     public void mouseEntered(MouseEvent e) {
     } 
 
@@ -450,9 +441,11 @@ public class Graph extends JPanel
     	
     	if ((xAxis != null) && (yAxis != null)) {
     		
-        	setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
-        	setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
-    		
+    		// Compute various layout dimensions. MUST DO Y AXIS FIRST!!!! 
+    		// Width of available chart area depends on y axis label width stored in maxLabelWidth
+    		setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
+    		setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
+        	
     		if (GraphType == BAR) {
     			drawBarGraph(g);
     		} else if (GraphType == AREA) {
@@ -879,46 +872,67 @@ public class Graph extends JPanel
      *  for each tick (1, 10, 100, 1000 etc ...) based on the "best" label
      *  pixel number.
      */
-    private void setBestIncrements(int axis, double pixelsPerValue, 
-				   long maxValue) {
-	long index = 0;
-	long labelValue = getNextLabelValue(index);
-	long tickValue = getNextTickValue(index++);
+    private void setBestIncrements(int axis, double pixelsPerValue, long maxValue) {
+    	long index = 0;
+    	long labelValue = getNextLabelValue(index);
+    	long tickValue = getNextTickValue(index++);
 
-	int labelWidth = 0;
-	while (true) {
-	
-    	if (axis == X_AXIS) {
-    		labelWidth = fmLabels.stringWidth(xAxis.getIndexName((int)(maxValue-1)));
-    	} else {
-    		labelWidth = fmLabels.getHeight();
+    	int labelWidth = 0;
+    	while (true) {
+    		
+    		if (axis == X_AXIS) {
+    			// Find largest x axis label:
+        		labelWidth = 0;
+        		for (int i=0; i<maxValue; i++) {
+        			String xLabel = xAxis.getIndexName(i);
+        			int w = fmLabels.stringWidth(xLabel);
+        			if (w > labelWidth){
+        				labelWidth = w;
+        			}
+        		}
+    		} else {
+    			labelWidth = fmLabels.getHeight();
+    		}
+    		// is the number of pixels to display a label too small?
+    		if (labelWidth > (pixelsPerValue*labelValue*0.8)) {
+    			labelValue = getNextLabelValue(index);
+    			tickValue = getNextTickValue(index++);
+    			continue;
+    		} else {
+    			// will my component ticks be too small?
+    			if ((pixelsPerValue*tickValue) < 2.0) {
+    				labelValue = getNextLabelValue(index);
+    				tickValue = getNextTickValue(index++);
+    				continue;
+    			} else {
+    				// everything is A OK. Set the global variables.
+    				if (axis == X_AXIS) {
+    					tickIncrementX = tickValue*pixelsPerValue;
+    					valuesPerTickX = tickValue;
+    					valuesPerLabelX = labelValue;
+    				} else if (axis == Y_AXIS) {
+    					//			tickIncrementY = tickValue*pixelsPerValue;
+    					valuesPerTickY = tickValue;
+    					valuesPerLabelY = labelValue;
+
+    					// Determine the width of the y axis labels so we can later figure out the x origin
+    					maxYLabelWidth = 0;
+    					for (long i=0; i<=maxvalueY(); i+=tickValue) {
+    						int cury = originY() - (int)(i*pixelincrementY());
+    						if (i % labelValue == 0) {
+    							String yLabel = yAxis.getValueName(i);
+    							int w = fmLabels.stringWidth(yLabel);
+    							if (w > maxYLabelWidth){
+    								maxYLabelWidth = w;
+    							}
+    						}
+    					}
+
+    				}
+    				return;
+    			}
+    		}
     	}
-	    // is the number of pixels to display a label too small?
-	    if (labelWidth > (pixelsPerValue*labelValue*0.8)) {
-		labelValue = getNextLabelValue(index);
-		tickValue = getNextTickValue(index++);
-		continue;
-	    } else {
-		// will my component ticks be too small?
-		if ((pixelsPerValue*tickValue) < 2.0) {
-		    labelValue = getNextLabelValue(index);
-		    tickValue = getNextTickValue(index++);
-		    continue;
-		} else {
-		    // everything is A OK. Set the global variables.
-		    if (axis == X_AXIS) {
-			tickIncrementX = tickValue*pixelsPerValue;
-			valuesPerTickX = tickValue;
-			valuesPerLabelX = labelValue;
-		    } else if (axis == Y_AXIS) {
-//			tickIncrementY = tickValue*pixelsPerValue;
-			valuesPerTickY = tickValue;
-			valuesPerLabelY = labelValue;
-		    }
-		    return;
-		}
-	    }
-	}
     }
 
     /**
@@ -1025,7 +1039,7 @@ public class Graph extends JPanel
 
 	/** The x pixel coordinate of the bottom left intersection of the axis lines */
 	private int originX(){
-		return fmLabels.stringWidth(""+(long)maxvalueY()) + spaceBetweenYValuesAndAxis + fmLabels.getHeight()*2;
+		return maxYLabelWidth + spaceBetweenYValuesAndAxis + fmLabels.getHeight()*2;
 	}
 
 	/** The y pixel coordinate of the bottom left intersection of the axis lines */

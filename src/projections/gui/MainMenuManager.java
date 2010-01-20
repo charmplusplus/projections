@@ -200,6 +200,8 @@ implements ActionListener, ItemListener
 	private void createMenus() {
 		menubar = new JMenuBar();
 
+    	System.out.println("MainMenuManager Create Menus");
+		
 		// FILE MENU	
 		fileMenu = new JMenu("File");		
 		fileOpenMenuItem = new JMenuItem("Open File(s)");
@@ -251,7 +253,7 @@ implements ActionListener, ItemListener
 		renderedTimelinesMenuItem = new JMenuItem("Timelines - rendered to image");
 		usageProfileMenuItem = new JMenuItem("Usage Profile");
 		communicationMenuItem = new JMenuItem("Communication");
-		communicationVsTimeMenuItem = new JMenuItem("Communication vs Time");
+		communicationVsTimeMenuItem = new JMenuItem("Communication Over Time");
 		callTableMenuItem = new JMenuItem("Call Table");
 		viewLogFilesMenuItem = new JMenuItem("View Log Files");
 		histogramsMenuItem = new JMenuItem("Histograms");

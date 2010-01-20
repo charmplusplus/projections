@@ -201,73 +201,55 @@ class CommTimeWindow extends GenericGraphWindow
     
     public void setCheckboxData(Checkbox cb) {
 	if(cb == sentMsgs) {
-	    setDataSource("Communication vs Time", sentMsgOutput, 
+	    setDataSource("Messages Sent Over Time", sentMsgOutput, 
 			  outColors, this);
 	    setPopupText("sentMsgCount");
-	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
+	    setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 		     startInterval, 1.0);
 	    setYAxis("Messages Sent", "");
 	    super.refreshGraph();
 	}
 	else if(cb == sentBytes){
-	    setDataSource("Communication vs Time", sentByteOutput, 
+	    setDataSource("Bytes Sent Over Time", sentByteOutput, 
 			  outColors, this);
 	    setPopupText("sentByteCount");
-	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
+	    setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 		     startInterval, 1.0);
 	    setYAxis("Bytes Sent", "");
 	    super.refreshGraph();
 	}
 	else if(cb == receivedMsgs){
-	    setDataSource("Communication vs Time", receivedMsgOutput, 
+	    setDataSource("Received Messages Over Time", receivedMsgOutput, 
 			  outColors, this);
 	    setPopupText("receivedMsgCount");
-	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
+	    setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 		     startInterval, 1.0);
 	    setYAxis("Messages Received", "");
 	    super.refreshGraph();
 	}
 	else if(cb == receivedBytes){
-	    setDataSource("Communication vs Time", receivedByteOutput, 
+	    setDataSource("Received Bytes Over Time", receivedByteOutput, 
 			  outColors, this);
 	    setPopupText("receivedByteCount");
-	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
+	    setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 		     startInterval, 1.0);
 	    setYAxis("Bytes Received", "");
 	    super.refreshGraph();
 	}
-/*
-	else if(cb == sentExternalMsgs) {
-	    setDataSource("Call Graph", sentExternalMsgOutput, outColors, this);
-	    setPopupText("sentExternalMsgCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
-		     startInterval, 1.0);
-	    setYAxis("Messages Sent Externally", "");
-	    super.refreshGraph();
-	}
-	else if(cb == sentExternalBytes){
-	    setDataSource("Call Graph", sentExternalByteOutput, outColors, this);
-	    setPopupText("sentExternalByteCount");
-	    setXAxis("Time Interval (" + U.t(intervalSize) + ")", "",
-		     startInterval, 1.0);
-	    setYAxis("Bytes Sent Externally", "");
-	    super.refreshGraph();
-        }
-*/
 	else if(cb == receivedExternalMsgs){
-	    setDataSource("Communication vs Time", receivedExternalMsgOutput,
+	    setDataSource("Received External Messages Over Time", receivedExternalMsgOutput,
 			  outColors, this);
 	    setPopupText("receivedExternalMsgCount");
-	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
+	    setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 		     startInterval, 1.0);
 	    setYAxis("Messages Received Externally", "");
 	    super.refreshGraph();
 	}
 	else if(cb == receivedExternalBytes){
-	    setDataSource("Communication vs Time", receivedExternalByteOutput,
+	    setDataSource("Received External Bytes Over Time", receivedExternalByteOutput,
 			  outColors, this);
 	    setPopupText("receivedExternalByteCount");
-	    setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
+	    setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 		     startInterval, 1.0);
 	    setYAxis("Bytes Received Externally", "");
 	    super.refreshGraph();

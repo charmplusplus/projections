@@ -48,7 +48,7 @@ public class ProjMain {
     public static final int DOP = 3;
     public static final int SUMACC = 4;
 
-    private static MainWindow mainWindow = null;
+    public static MainWindow mainWindow = null;
 
     private static void help()
     {
@@ -73,8 +73,10 @@ public class ProjMain {
 	System.exit(code);
     }
 
-    public static void main(String args[])
-    {	
+    /** Intialize everything so gui choices can be made and command line driven tools can do whatever they need. 
+     * */
+    public static void startup(String args[]){
+    	
     	/// The sts file to load
     	String loadSts=null;
     	boolean done = false;
@@ -164,5 +166,12 @@ public class ProjMain {
     	if (loadSts!=null) { 
     		mainWindow.openFile(loadSts); 
     	}
+    	
+    }
+    
+    
+    public static void main(String args[])
+    {	
+    	startup(args);
     }
 }

@@ -94,28 +94,9 @@ class UserEventsWindow extends GenericGraphWindow
 	Util.gblAdd(mainPanel, controlPanel, gbc, 0,1, 1,0, 0,0);
     }
 
-    protected void createMenus(){
-        JMenuBar mbar = new JMenuBar();
-        mbar.add(Util.makeJMenu("File", new Object[]
-            {
-                "Select Processors",
-                null,
-		"Close"
-            },
-                                this));
-        mbar.add(Util.makeJMenu("Tools", new Object[]
-            {
-                "Change Colors",
-            },
-                                this));
-        mbar.add(Util.makeJMenu("Help", new Object[]
-            {
-                "Index",
-		"About"
-            },
-                                this));
-        setJMenuBar(mbar);
-    }
+//    protected void createMenus(){
+//    	super.createMenus();
+//    }
 
     public void showDialog() {
     	if (dialog == null) {

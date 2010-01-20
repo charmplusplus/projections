@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.Tools.Histogram;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -12,6 +12,14 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+
+import projections.gui.JIntTextField;
+import projections.gui.JLongTextField;
+import projections.gui.RangeDialog;
+import projections.gui.RangeDialogExtensionPanel;
+import projections.gui.TimeTextField;
+import projections.gui.U;
+import projections.gui.Util;
 
 /**
  *  BinDialog
@@ -29,7 +37,7 @@ import javax.swing.border.TitledBorder;
  *  
  *  All data is stored inside the text fields.
  */
-class BinDialogPanel extends RangeDialogExtensionPanel 
+public class BinDialogPanel extends RangeDialogExtensionPanel 
 {
 	// GUI components
 	private JTabbedPane tabbedPane;

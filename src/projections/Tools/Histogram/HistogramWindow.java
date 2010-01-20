@@ -1,11 +1,13 @@
-package projections.gui;
+package projections.Tools.Histogram;
+
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.EOFException;
 import java.text.DecimalFormat;
+import java.util.LinkedList;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -13,21 +15,24 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
-import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
-import projections.analysis.GenericLogReader;
-import projections.analysis.ProjDefs;
-import projections.misc.LogEntryData;
+import projections.analysis.ThreadManager;
+import projections.gui.GenericGraphWindow;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.RangeDialog;
+import projections.gui.U;
+import projections.gui.Util;
 
 /**
  *  HistogramWindow
  *  modified by Chee Wai Lee
  *  2/23/2005
  */
-class HistogramWindow extends GenericGraphWindow 
+public class HistogramWindow extends GenericGraphWindow 
 implements ActionListener
 {
 
@@ -36,7 +41,7 @@ implements ActionListener
 	// runs.
 	private int myRun = 0;
 
-	private static final int NUM_TYPES = 2;
+	protected static final int NUM_TYPES = 2;
 	protected static final int TYPE_TIME = 0;
 	protected static final int TYPE_MSG_SIZE = 1;
 
@@ -69,7 +74,7 @@ implements ActionListener
 	private DecimalFormat _format;
 
 
-	protected HistogramWindow(MainWindow mainWindow)
+	public HistogramWindow(MainWindow mainWindow)
 	{
 		super("Projections Histograms", mainWindow);
 		thisWindow = this;
@@ -113,7 +118,35 @@ implements ActionListener
 					msgBinSize = binpanel.getMsgBinSize();
 					msgMinBinSize = binpanel.getMsgMinBinSize();
 					binType = binpanel.getSelectedType();
-					counts = thisWindow.getCounts(dialog.getStartTime(), dialog.getEndTime(), dialog.getSelectedProcessors());
+					
+					counts = new double[HistogramWindow.NUM_TYPES][][];
+					// we create an extra bin to hold overflows.
+					int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+					counts[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
+					counts[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
+
+					
+					// Create a list of worker threads
+					LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+
+					OrderedIntList processorList = dialog.getSelectedProcessors();
+					while (processorList.hasMoreElements()) {
+						int nextPe = processorList.nextElement();
+						readyReaders.add( new ThreadedFileReader(counts, nextPe, dialog.getStartTime(), dialog.getEndTime(), timeNumBins, timeBinSize, timeMinBinSize, msgNumBins, msgBinSize, msgMinBinSize));
+					}
+
+					// Determine a component to show the progress bar with
+					Component guiRootForProgressBar = null;
+					if(thisWindow!=null && thisWindow.isVisible()) {
+						guiRootForProgressBar = thisWindow;
+					} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+						guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+					}
+
+					// Pass this list of threads to a class that manages/runs the threads nicely
+					ThreadManager threadManager = new ThreadManager("Loading Histograms in Parallel", readyReaders, guiRootForProgressBar, true);
+					threadManager.runThreads();
+					
 					return null;
 				}
 				protected void done() {
@@ -134,25 +167,25 @@ implements ActionListener
 
 
 
-	public void actionPerformed(ActionEvent evt)
+	public void actionPerformed(ActionEvent e)
 	{
-		if (evt.getSource() instanceof JMenuItem) {
-			JMenuItem m = (JMenuItem)evt.getSource();
+		if (e.getSource() instanceof JMenuItem) {
+			JMenuItem m = (JMenuItem)e.getSource();
 			if(m.getText().equals("Set Range"))
 				showDialog();
 			else if(m.getText().equals("Close"))
 				close();
-		} else if (evt.getSource()  == timeBinButton) {
+		} else if (e.getSource()  == timeBinButton) {
 			binType = TYPE_TIME;
 			setGraphSpecificData();
 			refreshGraph();
-		} else if (evt.getSource()  ==  msgSizeBinButton) {
+		} else if (e.getSource()  ==  msgSizeBinButton) {
 			binType = TYPE_MSG_SIZE;
 			setGraphSpecificData();
 			refreshGraph();
-		} else if (evt.getSource() == entrySelectionButton) {
+		} else if (e.getSource() == entrySelectionButton) {
 			System.out.println("selecting entries for display");
-		} else if (evt.getSource() == epTableButton) {
+		} else if (e.getSource() == epTableButton) {
 			System.out.println("Showing out of range entries");
 		}
 	}
@@ -258,147 +291,18 @@ implements ActionListener
 		return bubbleText;
 	}
 
-	private double[][][] getCounts(long startTime, long endTime, OrderedIntList pes)
-	{
-		// Variables for use with the analysis
-		long executionTime;
-		long adjustedTime;
-		long adjustedSize;
+	
 
-		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
-
-		GenericLogReader r;
-		double[][][] countData = new double[NUM_TYPES][][];
-
-		// we create an extra bin to hold overflows.
-		countData[TYPE_TIME] = new double[timeNumBins+1][numEPs];
-		countData[TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
-
-
-		// for maintaining "begin" entries for the data type we
-		// wish to monitor.
-		LogEntryData[] typeLogs = new LogEntryData[NUM_TYPES];
-		for (int i=0; i<NUM_TYPES; i++) {
-			typeLogs[i] = new LogEntryData();
-		}
-		// for maintaining interval-based events 
-		boolean[] isActive = new boolean[NUM_TYPES];
-
-		ProgressMonitor progressBar = new ProgressMonitor(this, "Reading log files", "", 0, pes.size());
-		int curPeCount = 0;
-		while (pes.hasMoreElements()) {
-			int pe = pes.nextElement();
-			if (!progressBar.isCanceled()) {
-				progressBar.setNote("[PE: " + pe + " ] Reading data.");
-				progressBar.setProgress(curPeCount);
-			} else {
-				progressBar.close();
-			}
-			curPeCount++;
-			r = new GenericLogReader(pe,
-					MainWindow.runObject[myRun].getVersion());
-			try {
-				LogEntryData logdata = r.nextEventOnOrAfter(startTime);
-				boolean done = false;
-				while (!done) {
-					switch (logdata.type) {
-					case ProjDefs.BEGIN_PROCESSING:
-						// NOTE: If prior BEGIN never got terminated,
-						// simply drop the data given current tracing
-						// scheme (ie. do nothing)
-						if (logdata.time > endTime) {
-							done = true;
-						} else {
-							// swap logdata (ie. note the BEGIN event)
-							LogEntryData tmpLogPtr = logdata;
-							logdata = typeLogs[TYPE_TIME];
-							typeLogs[TYPE_TIME] = tmpLogPtr;
-							isActive[TYPE_TIME] = true;
-						}
-						break;
-					case ProjDefs.END_PROCESSING:
-						if (!isActive[TYPE_TIME]) {
-							// NOTE: No corresponding BEGIN, so this
-							// instance of END must be ignored given
-							// current tracing scheme.
-							if (logdata.time > endTime) {
-								done = true;
-							}
-							break;
-						} else {
-							if (logdata.entry != typeLogs[TYPE_TIME].entry) {
-								// The events are mismatched! Clear all.
-								// Possible under current tracing scheme.
-								isActive[TYPE_TIME] = false;
-								break;
-							}
-							// NOTE: Even if the END event happens past 
-							// the range, it is recorded as the proper 
-							// execution time of the event.
-							executionTime = 
-								logdata.time - typeLogs[TYPE_TIME].time;
-							adjustedTime = executionTime - timeMinBinSize;
-							// respect user threshold
-							if (adjustedTime >= 0) {
-								int targetBin = 
-									(int)(adjustedTime/timeBinSize);
-								if (targetBin >= timeNumBins) {
-									targetBin = timeNumBins;
-								}
-								countData[TYPE_TIME][targetBin][logdata.entry] += 1.0;
-							}
-							isActive[TYPE_TIME] = false;
-						}
-						break;
-					case ProjDefs.CREATION:
-						if (logdata.time > endTime) {
-							break;
-						}
-						// respect the user threshold.
-						adjustedSize =
-							logdata.msglen - msgMinBinSize;
-						if (adjustedSize >= 0) {
-							int targetBin = (int)(adjustedSize/msgBinSize);
-							if (targetBin >= msgNumBins) {
-								targetBin = msgNumBins;
-							}
-							countData[TYPE_MSG_SIZE][targetBin][logdata.entry]+=1.0;
-						}
-						break;
-					}
-					if (!done) {
-						logdata = r.nextEvent();
-					}
-				}
-			} catch(EOFException e) {
-				// do nothing just reached end-of-file
-			} catch(Exception e) {
-				System.err.println("Exception " + e);
-				e.printStackTrace();
-				System.exit(-1);
-			}
-		}
-		progressBar.close();
-		return countData;
-	}
-
-	// override the super class' createMenus(), add any menu items in 
-	// fileMenu if needed, add any new menus to the menuBar
-	// then call super class' createMenus() to add the menuBar to the Window
-	protected void createMenus()
-	{
-		fileMenu = Util.makeJMenu(fileMenu,
-				new Object[]
-				           {
-				"Select Entry Points"
-				           },
-				           this);
+	protected void createMenus() {
+		super.createMenus();
+		
+		// Add in our own special menu
 		menuBar.add(Util.makeJMenu("View", 
 				new Object[]
 				           {
 				new JCheckBoxMenuItem("Show Longest EPs",true)
 				           },
 				           this));
-		super.createMenus();
+
 	}
 }

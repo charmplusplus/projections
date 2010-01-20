@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 public class TimeTextField extends JTextField
 {   
 
-	protected TimeTextField(long defval, int size)
+	public TimeTextField(long defval, int size)
     {
 	this(U.humanReadableString(defval),size);
     }   

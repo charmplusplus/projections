@@ -134,12 +134,7 @@ class CallTableWindow extends ProjectionsWindow
                 "Change Colors",
             },
                                 this));
-        mbar.add(Util.makeJMenu("Help", new Object[]
-            {
-                "Index",
-                                    "About"
-            },
-                                this));
+     
         setJMenuBar(mbar);
     }
 

@@ -130,12 +130,6 @@ class ProfileWindow extends ProjectionsWindow
                                 this));
         }
 
-	mbar.add(Util.makeJMenu("Help", new Object[]
-                                {
-                                    "Index",
-                                    "About"
-                                },
-                                this));
 	setJMenuBar(mbar);
     }
 

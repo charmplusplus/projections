@@ -222,26 +222,13 @@ implements ItemListener, ActionListener, Clickable
 	}
 
 	protected void createMenus(){
-		JMenuBar mbar = new JMenuBar();
-		mbar.add(Util.makeJMenu("File", new Object[]
-		                                           {
-				"Select Processors",
-				null,
-				"Close"
-		                                           },
-		                                           this));
-		mbar.add(Util.makeJMenu("Tools", new Object[]
+		super.createMenus();
+	
+		menuBar.add(Util.makeJMenu("Tools", new Object[]
 		                                            {
 				"Change Colors",
 		                                            },
 		                                            this));
-		mbar.add(Util.makeJMenu("Help", new Object[]
-		                                           {
-				"Index",
-				"About"
-		                                           },
-		                                           this));
-		setJMenuBar(mbar);
 	}
 
 	private void createLayout() {

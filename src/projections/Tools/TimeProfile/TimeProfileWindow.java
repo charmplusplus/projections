@@ -72,9 +72,6 @@ implements ActionListener, ColorSelectable, Clickable
 	// **CW** this really should be a default button with ProjectionsWindow
 	private JButton saveColors;
 	private JButton loadColors;
-	private JMenuItem mWhiteBG;
-	private JMenuItem mBlackBG;
-	private JMenuItem mSaveScreenshot;
 	private JMenuItem mDisplayLegend;
 	private JMenuItem mDisplayLegendFull;
 
@@ -166,33 +163,7 @@ implements ActionListener, ColorSelectable, Clickable
 	}
 
 	protected void createMenus(){
-		JMenuBar mbar = new JMenuBar();
-		mbar.add(Util.makeJMenu("File", new Object[]
-		                                           {
-				"Select Processors",
-				null,
-				"Close"
-		                                           },
-		                                           this));
-
-		// Color Scheme Menu
-		JMenu mColors = new JMenu("Color Scheme");
-		mWhiteBG = new JMenuItem("White background");
-		mBlackBG = new JMenuItem("Black background");
-		mWhiteBG.addActionListener(this);
-		mBlackBG.addActionListener(this);
-		mColors.add(mWhiteBG);
-		mColors.add(mBlackBG);
-		mbar.add(mColors);
-
-
-		// Screenshot Menu
-		JMenu saveMenu = new JMenu("Save To Image");
-		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
-		mSaveScreenshot.addActionListener(this);
-		saveMenu.add(mSaveScreenshot);
-		mbar.add(saveMenu);
-
+		super.createMenus();
 
 		JMenu legendMenu = new JMenu("Legend");
 		mDisplayLegend = new JMenuItem("Display Legend");
@@ -202,9 +173,9 @@ implements ActionListener, ColorSelectable, Clickable
 		mDisplayLegendFull.addActionListener(this);
 		legendMenu.add(mDisplayLegendFull);
 
-		mbar.add(legendMenu);
 
-		setJMenuBar(mbar);
+		menuBar.add(legendMenu);
+
 	}
 
 	private void createLayout() {
@@ -655,16 +626,6 @@ implements ActionListener, ColorSelectable, Clickable
 			} catch (IOException exception) {
 				System.err.println("Failed to load colors!!");
 			}
-		} else if (e.getSource() == mWhiteBG) {
-			MainWindow.runObject[myRun].background = Color.white;
-			MainWindow.runObject[myRun].foreground = Color.black;
-			graphCanvas.repaint();
-		} else if (e.getSource() == mBlackBG){
-			MainWindow.runObject[myRun].background = Color.black;
-			MainWindow.runObject[myRun].foreground = Color.white;
-			graphCanvas.repaint();
-		} else if(e.getSource() == mSaveScreenshot){
-			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Time Profile", "./TimeProfileImage.png");
 		} else if(e.getSource() == mDisplayLegend){
 			generateLegend(true);
 		} else if(e.getSource() == mDisplayLegendFull){

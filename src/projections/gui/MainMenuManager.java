@@ -20,6 +20,7 @@ import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
 import projections.Tools.TimelineRendered.TimelineRenderedWindow;
 import projections.analysis.ProjMain;
+import projections.Tools.Histogram.HistogramWindow;
 
 /* ***************************************************
  * MainMenuManager.java

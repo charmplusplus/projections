@@ -59,6 +59,7 @@ class FunctionTool extends GenericGraphWindow
 	mainPanel = new JPanel();
 	setLayout(mainPanel);
 	createLayout();
+	super.createMenus();
 	setPopupText("timeData");
 	pack();
 	thisWindow = this;

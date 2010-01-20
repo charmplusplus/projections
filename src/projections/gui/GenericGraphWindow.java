@@ -1,10 +1,15 @@
 package projections.gui;
+import java.awt.Color;
 import java.awt.Paint;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
 import projections.gui.graph.DataSource;
@@ -63,6 +68,11 @@ implements PopUpAble
 	protected JMenu    fileMenu = new JMenu("File");
 
 
+	private JMenuItem mSaveScreenshot;
+	private JMenuItem mWhiteBG;
+	private JMenuItem mBlackBG;
+	
+
 	// constructor 
 	public GenericGraphWindow(String title, 
 			MainWindow mainWindow) {
@@ -80,6 +90,27 @@ implements PopUpAble
 				"Close"
 				           },
 				           this);
+		
+		
+		
+		// Color Scheme Menu
+		JMenu mColors = new JMenu("Color Scheme");
+		mWhiteBG = new JMenuItem("White background");
+		mBlackBG = new JMenuItem("Black background");
+		mWhiteBG.addActionListener(new MenuHandler());
+		mBlackBG.addActionListener(new MenuHandler());
+		mColors.add(mWhiteBG);
+		mColors.add(mBlackBG);
+		menuBar.add(mColors);
+		
+		
+		// Screenshot Menu
+		JMenu saveMenu = new JMenu("Save To Image");
+		mSaveScreenshot = new JMenuItem("Save Plot as JPG or PNG");
+		mSaveScreenshot.addActionListener(new MenuHandler());
+		saveMenu.add(mSaveScreenshot);
+		menuBar.add(saveMenu);
+		
 		setJMenuBar(menuBar);
 	}
 
@@ -166,5 +197,26 @@ implements PopUpAble
 			graphCanvas.repaint();
 		}
 	}
+	
+	
+	private class MenuHandler implements ActionListener {
+
+		public void actionPerformed(ActionEvent e) {
+			if (e.getSource() == mWhiteBG) {
+				MainWindow.runObject[myRun].background = Color.white;
+				MainWindow.runObject[myRun].foreground = Color.black;
+				graphCanvas.repaint();
+			} else if (e.getSource() == mBlackBG){
+				MainWindow.runObject[myRun].background = Color.black;
+				MainWindow.runObject[myRun].foreground = Color.white;
+				graphCanvas.repaint();
+			} else if(e.getSource() == mSaveScreenshot){
+				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File", "./ProjectionsPlot.png");
+			}		
+		}
+
+	}
+	
+	
 }
 

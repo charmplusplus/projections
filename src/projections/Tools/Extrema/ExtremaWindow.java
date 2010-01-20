@@ -71,10 +71,6 @@ Clickable
 	private int selectedAttribute;
 
 
-	private JMenuItem mWhiteBG;
-	private JMenuItem mBlackBG;
-	private JMenuItem mSaveScreenshot;
-
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
 	private String attributes[][] = {
@@ -187,36 +183,10 @@ Clickable
 	}
 
 
-
-	protected void createMenus(){
-		JMenuBar mbar = new JMenuBar();
-		mbar.add(Util.makeJMenu("File", new Object[]
-		                                           {
-				"Select Processors",
-				null,
-				"Close"
-		                                           },
-		                                           this));
-		// Color Scheme Menu
-		JMenu mColors = new JMenu("Color Scheme");
-		mWhiteBG = new JMenuItem("White background");
-		mBlackBG = new JMenuItem("Black background");
-		mWhiteBG.addActionListener(this);
-		mBlackBG.addActionListener(this);
-		mColors.add(mWhiteBG);
-		mColors.add(mBlackBG);
-		mbar.add(mColors);
-
-		
-		// Screenshot Menu
-		JMenu saveMenu = new JMenu("Save To Image");
-		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
-		mSaveScreenshot.addActionListener(this);
-		saveMenu.add(mSaveScreenshot);
-		mbar.add(saveMenu);
-		
-		setJMenuBar(mbar);
-	}
+//
+//	protected void createMenus(){
+//		super.createMenus();
+//	}
 
 	private ExtremaDialogExtension outlierDialogPanel;
 
@@ -933,17 +903,7 @@ Clickable
 	}
 	
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == mWhiteBG) {
-			MainWindow.runObject[myRun].background = Color.white;
-			MainWindow.runObject[myRun].foreground = Color.black;
-			graphCanvas.repaint();
-		} else if (e.getSource() == mBlackBG){
-			MainWindow.runObject[myRun].background = Color.black;
-			MainWindow.runObject[myRun].foreground = Color.white;
-			graphCanvas.repaint();
-		} else if(e.getSource() == mSaveScreenshot){
-			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Time Profile", "./TimeProfileImage.png");
-		} else if (e.getSource() instanceof JMenuItem) {
+		if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {
 				close();

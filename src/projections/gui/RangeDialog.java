@@ -137,7 +137,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 
 	/** Called whenever any input item changes, either in this dialog box, or its possibly extended tool specific JPanel */
-	protected void someInputChanged() {
+	public void someInputChanged() {
 		//		System.out.println("Something changed. We should update everything, and enable/disable the OK button");
 
 		if(isInputValid()){

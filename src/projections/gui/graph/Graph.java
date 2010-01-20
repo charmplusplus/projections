@@ -447,6 +447,25 @@ public class Graph extends JPanel
     		return;
     	}
 
+    	
+    	if ((xAxis != null) && (yAxis != null)) {
+    		
+        	setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
+        	setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
+    		
+    		if (GraphType == BAR) {
+    			drawBarGraph(g);
+    		} else if (GraphType == AREA) {
+    			drawAreaGraph(g);
+    		} else {
+    			drawLineGraph(g);
+    		}
+    		
+    		drawXAxis(g);
+    		drawYAxis(g);
+    	}
+
+    	
 
     	// display Graph title
     	String graphTitle = dataSource.getTitle();
@@ -455,11 +474,13 @@ public class Graph extends JPanel
     			(getWidth()-fmChartTitle.stringWidth(graphTitle))/2, 
     			chartTitleBaseline() );
 
-    	// display xAxis title
+    	// display xAxis title 
+    	// centered along x axis line
+    	int centerX = (originX() + availableWidth()+originX() )/ 2;    	
     	String xTitle = xAxis.getTitle();
     	g.setFont(fontAxisTitles);
     	g.drawString(xTitle,
-    			(getWidth()-fmAxisTitles.stringWidth(xTitle))/2, 
+    			centerX - fmAxisTitles.stringWidth(xTitle)/2, 
     			xAxisTitleBaseline() );
 
 
@@ -471,27 +492,6 @@ public class Graph extends JPanel
     			-(getHeight()+fmAxisTitles.stringWidth(yTitle))/2, 
     			fmAxisTitles.getHeight() );
     	g.rotate(Math.PI/2);
-
-	// total number of x values
-
-  
-
-	if ((xAxis != null) && (yAxis != null)) {
-		
-    	setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
-    	setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
-		
-		if (GraphType == BAR) {
-			drawBarGraph(g);
-		} else if (GraphType == AREA) {
-			drawAreaGraph(g);
-		} else {
-			drawLineGraph(g);
-		}
-		
-		drawXAxis(g);
-		drawYAxis(g);
-	}
 
 
     }
@@ -548,7 +548,7 @@ public class Graph extends JPanel
     		int cury = originY() - (int)(i*pixelincrementY());
     		if (i % valuesPerLabelY == 0) {
     			g.drawLine(originX()-1, cury, originX()-5-1,cury);
-    			String yLabel = "" + i; 
+    			String yLabel = yAxis.getValueName(i);
     	    	g.drawString(yLabel, originX()-1-fm.stringWidth(yLabel)-spaceBetweenYValuesAndAxis, 
     					cury + sw/2);
     		} else {

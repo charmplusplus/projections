@@ -42,8 +42,9 @@ public class U
 	private final static String printDecimals(double d,int nDec)
 	{
 		StringBuffer ret=new StringBuffer();
+		ret.append(".");
 		d-=(int)d;//Remove non-fraction part
-		d+=0.000000001;
+		d+=0.000000001; // This seems like a bad idea to Isaac :( Why is this here ????
 		for (int i=0;i<nDec;i++)
 		{
 			d*=10.0;
@@ -51,8 +52,28 @@ public class U
 			ret.append((char)(digit+'0'));
 			d-=digit;
 		}
-		return ret.toString();
+
+		return truncateTrailingZeroPeriod(ret.toString());
 	}
+	
+
+	public final static String truncateTrailingZeroPeriod(String in){
+		if(in.lastIndexOf(".") >= 0){
+			// Truncate off any trailing 0s
+			String s = in;
+			while(s.length()>0 && s.lastIndexOf("0") == s.length()-1){
+				s = s.substring(0, s.length()-1);
+			}	
+			// Truncate off a trailing .
+			if(s.length()>0 && s.lastIndexOf(".") == s.length()-1){
+				s = s.substring(0, s.length()-1);
+			}
+			return s;	
+		} else {
+			return in;
+		}
+	}
+
 
     /*
       Return a human-readable version of this time, 
@@ -67,29 +88,9 @@ public class U
     {
 	if (us<0) return us+"us";
 	if (us==0) return "0";
-	if (us<1000) return "0."+printDecimals(us*0.001,places)+"ms";
-	if (us<1000*1000) return (int)(us/1000)+"."+
-			      printDecimals(us*0.001,places)+"ms";
-	return (int)(us/1000000)+"."+
-	    printDecimals(us*0.000001,places)+"s";
+	if (us<1000) return "0"+printDecimals(us*0.001,places)+"ms";
+	if (us<1000*1000) return (int)(us/1000)+printDecimals(us*0.001,places)+"ms";
+	return (int)(us/1000000)+printDecimals(us*0.000001,places)+"s";
     }
 
-    private static int numUselessZeros(long number) {
-	int count = 0;
-	while (true) {
-	    if (number%10 > 0) {
-		break;
-	    } else {
-		count++;
-		number /= 10;
-	    }
-	}
-	return count;
-    }
-
-    public static void main(String args[]) {
-	System.out.println(numUselessZeros(2345800));
-	System.out.println(numUselessZeros(20034));
-	System.out.println(numUselessZeros(234580));
-    }
 }

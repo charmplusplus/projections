@@ -234,11 +234,11 @@ implements ActionListener
 
 	protected void setGraphSpecificData(){
 		if (binType == TYPE_TIME) {
-			setXAxis("Bin Interval Size (" + U.humanReadableString(timeBinSize) + ")", "Time", timeMinBinSize, timeBinSize);
+			setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
 			setYAxis("Number of Occurrences", "");
 			setDataSource("Histogram", counts[TYPE_TIME], thisWindow);
 		} else if (binType == TYPE_MSG_SIZE) {
-			setXAxis("Bin Interval Size (" +  _format.format(msgBinSize) + " bytes)",  "", msgMinBinSize, msgBinSize);
+			setXAxis("Message Size (at " +  _format.format(msgBinSize) + " byte resolution)",  "", msgMinBinSize, msgBinSize);
 			setYAxis("Number of Occurrences", "");
 			setDataSource("Histogram", counts[TYPE_MSG_SIZE], thisWindow);
 		}

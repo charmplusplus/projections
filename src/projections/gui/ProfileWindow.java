@@ -73,7 +73,7 @@ class ProfileWindow extends ProjectionsWindow
 //    public PieChartWindow pieChartWindow;
     private float[][] avgData;
 
-    private EntrySelectionDialog entryDialog;
+//    private EntrySelectionDialog entryDialog;
 
     private boolean ampiTraceOn = false;
 
@@ -367,48 +367,36 @@ class ProfileWindow extends ProjectionsWindow
     }
 
     private void showChangeColorDialog() {
-        int noEPs = MainWindow.runObject[myRun].getNumUserEntries();
-        if (entryDialog == null) {
-            String typeLabelStrings[] = {"Entry Points"};
-
-            boolean existsArray[][] =
-                new boolean[1][noEPs+NUM_SYS_EPS];
-            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
-                existsArray[0][i] = true;
-            }
-
-            boolean stateArray[][] =
-                new boolean[1][noEPs+NUM_SYS_EPS];
-            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
-                stateArray[0][i] = true;
-            }
-
-            String entryNames[] =
-                new String[noEPs+NUM_SYS_EPS];
-            for (int i=0; i<noEPs; i++) {
-                entryNames[i] =
-                    MainWindow.runObject[myRun].getEntryNameByIndex(i);
-            }
-            // cannot seem to avoid a hardcode
-            entryNames[noEPs] = "Pack Time";
-            entryNames[noEPs+1] = "Unpack Time";
-            entryNames[noEPs+2] = "Idle Time";
-
-            /**
-             * Reason why I need create a 2D new color array:
-             * 1. EntrySelectionDialog's constructor needs a 2D color array (I don't know the reason
-             * as I haven't read the source code for this class)
-             * 2. The 1D length is set to 1 because of in the original ProfileWindow version, this is
-             * set to 1. The reason is not stated in the original version. And I haven't figure out the
-             * exact reason for this. I really doubt it is for compatibility of the EntrySelectionDialog
-             * class or other old classes.
-             */
-            Color[][] newColors = new Color[1][];
-            newColors[0] = colors;
-
-            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
-        }
-        entryDialog.showDialog();
+//        int noEPs = MainWindow.runObject[myRun].getNumUserEntries();
+//        if (entryDialog == null) {
+//            String typeLabelStrings[] = {"Entry Points"};
+//
+//            boolean existsArray[] =
+//                new boolean[noEPs+NUM_SYS_EPS];
+//            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+//                existsArray[i] = true;
+//            }
+//
+//            boolean stateArray[] =
+//                new boolean[noEPs+NUM_SYS_EPS];
+//            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
+//                stateArray[i] = true;
+//            }
+//
+//            String entryNames[] =
+//                new String[noEPs+NUM_SYS_EPS];
+//            for (int i=0; i<noEPs; i++) {
+//                entryNames[i] =
+//                    MainWindow.runObject[myRun].getEntryNameByIndex(i);
+//            }
+//            // cannot seem to avoid a hardcode
+//            entryNames[noEPs] = "Pack Time";
+//            entryNames[noEPs+1] = "Unpack Time";
+//            entryNames[noEPs+2] = "Idle Time";
+//
+//            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, colors, existsArray, entryNames);
+//        }
+//        entryDialog.showDialog();
     }
 
     private void showUsageTable(){

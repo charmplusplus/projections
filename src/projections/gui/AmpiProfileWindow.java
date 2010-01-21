@@ -70,7 +70,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
     private float[] avgData; // [numFunc+1(other)]
 
-    private EntrySelectionDialog entryDialog;
+//    private EntrySelectionDialog entryDialog;
 
     private boolean ampiTraceOn = false;
 
@@ -376,45 +376,34 @@ class AmpiProfileWindow extends ProjectionsWindow
     }
 
     private void showChangeColorDialog() {
-	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
-        if (entryDialog == null) {
-            String typeLabelStrings[] = {"Functions"};
-
-            boolean existsArray[][] =
-                new boolean[1][numFunc+1];
-            for (int i=1; i<numFunc+1; i++) {
-                existsArray[0][i] = true;
-            }
-
-            boolean stateArray[][] =
-                new boolean[1][numFunc+1];
-            for (int i=1; i<numFunc; i++) {
-                stateArray[0][i] = true;
-            }
-
-            String entryNames[] =
-                new String[numFunc+1];
-            for (int i=1; i<numFunc; i++) {
-                entryNames[i] =
-                    MainWindow.runObject[myRun].getFunctionName(i);
-            }
-            entryNames[numFunc] = "OTHER";
-
-            /**
-             * Reason why I need create a 2D new color array:
-             * 1. EntrySelectionDialog's constructor needs a 2D color array (I don't know the reason
-             * as I haven't read the source code for this class)
-             * 2. The 1D length is set to 1 because of in the original ProfileWindow version, this is
-             * set to 1. The reason is not stated in the original version. And I haven't figure out the
-             * exact reason for this. I really doubt it is for compatibility of the EntrySelectionDialog
-             * class or other old classes.
-             */
-            Color[][] newColors = new Color[1][];
-            newColors[0] = colors;
-
-            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, newColors,existsArray, entryNames);
-	}
-        entryDialog.showDialog();
+//	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
+//        if (entryDialog == null) {
+//            String typeLabelStrings[] = {"Functions"};
+//
+//            boolean existsArray[] =
+//                new boolean[numFunc+1];
+//            for (int i=1; i<numFunc+1; i++) {
+//                existsArray[i] = true;
+//            }
+//
+//            boolean stateArray[] =
+//                new boolean[numFunc+1];
+//            for (int i=1; i<numFunc; i++) {
+//                stateArray[i] = true;
+//            }
+//
+//            String entryNames[] =
+//                new String[numFunc+1];
+//            for (int i=1; i<numFunc; i++) {
+//                entryNames[i] =
+//                    MainWindow.runObject[myRun].getFunctionName(i);
+//            }
+//            entryNames[numFunc] = "OTHER";
+//
+//
+//            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, colors, existsArray, entryNames);
+//	}
+//        entryDialog.show();
     }
 
     private void showUsageTable(){

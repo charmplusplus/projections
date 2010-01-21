@@ -1,14 +1,11 @@
 package projections.Tools.Histogram;
+
+
 import java.io.EOFException;
 
-import javax.swing.ProgressMonitor;
-
 import projections.analysis.GenericLogReader;
-import projections.analysis.IntervalData;
-import projections.analysis.LogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.misc.LogEntryData;
 
 

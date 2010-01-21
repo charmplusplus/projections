@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.util.LinkedList;
 
 import javax.swing.BoxLayout;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;

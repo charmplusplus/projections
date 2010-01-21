@@ -101,9 +101,10 @@ class AxisPanel extends JPanel
 			int pixelForTickX = data.timeToScreenPixel(timeForTick);
 
 			if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
-				String tmp = format_.format(timeForTick);				
+				String label = format_.format(timeForTick);	
+//				String label = U.humanReadableString(timeForTick);	
 				g.drawLine(pixelForTickX, axispos()-largeTickHalfLength, pixelForTickX, axispos() + largeTickHalfLength);
-				g.drawString(tmp, pixelForTickX - fm.stringWidth(tmp)/2, textpos());
+				g.drawString(label, pixelForTickX - fm.stringWidth(label)/2, textpos());
 			}
 		}
 				

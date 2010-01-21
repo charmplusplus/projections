@@ -49,7 +49,7 @@ ItemListener {
 
 	private TimelineWindow parentWindow;
 
-    private ColorChooser colorWindow;
+//    private ColorChooser colorWindow;
 
 	// basic zoom controls
 	private JButton bDecrease, bIncrease, bReset;
@@ -460,7 +460,7 @@ ItemListener {
 		colorMenu.add(mWhiteBG);
 		colorMenu.add(mBlackBG);
 		colorMenu.addSeparator();
-		colorMenu.add(mChangeColors);
+//		colorMenu.add(mChangeColors);
 		colorMenu.add(mSaveColors);
 		colorMenu.add(mRestoreColors);
 		colorMenu.add(mDefaultColors);
@@ -747,13 +747,13 @@ ItemListener {
 //	}
 
 	private void ShowColorWindow() {
-		if (colorWindow == null)
-			colorWindow = new ColorChooser(data, parentWindow);
-		colorWindow.setVisible(true);
+//		if (colorWindow == null)
+//			colorWindow = new ColorChooser(data, parentWindow);
+//		colorWindow.setVisible(true);
 	}
 
 	protected void CloseColorWindow() {
-		colorWindow = null;
+//		colorWindow = null;
 	}
 
 	/** Update the value in the scale factor label with the value in our data object */

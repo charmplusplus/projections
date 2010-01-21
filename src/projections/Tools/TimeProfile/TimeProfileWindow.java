@@ -19,7 +19,6 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -32,7 +31,6 @@ import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.ColorManager;
 import projections.gui.ColorSelectable;
-import projections.gui.EntrySelectionDialog;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
@@ -60,11 +58,11 @@ implements ActionListener, ColorSelectable, Clickable
 	// runs.
 	private static int myRun = 0;
 
-	private EntrySelectionDialog entryDialog;
+//	private EntrySelectionDialog entryDialog;
 
 	private JPanel mainPanel;
 	private JPanel controlPanel;
-	private JButton epSelection;
+//	private JButton epSelection;
 	private JButton setRanges;
 
 	private IntervalChooserPanel intervalPanel;
@@ -92,10 +90,10 @@ implements ActionListener, ColorSelectable, Clickable
 	// data required for entry selection dialog
 	private int numEPs;
 	//YSun add
-	private String typeLabelNames[] = {"Entry Points"};
-	private boolean stateArray[][];
-	private boolean existsArray[][];
-	private Color colorArray[][];
+//	private String typeLabelNames[] = {"Entry Points"};
+	private boolean stateArray[];
+	private boolean existsArray[];
+	private Color colorArray[];
 	private String entryNames[];
 
 	// stored raw data
@@ -127,10 +125,9 @@ implements ActionListener, ColorSelectable, Clickable
 		this.mainWindow = mainWindow;
 
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
-		stateArray = new boolean[1][numEPs+special];
-		existsArray = new boolean[1][numEPs+special];
-		colorArray = new Color[1][];
-		colorArray[0] = MainWindow.runObject[myRun].getColorMap();		
+		stateArray = new boolean[numEPs+special];
+		existsArray = new boolean[numEPs+special];
+		colorArray = MainWindow.runObject[myRun].getColorMap();		
 		entryNames = new String[numEPs+special];
 		for (int ep=0; ep<numEPs; ep++) {
 			entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
@@ -186,8 +183,8 @@ implements ActionListener, ColorSelectable, Clickable
 		mainPanel.setLayout(gbl);
 
 		// control panel items
-		epSelection = new JButton("Select Entry Points");
-		epSelection.addActionListener(this);
+//		epSelection = new JButton("Select Entry Points");
+//		epSelection.addActionListener(this);
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
 		saveColors = new JButton("Save Entry Colors");
@@ -206,12 +203,12 @@ implements ActionListener, ColorSelectable, Clickable
 
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
-		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, setRanges,      gbc, 1,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, saveColors,     gbc, 2,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, loadColors,     gbc, 3,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
+//		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, setRanges,      gbc, 0,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, saveColors,     gbc, 1,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, loadColors,     gbc, 2,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 4,0, 1,1, 0,0);
 
 
 		if(ampiTraceOn){            
@@ -479,8 +476,8 @@ implements ActionListener, ColorSelectable, Clickable
 							interval<endInterval-startInterval+1;
 							interval++) {
 								if (graphData[interval][ep] > 0) {
-									existsArray[0][ep] = true;
-									stateArray[0][ep] = true;
+									existsArray[ep] = true;
+									stateArray[ep] = true;
 									break;
 								}
 							}
@@ -513,7 +510,7 @@ implements ActionListener, ColorSelectable, Clickable
 		// need first pass to decide the size of the outputdata
 		int outSize = 0;
 		for (int ep=0; ep<numEPs+special; ep++) {
-			if (stateArray[0][ep]) {
+			if (stateArray[ep]) {
 				outSize++;
 			}
 		}
@@ -527,7 +524,7 @@ implements ActionListener, ColorSelectable, Clickable
 			for (int i=0; i<numIntervals; i++) {
 				int count = 0;
 				for (int ep=0; ep<numEPs+special; ep++) {
-					if (stateArray[0][ep]) {
+					if (stateArray[ep]) {
 						outputData[i][count] = graphData[i][ep];
 						if(ep == numEPs){
 							outColors[count++] = MainWindow.runObject[myRun].getOverheadColor();
@@ -536,7 +533,7 @@ implements ActionListener, ColorSelectable, Clickable
 							outColors[count++] = MainWindow.runObject[myRun].getIdleColor();
 						}
 						else
-							outColors[count++] = colorArray[0][ep];
+							outColors[count++] = colorArray[ep];
 					}
 				}
 
@@ -560,7 +557,7 @@ implements ActionListener, ColorSelectable, Clickable
 		String epName = "";
 		String epClassName = "";
 		for (int ep=0; ep<numEPs; ep++) {
-			if (stateArray[0][ep]) {
+			if (stateArray[ep]) {
 				if (count++ == yVal) {
 					epName = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 					epClassName = MainWindow.runObject[myRun].getEntryChareNameByIndex(ep);
@@ -592,16 +589,19 @@ implements ActionListener, ColorSelectable, Clickable
 	}	
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == epSelection) {
-			if (entryDialog == null) {
-				entryDialog = 
-					new EntrySelectionDialog(this,
-							typeLabelNames,
-							stateArray,colorArray,
-							existsArray,entryNames);
-			}
-			entryDialog.showDialog();
-		} else if (e.getSource() == analyzeSlopesCheckBox) {
+//		if (e.getSource() == epSelection) {
+//			if (entryDialog == null) {
+//				entryDialog = 
+//					new EntrySelectionDialog(this,
+//							typeLabelNames,
+//							stateArray,colorArray,
+//							existsArray,entryNames);
+//			}
+//			entryDialog.showDialog();
+//		} else 
+			
+			
+		if (e.getSource() == analyzeSlopesCheckBox) {
 			if(analyzeSlopesCheckBox.isSelected()){
 				displaySlopes = true;
 				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));	
@@ -620,7 +620,7 @@ implements ActionListener, ColorSelectable, Clickable
 		} else if (e.getSource() == loadColors) {
 			// load all entry point colors from disk
 			try {
-				ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
+				ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray);
 				// silly inefficiency
 				setOutputGraphData();
 			} catch (IOException exception) {

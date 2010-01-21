@@ -2,7 +2,6 @@ package projections.Tools.TimeProfile;
 
 
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
@@ -10,13 +9,11 @@ import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JScrollPane;
 
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;

@@ -1,11 +1,11 @@
 package projections.Testing;
 
 
+import java.io.EOFException;
+
 import projections.analysis.GenericLogReader;
-import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
-import java.io.EOFException;
 
 
 /** The reader threads for Scan Logs tool. */

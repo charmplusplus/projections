@@ -9,7 +9,6 @@ import java.io.EOFException;
 import java.io.IOException;
 
 import javax.swing.JButton;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;

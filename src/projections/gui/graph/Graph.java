@@ -918,7 +918,6 @@ public class Graph extends JPanel
     					// Determine the width of the y axis labels so we can later figure out the x origin
     					maxYLabelWidth = 0;
     					for (long i=0; i<=maxvalueY(); i+=tickValue) {
-    						int cury = originY() - (int)(i*pixelincrementY());
     						if (i % labelValue == 0) {
     							String yLabel = yAxis.getValueName(i);
     							int w = fmLabels.stringWidth(yLabel);

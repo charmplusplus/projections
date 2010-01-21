@@ -56,8 +56,8 @@ implements ScalePanel.StatusDisplay
 	// until the new interface can be cleanly handled by other tools.
 	protected static double CUR_VERSION;
 	public static boolean IGNORE_IDLE;
-	protected static boolean BLUEGENE;
-	protected static int BLUEGENE_SIZE[];
+	public static boolean BLUEGENE;
+	public static int BLUEGENE_SIZE[];
 	protected static boolean PRINT_USAGE;
 
 	// **CW** a semi-permanent hack to provide a file onto which raw data

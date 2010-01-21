@@ -23,8 +23,12 @@ public class YAxisFixed extends YAxis
 
 		
 	public String getValueName(double value) {
-		// Put M or K instead of printing whole thing
-		if(value > 1000000.0){
+		// Put G or M or K instead of printing whole thing
+		if(value > 1000000000.0){
+			String m = "" + (value / 1000000000.0);
+			m = U.truncateTrailingZeroPeriod(m);
+			return "" + m + "G";
+		} else if(value > 1000000.0){
 			String m = "" + (value / 1000000.0);
 			m = U.truncateTrailingZeroPeriod(m);
 			return "" + m + "M";

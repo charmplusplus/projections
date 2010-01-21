@@ -22,8 +22,6 @@ import java.util.LinkedList;
 import java.util.StringTokenizer;
 
 import javax.swing.JButton;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
@@ -36,7 +34,6 @@ import projections.analysis.ThreadManager;
 import projections.gui.Clickable;
 import projections.gui.ColorSelectable;
 import projections.gui.GenericGraphWindow;
-import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;

@@ -38,6 +38,7 @@ public class ThreadManager {
 
 		int numProcs = Runtime.getRuntime().availableProcessors()*1;
 		numConcurrentThreads = numProcs;
+
 	}
 
 

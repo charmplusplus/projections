@@ -10,7 +10,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 
+import projections.Tools.CommunicationOverTime.CommTimeWindow;
+import projections.Tools.CommunicationPerPE.CommWindow;
 import projections.Tools.Extrema.ExtremaWindow;
+import projections.Tools.Histogram.HistogramWindow;
 import projections.Tools.LogFileViewer.LogFileViewerWindow;
 import projections.Tools.MemoryUsage.MemoryUsageWindow;
 import projections.Tools.NoiseMiner.NoiseMinerWindow;
@@ -20,7 +23,6 @@ import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
 import projections.Tools.TimelineRendered.TimelineRenderedWindow;
 import projections.analysis.ProjMain;
-import projections.Tools.Histogram.HistogramWindow;
 
 /* ***************************************************
  * MainMenuManager.java
@@ -252,7 +254,7 @@ implements ActionListener, ItemListener
 		timelinesMenuItem = new JMenuItem("Timelines");
 		renderedTimelinesMenuItem = new JMenuItem("Timelines - rendered to image");
 		usageProfileMenuItem = new JMenuItem("Usage Profile");
-		communicationMenuItem = new JMenuItem("Communication");
+		communicationMenuItem = new JMenuItem("Communication Per Processor");
 		communicationVsTimeMenuItem = new JMenuItem("Communication Over Time");
 		callTableMenuItem = new JMenuItem("Call Table");
 		viewLogFilesMenuItem = new JMenuItem("View Log Files");

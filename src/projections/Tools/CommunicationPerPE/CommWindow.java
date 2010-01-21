@@ -1,7 +1,8 @@
-package projections.gui;
+package projections.Tools.CommunicationPerPE;
 
 import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -12,18 +13,23 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 
-import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
-import projections.analysis.GenericLogReader;
-import projections.analysis.ProjDefs;
-import projections.misc.LogEntryData;
+import projections.analysis.ThreadManager;
+import projections.gui.Analysis;
+import projections.gui.Clickable;
+import projections.gui.GenericGraphWindow;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.RangeDialog;
+import projections.gui.Util;
 
-class CommWindow extends GenericGraphWindow
+public class CommWindow extends GenericGraphWindow
 implements ItemListener, ActionListener, Clickable
 {
 
@@ -65,7 +71,7 @@ implements ItemListener, ActionListener, Clickable
 	private OrderedIntList peList;
 
 
-	protected CommWindow(MainWindow mainWindow) {
+	public CommWindow(MainWindow mainWindow) {
 		super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 		mainPanel = new JPanel();
 		setLayout(mainPanel);
@@ -223,12 +229,12 @@ implements ItemListener, ActionListener, Clickable
 
 	protected void createMenus(){
 		super.createMenus();
-	
-		menuBar.add(Util.makeJMenu("Tools", new Object[]
-		                                            {
-				"Change Colors",
-		                                            },
-		                                            this));
+//	
+//		menuBar.add(Util.makeJMenu("Tools", new Object[]
+//		                                            {
+//				"Change Colors",
+//		                                            },
+//		                                            this));
 	}
 
 	private void createLayout() {
@@ -309,6 +315,7 @@ implements ItemListener, ActionListener, Clickable
 			
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
+					peList = dialog.getSelectedProcessors().copyOf();
 					getData(dialog.getStartTime(), dialog.getEndTime(), dialog.getSelectedProcessors());
 					return null;
 				}
@@ -339,93 +346,41 @@ implements ItemListener, ActionListener, Clickable
 			hopCount = null;
 		}
 
-		peList = pes.copyOf();
-
-		int numPe = peList.size();
-		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		histogram = new ArrayList<Integer>();
-
-		int curPeArrayIndex = 0;
-
-		ProgressMonitor progressBar =
-			new ProgressMonitor(this, "Reading log files",
-					"", 0, numPe);
-		while (peList.hasMoreElements()) {
-			int pe = peList.nextElement();
-			if (!progressBar.isCanceled()) {
-				progressBar.setNote("[PE: " + pe + " ] Reading data.");
-				progressBar.setProgress(curPeArrayIndex+1);
-				validate();
-			} else {
-				progressBar.close();
-				return;
-			}
-			GenericLogReader glr = new GenericLogReader(pe,
-					MainWindow.runObject[myRun].getVersion());
-			try {
-				sentMsgCount[curPeArrayIndex] = new double[numEPs];
-				sentByteCount[curPeArrayIndex] = new double[numEPs];
-				receivedMsgCount[curPeArrayIndex] = new double[numEPs];
-				receivedByteCount[curPeArrayIndex] = new double[numEPs];
-				exclusiveRecv[curPeArrayIndex] = new double[numEPs];
-				exclusiveBytesRecv[curPeArrayIndex] = new double[numEPs];
-				if (MainWindow.BLUEGENE) {
-					hopCount[curPeArrayIndex] = new int[numEPs];
-				}
-				int EPid;
-
-				LogEntryData logdata = glr.nextEventOnOrAfter(startTime);
-				// we'll just use the EOFException to break us out of
-				// this loop :)
-				while (true) {
-					if (logdata.time > endTime) {
-						if ((logdata.type == ProjDefs.CREATION) ||
-								(logdata.type == ProjDefs.BEGIN_PROCESSING)) {
-							// past endtime. no more to do.
-							break;
-						}
-					}
-					logdata = glr.nextEvent();
-					if (logdata.type == ProjDefs.CREATION) {
-						EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
-						sentMsgCount[curPeArrayIndex][EPid]++;
-						sentByteCount[curPeArrayIndex][EPid] += 
-							logdata.msglen;
-						histogram.add(new Integer(logdata.msglen));
-					} else if ((logdata.type == ProjDefs.CREATION_BCAST) ||
-							(logdata.type == 
-								ProjDefs.CREATION_MULTICAST)) {
-						EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
-						sentMsgCount[curPeArrayIndex][EPid]+= logdata.numPEs;
-						sentByteCount[curPeArrayIndex][EPid] +=
-							(logdata.msglen * logdata.numPEs);
-					} else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
-						EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
-						receivedMsgCount[curPeArrayIndex][EPid]++;
-						receivedByteCount[curPeArrayIndex][EPid] += 
-							logdata.msglen;
-						// testing if the send was from outside the processor
-						if (logdata.pe != pe) {
-							exclusiveRecv[curPeArrayIndex][EPid]++;
-							exclusiveBytesRecv[curPeArrayIndex][EPid] += 
-								logdata.msglen;
-							if (MainWindow.BLUEGENE) {
-								hopCount[curPeArrayIndex][EPid] +=
-									manhattenDistance(pe,logdata.pe);
-							}
-						}
-					}
-				}
-			} catch (java.io.EOFException e) {
-				// used to break out of inner while(true) loop
-			} catch (java.io.IOException e) {
-				System.out.println("Exception: " +e);
-				e.printStackTrace();
-			}
-			curPeArrayIndex++;
+		
+		// Create a list of worker threads
+		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		int pIdx = 0;
+		OrderedIntList processorList = pes.copyOf();
+		while (processorList.hasMoreElements()) {
+			int nextPe = processorList.nextElement();
+			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, exclusiveRecv, exclusiveBytesRecv, hopCount ) );
+			pIdx++;
 		}
-		progressBar.close();
+		
+		// Determine a component to show the progress bar with
+		Component guiRootForProgressBar = null;
+		if(thisWindow!=null && thisWindow.isVisible()) {
+			guiRootForProgressBar = thisWindow;
+		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+		}
 
+		// Pass this list of threads to a class that manages/runs the threads nicely
+		ThreadManager threadManager = new ThreadManager("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
+		threadManager.runThreads();
+		
+		
+		// Combine histograms from all processors
+		
+		Iterator<Thread> iter = readyReaders.iterator();
+		while(iter.hasNext()){
+			ThreadedFileReader t = (ThreadedFileReader) iter.next();
+			histogram.addAll(t.localHistogram);
+		}
+		
+		// Do some post processing
+		
 		// **CW** Highly inefficient ... needs to be re-written as a
 		// bin-based solution instead.
 
@@ -459,8 +414,8 @@ implements ItemListener, ActionListener, Clickable
 		}
 	}
 
-	// NOTE: This is a torus-based manhatten distance computation!
-	private int manhattenDistance(int destPe, int srcPe) {
+	// NOTE: This is a torus-based Manhattan distance computation!
+	static int manhattanDistance(int destPe, int srcPe) {
 		int distance = 0;
 		int dimDistance = 0;
 
@@ -496,7 +451,7 @@ implements ItemListener, ActionListener, Clickable
 		return distance;
 	}
 
-	private int[] peToTriple(int pe) {
+	private static int[] peToTriple(int pe) {
 		int returnTriple[] = new int[3];
 
 		// **CW** Crisis of academic faith "Help! I can't do math anymore!"

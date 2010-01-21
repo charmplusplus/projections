@@ -29,7 +29,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     implements ActionListener, ColorSelectable
 {
 	private AmpiTimeProfileWindow thisWindow = null;
-    private EntrySelectionDialog entryDialog = null;
+//    private EntrySelectionDialog entryDialog = null;
 
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -56,16 +56,16 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 
     // data required for entry selection dialog
     private int numFunctions;
-    private String typeLabelNames[] = {"Ampi Functions"};
+//    private String typeLabelNames[] = {"Ampi Functions"};
 
     //this variable shows whether this function (indexed by 2D_Y) needs to be displayed
-    private boolean stateArray[][];
+    private boolean stateArray[];
 
     //this variable shows whether this function (indexed by 2D_Y) has its execution during
     //the selected interval
-    private boolean existsArray[][];
+    private boolean existsArray[];
 
-    private Color colorArray[][];
+    private Color colorArray[];
     private String funcNames[];
     private double[][] graphData=null;
 
@@ -176,17 +176,17 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         numFunctions = funcCnt;
         outColors = ColorManager.createColorMap(funcCnt);
         funcNames = new String[funcCnt];
-        colorArray = new Color[1][funcCnt];        
+        colorArray = new Color[funcCnt];        
         //initialize the stateArray that all functions will be displayed. Values
         //may be changed after function selection dialog
-        stateArray = new boolean[1][funcCnt];
+        stateArray = new boolean[funcCnt];
         //initialize the existsArray that all function don't exist as its value 
         //is determined to by the interval!!
-        existsArray = new boolean[1][funcCnt];
+        existsArray = new boolean[funcCnt];
         for(int i=0; i<funcCnt; i++){
-            colorArray[0][i] = outColors[i];
-            stateArray[0][i] = true;
-            existsArray[0][i] = false;
+            colorArray[i] = outColors[i];
+            stateArray[i] = true;
+            existsArray[i] = false;
         }            
 
         int intervalsCnt = endInterval-startInterval+1;
@@ -207,7 +207,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
                 for(int k=0; k<funcStk.size(); k++){
                     AmpiFunctionData funcData = (AmpiFunctionData)funcStk.get(k);
                     funcNames[funcCnt] = funcData.getFunctionName();
-                    if(stateArray[0][funcCnt] == false)
+                    if(stateArray[funcCnt] == false)
                         continue;
                     for(int l=0; l<funcData.execIntervalCnt(); l++){
                         AmpiFunctionData.AmpiFuncExecInterval oneInterval = funcData.getIntervalAt(l);
@@ -217,7 +217,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
                         if(endTime<=startTime)
                             continue;
 
-                        existsArray[0][funcCnt] = true;
+                        existsArray[funcCnt] = true;
                         int head = (int)((startTime-rangeStart)/intervalSize);
                         int tail = (int)((endTime-rangeStart)/intervalSize);
 
@@ -244,11 +244,11 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     public void applyDialogColors() {
         //set outputData according to recently changed stateArray
         for(int i=0; i<numFunctions; i++){
-            outColors[i] = colorArray[0][i];
+            outColors[i] = colorArray[i];
         }
         for(int i=0; i<outputData.length; i++){
             for(int j=0; j<numFunctions; j++){
-                if(stateArray[0][j]){
+                if(stateArray[j]){
                     outputData[i][j] = graphData[i][j];
                 } else {
                     outputData[i][j] = 0.0;
@@ -279,7 +279,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 	int count = 0;
 	String name = null;	
 	for (int i=0; i<numFunctions; i++) {
-	    if (stateArray[0][i]) {
+	    if (stateArray[i]) {
 		if (count++ == yVal) {
 		    name = funcNames[i];		    
 		    break;
@@ -302,14 +302,14 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         if (e.getSource() instanceof JButton) {
 	    JButton b = (JButton)e.getSource();
 	    if (b == epSelection) {
-		if (entryDialog == null) {
-		    entryDialog = 
-			new EntrySelectionDialog(this,
-						 typeLabelNames,
-						 stateArray,colorArray,
-						 existsArray,funcNames);
-		}
-		entryDialog.showDialog();
+//		if (entryDialog == null) {
+//		    entryDialog = 
+//			new EntrySelectionDialog(this,
+//						 typeLabelNames,
+//						 stateArray,colorArray,
+//						 existsArray,funcNames);
+//		}
+//		entryDialog.showDialog();
 	    } else if (b == setRanges) {
 		showDialog();
 
@@ -327,7 +327,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 	    } else if (b == loadColors) {
 		//load all entry point colors from disk
 		try {
-		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray[0]);
+		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray);
 		    // silly inefficiency
 		    setOutputGraphData(false);
 		} catch (IOException exception) {

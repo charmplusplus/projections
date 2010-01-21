@@ -49,7 +49,7 @@ public class NoiseMiner extends ProjDefs
 
 	private Duration osQuanta;
 	
-	private int eventsInBinWindow=50;
+	private int eventsInBinWindow=30;
 
 	/** A distance used to merge similar clusters, currently clusters are merged if the difference in their durations is 40% */
 	private double peMergeDistance = 0.15;
@@ -59,9 +59,9 @@ public class NoiseMiner extends ProjDefs
 
 
 	/** Number of bins in each histogram */
-	private int nbins = 5001;
+	private int nbins = 1001;
 	/** temporal width of each histogram bin (microseconds)*/
-	private Duration binWidth = new Duration(10);
+	private Duration binWidth = new Duration(100);
 	
 	protected int numDisplayBins = 200;
 	

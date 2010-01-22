@@ -37,7 +37,7 @@ import projections.gui.Util;
  *  
  *  All data is stored inside the text fields.
  */
-public class BinDialogPanel extends RangeDialogExtensionPanel 
+class BinDialogPanel extends RangeDialogExtensionPanel 
 {
 	// GUI components
 	private JTabbedPane tabbedPane;

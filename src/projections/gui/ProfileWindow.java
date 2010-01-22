@@ -30,7 +30,7 @@ import projections.analysis.AmpiFunctionData;
 import projections.analysis.AmpiProcessProfile;
 
 class ProfileWindow extends ProjectionsWindow
-    implements ActionListener, ColorSelectable, ChangeListener
+    implements ActionListener, ChangeListener
 {
 
 	private static final int NUM_SYS_EPS = 3;
@@ -358,13 +358,6 @@ class ProfileWindow extends ProjectionsWindow
     }
 
 
-    public void applyDialogColors() {
-        int eps = MainWindow.runObject[myRun].getNumUserEntries();
-
-        System.out.println(colors[eps+2]);
-        displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
-        displayCanvas.repaint();
-    }
 
     private void showChangeColorDialog() {
 //        int noEPs = MainWindow.runObject[myRun].getNumUserEntries();

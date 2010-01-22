@@ -58,7 +58,7 @@ public class Graph extends JPanel
     private FontMetrics fmLabels;
 
     // Computed width of largest y axis label. The largest value is not necessarily the longest string
-    int maxYLabelWidth = 0;
+    private int maxYLabelWidth = 0;
 
     // number of pixels per bar
     private double pixelincrementX(){

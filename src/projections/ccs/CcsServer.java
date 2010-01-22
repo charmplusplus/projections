@@ -35,6 +35,7 @@ import java.security.MessageDigest;
  * @version 2.0
  */
 
+@SuppressWarnings("ucd")
 public class CcsServer 
 { 
 // --------------------------------------------------------------------------

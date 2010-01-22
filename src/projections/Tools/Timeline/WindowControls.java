@@ -78,7 +78,6 @@ ItemListener {
 	private JMenuItem mWhiteBG;
 	private JMenuItem mBlackBG;
 
-	private JMenuItem mChangeColors;
 	private JMenuItem mSaveColors;
 	private JMenuItem mRestoreColors;
 	private JMenuItem mDefaultColors;
@@ -288,10 +287,7 @@ ItemListener {
 			data.setBackgroundColor(Color.black);
 			data.setForegroundColor(Color.white);
 		}
-
-		else if(evt.getSource() == mChangeColors)
-			ShowColorWindow();
-
+		
 		else if(evt.getSource() == mSaveColors)
 			MainWindow.runObject[myRun].saveColors();
 
@@ -444,7 +440,6 @@ ItemListener {
 		mWhiteBG = new JMenuItem("White background");
 		mBlackBG = new JMenuItem("Black background");
 	
-		mChangeColors = new JMenuItem("Change Entry Point Colors");
 		mSaveColors = new JMenuItem("Save Entry Point Colors");
 		mRestoreColors = new JMenuItem("Restore Entry Point Colors");
 		mDefaultColors = new JMenuItem("Default Entry Point Colors");
@@ -476,7 +471,6 @@ ItemListener {
 
 		mWhiteBG.addActionListener(this);
 		mBlackBG.addActionListener(this);
-		mChangeColors.addActionListener(this);
 		mSaveColors.addActionListener(this);
 		mRestoreColors.addActionListener(this);
 		mDefaultColors.addActionListener(this);
@@ -736,25 +730,6 @@ ItemListener {
 
 	}
 
-//	private void selectBackgroundColor(){
-//		Color c = JColorChooser.showDialog(parentWindow, "Choose Background Color", data.getBackgroundColor()); 
-//		data.setBackgroundColor(c);
-//	}
-//
-//	private void selectForegroundColor(){
-//		Color c = JColorChooser.showDialog(parentWindow, "Choose Foreground Color", data.getForegroundColor()); 
-//		data.setForegroundColor(c);
-//	}
-
-	private void ShowColorWindow() {
-//		if (colorWindow == null)
-//			colorWindow = new ColorChooser(data, parentWindow);
-//		colorWindow.setVisible(true);
-	}
-
-	protected void CloseColorWindow() {
-//		colorWindow = null;
-	}
 
 	/** Update the value in the scale factor label with the value in our data object */
 	protected void updateScaleField() {

@@ -31,7 +31,7 @@ import projections.analysis.AmpiProcessProfile;
 import projections.analysis.UsageCalc;
 
 class AmpiProfileWindow extends ProjectionsWindow
-    implements ActionListener, ColorSelectable, ChangeListener
+    implements ActionListener, ChangeListener
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -366,14 +366,6 @@ class AmpiProfileWindow extends ProjectionsWindow
         }
     }
 
-
-    public void applyDialogColors() {
-	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
-
-        System.out.println(colors[numFunc]);
-        displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
-        displayCanvas.repaint();
-    }
 
     private void showChangeColorDialog() {
 //	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();

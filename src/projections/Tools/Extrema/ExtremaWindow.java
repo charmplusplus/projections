@@ -32,7 +32,6 @@ import projections.analysis.ProjDefs;
 import projections.analysis.ProjMain;
 import projections.analysis.ThreadManager;
 import projections.gui.Clickable;
-import projections.gui.ColorSelectable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -48,7 +47,7 @@ import projections.misc.LogEntryData;
  *
  */
 public class ExtremaWindow extends GenericGraphWindow
-implements ActionListener, ItemListener, ColorSelectable,
+implements ActionListener, ItemListener,
 Clickable
 {
 
@@ -851,11 +850,6 @@ Clickable
 		refreshGraph();
 	}
 
-
-	public void applyDialogColors() {
-		setDataSource("Outliers", graphData, graphColors, this);
-		refreshGraph();
-	}
 
 	public String[] getPopup(int xVal, int yVal) {
 		DecimalFormat df = new DecimalFormat();

@@ -595,9 +595,7 @@ public class Data
 	protected long endTime(){
 		return endTime;
 	}
-	protected int[] entries(){
-		return entries;
-	}
+	
 	protected Color[] entryColor(){
 		return entryColor;
 	}

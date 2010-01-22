@@ -34,7 +34,7 @@ import projections.misc.MiscUtil;
  *
  */
 
-public class NoiseMiner extends ProjDefs
+class NoiseMiner extends ProjDefs
 {
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
@@ -70,7 +70,7 @@ public class NoiseMiner extends ProjDefs
 	 * 
 	 *  */
 	private LinkedList<NoiseResult> finalResults;
-	public long[] histogramToDisplay;
+	protected long[] histogramToDisplay;
 	
 	private class Time {
 
@@ -701,7 +701,7 @@ public class NoiseMiner extends ProjDefs
 	}
 
 
-	public NoiseMiner(long startInterval, long endInterval,
+	protected NoiseMiner(long startInterval, long endInterval,
 			OrderedIntList processorList)
 	{
 		//Initialize class variables

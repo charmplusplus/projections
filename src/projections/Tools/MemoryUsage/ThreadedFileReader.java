@@ -16,10 +16,10 @@ class ThreadedFileReader extends Thread  {
 	private int pe;
 	private int myRun;
 	private XYSeries series;
-	long intervalSize;
-	long startInterval;
-	long endInterval;
-	double timeScalingFactor;
+	private long intervalSize;
+	private long startInterval;
+	private long endInterval;
+	private double timeScalingFactor;
 
 	/** Construct a file reading thread that will determine the best EP representative for each interval
 	 *  

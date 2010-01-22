@@ -44,7 +44,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	
 		
 	/** The JPanel containing all the buttons and labels */
-	protected WindowControls controls;
+	private WindowControls controls;
 	
 	/** A reference to this object for use by event listener inner classes */
 	private TimelineWindow thisWindow;

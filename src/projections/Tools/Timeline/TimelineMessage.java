@@ -56,6 +56,7 @@ public class TimelineMessage implements Comparable
 	}
 
 	/** compare two timeline messages based on their source pe and their EventID */
+	@SuppressWarnings("ucd")
 	public int compareTo(Object o) {
 		TimelineMessage other = (TimelineMessage)o;
 

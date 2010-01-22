@@ -21,23 +21,21 @@ import projections.gui.MainWindow;
 /** Display a legend in a new window (clickable to save image to file) */
 class Legend implements MouseListener {
 	private BufferedImage image;
-	Paint fgColor;
-	Paint bgColor;
+	private Paint fgColor;
+	private Paint bgColor;
 	
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
 	private static int myRun = 0;
 	
-	Vector<String> names;
-	Vector<Paint> paints;
+	private Vector<String> names;
 	
-	Font namesFont;
-	Font legendFont;
+	private Font namesFont;
+	private Font legendFont;
 	
 	Legend( String title, Vector<String> names, Vector<Paint> paints){
 		this.names = names;
-		this.paints = paints;
 		
 		namesFont = new Font("SansSerif", Font.PLAIN, fontSizeNames() ); 
 		legendFont = new Font("SansSerif", Font.BOLD, fontSizeLegend() ); 

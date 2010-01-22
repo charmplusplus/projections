@@ -30,7 +30,6 @@ import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.ColorManager;
-import projections.gui.ColorSelectable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
@@ -47,7 +46,7 @@ import projections.gui.Util;
  * 
  */
 public class TimeProfileWindow extends GenericGraphWindow
-implements ActionListener, ColorSelectable, Clickable
+implements ActionListener, Clickable
 {
 
 	private TimeProfileWindow thisWindow;
@@ -237,12 +236,12 @@ implements ActionListener, ColorSelectable, Clickable
 	}
 
 
-	class SortableEPs implements Comparable{
-		double value;
-		String name;
-		Paint paint;
+	private class SortableEPs implements Comparable{
+		private double value;
+		private String name;
+		private Paint paint;
 
-		SortableEPs(double value, String name, Paint paint){
+		private SortableEPs(double value, String name, Paint paint){
 			this.value = value;
 			this.name = name;
 			this.paint = paint;
@@ -260,7 +259,7 @@ implements ActionListener, ColorSelectable, Clickable
 
 	}
 
-	public void generateLegend(boolean useShortenedNames){
+	private void generateLegend(boolean useShortenedNames){
 
 		List<SortableEPs> l = new Vector<SortableEPs>();
 
@@ -501,10 +500,6 @@ implements ActionListener, ColorSelectable, Clickable
 	}
 
 
-
-	public void applyDialogColors() {
-		setOutputGraphData();
-	}
 
 	private void setOutputGraphData() {
 		// need first pass to decide the size of the outputdata

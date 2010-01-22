@@ -19,7 +19,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 	private TimeTextField sizeField;
 	private JLabel numIntervalsLabel;
 	private JLabel sizeLabel;
-	JCheckBox t;
+	private JCheckBox t;
 
 	private final int DEFAULT_NUM_INTERVALS = 1000;
 

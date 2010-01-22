@@ -16,11 +16,11 @@ import projections.Tools.NoiseMiner.NoiseMiner.NoiseResult;
 import projections.Tools.Timeline.NonScrollingPanel;
 import projections.analysis.TimelineEvent;
 
-public class NoiseMinerExemplarTimelineWindow extends JFrame {
+class NoiseMinerExemplarTimelineWindow extends JFrame {
 
 	private JLabel explanation; //< The textual explanation at the top of the window
 	
-	public NoiseMinerExemplarTimelineWindow(NoiseResult nr)  {
+	protected NoiseMinerExemplarTimelineWindow(NoiseResult nr)  {
 		
 		JPanel wrapper = new JPanel();
 		wrapper.setBorder(BorderFactory.createEmptyBorder(8,4,4,0));

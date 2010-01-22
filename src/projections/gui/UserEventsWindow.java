@@ -26,7 +26,7 @@ import projections.misc.LogEntryData;
  *  Legends are in place (and probably replace the name)
  */
 class UserEventsWindow extends GenericGraphWindow
-    implements ActionListener, ColorSelectable
+    implements ActionListener
 {
 
 	private UserEventsWindow thisWindow;
@@ -207,11 +207,6 @@ class UserEventsWindow extends GenericGraphWindow
     protected void setGraphSpecificData() {
 	setXAxis("Processors", processorList);
 	setYAxis("Time (us)", "us");
-	setDataSource("User Events", graphData, graphColors, this);
-	refreshGraph();
-    }
-
-    public void applyDialogColors() {
 	setDataSource("User Events", graphData, graphColors, this);
 	refreshGraph();
     }

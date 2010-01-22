@@ -42,7 +42,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	
 	private JPanel combinedTimelinesPanel;
 
-	DialogExtension toolSpecificPanel;
+	private DialogExtension toolSpecificPanel;
 
 	public TimelineRenderedWindow(MainWindow parentWindow) {
 		super(parentWindow);

@@ -218,6 +218,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		EndTime += shift;
 	}
 
+	@SuppressWarnings("ucd")
 	public int compareTo(Object o) {
 		UserEventObject ueo = (UserEventObject) o;
 		if(pe != ueo.pe){

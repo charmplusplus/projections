@@ -21,12 +21,12 @@ class ThreadedFileReader extends Thread  {
 	private int myRun = 0;
 
 	// Global data that must be safely accumulated into:
-	double[][] globalMessagesSend;
-	double[][] globalMessagesRecv;
-	double[][] globalBytesSend;
-	double[][] globalBytesRecv;
-	double[][] globalExternalMessageRecv;
-	double[][] globalExternalBytesRecv;
+	private double[][] globalMessagesSend;
+	private double[][] globalMessagesRecv;
+	private double[][] globalBytesSend;
+	private double[][] globalBytesRecv;
+	private double[][] globalExternalMessageRecv;
+	private double[][] globalExternalBytesRecv;
 	
 
 	/** Construct a file reading thread that will generate data for one PE. */

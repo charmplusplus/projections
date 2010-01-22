@@ -108,6 +108,7 @@ protected void addPack(PackTime p)
 	PackTimes.addElement(p);
 }
 
+@SuppressWarnings("ucd")
 public int compareTo(Object o) {
 	return MiscUtil.sign(this.BeginTime - ((TimelineEvent)o).BeginTime);
 }

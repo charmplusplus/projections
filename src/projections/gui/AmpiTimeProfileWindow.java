@@ -26,7 +26,7 @@ import projections.analysis.AmpiProcessProfile;
  *  But it complicates the integration with entry points time profile.
  */
 public class AmpiTimeProfileWindow extends GenericGraphWindow
-    implements ActionListener, ColorSelectable
+    implements ActionListener
 {
 	private AmpiTimeProfileWindow thisWindow = null;
 //    private EntrySelectionDialog entryDialog = null;
@@ -241,22 +241,6 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         }            
     }
 
-    public void applyDialogColors() {
-        //set outputData according to recently changed stateArray
-        for(int i=0; i<numFunctions; i++){
-            outColors[i] = colorArray[i];
-        }
-        for(int i=0; i<outputData.length; i++){
-            for(int j=0; j<numFunctions; j++){
-                if(stateArray[j]){
-                    outputData[i][j] = graphData[i][j];
-                } else {
-                    outputData[i][j] = 0.0;
-                }
-            }
-        }
-        setOutputGraphData(false);            
-    }
 
     public void setOutputGraphData(boolean reCompute) {
         if(reCompute)

@@ -33,6 +33,7 @@ public boolean equals(Object o) {
 }
 
 /** Needed for putting these as keys in a TreeSet */
+@SuppressWarnings("ucd")
 public int compareTo(Object o) {
 	ObjectId oid = (ObjectId)o;
 

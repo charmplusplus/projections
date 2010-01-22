@@ -23,7 +23,6 @@ import javax.swing.SwingWorker;
 import projections.analysis.ThreadManager;
 import projections.gui.Analysis;
 import projections.gui.ColorManager;
-import projections.gui.ColorSelectable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
@@ -34,7 +33,7 @@ import projections.gui.Util;
 
 
 public class CommTimeWindow extends GenericGraphWindow
-implements ItemListener, ActionListener, ColorSelectable
+implements ItemListener, ActionListener
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -82,7 +81,7 @@ implements ItemListener, ActionListener, ColorSelectable
 	// data required for entry selection dialog
 	//    private String         typeLabelNames[] = {"Entry Points"};
 	private boolean        stateArray[];
-	private boolean        existsArray[];
+//	private boolean        existsArray[];
 	private Color          colorArray[];
 	private String         entryNames[];
 
@@ -118,7 +117,7 @@ implements ItemListener, ActionListener, ColorSelectable
 		// here
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		stateArray = new boolean[numEPs];
-		existsArray = new boolean[numEPs];
+//		existsArray = new boolean[numEPs];
 		colorArray = new Color[numEPs];
 		entryNames = new String[numEPs];
 		for (int ep=0; ep<numEPs; ep++) {
@@ -348,10 +347,6 @@ implements ItemListener, ActionListener, ColorSelectable
 		}
 	}
 
-	public void applyDialogColors() {
-		setOutputGraphData();
-		repaint();
-	}    
 
 	private void setOutputGraphData() {
 		// need first pass to decide the size of the outputdata

@@ -16,15 +16,15 @@ import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.TimeTextField;
 
 
-public class DialogExtension extends RangeDialogExtensionPanel implements ItemListener {
+class DialogExtension extends RangeDialogExtensionPanel implements ItemListener {
 
 	// Additional GUI objects
-	protected JCheckBox dialogEnableEntryFiltering;
-	protected TimeTextField dialogMinEntryFiltering;
+	private JCheckBox dialogEnableEntryFiltering;
+	private TimeTextField dialogMinEntryFiltering;
 
-	protected JCheckBox dialogEnableIdleFiltering;
-	protected JCheckBox dialogEnableMsgFiltering;
-	protected JCheckBox dialogEnableUserEventFiltering;
+	private JCheckBox dialogEnableIdleFiltering;
+	private JCheckBox dialogEnableMsgFiltering;
+	private JCheckBox dialogEnableUserEventFiltering;
 	
 	protected JTextField dialogWidth;
 

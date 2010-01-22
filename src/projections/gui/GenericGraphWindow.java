@@ -64,7 +64,7 @@ implements PopUpAble
 
 	// assuming all projections graph windows need a menu bar and a file menu
 	protected JMenuBar menuBar  = new JMenuBar();
-	protected JMenu    fileMenu = new JMenu("File");
+	private JMenu    fileMenu = new JMenu("File");
 
 
 	private JMenuItem mSaveScreenshot;

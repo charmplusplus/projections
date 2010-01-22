@@ -53,7 +53,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private int myRun = 0;
 
 	/** For each PE record a set of (time, memusage) pairs */
-	TreeMap<Long,XYSeries> memorySamples; 
+	private TreeMap<Long,XYSeries> memorySamples; 
 
 	private MemoryUsageWindow thisWindow;
 	private MainWindow mainWindow;
@@ -61,13 +61,13 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private JMenuBar mbar;
 	private JMenuItem mShowPhaseInfo;
 
-	public Vector<String> availableStepStrings;
-	public Vector<Long> availableStepTimes;
+	private Vector<String> availableStepStrings;
+	private Vector<Long> availableStepTimes;
 
-	IntervalChooserPanel intervalPanel;
+	private IntervalChooserPanel intervalPanel;
 	
-	double timeScalingFactor = 1.0;
-	String timeUnits = "us-default";
+	private double timeScalingFactor = 1.0;
+	private String timeUnits = "us-default";
 
 	public MemoryUsageWindow(MainWindow mainWindow)
 	{

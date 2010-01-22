@@ -27,7 +27,7 @@ class ThreadedFileReader extends Thread  {
 	}
 
 
-	double fakeCounter;
+	private double fakeCounter;
 
 	private void LoadGraphDataForOnePe(int pe) 
 	{

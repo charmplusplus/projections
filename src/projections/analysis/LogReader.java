@@ -253,9 +253,9 @@ public class LogReader
     	numIntervals = intervalEnd - intervalStart + 1;
     	byEntryPoint=NbyEntryPoint;
 
-    	// assume full range of processor if null
+    	// assume full range of processors if null
     	if (processorList == null) {
-    		processorList = MainWindow.runObject[myRun].getValidProcessorList();
+    		processorList = MainWindow.runObject[myRun].getValidProcessorList().copyOf();
     	}
 
     	numProcessors = processorList.size();
@@ -309,8 +309,9 @@ public class LogReader
 
     		GenericLogReader reader = new GenericLogReader(curPe, MainWindow.runObject[myRun].getVersion());
     		
-    		boolean isProcessing = false;
     		try { 
+    			int nestingLevel = 0;
+    			
     			while (true) { //EOFException will terminate loop
     				curData = reader.nextEvent();
     				nLines++;
@@ -319,37 +320,20 @@ public class LogReader
     					intervalCalc(curData.type, 0, 0, curData.time);
     					break;
     				case CREATION:
-    					intervalCalc(curData.type, curData.mtype, 
+    					intervalCalc(CREATION, curData.mtype, 
     							curData.entry, curData.time);
     					break;
     				case BEGIN_PROCESSING: 
-    					if (isProcessing) {
-    						// add a pretend end processing event.
-    						intervalCalc(END_PROCESSING, 
-    								curData.mtype, curData.entry,
-    								curData.time);
-    						// not necessarily needed.
-    						isProcessing = false;
+    					nestingLevel++;
+    					if(nestingLevel == 1){
+    						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
     					}
-    					intervalCalc(curData.type, curData.mtype, 
-    							curData.entry, curData.time);
-    					isProcessing = true;
     					break;
     				case END_PROCESSING:
-    					if (!isProcessing) {
-    						// bad, ignore. (the safe thing to do)
-    						// HAVE to add a dummy end event.
-    						// **HACK** use -5 as mtype number to
-    						// indicate the data is to be dropped.
-    						// (fillToIntervals still needs to make
-    						// progress though)
-    						intervalCalc(curData.type, -5, 
-    								curData.entry, curData.time);
-    					} else {
-    						intervalCalc(curData.type, curData.mtype, 
-    								curData.entry, curData.time);
+    					nestingLevel--;
+    					if(nestingLevel == 0){
+    						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
     					}
-    					isProcessing = false;
     					break;
     				case ENQUEUE:
     					intervalCalc(curData.type, curData.mtype, 

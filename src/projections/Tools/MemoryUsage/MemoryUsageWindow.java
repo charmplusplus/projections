@@ -263,7 +263,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			// Do parallel loading because we have full logs
 
 			// Create a list of worker threads
-			LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 			while (processorList.hasMoreElements()) {
 				int nextPe = processorList.nextElement();
@@ -286,7 +286,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 			memorySamples = new TreeMap(); 
 
-			Iterator<Thread> titer = readyReaders.iterator();
+			Iterator<Runnable> titer = readyReaders.iterator();
 			while(titer.hasNext()){
 				ThreadedFileReader r = (ThreadedFileReader) titer.next();
 				memorySamples.put(r.getPe(), r.getMemorySamples());

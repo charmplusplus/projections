@@ -17,7 +17,7 @@ import projections.analysis.TimelineEvent;
 import projections.gui.Analysis;
 import projections.misc.LogEntryData;
 
-class NoiseMinerThread extends Thread {
+class NoiseMinerThread implements Runnable {
 	private int pe;
 	private TreeMap h;
 	private Analysis analysis;

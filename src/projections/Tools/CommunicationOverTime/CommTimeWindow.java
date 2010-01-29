@@ -309,7 +309,7 @@ implements ItemListener, ActionListener
 		
 		
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
 		processorList.reset();
 		while (processorList.hasMoreElements()) {

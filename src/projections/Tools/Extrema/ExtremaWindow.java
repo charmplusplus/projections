@@ -241,7 +241,7 @@ Clickable
 		tempData = new double[numPEs][];
 
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 		int pIdx=0;		
 		selectedPEs.reset();
@@ -268,7 +268,7 @@ Clickable
 
 		// Retrieve results from each thread, storing them into tempData
 		int pIdx2=0;
-		Iterator iter = readyReaders.iterator();
+		Iterator<Runnable> iter = readyReaders.iterator();
 		while (iter.hasNext()) {
 			ExtremaReaderThread r = (ExtremaReaderThread) iter.next();
 			tempData[pIdx2] = r.myData;

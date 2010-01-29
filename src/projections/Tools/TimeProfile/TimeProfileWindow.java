@@ -344,7 +344,7 @@ implements ActionListener, Clickable
 						// Do parallel loading because we have full logs
 
 						// Create a list of worker threads
-						LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+						LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 						// Create multiple result arrays to reduce contention for accumulating
 						int numResultAccumulators = 8;

@@ -6,7 +6,7 @@ import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
- class ThreadedFileReader extends Thread  {
+ class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 //	int p;  // Which index am I into the flattened array of potentially sparse pe's

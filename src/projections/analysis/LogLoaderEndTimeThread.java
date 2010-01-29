@@ -8,7 +8,7 @@ import projections.misc.LogEntryData;
 
 
 /** This thread's run() method will lookup the endtime for an input log file */
-class LogLoaderEndTimeThread  extends Thread {
+class LogLoaderEndTimeThread  implements Runnable {
 
 	protected Long result;
 	private int myRun = 0;

@@ -130,13 +130,13 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			final Date time1  = new Date();
 
 			// Create a list of worker threads
-			final LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+			final LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 			processorList.reset();
 			int pIdx=0;		
 			while (processorList.hasMoreElements()) {
 				int nextPe = processorList.nextElement();
-				readyReaders.add( new ThreadedFileReaderTimelineRendered(nextPe, startTime, endTime, backgroundColor, foregroundColor, width) );
+				readyReaders.add( new ThreadedFileReader(nextPe, startTime, endTime, backgroundColor, foregroundColor, width) );
 				pIdx++;
 			}
 
@@ -159,9 +159,9 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 					combinedTimelinesPanel.setLayout(new BoxLayout(combinedTimelinesPanel, BoxLayout.PAGE_AXIS));
 
 					// Merge resulting images together.
-					Iterator<Thread> iter = readyReaders.iterator();
+					Iterator<Runnable> iter = readyReaders.iterator();
 					while(iter.hasNext()){
-						ThreadedFileReaderTimelineRendered r = (ThreadedFileReaderTimelineRendered) iter.next();
+						ThreadedFileReader r = (ThreadedFileReader) iter.next();
 						BufferedImage i = r.getImage();
 						JLabel l = new JLabel(new ImageIcon(i));
 						l.setToolTipText("PE " + r.PE);

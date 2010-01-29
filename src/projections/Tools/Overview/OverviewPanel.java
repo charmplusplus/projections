@@ -348,7 +348,7 @@ class OverviewPanel extends ScalePanel.Child
 		mode = OverviewWindow.MODE_EP;
 	
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 		selectedPEs.size();
 

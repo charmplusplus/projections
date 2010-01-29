@@ -349,7 +349,7 @@ implements ItemListener, ActionListener, Clickable
 		histogram = new ArrayList<Integer>();
 		
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
 		OrderedIntList processorList = pes.copyOf();
 		while (processorList.hasMoreElements()) {
@@ -373,7 +373,7 @@ implements ItemListener, ActionListener, Clickable
 		
 		// Combine histograms from all processors
 		
-		Iterator<Thread> iter = readyReaders.iterator();
+		Iterator<Runnable> iter = readyReaders.iterator();
 		while(iter.hasNext()){
 			ThreadedFileReader t = (ThreadedFileReader) iter.next();
 			histogram.addAll(t.localHistogram);

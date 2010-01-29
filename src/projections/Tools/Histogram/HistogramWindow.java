@@ -127,7 +127,7 @@ implements ActionListener
 
 					
 					// Create a list of worker threads
-					LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+					LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 					OrderedIntList processorList = dialog.getSelectedProcessors();
 					while (processorList.hasMoreElements()) {

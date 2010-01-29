@@ -9,7 +9,7 @@ import projections.misc.LogEntryData;
 
 
 /** The reader threads for Scan Logs tool. */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private int myRun;

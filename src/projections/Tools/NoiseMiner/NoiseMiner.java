@@ -749,7 +749,7 @@ class NoiseMiner extends ProjDefs
 		int numPs = peList.size();
 				
 		// Create a list of worker threads	
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		
 		for (int p=0; p<numPs; p++) {
 			int pe = peList.nextElement();
@@ -777,7 +777,7 @@ class NoiseMiner extends ProjDefs
 		LinkedList<NoiseResult> results = new LinkedList<NoiseResult>();
 		
 		
-		Iterator<Thread> iter = readyReaders.iterator();
+		Iterator<Runnable> iter = readyReaders.iterator();
 		while(iter.hasNext()) {
 			NoiseMinerThread thread = (NoiseMinerThread) iter.next();
 			results.addAll(thread.results);

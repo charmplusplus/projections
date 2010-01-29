@@ -1,7 +1,7 @@
 package projections.Tools.Timeline;
 
 /** The reader threads for timeline */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 	
 	private int pe;
 //	int p;

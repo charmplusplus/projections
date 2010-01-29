@@ -11,7 +11,7 @@ import projections.misc.LogEntryData;
 
 
 /** The reader threads for Communication Per PE Tool. */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private int pIdx;

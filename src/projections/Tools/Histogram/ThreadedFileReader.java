@@ -12,7 +12,7 @@ import projections.misc.LogEntryData;
 
 
 /** The reader threads for Histogram tool. */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private long startTime;

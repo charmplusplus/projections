@@ -11,7 +11,7 @@ import projections.misc.LogEntryData;
 
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
-class ExtremaReaderThread extends Thread  {
+class ExtremaReaderThread implements Runnable  {
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple

@@ -11,7 +11,7 @@ import projections.misc.LogEntryData;
  *  Written by Samir Mirza, Isaac Dooley, and possibly others
  * 
  */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private long startInterval;

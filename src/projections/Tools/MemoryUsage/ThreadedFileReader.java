@@ -11,7 +11,7 @@ import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
 
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private int myRun;

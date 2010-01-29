@@ -63,7 +63,7 @@ public class ScanLogFiles implements ActionListener
 						double fakeResult[] = new double[1];
 					
 						// Create a list of worker threads
-						LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+						LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 						int pIdx=0;		
 						while (processorList.hasMoreElements()) {

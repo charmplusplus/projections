@@ -5,16 +5,21 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 import javax.swing.ProgressMonitor;
 
 
-/** This class manages a pool of worker threads, updating a progress bar as threads complete. 
+/** This class runs a set of objects in threads, updating a progress bar as threads complete. 
  * 
- * The class must be provided with a list of Runnable objects that will be assigned to threads by me. 
+ *  Runnable objects are provided either to the constructor or through calls to execute(Runnable r).
+ *  
+ *  The threads are only run when runAll() is called.
+ *  
+ *  The class also prints out the time taken to run the threads.
  * 
  * */
-public class ThreadManager {
+public class TimedProgressThreadExecutor implements Executor{
 
 	/** A copy of the list of threads */
 	private LinkedList<Runnable> runableObjects;
@@ -28,25 +33,31 @@ public class ThreadManager {
 
 	private Component guiRootForProgressBar;
 
-	public ThreadManager(String description, List<Runnable> runableObjects, Component guiRoot, boolean showProgress){
+	public TimedProgressThreadExecutor(String description, Component guiRoot, boolean showProgress){
+		this(description, null, guiRoot, showProgress);
+	}
+	
+	public TimedProgressThreadExecutor(String description, List<Runnable> runableObjects, Component guiRoot, boolean showProgress){
 		this.runableObjects = new LinkedList<Runnable>();
-		this.runableObjects.addAll(runableObjects);
+		if(runableObjects != null)
+			this.runableObjects.addAll(runableObjects);
 		this.description = description;
 		this.numInitialThreads = runableObjects.size();
 		this.guiRootForProgressBar = guiRoot;
 		this.showProgress = showProgress;
 
-		int numProcs = Runtime.getRuntime().availableProcessors()*1;
-		numConcurrentThreads = numProcs;
-
+		int numProcs = Runtime.getRuntime().availableProcessors();
+		numConcurrentThreads = numProcs * 1;
 	}
 
+	public void execute(Runnable r){
+		runableObjects.add(r);
+	}
 
-	public void runThreads(){
+	public void runAll(){
 
 		Date startReadingTime  = new Date();
-		
-		
+				
 		ProgressMonitor progressBar=null;
 		if(showProgress){
 			progressBar = new ProgressMonitor(guiRootForProgressBar, description,"", 0, numInitialThreads);

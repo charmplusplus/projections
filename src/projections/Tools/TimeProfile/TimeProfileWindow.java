@@ -25,7 +25,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import projections.analysis.LogReader;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
@@ -371,8 +371,8 @@ implements ActionListener, Clickable
 						}
 
 						// Pass this list of threads to a class that manages/runs the threads nicely
-						ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
-						threadManager.runThreads();
+						TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
+						threadManager.runAll();
 
 
 						// Merge resulting graphData structures together.

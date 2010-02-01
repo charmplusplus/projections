@@ -20,7 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphWindow;
@@ -367,8 +367,8 @@ implements ItemListener, ActionListener, Clickable
 		}
 
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
+		threadManager.runAll();
 		
 		
 		// Combine histograms from all processors

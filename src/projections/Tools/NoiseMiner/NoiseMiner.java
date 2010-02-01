@@ -13,7 +13,7 @@ import java.util.Vector;
 import javax.swing.JButton;
 
 import projections.analysis.ProjDefs;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -764,8 +764,8 @@ class NoiseMiner extends ProjDefs
 			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
 		}
 		
-		ThreadManager threadManager = new ThreadManager("Loading Noise Miner in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Noise Miner in Parallel", readyReaders, guiRootForProgressBar, true);
+		threadManager.runAll();
 
 		// Retrieve results for each PE
 				

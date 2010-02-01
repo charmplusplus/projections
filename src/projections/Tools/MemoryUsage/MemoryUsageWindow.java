@@ -36,7 +36,7 @@ import org.jfree.data.xy.XYSeriesCollection;
 
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -281,8 +281,8 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			}
 
 			// Pass this list of threads to a class that manages/runs the threads nicely
-			ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
-			threadManager.runThreads();
+			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
+			threadManager.runAll();
 
 			memorySamples = new TreeMap(); 
 

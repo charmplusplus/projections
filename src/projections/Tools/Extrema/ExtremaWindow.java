@@ -30,7 +30,7 @@ import projections.analysis.GenericLogReader;
 import projections.analysis.KMeansClustering;
 import projections.analysis.ProjDefs;
 import projections.analysis.ProjMain;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
@@ -262,8 +262,8 @@ Clickable
 		}
 
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
+		threadManager.runAll();
 
 
 		// Retrieve results from each thread, storing them into tempData

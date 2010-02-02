@@ -94,18 +94,7 @@ import projections.gui.OrderedIntList;
 //			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();
 //			logReaderIntervalSize = logReader.getIntervalSize();
-		} else if (MainWindow.runObject[myRun].hasSumDetailFiles()) {
-			IntervalData intervalData = new IntervalData();
-			intervalData.loadIntervalData(intervalSize, intervalStart,
-					intervalEnd, byEntryPoint,
-					processorList);
-			mySystemUsageData = intervalData.getSystemUsageData();
-//			mySystemMsgsData = intervalData.getSystemMsgs();
-			myUserEntryData = intervalData.getUserEntries();
-		} else if (MainWindow.runObject[myRun].hasSumFiles()) { // no log files, so load .sum files
-			System.err.println("Error: This case should never be reached ?!");
-		} else {
-			System.err.println("Error: No data Files found!!");
+			System.err.println("Error: No log data files found!");
 		}
 
 		

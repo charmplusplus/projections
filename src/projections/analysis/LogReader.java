@@ -275,8 +275,7 @@ public class LogReader
 
     	sysUsgData = new int[3][numProcessors][];
     	if (byEntryPoint) {
-    		userEntries = new 
-    		int[numUserEntries][3][numProcessors][numIntervals];
+    		userEntries = new int[numUserEntries][3][numProcessors][numIntervals];
     		categorized = new int[5][3][numProcessors][];
     	}
     	processorList.reset();

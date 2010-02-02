@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -25,7 +26,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import projections.analysis.LogReader;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
@@ -72,6 +73,7 @@ implements ActionListener, Clickable
 	private JMenuItem mDisplayLegend;
 	private JMenuItem mDisplayLegendFull;
 
+	private JCheckBox showMarkersCheckBox;
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
 
@@ -83,6 +85,10 @@ implements ActionListener, Clickable
 
 	private boolean displaySlopes = false;
 
+	// Markers that are drawn at certain times (doubles in units of x axis bins) to identify phases or iterations
+	private TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
+
+	
 	// data used for intervalgraphdialog
 	private OrderedIntList processorList;
 
@@ -191,6 +197,11 @@ implements ActionListener, Clickable
 		loadColors = new JButton("Load Entry Colors");
 		loadColors.addActionListener(this);
 
+		showMarkersCheckBox =  new JCheckBox("Show Iteration/Phase Markers");
+		showMarkersCheckBox.setSelected(true);
+		showMarkersCheckBox.setToolTipText("Draw vertical lines at time associated with any user supplied notes containing\"***\"?");
+		showMarkersCheckBox.addActionListener(this);
+		
 		analyzeSlopesCheckBox = new JCheckBox("Analyze slope");
 		analyzeSlopesCheckBox.setToolTipText("Select a point on the graph to measure the slope");
 		analyzeSlopesCheckBox.addActionListener(this);
@@ -206,8 +217,9 @@ implements ActionListener, Clickable
 		Util.gblAdd(controlPanel, setRanges,      gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, saveColors,     gbc, 1,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, loadColors,     gbc, 2,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 3,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, showMarkersCheckBox, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 
 
 		if(ampiTraceOn){            
@@ -333,7 +345,8 @@ implements ActionListener, Clickable
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
-
+					phaseMarkers.clear();
+					
 					int numIntervals = endInterval-startInterval+1; 
 					graphData = new double[numIntervals][numEPs+special]; //entry number + idle
 
@@ -355,7 +368,7 @@ implements ActionListener, Clickable
 						while (processorList.hasMoreElements()) {
 							int nextPe = processorList.nextElement();
 							readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, myRun, 
-									startInterval, endInterval, 
+									startInterval, endInterval, phaseMarkers, 
 									graphDataAccumulators[pIdx%numResultAccumulators]) );
 							pIdx++;
 						}
@@ -371,8 +384,8 @@ implements ActionListener, Clickable
 						}
 
 						// Pass this list of threads to a class that manages/runs the threads nicely
-						ThreadManager threadManager = new ThreadManager("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
-						threadManager.runThreads();
+						TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Time Profile in Parallel", readyReaders, guiRootForProgressBar, true);
+						threadManager.runAll();
 
 
 						// Merge resulting graphData structures together.
@@ -509,9 +522,7 @@ implements ActionListener, Clickable
 				outSize++;
 			}
 		}
-		if (outSize == 0) {
-			// do nothing, just display empty graph
-		} else {
+		if (outSize > 0) {
 			// actually create and fill the data and color array
 			int numIntervals = endInterval-startInterval+1;
 			outputData = new double[numIntervals][outSize];
@@ -537,6 +548,8 @@ implements ActionListener, Clickable
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
 			setDataSource("Time Profile", outputData, outColors, thisWindow);
+			graphCanvas.setMarkers(phaseMarkers);
+
 			refreshGraph();
 		}
 	}
@@ -605,6 +618,8 @@ implements ActionListener, Clickable
 				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));	
 				graphCanvas.clearPolynomial();
 			}
+		} else if (e.getSource() == showMarkersCheckBox){
+			graphCanvas.showMarkers(showMarkersCheckBox.isSelected());
 		} else if (e.getSource() == hideMouseoversCheckBox) {
 			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
 		} else if (e.getSource() == setRanges) {

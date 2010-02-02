@@ -80,7 +80,7 @@ class ThreadedFileReader implements Runnable  {
 		if( MainWindow.runObject[myRun].hasLogFiles()) { // .log files
 			logReader.read(intervalSize, 
 					intervalStart, intervalEnd,
-					byEntryPoint, processorList, false);
+					byEntryPoint, processorList, false, null);
 			mySystemUsageData = logReader.getSystemUsageData();
 //			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();

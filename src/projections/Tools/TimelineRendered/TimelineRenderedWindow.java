@@ -23,7 +23,7 @@ import javax.swing.SwingWorker;
 
 import projections.Tools.Timeline.Data;
 import projections.Tools.Timeline.MainHandler;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -144,12 +144,12 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			Component guiRootForProgressBar = null;
 
 			// Pass this list of threads to a class that manages/runs the threads nicely
-			final ThreadManager threadManager = new ThreadManager("Rendering Timelines in Parallel", readyReaders, guiRootForProgressBar, true);
+			final TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Rendering Timelines in Parallel", readyReaders, guiRootForProgressBar, true);
 
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
-					threadManager.runThreads();
+					threadManager.runAll();
 					return null;
 				}
 

@@ -12,7 +12,7 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingWorker;
 
 import projections.analysis.ProjMain;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 
@@ -76,8 +76,8 @@ public class ScanLogFiles implements ActionListener
 						Component guiRootForProgressBar = null;
 					
 						// Pass this list of threads to a class that manages/runs the threads nicely
-						ThreadManager threadManager = new ThreadManager("Scanning Logs in Parallel", readyReaders, guiRootForProgressBar, true);
-						threadManager.runThreads();
+						TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Scanning Logs in Parallel", readyReaders, guiRootForProgressBar, true);
+						threadManager.runAll();
 						return null;
 				}
 			};

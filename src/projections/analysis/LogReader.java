@@ -2,6 +2,7 @@ package projections.analysis;
 
 import java.io.EOFException;
 import java.io.IOException;
+import java.util.TreeMap;
 
 import javax.swing.ProgressMonitor;
 
@@ -239,11 +240,13 @@ public class LogReader
 
     /**
        Read log files for a list of processors. If the list of PEs is null, load all available PEs. 
+     
+       Stores phase markers into phaseMarkers in a synchronized manner into phaseMarkers if it is non-null.
      */
     public void read(long reqIntervalSize,
     		int NintervalStart, int NintervalEnd,
     		boolean NbyEntryPoint, OrderedIntList processorList,
-    		boolean showProgress)  {
+    		boolean showProgress, TreeMap<Double, String> phaseMarkers)  {
     	
     	numProcessors = MainWindow.runObject[myRun].getNumProcessors();
     	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
@@ -272,8 +275,7 @@ public class LogReader
 
     	sysUsgData = new int[3][numProcessors][];
     	if (byEntryPoint) {
-    		userEntries = new 
-    		int[numUserEntries][3][numProcessors][numIntervals];
+    		userEntries = new int[numUserEntries][3][numProcessors][numIntervals];
     		categorized = new int[5][3][numProcessors][];
     	}
     	processorList.reset();
@@ -351,6 +353,14 @@ public class LogReader
     					break;
     				case END_TRACE:
     					intervalCalc(curData.type,curData.mtype,0,curData.time);
+    					break;
+    				case USER_SUPPLIED_NOTE:
+    					double timeInBinUnits = (double)curData.time / intervalSize - intervalStart;
+    					if(phaseMarkers != null){
+    						synchronized(phaseMarkers){
+    							phaseMarkers.put(timeInBinUnits, curData.note);
+    						}
+    					}
     					break;
     				}
     			} // end while loop

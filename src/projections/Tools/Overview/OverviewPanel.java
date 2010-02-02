@@ -21,7 +21,7 @@ import java.util.LinkedList;
 
 import javax.swing.JOptionPane;
 
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.ColorMap;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
@@ -367,8 +367,8 @@ class OverviewPanel extends ScalePanel.Child
 		}
 		
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Overview in Parallel", readyReaders, this, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Overview in Parallel", readyReaders, this, true);
+		threadManager.runAll();
 		
 		// For historical reasons, we use a utilization range of 0 to 100
 		utilData = new int[utilizationData.length][utilizationData[0].length];

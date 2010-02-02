@@ -46,13 +46,13 @@ public class StsReader extends ProjDefs
     private int entryIndex = 0; ///< The next available index
     
     /** index by Integer ID in STS file, return String name */
-    private Hashtable<Integer, String> entryNames = new Hashtable<Integer, String>(); 
+    private Map<Integer, String> entryNames = new TreeMap<Integer, String>(); 
     /** index by Integer ID in STS file, return String name */
-    private Hashtable<Integer, String>  entryChareNames = new Hashtable<Integer, String>(); 
+    private Map<Integer, String>  entryChareNames = new TreeMap<Integer, String>(); 
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
-    private Hashtable<Integer, Integer>  entryFlatToID = new Hashtable<Integer, Integer>();
+    private Map<Integer, Integer>  entryFlatToID = new TreeMap<Integer, Integer>();
     /** keys are the IDs given in STS file, values are indexes into flat arrays */
-    private Hashtable<Integer, Integer> entryIDToFlat = new Hashtable<Integer, Integer>();
+    private Map<Integer, Integer> entryIDToFlat = new TreeMap<Integer, Integer>();
     
     
     
@@ -258,8 +258,7 @@ public class StsReader extends ProjDefs
     		return ID;
 		return entryIDToFlat.get(ID);
 	}
-       
-    
+         
     // *** user event accessors ***
     public int getNumUserDefinedEvents() {
 	return userEvents.size();
@@ -342,6 +341,7 @@ public class StsReader extends ProjDefs
 	public Map<Integer, String>  getEntryChareNames() {
 		return entryChareNames;
 	}
+
 
 
 }

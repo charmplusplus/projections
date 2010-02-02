@@ -97,9 +97,6 @@ class ThreadedFileReader implements Runnable  {
 					break;
 				case ProjDefs.END_PROCESSING:
 					nestingLevel--;
-					if(nestingLevel < 0){
-						System.err.println("ERROR: END_PROCESSING found in log with no corresponding BEGIN_PROCESSING");
-					}
 					if(nestingLevel == 0){
 						if(logdata.time >= startTime && logdata.time <= endTime){
 							executionTime = logdata.time - prevBegin.time;
@@ -113,6 +110,8 @@ class ThreadedFileReader implements Runnable  {
 								countData[HistogramWindow.TYPE_TIME][targetBin][logdata.entry] += 1.0;
 							}
 						}
+					} else if(nestingLevel < 0){
+						nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
 					}
 					break;
 				case ProjDefs.CREATION:

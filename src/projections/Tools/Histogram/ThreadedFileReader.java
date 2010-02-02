@@ -70,80 +70,49 @@ class ThreadedFileReader implements Runnable  {
 
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 
-		GenericLogReader r;
 		double[][][] countData = new double[HistogramWindow.NUM_TYPES][][];
 
 		// we create an extra bin to hold overflows.
 		countData[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
 		countData[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
 
-
-		// for maintaining "begin" entries for the data type we
-		// wish to monitor.
-		LogEntryData[] typeLogs = new LogEntryData[HistogramWindow.NUM_TYPES];
-		for (int i=0; i<HistogramWindow.NUM_TYPES; i++) {
-			typeLogs[i] = new LogEntryData();
-		}
-		// for maintaining interval-based events 
-		boolean[] isActive = new boolean[HistogramWindow.NUM_TYPES];
-
 		int curPeCount = 0;
 
-
 		curPeCount++;
-		r = new GenericLogReader(pe,
-				MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		try {
-			LogEntryData logdata = r.nextEventOnOrAfter(startTime);
-			boolean done = false;
-			while (!done) {
+			int nestingLevel = 0;
+			LogEntryData prevBegin = null;
+			
+			while (true) { // EOFException will terminate loop when end of log file is reached
+
+				LogEntryData logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
+
 				switch (logdata.type) {
 				case ProjDefs.BEGIN_PROCESSING:
-					// NOTE: If prior BEGIN never got terminated,
-					// simply drop the data given current tracing
-					// scheme (ie. do nothing)
-					if (logdata.time > endTime) {
-						done = true;
-					} else {
-						// swap logdata (ie. note the BEGIN event)
-						LogEntryData tmpLogPtr = logdata;
-						logdata = typeLogs[HistogramWindow.TYPE_TIME];
-						typeLogs[HistogramWindow.TYPE_TIME] = tmpLogPtr;
-						isActive[HistogramWindow.TYPE_TIME] = true;
+					nestingLevel++;
+					if(nestingLevel == 1){
+						prevBegin = logdata;
 					}
 					break;
 				case ProjDefs.END_PROCESSING:
-					if (!isActive[HistogramWindow.TYPE_TIME]) {
-						// NOTE: No corresponding BEGIN, so this
-						// instance of END must be ignored given
-						// current tracing scheme.
-						if (logdata.time > endTime) {
-							done = true;
-						}
-						break;
-					} else {
-						if (logdata.entry != typeLogs[HistogramWindow.TYPE_TIME].entry) {
-							// The events are mismatched! Clear all.
-							// Possible under current tracing scheme.
-							isActive[HistogramWindow.TYPE_TIME] = false;
-							break;
-						}
-						// NOTE: Even if the END event happens past 
-						// the range, it is recorded as the proper 
-						// execution time of the event.
-						executionTime = 
-							logdata.time - typeLogs[HistogramWindow.TYPE_TIME].time;
-						adjustedTime = executionTime - timeMinBinSize;
-						// respect user threshold
-						if (adjustedTime >= 0) {
-							int targetBin = 
-								(int)(adjustedTime/timeBinSize);
-							if (targetBin >= timeNumBins) {
-								targetBin = timeNumBins;
+					nestingLevel--;
+					if(nestingLevel < 0){
+						System.err.println("ERROR: END_PROCESSING found in log with no corresponding BEGIN_PROCESSING");
+					}
+					if(nestingLevel == 0){
+						if(logdata.time >= startTime && logdata.time <= endTime){
+							executionTime = logdata.time - prevBegin.time;
+							adjustedTime = executionTime - timeMinBinSize;
+							// respect user threshold
+							if (adjustedTime >= 0) {
+								int targetBin = (int)(adjustedTime/timeBinSize);
+								if (targetBin >= timeNumBins) {
+									targetBin = timeNumBins;
+								}
+								countData[HistogramWindow.TYPE_TIME][targetBin][logdata.entry] += 1.0;
 							}
-							countData[HistogramWindow.TYPE_TIME][targetBin][logdata.entry] += 1.0;
 						}
-						isActive[HistogramWindow.TYPE_TIME] = false;
 					}
 					break;
 				case ProjDefs.CREATION:
@@ -161,12 +130,9 @@ class ThreadedFileReader implements Runnable  {
 					}
 					break;
 				}
-				if (!done) {
-					logdata = r.nextEvent();
-				}
 			}
 		} catch(EOFException e) {
-			// do nothing just reached end-of-file
+			// successfully reached end of log file
 		} catch(Exception e) {
 			System.err.println("Exception " + e);
 			e.printStackTrace();

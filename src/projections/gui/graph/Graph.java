@@ -15,6 +15,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
+import java.util.Iterator;
+import java.util.TreeMap;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -113,6 +115,10 @@ public class Graph extends JPanel
     // The x values are measured in terms of the bin/interval indices
     private double[] polynomialToOverlay;
 
+    // Markers to identify times where iterations or phases start/end
+    private TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
+    
+    
     /** Special constructor. This can only be called from a projections tool!!! */
     public Graph()
     {
@@ -186,6 +192,15 @@ public class Graph extends JPanel
 	repaint();
     }
 
+    public void setMarkers(TreeMap<Double, String> phaseMarkers){
+    	this.phaseMarkers = phaseMarkers;
+    	System.out.println("Graph: adding " + phaseMarkers.size() + " markers");
+    }
+
+    public void clearMarkers(){
+    	phaseMarkers.clear();
+    }
+    
     public void setData(DataSource d, XAxis x, YAxis  y)
     {
     	xAxis = x;
@@ -456,6 +471,8 @@ public class Graph extends JPanel
     		
     		drawXAxis(g);
     		drawYAxis(g);
+    		
+    		drawMarkers(g);
     	}
 
     	
@@ -492,7 +509,25 @@ public class Graph extends JPanel
     
     
 
-    private void drawXAxis(Graphics2D g) {
+    private void drawMarkers(Graphics2D g) {
+    	final int extendPastGraph = 8;
+    	Iterator<Double> iter = phaseMarkers.keySet().iterator();
+    	while(iter.hasNext()){
+    		int xval = originX() + (int)(iter.next()*pixelincrementX());
+
+        	g.setColor(MainWindow.runObject[myRun].background);
+        	g.setStroke(new BasicStroke(4f));
+    		g.drawLine(xval, originY()+extendPastGraph, xval , topMargin()-extendPastGraph);
+        	g.setColor(MainWindow.runObject[myRun].foreground);
+        	g.setStroke(new BasicStroke(2f));
+    		g.drawLine(xval, originY()+extendPastGraph, xval , topMargin()-extendPastGraph);
+
+    	}
+    	
+    }
+
+
+	private void drawXAxis(Graphics2D g) {
     	g.setColor(MainWindow.runObject[myRun].foreground);
 
     	// draw xAxis

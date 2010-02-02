@@ -1,5 +1,7 @@
 package projections.Tools.TimeProfile;
 
+import java.util.TreeMap;
+
 import projections.analysis.IntervalData;
 import projections.analysis.LogReader;
 import projections.gui.MainWindow;
@@ -22,6 +24,8 @@ import projections.gui.OrderedIntList;
 	
 	private double[][] graphData;
 	
+	TreeMap<Double, String> phaseMarkers;
+	
 //	long logReaderIntervalSize;
 	
 	/** Construct a file reading thread that will measure utilization data 
@@ -32,10 +36,12 @@ import projections.gui.OrderedIntList;
 	 *  graphData[interval][numEP] contains idle time.
 	 *  
 	 *  The resulting output data will be accumulated into the array specified in a synchronized manner
+	 * @param phaseMarkers 
 	 *  
 	 *  */
 	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, 
-			double[][] graphData){
+			TreeMap<Double, String> phaseMarkers, double[][] graphData){
+		this.phaseMarkers = phaseMarkers;
 		this.pe = pe;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
@@ -81,9 +87,9 @@ import projections.gui.OrderedIntList;
 		processorList.insert(pe);
 
 		if( MainWindow.runObject[myRun].hasLogFiles()) { // .log files
-			logReader.read(intervalSize, 
+			logReader.read(intervalSize,
 					intervalStart, intervalEnd,
-					byEntryPoint, processorList, false);
+					byEntryPoint, processorList, false, phaseMarkers);
 			mySystemUsageData = logReader.getSystemUsageData();
 //			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();

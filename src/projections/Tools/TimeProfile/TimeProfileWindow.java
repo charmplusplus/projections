@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -83,6 +84,10 @@ implements ActionListener, Clickable
 
 	private boolean displaySlopes = false;
 
+	// Markers that are drawn at certain times (doubles in units of x axis bins) to identify phases or iterations
+	TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
+
+	
 	// data used for intervalgraphdialog
 	private OrderedIntList processorList;
 
@@ -333,7 +338,8 @@ implements ActionListener, Clickable
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
-
+					phaseMarkers.clear();
+					
 					int numIntervals = endInterval-startInterval+1; 
 					graphData = new double[numIntervals][numEPs+special]; //entry number + idle
 
@@ -355,7 +361,7 @@ implements ActionListener, Clickable
 						while (processorList.hasMoreElements()) {
 							int nextPe = processorList.nextElement();
 							readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, myRun, 
-									startInterval, endInterval, 
+									startInterval, endInterval, phaseMarkers, 
 									graphDataAccumulators[pIdx%numResultAccumulators]) );
 							pIdx++;
 						}
@@ -509,9 +515,7 @@ implements ActionListener, Clickable
 				outSize++;
 			}
 		}
-		if (outSize == 0) {
-			// do nothing, just display empty graph
-		} else {
+		if (outSize > 0) {
 			// actually create and fill the data and color array
 			int numIntervals = endInterval-startInterval+1;
 			outputData = new double[numIntervals][outSize];
@@ -537,6 +541,8 @@ implements ActionListener, Clickable
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
 			setDataSource("Time Profile", outputData, outColors, thisWindow);
+			graphCanvas.setMarkers(phaseMarkers);
+
 			refreshGraph();
 		}
 	}

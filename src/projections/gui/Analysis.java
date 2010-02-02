@@ -491,7 +491,7 @@ public class Analysis {
 	    LogReader logReader = new LogReader();
 	    logReader.read(intervalSize, 
 			   intervalStart, intervalEnd,
-			   byEntryPoint, processorList, true);
+			   byEntryPoint, processorList, true, null);
 	    systemUsageData = logReader.getSystemUsageData();
 //	    systemMsgsData = logReader.getSystemMsgs();
 //	    userEntryData = logReader.getUserEntries();

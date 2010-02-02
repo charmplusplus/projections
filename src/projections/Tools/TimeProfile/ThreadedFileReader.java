@@ -93,6 +93,7 @@ import projections.gui.OrderedIntList;
 //			mySystemMsgsData = logReader.getSystemMsgs();
 			myUserEntryData = logReader.getUserEntries();
 //			logReaderIntervalSize = logReader.getIntervalSize();
+		} else {
 			System.err.println("Error: No log data files found!");
 		}
 

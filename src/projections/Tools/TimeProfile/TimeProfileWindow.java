@@ -73,6 +73,7 @@ implements ActionListener, Clickable
 	private JMenuItem mDisplayLegend;
 	private JMenuItem mDisplayLegendFull;
 
+	private JCheckBox showMarkersCheckBox;
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
 
@@ -196,6 +197,11 @@ implements ActionListener, Clickable
 		loadColors = new JButton("Load Entry Colors");
 		loadColors.addActionListener(this);
 
+		showMarkersCheckBox =  new JCheckBox("Show Iteration/Phase Markers");
+		showMarkersCheckBox.setSelected(true);
+		showMarkersCheckBox.setToolTipText("Draw vertical lines at time associated with any user supplied notes containing\"***\"?");
+		showMarkersCheckBox.addActionListener(this);
+		
 		analyzeSlopesCheckBox = new JCheckBox("Analyze slope");
 		analyzeSlopesCheckBox.setToolTipText("Select a point on the graph to measure the slope");
 		analyzeSlopesCheckBox.addActionListener(this);
@@ -211,8 +217,9 @@ implements ActionListener, Clickable
 		Util.gblAdd(controlPanel, setRanges,      gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, saveColors,     gbc, 1,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, loadColors,     gbc, 2,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 3,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, showMarkersCheckBox, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 
 
 		if(ampiTraceOn){            
@@ -611,6 +618,8 @@ implements ActionListener, Clickable
 				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));	
 				graphCanvas.clearPolynomial();
 			}
+		} else if (e.getSource() == showMarkersCheckBox){
+			graphCanvas.showMarkers(showMarkersCheckBox.isSelected());
 		} else if (e.getSource() == hideMouseoversCheckBox) {
 			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
 		} else if (e.getSource() == setRanges) {

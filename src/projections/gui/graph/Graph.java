@@ -118,6 +118,8 @@ public class Graph extends JPanel
     // Markers to identify times where iterations or phases start/end
     private TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
     
+    private boolean showMarkers = true;
+
     
     /** Special constructor. This can only be called from a projections tool!!! */
     public Graph()
@@ -507,23 +509,27 @@ public class Graph extends JPanel
     }
 
     
-    
+    public void showMarkers(boolean b){
+    	showMarkers = b;
+    	repaint();
+    }
 
     private void drawMarkers(Graphics2D g) {
-    	final int extendPastGraph = 8;
-    	Iterator<Double> iter = phaseMarkers.keySet().iterator();
-    	while(iter.hasNext()){
-    		int xval = originX() + (int)(iter.next()*pixelincrementX());
+    	if(showMarkers){
+    		final int extendPastGraph = 8;
+    		Iterator<Double> iter = phaseMarkers.keySet().iterator();
+    		while(iter.hasNext()){
+    			int xval = originX() + (int)(iter.next()*pixelincrementX());
 
-        	g.setColor(MainWindow.runObject[myRun].background);
-        	g.setStroke(new BasicStroke(4f));
-    		g.drawLine(xval, originY()+extendPastGraph, xval , topMargin()-extendPastGraph);
-        	g.setColor(MainWindow.runObject[myRun].foreground);
-        	g.setStroke(new BasicStroke(2f));
-    		g.drawLine(xval, originY()+extendPastGraph, xval , topMargin()-extendPastGraph);
+    			g.setColor(MainWindow.runObject[myRun].background);
+    			g.setStroke(new BasicStroke(4f));
+    			g.drawLine(xval, originY()+extendPastGraph, xval , topMargin()-extendPastGraph);
+    			g.setColor(MainWindow.runObject[myRun].foreground);
+    			g.setStroke(new BasicStroke(2f));
+    			g.drawLine(xval, originY()+extendPastGraph, xval , topMargin()-extendPastGraph);
 
-    	}
-    	
+    		}
+    	}    	
     }
 
 

@@ -196,7 +196,7 @@ public class Graph extends JPanel
 
     public void setMarkers(TreeMap<Double, String> phaseMarkers){
     	this.phaseMarkers = phaseMarkers;
-    	System.out.println("Graph: adding " + phaseMarkers.size() + " markers");
+    	repaint();
     }
 
     

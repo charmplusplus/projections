@@ -333,6 +333,8 @@ public class LogReader
     					nestingLevel--;
     					if(nestingLevel == 0){
     						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
+    					} else if(nestingLevel < 0){
+    						nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
     					}
     					break;
     				case ENQUEUE:

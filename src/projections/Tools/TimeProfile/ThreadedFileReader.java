@@ -2,7 +2,6 @@ package projections.Tools.TimeProfile;
 
 import java.util.TreeMap;
 
-import projections.analysis.IntervalData;
 import projections.analysis.LogReader;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -24,7 +23,7 @@ import projections.gui.OrderedIntList;
 	
 	private double[][] graphData;
 	
-	TreeMap<Double, String> phaseMarkers;
+	private TreeMap<Double, String> phaseMarkers;
 	
 //	long logReaderIntervalSize;
 	

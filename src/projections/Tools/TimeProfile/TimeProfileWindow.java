@@ -86,7 +86,7 @@ implements ActionListener, Clickable
 	private boolean displaySlopes = false;
 
 	// Markers that are drawn at certain times (doubles in units of x axis bins) to identify phases or iterations
-	TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
+	private TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
 
 	
 	// data used for intervalgraphdialog

@@ -32,10 +32,6 @@ public class TimedProgressThreadExecutor implements Executor{
 	public int numConcurrentThreads;
 
 	private Component guiRootForProgressBar;
-
-	public TimedProgressThreadExecutor(String description, Component guiRoot, boolean showProgress){
-		this(description, null, guiRoot, showProgress);
-	}
 	
 	public TimedProgressThreadExecutor(String description, List<Runnable> runableObjects, Component guiRoot, boolean showProgress){
 		this.runableObjects = new LinkedList<Runnable>();

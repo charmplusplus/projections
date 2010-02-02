@@ -199,9 +199,6 @@ public class Graph extends JPanel
     	System.out.println("Graph: adding " + phaseMarkers.size() + " markers");
     }
 
-    public void clearMarkers(){
-    	phaseMarkers.clear();
-    }
     
     public void setData(DataSource d, XAxis x, YAxis  y)
     {

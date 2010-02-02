@@ -6,7 +6,6 @@ import java.util.TreeMap;
 
 import javax.swing.ProgressMonitor;
 
-import projections.Tools.Timeline.UserEventObject;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.misc.LogEntryData;

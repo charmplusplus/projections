@@ -11,8 +11,8 @@ import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
 
-/** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
-class ExtremaReaderThread implements Runnable  {
+/** The reader threads for Extrema tool. */
+class ThreadedFileReader implements Runnable  {
 
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -31,7 +31,7 @@ class ExtremaReaderThread implements Runnable  {
 	double[] myData;
 
 
-	protected ExtremaReaderThread(int pe, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
+	protected ThreadedFileReader(int pe, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
 		this.pe = pe;
 		this.startTime = startTime2;
 		this.endTime = endTime2;
@@ -144,21 +144,16 @@ class ExtremaReaderThread implements Runnable  {
 			}
 		} catch (EndOfLogSuccess e) {
 			// Successfully read the log file, attempt to close it
-			System.out.println("Read the log file");
 		} catch (IOException e) {
 			System.err.println("Outlier Analysis: Error in reading log data for processor " + pe);
 			System.err.println(e);
 		}
-
-		
 
 		try {
 			reader.close();
 		} catch (IOException e1) {
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
-		
-		
 		
 
 		// compute overhead time

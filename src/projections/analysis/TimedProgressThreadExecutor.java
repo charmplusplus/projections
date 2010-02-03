@@ -43,7 +43,7 @@ public class TimedProgressThreadExecutor implements Executor{
 		this.showProgress = showProgress;
 
 		int numProcs = Runtime.getRuntime().availableProcessors();
-		numConcurrentThreads = numProcs * 1;
+		numConcurrentThreads = numProcs + numProcs/2;
 	}
 
 	public void execute(Runnable r){

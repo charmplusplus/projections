@@ -247,7 +247,7 @@ Clickable
 		selectedPEs.reset();
 		while (selectedPEs.hasMoreElements()) {
 			int nextPe = selectedPEs.nextElement();
-			readyReaders.add( new ExtremaReaderThread(nextPe, startTime, endTime, 
+			readyReaders.add( new ThreadedFileReader(nextPe, startTime, endTime, 
 					numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
 			pIdx++;
 		}
@@ -270,7 +270,7 @@ Clickable
 		int pIdx2=0;
 		Iterator<Runnable> iter = readyReaders.iterator();
 		while (iter.hasNext()) {
-			ExtremaReaderThread r = (ExtremaReaderThread) iter.next();
+			ThreadedFileReader r = (ThreadedFileReader) iter.next();
 			tempData[pIdx2] = r.myData;
 			pIdx2++;
 		}

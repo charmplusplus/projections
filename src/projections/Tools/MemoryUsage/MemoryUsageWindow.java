@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
@@ -34,6 +35,7 @@ import org.jfree.chart.renderer.xy.XYDotRenderer;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.TimedProgressThreadExecutor;
@@ -307,10 +309,10 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			return availableStepTimes;
 		}
 
-		try{
-			int PE = 0;
-			GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
+		int pe = 0;
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 
+		try{
 			int c = 0;
 			while (true) {
 				LogEntryData data = reader.nextEvent();
@@ -324,9 +326,18 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 				}
 			}
 
+		} catch (EndOfLogSuccess e) {			
+			// Successfully read log file
 		} catch (Exception e) {
+			System.err.println("Error occured while reading data for pe " + pe);
 		}
-
+		
+		
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
 		return availableStepTimes;
 
 	}

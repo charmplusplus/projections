@@ -11,7 +11,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,6 +25,7 @@ import javax.swing.JMenuItem;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.KMeansClustering;
 import projections.analysis.ProjDefs;
@@ -384,8 +384,14 @@ Clickable
 
 	switch (selectedAttribute) {
 	case ATTR_CLUSTERING: {
-	    int clusterMap[] = new int[numPEs];
-
+	    int clusterMap[] = new int[numPEs];  
+	    
+	    if(numPEs < 3){
+	    	System.err.println("Not enough processors selected to perform clustering\n");	    	
+	    	sortedMap = null;
+	    	return;
+	    }
+	    
 	    /* **CWL** This modification is used so the data agrees with
 	       the results generated for my thesis. In this case, the
 	       overhead value is ignored. Eventually, it is expected that
@@ -824,20 +830,21 @@ Clickable
 				logData = reader.nextEvent();
 			}
 			reader.close();
-		} catch (EOFException e) {
-			// close the reader and let the external loop continue.
-			try {
-				reader.close();
-			} catch (IOException evt) {
-				System.err.println("Outlier Analysis: Error in closing "+
-						"file for processor " + pe);
-				System.err.println(evt);
-			}
+		} catch (EndOfLogSuccess e) {
+			// Reached end of the log file successfully
 		} catch (IOException e) {
-			System.err.println("Outlier Analysis: Error in reading log "+
-					"data for processor " + pe);
+			System.err.println("Outlier Analysis: Error in reading log data for processor " + pe);
 			System.err.println(e);
 		}
+		
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
+		
 	}
 
 	protected void setGraphSpecificData() {

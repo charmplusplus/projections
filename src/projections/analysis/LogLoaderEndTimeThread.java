@@ -1,6 +1,5 @@
 package projections.analysis;
 
-import java.io.EOFException;
 import java.io.IOException;
 
 import projections.gui.MainWindow;
@@ -21,18 +20,27 @@ class LogLoaderEndTimeThread  implements Runnable {
 
 	/** Find the end time for the given logfile	*/
 	public void run() {
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+
 		try {	  
-			GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 			while (true) {
 				LogEntryData data = reader.nextEvent();
 				if (data.time > result)
 					result = data.time;
 			}		
-		} catch (EOFException e) {
+		} catch (EndOfLogSuccess e) {
 			// finished reading the file
 		} catch (IOException e) {
-			// Some error occured, possibly log files were truncated or corrupted, or some file format has changed that we are yet unaware of
-		}		
+			// Some error occurred, possibly log files were truncated or corrupted, or some file format has changed that we are yet unaware of
+		}
+		
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
 	}
 
 }

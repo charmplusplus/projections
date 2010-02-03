@@ -1,8 +1,9 @@
 package projections.Tools.Extrema;
 
-import java.io.EOFException;
+
 import java.io.IOException;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.Analysis;
@@ -17,19 +18,19 @@ class ExtremaReaderThread implements Runnable  {
 	// meaning in future versions of Projections that support multiple
 	// runs.
 	private static int myRun = 0;
-	
+
 	private int pe;
 	private long startTime;
 	private long endTime;
 	private int numActivities;
 	private int numActivityPlusSpecial;
-	
+
 	private int selectedActivity;
 	private int selectedAttribute;
-	
+
 	double[] myData;
 
-	
+
 	protected ExtremaReaderThread(int pe, long startTime2, long endTime2, int numActivities, int numActivityPlusSpecial, int selectedActivity, int selectedAttribute){
 		this.pe = pe;
 		this.startTime = startTime2;
@@ -40,12 +41,12 @@ class ExtremaReaderThread implements Runnable  {
 		this.selectedAttribute = selectedAttribute;
 	}
 
-	
+
 	public void run() { 
 
 		myData = new double[numActivityPlusSpecial];
 
-		
+
 		// Construct tempData (read) array hereColorSelectable
 		//
 		// **NOTE** We really need a generic interface to a "data"
@@ -58,8 +59,8 @@ class ExtremaReaderThread implements Runnable  {
 		// for it.
 		GenericLogReader reader = 
 			new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
-		
-		
+
+
 		try {
 			if (selectedActivity == Analysis.USER_EVENTS) {
 				LogEntryData logData;
@@ -85,168 +86,97 @@ class ExtremaReaderThread implements Runnable  {
 					}
 				}
 			} else {
-				LogEntryData logData;
-				// dealing with book-keeping events
-				boolean isFirstEvent = true;
-				// Jump to the first valid event
-				boolean markedBegin = false;
-				boolean markedIdle = false;
-				long beginBlockTime = startTime;
-				logData = reader.nextEventOnOrAfter(startTime);
-				while (logData.time <= endTime) {
-					LogEntryData BE = reader.getLastBE();
+
+				int nestingLevel = 0;
+				LogEntryData prevBeginProc = null;
+				LogEntryData prevBeginIdle = null;
+
+				while (true) {
+					LogEntryData logData = reader.nextEvent();	
+
 					switch (logData.type) {
+
 					case ProjDefs.CREATION:
-						if (isFirstEvent) {
-							if ((BE != null) && 
-									(BE.type == ProjDefs.BEGIN_PROCESSING)) {
-								beginBlockTime = startTime;
-								markedBegin = true;
-							}
-						}
-						if (markedBegin) {
-							int eventIndex = logData.entry;
-							if (selectedAttribute == 2) {
-								myData[eventIndex]++;
-							} else if (selectedAttribute == 3) {
-								myData[eventIndex] += logData.msglen;
-							}
-						}
+						int eventIndex = logData.entry;
+						if (selectedAttribute == 2) {
+							myData[eventIndex]++;
+						} else if (selectedAttribute == 3) {
+							myData[eventIndex] += logData.msglen;
+						}	
 						break;
+
 					case ProjDefs.BEGIN_PROCESSING:
-						isFirstEvent = false;
-						// check pairing
-						if (!markedBegin) {
-							markedBegin = true;
-						}
-						if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4|| selectedAttribute == 5|| selectedAttribute == 6|| selectedAttribute == 7) {
-							// even if a previous begin is found, just
-							// overwrite the begin time, we're
-							// not expecting nesting here.
-							beginBlockTime = logData.time;
+						nestingLevel++;
+						if(nestingLevel == 1){
+							prevBeginProc = logData;
 						}
 						break;
+
 					case ProjDefs.END_PROCESSING:
-						if (isFirstEvent) {
-							markedBegin = true;
-							beginBlockTime = startTime;
-						}
-						isFirstEvent = false;
-						if (markedBegin) {
-							markedBegin = false;
+						nestingLevel--;
+						if(nestingLevel == 0){
 							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6|| selectedAttribute == 7) {
-								myData[logData.entry] += logData.time - beginBlockTime;
+								myData[logData.entry] += logData.time - prevBeginProc.time;
 							}
+							prevBeginProc = null;	
+						} else if(nestingLevel < 0){
+							nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
+							prevBeginProc = null;
 						}
 						break;
+
 					case ProjDefs.BEGIN_IDLE:
-						isFirstEvent = false;
-						// check pairing
-						if (!markedIdle) {
-							markedIdle = true;
-						}
-						// NOTE: This code assumes that IDLEs cannot
-						// possibly be nested inside of PROCESSING
-						// blocks (which should be true).
-						if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5|| selectedAttribute == 6 || selectedAttribute == 7) {
-							beginBlockTime = logData.time;
-						}
+						// Assume Idles are never nested
+						prevBeginIdle = logData;
 						break;
+
 					case ProjDefs.END_IDLE:
-						if (isFirstEvent) {
-							markedIdle = true;
-							beginBlockTime = startTime;
+						if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6 || selectedAttribute == 7) {
+							myData[numActivities] += logData.time - prevBeginIdle.time;
 						}
-						// check pairing
-						if (markedIdle) {
-							markedIdle = false;
-							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6 || selectedAttribute == 7) {
-								myData[numActivities] += logData.time - beginBlockTime;
-							}
-						}
+						prevBeginIdle = null;
 						break;
+
 					}
-					logData = reader.nextEvent();
+
 				}
-				LogEntryData beginEvent = reader.getLastBE();
-				// Now handle the tail case.
-				switch (logData.type) {
-				case ProjDefs.END_PROCESSING:
-					// lastBE is empty by design in this case, so
-					// use beginBlockTime recorded from previously.
-					if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6 || selectedAttribute == 7) {
-						myData[logData.entry] +=
-							endTime - beginBlockTime;
-					}
-					break;
-				case ProjDefs.END_IDLE:
-					// lastBE is empty by design in this case, so
-					// use beginBlockTime recorded from previously.
-					if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6 || selectedAttribute == 7) {
-						myData[numActivities] += endTime - beginBlockTime;
-					}
-					break;
-				default:
-					// all other cases. Ignore if no beginEvent is
-					// found. Otherwise, use it's begin time if
-					// it is greater than startTime, otherwise, use
-					// startTime.
-					if (beginEvent != null) {
-						if (beginEvent.time > startTime) {
-							beginBlockTime = beginEvent.time;
-						} else {
-							beginBlockTime = startTime;
-						}
-						switch (beginEvent.type) {
-						case ProjDefs.BEGIN_PROCESSING:
-							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6 || selectedAttribute == 7) {
-								myData[beginEvent.entry] +=
-									endTime - beginBlockTime;
-							}
-							break;
-						case ProjDefs.BEGIN_IDLE:
-							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4|| selectedAttribute == 5|| selectedAttribute == 6 || selectedAttribute == 7) {
-								myData[numActivities] +=
-									endTime - beginBlockTime;
-							}
-							break;
-						}
-					}
-				}
-				reader.close();
+
 			}
-		} catch (EOFException e) {
-			// close the reader and let the external loop continue.
-			try {
-				reader.close();
-			} catch (IOException evt) {
-				System.err.println("Outlier Analysis: Error in closing "+
-						"file for processor " + pe);
-				System.err.println(evt);
-			}
+		} catch (EndOfLogSuccess e) {
+			// Successfully read the log file, attempt to close it
+			System.out.println("Read the log file");
 		} catch (IOException e) {
-			System.err.println("Outlier Analysis: Error in reading log "+
-					"data for processor " + pe);
+			System.err.println("Outlier Analysis: Error in reading log data for processor " + pe);
 			System.err.println(e);
+		}
+
+		
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
 		
 		
+		
+
 		// compute overhead time
 		myData[numActivities+1] = endTime - startTime;
 		for(int e=0; e<numActivities+1; e++){
 			myData[numActivities+1] -= myData[e];
 		}
-		
-		
+
+
 		if(selectedAttribute == ExtremaWindow.ATTR_LEASTIDLE || selectedAttribute == ExtremaWindow.ATTR_MOSTIDLE){
 			// Scale raw data into percentages
 			for(int e=0; e< myData.length; e++){
 				myData[e] = myData[e] * 100.0 / (double)(endTime - startTime);
 			}
 		}
-		
+
 	}
-	
+
 
 }
 

@@ -1,5 +1,8 @@
 package projections.Tools.CommunicationOverTime;
 
+import java.io.IOException;
+
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
@@ -48,7 +51,7 @@ class ThreadedFileReader implements Runnable  {
 
 	public void run() { 
 
-		GenericLogReader LogFile = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		//Initialize class variables
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		int numIntervals = (int) (endInterval-startInterval+1);
@@ -65,7 +68,7 @@ class ThreadedFileReader implements Runnable  {
 		try	{
 
 			while(true){
-				LogEntryData logdata = LogFile.nextEvent();
+				LogEntryData logdata = reader.nextEvent();
 
 				//Now we have entered into the time interval
 
@@ -106,15 +109,18 @@ class ThreadedFileReader implements Runnable  {
 
 			}
 
-		} catch (java.io.EOFException e) {
+		} catch (EndOfLogSuccess e) {
 			// Successfully reached end of log file
 		} catch (java.io.IOException e) {
 			System.out.println("Exception: " +e);
 			e.printStackTrace();
 		}
 
-
-
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
 
 		// Accumulate into global results. This must be done safely as many threads will all use these same arrays
 		synchronized (globalMessagesSend) {

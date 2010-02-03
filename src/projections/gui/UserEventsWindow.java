@@ -5,7 +5,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.EOFException;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -14,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.misc.LogEntryData;
@@ -128,7 +128,7 @@ class UserEventsWindow extends GenericGraphWindow
     }
 
     private void constructToolData() {
-	int nextPe = 0;
+	int pe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =
 	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
@@ -140,65 +140,59 @@ class UserEventsWindow extends GenericGraphWindow
 	graphData = new double[processorList.size()][];
 	numCalls = new long[processorList.size()][];
 	while (processorList.hasMoreElements()) {
-	    nextPe = processorList.nextElement();
-	    progressBar.setProgress(count);
-	    progressBar.setNote("[PE: " + nextPe +
-				" ] Reading Data.");
-	    if (progressBar.isCanceled()) {
-		return;
-	    }
-	    // process data here.
-	    graphData[count] = new double[numActivities];
-	    numCalls[count] = new long[numActivities];
-
-	    // READ - nothing here
-	    GenericLogReader reader = new GenericLogReader(nextPe,
-							   MainWindow.runObject[myRun].getVersion());
-	    LogEntryData logData;
-	    LogEntryData logDataEnd;
-	    
-	    // Skip to the first begin.
-	    try {
-			logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
-		    logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
-
-		while (logData.time < startInterval*intervalSize) {
-			logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
-		    logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+		pe = processorList.nextElement();
+		progressBar.setProgress(count);
+		progressBar.setNote("[PE: " + pe +
+		" ] Reading Data.");
+		if (progressBar.isCanceled()) {
+			return;
 		}
-		int eventIndex = 0;
-		while (true) {
-		    // process pair read previously
-		    eventIndex = MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID);
-		    graphData[count][eventIndex] +=
-			logDataEnd.time - logData.time;
-		    numCalls[count][eventIndex]++;
-		    logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
-		    logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
-		    if (logDataEnd.time > endInterval*intervalSize) {
-			break;
-		    }
-		}
-		reader.close();
-	    } catch (EOFException e) {
-		// file reading done, close the file and
-		// just go on to the next processor loop
+		// process data here.
+		graphData[count] = new double[numActivities];
+		numCalls[count] = new long[numActivities];
+
+		// READ - nothing here
+		GenericLogReader reader = new GenericLogReader(pe,
+				MainWindow.runObject[myRun].getVersion());
+		LogEntryData logData;
+		LogEntryData logDataEnd;
+
+		// Skip to the first begin.
 		try {
-		    reader.close();
-		} catch (IOException evt) {
-		    System.err.println("ERROR: UserEvents Window failed " +
-				       "to " + 
-				       "read log file for processor " + 
-				       nextPe);
-		    System.err.println(e);
-		    System.exit(-1);
+			logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+			logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+
+			while (logData.time < startInterval*intervalSize) {
+				logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+				logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+			}
+			int eventIndex = 0;
+			while (true) {
+				// process pair read previously
+				eventIndex = MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID);
+				graphData[count][eventIndex] +=
+					logDataEnd.time - logData.time;
+				numCalls[count][eventIndex]++;
+				logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+				logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
+				if (logDataEnd.time > endInterval*intervalSize) {
+					break;
+				}
+			}
+		}catch (EndOfLogSuccess e) {
+			// do nothing
+		} catch (IOException e) {
+			System.out.println("Exception while reading log file " + pe); 
 		}
-	    } catch (IOException e) {
-		System.err.println("ERROR: UserEvents Window failed to " + 
-				   "read log file for processor " + nextPe);
-		System.err.println(e);
-		System.exit(-1);
-	    }
+
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+
+
 	    count++;
 	}
 	progressBar.close();

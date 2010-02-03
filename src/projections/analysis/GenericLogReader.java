@@ -1,7 +1,7 @@
 package projections.analysis;
 
 import java.io.BufferedReader;
-import java.io.EOFException;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -130,12 +130,12 @@ implements PointCapableReader
 	 * Create a new LogEntryData by reading/parsing the next line from the log 
 	 * 
 	 * Upon reaching the end of the file, a fake END_COMPUTATION event will be produced if none was found in the log file.
-	 * After the end of the file is reached and after some END_COMPUTATION has been returned, an EOFException will be thrown
+	 * After the end of the file is reached and after some END_COMPUTATION has been returned, an EndOfLogException will be thrown
 	 * 
 	 * If any problem is detected when reading within a line, an IOException is produced
 	 * 
 	 * */
-	public LogEntryData nextEvent() throws IOException, EOFException
+	public LogEntryData nextEvent() throws IOException, EndOfLogSuccess
 	{
 		LogEntryData data = new LogEntryData();
 
@@ -144,7 +144,7 @@ implements PointCapableReader
 
 		// We can't keep reading once we've past the END_COMPUTATION record
 		if(endComputationOccurred){
-			throw new EOFException();
+			throw new EndOfLogSuccess();
 		}
 
 		// If at end of file and we haven't seen an END_COMPUTATION yet
@@ -387,10 +387,10 @@ implements PointCapableReader
 	/**
 	 * Find the next event on or after the given timestamp. 
 	 *
-	 *  An EOFException indicates that no such event was found.
+	 *  An EndOfLogException indicates that no such event was found.
 	 */
 	public LogEntryData nextEventOnOrAfter(long timestamp) 
-	throws IOException, EOFException
+	throws IOException, EndOfLogSuccess
 	{
 		LogEntryData data = new LogEntryData();
 		while (true) {
@@ -410,7 +410,7 @@ implements PointCapableReader
 	 *  Return the next log event with the given eventType.
 	 */
 	public LogEntryData nextEventOfType(int eventType) 
-	throws IOException, EOFException
+	throws IOException, EndOfLogSuccess
 	{
 		LogEntryData data = new LogEntryData();
 		while (true) {

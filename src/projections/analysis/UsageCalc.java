@@ -1,6 +1,5 @@
 package projections.analysis;
 
-import java.io.EOFException;
 import java.io.IOException;
 
 import projections.gui.MainWindow;
@@ -200,11 +199,19 @@ public class UsageCalc extends ProjDefs
 				LE = reader.nextEvent();
 				time = LE.time;
 			}
-		} catch (EOFException e) {
+		} catch (EndOfLogSuccess e) {
 			// do nothing
 		} catch (IOException e) {
 			System.out.println("Exception while reading log file " + pnum); 
 		}
+		
+		
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pnum );
+		}
+	    
 
 		float accumulated = 0;
 		for (int j=1; j<numFunc; j++) { //Scale times to percent
@@ -317,7 +324,7 @@ public class UsageCalc extends ProjDefs
 				break;
 				}
 			}
-		} catch (EOFException e) {
+		} catch (EndOfLogSuccess e) {
 			// do nothing
 		} catch (IOException e) {
 			System.out.println("Exception while reading log file " +

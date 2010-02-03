@@ -19,6 +19,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
@@ -34,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.RangeHistory;
@@ -595,9 +597,9 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		
 		final SwingWorker worker =  new SwingWorker() {
 			public Object doInBackground() {
+				int pe = 0;
+				GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 				try {	  
-					int PE = 0;
-					GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
 
 					int c = 0;
 					while (true) {
@@ -612,12 +614,22 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 						}
 					}
 
-				} catch (Exception e) {
-
+				} catch (EndOfLogSuccess e) {			
+					// Successfully read log file
 					availableStepStrings.add(new String("End"));
 					availableStepTimes.add(MainWindow.runObject[myRun].getTotalTime());
-
+				} catch (IOException e) {
+					System.err.println("Error occured while reading data for pe " + pe);
 				}
+				
+				
+				try {
+					reader.close();
+				} catch (IOException e1) {
+					System.err.println("Error: could not close log file reader for processor " + pe );
+				}
+			    				
+				
 				return null;
 			}
 			

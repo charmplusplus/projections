@@ -53,11 +53,10 @@ public class CallTable extends ProjDefs
 
 	public void GatherData(Component parent)
 	{
-		GenericLogReader LogFile;
+		GenericLogReader reader;
 		LogEntryData logdata;
 
 		int currPeIndex = 0;
-		int currPe;
 		int sourceEP;
 
 		ProgressMonitor progressBar =
@@ -65,20 +64,20 @@ public class CallTable extends ProjDefs
 					"", 0, numPe);
 
 		while (peList.hasMoreElements()) {
-			currPe = peList.nextElement();
+			int pe = peList.nextElement();
 			if (!progressBar.isCanceled()) {
-				progressBar.setNote("[PE: " + currPe + " ] Reading data.");
+				progressBar.setNote("[PE: " + pe + " ] Reading data.");
 				progressBar.setProgress(currPeIndex+1);
 			}
 			else {
 				progressBar.close();
 				break;
 			}
-			LogFile = new GenericLogReader(currPe, MainWindow.runObject[myRun].getVersion());    
+			reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());    
 
 			try
 			{
-				logdata = LogFile.nextEventOnOrAfter(startTime);
+				logdata = reader.nextEventOnOrAfter(startTime);
 				//Now we have entered into the time interval
 
 				Stack creationStack = new Stack();
@@ -105,10 +104,10 @@ public class CallTable extends ProjDefs
 							if (!exists[sourceEP])
 								exists[sourceEP]=true;
 						}
-						logdata = LogFile.nextEvent();
+						logdata = reader.nextEvent();
 						break;
 					}
-					logdata = LogFile.nextEvent();
+					logdata = reader.nextEvent();
 				}
 
 				while (logdata.time < endTime) {
@@ -117,7 +116,7 @@ public class CallTable extends ProjDefs
 					if (logdata.type == BEGIN_PROCESSING) {
 						//Starting new entry method
 						sourceEP = logdata.entry;
-						logdata = LogFile.nextEvent();
+						logdata = reader.nextEvent();
 						while ( (logdata.type != END_PROCESSING) &&
 								(logdata.type != END_COMPUTATION) &&
 								(logdata.time < endTime) ) {
@@ -135,15 +134,26 @@ public class CallTable extends ProjDefs
 								if (!exists[sourceEP])
 									exists[sourceEP]=true;
 							}
-							logdata = LogFile.nextEvent();
+							logdata = reader.nextEvent();
 						}
 					}
-					logdata = LogFile.nextEvent();
+					logdata = reader.nextEvent();
 				}
+			} catch (EndOfLogSuccess e) {
+				// Reached end of the log file successfully
+			} catch (IOException e) {
+				System.err.println("Error reading log data for processor " + pe);
+				System.err.println(e);
 			}
-			catch (IOException e)
-			{
+		
+			
+			try {
+				reader.close();
+			} catch (IOException e1) {
+				System.err.println("Error: could not close log file reader for processor " + pe );
 			}
+		    
+			
 			currPeIndex++;
 		}
 

@@ -1,10 +1,10 @@
 package projections.Tools.MemoryUsage;
 
-import java.io.EOFException;
 import java.io.IOException;
 
 import org.jfree.data.xy.XYSeries;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
@@ -62,15 +62,19 @@ class ThreadedFileReader implements Runnable  {
 
 			}
 		}
-		catch (EOFException e) {
+		catch (EndOfLogSuccess e) {
 			// Done reading file
-//			System.out.println("EOFException c after " + (count));
 		} catch (IOException e) {
 			// Error reading file
-//			System.out.println("IOException c after " + (count));
 		}
 
 
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
 		// Put data from intervals into a time series
 		series = new XYSeries("PE " + pe);
 

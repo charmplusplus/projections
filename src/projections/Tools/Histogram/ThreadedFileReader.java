@@ -1,8 +1,10 @@
 package projections.Tools.Histogram;
 
 
-import java.io.EOFException;
 
+import java.io.IOException;
+
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
@@ -84,7 +86,7 @@ class ThreadedFileReader implements Runnable  {
 			int nestingLevel = 0;
 			LogEntryData prevBegin = null;
 			
-			while (true) { // EOFException will terminate loop when end of log file is reached
+			while (true) { // EndOfLogException will terminate loop when end of log file is reached
 
 				LogEntryData logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
 
@@ -110,8 +112,10 @@ class ThreadedFileReader implements Runnable  {
 								countData[HistogramWindow.TYPE_TIME][targetBin][logdata.entry] += 1.0;
 							}
 						}
+						prevBegin = null;	
 					} else if(nestingLevel < 0){
 						nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
+						prevBegin = null;
 					}
 					break;
 				case ProjDefs.CREATION:
@@ -130,7 +134,7 @@ class ThreadedFileReader implements Runnable  {
 					break;
 				}
 			}
-		} catch(EOFException e) {
+		} catch(EndOfLogSuccess e) {
 			// successfully reached end of log file
 		} catch(Exception e) {
 			System.err.println("Exception " + e);
@@ -138,6 +142,13 @@ class ThreadedFileReader implements Runnable  {
 			System.exit(-1);
 		}
 
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+	    
+		
 		return countData;
 	}
 

@@ -1,6 +1,5 @@
 package projections.analysis;
 
-import java.io.EOFException;
 import java.io.IOException;
 import java.util.TreeMap;
 
@@ -279,12 +278,12 @@ public class LogReader
     		categorized = new int[5][3][numProcessors][];
     	}
     	processorList.reset();
-    	int curPe = processorList.nextElement();
+    	int pe = processorList.nextElement();
     	curPeIdx = 0;
-    	for (;curPe!=-1; curPe=processorList.nextElement()) {
+    	for (;pe!=-1; pe=processorList.nextElement()) {
     		if(showProgress){
     			progressBar.setProgress(curPeIdx);
-    			progressBar.setNote("[PE: " + curPe + " ] Allocating Memory.");
+    			progressBar.setNote("[PE: " + pe + " ] Allocating Memory.");
     		}
 
     		// gzheng: allocate sysUsgData only when needed.
@@ -293,7 +292,7 @@ public class LogReader
     		sysUsgData[2][curPeIdx] = new int [numIntervals+1];
 
     		if(showProgress){
-    			progressBar.setNote("[PE: " + curPe + " ] Reading data.");
+    			progressBar.setNote("[PE: " + pe + " ] Reading data.");
     			if (progressBar.isCanceled()) {
     				// clear all data and return
     				userEntries = null;
@@ -309,12 +308,12 @@ public class LogReader
 
     		int nLines = 2;
 
-    		GenericLogReader reader = new GenericLogReader(curPe, MainWindow.runObject[myRun].getVersion());
+    		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
     		
     		try { 
     			int nestingLevel = 0;
     			
-    			while (true) { //EOFException will terminate loop
+    			while (true) { //EndOfLogException will terminate loop
     				curData = reader.nextEvent();
     				nLines++;
     				switch (curData.type) {
@@ -364,18 +363,20 @@ public class LogReader
     					break;
     				}
     			} // end while loop
-    		} catch (EOFException e) {
+    		} catch (EndOfLogSuccess e) {
     			// Do nothing
     		} catch (IOException e) {
     			System.err.println("Error: Failure to read log file!");
     			System.exit(-1);
     		}
+
+
     		try {
     			reader.close();
-    		} catch (IOException e) {
-    			System.err.println("Error! Failed to close reader!");
-    			System.exit(-1);
+    		} catch (IOException e1) {
+    			System.err.println("Error: could not close log file reader for processor " + pe );
     		}
+    		
     		curPeIdx++;
     	} // for loop
 

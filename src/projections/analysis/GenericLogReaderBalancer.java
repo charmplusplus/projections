@@ -11,16 +11,17 @@ import projections.misc.FileUtils;
 public class GenericLogReaderBalancer {
 	private int myRun = 0;
 	
-	private Map<String, Integer> directories; //< Number of open files for each directory
+	private Map<String, Integer> directories = new TreeMap(); //< Number of open files for each directory
 	
 	public GenericLogReaderBalancer(){
-		directories = new TreeMap();
 	}
 	
 	public void init(){
-		directories.put(MainWindow.runObject[myRun].getLogDirectory(), new Integer(0));
-//		directories.put("/expand/home/idooley2/ProjectionsLogs/W256_MIN_TOPO_8192VN/", new Integer(0));
-	}
+		synchronized(directories){
+			directories.put(MainWindow.runObject[myRun].getLogDirectory(), new Integer(0));
+			//		directories.put("/expand/home/idooley2/ProjectionsLogs/W256_MIN_TOPO_8192VN/", new Integer(0));
+		}
+	}	
 	
 	protected String acquireLogName(int pe){
 		int minOpenFound = Integer.MAX_VALUE;

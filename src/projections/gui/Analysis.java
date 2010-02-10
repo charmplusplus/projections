@@ -708,8 +708,16 @@ public class Analysis {
 //    }
 
     /** Return the name specified in the STS file for the event with ID, as specified in STS file */
+    public String getEntryFullNameByID(int ID, boolean sanitizeForHTML) {
+    	if(sanitizeForHTML){
+    		return SanitizeForHTML.sanitize(getSts().getEntryFullNameByID(ID));
+    	} else {
+    		return getSts().getEntryFullNameByID(ID);
+    	}
+    }
+    
     public String getEntryFullNameByID(int ID) {
-    	return getSts().getEntryFullNameByID(ID);
+        return getEntryFullNameByID(ID, false);
     }
     
     public Integer getEntryIndex(Integer ID){

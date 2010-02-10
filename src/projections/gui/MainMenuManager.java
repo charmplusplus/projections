@@ -202,7 +202,7 @@ implements ActionListener, ItemListener
 	private void createMenus() {
 		menubar = new JMenuBar();
 
-    	System.out.println("MainMenuManager Create Menus");
+//    	System.out.println("MainMenuManager Create Menus");
 		
 		// FILE MENU	
 		fileMenu = new JMenu("File");		

@@ -10,7 +10,6 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
-import projections.analysis.GenericLogReaderBalancer;
 import projections.analysis.IntervalData;
 import projections.analysis.LogLoader;
 import projections.analysis.LogReader;
@@ -55,10 +54,6 @@ public class Analysis {
   private StsReader sts;
   
   public LogLoader logLoader;  //Only for .log files
-  
-  /** A load balancer that allows multiple GenericLogReader's to access multiple directories containing the copies of the log files */
-  public GenericLogReaderBalancer loadBalancer;
-
   
   public SumAnalyzer sumAnalyzer; //Only for .sum files
   
@@ -118,7 +113,6 @@ public class Analysis {
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
     // constructor until multiple run data is supported.
-	  loadBalancer = new GenericLogReaderBalancer();
   }
   
   
@@ -142,7 +136,6 @@ public class Analysis {
 	  guiRoot = rootComponent;
 	  try {
 		  baseName = FileUtils.getBaseName(filename);
-		  loadBalancer.init();
 
 		  setSts(new StsReader(filename));
 

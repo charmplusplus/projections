@@ -60,7 +60,7 @@ implements PointCapableReader
 	public GenericLogReader(int peNum, double Nversion) {
 		super("", String.valueOf(Nversion));
 		
-		sourceString = MainWindow.runObject[myRun].loadBalancer.acquireLogName(peNum);
+		sourceString = MainWindow.runObject[myRun].getLogName(peNum);
 //		System.out.println("Acquired: " + sourceString);
 		
 		lastBeginEvent = new LogEntryData();
@@ -431,8 +431,6 @@ implements PointCapableReader
 
 
 	public void close() throws IOException {
-		MainWindow.runObject[myRun].loadBalancer.releaseLogName(sourceString);
-
 		if (reader != null) {
 			reader.close();
 		}

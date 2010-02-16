@@ -156,6 +156,7 @@ ItemListener {
 					// Here we are basically at startup after the dialog window and the trace log has been read
 					parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 					parentWindow.invalidate();
+					parentWindow.validate();
 					parentWindow.setVisible(true);
 				}
 			};

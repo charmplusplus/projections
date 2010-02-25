@@ -118,7 +118,7 @@ public class Graph extends JPanel
     // Markers to identify times where iterations or phases start/end
     private TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
     
-    private boolean showMarkers = true;
+    private boolean showMarkers = false;
 
     
     /** Special constructor. This can only be called from a projections tool!!! */

@@ -198,7 +198,7 @@ implements ActionListener, Clickable
 		loadColors.addActionListener(this);
 
 		showMarkersCheckBox =  new JCheckBox("Show Iteration/Phase Markers");
-		showMarkersCheckBox.setSelected(true);
+		showMarkersCheckBox.setSelected(false);
 		showMarkersCheckBox.setToolTipText("Draw vertical lines at time associated with any user supplied notes containing\"***\"?");
 		showMarkersCheckBox.addActionListener(this);
 		

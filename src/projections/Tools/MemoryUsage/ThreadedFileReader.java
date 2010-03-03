@@ -21,6 +21,8 @@ class ThreadedFileReader implements Runnable  {
 	private long endInterval;
 	private double timeScalingFactor;
 
+	private double maxUsage[];
+	
 	/** Construct a file reading thread that will determine the best EP representative for each interval
 	 *  
 	 *  The resulting output data will be assigned into the array specified without synchronization
@@ -42,7 +44,7 @@ class ThreadedFileReader implements Runnable  {
 		int numIntervals = (int) (endInterval - startInterval);
 
 		// First take data and put it into intervals.
-		double maxUsage[] = new double[numIntervals];
+		maxUsage = new double[numIntervals];
 
 		int count = 0;
 		try {
@@ -90,6 +92,10 @@ class ThreadedFileReader implements Runnable  {
 
 	}
 
+	public double[] getData(){
+		return maxUsage;
+	}
+	
 	protected XYSeries getMemorySamples(){
 		return series;
 	}

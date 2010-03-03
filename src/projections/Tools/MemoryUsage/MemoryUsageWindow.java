@@ -47,6 +47,13 @@ import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.misc.LogEntryData;
 
+
+
+
+
+// FIXME: This tool does not correctly handle the cases where the start time != 0. There are places where startInterval is not correctly added to / subtracted from a value.
+
+
 public class MemoryUsageWindow extends ProjectionsWindow {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -54,15 +61,16 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	// runs.
 	private int myRun = 0;
 
-	/** For each PE record a set of (time, memusage) pairs */
+	/** For each PE keep a plottable data structure */
 	private TreeMap<Long,XYSeries> memorySamples; 
-
+	
 	private MemoryUsageWindow thisWindow;
 	private MainWindow mainWindow;
-	private long intervalSize;
 	private JMenuBar mbar;
 	private JMenuItem mShowPhaseInfo;
-
+	private JMenuItem mViewDataAsText;
+	private JMenuItem mViewPhaseInfoAsText;
+	
 	private Vector<String> availableStepStrings;
 	private Vector<Long> availableStepTimes;
 
@@ -71,6 +79,15 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private double timeScalingFactor = 1.0;
 	private String timeUnits = "us-default";
 
+	// Saved for further analysis and exporting of the data:
+	private long intervalSize;
+	private long startInterval;
+	private long endInterval;
+	/** For each PE keep data for further analysis */
+	private TreeMap<Long, double[]> memoryData;
+
+	
+	
 	public MemoryUsageWindow(MainWindow mainWindow)
 	{
 		super(mainWindow);
@@ -87,20 +104,13 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		showDialog();
 	}
 
-
-	private class PhaseInformationDisplay implements ActionListener{
-		PhaseInformationDisplay(){ }
-
-		public void actionPerformed(ActionEvent e) {
-			String info = "";
-			for(int i=0;i<availableStepTimes.size(); i++){
-				info += "" + projections.gui.U.humanReadableString(availableStepTimes.elementAt(i)) + "\t" + availableStepStrings.elementAt(i) + "\n";
-			}
-			System.out.println("Phase Info:\n" + info + "\n");
-
+	
+	private class FrameWithText {
+		FrameWithText(String text, String title){
+						
 			JFrame f = new JFrame();
 
-			JTextArea textArea = new JTextArea(info);
+			JTextArea textArea = new JTextArea(text);
 			textArea.setFont(new Font("Arial", Font.PLAIN, 16));
 			textArea.setLineWrap(true);
 			textArea.setWrapStyleWord(true);
@@ -111,9 +121,81 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 
 			f.getContentPane().setLayout(new BorderLayout());
 			f.getContentPane().add(areaScrollPane, BorderLayout.CENTER);
-			f.setTitle("Phase Information:");
+			f.setTitle(title);
 			f.pack();
 			f.setVisible(true);
+			
+		}
+	}
+	
+
+	private class ViewPhaseInfoAsTextDisplay implements ActionListener{
+		ViewPhaseInfoAsTextDisplay(){ }
+
+		public void actionPerformed(ActionEvent e) {
+			String info = "Copy & paste into your favorite spreadsheet or plotting tool:\n\nTime\tMaximum memory Usage Across All PEs:\n";
+
+			for(int i=0;i<availableStepTimes.size(); i++){
+				info += "" + projections.gui.U.humanReadableString(availableStepTimes.elementAt(i)) + "\t" + availableStepStrings.elementAt(i) + "\n";
+			}
+			System.out.println("Phase Info:\n" + info + "\n");
+
+			new FrameWithText(info, "Phase Information:");
+			
+		}
+	}
+
+
+	
+	
+	private class ViewMaxMemAsTextDisplay implements ActionListener{
+		ViewMaxMemAsTextDisplay(){ }
+
+		public void actionPerformed(ActionEvent e) {
+			
+			int numIntervals = (int) (endInterval - startInterval);
+			double[] memMax = new double[numIntervals];
+			Iterator<Long> pes = memoryData.keySet().iterator();
+			while(pes.hasNext()){
+				Long pe = pes.next();
+				double[] data = memoryData.get(pe);
+				for(int i=0; i<data.length; i++){
+					if(memMax[i] < data[i]){
+						memMax[i] = data[i];
+					}
+				}
+			}
+
+			
+			String info = "Copy & paste into your favorite spreadsheet or plotting tool:\n\nTime\tMaximum memory Usage Across All PEs:\n";
+
+			for(int i=0; i<numIntervals; i++){
+				double time = (i + startInterval) * intervalSize * timeScalingFactor;
+				if(memMax[i] > 0){
+					info += "" + time + "\t" + memMax[i] + "\n";
+				}
+			}
+			
+			new FrameWithText(info, "Maximum Memory Usage:");
+
+		}
+
+	}
+
+
+	
+	
+	private class PhaseInformationDisplay implements ActionListener{
+		PhaseInformationDisplay(){ }
+
+		public void actionPerformed(ActionEvent e) {
+			String info = "";
+			for(int i=0;i<availableStepTimes.size(); i++){
+				info += "" + projections.gui.U.humanReadableString(availableStepTimes.elementAt(i)) + "\t" + availableStepStrings.elementAt(i) + "\n";
+			}
+			System.out.println("Phase Info:\n" + info + "\n");
+
+			new FrameWithText(info, "Phase Information:");
 
 		}
 
@@ -128,9 +210,20 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		m1.add(mShowPhaseInfo);
 		mShowPhaseInfo.addActionListener(new PhaseInformationDisplay());
 
-		mbar.add(new JMenu("File"));
-		mbar.add(m1);
+		JMenu m2 = new JMenu("Export Data");
+		
+		mViewDataAsText = new JMenuItem("Max Memory Usage");
+		m2.add(mViewDataAsText);
+		mViewDataAsText.addActionListener(new ViewMaxMemAsTextDisplay());
 
+		mViewPhaseInfoAsText = new JMenuItem("Phase Information");
+		m2.add(mViewPhaseInfoAsText);
+		mViewPhaseInfoAsText.addActionListener(new ViewPhaseInfoAsTextDisplay());
+		
+		
+		mbar.add(m1);
+		mbar.add(m2);
+		
 		setJMenuBar(mbar);
 	} 
 
@@ -145,13 +238,13 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			if (!dialog.isCancelled()) {
 				final OrderedIntList pes = dialog.getSelectedProcessors();
 				intervalSize = intervalPanel.getIntervalSize();
-				final long startInterval = intervalPanel.getStartInterval();
-				final long endInterval = intervalPanel.getEndInterval();
+				startInterval = intervalPanel.getStartInterval();
+				endInterval = intervalPanel.getEndInterval();
 
 				final SwingWorker worker = new SwingWorker() {
 					public Object doInBackground() {
 						// Load memory usages here
-						thisWindow.loadData(pes, intervalSize, startInterval, endInterval);
+						thisWindow.loadData(pes);
 						return null;
 					}
 
@@ -242,7 +335,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	}
 
 
-	private void loadData(final OrderedIntList processorList, long intervalSize, long startInterval, long endInterval) {
+	private void loadData(final OrderedIntList processorList) {
 		
 		// Determine how to scale the x axis values&units
 		double timeSpan = (endInterval - startInterval) * intervalSize;
@@ -287,11 +380,13 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			threadManager.runAll();
 
 			memorySamples = new TreeMap(); 
-
+			memoryData = new TreeMap();
+			
 			Iterator<Runnable> titer = readyReaders.iterator();
 			while(titer.hasNext()){
 				ThreadedFileReader r = (ThreadedFileReader) titer.next();
 				memorySamples.put(r.getPe(), r.getMemorySamples());
+				memoryData.put(r.getPe(), r.getData());
 			}
 
 

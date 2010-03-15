@@ -1319,6 +1319,14 @@ public class Data
 		colorByEntryId = true;
 		displayMustBeRepainted();
 	}
+
+    	public void setColorByEID() {
+		colorByUserSupplied = false;
+		colorByObjectId = false;
+		colorByMemoryUsage = false;
+		colorByEntryId = true;
+		displayMustBeRepainted();
+	}
 	
 	
 	protected boolean colorByEID() {
@@ -1333,7 +1341,7 @@ public class Data
 	protected boolean colorByUserSupplied() {
 		return colorByUserSupplied;
 	}
-	
+
 	protected boolean colorByMemoryUsage() {
 		return colorByMemoryUsage;
 	}

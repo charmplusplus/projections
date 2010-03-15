@@ -84,6 +84,7 @@ ItemListener {
 
 	private JMenuItem mColorByDefault;
 	private JMenuItem mColorByObjectID;
+        private JMenuItem mColorByEntryMethod;
 	private JMenuItem mColorByUserRandom;
 	private JMenuItem mColorByUserGradient;
 	private JMenuItem mColorByUserObjRandom;
@@ -315,6 +316,9 @@ ItemListener {
 		else if(evt.getSource() == mColorByUserRandom)
 			data.setColorByUserSupplied(Data.RandomColors);
 
+		else if(evt.getSource() == mColorByEntryMethod)
+			data.setColorByEID();
+
 		else if(evt.getSource() == mColorByUserGradient)
 			data.setColorByUserSupplied(Data.BlueGradientColors);
 
@@ -446,11 +450,13 @@ ItemListener {
 
 		mColorByDefault = new JMenuItem("Color by Default");
 		mColorByObjectID = new JMenuItem("Color by Object Index");
+		mColorByEntryMethod = new JMenuItem("Color by Entry Method");
 		mColorByUserRandom = new JMenuItem("Color by User Supplied Parameter(timestep) with Disjoint Colors");
 		mColorByUserGradient = new JMenuItem("Color by User Supplied Parameter(timestep) with Gradient");
 		mColorByUserObjRandom = new JMenuItem("Color by User Supplied Parameter(timestep) + Object ID with Disjoint Colors");
 		mColorByUserEIDRandom =  new JMenuItem("Color by User Supplied Parameter(timestep) + Entry ID with Disjoint Colors");
 		mColorByMemUsage = new JMenuItem("Color by Memory Usage ...");
+		
 
 		colorMenu.add(mWhiteBG);
 		colorMenu.add(mBlackBG);
@@ -462,6 +468,7 @@ ItemListener {
 		colorMenu.addSeparator();
 		colorMenu.add(mColorByDefault);
 		colorMenu.add(mColorByObjectID);
+		colorMenu.add(mColorByEntryMethod);
 		colorMenu.add(mColorByUserRandom);
 		colorMenu.add(mColorByUserGradient);
 		colorMenu.add(mColorByUserObjRandom);
@@ -476,6 +483,7 @@ ItemListener {
 		mDefaultColors.addActionListener(this);
 		mColorByDefault.addActionListener(this);
 		mColorByObjectID.addActionListener(this);
+		mColorByEntryMethod.addActionListener(this);
 		mColorByUserRandom.addActionListener(this);
 		mColorByUserObjRandom.addActionListener(this);
 		mColorByUserGradient.addActionListener(this);

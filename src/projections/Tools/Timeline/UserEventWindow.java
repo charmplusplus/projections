@@ -35,7 +35,7 @@ class UserEventWindow extends JFrame
 	private Color FOREGROUND = Color.white;
 
 	// set the ints to have commas in appropriate places
-	private static DecimalFormat format_ = null;
+	private static DecimalFormat format_;
 	private JCheckBox             checkbox_;  // when closing, set to false
 	private Object[][]        events_ = null;
 	private Integer[] pes;
@@ -64,7 +64,7 @@ class UserEventWindow extends JFrame
 	}
 
 	private class UserEventTable extends AbstractTableModel {
-		private int index_ = -1;
+		private int index_;
 
 		protected UserEventTable(int i) { index_ = i; }
 		public int getColumnCount() { return 4; }
@@ -159,10 +159,9 @@ class UserEventWindow extends JFrame
 
 		super("User Event Window");
 
-		if (format_ == null) {
-			format_ = new DecimalFormat();
-			format_.setGroupingUsed(true);
-		}
+		format_ = new DecimalFormat();
+		format_.setGroupingUsed(true);
+
 		rightJustify_.setHorizontalAlignment(JLabel.RIGHT);
 		checkbox_ = c;
 		setSize(480, 400);

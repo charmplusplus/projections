@@ -531,7 +531,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			else if(data.messageStructures.getEventIDToMessageMap()[pCreation] == null)
 				return null;
 			else
-				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCreation].get(new Integer(EventID));
+				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCreation].get(Integer.valueOf(EventID));
 
 		}
 	}
@@ -559,8 +559,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			data.addMessageSendLineAlt(fwd);
 			
 			// highlight the objects as well
-			data.HighlightObjects(fwdGeneric);
-			data.HighlightObjects(backGeneric);
+			data.highlightObjects(fwdGeneric);
+			data.highlightObjects(backGeneric);
 			
 			needRepaint=true;
 		}
@@ -570,7 +570,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		if(data.traceOIDOnHover()){
 			synchronized(data.messageStructures){
 			Set allWithSameId = (Set) data.messageStructures.getOidToEntryMethodObjectsMap().get(tid);
-			data.HighlightObjects(allWithSameId);
+			data.highlightObjects(allWithSameId);
 			needRepaint=true;
 			}
 		}	

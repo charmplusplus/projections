@@ -48,19 +48,19 @@ class UserSuppliedAnalyzer extends JFrame {
 						// update the minimum seen for the user supplied parameter param
 						Long oldval = parameterMinTime.get(param);
 						if(start < oldval){
-							parameterMinTime.put(param, new Long(start));
+							parameterMinTime.put(param, Long.valueOf(start));
 						}
 
 						// update the maximum seen for the user supplied parameter param
 						oldval = parameterMaxTime.get(param);
 						if(end > oldval){
-							parameterMaxTime.put(param, new Long(end));
+							parameterMaxTime.put(param, Long.valueOf(end));
 						}						
 					}
 					else {
 						// first time we see the values, just insert them
-						parameterMinTime.put(param, new Long(start));
-						parameterMaxTime.put(param, new Long(end));
+						parameterMinTime.put(param, Long.valueOf(start));
+						parameterMaxTime.put(param, Long.valueOf(end));
 					}
 				}
 

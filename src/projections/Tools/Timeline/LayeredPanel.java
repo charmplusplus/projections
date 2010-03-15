@@ -36,8 +36,8 @@ class LayeredPanel extends JPanel  implements Scrollable
 		jLayeredPane.setLayout(lay);
 		
 		// Add the layers to the JLayeredPane
-		jLayeredPane.add(main, new Integer(10));
-		jLayeredPane.add(overlay,  new Integer(20));
+		jLayeredPane.add(main, Integer.valueOf(10));
+		jLayeredPane.add(overlay,  Integer.valueOf(20));
 		
 		// Add the layered panel to me
 		this.setLayout(new BorderLayout());

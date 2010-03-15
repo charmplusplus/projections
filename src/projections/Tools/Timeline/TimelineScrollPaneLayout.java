@@ -7,7 +7,6 @@ import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.io.Serializable;
 
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
@@ -31,7 +30,7 @@ import javax.swing.border.Border;
  * 
  */
 class TimelineScrollPaneLayout extends ScrollPaneLayout
-implements LayoutManager, ScrollPaneConstants, Serializable
+implements LayoutManager, ScrollPaneConstants
 {
 
 	private Data data;
@@ -93,7 +92,7 @@ implements LayoutManager, ScrollPaneConstants, Serializable
 		
 		super.layoutContainer(parent);
 		
-		Rectangle availR = new Rectangle();
+		Rectangle availR;
 
 		JScrollPane scrollPane;
 

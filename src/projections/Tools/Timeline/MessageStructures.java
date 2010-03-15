@@ -152,7 +152,7 @@ class MessageStructures {
 				while(msg_iter.hasNext()){
 					// For each message sent by the object
 					TimelineMessage msg = msg_iter.next();
-					getEventIDToMessageMap()[pe.intValue()].put(new Integer(msg.EventID), msg);
+					getEventIDToMessageMap()[pe.intValue()].put(Integer.valueOf(msg.EventID), msg);
 				}
 			}
 		}
@@ -171,7 +171,7 @@ class MessageStructures {
 			Iterator<EntryMethodObject> obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
 				EntryMethodObject obj = obj_iter.next();
-				getEventIDToEntryMethodMap()[pe.intValue()].put(new Integer(obj.EventID), obj);
+				getEventIDToEntryMethodMap()[pe.intValue()].put(Integer.valueOf(obj.EventID), obj);
 			}
 		}
 

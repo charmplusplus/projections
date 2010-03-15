@@ -65,7 +65,7 @@ class ScrollingPanel extends JPanel {
 		setVisible(true);
 		
 		// Set the tooltip delay to 0, so the entry method objects display their bubbles more quickly
-		data.SetToolTipDelaySmall();
+		data.setToolTipDelaySmall();
 		ToolTipManager.sharedInstance().registerComponent(mainPanel);
 	}
 	

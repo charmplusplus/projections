@@ -76,7 +76,7 @@ class MessagePanel extends JPanel {
     		msg = (TimelineMessage) iter.next();
 
     		// fill in the NUM_FIELDS columns
-    		tableData[row][0] = new Integer(row);
+    		tableData[row][0] = Integer.valueOf(row);
 
     		tableData[row][1] = df.format(msg.MsgLen);
     		tableData[row][2] = df.format(msg.Time);

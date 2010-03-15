@@ -13,7 +13,7 @@ class ThreadedFileReader implements Runnable  {
 	}
 	
      public void run() {
-     	 	data.getData(new Integer(pe));
+     	 	data.getData(Integer.valueOf(pe));
      }
 
 }

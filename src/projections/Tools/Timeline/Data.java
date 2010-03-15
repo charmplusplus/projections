@@ -277,7 +277,7 @@ public class Data
 	 */
 	protected void addProcessor(int pe){
 		System.out.println("Add processor " + pe);
-		Integer p = new Integer(pe);
+		Integer p = Integer.valueOf(pe);
 		if(!peToLine.contains(p)){
 			peToLine.addLast(p);
 			System.out.println("Add processor " + pe + " to peToLine size=" + peToLine.size() );
@@ -302,7 +302,7 @@ public class Data
 		int p = processorList.nextElement();
 		Integer line = 0;
 		while (p != -1) {
-			Integer pe = new Integer(p);
+			Integer pe = Integer.valueOf(p);
 			peToLine.addLast(pe);
 			line ++;
 			if(processorList.hasMoreElements())
@@ -1171,7 +1171,7 @@ public class Data
 	}
 	
 	/** Highlight the given set of timeline objects */
-	protected void HighlightObjects(Set<Object> objects) {
+	protected void highlightObjects(Set<Object> objects) {
 		highlightedObjects.addAll(objects);
 	}
 
@@ -1202,9 +1202,9 @@ public class Data
 		this.traceMessagesBackOnHover = traceMessagesOnHover;
 		
 		if(traceMessagesOnHover)
-			SetToolTipDelayLarge();
+			setToolTipDelayLarge();
 		else
-			SetToolTipDelaySmall();
+			setToolTipDelaySmall();
 		
 	}
 	
@@ -1212,9 +1212,9 @@ public class Data
 		this.traceMessagesForwardOnHover = traceMessagesForwardOnHover;
 		
 		if(traceMessagesForwardOnHover)
-			SetToolTipDelayLarge();
+			setToolTipDelayLarge();
 		else
-			SetToolTipDelaySmall();
+			setToolTipDelaySmall();
 		
 	}
 		
@@ -1225,13 +1225,13 @@ public class Data
 	}
 	
 	
-	protected void SetToolTipDelaySmall() {
+	protected void setToolTipDelaySmall() {
 		ToolTipManager.sharedInstance().setInitialDelay(0);
 		ToolTipManager.sharedInstance().setDismissDelay(600000);	
 	}
 	
 
-	private void SetToolTipDelayLarge() {
+	private void setToolTipDelayLarge() {
 		ToolTipManager.sharedInstance().setInitialDelay(2000);
 		ToolTipManager.sharedInstance().setDismissDelay(10000);	
 	}
@@ -1386,7 +1386,7 @@ public class Data
 			System.out.println("Processor " + minDest + " is lagging behind by " + (-1*minLatency) + "us");
 
 			// Adjust times for all objects and messages associated with processor dest
-			Integer laggingPE = new Integer(minDest);
+			Integer laggingPE = Integer.valueOf(minDest);
 			
 			long shift = -1*minLatency;
 
@@ -1476,7 +1476,7 @@ public class Data
 		if(!peToLine.contains(new Integer(PE))){
 			throw new RuntimeException("peToLine does not contain pe " + PE);
 		}
-		return peToLine.indexOf(new Integer(PE));
+		return peToLine.indexOf(Integer.valueOf(PE));
 	}
 	
 	/** Update the ordering of the PEs (vertical position ordering) */
@@ -1507,7 +1507,7 @@ public class Data
 
 
 	protected void movePEToLine(int PE, int newPos){
-		Integer p = new Integer(PE);
+		Integer p = Integer.valueOf(PE);
 		peToLine.remove(p);
 		peToLine.add(newPos, p);
 		this.displayMustBeRedrawn();
@@ -1558,7 +1558,7 @@ public class Data
 				if(obj.Type == UserEventObject.PAIR){
 					long BeginTime = obj.BeginTime;
 					long EndTime = obj.EndTime;
-					Integer UserEventID = new Integer(obj.UserEventID); 
+					Integer UserEventID = Integer.valueOf(obj.UserEventID); 
 
 					long duration = EndTime-BeginTime;
 
@@ -1575,11 +1575,11 @@ public class Data
 						}
 
 						if(max.get(UserEventID) < duration){
-							max.put(UserEventID, new Long(duration));
+							max.put(UserEventID, Long.valueOf(duration));
 						}
 
-						total.put(UserEventID, total.get(UserEventID) + new Long(duration));
-						count.put(UserEventID, count.get(UserEventID) + new Long(1));
+						total.put(UserEventID, total.get(UserEventID) + Long.valueOf(duration));
+						count.put(UserEventID, count.get(UserEventID) + Long.valueOf(1));
 
 					}
 
@@ -1794,7 +1794,7 @@ public class Data
 			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
 		}
 		
-		return result;	
+		return result;
 	}
 	
 	

@@ -129,7 +129,7 @@ class AxisPanel extends JPanel
 
 	/** Round the left offset to a multiple of the pretty timeIncrement() */
 	private long startTimePretty() {
-		return (long)Math.ceil(((long)data.startTime()/(long)smallTickTimeIncrement())*smallTickTimeIncrement());
+		return (long)(((long)data.startTime()/(long)smallTickTimeIncrement())*smallTickTimeIncrement());
 	}
 
 	private String axisLabel(){
@@ -149,7 +149,7 @@ class AxisPanel extends JPanel
 	
 	/** The number of ticks we can display on the timeline in the given sized window */
 	private int numSmallIntervals(){
-		return (int) Math.ceil(data.totalTime() / smallTickTimeIncrement()) + 1;
+		return (int) (data.totalTime() / smallTickTimeIncrement() + 1);
 	}
 
 	private int numSmallTicks(){

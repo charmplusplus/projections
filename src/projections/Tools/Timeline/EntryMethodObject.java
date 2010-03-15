@@ -22,6 +22,8 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JToolTip;
+import javax.swing.ToolTipManager;
 
 import projections.analysis.AmpiFunctionData;
 import projections.analysis.ObjectId;
@@ -145,20 +147,22 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		} else if (tle.EntryPoint >= 0) {
 		}
 		
-		updateToolTipText();
 		
 		if(!isIdleEvent()){
 			addMouseListener(this);
 		}
-					
+		
+
+		// Tell the tooltip manager that we have something to display
+        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+        toolTipManager.registerComponent(this);
+
 	} 
 	
-	
-	/** Set the tooltip to a nicely formatted representation of this object */
-	private void updateToolTipText(){
+	/** Dynamically generate the tooltip mouseover text when needed */
+	public String getToolTipText(MouseEvent evt){
 
 		// Construct a nice informative html formatted string about this entry method object. 
-		// This string is displayed on mouseover(by setting it as this component's tooltip)
 
 		StringBuilder infoString = new StringBuilder(5000);
 
@@ -263,10 +267,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			infoString.append("<i>Memory Usage:</i> " + memoryUsage/1024/1024 + " MB<br>");
 		}
 			
-		
-		setToolTipText("<html><body>" + infoString.toString() + "</html></body>");
-		
+		return "<html><body>" + infoString.toString() + "</html></body>";
 	}
+	
 	
 
 	/** paint an entry method that tapers to a point at its left side */

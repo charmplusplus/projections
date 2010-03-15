@@ -12,6 +12,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 
 import projections.gui.MainWindow;
 import projections.misc.MiscUtil;
@@ -53,6 +54,11 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.pe = pe;
 		setOpaque(false);
 		addMouseListener(this);
+
+		// Tell the tooltip manager that we have something to display
+        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+        toolTipManager.registerComponent(this);
+		
 	}
 	
 	/** Create a user event that is a note */
@@ -64,6 +70,10 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.UserEventID=-1;
 		setOpaque(false);
 		addMouseListener(this);
+
+		// Tell the tooltip manager that we have something to display
+        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+        toolTipManager.registerComponent(this);
 	}
 
 
@@ -79,6 +89,11 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		this.note = note;
 
 		addMouseListener(this);
+
+
+		// Tell the tooltip manager that we have something to display
+        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+        toolTipManager.registerComponent(this);
 	}
 
 	public String getName(){
@@ -149,15 +164,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 			height = data.screenHeight()-top;
 		}
 		
-		if(note == null) {
-			setToolTipText("<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>");
-		} else {
-			if(EndTime - BeginTime > 0)
-				setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>");
-			else
-				setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "<p><i>Duration</i>: " + (EndTime-BeginTime) + "us</p></html></body>");
-				
-		}
+		
 			
 		setBounds( left, top, width, height );
 				
@@ -209,15 +216,24 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 				}
 			}		
 			
-		}		
-		
-		
-		
-		
-		
+		}
 		
 	}
 
+
+
+	/** Dynamically generate the tooltip mouseover text when needed */
+	public String getToolTipText(MouseEvent evt){
+		if(note == null) 
+			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
+		else if(EndTime - BeginTime > 0)
+			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>";
+		else
+			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "<p><i>Duration</i>: " + (EndTime-BeginTime) + "us</p></html></body>";
+	}
+	
+	
+	
 	protected void shiftTimesBy(long shift) {
 		BeginTime += shift;
 		EndTime += shift;

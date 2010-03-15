@@ -43,7 +43,7 @@ class MemoryLegend implements MouseListener {
 		g.setFont(numberFont);
 		int numLabels = 4;
 		int pxBetweenLabels = (getWidth()-barRightMargin()-barLeftMargin()) / (numLabels-1);
-		float memUsageBetweenLabels =  (data.maxMemBColorRange() - data.minMemBColorRange()) / (numLabels-1);
+		float memUsageBetweenLabels =  (float)((data.maxMemBColorRange() - data.minMemBColorRange()) / (numLabels-1));
 		for(int j=0; j<numLabels; j++){
 			float memUsageB =(data.minMemBColorRange() + j * memUsageBetweenLabels);
 			int memUsageMB = (int) (memUsageB / 1024 / 1024);

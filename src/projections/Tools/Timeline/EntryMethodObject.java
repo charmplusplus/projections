@@ -159,110 +159,112 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 		// Construct a nice informative html formatted string about this entry method object. 
 		// This string is displayed on mouseover(by setting it as this component's tooltip)
-		String infoString = "";
 
+		StringBuilder infoString = new StringBuilder(5000);
+
+		
 		// **CW** special treatment for functions. There really should
 		// be a general way of dealing with this.
 		if (isFunction) {			
-			infoString += "<i>Function</i>: " + MainWindow.runObject[data.myRun].getFunctionName(entry) + "<br>";
-			infoString += "<i>Begin Time</i>: " + format_.format(beginTime) + "<br>";
-			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
-			infoString += "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>";
-			infoString += "<i>Msgs created</i>: " + messages.size() + "<br>";
-			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
-			infoString += "<hr><br><i>Function Callstack</i>:<br>";
+			infoString.append("<i>Function</i>: " + MainWindow.runObject[data.myRun].getFunctionName(entry) + "<br>" );
+			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime) + "<br>");
+			infoString.append("<i>End Time</i>: " + format_.format(endTime) + "<br>");
+			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>");
+			infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
+			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
+			infoString.append("<hr><br><i>Function Callstack</i>:<br>");
 
 			// look at the call stack
 			for(int i=0;i<funcData.length;i++){
 				AmpiFunctionData functionData = funcData[i];
-				infoString += "<i>[Func]</i>: " + MainWindow.runObject[data.myRun].getFunctionName(functionData.FunctionID) + "<br>";
-				infoString += "&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>";
+				infoString.append("<i>[Func]</i>: " + MainWindow.runObject[data.myRun].getFunctionName(functionData.FunctionID) + "<br>");
+				infoString.append("&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>");
 			}
 		} else if (entry >= 0) {
 
-			infoString += "<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"; 
+			infoString.append("<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"); 
 
 			if(msglen > 0) {
-				infoString += "<i>Msg Len</i>: " + msglen + "<br>";
+				infoString.append("<i>Msg Len</i>: " + msglen + "<br>");
 			}
 			
-			infoString +=  "<i>Begin Time</i>: " + format_.format(beginTime);
+			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
 			if (cpuTime > 0) 
-				infoString +=  " (" + format_.format(cpuBegin) + ")";
-			infoString += "<br>";
+				infoString.append(" (" + format_.format(cpuBegin) + ")");
+			infoString.append("<br>");
 			
-			infoString +=  "<i>End Time</i>: " + format_.format(endTime) ;
+			infoString.append("<i>End Time</i>: " + format_.format(endTime) );
 			if (cpuTime > 0)
-				infoString +=  " (" + format_.format(cpuEnd) + ")";
-			infoString += "<br>";
+				infoString.append(" (" + format_.format(cpuEnd) + ")");
+			infoString.append("<br>");
 			
-			infoString +=  "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime);
+			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime));
 			if (cpuTime > 0)
-				infoString +=  " (" + U.humanReadableString(cpuTime) + ")";
-			infoString += "<br>";
+				infoString.append(" (" + U.humanReadableString(cpuTime) + ")");
+			infoString.append("<br>");
 			
-			infoString +=  "<i>Packing</i>: " + U.humanReadableString(packtime);
+			infoString.append("<i>Packing</i>: " + U.humanReadableString(packtime));
 			if (packtime > 0)
-				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
-			infoString += "<br>";
+				infoString.append(" (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)");
+			infoString.append("<br>");
 			
-			infoString += "<i>Msgs created</i>: " + messages.size() + "<br>";
-			infoString += "<i>Created by processor</i>: " + pCreation + "<br>";
-			infoString += "<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>";
+			infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
+			infoString.append("<i>Created by processor</i>: " + pCreation + "<br>");
+			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
 			if(tleUserEventName!=null)
-				infoString += "<i>Associated User Event</i>: "+tleUserEventName+ "<br>";
+				infoString.append("<i>Associated User Event</i>: "+tleUserEventName+ "<br>");
 			
 			if(recvTime > 0){
-				infoString += "<i>Recv Time</i>: " + recvTime + "<br>";
+				infoString.append("<i>Recv Time</i>: " + recvTime + "<br>");
 			}	
 			
 			if (numPapiCounts > 0) {
-				infoString += "<i>*** PAPI counts ***</i>" + "<br>";
+				infoString.append("<i>*** PAPI counts ***</i>" + "<br>");
 				for (int i=0; i<numPapiCounts; i++) {
-					infoString += MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>";
+					infoString.append(MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>");
 				}
 			}
 		} else if (entry == -1) {
-			infoString += "<b>Idle Time</b><br><br>";
-			infoString += "<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>";
-			infoString += "<i>End Time</i>: " + format_.format(endTime) + "<br>";
-			infoString += "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>";
+			infoString.append("<b>Idle Time</b><br><br>");
+			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>");
+			infoString.append("<i>End Time</i>: " + format_.format(endTime) + "<br>");
+			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>");
 		} else if (entry == -2) {
-			infoString += "<i>Unaccounted Time</i>" + "<br>";
+			infoString.append("<i>Unaccounted Time</i>" + "<br>");
 			
-			infoString +=  "<i>Begin Time</i>: " + format_.format(beginTime);
+			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
 			if (cpuTime > 0) 
-				infoString +=  " (" + format_.format(cpuBegin) + ")";
-			infoString += "<br>";
+				infoString.append(" (" + format_.format(cpuBegin) + ")");
+			infoString.append("<br>");
 			
-			infoString +=  "<i>End Time</i>: " + format_.format(endTime);
+			infoString.append("<i>End Time</i>: " + format_.format(endTime));
 			if (cpuTime > 0) 
-				infoString +=  " (" + format_.format(cpuEnd) + ")";
-			infoString += "<br>";
+				infoString.append( " (" + format_.format(cpuEnd) + ")");
+			infoString.append( "<br>");
 			
-			infoString +=  "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime);
+			infoString.append( "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime));
 			if (cpuTime > 0) 
-				infoString +=  " (" + (cpuTime) + ")";
-			infoString += "<br>";
+				infoString.append( " (" + (cpuTime) + ")");
+			infoString.append( "<br>");
 			
-			infoString +=  "<i>Packing</i>: " + U.humanReadableString(packtime);
+			infoString.append( "<i>Packing</i>: " + U.humanReadableString(packtime));
 			if (packtime > 0) 
-				infoString +=  " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)";
-			infoString += "<br>";
+				infoString.append( " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)");
+			infoString.append("<br>");
 			
-			infoString += "<i>Num Msgs created</i>: " + messages.size() + "<br>";
+			infoString.append("<i>Num Msgs created</i>: " + messages.size() + "<br>");
 		}
 
 		if(userSuppliedData != null){
-			infoString += "<i>User Supplied Parameter(timestep):</i> " + userSuppliedData.intValue() + "<br>";
+			infoString.append("<i>User Supplied Parameter(timestep):</i> " + userSuppliedData.intValue() + "<br>");
 		}
 			
 		if(memoryUsage != 0){
-			infoString += "<i>Memory Usage:</i> " + memoryUsage/1024/1024 + " MB<br>";
+			infoString.append("<i>Memory Usage:</i> " + memoryUsage/1024/1024 + " MB<br>");
 		}
 			
 		
-		setToolTipText("<html><body>" + infoString + "</html></body>");
+		setToolTipText("<html><body>" + infoString.toString() + "</html></body>");
 		
 	}
 	

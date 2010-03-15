@@ -94,9 +94,8 @@ implements LayoutManager, ScrollPaneConstants
 		
 		Rectangle availR;
 
-		JScrollPane scrollPane;
-
-		scrollPane = (JScrollPane)parent;
+		assert(parent instanceof JScrollPane);
+		JScrollPane scrollPane = (JScrollPane)parent;
 
 
 		availR = parent.getBounds();

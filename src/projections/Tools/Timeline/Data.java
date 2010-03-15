@@ -1481,7 +1481,7 @@ public class Data
 		if(peToLine==null){
 			throw new RuntimeException("peToLine is null");
 		}
-		if(!peToLine.contains(new Integer(PE))){
+		if(!peToLine.contains(Integer.valueOf(PE))){
 			throw new RuntimeException("peToLine does not contain pe " + PE);
 		}
 		return peToLine.indexOf(Integer.valueOf(PE));
@@ -1579,7 +1579,7 @@ public class Data
 					} else {
 
 						if(min.get(UserEventID) > duration){
-							min.put(UserEventID, new Long(duration));
+							min.put(UserEventID, Long.valueOf(duration));
 						}
 
 						if(max.get(UserEventID) < duration){

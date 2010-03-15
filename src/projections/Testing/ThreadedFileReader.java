@@ -1,15 +1,17 @@
 package projections.Testing;
 
 
-import java.io.EOFException;
 
+import java.io.IOException;
+
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
 
 /** The reader threads for Scan Logs tool. */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private int myRun;
@@ -31,28 +33,32 @@ class ThreadedFileReader extends Thread  {
 
 	private void LoadGraphDataForOnePe(int pe) 
 	{
-		try {	  
-			GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
-			fakeCounter = 0.0;
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 
+		try {	  
+			fakeCounter = 0.0;
 			while (true) {
 				LogEntryData data = reader.nextEvent();
-
 				fakeCounter += data.time;
-
 			}
 
-		} catch (EOFException e) {			
-			// I guess we are done now
-
-			synchronized(result){
-				result[0] += fakeCounter;
-			}
-
-		}catch (Exception e) {
+		} catch (EndOfLogSuccess e) {			
+			// Successfully read log file
+		} catch (Exception e) {
 			System.err.println("Error occured while reading data for pe " + pe);
 		}
 
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}		
+
+		synchronized(result){
+			result[0] += fakeCounter;
+		}
+		
+		
 	}
 
 

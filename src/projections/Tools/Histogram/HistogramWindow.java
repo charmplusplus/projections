@@ -19,7 +19,7 @@ import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -127,7 +127,7 @@ implements ActionListener
 
 					
 					// Create a list of worker threads
-					LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+					LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 					OrderedIntList processorList = dialog.getSelectedProcessors();
 					while (processorList.hasMoreElements()) {
@@ -144,8 +144,8 @@ implements ActionListener
 					}
 
 					// Pass this list of threads to a class that manages/runs the threads nicely
-					ThreadManager threadManager = new ThreadManager("Loading Histograms in Parallel", readyReaders, guiRootForProgressBar, true);
-					threadManager.runThreads();
+					TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Histograms in Parallel", readyReaders, guiRootForProgressBar, true);
+					threadManager.runAll();
 					
 					return null;
 				}

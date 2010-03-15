@@ -23,7 +23,7 @@ import javax.swing.SwingWorker;
 
 import projections.Tools.Timeline.Data;
 import projections.Tools.Timeline.MainHandler;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -130,13 +130,13 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			final Date time1  = new Date();
 
 			// Create a list of worker threads
-			final LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+			final LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 			processorList.reset();
 			int pIdx=0;		
 			while (processorList.hasMoreElements()) {
 				int nextPe = processorList.nextElement();
-				readyReaders.add( new ThreadedFileReaderTimelineRendered(nextPe, startTime, endTime, backgroundColor, foregroundColor, width) );
+				readyReaders.add( new ThreadedFileReader(nextPe, startTime, endTime, backgroundColor, foregroundColor, width) );
 				pIdx++;
 			}
 
@@ -144,12 +144,12 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			Component guiRootForProgressBar = null;
 
 			// Pass this list of threads to a class that manages/runs the threads nicely
-			final ThreadManager threadManager = new ThreadManager("Rendering Timelines in Parallel", readyReaders, guiRootForProgressBar, true);
+			final TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Rendering Timelines in Parallel", readyReaders, guiRootForProgressBar, true);
 
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
-					threadManager.runThreads();
+					threadManager.runAll();
 					return null;
 				}
 
@@ -159,9 +159,9 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 					combinedTimelinesPanel.setLayout(new BoxLayout(combinedTimelinesPanel, BoxLayout.PAGE_AXIS));
 
 					// Merge resulting images together.
-					Iterator<Thread> iter = readyReaders.iterator();
+					Iterator<Runnable> iter = readyReaders.iterator();
 					while(iter.hasNext()){
-						ThreadedFileReaderTimelineRendered r = (ThreadedFileReaderTimelineRendered) iter.next();
+						ThreadedFileReader r = (ThreadedFileReader) iter.next();
 						BufferedImage i = r.getImage();
 						JLabel l = new JLabel(new ImageIcon(i));
 						l.setToolTipText("PE " + r.PE);

@@ -2,8 +2,10 @@ package projections.Tools.CommunicationPerPE;
 
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
@@ -11,7 +13,7 @@ import projections.misc.LogEntryData;
 
 
 /** The reader threads for Communication Per PE Tool. */
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private int pIdx;
@@ -47,7 +49,7 @@ class ThreadedFileReader extends Thread  {
 
 	public void run() { 
 
-		GenericLogReader glr = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		
@@ -65,8 +67,8 @@ class ThreadedFileReader extends Thread  {
 			}
 
 
-			LogEntryData logdata = glr.nextEventOnOrAfter(startTime);
-			// we'll just use the EOFException to break us out of
+			LogEntryData logdata = reader.nextEventOnOrAfter(startTime);
+			// we'll just use the EndOfLogException to break us out of
 			// this loop :)
 			while (true) {
 				if (logdata.time > endTime) {
@@ -76,7 +78,7 @@ class ThreadedFileReader extends Thread  {
 						break;
 					}
 				}
-				logdata = glr.nextEvent();
+				logdata = reader.nextEvent();
 				if (logdata.type == ProjDefs.CREATION) {
 					int EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
 					sentMsgCount[pIdx][EPid]++;
@@ -107,13 +109,20 @@ class ThreadedFileReader extends Thread  {
 					}
 				}
 			}
-		} catch (java.io.EOFException e) {
+		} catch (EndOfLogSuccess e) {
 			// Successfully reached end of log file
-		} catch (java.io.IOException e) {
+		} catch (IOException e) {
 			System.out.println("Exception: " +e);
 			e.printStackTrace();
 		}
 
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
 
 	}
 

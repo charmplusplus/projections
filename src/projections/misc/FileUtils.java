@@ -77,6 +77,9 @@ public class FileUtils {
 	private static void detectFiles(String baseName, int type) {
 		File testFile = null;
 
+//		System.out.println("detectFiles(baseName = " + baseName + ", type=" + type + ")  ");
+
+		
 		// special condition for SUMACC (and any future, single-file
 		// log types) only
 		if (type == ProjMain.SUMACC) {
@@ -91,6 +94,8 @@ public class FileUtils {
 
 		File prefix = new File( baseName );
 		String prefix_s = prefix.getName();
+		
+//		System.out.println("FileUtils.dirFromFile(baseName) = " + FileUtils.dirFromFile(baseName) );
 		
 		testFile = new File( FileUtils.dirFromFile(baseName) );
 		if (!testFile.isDirectory()) {
@@ -107,22 +112,28 @@ public class FileUtils {
 			if(filename.startsWith(prefix_s)){
 				String[] splits = filename.split("\\.");
 				int numSplits = splits.length;
-
-				if(splits[numSplits-1].equals(extension) ){
-					int pe = Integer.parseInt(splits[numSplits-2]);
-					validPEs[type].insert(pe);
-					hasFiles[type] = true;
-//					System.out.println("Found " + extension + " for pe " + pe);
-				} else if(splits[numSplits-2].equals(extension)  &&  splits[numSplits-1].equals("gz") ){
-					int pe = Integer.parseInt(splits[numSplits-3]);
-					validPEs[type].insert(pe);
-					hasFiles[type] = true;
-	//				System.out.println("Found " + extension + ".gz for pe " + pe);
-				} else {
-					// The file does not appear to match the desired names
+				
+//				System.out.println("File "+ filename + " does start with " + prefix_s);
+				
+				if(numSplits > 1){
+					if(splits[numSplits-1].equals(extension) ){
+						int pe = Integer.parseInt(splits[numSplits-2]);
+						validPEs[type].insert(pe);
+						hasFiles[type] = true;
+//						System.out.println("Found " + extension + " for pe " + pe);
+					} else if(splits[numSplits-2].equals(extension)  &&  splits[numSplits-1].equals("gz") ){
+						int pe = Integer.parseInt(splits[numSplits-3]);
+						validPEs[type].insert(pe);
+						hasFiles[type] = true;
+//						System.out.println("Found " + extension + ".gz for pe " + pe);
+					} else {
+						// The file does not appear to match the desired names
+					}
 				}
 
-			}	
+			} else {
+//				System.out.println("File "+ filename + " does not start with " + prefix_s);
+			}
 
 
 		}

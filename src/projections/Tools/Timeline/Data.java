@@ -20,7 +20,7 @@ import java.util.Vector;
 import javax.swing.ToolTipManager;
 
 import projections.analysis.PackTime;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -436,7 +436,7 @@ public class Data
 	
 			
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		
 		Iterator<Integer> peIter = peToLine.iterator();
 		int pIdx=0;
@@ -457,8 +457,8 @@ public class Data
 		}
 
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Timeline in Parallel", readyReaders, guiRootForProgressBar, showProgress);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Timeline in Parallel", readyReaders, guiRootForProgressBar, showProgress);
+		threadManager.runAll();
 
 		if(memoryUsageValid())
 			System.out.println("memory usage seen in the logs ranges from : " + minMem/1024/1024 + "MB to " + maxMem/1024/1024 + "MB");

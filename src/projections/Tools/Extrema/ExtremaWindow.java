@@ -11,7 +11,6 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -26,11 +25,12 @@ import javax.swing.JMenuItem;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.KMeansClustering;
 import projections.analysis.ProjDefs;
 import projections.analysis.ProjMain;
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
@@ -241,13 +241,13 @@ Clickable
 		tempData = new double[numPEs][];
 
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 		int pIdx=0;		
 		selectedPEs.reset();
 		while (selectedPEs.hasMoreElements()) {
 			int nextPe = selectedPEs.nextElement();
-			readyReaders.add( new ExtremaReaderThread(nextPe, startTime, endTime, 
+			readyReaders.add( new ThreadedFileReader(nextPe, startTime, endTime, 
 					numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
 			pIdx++;
 		}
@@ -262,15 +262,15 @@ Clickable
 		}
 
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
+		threadManager.runAll();
 
 
 		// Retrieve results from each thread, storing them into tempData
 		int pIdx2=0;
-		Iterator iter = readyReaders.iterator();
+		Iterator<Runnable> iter = readyReaders.iterator();
 		while (iter.hasNext()) {
-			ExtremaReaderThread r = (ExtremaReaderThread) iter.next();
+			ThreadedFileReader r = (ThreadedFileReader) iter.next();
 			tempData[pIdx2] = r.myData;
 			pIdx2++;
 		}
@@ -384,8 +384,14 @@ Clickable
 
 	switch (selectedAttribute) {
 	case ATTR_CLUSTERING: {
-	    int clusterMap[] = new int[numPEs];
-
+	    int clusterMap[] = new int[numPEs];  
+	    
+	    if(numPEs < 3){
+	    	System.err.println("Not enough processors selected to perform clustering\n");	    	
+	    	sortedMap = null;
+	    	return;
+	    }
+	    
 	    /* **CWL** This modification is used so the data agrees with
 	       the results generated for my thesis. In this case, the
 	       overhead value is ignored. Eventually, it is expected that
@@ -824,20 +830,21 @@ Clickable
 				logData = reader.nextEvent();
 			}
 			reader.close();
-		} catch (EOFException e) {
-			// close the reader and let the external loop continue.
-			try {
-				reader.close();
-			} catch (IOException evt) {
-				System.err.println("Outlier Analysis: Error in closing "+
-						"file for processor " + pe);
-				System.err.println(evt);
-			}
+		} catch (EndOfLogSuccess e) {
+			// Reached end of the log file successfully
 		} catch (IOException e) {
-			System.err.println("Outlier Analysis: Error in reading log "+
-					"data for processor " + pe);
+			System.err.println("Outlier Analysis: Error in reading log data for processor " + pe);
 			System.err.println(e);
 		}
+		
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
+		
 	}
 
 	protected void setGraphSpecificData() {

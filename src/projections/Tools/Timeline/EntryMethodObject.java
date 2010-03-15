@@ -180,7 +180,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			}
 		} else if (entry >= 0) {
 
-			infoString += "<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry) + "</b><br><br>"; 
+			infoString += "<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"; 
 
 			if(msglen > 0) {
 				infoString += "<i>Msg Len</i>: " + msglen + "<br>";
@@ -260,6 +260,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		if(memoryUsage != 0){
 			infoString += "<i>Memory Usage:</i> " + memoryUsage/1024/1024 + " MB<br>";
 		}
+			
 		
 		setToolTipText("<html><body>" + infoString + "</html></body>");
 		

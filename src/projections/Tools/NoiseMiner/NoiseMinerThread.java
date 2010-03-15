@@ -11,13 +11,14 @@ import projections.Tools.NoiseMiner.NoiseMiner.Duration;
 import projections.Tools.NoiseMiner.NoiseMiner.Event;
 import projections.Tools.NoiseMiner.NoiseMiner.EventWindow;
 import projections.Tools.NoiseMiner.NoiseMiner.Histogram;
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.TimelineEvent;
 import projections.gui.Analysis;
 import projections.misc.LogEntryData;
 
-class NoiseMinerThread extends Thread {
+class NoiseMinerThread implements Runnable {
 	private int pe;
 	private TreeMap h;
 	private Analysis analysis;
@@ -40,7 +41,6 @@ class NoiseMinerThread extends Thread {
 		
 //		System.out.println("PE " + pe + " loading");
 		
-		GenericLogReader LogFile;
 		LogEntryData logdata = new LogEntryData();
 
 		long previous_begin_time = -1;
@@ -64,11 +64,11 @@ class NoiseMinerThread extends Thread {
 		h = new TreeMap();
 			
 		
-		LogFile = new GenericLogReader(getPe(), analysis.getVersion());
+		GenericLogReader reader = new GenericLogReader(getPe(), analysis.getVersion());
 
 		try {
 
-			logdata = LogFile.nextEventOnOrAfter(parent.getStartTime());
+			logdata = reader.nextEventOnOrAfter(parent.getStartTime());
 			while (logdata.time < parent.getEndTime()) {
 				//System.out.println("Time=" + logdata.time + " event " + logdata.event);
 				//Go through each log file and for each Creation
@@ -116,14 +116,23 @@ class NoiseMinerThread extends Thread {
 					//other events
 					previous_black_time = -1;
 				}
-				logdata = LogFile.nextEvent();				
+				logdata = reader.nextEvent();				
 			}
 		}
-		catch (IOException e)
-		{
+		catch (EndOfLogSuccess e) {
+			// successfully read log file
+		}catch (IOException e) {
 			// I doubt we'll ever get here
 		}
 
+
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
+		
 
 		// Generate clusters from each histogram
 		// Merge all the normalized clusters for this pe

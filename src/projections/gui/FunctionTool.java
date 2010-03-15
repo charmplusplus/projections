@@ -3,7 +3,7 @@ package projections.gui;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.io.EOFException;
+
 import java.io.IOException;
 
 import javax.swing.ButtonGroup;
@@ -13,6 +13,7 @@ import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
 import projections.analysis.CallStackManager;
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.misc.LogEntryData;
@@ -140,7 +141,6 @@ class FunctionTool extends GenericGraphWindow
 
     private void getData() {
 	// setup the reader to read all data.
-	GenericLogReader reader;
 	LogEntryData logEntry = new LogEntryData();
 	OrderedIntList validPEs = MainWindow.runObject[myRun].getValidProcessorList();
 	validPEs.reset();
@@ -159,7 +159,8 @@ class FunctionTool extends GenericGraphWindow
 				"", 0, validPEs.size());
 	while (validPEs.hasMoreElements()) {
 	    pe = validPEs.nextElement();
-	    try {
+		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		try {
 		if (!progressBar.isCanceled()) {
 		    progressBar.setNote("[PE: " + pe + " ] Reading data");
 		    progressBar.setProgress(curPeArrayIndex+1);
@@ -168,8 +169,6 @@ class FunctionTool extends GenericGraphWindow
 		    progressBar.close();
 		    return;
 		}
-		reader = new GenericLogReader(pe,
-					      MainWindow.runObject[myRun].getVersion());
 		double lastFuncTime = 0.0;
 		Integer stackEntry;
 		// find first begin processing event.
@@ -269,12 +268,18 @@ class FunctionTool extends GenericGraphWindow
 		    }
 		    logEntry = reader.nextEvent();
 		}
-	    } catch (EOFException e) {
-		// the only way the system can stop correctly
+	    } catch (EndOfLogSuccess e) {
+	    	// Successfully read the log file
 	    } catch (IOException e) {
-		System.err.println("Failed to read log at processor " +
-				   "[" + pe + "]");
+	    	System.err.println("Failed to read log at processor [" + pe + "]");
 	    }
+	    
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+	    
 	    curPeArrayIndex++;
 	}
 	progressBar.close();

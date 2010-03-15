@@ -20,7 +20,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
-import projections.analysis.ThreadManager;
+import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphWindow;
@@ -349,7 +349,7 @@ implements ItemListener, ActionListener, Clickable
 		histogram = new ArrayList<Integer>();
 		
 		// Create a list of worker threads
-		LinkedList<Thread> readyReaders = new LinkedList<Thread>();
+		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
 		OrderedIntList processorList = pes.copyOf();
 		while (processorList.hasMoreElements()) {
@@ -367,13 +367,13 @@ implements ItemListener, ActionListener, Clickable
 		}
 
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
+		threadManager.runAll();
 		
 		
 		// Combine histograms from all processors
 		
-		Iterator<Thread> iter = readyReaders.iterator();
+		Iterator<Runnable> iter = readyReaders.iterator();
 		while(iter.hasNext()){
 			ThreadedFileReader t = (ThreadedFileReader) iter.next();
 			histogram.addAll(t.localHistogram);

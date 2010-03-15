@@ -149,10 +149,15 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 			height = data.screenHeight()-top;
 		}
 		
-		if(note == null)
+		if(note == null) {
 			setToolTipText("<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>");
-		else
-			setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>");
+		} else {
+			if(EndTime - BeginTime > 0)
+				setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>");
+			else
+				setToolTipText("<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "<p><i>Duration</i>: " + (EndTime-BeginTime) + "us</p></html></body>");
+				
+		}
 			
 		setBounds( left, top, width, height );
 				

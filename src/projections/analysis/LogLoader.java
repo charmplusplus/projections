@@ -1,7 +1,6 @@
 package projections.analysis;
 
 
-import java.io.EOFException;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -48,8 +47,8 @@ public class LogLoader extends ProjDefs
 			}
 	
 		// Pass this list of threads to a class that manages/runs the threads nicely
-		ThreadManager threadManager = new ThreadManager("Computing End Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot, true);
-		threadManager.runThreads();
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Computing End Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot, true);
+		threadManager.runAll();
 
 		
 		Iterator iter = workerThreads.iterator();
@@ -296,7 +295,7 @@ public class LogLoader extends ProjDefs
 				}
 				prevEntry = curEntry;
 			}
-		} catch (EOFException e) { 
+		} catch (EndOfLogSuccess e) { 
 			/*ignore*/ 
 		} catch (FileNotFoundException E) {
 			System.out.println("ERROR: couldn't open file " + 
@@ -563,7 +562,7 @@ public class LogLoader extends ProjDefs
 				}
 				prevEntry = curEntry;
 			}
-		} catch (EOFException e) { 
+		} catch (EndOfLogSuccess e) { 
 			/*ignore*/ 
 		} catch (FileNotFoundException E) {
 			System.out.println("ERROR: couldn't open file " + 
@@ -598,12 +597,10 @@ public class LogLoader extends ProjDefs
 		PackTime          PT          = null;
 		boolean tempte;
 
-		GenericLogReader reader;
-		LogEntryData data;
-
 		// open the file
+		GenericLogReader reader = new GenericLogReader(pe,MainWindow.runObject[myRun].getVersion());
+
 		try {
-			reader = new GenericLogReader(pe,MainWindow.runObject[myRun].getVersion());
 			// to treat dummy thread EPs as a special-case EP
 			//  **CW** I consider this a hack. A more elegant way must
 			// be found design-wise.
@@ -626,7 +623,7 @@ public class LogLoader extends ProjDefs
 //			
 			
 			while (true) { //Seek to time Begin
-				data = reader.nextEvent();
+				LogEntryData data = reader.nextEvent();
 				LE = new LogEntry(data);
 				if (LE.Time >= Begin) {
 					break;
@@ -723,7 +720,7 @@ public class LogLoader extends ProjDefs
 				return;
 				}
 			}
-			//Throws EOFException at end of file; break if past endTime
+			//Throws EndOfLogException at end of file; break if past endTime
 			CallStackManager cstack = new CallStackManager();
 			LogEntry enclosingDummy = null;
 			ObjectId tid = null;
@@ -1081,8 +1078,8 @@ public class LogLoader extends ProjDefs
 
 						// Now, expect to read the second entry and handle
 						// errors if necessary.
-						data = reader.nextEvent();
-						LE = new LogEntry(data);
+						LogEntryData data2 = reader.nextEvent();
+						LE = new LogEntry(data2);
 
 						if (LE.TransactionType != USER_EVENT_PAIR) {
 							// DANGLING - throw away the old event
@@ -1193,8 +1190,8 @@ public class LogLoader extends ProjDefs
 						break;
 					}
 				}
-				data = reader.nextEvent();
-				LE = new LogEntry(data);
+				LogEntryData data2 = reader.nextEvent();
+				LE = new LogEntry(data2);
 				// this will still eventually end because of the 
 				// END COMPUTATION event.
 				if (LE.Entry != -1) {
@@ -1217,73 +1214,23 @@ public class LogLoader extends ProjDefs
 						TE=null;
 					}
 				}
-				data = reader.nextEvent();
-				LE = new LogEntry(data);
+				LogEntryData data2 = reader.nextEvent();
+				LE = new LogEntry(data2);
 			}
-		} catch (EOFException e) { 
+		} catch (EndOfLogSuccess e) { 
 			/* Reached end of the log file */ 
-		} catch (FileNotFoundException E) {
-			System.out.println("ERROR: couldn't open file " + 
-					MainWindow.runObject[myRun].getLogName(pe));
 		} catch (IOException E) {
 			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(pe));
 		}
-		return;
+		
+		
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}		
+		
+		
 	}
-//
-//
-//	public long searchtimeline(int PeNum, int Entry, int Num)
-//	throws LogLoadException
-//	{
-//		long BeginTime = 0;
-//		long           Count = 0;
-//		LogEntry       LE     = null;
-//
-//		GenericLogReader reader;
-//		LogEntryData data;
-//
-//		// open the file
-//		try {
-//			System.gc();
-//			reader = new GenericLogReader(PeNum, MainWindow.runObject[myRun].getVersion());
-//			data = new LogEntryData();
-//
-//			//Throws EOFException at end of file
-//			while(true) {
-//				data = reader.nextEvent();
-//				LE = new LogEntry(data);
-//				if (LE.Entry == -1) {
-//					continue;
-//				}
-//				if ((LE.Entry == Entry) && 
-//						(LE.TransactionType == BEGIN_PROCESSING)) {
-//					Count++;
-//				}
-//				if (Count > Num) {
-//					break;
-//				}
-//			}
-//		} catch (FileNotFoundException E) {
-//			System.out.println("ERROR: couldn't open file " + 
-//					MainWindow.runObject[myRun].getLogName(PeNum));
-//		} catch (EOFException E) {
-//			/*ignore*/
-//		} catch (IOException E) {
-//			throw new LogLoadException(MainWindow.runObject[myRun].getLogName(PeNum), 
-//					LogLoadException.READ);
-//		}  
-//		//	assert(LE != null);
-//		return LE.Time - BeginTime;
-//	}   
-
-//	public void createTimeIndexes(OrderedIntList processorList) {
-//		if(index == null){
-//			String indexFilename = MainWindow.runObject[myRun].getFilename() + ".index";
-//			index = new LogIndex(indexFilename, this);
-//		}
-//			
-//		index.createTimeIndexes(processorList);
-//	}
-	
 	
 }

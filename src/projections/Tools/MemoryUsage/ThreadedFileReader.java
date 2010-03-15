@@ -1,17 +1,17 @@
 package projections.Tools.MemoryUsage;
 
-import java.io.EOFException;
 import java.io.IOException;
 
 import org.jfree.data.xy.XYSeries;
 
+import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
 
-class ThreadedFileReader extends Thread  {
+class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 	private int myRun;
@@ -21,6 +21,8 @@ class ThreadedFileReader extends Thread  {
 	private long endInterval;
 	private double timeScalingFactor;
 
+	private double maxUsage[];
+	
 	/** Construct a file reading thread that will determine the best EP representative for each interval
 	 *  
 	 *  The resulting output data will be assigned into the array specified without synchronization
@@ -42,7 +44,7 @@ class ThreadedFileReader extends Thread  {
 		int numIntervals = (int) (endInterval - startInterval);
 
 		// First take data and put it into intervals.
-		double maxUsage[] = new double[numIntervals];
+		maxUsage = new double[numIntervals];
 
 		int count = 0;
 		try {
@@ -62,15 +64,19 @@ class ThreadedFileReader extends Thread  {
 
 			}
 		}
-		catch (EOFException e) {
+		catch (EndOfLogSuccess e) {
 			// Done reading file
-//			System.out.println("EOFException c after " + (count));
 		} catch (IOException e) {
 			// Error reading file
-//			System.out.println("IOException c after " + (count));
 		}
 
 
+		try {
+			reader.close();
+		} catch (IOException e1) {
+			System.err.println("Error: could not close log file reader for processor " + pe );
+		}
+		
 		// Put data from intervals into a time series
 		series = new XYSeries("PE " + pe);
 
@@ -86,6 +92,10 @@ class ThreadedFileReader extends Thread  {
 
 	}
 
+	public double[] getData(){
+		return maxUsage;
+	}
+	
 	protected XYSeries getMemorySamples(){
 		return series;
 	}

@@ -9,7 +9,7 @@ import projections.gui.JPanelToImage;
 import projections.gui.OrderedIntList;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
-class ThreadedFileReaderTimelineRendered extends Thread implements MainHandler {
+class ThreadedFileReader implements MainHandler, Runnable {
 	protected int PE;
 	private Color background;
 	private Color foreground;
@@ -17,7 +17,7 @@ class ThreadedFileReaderTimelineRendered extends Thread implements MainHandler {
 	private BufferedImage image;
 	private int width;
 
-	protected ThreadedFileReaderTimelineRendered(int pe, long startTime, long endTime, Color backgroundColor, Color foregroundColor, int width){
+	protected ThreadedFileReader(int pe, long startTime, long endTime, Color backgroundColor, Color foregroundColor, int width){
 		this.PE = pe;
 		this.startTime = startTime;
 		this.endTime = endTime;

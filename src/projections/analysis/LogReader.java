@@ -1,7 +1,7 @@
 package projections.analysis;
 
-import java.io.EOFException;
 import java.io.IOException;
+import java.util.TreeMap;
 
 import javax.swing.ProgressMonitor;
 
@@ -239,11 +239,13 @@ public class LogReader
 
     /**
        Read log files for a list of processors. If the list of PEs is null, load all available PEs. 
+     
+       Stores phase markers into phaseMarkers in a synchronized manner into phaseMarkers if it is non-null.
      */
     public void read(long reqIntervalSize,
     		int NintervalStart, int NintervalEnd,
     		boolean NbyEntryPoint, OrderedIntList processorList,
-    		boolean showProgress)  {
+    		boolean showProgress, TreeMap<Double, String> phaseMarkers)  {
     	
     	numProcessors = MainWindow.runObject[myRun].getNumProcessors();
     	numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
@@ -253,9 +255,9 @@ public class LogReader
     	numIntervals = intervalEnd - intervalStart + 1;
     	byEntryPoint=NbyEntryPoint;
 
-    	// assume full range of processor if null
+    	// assume full range of processors if null
     	if (processorList == null) {
-    		processorList = MainWindow.runObject[myRun].getValidProcessorList();
+    		processorList = MainWindow.runObject[myRun].getValidProcessorList().copyOf();
     	}
 
     	numProcessors = processorList.size();
@@ -272,17 +274,16 @@ public class LogReader
 
     	sysUsgData = new int[3][numProcessors][];
     	if (byEntryPoint) {
-    		userEntries = new 
-    		int[numUserEntries][3][numProcessors][numIntervals];
+    		userEntries = new int[numUserEntries][3][numProcessors][numIntervals];
     		categorized = new int[5][3][numProcessors][];
     	}
     	processorList.reset();
-    	int curPe = processorList.nextElement();
+    	int pe = processorList.nextElement();
     	curPeIdx = 0;
-    	for (;curPe!=-1; curPe=processorList.nextElement()) {
+    	for (;pe!=-1; pe=processorList.nextElement()) {
     		if(showProgress){
     			progressBar.setProgress(curPeIdx);
-    			progressBar.setNote("[PE: " + curPe + " ] Allocating Memory.");
+    			progressBar.setNote("[PE: " + pe + " ] Allocating Memory.");
     		}
 
     		// gzheng: allocate sysUsgData only when needed.
@@ -291,7 +292,7 @@ public class LogReader
     		sysUsgData[2][curPeIdx] = new int [numIntervals+1];
 
     		if(showProgress){
-    			progressBar.setNote("[PE: " + curPe + " ] Reading data.");
+    			progressBar.setNote("[PE: " + pe + " ] Reading data.");
     			if (progressBar.isCanceled()) {
     				// clear all data and return
     				userEntries = null;
@@ -307,11 +308,12 @@ public class LogReader
 
     		int nLines = 2;
 
-    		GenericLogReader reader = new GenericLogReader(curPe, MainWindow.runObject[myRun].getVersion());
+    		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
     		
-    		boolean isProcessing = false;
     		try { 
-    			while (true) { //EOFException will terminate loop
+    			int nestingLevel = 0;
+    			
+    			while (true) { //EndOfLogException will terminate loop
     				curData = reader.nextEvent();
     				nLines++;
     				switch (curData.type) {
@@ -319,37 +321,22 @@ public class LogReader
     					intervalCalc(curData.type, 0, 0, curData.time);
     					break;
     				case CREATION:
-    					intervalCalc(curData.type, curData.mtype, 
+    					intervalCalc(CREATION, curData.mtype, 
     							curData.entry, curData.time);
     					break;
     				case BEGIN_PROCESSING: 
-    					if (isProcessing) {
-    						// add a pretend end processing event.
-    						intervalCalc(END_PROCESSING, 
-    								curData.mtype, curData.entry,
-    								curData.time);
-    						// not necessarily needed.
-    						isProcessing = false;
+    					nestingLevel++;
+    					if(nestingLevel == 1){
+    						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
     					}
-    					intervalCalc(curData.type, curData.mtype, 
-    							curData.entry, curData.time);
-    					isProcessing = true;
     					break;
     				case END_PROCESSING:
-    					if (!isProcessing) {
-    						// bad, ignore. (the safe thing to do)
-    						// HAVE to add a dummy end event.
-    						// **HACK** use -5 as mtype number to
-    						// indicate the data is to be dropped.
-    						// (fillToIntervals still needs to make
-    						// progress though)
-    						intervalCalc(curData.type, -5, 
-    								curData.entry, curData.time);
-    					} else {
-    						intervalCalc(curData.type, curData.mtype, 
-    								curData.entry, curData.time);
+    					nestingLevel--;
+    					if(nestingLevel == 0){
+    						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
+    					} else if(nestingLevel < 0){
+    						nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
     					}
-    					isProcessing = false;
     					break;
     				case ENQUEUE:
     					intervalCalc(curData.type, curData.mtype, 
@@ -366,20 +353,30 @@ public class LogReader
     				case END_TRACE:
     					intervalCalc(curData.type,curData.mtype,0,curData.time);
     					break;
+    				case USER_SUPPLIED_NOTE:
+    					double timeInBinUnits = (double)curData.time / intervalSize - intervalStart;
+    					if(phaseMarkers != null){
+    						synchronized(phaseMarkers){
+    							phaseMarkers.put(timeInBinUnits, curData.note);
+    						}
+    					}
+    					break;
     				}
     			} // end while loop
-    		} catch (EOFException e) {
+    		} catch (EndOfLogSuccess e) {
     			// Do nothing
     		} catch (IOException e) {
     			System.err.println("Error: Failure to read log file!");
     			System.exit(-1);
     		}
+
+
     		try {
     			reader.close();
-    		} catch (IOException e) {
-    			System.err.println("Error! Failed to close reader!");
-    			System.exit(-1);
+    		} catch (IOException e1) {
+    			System.err.println("Error: could not close log file reader for processor " + pe );
     		}
+    		
     		curPeIdx++;
     	} // for loop
 

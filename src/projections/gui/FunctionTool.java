@@ -159,7 +159,7 @@ class FunctionTool extends GenericGraphWindow
 				"", 0, validPEs.size());
 	while (validPEs.hasMoreElements()) {
 	    pe = validPEs.nextElement();
-		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe),pe, MainWindow.runObject[myRun].getVersion());
 		try {
 		if (!progressBar.isCanceled()) {
 		    progressBar.setNote("[PE: " + pe + " ] Reading data");

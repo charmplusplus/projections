@@ -152,7 +152,7 @@ class UserEventsWindow extends GenericGraphWindow
 		numCalls[count] = new long[numActivities];
 
 		// READ - nothing here
-		GenericLogReader reader = new GenericLogReader(pe,
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe,
 				MainWindow.runObject[myRun].getVersion());
 		LogEntryData logData;
 		LogEntryData logDataEnd;

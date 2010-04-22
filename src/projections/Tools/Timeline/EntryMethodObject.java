@@ -22,7 +22,6 @@ import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import javax.swing.JToolTip;
 import javax.swing.ToolTipManager;
 
 import projections.analysis.AmpiFunctionData;

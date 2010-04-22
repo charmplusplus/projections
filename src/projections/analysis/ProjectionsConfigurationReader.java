@@ -25,11 +25,10 @@ import projections.misc.LogLoadException;
  */
 public class ProjectionsConfigurationReader
 {
-  private String baseName;
-  private String configurationName;
+  private String projrcFileName;
   
   private boolean dirty;
-  
+  FileUtils fileNameHandler;
   // Configuration Variables. They *must* begin with "RC_"
   // For convenience of coding, these are static. This will have to
   // be changed once multiple runs are supported generically in
@@ -39,12 +38,11 @@ public class ProjectionsConfigurationReader
   public Long RC_POSE_VIRT_TIME = new Long(-1);    
   public Boolean RC_OUTLIER_FILTERED = Boolean.valueOf(false);
   
-  public ProjectionsConfigurationReader(String filename)
+  public ProjectionsConfigurationReader(String filename, FileUtils fileNameHandler)
   {
-    baseName = FileUtils.getBaseName(filename);
-//    String logDirectory = FileUtils.dirFromFile(filename);
-    configurationName = baseName + ".projrc";
-    dirty = false;
+	  this.fileNameHandler = fileNameHandler;
+	  projrcFileName = fileNameHandler.getProjRCName();
+	  dirty = false;
     try {
       readfile();
     } catch (LogLoadException e) {
@@ -57,7 +55,7 @@ public class ProjectionsConfigurationReader
   throws LogLoadException
   {
 	  try {
-		  BufferedReader InFile = new BufferedReader(new InputStreamReader(new FileInputStream(configurationName)));
+		  BufferedReader InFile = new BufferedReader(new InputStreamReader(new FileInputStream(projrcFileName)));
 		  String Line;
 		  while ((Line = InFile.readLine()) != null) {
 			  StringTokenizer st = new StringTokenizer(Line);
@@ -121,7 +119,7 @@ public class ProjectionsConfigurationReader
 	  } catch (FileNotFoundException e) {
 		  // no previous rc file. Create new file.
 	  } catch (IOException e) {
-		  throw new LogLoadException (configurationName);
+		  throw new LogLoadException (projrcFileName);
 	  }
   }
   
@@ -153,7 +151,7 @@ public class ProjectionsConfigurationReader
 	  // Write the string into the file 
 	  if (dirty && filedata.length()>0) {  
 		  try {
-			  PrintWriter writer =  new PrintWriter(new FileWriter(configurationName));
+			  PrintWriter writer =  new PrintWriter(new FileWriter(projrcFileName));
 			  try {
 				  writer.print(filedata);
 			  } catch (Exception e) {
@@ -163,9 +161,9 @@ public class ProjectionsConfigurationReader
 			  }
 			  writer.close();
 		  } catch (FileNotFoundException e) {
-			  throw new LogLoadException (configurationName);
+			  throw new LogLoadException (projrcFileName);
 		  } catch (IOException e) {
-			  throw new LogLoadException (configurationName);
+			  throw new LogLoadException (projrcFileName);
 		  }
 	  }
 	  

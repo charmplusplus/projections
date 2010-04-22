@@ -51,7 +51,7 @@ class ThreadedFileReader implements Runnable  {
 
 	public void run() { 
 
-		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
 		//Initialize class variables
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		int numIntervals = (int) (endInterval-startInterval+1);
@@ -74,7 +74,7 @@ class ThreadedFileReader implements Runnable  {
 
 				if (logdata.type == ProjDefs.CREATION) {  // Message being sent
 					int destEP = logdata.entry;
-					int timeInterval = getInterval(logdata.time, numIntervals);
+					int timeInterval = getInterval(logdata.time);
 
 					// Update message and byte sent arrays
 					if(timeInterval >= 0 && timeInterval < numIntervals){
@@ -85,7 +85,7 @@ class ThreadedFileReader implements Runnable  {
 				} else if ((logdata.type ==  ProjDefs.CREATION_BCAST) ||
 						(logdata.type ==  ProjDefs.CREATION_MULTICAST)) {
 					int destEP = logdata.entry;
-					int timeInterval = getInterval(logdata.time, numIntervals);
+					int timeInterval = getInterval(logdata.time);
 					if(timeInterval >= 0 && timeInterval < numIntervals){
 						localMessagesSend[timeInterval][destEP] += logdata.numPEs;
 						localBytesSend[timeInterval][destEP] +=	(logdata.msglen * logdata.numPEs);
@@ -93,7 +93,7 @@ class ThreadedFileReader implements Runnable  {
 				} else if (logdata.type ==  ProjDefs.BEGIN_PROCESSING) {  // Starting new entry method
 					int currEPindex = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
 					int srcPe = logdata.pe;
-					int timeInterval = getInterval(logdata.time, numIntervals);
+					int timeInterval = getInterval(logdata.time);
 					if(timeInterval >= 0 && timeInterval < numIntervals){
 						// Update message and byte received arrays
 						localMessagesRecv[timeInterval][currEPindex]++;
@@ -176,7 +176,7 @@ class ThreadedFileReader implements Runnable  {
 
 
 
-	private int getInterval(long currTime, int numIntervals)
+	private int getInterval(long currTime)
 	{
 		long ginterval = currTime/intervalSize;
 		return (int) (ginterval - startInterval);

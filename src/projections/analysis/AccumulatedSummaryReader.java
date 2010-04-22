@@ -31,8 +31,8 @@ class AccumulatedSummaryReader extends ProjectionsReader
     // Interval Data
     private double utilization[];  // indexed by interval number
 
-    private AccumulatedSummaryReader(String filename, String version) {
-	super(filename, version);
+    private AccumulatedSummaryReader(File file, String version) {
+	super(file, version);
     }
    
     // ****** Contract requirements as a ProjectionsReader
@@ -42,7 +42,6 @@ class AccumulatedSummaryReader extends ProjectionsReader
      *  The availability check is implemented as such.
      */
     protected boolean checkAvailable() {
-	File sourceFile = new File(sourceString);
 	return sourceFile.canRead();
     }
 
@@ -137,7 +136,7 @@ class AccumulatedSummaryReader extends ProjectionsReader
 	throws IOException 
     {
 	BufferedReader reader =
-	    new BufferedReader(new FileReader(sourceString));
+	    new BufferedReader(new FileReader(sourceFile));
 	ParseTokenizer tokenizer = initNewTokenizer(reader);
 
 	// initialize utilization array
@@ -209,32 +208,4 @@ class AccumulatedSummaryReader extends ProjectionsReader
 	return utilization;
     }
 
-    public static void main(String args[]) {
-	String filename = args[0];
-	AccumulatedSummaryReader reader = 
-	    new AccumulatedSummaryReader(filename, "5.0");
-	// verify that header data was read.
-	System.out.println(reader.getIntervalSize());
-	System.out.println(reader.numProcessors);
-	System.out.println(reader.numIntervals);
-	System.out.println(reader.intervalSize);
-	System.out.println(reader.totalTime);
-
-	// VERY SPECIFIC to the file 
-	// /scratch/namdlogs/32000/leanMD-bg.sum
-	// on prowess.
-	// READ and SPIT everything out.
-	try {
-	    reader.loadIntervalData(0, reader.numIntervals-1);
-	    // now acquire the data and print.
-	    double data[] = reader.getUtilData();
-	    for (int i=0; i<data.length; i++) {
-		System.out.print((long)(data[i]) + " ");
-	    }
-	    System.out.println();
-//	    reader.reset();
-	} catch (IOException e) {
-	    System.err.println(e.toString());
-	}
-    }
 }

@@ -60,8 +60,6 @@ public class Analysis {
   private PoseDopReader dopReader; //Only for .poselog files
   
   private IntervalData intervalData; // interval-based data
-
-  private String baseName; 
   
   
   /** Stores previous selections from a range dialog box from all tools */
@@ -116,7 +114,7 @@ public class Analysis {
   }
   
   
-  
+  FileUtils fileNameHandler;
   /** ************** Methods ********************** */
   
   /**
@@ -135,7 +133,8 @@ public class Analysis {
     {
 	  guiRoot = rootComponent;
 	  try {
-		  baseName = FileUtils.getBaseName(filename);
+		  
+		  fileNameHandler = new FileUtils(filename);
 
 		  setSts(new StsReader(filename));
 
@@ -149,9 +148,7 @@ public class Analysis {
 			  System.exit(-1);
 		  }
 
-		  rcReader = 
-			  new ProjectionsConfigurationReader(filename);
-		  FileUtils.detectFiles(baseName);	
+		  rcReader = new ProjectionsConfigurationReader(filename, fileNameHandler);
 
 		  // Projections Colors
 		  String colorsaved = 
@@ -602,15 +599,20 @@ public class Analysis {
 //    }
 
     public String getLogDirectory() {
-    	return FileUtils.dirFromFile(baseName);
+    	return fileNameHandler.dirFromFile();
     }
     
     public String getLogWithoutExtensionOrDirectory() {
-    	return FileUtils.withoutDir(baseName);
+    	return fileNameHandler.withoutDir();
     }
 
     public String getFilename() { 
-    	return baseName;
+    	return fileNameHandler.getBaseName();
+    }
+
+    
+    public String getBaseFilename() { 
+    	return fileNameHandler.getBaseName();
     }   
     
     // *** Activity Management *** */
@@ -867,11 +869,11 @@ public class Analysis {
 
     // ************** Public Accessors to File Information *************
     private String getValidProcessorString(int type) {
-	return FileUtils.getValidProcessorString(type);
+	return fileNameHandler.getValidProcessorString(type);
     }
 
     public OrderedIntList getValidProcessorList(int type) {
-	return FileUtils.getValidProcessorList(type);
+	return fileNameHandler.getValidProcessorList(type);
     }
 
     /**
@@ -908,53 +910,64 @@ public class Analysis {
 	}
     }
 
+    /** This should be the only function to provide the log file name to the tools */
     public String getLogName(int pnum) {
-	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.LOG);
+    	return fileNameHandler.getCanonicalFileName(pnum, ProjMain.LOG);
     }   
     
+    public File getLog(int pe) {
+    	return fileNameHandler.getLogFile(pe);
+    }   
+
 
     public String getSumName(int pnum) {
-	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.SUMMARY);
-    }   
-    
-//    public String getSumAccumulatedName() {
-//	return FileUtils.getSumAccumulatedName(baseName);
-//    }
-
-    public String getSumDetailName(int pnum) {
-	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.SUMDETAIL);
+    	return fileNameHandler.getCanonicalFileName(pnum, ProjMain.SUMMARY);
     }
 
+    public String getSumDetailName(int pnum) {
+    	return fileNameHandler.getCanonicalFileName(pnum, ProjMain.SUMDETAIL);
+    }
+
+
+	public File getSumDetailLog(int pe) {
+		File f = new File(getSumDetailName(pe));
+		if(! f.isFile()){
+			System.err.println("Sum Detail log does not appear to be a regular file: " + f.getAbsolutePath());
+			return null;
+		}
+		return f;
+	}
+    
     public String getPoseDopName(int pnum) {
-	return FileUtils.getCanonicalFileName(baseName, pnum, ProjMain.DOP);
+    	return fileNameHandler.getCanonicalFileName(pnum, ProjMain.DOP);
     }
 
     protected void closeRC() {
-	if (rcReader != null) {
-	    rcReader.close();
-	}
+    	if (rcReader != null) {
+    		rcReader.close();
+    	}
     }
 
     // ************** Internal Data file(s) management routines ********
 
     public boolean hasLogFiles() {
-	return FileUtils.hasLogFiles();
+	return fileNameHandler.hasLogFiles();
     }   
 
     public boolean hasSumFiles() {
-	return FileUtils.hasSumFiles();
+	return fileNameHandler.hasSumFiles();
     }
    
     private boolean hasSumAccumulatedFile() {
-	return FileUtils.hasSumAccumulatedFile();
+	return fileNameHandler.hasSumAccumulatedFile();
     }
 
     public boolean hasSumDetailFiles() {
-	return FileUtils.hasSumDetailFiles();
+	return fileNameHandler.hasSumDetailFiles();
     }
 
     private boolean hasPoseDopFiles() {
-	return FileUtils.hasPoseDopFiles();
+	return fileNameHandler.hasPoseDopFiles();
     }
 
 	public void setSts(StsReader sts) {
@@ -973,6 +986,11 @@ public class Analysis {
 	public Paint getOverheadColor() {
 		return new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
 	}
+
+	public String getOutlierFilename() {
+		return getBaseFilename() + ".outlier";	
+	}
+
 	
 	
 }

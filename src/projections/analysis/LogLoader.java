@@ -106,7 +106,7 @@ public class LogLoader extends ProjDefs
 		Hashtable procThdMap = new Hashtable();
 
 		try{
-			logFileRd = new GenericLogReader(procId,MainWindow.runObject[myRun].getVersion());
+			logFileRd = new GenericLogReader(MainWindow.runObject[myRun].getLog(procId),procId,MainWindow.runObject[myRun].getVersion());
 			
 			/** 
 			 * seek the first BEGIN_PROCESSING within this time interval 
@@ -369,7 +369,7 @@ public class LogLoader extends ProjDefs
 		Hashtable procThdMap = new Hashtable();
 
 		try {
-			logFileRd = new GenericLogReader(procId,MainWindow.runObject[myRun].getVersion());
+			logFileRd = new GenericLogReader(MainWindow.runObject[myRun].getLog(procId), procId,MainWindow.runObject[myRun].getVersion());
 
 			/** 
 			 * seek the first BEGIN_PROCESSING within this time interval 
@@ -598,7 +598,7 @@ public class LogLoader extends ProjDefs
 		boolean tempte;
 
 		// open the file
-		GenericLogReader reader = new GenericLogReader(pe,MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe),pe,MainWindow.runObject[myRun].getVersion());
 
 		try {
 			// to treat dummy thread EPs as a special-case EP

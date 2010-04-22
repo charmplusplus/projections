@@ -33,7 +33,7 @@ class ThreadedFileReader implements Runnable  {
 
 	private void LoadGraphDataForOnePe(int pe) 
 	{
-		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
 
 		try {	  
 			fakeCounter = 0.0;

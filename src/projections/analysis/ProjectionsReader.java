@@ -1,5 +1,7 @@
 package projections.analysis;
 
+import java.io.File;
+
 
 /**
  *  The base class for all future projections readers. It provides basic
@@ -24,8 +26,10 @@ extends ProjDefs
 
 	// this can be any identifying string - full path name (default),
 	// network address, URL etc ...
-	protected String sourceString;
+//	protected String sourceString;
 
+	protected File sourceFile;
+	
 	/**
 	 *  INHERITANCE NOTE:
 	 *
@@ -36,9 +40,9 @@ extends ProjDefs
 	 *  by the subclass' constructor. The default constructor will
 	 *  only perform the necessary checks.
 	 */
-	protected ProjectionsReader(String sourceString, String versionOverride) {
+	protected ProjectionsReader(File sourceFile, String versionOverride) {
 		expectedVersion = versionOverride;
-		this.sourceString = sourceString;
+		this.sourceFile = sourceFile;
 		checkAvailable();
 	}
 

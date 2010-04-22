@@ -118,7 +118,7 @@ public class UsageCalc extends ProjDefs
 		float data[] = new float [numFunc+1];
 		for(int i=0;i<numFunc;i++) accTime[i]=0;
 
-		GenericLogReader reader = new GenericLogReader(procnum, v);
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(procnum), procnum, v);
 		LogEntryData LE;
 		AmpiFunctionData curFunc = null;
 
@@ -247,7 +247,7 @@ public class UsageCalc extends ProjDefs
 			data[1][i] = (float )0.0;
 		}
 
-		reader = new GenericLogReader(procnum, version);
+		reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(procnum), procnum, version);
 		logEntry = new LogEntryData();
 		curEntry = -1;
 

@@ -16,6 +16,7 @@ import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.TimelineEvent;
 import projections.gui.Analysis;
+import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
 class NoiseMinerThread implements Runnable {
@@ -23,6 +24,8 @@ class NoiseMinerThread implements Runnable {
 	private TreeMap h;
 	private Analysis analysis;
 	private NoiseMiner parent;
+	
+	private int myRun = 0;
 	
 	private	Histogram h_pe;
 	
@@ -64,7 +67,7 @@ class NoiseMinerThread implements Runnable {
 		h = new TreeMap();
 			
 		
-		GenericLogReader reader = new GenericLogReader(getPe(), analysis.getVersion());
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(getPe()), getPe(), analysis.getVersion());
 
 		try {
 

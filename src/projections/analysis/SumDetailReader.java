@@ -50,9 +50,9 @@ class SumDetailReader extends ProjectionsReader
 
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
-    protected SumDetailReader(String filename, double Nversion)
+    protected SumDetailReader(File file, double Nversion)
     {
-	super(filename, String.valueOf(Nversion));
+	super(file, String.valueOf(Nversion));
     }
 
     /**
@@ -60,7 +60,6 @@ class SumDetailReader extends ProjectionsReader
      *  as such.
      */
     protected boolean checkAvailable() {
-	File sourceFile = new File(sourceString);
 	return sourceFile.canRead();
     }
 
@@ -118,7 +117,7 @@ class SumDetailReader extends ProjectionsReader
     protected void read() 
 	throws IOException
     {
-	reader = new BufferedReader(new FileReader(sourceString));
+	reader = new BufferedReader(new FileReader(sourceFile));
 
 	// Set up the tokenizer  
 	tokenizer=new ParseTokenizer(reader);

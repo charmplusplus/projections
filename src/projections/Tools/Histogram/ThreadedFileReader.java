@@ -81,7 +81,7 @@ class ThreadedFileReader implements Runnable  {
 		int curPeCount = 0;
 
 		curPeCount++;
-		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
 		try {
 			int nestingLevel = 0;
 			LogEntryData prevBegin = null;

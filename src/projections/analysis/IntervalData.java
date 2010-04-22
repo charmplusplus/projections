@@ -77,7 +77,7 @@ public class IntervalData
 		int pe = availablePEs.nextElement();
 		try {
 		    summaryDetails[pe] = 
-			new SumDetailReader(MainWindow.runObject[myRun].getSumDetailName(pe),
+			new SumDetailReader(MainWindow.runObject[myRun].getSumDetailLog(pe),
 					    MainWindow.runObject[myRun].getVersion());
 		    summaryDetails[pe].read();
 		    for (int type=0; type<SumDetailReader.NUM_TAGS; type++) {

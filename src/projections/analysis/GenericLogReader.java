@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 import projections.gui.Analysis;
 import projections.gui.MainWindow;
@@ -57,17 +58,17 @@ implements PointCapableReader
 	
 		
 	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
-	public GenericLogReader(int peNum, double Nversion) {
-		super("", String.valueOf(Nversion));
+	public GenericLogReader(File file, int peNum, double Nversion) {
+		super(MainWindow.runObject[myRun].getLog(peNum), String.valueOf(Nversion));
 		
-		sourceString = MainWindow.runObject[myRun].getLogName(peNum);
-//		System.out.println("Acquired: " + sourceString);
+		sourceFile = MainWindow.runObject[myRun].getLog(peNum);
+
 		
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);
 		endComputationOccurred = false;
 		
-		reader = createBufferedReader(sourceString); 
+		reader = createBufferedReader(sourceFile); 
 		version = Nversion;
 		try {
 			reader.readLine(); // skip over the header (already read)
@@ -79,25 +80,29 @@ implements PointCapableReader
 
 
 	/** Try to load the log file or a corresponding compressed version ending in ".gz" */
-	private BufferedReader createBufferedReader(String filename) {
+	private BufferedReader createBufferedReader(File file) {
 		BufferedReader r = null;
+		String filename = file.getAbsolutePath();
+		String s3 = filename.substring(filename.length()-3); // last 3 characters of filename
+		String s4 = filename.substring(filename.length()-4); // last 4 characters of filename
+		
 		try {
-			// Try loading the log file using its standard name
-			FileReader fr = new FileReader(filename);
-			r = new BufferedReader(fr, bufferSize);
-			
-		} catch (FileNotFoundException e) {
-			try{
+			if(s3.compareTo(".gz")==0){
 				// Try loading the gz version of the log file
-				String inFilename = filename + ".gz";
-				InputStream fis = new FileInputStream(inFilename);
+				InputStream fis = new FileInputStream(file);
 				InputStream gis = new GZIPInputStream(fis);
 				r = new BufferedReader(new InputStreamReader(gis), bufferSize);
-			} catch (IOException e2) {
-				System.err.println("Error reading file " + filename + ".gz");
-				return null;
+			} else {
+				// Try loading the log file uncompressed
+				FileReader fr = new FileReader(file);
+				r = new BufferedReader(fr, bufferSize);			
 			}
-		}	
+
+		} catch (IOException e2) {
+			System.err.println("Error reading file " + filename);
+			return null;
+		}
+		
 		return r;
 
 	}
@@ -105,9 +110,7 @@ implements PointCapableReader
 	
 	/** Check if the log file or a corresponding compressed version ending in ".gz" is readable */
 	protected boolean checkAvailable() {
-		File sourceFile = new File(sourceString);
-		File sourceFileGZ = new File(sourceString + ".gz");		
-		return sourceFile.canRead() || sourceFileGZ.canRead();
+		return sourceFile.canRead();
 	}
 
 	
@@ -154,7 +157,7 @@ implements PointCapableReader
 			endComputationOccurred = true;
 			data.type = END_COMPUTATION;
 			data.time = lastRecordedTime;
-			System.err.println("[" + sourceString + "] WARNING: Partial or Corrupted Projections log. Faked END_COMPUTATION entry added for last recorded time of " +	data.time);
+			System.err.println("[" + sourceFile.getAbsolutePath() + "] WARNING: Partial or Corrupted Projections log. Faked END_COMPUTATION entry added for last recorded time of " +	data.time);
 			return data;			
 		}
 

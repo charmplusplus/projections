@@ -710,7 +710,7 @@ Clickable
 		// Read the stats file for global average data.
 		String statsFilePath =
 			MainWindow.runObject[myRun].getLogDirectory() + File.separator + 
-			MainWindow.runObject[myRun].getFilename() + ".outlier";
+			MainWindow.runObject[myRun].getOutlierFilename();
 		try {
 			BufferedReader InFile =
 				new BufferedReader(new InputStreamReader(new FileInputStream(statsFilePath)));	
@@ -784,7 +784,7 @@ Clickable
 
 	private void readOnlineOutlierProcessor(int pe, int index, final long startTime, final long endTime) {
 		GenericLogReader reader = 
-			new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
+			new GenericLogReader(MainWindow.runObject[myRun].getLog(pe),pe, MainWindow.runObject[myRun].getVersion());
 		try {
 			LogEntryData logData = new LogEntryData();
 			logData.time = 0;

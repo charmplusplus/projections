@@ -73,7 +73,7 @@ public class CallTable extends ProjDefs
 				progressBar.close();
 				break;
 			}
-			reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());    
+			reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
 
 			try
 			{

@@ -58,7 +58,7 @@ class ThreadedFileReader implements Runnable  {
 		// unfortunately requires us to write a different read loop
 		// for it.
 		GenericLogReader reader = 
-			new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
+			new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
 
 
 		try {

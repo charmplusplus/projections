@@ -1,16 +1,13 @@
 package projections.analysis;
 
 import java.io.BufferedReader;
-
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 import projections.gui.Analysis;
 import projections.gui.MainWindow;
@@ -58,7 +55,7 @@ implements PointCapableReader
 	
 		
 	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
-	public GenericLogReader(File file, int peNum, double Nversion) {
+	public GenericLogReader(int peNum, double Nversion) {
 		super(MainWindow.runObject[myRun].getLog(peNum), String.valueOf(Nversion));
 		
 		sourceFile = MainWindow.runObject[myRun].getLog(peNum);
@@ -84,7 +81,6 @@ implements PointCapableReader
 		BufferedReader r = null;
 		String filename = file.getAbsolutePath();
 		String s3 = filename.substring(filename.length()-3); // last 3 characters of filename
-		String s4 = filename.substring(filename.length()-4); // last 4 characters of filename
 		
 		try {
 			if(s3.compareTo(".gz")==0){

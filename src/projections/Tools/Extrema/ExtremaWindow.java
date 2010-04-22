@@ -784,7 +784,7 @@ Clickable
 
 	private void readOnlineOutlierProcessor(int pe, int index, final long startTime, final long endTime) {
 		GenericLogReader reader = 
-			new GenericLogReader(MainWindow.runObject[myRun].getLog(pe),pe, MainWindow.runObject[myRun].getVersion());
+			new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		try {
 			LogEntryData logData = new LogEntryData();
 			logData.time = 0;

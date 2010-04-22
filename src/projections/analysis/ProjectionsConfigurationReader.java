@@ -38,7 +38,7 @@ public class ProjectionsConfigurationReader
   public Long RC_POSE_VIRT_TIME = new Long(-1);    
   public Boolean RC_OUTLIER_FILTERED = Boolean.valueOf(false);
   
-  public ProjectionsConfigurationReader(String filename, FileUtils fileNameHandler)
+  public ProjectionsConfigurationReader(FileUtils fileNameHandler)
   {
 	  this.fileNameHandler = fileNameHandler;
 	  projrcFileName = fileNameHandler.getProjRCName();

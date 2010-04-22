@@ -598,7 +598,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		final SwingWorker worker =  new SwingWorker() {
 			public Object doInBackground() {
 				int pe = 0;
-				GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
+				GenericLogReader reader = new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
 				try {	  
 
 					int c = 0;

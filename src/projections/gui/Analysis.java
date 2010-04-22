@@ -148,7 +148,7 @@ public class Analysis {
 			  System.exit(-1);
 		  }
 
-		  rcReader = new ProjectionsConfigurationReader(filename, fileNameHandler);
+		  rcReader = new ProjectionsConfigurationReader(fileNameHandler);
 
 		  // Projections Colors
 		  String colorsaved = 

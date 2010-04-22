@@ -23,10 +23,7 @@ class AccumulatedSummaryReader extends ProjectionsReader
     implements IntervalCapableReader
 {
     // Static Data items
-	private int numProcessors;
-    private long numIntervals;
     private double intervalSize;
-    private double totalTime;
 
     // Interval Data
     private double utilization[];  // indexed by interval number

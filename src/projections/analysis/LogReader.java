@@ -308,7 +308,7 @@ public class LogReader
 
     		int nLines = 2;
 
-    		GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(pe), pe, MainWindow.runObject[myRun].getVersion());
+    		GenericLogReader reader = new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
     		
     		try { 
     			int nestingLevel = 0;

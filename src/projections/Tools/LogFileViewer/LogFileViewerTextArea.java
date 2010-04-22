@@ -78,7 +78,7 @@ class LogFileViewerTextArea extends JPanel
 		htmlFormattedTable.append( "<table><tr><td><h2>Time</h2><td><h2>Event type and description</h2>");
 
 		try {	  
-			GenericLogReader reader = new GenericLogReader(MainWindow.runObject[myRun].getLog(PE),PE, MainWindow.runObject[myRun].getVersion());
+			GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
 
 			while (true) {
 				LogEntryData data = reader.nextEvent();

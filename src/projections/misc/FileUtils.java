@@ -13,6 +13,9 @@ import projections.gui.OrderedIntList;
  *
  *	Note: Originally this class just handled the names of the files, but it is in transition to supply File objects.
  *
+ *
+ * @TODO: Fix the rest of the log readers to get their "File" objects from this class instead of the filename string they currently get.
+ * 
  */
 
 public class FileUtils {
@@ -21,7 +24,6 @@ public class FileUtils {
 	private String validPEStrings[];
 	private boolean hasFiles[];
 	
-	private String filename;
 	private String baseName;
 	
 	
@@ -33,7 +35,6 @@ public class FileUtils {
 	private TreeMap<Integer, File> logFiles;
 	
 	public FileUtils(String filename){
-		this.filename = filename;
 		System.out.println("FileUtils created with filename: " + filename);	
 	
 		// Extract base name

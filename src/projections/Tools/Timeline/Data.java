@@ -1263,6 +1263,15 @@ public class Data
 		colorByEntryId = false;
 		displayMustBeRepainted();
 	}
+	
+
+	public void setColorForEntry(int id, Color c) {
+		if(c !=null){
+			MainWindow.runObject[myRun].setEntryColor(id, c);
+			displayMustBeRepainted();
+		}	 
+	}	
+	
 
 	/** Color the events by memory usage if possible */
 	protected void setColorByMemoryUsage() {
@@ -2008,7 +2017,7 @@ public class Data
 		messageStructures = null;
 		drawMessagesForTheseObjects = null;
 		drawMessagesForTheseObjectsAlt = null;
-	} 
+	}
 	
 	
 }

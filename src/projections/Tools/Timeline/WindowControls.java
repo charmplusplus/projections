@@ -78,6 +78,7 @@ ItemListener {
 	private JMenuItem mWhiteBG;
 	private JMenuItem mBlackBG;
 
+	private JMenuItem mColorChooser;
 	private JMenuItem mSaveColors;
 	private JMenuItem mRestoreColors;
 	private JMenuItem mDefaultColors;
@@ -293,6 +294,7 @@ ItemListener {
 		else if(evt.getSource() == mSaveColors)
 			MainWindow.runObject[myRun].saveColors();
 
+		
 		else if(evt.getSource() == mRestoreColors){
 			try {
 				Util.restoreColors(data.entryColor());
@@ -300,6 +302,11 @@ ItemListener {
 			} catch (Exception e) {
 				System.err.println("Attempt to read from color.map failed");
 			}	
+		}
+		
+		
+		else if(evt.getSource() == mColorChooser){
+			new ChooseEntriesWindow(data);
 		}
 
 		else if(evt.getSource() == mDefaultColors){
@@ -448,7 +455,9 @@ ItemListener {
 		mSaveColors = new JMenuItem("Save Entry Point Colors");
 		mRestoreColors = new JMenuItem("Restore Entry Point Colors");
 		mDefaultColors = new JMenuItem("Default Entry Point Colors");
-
+		mColorChooser = new JMenuItem("Choose Entry Point Colors");
+		
+		
 		mColorByDefault = new JMenuItem("Color by Default");
 		mColorByObjectID = new JMenuItem("Color by Object Index");
 		mColorByEntryMethod = new JMenuItem("Color by Entry Method");
@@ -465,6 +474,7 @@ ItemListener {
 //		colorMenu.add(mChangeColors);
 		colorMenu.add(mSaveColors);
 		colorMenu.add(mRestoreColors);
+		colorMenu.add(mColorChooser);
 		colorMenu.add(mDefaultColors);
 		colorMenu.addSeparator();
 		colorMenu.add(mColorByDefault);
@@ -482,6 +492,7 @@ ItemListener {
 		mSaveColors.addActionListener(this);
 		mRestoreColors.addActionListener(this);
 		mDefaultColors.addActionListener(this);
+		mColorChooser.addActionListener(this);
 		mColorByDefault.addActionListener(this);
 		mColorByObjectID.addActionListener(this);
 		mColorByEntryMethod.addActionListener(this);

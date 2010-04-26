@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Hashtable;
@@ -11,14 +12,27 @@ import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.AbstractCellEditor;
+import javax.swing.table.TableCellEditor;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JDialog;
+import javax.swing.JTable;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
 
 class ChooseEntriesWindow extends JFrame 
 {
@@ -29,16 +43,16 @@ class ChooseEntriesWindow extends JFrame
 
 	private JButton checkAll;
 	private JButton uncheckAll;
-	
-	
+
+
 	ChooseEntriesWindow(Data _data){
 		data = _data;
 		createLayout();
 	}
 
 	private void createLayout(){
-		setTitle("Choose which entry methods are displayed");
-		
+		setTitle("Choose which entry methods are displayed and their colors");
+
 
 		// create a table of the data
 		columnNames = new Vector();
@@ -57,11 +71,11 @@ class ChooseEntriesWindow extends JFrame
 			Integer id = iter.next();
 			String name = entryNames.get(id);
 			Vector tableRow = new Vector();
-			
+
 			Boolean b = data.entryIsVisibleID(id);
 
-			Color c = data.getEntryColor(id);
-			
+			ClickableColorBox c = new ClickableColorBox(id, data.getEntryColor(id));
+
 			tableRow.add(b);
 			tableRow.add(name);
 			tableRow.add(id);
@@ -75,29 +89,30 @@ class ChooseEntriesWindow extends JFrame
 		JTable table = new JTable(tableModel);
 		initColumnSizes(table);
 
-		table.setDefaultRenderer(Color.class, new ColorRenderer());
-		
+		table.setDefaultRenderer(ClickableColorBox.class, new ColorRenderer());
+		table.setDefaultEditor(ClickableColorBox.class, new ColorEditor());
+
 		// put the table into a scrollpane
 		JScrollPane scroller = new JScrollPane(table);
 		scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout());
-		checkAll = new JButton("Show All");
+		checkAll = new JButton("Make All Visible");
 		uncheckAll = new JButton("Hide All");
 		checkAll.addActionListener(tableModel);
 		uncheckAll.addActionListener(tableModel);
 		buttonPanel.add(checkAll);
 		buttonPanel.add(uncheckAll);
-		
+
 		// put the scrollpane into our guiRoot
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
-		
+
 		p.add(buttonPanel, BorderLayout.NORTH);
 		p.add(scroller, BorderLayout.CENTER);
 
-		
+
 		this.setContentPane(p);
 
 		// Display it all
@@ -127,10 +142,10 @@ class ChooseEntriesWindow extends JFrame
 	private class MyTableModel extends AbstractTableModel implements ActionListener{
 
 		public boolean isCellEditable(int row, int col) {
-			if (col >= 1) {
-				return false;
-			} else {
+			if (col == 0 || col == 3) {
 				return true;
+			} else {
+				return false;
 			}
 		}
 
@@ -167,6 +182,8 @@ class ChooseEntriesWindow extends JFrame
 					// add to list of disabled entry methods
 					data.makeEntryInvisibleID(id);
 				}				
+			} else {
+//				System.out.println("setValueAt col = " + col);
 			}
 
 			tabledata.get(row).set(col,value);
@@ -174,7 +191,7 @@ class ChooseEntriesWindow extends JFrame
 
 		}
 
-			
+
 
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == checkAll){
@@ -187,7 +204,7 @@ class ChooseEntriesWindow extends JFrame
 					// Update the visualization (but don't redraw yet)
 					data.makeEntryVisibleID(id, false);
 				}
-			} else {
+			} else if(e.getSource() == uncheckAll) {
 				Iterator<Vector> iter= tabledata.iterator();
 				while(iter.hasNext()){
 					Vector v = iter.next();
@@ -197,19 +214,35 @@ class ChooseEntriesWindow extends JFrame
 					// Update the visualization (but don't redraw yet)
 					data.makeEntryInvisibleID(id, false);
 				}				
+			} else {
+				System.out.println("Action for object: " + e.getSource());
 			}
+
+
 			data.displayMustBeRedrawn();
 			fireTableDataChanged();
-			
 		}
 
-		
-	}    
-	
-	
 
-	
-    /// A simple color renderer
+	}    
+
+
+	/// A class that incorporates an integer identifier and its corresponding paint
+	private class ClickableColorBox {
+		public int id;
+		public Color c;
+		public ClickableColorBox(int id, Color c){
+			this.id = id;
+			this.c = c;
+		}
+		public void setColor(Color c){
+			this.c = c;
+			data.setColorForEntry(id, c);
+		}
+	}
+
+
+	/// A simple color renderer
 	private class ColorRenderer extends JLabel
 	implements TableCellRenderer {	
 		private ColorRenderer() {
@@ -219,11 +252,75 @@ class ChooseEntriesWindow extends JFrame
 				JTable table, Object color,
 				boolean isSelected, boolean hasFocus,
 				int row, int column) {
-			setBackground((Color) color);
+			if(color instanceof Color){
+				setBackground((Color) color);
+			}else if(color instanceof ClickableColorBox){
+				setBackground(((ClickableColorBox) color).c);
+			}
+
 			return this;
 		}
 	}
 
+
+
+	public class ColorEditor extends AbstractCellEditor
+	implements TableCellEditor,
+	ActionListener {
+		ClickableColorBox currentColorBox;
+		JButton button;
+		JColorChooser colorChooser;
+		JDialog dialog;
+		protected static final String EDIT = "edit";
+
+		public ColorEditor() {
+			button = new JButton();
+			button.setActionCommand(EDIT);
+			button.addActionListener(this);
+			button.setBorderPainted(false);
+
+			//Set up the dialog that the button brings up.
+			colorChooser = new JColorChooser();
+			dialog = JColorChooser.createDialog(button,
+					"Pick a Color",
+					true,  //modal
+					colorChooser,
+					this,  //OK button handler
+					null); //no CANCEL button handler
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			if (EDIT.equals(e.getActionCommand())) {
+				//The user has clicked the cell, so
+				//bring up the dialog.
+				button.setBackground(currentColorBox.c);
+				colorChooser.setColor(currentColorBox.c);
+				dialog.setVisible(true);
+
+				fireEditingStopped(); //Make the renderer reappear.
+
+			} else { //User pressed dialog's "OK" button.
+				currentColorBox.setColor(colorChooser.getColor());
+			}
+		}
+
+		//Implement the one CellEditor method that AbstractCellEditor doesn't.
+		public Object getCellEditorValue() {
+			return currentColorBox;
+		}
+
+		//Implement the one method defined by TableCellEditor.
+		public Component getTableCellEditorComponent(JTable table,
+				Object value,
+				boolean isSelected,
+				int row,
+				int column) {
+			
+			currentColorBox = (ClickableColorBox)value;
+			
+			return button;
+		}
+	}
 
 
 

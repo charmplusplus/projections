@@ -1,11 +1,10 @@
 package projections.gui;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -40,8 +39,6 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     private JPanel controlPanel;
     private JButton epSelection;
     private JButton setRanges;
-    private JButton saveColors;
-    private JButton loadColors;
 
 
     // data used for intervalgraphdialog
@@ -65,14 +62,14 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     //the selected interval
     private boolean existsArray[];
 
-    private Color colorArray[];
     private String funcNames[];
     private double[][] graphData=null;
 
     //output arrays
     private double[][] outputData = null;
-    private Color[] outColors = null;
-    
+
+    private AmpiTimeProfileColorer ampiTimeProfColorer;
+
 
     // flag signifying callgraph has just begun
     //private boolean	   startFlag;
@@ -99,16 +96,10 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         epSelection.addActionListener(this);
         setRanges = new JButton("Select New Range");
         setRanges.addActionListener(this);
-        saveColors = new JButton("Save Function Colors");
-        saveColors.addActionListener(this);
-        loadColors = new JButton("Load Function Colors");
-        loadColors.addActionListener(this);
         controlPanel = new JPanel();
         controlPanel.setLayout(gbl);
         Util.gblAdd(controlPanel, epSelection, gbc, 0,0, 1,1, 0,0);
         Util.gblAdd(controlPanel, setRanges,   gbc, 1,0, 1,1, 0,0);
-        Util.gblAdd(controlPanel, saveColors,  gbc, 2,0, 1,1, 0,0);
-        Util.gblAdd(controlPanel, loadColors,  gbc, 3,0, 1,1, 0,0);
 
         JPanel graphPanel = getMainPanel();
         Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
@@ -172,11 +163,13 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
                 funcCnt += funcStk.size();
             }
         }
+        
+        ampiTimeProfColorer = new AmpiTimeProfileColorer(funcCnt);
 
         numFunctions = funcCnt;
-        outColors = ColorManager.createColorMap(funcCnt);
         funcNames = new String[funcCnt];
-        colorArray = new Color[funcCnt];        
+           
+
         //initialize the stateArray that all functions will be displayed. Values
         //may be changed after function selection dialog
         stateArray = new boolean[funcCnt];
@@ -184,7 +177,6 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         //is determined to by the interval!!
         existsArray = new boolean[funcCnt];
         for(int i=0; i<funcCnt; i++){
-            colorArray[i] = outColors[i];
             stateArray[i] = true;
             existsArray[i] = false;
         }            
@@ -249,11 +241,28 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         setXAxis("Time Interval (" + U.humanReadableString(intervalSize) + ")", "",
 		     startInterval, 1.0);
 	setYAxis("AMPI function Execution Time (intervals)", "");
-	setDataSource("Time Profile Graph", outputData, 
-			  outColors, thisWindow);
+	setDataSource("Time Profile Graph", outputData,  ampiTimeProfColorer, thisWindow);
 	super.refreshGraph();
     }
 
+    
+
+	/** A class that provides the colors for the display */
+	public class AmpiTimeProfileColorer implements GenericGraphColorer {
+		int funcCnt;
+	
+		AmpiTimeProfileColorer(int funcCnt){
+			this.funcCnt = funcCnt;
+		}
+
+		public Paint[] getColorMap() {
+			Paint[]  outColors = ColorManager.createColorMap(funcCnt);
+			return outColors;
+		}
+	}
+    
+    
+    
     public String[] getPopup(int xVal, int yVal) {
 	if ((xVal < 0) || (yVal < 0)) {
 	    return null;
@@ -305,18 +314,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
                 }
 
                 setOutputGraphData(true);
-	    } else if (b == saveColors) {
-		// save all entry point colors to disk
-		MainWindow.runObject[myRun].saveColors();
-	    } else if (b == loadColors) {
-		//load all entry point colors from disk
-		try {
-		    ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray);
-		    // silly inefficiency
-		    setOutputGraphData(false);
-		} catch (IOException exception) {
-		    System.err.println("Failed to load colors!!");
-		}
+	  
 	    }
 	}
     }

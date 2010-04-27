@@ -1,6 +1,5 @@
 package projections.Tools.TimeProfile;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
@@ -10,7 +9,6 @@ import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,9 +26,8 @@ import javax.swing.SwingWorker;
 import projections.analysis.LogReader;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.AmpiTimeProfileWindow;
-import projections.gui.Analysis;
 import projections.gui.Clickable;
-import projections.gui.ColorManager;
+import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
@@ -67,9 +64,6 @@ implements ActionListener, Clickable
 
 	private IntervalChooserPanel intervalPanel;
 
-	// **CW** this really should be a default button with ProjectionsWindow
-	private JButton saveColors;
-	private JButton loadColors;
 	private JMenuItem mDisplayLegend;
 	private JMenuItem mDisplayLegendFull;
 
@@ -98,7 +92,6 @@ implements ActionListener, Clickable
 //	private String typeLabelNames[] = {"Entry Points"};
 	private boolean stateArray[];
 	private boolean existsArray[];
-	private Color colorArray[];
 	private String entryNames[];
 
 	// stored raw data
@@ -106,7 +99,6 @@ implements ActionListener, Clickable
 
 	// output arrays
 	private double[][] outputData;
-	private Paint[] outColors;
 
 	// flag signifying callgraph has just begun
 	private boolean	   startFlag;
@@ -122,7 +114,7 @@ implements ActionListener, Clickable
 
 	// the following data are statically known and can be initialized
 	// here overhead, idle time
-	private final static int special = 2;
+	private final int special = 2;
 
 	public TimeProfileWindow(MainWindow mainWindow) {
 		super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
@@ -132,7 +124,6 @@ implements ActionListener, Clickable
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		stateArray = new boolean[numEPs+special];
 		existsArray = new boolean[numEPs+special];
-		colorArray = MainWindow.runObject[myRun].getColorMap();		
 		entryNames = new String[numEPs+special];
 		for (int ep=0; ep<numEPs; ep++) {
 			entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
@@ -192,10 +183,6 @@ implements ActionListener, Clickable
 //		epSelection.addActionListener(this);
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
-		saveColors = new JButton("Save Entry Colors");
-		saveColors.addActionListener(this);
-		loadColors = new JButton("Load Entry Colors");
-		loadColors.addActionListener(this);
 
 		showMarkersCheckBox =  new JCheckBox("Show Iteration/Phase Markers");
 		showMarkersCheckBox.setSelected(false);
@@ -215,8 +202,6 @@ implements ActionListener, Clickable
 		controlPanel.setLayout(gbl);
 //		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, setRanges,      gbc, 0,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, saveColors,     gbc, 1,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, loadColors,     gbc, 2,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, showMarkersCheckBox, gbc, 3,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
@@ -289,9 +274,9 @@ implements ActionListener, Clickable
 		// Put data into list	
 		for (int ep=0; ep<numEPs; ep++) {
 			if(useShortenedNames)
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
 			else
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
 
 		}
 
@@ -513,6 +498,43 @@ implements ActionListener, Clickable
 	}
 
 
+	
+	/** A class that provides the colors for the display */
+	public class TimeProfileColorer implements GenericGraphColorer {
+		int myRun = 0;
+		int outSize;
+		int numIntervals;
+
+		TimeProfileColorer(int outSize, int numIntervals){
+			this.outSize = outSize;
+			this.numIntervals = numIntervals;
+		}
+
+		public Paint[] getColorMap() {
+			Paint[]  outColors = new Paint[outSize];
+			for (int i=0; i<numIntervals; i++) {
+				int count = 0;
+				for (int ep=0; ep<numEPs+special; ep++) {
+					if (stateArray[ep]) {
+						outputData[i][count] = graphData[i][ep];
+						if(ep == numEPs){
+							outColors[count++] = MainWindow.runObject[myRun].getOverheadColor();
+						}
+						else if (ep == numEPs+1){
+							outColors[count++] = MainWindow.runObject[myRun].getIdleColor();
+						}
+						else
+							outColors[count++] = MainWindow.runObject[myRun].getEPColorMap()[ep];
+					}
+				}
+			}
+
+			return outColors;
+		}
+
+	}
+
+	
 
 	private void setOutputGraphData() {
 		// need first pass to decide the size of the outputdata
@@ -526,20 +548,11 @@ implements ActionListener, Clickable
 			// actually create and fill the data and color array
 			int numIntervals = endInterval-startInterval+1;
 			outputData = new double[numIntervals][outSize];
-			outColors = new Paint[outSize];
 			for (int i=0; i<numIntervals; i++) {
 				int count = 0;
 				for (int ep=0; ep<numEPs+special; ep++) {
 					if (stateArray[ep]) {
 						outputData[i][count] = graphData[i][ep];
-						if(ep == numEPs){
-							outColors[count++] = MainWindow.runObject[myRun].getOverheadColor();
-						}
-						else if (ep == numEPs+1){
-							outColors[count++] = MainWindow.runObject[myRun].getIdleColor();
-						}
-						else
-							outColors[count++] = colorArray[ep];
 					}
 				}
 
@@ -547,7 +560,7 @@ implements ActionListener, Clickable
 			setYAxis("Percentage Utilization", "%");		
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
-			setDataSource("Time Profile", outputData, outColors, thisWindow);
+			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals), thisWindow);
 			graphCanvas.setMarkers(phaseMarkers);
 
 			refreshGraph();
@@ -624,18 +637,6 @@ implements ActionListener, Clickable
 			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
 		} else if (e.getSource() == setRanges) {
 			showDialog();
-		} else if (e.getSource() == saveColors) {
-			// save all entry point colors to disk
-			MainWindow.runObject[myRun].saveColors();
-		} else if (e.getSource() == loadColors) {
-			// load all entry point colors from disk
-			try {
-				ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray);
-				// silly inefficiency
-				setOutputGraphData();
-			} catch (IOException exception) {
-				System.err.println("Failed to load colors!!");
-			}
 		} else if(e.getSource() == mDisplayLegend){
 			generateLegend(true);
 		} else if(e.getSource() == mDisplayLegendFull){

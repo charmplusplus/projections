@@ -1,6 +1,5 @@
 package projections.gui;
 import java.awt.Color;
-import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
@@ -24,18 +23,9 @@ import projections.gui.graph.YAxisAuto;
 import projections.gui.graph.YAxisFixed;
 
 /**
- *  GenericGraphWindow
- *  written by Sindhura Bandhakavi
- *  8/2/2002
- *  modified by Chee Wai Lee
- *  12/15/2003 - to use the (hopefully) cleaner windows framework.
- *
  *  This class should be inherited by all projections tools that present
  *  some kind of main window and show a dialog box requiring the user to
  *  input a range of processors and a time interval.
- *
- *  NOTE that it is *still* an abstract class despite implementing a whole
- *  lot more functionality.
  *
  */
 
@@ -70,13 +60,22 @@ implements PopUpAble
 	private JMenuItem mSaveScreenshot;
 	private JMenuItem mWhiteBG;
 	private JMenuItem mBlackBG;
-	
+	private JMenuItem mChooseColors;
+	private JMenuItem mSaveColors;
+	private JMenuItem mLoadColors;
 
+
+	/** Provides the color mapping for the graph */
+	private GenericGraphColorer colorer;
+
+	GenericGraphWindow gw;
+	
 	// constructor 
 	public GenericGraphWindow(String title, 
 			MainWindow mainWindow) {
 		super(title, mainWindow);
 		menuBar.add(fileMenu);
+		gw = this;
 	}
 
 	// create a standard fileMenu to be inherited by subclasses
@@ -96,10 +95,23 @@ implements PopUpAble
 		JMenu mColors = new JMenu("Color Scheme");
 		mWhiteBG = new JMenuItem("White background");
 		mBlackBG = new JMenuItem("Black background");
+		mChooseColors = new JMenuItem("Choose Entry Colors");
+		mSaveColors = new JMenuItem("Save Colors To File");
+		mLoadColors = new JMenuItem("Load Colors From File");	
+		
 		mWhiteBG.addActionListener(new MenuHandler());
 		mBlackBG.addActionListener(new MenuHandler());
+		mChooseColors.addActionListener(new MenuHandler());
+		mSaveColors.addActionListener(new MenuHandler());
+		mLoadColors.addActionListener(new MenuHandler());
+
 		mColors.add(mWhiteBG);
 		mColors.add(mBlackBG);
+		mColors.addSeparator();
+		mColors.add(mChooseColors);
+		mColors.addSeparator();
+		mColors.add(mSaveColors);
+		mColors.add(mLoadColors);
 		menuBar.add(mColors);
 		
 		
@@ -169,29 +181,28 @@ implements PopUpAble
 			// create a dummy YAxis storing the title and units
 			yAxis = new YAxisFixed(title,units,0);	
 	}
-
+	
+		
 	// This should be the correct way of setting a data source with a partial
 	// set of colors
-	protected void setDataSource(String title, double data[][], 
-			Paint colorMap[],
-			GenericGraphWindow parent) {
+	protected void setDataSource(String title, double data[][], GenericGraphColorer colorer, GenericGraphWindow parent) {
 		dataSource = new DataSource2D(title, data, parent);
-		dataSource.setColors(colorMap);
+		this.colorer = colorer;
+		dataSource.setColors(colorer.getColorMap());
 		if (yAxis != null) {
-			yAxis = 
-				new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+			yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
 		}
 	}
-
-	protected void setDataSource(String title, double [][] data, GenericGraphWindow parent){
-		dataSource = new DataSource2D(title,data, parent);
-		dataSource.setColors(MainWindow.runObject[myRun].getColorMap());
-		if(yAxis != null)
-			yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
+	
+	protected void setDataSource(String title, double data[][], GenericGraphWindow parent) {
+		setDataSource( title,  data, new GenericGraphDefaultColors(),  parent);
 	}
+	
 	// refresh graph
 	protected void refreshGraph(){    
 		if(graphCanvas!=null){
+			// Colors can be changed, so we must update them
+			dataSource.setColors(colorer.getColorMap());
 			graphCanvas.setData(dataSource,xAxis,yAxis);
 			graphCanvas.repaint();
 		}
@@ -211,7 +222,14 @@ implements PopUpAble
 				graphCanvas.repaint();
 			} else if(e.getSource() == mSaveScreenshot){
 				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File", "./ProjectionsPlot.png");
-			}		
+			} else if (e.getSource() == mChooseColors){
+				new ChooseEntriesWindow(gw);
+			} else if (e.getSource() == mLoadColors){
+				MainWindow.runObject[myRun].loadColors();
+				refreshGraph();
+			} else if (e.getSource() == mSaveColors){
+				MainWindow.runObject[myRun].saveColors();
+			}
 		}
 
 	}

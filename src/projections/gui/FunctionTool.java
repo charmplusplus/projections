@@ -2,6 +2,7 @@ package projections.gui;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 
 import java.io.IOException;
@@ -38,9 +39,6 @@ class FunctionTool extends GenericGraphWindow
     // runs.
 	private int myRun = 0;
     
-    
-
-
     // local GUI components
     private JPanel mainPanel;
     private JPanel graphPanel;
@@ -97,15 +95,28 @@ class FunctionTool extends GenericGraphWindow
 	Util.gblAdd(mainPanel, radioButtonPanel, gbc, 0,2, 1,1, 0,0);
     }
 
+
+
+	/** A class that provides the colors for the display */
+	public class FunctionColorer implements GenericGraphColorer {
+		public Paint[] getColorMap() {
+			return MainWindow.runObject[myRun].getFunctionColors();
+		}
+	}
+    
+    
+    
+    
+    
     protected void setGraphSpecificData(){
 	if (currentArrayName.equals("timeData")) {
 	    setDataSource("Total Function Time", timeData, 
-			  MainWindow.runObject[myRun].getFunctionColors(), thisWindow);
+	    		new FunctionColorer(), thisWindow);
 	    setXAxis("Processor", "");
 	    setYAxis("Time Spent in Function", "us");
 	} else if (currentArrayName.equals("countData")) {
 	    setDataSource("Total Function Calls", countData, 
-			  MainWindow.runObject[myRun].getFunctionColors(), thisWindow);
+			  new FunctionColorer(), thisWindow);
 	    setXAxis("Processor", "");
 	    setYAxis("# Times Called", "");
 	}

@@ -45,7 +45,6 @@ implements ActionListener, ItemListener
 	private JMenuBar menubar;
 
 	private JMenu fileMenu;
-	private JMenu preferencesMenu;
 	private JMenu toolMenu;
 
 
@@ -63,11 +62,6 @@ implements ActionListener, ItemListener
 	private JMenuItem fileCloseAllMenuItem;
 	private JMenuItem fileQuitMenuItem;
 
-	// The menu items for the preferences menu
-	private JMenuItem changeBGColorMenuItem;
-	private JMenuItem changeFGColorMenuItem;
-	private JMenuItem useGrayscaleColorsMenuItem;	
-	private JMenuItem useStandardColorsMenuItem;
 
 	// The menu items for each tool in the tool menu
 	private JMenuItem timelinesMenuItem;
@@ -105,11 +99,6 @@ implements ActionListener, ItemListener
 			fileCloseAllMenuItem.setEnabled(false);
 			fileQuitMenuItem.setEnabled(true);
 
-			changeBGColorMenuItem.setEnabled(true);
-			changeFGColorMenuItem.setEnabled(false);
-			useGrayscaleColorsMenuItem.setEnabled(false);	
-			useStandardColorsMenuItem.setEnabled(false);
-			
 			renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(false);
@@ -137,11 +126,6 @@ implements ActionListener, ItemListener
 			fileCloseAllMenuItem.setEnabled(true);
 			fileQuitMenuItem.setEnabled(true);
 
-			changeBGColorMenuItem.setEnabled(true);
-			changeFGColorMenuItem.setEnabled(true);
-			useGrayscaleColorsMenuItem.setEnabled(false);	
-			useStandardColorsMenuItem.setEnabled(false);
-			
 			renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(true);
@@ -168,11 +152,6 @@ implements ActionListener, ItemListener
 			fileCloseMenuItem.setEnabled(true);
 			fileCloseAllMenuItem.setEnabled(true);
 			fileQuitMenuItem.setEnabled(true);
-
-			changeBGColorMenuItem.setEnabled(true);
-			changeFGColorMenuItem.setEnabled(true);
-			useGrayscaleColorsMenuItem.setEnabled(false);	
-			useStandardColorsMenuItem.setEnabled(false);	
 
 			renderedTimelinesMenuItem.setEnabled(true);
 			timelinesMenuItem.setEnabled(true);
@@ -224,29 +203,6 @@ implements ActionListener, ItemListener
 		fileMenu.add(fileQuitMenuItem);
 
 		menubar.add(fileMenu);
-
-
-		// PREFERENCES MENU
-		preferencesMenu = new JMenu("Preferences");
-
-		changeBGColorMenuItem = new JMenuItem("Change Background Color");	
-		changeFGColorMenuItem = new JMenuItem("Change Foreground Color");	
-		useGrayscaleColorsMenuItem = new JMenuItem("Use Default Grayscale Colors");	
-		useStandardColorsMenuItem = new JMenuItem("Use Standard Colors");	
-
-		changeBGColorMenuItem.addActionListener(this);
-		changeFGColorMenuItem.addActionListener(this);
-		useGrayscaleColorsMenuItem.addActionListener(this);
-		useStandardColorsMenuItem.addActionListener(this);
-
-		preferencesMenu.add(changeBGColorMenuItem);
-		preferencesMenu.add(changeFGColorMenuItem);
-		preferencesMenu.add(useGrayscaleColorsMenuItem);
-		preferencesMenu.add(useStandardColorsMenuItem);
-
-		menubar.add(preferencesMenu);
-
-
 
 		// TOOLS MENU
 		toolMenu = new JMenu("Tools");
@@ -336,18 +292,6 @@ implements ActionListener, ItemListener
 			else if (mi == fileQuitMenuItem) 
 				ProjMain.shutdown(0);
 			
-			else if (mi == changeBGColorMenuItem)
-				parent.changeBackground();
-			
-			else if (mi == changeFGColorMenuItem)
-				parent.changeForeground();
-			
-			else if (mi == useGrayscaleColorsMenuItem)
-				parent.setGrayscale();
-			
-			else if (mi == useStandardColorsMenuItem)
-				parent.setFullColor();
-		
 			else if (mi == timelinesMenuItem)
 				parent.openTool(new TimelineWindow(parent) );
 

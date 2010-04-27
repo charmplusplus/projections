@@ -2,16 +2,15 @@ package projections.Tools.CommunicationOverTime;
 
 import java.awt.Checkbox;
 import java.awt.CheckboxGroup;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 
@@ -21,8 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 import projections.analysis.TimedProgressThreadExecutor;
-import projections.gui.Analysis;
-import projections.gui.ColorManager;
+import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
@@ -56,8 +54,6 @@ implements ItemListener, ActionListener
 
 	private JButton	   setRanges;
 	//    private JButton	   epSelection;
-	private JButton        saveColors;
-	private JButton        loadColors;
 
 	private CheckboxGroup  cbg;
 	private Checkbox	   sentMsgs;
@@ -82,7 +78,6 @@ implements ItemListener, ActionListener
 	//    private String         typeLabelNames[] = {"Entry Points"};
 	private boolean        stateArray[];
 //	private boolean        existsArray[];
-	private Color          colorArray[];
 	private String         entryNames[];
 
 	// stored raw data
@@ -96,7 +91,6 @@ implements ItemListener, ActionListener
 	private double[][]     receivedExternalByteCount;
 
 	// output arrays    
-	private Color[]        outColors;
 	private double[][]     sentMsgOutput;
 	private double[][]     sentByteOutput;
 	private double[][]     receivedMsgOutput;
@@ -109,6 +103,7 @@ implements ItemListener, ActionListener
 	// format for output
 	private DecimalFormat  _format;
 
+	private MyColorer commTimeColors;
 
 	public CommTimeWindow(MainWindow mainWindow) {
 		super("Projections Communication vs Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
@@ -118,10 +113,9 @@ implements ItemListener, ActionListener
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		stateArray = new boolean[numEPs];
 //		existsArray = new boolean[numEPs];
-		colorArray = new Color[numEPs];
+		commTimeColors = new MyColorer();
 		entryNames = new String[numEPs];
 		for (int ep=0; ep<numEPs; ep++) {
-			colorArray[ep] = MainWindow.runObject[myRun].getEntryColor(ep);
 			entryNames[ep] = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 		}
 		mainPanel = new JPanel();
@@ -136,6 +130,34 @@ implements ItemListener, ActionListener
 		showDialog();
 	}
 
+	
+
+	/** A class that provides the colors for the display */
+	public class MyColorer implements GenericGraphColorer {
+		
+		public Paint[] getColorMap() {
+
+			int outSize = 0;
+			for (int ep=0; ep<numEPs; ep++) {
+				if (stateArray[ep]) {
+					outSize++;
+				}
+			}
+			
+			Paint[]  outColors = new Paint[outSize];
+
+			int count=0;
+			for (int ep=0; ep<numEPs; ep++) {
+				if (stateArray[ep]) {
+					outColors[count++] = MainWindow.runObject[myRun].getEntryColor(ep);
+				}
+			}
+		
+			return outColors;
+		}
+	}
+	
+	
 	protected void createMenus(){
 		super.createMenus();
 	}
@@ -174,16 +196,10 @@ implements ItemListener, ActionListener
 		setRanges.addActionListener(this);
 		//	epSelection = new JButton("Select Entry Points");
 		//	epSelection.addActionListener(this);
-		saveColors = new JButton("Save Entry Colors");
-		saveColors.addActionListener(this);
-		loadColors = new JButton("Load Entry Colors");
-		loadColors.addActionListener(this);
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 		//	Util.gblAdd(controlPanel, epSelection, gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, setRanges,   gbc, 0,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, saveColors,  gbc, 1,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, loadColors,  gbc, 2,0, 1,1, 0,0);
 
 		graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel,     gbc, 0,1, 1,1, 1,1);
@@ -203,7 +219,7 @@ implements ItemListener, ActionListener
 	public void setCheckboxData(Checkbox cb) {
 		if(cb == sentMsgs) {
 			setDataSource("Messages Sent Over Time", sentMsgOutput, 
-					outColors, this);
+					commTimeColors, this);
 			setPopupText("sentMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
@@ -212,7 +228,7 @@ implements ItemListener, ActionListener
 		}
 		else if(cb == sentBytes){
 			setDataSource("Bytes Sent Over Time", sentByteOutput, 
-					outColors, this);
+					commTimeColors, this);
 			setPopupText("sentByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
@@ -221,7 +237,7 @@ implements ItemListener, ActionListener
 		}
 		else if(cb == receivedMsgs){
 			setDataSource("Received Messages Over Time", receivedMsgOutput, 
-					outColors, this);
+					commTimeColors, this);
 			setPopupText("receivedMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
@@ -230,7 +246,7 @@ implements ItemListener, ActionListener
 		}
 		else if(cb == receivedBytes){
 			setDataSource("Received Bytes Over Time", receivedByteOutput, 
-					outColors, this);
+					commTimeColors, this);
 			setPopupText("receivedByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
@@ -239,7 +255,7 @@ implements ItemListener, ActionListener
 		}
 		else if(cb == receivedExternalMsgs){
 			setDataSource("Received External Messages Over Time", receivedExternalMsgOutput,
-					outColors, this);
+					commTimeColors, this);
 			setPopupText("receivedExternalMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
@@ -248,7 +264,7 @@ implements ItemListener, ActionListener
 		}
 		else if(cb == receivedExternalBytes){
 			setDataSource("Received External Bytes Over Time", receivedExternalByteOutput,
-					outColors, this);
+					commTimeColors, this);
 			setPopupText("receivedExternalByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
@@ -379,8 +395,7 @@ implements ItemListener, ActionListener
 				new double[numIntervals][outSize];
 			receivedExternalByteOutput =
 				new double[numIntervals][outSize];
-			outColors =
-				new Color[outSize];
+
 			int count=0;
 			for (int ep=0; ep<numEPs; ep++) {
 				if (stateArray[ep]) {
@@ -394,7 +409,6 @@ implements ItemListener, ActionListener
 						receivedExternalMsgOutput[interval][count] = receivedExternalMsgCount[interval][ep];
 						receivedExternalByteOutput[interval][count] = receivedExternalByteCount[interval][ep];
 					}
-					outColors[count++] = colorArray[ep];
 				}
 			}
 		}
@@ -499,21 +513,7 @@ implements ItemListener, ActionListener
 			if (b == setRanges) {
 				showDialog();
 			}
-			else if (b == saveColors) {
-				// save all entry point colors to disk
-				MainWindow.runObject[myRun].saveColors();
-			}
-			else if (b == loadColors) {
-				// load all entry point colors from disk
-				try {
-					ColorManager.loadActivityColors(Analysis.PROJECTIONS, colorArray);
-					// silly inefficiency
-					setOutputGraphData();
-				} 
-				catch (IOException exception) {
-					System.err.println("Failed to load colors!!");
-				}
-			}
+			
 		} else if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {

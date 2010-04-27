@@ -194,15 +194,6 @@ implements ScalePanel.StatusDisplay
 		}
 	}
 
-	protected void setGrayscale() {
-		MainWindow.runObject[myRun].setGrayscale();
-		repaintAllWindows();
-	}
-
-	protected void setFullColor() {
-		MainWindow.runObject[myRun].setFullColor();
-		repaintAllWindows();
-	}
 
 	// repaints all windows to reflect global drawing changes.
 	private void repaintAllWindows() {

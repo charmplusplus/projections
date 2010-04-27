@@ -94,19 +94,18 @@ public class Analysis {
   
   /** *************** Color Maps 6/27/2002 ************ */
   
+  ColorManager colorManager;
+  
   public Color background = Color.black;
   public Color foreground = Color.white;
   
-  private Color[] entryColors;
   private Color[] userEventColors;
   private Color[] functionColors;
   private Color[][] activityColors =
   new Color[NUM_ACTIVITIES][];
   
-  private Color[] grayColors;
-//  private Color[] grayUserEventColors;
+  private Color[] entryColors;
   
-  private Color[] activeColorMap;
   
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
@@ -150,10 +149,8 @@ public class Analysis {
 
 		  rcReader = new ProjectionsConfigurationReader(fileNameHandler);
 
-		  // Projections Colors
-		  String colorsaved = 
-			  getLogDirectory() + File.separator + "savedcolors.prj";
-		  initColors(colorsaved);
+		  // Load saved color information from file
+		  loadColors();
 
 		  // Build Summary Data
 		  if (hasSumFiles()) {
@@ -268,28 +265,19 @@ public class Analysis {
   /**
    *  Read or initialize color maps
    */
-  private void initColors(String colorsaved) 
-    throws IOException
-  {
-    ColorManager.setDefaultLocation(colorsaved);
-    if ((new File(colorsaved)).exists()) {
-      activityColors = ColorManager.initializeColors(colorsaved);
-      // fall back on error
-      if (activityColors == null) {
-	activityColors = ColorManager.initializeColors();
-      }
-    } else {
-      activityColors = ColorManager.initializeColors();
-    }
-    entryColors = activityColors[PROJECTIONS];
-    userEventColors = activityColors[USER_EVENTS];
-    functionColors = activityColors[FUNCTIONS];
-    grayColors = 
-      ColorManager.createGrayscaleColorMap(getSts().getEntryCount());
-//    grayUserEventColors = ColorManager.createGrayscaleColorMap(getSts().getNumUserDefinedEvents());
-    // default to full colors
-    activeColorMap = entryColors;
+  public void loadColors()  {
+	  String colorsaved = getLogDirectory() + File.separator + "savedcolors.prj";
+	  colorManager = new ColorManager(colorsaved, this);
+	  activityColors = colorManager.initializeColors();
+	  entryColors = activityColors[PROJECTIONS];
+	  userEventColors = activityColors[USER_EVENTS];
+	  functionColors = activityColors[FUNCTIONS];
   }
+  
+  public void saveColors() {
+  	colorManager.saveColors();
+  }
+
     
   /**
    * Creating AMPI usage profile
@@ -382,19 +370,19 @@ public class Analysis {
 
     public Color getEntryColor(int entryIdx) {
 	if (entryIdx < getSts().getEntryCount()) {
-	    return activeColorMap[entryIdx];
+	    return entryColors[entryIdx];
 	}
 	return null;
     }
 
-    
+
     public void setEntryColor(int entryIdx, Color color) {
-	if (entryIdx < getSts().getEntryCount()) {
-	    activeColorMap[entryIdx] = color;
-	} else {
-	    System.err.println("Warning: entry point index " + entryIdx +
-			       " not found. Cannot set color");
-	}
+    	if (entryIdx < getSts().getEntryCount()) {
+    		entryColors[entryIdx] = color;
+    	} else {
+    		System.err.println("Warning: entry point index " + entryIdx +
+    		" not found. Cannot set color");
+    	}
     }
 
     /** ***************** Usage Profile ******************
@@ -681,6 +669,11 @@ public class Analysis {
     	return getSts().getEntryNameByIndex(epIdx);
     }
 
+
+	public int getEntryIDByName(String epName) {
+    	return getSts().getEntryIDByName(epName);
+	}
+    
     /** Generate a shortened prettier version of the entry name, excluding the parameter list */
     public String getPrettyEntryNameByIndex(int epIdx) {
     	String full = getSts().getEntryNameByIndex(epIdx);
@@ -770,9 +763,6 @@ public class Analysis {
 	return functionColors;
     }
 
-    public void saveColors() {
-	ColorManager.saveColors(activityColors);
-    }
 
     public String getFunctionName(int funcID) {
 	return getSts().getFunctionEventDescriptor(funcID);
@@ -839,17 +829,10 @@ public class Analysis {
 	return activityColors[activityType];
     }
 
-    public Color[] getColorMap() {
-	return activeColorMap;
+    public Color[] getEPColorMap() {
+	return entryColors;
     }
 
-    protected void setFullColor() {
-	activeColorMap = entryColors;
-	  }
-
-    protected void setGrayscale() {
-	activeColorMap = grayColors;
-	}
 
     /** jTimeAvailable(), getJStartTime(), getJEndTime()
      *  Used for storing user defined startTime and endTime 
@@ -990,6 +973,7 @@ public class Analysis {
 	public String getOutlierFilename() {
 		return getBaseFilename() + ".outlier";	
 	}
+
 
 	
 	

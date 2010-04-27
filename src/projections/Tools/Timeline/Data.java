@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -248,7 +247,7 @@ public class Data
 				
 		allEntryMethodObjects = null;
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
-		entryColor = MainWindow.runObject[myRun].getColorMap();
+		entryColor = MainWindow.runObject[myRun].getEPColorMap();
 
 		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
@@ -1797,21 +1796,9 @@ public class Data
 	}
 
 	
-	/** Produce a hashmap containing the ids and nicely mangled string names for each entry method */
-	public Hashtable<Integer, String> getEntryNames() {
-		
-		Map<Integer, String> entryNames = MainWindow.runObject[myRun].getSts().getEntryNames();
-		Map<Integer, String> entryChareNames = MainWindow.runObject[myRun].getSts().getEntryChareNames();
-
-		Hashtable<Integer, String> result = new Hashtable<Integer, String>();
-		
-		Iterator<Integer> iter = entryNames.keySet().iterator();
-		while(iter.hasNext()){
-			Integer id = iter.next();
-			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
-		}
-		
-		return result;
+	/** Produce a map containing the ids and nicely mangled string names for each entry method */
+	public Map<Integer, String> getEntryNames() {
+		return MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
 	}
 	
 	

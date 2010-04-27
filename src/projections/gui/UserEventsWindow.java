@@ -1,8 +1,8 @@
 package projections.gui;
 
-import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -55,7 +55,6 @@ class UserEventsWindow extends GenericGraphWindow
     // stored raw data
     private double[][] graphData;
     private long[][] numCalls;
-    private Color[] graphColors;
     
     protected UserEventsWindow(MainWindow mainWindow) {
     	super("Projections User Events Tool - " + 
@@ -64,8 +63,6 @@ class UserEventsWindow extends GenericGraphWindow
     	numActivities = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
     	activityNames = MainWindow.runObject[myRun].getUserEventNames();
     	// Normally would set activity names here.
-    	// Normally would get color maps from MainWindow.runObject[myRun].java.
-    	graphColors = ColorManager.createColorMap(numActivities);
 
     	createMenus();
     	createLayout();
@@ -198,13 +195,32 @@ class UserEventsWindow extends GenericGraphWindow
 	progressBar.close();
     }
     
+    
+    
+    
+    
+
+	/** A class that provides the colors for the display */
+	public class UserEventColorer implements GenericGraphColorer {
+		public Paint[] getColorMap() {
+			int numUserEvents = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
+			Paint[]  outColors = ColorManager.createColorMap(numUserEvents);
+			return outColors;
+		}
+	}
+    
+    
+    
+    
     protected void setGraphSpecificData() {
 	setXAxis("Processors", processorList);
 	setYAxis("Time (us)", "us");
-	setDataSource("User Events", graphData, graphColors, this);
+	setDataSource("User Events", graphData, new UserEventColorer() , this);
 	refreshGraph();
     }
 
+    
+    
     public String[] getPopup(int xVal, int yVal) {
 	if ((xVal < 0) || (yVal < 0)) {
 	    return null;

@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
@@ -46,7 +47,7 @@ public class StsReader extends ProjDefs
     private int entryIndex = 0; ///< The next available index
     
     /** index by Integer ID in STS file, return String name */
-    private Map<Integer, String> entryNames = new TreeMap<Integer, String>(); 
+    private Map<Integer, String> entryNames = new TreeMap<Integer, String>();
     /** index by Integer ID in STS file, return String name */
     private Map<Integer, String>  entryChareNames = new TreeMap<Integer, String>(); 
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
@@ -236,6 +237,18 @@ public class StsReader extends ProjDefs
     		return "Unknown";
     	}
     }   
+
+    /** Linearly scan entry list to find a given name */
+    public int getEntryIDByName(String epName) {
+    	Iterator<Integer> iter = entryNames.keySet().iterator();
+    	while(iter.hasNext()){
+    		Integer id = iter.next();
+    		if(entryNames.get(id).equals(epName)){
+    			return id;
+    		}			
+    	}
+    	return -1;
+    }
     
     private String getEntryChareNameByID(int ID) {
     	return getEntryChareNames().get(ID);
@@ -341,6 +354,24 @@ public class StsReader extends ProjDefs
 	public Map<Integer, String>  getEntryChareNames() {
 		return entryChareNames;
 	}
+
+	
+	/** Produce a mapping from EP to a pretty version of the entry point's name */
+	public Map<Integer, String>  getPrettyEntryNames() {
+		Map<Integer, String> entryNames = getEntryNames();
+		Map<Integer, String> entryChareNames = getEntryChareNames();
+
+		TreeMap<Integer, String> result = new TreeMap<Integer, String>();
+	
+		Iterator<Integer> iter = entryNames.keySet().iterator();
+		while(iter.hasNext()){
+			Integer id = iter.next();
+			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
+		}
+		
+		return result;
+	}
+
 
 
 

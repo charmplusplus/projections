@@ -710,7 +710,7 @@ class ProfileWindow extends ProjectionsWindow
 	}
 	if (!colorsSet) {
             //also create colors for "PACKING, UNPACKING, IDLE"
-	    Color[] entryColors = MainWindow.runObject[myRun].getColorMap();
+	    Color[] entryColors = MainWindow.runObject[myRun].getEPColorMap();
             colors = new Color[numEPs+NUM_SYS_EPS];
             for(int i=0; i<numEPs; i++)
                 colors[i] = entryColors[i];

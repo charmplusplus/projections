@@ -1,6 +1,5 @@
 package projections.Tools.Extrema;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -32,6 +31,7 @@ import projections.analysis.ProjDefs;
 import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
+import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
@@ -114,7 +114,6 @@ Clickable
 	private int numActivities;
 	private int numSpecials;
 	private double[][] graphData;
-	private Paint[] graphColors;
 	private LinkedList<Integer> outlierPEs;
 
 
@@ -218,6 +217,55 @@ Clickable
 		}
 	}
 
+	
+	/** A class that provides the colors for the display */
+	public class NormalColorer implements GenericGraphColorer {
+		int myRun = 0;
+		int numActivities;
+		int numSpecials;
+
+		public NormalColorer(int numActivities, int numSpecials) {
+			this.numActivities = numActivities;
+			this.numSpecials = numSpecials;
+		}
+
+		public Paint[] getColorMap() {
+			Paint[]  outColors = new Paint[numActivities+numSpecials];
+
+			for (int i=0;i<numActivities; i++) {
+				outColors[i] = MainWindow.runObject[myRun].getColorMap(selectedActivity)[i];
+			}
+			outColors[numActivities] = MainWindow.runObject[myRun].getOverheadColor();
+			outColors[numActivities+1] = MainWindow.runObject[myRun].getIdleColor();
+			
+			return outColors;
+		}
+	}
+
+	
+	/** A class that provides the colors for the display */
+	public class OnlineDataColorer implements GenericGraphColorer {
+		int myRun = 0;
+		int numActivities;
+
+		public OnlineDataColorer(int numActivities) {
+			this.numActivities = numActivities;
+		}
+
+		public Paint[] getColorMap() {
+			int numSpecials = 1;
+			Paint[]  outColors = new Paint[numActivities+numSpecials];
+			for (int i=0;i<numActivities; i++) {
+				outColors[i] = MainWindow.runObject[myRun].getColorMap(selectedActivity)[i];
+			}
+			outColors[numActivities] = MainWindow.runObject[myRun].getIdleColor();
+			
+			return outColors;
+		}
+	}
+
+	
+	private GenericGraphColorer colorer;
 
 	private void constructToolData(final  long startTime, final long endTime ) {
 		// construct the necessary meta-data given the selected activity
@@ -227,13 +275,8 @@ Clickable
 
 		// Idle and overhead are always added to the chart.
 		numSpecials = 2;
-		graphColors = new Paint[numActivities+numSpecials];
-		for (int i=0;i<numActivities; i++) {
-			graphColors[i] = MainWindow.runObject[myRun].getColorMap(selectedActivity)[i];
-		}
-		graphColors[numActivities] = MainWindow.runObject[myRun].getOverheadColor();
-		graphColors[numActivities+1] = MainWindow.runObject[myRun].getIdleColor();
-	
+		colorer = new NormalColorer(numActivities,numSpecials);
+		
 		int numActivityPlusSpecial = numActivities+numSpecials;
 
 		OrderedIntList selectedPEs = dialog.getSelectedProcessors().copyOf();
@@ -695,16 +738,10 @@ Clickable
 	// outlier analysis which will then determine which processor's
 	// log data to read.
 	private void readOutlierStats(final long startTime, final long endTime) {
-		Color[] tempGraphColors;
 		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
-		tempGraphColors = MainWindow.runObject[myRun].getColorMap(selectedActivity);
-		numSpecials = 1;
-		graphColors = new Paint[numActivities+numSpecials];
-		for (int i=0;i<numActivities; i++) {
-			graphColors[i] = tempGraphColors[i];
-		}
-		graphColors[numActivities] = MainWindow.runObject[myRun].getIdleColor();
 
+		colorer = new OnlineDataColorer(numActivities);
+		
 		graphData = new double[threshold+3][numActivities+numSpecials];
 
 		// Read the stats file for global average data.
@@ -853,7 +890,7 @@ Clickable
 				attributes[2][selectedAttribute]);
 		setDataSource("Extrema: " + attributes[0][selectedAttribute] +
 				" (" + threshold + 
-				" Extrema PEs)", graphData, graphColors, this);
+				" Extrema PEs)", graphData, colorer, this);
 		refreshGraph();
 	}
 

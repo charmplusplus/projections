@@ -35,7 +35,7 @@ public class FileUtils {
 	private TreeMap<Integer, File> logFiles;
 	
 	public FileUtils(String filename){
-		System.out.println("FileUtils created with filename: " + filename);	
+//		System.out.println("FileUtils created with filename: " + filename);	
 	
 		// Extract base name
 		if (filename.endsWith(".sum.sts")) {
@@ -46,7 +46,7 @@ public class FileUtils {
 			System.err.println("Invalid sts filename! Exiting ...");
 			System.exit(-1);
 		}
-		System.out.println("FileUtils extracted basename: " + baseName);	
+//		System.out.println("FileUtils extracted basename: " + baseName);	
 		
 		
 		detectFiles();

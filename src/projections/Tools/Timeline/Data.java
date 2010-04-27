@@ -464,37 +464,40 @@ public class Data
 		
 		//==========================================	
 		//  Perform some post processing
-			
 		for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 			entries[e] = 0;
 		}
-		
+
 		processorUsage = new float[numPEs()];
 		entryUsageList = new OrderedUsageList[numPEs()];
 		float[] entryUsageArray = new float[MainWindow.runObject[myRun].getNumUserEntries()];
 		idleUsage  = new float[numPEs()];
 		packUsage  = new float[numPEs()];
-
+		
 		for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 			entryUsageArray[i] = 0;
 		}
+
 		
 		for (int p=0; p<numPEs(); p++) {
 			processorUsage[p] = 0;
 			idleUsage[p] = 0;
 			packUsage[p] = 0;
 		}
-
+		
 		Iterator<Integer> pe_iter = allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
 			Integer pe = pe_iter.next();
 			List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
+			
 			Iterator<EntryMethodObject> obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
+
 				EntryMethodObject obj = obj_iter.next();
 
 				float usage = obj.getUsage();
 				int entryIndex = obj.getEntryIndex();
+
 
 				if (entryIndex >=0) {
 					entries[entryIndex]++;
@@ -504,19 +507,24 @@ public class Data
 				} else {
 					idleUsage[pe.intValue()] += usage;
 				}
+
 			}
 
 			entryUsageList[pe.intValue()] = new OrderedUsageList();
+
 			for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
 				if (entryUsageArray[i] > 0) {
 					entryUsageList[pe.intValue()].insert(entryUsageArray[i]);
 				}
-			}      
+			}
+			
 		} 
 
 		// Spawn a thread that computes some secondary message related data structures
 		messageStructures.create(useHelperThreads);
 	
+		
+		
 		printNumLoadedObjects();
 	}
 
@@ -624,6 +632,14 @@ public class Data
 	 * */
 	void getData(Integer pe)
 	{
+		// Sanity checks first
+		if(pe > MainWindow.runObject[myRun].getSts().getProcessorCount()){
+			String err = "Your sts file only specifies " + MainWindow.runObject[myRun].getSts().getProcessorCount() + " PEs, but you are trying somehow to load pe " + pe;
+//			System.err.println(err);
+			throw new RuntimeException(err);
+		}
+		
+		
 		LinkedList<TimelineEvent> tl = new LinkedList<TimelineEvent>();
 		
 		/** Stores all user events from the currently loaded PE/time range. It must be sorted,

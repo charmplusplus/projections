@@ -4,7 +4,6 @@ package projections.Tools.Timeline;
 class ThreadedFileReader implements Runnable  {
 	
 	private int pe;
-//	int p;
 	private Data data;
 	
 	protected ThreadedFileReader(int pe, Data data){

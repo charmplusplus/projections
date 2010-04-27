@@ -31,7 +31,7 @@ import projections.gui.graph.YAxisFixed;
 
 public abstract class GenericGraphWindow 
 extends ProjectionsWindow 
-implements PopUpAble
+implements PopUpAble, ColorUpdateNotifier
 {
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
@@ -209,6 +209,12 @@ implements PopUpAble
 	}
 	
 	
+	/** Recieve notification that colors have been changed */
+	public void colorsHaveChanged(){
+		refreshGraph();
+	}
+	
+	
 	private class MenuHandler implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
@@ -223,7 +229,7 @@ implements PopUpAble
 			} else if(e.getSource() == mSaveScreenshot){
 				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File", "./ProjectionsPlot.png");
 			} else if (e.getSource() == mChooseColors){
-				new ChooseEntriesWindow(gw);
+				new ChooseEntryColorsWindow(gw);
 			} else if (e.getSource() == mLoadColors){
 				MainWindow.runObject[myRun].loadColors();
 				refreshGraph();
@@ -233,6 +239,9 @@ implements PopUpAble
 		}
 
 	}
+	
+	
+	
 	
 	
 }

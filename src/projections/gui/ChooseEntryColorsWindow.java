@@ -24,7 +24,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
 /** A class that displays a color and selection chooser for entry methods */
-class ChooseEntriesWindow extends JFrame 
+public class ChooseEntryColorsWindow extends JFrame 
 {
 	private Map<Integer, String> entryNames;
 	private Vector<Vector> tabledata;
@@ -32,9 +32,9 @@ class ChooseEntriesWindow extends JFrame
 
 	private int myRun = 0;
 
-	GenericGraphWindow gw;
+	ColorUpdateNotifier gw;
 	
-	ChooseEntriesWindow(GenericGraphWindow gw){
+	public ChooseEntryColorsWindow(ColorUpdateNotifier gw){
 		setTitle("Choose colors for each entry point");
 
 		this.gw = gw;
@@ -164,9 +164,8 @@ class ChooseEntriesWindow extends JFrame
 		}
 		public void setColor(Color c){
 			this.c = c;
-			System.out.println("Should set color here");
 			MainWindow.runObject[myRun].setEntryColor(id, c);
-			gw.refreshGraph();
+			gw.colorsHaveChanged();
 		}
 	}
 

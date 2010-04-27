@@ -23,6 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -30,7 +31,9 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
 
+import projections.gui.ChooseEntryColorsWindow;
 import projections.gui.ColorMap;
+import projections.gui.ColorUpdateNotifier;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
@@ -40,7 +43,7 @@ import projections.gui.ScaleSlider;
 import projections.gui.Util;
 
 public class OverviewWindow extends ProjectionsWindow
-implements MouseListener, ActionListener, ScalePanel.StatusDisplay
+implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateNotifier
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -52,6 +55,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 	private JRadioButton colorByEntryMethod;
 
 	private JRadioButton colorByUtil;
+	private JButton mChooseColors;
 
 	private ScalePanel scalePanel;
 	private OverviewPanel stl;
@@ -112,7 +116,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		Util.gblAdd(displayPanel, status,     gbc, 0,2, 1,1, 1,0);
 
 		gbc.fill = GridBagConstraints.BOTH;
-		Util.gblAdd(windowPane, displayPanel, gbc, 0,0, 1,1, 1,1, 1,1,1,1);
+		Util.gblAdd(windowPane, displayPanel, gbc, 0,0, 2,1, 2,1, 1,1,1,1);
 		scalePanel.setStatusDisplay(this);
 		
 		
@@ -127,12 +131,17 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 	    colorByUtil.addActionListener(this);
 	    JPanel radioPanel = new JPanel();
 	    radioPanel.setLayout(new GridBagLayout());   
-		Util.gblAdd(radioPanel, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
+		mChooseColors = new JButton("Choose Entry Method Colors");
+		mChooseColors.addActionListener(this);
+	    
+	    Util.gblAdd(radioPanel, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(radioPanel, colorByEntryMethod, gbc, 1,0, 1,1, 1,1);
 		Util.gblAdd(radioPanel, colorByUtil, gbc, 2,0, 1,1, 1,1);
+
 		
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		Util.gblAdd(windowPane, radioPanel, gbc, 0,3, 1,1, 0,0, 1,1,1,1);
+		Util.gblAdd(windowPane, mChooseColors, gbc, 1,3, 1,1, 0,0, 1,1,1,1);
 
 
 		// Establishing the Utilization-only color map. 
@@ -243,9 +252,10 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 			if (arg.equals("Set Range")) {
 				showDialog();
 			}
+		} else if (evt.getSource() == mChooseColors) {
+			new ChooseEntryColorsWindow(this);
 		}
-		
-	}  
+	}
 
 	public void mouseClicked(MouseEvent evt) {
 	}
@@ -270,6 +280,15 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay
 		status.setText(msg);
 	}
 
+
+	/** Recieve notification that colors have been changed */
+	public void colorsHaveChanged(){
+		if (colorByEntryMethod.isSelected()){
+			stl.colorByEntry();
+		} else{
+			stl.colorByUtil();
+		}
+	}
 
 
 }

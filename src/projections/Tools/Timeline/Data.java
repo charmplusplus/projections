@@ -633,9 +633,8 @@ public class Data
 	void getData(Integer pe)
 	{
 		// Sanity checks first
-		if(pe > MainWindow.runObject[myRun].getSts().getProcessorCount()){
+		if(pe >= MainWindow.runObject[myRun].getSts().getProcessorCount()){
 			String err = "Your sts file only specifies " + MainWindow.runObject[myRun].getSts().getProcessorCount() + " PEs, but you are trying somehow to load pe " + pe;
-//			System.err.println(err);
 			throw new RuntimeException(err);
 		}
 		

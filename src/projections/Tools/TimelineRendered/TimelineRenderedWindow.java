@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -37,9 +38,9 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	private Color foregroundColor;
 	private int width;
 	private int height;
-	
+
 	private JMenuItem mSave;
-	
+
 	private JPanel combinedTimelinesPanel;
 
 	private DialogExtension toolSpecificPanel;
@@ -47,69 +48,49 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	public TimelineRenderedWindow(MainWindow parentWindow) {
 		super(parentWindow);
 		createMenus();
-		
 		showDialog();
 	}
 
-	
-	  private void createMenus(){
-	        JMenuBar mbar = new JMenuBar();
-	        mbar.add(Util.makeJMenu("File", new Object[]
-	            {
-	                "Select Processors",
-	                null,
-	                                    "Close"
-	            },
-	                                this));
-	        
-	        
-	        
-	        JMenu saveMenu = new JMenu("Save To Image");
-			mSave = new JMenuItem("Save as JPG or PNG");
-			menuHandler mh = new menuHandler();
-			mSave.addActionListener(mh);
-			saveMenu.add(mSave);
 
-			mbar.add(saveMenu);
-	        
-	        setJMenuBar(mbar);
-	    }
+	private void createMenus(){
+		JMenuBar mbar = new JMenuBar();
+		// Historic way of constructing menus. Needed for parent's class handling of menus.
+		mbar.add(Util.makeJMenu("File", new Object[]
+		                                           {
+				"Select Processors",
+				null,
+				"Close"
+		                                           },
+		                                           this));
 
-	
+
+		// Construct menu items specific to this tool
+		JMenu saveMenu = new JMenu("Save To Image");
+		mSave = new JMenuItem("Save as JPG or PNG");
+		menuHandler mh = new menuHandler();
+		mSave.addActionListener(mh);
+		saveMenu.add(mSave);
+
+		mbar.add(saveMenu);
+
+		setJMenuBar(mbar);
+	}
+
+
 	private class menuHandler implements ActionListener  {
 
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == mSave){
 				JPanelToImage.saveToFileChooserSelection(combinedTimelinesPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 			}
-			
+
 		}
-		
-	}
-	  
-	
-	
-	/** Resize my panels(required by interface, called by data object) */
-	// The data object has been instructed to change the display width
-	// The scale factor or window size has likely changed.
-	// Do not call data.setScreenWidth() in here
-	public void refreshDisplay(boolean doRevalidate){
-		// do nothing
+
 	}
 
 
-	/** Required by interface MainHandler. This one does nothing */
-	public void notifyProcessorListHasChanged() {
-		// Do nothing
-	}
 
-
-	public void displayWarning(String message) {
-		// Do nothing
-	}
-	
-	
-
+	/** Display the dialog box and load data specfied by user */
 	protected void showDialog() {
 
 		if (dialog == null) {
@@ -126,12 +107,13 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			backgroundColor = Color.white;
 			foregroundColor = Color.black;
 			width = Integer.parseInt(toolSpecificPanel.dialogWidth.getText());
-			
-			final Date time1  = new Date();
+
+			final Date timeStart  = new Date();
 
 			// Create a list of worker threads
-			final LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+			final List<Runnable> readyReaders = new LinkedList<Runnable>();
 
+			// Iterate over user-specified processors
 			processorList.reset();
 			int pIdx=0;		
 			while (processorList.hasMoreElements()) {
@@ -152,42 +134,39 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 					threadManager.runAll();
 					return null;
 				}
-
+				
 				public void done() {
 					
 					combinedTimelinesPanel = new JPanel();
 					combinedTimelinesPanel.setLayout(new BoxLayout(combinedTimelinesPanel, BoxLayout.PAGE_AXIS));
 
-					// Merge resulting images together.
-					Iterator<Runnable> iter = readyReaders.iterator();
-					while(iter.hasNext()){
-						ThreadedFileReader r = (ThreadedFileReader) iter.next();
-						BufferedImage i = r.getImage();
+					// Merge resulting images together into a single JPanel
+					for (Runnable r : readyReaders) {
+						BufferedImage i = ((ThreadedFileReader)r).getImage();
 						JLabel l = new JLabel(new ImageIcon(i));
-						l.setToolTipText("PE " + r.PE);
+						l.setToolTipText("PE " + ((ThreadedFileReader)r).PE);
 						combinedTimelinesPanel.add(l);
 						width = i.getWidth();
 						height = i.getHeight();
 					}
-					
+
 					int totalHeight = readyReaders.size() * height;
 					combinedTimelinesPanel.setPreferredSize(new Dimension(width, totalHeight));
 
 
-					// put it in a scrolling pane
+					// put the resulting JPanel into a scrolling pane
 					JScrollPane scrollpane = new JScrollPane(combinedTimelinesPanel);
-					scrollpane.getVerticalScrollBar();
-					scrollpane.getHorizontalScrollBar();
 					scrollpane.setPreferredSize(new Dimension(width+JScrollBar.WIDTH,
 							totalHeight + JScrollBar.HEIGHT));
 
+					// Add the resulting scroll pane to this tools window, then display it
 					setLayout(scrollpane);
 					pack();
 					setVisible(true);
-					
+
 					Date time4  = new Date();
 
-					double totalTime = ((time4.getTime() - time1.getTime())/1000.0);
+					double totalTime = ((time4.getTime() - timeStart.getTime())/1000.0);
 					System.out.println("Time to render " + threadManager.numInitialThreads +  
 							" input PE Timelines (using " + threadManager.numConcurrentThreads + " concurrent threads): " + 
 							totalTime + "sec");	
@@ -200,9 +179,25 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 	}
 
 
+	/** Required by interface MainHandler. This one does nothing */
 	public void setData(Data data) {
-		//		do nothing		
+		// Do nothing
 	}		
 
+	/** Required by interface MainHandler. This one does nothing */
+	public void refreshDisplay(boolean doRevalidate){
+		// Do nothing	
+	}
+
+	/** Required by interface MainHandler. This one does nothing */
+	public void notifyProcessorListHasChanged() {
+		// Do nothing
+	}
+
+	/** Required by interface MainHandler. This one does nothing */
+	public void displayWarning(String message) {
+		// Do nothing
+	}
+	
 
 }

@@ -8,7 +8,7 @@ import projections.Tools.Timeline.MainPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.OrderedIntList;
 
-/** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
+/** A runnable object that acts like a MainHandler and renders an image of a single PE's Timeline. */
 class ThreadedFileReader implements MainHandler, Runnable {
 	protected int PE;
 	private Color background;
@@ -63,8 +63,8 @@ class ThreadedFileReader implements MainHandler, Runnable {
 		displayPanel = null;
 		data = null;
 		
-		long aGB = 1024*1024*1024;
-		if(Runtime.getRuntime().freeMemory() < aGB){
+		long oneGB = 1024*1024*1024;
+		if(Runtime.getRuntime().freeMemory() < oneGB){
 			System.out.println("Calling garbage collector");
 			Runtime.getRuntime().gc();
 		}

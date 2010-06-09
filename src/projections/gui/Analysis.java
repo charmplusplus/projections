@@ -7,8 +7,10 @@ import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
+import java.awt.*;
 
 import javax.swing.SwingWorker;
+import javax.swing.JOptionPane;
 
 import projections.analysis.IntervalData;
 import projections.analysis.LogLoader;
@@ -150,7 +152,8 @@ public class Analysis {
 		  rcReader = new ProjectionsConfigurationReader(fileNameHandler);
 
 		  // Load saved color information from file
-		  loadColors();
+		  try {loadColors();}
+		  catch(Exception e) {};
 
 		  // Build Summary Data
 		  if (hasSumFiles()) {
@@ -265,13 +268,22 @@ public class Analysis {
   /**
    *  Read or initialize color maps
    */
-  public void loadColors()  {
+  public void loadColors() throws Exception {
 	  String colorsaved = getLogDirectory() + File.separator + "savedcolors.prj";
 	  colorManager = new ColorManager(colorsaved, this);
-	  activityColors = colorManager.initializeColors();
-	  entryColors = activityColors[PROJECTIONS];
-	  userEventColors = activityColors[USER_EVENTS];
-	  functionColors = activityColors[FUNCTIONS];
+	  try {
+		  activityColors = colorManager.initializeColors();
+		  entryColors = activityColors[PROJECTIONS];
+		  userEventColors = activityColors[USER_EVENTS];
+		  functionColors = activityColors[FUNCTIONS];
+	  }
+	  catch (Exception e) {
+		  activityColors = colorManager.defaultColorMap();
+		  entryColors = activityColors[PROJECTIONS];
+		  userEventColors = activityColors[USER_EVENTS];
+		  functionColors = activityColors[FUNCTIONS];
+		  throw e;
+	  }
   }
   
   public void saveColors() {

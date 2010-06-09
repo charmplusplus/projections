@@ -9,6 +9,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JOptionPane;
 
 import projections.gui.graph.DataSource;
 import projections.gui.graph.DataSource2D;
@@ -218,6 +219,7 @@ implements PopUpAble, ColorUpdateNotifier
 	private class MenuHandler implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
+			
 			if (e.getSource() == mWhiteBG) {
 				MainWindow.runObject[myRun].background = Color.white;
 				MainWindow.runObject[myRun].foreground = Color.black;
@@ -231,8 +233,14 @@ implements PopUpAble, ColorUpdateNotifier
 			} else if (e.getSource() == mChooseColors){
 				new ChooseEntryColorsWindow(gw);
 			} else if (e.getSource() == mLoadColors){
-				MainWindow.runObject[myRun].loadColors();
-				refreshGraph();
+				try {
+					MainWindow.runObject[myRun].loadColors();
+					JOptionPane.showMessageDialog(null, "The colors have successfully been loaded.", "Colors Loaded", JOptionPane.INFORMATION_MESSAGE);
+				}
+				catch (Exception error)
+					{JOptionPane.showMessageDialog(null, error.getMessage() + "\nPlease set your colors and save them.", "Error", JOptionPane.ERROR_MESSAGE);
+					refreshGraph();
+					}
 			} else if (e.getSource() == mSaveColors){
 				MainWindow.runObject[myRun].saveColors();
 			}

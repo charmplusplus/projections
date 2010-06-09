@@ -25,22 +25,20 @@ public class ColorManager
 		this.a = a;
 	}
 
-	protected Color[][] initializeColors() {
-		
+	protected Color[][] initializeColors() throws Exception {
+		Exception exception = null;
+		Color[][] colorToReturn = null;
 		File f = new File(filename);
 		
 		if(f.exists()){
 			// First try to read colors from a file
-			
 			ObjectInputStream in = null;
 			try {
 				in = new ObjectInputStream(new FileInputStream(f));
 			} catch (FileNotFoundException e1) {
-				System.err.println("Could not open file, even though it exists: " + filename);
-				return defaultColorMap();
+				exception = e1;
 			} catch (IOException e1) {
-				System.err.println("Could not read from color file: " + filename);
-				return defaultColorMap();
+				exception = e1;
 			}
 			
 			
@@ -72,11 +70,15 @@ public class ColorManager
 //								System.out.println("Using color found in file for " + epName);
 								retColors[Analysis.PROJECTIONS][k] = inputColors[i];
 							}
-						}	
+						}
+						
 
 						in.close();
-						return retColors;
+						colorToReturn = retColors;
 					}	
+					else {
+						exception = new Exception("Read object for color has failed.");
+					}
 					
 
 				} else if (o1 instanceof Color[][]) {
@@ -91,7 +93,7 @@ public class ColorManager
 						}
 					}
 					in.close();
-					return retColors;
+					colorToReturn = retColors;
 				} else if (o1 instanceof Color[]) {
 					// Else, it may be an ancient format that is just a color array
 
@@ -106,29 +108,39 @@ public class ColorManager
 					}
 
 					in.close();
-					return retColors;
+					colorToReturn = retColors;
 				}
 
-									
+				else {
+					exception = new Exception("Read object has failed.");
+				}
 				
 				
 			} catch (IOException e) {
-				System.out.println("WARNING: Could not read colors from file (IOException): " + filename);
-				return defaultColorMap();
+				exception = e;
 			} catch (ClassNotFoundException e) {
-				System.out.println("WARNING: Could not read colors from file (ClassNotFoundException): " + filename);
-				return defaultColorMap();
+				exception = e;
 			}
 
 		}
+		else {
+			exception = new FileNotFoundException("The file, " + filename + ", was not found.");
+		}
+		
+		if (colorToReturn != null) {
+			return colorToReturn;
+		}
+		else {
+			throw exception;
+		}
 	
 		// Otherwise, just generate the new colors
-		return defaultColorMap();
+		
 	
 	}
 
 
-	private Color[][] defaultColorMap() {
+	public Color[][] defaultColorMap() {
 		Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];
 		for (int i=0; i<retColors.length; i++) {
 			retColors[i] = createColorMap(a.getNumActivity(i));

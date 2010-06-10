@@ -793,7 +793,11 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 		}
 
-
+		//Return the color stored in the TreeMap if the entryIndex already exists in the TreeMap
+		if (MainWindow.runObject[data.myRun].entryColorsMapping.containsKey(entryIndex)) {
+			return MainWindow.runObject[data.myRun].entryColorsMapping.get(entryIndex);
+		}
+		
 		// color the objects by memory usage with a nice blue - red gradient
 		if(data.colorByMemoryUsage()){
 			if(this.memoryUsage == 0){
@@ -1023,7 +1027,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				Color old = MainWindow.runObject[data.myRun].getEntryColor(entry);
 				Color c = JColorChooser.showDialog(null, "Choose new color", old); 
 				if(c !=null){
-					MainWindow.runObject[data.myRun].setEntryColor(entry, c);
+					MainWindow.runObject[data.myRun].entryColorsMapping.put(entry, c);
+					//MainWindow.runObject[data.myRun].setEntryColor(entry, c);
 					data.displayMustBeRepainted();
 				}
 

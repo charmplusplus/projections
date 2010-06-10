@@ -19,6 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
@@ -297,10 +298,16 @@ ItemListener {
 		
 		else if(evt.getSource() == mRestoreColors){
 			try {
-				Util.restoreColors(data.entryColor());
+				MainWindow.runObject[myRun].entryColorsMapping.clear();
+				data.setColorByDefault();
+				MainWindow.runObject[myRun].loadColors();
+				for (int i = 0; i < data.entryColor().length; i++)
+					data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
+				data.displayMustBeRepainted();
 				parentWindow.refreshDisplay(false);
+				JOptionPane.showMessageDialog(null, "The colors have successfully been loaded.", "Colors Loaded", JOptionPane.INFORMATION_MESSAGE);
 			} catch (Exception e) {
-				System.err.println("Attempt to read from color.map failed");
+				JOptionPane.showMessageDialog(null, e.getMessage() + "\nPlease set your colors and save them.", "Error", JOptionPane.ERROR_MESSAGE);
 			}	
 		}
 		
@@ -310,13 +317,23 @@ ItemListener {
 		}
 
 		else if(evt.getSource() == mDefaultColors){
+			MainWindow.runObject[myRun].entryColorsMapping.clear();
+			MainWindow.runObject[myRun].setDefaultColors();
 			for (int i = 0; i < data.entryColor().length; i++)
 				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
+			data.displayMustBeRepainted();
 			parentWindow.refreshDisplay(false);
 		} 
 
-		else if(evt.getSource() == mColorByDefault)
+		else if(evt.getSource() == mColorByDefault) {
+			MainWindow.runObject[myRun].entryColorsMapping.clear();
+			MainWindow.runObject[myRun].setDefaultColors();
+			for (int i = 0; i < data.entryColor().length; i++)
+				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
+			data.displayMustBeRepainted();
+			parentWindow.refreshDisplay(false);
 			data.setColorByDefault();
+		}
 
 		else if(evt.getSource() == mColorByObjectID)
 			data.setColorByObjectID();

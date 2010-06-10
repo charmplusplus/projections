@@ -7,6 +7,7 @@ import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
+import java.util.TreeMap;
 import java.awt.*;
 
 import javax.swing.SwingWorker;
@@ -107,7 +108,7 @@ public class Analysis {
   new Color[NUM_ACTIVITIES][];
   
   private Color[] entryColors;
-  
+  public TreeMap<Integer, Color> entryColorsMapping = new TreeMap<Integer, Color>();
   
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
@@ -278,12 +279,17 @@ public class Analysis {
 		  functionColors = activityColors[FUNCTIONS];
 	  }
 	  catch (Exception e) {
-		  activityColors = colorManager.defaultColorMap();
-		  entryColors = activityColors[PROJECTIONS];
-		  userEventColors = activityColors[USER_EVENTS];
-		  functionColors = activityColors[FUNCTIONS];
+		  setDefaultColors();
 		  throw e;
 	  }
+  }
+  
+  public void setDefaultColors() {
+	  activityColors = colorManager.defaultColorMap();
+	  entryColors = activityColors[PROJECTIONS];
+	  userEventColors = activityColors[USER_EVENTS];
+	  functionColors = activityColors[FUNCTIONS];
+
   }
   
   public void saveColors() {

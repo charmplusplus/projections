@@ -164,6 +164,8 @@ public class ColorManager
 		    for(int i=0; i<numEPs; i++){
 		    	o1[i] = a.getEntryNameByIndex(i);
 		    	o2[i] = a.getEPColorMap()[i];
+		    	if (a.entryColorsMapping.containsKey(i))
+		    		o2[i] = a.entryColorsMapping.get(i);
 		    }
 			
 			out.writeObject(o1);

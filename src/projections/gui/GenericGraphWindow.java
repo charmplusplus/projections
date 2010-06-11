@@ -216,7 +216,7 @@ implements PopUpAble, ColorUpdateNotifier
 	}
 	
 	
-	private class MenuHandler implements ActionListener {
+	public class MenuHandler implements ActionListener {
 
 		public void actionPerformed(ActionEvent e) {
 			
@@ -235,6 +235,7 @@ implements PopUpAble, ColorUpdateNotifier
 			} else if (e.getSource() == mLoadColors){
 				try {
 					MainWindow.runObject[myRun].loadColors();
+					gw.colorsHaveChanged();
 					JOptionPane.showMessageDialog(null, "The colors have successfully been loaded.", "Colors Loaded", JOptionPane.INFORMATION_MESSAGE);
 				}
 				catch (Exception error)

@@ -49,6 +49,8 @@ public class ChooseEntryColorsWindow extends JFrame
 		tabledata  = new Vector();
 
 		entryNames = MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
+		entryNames.put(-1, "Overhead");
+		entryNames.put(-2, "Idle");
 
 		Iterator<Integer> iter = entryNames.keySet().iterator();
 		while(iter.hasNext()){

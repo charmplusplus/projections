@@ -110,6 +110,11 @@ public class Analysis {
   private Color[] entryColors;
   public TreeMap<Integer, Color> entryColorsMapping = new TreeMap<Integer, Color>();
   
+  Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
+  Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
+  public static int isOverhead = -1;
+  public static int isIdle = -2;
+  
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
     // constructor until multiple run data is supported.
@@ -387,17 +392,36 @@ public class Analysis {
     }
 
     public Color getEntryColor(int entryIdx) {
-	if (entryIdx < getSts().getEntryCount()) {
-	    return entryColors[entryIdx];
-	}
-	return null;
+    	if (entryIdx == isIdle) {
+    		Paint p = getIdleColor();
+    		if (p instanceof GradientPaint)
+    			return ((GradientPaint)p).getColor1();
+    		else
+    			return (Color)p;
+    	}
+    	else if (entryIdx == isOverhead) {
+    		Paint p = getOverheadColor();
+    		if (p instanceof GradientPaint)
+    			return ((GradientPaint)p).getColor1();
+    		else
+    			return (Color)p;
+    	}
+    	else if (entryIdx < getSts().getEntryCount()) {
+		    return entryColors[entryIdx];
+		}
+    	else
+    		return null;
     }
 
 
     public void setEntryColor(int entryIdx, Color color) {
-    	if (entryIdx < getSts().getEntryCount()) {
+    	if (entryIdx == isIdle)
+    		idle = color;
+    	else if (entryIdx == isOverhead)
+    		overhead = color;
+    	else if (entryIdx < getSts().getEntryCount())
     		entryColors[entryIdx] = color;
-    	} else {
+    	else {
     		System.err.println("Warning: entry point index " + entryIdx +
     		" not found. Cannot set color");
     	}
@@ -981,11 +1005,19 @@ public class Analysis {
 
 
 	public Paint getIdleColor() {
-		return new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
+		return idle;
 	}
 
 	public Paint getOverheadColor() {
-		return new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
+		return overhead;
+	}
+	
+	public void setIdleColor(Color c) {
+		idle = c;
+	}
+	
+	public void setOverheadColor(Color c) {
+		overhead = c;
 	}
 
 	public String getOutlierFilename() {

@@ -87,6 +87,7 @@ ItemListener {
 	private JMenuItem mColorByDefault;
 	private JMenuItem mColorByObjectID;
         private JMenuItem mColorByEntryMethod;
+        private JMenuItem mColorByEntryMethodFrequency;
 	private JMenuItem mColorByUserRandom;
 	private JMenuItem mColorByUserGradient;
 	private JMenuItem mColorByUserObjRandom;
@@ -343,6 +344,13 @@ ItemListener {
 
 		else if(evt.getSource() == mColorByEntryMethod)
 			data.setColorByEID();
+		
+		else if(evt.getSource() == mColorByEntryMethodFrequency) {
+			data.setFrequencyColors();
+			data.displayMustBeRepainted();
+			parentWindow.refreshDisplay(false);
+			data.setColorByEIDFreq();
+		}
 
 		else if(evt.getSource() == mColorByUserGradient)
 			data.setColorByUserSupplied(Data.BlueGradientColors);
@@ -478,6 +486,7 @@ ItemListener {
 		mColorByDefault = new JMenuItem("Color by Default");
 		mColorByObjectID = new JMenuItem("Color by Object Index");
 		mColorByEntryMethod = new JMenuItem("Color by Entry Method");
+		mColorByEntryMethodFrequency = new JMenuItem("Color by Entry Method Frequency");
 		mColorByUserRandom = new JMenuItem("Color by User Supplied Parameter(timestep) with Disjoint Colors");
 		mColorByUserGradient = new JMenuItem("Color by User Supplied Parameter(timestep) with Gradient");
 		mColorByUserObjRandom = new JMenuItem("Color by User Supplied Parameter(timestep) + Object ID with Disjoint Colors");
@@ -497,6 +506,7 @@ ItemListener {
 		colorMenu.add(mColorByDefault);
 		colorMenu.add(mColorByObjectID);
 		colorMenu.add(mColorByEntryMethod);
+		colorMenu.add(mColorByEntryMethodFrequency);
 		colorMenu.add(mColorByUserRandom);
 		colorMenu.add(mColorByUserGradient);
 		colorMenu.add(mColorByUserObjRandom);
@@ -513,6 +523,9 @@ ItemListener {
 		mColorByDefault.addActionListener(this);
 		mColorByObjectID.addActionListener(this);
 		mColorByEntryMethod.addActionListener(this);
+		mColorByEntryMethod.addActionListener(this);
+		mColorByEntryMethodFrequency.addActionListener(this);
+		mColorByEntryMethodFrequency.addActionListener(this);
 		mColorByUserRandom.addActionListener(this);
 		mColorByUserObjRandom.addActionListener(this);
 		mColorByUserGradient.addActionListener(this);

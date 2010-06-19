@@ -121,7 +121,7 @@ public class Graph extends JPanel
     private boolean showMarkers = false;
 
     
-    /** Special constructor. This can only be called from a projections tool!!! */
+    /** Special construgraphCanvasctor. This can only be called from a projections tool!!! */
     public Graph()
     {
 	setPreferredSize(new Dimension(400,300));	

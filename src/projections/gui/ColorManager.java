@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.Vector;
 
 
 /**
@@ -145,7 +146,7 @@ public class ColorManager
 		for (int i=0; i<retColors.length; i++) {
 			retColors[i] = createColorMap(a.getNumActivity(i));
 		}
-		return retColors;	
+		return retColors;
 	}
 
 	
@@ -206,4 +207,67 @@ public class ColorManager
 		return colors;
 	}
 	
+	public static Color[] createComplementaryColorMap(int numUserEntries) {
+		if (numUserEntries>=2) {
+			float[] hLookup = new float[numUserEntries];
+			hLookup[0] = (float)0.0;
+			hLookup[1] = (float)180.0;
+			Color[] complementaryColors = new Color[numUserEntries];
+			float S = (float)1.0;
+			float B = (float)1.0;
+			
+			for (int i=1; i<(numUserEntries/2); i++) {
+				hLookup[i*2] = (hLookup[i]/2);
+				if (((i*2)+1)<numUserEntries) {
+					hLookup[(i*2)+1] = (hLookup[i]+360)/2;
+				}
+			}
+			
+			for (int i=0; i<numUserEntries; i++) {
+				//When i is a multiple of 15 or 16, it's hue will be reddish... make sure the two look different enough
+				//from each other
+				if((i+1)%15==0)
+					complementaryColors[i] = Color.getHSBColor((hLookup[i])/360, (float)1.0, (float)1.0);
+				else if ((i+1)%16==0)
+					complementaryColors[i] = Color.getHSBColor((hLookup[i])/360, (float)0.25, (float)1.0);
+				else				
+					complementaryColors[i] = Color.getHSBColor((hLookup[i])/360, S, B);
+				
+				//Modify S and B in a cyclic way
+				if ((i+1)%4==0)
+					S-=(0.14);
+				if ((i+3)%4==0)
+					B-=(0.19);
+				
+				//Modify S and B to be in proper range
+				if ((B+S)<1.3) {
+					B=(float)(1.0/B);
+					S=(float)(1.0/S);
+				}
+				if (B<=0)
+					B=-B;
+				if (B>1)
+					B-=(int)B;
+				if (B<=.4)
+					B = (float)1.0;
+				
+				if (S<=0)
+					S=-S;
+				if (S>1)
+					S-=(int)S;
+				if (S<=.4)
+					S = (float)1.0;
+			}
+			return complementaryColors;
+		}
+		return new Color[0];
+	}
+
+	public static Color[] entryColorsByFrequency(Color[] complementaryMap, Vector<Integer> freqVector) {
+		Color [] colors = new Color[freqVector.size()];
+		for (int i=0; i< freqVector.size(); i++) {
+			colors[freqVector.get(i)] = complementaryMap[i];
+		}
+		return colors;
+	}
 }

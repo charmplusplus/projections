@@ -38,7 +38,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	/** The panel on the left that displays strings like "PE 0 (20%,40%)" */
 	protected LabelPanel labelPanel;
 	/** The panel on top that draws a scale for the time dimension */
-	protected LayeredPanel axisPanel; 
+	protected LayeredPanel axisPanel;
 	/** The panel that draws the main portion of the window, the timelines */
 	protected MainPanel mainPanel;
 	

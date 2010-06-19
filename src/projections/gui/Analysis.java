@@ -97,17 +97,17 @@ public class Analysis {
   
   /** *************** Color Maps 6/27/2002 ************ */
   
-  ColorManager colorManager;
+  public ColorManager colorManager;
   
   public Color background = Color.black;
   public Color foreground = Color.white;
   
-  private Color[] userEventColors;
-  private Color[] functionColors;
-  private Color[][] activityColors =
+  public Color[] userEventColors;
+  public Color[] functionColors;
+  public Color[][] activityColors =
   new Color[NUM_ACTIVITIES][];
   
-  private Color[] entryColors;
+  public Color[] entryColors;
   public TreeMap<Integer, Color> entryColorsMapping = new TreeMap<Integer, Color>();
   
   Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);

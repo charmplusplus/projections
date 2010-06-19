@@ -72,6 +72,8 @@ class ScrollingPanel extends JPanel {
 	
 	
 	void updateBackgroundColor(){
+		scrollpane.getHorizontalScrollBar().setBackground(data.getBackgroundColor());
+		scrollpane.getViewport().setBackground(data.getBackgroundColor());
 		this.setBackground(data.getBackgroundColor());
 		scrollpane.setBackground(data.getBackgroundColor());
 	}

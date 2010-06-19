@@ -21,6 +21,8 @@ import javax.swing.ToolTipManager;
 import projections.analysis.PackTime;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
+import projections.gui.Analysis;
+import projections.gui.ColorManager;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
@@ -41,7 +43,26 @@ import projections.misc.LogLoadException;
  * 
  *  Style information is also to be found here
  * 		-- Colors for the background/foreground
- * 		-- Fonts to be used for the axis and labels
+ * 		-- Fonts to be used for the axis and labelsTimelineWindow(MainWindow parentWindow) {
+		super(parentWindow);
+		
+        thisWindow = this;
+		
+		data = new Data(this);
+		
+		labelPanel = new LabelPanel(data);
+		
+		// Construct the various layers, and the layout manager
+		AxisPanel ap = new AxisPanel(data);
+		AxisOverlayPanel op = new AxisOverlayPanel(data);
+		AxisLayout lay = new AxisLayout(ap);
+		// Create the layered panel containing our layers
+		axisPanel = new LayeredPanel(ap,op,lay);
+		ap.setOpaque(false);
+		op.setOpaque(false);
+		
+		mainPanel = new MainPanel(data, this);
+		
  *
  *  Also many utility functions are here:
  *      -- Conversions between screen coordinates and times
@@ -97,6 +118,9 @@ public class Data
 	/** If true, color the entry method invocations by their entry method id */
 	private boolean colorByEntryId;
 	
+	/** If true, color the entry method invocations by their entry method frequency */
+	private boolean colorByEntryIdFreq;
+	
 	private int[]          entries;
 
 	private Color[]        entryColor;
@@ -120,7 +144,20 @@ public class Data
 	 */
 	protected Map<Integer, Set <UserEventObject> > allUserEventObjects = new TreeMap<Integer, Set <UserEventObject> >();
 
-
+	/**
+	 * Each value in this TreeMap is a TreeSet of the entry method's frequencies.
+	 * Each key is an integer, the entry ID frequency
+	 * Each value is a linked list of entry ID's that have the frequency defined by the key
+	 */
+	protected TreeMap<Integer, LinkedList<Integer>> frequencyTreeMap = new TreeMap<Integer, LinkedList<Integer>>();
+	
+	
+	/**
+	 * This is a Vector of the relative frequencies of the entry methods.  The entry
+	 * method with the most frequencies will be the first item in the Vector 
+	 */
+	protected Vector<Integer> frequencyVector = new Vector<Integer>();
+	
 	/** processor usage indexed by PE */
 	float[] processorUsage;
 
@@ -247,6 +284,8 @@ public class Data
 				
 		allEntryMethodObjects = null;
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
+		makeFrequencyMap(entries);
+		makeFreqVector();
 		entryColor = MainWindow.runObject[myRun].getEPColorMap();
 
 		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
@@ -257,6 +296,8 @@ public class Data
 		colorByMemoryUsage = false;
 		colorByObjectId = false;
 		colorByUserSupplied = false;
+		colorByEntryId = false;
+		colorByEntryIdFreq = false;
 			
 		/// Default value for custom color (Normally not used)
 		customForeground = Color.white; 
@@ -1275,6 +1316,7 @@ public class Data
 		colorByMemoryUsage=false;
 		colorByUserSupplied=false;
 		colorByEntryId = false;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
 	
@@ -1304,6 +1346,7 @@ public class Data
 		colorByObjectId = false;
 		colorByUserSupplied=false;
 		colorByEntryId = false;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
 
@@ -1313,6 +1356,7 @@ public class Data
 		colorByObjectId = false;
 		colorByMemoryUsage=false;
 		colorByEntryId = false;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
 
@@ -1321,6 +1365,7 @@ public class Data
 		colorByMemoryUsage=false;
 		colorByUserSupplied=false;
 		colorByEntryId = false;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
 	
@@ -1331,6 +1376,7 @@ public class Data
 		colorByObjectId = true;
 		colorByMemoryUsage=false;
 		colorByEntryId = false;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
 	
@@ -1340,6 +1386,7 @@ public class Data
 		colorByObjectId = false;
 		colorByMemoryUsage=false;
 		colorByEntryId = true;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
 
@@ -1348,14 +1395,26 @@ public class Data
 		colorByObjectId = false;
 		colorByMemoryUsage = false;
 		colorByEntryId = true;
+		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
+    	public void setColorByEIDFreq() {
+    		colorByUserSupplied = false;
+    		colorByObjectId = false;
+    		colorByMemoryUsage = false;
+    		colorByEntryId = false;
+    		colorByEntryIdFreq = true;
+    		displayMustBeRepainted();
+    	}
 	
 	
 	protected boolean colorByEID() {
 		return colorByEntryId;
 	}
 	
+	protected boolean colorByEIDFreq() {
+		return colorByEntryIdFreq;
+	}
 
 	protected boolean colorByOID() {
 		return colorByObjectId;
@@ -1543,8 +1602,6 @@ public class Data
 		peToLine.add(newPos, p);
 		this.displayMustBeRedrawn();
 	}
-
-	
 
 	
 	public void setBackgroundColor(Color c) {
@@ -2021,5 +2078,49 @@ public class Data
 		drawMessagesForTheseObjectsAlt = null;
 	}
 	
+	public void makeFrequencyMap(int[] frequencyOfEntries) {
+		TreeMap<Integer, LinkedList<Integer>> mapToReturn = new TreeMap<Integer, LinkedList<Integer>>();
+		for (int i=0; i< frequencyOfEntries.length; i++) {
+			if(mapToReturn.containsKey(entries[i])) {
+				mapToReturn.get(entries[i]).add(i);
+			}
+			else {
+				LinkedList<Integer> ll = new LinkedList<Integer>();
+				ll.add(i);
+				mapToReturn.put(entries[i], ll);
+			}
+		}
+		frequencyTreeMap = mapToReturn;
+	}
 	
+	//Returns a vector of the entry methods sorted by their frequency, starting with the least frequent and ending
+	//with the most frequent
+	public void makeFreqVector() {
+		Vector<Integer> vectorToReturn = new Vector<Integer>();
+		Collection<LinkedList<Integer>> collec = frequencyTreeMap.values();
+		Iterator<LinkedList<Integer>> iter = collec.iterator();
+		
+		while(iter.hasNext()) {
+			LinkedList<Integer> tempLinkedL = iter.next();
+			for(int i=0; i<tempLinkedL.size(); i++) {
+				vectorToReturn.add(0, tempLinkedL.get(i));
+			}
+		}
+		
+		frequencyVector = vectorToReturn;
+		
+		//to add the int to the end of the Vector arrayToReturn.addElement(Integer??);
+		
+		//or iterate normal way through the treemap, then just add the integer to the
+		//beginning of the arrayToReturn using arrayToReturn.add(0, Integer)
+	}
+	
+	 public void setFrequencyColors() {
+		 Analysis a = MainWindow.runObject[myRun];
+		 a.activityColors = a.colorManager.defaultColorMap();
+		 a.entryColors = ColorManager.entryColorsByFrequency(ColorManager.createComplementaryColorMap(entries.length), frequencyVector);
+		 a.userEventColors = a.activityColors[a.USER_EVENTS];
+		 a.functionColors = a.activityColors[a.FUNCTIONS];
+
+	  }
 }

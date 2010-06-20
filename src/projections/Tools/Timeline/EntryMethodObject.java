@@ -850,7 +850,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 
 		// Sometimes Overrule the normal colors and use one based on the chare array index
-		if( data.colorByOID() || data.colorByUserSupplied() || data.colorByEID() || data.colorByEIDFreq() ){
+		if( data.colorByOID() || data.colorByUserSupplied() || data.colorByEID()){
 
 			long color = 0;
 

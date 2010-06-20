@@ -346,7 +346,10 @@ ItemListener {
 			data.setColorByEID();
 		
 		else if(evt.getSource() == mColorByEntryMethodFrequency) {
+			MainWindow.runObject[myRun].entryColorsMapping.clear();
 			data.setFrequencyColors();
+			for (int i = 0; i < data.entryColor().length; i++)
+				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
 			data.displayMustBeRepainted();
 			parentWindow.refreshDisplay(false);
 			data.setColorByEIDFreq();

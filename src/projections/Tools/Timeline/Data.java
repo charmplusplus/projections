@@ -2121,6 +2121,5 @@ public class Data
 		 a.entryColors = ColorManager.entryColorsByFrequency(ColorManager.createComplementaryColorMap(entries.length), frequencyVector);
 		 a.userEventColors = a.activityColors[a.USER_EVENTS];
 		 a.functionColors = a.activityColors[a.FUNCTIONS];
-
 	  }
 }

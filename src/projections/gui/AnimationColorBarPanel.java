@@ -4,9 +4,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
-import java.awt.Panel;
 
-class AnimationColorBarPanel extends Panel
+import javax.swing.JPanel;
+
+class AnimationColorBarPanel extends JPanel
 {
 	private float MAXHUE = (float)0.65;
     private FontMetrics fm;

@@ -7,8 +7,6 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Label;
-import java.awt.Panel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -17,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JLabel;
 import javax.swing.SwingWorker;
 
 import projections.analysis.CallTable;
@@ -33,8 +32,8 @@ class CallTableWindow extends ProjectionsWindow
 	private int myRun = 0;
     
     private CallTableTextArea    textArea;
-    private Label                lTitle;
-    private Panel                titlePanel;
+    private JLabel                lTitle;
+    private JPanel                titlePanel;
 
     private JPanel	         mainPanel;
     private JPanel	         checkBoxPanel1;
@@ -148,9 +147,9 @@ class CallTableWindow extends ProjectionsWindow
 	  
 	  textArea = new CallTableTextArea();
 	  
-	  titlePanel = new Panel();
+	  titlePanel = new JPanel();
 	  titlePanel.setBackground(Color.black);
-	  lTitle = new Label("CALL TABLE", Label.CENTER);
+	  lTitle = new JLabel("CALL TABLE", JLabel.CENTER);
 	  lTitle.setForeground(Color.white);
 	  lTitle.setFont(new Font("SansSerif", Font.BOLD, 16));
 	  titlePanel.add(lTitle);

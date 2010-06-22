@@ -6,14 +6,15 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Panel;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 
-class AnimationDisplayPanel extends Panel
+import javax.swing.JPanel;
+
+class AnimationDisplayPanel extends JPanel
     implements MouseMotionListener , MouseListener
 {
 

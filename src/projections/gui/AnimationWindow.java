@@ -241,12 +241,13 @@ class AnimationWindow extends ProjectionsWindow
 	Font titleFont = new Font("SansSerif", Font.BOLD, 16);
 	lTitle = new JLabel("", JLabel.CENTER);
 	lTitle.setFont(titleFont);
+	lTitle.setForeground(MainWindow.runObject[myRun].foreground);
 	setTitleInfo(0);
 	titlePanel.add(lTitle);
           
 	lStatus = new JLabel("");
 	statusPanel.add(lStatus, "Center");
-	statusPanel.setBackground(Color.lightGray);
+	statusPanel.setBackground(MainWindow.runObject[myRun].background);
           
 	GridBagLayout gbl = new GridBagLayout();
 	GridBagConstraints gbc = new GridBagConstraints();
@@ -261,7 +262,7 @@ class AnimationWindow extends ProjectionsWindow
 	Util.gblAdd(controlPanel, delayField, gbc, 4,1, 1,1, 1,1);
 	Util.gblAdd(controlPanel, setRanges,  gbc, 5,1, 1,1, 1,1);
           
-	mainPanel.setBackground(Color.gray);
+	mainPanel.setBackground(MainWindow.runObject[myRun].background);
 	mainPanel.setLayout(gbl);
           
 	Util.gblAdd(mainPanel,titlePanel, gbc, 0,0, 1,1, 1,0);

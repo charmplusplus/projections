@@ -15,7 +15,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Label;
 import java.awt.Scrollbar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -59,7 +58,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 
 	private ScalePanel scalePanel;
 	private OverviewPanel stl;
-	private Label status;
+	private JLabel status;
 	// Modified to display data by entry method color. Mode panel.
 	protected static final int MODE_UTILIZATION = 0;
 	protected static final int MODE_EP = 1;
@@ -94,7 +93,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 		JPanel displayPanel = new JPanel();
 		displayPanel.setLayout(gbl);
 
-		status = new Label("");
+		status = new JLabel("");
 		status.setBackground(Color.black);
 		status.setForeground(Color.lightGray);
 

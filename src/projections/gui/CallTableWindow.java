@@ -186,7 +186,7 @@ class CallTableWindow extends ProjectionsWindow
 	  //Util.gblAdd(p, controlPanel,   gbc, 0,3, 1,1, 1,1, 0,5,5,5);
 	  
 	  Util.gblAdd(mainPanel, titlePanel,     gbc, 0,1, 1,1, 0,0);
-	  Util.gblAdd(mainPanel, textArea,       gbc, 0,2, 1,1, 1,1);
+	  //Util.gblAdd(mainPanel, textArea,       gbc, 0,2, 1,1, 1,1);
 	  Util.gblAdd(mainPanel, checkBoxPanel1,  gbc, 0,3, 1,1, 0,0);
 	  Util.gblAdd(mainPanel, checkBoxPanel2,  gbc, 0,4, 1,1, 0,0);
 	  Util.gblAdd(mainPanel, controlPanel,   gbc, 0,5, 1,0, 0,0);

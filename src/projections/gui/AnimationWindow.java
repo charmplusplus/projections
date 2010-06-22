@@ -5,16 +5,16 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Label;
-import java.awt.Panel;
 import java.awt.Scrollbar;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 class AnimationWindow extends ProjectionsWindow
@@ -38,11 +38,11 @@ class AnimationWindow extends ProjectionsWindow
 	private Button bPlusOne, bMinusOne, bAuto;
     private Button setRanges;
     private TimeTextField delayField;
-    private Panel statusPanel;
-    private Panel titlePanel; 
+    private JPanel statusPanel;
+    private JPanel titlePanel; 
     
     //private Label lTitle, lStatus;
-    private Label lTitle, lStatus, lDelay;
+    private JLabel lTitle, lStatus, lDelay;
     private Scrollbar slider;
     
     private int redrawDelay; //Real time between frames (ms)
@@ -208,10 +208,10 @@ class AnimationWindow extends ProjectionsWindow
 
     private void createLayout()
     {
-	Panel mainPanel     = new Panel();
-	titlePanel    = new Panel();
-	statusPanel   = new Panel();
-	Panel controlPanel  = new Panel();
+	JPanel mainPanel     = new JPanel();
+	titlePanel    = new JPanel();
+	statusPanel   = new JPanel();
+	JPanel controlPanel  = new JPanel();
 	colorbarPanel = new AnimationColorBarPanel();
 	displayPanel  = new AnimationDisplayPanel(this);
           
@@ -224,7 +224,7 @@ class AnimationWindow extends ProjectionsWindow
 	bAuto.addActionListener(this);
           
 	redrawDelay=500;  // default delay value
-	lDelay = new Label("Frame Refresh Delay:", Label.CENTER);
+	lDelay = new JLabel("Frame Refresh Delay:", JLabel.CENTER);
 	delayField = new TimeTextField("500 ms", 8);
 	delayField.addActionListener(this);
 	
@@ -239,12 +239,12 @@ class AnimationWindow extends ProjectionsWindow
 	titlePanel.setBackground(MainWindow.runObject[myRun].background);
 	titlePanel.setForeground(MainWindow.runObject[myRun].foreground);
 	Font titleFont = new Font("SansSerif", Font.BOLD, 16);
-	lTitle = new Label("", Label.CENTER);
+	lTitle = new JLabel("", JLabel.CENTER);
 	lTitle.setFont(titleFont);
 	setTitleInfo(0);
 	titlePanel.add(lTitle);
           
-	lStatus = new Label("");
+	lStatus = new JLabel("");
 	statusPanel.add(lStatus, "Center");
 	statusPanel.setBackground(Color.lightGray);
           
@@ -270,7 +270,7 @@ class AnimationWindow extends ProjectionsWindow
 	Util.gblAdd(mainPanel, statusPanel,   gbc, 0,3, 1,1, 1,0);
 	Util.gblAdd(mainPanel, controlPanel,  gbc, 0,4, 1,1, 1,0); 
           
-	getContentPane().add(mainPanel,"Center");
+	getContentPane().add(mainPanel,"Center"); //bug is here
 	layoutComplete = true;
     }   
 

@@ -299,7 +299,7 @@ implements ActionListener, ItemListener
 				parent.openTool(new TimelineRenderedWindow(parent) );
 			
 			else if (mi == usageProfileMenuItem)
-				parent.openTool(new ProfileWindow(parent) );
+				parent.openTool(new ProfileWindow(parent) ); 
 			
 			else if (mi == communicationMenuItem)	
 				parent.openTool(new CommWindow(parent) );

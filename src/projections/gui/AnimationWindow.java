@@ -189,7 +189,7 @@ class AnimationWindow extends ProjectionsWindow
             {
                 "Select Processors",
                 null,
-		"Close"
+                "Close"
             },
                                 this));
         mbar.add(Util.makeJMenu("Tools", new Object[]
@@ -200,7 +200,7 @@ class AnimationWindow extends ProjectionsWindow
         mbar.add(Util.makeJMenu("Help", new Object[]
             {
                 "Index",
-		"About"
+                "About"
             },
                                 this));
         setJMenuBar(mbar);
@@ -264,9 +264,7 @@ class AnimationWindow extends ProjectionsWindow
 	mainPanel.setBackground(Color.gray);
 	mainPanel.setLayout(gbl);
           
-	Util.gblAdd(mainPanel,
-
- titlePanel,    gbc, 0,0, 1,1, 1,0);
+	Util.gblAdd(mainPanel,titlePanel, gbc, 0,0, 1,1, 1,0);
 	Util.gblAdd(mainPanel, displayPanel,  gbc, 0,1, 1,1, 1,1);
 	Util.gblAdd(mainPanel, colorbarPanel, gbc, 0,2, 1,1, 1,0);
 	Util.gblAdd(mainPanel, statusPanel,   gbc, 0,3, 1,1, 1,0);

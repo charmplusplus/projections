@@ -487,9 +487,9 @@ ItemListener {
 		
 		
 		mColorByDefault = new JMenuItem("Color by Default");
-		mColorByObjectID = new JMenuItem("Color by Object Index");
 		mColorByEntryMethod = new JMenuItem("Color by Entry Method");
-		mColorByEntryMethodFrequency = new JMenuItem("Color by Entry Method Frequency");
+		mColorByEntryMethodFrequency = new JMenuItem("Color by Entry Method Using Frequency");
+		mColorByObjectID = new JMenuItem("Color by Object Index");
 		mColorByUserRandom = new JMenuItem("Color by User Supplied Parameter(timestep) with Disjoint Colors");
 		mColorByUserGradient = new JMenuItem("Color by User Supplied Parameter(timestep) with Gradient");
 		mColorByUserObjRandom = new JMenuItem("Color by User Supplied Parameter(timestep) + Object ID with Disjoint Colors");
@@ -507,9 +507,9 @@ ItemListener {
 		colorMenu.add(mDefaultColors);
 		colorMenu.addSeparator();
 		colorMenu.add(mColorByDefault);
-		colorMenu.add(mColorByObjectID);
 		colorMenu.add(mColorByEntryMethod);
 		colorMenu.add(mColorByEntryMethodFrequency);
+		colorMenu.add(mColorByObjectID);
 		colorMenu.add(mColorByUserRandom);
 		colorMenu.add(mColorByUserGradient);
 		colorMenu.add(mColorByUserObjRandom);

@@ -59,7 +59,7 @@ public class ChooseEntryColorsWindow extends JFrame
 			Vector tableRow = new Vector();
 
 			Color epColor = MainWindow.runObject[myRun].getEntryColor(id);
-			ClickableColorBox c = new ClickableColorBox(id, epColor);
+			ClickableColorBox1 c = new ClickableColorBox1(id, epColor, myRun, gw);
 
 			tableRow.add(name);
 			tableRow.add(id);
@@ -68,13 +68,13 @@ public class ChooseEntryColorsWindow extends JFrame
 			tabledata.add(tableRow);
 		}
 
-		MyTableModel tableModel = new MyTableModel(); 
+		MyTableModel1 tableModel = new MyTableModel1(tabledata, columnNames); 
 
 		JTable table = new JTable(tableModel);
 		initColumnSizes(table);
 
-		table.setDefaultRenderer(ClickableColorBox.class, new ColorRenderer());
-		table.setDefaultEditor(ClickableColorBox.class, new ColorEditor());
+		table.setDefaultRenderer(ClickableColorBox1.class, new ColorRenderer());
+		table.setDefaultEditor(ClickableColorBox1.class, new ColorEditor());
 
 		// put the table into a scrollpane
 		JScrollPane scroller = new JScrollPane(table);
@@ -105,154 +105,54 @@ public class ChooseEntryColorsWindow extends JFrame
 		column = table.getColumnModel().getColumn(1);
 		column.setPreferredWidth(50);
 
-	}
-
-
-	private class MyTableModel extends AbstractTableModel implements ActionListener{
-
-		public boolean isCellEditable(int row, int col) {
-			if (col == 2) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
-		public Class getColumnClass(int c) {
-			return getValueAt(0, c).getClass();
-		}
-
-
-		public int getColumnCount() {
-			return 3;
-		}
-
-		public int getRowCount() {
-			return tabledata.size();
-		}
-
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			return tabledata.get(rowIndex).get(columnIndex);
-		}
-
-		public String getColumnName(int col) {
-			return columnNames.get(col);
-		}
-
-		public void setValueAt(Object value, int row, int col) {
-		
-			tabledata.get(row).set(col,value);
-			fireTableCellUpdated(row, col);
-
-		}
-
-
-		public void actionPerformed(ActionEvent e) {
-			System.out.println("Action for object: " + e.getSource());
-			System.out.println("Update/refresh the plot here");
-			fireTableDataChanged();
-		}
-
-	}    
-
-
-	/// A class that incorporates an integer identifier and its corresponding paint
-	private class ClickableColorBox {
-		public int id;
-		public Color c;
-		public ClickableColorBox(int id, Color c){
-			this.id = id;
-			this.c = c;
-		}
-		public void setColor(Color c){
-			this.c = c;
-			MainWindow.runObject[myRun].setEntryColor(id, c);
-			gw.colorsHaveChanged();
-		}
-	}
-
-
-	/// A simple color renderer
-	private class ColorRenderer extends JLabel
-	implements TableCellRenderer {	
-		private ColorRenderer() {
-			setOpaque(true);
-		}
-		public Component getTableCellRendererComponent(
-				JTable table, Object color,
-				boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			if(color instanceof Color){
-				setBackground((Color) color);
-			}else if(color instanceof ClickableColorBox){
-				setBackground(((ClickableColorBox) color).c);
-			}
-
-			return this;
-		}
-	}
-
-
-
-	public class ColorEditor extends AbstractCellEditor
-	implements TableCellEditor,
-	ActionListener {
-		ClickableColorBox currentColorBox;
-		JButton button;
-		JColorChooser colorChooser;
-		JDialog dialog;
-		protected static final String EDIT = "edit";
-
-		public ColorEditor() {
-			button = new JButton();
-			button.setActionCommand(EDIT);
-			button.addActionListener(this);
-			button.setBorderPainted(false);
-
-			//Set up the dialog that the button brings up.
-			colorChooser = new JColorChooser();
-			dialog = JColorChooser.createDialog(button,
-					"Pick a Color",
-					true,  //modal
-					colorChooser,
-					this,  //OK button handler
-					null); //no CANCEL button handler
-		}
-
-		public void actionPerformed(ActionEvent e) {
-			if (EDIT.equals(e.getActionCommand())) {
-				//The user has clicked the cell, so
-				//bring up the dialog.
-				button.setBackground(currentColorBox.c);
-				colorChooser.setColor(currentColorBox.c);
-				dialog.setVisible(true);
-
-				fireEditingStopped(); //Make the renderer reappear.
-
-			} else { //User pressed dialog's "OK" button.
-				currentColorBox.setColor(colorChooser.getColor());
-			}
-		}
-
-		//Implement the one CellEditor method that AbstractCellEditor doesn't.
-		public Object getCellEditorValue() {
-			return currentColorBox;
-		}
-
-		//Implement the one method defined by TableCellEditor.
-		public Component getTableCellEditorComponent(JTable table,
-				Object value,
-				boolean isSelected,
-				int row,
-				int column) {
-			
-			currentColorBox = (ClickableColorBox)value;
-			
-			return button;
-		}
-	}
-
-
-
-
+	}   
 }
+
+/// A class that incorporates an integer identifier and its corresponding paint
+class ClickableColorBox1 extends ClickableColorBox {
+	public int myRun;
+	public ColorUpdateNotifier gw;
+	
+	public ClickableColorBox1(int id, Color c, int myRun_, ColorUpdateNotifier gw_) {
+		super(id, c);
+		myRun = myRun_;
+		gw=gw_;
+	}
+	public void setColor(Color c){
+		this.c = c;
+		MainWindow.runObject[myRun].setEntryColor(id, c);
+		gw.colorsHaveChanged();
+	}
+}
+
+
+class MyTableModel1 extends MyTableModel implements ActionListener{
+	
+	public MyTableModel1(Vector<Vector> TD, Vector<String> CN) {
+		super(TD, CN);
+	}
+
+	public boolean isCellEditable(int row, int col) {
+		if (col == 2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public int getColumnCount() {
+		return 3;
+	}
+
+	public void setValueAt(Object value, int row, int col) {
+		tabledata.get(row).set(col,value);
+		fireTableCellUpdated(row, col);
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		System.out.println("Action for object: " + e.getSource());
+		System.out.println("Update/refresh the plot here");
+		fireTableDataChanged();
+	}
+
+} 

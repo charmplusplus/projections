@@ -24,6 +24,8 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import projections.gui.*;
+
 /** A class that displays a color and selection chooser for entry methods */
 class ChooseEntriesWindow extends JFrame 
 {
@@ -56,6 +58,8 @@ class ChooseEntriesWindow extends JFrame
 		tabledata  = new Vector();
 
 		entryNames =  data.getEntryNames();
+		entryNames.put(-1, "Overhead");
+		entryNames.put(-2, "Idle");
 
 		Iterator<Integer> iter = entryNames.keySet().iterator();
 		while(iter.hasNext()){
@@ -65,7 +69,7 @@ class ChooseEntriesWindow extends JFrame
 
 			Boolean b = data.entryIsVisibleID(id);
 
-			ClickableColorBox c = new ClickableColorBox(id, data.getEntryColor(id));
+			ClickableColorBox1 c = new ClickableColorBox1(id, data.getEntryColor(id), data);
 
 			tableRow.add(b);
 			tableRow.add(name);
@@ -75,13 +79,13 @@ class ChooseEntriesWindow extends JFrame
 			tabledata.add(tableRow);
 		}
 
-		MyTableModel tableModel = new MyTableModel(); 
+		MyTableModel1 tableModel = new MyTableModel1(tabledata, columnNames, data, checkAll, uncheckAll); 
 
 		JTable table = new JTable(tableModel);
 		initColumnSizes(table);
 
-		table.setDefaultRenderer(ClickableColorBox.class, new ColorRenderer());
-		table.setDefaultEditor(ClickableColorBox.class, new ColorEditor());
+		table.setDefaultRenderer(ClickableColorBox1.class, new ColorRenderer());
+		table.setDefaultEditor(ClickableColorBox1.class, new ColorEditor());
 
 		// put the table into a scrollpane
 		JScrollPane scroller = new JScrollPane(table);
@@ -128,192 +132,93 @@ class ChooseEntriesWindow extends JFrame
 		column.setPreferredWidth(50);
 
 	}
+}   
 
 
-	private class MyTableModel extends AbstractTableModel implements ActionListener{
+/// A class that incorporates an integer identifier and its corresponding paint
+class ClickableColorBox1 extends ClickableColorBox {
+	Data data;
+	
+	public ClickableColorBox1(int id, Color c, Data data_) {
+		super(id, c);
+		data=data_;
+	}
+	
+	public void setColor(Color c){
+		this.c = c;
+		data.setColorForEntry(id, c);
+	}
+}
 
-		public boolean isCellEditable(int row, int col) {
-			if (col == 0 || col == 3) {
-				return true;
-			} else {
-				return false;
-			}
-		}
+class MyTableModel1 extends MyTableModel implements ActionListener{
+	Data data;
+	JButton checkAll;
+	JButton uncheckAll;
 
-		public Class getColumnClass(int c) {
-			return getValueAt(0, c).getClass();
-		}
-
-
-		public int getColumnCount() {
-			return 4;
-		}
-
-		public int getRowCount() {
-			return tabledata.size();
-		}
-
-		public Object getValueAt(int rowIndex, int columnIndex) {
-			return tabledata.get(rowIndex).get(columnIndex);
-		}
-
-		public String getColumnName(int col) {
-			return columnNames.get(col);
-		}
-
-		public void setValueAt(Object value, int row, int col) {
-			if(col==0){
-				Boolean newValue = (Boolean) value;
-				Integer id = (Integer) tabledata.get(row).get(2);
-
-				if(newValue){
-					// remove from list of disabled entry methods
-					data.makeEntryVisibleID(id);
-				} else {
-					// add to list of disabled entry methods
-					data.makeEntryInvisibleID(id);
-				}				
-			} else {
-//				System.out.println("setValueAt col = " + col);
-			}
-
-			tabledata.get(row).set(col,value);
-			fireTableCellUpdated(row, col);
-
-		}
-
-
-
-		public void actionPerformed(ActionEvent e) {
-			if(e.getSource() == checkAll){
-				Iterator<Vector> iter= tabledata.iterator();
-				while(iter.hasNext()){
-					Vector v = iter.next();
-					Integer id = (Integer) v.get(2);
-					// update the backing data for the table
-					v.set(0,true);				
-					// Update the visualization (but don't redraw yet)
-					data.makeEntryVisibleID(id, false);
-				}
-			} else if(e.getSource() == uncheckAll) {
-				Iterator<Vector> iter= tabledata.iterator();
-				while(iter.hasNext()){
-					Vector v = iter.next();
-					Integer id = (Integer) v.get(2);
-					// update the backing data for the table
-					v.set(0,false);
-					// Update the visualization (but don't redraw yet)
-					data.makeEntryInvisibleID(id, false);
-				}				
-			} else {
-				System.out.println("Action for object: " + e.getSource());
-			}
-
-
-			data.displayMustBeRedrawn();
-			fireTableDataChanged();
-		}
-
-
-	}    
-
-
-	/// A class that incorporates an integer identifier and its corresponding paint
-	private class ClickableColorBox {
-		public int id;
-		public Color c;
-		public ClickableColorBox(int id, Color c){
-			this.id = id;
-			this.c = c;
-		}
-		public void setColor(Color c){
-			this.c = c;
-			data.setColorForEntry(id, c);
+	public MyTableModel1(Vector<Vector> TD, Vector<String> CN, Data data_, JButton checkAll_, JButton uncheckAll_) {
+		super(TD, CN);
+		data = data_;
+	}
+	
+	public boolean isCellEditable(int row, int col) {
+		if (col == 0 || col == 3) {
+			return true;
+		} else {
+			return false;
 		}
 	}
 
-
-	/// A simple color renderer
-	private class ColorRenderer extends JLabel
-	implements TableCellRenderer {	
-		private ColorRenderer() {
-			setOpaque(true);
-		}
-		public Component getTableCellRendererComponent(
-				JTable table, Object color,
-				boolean isSelected, boolean hasFocus,
-				int row, int column) {
-			if(color instanceof Color){
-				setBackground((Color) color);
-			}else if(color instanceof ClickableColorBox){
-				setBackground(((ClickableColorBox) color).c);
-			}
-
-			return this;
-		}
+	public int getColumnCount() {
+		return 4;
 	}
 
+	public void setValueAt(Object value, int row, int col) {
+		if(col==0){
+			Boolean newValue = (Boolean) value;
+			Integer id = (Integer) tabledata.get(row).get(2);
 
-
-	public class ColorEditor extends AbstractCellEditor
-	implements TableCellEditor,
-	ActionListener {
-		ClickableColorBox currentColorBox;
-		JButton button;
-		JColorChooser colorChooser;
-		JDialog dialog;
-		protected static final String EDIT = "edit";
-
-		public ColorEditor() {
-			button = new JButton();
-			button.setActionCommand(EDIT);
-			button.addActionListener(this);
-			button.setBorderPainted(false);
-
-			//Set up the dialog that the button brings up.
-			colorChooser = new JColorChooser();
-			dialog = JColorChooser.createDialog(button,
-					"Pick a Color",
-					true,  //modal
-					colorChooser,
-					this,  //OK button handler
-					null); //no CANCEL button handler
+			if(newValue){
+				// remove from list of disabled entry methods
+				data.makeEntryVisibleID(id);
+			} else {
+				// add to list of disabled entry methods
+				data.makeEntryInvisibleID(id);
+			}				
+		} else {
+//			System.out.println("setValueAt col = " + col);
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			if (EDIT.equals(e.getActionCommand())) {
-				//The user has clicked the cell, so
-				//bring up the dialog.
-				button.setBackground(currentColorBox.c);
-				colorChooser.setColor(currentColorBox.c);
-				dialog.setVisible(true);
-
-				fireEditingStopped(); //Make the renderer reappear.
-
-			} else { //User pressed dialog's "OK" button.
-				currentColorBox.setColor(colorChooser.getColor());
-			}
-		}
-
-		//Implement the one CellEditor method that AbstractCellEditor doesn't.
-		public Object getCellEditorValue() {
-			return currentColorBox;
-		}
-
-		//Implement the one method defined by TableCellEditor.
-		public Component getTableCellEditorComponent(JTable table,
-				Object value,
-				boolean isSelected,
-				int row,
-				int column) {
-			
-			currentColorBox = (ClickableColorBox)value;
-			
-			return button;
-		}
+		tabledata.get(row).set(col,value);
+		fireTableCellUpdated(row, col);
 	}
+	
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == checkAll){
+			Iterator<Vector> iter= tabledata.iterator();
+			while(iter.hasNext()){
+				Vector v = iter.next();
+				Integer id = (Integer) v.get(2);
+				// update the backing data for the table
+				v.set(0,true);				
+				// Update the visualization (but don't redraw yet)
+				data.makeEntryVisibleID(id, false);
+			}
+		} else if(e.getSource() == uncheckAll) {
+			Iterator<Vector> iter= tabledata.iterator();
+			while(iter.hasNext()){
+				Vector v = iter.next();
+				Integer id = (Integer) v.get(2);
+				// update the backing data for the table
+				v.set(0,false);
+				// Update the visualization (but don't redraw yet)
+				data.makeEntryInvisibleID(id, false);
+			}				
+		} else {
+			System.out.println("Action for object: " + e.getSource());
+		}
 
 
-
-
+		data.displayMustBeRedrawn();
+		fireTableDataChanged();
+	}
 }

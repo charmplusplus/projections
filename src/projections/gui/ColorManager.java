@@ -8,7 +8,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.TreeMap;
 import java.util.Vector;
+
+import projections.Tools.Timeline.Data;
 
 
 /**
@@ -150,10 +153,14 @@ public class ColorManager
 	}
 
 	
+	protected void saveColorsData(Data d) {
+		saveColors(d.entryColorsMapping);
+	}
+	
 /** Write out the colors to the file. Make sure that this output format is readable 
  *  by initializeColors() above.
  */
-	protected void saveColors() 
+	protected void saveColors(TreeMap<Integer,Color> overrideMapping) 
 	{
 		try {
 			System.out.println("Saving colors in new format");
@@ -165,8 +172,8 @@ public class ColorManager
 		    for(int i=0; i<numEPs; i++){
 		    	o1[i] = a.getEntryNameByIndex(i);
 		    	o2[i] = a.getEPColorMap()[i];
-		    	if (a.entryColorsMapping.containsKey(i))
-		    		o2[i] = a.entryColorsMapping.get(i);
+		    	if (overrideMapping!=null && overrideMapping.containsKey(i))
+		    		o2[i] = overrideMapping.get(i);
 		    }
 			
 			out.writeObject(o1);

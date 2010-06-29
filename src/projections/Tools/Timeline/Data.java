@@ -124,6 +124,7 @@ public class Data
 	private int[]          entries;
 
 	private Color[]        entryColor;
+	public TreeMap<Integer, Color> entryColorsMapping = new TreeMap<Integer, Color>();
 
 	/** A set of entry point ids that should be hidden */
 	private Set<Integer> hiddenEntryPoints;

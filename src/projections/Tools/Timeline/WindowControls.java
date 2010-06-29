@@ -299,7 +299,7 @@ ItemListener {
 		
 		else if(evt.getSource() == mRestoreColors){
 			try {
-				MainWindow.runObject[myRun].entryColorsMapping.clear();
+				data.entryColorsMapping.clear();
 				data.setColorByDefault();
 				MainWindow.runObject[myRun].loadColors();
 				for (int i = 0; i < data.entryColor().length; i++)
@@ -318,7 +318,7 @@ ItemListener {
 		}
 
 		else if(evt.getSource() == mDefaultColors){
-			MainWindow.runObject[myRun].entryColorsMapping.clear();
+			data.entryColorsMapping.clear();
 			MainWindow.runObject[myRun].setDefaultColors();
 			for (int i = 0; i < data.entryColor().length; i++)
 				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
@@ -327,7 +327,7 @@ ItemListener {
 		} 
 
 		else if(evt.getSource() == mColorByDefault) {
-			MainWindow.runObject[myRun].entryColorsMapping.clear();
+			data.entryColorsMapping.clear();
 			MainWindow.runObject[myRun].setDefaultColors();
 			for (int i = 0; i < data.entryColor().length; i++)
 				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
@@ -346,7 +346,7 @@ ItemListener {
 			data.setColorByEID();
 		
 		else if(evt.getSource() == mColorByEntryMethodFrequency) {
-			MainWindow.runObject[myRun].entryColorsMapping.clear();
+			data.entryColorsMapping.clear();
 			data.setFrequencyColors();
 			for (int i = 0; i < data.entryColor().length; i++)
 				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);

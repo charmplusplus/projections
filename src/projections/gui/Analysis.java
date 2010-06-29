@@ -108,7 +108,6 @@ public class Analysis {
   new Color[NUM_ACTIVITIES][];
   
   public Color[] entryColors;
-  public TreeMap<Integer, Color> entryColorsMapping = new TreeMap<Integer, Color>();
   
   Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
   Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
@@ -298,7 +297,7 @@ public class Analysis {
   }
   
   public void saveColors() {
-  	colorManager.saveColors();
+  	colorManager.saveColors(null);
   }
 
     

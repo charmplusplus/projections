@@ -26,7 +26,6 @@ public class LogLoader extends ProjDefs
 	// runs.
 	private int myRun = 0;
 
-	private boolean isProcessing = false;
 	private boolean ampiTraceOn = false;
 		
 	
@@ -608,7 +607,7 @@ public class LogLoader extends ProjDefs
 				ampiTraceOn = true;
 			}
 
-			isProcessing = false; 
+			boolean isProcessing = false;
 			LogEntry lastBeginEvent = null;
 			TimelineEvent lastBeginTimelineEvent = null;
 			

@@ -7,6 +7,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 import java.util.zip.GZIPInputStream;
 
 import projections.gui.Analysis;
@@ -134,19 +136,23 @@ implements PointCapableReader
 	 * If any problem is detected when reading within a line, an IOException is produced
 	 * 
 	 * */
-	public LogEntryData nextEvent() throws IOException, EndOfLogSuccess
+	public LogEntryData nextEvent() throws InputMismatchException, IOException, EndOfLogSuccess
 	{
 		LogEntryData data = new LogEntryData();
 
 		String line = reader.readLine();
-		AsciiLineParser parser = new AsciiLineParser(line);
+		
+		if (line == null)
+			throw new EndOfLogSuccess();
+		
+		AsciiLineParser sc = new AsciiLineParser(line);
 
 		// We can't keep reading once we've past the END_COMPUTATION record
 		if(endComputationOccurred){
 			throw new EndOfLogSuccess();
 		}
 
-		// If at end of file and we haven't seen an END_COMPUTATION yet
+		// If at end of file and we haven't s3een an END_COMPUTATION yet
 		if(line == null){
 			// Generate a fake END_COMPUTATION if no legitimate one was found
 			// This is to deal with partial truncated projections logs.
@@ -157,156 +163,156 @@ implements PointCapableReader
 			return data;			
 		}
 
-		data.type = (int) parser.nextLong();
+		data.type = (int) sc.nextLong();
 		switch (data.type) {
 		case BEGIN_IDLE:
-			lastBeginEvent.time = data.time = parser.nextLong();
-			lastBeginEvent.pe = data.pe = (int) parser.nextLong();
+			lastBeginEvent.time = data.time = sc.nextLong();
+			lastBeginEvent.pe = data.pe = (int) sc.nextLong();
 			lastBeginEvent.setValid(true);
 			break;
 		case END_IDLE: 
-			data.time = parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			lastBeginEvent.setValid(false);
 			break;
 		case BEGIN_PACK: case END_PACK:
 		case BEGIN_UNPACK: case END_UNPACK:
-			data.time = parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			break;
 		case USER_SUPPLIED:
-			data.userSupplied = new Integer((int) parser.nextLong());
+			data.userSupplied = new Integer((int) sc.nextLong());
 			break;
 		case USER_SUPPLIED_NOTE:
-			data.time = parser.nextLong();
-			parser.nextLong(); // strlen
-			String r = parser.restOfLine();
+			data.time = sc.nextLong();
+			sc.nextLong(); // strlen
+			String r = "";//sc.nextLine();
 			data.note = interpretNote(r);
 			break;
 		case USER_SUPPLIED_BRACKETED_NOTE:
-			data.time = parser.nextLong();
-			data.endTime = parser.nextLong();
-			data.userEventID = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.endTime = sc.nextLong();
+			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID;
-			parser.nextLong(); // strlen
-			data.note = interpretNote(parser.restOfLine());
+			sc.nextLong(); // strlen
+			data.note = interpretNote(""); //sc.nextLine()
 			break;
 		case MEMORY_USAGE:
-			data.memoryUsage = parser.nextLong();
-			data.time = parser.nextLong();
+			data.memoryUsage = sc.nextLong();
+			data.time = sc.nextLong();
 			break;
 		case CREATION:
-			data.mtype = (int) parser.nextLong();
-			data.entry = (int) parser.nextLong();
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.mtype = (int) sc.nextLong();
+			data.entry = (int) sc.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
-				data.msglen = (int) parser.nextLong();
+				data.msglen = (int) sc.nextLong();
 			} else {
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
-				data.sendTime = parser.nextLong();
+				data.sendTime = sc.nextLong();
 			}
 			break;
 		case CREATION_BCAST:
-			data.mtype = (int) parser.nextLong();
-			data.entry = (int) parser.nextLong();
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.mtype = (int) sc.nextLong();
+			data.entry = (int) sc.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
-				data.msglen = (int) parser.nextLong();
+				data.msglen = (int) sc.nextLong();
 			} else {
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
-				data.sendTime = parser.nextLong();
+				data.sendTime = sc.nextLong();
 			}
-			data.numPEs = (int) parser.nextLong();
+			data.numPEs = (int) sc.nextLong();
 			break;
 		case CREATION_MULTICAST:
-			data.mtype = (int) parser.nextLong();
-			data.entry = (int) parser.nextLong();
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.mtype = (int) sc.nextLong();
+			data.entry = (int) sc.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
-				data.msglen = (int) parser.nextLong();
+				data.msglen = (int) sc.nextLong();
 			} else {
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
-				data.sendTime = parser.nextLong();
+				data.sendTime = sc.nextLong();
 			}
-			data.numPEs = (int) parser.nextLong();
+			data.numPEs = (int) sc.nextLong();
 			data.destPEs = new int[data.numPEs];
 			for (int i=0;i<data.numPEs;i++) {
-				data.destPEs[i] = (int) parser.nextLong();
+				data.destPEs[i] = (int) sc.nextLong();
 			}
 			break;
 		case BEGIN_PROCESSING: 
-			lastBeginEvent.mtype = data.mtype = (int) parser.nextLong();
-			lastBeginEvent.entry = data.entry = (int) parser.nextLong();
-			lastBeginEvent.time = data.time = parser.nextLong();
-			lastBeginEvent.event = data.event = (int) parser.nextLong();
-			lastBeginEvent.pe = data.pe = (int) parser.nextLong();
+			lastBeginEvent.mtype = data.mtype = (int) sc.nextLong();
+			lastBeginEvent.entry = data.entry = (int) sc.nextLong();
+			lastBeginEvent.time = data.time = sc.nextLong();
+			lastBeginEvent.event = data.event = (int) sc.nextLong();
+			lastBeginEvent.pe = data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
-				lastBeginEvent.msglen = data.msglen = (int) parser.nextLong();
+				lastBeginEvent.msglen = data.msglen = (int) sc.nextLong();
 			} else {
 				lastBeginEvent.msglen = data.msglen = -1;
 			}
 			if (version >= 4.0) {
 				lastBeginEvent.recvTime = data.recvTime = 
-					parser.nextLong();
-				lastBeginEvent.id[0] = data.id[0] = (int) parser.nextLong();
-				lastBeginEvent.id[1] = data.id[1] = (int) parser.nextLong();
-				lastBeginEvent.id[2] = data.id[2] = (int) parser.nextLong();
+					sc.nextLong();
+				lastBeginEvent.id[0] = data.id[0] = (int) sc.nextLong();
+				lastBeginEvent.id[1] = data.id[1] = (int) sc.nextLong();
+				lastBeginEvent.id[2] = data.id[2] = (int) sc.nextLong();
 			}
 			if (version >= 7.0) {
-				lastBeginEvent.id[3] = data.id[3] = (int) parser.nextLong();
+				lastBeginEvent.id[3] = data.id[3] = (int) sc.nextLong();
 			}
 			if (version >= 6.5) {
 				lastBeginEvent.cpuStartTime = data.cpuStartTime = 
-					parser.nextLong();
+					sc.nextLong();
 			}
 			if (version >= 6.6) {
 				lastBeginEvent.numPerfCounts = data.numPerfCounts = 
-					(int) parser.nextLong();
+					(int) sc.nextLong();
 				lastBeginEvent.perfCounts = new long[data.numPerfCounts];
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
 					lastBeginEvent.perfCounts[i] = data.perfCounts[i] = 
-						parser.nextLong();
+						sc.nextLong();
 				}
 			}
 			lastBeginEvent.setValid(true);
 			break;
 		case END_PROCESSING:
-			data.mtype = (int) parser.nextLong();
-			data.entry = (int) parser.nextLong();
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.mtype = (int) sc.nextLong();
+			data.entry = (int) sc.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
-				data.msglen = (int) parser.nextLong();
+				data.msglen = (int) sc.nextLong();
 			} else {
 				data.msglen = -1;
 			}
 			if (version >= 6.5) {
-				data.cpuEndTime = parser.nextLong();
+				data.cpuEndTime = sc.nextLong();
 			}
 			if (version >= 6.6) {
-				data.numPerfCounts = (int) parser.nextLong();
+				data.numPerfCounts = (int) sc.nextLong();
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
-					data.perfCounts[i] = parser.nextLong();
+					data.perfCounts[i] = sc.nextLong();
 				}
 			}
 			break;
 		case BEGIN_TRACE: 
-			data.time = parser.nextLong();
+			data.time = sc.nextLong();
 			// invalidates the last Begin Event. BEGIN_TRACE happens
 			// in the context of an entry method that is *not* traced.
 			// Hence when a BEGIN_TRACE event is encountered, no
@@ -315,7 +321,7 @@ implements PointCapableReader
 			lastBeginEvent.setValid(false);
 			break;
 		case END_TRACE:
-			data.time = parser.nextLong();
+			data.time = sc.nextLong();
 			// END_TRACE happens in the context of an existing
 			// entry method and hence should logically "end" it.
 			// This means any client taking note of END_TRACE must
@@ -323,53 +329,53 @@ implements PointCapableReader
 			// reasonable data.
 			break;
 		case BEGIN_FUNC:
-			data.time = parser.nextLong();
-			data.entry = (int) parser.nextLong();
-			data.lineNo = (int) parser.nextLong();
-			data.funcName = parser.restOfLine();
+			data.time = sc.nextLong();
+			data.entry = (int) sc.nextLong();
+			data.lineNo = (int) sc.nextLong();
+			data.funcName = "";//sc.nextLine();
 			break;
 		case END_FUNC:
-			data.time = parser.nextLong();
-			data.entry = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.entry = (int) sc.nextLong();
 			break;
 		case MESSAGE_RECV:
-			data.mtype = (int) parser.nextLong();
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
-			data.msglen = (int) parser.nextLong();
+			data.mtype = (int) sc.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
+			data.msglen = (int) sc.nextLong();
 			break;
 		case ENQUEUE: case DEQUEUE:
-			data.mtype = (int) parser.nextLong();
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.mtype = (int) sc.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			break;
 		case BEGIN_INTERRUPT: case END_INTERRUPT:
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			break;
 		case BEGIN_COMPUTATION:
-			data.time = parser.nextLong();
+			data.time = sc.nextLong();
 			break;
 		case END_COMPUTATION:
-			data.time = parser.nextLong();
+			data.time = sc.nextLong();
 			endComputationOccurred = true;
 			break;
 		case USER_EVENT:
-			data.userEventID = (int) parser.nextLong();
+			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID; 
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			break;
 		case USER_EVENT_PAIR:
-			data.userEventID = (int) parser.nextLong();
+			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID;
-			data.time = parser.nextLong();
-			data.event = (int) parser.nextLong();
-			data.pe = (int) parser.nextLong();
+			data.time = sc.nextLong();
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
 			break;
 		default:
 			data.type = -1;
@@ -378,7 +384,6 @@ implements PointCapableReader
 		}
 
 		lastRecordedTime = data.time;
-
 		return data;
 
 	}

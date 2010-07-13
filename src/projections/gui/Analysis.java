@@ -316,7 +316,7 @@ public class Analysis {
 	System.err.println("createAMPIUsage: No log files available!");
       }
     } catch (LogLoadException e) {
-      System.err.println("LOG LOAD EXCEPTION");	    
+      System.err.println("LOG LOAD EXCEPTION " + e.getStackTrace());	    
     }
   }
 
@@ -336,7 +336,7 @@ public class Analysis {
 		System.err.println("createAMPIUsage: No log files available!");
 	    }
 	} catch (LogLoadException e) {
-	    System.err.println("LOG LOAD EXCEPTION");	    
+	    System.err.println("LOG LOAD EXCEPTION " + e.getStackTrace());	    
 	}
     }
 

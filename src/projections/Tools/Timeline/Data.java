@@ -700,6 +700,7 @@ public class Data
 			}
 		} catch (LogLoadException e) {
 			System.err.println("LOG LOAD EXCEPTION");
+			e.printStackTrace();
 			return;
 		}
 		

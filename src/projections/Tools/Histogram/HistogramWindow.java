@@ -73,7 +73,11 @@ implements ActionListener
 
 	private DecimalFormat _format;
 
-
+    /* YH Sun  total execution time */
+    private double[][] executionTime;
+    private double totalExecutionTime;
+    private double maxEntryTime;
+    private int maxEntryIndex;
 	public HistogramWindow(MainWindow mainWindow)
 	{
 		super("Projections Histograms", mainWindow);
@@ -124,18 +128,19 @@ implements ActionListener
 					int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 					counts[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
 					counts[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
-
-					
+                    
+                    executionTime = new double[3][numEPs];
 					// Create a list of worker threads
 					LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 					OrderedIntList processorList = dialog.getSelectedProcessors();
-					while (processorList.hasMoreElements()) {
+					
+                    while (processorList.hasMoreElements()) {
 						int nextPe = processorList.nextElement();
-						readyReaders.add( new ThreadedFileReader(counts, nextPe, dialog.getStartTime(), dialog.getEndTime(), timeNumBins, timeBinSize, timeMinBinSize, msgNumBins, msgBinSize, msgMinBinSize));
+						//readyReaders.add( new ThreadedFileReader(counts, nextPe, dialog.getStartTime(), dialog.getEndTime(), timeNumBins, timeBinSize, timeMinBinSize, msgNumBins, msgBinSize, msgMinBinSize));
+						readyReaders.add( new ThreadedFileReader(counts, nextPe, dialog.getStartTime(), dialog.getEndTime(), timeNumBins, timeBinSize, timeMinBinSize, msgNumBins, msgBinSize, msgMinBinSize, executionTime));
 					}
-
-					// Determine a component to show the progress bar with
+ 					// Determine a component to show the progress bar with
 					Component guiRootForProgressBar = null;
 					if(thisWindow!=null && thisWindow.isVisible()) {
 						guiRootForProgressBar = thisWindow;
@@ -155,7 +160,22 @@ implements ActionListener
 						msgSizeBinButton.setSelected(true);
 					else
 						timeBinButton.setSelected(true);			
-					setGraphSpecificData();
+                    totalExecutionTime = 0;
+                    for(int _i=0; _i<executionTime[0].length; _i++)
+                    {
+                        totalExecutionTime += executionTime[0][_i];
+                        if(executionTime[0][_i] > 0)
+                            System.out.println(" Entry method:" + MainWindow.runObject[myRun].getEntryNameByIndex(_i) + "  time: " + executionTime[0][_i] + "\t max time=" + executionTime[1][_i] + "\t min=" +executionTime[2][_i]  );
+                        if(maxEntryTime < executionTime[1][_i])
+                        {
+                            maxEntryTime = executionTime[1][_i];
+                            maxEntryIndex = _i;
+                        }
+                    }
+                    //System.out.println(" Total execution time :" + totalExecutionTime + "\t max EntryMethod time:"+ maxEntryTime);
+                    System.out.println(" Total execution time :" + totalExecutionTime + "\t max EntryMethod:" + MainWindow.runObject[myRun].getEntryNameByIndex(maxEntryIndex) + ", time:"+ maxEntryTime);
+
+                    setGraphSpecificData();
 					refreshGraph();
 					thisWindow.setVisible(true);
 				}
@@ -234,7 +254,7 @@ implements ActionListener
 
 	protected void setGraphSpecificData(){
 		if (binType == TYPE_TIME) {
-			setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
+			setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)" + "(total execution time="+totalExecutionTime, "Time", timeMinBinSize, timeBinSize);
 			setYAxis("Number of Occurrences", "");
 			setDataSource("Histogram", counts[TYPE_TIME], thisWindow);
 		} else if (binType == TYPE_MSG_SIZE) {

@@ -41,15 +41,16 @@ implements ActionListener
 	// runs.
 	private int myRun = 0;
 
-	protected static final int NUM_TYPES = 2;
+	protected static final int NUM_TYPES = 3;
 	protected static final int TYPE_TIME = 0;
 	protected static final int TYPE_MSG_SIZE = 1;
-
+    protected static final int TYPE_ACCTIME = 2;
 	// Gui components
 	private JButton entrySelectionButton;
 	private JButton epTableButton;
 
 	private JRadioButton timeBinButton;
+	private JRadioButton timeAccumulateBinButton;
 	private JRadioButton msgSizeBinButton;
 	private ButtonGroup binTypeGroup;
 
@@ -127,9 +128,10 @@ implements ActionListener
 					// we create an extra bin to hold overflows.
 					int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 					counts[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
+					counts[HistogramWindow.TYPE_ACCTIME] = new double[timeNumBins+1][numEPs];
 					counts[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
                     
-                    executionTime = new double[3][numEPs];
+                    executionTime = new double[4][numEPs];
 					// Create a list of worker threads
 					LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
@@ -158,14 +160,18 @@ implements ActionListener
 					// Make the gui status reflect what was chosen in the dialog box
 					if(binType == TYPE_MSG_SIZE)
 						msgSizeBinButton.setSelected(true);
-					else
-						timeBinButton.setSelected(true);			
+					else if (binType == TYPE_TIME){
+						timeBinButton.setSelected(true);
+                    }else if (binType == TYPE_ACCTIME)
+                    {
+                        timeAccumulateBinButton.setSelected(true);
+                    }
                     totalExecutionTime = 0;
                     for(int _i=0; _i<executionTime[0].length; _i++)
                     {
                         totalExecutionTime += executionTime[0][_i];
                         if(executionTime[0][_i] > 0)
-                            System.out.println(" Entry method:" + MainWindow.runObject[myRun].getEntryNameByIndex(_i) + "  time: " + executionTime[0][_i] + "\t max time=" + executionTime[1][_i] + "\t min=" +executionTime[2][_i]  );
+                            System.out.println(" Entry method:" + MainWindow.runObject[myRun].getEntryNameByIndex(_i) + "  time: " + executionTime[0][_i] + "\t max time=" + executionTime[1][_i] + "\t total frequency=" +executionTime[3][_i]  );
                         if(maxEntryTime < executionTime[1][_i])
                         {
                             maxEntryTime = executionTime[1][_i];
@@ -199,7 +205,11 @@ implements ActionListener
 			binType = TYPE_TIME;
 			setGraphSpecificData();
 			refreshGraph();
-		} else if (e.getSource()  ==  msgSizeBinButton) {
+		}else if(e.getSource() == timeAccumulateBinButton) {
+            binType = TYPE_ACCTIME;
+			setGraphSpecificData();
+			refreshGraph();
+        }else if (e.getSource()  ==  msgSizeBinButton) {
 			binType = TYPE_MSG_SIZE;
 			setGraphSpecificData();
 			refreshGraph();
@@ -234,14 +244,18 @@ implements ActionListener
 
 		timeBinButton = new JRadioButton("Execution Time", true);
 		timeBinButton.addActionListener(this);
+		timeAccumulateBinButton = new JRadioButton("Accumulate Execution Time", true);
+		timeAccumulateBinButton.addActionListener(this);
 		msgSizeBinButton = new JRadioButton("Message Size");
 		msgSizeBinButton.addActionListener(this);
 
 		binTypeGroup = new ButtonGroup();
 		binTypeGroup.add(timeBinButton);
+		binTypeGroup.add(timeAccumulateBinButton);
 		binTypeGroup.add(msgSizeBinButton);
 
 		buttonPanel.add(timeBinButton);
+		buttonPanel.add(timeAccumulateBinButton);
 		buttonPanel.add(msgSizeBinButton);
 //		buttonPanel.add(entrySelectionButton);
 //		buttonPanel.add(epTableButton);
@@ -254,10 +268,15 @@ implements ActionListener
 
 	protected void setGraphSpecificData(){
 		if (binType == TYPE_TIME) {
-			setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)" + "(total execution time="+totalExecutionTime, "Time", timeMinBinSize, timeBinSize);
+			setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
 			setYAxis("Number of Occurrences", "");
 			setDataSource("Histogram", counts[TYPE_TIME], thisWindow);
-		} else if (binType == TYPE_MSG_SIZE) {
+		}if (binType == TYPE_ACCTIME) {
+            setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
+			setYAxis("Time in Bin range (us)", "");
+			setDataSource("Histogram", counts[TYPE_ACCTIME], thisWindow);
+
+        }else if (binType == TYPE_MSG_SIZE) {
 			setXAxis("Message Size (at " +  _format.format(msgBinSize) + " byte resolution)",  "", msgMinBinSize, msgBinSize);
 			setYAxis("Number of Occurrences", "");
 			setDataSource("Histogram", counts[TYPE_MSG_SIZE], thisWindow);
@@ -272,22 +291,41 @@ implements ActionListener
 	public String[] getPopup(int xVal, int yVal) {
 		if (binType == TYPE_TIME) {
 			return getTimePopup(xVal, yVal);
-		} else if (binType == TYPE_MSG_SIZE) {
-			return getMsgSizePopup(xVal, yVal);
+		} else if (binType == TYPE_ACCTIME) {
+            return getACCTimePopup(xVal, yVal);
+        }else if (binType == TYPE_MSG_SIZE) {
+            return getMsgSizePopup(xVal, yVal);
 		}
 		return null;
 	}
 
 	private String[] getTimePopup(int xVal, int yVal) {
-		String bubbleText[] = new String[3];
+		String bubbleText[] = new String[4];
 
 		bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
 		bubbleText[1] = "Count: " + counts[TYPE_TIME][xVal][yVal];
+		bubbleText[2] = "Time:"+counts[TYPE_ACCTIME][xVal][yVal];
 		if (xVal < timeNumBins) {
-			bubbleText[2] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
+			bubbleText[3] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
 			" to " + U.humanReadableString((xVal+1)*timeBinSize+timeMinBinSize);
 		} else {
-			bubbleText[2] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
+			bubbleText[3] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
+					timeMinBinSize);
+		}
+		return bubbleText;
+	}
+
+    private String[] getACCTimePopup(int xVal, int yVal) {
+		String bubbleText[] = new String[4];
+
+		bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
+		bubbleText[1] = "Total Time: " + counts[TYPE_ACCTIME][xVal][yVal];
+		bubbleText[2] = "Occurence:"+counts[TYPE_TIME][xVal][yVal];
+		if (xVal < timeNumBins) {
+			bubbleText[3] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
+			" to " + U.humanReadableString((xVal+1)*timeBinSize+timeMinBinSize);
+		} else {
+			bubbleText[3] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
 					timeMinBinSize);
 		}
 		return bubbleText;

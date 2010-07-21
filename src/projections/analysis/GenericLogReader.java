@@ -141,7 +141,7 @@ implements PointCapableReader
 		LogEntryData data = new LogEntryData();
 
 		String line = reader.readLine();
-		
+	    
 		if (line == null)
 			throw new EndOfLogSuccess();
 		

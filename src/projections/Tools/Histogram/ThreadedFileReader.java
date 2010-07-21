@@ -79,6 +79,8 @@ class ThreadedFileReader implements Runnable  {
             for(int i=0; i< executionTime[0].length; i++)
             {
                 executionTime[0][i] += exec_time[0][i];
+                executionTime[3][i] += exec_time[3][i];
+                
             }
             for(int i=0; i< executionTime[1].length; i++)
             {
@@ -90,6 +92,7 @@ class ThreadedFileReader implements Runnable  {
                 if(executionTime[2][i] < exec_time[2][i])
                    executionTime[2][i] = exec_time[2][i];
             }
+            
         }
 		myCounts = null;
 	}
@@ -112,6 +115,7 @@ class ThreadedFileReader implements Runnable  {
 
 		// we create an extra bin to hold overflows.
 		countData[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
+		countData[HistogramWindow.TYPE_ACCTIME] = new double[timeNumBins+1][numEPs];
 		countData[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
 
 		int curPeCount = 0;
@@ -146,6 +150,7 @@ class ThreadedFileReader implements Runnable  {
 									targetBin = timeNumBins;
 								}
 								countData[HistogramWindow.TYPE_TIME][targetBin][logdata.entry] += 1.0;
+								countData[HistogramWindow.TYPE_ACCTIME][targetBin][logdata.entry] += executionTime;
 							}
                             _sun_execution_time[logdata.entry] += executionTime;
 						}
@@ -198,7 +203,7 @@ class ThreadedFileReader implements Runnable  {
 
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
         /* YH Sun added */
-        double _sun_execution_time[][] = new double[3][numEPs];
+        double _sun_execution_time[][] = new double[4][numEPs];
 
 		int curPeCount = 0;
 
@@ -229,6 +234,7 @@ class ThreadedFileReader implements Runnable  {
                                 _sun_execution_time[1][logdata.entry] = executionTime;
                             if(_sun_execution_time[2][logdata.entry] > executionTime)
                                 _sun_execution_time[2][logdata.entry] = executionTime;
+                            _sun_execution_time[3][logdata.entry]++;
 						}
 						prevBegin = null;	
 					} else if(nestingLevel < 0){

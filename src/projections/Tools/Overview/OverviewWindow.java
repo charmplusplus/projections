@@ -93,9 +93,9 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 		JPanel displayPanel = new JPanel();
 		displayPanel.setLayout(gbl);
 
-		status = new JLabel("");
+		status = new JLabel(" ");
 		status.setBackground(Color.black);
-		status.setForeground(Color.lightGray);
+		status.setForeground(Color.black);
 
 		hor=new ScaleSlider(Scrollbar.HORIZONTAL);
 		hor.addMouseListener(this);
@@ -266,7 +266,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 	}
 
 	public void mouseExited(MouseEvent evt) {
-		setStatus("");//Clear the old message
+		setStatus(" ");//Clear the old message
 	}
 
 	public void mousePressed(MouseEvent evt) {

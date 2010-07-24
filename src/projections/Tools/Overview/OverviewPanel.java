@@ -68,10 +68,10 @@ class OverviewPanel extends ScalePanel.Child
 	{
 		int p=(int)procs;
 		if (p<0 || p>=nPe || procs<0)
-			return "";
+			return " ";
 		long t=(long)time;
 		if (t<0 || t>=totalTime())
-			return "";
+			return " ";
 		if (selectedPEs != null ) {
 			int count=0;
 			int pe=0;
@@ -106,7 +106,7 @@ class OverviewPanel extends ScalePanel.Child
 				}
 			}
 		}
-		return "";
+		return " ";
 	}
 
 	private String entryName(int entry){

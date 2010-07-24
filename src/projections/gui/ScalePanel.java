@@ -249,7 +249,7 @@ public class ScalePanel extends Panel
 	public void mouseEntered(MouseEvent evt)
 	{}
 	public void mouseExited(MouseEvent evt)
-	{status("");}
+	{status(" ");}
 	public void mouseMoved(MouseEvent evt)
 	{
 		if (!inDrag) {
@@ -269,7 +269,7 @@ public class ScalePanel extends Panel
 	}
 	public void mouseReleased(MouseEvent evt)
 	{
-		status("");
+		status(" ");
 		updatePoint(evt,false);
 		inDrag=false;
 		lastX=-1;lastY=-1;

@@ -1058,5 +1058,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 	}
 
-
+	public Vector<TimelineMessage> getTLmsgs() {
+		return TLmsgs;
+	}
 }

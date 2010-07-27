@@ -620,6 +620,29 @@ public class Data
 		}
 	}
 	
+	/** Add or Remove a new line to the visualization representing the entry methods called
+	 *  by the object the mouse is over
+	 */
+	private void toggleMessageCalledByThisLine(EntryMethodObject obj) {
+		Vector<TimelineMessage> tleMsg = obj.getTLmsgs();
+		if (tleMsg!=null) {
+			for (int i=0; i<tleMsg.size(); i++) { //when to empty the drawMsgsForTheseObjsAlt?
+				Set<EntryMethodObject> entMethSet = this.messageStructures.getMessageToExecutingObjectsMap().get(tleMsg.get(i));
+				if (entMethSet!=null) {
+					Iterator<EntryMethodObject> iter = entMethSet.iterator();
+					while (iter.hasNext()) {
+						EntryMethodObject emo = iter.next();
+						if (drawMessagesForTheseObjectsAlt.contains(emo))
+							drawMessagesForTheseObjectsAlt.remove(emo);
+						else
+							drawMessagesForTheseObjectsAlt.add(emo);
+					}
+				}
+			}
+			displayMustBeRepainted();
+		}
+	}
+	
 	/** Add a set of new lines to the visualization representing the sending of a message.
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */
@@ -1194,11 +1217,12 @@ public class Data
 		return 3;
 	}
 	
-	/** Do something when the user right clicks on an entry method object */
+	/** Do something when the user left clicks on an entry method object */
 	protected void clickTraceSender(EntryMethodObject obj) {
 		if(! useMinimalView()){
 			addProcessor(obj.pCreation);
 			toggleMessageSendLine(obj);
+			toggleMessageCalledByThisLine(obj);
 		}		
 	}
 

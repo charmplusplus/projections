@@ -69,6 +69,8 @@ ItemListener {
 
 	private UserEventWindow userEventWindow;
 
+	private JMenuItem cbTraceArrayRemoveLines;
+	
 	private JMenuItem mClose;
 	private JMenuItem mModifyRanges;
 
@@ -243,14 +245,18 @@ ItemListener {
 	}
 
 	public void actionPerformed(ActionEvent evt) {
-
 		// If the event is a menu action
 
 		if(evt.getSource() == mClose)
 			parentWindow.close();
+		
+		else if (evt.getSource()==cbTraceArrayRemoveLines)
+			data.removeLines();
 
-		else if(evt.getSource() == mModifyRanges)
+		else if(evt.getSource() == mModifyRanges) {
+			System.out.println("here");
 			showDialog();
+		}
 		
 		else if(evt.getSource() == mSaveFullTimeline){
 			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
@@ -544,14 +550,17 @@ ItemListener {
 		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages Back");
 		cbTraceMessagesForward = new JCheckBoxMenuItem("Trace Messages Forward");
 		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
+		cbTraceArrayRemoveLines = new JMenuItem("Clear all message tracing lines");
 
 		tracingMenu.add(cbTraceMessages);
 		tracingMenu.add(cbTraceMessagesForward);
 		tracingMenu.add(cbTraceArrayElementID);
+		tracingMenu.add(cbTraceArrayRemoveLines);
 
 		cbTraceMessages.addItemListener(this);
 		cbTraceMessagesForward.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
+		cbTraceArrayRemoveLines.addActionListener(this);
 
 		mbar.add(tracingMenu);
 
@@ -766,7 +775,7 @@ ItemListener {
 
 		else if (c == cbTraceArrayElementID)
 			data.setTraceOIDOnHover(evt.getStateChange() == ItemEvent.SELECTED);
-
+		
 		else if (c == cbUser)
 			data.showUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
 

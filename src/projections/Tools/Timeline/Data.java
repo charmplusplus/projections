@@ -643,6 +643,13 @@ public class Data
 		}
 	}
 	
+	/**Remove all lines from forward and backward tracing from Timelines display*/
+	public void removeLines() {
+		drawMessagesForTheseObjectsAlt.clear();
+		drawMessagesForTheseObjects.clear();
+		displayMustBeRepainted();
+	}
+	
 	/** Add a set of new lines to the visualization representing the sending of a message.
 	 * @note the caller should call 	displayMustBeRepainted() after adding all desired messages
 	 */

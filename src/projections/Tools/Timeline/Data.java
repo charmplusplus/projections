@@ -695,11 +695,11 @@ public class Data
 	}
 
 
-	/** Load the timeline for processor pe.
+	/** Load the Timeline data for one processor (pe)
 	 * 
 	 *  This method loads the timeline into: timelineUserEventObjectsArray, allEntryMethodObjects
 	 *  
-	 *  This function must be thread safe
+	 *  Note: This function must be thread safe.
 	 *  
 	 * */
 	void getData(Integer pe)
@@ -710,7 +710,7 @@ public class Data
 			throw new RuntimeException(err);
 		}
 		
-		
+	
 		LinkedList<TimelineEvent> tl = new LinkedList<TimelineEvent>();
 		
 		/** Stores all user events from the currently loaded PE/time range. It must be sorted,
@@ -723,9 +723,9 @@ public class Data
 		
 		try {
 			if (MainWindow.runObject[myRun].hasLogData()) {
-				MainWindow.runObject[myRun].logLoader.createtimeline(pe.intValue(), startTime, endTime, tl, userEvents, minEntryDuration);
+				MainWindow.runObject[myRun].logLoader.createtimeline(pe, startTime, endTime, tl, userEvents, minEntryDuration);
 			} else {
-				System.err.println("createTL: No log files available!");
+				System.err.println("Error loadign log files!");
 				return;
 			}
 		} catch (LogLoadException e) {
@@ -749,11 +749,8 @@ public class Data
 		long maxUserSuppliedThisPE = 0;
 		
 		
-		// proc timeline events
-		Iterator<TimelineEvent> iter = tl.iterator();
-		while(iter.hasNext()){
-		
-			TimelineEvent tle = iter.next();
+		// process timeline events
+		for(TimelineEvent tle : tl) {
 			
 			// Construct a list of messages sent by the object
 			Vector<TimelineMessage> msglist = tle.MsgsSent;
@@ -801,7 +798,7 @@ public class Data
 		
 		}
 		
-		// save the time range
+		// Thread-safe merge of the min/max values
 		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE, minUserSuppliedThisPE, maxUserSuppliedThisPE);
 		
 	}

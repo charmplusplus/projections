@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.Vector;
 
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
@@ -46,7 +47,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private ObjectId tid; 
 	int pCurrent;
 	int pCreation;
-	
+	private Vector<TimelineMessage> TLmsgs; //stores TimelineEvent object's MsgsSent vector
 	
 	private final static String popupChangeColor = "Change Entry Point Color";
 	private final static String popupShowDetails = "Show details";
@@ -103,6 +104,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		setBackground(MainWindow.runObject[data.myRun].background);
 		setForeground(MainWindow.runObject[data.myRun].foreground);
 		
+		TLmsgs=tle.MsgsSent;
 		this.data = data;
 		beginTime = tle.BeginTime;
 		endTime   = tle.EndTime;
@@ -449,8 +451,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			if(data.traceMessagesBackOnHover()){
 				EntryMethodObject obj = this;
 
-				boolean done = false;
-				while(!done){
+				boolean done;
+				do{
 					done = true;
 					v.add(obj);
 
@@ -463,60 +465,48 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 							if(obj != null){
 								done = false;
 							}
-
 						}
 					}
-				}
+				}while(!done);
 			}
 			return v;
 		}
 	}
 
 
-	/** Trace one level of message sends forward from this object
-	 *
-	 *  @note This uses an inefficient algorithm which could be sped up by using more suitable data structures
-	 *
-	 */
+	/** Trace one level of message sends forward from this object */
 	protected Set<EntryMethodObject> traceForwardDependencies(){
-		HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
-		
-		LinkedList<EntryMethodObject> toExamine = new LinkedList<EntryMethodObject>();
-		
-		toExamine.add(this);
-		
-		while(toExamine.size()>0){
-			EntryMethodObject current = toExamine.poll();
-			v.add(current);
-						
-			// For all loaded EntryMethodObjects, see if they match any of the sends from this object
-			Iterator<Integer> iter = data.allEntryMethodObjects.keySet().iterator();
-			while(iter.hasNext()){
-				Integer pe = iter.next();
-				List<EntryMethodObject> entryMethods = data.allEntryMethodObjects.get(pe);
-
-				Iterator<EntryMethodObject> j = entryMethods.iterator();
-				while(j.hasNext()){
-					EntryMethodObject obj = j.next();
-
-					// If any of the messages sent by this object created the EntryMethodObject obj
-					TimelineMessage m = obj.creationMessage();
-					// a message found on pe=obj.pCreation with eventID==obj.EventID
-
-					if(m!=null && current.messages.contains(m))
-						toExamine.add(obj);
-					
+		synchronized(data.messageStructures){
+			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
+			if(data.traceMessagesForwardOnHover()){
+				EntryMethodObject obj = this;
+				Vector<TimelineMessage> tleMsg = this.TLmsgs;
+				
+				boolean done = false;
+				while(!done){
+					done = true;
+					v.add(obj); //add this object to the set that is returned
+					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && tleMsg != null && !tleMsg.isEmpty()){
+						// Find messages called by current entry method
+						TimelineMessage msgToCalledEntryMethod = tleMsg.firstElement();
+						if(msgToCalledEntryMethod != null){
+							//if there is a mapping for this message, find objects that are called by this message.
+							//if this object isn't null or equal to this, go through while loop again
+							if (!data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod).isEmpty()) {
+								Iterator<EntryMethodObject> i = data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod).iterator();
+								obj = i.next();
+								if(obj != null && obj!=this){
+									done = false;
+									tleMsg=obj.TLmsgs;
+								}
+							}
+						}
+					}
 				}
-
 			}
-			if(data.traceMessagesForwardOnHover() == false){
-				break; // only go one step forward from the current object
-			}
+			v.remove(this);
+			return v;
 		}
-		
-		v.remove(this);
-		
-		return v;
 	}
 
 	
@@ -536,6 +526,24 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				return null;
 			else
 				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCreation].get(Integer.valueOf(EventID));
+
+		}
+	}
+	
+	protected TimelineMessage currentMessage() {
+		synchronized(data.messageStructures){
+			if(data == null)
+				return null;
+			else if(pCurrent<0)
+				return null;
+			else if(data.messageStructures.getEventIDToMessageMap() == null)
+				return null;
+			else if(pCurrent >= data.messageStructures.getEventIDToMessageMap().length)
+				return null;
+			else if(data.messageStructures.getEventIDToMessageMap()[pCurrent] == null)
+				return null;
+			else
+				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCurrent].get(Integer.valueOf(EventID));
 
 		}
 	}

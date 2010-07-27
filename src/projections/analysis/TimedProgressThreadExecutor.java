@@ -56,7 +56,7 @@ public class TimedProgressThreadExecutor implements Executor{
 				
 		ProgressMonitor progressBar=null;
 		if(showProgress){
-			progressBar = new ProgressMonitor(guiRootForProgressBar, description,"", 0, numInitialThreads);
+			progressBar = new ProgressMonitor(guiRootForProgressBar, description,"Starting", 0, numInitialThreads);
 			progressBar.setMillisToPopup(0);
 			progressBar.setMillisToDecideToPopup(0);
 			progressBar.setProgress(0);
@@ -89,7 +89,7 @@ public class TimedProgressThreadExecutor implements Executor{
 			if(showProgress){
 				int doneCount = totalToLoad-runableObjects.size()-spawnedThreads.size();
 				if (!progressBar.isCanceled()) {
-					progressBar.setNote(doneCount+ " of " + totalToLoad);
+					progressBar.setNote(doneCount + " of " + totalToLoad);
 					progressBar.setProgress(doneCount);
 				} else {
 					// user cancelled this operation

@@ -1225,7 +1225,8 @@ public class Data
 		if(viewType != ViewType.VIEW_MINIMAL){
 			addProcessor(obj.pCreation);
 			toggleMessageSendLine(obj);
-			toggleMessageCalledByThisLine(obj);
+			if (traceMessagesForwardOnClick)
+				toggleMessageCalledByThisLine(obj);
 		}		
 	}
 
@@ -1243,6 +1244,9 @@ public class Data
 	
 	/** Highlight the other entry method invocations upon mouseover */
 	private boolean traceOIDOnHover;
+	
+	/** Forward tracing by one step when left-clicking on an entry method */
+	private boolean traceMessagesForwardOnClick;
 
 	
 	public static enum ViewType {
@@ -1290,6 +1294,10 @@ public class Data
 		return traceMessagesForwardOnHover;
 	}
 	
+	protected boolean traceMessagesForwardOnClick() {
+		return traceMessagesForwardOnClick;
+	}
+	
 	protected boolean traceOIDOnHover() {
 		return traceOIDOnHover;
 	}
@@ -1314,7 +1322,9 @@ public class Data
 		
 	}
 		
-	
+	public void setTraceMessagesForwardOnClick(boolean traceMessagesForwardOnClick) {
+		this.traceMessagesForwardOnClick = traceMessagesForwardOnClick;
+	}
 	
 	public void setTraceOIDOnHover(boolean showOIDOnHover) {
 		this.traceOIDOnHover = showOIDOnHover;

@@ -68,7 +68,8 @@ ItemListener {
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 
-	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceArrayElementID, cbNestedUserEvents;
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceArrayElementID, 
+								cbNestedUserEvents, cbTraceForwardOnClick;
 	private JRadioButton cbNormalView, cbCompactView, cbSuperCompactView;
 	
 	private UserEventWindow userEventWindow;
@@ -563,16 +564,19 @@ ItemListener {
 		cbTraceMessagesForward = new JCheckBoxMenuItem("Trace Messages Forward");
 		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
 		cbTraceArrayRemoveLines = new JMenuItem("Clear all message tracing lines");
+		cbTraceForwardOnClick = new JCheckBoxMenuItem("Trace Messages Forward on Left-Click");
 
 		tracingMenu.add(cbTraceMessages);
 		tracingMenu.add(cbTraceMessagesForward);
 		tracingMenu.add(cbTraceArrayElementID);
 		tracingMenu.add(cbTraceArrayRemoveLines);
+		tracingMenu.add(cbTraceForwardOnClick);
 
 		cbTraceMessages.addItemListener(this);
 		cbTraceMessagesForward.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
 		cbTraceArrayRemoveLines.addActionListener(this);
+		cbTraceForwardOnClick.addItemListener(this);
 
 		mbar.add(tracingMenu);
 
@@ -788,6 +792,9 @@ ItemListener {
 
 		else if (c == cbTraceMessagesForward)
 			data.setTraceMessagesForwardOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+		
+		else if (c == cbTraceForwardOnClick)
+			data.setTraceMessagesForwardOnClick(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if(c == cbNestedUserEvents)
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);

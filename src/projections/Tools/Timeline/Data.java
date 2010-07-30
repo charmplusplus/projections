@@ -1473,7 +1473,7 @@ public class Data
 	protected void fixTachyons() {
 		System.out.println("The fix tachyons feature is still experimental. It will probably not work well if new processors are loaded, or ranges are changed");
 		
-		int numIterations = 100;
+		int numIterations = 2*numPEs();
 		long threshold_us = 10;
 		
 		System.out.println("Executing at most " + numIterations + " times or until no tachyons longer than " + threshold_us + "us are found");

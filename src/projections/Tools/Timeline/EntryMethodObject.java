@@ -678,7 +678,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		int verticalInset = 0;
 
 		// Idle regions are thinner vertically
-		if(entryIndex==-1){
+		if(entryIndex==-1 && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT){
 			rectHeight -= 6;
 			verticalInset += 3;
 		}

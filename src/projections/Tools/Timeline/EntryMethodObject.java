@@ -708,7 +708,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
-		if(rectWidth > 2 && !data.colorByMemoryUsage())
+		if(rectWidth > 2 && !data.colorByMemoryUsage() && rectHeight > 1)
 		{
 			g2d.setPaint(makeMoreLikeForeground(c));			
 			g2d.drawLine(left, verticalInset, right, verticalInset);

@@ -35,11 +35,7 @@ class ThreadedFileReader implements MainHandler, Runnable {
 		Data data = new Data(null);
 		data.setProcessorList(validPEs);
 		data.setRange(startTime, endTime);
-//		data.setUseMinimalMargins(true);
-//		data.setFontSizes(12, 10, true);
-//		data.showIdle(false);
-//		data.showPacks(true);
-		data.setCompactView(true);
+		data.setViewType(Data.ViewType.VIEW_COMPACT);
 		
 		if(background != null && foreground != null)
 			data.setColors(background,foreground);

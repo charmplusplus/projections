@@ -47,14 +47,15 @@ class MainPanelBackground extends JPanel {
 		}
 		
 		// Draw the horizontal line 
-		g.setColor(new Color(128,128,128));
-		for (int i=0; i<data.numPs(); i++) {
-			
-			int y = data.horizontalLineLocationTop(i);
+		if(data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT){
+			g.setColor(new Color(128,128,128));
+			for (int i=0; i<data.numPs(); i++) {
 
-			g.drawLine(0+data.offset(), y, width-data.offset(), y);
-		}
-		
+				int y = data.horizontalLineLocationTop(i);
+
+				g.drawLine(0+data.offset(), y, width-data.offset(), y);
+			}
+		}		
 	}
 	
 }

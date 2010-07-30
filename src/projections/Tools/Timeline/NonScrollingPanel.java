@@ -5,6 +5,7 @@ import java.awt.Graphics;
 
 import javax.swing.JPanel;
 
+import projections.Tools.Timeline.Data.ViewType;
 import projections.gui.OrderedIntList;
 
 
@@ -46,7 +47,8 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		data = new Data(null);
 		data.setProcessorList(validPEs);
 		data.setRange(startTime, endTime);
-		data.setUseMinimalMargins(useMinimalMargins);
+		if(useMinimalMargins)
+			data.setViewType(ViewType.VIEW_MINIMAL);
 		data.setFontSizes(12, 10, true);
 		data.showIdle(true);
 		data.showPacks(true);

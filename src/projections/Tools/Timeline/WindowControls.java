@@ -11,6 +11,7 @@ import java.awt.event.ItemListener;
 import java.net.URL;
 import java.text.DecimalFormat;
 
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -21,9 +22,11 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
+import projections.Tools.Timeline.Data.ViewType;
 import projections.gui.FloatJTextField;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
@@ -65,8 +68,9 @@ ItemListener {
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 
-	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceArrayElementID, cbCompactView, cbNestedUserEvents;
-
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceArrayElementID, cbNestedUserEvents;
+	private JRadioButton cbNormalView, cbCompactView, cbSuperCompactView;
+	
 	private UserEventWindow userEventWindow;
 
 	private JMenuItem cbTraceArrayRemoveLines;
@@ -246,19 +250,27 @@ ItemListener {
 
 	public void actionPerformed(ActionEvent evt) {
 		// If the event is a menu action
-
-		if(evt.getSource() == mClose)
+		Object c = evt.getSource();
+		
+		if(c == mClose)
 			parentWindow.close();
 		
-		else if (evt.getSource()==cbTraceArrayRemoveLines)
+		else if (c == cbTraceArrayRemoveLines)
 			data.removeLines();
 
-		else if(evt.getSource() == mModifyRanges) {
+		else if(c == mModifyRanges) {
 			System.out.println("here");
 			showDialog();
 		}
 		
-		else if(evt.getSource() == mSaveFullTimeline){
+		else if(c == cbNormalView)
+			data.setViewType(Data.ViewType.VIEW_NORMAL);
+		else if(c == cbCompactView)
+			data.setViewType(Data.ViewType.VIEW_COMPACT);
+		else if(c == cbSuperCompactView)
+			data.setViewType(Data.ViewType.VIEW_SUPERCOMPACT);
+		
+		else if(c == mSaveFullTimeline){
 			// Create a blank panel to put in the upper left position. The timeline tool currently only maintains the other three panels that are displayed.
 			SolidColorJPanel upperLeftPanel = new SolidColorJPanel(data.getBackgroundColor(), parentWindow.labelPanel.getWidth(), parentWindow.axisPanel.getHeight() );
 			// Create a panel that is rendered from the four panels we supply
@@ -267,7 +279,7 @@ ItemListener {
 			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");		
 		}
 
-		else if(evt.getSource() == mSaveFullTimelineWhiteBG){
+		else if(c == mSaveFullTimelineWhiteBG){
 			Color oldBG = data.getBackgroundColor();
 			Color oldFG = data.getForegroundColor();
 			data.setForegroundColor(Color.black);
@@ -286,24 +298,24 @@ ItemListener {
 		}
 		
 
-		else if(evt.getSource() == mSaveScreenshot){
+		else if(c == mSaveScreenshot){
 			JPanelToImage.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.png");
 		}
 
-		else if(evt.getSource() == mWhiteBG){
+		else if(c == mWhiteBG){
 			data.setBackgroundColor(Color.white);
 			data.setForegroundColor(Color.black);
 		}
-		else if(evt.getSource() == 	mBlackBG){
+		else if(c == mBlackBG){
 			data.setBackgroundColor(Color.black);
 			data.setForegroundColor(Color.white);
 		}
 		
-		else if(evt.getSource() == mSaveColors)
+		else if(c == mSaveColors)
 			MainWindow.runObject[myRun].saveColors();
 
 		
-		else if(evt.getSource() == mRestoreColors){
+		else if(c == mRestoreColors){
 			try {
 				data.entryColorsMapping.clear();
 				data.setColorByDefault();
@@ -319,11 +331,11 @@ ItemListener {
 		}
 		
 		
-		else if(evt.getSource() == mColorChooser){
+		else if(c == mColorChooser){
 			new ChooseEntriesWindow(data);
 		}
 
-		else if(evt.getSource() == mDefaultColors){
+		else if(c == mDefaultColors){
 			data.entryColorsMapping.clear();
 			MainWindow.runObject[myRun].setDefaultColors();
 			for (int i = 0; i < data.entryColor().length; i++)
@@ -332,7 +344,7 @@ ItemListener {
 			parentWindow.refreshDisplay(false);
 		} 
 
-		else if(evt.getSource() == mColorByDefault) {
+		else if(c == mColorByDefault) {
 			data.entryColorsMapping.clear();
 			MainWindow.runObject[myRun].setDefaultColors();
 			for (int i = 0; i < data.entryColor().length; i++)
@@ -342,16 +354,16 @@ ItemListener {
 			data.setColorByDefault();
 		}
 
-		else if(evt.getSource() == mColorByObjectID)
+		else if(c == mColorByObjectID)
 			data.setColorByObjectID();
 
-		else if(evt.getSource() == mColorByUserRandom)
+		else if(c == mColorByUserRandom)
 			data.setColorByUserSupplied(Data.RandomColors);
 
-		else if(evt.getSource() == mColorByEntryMethod)
+		else if(c == mColorByEntryMethod)
 			data.setColorByEID();
 		
-		else if(evt.getSource() == mColorByEntryMethodFrequency) {
+		else if(c == mColorByEntryMethodFrequency) {
 			data.entryColorsMapping.clear();
 			data.setFrequencyColors();
 			for (int i = 0; i < data.entryColor().length; i++)
@@ -361,69 +373,69 @@ ItemListener {
 			data.setColorByEIDFreq();
 		}
 
-		else if(evt.getSource() == mColorByUserGradient)
+		else if(c == mColorByUserGradient)
 			data.setColorByUserSupplied(Data.BlueGradientColors);
 
-		else if(evt.getSource() == mColorByUserObjRandom)
+		else if(c == mColorByUserObjRandom)
 			data.setColorByUserSuppliedAndObjID(Data.RandomColors);
 
-		else if(evt.getSource() == mColorByUserEIDRandom)
+		else if(c == mColorByUserEIDRandom)
 			data.setColorByUserSuppliedAndEID(Data.RandomColors);
 		
-		else if(evt.getSource() == mColorByMemUsage)
+		else if(c == mColorByMemUsage)
 			data.setColorByMemoryUsage();
 
-		else if(evt.getSource() == mShiftTimelines)
+		else if(c == mShiftTimelines)
 			data.fixTachyons();
 		
-		else if(evt.getSource() == 	mShowHideEntries){
+		else if(c == 	mShowHideEntries){
 			new ChooseEntriesWindow(data);
 		}
 		
-		else if(evt.getSource() == 	mShowHideUserEvents){
+		else if(c == 	mShowHideUserEvents){
 			new ChooseUserEventsWindow(data);
 		}
 
-		else if(evt.getSource() == mUserEventReport){
+		else if(c == mUserEventReport){
 			data.printUserEventInfo();
 		}
 		
-		else if(evt.getSource() == mDisplayLegend){
+		else if(c == mDisplayLegend){
 			data.displayLegend();
 		}
 		
-		else if(evt.getSource() == mDetermineTimeRangesUserSupplied){
+		else if(c == mDetermineTimeRangesUserSupplied){
 			new UserSuppliedAnalyzer(data);
 		}
 
-		else if (evt.getSource()  == bZoomSelected) {
+		else if (c  == bZoomSelected) {
 			zoomSelected();
 		} 
 
-		else if (evt.getSource()  == bRanges) {
+		else if (c  == bRanges) {
 			showDialog();
 		}
 
-		else if (evt.getSource()  == bLoadSelected) {
+		else if (c  == bLoadSelected) {
 			loadSelected();
 			parentWindow.refreshDisplay(true);
 		} 
 
-		else if (evt.getSource()  == bDecrease) {
+		else if (c  == bDecrease) {
 			data.keepViewCentered(true); // Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
 			data.decreaseScaleFactor();
 			scaleField.setText("" + data.getScaleFactor());
 			parentWindow.refreshDisplay(true);
 		} 
 
-		else if (evt.getSource()  == bIncrease) {
+		else if (c  == bIncrease) {
 			data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
 			data.increaseScaleFactor();
 			scaleField.setText("" + data.getScaleFactor());
 			parentWindow.refreshDisplay(true);
 		} 
 
-		else if (evt.getSource()  == bReset) {
+		else if (c  == bReset) {
 			data.setScaleFactor(1.0f);
 			scaleField.setText("" + data.getScaleFactor());
 			parentWindow.refreshDisplay(true);
@@ -432,7 +444,7 @@ ItemListener {
 
 
 		// If the action corresponds to the scale value changing(likely typed in)
-		else if (evt.getSource() == scaleField) {
+		else if (c == scaleField) {
 			data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
 			data.setScaleFactor(scaleField.getValue());
 			parentWindow.refreshDisplay(true);
@@ -567,11 +579,27 @@ ItemListener {
 		// View Menu
 		JMenu viewMenu = new JMenu("View");
 
-		cbCompactView = new JCheckBoxMenuItem("Compact View");
-		cbCompactView.addItemListener(this);
+		cbNormalView = new JRadioButton("Normal View");
+		cbNormalView.addActionListener(this);
+		cbNormalView.setSelected(true);
+		viewMenu.add(cbNormalView);
+
+		cbCompactView = new JRadioButton("Compact View");
+		cbCompactView.addActionListener(this);
 		viewMenu.add(cbCompactView);
+
+		cbSuperCompactView = new JRadioButton("Super-Compact View");
+		cbSuperCompactView.addActionListener(this);
+		viewMenu.add(cbSuperCompactView);
+
+	    ButtonGroup group = new ButtonGroup();
+	    group.add(cbNormalView);
+	    group.add(cbCompactView);
+	    group.add(cbSuperCompactView);
 		
-		mShowHideEntries = new JMenuItem("Show & Hide Entry Methods");
+	    viewMenu.addSeparator();
+	    
+	    mShowHideEntries = new JMenuItem("Show & Hide Entry Methods");
 		mShowHideEntries.addActionListener(this);
 		viewMenu.add(mShowHideEntries);
 		
@@ -760,9 +788,6 @@ ItemListener {
 
 		else if (c == cbTraceMessagesForward)
 			data.setTraceMessagesForwardOnHover(evt.getStateChange() == ItemEvent.SELECTED);
-
-		else if(c == cbCompactView)
-			data.setCompactView(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if(c == cbNestedUserEvents)
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);

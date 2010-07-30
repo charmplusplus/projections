@@ -12,6 +12,8 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
 
+import projections.Tools.Timeline.Data.ViewType;
+
 /** Draws the left column of the timeline view. The labels such as "PE 0", "PE 1" */
 class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 
@@ -40,7 +42,7 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 	 * @note if data.useMinimalMargins is true then only the PE number will be printed without the idle %
 	 * */
 	private int preferredWidth(){
-		if(data.useMinimalView())
+		if(data.getViewType() == ViewType.VIEW_MINIMAL)
 			return 60;
 		else
 			return 90;
@@ -68,13 +70,16 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 	
 		for (int verticalPosition=0; verticalPosition<data.numPs(); verticalPosition++) {
 			// Draw the labels onto the screen
-			g.setColor(data.getForegroundColor());
 
 			int pe = data.whichPE(verticalPosition);
 
 			if(pe > -1){
-
-				if(data.useMinimalView() || data.useCompactView()){
+				
+				switch(data.getViewType()){
+				case VIEW_SUPERCOMPACT:
+					break;
+				case VIEW_MINIMAL:
+				case VIEW_COMPACT:
 					// A simpler version (right justified, bold larger PE label, no idle percentage)
 
 					if(clickedOnPE == pe){
@@ -92,9 +97,9 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 						int stringWidth = fm.stringWidth(peString);			
 						g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 					}
-
-				} else {
-
+					break;
+				default:
+					
 					// The full version
 					if(clickedOnPE == pe){
 						// don't draw the old location
@@ -121,6 +126,7 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 						}
 						g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
 					}
+					break;
 				}
 			}
 		}

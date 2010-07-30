@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 
 import javax.swing.JPanel;
 
+import projections.Tools.Timeline.Data.ViewType;
 import projections.gui.Util;
 
 /** The class that draws the top time axis on the top of the timeline window */
@@ -16,7 +17,7 @@ class AxisPanel extends JPanel
 
 	/** Desired height of the whole JPanel */
 	private int totalHeight() {
-		if(data.useMinimalView())
+		if(data.getViewType() == ViewType.VIEW_MINIMAL)
 			return axispos()+largeTickHalfLength;
 		else
 			return 14+axispos()+largeTickHalfLength;
@@ -24,7 +25,7 @@ class AxisPanel extends JPanel
 	
 	/** Distance from top to the horizontal line **/
 	private int axispos() {
-		if(data.useMinimalView())
+		if(data.getViewType() == ViewType.VIEW_MINIMAL)
 			return 2 + largeTickHalfLength + textpos();
 		else
 			return 5 + largeTickHalfLength + textpos();
@@ -32,7 +33,7 @@ class AxisPanel extends JPanel
 	
 	/** Distance from top to the bottom of the text label */
 	private int axisLabelPositionY(){
-		if(data.useMinimalView())
+		if(data.getViewType() == ViewType.VIEW_MINIMAL)
 			return 0;
 		else
 			return 15;
@@ -40,7 +41,7 @@ class AxisPanel extends JPanel
 		
 	/** Distance from top to the baseline for the timestamps */
 	private int textpos() {
-		if(data.useMinimalView())
+		if(data.getViewType() == ViewType.VIEW_MINIMAL)
 			return data.axisFont.getSize()+axisLabelPositionY();
 		else
 			return 5+data.axisFont.getSize()+axisLabelPositionY();

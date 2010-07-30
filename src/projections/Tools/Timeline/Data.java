@@ -215,14 +215,6 @@ public class Data
 	/** The font used by the time labels on the TimelineAxisCanvas */
 	protected Font axisFont;
 
-	/** If set to true we should try to use minimal margins around our drawings. */
-	private boolean useMinimalView=false;
-
-	/** If set to true we should try to use minimal margins and simpler text */
-	protected boolean useMinimalView(){
-		return useMinimalView;
-	}
-
 	/** A set of objects for which we draw their creation message lines */
 	protected Set<EntryMethodObject> drawMessagesForTheseObjects;
 	/** A set of objects for which we draw their creation message lines in an alternate color */
@@ -259,6 +251,7 @@ public class Data
 		hiddenEntryPoints = new TreeSet<Integer>();
 		hiddenUserEvents = new TreeSet<Integer>();
 
+		viewType = ViewType.VIEW_NORMAL;
 		
 		oldBT = -1;
 		oldET = -1;
@@ -301,7 +294,7 @@ public class Data
 		colorByEntryIdFreq = false;
 			
 		/// Default value for custom color (Normally not used)
-		customForeground = Color.white; 
+		customForeground = Color.white;
 		customBackground = Color.black;
 		
 		skipIdleRegions = false;
@@ -897,7 +890,7 @@ public class Data
 	 * after the painted line 
 	 */
 	protected int offset(){
-		if(useMinimalView())
+		if(viewType == ViewType.VIEW_MINIMAL)
 			return maxLabelLen()/2;
 		else
 			return 5 + maxLabelLen()/2;
@@ -911,17 +904,28 @@ public class Data
 
 
 	private int topOffset(){
-		if(useMinimalView() || useCompactView())
+		switch(viewType){
+		case VIEW_SUPERCOMPACT:
+			return 0;
+		case VIEW_MINIMAL:
+		case VIEW_COMPACT:
 			return 1;
-		else
-			return 4;
+		default :
+			return 4;	
+		}
 	}
 	
 	private int bottomOffset(){
-		if(useMinimalView() || useCompactView())
+		switch(viewType){
+		case VIEW_SUPERCOMPACT:
+			return 0;
+		case VIEW_MINIMAL:
+		case VIEW_COMPACT:
 			return 1;
-		else
+		default	 :
 			return 4;
+		}
+		
 	}
 
 	
@@ -947,10 +951,14 @@ public class Data
 
 	/** The height of the timeline event object rectangles */
 	protected int barheight(){
-		if(useCompactView())
+		switch(viewType){
+		case VIEW_COMPACT :
 			return 12;
-		else
+		case VIEW_SUPERCOMPACT :
+			return 1;
+		default	 :
 			return 16;
+		}
 	}
 		
 	/** Get the height required to draw a single PE's Timeline */
@@ -1189,16 +1197,7 @@ public class Data
 			return false;
 	}
 
-	
-	/** Enable or disable the use of minimal margins and other features 
-	 * 
-	 * The mini-timelines used for the NoiseMiner Exemplar screen will set this to true
-	 * */
-	public void setUseMinimalMargins(boolean useMinimalMargins) {
-		this.useMinimalView = useMinimalMargins;
-	}
-	
-	
+		
 	private boolean keepViewCentered = false;
 	/** Request that the layout manager not change the scrollbar position, but rather keep it centered on the same location */ 
 	protected void keepViewCentered(boolean b){
@@ -1223,7 +1222,7 @@ public class Data
 	
 	/** Do something when the user left clicks on an entry method object */
 	protected void clickTraceSender(EntryMethodObject obj) {
-		if(! useMinimalView()){
+		if(viewType != ViewType.VIEW_MINIMAL){
 			addProcessor(obj.pCreation);
 			toggleMessageSendLine(obj);
 			toggleMessageCalledByThisLine(obj);
@@ -1245,8 +1244,20 @@ public class Data
 	/** Highlight the other entry method invocations upon mouseover */
 	private boolean traceOIDOnHover;
 
-	/** Should we use a very compact view, with no message sends, or user events */
-	private boolean useCompactView;
+	
+	public static enum ViewType {
+		/** The normal display mode */
+		VIEW_NORMAL, 
+		/** Compact the entry margins around the entry method objects, and eliminate user events */
+		VIEW_COMPACT, 
+		/** Compact the entry margins around the entry method objects, and eliminate user events */
+		VIEW_SUPERCOMPACT, 
+		/** Produce a single PE embedded Timeline for use in other tools (such as NoiseMiner) */
+		VIEW_MINIMAL
+	}
+	
+	/** Should we use a very compact view, with no message sends? */
+	private ViewType viewType;
 
 	int colorSchemeForUserSupplied;
 	
@@ -1544,11 +1555,13 @@ public class Data
 
 		displayMustBeRedrawn();
 	}
-	public void setCompactView(boolean b) {
-		useCompactView=b;
+	
+	public void setViewType(ViewType vt) {
+		viewType = vt;
 		displayMustBeRedrawn();
 	}
 
+	
 	/** Should the message pack time regions be displayed */
 	protected boolean showPacks() {
 		if(useCompactView())
@@ -1583,7 +1596,7 @@ public class Data
 	}
 	
 	protected boolean useCompactView() {
-		return useCompactView;
+		return (viewType != ViewType.VIEW_NORMAL);
 	}
 
 	
@@ -2152,4 +2165,7 @@ public class Data
 		 a.userEventColors = a.activityColors[a.USER_EVENTS];
 		 a.functionColors = a.activityColors[a.FUNCTIONS];
 	  }
+	public ViewType getViewType() {
+		return viewType;
+	}
 }

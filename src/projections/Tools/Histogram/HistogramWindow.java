@@ -300,32 +300,36 @@ implements ActionListener
 	}
 
 	private String[] getTimePopup(int xVal, int yVal) {
-		String bubbleText[] = new String[4];
+		DecimalFormat df = new DecimalFormat("#.##");
+        String bubbleText[] = new String[5];
 
 		bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
 		bubbleText[1] = "Count: " + counts[TYPE_TIME][xVal][yVal];
 		bubbleText[2] = "Time:"+counts[TYPE_ACCTIME][xVal][yVal];
+		bubbleText[3] = "Time Percentage:"+(df.format((counts[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
 		if (xVal < timeNumBins) {
-			bubbleText[3] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
+			bubbleText[4] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
 			" to " + U.humanReadableString((xVal+1)*timeBinSize+timeMinBinSize);
 		} else {
-			bubbleText[3] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
+			bubbleText[4] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
 					timeMinBinSize);
 		}
 		return bubbleText;
 	}
 
     private String[] getACCTimePopup(int xVal, int yVal) {
-		String bubbleText[] = new String[4];
+		DecimalFormat df = new DecimalFormat("#.##");
+		String bubbleText[] = new String[5];
 
 		bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-		bubbleText[1] = "Total Time: " + counts[TYPE_ACCTIME][xVal][yVal];
-		bubbleText[2] = "Occurence:"+counts[TYPE_TIME][xVal][yVal];
+		bubbleText[1] = "Time: " + counts[TYPE_ACCTIME][xVal][yVal];
+		bubbleText[2] = "Count:"+counts[TYPE_TIME][xVal][yVal];
+		bubbleText[3] = "Time Percentage:"+(df.format((counts[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
 		if (xVal < timeNumBins) {
-			bubbleText[3] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
+			bubbleText[4] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
 			" to " + U.humanReadableString((xVal+1)*timeBinSize+timeMinBinSize);
 		} else {
-			bubbleText[3] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
+			bubbleText[4] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+
 					timeMinBinSize);
 		}
 		return bubbleText;

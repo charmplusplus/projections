@@ -18,6 +18,7 @@ import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
 import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.BorderFactory;
 
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.GenericGraphWindow;
@@ -45,7 +46,12 @@ implements ActionListener
 	protected static final int TYPE_TIME = 0;
 	protected static final int TYPE_MSG_SIZE = 1;
     protected static final int TYPE_ACCTIME = 2;
-	// Gui components
+	
+    protected static final int TYPE_ALL_ENTRIES = 1000;
+    protected static final int TYPE_CHOOSE_ENTRIES = 1001;
+    protected static final int TYPE_LONGEST_ENTRIES = 1000;
+    
+    // Gui components
 	private JButton entrySelectionButton;
 	private JButton epTableButton;
 
@@ -53,7 +59,11 @@ implements ActionListener
 	private JRadioButton timeAccumulateBinButton;
 	private JRadioButton msgSizeBinButton;
 	private ButtonGroup binTypeGroup;
-
+    
+    private JRadioButton   allEntriesButton;
+    private JRadioButton   chooseEntriesButton;
+    private JRadioButton   longestEntryButton;
+    private ButtonGroup entryTypeGroup;
 	
 	private BinDialogPanel binpanel;
 	
@@ -62,6 +72,7 @@ implements ActionListener
 	// NOTE: bin indices need not be of the same size
 	private double[][][] counts;
 	private int binType;
+    private int entryDisplayType;
 
 	private int timeNumBins;
 	private long timeBinSize;
@@ -85,7 +96,8 @@ implements ActionListener
 		thisWindow = this;
 
 		binType = TYPE_TIME;
-		_format = new DecimalFormat();
+		entryDisplayType = TYPE_ALL_ENTRIES;
+        _format = new DecimalFormat();
 
 		setTitle("Projections Histograms - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
@@ -123,7 +135,6 @@ implements ActionListener
 					msgBinSize = binpanel.getMsgBinSize();
 					msgMinBinSize = binpanel.getMsgMinBinSize();
 					binType = binpanel.getSelectedType();
-					
 					counts = new double[HistogramWindow.NUM_TYPES][][];
 					// we create an extra bin to hold overflows.
 					int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
@@ -217,7 +228,23 @@ implements ActionListener
 			System.out.println("selecting entries for display");
 		} else if (e.getSource() == epTableButton) {
 			System.out.println("Showing out of range entries");
-		}
+		} else if(e.getSource() == allEntriesButton)
+        {
+            entryDisplayType = TYPE_ALL_ENTRIES;
+            setGraphSpecificData();
+            refreshGraph();
+        }else if (e.getSource() ==  chooseEntriesButton)
+        {
+            entryDisplayType = TYPE_CHOOSE_ENTRIES;
+            setGraphSpecificData();
+            refreshGraph();
+        }else if(e.getSource() == longestEntryButton)
+        {
+            entryDisplayType = TYPE_LONGEST_ENTRIES;
+            setGraphSpecificData();
+            refreshGraph();
+
+        }
 	}
 	
 
@@ -234,15 +261,19 @@ implements ActionListener
 		JPanel graphPanel = super.getMainPanel(); 
 
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.setBorder(new TitledBorder(new LineBorder(Color.black), 
-				"Histogram Controls"));
+        //buttonPanel.setBorder(new TitledBorder(new LineBorder(Color.black), 
+		//		"Histogram Controls"));
 
 		entrySelectionButton = new JButton("Select Entries");
 		entrySelectionButton.addActionListener(this);
 		epTableButton = new JButton("Out-of-Range EPs");
 		epTableButton.addActionListener(this);
 
-		timeBinButton = new JRadioButton("Execution Time", true);
+        JPanel displayTypePanel = new JPanel();
+        displayTypePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Display Type"));
+        displayTypePanel.setLayout(gbl);
+		
+        timeBinButton = new JRadioButton("Execution Time", true);
 		timeBinButton.addActionListener(this);
 		timeAccumulateBinButton = new JRadioButton("Accumulate Execution Time", true);
 		timeAccumulateBinButton.addActionListener(this);
@@ -254,10 +285,33 @@ implements ActionListener
 		binTypeGroup.add(timeAccumulateBinButton);
 		binTypeGroup.add(msgSizeBinButton);
 
-		buttonPanel.add(timeBinButton);
-		buttonPanel.add(timeAccumulateBinButton);
-		buttonPanel.add(msgSizeBinButton);
-//		buttonPanel.add(entrySelectionButton);
+		displayTypePanel.add(timeBinButton);
+		displayTypePanel.add(timeAccumulateBinButton);
+		displayTypePanel.add(msgSizeBinButton);
+        buttonPanel.add(displayTypePanel);
+
+
+        JPanel entryTypePanel = new JPanel();
+        entryTypePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Entry Type"));
+        entryTypePanel.setLayout(gbl);
+        allEntriesButton = new JRadioButton("All Entries", true);
+        allEntriesButton.addActionListener(this);
+        chooseEntriesButton = new JRadioButton("Choose Entries...");
+        chooseEntriesButton.addActionListener(this);
+        longestEntryButton = new JRadioButton("Longest Entry");
+        longestEntryButton.addActionListener(this);
+		
+        entryTypeGroup = new ButtonGroup();
+		entryTypeGroup.add(allEntriesButton);
+		entryTypeGroup.add(chooseEntriesButton);
+		entryTypeGroup.add(longestEntryButton);
+       
+        entryTypePanel.add(allEntriesButton);
+        entryTypePanel.add(chooseEntriesButton);
+        entryTypePanel.add(longestEntryButton);
+        buttonPanel.add(entryTypePanel);
+
+        //		buttonPanel.add(entrySelectionButton);
 //		buttonPanel.add(epTableButton);
 
 		Util.gblAdd(mainPanel, graphPanel,  gbc, 0,0, 1,1, 1,1);

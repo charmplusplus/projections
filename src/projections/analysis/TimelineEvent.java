@@ -1,8 +1,7 @@
 package projections.analysis;
 
+import java.util.ArrayList;
 import java.util.Stack;
-import java.util.Vector;
-
 import projections.Tools.Timeline.TimelineMessage;
 import projections.misc.MiscUtil;
 
@@ -17,8 +16,8 @@ public long RecvTime;
     public int EntryPoint, SrcPe, MsgLen;
     public int EventID; //seq no of processor
     public ObjectId id;
-    public Vector<TimelineMessage> MsgsSent; 
-    public Vector<PackTime> PackTimes;
+    public ArrayList<TimelineMessage> MsgsSent; 
+    public ArrayList<PackTime> PackTimes;
     public int numPapiCounts = 0;
     public long papiCounts[];
     public Integer UserSpecifiedData;
@@ -99,13 +98,13 @@ public TimelineEvent(long bt,long et, int ep,int pe)
 }
 protected void addMessage(TimelineMessage m)
 {
-	if (MsgsSent==null) MsgsSent=new Vector();
-	MsgsSent.addElement(m);
+	if (MsgsSent==null) MsgsSent=new ArrayList();
+	MsgsSent.add(m);
 }
 protected void addPack(PackTime p)
 {
-	if (PackTimes==null) PackTimes=new Vector();
-	PackTimes.addElement(p);
+	if (PackTimes==null) PackTimes=new ArrayList();
+	PackTimes.add(p);
 }
 
 @SuppressWarnings("ucd")

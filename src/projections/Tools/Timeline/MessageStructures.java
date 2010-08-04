@@ -145,14 +145,12 @@ class MessageStructures {
 			Integer pe =  pe_iter.next();
 			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
 			Iterator<EntryMethodObject> obj_iter = objs.iterator();
-			while(obj_iter.hasNext()){  
-				// For each EntryMethod Object
-				EntryMethodObject obj = obj_iter.next();
-				Iterator<TimelineMessage> msg_iter = obj.messages.iterator();
-				while(msg_iter.hasNext()){
-					// For each message sent by the object
-					TimelineMessage msg = msg_iter.next();
-					getEventIDToMessageMap()[pe.intValue()].put(Integer.valueOf(msg.EventID), msg);
+
+			for (EntryMethodObject obj : objs) { // For each EntryMethod Object
+				if(obj.messages != null){
+					for (TimelineMessage msg : obj.messages){  // For each message sent by the object
+						getEventIDToMessageMap()[pe.intValue()].put(Integer.valueOf(msg.EventID), msg);
+					}
 				}
 			}
 		}
@@ -181,21 +179,18 @@ class MessageStructures {
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
 			
-
 			if(structures!=null && structures.stop)
 				return;
 			
 			Integer pe =  pe_iter.next();
 			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
-			Iterator<EntryMethodObject> obj_iter = objs.iterator();
-			while(obj_iter.hasNext()){
-				EntryMethodObject obj = obj_iter.next();
 
-				// put all the messages created by obj into the map, listing obj as the creator
-				Iterator<TimelineMessage> iter = obj.messages.iterator();
-				while(iter.hasNext()){
-					TimelineMessage msg = iter.next();
-					getMessageToSendingObjectsMap().put(msg, obj);
+			for(EntryMethodObject obj : objs) {
+				if(obj.messages != null){
+					for(TimelineMessage msg : obj.messages) {
+						// put all the messages created by obj into the map, listing obj as the creator
+						getMessageToSendingObjectsMap().put(msg, obj);
+					}
 				}
 			}				
 		}

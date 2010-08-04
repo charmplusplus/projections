@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.awt.Button;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

@@ -11,14 +11,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.Vector;
-
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
@@ -47,7 +43,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private ObjectId tid; 
 	int pCurrent;
 	int pCreation;
-	private Vector<TimelineMessage> TLmsgs; //stores TimelineEvent object's MsgsSent vector
+	private ArrayList<TimelineMessage> TLmsgs; //stores TimelineEvent object's MsgsSent vector
 	
 	private final static String popupChangeColor = "Change Entry Point Color";
 	private final static String popupShowDetails = "Show details";
@@ -80,9 +76,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private Data data = null;
 	
 	/** A set of TimelineMessage's */
-	protected Set<TimelineMessage> messages;
+	protected ArrayList<TimelineMessage> messages;
 	
-	private PackTime[] packs;
+	private ArrayList<PackTime> packs;
 
 	private int numPapiCounts = 0;
 	private long papiCounts[];
@@ -93,7 +89,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private AmpiFunctionData funcData[];
 
 	protected EntryMethodObject(Data data,  TimelineEvent tle, 
-			TreeSet<TimelineMessage> msgs, PackTime[] packs,
+			ArrayList<TimelineMessage> msgs, ArrayList<PackTime> packs,
 			int p1)
 	{
 		setFocusable(false); // optimization for speed
@@ -213,7 +209,11 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				infoString.append(" (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)");
 			infoString.append("<br>");
 			
-			infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
+			if(messages!=null)
+				infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
+			else 
+				infoString.append("<i>Msgs created</i>: 0<br>");
+
 			infoString.append("<i>Created by processor</i>: " + pCreation + "<br>");
 			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
 			if(tleUserEventName!=null)
@@ -354,7 +354,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}
 	
 	/** Return a set of messages for this entry method */
-	public Set<TimelineMessage> getMessages()
+	public ArrayList<TimelineMessage> getMessages()
 	{
 		return messages;
 	}   
@@ -480,7 +480,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 			if(data.traceMessagesForwardOnHover()){
 				EntryMethodObject obj = this;
-				Vector<TimelineMessage> tleMsg = this.TLmsgs;
+				ArrayList<TimelineMessage> tleMsg = this.TLmsgs;
 				
 				boolean done = false;
 				while(!done){
@@ -488,7 +488,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 					v.add(obj); //add this object to the set that is returned
 					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && tleMsg != null && !tleMsg.isEmpty()){
 						// Find messages called by current entry method
-						TimelineMessage msgToCalledEntryMethod = tleMsg.firstElement();
+						TimelineMessage msgToCalledEntryMethod = tleMsg.get(0);
 						if(msgToCalledEntryMethod != null){
 							//if there is a mapping for this message, find objects that are called by this message.
 							//if this object isn't null or equal to this, go through while loop again
@@ -738,10 +738,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		if(data.showPacks() && packs != null)
 		{
 			g.setColor(Color.pink);
-			for(int p=0; p<packs.length; p++)
-			{
-				long packBeginTime = packs[p].BeginTime;
-				long packEndTime = packs[p].EndTime;
+			for(PackTime pt : packs){
+				long packBeginTime = pt.BeginTime;
+				long packEndTime = pt.EndTime;
 
 				if(packEndTime >= data.startTime() && packBeginTime <= data.endTime())
 				{
@@ -955,14 +954,13 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		packtime = 0;
 		if(packs != null)
 		{   
-			for(int p=0; p<packs.length; p++)
-			{
+			for(PackTime pt : packs){
 				// packtime += packs[p].EndTime - packs[p].BeginTime + 1;
-				packtime += packs[p].EndTime - packs[p].BeginTime;
-				if(packs[p].BeginTime < data.startTime())
-					packtime -= (data.startTime() - packs[p].BeginTime);
-				if(packs[p].EndTime > data.endTime())
-					packtime -= (packs[p].EndTime - data.endTime());
+				packtime += pt.EndTime - pt.BeginTime;
+				if(pt.BeginTime < data.startTime())
+					packtime -= (data.startTime() - pt.BeginTime);
+				if(pt.EndTime > data.endTime())
+					packtime -= (pt.EndTime - data.endTime());
 			}
 			packusage = packtime * 100;
 			packusage /= (data.endTime() - data.startTime());
@@ -1058,7 +1056,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 	}
 
-	public Vector<TimelineMessage> getTLmsgs() {
+	public ArrayList<TimelineMessage> getTLmsgs() {
 		return TLmsgs;
 	}
 }

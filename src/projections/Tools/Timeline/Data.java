@@ -3,6 +3,7 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,7 +15,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Vector;
 
 import javax.swing.ToolTipManager;
 
@@ -157,7 +157,7 @@ public class Data
 	 * This is a Vector of the relative frequencies of the entry methods.  The entry
 	 * method with the most frequencies will be the first item in the Vector 
 	 */
-	protected Vector<Integer> frequencyVector = new Vector<Integer>();
+	protected ArrayList<Integer> frequencyVector = new ArrayList<Integer>();
 	
 	/** processor usage indexed by PE */
 	float[] processorUsage;
@@ -617,7 +617,7 @@ public class Data
 	 *  by the object the mouse is over
 	 */
 	private void toggleMessageCalledByThisLine(EntryMethodObject obj) {
-		Vector<TimelineMessage> tleMsg = obj.getTLmsgs();
+		List<TimelineMessage> tleMsg = obj.getTLmsgs();
 		if (tleMsg!=null) {
 			for (int i=0; i<tleMsg.size(); i++) { //when to empty the drawMsgsForTheseObjsAlt?
 				Set<EntryMethodObject> entMethSet = this.messageStructures.getMessageToExecutingObjectsMap().get(tleMsg.get(i));
@@ -745,27 +745,17 @@ public class Data
 		// process timeline events
 		for(TimelineEvent tle : tl) {
 			
-			// Construct a list of messages sent by the object
-			Vector<TimelineMessage> msglist = tle.MsgsSent;
-			TreeSet<TimelineMessage> msgs = new TreeSet<TimelineMessage>();
-			if(msglist!=null && (!skipLoadingMessages()) ){
-				msgs.addAll( msglist );
+			// Construct a list of messages sent by the object	
+			ArrayList<TimelineMessage> msgs = new ArrayList<TimelineMessage>();
+			if(tle.MsgsSent!=null && (!skipLoadingMessages()) ){
+				msgs.addAll( tle.MsgsSent );
 			}
 			
-			// Construct a list of message pack times for the object
-			Vector<PackTime> packlist = tle.PackTimes;
-			int numpacks;
-			if (packlist == null || skipLoadingMessages() ) {
-				numpacks = 0;
-			} else {
-				numpacks = packlist.size();
+			ArrayList<PackTime> packs = null;
+			if (tle.PackTimes != null && ! skipLoadingMessages() ) {
+				packs = tle.PackTimes;
 			}
-			PackTime[] packs = new PackTime[numpacks];
-			for (int p=0; p<numpacks; p++) {
-				packs[p] = packlist.elementAt(p);
-			}
-		
-		
+			
 			EntryMethodObject obj = new EntryMethodObject(this, tle, msgs, packs, pe.intValue());
 			if((obj.isIdleEvent() || obj.isUnaccountedTime() ) && skipLoadingIdleRegions()){
 				// don't load this idle event because we are skipping them
@@ -2059,7 +2049,7 @@ public class Data
 			Iterator<EntryMethodObject> iter2 = list.iterator();
 			while(iter2.hasNext()){
 				EntryMethodObject o = iter2.next();
-				o.messages = new TreeSet<TimelineMessage>();
+				o.messages = null;
 			}
 		
 		}
@@ -2149,7 +2139,7 @@ public class Data
 	//Returns a vector of the entry methods sorted by their frequency, starting with the least frequent and ending
 	//with the most frequent
 	public void makeFreqVector() {
-		Vector<Integer> vectorToReturn = new Vector<Integer>();
+		ArrayList<Integer> vectorToReturn = new ArrayList<Integer>();
 		Collection<LinkedList<Integer>> collec = frequencyTreeMap.values();
 		Iterator<LinkedList<Integer>> iter = collec.iterator();
 		

@@ -26,7 +26,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
-import projections.Tools.Timeline.Data.ViewType;
 import projections.gui.FloatJTextField;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;

@@ -740,9 +740,9 @@ public class Data
 		for(TimelineEvent tle : tl) {
 			
 			// Construct a list of messages sent by the object	
-			ArrayList<TimelineMessage> msgs = new ArrayList<TimelineMessage>();
+			ArrayList<TimelineMessage> msgs = null;
 			if(tle.MsgsSent!=null && (!skipLoadingMessages()) ){
-				msgs.addAll( tle.MsgsSent );
+				msgs = tle.MsgsSent;
 			}
 			
 			ArrayList<PackTime> packs = null;

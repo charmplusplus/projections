@@ -712,7 +712,7 @@ public class Data
 			if (MainWindow.runObject[myRun].hasLogData()) {
 				MainWindow.runObject[myRun].logLoader.createtimeline(pe, startTime, endTime, tl, userEvents, minEntryDuration);
 			} else {
-				System.err.println("Error loadign log files!");
+				System.err.println("Error loading log files!");
 				return;
 			}
 		} catch (LogLoadException e) {

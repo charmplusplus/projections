@@ -198,8 +198,6 @@ class ThreadedFileReader implements Runnable  {
 	{
 		// Variables for use with the analysis
 		long executionTime;
-		long adjustedTime;
-		long adjustedSize;
 
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
         /* YH Sun added */

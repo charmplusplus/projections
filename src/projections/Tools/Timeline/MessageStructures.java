@@ -143,10 +143,7 @@ class MessageStructures {
 				return;
 			
 			Integer pe =  pe_iter.next();
-			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
-			Iterator<EntryMethodObject> obj_iter = objs.iterator();
-
-			for (EntryMethodObject obj : objs) { // For each EntryMethod Object
+			for (EntryMethodObject obj : data.allEntryMethodObjects.get(pe)) { // For each EntryMethod Object
 				if(obj.messages != null){
 					for (TimelineMessage msg : obj.messages){  // For each message sent by the object
 						getEventIDToMessageMap()[pe.intValue()].put(Integer.valueOf(msg.EventID), msg);

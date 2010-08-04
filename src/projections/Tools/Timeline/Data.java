@@ -520,15 +520,9 @@ public class Data
 			packUsage[p] = 0;
 		}
 		
-		Iterator<Integer> pe_iter = allEntryMethodObjects.keySet().iterator();
-		while(pe_iter.hasNext()){
-			Integer pe = pe_iter.next();
-			List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
-			
-			Iterator<EntryMethodObject> obj_iter = objs.iterator();
-			while(obj_iter.hasNext()){
 
-				EntryMethodObject obj = obj_iter.next();
+		for(Integer pe : allEntryMethodObjects.keySet()) {	
+			for(EntryMethodObject obj : allEntryMethodObjects.get(pe)){
 
 				float usage = obj.getUsage();
 				int entryIndex = obj.getEntryIndex();
@@ -2162,8 +2156,8 @@ public class Data
 		 Analysis a = MainWindow.runObject[myRun];
 		 a.activityColors = a.colorManager.defaultColorMap();
 		 a.entryColors = ColorManager.entryColorsByFrequency(ColorManager.createComplementaryColorMap(entries.length), frequencyVector);
-		 a.userEventColors = a.activityColors[a.USER_EVENTS];
-		 a.functionColors = a.activityColors[a.FUNCTIONS];
+		 a.userEventColors = a.activityColors[Analysis.USER_EVENTS];
+		 a.functionColors = a.activityColors[Analysis.FUNCTIONS];
 	  }
 	public ViewType getViewType() {
 		return viewType;

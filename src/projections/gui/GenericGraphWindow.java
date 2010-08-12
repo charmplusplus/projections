@@ -62,6 +62,7 @@ implements PopUpAble, ColorUpdateNotifier
 	private JMenuItem mWhiteBG;
 	private JMenuItem mBlackBG;
 	private JMenuItem mChooseColors;
+	private JMenuItem mChooseEnableNot;
 	private JMenuItem mSaveColors;
 	private JMenuItem mLoadColors;
 
@@ -97,12 +98,14 @@ implements PopUpAble, ColorUpdateNotifier
 		mWhiteBG = new JMenuItem("White background");
 		mBlackBG = new JMenuItem("Black background");
 		mChooseColors = new JMenuItem("Choose Entry Colors");
+		mChooseEnableNot = new JMenuItem("Choose Entry Enable or Disable");
 		mSaveColors = new JMenuItem("Save Colors To File");
 		mLoadColors = new JMenuItem("Load Colors From File");	
 		
 		mWhiteBG.addActionListener(new MenuHandler());
 		mBlackBG.addActionListener(new MenuHandler());
 		mChooseColors.addActionListener(new MenuHandler());
+		mChooseEnableNot.addActionListener(new MenuHandler());
 		mSaveColors.addActionListener(new MenuHandler());
 		mLoadColors.addActionListener(new MenuHandler());
 
@@ -110,6 +113,7 @@ implements PopUpAble, ColorUpdateNotifier
 		mColors.add(mBlackBG);
 		mColors.addSeparator();
 		mColors.add(mChooseColors);
+		mColors.add(mChooseEnableNot);
 		mColors.addSeparator();
 		mColors.add(mSaveColors);
 		mColors.add(mLoadColors);
@@ -232,7 +236,11 @@ implements PopUpAble, ColorUpdateNotifier
 				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File", "./ProjectionsPlot.png");
 			} else if (e.getSource() == mChooseColors){
 				new ChooseEntryColorsWindow(gw);
-			} else if (e.getSource() == mLoadColors){
+			} else if(e.getSource() == mChooseEnableNot)
+            {
+
+            }
+            else if (e.getSource() == mLoadColors){
 				try {
 					MainWindow.runObject[myRun].loadColors();
 					gw.colorsHaveChanged();

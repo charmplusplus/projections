@@ -114,7 +114,7 @@ implements ActionListener, Clickable
 
 	// the following data are statically known and can be initialized
 	// here overhead, idle time
-	private final int special = 2;
+	private final static int special = 2;
 
 	public TimeProfileWindow(MainWindow mainWindow) {
 		super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);

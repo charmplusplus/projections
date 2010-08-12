@@ -8,9 +8,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.AbstractList;
 import java.util.TreeMap;
-import java.util.Vector;
-
 import projections.Tools.Timeline.Data;
 
 
@@ -265,7 +264,7 @@ public class ColorManager
 		return new Color[0];
 	}
 
-	public static Color[] entryColorsByFrequency(Color[] complementaryMap, Vector<Integer> freqVector) {
+	public static Color[] entryColorsByFrequency(Color[] complementaryMap, AbstractList<Integer> freqVector) {
 		Color [] colors = new Color[freqVector.size()];
 		for (int i=0; i< freqVector.size(); i++) {
 			colors[freqVector.get(i)] = complementaryMap[i];

@@ -3,9 +3,8 @@ package projections.Tools.Timeline;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
-
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -38,7 +37,7 @@ class MessagePanel extends JPanel {
 
     // Data objects
     private EntryMethodObject obj;
-    private Set messages;
+    private ArrayList messages;
     private Object tableData[][];
     private Object columnNames[];
 

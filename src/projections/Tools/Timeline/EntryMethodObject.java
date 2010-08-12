@@ -661,6 +661,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 		// Determine the base color
 		Paint c = determineColor();
+		
 
 		// Dim this object if we want to focus on some objects (for some reason or another)
 		if(data.isObjectDimmed(this)){
@@ -792,6 +793,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		
 	/**  Determine the color of the object */	
 	private Paint determineColor() {
+		Color colToSave = null;
+		
 		// First handle the simple cases of idle, unknown and function events
 		if (isIdleEvent()) { 	
 			return MainWindow.runObject[data.myRun].getIdleColor();
@@ -800,23 +803,18 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		} else if (isFunction) {
 			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 		}
-
-		//Return the color stored in the TreeMap if the entryIndex already exists in the TreeMap
-		if (data.entryColorsMapping.containsKey(entryIndex)) {
-			return data.entryColorsMapping.get(entryIndex);
-		}
 		
 		// color the objects by memory usage with a nice blue - red gradient
 		if(data.colorByMemoryUsage()){
 			if(this.memoryUsage == 0){
-				return Color.darkGray;
+				colToSave = Color.darkGray;
 			}else{
 				// scale the memory usage to the interval [0,1]
 				float normalizedValue = (float)(memoryUsage - data.minMemBColorRange()) / (float)(data.maxMemBColorRange()-data.minMemBColorRange());
 				if( normalizedValue<0.0 || normalizedValue>1.0 )
-					return Color.darkGray;
+					colToSave = Color.darkGray;
 				else {
-					return Color.getHSBColor(0.6f-normalizedValue*0.65f, 1.0f, 1.0f); 
+					colToSave = Color.getHSBColor(0.6f-normalizedValue*0.65f, 1.0f, 1.0f); 
 				}
 			}
 		}
@@ -877,10 +875,15 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			if(h2 > 1.0)
 				b = 0.6f;
 
-			return Color.getHSBColor(h, s, b);
+			colToSave = Color.getHSBColor(h, s, b);
 
-		} else {
-			return data.entryColor()[entryIndex];
+		}
+		if (colToSave == null) {
+			return MainWindow.runObject[data.myRun].entryColors[entryIndex];
+		}
+		else {
+			MainWindow.runObject[data.myRun].entryColors[entryIndex] = colToSave;
+			return colToSave;
 		}
 
 
@@ -1011,8 +1014,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				Color old = MainWindow.runObject[data.myRun].getEntryColor(entry);
 				Color c = JColorChooser.showDialog(null, "Choose new color", old); 
 				if(c !=null){
-					data.entryColorsMapping.put(entry, c);
-					//MainWindow.runObject[data.myRun].setEntryColor(entry, c);
+					MainWindow.runObject[data.myRun].setEntryColor(entry, c);
 					data.displayMustBeRepainted();
 				}
 

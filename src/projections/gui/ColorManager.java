@@ -151,11 +151,6 @@ public class ColorManager
 		}
 		return retColors;
 	}
-
-	
-	protected void saveColorsData(Data d) {
-		saveColors(d.entryColorsMapping);
-	}
 	
 /** Write out the colors to the file. Make sure that this output format is readable 
  *  by initializeColors() above.

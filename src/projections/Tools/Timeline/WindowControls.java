@@ -89,7 +89,6 @@ ItemListener {
 	private JMenuItem mColorChooser;
 	private JMenuItem mSaveColors;
 	private JMenuItem mRestoreColors;
-	private JMenuItem mDefaultColors;
 
 	private JMenuItem mColorByDefault;
 	private JMenuItem mColorByObjectID;
@@ -318,11 +317,8 @@ ItemListener {
 		
 		else if(c == mRestoreColors){
 			try {
-				data.entryColorsMapping.clear();
 				data.setColorByDefault();
 				MainWindow.runObject[myRun].loadColors();
-				for (int i = 0; i < data.entryColor().length; i++)
-					data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
 				data.displayMustBeRepainted();
 				parentWindow.refreshDisplay(false);
 				JOptionPane.showMessageDialog(null, "The colors have successfully been loaded.", "Colors Loaded", JOptionPane.INFORMATION_MESSAGE);
@@ -336,20 +332,8 @@ ItemListener {
 			new ChooseEntriesWindow(data);
 		}
 
-		else if(c == mDefaultColors){
-			data.entryColorsMapping.clear();
-			MainWindow.runObject[myRun].setDefaultColors();
-			for (int i = 0; i < data.entryColor().length; i++)
-				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
-			data.displayMustBeRepainted();
-			parentWindow.refreshDisplay(false);
-		} 
-
 		else if(c == mColorByDefault) {
-			data.entryColorsMapping.clear();
 			MainWindow.runObject[myRun].setDefaultColors();
-			for (int i = 0; i < data.entryColor().length; i++)
-				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
 			data.displayMustBeRepainted();
 			parentWindow.refreshDisplay(false);
 			data.setColorByDefault();
@@ -365,10 +349,7 @@ ItemListener {
 			data.setColorByEID();
 		
 		else if(c == mColorByEntryMethodFrequency) {
-			data.entryColorsMapping.clear();
 			data.setFrequencyColors();
-			for (int i = 0; i < data.entryColor().length; i++)
-				data.entryColor()[i] = MainWindow.runObject[myRun].getEntryColor(i);
 			data.displayMustBeRepainted();
 			parentWindow.refreshDisplay(false);
 			data.setColorByEIDFreq();
@@ -501,7 +482,6 @@ ItemListener {
 	
 		mSaveColors = new JMenuItem("Save Entry Point Colors");
 		mRestoreColors = new JMenuItem("Restore Entry Point Colors");
-		mDefaultColors = new JMenuItem("Default Entry Point Colors");
 		mColorChooser = new JMenuItem("Choose Entry Point Colors");
 		
 		
@@ -523,7 +503,6 @@ ItemListener {
 		colorMenu.add(mSaveColors);
 		colorMenu.add(mRestoreColors);
 		colorMenu.add(mColorChooser);
-		colorMenu.add(mDefaultColors);
 		colorMenu.addSeparator();
 		colorMenu.add(mColorByDefault);
 		colorMenu.add(mColorByEntryMethod);
@@ -540,7 +519,6 @@ ItemListener {
 		mBlackBG.addActionListener(this);
 		mSaveColors.addActionListener(this);
 		mRestoreColors.addActionListener(this);
-		mDefaultColors.addActionListener(this);
 		mColorChooser.addActionListener(this);
 		mColorByDefault.addActionListener(this);
 		mColorByObjectID.addActionListener(this);

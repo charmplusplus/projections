@@ -123,9 +123,6 @@ public class Data
 	
 	private int[]          entries;
 
-	private Color[]        entryColor;
-	public TreeMap<Integer, Color> entryColorsMapping = new TreeMap<Integer, Color>();
-
 	/** A set of entry point ids that should be hidden */
 	private Set<Integer> hiddenEntryPoints;
 
@@ -280,7 +277,6 @@ public class Data
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		makeFrequencyMap(entries);
 		makeFreqVector();
-		entryColor = MainWindow.runObject[myRun].getEPColorMap();
 
 		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
@@ -666,10 +662,6 @@ public class Data
 	
 	protected long endTime(){
 		return endTime;
-	}
-	
-	protected Color[] entryColor(){
-		return entryColor;
 	}
 
 	protected Color getEntryColor(Integer id){
@@ -2119,7 +2111,6 @@ public class Data
 	public void disposeOfStructures()
 	{
 		entries = null;
-		entryColor = null;
 		hiddenEntryPoints = null;
 		allEntryMethodObjects = null;
 		allUserEventObjects = null;

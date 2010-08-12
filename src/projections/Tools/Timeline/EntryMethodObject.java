@@ -827,35 +827,11 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			if(userSuppliedData !=  null){
 				long value = userSuppliedData.longValue();
 				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);
-				return Color.getHSBColor(0.25f-normalizedValue*0.75f, 1.0f, 1.0f); 
+				colToSave = Color.getHSBColor(0.25f-normalizedValue*0.75f, 1.0f, 1.0f); 
 			} 	else {
-				return Color.darkGray;
+				colToSave = Color.darkGray;
 			}
 		}
-
-		
-		
-		
-
-//		
-//			
-//		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.RandomColors){
-//			if(userSuppliedData !=  null){
-//				switch ((userSuppliedData.intValue()+5000)%10) {
-//				 case 0: c = Color.green; break;
-//				 case 1: c = Color.red; break;
-//				 case 2: c = Color.blue; break;
-//				 case 3: c = Color.yellow; break;
-//				 case 4: c = Color.darkGray; break;
-//				 case 5: c = Color.magenta; break;
-//				 case 6: c = Color.cyan; break;
-//				 case 7: c = Color.orange; break;
-//				 case 8: c = Color.pink; break;
-//				 case 9: c = Color.lightGray; break;
-//				}
-//			}
-//		}
-
 
 		// Sometimes Overrule the normal colors and use one based on the chare array index
 		if( data.colorByOID() || data.colorByUserSupplied() || data.colorByEID()){

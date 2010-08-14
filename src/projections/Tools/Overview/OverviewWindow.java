@@ -30,7 +30,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
 
-import projections.gui.ChooseEntryColorsWindow;
+import projections.gui.ChooseEntriesWindow;
 import projections.gui.ColorMap;
 import projections.gui.ColorUpdateNotifier;
 import projections.gui.MainWindow;
@@ -252,7 +252,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 				showDialog();
 			}
 		} else if (evt.getSource() == mChooseColors) {
-			new ChooseEntryColorsWindow(this);
+			new ChooseEntriesWindow(this);
 		}
 	}
 

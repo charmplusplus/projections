@@ -23,6 +23,7 @@ import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
 import projections.gui.Analysis;
 import projections.gui.ColorManager;
+import projections.gui.ColorUpdateNotifier;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
@@ -78,7 +79,7 @@ import projections.misc.LogLoadException;
  *
  */
 
-public class Data
+public class Data implements ColorUpdateNotifier
 {
 	protected static final int BlueGradientColors = 0;
 	protected static final int RandomColors = 1;
@@ -569,7 +570,7 @@ public class Data
 	
 	
 	/** Relayout and repaint everything */
-	protected void displayMustBeRedrawn(){
+	public void displayMustBeRedrawn(){
 		if(modificationHandler != null){
 			modificationHandler.refreshDisplay(true);
 		}
@@ -658,7 +659,7 @@ public class Data
 		return endTime;
 	}
 
-	protected Color getEntryColor(Integer id){
+	public Color getEntryColor(Integer id){
 		return MainWindow.runObject[myRun].getEntryColor(id);
 	}
 	
@@ -1910,15 +1911,15 @@ public class Data
 
 
 	
-	protected void makeEntryVisibleID(Integer id){		
+	public void makeEntryVisibleID(Integer id){
 		makeEntryVisibleID(id, true);
 	}
-	protected void makeEntryInvisibleID(Integer id){		
+	public void makeEntryInvisibleID(Integer id){
 		makeEntryInvisibleID(id, true);
 	}
 	
 	/** Make visible the entry methods for this id */	
-	protected void makeEntryVisibleID(Integer id, boolean redraw) {
+	public void makeEntryVisibleID(Integer id, boolean redraw) {
 		hiddenEntryPoints.remove(id);
 		if(redraw)
 			this.displayMustBeRedrawn();
@@ -1971,7 +1972,7 @@ public class Data
 		return hiddenEntryPoints.contains(id);
 	}
 	
-	protected boolean entryIsVisibleID(Integer id) {
+	public boolean entryIsVisibleID(Integer id) {
 		return ! hiddenEntryPoints.contains(id);
 	}
 	
@@ -2152,5 +2153,9 @@ public class Data
 	  }
 	public ViewType getViewType() {
 		return viewType;
+	}
+	
+	public void colorsHaveChanged() {
+		displayMustBeRepainted();
 	}
 }

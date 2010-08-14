@@ -235,7 +235,7 @@ implements PopUpAble, ColorUpdateNotifier
 			} else if(e.getSource() == mSaveScreenshot){
 				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File", "./ProjectionsPlot.png");
 			} else if (e.getSource() == mChooseColors){
-				new ChooseEntryColorsWindow(gw);
+				new ChooseEntriesWindow(gw);
 			} else if(e.getSource() == mChooseEnableNot)
             {
 

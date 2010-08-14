@@ -31,6 +31,7 @@ import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.Util;
+import projections.gui.ChooseEntriesWindow;
 
 /**
  * A panel that contains all the buttons and labels and things at the bottom of
@@ -328,7 +329,7 @@ ItemListener {
 		
 		
 		else if(c == mColorChooser){
-			new ChooseEntriesWindow(data);
+			new ChooseEntriesWindow(data, true);
 		}
 
 		else if(c == mColorByDefault) {
@@ -370,7 +371,7 @@ ItemListener {
 			data.fixTachyons();
 		
 		else if(c == 	mShowHideEntries){
-			new ChooseEntriesWindow(data);
+			new ChooseEntriesWindow(data, true);
 		}
 		
 		else if(c == 	mShowHideUserEvents){

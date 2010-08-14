@@ -122,7 +122,7 @@ public class Data implements ColorUpdateNotifier
 	/** If true, color the entry method invocations by their entry method frequency */
 	private boolean colorByEntryIdFreq;
 	
-	private int[]          entries;
+	public int[]          entries;
 
 	/** A set of entry point ids that should be hidden */
 	private Set<Integer> hiddenEntryPoints;

@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -62,7 +63,16 @@ public class ChooseEntriesWindow extends JFrame
 
 		tabledata  = new Vector();
 
-		entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
+		if (data!=null) {
+			entryNames = new TreeMap<Integer, String>();
+			for (int i = 0; i < data.entries.length; i++) {
+				if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.entries[i]!=0)
+					entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i));
+			}
+		}
+
+		else
+			entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
 		entryNames.put(-1, "Overhead");
 		entryNames.put(-2, "Idle");
 

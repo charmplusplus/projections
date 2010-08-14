@@ -251,10 +251,10 @@ class MyTableModel extends AbstractTableModel implements ActionListener {
 					Vector v = iter.next();
 					Integer id = (Integer) v.get(2);
 					// update the backing data for the table
-					v.set(0,e.getSource() == uncheckAll ? false : true);				
+					v.set(0,e.getSource() == uncheckAll ? false : true);
 					// Update the visualization (but don't redraw yet)
 					data.makeEntryVisibleID(id, false);
-				}	
+				}
 				data.displayMustBeRedrawn();
 			}
 			else {

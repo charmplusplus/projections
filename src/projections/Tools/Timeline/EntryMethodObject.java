@@ -21,6 +21,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 
+import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.analysis.AmpiFunctionData;
 import projections.analysis.ObjectId;
 import projections.analysis.PackTime;
@@ -29,7 +30,7 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 import projections.misc.MiscUtil;
 
-class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
+class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener, Range1D
 {
 
 	private MessageWindow msgwindow;
@@ -1036,5 +1037,15 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 	public ArrayList<TimelineMessage> getTLmsgs() {
 		return TLmsgs;
+	}
+
+	@Override
+	public long lowerBound() {
+		return beginTime;
+	}	
+
+	@Override
+	public long upperBound() {
+		return endTime;
 	}
 }

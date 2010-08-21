@@ -11,11 +11,19 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.Scrollable;
+
+import projections.Tools.Timeline.RangeQueries.Range1D;
+import projections.Tools.Timeline.RangeQueries.RangeQueryArrayList;
+import projections.Tools.Timeline.RangeQueries.UnitTest.TestRange1DObject;
 
 
 /** This class displays the timeline background and horizontal lines
@@ -31,6 +39,8 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	
 	private Data data;
 	private MainHandler handler;
+	
+	private Map<Integer,RangeQueryArrayList<EntryMethodObject>> entryMethodObjectsToPaintForEachPE;
 	
 	
 	public MainPanel(Data data, MainHandler handler){
@@ -56,6 +66,21 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		super.paintComponent(g);
 //		g.setColor(data.getBackgroundColor());
 //		g.fillRect(0, 0, getWidth(), getHeight());		
+		
+		
+		// Paint all entry method objects:
+
+		int count = 0;
+		for(Entry<Integer, RangeQueryArrayList<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
+			Integer pe = entry.getKey();
+			RangeQueryArrayList<EntryMethodObject> l = entry.getValue();
+			for(EntryMethodObject r : l){
+				count ++;
+			}
+		}
+		System.out.println("Should have just painted up to " + count + " entry method objects in MainPanel");
+				
+		
 	}
 
 
@@ -89,34 +114,48 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		
 		// Add the entry method instances (EntryMethodObject) to the panel for displaying
 				
-		/** <LinkedList<EntryMethodObject>> */
-		Iterator pe_iter = data.allEntryMethodObjects.values().iterator();
-		while(pe_iter.hasNext()){
-			LinkedList objs = (LinkedList) pe_iter.next();
-			Iterator obj_iter = objs.iterator();
-			while(obj_iter.hasNext()){
-				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
 
-				this.add(obj);
 
-				// Register a mouse motion listener for dragging of the viewport
-
-				// Only register it if we have not already registered it
-				MouseMotionListener[] mml = obj.getMouseMotionListeners();
-				boolean found = false;
-				for(int mml_index=0;mml_index<mml.length;mml_index++){
-					if(mml[mml_index]==this){
-						found = true;
-					}
-				}
-				if(!found){
-					obj.addMouseListener(this);
-					obj.addMouseMotionListener(this);
-				}
-
+		entryMethodObjectsToPaintForEachPE = new TreeMap<Integer,RangeQueryArrayList<EntryMethodObject>>();	
+		for(Integer pe : data.allEntryMethodObjects.keySet()) {
+			RangeQueryArrayList l = new RangeQueryArrayList();
+			entryMethodObjectsToPaintForEachPE.put(pe, l);
+			for(EntryMethodObject obj : data.allEntryMethodObjects.get(pe)){
+				l.add(obj);
 			}
-
 		}
+		
+//		
+//		Iterator pe_iter = data.allEntryMethodObjects.values().iterator();
+//		while(pe_iter.hasNext()){
+//			LinkedList objs = (LinkedList) pe_iter.next();
+//			Iterator obj_iter = objs.iterator();
+//			while(obj_iter.hasNext()){
+//				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
+//
+//
+//				
+//				// Register a mouse motion listener for dragging of the viewport
+//
+//				// Only register it if we have not already registered it
+//				MouseMotionListener[] mml = obj.getMouseMotionListeners();
+//				boolean found = false;
+//				for(int mml_index=0;mml_index<mml.length;mml_index++){
+//					if(mml[mml_index]==this){
+//						found = true;
+//					}
+//				}
+//				if(!found){
+//					obj.addMouseListener(this);
+//					obj.addMouseMotionListener(this);
+//				}
+//
+//			}
+//
+//		}
+//		
+//		
+		
 
 		// Add each user event 
 		/** <LinkedList<UserEventObject>> */

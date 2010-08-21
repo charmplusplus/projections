@@ -56,18 +56,19 @@ class MainLayout implements LayoutManager {
 			// Determine if the component is a EntryMethodObject
 
 			
-			if ( c instanceof EntryMethodObject ) {
-				((EntryMethodObject)c).setLocationAndSize((width)); // setBounds on child
-			} 
-			else if ( c instanceof UserEventObject ) {
+//			if ( c instanceof EntryMethodObject ) {
+//				((EntryMethodObject)c).setLocationAndSize((width)); // setBounds on child
+//			} 
+//			else 
+			if ( c instanceof UserEventObject ) {
 				((UserEventObject)c).setLocationAndSize(data, (width));	// setBounds on child	
 			} 
 			else if ( c instanceof MainPanelForeground ) {
 				((MainPanelForeground)c).setBounds(0, 0, width, height );
 			} 
-			else if ( c instanceof MainPanelBackground ) {
-				((MainPanelBackground)c).setBounds(0, 0, width, height );
-			} 
+//			else if ( c instanceof MainPanelBackground ) {
+//				((MainPanelBackground)c).setBounds(0, 0, width, height );
+//			} 
 			else {
 //				System.out.println("MainLayout found unknown type of child object");
 			}	

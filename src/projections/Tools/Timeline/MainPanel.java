@@ -1,9 +1,12 @@
 package projections.Tools.Timeline;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -64,25 +67,85 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	/** Paint the panel, filling the entire panel's width */
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-//		g.setColor(data.getBackgroundColor());
-//		g.fillRect(0, 0, getWidth(), getHeight());		
 		
+		paintBackground(g);
 		
 		// Paint all entry method objects:
+		int width;
+		int height;
+		Insets insets = getInsets();
+		width = getWidth() - (insets.left + insets.right);
+		height = getHeight() - (insets.top + insets.bottom);
 
+		// Find time ranges to draw
+		Rectangle clip = g.getClipBounds();
+//		data.scaledScreenWidth(width);
+		long leftClipTime = data.screenToTime(clip.x-5);
+		long rightClipTime = data.screenToTime(clip.x+clip.width+5);
+		
+		
+		
 		int count = 0;
 		for(Entry<Integer, RangeQueryArrayList<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
 			Integer pe = entry.getKey();
-			RangeQueryArrayList<EntryMethodObject> l = entry.getValue();
-			for(EntryMethodObject r : l){
-				count ++;
+			
+			if(data.peTopPixel(pe) <= clip.y+clip.height+5 && data.peBottomPixel(pe) >= clip.y-5){
+
+				RangeQueryArrayList<EntryMethodObject> l = entry.getValue();
+				l.setQueryRange(leftClipTime, rightClipTime);
+				for(EntryMethodObject o : l){
+					o.paintMe((Graphics2D) g, width);
+					count ++;
+				}
 			}
 		}
-		System.out.println("Should have just painted up to " + count + " entry method objects in MainPanel");
-				
+		System.out.println("Should have just painted up to " + count + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
+		
 		
 	}
 
+	
+	
+	/** Paint the panel, filling the entire panel's width */
+	public void paintBackground(Graphics g) {
+
+		int width = getWidth();
+		
+		g.setColor(data.getBackgroundColor());
+		Rectangle clipBounds = g.getClipBounds();
+		g.fillRect(clipBounds.x,clipBounds.y,clipBounds.width,clipBounds.height);
+
+		// Paint the selection region
+		if(data.selectionValid()){
+			// Draw a  background for the selected timelines
+			g.setColor(new Color(100,100,100));
+			g.fillRect(data.leftSelection(), 0,  data.rightSelection()-data.leftSelection(), getHeight()-1);
+			
+			// Draw vertical lines at the selection boundaries
+			g.setColor(data.getForegroundColor());
+			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
+			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
+		}
+		
+		// Paint the highlight where the mouse cursor was last seen
+		if(data.highlightValid()){
+			// Draw vertical line
+			g.setColor(data.getForegroundColor());
+			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
+		}
+		
+		// Draw the horizontal line 
+		if(data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT){
+			g.setColor(new Color(128,128,128));
+			for (int i=0; i<data.numPs(); i++) {
+
+				int y = data.horizontalLineLocationTop(i);
+
+				g.drawLine(0+data.offset(), y, width-data.offset(), y);
+			}
+		}		
+	}
+	
 
 	public void disposeOfStructures(){
 		handler = null;
@@ -169,10 +232,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			}
 		}
 		
-		MainPanelBackground b = new MainPanelBackground(data);
-		b.addMouseListener(this);
-		b.addMouseMotionListener(this);
-		add(b);
+//		MainPanelBackground b = new MainPanelBackground(data);
+//		b.addMouseListener(this);
+//		b.addMouseMotionListener(this);
+//		add(b);
 			
 		handler.setData(data);
 		handler.refreshDisplay(true);

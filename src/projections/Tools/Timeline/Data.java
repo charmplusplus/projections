@@ -1090,7 +1090,7 @@ public class Data implements ColorUpdateNotifier
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	private long screenToTime(int xPixelCoord){
+	long screenToTime(int xPixelCoord){
 		double fractionAlongAxis = ((double) (xPixelCoord-leftOffset())) /
 		((double)(mostRecentScaledScreenWidth-2*offset()));
 
@@ -1803,6 +1803,20 @@ public class Data implements ColorUpdateNotifier
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
 	}
+	
+	
+	/** The pixel y-coordinate for the topmost pixel for a PE's timeline */
+	protected int peTopPixel(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*yidx + topOffset();
+	}
+	
+	/** The pixel y-coordinate for the bottommost pixel for a PE's timeline */
+	protected int peBottomPixel(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*(yidx+1) + topOffset() - 1;
+	}
+	
 	
 	/** The pixel height of the entry method object. This includes just the rectangular region and the descending message sends */
 	protected int entryMethodLocationHeight() {

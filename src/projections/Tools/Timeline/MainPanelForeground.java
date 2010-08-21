@@ -34,10 +34,10 @@ class MainPanelForeground extends JPanel {
 	public void paintComponent(Graphics g) {
 		// Let UI delegate paint first 
 		// (including background filling, if I'm opaque)
-		super.paintComponent(g); 
+	//	super.paintComponent(g); 
 		// paint the message send lines	
-		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
-		paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);	
+//		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
+	//	paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);	
 	}
 
 

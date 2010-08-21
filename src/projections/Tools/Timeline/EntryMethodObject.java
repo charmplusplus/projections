@@ -275,9 +275,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	
 
 	/** paint an entry method that tapers to a point at its left side */
-	private void drawLeftArrow(Graphics2D g, Paint c, int startY, int h)
+	private void drawLeftArrow(Graphics2D g, Paint c, int startY, int leftCoord, int h)
 	{
-		int[] xpts = {5, 0, 5};
+		int[] xpts = {leftCoord+5, leftCoord+0, leftCoord+5};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
 		g.setPaint(c);
@@ -292,9 +292,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}   
 	
 	/** paint an entry method that tapers to a point at its right side */
-	private void drawRightArrow(Graphics2D g, Paint c, int startY, int h, int right)
+	private void drawRightArrow(Graphics2D g, Paint c, int startY, int leftCoord, int h, int right)
 	{
-		int[] xpts = {right-6, right, right-6};
+		int[] xpts = {leftCoord+right-6, leftCoord+right, leftCoord+right-6};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
 		g.setPaint(c);
@@ -644,13 +644,15 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	public boolean isUnaccountedTime(){
 		return (entry == -2);
 	}
-
-	public void paintComponent(Graphics g)
-	{     
-		super.paintComponent(g);
+	
+	
+	
+	public void paintMe(Graphics2D g2d, int actualDisplayWidth){
+		// If it is hidden, we may not display it
+		if(data.entryIsHiddenID(entry)){
+			return;
+		}
 		
-		Graphics2D g2d = (Graphics2D) g;
-			
 		// If this is an idle time region, we may not display it
 		if 	(isIdleEvent() && data.showIdle() == false) 
 			return;
@@ -658,6 +660,25 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			return;
 		if(data.entryIsHiddenID(this.getEntryID()))
 			return;
+		
+		
+		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
+
+		if(endTime > data.endTime())
+			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
+
+		if(beginTime < data.startTime())
+			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
+		
+		int width = rightCoord-leftCoord+1;
+
+		if(width < 1)
+			width = 1;
+		
+		int topCoord = data.entryMethodLocationTop(pCurrent);
+		int height = data.entryMethodLocationHeight();
+	
 		
 
 		// Determine the base color
@@ -671,7 +692,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		
 			
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
-		int rectWidth = getWidth();
+		int rectWidth = width;
 		int rectHeight = data.barheight();
 
 	
@@ -685,42 +706,43 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			verticalInset += 3;
 		}
 		
-		int left  = 0;
-		int right = rectWidth-1;
+		int left  = leftCoord+0;
+		int right = leftCoord+rectWidth-1;
 			
 		
 		if(beginTime < data.startTime())
 		{
-			drawLeftArrow(g2d, c, verticalInset, rectHeight);
+			drawLeftArrow(g2d, c, topCoord+verticalInset, leftCoord, rectHeight);
 			rectWidth -= 5;
-			left = 5;
+			left += 5;
 		}
 
 		if(endTime > data.endTime())
 		{
-			drawRightArrow(g2d, c, verticalInset, rectHeight, rectWidth);
+			drawRightArrow(g2d, c, topCoord+verticalInset, leftCoord, rectHeight, rectWidth);
 			rectWidth -= 5;
-			right = rectWidth-6;
+			right -= 5;
 		}
 
 		// Paint the main rectangle for the object, as long as it is not a skinny idle event
 		g2d.setPaint(c);
-		if(rectWidth > 1 || entryIndex!=-1)
-			g2d.fillRect(left, verticalInset, rectWidth, rectHeight);
-
+		if(rectWidth > 1 || entryIndex!=-1){
+			g2d.fillRect(left, topCoord+verticalInset, rectWidth, rectHeight);
+//			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
+		}
 
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
 		if(rectWidth > 2 && !data.colorByMemoryUsage() && rectHeight > 1)
 		{
 			g2d.setPaint(makeMoreLikeForeground(c));			
-			g2d.drawLine(left, verticalInset, right, verticalInset);
-			if(left == 0)
-				g2d.drawLine(0, verticalInset, 0, verticalInset+rectHeight-1);
+			g2d.drawLine(left, topCoord+verticalInset, right, topCoord+verticalInset);
+			if(left == leftCoord)
+				g2d.drawLine(left, topCoord+verticalInset, left, topCoord+verticalInset+rectHeight-1);
 
 			g2d.setPaint(makeMoreLikeBackground(c));
-			g2d.drawLine(left, verticalInset+rectHeight-1, right, verticalInset+rectHeight-1);
+			g2d.drawLine(left, topCoord+verticalInset+rectHeight-1, right, topCoord+verticalInset+rectHeight-1);
 			if(right == rectWidth-1)
-				g2d.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
+				g2d.drawLine(right, topCoord+verticalInset, right, topCoord+verticalInset+rectHeight-1);
 		}
 
 
@@ -736,58 +758,58 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	       connected to the message send when zoomed in.
 
 		 */
-
-		if(data.showPacks() && packs != null)
-		{
-			g.setColor(Color.pink);
-			for(PackTime pt : packs){
-				long packBeginTime = pt.BeginTime;
-				long packEndTime = pt.EndTime;
-
-				if(packEndTime >= data.startTime() && packBeginTime <= data.endTime())
-				{
-
-					// Compute the begin pixel coordinate relative to the containing panel
-					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
-
-					// Compute the begin pixel coordinate relative to the Entry method object itself
-					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord - 1;
-
-					// Compute the end pixel coordinate relative to the containing panel
-					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
-
-					// Compute the end pixel coordinate relative to the Entry method object itself
-					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord - 1;
-
-					g.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
-
-				}
-			}
-		}
-
-		// Show the message sends. See note above for the message packing areas
-		// Don't change this without changing MainPanel's paintComponent which draws message send lines
-		if(data.showMsgs() == true && messages != null)
-		{
-			g.setColor(getForeground());
-			
-			Iterator<TimelineMessage> m = messages.iterator();
-			while(m.hasNext()){
-				TimelineMessage msg = m.next();
-				long msgtime = msg.Time;
-				if(msgtime >= data.startTime() && msgtime <= data.endTime())
-				{
-					// Compute the pixel coordinate relative to the containing panel
-					int msgPanelCoordX = data.timeToScreenPixel(msgtime);
-
-					// Compute the pixel coordinate relative to the Entry method object itself
-					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
-
-					g.drawLine(msgObjectCoordX, verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
-
-				}
-			}
-		}
+//
+//		if(data.showPacks() && packs != null)
+//		{
+//			g2d.setColor(Color.pink);
+//			for(PackTime pt : packs){
+//				long packBeginTime = pt.BeginTime;
+//				long packEndTime = pt.EndTime;
+//
+//				if(packEndTime >= data.startTime() && packBeginTime <= data.endTime())
+//				{
+//
+//					// Compute the begin pixel coordinate relative to the containing panel
+//					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
+//
+//					// Compute the begin pixel coordinate relative to the Entry method object itself
+//					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord - 1;
+//
+//					// Compute the end pixel coordinate relative to the containing panel
+//					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
+//
+//					// Compute the end pixel coordinate relative to the Entry method object itself
+//					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord - 1;
+//
+//					g2d.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
+//
+//				}
+//			}
+//		}
+//
+//		// Show the message sends. See note above for the message packing areas
+//		// Don't change this without changing MainPanel's paintComponent which draws message send lines
+//		if(data.showMsgs() == true && messages != null)
+//		{
+//			g2d.setColor(getForeground());
+//			
+//			Iterator<TimelineMessage> m = messages.iterator();
+//			while(m.hasNext()){
+//				TimelineMessage msg = m.next();
+//				long msgtime = msg.Time;
+//				if(msgtime >= data.startTime() && msgtime <= data.endTime())
+//				{
+//					// Compute the pixel coordinate relative to the containing panel
+//					int msgPanelCoordX = data.timeToScreenPixel(msgtime);
+//
+//					// Compute the pixel coordinate relative to the Entry method object itself
+//					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
+//
+//					g2d.drawLine(msgObjectCoordX, topCoord+verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
+//
+//				}
+//			}
+//		}
 	}
 
 		
@@ -890,39 +912,41 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}
 
 	
-	
-	public void setLocationAndSize(int actualDisplayWidth)
-	{
-		
-		if(data.entryIsHiddenID(entry)){
-			setBounds( 0, 0, 0, 0 );			
-			return;
-		}	
-		
-		
-		leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
-		rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
-
-		if(endTime > data.endTime())
-			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
-
-		if(beginTime < data.startTime())
-			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
-		
-		int width = rightCoord-leftCoord+1;
-
-		if(width < 1)
-			width = 1;
-		
-//		int singleTimelineH = data.singleTimelineHeight();
-		
-//		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
-//				width, singleTimelineH);
-		
-		this.setBounds(leftCoord,  data.entryMethodLocationTop(pCurrent),
-				width, data.entryMethodLocationHeight());
-	
-	}   
+//	
+//	public void setLocationAndSize(int actualDisplayWidth)
+//	{
+//		
+//		if(data.entryIsHiddenID(entry)){
+//			setBounds( 0, 0, 0, 0 );			
+//			return;
+//		}	
+//		
+//		
+//		leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+//		rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
+//
+//		if(endTime > data.endTime())
+//			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
+//
+//		if(beginTime < data.startTime())
+//			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
+//		
+//		int width = rightCoord-leftCoord+1;
+//
+//		if(width < 1)
+//			width = 1;
+//		
+////		int singleTimelineH = data.singleTimelineHeight();
+//		
+////		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
+////				width, singleTimelineH);
+//		
+//		this.setBounds(leftCoord,  data.entryMethodLocationTop(pCurrent),
+//				width, data.entryMethodLocationHeight());
+//	
+//	}  
+//	
+//	
 	
 //	public int whichTimelineVerticalIndex(){
 //		return data.whichTimelineVerticalPosition(pCurrent);

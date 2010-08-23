@@ -24,8 +24,10 @@ import javax.swing.JPanel;
 import javax.swing.JViewport;
 import javax.swing.Scrollable;
 
+import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.Tools.Timeline.RangeQueries.RangeQueryArrayList;
+import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
 import projections.Tools.Timeline.RangeQueries.UnitTest.TestRange1DObject;
 
 
@@ -43,7 +45,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	private Data data;
 	private MainHandler handler;
 	
-	private Map<Integer,RangeQueryArrayList<EntryMethodObject>> entryMethodObjectsToPaintForEachPE;
+	private Map<Integer,Query1D<EntryMethodObject>> entryMethodObjectsToPaintForEachPE;
 	
 	
 	public MainPanel(Data data, MainHandler handler){
@@ -86,12 +88,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		
 		
 		int count = 0;
-		for(Entry<Integer, RangeQueryArrayList<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
+		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
 			Integer pe = entry.getKey();
 			
 			if(data.peTopPixel(pe) <= clip.y+clip.height+5 && data.peBottomPixel(pe) >= clip.y-5){
 
-				RangeQueryArrayList<EntryMethodObject> l = entry.getValue();
+				Query1D<EntryMethodObject> l = entry.getValue();
 				l.setQueryRange(leftClipTime, rightClipTime);
 				for(EntryMethodObject o : l){
 					o.paintMe((Graphics2D) g, width);
@@ -179,14 +181,40 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				
 
 
-		entryMethodObjectsToPaintForEachPE = new TreeMap<Integer,RangeQueryArrayList<EntryMethodObject>>();	
+		entryMethodObjectsToPaintForEachPE = new TreeMap<Integer,Query1D<EntryMethodObject>>();	
 		for(Integer pe : data.allEntryMethodObjects.keySet()) {
-			RangeQueryArrayList l = new RangeQueryArrayList();
+			RangeQueryTree l = new RangeQueryTree();
 			entryMethodObjectsToPaintForEachPE.put(pe, l);
 			for(EntryMethodObject obj : data.allEntryMethodObjects.get(pe)){
 				l.add(obj);
 			}
 		}
+		
+		
+		// DEBUGGING:
+		System.out.println("entryMethodObjectsToPaintForEachPE.size()=" + entryMethodObjectsToPaintForEachPE.size());
+		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
+
+			Integer pe = entry.getKey();
+			Query1D<EntryMethodObject> l = entry.getValue();
+
+			final long startTime = System.nanoTime();
+			final long endTime;
+			try {
+				int count = 0;
+				for(EntryMethodObject o : l){
+					count++;
+				}
+			} finally {
+			  endTime = System.nanoTime();
+			}
+			final long duration = endTime - startTime;
+			System.out.println("Time To Iterate Through entries: " + (duration/1000000) + " ms");
+			
+			//			if(l instanceof RangeQueryTree)
+//			((RangeQueryTree)l).printTree();
+		}
+		
 		
 //		
 //		Iterator pe_iter = data.allEntryMethodObjects.values().iterator();

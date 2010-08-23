@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 /** Provides a collection interface that provides range queries via iterators. */
-public class RangeQueryArrayList <T extends Range1D> implements  Iterable<T>, Collection<T>, Query1D{
+public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 	
 	ArrayList<T>	backingStorage;
 	private long lb;
@@ -27,58 +27,15 @@ public class RangeQueryArrayList <T extends Range1D> implements  Iterable<T>, Co
 		hasQueryRange = false;
 	}
 	
-	public class DB1DIterator implements Iterator<T> {
-		private Iterator<T> backingIterator;
-		
-		private T next;
-		private T oldNext;
-		
-		private void findNextInRange(){
-			next = null;
-			while(backingIterator.hasNext()){
-				T o = backingIterator.next();
-				if((hasQueryRange==false) || (o.lowerBound() <= ub && o.upperBound() >= lb)){
-					next = o;
-					break;
-				}
-			}
-		}
-		
-		private DB1DIterator(){
-			// Must not construct without bounds
-		}
-		
-		public DB1DIterator(long lowerBound, long upperBound){
-			backingIterator = backingStorage.iterator();
-			lb = lowerBound;
-			ub = upperBound;
-			findNextInRange();
-		}
-
-		
-		public boolean hasNext() {
-			// scan to find if we have another object in the range
-			return next != null;
-		}
-
-		public T next() {
-			oldNext = next;
-			findNextInRange();
-			return oldNext;
-		}
-
-		public void remove(){
-			throw new UnsupportedOperationException();
-		}
-	
-	}
-	
-	
-	
 	
 	@Override
 	public Iterator<T> iterator() {
-		return new DB1DIterator(lb, ub);
+		if(hasQueryRange){
+			System.out.println("RangeQueryArrayList using RangeIterator lb=" + lb + " ub=" + ub);
+			return new RangeIterator(backingStorage.iterator(), lb, ub);
+		}
+		else
+			return backingStorage.iterator();
 	}
 
 	

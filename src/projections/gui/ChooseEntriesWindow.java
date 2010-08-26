@@ -5,12 +5,15 @@ import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -34,6 +37,7 @@ public class ChooseEntriesWindow extends JFrame
 
 	private JButton checkAll;
 	private JButton uncheckAll;
+	private JCheckBox displayAllEntryMethods;
 
 	public ChooseEntriesWindow(ColorUpdateNotifier gw_) {
 		data = null;
@@ -49,33 +53,20 @@ public class ChooseEntriesWindow extends JFrame
 		createLayout();
 	}
 
-	private void createLayout(){
-		setTitle("Choose which entry methods are displayed and their colors");
-
-
-		// create a table of the data
-		columnNames = new Vector();
-		if (displayVisibilityCheckboxes)
-			columnNames.add(new String("Visible"));
-		columnNames.add(new String("Entry Method"));
-		columnNames.add(new String("ID"));
-		columnNames.add(new String("Color"));
-
-		tabledata  = new Vector();
-
-		if (data!=null) {
-			entryNames = new TreeMap<Integer, String>();
-			for (int i = 0; i < data.entries.length; i++) {
-				if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.entries[i]!=0)
-					entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i));
-			}
+	private void onlyEntryMethodsInRange() {
+		entryNames = new TreeMap<Integer, String>();
+		for (int i = 0; i < data.entries.length; i++) {
+			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.entries[i]!=0)
+				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i));
 		}
+	}
 
-		else
-			entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
-		entryNames.put(-1, "Overhead");
-		entryNames.put(-2, "Idle");
+	private void allEntryMethods() {
+		entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
+	}
 
+	private void makeTableData() {
+		tabledata.clear();
 		Iterator<Integer> iter = entryNames.keySet().iterator();
 		while(iter.hasNext()){
 			Integer id = iter.next();
@@ -95,8 +86,32 @@ public class ChooseEntriesWindow extends JFrame
 
 			tabledata.add(tableRow);
 		}
+	}
 
-		MyTableModel tableModel = new MyTableModel(tabledata, columnNames, data, checkAll,
+	private void createLayout(){
+		setTitle("Choose which entry methods are displayed and their colors");
+
+
+		// create a table of the data
+		columnNames = new Vector();
+		if (displayVisibilityCheckboxes)
+			columnNames.add(new String("Visible"));
+		columnNames.add(new String("Entry Method"));
+		columnNames.add(new String("ID"));
+		columnNames.add(new String("Color"));
+
+		tabledata  = new Vector();
+
+		if (data!=null)
+			onlyEntryMethodsInRange();
+		else
+			allEntryMethods();
+		entryNames.put(-1, "Overhead");
+		entryNames.put(-2, "Idle");
+
+		makeTableData();
+
+		final MyTableModel tableModel = new MyTableModel(tabledata, columnNames, data, checkAll,
 													uncheckAll, displayVisibilityCheckboxes); 
 
 		JTable table = new JTable(tableModel);
@@ -113,17 +128,35 @@ public class ChooseEntriesWindow extends JFrame
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new FlowLayout());
+
 		if (displayVisibilityCheckboxes) {
-			JPanel buttonPanel = new JPanel();
-			buttonPanel.setLayout(new FlowLayout());
 			checkAll = new JButton("Make All Visible");
 			uncheckAll = new JButton("Hide All");
 			checkAll.addActionListener(tableModel);
 			uncheckAll.addActionListener(tableModel);
 			buttonPanel.add(checkAll);
 			buttonPanel.add(uncheckAll);
-			p.add(buttonPanel, BorderLayout.NORTH);
 		}
+
+		displayAllEntryMethods = new JCheckBox("Show All Entry Methods");
+		displayAllEntryMethods.addItemListener(new ItemListener() {
+
+			public void itemStateChanged(ItemEvent e) {
+				if (e.DESELECTED==e.getStateChange() && data!=null)
+					onlyEntryMethodsInRange();
+				else if (data!=null)
+					allEntryMethods();
+				entryNames.put(-1, "Overhead");
+				entryNames.put(-2, "Idle");
+				makeTableData();
+				tableModel.fireTableDataChanged();
+			}
+		});
+
+		buttonPanel.add(displayAllEntryMethods);
+		p.add(buttonPanel, BorderLayout.NORTH);
 
 		p.add(scroller, BorderLayout.CENTER);
 
@@ -188,6 +221,7 @@ class MyTableModel extends AbstractTableModel implements ActionListener {
 	Data data;
 	JButton checkAll;
 	JButton uncheckAll;
+	JCheckBox displayAllEntryMethods;
 	boolean displayVisibilityCheckboxes;
 	Vector<Vector> tabledata;
 	Vector<String> columnNames;

@@ -49,7 +49,7 @@ public class StsReader extends ProjDefs
     /** index by Integer ID in STS file, return String name */
     private Map<Integer, String> entryNames = new TreeMap<Integer, String>();
     /** index by Integer ID in STS file, return String name */
-    private Map<Integer, String>  entryChareNames = new TreeMap<Integer, String>(); 
+    public Map<Integer, String>  entryChareNames = new TreeMap<Integer, String>(); 
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
     private Map<Integer, Integer>  entryFlatToID = new TreeMap<Integer, Integer>();
     /** keys are the IDs given in STS file, values are indexes into flat arrays */

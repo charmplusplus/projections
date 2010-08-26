@@ -57,7 +57,9 @@ public class ChooseEntriesWindow extends JFrame
 		entryNames = new TreeMap<Integer, String>();
 		for (int i = 0; i < data.entries.length; i++) {
 			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.entries[i]!=0)
-				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i));
+				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) + 
+						"::" + 
+						MainWindow.runObject[myRun].getSts().entryChareNames.get(i));
 		}
 	}
 

@@ -19,20 +19,23 @@ import javax.swing.SwingWorker;
 import javax.swing.BorderFactory;
 
 import projections.analysis.TimedProgressThreadExecutor;
+import projections.gui.ChooseEntriesWindow;
+import projections.gui.EntryMethodVisibility;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
+import projections.gui.GenericGraphWindow.MenuHandler;
 
 /**
  *  HistogramWindow
  *  modified by Chee Wai Lee
  *  2/23/2005
  */
-public class HistogramWindow extends GenericGraphWindow 
-implements ActionListener
+public class HistogramWindow extends GenericGraphWindow
+implements ActionListener, EntryMethodVisibility
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -109,6 +112,13 @@ implements ActionListener
 		setTitle("Projections Histograms - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
 		createMenus();
+		if (mChooseColors.getActionListeners()[0]!=null)
+			mChooseColors.removeActionListener(mChooseColors.getActionListeners()[0]);
+		mChooseColors.addActionListener(new MenuHandler() {
+			public void actionPerformed(ActionEvent e) {
+				new ChooseEntriesWindow(thisWindow, true, thisWindow);
+			}
+		});
 		getContentPane().add(getMainPanel());
 
 		pack();
@@ -479,5 +489,33 @@ implements ActionListener
 				           },
 				           this));
 
+	}
+
+	public void displayMustBeRedrawn() {
+		System.out.println("here");
+		calcDisplayData();
+		setGraphSpecificData();
+		refreshGraph();
+	}
+
+	public boolean entryIsVisibleID(Integer id) {
+		return true;
+	}
+
+	public int[] getEntriesArray() {
+		return null;
+	}
+
+	public void makeEntryInvisibleID(Integer id) {
+		System.out.println("in invisibleid");
+		display_mask[id] = false;
+	}
+
+	public void makeEntryVisibleID(Integer id) {
+		display_mask[id] = true;
+	}
+
+	public boolean hasEntryList() {
+		return false;
 	}
 }

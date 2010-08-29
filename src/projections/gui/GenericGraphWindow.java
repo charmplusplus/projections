@@ -61,7 +61,7 @@ implements PopUpAble, ColorUpdateNotifier
 	private JMenuItem mSaveScreenshot;
 	private JMenuItem mWhiteBG;
 	private JMenuItem mBlackBG;
-	private JMenuItem mChooseColors;
+	protected JMenuItem mChooseColors;
 	private JMenuItem mChooseEnableNot;
 	private JMenuItem mSaveColors;
 	private JMenuItem mLoadColors;

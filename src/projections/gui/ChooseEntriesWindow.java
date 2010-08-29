@@ -23,11 +23,12 @@ import javax.swing.table.TableColumn;
 
 import projections.Tools.Timeline.Data;
 import projections.gui.*;
+import projections.gui.GenericGraphWindow.MenuHandler;
 
 /** A class that displays a color and selection chooser for entry methods */
 public class ChooseEntriesWindow extends JFrame
 {
-	private Data data;
+	private EntryMethodVisibility data;
 	private Map<Integer, String> entryNames;
 	private Vector<Vector> tabledata;
 	private Vector<String> columnNames;
@@ -39,28 +40,30 @@ public class ChooseEntriesWindow extends JFrame
 	private JButton uncheckAll;
 	private JCheckBox displayAllEntryMethods;
 
-	public ChooseEntriesWindow(ColorUpdateNotifier gw_) {
+	public ChooseEntriesWindow(ColorUpdateNotifier _gw) {
 		data = null;
 		displayVisibilityCheckboxes = false;
-		gw = gw_;
+		gw = _gw;
 		createLayout();
 	}
 
-	public ChooseEntriesWindow(Data _data, boolean checkboxesVisible){
+	public ChooseEntriesWindow(EntryMethodVisibility _data, boolean checkboxesVisible, ColorUpdateNotifier _gw){
 		data = _data;
 		displayVisibilityCheckboxes = checkboxesVisible;
-		gw = _data;
+		gw = _gw;
 		createLayout();
 	}
 
 	private void onlyEntryMethodsInRange() {
 		entryNames = new TreeMap<Integer, String>();
-		for (int i = 0; i < data.entries.length; i++) {
-			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.entries[i]!=0)
+		for (int i = 0; i < data.getEntriesArray().length; i++) {
+			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.getEntriesArray()[i]!=0)
 				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) + 
 						"::" + 
 						MainWindow.runObject[myRun].getSts().entryChareNames.get(i));
 		}
+		entryNames.put(-1, "Overhead");
+		entryNames.put(-2, "Idle");
 	}
 
 	private void allEntryMethods() {
@@ -104,12 +107,10 @@ public class ChooseEntriesWindow extends JFrame
 
 		tabledata  = new Vector();
 
-		if (data!=null)
+		if (data!=null && data.hasEntryList())
 			onlyEntryMethodsInRange();
 		else
 			allEntryMethods();
-		entryNames.put(-1, "Overhead");
-		entryNames.put(-2, "Idle");
 
 		makeTableData();
 
@@ -129,44 +130,45 @@ public class ChooseEntriesWindow extends JFrame
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 
-		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new FlowLayout());
-
 		if (displayVisibilityCheckboxes) {
+			JPanel buttonPanel = new JPanel();
+			buttonPanel.setLayout(new FlowLayout());
 			checkAll = new JButton("Make All Visible");
 			uncheckAll = new JButton("Hide All");
 			checkAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					changeVisibility(true, tableModel);
 					tableModel.fireTableDataChanged();
+					data.displayMustBeRedrawn();
 				}
 			});
 			uncheckAll.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					changeVisibility(false, tableModel);
 					tableModel.fireTableDataChanged();
+					data.displayMustBeRedrawn();
 				}
 			});
 			buttonPanel.add(checkAll);
 			buttonPanel.add(uncheckAll);
-		}
-
-		displayAllEntryMethods = new JCheckBox("Show All Entry Methods");
-		displayAllEntryMethods.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent e) {
-				if (e.DESELECTED==e.getStateChange() && data!=null)
-					onlyEntryMethodsInRange();
-				else if (data!=null)
-					allEntryMethods();
-				entryNames.put(-1, "Overhead");
-				entryNames.put(-2, "Idle");
-				makeTableData();
-				tableModel.fireTableDataChanged();
+			if (data!=null && data instanceof Data) {
+				displayAllEntryMethods = new JCheckBox("Show All Entry Methods");
+				displayAllEntryMethods.addItemListener(new ItemListener() {
+					public void itemStateChanged(ItemEvent e) {
+						if (e.DESELECTED==e.getStateChange() && data!=null && data.hasEntryList())
+							onlyEntryMethodsInRange();
+						else if (data!=null && data.hasEntryList())
+							allEntryMethods();
+						makeTableData();
+						tableModel.fireTableDataChanged();
+						data.displayMustBeRedrawn();
+					}
+				});
+				buttonPanel.add(displayAllEntryMethods);
 			}
-		});
 
-		buttonPanel.add(displayAllEntryMethods);
-		p.add(buttonPanel, BorderLayout.NORTH);
+			p.add(buttonPanel, BorderLayout.NORTH);
+		}
 
 		p.add(scroller, BorderLayout.CENTER);
 
@@ -193,6 +195,7 @@ public class ChooseEntriesWindow extends JFrame
 			tabledata.get(i).set(0,visible);
 		}
 		tableModel.fireTableDataChanged();
+		data.displayMustBeRedrawn();
 	}
 
 	private void initColumnSizes(JTable table) {
@@ -242,17 +245,18 @@ class ClickableColorBox {
 }
 
 class MyTableModel extends AbstractTableModel implements ActionListener {
-	Data data;
+	EntryMethodVisibility data;
 	JCheckBox displayAllEntryMethods;
 	boolean displayVisibilityCheckboxes;
 	Vector<Vector> tabledata;
 	Vector<String> columnNames;
 
-	public MyTableModel(Vector<Vector> TD, Vector<String> CN, Data data_, boolean checkboxesVisible) {
+	public MyTableModel(Vector<Vector> TD, Vector<String> CN, EntryMethodVisibility data_, boolean checkboxesVisible) {
 		tabledata=TD;
 		columnNames=CN;
 		data = data_;
-		data.displayMustBeRedrawn();
+		if (data!=null)
+			data.displayMustBeRedrawn();
 		displayVisibilityCheckboxes = checkboxesVisible;
 	}
 
@@ -301,6 +305,7 @@ class MyTableModel extends AbstractTableModel implements ActionListener {
 				// add to list of disabled entry methods
 				data.makeEntryInvisibleID(id);
 			}
+			data.displayMustBeRedrawn();
 		} else {
 //			System.out.println("setValueAt col = " + col);
 		}
@@ -312,5 +317,6 @@ class MyTableModel extends AbstractTableModel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		System.out.println("Action for object: " + e.getSource());
 		fireTableDataChanged();
+		data.displayMustBeRedrawn();
 	}
 }

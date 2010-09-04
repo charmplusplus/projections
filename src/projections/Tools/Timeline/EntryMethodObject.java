@@ -42,7 +42,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private int msglen;
 	int EventID;
 	private ObjectId tid; 
-	int pCurrent;
+	int pe;
 	int pCreation;
 	private ArrayList<TimelineMessage> TLmsgs; //stores TimelineEvent object's MsgsSent vector
 	
@@ -64,11 +64,6 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private float packusage;
 	private long packtime;
 	
-	
-	/** Pixel coordinate of left side of object */
-	private int leftCoord=0;
-
-	private int rightCoord=0;
 	
 	
 	private String tleUserEventName;
@@ -112,7 +107,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
 		this.packs= packs;
-		pCurrent  = p1;
+		pe  = p1;
 		pCreation = tle.SrcPe;
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
@@ -391,7 +386,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 	public int getPCurrent()
 	{
-		return pCurrent;
+		return pe;
 	}   
 
 	public float getUsage()
@@ -535,16 +530,16 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		synchronized(data.messageStructures){
 			if(data == null)
 				return null;
-			else if(pCurrent<0)
+			else if(pe<0)
 				return null;
 			else if(data.messageStructures.getEventIDToMessageMap() == null)
 				return null;
-			else if(pCurrent >= data.messageStructures.getEventIDToMessageMap().length)
+			else if(pe >= data.messageStructures.getEventIDToMessageMap().length)
 				return null;
-			else if(data.messageStructures.getEventIDToMessageMap()[pCurrent] == null)
+			else if(data.messageStructures.getEventIDToMessageMap()[pe] == null)
 				return null;
 			else
-				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCurrent].get(Integer.valueOf(EventID));
+				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pe].get(Integer.valueOf(EventID));
 
 		}
 	}
@@ -676,7 +671,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		if(width < 1)
 			width = 1;
 		
-		int topCoord = data.entryMethodLocationTop(pCurrent);
+		int topCoord = data.entryMethodLocationTop(pe);
 		int height = data.entryMethodLocationHeight();
 	
 		
@@ -1008,8 +1003,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		EntryMethodObject obj = (EntryMethodObject) o;
 		if(pCreation != obj.pCreation)
 			return MiscUtil.sign(pCreation-obj.pCreation);
-		else if(pCurrent != obj.pCurrent)
-			return MiscUtil.sign(pCurrent - obj.pCurrent);
+		else if(pe != obj.pe)
+			return MiscUtil.sign(pe - obj.pe);
 		else
 			return MiscUtil.sign(EventID - obj.EventID);
 	}
@@ -1052,7 +1047,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				data.dropPEsUnrelatedToObject(this);
 			} 
 			else if(arg.equals(popupDropPEsForPE)) {
-				data.dropPEsUnrelatedToPE(this.pCurrent);
+				data.dropPEsUnrelatedToPE(this.pe);
 			}
 
 		}

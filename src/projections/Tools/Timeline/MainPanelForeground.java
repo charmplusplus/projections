@@ -53,7 +53,7 @@ class MainPanelForeground extends JPanel {
 					EntryMethodObject obj = (EntryMethodObject)o;
 					if(obj.creationMessage() != null){
 						int pCreation = obj.pCreation;
-						int pExecution = obj.pCurrent;
+						int pExecution = obj.pe;
 						
 						// Message Creation point
 						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			

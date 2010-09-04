@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import javax.swing.ToolTipManager;
 
@@ -279,7 +280,7 @@ public class Data implements ColorUpdateNotifier
 		makeFrequencyMap(entries);
 		makeFreqVector();
 
-		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
+		labelFont = new Font("SansSerif", Font.PLAIN, 10); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
 
 		highlightedObjects = new HashSet<Object>();
@@ -441,7 +442,7 @@ public class Data implements ColorUpdateNotifier
 						Iterator<UserEventObject> iter2 = allUserEventObjects.get(pe).iterator();
 						while(iter2.hasNext()){
 							UserEventObject obj = iter2.next();
-							if(obj.EndTime < startTime || obj.BeginTime > endTime){
+							if(obj.endTime < startTime || obj.beginTime > endTime){
 								iter2.remove();
 							}
 						}
@@ -558,14 +559,17 @@ public class Data implements ColorUpdateNotifier
 	
 	private void printNumLoadedObjects(){
 		int objCount = 0;
-		
-		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = iter.next();
-			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
-			objCount += list.size();
+		for(List<EntryMethodObject> e : allEntryMethodObjects.values()){
+			objCount += e.size();
 		}
-		System.out.println("Displaying " + objCount + " entry method objects in the timeline visualization\n");
+		System.out.println("Displaying " + objCount + " entry method invocations in the timeline visualization");
+
+		objCount = 0;
+		for(Set<UserEventObject> e : allUserEventObjects.values()){
+			objCount += e.size();
+		}
+		System.out.println("Displaying " + objCount + " user events in the timeline visualization");
+	
 	}
 	
 	
@@ -1488,7 +1492,7 @@ public class Data implements ColorUpdateNotifier
 						long latency = executeTime - sendTime;
 
 //						int senderPE = m.srcPE;
-						int executingPE = obj.pCurrent;
+						int executingPE = obj.pe;
 
 						if(minLatency> latency ){
 							minLatency = latency;
@@ -1674,8 +1678,8 @@ public class Data implements ColorUpdateNotifier
 			while(eventiter.hasNext()){
 				UserEventObject obj = eventiter.next();
 				if(obj.Type == UserEventObject.PAIR){
-					long BeginTime = obj.BeginTime;
-					long EndTime = obj.EndTime;
+					long BeginTime = obj.beginTime;
+					long EndTime = obj.endTime;
 					Integer UserEventID = Integer.valueOf(obj.UserEventID); 
 
 					long duration = EndTime-BeginTime;
@@ -1749,8 +1753,8 @@ public class Data implements ColorUpdateNotifier
 			while(eventiter.hasNext()){
 				UserEventObject obj = (UserEventObject) eventiter.next();
 				if(obj.Type == UserEventObject.PAIR){
-					long BeginTime = obj.BeginTime;
-					long EndTime = obj.EndTime;
+					long BeginTime = obj.beginTime;
+					long EndTime = obj.endTime;
 
 					// pop all user events from the stack if their endtime is earlier than this one's start time
 					while(activeEndTimes.size()>0 && activeEndTimes.peek() <= BeginTime){
@@ -1823,7 +1827,7 @@ public class Data implements ColorUpdateNotifier
 		return barheight()+messageSendHeight();
 	}
 
-	private int userEventLocationTop(int pe) {
+	protected int userEventLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset();
 	}
@@ -1881,7 +1885,7 @@ public class Data implements ColorUpdateNotifier
 		Iterator<EntryMethodObject> iter = allRelatedEntries.iterator();
 		while(iter.hasNext()){
 			EntryMethodObject o = iter.next();
-			relatedPEs.add(o.pCurrent); 
+			relatedPEs.add(o.pe); 
 		}
 		
 		dropPEsNotInList(relatedPEs);

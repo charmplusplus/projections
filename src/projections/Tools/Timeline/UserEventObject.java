@@ -3,6 +3,7 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -14,10 +15,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 
+import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.gui.MainWindow;
 import projections.misc.MiscUtil;
 
-public class UserEventObject extends JComponent implements Comparable, MouseListener,  ActionListener
+public class UserEventObject implements Comparable, MouseListener,   , Range1D
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -29,12 +31,10 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	public static final int PAIR=2;  // if this has a begin and end point
 
 	protected int    Type;         // should be SINGLE or PAIR
-	public long   BeginTime;    // Begin Time
-	public long   EndTime;      // End Time
+	public long   beginTime;    // Begin Time
+	public long   endTime;      // End Time
 	public int    UserEventID;  // The user supplied value used to distinguish different types of user events
 	public int    CharmEventID; // for matching with end time
-
-	private Data data;
 	
 	private int pe;
 
@@ -46,54 +46,31 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	private int nestedRow;
 	
 	public UserEventObject(int pe, long t, int e, int event, int type) {
-		setFocusable(false); // optimization for speed
 		this.Type=type;
-		this.BeginTime=EndTime=t;
+		this.beginTime=endTime=t;
 		this.UserEventID=e;
 		this.CharmEventID=event;
 		this.pe = pe;
-		setOpaque(false);
-		addMouseListener(this);
-
-		// Tell the tooltip manager that we have something to display
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.registerComponent(this);
-		
 	}
 	
 	/** Create a user event that is a note */
 	public UserEventObject(int pe, long t, String note) {
-		setFocusable(false); // optimization for speed		
-		this.BeginTime=EndTime=t;
+		this.beginTime=endTime=t;
 		this.pe = pe;
 		this.note = note;
 		this.UserEventID=-1;
-		setOpaque(false);
-		addMouseListener(this);
-
-		// Tell the tooltip manager that we have something to display
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.registerComponent(this);
 	}
 
 
 	
 	
 	public UserEventObject(int pe, long t, int e, int event, int type, String note) {
-		setFocusable(false); // optimization for speed
 		this.Type=type;
-		this.BeginTime=EndTime=t;
+		this.beginTime=endTime=t;
 		this.UserEventID=e;
 		this.CharmEventID=event;
 		this.pe = pe;
 		this.note = note;
-
-		addMouseListener(this);
-
-
-		// Tell the tooltip manager that we have something to display
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.registerComponent(this);
 	}
 
 	public String getName(){
@@ -116,7 +93,7 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		return name;
 	}		
 	
-	public Color getColor(){	
+	public Color getColor(Data data){	
 		Color c = MainWindow.runObject[myRun].getUserEventColor(UserEventID);
 		if(c != null)
 			return c;
@@ -127,97 +104,110 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	
 	/** Called by the layout manager to put this in the right place */
 	protected void setLocationAndSize(Data data, int actualDisplayWidth) {
-		this.data = data;
-
-		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && UserEventID==-1)){
-			setBounds( 0, 0, 0, 0 );			
-			return;
-		}	
-		
-		int left = data.timeToScreenPixel(BeginTime, actualDisplayWidth);
-		int rightCoord = data.timeToScreenPixel(EndTime, actualDisplayWidth);
-
-		if(EndTime > data.endTime())
-			rightCoord = data.timeToScreenPixel(data.endTime(), actualDisplayWidth) - 5;
-
-		if(BeginTime < data.startTime())
-			left = data.timeToScreenPixel(data.startTime(), actualDisplayWidth) + 5;
-		
-		int width = rightCoord-left+1;
-		
-		
-		// Do the layout to account for multiple rows
-		
-		int heightPerRow = data.userEventRectHeight() / data.getNumUserEventRows();
-		int bottom = data.userEventLocationBottom(pe);
-
-		if(data.drawNestedUserEventRows){
-			 bottom -= heightPerRow * ( nestedRow );
-		}
-		
-		int top = bottom - heightPerRow;
-		int height = heightPerRow;
-		
-		// Use a very large height if this is meant to span all PE timelines
-		if(getName().contains("***")){
-			top = 3;
-			height = data.screenHeight()-top;
-		}
-		
-		
-			
-		setBounds( left, top, width, height );
+//		this.data = data;
+//
+//		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && UserEventID==-1)){
+//			setBounds( 0, 0, 0, 0 );			
+//			return;
+//		}	
+//		
+//		int left = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+//		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
+//
+//		if(endTime > data.endTime())
+//			rightCoord = data.timeToScreenPixel(data.endTime(), actualDisplayWidth) - 5;
+//
+//		if(beginTime < data.startTime())
+//			left = data.timeToScreenPixel(data.startTime(), actualDisplayWidth) + 5;
+//		
+//		int width = rightCoord-left+1;
+//		
+//		
+//		// Do the layout to account for multiple rows
+//		
+//		int heightPerRow = data.userEventRectHeight() / data.getNumUserEventRows();
+//		int bottom = data.userEventLocationBottom(pe);
+//
+//		if(data.drawNestedUserEventRows){
+//			 bottom -= heightPerRow * ( nestedRow );
+//		}
+//		
+//		int top = bottom - heightPerRow;
+//		int height = heightPerRow;
+//		
+//		// Use a very large height if this is meant to span all PE timelines
+//		if(getName().contains("***")){
+//			top = 3;
+//			height = data.screenHeight()-top;
+//		}
+//		
+//		
+//			
+//		setBounds( left, top, width, height );
 				
 	}
 
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
+	
+
+	public void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
 
 		if(data.userEventIsHiddenID(UserEventID)){
 			return;
 		}
-		
-		
-		if(data.showUserEvents()){
-			Color c = getColor();
-			g.setColor(c);
-		
-			g.fillRect(0, 0, getWidth(), getHeight());
-						
-			
-			// Paint the left/right edges of the rectangle lighter/darker to help differentiate between adjacent same-colored objects
-			if(getWidth() > 1)
-			{	
-				g.setColor(c.brighter());
-				g.drawLine(0, 0, 0, getHeight());
-				g.setColor(c.darker());
-				g.drawLine(getWidth()-1, 0, getWidth()-1, getHeight()-1);
-			}
-			
-			
-			
-			// Draw the name of the user event
-			if(getName() != null){
-				int leftpad = 3;
-				int rightpad = 3;
-				int toppad = 1;
-				int bottompad = 1;
-				int fontsize = getHeight() - toppad - bottompad;
 
-				g.setFont(data.labelFont);
-				FontMetrics fm = g.getFontMetrics();
-				int stringWidth = fm.stringWidth(getName());		
+		
+		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
 
-				if( fontsize >=9 && stringWidth < getWidth() - leftpad - rightpad){
-					g.setColor(Color.black);
-					g.drawString(getName(), leftpad, toppad + fontsize);
-					
-					g.setPaintMode();
-				}
-			}		
-			
+		if(endTime > data.endTime())
+			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
+
+		if(beginTime < data.startTime())
+			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
+		
+		int width = rightCoord-leftCoord+1;
+
+		if(width < 1)
+			width = 1;
+		
+		int topCoord = data.userEventLocationTop(pe);
+		int height = data.userEventRectHeight();
+		int bottomCoord = topCoord+height-1;
+		
+		Color c = getColor(data);
+		g.setColor(c);
+		g.fillRect(leftCoord, topCoord, width, height);
+
+		// Paint the left/right edges of the rectangle lighter/darker to help differentiate between adjacent same-colored objects
+		if(width > 1)
+		{	
+			g.setColor(c.brighter());
+			g.drawLine(leftCoord, topCoord, leftCoord, bottomCoord);
+			g.setColor(c.darker());
+			g.drawLine(rightCoord, topCoord, rightCoord, bottomCoord);
 		}
-		
+
+		// Draw the name of the user event
+		if(getName() != null){
+			int leftpad = 3;
+			int rightpad = 3;
+			int toppad = 1;
+			int bottompad = 1;
+			int fontsize = height - toppad - bottompad;
+
+			g.setFont(data.labelFont);
+			FontMetrics fm = g.getFontMetrics();
+			int stringWidth = fm.stringWidth(getName());		
+
+			if( fontsize >=9 && stringWidth < width - leftpad - rightpad){
+				g.setColor(Color.black);
+				g.drawString(getName(), leftCoord+leftpad, topCoord+toppad + fontsize);
+
+//				g.setPaintMode();
+			}
+		}
+
+
 	}
 
 
@@ -225,18 +215,18 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	/** Dynamically generate the tooltip mouseover text when needed */
 	public String getToolTipText(MouseEvent evt){
 		if(note == null) 
-			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (EndTime-BeginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
-		else if(EndTime - BeginTime > 0)
+			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (endTime-beginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
+		else if(endTime - beginTime > 0)
 			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>";
 		else
-			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "<p><i>Duration</i>: " + (EndTime-BeginTime) + "us</p></html></body>";
+			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "<p><i>Duration</i>: " + (endTime-beginTime) + "us</p></html></body>";
 	}
 	
 	
 	
 	protected void shiftTimesBy(long shift) {
-		BeginTime += shift;
-		EndTime += shift;
+		beginTime += shift;
+		endTime += shift;
 	}
 
 	@SuppressWarnings("ucd")
@@ -245,10 +235,10 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 		if(pe != ueo.pe){
 			return pe - ueo.pe;
 		}
-		else if (BeginTime != ueo.BeginTime) {
-			return MiscUtil.sign(BeginTime - ueo.BeginTime);	
-		} else if (EndTime != ueo.EndTime) {
-			return MiscUtil.sign(ueo.EndTime - EndTime);
+		else if (beginTime != ueo.beginTime) {
+			return MiscUtil.sign(beginTime - ueo.beginTime);	
+		} else if (endTime != ueo.endTime) {
+			return MiscUtil.sign(ueo.endTime - endTime);
 		} else if (this != ueo) {
 			return MiscUtil.sign(this.UserEventID - ueo.UserEventID);
 		} else {
@@ -263,20 +253,20 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	}
 
 	public void mouseClicked(MouseEvent evt) {
-		
-		if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
-			// Left Click
-		} else {	
-			// non-left click: display popup menu
-			JPopupMenu popup = new JPopupMenu();
-
-			JMenuItem menuItem = new JMenuItem(popupChangeColor);
-			menuItem.addActionListener(this);
-			popup.add(menuItem);
-
-			popup.show(this, evt.getX(), evt.getY());			
-		}
-		
+//		
+//		if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
+//			// Left Click
+//		} else {	
+//			// non-left click: display popup menu
+//			JPopupMenu popup = new JPopupMenu();
+//
+//			JMenuItem menuItem = new JMenuItem(popupChangeColor);
+//			menuItem.addActionListener(this);
+//			popup.add(menuItem);
+//
+//			popup.show(null, evt.getX(), evt.getY());			
+//		}
+//		
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -300,22 +290,31 @@ public class UserEventObject extends JComponent implements Comparable, MouseList
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() instanceof JMenuItem) {
-			String arg = ((JMenuItem) e.getSource()).getText();
-			
-			if (arg.equals(popupChangeColor)){
-				Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
-				if(c !=null){
-					MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
-					data.displayMustBeRepainted();
-				}
-
-			}
-
-		}
+//		if (e.getSource() instanceof JMenuItem) {
+//			String arg = ((JMenuItem) e.getSource()).getText();
+//			
+//			if (arg.equals(popupChangeColor)){
+//				Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
+//				if(c !=null){
+//					MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
+//					data.displayMustBeRepainted();
+//				}
+//
+//			}
+//
+//		}
 	}
-	
-	
+
+	@Override
+	public long lowerBound() {
+		return beginTime;
+	}
+
+	@Override
+	public long upperBound() {
+		return endTime;
+	}
+
 }
 
 

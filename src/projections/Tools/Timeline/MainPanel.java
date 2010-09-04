@@ -45,8 +45,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	private Data data;
 	private MainHandler handler;
 	
-	private Map<Integer,Query1D<EntryMethodObject>> entryMethodObjectsToPaintForEachPE;
-	
+	private Map<Integer,Query1D<EntryMethodObject>> entryMethodInvocationsForEachPE;
+	private TreeMap<Integer, Query1D<UserEventObject>> userEventsToPaintForEachPE;
+ 
 	
 	public MainPanel(Data data, MainHandler handler){
 		this.handler = handler;
@@ -68,6 +69,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 	/** Paint the panel, filling the entire panel's width */
 	public void paintComponent(Graphics g) {
+		
+		final long startTime = System.nanoTime();
+
 		super.paintComponent(g);
 		
 		paintBackground(g);
@@ -86,9 +90,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		long rightClipTime = data.screenToTime(clip.x+clip.width+5);
 		
 		
-		
-		int count = 0;
-		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
+		// Draw entry method invocations
+		int count1 = 0;
+		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodInvocationsForEachPE.entrySet()) {
 			Integer pe = entry.getKey();
 			
 			if(data.peTopPixel(pe) <= clip.y+clip.height+5 && data.peBottomPixel(pe) >= clip.y-5){
@@ -97,12 +101,37 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				l.setQueryRange(leftClipTime, rightClipTime);
 				for(EntryMethodObject o : l){
 					o.paintMe((Graphics2D) g, width);
-					count ++;
+					count1 ++;
 				}
 			}
 		}
-		System.out.println("Should have just painted up to " + count + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
+//		System.out.println("Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
 		
+		
+		// Draw user events
+		int count2 = 0;
+		if(data.showUserEvents()){
+			count2 = 0;
+			for(Entry<Integer, Query1D<UserEventObject>> entry : userEventsToPaintForEachPE.entrySet()) {
+				Integer pe = entry.getKey();
+
+				if(data.peTopPixel(pe) <= clip.y+clip.height+5 && data.peBottomPixel(pe) >= clip.y-5){
+
+					Query1D<UserEventObject> l = entry.getValue();
+					l.setQueryRange(leftClipTime, rightClipTime);
+					for(UserEventObject o : l){
+						o.paintMe((Graphics2D) g, width, data);
+						count2 ++;
+					}
+				}
+			}
+//			System.out.println("Should have just painted up to " + count2 + " user events in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
+		}
+		
+		
+		final long endTime = System.nanoTime();
+		final long duration = endTime - startTime;
+		System.out.println("Time To Paint (" + count1 + " entry methods, " + count2 + " user events): " + (duration/1000000) + " ms");
 		
 	}
 
@@ -177,43 +206,50 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		// Add the panel which will draw the message send lines on top of everything else
 		add(new MainPanelForeground(data));
 		
-		// Add the entry method instances (EntryMethodObject) to the panel for displaying
 				
 
+		final long startTime = System.nanoTime();
 
-		entryMethodObjectsToPaintForEachPE = new TreeMap<Integer,Query1D<EntryMethodObject>>();	
-		for(Integer pe : data.allEntryMethodObjects.keySet()) {
-			RangeQueryTree l = new RangeQueryTree();
-			entryMethodObjectsToPaintForEachPE.put(pe, l);
-			for(EntryMethodObject obj : data.allEntryMethodObjects.get(pe)){
-				l.add(obj);
-			}
+		// Add each user event 
+		userEventsToPaintForEachPE = new TreeMap<Integer,Query1D<UserEventObject>>();	
+		for(Entry<Integer, Set<UserEventObject>>  e : data.allUserEventObjects.entrySet()) {
+			RangeQueryTree l = new RangeQueryTree(e.getValue());
+			userEventsToPaintForEachPE.put(e.getKey(), l);
 		}
-		
+
+		// Add the entry method invocations
+		entryMethodInvocationsForEachPE = new TreeMap<Integer,Query1D<EntryMethodObject>>();	
+		for(Entry<Integer, List<EntryMethodObject>> e : data.allEntryMethodObjects.entrySet()) {
+			RangeQueryTree l = new RangeQueryTree(e.getValue());
+			entryMethodInvocationsForEachPE.put(e.getKey(), l);
+		}
+		final long endTime = System.nanoTime();
+		final long duration = endTime - startTime;
+		System.out.println("Time To Build user event and entry method display spatial data structures: " + (duration/1000000) + " ms");
+
+	
+	
 		
 		// DEBUGGING:
-		System.out.println("entryMethodObjectsToPaintForEachPE.size()=" + entryMethodObjectsToPaintForEachPE.size());
-		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodObjectsToPaintForEachPE.entrySet()) {
-
-			Integer pe = entry.getKey();
-			Query1D<EntryMethodObject> l = entry.getValue();
-
-			final long startTime = System.nanoTime();
-			final long endTime;
-			try {
-				int count = 0;
-				for(EntryMethodObject o : l){
-					count++;
-				}
-			} finally {
-			  endTime = System.nanoTime();
-			}
-			final long duration = endTime - startTime;
-			System.out.println("Time To Iterate Through entries: " + (duration/1000000) + " ms");
-			
-			//			if(l instanceof RangeQueryTree)
-//			((RangeQueryTree)l).printTree();
-		}
+//		System.out.println("entryMethodObjectsToPaintForEachPE.size()=" + entryMethodInvocationsForEachPE.size());
+//		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodInvocationsForEachPE.entrySet()) {
+//
+//			Integer pe = entry.getKey();
+//			Query1D<EntryMethodObject> l = entry.getValue();
+//
+//			final long startTime1 = System.nanoTime();
+//			final long endTime1;
+//			try {
+//				int count = 0;
+//				for(EntryMethodObject o : l){
+//					count++;
+//				}
+//			} finally {
+//			  endTime1 = System.nanoTime();
+//			}
+//			final long duration1 = endTime1 - startTime1;
+//			System.out.println("Time To Iterate Through entries: " + (duration1/1000000) + " ms");
+//		}
 		
 		
 //		
@@ -247,18 +283,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 //		
 //		
 		
-
-		// Add each user event 
-		/** <LinkedList<UserEventObject>> */
-		Iterator <Set <UserEventObject> > iter = data.allUserEventObjects.values().iterator();
-		while(iter.hasNext()){
-			/** <UserEventObject> */
-			Iterator <UserEventObject> ue_iter = iter.next().iterator();
-			while(ue_iter.hasNext()){
-				UserEventObject ueo = ue_iter.next();
-				this.add(ueo);						
-			}
-		}
 		
 //		MainPanelBackground b = new MainPanelBackground(data);
 //		b.addMouseListener(this);

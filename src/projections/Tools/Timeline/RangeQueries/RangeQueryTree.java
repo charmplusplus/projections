@@ -21,6 +21,15 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 		hasQueryRange = false;
 	}
 	
+	/** Create a new RangeQueryTree that is initially populated with the objects from the specified collection. */
+	public RangeQueryTree(Collection<? extends T> c){
+		root = new TreeNode<T>();
+		hasQueryRange = false;
+		addAll(c);
+		// Rebalance the tree just to make sure future accesses to this tree are fast, as the user will likely not modify the tree again
+		root = root.rebalanceTree();
+	}
+	
 	public void setQueryRange(long lb, long ub){
 		this.lb = lb;
 		this.ub = ub;

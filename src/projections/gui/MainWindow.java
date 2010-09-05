@@ -16,6 +16,7 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -108,8 +109,9 @@ implements ScalePanel.StatusDisplay
 		BLUEGENE_SIZE = ProjMain.BLUEGENE_SIZE;
 		PRINT_USAGE = ProjMain.PRINT_USAGE;
 
-		
+		// Disable logging unless someone explicitly turns it on from the menu item
 		performanceLogger.setLevel(Level.OFF);
+				
 		
 		// static screen information.
 		ScreenInfo.init();

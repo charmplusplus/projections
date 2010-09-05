@@ -343,7 +343,7 @@ ItemListener {
 			data.setColorByObjectID();
 
 		else if(c == mColorByUserRandom)
-			data.setColorByUserSupplied(Data.RandomColors);
+			data.setColorByUserSupplied(Data.ColorScheme.RandomColors);
 
 		else if(c == mColorByEntryMethod)
 			data.setColorByEID();
@@ -356,13 +356,13 @@ ItemListener {
 		}
 
 		else if(c == mColorByUserGradient)
-			data.setColorByUserSupplied(Data.BlueGradientColors);
+			data.setColorByUserSupplied(Data.ColorScheme.BlueGradientColors);
 
 		else if(c == mColorByUserObjRandom)
-			data.setColorByUserSuppliedAndObjID(Data.RandomColors);
+			data.setColorByUserSuppliedAndObjID(Data.ColorScheme.RandomColors);
 
 		else if(c == mColorByUserEIDRandom)
-			data.setColorByUserSuppliedAndEID(Data.RandomColors);
+			data.setColorByUserSuppliedAndEID(Data.ColorScheme.RandomColors);
 		
 		else if(c == mColorByMemUsage)
 			data.setColorByMemoryUsage();

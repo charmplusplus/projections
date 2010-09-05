@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JViewport;
@@ -32,6 +34,7 @@ import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.Tools.Timeline.RangeQueries.RangeQueryArrayList;
 import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
 import projections.Tools.Timeline.RangeQueries.UnitTest.TestRange1DObject;
+import projections.gui.MainWindow;
 
 
 /** This class displays the timeline background, horizontal lines, entry method invocations, and user events
@@ -119,7 +122,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				}
 			}
 		}
-//		System.out.println("Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
+
+		
+		MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")" );
+		
 		
 		
 		// Draw user events
@@ -139,13 +145,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					}
 				}
 			}
-//			System.out.println("Should have just painted up to " + count2 + " user events in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
+			MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count2 + " user events in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
 		}
 		
 		
 		final long endTime = System.nanoTime();
 		final long duration = endTime - startTime;
-		System.out.println("Time To Paint (" + count1 + " entry methods, " + count2 + " user events): " + (duration/1000000) + " ms");
+		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint (" + count1 + " entry methods, " + count2 + " user events): " + (duration/1000000) + " ms");
 		
 		
 		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
@@ -288,70 +294,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 		final long endTime = System.nanoTime();
 		final long duration = endTime - startTime;
-		System.out.println("Time To Build user event and entry method display spatial data structures: " + (duration/1000000) + " ms");
+		MainWindow.performanceLogger.log(Level.INFO,"Time To Build user event and entry method display spatial data structures: " + (duration/1000000) + " ms");
 
-	
-	
 		
-		// DEBUGGING:
-//		System.out.println("entryMethodObjectsToPaintForEachPE.size()=" + entryMethodInvocationsForEachPE.size());
-//		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodInvocationsForEachPE.entrySet()) {
-//
-//			Integer pe = entry.getKey();
-//			Query1D<EntryMethodObject> l = entry.getValue();
-//
-//			final long startTime1 = System.nanoTime();
-//			final long endTime1;
-//			try {
-//				int count = 0;
-//				for(EntryMethodObject o : l){
-//					count++;
-//				}
-//			} finally {
-//			  endTime1 = System.nanoTime();
-//			}
-//			final long duration1 = endTime1 - startTime1;
-//			System.out.println("Time To Iterate Through entries: " + (duration1/1000000) + " ms");
-//		}
-		
-		
-//		
-//		Iterator pe_iter = data.allEntryMethodObjects.values().iterator();
-//		while(pe_iter.hasNext()){
-//			LinkedList objs = (LinkedList) pe_iter.next();
-//			Iterator obj_iter = objs.iterator();
-//			while(obj_iter.hasNext()){
-//				EntryMethodObject obj = (EntryMethodObject) obj_iter.next();
-//
-//
-//				
-//				// Register a mouse motion listener for dragging of the viewport
-//
-//				// Only register it if we have not already registered it
-//				MouseMotionListener[] mml = obj.getMouseMotionListeners();
-//				boolean found = false;
-//				for(int mml_index=0;mml_index<mml.length;mml_index++){
-//					if(mml[mml_index]==this){
-//						found = true;
-//					}
-//				}
-//				if(!found){
-//					obj.addMouseListener(this);
-//					obj.addMouseMotionListener(this);
-//				}
-//
-//			}
-//
-//		}
-//		
-//		
-		
-		
-//		MainPanelBackground b = new MainPanelBackground(data);
-//		b.addMouseListener(this);
-//		b.addMouseMotionListener(this);
-//		add(b);
-			
 		handler.setData(data);
 		handler.refreshDisplay(true);
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -505,7 +450,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		
 		// Cursor enters object from nothing
 		if(underCursor != null && currentMouseTrackedObject == null){
-			System.out.println("Cursor enters object from nothing");
 			underCursor.mouseEntered(evt);
 			currentMouseTrackedObject = underCursor;
 		}
@@ -513,12 +457,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		// Cursor still on same object
 		else if(underCursor != null && underCursor == currentMouseTrackedObject){
 			currentMouseTrackedObject.mouseMoved(evt);
-			System.out.println("Cursor still on same object");
 		}
 		
 		// Cursor left object for another one
 		else if(underCursor != null && underCursor != currentMouseTrackedObject){		
-			System.out.println("Cursor left object for another one");
 			currentMouseTrackedObject.mouseExited(evt);
 			underCursor.mouseEntered(evt);
 			currentMouseTrackedObject = underCursor;
@@ -528,9 +470,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		else if(underCursor == null && currentMouseTrackedObject != null){
 			currentMouseTrackedObject.mouseExited(evt);
 			currentMouseTrackedObject = null;
-			System.out.println("Cursor left object for nothing");
-		} else {
-			System.out.println("ERROR SOMETHING WEIRD HAPPENED");
+		} 
+		else {
+			// Should never get here
+			currentMouseTrackedObject = null;
 		}
 		
 	}

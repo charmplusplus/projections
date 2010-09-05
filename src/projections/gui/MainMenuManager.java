@@ -4,7 +4,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -46,6 +49,7 @@ implements ActionListener, ItemListener
 
 	private JMenu fileMenu;
 	private JMenu toolMenu;
+	private JMenu debugMenu;
 
 
 	//    private static final int NUM_STATES = 4;
@@ -84,6 +88,7 @@ implements ActionListener, ItemListener
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
 
+	private JCheckBoxMenuItem perfLogMenuItem;
 
 	protected MainMenuManager(JFrame parent) {
 		this.parent = (MainWindow)parent;
@@ -269,11 +274,26 @@ implements ActionListener, ItemListener
 		
 		menubar.add(toolMenu);
 
+		
+
+		// DEBUG/Logging MENU
+		debugMenu = new JMenu("Debug");
+		debugMenu.setToolTipText("For debugging or optimizing the projections tools");
+		
+		perfLogMenuItem = new JCheckBoxMenuItem("Enable Logging of Performance Measurements");
+		perfLogMenuItem.addActionListener(this);
+		debugMenu.add(perfLogMenuItem);
+		menubar.add(debugMenu);
+
+		
+		
 		parent.setJMenuBar(menubar);
 
 		stateChanged(NO_DATA);
 	}
 
+	
+	
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JMenuItem) {
@@ -291,6 +311,14 @@ implements ActionListener, ItemListener
 			
 			else if (mi == fileQuitMenuItem) 
 				ProjMain.shutdown(0);
+			
+			else if (mi == perfLogMenuItem){
+				if(perfLogMenuItem.isSelected()){
+					MainWindow.performanceLogger.setLevel(Level.ALL);
+				} else {
+					MainWindow.performanceLogger.setLevel(Level.OFF);
+				}
+			}
 			
 			else if (mi == timelinesMenuItem)
 				parent.openTool(new TimelineWindow(parent) );

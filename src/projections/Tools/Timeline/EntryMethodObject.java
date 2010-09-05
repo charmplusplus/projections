@@ -811,7 +811,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 
 		// color the objects by user supplied values with a nice blue gradient
-		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.BlueGradientColors){
+		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.ColorScheme.BlueGradientColors){
 			if(userSuppliedData !=  null){
 				long value = userSuppliedData.longValue();
 				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);

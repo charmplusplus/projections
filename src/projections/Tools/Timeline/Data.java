@@ -16,6 +16,8 @@ import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ToolTipManager;
 
@@ -63,8 +65,10 @@ import projections.misc.LogLoadException;
 
 public class Data implements ColorUpdateNotifier
 {
-	protected static final int BlueGradientColors = 0;
-	protected static final int RandomColors = 1;
+	
+	public enum ColorScheme {
+	 BlueGradientColors, RandomColors
+	}
 
 	// meaning in future versions of Projections that support multiple
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -289,11 +293,11 @@ public class Data implements ColorUpdateNotifier
 	 * Add the data for a new processor to this visualization
 	 */
 	protected void addProcessor(int pe){
-		System.out.println("Add processor " + pe);
+		MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe);
 		Integer p = Integer.valueOf(pe);
 		if(!peToLine.contains(p)){
 			peToLine.addLast(p);
-			System.out.println("Add processor " + pe + " to peToLine size=" + peToLine.size() );
+			MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe + " to peToLine size=" + peToLine.size() );
 			modificationHandler.notifyProcessorListHasChanged();
 			storeRangeToPersistantStorage();
 			displayMustBeRedrawn();
@@ -536,20 +540,20 @@ public class Data implements ColorUpdateNotifier
 		printNumLoadedObjects();
 	}
 
-	
+
 	
 	private void printNumLoadedObjects(){
 		int objCount = 0;
 		for(List<EntryMethodObject> e : allEntryMethodObjects.values()){
 			objCount += e.size();
 		}
-		System.out.println("Displaying " + objCount + " entry method invocations in the timeline visualization");
+		MainWindow.performanceLogger.log(Level.INFO, "Displaying " + objCount + " entry method invocations in the timeline visualization");
 
 		objCount = 0;
 		for(Set<UserEventObject> e : allUserEventObjects.values()){
 			objCount += e.size();
 		}
-		System.out.println("Displaying " + objCount + " user events in the timeline visualization");
+		MainWindow.performanceLogger.log(Level.INFO, "Displaying " + objCount + " user events in the timeline visualization");
 	
 	}
 	
@@ -1225,7 +1229,7 @@ public class Data implements ColorUpdateNotifier
 	/** Should we use a very compact view, with no message sends? */
 	private ViewType viewType;
 
-	int colorSchemeForUserSupplied;
+	ColorScheme colorSchemeForUserSupplied;
 	
 	/** Clear any highlights created by HighlightObjects() */
 	protected void clearObjectHighlights() {
@@ -1363,7 +1367,7 @@ public class Data implements ColorUpdateNotifier
 		displayMustBeRepainted();
 	}
 
-	public void setColorByUserSupplied(int colorScheme) {
+	public void setColorByUserSupplied(ColorScheme colorScheme) {
 		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = false;
@@ -1383,7 +1387,7 @@ public class Data implements ColorUpdateNotifier
 	}
 	
 	
-	public void setColorByUserSuppliedAndObjID(int colorScheme) {
+	public void setColorByUserSuppliedAndObjID(ColorScheme colorScheme) {
 		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = true;
@@ -1393,7 +1397,7 @@ public class Data implements ColorUpdateNotifier
 		displayMustBeRepainted();
 	}
 	
-	public void setColorByUserSuppliedAndEID(int colorScheme) {
+	public void setColorByUserSuppliedAndEID(ColorScheme colorScheme) {
 		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = false;
@@ -1840,7 +1844,7 @@ public class Data implements ColorUpdateNotifier
 	}
 	
 	protected void dropPEsUnrelatedToObject(EntryMethodObject obj) {
-		System.out.println("dropPEsUnrelatedToObject()");
+		MainWindow.performanceLogger.log(Level.INFO,"dropPEsUnrelatedToObject()");
 		HashSet<EntryMethodObject> set = new HashSet<EntryMethodObject>();
 		set.add(obj);
 		dropPEsUnrelatedToObjects(set);
@@ -1849,7 +1853,7 @@ public class Data implements ColorUpdateNotifier
 	
 
 	private void dropPEsUnrelatedToObjects(Collection<EntryMethodObject> objs) {
-		System.out.println("dropPEsUnrelatedToObjects()");
+		MainWindow.performanceLogger.log(Level.INFO,"dropPEsUnrelatedToObjects()");
 		HashSet<EntryMethodObject> allRelatedEntries = new HashSet<EntryMethodObject>();
 
 		// Find all entry method invocations related to this one
@@ -2005,7 +2009,7 @@ public class Data implements ColorUpdateNotifier
 	
 	/** Remove from allEntryMethodObjects any idle EntryMethodObjects */
 	private void pruneOutIdleRegions() {
-		System.out.println("pruneOutIdleRegions");
+		MainWindow.performanceLogger.log(Level.INFO,"pruneOutIdleRegions");
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();
@@ -2027,7 +2031,7 @@ public class Data implements ColorUpdateNotifier
 	
 	
 	private void pruneOutMessages() {
-		System.out.println("pruneOutMessages");
+		MainWindow.performanceLogger.log(Level.INFO,"pruneOutMessages");
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();

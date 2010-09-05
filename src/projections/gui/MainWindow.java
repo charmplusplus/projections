@@ -16,6 +16,8 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
@@ -88,6 +90,13 @@ implements ScalePanel.StatusDisplay
 	private GridBagConstraints gbc;
 	private GridBagLayout gbl;   
 
+	
+	
+	/** The place where messages about the performance of projections itself should go. These messages should help anyone who is trying to optimize projections. */
+	public static Logger performanceLogger = Logger.getLogger("ProjectionsPerformance");
+
+	
+	
 	public MainWindow()
 	{
 		mainWindow = this;
@@ -99,11 +108,14 @@ implements ScalePanel.StatusDisplay
 		BLUEGENE_SIZE = ProjMain.BLUEGENE_SIZE;
 		PRINT_USAGE = ProjMain.PRINT_USAGE;
 
+		
+		performanceLogger.setLevel(Level.OFF);
+		
 		// static screen information.
 		ScreenInfo.init();
 
 		int numProcs = Runtime.getRuntime().availableProcessors();
-		System.out.println("Number of processors available to the Java Virtual Machine: " + numProcs);		
+		performanceLogger.log(Level.INFO,"Number of processors available to the Java Virtual Machine: " + numProcs);		
 
 		
 		addWindowListener(new WindowAdapter()

@@ -1,6 +1,7 @@
 package projections.Tools.Timeline.RangeQueries;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /** An interface for collections whose iterators will only return Range1D objects that 
  *  overlap the range specified by setQueryRange. By default all collection items will
@@ -17,6 +18,10 @@ public interface Query1D<T extends Range1D> extends Iterable<T>, Collection<T> {
 	 */
 	public void setQueryRange(long lb, long ub);
 
+	
+	public Iterator<T> iterator(long lowerBound, long upperBound);
+
+	
 
 	/** Clear range for all subsequent iterators to use. 
 	 * 

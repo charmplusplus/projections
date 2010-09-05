@@ -37,6 +37,12 @@ public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 		else
 			return backingStorage.iterator();
 	}
+	
+	/** For thread-safety, multiple iterators can be constructed using explicit bounds with this method */
+	public Iterator<T> iterator(long lowerBound, long upperBound) {
+			return new RangeIterator(backingStorage.iterator(), lowerBound, upperBound);
+	}
+
 
 	
 	@Override

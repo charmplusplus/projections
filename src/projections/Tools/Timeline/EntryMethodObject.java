@@ -3,23 +3,21 @@ package projections.Tools.Timeline;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+
 import javax.swing.JColorChooser;
-import javax.swing.JComponent;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.analysis.AmpiFunctionData;
@@ -30,7 +28,7 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 import projections.misc.MiscUtil;
 
-class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener, Range1D
+class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPanel.SpecialMouseHandler
 {
 
 	private MessageWindow msgwindow;
@@ -88,14 +86,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			ArrayList<TimelineMessage> msgs, ArrayList<PackTime> packs,
 			int p1)
 	{
-		setFocusable(false); // optimization for speed
-		setVisible(true);
-		setOpaque(false);
-
-		
-		setBackground(MainWindow.runObject[data.myRun].background);
-		setForeground(MainWindow.runObject[data.myRun].foreground);
-		
+	
 		TLmsgs=tle.MsgsSent;
 		this.data = data;
 		beginTime = tle.BeginTime;
@@ -141,19 +132,10 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		}
 		
 		
-		if(!isIdleEvent()){
-			addMouseListener(this);
-		}
-		
-
-		// Tell the tooltip manager that we have something to display
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.registerComponent(this);
-
 	} 
 	
 	/** Dynamically generate the tooltip mouseover text when needed */
-	public String getToolTipText(MouseEvent evt){
+	public String getToolTipText(){
 
 		// Construct a nice informative html formatted string about this entry method object. 
 
@@ -304,7 +286,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	
 	
 	private Paint makeMoreLikeBackground(Paint c){
-		Color other = getBackground();
+		Color other = data.getBackgroundColor();
 		if(c instanceof Color)
 			return mixColors((Color)c, other, 0.8f);
 		else
@@ -312,7 +294,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}
 	
 	private Paint makeMoreLikeForeground(Paint c){
-		Color other = getForeground();
+		Color other = data.getForegroundColor();
 		if(c instanceof Color)
 			return mixColors((Color)c, other, 0.8f);
 		else
@@ -354,11 +336,12 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	{
 		return messages;
 	}   
-
-	public Dimension getMinimumSize()
-	{
-		return new Dimension(getSize().width, getSize().height);
-	}   
+	
+//
+//	public Dimension getMinimumSize()
+//	{
+//		return new Dimension(getSize().width, getSize().height);
+//	}   
 
 	
 	public float getNonPackUsage()
@@ -395,7 +378,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}   
 
 	
-	public void mouseClicked(MouseEvent evt)
+	public void mouseClicked(MouseEvent evt, JPanel parent, Data data)
 	{
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
@@ -426,7 +409,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		        menuItem.addActionListener(this);
 		        popup.add(menuItem);
 		            
-		        popup.show(this, evt.getX(), evt.getY());			
+		        popup.show(parent, evt.getX(), evt.getY());			
 			}
 		}
 	} 
@@ -609,16 +592,16 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		
 	}   
 
-
-	public void mousePressed(MouseEvent evt)
-	{
-		// ignore 	
-	}   
-
-	public void mouseReleased(MouseEvent evt)
-	{
-		// ignore 	
-	}   
+//
+//	public void mousePressed(MouseEvent evt)
+//	{
+//		// ignore 	
+//	}   
+//
+//	public void mouseReleased(MouseEvent evt)
+//	{
+//		// ignore 	
+//	}   
 
 	private void OpenMessageWindow()
 	{
@@ -753,58 +736,48 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	       connected to the message send when zoomed in.
 
 		 */
-//
-//		if(data.showPacks() && packs != null)
-//		{
-//			g2d.setColor(Color.pink);
-//			for(PackTime pt : packs){
-//				long packBeginTime = pt.BeginTime;
-//				long packEndTime = pt.EndTime;
-//
-//				if(packEndTime >= data.startTime() && packBeginTime <= data.endTime())
-//				{
-//
-//					// Compute the begin pixel coordinate relative to the containing panel
-//					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
-//
-//					// Compute the begin pixel coordinate relative to the Entry method object itself
-//					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord - 1;
-//
-//					// Compute the end pixel coordinate relative to the containing panel
-//					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
-//
-//					// Compute the end pixel coordinate relative to the Entry method object itself
-//					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord - 1;
-//
-//					g2d.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
-//
-//				}
-//			}
-//		}
-//
-//		// Show the message sends. See note above for the message packing areas
-//		// Don't change this without changing MainPanel's paintComponent which draws message send lines
-//		if(data.showMsgs() == true && messages != null)
-//		{
-//			g2d.setColor(getForeground());
-//			
-//			Iterator<TimelineMessage> m = messages.iterator();
-//			while(m.hasNext()){
-//				TimelineMessage msg = m.next();
-//				long msgtime = msg.Time;
-//				if(msgtime >= data.startTime() && msgtime <= data.endTime())
-//				{
-//					// Compute the pixel coordinate relative to the containing panel
-//					int msgPanelCoordX = data.timeToScreenPixel(msgtime);
-//
-//					// Compute the pixel coordinate relative to the Entry method object itself
-//					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
-//
-//					g2d.drawLine(msgObjectCoordX, topCoord+verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
-//
-//				}
-//			}
-//		}
+
+		if(data.showPacks() && packs != null)
+		{
+			g2d.setColor(Color.pink);
+			for(PackTime pt : packs){
+				long packBeginTime = pt.BeginTime;
+				long packEndTime = pt.EndTime;
+
+				if(packEndTime >= data.startTime() && packBeginTime <= data.endTime())
+				{
+
+					// Compute the begin pixel coordinate relative to the containing panel
+					int packBeginCoordX = data.timeToScreenPixelLeft(packBeginTime);
+
+					// Compute the end pixel coordinate relative to the containing panel
+					int packEndCoordX = data.timeToScreenPixelRight(packEndTime);
+
+					g2d.fillRect(packBeginCoordX, topCoord+verticalInset+rectHeight, (packEndCoordX-packBeginCoordX+1), data.messagePackHeight());
+
+				}
+			}
+		}
+
+		// Show the message sends. See note above for the message packing areas
+		// Don't change this without changing MainPanel's paintComponent which draws message send lines
+		if(data.showMsgs() == true && messages != null)
+		{
+			g2d.setColor(data.getForegroundColor());
+			
+			Iterator<TimelineMessage> m = messages.iterator();
+			while(m.hasNext()){
+				TimelineMessage msg = m.next();
+				long msgtime = msg.Time;
+				if(msgtime >= data.startTime() && msgtime <= data.endTime())
+				{
+					// Compute the pixel coordinate relative to the containing panel
+					int msgCoordX = data.timeToScreenPixel(msgtime);
+
+					g2d.drawLine(msgCoordX, topCoord+verticalInset+rectHeight, msgCoordX, topCoord+verticalInset+rectHeight+data.messageSendHeight());
+				}
+			}
+		}
 	}
 
 		
@@ -1067,4 +1040,11 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	public long upperBound() {
 		return endTime;
 	}
+
+	@Override
+	public void mouseMoved(MouseEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -45,26 +45,7 @@ import projections.misc.LogLoadException;
  * 
  *  Style information is also to be found here
  * 		-- Colors for the background/foreground
- * 		-- Fonts to be used for the axis and labelsTimelineWindow(MainWindow parentWindow) {
-		super(parentWindow);
-		
-        thisWindow = this;
-		
-		data = new Data(this);
-		
-		labelPanel = new LabelPanel(data);
-		
-		// Construct the various layers, and the layout manager
-		AxisPanel ap = new AxisPanel(data);
-		AxisOverlayPanel op = new AxisOverlayPanel(data);
-		AxisLayout lay = new AxisLayout(ap);
-		// Create the layered panel containing our layers
-		axisPanel = new LayeredPanel(ap,op,lay);
-		ap.setOpaque(false);
-		op.setOpaque(false);
-		
-		mainPanel = new MainPanel(data, this);
-		
+ * 		-- Fonts to be used for the axis and labels
  *
  *  Also many utility functions are here:
  *      -- Conversions between screen coordinates and times
@@ -1603,30 +1584,14 @@ public class Data implements ColorUpdateNotifier
 		return peToLine.indexOf(Integer.valueOf(PE));
 	}
 	
-	/** Update the ordering of the PEs (vertical position ordering) */
-//	void updatePEVerticalOrdering(){
-//=
-//		// Add the newly selected PEs
-//		processorList.reset();
-//		int p = processorList.nextElement();
-//		while (p != -1) {
-//			Integer pe = new Integer(p);
-//			
-//
-//			
-//			p = processorList.nextElement();
-//		}
-//		
-//	}
-		
-	/** Determines the PE for a given vertical position 
-	 * 
-	 * @note this may be slow, don't call frequently
-	 * 
-	 */
-	protected int whichPE(int verticalPosition) {
-		Integer which = peToLine.get(verticalPosition);
-		return which;
+
+	/** Determines the PE for a given vertical position */
+	protected int whichPE(Integer verticalPosition) {
+		if(verticalPosition < this.numPs()){
+			return peToLine.get(verticalPosition);
+		} else {
+			return -1;
+		}
 	}
 
 
@@ -1802,6 +1767,23 @@ public class Data implements ColorUpdateNotifier
 		return numUserEventRows;
 	}
 
+	/** What type of entity is rendered at a y-pixel offset from the top of a single PE's timeline? */
+	protected representedEntity representedAtPixelYOffsetInRow(int y){
+		if(y < topOffset())
+			return representedEntity.NOTHING;
+		else if(y<(topOffset() + userEventRectHeight()))
+			return representedEntity.USER_EVENT;
+		else if(y < (topOffset() + userEventRectHeight()+entryMethodLocationHeight() ))
+			return representedEntity.ENTRY_METHOD;
+		else 
+			return representedEntity.NOTHING;
+	}
+
+	public enum representedEntity {
+		ENTRY_METHOD, USER_EVENT, NOTHING
+	}
+	
+	
 	/** The pixel offset for the top of the entry method from the top of a single PE's timeline */
 	protected int entryMethodLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);

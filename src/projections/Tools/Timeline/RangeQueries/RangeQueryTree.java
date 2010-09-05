@@ -52,6 +52,12 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 		else
 			return root.iterator(Long.MIN_VALUE, Long.MAX_VALUE);
 	}
+	
+	/** For thread-safety, multiple iterators can be constructed using explicit bounds with this method */
+	public Iterator<T> iterator(long lowerBound, long upperBound) {
+			return root.iterator(lowerBound, upperBound);
+	}
+
 
 	
 	@Override

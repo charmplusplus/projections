@@ -99,6 +99,8 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		scrollingPanel = new ScrollingPanel(data, mainPanel, axisPanel, labelPanel);
 		
+
+		
 		controls = new WindowControls(this, data);
 		
 		scrollingPanel.updateBackgroundColor();

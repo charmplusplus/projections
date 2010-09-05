@@ -12,6 +12,7 @@ import java.awt.event.MouseListener;
 import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 
@@ -19,7 +20,7 @@ import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.gui.MainWindow;
 import projections.misc.MiscUtil;
 
-public class UserEventObject implements Comparable, MouseListener,   , Range1D
+public class UserEventObject implements Comparable, Range1D, ActionListener, MainPanel.SpecialMouseHandler
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -102,52 +103,6 @@ public class UserEventObject implements Comparable, MouseListener,   , Range1D
 	}
 	
 	
-	/** Called by the layout manager to put this in the right place */
-	protected void setLocationAndSize(Data data, int actualDisplayWidth) {
-//		this.data = data;
-//
-//		if(data.userEventIsHiddenID(UserEventID) || (data.userSuppliedNotesHidden() && UserEventID==-1)){
-//			setBounds( 0, 0, 0, 0 );			
-//			return;
-//		}	
-//		
-//		int left = data.timeToScreenPixel(beginTime, actualDisplayWidth);
-//		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
-//
-//		if(endTime > data.endTime())
-//			rightCoord = data.timeToScreenPixel(data.endTime(), actualDisplayWidth) - 5;
-//
-//		if(beginTime < data.startTime())
-//			left = data.timeToScreenPixel(data.startTime(), actualDisplayWidth) + 5;
-//		
-//		int width = rightCoord-left+1;
-//		
-//		
-//		// Do the layout to account for multiple rows
-//		
-//		int heightPerRow = data.userEventRectHeight() / data.getNumUserEventRows();
-//		int bottom = data.userEventLocationBottom(pe);
-//
-//		if(data.drawNestedUserEventRows){
-//			 bottom -= heightPerRow * ( nestedRow );
-//		}
-//		
-//		int top = bottom - heightPerRow;
-//		int height = heightPerRow;
-//		
-//		// Use a very large height if this is meant to span all PE timelines
-//		if(getName().contains("***")){
-//			top = 3;
-//			height = data.screenHeight()-top;
-//		}
-//		
-//		
-//			
-//		setBounds( left, top, width, height );
-				
-	}
-
-	
 
 	public void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
 
@@ -213,7 +168,7 @@ public class UserEventObject implements Comparable, MouseListener,   , Range1D
 
 
 	/** Dynamically generate the tooltip mouseover text when needed */
-	public String getToolTipText(MouseEvent evt){
+	public String getToolTipText(){
 		if(note == null) 
 			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (endTime-beginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
 		else if(endTime - beginTime > 0)
@@ -252,21 +207,24 @@ public class UserEventObject implements Comparable, MouseListener,   , Range1D
 		nestedRow = row;
 	}
 
-	public void mouseClicked(MouseEvent evt) {
-//		
-//		if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
-//			// Left Click
-//		} else {	
-//			// non-left click: display popup menu
-//			JPopupMenu popup = new JPopupMenu();
-//
-//			JMenuItem menuItem = new JMenuItem(popupChangeColor);
-//			menuItem.addActionListener(this);
-//			popup.add(menuItem);
-//
-//			popup.show(null, evt.getX(), evt.getY());			
-//		}
-//		
+	Data dataForLastClick;
+	
+
+	public void mouseClicked(MouseEvent evt, JPanel parent, Data data) {
+		dataForLastClick = data;
+		if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
+			// Left Click
+		} else {	
+			// non-left click: display popup menu
+			JPopupMenu popup = new JPopupMenu();
+
+			JMenuItem menuItem = new JMenuItem(popupChangeColor);
+			menuItem.addActionListener(this);
+			popup.add(menuItem);
+
+			popup.show(parent, evt.getX(), evt.getY());			
+		}
+		
 	}
 
 	public void mouseEntered(MouseEvent e) {
@@ -278,31 +236,34 @@ public class UserEventObject implements Comparable, MouseListener,   , Range1D
 		// TODO Auto-generated method stub
 		
 	}
-
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
+	
+	
+//
+//	public void mousePressed(MouseEvent e) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+//	public void mouseReleased(MouseEvent e) {
+//		// TODO Auto-generated method stub
+//		
+//	}
+//
+	
 	public void actionPerformed(ActionEvent e) {
-//		if (e.getSource() instanceof JMenuItem) {
-//			String arg = ((JMenuItem) e.getSource()).getText();
-//			
-//			if (arg.equals(popupChangeColor)){
-//				Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor()); 
-//				if(c !=null){
-//					MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
-//					data.displayMustBeRepainted();
-//				}
-//
-//			}
-//
-//		}
+		if (e.getSource() instanceof JMenuItem) {
+			String arg = ((JMenuItem) e.getSource()).getText();
+			
+			if (arg.equals(popupChangeColor)){
+				Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor(dataForLastClick)); 
+				if(c !=null){
+					MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
+					dataForLastClick.displayMustBeRepainted();
+				}
+
+			}
+
+		}
 	}
 
 	@Override
@@ -313,6 +274,12 @@ public class UserEventObject implements Comparable, MouseListener,   , Range1D
 	@Override
 	public long upperBound() {
 		return endTime;
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent evt) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

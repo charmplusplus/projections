@@ -506,7 +506,6 @@ implements ActionListener, EntryMethodVisibility
         }
 
         public void makeEntryInvisibleID(Integer id) {
-                System.out.println("in invisibleid");
                 display_mask[id] = false;
         }
 

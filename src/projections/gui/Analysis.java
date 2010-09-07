@@ -106,8 +106,8 @@ public class Analysis {
   
   Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
   Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
-  public static int isOverhead = -1;
-  public static int isIdle = -2;
+  public static int isOverhead = -2;
+  public static int isIdle = -1;
   
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"

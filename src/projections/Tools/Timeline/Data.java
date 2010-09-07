@@ -27,6 +27,7 @@ import projections.analysis.TimelineEvent;
 import projections.gui.Analysis;
 import projections.gui.ColorManager;
 import projections.gui.ColorUpdateNotifier;
+import projections.gui.EntryMethodVisibility;
 import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
@@ -63,7 +64,7 @@ import projections.misc.LogLoadException;
  *
  */
 
-public class Data implements ColorUpdateNotifier
+public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 {
 	
 	public enum ColorScheme {
@@ -2161,5 +2162,17 @@ public class Data implements ColorUpdateNotifier
 	
 	public void colorsHaveChanged() {
 		displayMustBeRepainted();
+	}
+
+	public int[] getEntriesArray() {
+		return entries;
+	}
+
+	public boolean hasEntryList() {
+		return true;
+	}
+	
+	public boolean handleIdleOverhead() {
+		return true;
 	}
 }

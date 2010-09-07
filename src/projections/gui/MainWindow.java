@@ -269,7 +269,6 @@ implements ScalePanel.StatusDisplay
 			public void done() {
 				setTitle("Projections - " + newfile);
 				if (MainWindow.runObject[myRun].hasSummaryData()) {
-					System.out.println("here");
 					//		MainWindow.runObject[myRun].loadSummaryData();	  
 					double[][] data = MainWindow.runObject[myRun].getSummaryAverageData();
 					long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();

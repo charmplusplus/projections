@@ -259,7 +259,6 @@ ItemListener {
 			data.removeLines();
 
 		else if(c == mModifyRanges) {
-			System.out.println("here");
 			showDialog();
 		}
 		
@@ -329,7 +328,7 @@ ItemListener {
 		
 		
 		else if(c == mColorChooser){
-			new ChooseEntriesWindow(data, true);
+			new ChooseEntriesWindow(data, true, data);
 		}
 
 		else if(c == mColorByDefault) {
@@ -371,7 +370,7 @@ ItemListener {
 			data.fixTachyons();
 		
 		else if(c == 	mShowHideEntries){
-			new ChooseEntriesWindow(data, true);
+			new ChooseEntriesWindow(data, true, data);
 		}
 		
 		else if(c == 	mShowHideUserEvents){

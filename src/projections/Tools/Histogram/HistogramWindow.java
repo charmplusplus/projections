@@ -516,4 +516,8 @@ implements ActionListener, EntryMethodVisibility
         public boolean hasEntryList() {
                 return false;
         }
+        
+        public boolean handleIdleOverhead() {
+        	return false;
+        }
 }

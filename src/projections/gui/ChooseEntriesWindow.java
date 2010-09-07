@@ -62,15 +62,18 @@ public class ChooseEntriesWindow extends JFrame
 						"::" + 
 						MainWindow.runObject[myRun].getSts().entryChareNames.get(i));
 		}
-		entryNames.put(-2, "Overhead");
-		entryNames.put(-1, "Idle");
+		addIdleOverhead();
 	}
 
 	private void allEntryMethods() {
 		entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
-		if (data!=null) {
-			entryNames.put(-2, "Overhead");
-			entryNames.put(-1, "Idle");
+		addIdleOverhead();
+	}
+	
+	private void addIdleOverhead() {
+		if (data.handleIdleOverhead()) {
+			entryNames.put(Analysis.isOverhead, "Overhead");
+			entryNames.put(Analysis.isIdle, "Idle");
 		}
 	}
 

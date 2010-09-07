@@ -2167,4 +2167,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	public boolean hasEntryList() {
 		return true;
 	}
+	
+	public boolean handleIdleOverhead() {
+		return true;
+	}
 }

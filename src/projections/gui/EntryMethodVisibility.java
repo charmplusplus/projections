@@ -7,4 +7,5 @@ public interface EntryMethodVisibility {
 	public boolean entryIsVisibleID(Integer id);
 	public int[] getEntriesArray();
 	public boolean hasEntryList();
+	public boolean handleIdleOverhead();
 }

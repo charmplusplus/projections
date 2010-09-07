@@ -68,6 +68,10 @@ public class ChooseEntriesWindow extends JFrame
 
 	private void allEntryMethods() {
 		entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
+		if (data!=null) {
+			entryNames.put(-1, "Overhead");
+			entryNames.put(-2, "Idle");
+		}
 	}
 
 	private void makeTableData() {

@@ -492,7 +492,6 @@ implements ActionListener, EntryMethodVisibility
         }
 
         public void displayMustBeRedrawn() {
-                System.out.println("here");
                 calcDisplayData();
                 setGraphSpecificData();
                 refreshGraph();

@@ -259,7 +259,6 @@ ItemListener {
 			data.removeLines();
 
 		else if(c == mModifyRanges) {
-			System.out.println("here");
 			showDialog();
 		}
 		

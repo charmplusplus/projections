@@ -2,19 +2,15 @@ package projections.Tools.Timeline;
 
 import java.awt.Color;
 import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JColorChooser;
-import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.gui.MainWindow;
@@ -94,7 +90,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		return name;
 	}		
 	
-	public Color getColor(Data data){	
+	protected Color getColor(Data data){	
 		Color c = MainWindow.runObject[myRun].getUserEventColor(UserEventID);
 		if(c != null)
 			return c;
@@ -104,7 +100,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	
 	
 
-	public void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
+	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
 
 		if(data.userEventIsHiddenID(UserEventID)){
 			return;
@@ -125,8 +121,8 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		if(width < 1)
 			width = 1;
 		
-		int topCoord = data.userEventLocationTop(pe);
-		int height = data.userEventRectHeight();
+		int topCoord = data.userEventLocationBottom(pe) - (1+nestedRow) * data.singleUserEventRectHeight();
+		int height = data.singleUserEventRectHeight();
 		int bottomCoord = topCoord+height-1;
 		
 		Color c = getColor(data);

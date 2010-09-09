@@ -7,7 +7,9 @@ import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
+
 import javax.swing.SwingWorker;
+
 import projections.analysis.IntervalData;
 import projections.analysis.LogLoader;
 import projections.analysis.LogReader;

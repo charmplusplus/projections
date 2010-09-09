@@ -147,12 +147,12 @@ class ChooseUserEventsWindow extends JFrame
 				Boolean newValue = (Boolean) value;
 
 				if(row == 0){
-					// Show/Hide the user supplied notes
-					if(newValue){
-						data.makeUserSuppliedNotesVisible();
-					} else {
-						data.makeUserSuppliedNotesInvisible();
-					}		
+//					// Show/Hide the user supplied notes
+//					if(newValue){
+//						data.makeUserSuppliedNotesVisible();
+//					} else {
+//						data.makeUserSuppliedNotesInvisible();
+//					}		
 				} else { 
 					// Show/Hide the normal user events
 					Integer id = (Integer) tabledata.get(row).get(2);

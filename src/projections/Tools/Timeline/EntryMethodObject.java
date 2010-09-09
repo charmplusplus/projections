@@ -675,7 +675,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			width = 1;
 		
 		int topCoord = data.entryMethodLocationTop(pe);
-		int height = data.entryMethodLocationHeight();
+//		int height = data.entryMethodLocationHeight();
 	
 		
 

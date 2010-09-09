@@ -22,8 +22,6 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import projections.Tools.Timeline.Data;
-import projections.gui.*;
-import projections.gui.GenericGraphWindow.MenuHandler;
 
 /** A class that displays a color and selection chooser for entry methods */
 public class ChooseEntriesWindow extends JFrame
@@ -162,7 +160,7 @@ public class ChooseEntriesWindow extends JFrame
 				displayAllEntryMethods = new JCheckBox("Show All Entry Methods");
 				displayAllEntryMethods.addItemListener(new ItemListener() {
 					public void itemStateChanged(ItemEvent e) {
-						if (e.DESELECTED==e.getStateChange() && data!=null && data.hasEntryList())
+						if (ItemEvent.DESELECTED==e.getStateChange() && data!=null && data.hasEntryList())
 							onlyEntryMethodsInRange();
 						else if (data!=null && data.hasEntryList())
 							allEntryMethods();

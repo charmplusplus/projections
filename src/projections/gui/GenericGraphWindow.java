@@ -8,8 +8,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JPanel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import projections.gui.graph.DataSource;
 import projections.gui.graph.DataSource2D;

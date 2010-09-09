@@ -14,14 +14,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JViewport;
@@ -30,10 +28,7 @@ import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.Data.representedEntity;
 import projections.Tools.Timeline.RangeQueries.Query1D;
-import projections.Tools.Timeline.RangeQueries.Range1D;
-import projections.Tools.Timeline.RangeQueries.RangeQueryArrayList;
 import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
-import projections.Tools.Timeline.RangeQueries.UnitTest.TestRange1DObject;
 import projections.gui.MainWindow;
 
 
@@ -96,10 +91,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// Paint all entry method objects:
 		int width;
-		int height;
+//		int height;
 		Insets insets = getInsets();
 		width = getWidth() - (insets.left + insets.right);
-		height = getHeight() - (insets.top + insets.bottom);
+//		height = getHeight() - (insets.top + insets.bottom);
 
 		// Find time ranges to draw
 		Rectangle clip = g.getClipBounds();

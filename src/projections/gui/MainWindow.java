@@ -16,7 +16,6 @@ import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

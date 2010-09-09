@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;

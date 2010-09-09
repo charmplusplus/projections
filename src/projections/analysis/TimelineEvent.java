@@ -2,6 +2,7 @@ package projections.analysis;
 
 import java.util.ArrayList;
 import java.util.Stack;
+
 import projections.Tools.Timeline.TimelineMessage;
 import projections.misc.MiscUtil;
 

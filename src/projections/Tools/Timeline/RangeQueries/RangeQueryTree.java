@@ -264,21 +264,21 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 			return numEntriesInSubTree;
 		}
 		
-		public void printInfoRecursive(int level) {
-			for(int i=0; i<level; i++){
-				System.out.print("    ");
-			}
-			if(data != null){
-				System.out.println("Leaf node contains " + data.size() + " local data entries, range=(" + lowerBound + "," + upperBound + ") : " + data.toString());
-			} else {
-				System.out.println("non-leaf node contains " + numEntriesInSubTree + " entries in subtree, range=(" + lowerBound + "," + upperBound + ")");
-				leftChild.printInfoRecursive(level+1);
-				rightChild.printInfoRecursive(level+1);
-			}
-		}
-		
-		
-		
+//		
+//		public void printInfoRecursive(int level) {
+//			for(int i=0; i<level; i++){
+//				System.out.print("    ");
+//			}
+//			if(data != null){
+//				System.out.println("Leaf node contains " + data.size() + " local data entries, range=(" + lowerBound + "," + upperBound + ") : " + data.toString());
+//			} else {
+//				System.out.println("non-leaf node contains " + numEntriesInSubTree + " entries in subtree, range=(" + lowerBound + "," + upperBound + ")");
+//				leftChild.printInfoRecursive(level+1);
+//				rightChild.printInfoRecursive(level+1);
+//			}
+//		}
+//		
+//		
 		
 		public class CompareRange1DByAverage implements java.util.Comparator {
 			public int compare(Object a, Object b) {
@@ -418,11 +418,11 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 		}
 
 	}
-
-
-	public void printTree() {
-		root.printInfoRecursive(0);
-	}
-	
+//
+//
+//	public void printTree() {
+//		root.printInfoRecursive(0);
+//	}
+//	
 	
 }

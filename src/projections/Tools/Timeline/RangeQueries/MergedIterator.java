@@ -1,6 +1,5 @@
 package projections.Tools.Timeline.RangeQueries;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
@@ -8,12 +7,6 @@ import java.util.NoSuchElementException;
 public class MergedIterator<E> implements Iterator<E>{
 	private LinkedList<Iterator<E>> backingIterators;
 	
-	
-	public MergedIterator(Iterator<E> i){
-		backingIterators = new LinkedList<Iterator<E>>();
-		backingIterators.add(i);
-	}
-
 	public MergedIterator(Iterator<E> i1, Iterator<E> i2){
 		backingIterators = new LinkedList<Iterator<E>>();
 		backingIterators.add(i1);

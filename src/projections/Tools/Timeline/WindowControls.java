@@ -26,12 +26,12 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
+import projections.gui.ChooseEntriesWindow;
 import projections.gui.FloatJTextField;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.Util;
-import projections.gui.ChooseEntriesWindow;
 
 /**
  * A panel that contains all the buttons and labels and things at the bottom of

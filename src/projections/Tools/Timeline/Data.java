@@ -15,9 +15,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.ToolTipManager;
 
@@ -109,7 +107,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** If true, color the entry method invocations by their entry method frequency */
 	private boolean colorByEntryIdFreq;
 	
-	public int[]          entries;
+	private int[]          entries;
 
 	/** A set of entry point ids that should be hidden */
 	private Set<Integer> hiddenEntryPoints;
@@ -117,8 +115,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** A set of user events that should be hidden */
 	private Set<Integer> hiddenUserEvents;
 
-	private boolean hideUserSuppliedNotes = false;
-	
 	/** Each value of the TreeMap is a TreeSet (sorted list) of EntryMethodObject's .
 	 *  Each key of the TreeMap is an Integer pe 
 	 *  <Integer,LinkedList<EntryMethodObject> >
@@ -213,7 +209,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	private Color customBackground;
 
 	private int numUserEventRows = 1;
-	boolean drawNestedUserEventRows = false;
+	private boolean drawNestedUserEventRows = false;
 	protected long minUserSupplied = 0;
 	protected long maxUserSupplied = 0;
 	
@@ -618,7 +614,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 	
 	/**Remove all lines from forward and backward tracing from Timelines display*/
-	public void removeLines() {
+	protected void removeLines() {
 		drawMessagesForTheseObjectsAlt.clear();
 		drawMessagesForTheseObjects.clear();
 		displayMustBeRepainted();
@@ -930,19 +926,24 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		
 	/** Get the height required to draw a single PE's Timeline */
 	public int singleTimelineHeight(){
-		return topOffset() + userEventRectHeight() + barheight() + messageSendHeight() + bottomOffset();
+		return topOffset() + totalUserEventRectsHeight() + barheight() + messageSendHeight() + bottomOffset();
 	}
 
 	
 	
+	/** get the height of the nested stack of user events */
+	protected int totalUserEventRectsHeight(){
+		return singleUserEventRectHeight() * getNumUserEventRows();
+	}
+	
 	/** get the height of each user event rectangle */
-	protected int userEventRectHeight(){
+	protected int singleUserEventRectHeight(){
 		if(useCompactView())
 			return 0;
 		else if (this.drawNestedUserEventRows)
-			return 12*getNumUserEventRows();
+			return 12;
 		else
-			return 8*getNumUserEventRows();	
+			return 8;	
 	}
 	
 
@@ -1261,9 +1262,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return traceMessagesForwardOnHover;
 	}
 	
-	protected boolean traceMessagesForwardOnClick() {
-		return traceMessagesForwardOnClick;
-	}
+//	protected boolean traceMessagesForwardOnClick() {
+//		return traceMessagesForwardOnClick;
+//	}
 	
 	protected boolean traceOIDOnHover() {
 		return traceOIDOnHover;
@@ -1408,7 +1409,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		displayMustBeRepainted();
 	}
 
-    	public void setColorByEID() {
+    	protected void setColorByEID() {
 		colorByUserSupplied = false;
 		colorByObjectId = false;
 		colorByMemoryUsage = false;
@@ -1416,7 +1417,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		colorByEntryIdFreq = false;
 		displayMustBeRepainted();
 	}
-    	public void setColorByEIDFreq() {
+    	protected void setColorByEIDFreq() {
     		colorByUserSupplied = false;
     		colorByObjectId = false;
     		colorByMemoryUsage = false;
@@ -1572,7 +1573,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		showMsgs = b;
 	}
 	
-	protected boolean useCompactView() {
+	private boolean useCompactView() {
 		return (viewType != ViewType.VIEW_NORMAL);
 	}
 
@@ -1772,13 +1773,17 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return numUserEventRows;
 	}
 
-	/** What type of entity is rendered at a y-pixel offset from the top of a single PE's timeline? */
+	/** What type of entity is rendered at a y-pixel offset from the top of a single PE's timeline? 
+	 * 
+	 *  TODO: fix this for nested user events
+	 * 
+	 * */
 	protected representedEntity representedAtPixelYOffsetInRow(int y){
 		if(y < topOffset())
 			return representedEntity.NOTHING;
-		else if(y<(topOffset() + userEventRectHeight()))
+		else if(y<(topOffset() + totalUserEventRectsHeight()))
 			return representedEntity.USER_EVENT;
-		else if(y < (topOffset() + userEventRectHeight()+entryMethodLocationHeight() ))
+		else if(y < (topOffset() + totalUserEventRectsHeight()+entryMethodLocationHeight() ))
 			return representedEntity.ENTRY_METHOD;
 		else 
 			return representedEntity.NOTHING;
@@ -1792,7 +1797,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** The pixel offset for the top of the entry method from the top of a single PE's timeline */
 	protected int entryMethodLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
-		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
+		return singleTimelineHeight()*yidx + topOffset() + totalUserEventRectsHeight();
 	}
 	
 	
@@ -1820,23 +1825,23 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 
 	protected int userEventLocationBottom(int pe) {
-		return userEventLocationTop(pe) + userEventRectHeight();
+		return userEventLocationTop(pe) + totalUserEventRectsHeight();
 	}
 	
 	protected int horizontalLineLocationTop(int i) {
-		return singleTimelineHeight()*i + topOffset() + userEventRectHeight() + (barheight()/2);		
+		return singleTimelineHeight()*i + topOffset() + totalUserEventRectsHeight() + (barheight()/2);		
 	}
 	
 	/** The message send tick mark bottom point*/
 	protected int messageSendLocationY(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
-		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight() + barheight()+this.messageSendHeight();
+		return singleTimelineHeight()*yidx + topOffset() + totalUserEventRectsHeight() + barheight()+this.messageSendHeight();
 	}
 	
 	/** The message send tick mark bottom point*/
 	protected int messageRecvLocationY(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
-		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
+		return singleTimelineHeight()*yidx + topOffset() + totalUserEventRectsHeight();
 	}
 
 	
@@ -1953,24 +1958,24 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	
 	
-	
-	protected void makeUserSuppliedNotesVisible() {
-		hideUserSuppliedNotes = false;
-		this.displayMustBeRedrawn();
-	}	
-
-	protected void makeUserSuppliedNotesInvisible() {
-		hideUserSuppliedNotes = true;
-		this.displayMustBeRedrawn();
-	}
+//	
+//	protected void makeUserSuppliedNotesVisible() {
+//		hideUserSuppliedNotes = false;
+//		this.displayMustBeRedrawn();
+//	}	
+//
+//	protected void makeUserSuppliedNotesInvisible() {
+//		hideUserSuppliedNotes = true;
+//		this.displayMustBeRedrawn();
+//	}
 	
 //	public boolean userSuppliedNotesVisible() {
 //		return ! hideUserSuppliedNotes;	
 //	}
 
-	protected boolean userSuppliedNotesHidden() {
-		return hideUserSuppliedNotes;	
-	}
+//	protected boolean userSuppliedNotesHidden() {
+//		return hideUserSuppliedNotes;	
+//	}
 
 	
 	protected boolean entryIsHiddenID(Integer id) {
@@ -2149,7 +2154,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		//beginning of the arrayToReturn using arrayToReturn.add(0, Integer)
 	}
 	
-	 public void setFrequencyColors() {
+	 protected void setFrequencyColors() {
 		 Analysis a = MainWindow.runObject[myRun];
 		 a.activityColors = a.colorManager.defaultColorMap();
 		 a.entryColors = ColorManager.entryColorsByFrequency(ColorManager.createComplementaryColorMap(entries.length), frequencyVector);

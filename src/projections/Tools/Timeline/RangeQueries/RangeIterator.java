@@ -8,8 +8,8 @@ public class RangeIterator<T extends Range1D> implements Iterator<T> {
 	
 	private T next;
 	
-	long lb;
-	long ub;
+	private long lb;
+	private long ub;
 	
 	private void findNextInRange(){
 		next = null;

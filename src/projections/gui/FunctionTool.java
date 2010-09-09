@@ -4,7 +4,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
-
 import java.io.IOException;
 
 import javax.swing.ButtonGroup;

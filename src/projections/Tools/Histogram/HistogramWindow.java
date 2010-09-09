@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 
+import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -16,7 +17,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
-import javax.swing.BorderFactory;
 
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.ChooseEntriesWindow;
@@ -27,7 +27,6 @@ import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
-import projections.gui.GenericGraphWindow.MenuHandler;
 
 /**
  *  HistogramWindow

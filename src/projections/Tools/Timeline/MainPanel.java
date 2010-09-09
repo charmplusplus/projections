@@ -55,16 +55,16 @@ import projections.gui.MainWindow;
 public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
 {
 	private int viewX, viewY;
-	
+
 	private Data data;
 	private MainHandler handler;
-	
+
 	/** A queriable time based datastructure that holds all the entry method invocations that will be drawn */
 	private Map<Integer,Query1D<EntryMethodObject>> entryMethodInvocationsForEachPE;
 
 	/** A queriable time based datastructure that holds all the user events that will be drawn */
 	private TreeMap<Integer, Query1D<UserEventObject>> userEventsToPaintForEachPE;
- 
+
 	public MainPanel(Data data, MainHandler handler){
 		this.handler = handler;
 		this.data = data;
@@ -72,28 +72,28 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		this.setFocusable(true);
 		this.setFocusCycleRoot(true);
 		this.setFocusTraversalPolicy(new NullFocusTraversalPolicy());
-		
+
 		setAutoscrolls(true); //enable synthetic drag events
 
 		addMouseMotionListener(this); 
 		addMouseListener(this);
-		
-		
+
+
 		// Tell the tooltip manager that we have something to display
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.registerComponent(this);
-		
+		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
+		toolTipManager.registerComponent(this);
+
 	}
 
 	/** Paint the panel, filling the entire panel's width */
 	public void paintComponent(Graphics g) {
-		
+
 		final long startTime = System.nanoTime();
 
 		super.paintComponent(g);
-		
+
 		paintBackground(g);
-		
+
 		// Paint all entry method objects:
 		int width;
 		int height;
@@ -105,13 +105,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		Rectangle clip = g.getClipBounds();
 		long leftClipTime = data.screenToTime(clip.x-5);
 		long rightClipTime = data.screenToTime(clip.x+clip.width+5);
-		
-		
+
+
 		// Draw entry method invocations
 		int count1 = 0;
 		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodInvocationsForEachPE.entrySet()) {
 			Integer pe = entry.getKey();
-			
+
 			if(data.peTopPixel(pe) <= clip.y+clip.height+5 && data.peBottomPixel(pe) >= clip.y-5){
 
 				Query1D<EntryMethodObject> l = entry.getValue();
@@ -123,11 +123,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			}
 		}
 
-		
+
 		MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")" );
-		
-		
-		
+
+
+
 		// Draw user events
 		int count2 = 0;
 		if(data.showUserEvents()){
@@ -147,55 +147,55 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			}
 			MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count2 + " user events in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
 		}
-		
-		
+
+
 		final long endTime = System.nanoTime();
 		final long duration = endTime - startTime;
 		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint (" + count1 + " entry methods, " + count2 + " user events): " + (duration/1000000) + " ms");
-		
-		
+
+
 		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
 		paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);
-		
+
 	}
 
 
-	
+
 	/** Paint the panel, filling the entire panel's width */
 	public void paintBackground(Graphics g) {
-	
+
 		int width = getWidth();
-		
+
 		g.setColor(data.getBackgroundColor());
 		Rectangle clipBounds = g.getClipBounds();
 		g.fillRect(clipBounds.x,clipBounds.y,clipBounds.width,clipBounds.height);
-	
+
 		// Paint the selection region
 		if(data.selectionValid()){
 			// Draw a  background for the selected timelines
 			g.setColor(new Color(100,100,100));
 			g.fillRect(data.leftSelection(), 0,  data.rightSelection()-data.leftSelection(), getHeight()-1);
-			
+
 			// Draw vertical lines at the selection boundaries
 			g.setColor(data.getForegroundColor());
 			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
 			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
 		}
-		
+
 		// Paint the highlight where the mouse cursor was last seen
 		if(data.highlightValid()){
 			// Draw vertical line
 			g.setColor(data.getForegroundColor());
 			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
 		}
-		
+
 		// Draw the horizontal line 
 		if(data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT){
 			g.setColor(new Color(128,128,128));
 			for (int i=0; i<data.numPs(); i++) {
-	
+
 				int y = data.horizontalLineLocationTop(i);
-	
+
 				g.drawLine(0+data.offset(), y, width-data.offset(), y);
 			}
 		}		
@@ -213,7 +213,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					if(obj.creationMessage() != null){
 						int pCreation = obj.pCreation;
 						int pExecution = obj.pe;
-						
+
 						// Message Creation point
 						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
 						double y1 = data.messageSendLocationY(pCreation);
@@ -234,8 +234,8 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 
 	}
-	
-	
+
+
 
 
 	/** Dynamically generate the tooltip mouseover text when needed */
@@ -247,17 +247,17 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		} else {
 			return null;
 		}
-		
+
 	}
-	
-	
+
+
 	public void disposeOfStructures(){
 		handler = null;
 		removeAll();
 		data.disposeOfStructures();
 	}
-	
-	
+
+
 	/** 
 	 * Load or Reload the timeline objects from the data object's tloArray.
 	 *  
@@ -268,11 +268,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	 * @note This was formerly called procRangeDialog()
 	 */
 	public void loadTimelineObjects(boolean useHelperThreads, Component rootWindow, boolean showProgress) {
-		
+
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
-		
+
 		this.removeAll();
 		data.createTLOArray(useHelperThreads, rootWindow, showProgress);
 
@@ -296,12 +296,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		final long duration = endTime - startTime;
 		MainWindow.performanceLogger.log(Level.INFO,"Time To Build user event and entry method display spatial data structures: " + (duration/1000000) + " ms");
 
-		
+
 		handler.setData(data);
 		handler.refreshDisplay(true);
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	}
-	
+
 
 	/** should be ignored */
 	public Dimension getPreferredSize() {
@@ -345,29 +345,29 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 		data.displayMustBeRepainted();
 	}
-	
-	/** Handle dragging of panel if we are in a viewport */
-    public void mousePressed(MouseEvent e) {
-    	if(getParent() instanceof JViewport){
-    		viewX = e.getX();	
-    		viewY = e.getY();
-    		setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
-    	}
-    }
 
-    /** Handle dragging of panel if we are in a viewport */
+	/** Handle dragging of panel if we are in a viewport */
+	public void mousePressed(MouseEvent e) {
+		if(getParent() instanceof JViewport){
+			viewX = e.getX();	
+			viewY = e.getY();
+			setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+		}
+	}
+
+	/** Handle dragging of panel if we are in a viewport */
 	public void mouseReleased(MouseEvent e) {
 		if(getParent() instanceof JViewport){
 			setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
-	
-	
+
+
 	/** The MainPanel can draw entry method objects and user event objects. This interface provides methods that handle GUI feedback to those objects. */
 	public interface SpecialMouseHandler {
 
 		public void mouseClicked(MouseEvent evt, JPanel parent, Data data);
-		
+
 		public String getToolTipText();
 
 		public void mouseEntered(MouseEvent evt);
@@ -375,7 +375,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		public void mouseExited(MouseEvent evt);
 	}
 
-	
+
 	private SpecialMouseHandler getObjectRenderedAtEvtLocation(MouseEvent evt){
 		// Check to see which pe we are on
 
@@ -385,49 +385,56 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		final int PE = data.whichPE(whichPERow);
 
 		if(PE >= 0){
-			final long time = data.screenToTime(evt.getX());
 
 			representedEntity what = data.representedAtPixelYOffsetInRow(verticalOffsetWithinRow);
 
-			if(what == representedEntity.ENTRY_METHOD){
-
-				// Find an entry method invocation that occurred at this time, and display its tooltip instead
-				Query1D<EntryMethodObject> a = entryMethodInvocationsForEachPE.get(PE);
-				Iterator<EntryMethodObject> b = a.iterator(time, time);
-
-				// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
-				EntryMethodObject frontmostVisibleObject = null;
-				while(b.hasNext()){
-					EntryMethodObject o = b.next();
-					if(o.isDisplayed())
-						frontmostVisibleObject = o;
-				}
-
-				if(frontmostVisibleObject != null){
-					return frontmostVisibleObject;
-				}
+			// Sometimes it is hard to mouseover a single pixel wide object, so we expand searches until we find something nearby if necessary
+			for(int slackPixels = 0; slackPixels < 3; slackPixels++){
 				
-			} else if(what == representedEntity.USER_EVENT){
+				final long timeL = data.screenToTime(evt.getX()   - slackPixels);
+				final long timeR = data.screenToTime(evt.getX()+1 + slackPixels);
 
-				// Find an entry method invocation that occurred at this time, and display its tooltip instead
-				Query1D<UserEventObject> a = userEventsToPaintForEachPE.get(PE);
-				Iterator<UserEventObject> b = a.iterator(time, time);
+				if(what == representedEntity.ENTRY_METHOD){
 
-				// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
-				UserEventObject o = null;
-				while(b.hasNext()){
-					o = b.next();
+					// Find an entry method invocation that occurred at this time, and display its tooltip instead
+					Query1D<EntryMethodObject> a = entryMethodInvocationsForEachPE.get(PE);
+					Iterator<EntryMethodObject> b = a.iterator(timeL, timeR);
+
+					// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
+					EntryMethodObject frontmostVisibleObject = null;
+					while(b.hasNext()){
+						EntryMethodObject o = b.next();
+						if(o.isDisplayed())
+							frontmostVisibleObject = o;
+					}
+
+					if(frontmostVisibleObject != null){
+						return frontmostVisibleObject;
+					}
+
 				}
-				if(o != null){
-					return o;
+				else if(what == representedEntity.USER_EVENT){
+
+					// Find an entry method invocation that occurred at this time, and display its tooltip instead
+					Query1D<UserEventObject> a = userEventsToPaintForEachPE.get(PE);
+					Iterator<UserEventObject> b = a.iterator(timeL, timeR);
+
+					// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
+					UserEventObject o = null;
+					while(b.hasNext()){
+						o = b.next();
+					}
+					if(o != null){
+						return o;
+					}
 				}
 			}
 		}
 
 		return null;
 	}
-	
-	
+
+
 
 	public void mouseClicked(MouseEvent evt) {
 		SpecialMouseHandler o = getObjectRenderedAtEvtLocation(evt);
@@ -436,13 +443,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 	}
 
-	
+
 	SpecialMouseHandler currentMouseTrackedObject;
-	
+
 	public void mouseEntered(MouseEvent evt) {
 		// Start tracking which of our underlying rendered objects is currently under the cursor
 		currentMouseTrackedObject = getObjectRenderedAtEvtLocation(evt);
-		
+
 	}
 
 	public void mouseMoved(MouseEvent evt) {
@@ -450,25 +457,25 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// First find what object is under the cursor:
 		SpecialMouseHandler underCursor = getObjectRenderedAtEvtLocation(evt);
-		
+
 		// Cursor enters object from nothing
 		if(underCursor != null && currentMouseTrackedObject == null){
 			underCursor.mouseEntered(evt);
 			currentMouseTrackedObject = underCursor;
 		}
-				
+
 		// Cursor still on same object
 		else if(underCursor != null && underCursor == currentMouseTrackedObject){
 			currentMouseTrackedObject.mouseMoved(evt);
 		}
-		
+
 		// Cursor left object for another one
 		else if(underCursor != null && underCursor != currentMouseTrackedObject){		
 			currentMouseTrackedObject.mouseExited(evt);
 			underCursor.mouseEntered(evt);
 			currentMouseTrackedObject = underCursor;
 		}
-				
+
 		// Cursor left object for nothing
 		else if(underCursor == null && currentMouseTrackedObject != null){
 			currentMouseTrackedObject.mouseExited(evt);
@@ -478,9 +485,9 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			// Should never get here
 			currentMouseTrackedObject = null;
 		}
-		
+
 	}
-	
+
 	public void mouseExited(MouseEvent evt) {
 		// End tracking which of our underlying rendered objects is currently under the cursor
 		if(currentMouseTrackedObject != null){

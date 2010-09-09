@@ -31,7 +31,7 @@ public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 	@Override
 	public Iterator<T> iterator() {
 		if(hasQueryRange){
-			System.out.println("RangeQueryArrayList using RangeIterator lb=" + lb + " ub=" + ub);
+//			System.out.println("RangeQueryArrayList using RangeIterator lb=" + lb + " ub=" + ub);
 			return new RangeIterator(backingStorage.iterator(), lb, ub);
 		}
 		else

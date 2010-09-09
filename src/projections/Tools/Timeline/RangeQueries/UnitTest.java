@@ -191,6 +191,112 @@ public class UnitTest {
 //		}
 		
 		
+		
+		
+		//////////////////////////////////////////////	
+
+		db.clear();
+		
+		for(int i=0; i<100; i++){
+			db.add(new TestRange1DObject(i,i));
+		}
+		
+		
+		for(int j=0; j<1000; j++){
+			long lb = (long) (Math.random()*40);
+			long ub = (long) (lb + Math.random()*40);
+			
+			long expectedCount = ub - lb +1;
+			
+			db.setQueryRange(lb, ub);
+			count = 0;
+			for(Object o : db)
+				count++;
+//			System.out.println("count = " + count);
+			if(count != expectedCount)
+				return false;
+
+		}
+		
+		for(int j=0; j<1000; j++){
+			long lb = (long) (Math.random()*40);
+			long ub = lb;
+			
+			long expectedCount = 1;
+			
+			db.setQueryRange(lb, ub);
+			count = 0;
+			for(Object o : db)
+				count++;
+			if(count != expectedCount)
+				return false;
+		}
+		
+		
+		for(int j=0; j<1000; j++){
+			long lb = (long) (Math.random()*40);
+			long ub = lb+1;
+			long expectedCount = 2;
+			db.setQueryRange(lb, ub);
+			count = 0;
+			for(Object o : db)
+				count++;
+			if(count != expectedCount)
+				return false;
+		}
+		
+		
+		for(int i=0; i<100; i++){
+			db.add(new TestRange1DObject(i,i));
+		}
+		
+		
+
+		for(int j=0; j<1000; j++){
+			long lb = (long) (Math.random()*40);
+			long ub = (long) (lb + Math.random()*40);
+			
+			long expectedCount = 2*(ub - lb +1);
+			
+			db.setQueryRange(lb, ub);
+			count = 0;
+			for(Object o : db)
+				count++;
+//			System.out.println("count = " + count);
+			if(count != expectedCount)
+				return false;
+
+		}
+		
+
+		for(int j=0; j<1000; j++){
+			long lb = (long) (Math.random()*40);
+			long ub = lb;
+			
+			long expectedCount = 2;
+			
+			db.setQueryRange(lb, ub);
+			count = 0;
+			for(Object o : db)
+				count++;
+			if(count != expectedCount)
+				return false;
+		}
+		
+		for(int j=0; j<1000; j++){
+			long lb = (long) (Math.random()*40);
+			long ub = lb+1;
+			long expectedCount = 4;
+			db.setQueryRange(lb, ub);
+			count = 0;
+			for(Object o : db)
+				count++;
+			if(count != expectedCount)
+				return false;
+		}
+
+		
+		
 		System.out.println("\n\n");
 		return true;
 	}

@@ -396,14 +396,17 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				Iterator<EntryMethodObject> b = a.iterator(time, time);
 
 				// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
-				EntryMethodObject o = null;
+				EntryMethodObject frontmostVisibleObject = null;
 				while(b.hasNext()){
-					o = b.next();
+					EntryMethodObject o = b.next();
+					if(o.isDisplayed())
+						frontmostVisibleObject = o;
 				}
 
-				if(o != null){
-					return o;
+				if(frontmostVisibleObject != null){
+					return frontmostVisibleObject;
 				}
+				
 			} else if(what == representedEntity.USER_EVENT){
 
 				// Find an entry method invocation that occurred at this time, and display its tooltip instead

@@ -624,10 +624,30 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 	
 	
+/** Whether this object is displayed or hidden (for example when idle's are not displayed this might be false) */
+	public boolean isDisplayed() {
+		// If it is hidden, we may not display it
+		if(data.entryIsHiddenID(entry)){
+			return false;
+		}
+		
+		// If this is an idle time region, we may not display it
+		if 	(isIdleEvent() && data.showIdle() == false) 
+			return false ;
+		if (isIdleEvent() && MainWindow.IGNORE_IDLE)
+			return false;
+		if(data.entryIsHiddenID(this.getEntryID()))
+			return false;
+
+		return true;
+	}
+
+	
+	
 	
 	public void paintMe(Graphics2D g2d, int actualDisplayWidth){
 		// If it is hidden, we may not display it
-		if(data.entryIsHiddenID(entry)){
+		if(isDisplayed() == false){
 			return;
 		}
 		

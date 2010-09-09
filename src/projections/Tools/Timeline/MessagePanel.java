@@ -67,24 +67,26 @@ class MessagePanel extends JPanel {
     	columnNames[5] = "Destination PE(s)";
 
     	// setting the data
-    	Iterator iter = messages.iterator();	
-    	int row =0;
-    	TimelineMessage msg=null, prev=null;
-    	while(iter.hasNext()){
-    		prev = msg;
-    		msg = (TimelineMessage) iter.next();
+    	if(messages!=null){
+    		Iterator iter = messages.iterator();	
+    		int row =0;
+    		TimelineMessage msg=null, prev=null;
+    		while(iter.hasNext()){
+    			prev = msg;
+    			msg = (TimelineMessage) iter.next();
 
-    		// fill in the NUM_FIELDS columns
-    		tableData[row][0] = Integer.valueOf(row);
+    			// fill in the NUM_FIELDS columns
+    			tableData[row][0] = Integer.valueOf(row);
 
-    		tableData[row][1] = df.format(msg.MsgLen);
-    		tableData[row][2] = df.format(msg.Time);
-    		tableData[row][3] = df.format((row>0) ? (msg.Time - prev.Time) : (msg.Time - obj.getBeginTime()) );
-    		tableData[row][4] = MainWindow.runObject[myRun].getEntryNameByID(msg.Entry);								 
-    		tableData[row][5] = msg.destination(MainWindow.runObject[myRun].getNumProcessors());
+    			tableData[row][1] = df.format(msg.MsgLen);
+    			tableData[row][2] = df.format(msg.Time);
+    			tableData[row][3] = df.format((row>0) ? (msg.Time - prev.Time) : (msg.Time - obj.getBeginTime()) );
+    			tableData[row][4] = MainWindow.runObject[myRun].getEntryNameByID(msg.Entry);								 
+    			tableData[row][5] = msg.destination(MainWindow.runObject[myRun].getNumProcessors());
 
-    		row++;
-    	}// end while
+    			row++;
+    		}// end while
+    	}
     }
 
     private void createLayout() {

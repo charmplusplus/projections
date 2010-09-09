@@ -950,7 +950,7 @@ public class LogLoader extends ProjDefs
 						break;
 					case USER_SUPPLIED_BRACKETED_NOTE:
 						UserEventObject note2 = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.PAIR, LE.note);
-						note2.EndTime = LE.endTime;
+						note2.endTime = LE.endTime;
 						userEventVector.add(note2);
 						break;
 					case MEMORY_USAGE:
@@ -1074,7 +1074,7 @@ public class LogLoader extends ProjDefs
 								UserEventObject.PAIR); 
 						// assume the end time to be the end of range
 						// in case the ending userevent gets cut off.
-						userEventObject.EndTime = End;
+						userEventObject.endTime = End;
 
 						// Now, expect to read the second entry and handle
 						// errors if necessary.
@@ -1097,7 +1097,7 @@ public class LogLoader extends ProjDefs
 							continue;
 						} else {
 
-							userEventObject.EndTime = LE.Time-BeginTime;
+							userEventObject.endTime = LE.Time-BeginTime;
 							userEventVector.add(userEventObject);
 							if(!timeline.isEmpty()) {
 								//If the log is loaded somewhere in the middle where
@@ -1106,8 +1106,8 @@ public class LogLoader extends ProjDefs
 								TimelineEvent curLastOne = timeline.getLast();
 								long tleBeginTime = curLastOne.BeginTime;
 								//System.out.println("TLE's begin: "+tleBeginTime+" user's begin: "+userEvent.BeginTime);
-								if(tleBeginTime <= userEventObject.BeginTime && 
-										userEventObject.BeginTime - tleBeginTime<= TimelineEvent.USEREVENTMAXGAP){
+								if(tleBeginTime <= userEventObject.beginTime && 
+										userEventObject.beginTime - tleBeginTime<= TimelineEvent.USEREVENTMAXGAP){
 									curLastOne.userEventName = userEventObject.getName();
 								}
 								//System.out.println("Encountering user name: "+userEvent.Name);

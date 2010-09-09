@@ -15,6 +15,9 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ToolTipManager;
 
@@ -45,26 +48,7 @@ import projections.misc.LogLoadException;
  * 
  *  Style information is also to be found here
  * 		-- Colors for the background/foreground
- * 		-- Fonts to be used for the axis and labelsTimelineWindow(MainWindow parentWindow) {
-		super(parentWindow);
-		
-        thisWindow = this;
-		
-		data = new Data(this);
-		
-		labelPanel = new LabelPanel(data);
-		
-		// Construct the various layers, and the layout manager
-		AxisPanel ap = new AxisPanel(data);
-		AxisOverlayPanel op = new AxisOverlayPanel(data);
-		AxisLayout lay = new AxisLayout(ap);
-		// Create the layered panel containing our layers
-		axisPanel = new LayeredPanel(ap,op,lay);
-		ap.setOpaque(false);
-		op.setOpaque(false);
-		
-		mainPanel = new MainPanel(data, this);
-		
+ * 		-- Fonts to be used for the axis and labels
  *
  *  Also many utility functions are here:
  *      -- Conversions between screen coordinates and times
@@ -82,8 +66,10 @@ import projections.misc.LogLoadException;
 
 public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 {
-	protected static final int BlueGradientColors = 0;
-	protected static final int RandomColors = 1;
+	
+	public enum ColorScheme {
+	 BlueGradientColors, RandomColors
+	}
 
 	// meaning in future versions of Projections that support multiple
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -280,7 +266,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		makeFrequencyMap(entries);
 		makeFreqVector();
 
-		labelFont = new Font("SansSerif", Font.PLAIN, 12); 
+		labelFont = new Font("SansSerif", Font.PLAIN, 10); 
 		axisFont = new Font("SansSerif", Font.PLAIN, 10);
 
 		highlightedObjects = new HashSet<Object>();
@@ -308,11 +294,11 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 * Add the data for a new processor to this visualization
 	 */
 	protected void addProcessor(int pe){
-		System.out.println("Add processor " + pe);
+		MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe);
 		Integer p = Integer.valueOf(pe);
 		if(!peToLine.contains(p)){
 			peToLine.addLast(p);
-			System.out.println("Add processor " + pe + " to peToLine size=" + peToLine.size() );
+			MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe + " to peToLine size=" + peToLine.size() );
 			modificationHandler.notifyProcessorListHasChanged();
 			storeRangeToPersistantStorage();
 			displayMustBeRedrawn();
@@ -442,7 +428,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 						Iterator<UserEventObject> iter2 = allUserEventObjects.get(pe).iterator();
 						while(iter2.hasNext()){
 							UserEventObject obj = iter2.next();
-							if(obj.EndTime < startTime || obj.BeginTime > endTime){
+							if(obj.endTime < startTime || obj.beginTime > endTime){
 								iter2.remove();
 							}
 						}
@@ -555,18 +541,21 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		printNumLoadedObjects();
 	}
 
-	
+
 	
 	private void printNumLoadedObjects(){
 		int objCount = 0;
-		
-		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = iter.next();
-			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
-			objCount += list.size();
+		for(List<EntryMethodObject> e : allEntryMethodObjects.values()){
+			objCount += e.size();
 		}
-		System.out.println("Displaying " + objCount + " entry method objects in the timeline visualization\n");
+		MainWindow.performanceLogger.log(Level.INFO, "Displaying " + objCount + " entry method invocations in the timeline visualization");
+
+		objCount = 0;
+		for(Set<UserEventObject> e : allUserEventObjects.values()){
+			objCount += e.size();
+		}
+		MainWindow.performanceLogger.log(Level.INFO, "Displaying " + objCount + " user events in the timeline visualization");
+	
 	}
 	
 	
@@ -1091,7 +1080,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 * @note requires that mostRecentScaledScreenWidth be correct prior to invocation,
 	 * so you should call  scaledScreenWidth(int actualDisplayWidth) before this
 	 */
-	private long screenToTime(int xPixelCoord){
+	long screenToTime(int xPixelCoord){
 		double fractionAlongAxis = ((double) (xPixelCoord-leftOffset())) /
 		((double)(mostRecentScaledScreenWidth-2*offset()));
 
@@ -1241,7 +1230,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** Should we use a very compact view, with no message sends? */
 	private ViewType viewType;
 
-	int colorSchemeForUserSupplied;
+	ColorScheme colorSchemeForUserSupplied;
 	
 	/** Clear any highlights created by HighlightObjects() */
 	protected void clearObjectHighlights() {
@@ -1379,7 +1368,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		displayMustBeRepainted();
 	}
 
-	public void setColorByUserSupplied(int colorScheme) {
+	public void setColorByUserSupplied(ColorScheme colorScheme) {
 		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = false;
@@ -1399,7 +1388,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 	
 	
-	public void setColorByUserSuppliedAndObjID(int colorScheme) {
+	public void setColorByUserSuppliedAndObjID(ColorScheme colorScheme) {
 		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = true;
@@ -1409,7 +1398,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		displayMustBeRepainted();
 	}
 	
-	public void setColorByUserSuppliedAndEID(int colorScheme) {
+	public void setColorByUserSuppliedAndEID(ColorScheme colorScheme) {
 		colorSchemeForUserSupplied=colorScheme;
 		colorByUserSupplied=true;
 		colorByObjectId = false;
@@ -1489,7 +1478,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 						long latency = executeTime - sendTime;
 
 //						int senderPE = m.srcPE;
-						int executingPE = obj.pCurrent;
+						int executingPE = obj.pe;
 
 						if(minLatency> latency ){
 							minLatency = latency;
@@ -1600,30 +1589,14 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return peToLine.indexOf(Integer.valueOf(PE));
 	}
 	
-	/** Update the ordering of the PEs (vertical position ordering) */
-//	void updatePEVerticalOrdering(){
-//=
-//		// Add the newly selected PEs
-//		processorList.reset();
-//		int p = processorList.nextElement();
-//		while (p != -1) {
-//			Integer pe = new Integer(p);
-//			
-//
-//			
-//			p = processorList.nextElement();
-//		}
-//		
-//	}
-		
-	/** Determines the PE for a given vertical position 
-	 * 
-	 * @note this may be slow, don't call frequently
-	 * 
-	 */
-	protected int whichPE(int verticalPosition) {
-		Integer which = peToLine.get(verticalPosition);
-		return which;
+
+	/** Determines the PE for a given vertical position */
+	protected int whichPE(Integer verticalPosition) {
+		if(verticalPosition < this.numPs()){
+			return peToLine.get(verticalPosition);
+		} else {
+			return -1;
+		}
 	}
 
 
@@ -1675,8 +1648,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			while(eventiter.hasNext()){
 				UserEventObject obj = eventiter.next();
 				if(obj.Type == UserEventObject.PAIR){
-					long BeginTime = obj.BeginTime;
-					long EndTime = obj.EndTime;
+					long BeginTime = obj.beginTime;
+					long EndTime = obj.endTime;
 					Integer UserEventID = Integer.valueOf(obj.UserEventID); 
 
 					long duration = EndTime-BeginTime;
@@ -1750,8 +1723,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			while(eventiter.hasNext()){
 				UserEventObject obj = (UserEventObject) eventiter.next();
 				if(obj.Type == UserEventObject.PAIR){
-					long BeginTime = obj.BeginTime;
-					long EndTime = obj.EndTime;
+					long BeginTime = obj.beginTime;
+					long EndTime = obj.endTime;
 
 					// pop all user events from the stack if their endtime is earlier than this one's start time
 					while(activeEndTimes.size()>0 && activeEndTimes.peek() <= BeginTime){
@@ -1799,18 +1772,49 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return numUserEventRows;
 	}
 
+	/** What type of entity is rendered at a y-pixel offset from the top of a single PE's timeline? */
+	protected representedEntity representedAtPixelYOffsetInRow(int y){
+		if(y < topOffset())
+			return representedEntity.NOTHING;
+		else if(y<(topOffset() + userEventRectHeight()))
+			return representedEntity.USER_EVENT;
+		else if(y < (topOffset() + userEventRectHeight()+entryMethodLocationHeight() ))
+			return representedEntity.ENTRY_METHOD;
+		else 
+			return representedEntity.NOTHING;
+	}
+
+	public enum representedEntity {
+		ENTRY_METHOD, USER_EVENT, NOTHING
+	}
+	
+	
 	/** The pixel offset for the top of the entry method from the top of a single PE's timeline */
 	protected int entryMethodLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset() + userEventRectHeight();
 	}
 	
+	
+	/** The pixel y-coordinate for the topmost pixel for a PE's timeline */
+	protected int peTopPixel(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*yidx + topOffset();
+	}
+	
+	/** The pixel y-coordinate for the bottommost pixel for a PE's timeline */
+	protected int peBottomPixel(int pe) {
+		int yidx = whichTimelineVerticalPosition(pe);
+		return singleTimelineHeight()*(yidx+1) + topOffset() - 1;
+	}
+	
+	
 	/** The pixel height of the entry method object. This includes just the rectangular region and the descending message sends */
 	protected int entryMethodLocationHeight() {
 		return barheight()+messageSendHeight();
 	}
 
-	private int userEventLocationTop(int pe) {
+	protected int userEventLocationTop(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*yidx + topOffset();
 	}
@@ -1841,7 +1845,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 	
 	protected void dropPEsUnrelatedToObject(EntryMethodObject obj) {
-		System.out.println("dropPEsUnrelatedToObject()");
+		MainWindow.performanceLogger.log(Level.INFO,"dropPEsUnrelatedToObject()");
 		HashSet<EntryMethodObject> set = new HashSet<EntryMethodObject>();
 		set.add(obj);
 		dropPEsUnrelatedToObjects(set);
@@ -1850,7 +1854,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 
 	private void dropPEsUnrelatedToObjects(Collection<EntryMethodObject> objs) {
-		System.out.println("dropPEsUnrelatedToObjects()");
+		MainWindow.performanceLogger.log(Level.INFO,"dropPEsUnrelatedToObjects()");
 		HashSet<EntryMethodObject> allRelatedEntries = new HashSet<EntryMethodObject>();
 
 		// Find all entry method invocations related to this one
@@ -1868,7 +1872,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		Iterator<EntryMethodObject> iter = allRelatedEntries.iterator();
 		while(iter.hasNext()){
 			EntryMethodObject o = iter.next();
-			relatedPEs.add(o.pCurrent); 
+			relatedPEs.add(o.pe); 
 		}
 		
 		dropPEsNotInList(relatedPEs);
@@ -2006,7 +2010,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	/** Remove from allEntryMethodObjects any idle EntryMethodObjects */
 	private void pruneOutIdleRegions() {
-		System.out.println("pruneOutIdleRegions");
+		MainWindow.performanceLogger.log(Level.INFO,"pruneOutIdleRegions");
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();
@@ -2028,7 +2032,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	
 	private void pruneOutMessages() {
-		System.out.println("pruneOutMessages");
+		MainWindow.performanceLogger.log(Level.INFO,"pruneOutMessages");
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();

@@ -3,24 +3,23 @@ package projections.Tools.Timeline;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import javax.swing.JColorChooser;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.ToolTipManager;
 
+import javax.swing.JColorChooser;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+
+import projections.Tools.Timeline.RangeQueries.Range1D;
 import projections.analysis.AmpiFunctionData;
 import projections.analysis.ObjectId;
 import projections.analysis.PackTime;
@@ -29,7 +28,7 @@ import projections.gui.MainWindow;
 import projections.gui.U;
 import projections.misc.MiscUtil;
 
-class EntryMethodObject extends JComponent implements Comparable, MouseListener, ActionListener
+class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPanel.SpecialMouseHandler
 {
 
 	private MessageWindow msgwindow;
@@ -41,7 +40,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private int msglen;
 	int EventID;
 	private ObjectId tid; 
-	int pCurrent;
+	int pe;
 	int pCreation;
 	private ArrayList<TimelineMessage> TLmsgs; //stores TimelineEvent object's MsgsSent vector
 	
@@ -63,11 +62,6 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	private float packusage;
 	private long packtime;
 	
-	
-	/** Pixel coordinate of left side of object */
-	private int leftCoord=0;
-
-	private int rightCoord=0;
 	
 	
 	private String tleUserEventName;
@@ -92,14 +86,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			ArrayList<TimelineMessage> msgs, ArrayList<PackTime> packs,
 			int p1)
 	{
-		setFocusable(false); // optimization for speed
-		setVisible(true);
-		setOpaque(false);
-
-		
-		setBackground(MainWindow.runObject[data.myRun].background);
-		setForeground(MainWindow.runObject[data.myRun].foreground);
-		
+	
 		TLmsgs=tle.MsgsSent;
 		this.data = data;
 		beginTime = tle.BeginTime;
@@ -111,7 +98,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
 		this.packs= packs;
-		pCurrent  = p1;
+		pe  = p1;
 		pCreation = tle.SrcPe;
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
@@ -145,19 +132,10 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		}
 		
 		
-		if(!isIdleEvent()){
-			addMouseListener(this);
-		}
-		
-
-		// Tell the tooltip manager that we have something to display
-        ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
-        toolTipManager.registerComponent(this);
-
 	} 
 	
 	/** Dynamically generate the tooltip mouseover text when needed */
-	public String getToolTipText(MouseEvent evt){
+	public String getToolTipText(){
 
 		// Construct a nice informative html formatted string about this entry method object. 
 
@@ -274,9 +252,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	
 
 	/** paint an entry method that tapers to a point at its left side */
-	private void drawLeftArrow(Graphics2D g, Paint c, int startY, int h)
+	private void drawLeftArrow(Graphics2D g, Paint c, int startY, int leftCoord, int h)
 	{
-		int[] xpts = {5, 0, 5};
+		int[] xpts = {leftCoord+5, leftCoord+0, leftCoord+5};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
 		g.setPaint(c);
@@ -291,9 +269,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}   
 	
 	/** paint an entry method that tapers to a point at its right side */
-	private void drawRightArrow(Graphics2D g, Paint c, int startY, int h, int right)
+	private void drawRightArrow(Graphics2D g, Paint c, int startY, int leftCoord, int h, int right)
 	{
-		int[] xpts = {right-6, right, right-6};
+		int[] xpts = {leftCoord+right-6, leftCoord+right, leftCoord+right-6};
 		int[] ypts = {startY, startY+h/2, startY+h-1};
 
 		g.setPaint(c);
@@ -308,7 +286,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	
 	
 	private Paint makeMoreLikeBackground(Paint c){
-		Color other = getBackground();
+		Color other = data.getBackgroundColor();
 		if(c instanceof Color)
 			return mixColors((Color)c, other, 0.8f);
 		else
@@ -316,7 +294,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}
 	
 	private Paint makeMoreLikeForeground(Paint c){
-		Color other = getForeground();
+		Color other = data.getForegroundColor();
 		if(c instanceof Color)
 			return mixColors((Color)c, other, 0.8f);
 		else
@@ -358,11 +336,12 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	{
 		return messages;
 	}   
-
-	public Dimension getMinimumSize()
-	{
-		return new Dimension(getSize().width, getSize().height);
-	}   
+	
+//
+//	public Dimension getMinimumSize()
+//	{
+//		return new Dimension(getSize().width, getSize().height);
+//	}   
 
 	
 	public float getNonPackUsage()
@@ -390,7 +369,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 	public int getPCurrent()
 	{
-		return pCurrent;
+		return pe;
 	}   
 
 	public float getUsage()
@@ -399,7 +378,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}   
 
 	
-	public void mouseClicked(MouseEvent evt)
+	public void mouseClicked(MouseEvent evt, JPanel parent, Data data)
 	{
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
@@ -430,7 +409,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		        menuItem.addActionListener(this);
 		        popup.add(menuItem);
 		            
-		        popup.show(this, evt.getX(), evt.getY());			
+		        popup.show(parent, evt.getX(), evt.getY());			
 			}
 		}
 	} 
@@ -534,16 +513,16 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		synchronized(data.messageStructures){
 			if(data == null)
 				return null;
-			else if(pCurrent<0)
+			else if(pe<0)
 				return null;
 			else if(data.messageStructures.getEventIDToMessageMap() == null)
 				return null;
-			else if(pCurrent >= data.messageStructures.getEventIDToMessageMap().length)
+			else if(pe >= data.messageStructures.getEventIDToMessageMap().length)
 				return null;
-			else if(data.messageStructures.getEventIDToMessageMap()[pCurrent] == null)
+			else if(data.messageStructures.getEventIDToMessageMap()[pe] == null)
 				return null;
 			else
-				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pCurrent].get(Integer.valueOf(EventID));
+				return (TimelineMessage) data.messageStructures.getEventIDToMessageMap()[pe].get(Integer.valueOf(EventID));
 
 		}
 	}
@@ -613,16 +592,16 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		
 	}   
 
-
-	public void mousePressed(MouseEvent evt)
-	{
-		// ignore 	
-	}   
-
-	public void mouseReleased(MouseEvent evt)
-	{
-		// ignore 	
-	}   
+//
+//	public void mousePressed(MouseEvent evt)
+//	{
+//		// ignore 	
+//	}   
+//
+//	public void mouseReleased(MouseEvent evt)
+//	{
+//		// ignore 	
+//	}   
 
 	private void OpenMessageWindow()
 	{
@@ -643,13 +622,35 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	public boolean isUnaccountedTime(){
 		return (entry == -2);
 	}
-
-	public void paintComponent(Graphics g)
-	{     
-		super.paintComponent(g);
+	
+	
+/** Whether this object is displayed or hidden (for example when idle's are not displayed this might be false) */
+	public boolean isDisplayed() {
+		// If it is hidden, we may not display it
+		if(data.entryIsHiddenID(entry)){
+			return false;
+		}
 		
-		Graphics2D g2d = (Graphics2D) g;
-			
+		// If this is an idle time region, we may not display it
+		if 	(isIdleEvent() && data.showIdle() == false) 
+			return false ;
+		if (isIdleEvent() && MainWindow.IGNORE_IDLE)
+			return false;
+		if(data.entryIsHiddenID(this.getEntryID()))
+			return false;
+
+		return true;
+	}
+
+	
+	
+	
+	public void paintMe(Graphics2D g2d, int actualDisplayWidth){
+		// If it is hidden, we may not display it
+		if(isDisplayed() == false){
+			return;
+		}
+		
 		// If this is an idle time region, we may not display it
 		if 	(isIdleEvent() && data.showIdle() == false) 
 			return;
@@ -657,6 +658,25 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			return;
 		if(data.entryIsHiddenID(this.getEntryID()))
 			return;
+		
+		
+		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
+
+		if(endTime > data.endTime())
+			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
+
+		if(beginTime < data.startTime())
+			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
+		
+		int width = rightCoord-leftCoord+1;
+
+		if(width < 1)
+			width = 1;
+		
+		int topCoord = data.entryMethodLocationTop(pe);
+		int height = data.entryMethodLocationHeight();
+	
 		
 
 		// Determine the base color
@@ -670,7 +690,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		
 			
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
-		int rectWidth = getWidth();
+		int rectWidth = width;
 		int rectHeight = data.barheight();
 
 	
@@ -684,42 +704,43 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 			verticalInset += 3;
 		}
 		
-		int left  = 0;
-		int right = rectWidth-1;
+		int left  = leftCoord+0;
+		int right = leftCoord+rectWidth-1;
 			
 		
 		if(beginTime < data.startTime())
 		{
-			drawLeftArrow(g2d, c, verticalInset, rectHeight);
+			drawLeftArrow(g2d, c, topCoord+verticalInset, leftCoord, rectHeight);
 			rectWidth -= 5;
-			left = 5;
+			left += 5;
 		}
 
 		if(endTime > data.endTime())
 		{
-			drawRightArrow(g2d, c, verticalInset, rectHeight, rectWidth);
+			drawRightArrow(g2d, c, topCoord+verticalInset, leftCoord, rectHeight, rectWidth);
 			rectWidth -= 5;
-			right = rectWidth-6;
+			right -= 5;
 		}
 
 		// Paint the main rectangle for the object, as long as it is not a skinny idle event
 		g2d.setPaint(c);
-		if(rectWidth > 1 || entryIndex!=-1)
-			g2d.fillRect(left, verticalInset, rectWidth, rectHeight);
-
+		if(rectWidth > 1 || entryIndex!=-1){
+			g2d.fillRect(left, topCoord+verticalInset, rectWidth, rectHeight);
+//			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
+		}
 
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
 		if(rectWidth > 2 && !data.colorByMemoryUsage() && rectHeight > 1)
 		{
 			g2d.setPaint(makeMoreLikeForeground(c));			
-			g2d.drawLine(left, verticalInset, right, verticalInset);
-			if(left == 0)
-				g2d.drawLine(0, verticalInset, 0, verticalInset+rectHeight-1);
+			g2d.drawLine(left, topCoord+verticalInset, right, topCoord+verticalInset);
+			if(left == leftCoord)
+				g2d.drawLine(left, topCoord+verticalInset, left, topCoord+verticalInset+rectHeight-1);
 
 			g2d.setPaint(makeMoreLikeBackground(c));
-			g2d.drawLine(left, verticalInset+rectHeight-1, right, verticalInset+rectHeight-1);
+			g2d.drawLine(left, topCoord+verticalInset+rectHeight-1, right, topCoord+verticalInset+rectHeight-1);
 			if(right == rectWidth-1)
-				g2d.drawLine(rectWidth-1, verticalInset, rectWidth-1, verticalInset+rectHeight-1);
+				g2d.drawLine(right, topCoord+verticalInset, right, topCoord+verticalInset+rectHeight-1);
 		}
 
 
@@ -738,7 +759,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 		if(data.showPacks() && packs != null)
 		{
-			g.setColor(Color.pink);
+			g2d.setColor(Color.pink);
 			for(PackTime pt : packs){
 				long packBeginTime = pt.BeginTime;
 				long packEndTime = pt.EndTime;
@@ -747,18 +768,12 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				{
 
 					// Compute the begin pixel coordinate relative to the containing panel
-					int packBeginPanelCoordX = data.timeToScreenPixelLeft(packBeginTime);
-
-					// Compute the begin pixel coordinate relative to the Entry method object itself
-					int packBeginObjectCoordX = packBeginPanelCoordX  - leftCoord - 1;
+					int packBeginCoordX = data.timeToScreenPixelLeft(packBeginTime);
 
 					// Compute the end pixel coordinate relative to the containing panel
-					int packEndPanelCoordX = data.timeToScreenPixelRight(packEndTime);
+					int packEndCoordX = data.timeToScreenPixelRight(packEndTime);
 
-					// Compute the end pixel coordinate relative to the Entry method object itself
-					int packEndObjectCoordX = packEndPanelCoordX  - leftCoord - 1;
-
-					g.fillRect(packBeginObjectCoordX, verticalInset+rectHeight, (packEndObjectCoordX-packBeginObjectCoordX+1), data.messagePackHeight());
+					g2d.fillRect(packBeginCoordX, topCoord+verticalInset+rectHeight, (packEndCoordX-packBeginCoordX+1), data.messagePackHeight());
 
 				}
 			}
@@ -768,7 +783,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		// Don't change this without changing MainPanel's paintComponent which draws message send lines
 		if(data.showMsgs() == true && messages != null)
 		{
-			g.setColor(getForeground());
+			g2d.setColor(data.getForegroundColor());
 			
 			Iterator<TimelineMessage> m = messages.iterator();
 			while(m.hasNext()){
@@ -777,13 +792,9 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				if(msgtime >= data.startTime() && msgtime <= data.endTime())
 				{
 					// Compute the pixel coordinate relative to the containing panel
-					int msgPanelCoordX = data.timeToScreenPixel(msgtime);
+					int msgCoordX = data.timeToScreenPixel(msgtime);
 
-					// Compute the pixel coordinate relative to the Entry method object itself
-					int msgObjectCoordX = msgPanelCoordX  - leftCoord;
-
-					g.drawLine(msgObjectCoordX, verticalInset+rectHeight, msgObjectCoordX, verticalInset+rectHeight+data.messageSendHeight());
-
+					g2d.drawLine(msgCoordX, topCoord+verticalInset+rectHeight, msgCoordX, topCoord+verticalInset+rectHeight+data.messageSendHeight());
 				}
 			}
 		}
@@ -820,7 +831,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 
 
 		// color the objects by user supplied values with a nice blue gradient
-		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.BlueGradientColors){
+		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.ColorScheme.BlueGradientColors){
 			if(userSuppliedData !=  null){
 				long value = userSuppliedData.longValue();
 				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);
@@ -889,39 +900,41 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	}
 
 	
-	
-	public void setLocationAndSize(int actualDisplayWidth)
-	{
-		
-		if(data.entryIsHiddenID(entry)){
-			setBounds( 0, 0, 0, 0 );			
-			return;
-		}	
-		
-		
-		leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
-		rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
-
-		if(endTime > data.endTime())
-			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
-
-		if(beginTime < data.startTime())
-			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
-		
-		int width = rightCoord-leftCoord+1;
-
-		if(width < 1)
-			width = 1;
-		
-//		int singleTimelineH = data.singleTimelineHeight();
-		
-//		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
-//				width, singleTimelineH);
-		
-		this.setBounds(leftCoord,  data.entryMethodLocationTop(pCurrent),
-				width, data.entryMethodLocationHeight());
-	
-	}   
+//	
+//	public void setLocationAndSize(int actualDisplayWidth)
+//	{
+//		
+//		if(data.entryIsHiddenID(entry)){
+//			setBounds( 0, 0, 0, 0 );			
+//			return;
+//		}	
+//		
+//		
+//		leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
+//		rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
+//
+//		if(endTime > data.endTime())
+//			rightCoord = data.timeToScreenPixelRight(data.endTime(), actualDisplayWidth);
+//
+//		if(beginTime < data.startTime())
+//			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
+//		
+//		int width = rightCoord-leftCoord+1;
+//
+//		if(width < 1)
+//			width = 1;
+//		
+////		int singleTimelineH = data.singleTimelineHeight();
+//		
+////		this.setBounds(leftCoord,  whichTimelineVerticalIndex()*singleTimelineH,
+////				width, singleTimelineH);
+//		
+//		this.setBounds(leftCoord,  data.entryMethodLocationTop(pCurrent),
+//				width, data.entryMethodLocationHeight());
+//	
+//	}  
+//	
+//	
 	
 //	public int whichTimelineVerticalIndex(){
 //		return data.whichTimelineVerticalPosition(pCurrent);
@@ -983,8 +996,8 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 		EntryMethodObject obj = (EntryMethodObject) o;
 		if(pCreation != obj.pCreation)
 			return MiscUtil.sign(pCreation-obj.pCreation);
-		else if(pCurrent != obj.pCurrent)
-			return MiscUtil.sign(pCurrent - obj.pCurrent);
+		else if(pe != obj.pe)
+			return MiscUtil.sign(pe - obj.pe);
 		else
 			return MiscUtil.sign(EventID - obj.EventID);
 	}
@@ -1027,7 +1040,7 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 				data.dropPEsUnrelatedToObject(this);
 			} 
 			else if(arg.equals(popupDropPEsForPE)) {
-				data.dropPEsUnrelatedToPE(this.pCurrent);
+				data.dropPEsUnrelatedToPE(this.pe);
 			}
 
 		}
@@ -1037,4 +1050,21 @@ class EntryMethodObject extends JComponent implements Comparable, MouseListener,
 	public ArrayList<TimelineMessage> getTLmsgs() {
 		return TLmsgs;
 	}
+
+	@Override
+	public long lowerBound() {
+		return beginTime;
+	}	
+
+	@Override
+	public long upperBound() {
+		return endTime;
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent evt) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

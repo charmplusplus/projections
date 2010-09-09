@@ -34,6 +34,8 @@ class UserEventWindow extends JFrame
 	private Color BACKGROUND = Color.black;
 	private Color FOREGROUND = Color.white;
 
+	Data data;
+	
 	// set the ints to have commas in appropriate places
 	private static DecimalFormat format_;
 	private JCheckBox             checkbox_;  // when closing, set to false
@@ -55,7 +57,7 @@ class UserEventWindow extends JFrame
 		{
 			setHorizontalAlignment(JLabel.CENTER);
 			setEnabled(table == null || table.isEnabled()); // see question above
-			setForeground(((UserEventObject)events_[index_][sorter_[index_].mapRow(row)]).getColor());
+			setForeground(((UserEventObject)events_[index_][sorter_[index_].mapRow(row)]).getColor(data));
 			setBackground(BACKGROUND);
 			super.getTableCellRendererComponent(
 					table, value, selected, focused, row, column);
@@ -88,10 +90,10 @@ class UserEventWindow extends JFrame
 				switch (col) {
 				case 0:  
 					return ((UserEventObject)events_[index_][row]).getName();
-				case 1:  return new FormattedNumber(((UserEventObject)events_[index_][row]).BeginTime, format_);
-				case 2:  return new FormattedNumber(((UserEventObject)events_[index_][row]).EndTime, format_);
-				case 3:  return new FormattedNumber(((UserEventObject)events_[index_][row]).EndTime-
-						((UserEventObject)events_[index_][row]).BeginTime, format_);
+				case 1:  return new FormattedNumber(((UserEventObject)events_[index_][row]).beginTime, format_);
+				case 2:  return new FormattedNumber(((UserEventObject)events_[index_][row]).endTime, format_);
+				case 3:  return new FormattedNumber(((UserEventObject)events_[index_][row]).endTime-
+						((UserEventObject)events_[index_][row]).beginTime, format_);
 				default: return "ERROR";
 				}
 			}
@@ -104,7 +106,7 @@ class UserEventWindow extends JFrame
 	}
 
 	public void setData(Data data) { 
-
+		this.data = data;
 		// TODO This file should be converted to use the treeset structure instead of these old arrays
 		//  events_ is sorted already because it comes from a treeset
 		events_ = new Object[data.numPs()][];

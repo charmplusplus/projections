@@ -44,6 +44,8 @@ class ThreadedFileReader implements MainHandler, Runnable {
 
 		// create a MainPanel for it	
 		MainPanel displayPanel = new MainPanel(data, this);
+		System.out.println("Calling loadTimelineObjects");
+
 		displayPanel.loadTimelineObjects(false, null, false);
 
 		displayPanel.setSize(width,data.singleTimelineHeight());

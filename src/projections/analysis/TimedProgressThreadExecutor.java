@@ -6,8 +6,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.swing.ProgressMonitor;
+
+import projections.gui.MainWindow;
 
 
 /** This class runs a set of objects in threads, updating a progress bar as threads complete. 
@@ -131,7 +135,7 @@ public class TimedProgressThreadExecutor implements Executor{
 		}
 		
 		Date endReadingTime  = new Date();
-		System.out.println("Time to read " + numInitialThreads +  " input files(using " + numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
+		MainWindow.performanceLogger.log(Level.INFO,"Time to read " + numInitialThreads +  " input files(using " + numConcurrentThreads + " concurrent threads): " + ((double)(endReadingTime.getTime() - startReadingTime.getTime())/1000.0) + "sec");
 
 		if(showProgress){
 			progressBar.close();

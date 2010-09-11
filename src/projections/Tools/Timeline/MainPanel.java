@@ -13,6 +13,7 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -84,6 +85,27 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
         toolTipManager.registerComponent(this);
 		
 	}
+	
+	public class PeRenderer implements Runnable {
+		Graphics g;
+		Query1D<EntryMethodObject> l;
+		int width;
+		
+		public PeRenderer(Graphics g, Query1D<EntryMethodObject> l, int width) {
+			this.g = g.create();
+			this.l = l;
+			this.width = width;
+		}
+		
+		public void run() {
+			for(EntryMethodObject o : l){
+				o.paintMe((Graphics2D) g, width);
+//				count1 ++;
+			}
+		}
+		
+	}
+	
 
 	/** Paint the panel, filling the entire panel's width */
 	public void paintComponent(Graphics g) {
@@ -107,8 +129,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		long rightClipTime = data.screenToTime(clip.x+clip.width+5);
 		
 		
+		
+		
 		// Draw entry method invocations
-		int count1 = 0;
+		int count1 = -1;
+
+		ArrayList<Thread> threads = new ArrayList();
 		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodInvocationsForEachPE.entrySet()) {
 			Integer pe = entry.getKey();
 			
@@ -116,6 +142,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 				Query1D<EntryMethodObject> l = entry.getValue();
 				l.setQueryRange(leftClipTime, rightClipTime);
+				PeRenderer pr = new PeRenderer(g, l, width);
+				pr.run();
+				
+//				Thread t = new Thread(pr);
+//				threads.add(t);
+//				t.run();
+//				
 				for(EntryMethodObject o : l){
 					o.paintMe((Graphics2D) g, width);
 					count1 ++;
@@ -123,8 +156,16 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			}
 		}
 
+		// Wait for threads to finish rendering
+		for(Thread t : threads){
+			try {
+				t.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		
-		MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")" );
+//		MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")" );
 		
 		
 		

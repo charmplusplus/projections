@@ -3,13 +3,14 @@ package projections.Tools.Timeline.RangeQueries;
 import java.util.Collection;
 import java.util.Iterator;
 
+
 /** An interface for collections whose iterators will only return Range1D objects that 
  *  overlap the range specified by setQueryRange. By default all collection items will
  *  be returned by the iterators.
  * 
  *  @author Isaac Dooley
  */
-public interface Query1D<T extends Range1D> extends Iterable<T>, Collection<T> {
+public interface Query1D<T extends Range1D> extends Iterable<T>, Collection<T>, Cloneable {
 
 	/** Specify the range for all subsequent iterators to use. 
 	 * 

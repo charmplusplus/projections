@@ -10,15 +10,23 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 
 import javax.swing.JPanel;
@@ -41,25 +49,36 @@ import projections.gui.MainWindow;
  *  For speed, special data structures are used to store the entry method invocations and user events. 
  *  Historically these were just added to this JPanel as subcomponents, but this was too expensive if more 
  *  than a few hundred thousand were added.
- *  
- *  Now the code is a bit more complex to handle the painting and mouseover events, but it is faster!
- *  
+ *
+ *  @note Now the code is a bit more complex to handle the painting and mouseover events, but it is faster!
  *  
  */
 
 public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
 {
+	/** Should the painting be performed in multiple threads */
+	private static final boolean RenderInParallel = false;
+
+	/** A thread pool for use in rendering if RenderInParallel is true */
+	private static ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+	
+	/** Stores information about mouse dragging in window */
 	private int viewX, viewY;
 
+
+	/** The backing model/view information for the Timeline */
 	private Data data;
 	private MainHandler handler;
 
-	/** A queriable time based datastructure that holds all the entry method invocations that will be drawn */
+	
+	/** A query-able time based data structure that holds all the entry method invocations that will be drawn */
 	private Map<Integer,Query1D<EntryMethodObject>> entryMethodInvocationsForEachPE;
 
-	/** A queriable time based datastructure that holds all the user events that will be drawn */
+	/** A query-able time based data structure that holds all the user events that will be drawn */
 	private TreeMap<Integer, Query1D<UserEventObject>> userEventsToPaintForEachPE;
-
+	
+	/** Construct a main Timeline Panel */
 	public MainPanel(Data data, MainHandler handler){
 		this.handler = handler;
 		this.data = data;
@@ -68,6 +87,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		this.setFocusCycleRoot(true);
 		this.setFocusTraversalPolicy(new NullFocusTraversalPolicy());
 
+		
 		setAutoscrolls(true); //enable synthetic drag events
 
 		addMouseMotionListener(this); 
@@ -78,51 +98,155 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
 		toolTipManager.registerComponent(this);
 
+		this.setOpaque(true);
+	}
+	
+	
+	/** A little class to help render a sub-region of the graphics */
+	public class SliceRenderer implements Runnable {
+		private Graphics2D g;
+		private int destinationX;
+		private int destinationY;
+		private BufferedImage b;
+		public long paintedEntities;
+		
+		
+		public SliceRenderer(Graphics2D g, BufferedImage b, int destinationX, int destinationY) {
+			this.g = g;
+			this.b = b;
+			this.destinationX = destinationX;
+			this.destinationY = destinationY;
+		}
+		
+		public void run() {
+			paintedEntities = paintAll(g);
+		}
+		
+	}
+	
+	
+	/** Paint the entire opaque panel*/
+	public void paintComponent(Graphics g) {
+		if(RenderInParallel){
+			paintInParallel((Graphics2D)g);
+		} else {
+			paintSequentially((Graphics2D)g);
+		}
 	}
 
-	/** Paint the panel, filling the entire panel's width */
-	public void paintComponent(Graphics g) {
+	/** Directly paint the whole requested clipped region from within this thread */
+	public void paintSequentially(Graphics2D g){
+		final long startTime = System.nanoTime();
+		Rectangle clip = g.getClipBounds();		
+		MainWindow.performanceLogger.log(Level.INFO,"Rendering MainPanel Sequentially with clip: " + clip.x + "," +clip.y + " " + clip.width + "," + clip.height);
 
+		paintAll(g);
+
+		final long endTime = System.nanoTime();
+		final long duration = endTime - startTime;
+		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint (sequential version): " + (duration/1000000) + " ms");
+
+	}
+	
+	/** Use the thread pool to render slices (rows) of the display */
+	public void paintInParallel(Graphics g){
+		
 		final long startTime = System.nanoTime();
 
-		super.paintComponent(g);
+		Rectangle clip = g.getClipBounds();
+		
+		MainWindow.performanceLogger.log(Level.INFO,"Rendering MainPanel with clip: " + clip.x + "," +clip.y + " " + clip.width + "," + clip.height);
 
+		int piecesToRender = Runtime.getRuntime().availableProcessors();
+
+		int heightOfEachSlice = clip.height/piecesToRender + 1;
+
+		ArrayList<SliceRenderer> renderers = new ArrayList<SliceRenderer>();
+		ArrayList<Future> futures = new ArrayList<Future>();
+
+		for(int i=0; i<piecesToRender; i++){
+			// Slice the clipped region into piecesToRender pieces
+			int startYPixel = i*(heightOfEachSlice);
+			int endYPixel = (1+i)*(heightOfEachSlice) - 1;
+			if(endYPixel > clip.height-1)
+				endYPixel = clip.height-1;
+			
+			int heightOfSlice = endYPixel - startYPixel + 1;		
+			
+//			System.out.println("slice: startYPixel="+startYPixel+" endYPixel="+endYPixel+" heightOfSlice="+heightOfSlice + " clip.height=" + clip.height);
+			
+			BufferedImage b = new BufferedImage(clip.width, heightOfSlice, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g2d = b.createGraphics();
+			g2d.translate(-clip.x, -clip.y-startYPixel);
+			
+			g2d.setClip(clip.x, clip.y+startYPixel, clip.width, heightOfSlice);
+
+			SliceRenderer s = new SliceRenderer(g2d, b, clip.x, clip.y+startYPixel);
+			renderers.add(s);
+			Future f = threadExecutor.submit(s);
+			futures.add(f);
+		}
+		
+		
+		// Await completion of all threads
+		for(Future f : futures){
+			try {
+				f.get(); // wait for the Runnable to complete
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				e.printStackTrace();
+			} 
+		}
+
+		
+		// Paint final results based on renderings of each thread
+		int count = 0;
+		for(SliceRenderer s : renderers) {
+			g.drawImage(s.b, s.destinationX, s.destinationY, null);
+			count += s.paintedEntities;
+		}
+		
+		final long endTime = System.nanoTime();
+		final long duration = endTime - startTime;
+		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint " + count + " entities using " + piecesToRender +  " threads: " + (duration/1000000) + " ms");
+
+	}
+
+	/**
+	 * Paint the desired clipped region for this component 
+	 * 
+	 * @return Number of entities rendered (for performance tuning)
+	 */
+	public long paintAll(Graphics2D g){
 		paintBackground(g);
-
-		// Paint all entry method objects:
-		int width;
-//		int height;
-		Insets insets = getInsets();
-		width = getWidth() - (insets.left + insets.right);
-//		height = getHeight() - (insets.top + insets.bottom);
+		Rectangle clip = g.getClipBounds();
 
 		// Find time ranges to draw
-		Rectangle clip = g.getClipBounds();
 		long leftClipTime = data.screenToTime(clip.x-5);
 		long rightClipTime = data.screenToTime(clip.x+clip.width+5);
-
-
+		
 		// Draw entry method invocations
-		int count1 = 0;
+		int count1 = -1;
+
 		for(Entry<Integer, Query1D<EntryMethodObject>> entry : entryMethodInvocationsForEachPE.entrySet()) {
 			Integer pe = entry.getKey();
 
 			if(data.peTopPixel(pe) <= clip.y+clip.height+5 && data.peBottomPixel(pe) >= clip.y-5){
 
 				Query1D<EntryMethodObject> l = entry.getValue();
-				l.setQueryRange(leftClipTime, rightClipTime);
-				for(EntryMethodObject o : l){
-					o.paintMe((Graphics2D) g, width);
-					count1 ++;
+				synchronized(l){
+					l.setQueryRange(leftClipTime, rightClipTime);
+					for(EntryMethodObject o : l){
+						o.paintMe((Graphics2D) g, getWidth());
+						count1 ++;
+					}
 				}
 			}
 		}
-
-
-		MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count1 + " entry method objects in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")" );
-
-
-
+		
+		
+		
 		// Draw user events
 		int count2 = 0;
 		if(data.showUserEvents()){
@@ -135,28 +259,22 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					Query1D<UserEventObject> l = entry.getValue();
 					l.setQueryRange(leftClipTime, rightClipTime);
 					for(UserEventObject o : l){
-						o.paintMe((Graphics2D) g, width, data);
+						o.paintMe((Graphics2D) g, getWidth(), data);
 						count2 ++;
 					}
 				}
 			}
-			MainWindow.performanceLogger.log(Level.INFO,"Should have just painted up to " + count2 + " user events in MainPanel of size (" + getWidth() + "," + getHeight() + ") clip=(" + clip.x + "," + clip.y + "," + clip.width + "," + clip.height + ")");
 		}
-
-
-		final long endTime = System.nanoTime();
-		final long duration = endTime - startTime;
-		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint (" + count1 + " entry methods, " + count2 + " user events): " + (duration/1000000) + " ms");
-
 
 		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
 		paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);
 
+		return count1 + count2;
 	}
 
 
 
-	/** Paint the panel, filling the entire panel's width */
+	/** Paint the background, filling the entire clipping area */
 	public void paintBackground(Graphics g) {
 
 		int width = getWidth();
@@ -196,34 +314,30 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}		
 	}
 
-	private void paintMessageSendLines(Graphics g, Color c, Color bgColor, Set drawMessagesForObjects){
+	/** Paint lines to represent messages */
+	private void paintMessageSendLines(Graphics g, Color c, Color bgColor, Set<EntryMethodObject> drawMessagesForObjects){
 		Graphics2D g2d = (Graphics2D) g;
 		// paint the message send lines
 		if (drawMessagesForObjects.size()>0) {
-			Iterator iter = drawMessagesForObjects.iterator();
-			while(iter.hasNext()){
-				Object o = iter.next();
-				if(o instanceof EntryMethodObject){
-					EntryMethodObject obj = (EntryMethodObject)o;
-					if(obj.creationMessage() != null){
-						int pCreation = obj.pCreation;
-						int pExecution = obj.pe;
+			for(EntryMethodObject obj : drawMessagesForObjects){
+				if(obj.creationMessage() != null){
+					int pCreation = obj.pCreation;
+					int pExecution = obj.pe;
 
-						// Message Creation point
-						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
-						double y1 = data.messageSendLocationY(pCreation);
-						// Message executed (entry method starts) 
-						int x2 =  data.timeToScreenPixel(obj.getBeginTime());
-						double y2 = data.messageRecvLocationY(pExecution);
+					// Message Creation point
+					int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
+					double y1 = data.messageSendLocationY(pCreation);
+					// Message executed (entry method starts) 
+					int x2 =  data.timeToScreenPixel(obj.getBeginTime());
+					double y2 = data.messageRecvLocationY(pExecution);
 
-						// Draw thick background Then thin foreground
-						g2d.setPaint(bgColor);
-						g2d.setStroke(new BasicStroke(4.0f));
-						g2d.drawLine(x1,(int)y1,x2,(int)y2);
-						g2d.setPaint(c);
-						g2d.setStroke(new BasicStroke(2.0f));
-						g2d.drawLine(x1,(int)y1,x2,(int)y2);
-					}
+					// Draw thick background Then thin foreground
+					g2d.setPaint(bgColor);
+					g2d.setStroke(new BasicStroke(4.0f));
+					g2d.drawLine(x1,(int)y1,x2,(int)y2);
+					g2d.setPaint(c);
+					g2d.setStroke(new BasicStroke(2.0f));
+					g2d.drawLine(x1,(int)y1,x2,(int)y2);
 				}
 			}
 		}
@@ -243,13 +357,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			return null;
 		}
 
-	}
-
-
-	public void disposeOfStructures(){
-		handler = null;
-		removeAll();
-		data.disposeOfStructures();
 	}
 
 

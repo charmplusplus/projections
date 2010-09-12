@@ -56,7 +56,6 @@ class ThreadedFileReader implements MainHandler, Runnable {
 		
 		System.out.println("Created image for PE " + PE);
 
-		displayPanel.disposeOfStructures();
 		data.disposeOfStructures();
 		displayPanel = null;
 		data = null;

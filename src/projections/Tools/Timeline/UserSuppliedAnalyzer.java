@@ -1,7 +1,6 @@
 package projections.Tools.Timeline;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
@@ -11,6 +10,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
+
+import projections.Tools.Timeline.RangeQueries.Query1D;
 
 
 /** A class that analyzes the user supplied data ranges, and displays a table of the results */
@@ -29,16 +30,10 @@ class UserSuppliedAnalyzer extends JFrame {
 
 		TreeMap<Integer, Long> parameterMinTime = new TreeMap();
 		TreeMap<Integer, Long> parameterMaxTime = new TreeMap();
-		
-		
-		/* TreeMap<Integer,LinkedList<EntryMethodObject> > */ 
-		Iterator iter = data.allEntryMethodObjects.values().iterator();
 
-		while(iter.hasNext()){
-			List objs = (List) iter.next();
-			Iterator objIter = objs.iterator();
-			while(objIter.hasNext()){
-				EntryMethodObject obj = (EntryMethodObject) objIter.next();
+		
+		for(Query1D<EntryMethodObject> objs : data.allEntryMethodObjects.values()){
+			for(EntryMethodObject obj : objs){
 				Integer param = obj.userSuppliedData;
 				long start = obj.getBeginTime();
 				long end = obj.getEndTime();

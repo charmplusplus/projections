@@ -235,7 +235,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append( " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)");
 			infoString.append("<br>");
 			
-			infoString.append("<i>Num Msgs created</i>: " + messages.size() + "<br>");
+			
+			int numMsgs = 0;
+			if(messages!=null)
+				numMsgs = messages.size();
+			infoString.append("<i>Num Msgs created</i>: " + numMsgs + "<br>");
 		}
 
 		if(userSuppliedData != null){

@@ -233,7 +233,7 @@ implements ActionListener, Clickable
 	}
 
 
-	private class SortableEPs implements Comparable{
+	private static class SortableEPs implements Comparable{
 		private double value;
 		private String name;
 		private Paint paint;

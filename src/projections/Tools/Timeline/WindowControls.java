@@ -135,6 +135,7 @@ ItemListener {
 		if(dialog == null){
 			toolSpecificDialogPanel = new TimlineRangeDialogExtension();    	
 			dialog = new RangeDialog(parentWindow, "Select Range For Timeline", toolSpecificDialogPanel, false);
+			parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
 		}
 		
 		dialog.displayDialog();
@@ -142,8 +143,6 @@ ItemListener {
 			
 			data.setProcessorList(dialog.getSelectedProcessors());
 	        data.setRange(dialog.getStartTime(),dialog.getEndTime());
-
-			
 
 			// Create a worker that will load the trace logs and then will make 
 			// the main window visible after it has finished loading
@@ -158,16 +157,16 @@ ItemListener {
 					parentWindow.data.skipLoadingUserEvents(toolSpecificDialogPanel.dialogEnableUserEventFiltering.isSelected());
 
 					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
-					cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
+					cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
 					return null;
 				}
 
 				public void done() {
 					// Here we are basically at startup after the dialog window and the trace log has been read
-					parentWindow.setSize(Toolkit.getDefaultToolkit().getScreenSize());
-					parentWindow.invalidate();
-					parentWindow.validate();
+
+					parentWindow.refreshDisplay(true);
 					parentWindow.setVisible(true);
+
 				}
 			};
 			worker.execute();
@@ -196,9 +195,9 @@ ItemListener {
 	}
 
 	protected void unsetSelectedTime() {
-		selectionBeginTime.setText("");
-		selectionEndTime.setText("");
-		selectionDiff.setText("");
+		selectionBeginTime.setText(" ");
+		selectionEndTime.setText(" ");
+		selectionDiff.setText("no selection");
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
 	}
@@ -703,7 +702,6 @@ ItemListener {
 		bLoadSelected = new JButton("Load Selection");
 		bRanges = new JButton("Load New Time/PE Range");
 
-		// Ideally we would enable and disable the appropriate buttons, but this takes too long on some jvms
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
 		bRanges.setEnabled(true);
@@ -713,10 +711,10 @@ ItemListener {
 		bRanges.addActionListener(this);
 
 
-		highlightTime = new JTextField("");
-		selectionBeginTime = new JTextField("");
-		selectionEndTime = new JTextField("");
-		selectionDiff = new JTextField("");
+		highlightTime = new JTextField(" ");
+		selectionBeginTime = new JTextField(" ");
+		selectionEndTime = new JTextField(" ");
+		selectionDiff = new JTextField("no selection");
 		highlightTime.setEditable(false);
 		selectionBeginTime.setEditable(false);
 		selectionEndTime.setEditable(false);
@@ -741,9 +739,9 @@ ItemListener {
 
 
 		this.setLayout(gbl);
-		Util.gblAdd(this, cbPanel, gbc, 0, 1, 1, 1, 1, 0);
-		Util.gblAdd(this, buttonPanel, gbc, 0, 3, 1, 1, 1, 0);
-		Util.gblAdd(this, zoomPanel, gbc, 0, 4, 1, 1, 1, 0);
+		Util.gblAdd(this, cbPanel, gbc, 0, 1, 1, 1, 1, 1);
+		Util.gblAdd(this, buttonPanel, gbc, 0, 3, 1, 1, 1, 1);
+		Util.gblAdd(this, zoomPanel, gbc, 0, 4, 1, 1, 1, 1);
 
 	}
 

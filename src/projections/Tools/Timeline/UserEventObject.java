@@ -27,11 +27,13 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	public static final int SINGLE=1;   // if this just marks one point in time
 	public static final int PAIR=2;  // if this has a begin and end point
 
-	protected int    Type;         // should be SINGLE or PAIR
+	public enum Type { SINGLE, PAIR }
+	
+	protected Type    type;         // should be SINGLE or PAIR
 	public long   beginTime;    // Begin Time
 	public long   endTime;      // End Time
-	public int    UserEventID;  // The user supplied value used to distinguish different types of user events
-	public int    CharmEventID; // for matching with end time
+	public int    userEventID;  // The user supplied value used to distinguish different types of user events
+	public int    charmEventID; // for matching with end time
 	
 	private int pe;
 
@@ -42,11 +44,11 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	/** If displaying nested user events in multiple rows, use this value to determine the row in which we draw this event */
 	private int nestedRow;
 	
-	public UserEventObject(int pe, long t, int e, int event, int type) {
-		this.Type=type;
+	public UserEventObject(int pe, long t, int e, int event, Type type) {
+		this.type=type;
 		this.beginTime=endTime=t;
-		this.UserEventID=e;
-		this.CharmEventID=event;
+		this.userEventID=e;
+		this.charmEventID=event;
 		this.pe = pe;
 	}
 	
@@ -55,17 +57,17 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		this.beginTime=endTime=t;
 		this.pe = pe;
 		this.note = note;
-		this.UserEventID=-1;
+		this.userEventID=-1;
 	}
 
 
 	
 	
-	public UserEventObject(int pe, long t, int e, int event, int type, String note) {
-		this.Type=type;
+	public UserEventObject(int pe, long t, int e, int event, Type type, String note) {
+		this.type=type;
 		this.beginTime=endTime=t;
-		this.UserEventID=e;
-		this.CharmEventID=event;
+		this.userEventID=e;
+		this.charmEventID=event;
 		this.pe = pe;
 		this.note = note;
 	}
@@ -75,7 +77,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		
 		boolean addNewline = false;
 		
-		String userEventName = MainWindow.runObject[myRun].getUserEventName(UserEventID);
+		String userEventName = MainWindow.runObject[myRun].getUserEventName(userEventID);
 		if(userEventName != null){
 			name += userEventName;
 			addNewline = true;
@@ -91,7 +93,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	}		
 	
 	protected Color getColor(Data data){	
-		Color c = MainWindow.runObject[myRun].getUserEventColor(UserEventID);
+		Color c = MainWindow.runObject[myRun].getUserEventColor(userEventID);
 		if(c != null)
 			return c;
 		else 
@@ -102,7 +104,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 
 	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
 
-		if(data.userEventIsHiddenID(UserEventID)){
+		if(data.userEventIsHiddenID(userEventID)){
 			return;
 		}
 
@@ -166,7 +168,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	/** Dynamically generate the tooltip mouseover text when needed */
 	public String getToolTipText(){
 		if(note == null) 
-			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (endTime-beginTime) + " us</p><p><i>event:</i> " + UserEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
+			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (endTime-beginTime) + " us</p><p><i>event:</i> " + userEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
 		else if(endTime - beginTime > 0)
 			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>";
 		else
@@ -191,7 +193,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		} else if (endTime != ueo.endTime) {
 			return MiscUtil.sign(ueo.endTime - endTime);
 		} else if (this != ueo) {
-			return MiscUtil.sign(this.UserEventID - ueo.UserEventID);
+			return MiscUtil.sign(this.userEventID - ueo.userEventID);
 		} else {
 			System.err.println("ERROR: compareTo not working correctly for class UserEventObject");
 			return 0;
@@ -253,7 +255,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 			if (arg.equals(popupChangeColor)){
 				Color c = JColorChooser.showDialog(null, "Choose color for " + getName(), getColor(dataForLastClick)); 
 				if(c !=null){
-					MainWindow.runObject[myRun].setUserEventColor(UserEventID, c);
+					MainWindow.runObject[myRun].setUserEventColor(userEventID, c);
 					dataForLastClick.displayMustBeRepainted();
 				}
 

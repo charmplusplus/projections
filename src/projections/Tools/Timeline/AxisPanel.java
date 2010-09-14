@@ -1,18 +1,25 @@
 package projections.Tools.Timeline;
 
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.text.DecimalFormat;
 
 import javax.swing.JPanel;
+import javax.swing.Scrollable;
 
 import projections.Tools.Timeline.Data.ViewType;
 import projections.gui.Util;
 
 /** The class that draws the top time axis on the top of the timeline window */
-class AxisPanel extends JPanel 
+class AxisPanel extends JPanel implements Scrollable, MouseListener, MouseMotionListener 
 {
 
 	/** Desired height of the whole JPanel */
@@ -61,21 +68,24 @@ class AxisPanel extends JPanel
 	{
 		this.data = data;
 		format_.setGroupingUsed(true);
+
+	
+		addComponentListener(new MyListener());
+		
+		addMouseListener(this);
+		addMouseMotionListener(this);
+	
 	}   
 
 
-	/** Get the preferred size. The Width provided should be ignored */
-	public Dimension getPreferredSize() {
-		int preferredWidth = 200;
-		int preferredHeight = totalHeight();
-		return new Dimension(preferredWidth, preferredHeight);
-	}
+	
 
 	/** Paint the axis in its panel */
 
 	public void paintComponent(Graphics g)
 	{
-		super.paintComponent(g);
+		
+		System.out.println("MainPanel paintComponent width=" + getWidth());
 		
 		g.setFont(data.axisFont);
 		FontMetrics fm = g.getFontMetrics();
@@ -124,6 +134,22 @@ class AxisPanel extends JPanel
 		
 		// Draw the label for the axis
 		g.drawString(axisLabel(), getWidth()/2 - fm.stringWidth(axisLabel())/2, axisLabelPositionY());
+		
+		
+		// Draw the overlay
+		if(data.selectionValid()){
+			g.setColor(data.getForegroundColor());
+			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
+			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
+		}
+
+		if(data.highlightValid()){
+			// Draw vertical line
+			g.setColor(data.getForegroundColor());
+			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
+		}
+		
+		
 
 	}
 
@@ -175,6 +201,98 @@ class AxisPanel extends JPanel
 		return Util.getBestIncrement((int)(Math.ceil(data.maxLabelLen() / pixelsPerTickMark())));
 	}
 	
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		data.setSelection2(e.getPoint().x);
+		data.setHighlight(e.getPoint().x);
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		data.setHighlight(e.getPoint().x);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		data.invalidateSelection();
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		data.setSelection1(e.getPoint().x);
+	}
+	
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		data.setSelection2(e.getPoint().x);
+		data.setHighlight(e.getPoint().x);
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+		data.setHighlight(e.getPoint().x);
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+		data.removeHighlight();
+	}
+
+
+	private class MyListener implements ComponentListener {
+
+		public void componentHidden(ComponentEvent e) {
+		}
+
+		public void componentMoved(ComponentEvent e) {
+		}
+
+		public void componentResized(ComponentEvent e) {
+			data.invalidateSelection();
+			repaint();
+		}
+
+		public void componentShown(ComponentEvent e) {
+		}
+	
+	}
+
+
+	
+
+	/** Get the preferred size. The Width provided should be ignored */
+	@Override
+	public Dimension getPreferredSize() {
+		return new Dimension(getWidth(),totalHeight());
+	}
+	
+	@Override
+	public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction){
+		return data.singleTimelineHeight();
+	}
+
+	@Override
+	public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction){
+		return 5*data.singleTimelineHeight();
+	}
+
+	@Override
+	public Dimension getPreferredScrollableViewportSize(){
+		return getPreferredSize();
+	}
+
+	@Override
+	public boolean getScrollableTracksViewportWidth(){
+		return false;
+	}
+
+	@Override
+	public boolean getScrollableTracksViewportHeight(){
+		return false;
+	}
 
 
 }

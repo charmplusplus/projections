@@ -3,7 +3,6 @@ package projections.Tools.Timeline;
 import java.awt.BorderLayout;
 import java.awt.Graphics;
 
-import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
@@ -18,14 +17,14 @@ class ScrollingPanel extends JPanel {
 	private JScrollPane scrollpane;
 		
 	private MainPanel mainPanel;
-	private LayeredPanel axisPanel;
+	private AxisPanel axisPanel;
 	private LabelPanel labelPanel;
 	
 	private Data data;
 	
 	
 	/** Create the scrollable panel with the three provided panels. */
-	protected ScrollingPanel(Data data_, MainPanel mainPanel_, LayeredPanel axisPanel_, LabelPanel labelPanel_) {
+	protected ScrollingPanel(Data data_, MainPanel mainPanel_, AxisPanel axisPanel_, LabelPanel labelPanel_) {
  
 		data=data_;
 		mainPanel=mainPanel_;
@@ -57,7 +56,10 @@ class ScrollingPanel extends JPanel {
 		add(scrollpane, BorderLayout.CENTER);
 		
 		scrollpane.getViewport().setBackground(data.getBackgroundColor());
-		scrollpane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // This should be tuned for performance
+
+//		scrollpane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // This should be tuned for performance
+		scrollpane.getViewport().setScrollMode(JViewport.BLIT_SCROLL_MODE); // This should be tuned for performance
+
 		
 		axisPanel.setVisible(true);
 		mainPanel.setVisible(true);
@@ -87,50 +89,28 @@ class ScrollingPanel extends JPanel {
 		
 		if(doRevalidate){
 			data.invalidateSelection();
+			scrollpane.invalidate();
+			mainPanel.invalidate();
+			axisPanel.invalidate();
+			labelPanel.invalidate();
 			this.revalidate();
-			scrollpane.revalidate();
-			mainPanel.revalidate();
-			axisPanel.revalidate();
-			labelPanel.revalidate();
 		}
 		
+		// Repaint all subcomponents
 		this.repaint();
 		scrollpane.repaint();
 		mainPanel.repaint();
 		axisPanel.repaint();
 		labelPanel.repaint();		  
-
+		
 	}
 
 	/** A simple class for drawing the corners in the JScrollPane */
-	private class Corner extends JComponent {
+	private class Corner extends JPanel {
 		public void paintComponent(Graphics g) {
-			// Let UI delegate paint first 
-		    // (including background filling, if I'm opaque)
-		    super.paintComponent(g); 
-		    // paint my contents next....
 			g.setColor(data.getBackgroundColor());
 			g.fillRect(0,0,getWidth(),getHeight());
 		}
 	}
-	
-	
-//	/** Paint the panel */
-//	@Override public void paintComponent(Graphics g) {
-//		System.out.println("paintComponent ScrollingPanel");
-//		super.paintComponent(g);
-//	
-//		scrollpane.paintComponents(g);
-//		
-//		g.setColor(Color.yellow);
-//		g.fillRect(0,0, getWidth(), getHeight());
-//		
-//	}
-//		
-//	
-//
-//	@Override public void update(Graphics g){
-//		paintComponent(g);
-//	}
 	
 }

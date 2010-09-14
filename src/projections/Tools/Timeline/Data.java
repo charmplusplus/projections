@@ -19,6 +19,8 @@ import java.util.logging.Level;
 
 import javax.swing.ToolTipManager;
 
+import projections.Tools.Timeline.RangeQueries.Query1D;
+import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
 import projections.analysis.PackTime;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
@@ -90,7 +92,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	private int mostRecentScaledScreenWidth;
 	
 	/** The list of pes displayed, in display order*/
-	private LinkedList<Integer> peToLine;
+	public LinkedList<Integer> peToLine;
 
 	/** If true, color entry method invocations by Object ID */
 	private boolean colorByObjectId;
@@ -119,13 +121,15 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 *  Each key of the TreeMap is an Integer pe 
 	 *  <Integer,LinkedList<EntryMethodObject> >
 	 */
-	protected Map<Integer,List<EntryMethodObject> > allEntryMethodObjects = new TreeMap<Integer,List<EntryMethodObject> >();
+	protected TreeMap<Integer, Query1D<EntryMethodObject>> allEntryMethodObjects = new TreeMap<Integer,Query1D<EntryMethodObject> >();
 
 	/** Each value in this TreeMap is a TreeSet of UserEventObject's .
 	 *  Each key of the TreeMap is an Integer pe
 	 */
-	protected Map<Integer, Set <UserEventObject> > allUserEventObjects = new TreeMap<Integer, Set <UserEventObject> >();
+	protected TreeMap<Integer, Query1D<UserEventObject>> allUserEventObjects = new TreeMap<Integer, Query1D <UserEventObject> >();
 
+	
+	
 	/**
 	 * Each value in this TreeMap is a TreeSet of the entry method's frequencies.
 	 * Each key is an integer, the entry ID frequency
@@ -387,12 +391,12 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		// Can we reuse our already loaded data?
 		if(startTime >= oldBT && endTime <= oldET){
 		
-			Map<Integer, List<EntryMethodObject> > oldEntryMethodObjects = allEntryMethodObjects;
+			Map<Integer, Query1D<EntryMethodObject> > oldEntryMethodObjects = allEntryMethodObjects;
 
-			Map<Integer, Set <UserEventObject> > oldUserEventObjects = allUserEventObjects;
+			Map<Integer, Query1D<UserEventObject> > oldUserEventObjects = allUserEventObjects;
 			
-			allEntryMethodObjects = new TreeMap<Integer, List<EntryMethodObject>>();
-			allUserEventObjects = new TreeMap<Integer, Set<UserEventObject>>();
+			allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
+			allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
 
 			// Remove any unused objects from our data structures 
 			// (the components in the JPanel will be regenerated later from this updated list)
@@ -408,7 +412,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 					// Drop elements from mesgVector and allEntryMethodObjects outside range
 					if(allEntryMethodObjects.containsKey(pe)){
-						List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
+						Query1D<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
 						Iterator<EntryMethodObject> iter = objs.iterator();
 						while(iter.hasNext()){
 							EntryMethodObject obj = iter.next();
@@ -436,8 +440,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			
 		} else {
 			// We need to reload everything
-			allEntryMethodObjects = new TreeMap<Integer, List<EntryMethodObject>>();
-			allUserEventObjects = new TreeMap<Integer, Set<UserEventObject>>();
+			allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
+			allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
 		}
 		
 		oldBT = startTime;
@@ -541,13 +545,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	private void printNumLoadedObjects(){
 		int objCount = 0;
-		for(List<EntryMethodObject> e : allEntryMethodObjects.values()){
+		for(Query1D<EntryMethodObject> e : allEntryMethodObjects.values()){
 			objCount += e.size();
 		}
 		MainWindow.performanceLogger.log(Level.INFO, "Displaying " + objCount + " entry method invocations in the timeline visualization");
 
 		objCount = 0;
-		for(Set<UserEventObject> e : allUserEventObjects.values()){
+		for(Collection<UserEventObject> e : allUserEventObjects.values()){
 			objCount += e.size();
 		}
 		MainWindow.performanceLogger.log(Level.INFO, "Displaying " + objCount + " user events in the timeline visualization");
@@ -682,9 +686,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		/** Stores all user events from the currently loaded PE/time range. It must be sorted,
 		 *  so the nesting of bracketed user events can be efficiently processed.
 		 *  */
-		Set<UserEventObject> userEvents= new TreeSet<UserEventObject>();
+		Query1D<UserEventObject> userEvents= new RangeQueryTree<UserEventObject>();
 		
-		LinkedList<EntryMethodObject> perPEObjects = new LinkedList<EntryMethodObject>();
+		Query1D<EntryMethodObject> perPEObjects = new RangeQueryTree<EntryMethodObject>();
 		
 		
 		try {
@@ -762,7 +766,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 
 	/** Thread-safe storing of the userEvents and perPEObjects */
-	synchronized private void getDataSyncSaveObjectLists(Integer pe, List<EntryMethodObject> perPEObjects, Set<UserEventObject> userEvents )  
+	synchronized private void getDataSyncSaveObjectLists(Integer pe, Query1D<EntryMethodObject> perPEObjects, Query1D<UserEventObject> userEvents )  
 	{
 		// The user events are simply that which were produced by createtimeline
 		allUserEventObjects.put(pe,userEvents);
@@ -800,7 +804,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 	public int getNumUserEvents() {
-		Iterator<Set<UserEventObject>> iter = allUserEventObjects.values().iterator();
+		Iterator<Query1D<UserEventObject>> iter = allUserEventObjects.values().iterator();
 		int num = 0;
 		while(iter.hasNext()){
 			num += iter.next().size();
@@ -1466,7 +1470,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			Iterator<Integer> pe_iter = allEntryMethodObjects.keySet().iterator();
 			while(pe_iter.hasNext()){
 				Integer pe = pe_iter.next();
-				List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
+				Query1D<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
 				Iterator<EntryMethodObject> obj_iter = objs.iterator();
 				while(obj_iter.hasNext()){ 
 					EntryMethodObject obj = obj_iter.next();
@@ -1648,10 +1652,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			Iterator<UserEventObject> eventiter = allUserEventObjects.get(pe).iterator();
 			while(eventiter.hasNext()){
 				UserEventObject obj = eventiter.next();
-				if(obj.Type == UserEventObject.PAIR){
+				if(obj.type == UserEventObject.Type.PAIR){
 					long BeginTime = obj.beginTime;
 					long EndTime = obj.endTime;
-					Integer UserEventID = Integer.valueOf(obj.UserEventID); 
+					Integer UserEventID = Integer.valueOf(obj.userEventID); 
 
 					long duration = EndTime-BeginTime;
 
@@ -1659,7 +1663,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 						min.put(UserEventID, new Long(duration));
 						max.put(UserEventID, new Long(duration));
 						total.put(UserEventID, new Long(duration));
-						count.put(UserEventID, new Long(1));
+						count.put(UserEventID, Long.valueOf(1));
 						name.put(UserEventID, obj.getName());
 					} else {
 
@@ -1723,7 +1727,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			Iterator eventiter = allUserEventObjects.get(pe).iterator();
 			while(eventiter.hasNext()){
 				UserEventObject obj = (UserEventObject) eventiter.next();
-				if(obj.Type == UserEventObject.PAIR){
+				if(obj.type == UserEventObject.Type.PAIR){
 					long BeginTime = obj.beginTime;
 					long EndTime = obj.endTime;
 
@@ -1778,18 +1782,18 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 *  TODO: fix this for nested user events
 	 * 
 	 * */
-	protected representedEntity representedAtPixelYOffsetInRow(int y){
+	protected RepresentedEntity representedAtPixelYOffsetInRow(int y){
 		if(y < topOffset())
-			return representedEntity.NOTHING;
+			return RepresentedEntity.NOTHING;
 		else if(y<(topOffset() + totalUserEventRectsHeight()))
-			return representedEntity.USER_EVENT;
+			return RepresentedEntity.USER_EVENT;
 		else if(y < (topOffset() + totalUserEventRectsHeight()+entryMethodLocationHeight() ))
-			return representedEntity.ENTRY_METHOD;
+			return RepresentedEntity.ENTRY_METHOD;
 		else 
-			return representedEntity.NOTHING;
+			return RepresentedEntity.NOTHING;
 	}
 
-	public enum representedEntity {
+	public enum RepresentedEntity {
 		ENTRY_METHOD, USER_EVENT, NOTHING
 	}
 	
@@ -1811,6 +1815,29 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	protected int peBottomPixel(int pe) {
 		int yidx = whichTimelineVerticalPosition(pe);
 		return singleTimelineHeight()*(yidx+1) + topOffset() - 1;
+	}
+	
+	/** Which pe row is at pixel y coordinate. The result corresponds to an index into peToLine. */
+	private int rowForPixel(int y){
+		return (y - topOffset()) / singleTimelineHeight();
+	}
+	
+	/** Returns a list of processors that are rendered within the specified range of y pixel coordinates */
+	Collection<Integer> processorsInPixelYRange(int y1, int y2){
+		int r1 = rowForPixel(y1);
+		int r2 = rowForPixel(y2);
+		
+		ArrayList<Integer> results = new ArrayList();
+
+		// FIXME: inefficient traversal of linked list
+		for(int i=r1; i<=r2; i++){
+			if(i < peToLine.size()) {
+				results.add(peToLine.get(i));
+			} else {
+				System.err.println("Trying to render row " + i + " which doesn't have an associated PE");
+			}
+		}
+		return results;
 	}
 	
 	
@@ -2019,7 +2046,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();
-			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
+			Query1D<EntryMethodObject> list = allEntryMethodObjects.get(pe);
 			
 			Iterator<EntryMethodObject> iter2 = list.iterator();
 			while(iter2.hasNext()){
@@ -2041,7 +2068,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();
-			List<EntryMethodObject> list = allEntryMethodObjects.get(pe);
+			Query1D<EntryMethodObject> list = allEntryMethodObjects.get(pe);
 			
 			Iterator<EntryMethodObject> iter2 = list.iterator();
 			while(iter2.hasNext()){

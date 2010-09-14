@@ -27,14 +27,14 @@ public class Util
 
     public static void gblAdd(Container target, Component c,
 			      GridBagConstraints gbc,
-			      int x, int y, int dx, int dy, int wx, int wy)
+			      int x, int y, int gridwidth, int gridheight, int weightx, int weighty)
     {
 	gbc.gridx = x;
 	gbc.gridy = y;
-	gbc.gridwidth = dx;
-	gbc.gridheight = dy;
-	gbc.weightx = wx;
-	gbc.weighty = wy;
+	gbc.gridwidth = gridwidth;
+	gbc.gridheight = gridheight;
+	gbc.weightx = weightx;
+	gbc.weighty = weighty;
 	target.add(c, gbc);
     }
 

@@ -38,7 +38,7 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 	/** The panel on the left that displays strings like "PE 0 (20%,40%)" */
 	protected LabelPanel labelPanel;
 	/** The panel on top that draws a scale for the time dimension */
-	protected LayeredPanel axisPanel;
+	protected AxisPanel axisPanel;
 	/** The panel that draws the main portion of the window, the timelines */
 	protected MainPanel mainPanel;
 	
@@ -75,6 +75,10 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		
 		// Revalidate/Repaint
 		scrollingPanel.refreshDisplay(doRevalidate);
+		
+		invalidate();
+		validate();
+		repaint();
 	}
 	
 	public TimelineWindow(MainWindow parentWindow) {
@@ -87,13 +91,9 @@ public class TimelineWindow extends ProjectionsWindow implements MainHandler {
 		labelPanel = new LabelPanel(data);
 		
 		// Construct the various layers, and the layout manager
-		AxisPanel ap = new AxisPanel(data);
-		AxisOverlayPanel op = new AxisOverlayPanel(data);
-		AxisLayout lay = new AxisLayout(ap);
+		axisPanel = new AxisPanel(data);
+//		AxisLayout lay = new AxisLayout(axisPanel);
 		// Create the layered panel containing our layers
-		axisPanel = new LayeredPanel(ap,op,lay);
-		ap.setOpaque(false);
-		op.setOpaque(false);
 		
 		mainPanel = new MainPanel(data, this);
 		

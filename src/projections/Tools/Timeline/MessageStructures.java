@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.analysis.ObjectId;
 
 /** this class is used to hold some data structures that are initialized by a separate thread 
@@ -162,7 +163,7 @@ class MessageStructures {
 				return;
 			
 			Integer pe =  pe_iter.next();
-			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
+			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
 			Iterator<EntryMethodObject> obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
 				EntryMethodObject obj = obj_iter.next();
@@ -180,7 +181,7 @@ class MessageStructures {
 				return;
 			
 			Integer pe =  pe_iter.next();
-			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
+			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
 
 			for(EntryMethodObject obj : objs) {
 				if(obj.messages != null){
@@ -202,7 +203,7 @@ class MessageStructures {
 				return;
 			
 			Integer pe =  pe_iter.next();
-			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
+			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
 			Iterator<EntryMethodObject> obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
 				EntryMethodObject obj = obj_iter.next();
@@ -235,7 +236,7 @@ class MessageStructures {
 				return;
 			
 			Integer pe =  pe_iter.next();
-			List<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
+			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
 			Iterator<EntryMethodObject> obj_iter = objs.iterator();
 			while(obj_iter.hasNext()){
 				EntryMethodObject obj = obj_iter.next();

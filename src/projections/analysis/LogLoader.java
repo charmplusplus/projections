@@ -3,12 +3,12 @@ package projections.analysis;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -583,7 +583,7 @@ public class LogLoader extends ProjDefs
 	}
 
 	/** Read the timeline for a single PE and return the result as a Collection of TimelineEvent's */
-	public void createtimeline(int pe, long Begin, long End, Deque<TimelineEvent> timeline, Set<UserEventObject>  userEventVector, long minEntryDuration)
+	public void createtimeline(int pe, long Begin, long End, Deque<TimelineEvent> timeline, Collection<UserEventObject>  userEventVector, long minEntryDuration)
 	throws LogLoadException
 	{
 		long BeginTime = 0;
@@ -949,7 +949,7 @@ public class LogLoader extends ProjDefs
 							lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
 						break;
 					case USER_SUPPLIED_BRACKETED_NOTE:
-						UserEventObject note2 = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.PAIR, LE.note);
+						UserEventObject note2 = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.Type.PAIR, LE.note);
 						note2.endTime = LE.endTime;
 						userEventVector.add(note2);
 						break;
@@ -1058,7 +1058,7 @@ public class LogLoader extends ProjDefs
 						break;
 					case USER_EVENT:
 						// don't mess with TE, that's just for EPs
-						UserEventObject event = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.SINGLE);
+						UserEventObject event = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.Type.SINGLE);
 						userEventVector.add(event);
 						break;
 					case USER_SUPPLIED_NOTE:
@@ -1071,7 +1071,7 @@ public class LogLoader extends ProjDefs
 						// written.
 						userEventObject = new UserEventObject(pe, LE.Time-BeginTime,
 								LE.Entry, LE.EventID,
-								UserEventObject.PAIR); 
+								UserEventObject.Type.PAIR); 
 						// assume the end time to be the end of range
 						// in case the ending userevent gets cut off.
 						userEventObject.endTime = End;
@@ -1091,8 +1091,8 @@ public class LogLoader extends ProjDefs
 						// MISMATCHED EVENT PAIRS - again, nullify
 						// the first read event and pass the newly
 						// read entry back through the loop
-						if (userEventObject.CharmEventID != LE.EventID || 
-								userEventObject.UserEventID != LE.Entry) {
+						if (userEventObject.charmEventID != LE.EventID || 
+								userEventObject.userEventID != LE.Entry) {
 							userEventObject = null;
 							continue;
 						} else {

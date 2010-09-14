@@ -8,33 +8,15 @@ import java.util.Iterator;
 public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 	
 	ArrayList<T>	backingStorage;
-	private long lb;
-	private long ub;
-	private boolean hasQueryRange;
+
 	
 	public RangeQueryArrayList(){
 		backingStorage = new ArrayList<T>();
-		hasQueryRange = false;
-	}
-	
-	public void setQueryRange(long lb, long ub){
-		this.lb = lb;
-		this.ub = ub;
-		hasQueryRange = true;
 	}
 
-	public void clearQueryRange(){
-		hasQueryRange = false;
-	}
-	
 	
 	@Override
 	public Iterator<T> iterator() {
-		if(hasQueryRange){
-//			System.out.println("RangeQueryArrayList using RangeIterator lb=" + lb + " ub=" + ub);
-			return new RangeIterator(backingStorage.iterator(), lb, ub);
-		}
-		else
 			return backingStorage.iterator();
 	}
 	
@@ -101,7 +83,7 @@ public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
+	public <E> E[] toArray(E[] a) {
 		return backingStorage.toArray(a);
 	}
 	

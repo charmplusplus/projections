@@ -1011,12 +1011,20 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 
 	/** Shift all the times associated with this entry method by given amount */
-	protected void shiftTimesBy(long s){
+	@Override
+	public void shiftTimesBy(long s){
 		beginTime += s;
 		endTime += s;
 		recvTime += s;
 		cpuBegin += s;
 		cpuEnd += s;
+
+		if(messages != null){
+			for(TimelineMessage msg : messages){
+				msg.shiftTimesBy(s);
+			}
+		}
+		
 	}
 
 

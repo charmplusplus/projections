@@ -25,7 +25,12 @@ public class UnitTest {
 		public String toString(){
 			return "(" + lb + "," + ub + ") ";
 		}
-		
+
+		@Override
+		public void shiftTimesBy(long s) {
+			lb += s;
+			ub += s;
+		}
 		
 	}
 	

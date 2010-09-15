@@ -98,6 +98,14 @@ public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 		}
 		
 	}
+
+
+	@Override
+	public void shiftAllEntriesBy(long shift) {
+		for(T o : backingStorage){
+			o.shiftTimesBy(shift);
+		}
+	}
 	
 	
 }

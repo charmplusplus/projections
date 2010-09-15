@@ -7,4 +7,7 @@ public interface Range1D {
 	long lowerBound();
 	long upperBound();
 	
+	/** Shift all objects by the specified amount. Used to fix Tachyons in Timeline, and possibly elsewhere */
+	void shiftTimesBy(long s);
+	
 }

@@ -139,10 +139,15 @@ class MessageStructures {
 		/** Create a mapping from EventIDs on each pe to messages */
 		Iterator<Integer> pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
-
-			if(structures!=null && structures.stop)
-				return;
 			
+			// Need to syncrhonize or the value structures.stop may never be updated
+			if(structures!=null) {
+				synchronized(structures){
+					if(structures.stop)
+						return;					
+				}
+			}			
+
 			Integer pe =  pe_iter.next();
 			for (EntryMethodObject obj : data.allEntryMethodObjects.get(pe)) { // For each EntryMethod Object
 				if(obj.messages != null){
@@ -159,8 +164,12 @@ class MessageStructures {
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
 
-			if(structures!=null && structures.stop)
-				return;
+			if(structures!=null) {
+				synchronized(structures){
+					if(structures.stop)
+						return;					
+				}
+			}	
 			
 			Integer pe =  pe_iter.next();
 			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
@@ -177,8 +186,12 @@ class MessageStructures {
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
 			
-			if(structures!=null && structures.stop)
-				return;
+			if(structures!=null) {
+				synchronized(structures){
+					if(structures.stop)
+						return;					
+				}
+			}	
 			
 			Integer pe =  pe_iter.next();
 			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
@@ -199,8 +212,12 @@ class MessageStructures {
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
 
-			if(structures!=null && structures.stop)
-				return;
+			if(structures!=null) {
+				synchronized(structures){
+					if(structures.stop)
+						return;					
+				}
+			}	
 			
 			Integer pe =  pe_iter.next();
 			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
@@ -232,8 +249,12 @@ class MessageStructures {
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
 		while(pe_iter.hasNext()){
 
-			if(structures!=null && structures.stop)
-				return;
+			if(structures!=null) {
+				synchronized(structures){
+					if(structures.stop)
+						return;					
+				}
+			}	
 			
 			Integer pe =  pe_iter.next();
 			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);

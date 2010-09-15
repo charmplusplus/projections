@@ -203,6 +203,17 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 			return newRoot;
 		}
 
+		public void shiftRangeBy(long shift){
+			lowerBound += shift;
+			upperBound += shift;
+			
+			if(leftChild != null)
+				leftChild.shiftRangeBy(shift);
+			if(rightChild != null)
+				rightChild.shiftRangeBy(shift);
+			
+		}
+
 
 		public boolean isEmpty() {
 			return (numEntriesInSubTree==0);
@@ -673,6 +684,18 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 				add(t);
 		}
 		
+	}
+
+	@Override
+	public void shiftAllEntriesBy(long shift) {
+		// Shift all the objects in this collection
+		for(T o : this){
+			o.shiftTimesBy(shift);
+		}
+		
+		// Then shift the bounds for the whole tree
+		root.shiftRangeBy(shift);
+				
 	}
 	
 	

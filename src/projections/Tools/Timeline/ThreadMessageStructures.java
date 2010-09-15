@@ -14,7 +14,9 @@ class ThreadMessageStructures extends Thread {
 	volatile boolean stop = false;
 	
 	protected void stopThread(){
-		stop = true;
+		synchronized(this){
+			stop = true;
+		}
 	}
 	
 	private MessageStructures messageStructures;

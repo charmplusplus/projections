@@ -176,8 +176,8 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	}
 	
 	
-	
-	protected void shiftTimesBy(long shift) {
+	@Override
+	public void shiftTimesBy(long shift) {
 		beginTime += shift;
 		endTime += shift;
 	}

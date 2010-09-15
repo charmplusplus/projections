@@ -114,7 +114,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	
 	
 	/** Paint the entire opaque panel*/
-	public void paintComponent(Graphics g) {	
+	public void paintComponent(Graphics g) {
 		synchronized(data){
 			if(RenderInParallel && data.numPs()>1){
 				paintInParallel((Graphics2D)g);
@@ -369,13 +369,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.
-		setCursor(new Cursor(Cursor.WAIT_CURSOR));
+//		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
 		data.createTLOArray(useHelperThreads, rootWindow, showProgress);
 		
 		handler.setData(data);
 //		handler.refreshDisplay(true);
-		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+//		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	
 	}
 

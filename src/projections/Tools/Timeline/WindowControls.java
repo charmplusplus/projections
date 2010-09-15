@@ -157,11 +157,9 @@ ItemListener {
 					parentWindow.data.skipLoadingUserEvents(toolSpecificDialogPanel.dialogEnableUserEventFiltering.isSelected());
 
 					System.out.println("-------- post dialog box A");
-					synchronized(data){
 						System.out.println("-------- post dialog box B (in synchronized block)");
 						parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
 						cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
-					}
 					return null;
 				}
 
@@ -223,7 +221,6 @@ ItemListener {
 
 	/** Load a new time region */
 	private void loadSelected() {
-		synchronized(data){
 			if (data.selectionValid()) {
 
 				double startTime = data.leftSelectionTime();
@@ -250,7 +247,6 @@ ItemListener {
 			} else{
 				System.out.println("ERROR: somehow you clicked the loadSelected button which shouldn't have been enabled!");			
 			}
-		}
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -371,8 +367,10 @@ ItemListener {
 		else if(c == mColorByMemUsage)
 			data.setColorByMemoryUsage();
 
-		else if(c == mShiftTimelines)
+		else if(c == mShiftTimelines){
 			data.fixTachyons();
+			data.displayMustBeRedrawn();
+		}
 		
 		else if(c == 	mShowHideEntries){
 			new ChooseEntriesWindow(data, true, data);

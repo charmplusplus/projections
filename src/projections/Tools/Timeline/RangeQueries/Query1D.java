@@ -20,4 +20,6 @@ public interface Query1D<T extends Range1D> extends Iterable<T>, Collection<T> {
 
 	public void removeEntriesOutsideRange(long startTime, long endTime);
 
+	public void shiftAllEntriesBy(long shift);
+
 }

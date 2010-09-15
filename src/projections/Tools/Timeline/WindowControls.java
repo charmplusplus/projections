@@ -156,8 +156,12 @@ ItemListener {
 					}
 					parentWindow.data.skipLoadingUserEvents(toolSpecificDialogPanel.dialogEnableUserEventFiltering.isSelected());
 
-					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
-					cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
+					System.out.println("-------- post dialog box A");
+					synchronized(data){
+						System.out.println("-------- post dialog box B (in synchronized block)");
+						parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
+						cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
+					}
 					return null;
 				}
 
@@ -219,31 +223,33 @@ ItemListener {
 
 	/** Load a new time region */
 	private void loadSelected() {
-		if (data.selectionValid()) {
+		synchronized(data){
+			if (data.selectionValid()) {
 
-			double startTime = data.leftSelectionTime();
-			double endTime = data.rightSelectionTime();
+				double startTime = data.leftSelectionTime();
+				double endTime = data.rightSelectionTime();
 
-			data.invalidateSelection();
-			unsetSelectedTime();
+				data.invalidateSelection();
+				unsetSelectedTime();
 
-			if (startTime < data.startTime()) { // This seems unlikely to happen
-				startTime = data.startTime();
+				if (startTime < data.startTime()) { // This seems unlikely to happen
+					startTime = data.startTime();
+				}
+				if (endTime > data.endTime()) { // This seems unlikely to happen
+					endTime = data.endTime();
+				}
+
+				data.setNewRange((long)(startTime+0.5),(long)(endTime+0.5));
+
+				scaleField.setText("" + 1.0);	
+
+				parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
+
+				cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
+
+			} else{
+				System.out.println("ERROR: somehow you clicked the loadSelected button which shouldn't have been enabled!");			
 			}
-			if (endTime > data.endTime()) { // This seems unlikely to happen
-				endTime = data.endTime();
-			}
-
-			data.setNewRange((long)(startTime+0.5),(long)(endTime+0.5));
-
-			scaleField.setText("" + 1.0);	
-
-			parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
-
-			cbUserTable.setText("View User Events (" + data.getNumUserEvents() + ")");
-
-		} else{
-			System.out.println("ERROR: somehow you clicked the loadSelected button which shouldn't have been enabled!");			
 		}
 	}
 

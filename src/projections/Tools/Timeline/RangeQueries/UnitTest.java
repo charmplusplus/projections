@@ -64,7 +64,7 @@ public class UnitTest {
 		return testQuery1D(db) && testQuery1D(db2);
 	}
 	
-	@SuppressWarnings("deprecation")
+
 	public boolean testQuery1D(Query1D db){
 		System.out.println("Starting test for " + db);
 

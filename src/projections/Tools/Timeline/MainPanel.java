@@ -51,7 +51,7 @@ import projections.gui.MainWindow;
 public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
 {
 	/** Should the painting be performed in multiple threads */
-	private static final boolean RenderInParallel = false;
+	private static final boolean RenderInParallel = true;
 
 	/** A thread pool for use in rendering if RenderInParallel is true */
 	private static ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -64,7 +64,6 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	/** The backing model/view information for the Timeline */
 	private Data data;
 	private MainHandler handler;
-
 
 	
 	/** Construct a main Timeline Panel */
@@ -115,14 +114,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	
 	
 	/** Paint the entire opaque panel*/
-	public void paintComponent(Graphics g) {
-		
-		System.out.println("MainPanel paintComponent width=" + getWidth());
-		
-		if(RenderInParallel && data.numPs()>1){
-			paintInParallel((Graphics2D)g);
-		} else {
-			paintSequentially((Graphics2D)g);
+	public void paintComponent(Graphics g) {	
+		synchronized(data){
+			if(RenderInParallel && data.numPs()>1){
+				paintInParallel((Graphics2D)g);
+			} else {
+				paintSequentially((Graphics2D)g);
+			}
 		}
 	}
 
@@ -349,13 +347,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	/** Dynamically generate the tooltip mouseover text when needed */
 	@Override
 	public String getToolTipText(MouseEvent evt){
-		SpecialMouseHandler o = getObjectRenderedAtEvtLocation(evt);
-		if(o != null){
-			return o.getToolTipText();
-		} else {
-			return null;
-		}
-
+			SpecialMouseHandler o = getObjectRenderedAtEvtLocation(evt);
+			if(o != null){
+				return o.getToolTipText();
+			} else {
+				return null;
+			}
 	}
 
 
@@ -366,7 +363,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	 *  This will allow the results to be returned faster, but if the message information is needed immedeately, 
 	 *  this should be set to false.
 	 *  
-	 * @note This was formerly called procRangeDialog()
+	 * @note caller must synchronize on data to prevent race conditions between rendering and modifying data
 	 */
 	public void loadTimelineObjects(boolean useHelperThreads, Component rootWindow, boolean showProgress) {
 
@@ -375,11 +372,10 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
 		data.createTLOArray(useHelperThreads, rootWindow, showProgress);
-
+		
 		handler.setData(data);
 //		handler.refreshDisplay(true);
 		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-
 	
 	}
 
@@ -459,7 +455,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 	private SpecialMouseHandler getObjectRenderedAtEvtLocation(MouseEvent evt){
 		// Check to see which pe we are on
-
+		
 		final int whichPERow = evt.getY() / data.singleTimelineHeight();
 		final int verticalOffsetWithinRow = evt.getY() % data.singleTimelineHeight();
 
@@ -479,8 +475,8 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 					// Find an entry method invocation that occurred at this time, and display its tooltip instead
 					Query1D<EntryMethodObject> a = data.allEntryMethodObjects.get(PE);
-					
 					// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
+					// unfortunately we can't synchronize on data because this executes in some GUI thread which had better not block, as it may block the progress bar which blocks the loading of data
 					if(a == null)
 						return null;
 					

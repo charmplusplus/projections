@@ -58,88 +58,94 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 
 	public void paintComponent(Graphics g)
 	{
-
 		final long startTime = System.nanoTime();
-
+		long startTime2;
 		
-		g.setFont(data.labelFont);
-		FontMetrics fm = g.getFontMetrics();
+		synchronized(data){
 
-		g.setColor(data.getBackgroundColor());
-		Rectangle clip = g.getClipBounds();
-		g.fillRect(clip.x, clip.y, clip.width, clip.height);
+			startTime2 = System.nanoTime();
 
-		int upperRowToPaint = data.rowForPixel(clip.y);
-		int lowerRowToPaint = data.rowForPixel(clip.y+clip.height-1);
-				
-		
-		for (int verticalPosition=upperRowToPaint; verticalPosition<=lowerRowToPaint; verticalPosition++) {
-			// Draw the labels onto the screen
 
-			int pe = data.whichPE(verticalPosition);
+			g.setFont(data.labelFont);
+			FontMetrics fm = g.getFontMetrics();
 
-			if(pe > -1){
-				
-				switch(data.getViewType()){
-				case VIEW_SUPERCOMPACT:
-					break;
-				case VIEW_MINIMAL:
-				case VIEW_COMPACT:
-					// A simpler version (right justified, bold larger PE label, no idle percentage)
+			g.setColor(data.getBackgroundColor());
+			Rectangle clip = g.getClipBounds();
+			g.fillRect(clip.x, clip.y, clip.width, clip.height);
 
-					if(clickedOnPE == pe){
-						// don't draw the old location
-					}
-					else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
-						// draw the PE we are dragging around here
-						g.setColor(Color.red);
-						String peString = "PE "+clickedOnPE;
-						int stringWidth = fm.stringWidth(peString);			
-						g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
-					}
-					else {
-						String peString = "PE "+pe;
-						int stringWidth = fm.stringWidth(peString);			
-						g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
-					}
-					break;
-				default:
-					
-					// The full version
-					if(clickedOnPE == pe){
-						// don't draw the old location
-					}
-					else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
-						// draw the PE we are dragging around here
-						g.setColor(Color.red);
+			int upperRowToPaint = data.rowForPixel(clip.y);
+			int lowerRowToPaint = data.rowForPixel(clip.y+clip.height-1);
 
-						String peString = "PE "+ clickedOnPE;
-						g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 
-						String percentString = "(" + (int)(100 - data.idleUsage[clickedOnPE]) + ", " + (int)(data.processorUsage[clickedOnPE]) + ")";
-						g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
-					}
-					else {
-						g.setColor(data.getForegroundColor());
+			for (int verticalPosition=upperRowToPaint; verticalPosition<=lowerRowToPaint; verticalPosition++) {
+				// Draw the labels onto the screen
 
-						String peString = "PE "+ pe;
-						g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+				int pe = data.whichPE(verticalPosition);
 
-						String percentString = "(?,?)";
-						if(data.idleUsage.length > pe && data.processorUsage.length>pe){
-							percentString = "(" + (int)(100 - data.idleUsage[pe]) + ", " + (int)(data.processorUsage[pe]) + ")";
+				if(pe > -1){
+
+					switch(data.getViewType()){
+					case VIEW_SUPERCOMPACT:
+						break;
+					case VIEW_MINIMAL:
+					case VIEW_COMPACT:
+						// A simpler version (right justified, bold larger PE label, no idle percentage)
+
+						if(clickedOnPE == pe){
+							// don't draw the old location
 						}
-						g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
+						else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
+							// draw the PE we are dragging around here
+							g.setColor(Color.red);
+							String peString = "PE "+clickedOnPE;
+							int stringWidth = fm.stringWidth(peString);			
+							g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+						}
+						else {
+							String peString = "PE "+pe;
+							int stringWidth = fm.stringWidth(peString);			
+							g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+						}
+						break;
+					default:
+
+						// The full version
+						if(clickedOnPE == pe){
+							// don't draw the old location
+						}
+						else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
+							// draw the PE we are dragging around here
+							g.setColor(Color.red);
+
+							String peString = "PE "+ clickedOnPE;
+							g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+
+							String percentString = "(" + (int)(100 - data.idleUsage[clickedOnPE]) + ", " + (int)(data.processorUsage[clickedOnPE]) + ")";
+							g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
+						}
+						else {
+							g.setColor(data.getForegroundColor());
+
+							String peString = "PE "+ pe;
+							g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
+
+							String percentString = "(?,?)";
+							if(data.idleUsage.length > pe && data.processorUsage.length>pe){
+								percentString = "(" + (int)(100 - data.idleUsage[pe]) + ", " + (int)(data.processorUsage[pe]) + ")";
+							}
+							g.drawString(percentString, 15, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight() + fm.getHeight() + 2);
+						}
+						break;
 					}
-					break;
 				}
 			}
-		}
 
-		
+		}
 		final long endTime = System.nanoTime();
-		final long duration = endTime - startTime;
-		MainWindow.performanceLogger.log(Level.INFO,"Time to paint Label Panel: " + (duration/1000000) + " ms");
+		final long duration1 = startTime2 - startTime;
+		final long duration2 = endTime - startTime2;
+
+		MainWindow.performanceLogger.log(Level.INFO,"Time to paint Label Panel: " + (duration2/1000000) + " ms. Time waiting to synchronize: " + (duration1/1000000) + " ms");
 		
 	}
 

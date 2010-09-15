@@ -84,72 +84,73 @@ class AxisPanel extends JPanel implements Scrollable, MouseListener, MouseMotion
 
 	public void paintComponent(Graphics g)
 	{
-		
-		System.out.println("MainPanel paintComponent width=" + getWidth());
-		
-		g.setFont(data.axisFont);
-		FontMetrics fm = g.getFontMetrics();
-		
-		g.setColor(data.getBackgroundColor());
-		Rectangle clipBounds = g.getClipBounds();
-		g.fillRect(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
+		synchronized(data){
 
-		int maxx = getWidth();
+			System.out.println("MainPanel paintComponent width=" + getWidth());
 
-		// Determine the left and right pixel coordinates where we will be drawing the timeline
-		int xLeft = data.offset();
-		int xRight = maxx-data.offset();
-		
-		// Draw horizontal line
-		g.setColor(data.getForegroundColor());
-		g.drawLine(xLeft, axispos(), xRight, axispos());
+			g.setFont(data.axisFont);
+			FontMetrics fm = g.getFontMetrics();
 
-		
-		// Draw the big tick marks
-		for(int i=0;i<numBigTicks()+1;i++){
-		
-			double timeForTick = (startTimePretty()+i*smallTickTimeIncrement()*smallTicksPerBigTick());
-			int pixelForTickX = data.timeToScreenPixel(timeForTick);
+			g.setColor(data.getBackgroundColor());
+			Rectangle clipBounds = g.getClipBounds();
+			g.fillRect(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
 
-			if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
-				String label = format_.format(timeForTick);	
-//				String label = U.humanReadableString(timeForTick);	
-				g.drawLine(pixelForTickX, axispos()-largeTickHalfLength, pixelForTickX, axispos() + largeTickHalfLength);
-				g.drawString(label, pixelForTickX - fm.stringWidth(label)/2, textpos());
-			}
-		}
-				
-		
-		// Draw the small tick marks
-		double timeForFirstBigTick = startTimePretty();
-		for(int i=0;i<numSmallTicks()+1;i++){
-			
-			double timeForTick = timeForFirstBigTick + i*smallTickTimeIncrement();
-			int pixelForTickX = data.timeToScreenPixel(timeForTick);
-			if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
-				g.drawLine(pixelForTickX, axispos()-smallTickHalfLength, pixelForTickX, axispos()+smallTickHalfLength);			
-			}
-		}
-				
-		
-		// Draw the label for the axis
-		g.drawString(axisLabel(), getWidth()/2 - fm.stringWidth(axisLabel())/2, axisLabelPositionY());
-		
-		
-		// Draw the overlay
-		if(data.selectionValid()){
+			int maxx = getWidth();
+
+			// Determine the left and right pixel coordinates where we will be drawing the timeline
+			int xLeft = data.offset();
+			int xRight = maxx-data.offset();
+
+			// Draw horizontal line
 			g.setColor(data.getForegroundColor());
-			g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
-			g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
-		}
+			g.drawLine(xLeft, axispos(), xRight, axispos());
 
-		if(data.highlightValid()){
-			// Draw vertical line
-			g.setColor(data.getForegroundColor());
-			g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
+
+			// Draw the big tick marks
+			for(int i=0;i<numBigTicks()+1;i++){
+
+				double timeForTick = (startTimePretty()+i*smallTickTimeIncrement()*smallTicksPerBigTick());
+				int pixelForTickX = data.timeToScreenPixel(timeForTick);
+
+				if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
+					String label = format_.format(timeForTick);	
+					//				String label = U.humanReadableString(timeForTick);	
+					g.drawLine(pixelForTickX, axispos()-largeTickHalfLength, pixelForTickX, axispos() + largeTickHalfLength);
+					g.drawString(label, pixelForTickX - fm.stringWidth(label)/2, textpos());
+				}
+			}
+
+
+			// Draw the small tick marks
+			double timeForFirstBigTick = startTimePretty();
+			for(int i=0;i<numSmallTicks()+1;i++){
+
+				double timeForTick = timeForFirstBigTick + i*smallTickTimeIncrement();
+				int pixelForTickX = data.timeToScreenPixel(timeForTick);
+				if(pixelForTickX >= xLeft && pixelForTickX <= xRight){
+					g.drawLine(pixelForTickX, axispos()-smallTickHalfLength, pixelForTickX, axispos()+smallTickHalfLength);			
+				}
+			}
+
+
+			// Draw the label for the axis
+			g.drawString(axisLabel(), getWidth()/2 - fm.stringWidth(axisLabel())/2, axisLabelPositionY());
+
+
+			// Draw the overlay
+			if(data.selectionValid()){
+				g.setColor(data.getForegroundColor());
+				g.drawLine(data.leftSelection(),0, data.leftSelection(), getHeight()-1);
+				g.drawLine(data.rightSelection(),0, data.rightSelection(), getHeight()-1);
+			}
+
+			if(data.highlightValid()){
+				// Draw vertical line
+				g.setColor(data.getForegroundColor());
+				g.drawLine(data.getHighlight(),0, data.getHighlight(), getHeight()-1);
+			}
+
 		}
-		
-		
 
 	}
 

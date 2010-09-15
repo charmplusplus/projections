@@ -44,9 +44,10 @@ class ThreadedFileReader implements MainHandler, Runnable {
 
 		// create a MainPanel for it	
 		MainPanel displayPanel = new MainPanel(data, this);
-		System.out.println("Calling loadTimelineObjects");
-
-		displayPanel.loadTimelineObjects(false, null, false);
+		synchronized(data){
+			System.out.println("Calling loadTimelineObjects");
+			displayPanel.loadTimelineObjects(false, null, false);
+		}
 
 		displayPanel.setSize(width,data.singleTimelineHeight());
 		displayPanel.revalidate();
@@ -56,7 +57,6 @@ class ThreadedFileReader implements MainHandler, Runnable {
 		
 		System.out.println("Created image for PE " + PE);
 
-		data.disposeOfStructures();
 		displayPanel = null;
 		data = null;
 		

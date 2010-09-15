@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,6 +16,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 import java.util.logging.Level;
 
 import javax.swing.ToolTipManager;
@@ -59,6 +61,10 @@ import projections.misc.LogLoadException;
  *  
  *  This class requires a handler(which implements an appropriate interface) be provided. This
  *  handler is used when things change enough that a repaint or re-layout is required
+ * 
+ * 
+ *  For thread safety, all rendering calls or calls that update the data in this object must syncrhonize on this.
+ * 
  * 
  * @author idooley et. al.
  *
@@ -117,16 +123,11 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** A set of user events that should be hidden */
 	private Set<Integer> hiddenUserEvents;
 
-	/** Each value of the TreeMap is a TreeSet (sorted list) of EntryMethodObject's .
-	 *  Each key of the TreeMap is an Integer pe 
-	 *  <Integer,LinkedList<EntryMethodObject> >
-	 */
-	protected TreeMap<Integer, Query1D<EntryMethodObject>> allEntryMethodObjects = new TreeMap<Integer,Query1D<EntryMethodObject> >();
+	/** A synchronized collection of the Entry Methods for each PE */ 
+	protected Map<Integer, Query1D<EntryMethodObject>> allEntryMethodObjects = Collections.synchronizedMap(new TreeMap<Integer,Query1D<EntryMethodObject> >());
 
-	/** Each value in this TreeMap is a TreeSet of UserEventObject's .
-	 *  Each key of the TreeMap is an Integer pe
-	 */
-	protected TreeMap<Integer, Query1D<UserEventObject>> allUserEventObjects = new TreeMap<Integer, Query1D <UserEventObject> >();
+	/** A synchronized collection of the User Events for each PE  */
+	protected Map<Integer, Query1D<UserEventObject>> allUserEventObjects = Collections.synchronizedMap(new TreeMap<Integer, Query1D <UserEventObject> >());
 
 	
 	
@@ -261,7 +262,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		drawMessagesForTheseObjects = new HashSet<EntryMethodObject>();
 		drawMessagesForTheseObjectsAlt = new HashSet<EntryMethodObject>();
 				
-		allEntryMethodObjects = null;
+		allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
+		allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
+
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		makeFrequencyMap(entries);
 		makeFreqVector();
@@ -376,46 +379,55 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 *        
 	 * If the message send lines are needed immediately, no helper threads should be used(race condition)
 	 *        
+	 *  @note caller synchronizes on this
 	 */
 	protected void createTLOArray(boolean useHelperThreads, Component rootWindow, boolean showProgress)
 	{
 		
 		// Kill off the secondary processing threads if needed
 		messageStructures.kill();
-		
-		allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
-		allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
-
-		
+	
 		// Can we reuse our already loaded data?
 		if(startTime >= oldBT && endTime <= oldET){
-		
-			Map<Integer, Query1D<EntryMethodObject> > oldEntryMethodObjects = allEntryMethodObjects;
-
-			Map<Integer, Query1D<UserEventObject> > oldUserEventObjects = allUserEventObjects;
-
 			// Remove any unused objects from our data structures 
-		
-			for(Integer pe : peToLine){
-				
-				if(oldEntryMethodObjects.containsKey(pe)){					
-					// Reuse the already loaded data
-					Query1D<EntryMethodObject> oldData = oldEntryMethodObjects.get(pe);
-					oldData.removeEntriesOutsideRange(startTime, endTime);
-					allEntryMethodObjects.put(pe, oldData);
-				}
-				
-				if(oldUserEventObjects.containsKey(pe)){					
-					// Reuse the already loaded data
-					Query1D<UserEventObject> oldData = allUserEventObjects.get(pe);
-					oldData.removeEntriesOutsideRange(startTime, endTime);
-					allUserEventObjects.put(pe, oldData);
-				}
+//			System.out.println("Attempting to reuse some old data");
 
+			// scan through oldEntryMethodObjects, cleaning as we go
+			Iterator<Entry<Integer, Query1D<EntryMethodObject>>> iter = allEntryMethodObjects.entrySet().iterator();
+			while(iter.hasNext()){
+				Entry<Integer, Query1D<EntryMethodObject>> e = iter.next();
+				Integer pe = e.getKey();
+				Query1D<EntryMethodObject> objs = e.getValue();
+
+				if(peToLine.contains(pe)){
+//					System.out.println("Pruning entry methods for PE " + pe);
+					objs.removeEntriesOutsideRange(startTime, endTime);
+				} else {
+//					System.out.println("Deleting entry methods for PE " + pe);
+					iter.remove();
+				}
 			}
+
+			// scan through allUserEventObjects, cleaning as we go
+			Iterator<Entry<Integer, Query1D<UserEventObject>>> iter2 = allUserEventObjects.entrySet().iterator();
+			while(iter2.hasNext()){
+				Entry<Integer, Query1D<UserEventObject>> e = iter2.next();
+				Integer pe = e.getKey();
+				Query1D<UserEventObject> objs = e.getValue();
+
+				if(peToLine.contains(pe)){
+//					System.out.println("Pruning user events for PE " + pe);
+					objs.removeEntriesOutsideRange(startTime, endTime);
+				} else {
+//					System.out.println("Deleting user events for PE " + pe);
+					iter2.remove();
+				}				
+			}
+
+//			System.out.println("done pruning/deleting");
 			
 		}
-		
+				
 		oldBT = startTime;
 		oldET = endTime;
 		
@@ -428,14 +440,12 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		// Create a list of worker threads
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		
-		Iterator<Integer> peIter = peToLine.iterator();
-		int pIdx=0;
-		while(peIter.hasNext()){
-			Integer pe = peIter.next();
+		for(Integer pe : peToLine){
 			if(!allEntryMethodObjects.containsKey(pe)) {
 				readyReaders.add(new ThreadedFileReader(pe,this));
+			} else {
+				// data exists for this pe already
 			}
-			pIdx++;
 		}
 	
 		// Determine a component to show the progress bar with
@@ -682,7 +692,11 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 		
 		// Save perPEObjects and userEvents
-		getDataSyncSaveObjectLists(pe, perPEObjects, userEvents);
+		
+		allUserEventObjects.put(pe,userEvents);
+		allEntryMethodObjects.put(pe,perPEObjects);
+
+		
 		
 		long minMemThisPE = Long.MAX_VALUE;
 		long maxMemThisPE = 0;
@@ -737,30 +751,25 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	
 
-	/** Thread-safe storing of the userEvents and perPEObjects */
-	synchronized private void getDataSyncSaveObjectLists(Integer pe, Query1D<EntryMethodObject> perPEObjects, Query1D<UserEventObject> userEvents )  
-	{
-		// The user events are simply that which were produced by createtimeline
-		allUserEventObjects.put(pe,userEvents);
-		// The entry method objects must however be constructed
-		allEntryMethodObjects.put(pe,perPEObjects);
-	}
+	/** A little object to help with syncrhonization of the updates to the memory structures */
+	Object memUsageLock = new Object();
 	
 	/** Thread safe updating of the memory and user supplied ranges */
-	synchronized private void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE, long minUserSuppliedThisPE, long maxUserSuppliedThisPE)  
+	private void getDataSyncSaveMemUsage(long minMemThisPE, long maxMemThisPE, long minUserSuppliedThisPE, long maxUserSuppliedThisPE)  
 	{
-		if(minMemThisPE < minMem)
-			minMem = minMemThisPE;
-		if(maxMemThisPE > maxMem)
-			maxMem = maxMemThisPE;
-		
-		
-		if(minUserSuppliedThisPE < minUserSupplied)
-			minUserSupplied = minUserSuppliedThisPE;
-		if(maxUserSuppliedThisPE > maxUserSupplied)
-			maxUserSupplied = maxUserSuppliedThisPE;
-	}
+		synchronized(memUsageLock){
+			if(minMemThisPE < minMem)
+				minMem = minMemThisPE;
+			if(maxMemThisPE > maxMem)
+				maxMem = maxMemThisPE;
 
+
+			if(minUserSuppliedThisPE < minUserSupplied)
+				minUserSupplied = minUserSuppliedThisPE;
+			if(maxUserSuppliedThisPE > maxUserSupplied)
+				maxUserSupplied = maxUserSuppliedThisPE;
+		}
+	}
 	
 	/** Did the logs we loaded so far contain any memory usage entries? */
 	private boolean memoryUsageValid() {
@@ -2015,6 +2024,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	/** Remove from allEntryMethodObjects any idle EntryMethodObjects */
 	private void pruneOutIdleRegions() {
+		// FIXME: may not work with new queryable data structure for allEntryMethodObjects
+		System.err.println("pruneOutIdleRegions() may not work in this version of projections");
 		MainWindow.performanceLogger.log(Level.INFO,"pruneOutIdleRegions");
 		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
 		while(iter.hasNext()){
@@ -2099,23 +2110,16 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	public void finalize() throws Throwable
 	{
-		disposeOfStructures();
-		super.finalize(); //not necessary if extending Object.
-	} 
-	
-	public void disposeOfStructures()
-	{
 		entries = null;
 		hiddenEntryPoints = null;
-		allEntryMethodObjects = null;
-		allUserEventObjects = null;
 		processorUsage = null;
 		packUsage = null;
 		entryUsageList = null;
 		messageStructures = null;
 		drawMessagesForTheseObjects = null;
 		drawMessagesForTheseObjectsAlt = null;
-	}
+		super.finalize(); //not necessary if extending Object.
+	} 
 	
 	public void makeFrequencyMap(int[] frequencyOfEntries) {
 		TreeMap<Integer, LinkedList<Integer>> mapToReturn = new TreeMap<Integer, LinkedList<Integer>>();

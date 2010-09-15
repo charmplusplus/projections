@@ -657,6 +657,23 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 	public void printTree() {
 		root.printInfoRecursive(0);
 	}
+
+	
+	@Override
+	/** A probably non-efficient method for eliminating unused entries from the tree */
+	public void removeEntriesOutsideRange(long startTime, long endTime) {
+		
+		Object[] a = toArray();
+
+		clear();
+		
+		for(Object o : a){
+			T t = (T)o;
+			if(t.lowerBound() <= endTime && t.upperBound() >= startTime)
+				add(t);
+		}
+		
+	}
 	
 	
 }

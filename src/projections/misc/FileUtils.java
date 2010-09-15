@@ -136,9 +136,8 @@ public class FileUtils {
 		String prefix_s = prefix.getName();
 		
 //		System.out.println("FileUtils.dirFromFile(baseName) = " + FileUtils.dirFromFile(baseName) );
-		File files[] = myDir.listFiles();
-		for (int i=0; i<files.length; i++) {
-			File f = files[i];
+
+		for(File f : myDir.listFiles()){
 			String filename = f.getName();
 			String extension = getTypeExtension(type);
 

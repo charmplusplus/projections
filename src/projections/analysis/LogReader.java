@@ -277,10 +277,9 @@ public class LogReader
     		userEntries = new int[numUserEntries][3][numProcessors][numIntervals];
     		categorized = new int[5][3][numProcessors][];
     	}
-    	processorList.reset();
-    	int pe = processorList.nextElement();
+    	
     	curPeIdx = 0;
-    	for (;pe!=-1; pe=processorList.nextElement()) {
+    	for(Integer pe : processorList) {
     		if(showProgress){
     			progressBar.setProgress(curPeIdx);
     			progressBar.setNote("[PE: " + pe + " ] Allocating Memory.");

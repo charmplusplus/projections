@@ -7,6 +7,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.util.Iterator;
+import java.util.Map.Entry;
 
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
@@ -19,6 +20,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.gui.FormattedNumber;
 import projections.gui.count.TableSorter;
 
@@ -107,50 +109,57 @@ class UserEventWindow extends JFrame
 
 	public void setData(Data data) { 
 		this.data = data;
-		// TODO This file should be converted to use the treeset structure instead of these old arrays
-		//  events_ is sorted already because it comes from a treeset
-		events_ = new Object[data.numPs()][];
-		pes = new Integer[data.numPs()];
 		
-		Iterator pe_iter = data.allUserEventObjects.keySet().iterator();
-		int pindex=0;
-		while(pe_iter.hasNext()){
-			Integer pe = (Integer) pe_iter.next();
-			events_[pindex] = (data.allUserEventObjects.get(pe)).toArray();	
-			pes[pindex] = pe;
-			pindex++;
-		}
-		
-		// create the layout here
-		super.getContentPane().removeAll();
-		tabbedPane_.removeAll();
-		if (events_.length > 1) { super.getContentPane().add(tabbedPane_); }
-		sorter_ = new TableSorter[events_.length];
-		
-		for (int i=0; i<events_.length; i++) {
-			UserEventTable userEvents = new UserEventTable(i);
-			sorter_[i] = new TableSorter(userEvents);
-			JTable table = new JTable(sorter_[i]);
-			sorter_[i].addMouseListenerToHeaderInTable(table);
-			table.setBackground(BACKGROUND);
-			table.setForeground(FOREGROUND);
-			TableColumn column = null;
-			column = table.getColumnModel().getColumn(0);
-			column.setPreferredWidth(150);
-			column.setCellRenderer(new NameRenderer(i));
-			for (int j=1; j<userEvents.getColumnCount(); j++) {
-				column = table.getColumnModel().getColumn(j);
-				column.setPreferredWidth(75);
-				column.setCellRenderer(rightJustify_);
+		if(data.numPs() <= 100){
+			// TODO This file should be converted to use the treeset structure instead of these old arrays
+			//  events_ is sorted already because it comes from a treeset
+			events_ = new Object[data.numPs()][];
+			pes = new Integer[data.numPs()];
+
+
+			int pindex=0;
+			for(Entry<Integer, Query1D<UserEventObject>> e : data.allUserEventObjects.entrySet()){
+				Integer pe = e.getKey();
+				Query1D<UserEventObject> userEventsForPe = e.getValue();
+				events_[pindex] = userEventsForPe.toArray();	
+				pes[pindex] = pe;
+				pindex++;
 			}
-			if (events_.length==1) { 
-				super.getContentPane().add(new JScrollPane(table));
+
+			// create the layout here
+			super.getContentPane().removeAll();
+			tabbedPane_.removeAll();
+			if (events_.length > 1) { super.getContentPane().add(tabbedPane_); }
+			sorter_ = new TableSorter[events_.length];
+
+			for (int i=0; i<events_.length; i++) {
+				UserEventTable userEvents = new UserEventTable(i);
+				sorter_[i] = new TableSorter(userEvents);
+				JTable table = new JTable(sorter_[i]);
+				sorter_[i].addMouseListenerToHeaderInTable(table);
+				table.setBackground(BACKGROUND);
+				table.setForeground(FOREGROUND);
+				TableColumn column = null;
+				column = table.getColumnModel().getColumn(0);
+				column.setPreferredWidth(150);
+				column.setCellRenderer(new NameRenderer(i));
+				for (int j=1; j<userEvents.getColumnCount(); j++) {
+					column = table.getColumnModel().getColumn(j);
+					column.setPreferredWidth(75);
+					column.setCellRenderer(rightJustify_);
+				}
+				if (events_.length==1) { 
+					super.getContentPane().add(new JScrollPane(table));
+				}
+				else {
+					tabbedPane_.addTab(
+							pes[i].toString(),
+							new JScrollPane(table));
+				}
 			}
-			else {
-				tabbedPane_.addTab(
-						pes[i].toString(),
-						new JScrollPane(table));
-			}
+		} else {
+			super.getContentPane().removeAll();
+			super.getContentPane().add(new JLabel("<html><body><h1>ERROR: Can only load display when at most 100 PEs are loaded</h1></body></html>"));
 		}
 		super.getContentPane().invalidate();
 		super.getContentPane().doLayout();

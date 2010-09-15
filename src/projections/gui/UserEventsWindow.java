@@ -125,7 +125,6 @@ class UserEventsWindow extends GenericGraphWindow
     }
 
     private void constructToolData() {
-	int pe = 0;
 	int count = 0;
 	ProgressMonitor progressBar =
 	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
@@ -136,11 +135,10 @@ class UserEventsWindow extends GenericGraphWindow
 	progressBar.setProgress(0);
 	graphData = new double[processorList.size()][];
 	numCalls = new long[processorList.size()][];
-	while (processorList.hasMoreElements()) {
-		pe = processorList.nextElement();
+
+	for(Integer pe : processorList) {
 		progressBar.setProgress(count);
-		progressBar.setNote("[PE: " + pe +
-		" ] Reading Data.");
+		progressBar.setNote("[PE: " + pe + " ] Reading Data.");
 		if (progressBar.isCanceled()) {
 			return;
 		}

@@ -316,18 +316,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
 	public void setProcessorList(OrderedIntList processorList){
 		peToLine.clear();
-		processorList.reset();
-		int p = processorList.nextElement();
 		Integer line = 0;
-		while (p != -1) {
-			Integer pe = Integer.valueOf(p);
+
+		for(Integer pe : processorList){
 			peToLine.addLast(pe);
 			line ++;
-			if(processorList.hasMoreElements())
-				p = processorList.nextElement();
-			else
-				p = -1;
 		}
+		
 	}
 
 
@@ -388,60 +383,37 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		// Kill off the secondary processing threads if needed
 		messageStructures.kill();
 		
+		allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
+		allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
+
+		
 		// Can we reuse our already loaded data?
 		if(startTime >= oldBT && endTime <= oldET){
 		
 			Map<Integer, Query1D<EntryMethodObject> > oldEntryMethodObjects = allEntryMethodObjects;
 
 			Map<Integer, Query1D<UserEventObject> > oldUserEventObjects = allUserEventObjects;
-			
-			allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
-			allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
 
 			// Remove any unused objects from our data structures 
-			// (the components in the JPanel will be regenerated later from this updated list)
 		
-			Iterator<Integer> peIter = peToLine.iterator();
-			while(peIter.hasNext()){
-				Integer pe = peIter.next();
-					
-				if(oldEntryMethodObjects.containsKey(pe)){
+			for(Integer pe : peToLine){
+				
+				if(oldEntryMethodObjects.containsKey(pe)){					
 					// Reuse the already loaded data
-					allEntryMethodObjects.put(pe, oldEntryMethodObjects.get(pe));
-					allUserEventObjects.put(pe, oldUserEventObjects.get(pe));
-
-					// Drop elements from mesgVector and allEntryMethodObjects outside range
-					if(allEntryMethodObjects.containsKey(pe)){
-						Query1D<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
-						Iterator<EntryMethodObject> iter = objs.iterator();
-						while(iter.hasNext()){
-							EntryMethodObject obj = iter.next();
-							if(obj.getEndTime() < startTime || obj.getBeginTime() > endTime){
-								iter.remove();
-							}
-						}
-					}
-
-					// Drop elements from userEventsArray outside range
-					if(allUserEventObjects.containsKey(pe)){
-
-						Iterator<UserEventObject> iter2 = allUserEventObjects.get(pe).iterator();
-						while(iter2.hasNext()){
-							UserEventObject obj = iter2.next();
-							if(obj.endTime < startTime || obj.beginTime > endTime){
-								iter2.remove();
-							}
-						}
-					}
-					
+					Query1D<EntryMethodObject> oldData = oldEntryMethodObjects.get(pe);
+					oldData.removeEntriesOutsideRange(startTime, endTime);
+					allEntryMethodObjects.put(pe, oldData);
+				}
+				
+				if(oldUserEventObjects.containsKey(pe)){					
+					// Reuse the already loaded data
+					Query1D<UserEventObject> oldData = allUserEventObjects.get(pe);
+					oldData.removeEntriesOutsideRange(startTime, endTime);
+					allUserEventObjects.put(pe, oldData);
 				}
 
 			}
 			
-		} else {
-			// We need to reload everything
-			allEntryMethodObjects = new TreeMap<Integer, Query1D<EntryMethodObject>>();
-			allUserEventObjects = new TreeMap<Integer, Query1D<UserEventObject>>();
 		}
 		
 		oldBT = startTime;
@@ -1588,12 +1560,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		if(peToLine==null){
 			throw new RuntimeException("peToLine is null");
 		}
+	
 		if(!peToLine.contains(Integer.valueOf(PE))){
 			throw new RuntimeException("peToLine does not contain pe " + PE);
 		}
 		return peToLine.indexOf(Integer.valueOf(PE));
 	}
-	
+
 
 	/** Determines the PE for a given vertical position */
 	protected int whichPE(Integer verticalPosition) {
@@ -1818,7 +1791,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 	
 	/** Which pe row is at pixel y coordinate. The result corresponds to an index into peToLine. */
-	private int rowForPixel(int y){
+	protected int rowForPixel(int y){
 		return (y - topOffset()) / singleTimelineHeight();
 	}
 	
@@ -1829,14 +1802,14 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		
 		ArrayList<Integer> results = new ArrayList();
 
-		// FIXME: inefficient traversal of linked list
-		for(int i=r1; i<=r2; i++){
-			if(i < peToLine.size()) {
-				results.add(peToLine.get(i));
-			} else {
-				System.err.println("Trying to render row " + i + " which doesn't have an associated PE");
-			}
+		int count = 0;
+		for(Integer pe : peToLine){
+			if(count >= r1 && count <= r2){
+				results.add(pe);
+			} 
+			count++;
 		}
+		
 		return results;
 	}
 	

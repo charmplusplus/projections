@@ -9,10 +9,13 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Collection;
+import java.util.logging.Level;
 
 import javax.swing.JPanel;
 
 import projections.Tools.Timeline.Data.ViewType;
+import projections.gui.MainWindow;
 
 /** Draws the left column of the timeline view. The labels such as "PE 0", "PE 1" */
 class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
@@ -55,20 +58,22 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 
 	public void paintComponent(Graphics g)
 	{
-		// Let UI delegate paint first 
-		// (including background filling, if I'm opaque)
-		super.paintComponent(g); 
-		// paint my contents next....
 
+		final long startTime = System.nanoTime();
+
+		
 		g.setFont(data.labelFont);
 		FontMetrics fm = g.getFontMetrics();
 
 		g.setColor(data.getBackgroundColor());
-		Rectangle clipBounds = g.getClipBounds();
-		g.fillRect(clipBounds.x, clipBounds.y, clipBounds.width, clipBounds.height);
+		Rectangle clip = g.getClipBounds();
+		g.fillRect(clip.x, clip.y, clip.width, clip.height);
 
-	
-		for (int verticalPosition=0; verticalPosition<data.numPs(); verticalPosition++) {
+		int upperRowToPaint = data.rowForPixel(clip.y);
+		int lowerRowToPaint = data.rowForPixel(clip.y+clip.height-1);
+				
+		
+		for (int verticalPosition=upperRowToPaint; verticalPosition<=lowerRowToPaint; verticalPosition++) {
 			// Draw the labels onto the screen
 
 			int pe = data.whichPE(verticalPosition);
@@ -131,6 +136,11 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 			}
 		}
 
+		
+		final long endTime = System.nanoTime();
+		final long duration = endTime - startTime;
+		MainWindow.performanceLogger.log(Level.INFO,"Time to paint Label Panel: " + (duration/1000000) + " ms");
+		
 	}
 
 	public void mouseClicked(MouseEvent e) {	

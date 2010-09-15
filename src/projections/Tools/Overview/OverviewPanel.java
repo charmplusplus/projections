@@ -75,11 +75,16 @@ class OverviewPanel extends ScalePanel.Child
 		if (selectedPEs != null ) {
 			int count=0;
 			int pe=0;
-			selectedPEs.reset();
-			while (count <= p) {
-				pe = selectedPEs.nextElement();
+
+			for(Integer tmp : selectedPEs){
+				if (count > p){
+					pe = tmp;
+					break;
+				}
 				count++;
 			}
+			
+						
 			//			int numEP = MainWindow.runObject[myRun].getNumUserEntries();
 			int interval = (int)(t/intervalSize);
 
@@ -156,24 +161,22 @@ class OverviewPanel extends ScalePanel.Child
 				int[] offBuf=new int[wid*ht];
 //				int proc_min=(int)Math.floor(pl);
 //				int proc_max=(int)Math.ceil(ph);
-				selectedPEs.reset();
-				int proc;
 				int p =0;
-				while((proc = selectedPEs.nextElement()) != -1){
-					if(proc != -1){
-						int y_min=(int)Math.floor(req.y(p));
-						int y_max=(int)Math.floor(req.y(p+1));
-						if (y_min<starty) y_min=starty;
-						if (y_max>endy) y_max=endy;
-						if(p < colors.length){
-							renderRow(colors[p],x2t_off,x2t_slope,offBuf,
-									wid,
-									y_min-starty,y_max-starty,
-									startx-startx,endx-startx);
-						}
-						p++;
+				
+				for(Integer pe : selectedPEs) {
+					int y_min=(int)Math.floor(req.y(p));
+					int y_max=(int)Math.floor(req.y(p+1));
+					if (y_min<starty) y_min=starty;
+					if (y_max>endy) y_max=endy;
+					if(p < colors.length){
+						renderRow(colors[p],x2t_off,x2t_slope,offBuf,
+								wid,
+								y_min-starty,y_max-starty,
+								startx-startx,endx-startx);
 					}
+					p++;
 				}
+			
 				Image offImg = 
 					createImage(new MemoryImageSource(wid,ht,
 							offBuf,0,wid));
@@ -358,10 +361,9 @@ class OverviewPanel extends ScalePanel.Child
 		float[][] utilizationData = new float[selectedPEs.size()][numIntervals];
 		
 		int pIdx=0;		
-		selectedPEs.reset();
-		while (selectedPEs.hasMoreElements()) {
-			int nextPe = selectedPEs.nextElement();
-			readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, myRun, 
+		
+		for(Integer pe : selectedPEs){
+			readyReaders.add( new ThreadedFileReader(pe, intervalSize, myRun, 
 					startInterval, endInterval, entryData[pIdx], utilizationData[pIdx]) );
 			pIdx++;
 		}

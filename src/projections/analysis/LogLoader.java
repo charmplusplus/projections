@@ -40,11 +40,9 @@ public class LogLoader extends ProjDefs
 		// Create a list of worker threads
 		LinkedList workerThreads = new LinkedList();
 
- 		validPEs.reset();
- 		while (validPEs.hasMoreElements()) {
- 				int pe = validPEs.nextElement();
-				workerThreads.add(new LogLoaderEndTimeThread(pe) );
-			}
+		for(Integer pe : validPEs){
+			workerThreads.add(new LogLoaderEndTimeThread(pe) );
+		}
 	
 		// Pass this list of threads to a class that manages/runs the threads nicely
 		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Computing End Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot, true);

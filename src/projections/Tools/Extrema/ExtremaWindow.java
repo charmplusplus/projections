@@ -287,10 +287,9 @@ Clickable
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
 		int pIdx=0;		
-		selectedPEs.reset();
-		while (selectedPEs.hasMoreElements()) {
-			int nextPe = selectedPEs.nextElement();
-			readyReaders.add( new ThreadedFileReader(nextPe, startTime, endTime, 
+		
+		for(Integer pe : selectedPEs){
+			readyReaders.add( new ThreadedFileReader(pe, startTime, endTime, 
 					numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
 			pIdx++;
 		}
@@ -343,9 +342,10 @@ Clickable
 		}
 
 		// initialize processor names
-		selectedPEs.reset();
-		for (int p=0; p<selectedPEs.size(); p++) {
-		    peNames[p] = Integer.toString(selectedPEs.nextElement());
+		int pcount = 0;
+		for(Integer pe : selectedPEs) {
+		    peNames[pcount] = Integer.toString(pe);
+		    pcount++;
 		}
 
 		// ********* Generate graph data **********

@@ -51,7 +51,7 @@ import projections.gui.MainWindow;
 public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
 {
 	/** Should the painting be performed in multiple threads */
-	private static final boolean RenderInParallel = true;
+	private static final boolean RenderInParallel = false;
 
 	/** A thread pool for use in rendering if RenderInParallel is true */
 	private static ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -167,16 +167,18 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			
 //			System.out.println("slice: startYPixel="+startYPixel+" endYPixel="+endYPixel+" heightOfSlice="+heightOfSlice + " clip.height=" + clip.height);
 			
-			BufferedImage b = new BufferedImage(clip.width, heightOfSlice, BufferedImage.TYPE_INT_RGB);
-			Graphics2D g2d = b.createGraphics();
-			g2d.translate(-clip.x, -clip.y-startYPixel);
-			
-			g2d.setClip(clip.x, clip.y+startYPixel, clip.width, heightOfSlice);
+			if(heightOfSlice > 0){
+				BufferedImage b = new BufferedImage(clip.width, heightOfSlice, BufferedImage.TYPE_INT_RGB);
+				Graphics2D g2d = b.createGraphics();
+				g2d.translate(-clip.x, -clip.y-startYPixel);
 
-			SliceRenderer s = new SliceRenderer(g2d, b, clip.x, clip.y+startYPixel);
-			renderers.add(s);
-			Future f = threadExecutor.submit(s);
-			futures.add(f);
+				g2d.setClip(clip.x, clip.y+startYPixel, clip.width, heightOfSlice);
+
+				SliceRenderer s = new SliceRenderer(g2d, b, clip.x, clip.y+startYPixel);
+				renderers.add(s);
+				Future f = threadExecutor.submit(s);
+				futures.add(f);
+			}
 		}
 		
 		
@@ -186,11 +188,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				f.get(); // wait for the Runnable to complete
 			} catch (InterruptedException e) {
 				e.printStackTrace();
+				System.exit(100);
 			} catch (ExecutionException e) {
 				e.printStackTrace();
+				System.exit(200);
 			} 
 		}
-
+		
 		
 		// Paint final results based on renderings of each thread
 		int count = 0;
@@ -198,6 +202,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			g.drawImage(s.b, s.destinationX, s.destinationY, null);
 			count += s.paintedEntities;
 		}
+		
 		
 		final long endTime = System.nanoTime();
 		final long duration = endTime - startTime;
@@ -227,11 +232,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		for(Integer pe : pesToRender){
 			Query1D<EntryMethodObject> l = data.allEntryMethodObjects.get(pe);
 
-			Iterator<EntryMethodObject> iter = l.iterator(leftClipTime, rightClipTime);
-			while(iter.hasNext()){
-				EntryMethodObject o = iter.next();
-				o.paintMe((Graphics2D) g, getWidth());
-				count1 ++;
+			if(l != null){ // FIXME: this shouldn't be here but is to fix a race condition with reloading ranges once something is displayed
+				Iterator<EntryMethodObject> iter = l.iterator(leftClipTime, rightClipTime);
+				while(iter.hasNext()){
+					EntryMethodObject o = iter.next();
+					o.paintMe((Graphics2D) g, getWidth());
+					count1 ++;
+				}
 			}
 		}
 		
@@ -246,13 +253,15 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			for(Integer pe : pesToRender){
 				Query1D<UserEventObject> l = data.allUserEventObjects.get(pe);
 
-				Iterator<UserEventObject> iter = l.iterator(leftClipTime, rightClipTime);
-				while(iter.hasNext()){
-					UserEventObject o = iter.next();
-					o.paintMe((Graphics2D) g, getWidth(), data);
-					count2 ++;
+				if(l != null){ // FIXME: this shouldn't be here but is to fix a race condition with reloading ranges once something is displayed
+					Iterator<UserEventObject> iter = l.iterator(leftClipTime, rightClipTime);
+					while(iter.hasNext()){
+						UserEventObject o = iter.next();
+						o.paintMe((Graphics2D) g, getWidth(), data);
+						count2 ++;
+					}
 				}
-
+				
 			}
 		}
 
@@ -470,6 +479,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 					// Find an entry method invocation that occurred at this time, and display its tooltip instead
 					Query1D<EntryMethodObject> a = data.allEntryMethodObjects.get(PE);
+					
+					// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
+					if(a == null)
+						return null;
+					
 					Iterator<EntryMethodObject> b = a.iterator(timeL, timeR);
 
 					// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
@@ -489,6 +503,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 					// Find an entry method invocation that occurred at this time, and display its tooltip instead
 					Query1D<UserEventObject> a = data.allUserEventObjects.get(PE);
+
+					// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
+					if(a == null)
+						return null;
+					
 					Iterator<UserEventObject> b = a.iterator(timeL, timeR);
 
 					// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)

@@ -531,20 +531,19 @@ public class Analysis {
 
     // yet another version of summary load for processor subsets.
     private void loadSummaryData(long intervalSize, 
-				int intervalStart, int intervalEnd,
-				OrderedIntList processorList) {
-	systemUsageData = new int[3][][];
-	int[][][] temp = new int[3][][];
-	temp[1] =
-	    sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd,
-	                                   intervalSize);
-	processorList.reset();
-	systemUsageData[1] = 
-	  new int[processorList.size()][intervalEnd-intervalStart+1];
-	for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
-	  systemUsageData[1][pIdx] = 
-	    temp[1][processorList.nextElement()];
-	} 
+    		int intervalStart, int intervalEnd,
+    		OrderedIntList processorList) {
+    	systemUsageData = new int[3][][];
+    	int[][][] temp = new int[3][][];
+    	temp[1] =
+    		sumAnalyzer.getSystemUsageData(intervalStart, intervalEnd,
+    				intervalSize);
+    	systemUsageData[1] = new int[processorList.size()][intervalEnd-intervalStart+1];
+    	int pIdx=0;
+    	for(Integer pe : processorList){
+    		systemUsageData[1][pIdx] = temp[1][pe];
+    		pIdx++;
+    	} 
     }
   
 //    // wrapper method for default interval size.

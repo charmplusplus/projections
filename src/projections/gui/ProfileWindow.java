@@ -467,21 +467,19 @@ class ProfileWindow extends ProjectionsWindow
          * content to display. The better way is to displaying the data on the table at the same time analyzing
          * the data. This could be later implemented!
          */
-        int curPe = -1;
-        data.plist.reset();
         Vector[] ampiProcessVec = new Vector[data.plist.size()];
         int pCnt=0;
         int totalLine=0;
-        while(data.plist.hasMoreElements()){
-            curPe = data.plist.nextElement();
-            ampiProcessVec[pCnt] = new Vector();
-            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
-            Vector v = ampiProcessVec[pCnt];
-            for(int i=0; i<v.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
-                totalLine += p.getFinalCallFuncStack().size();
-            }
-            pCnt++;
+        
+        for(Integer pe : data.plist) {
+        	ampiProcessVec[pCnt] = new Vector();
+        	MainWindow.runObject[myRun].createAMPIUsage(pe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
+        	Vector v = ampiProcessVec[pCnt];
+        	for(int i=0; i<v.size(); i++){
+        		AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
+        		totalLine += p.getFinalCallFuncStack().size();
+        	}
+        	pCnt++;
         }
 
         //formating data to display
@@ -489,13 +487,12 @@ class ProfileWindow extends ProjectionsWindow
         df.setMaximumFractionDigits(3);
         long totalExecTime = data.endtime - data.begintime;
         Object[][] tData = new Object[totalLine][];
-        curPe = -1;
-        data.plist.reset();
+      
         pCnt=0;
         int lineCnt=0;
-        while(data.plist.hasMoreElements()){
-            curPe = data.plist.nextElement();
-            Vector v = ampiProcessVec[pCnt++];
+
+        for(Integer pe : data.plist) {
+        	Vector v = ampiProcessVec[pCnt++];
             for(int i=0; i<v.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
                 long processTotalExecTime = p.getAccExecTime();
@@ -503,7 +500,7 @@ class ProfileWindow extends ProjectionsWindow
                 for(Enumeration e=stk.elements(); e.hasMoreElements();){
                     AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
                     tData[lineCnt] = new Object[tHeading.length];
-                    tData[lineCnt][0] = ""+curPe;
+                    tData[lineCnt][0] = ""+pe;
                     tData[lineCnt][1] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID);
                     tData[lineCnt][2] = d.sourceFileName;
                     tData[lineCnt][3] = ""+d.LineNo;
@@ -530,8 +527,6 @@ class ProfileWindow extends ProjectionsWindow
 
         String[] xNames = new String[data.plist.size()];
 
-        int curPe = -1;
-        data.plist.reset();
         Vector ampiProcess = null;
         int pCnt=0;
 
@@ -541,10 +536,10 @@ class ProfileWindow extends ProjectionsWindow
         long totalExecTime = data.endtime - data.begintime;
 
         //firstly, create the usage percent and every sections' name
-        while(data.plist.hasMoreElements()){
-            curPe = data.plist.nextElement();
+        for(Integer pe : data.plist) {
+            
             ampiProcess = new Vector();
-            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcess);
+            MainWindow.runObject[myRun].createAMPIUsage(pe,data.begintime,data.endtime,ampiProcess);
             int total = 0;
             for(int i=0; i<ampiProcess.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)ampiProcess.get(i);
@@ -565,7 +560,7 @@ class ProfileWindow extends ProjectionsWindow
                     total++;
                 }
             }
-            xNames[pCnt] = curPe+"";
+            xNames[pCnt] = pe+"";
             pCnt++;
         }
 
@@ -618,10 +613,9 @@ class ProfileWindow extends ProjectionsWindow
 
         String[] xNames = new String[data.plist.size()+1];
         xNames[0] = "Avg";
-        data.plist.reset();
         int cnt=1;
-        while(data.plist.hasMoreElements()){
-            xNames[cnt++] = ""+data.plist.nextElement();
+        for(Integer pe : data.plist) {
+        	xNames[cnt++] = ""+pe;
         }
 
         procNames = xNames; //store this in order for the usage of usage table
@@ -656,7 +650,6 @@ class ProfileWindow extends ProjectionsWindow
 
 
 	int progressCount = 0;
-        int curPe = -1;
 	ProgressMonitor progressBar;
 
 	// Profile really should be cleanly rewritten.
@@ -671,27 +664,26 @@ class ProfileWindow extends ProjectionsWindow
 	    new ProgressMonitor(this,
 				"Computing Usage Values",
 				"", 0, data.numPs);
-	data.plist.reset();
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.nextElement();
-	    if (!progressBar.isCanceled()) {
-                progressBar.setNote("[PE: " + curPe + " ] Computing Average.");
-		progressBar.setProgress(progressCount);
-	    } else {
-		break;
-	    }
+        
+        for(Integer pe : data.plist){
+        	if (!progressBar.isCanceled()) {
+        		progressBar.setNote("[PE: " + pe + " ] Computing Average.");
+        		progressBar.setProgress(progressCount);
+        	} else {
+        		break;
+        	}
 
-	    // the first row is for entry method execution time
-	    // the second is for time spent sending messages in
-	    // that entry method
-	    float cur[][] =
-		MainWindow.runObject[myRun].GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
-	    for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
-		avg[0][i]+=(float)(cur[0][i]*avgScale);
-		avg[1][i]+=(float)(cur[1][i]*avgScale);
-	    }
-	    progressCount++;
-	}
+        	// the first row is for entry method execution time
+        	// the second is for time spent sending messages in
+        	// that entry method
+        	float cur[][] =
+        		MainWindow.runObject[myRun].GetUsageData(pe,data.begintime,data.endtime,data.phaselist);
+        	for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
+        		avg[0][i]+=(float)(cur[0][i]*avgScale);
+        		avg[1][i]+=(float)(cur[1][i]*avgScale);
+        	}
+        	progressCount++;
+        }
 
 	// Phase1b: Assigning colors based on the average usage}
         Vector sigElements = new Vector();
@@ -728,28 +720,27 @@ class ProfileWindow extends ProjectionsWindow
         nameMap[0] = sNameMap;
 
         progressCount = 0;
-	data.plist.reset();
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.nextElement();
-	    if (!progressBar.isCanceled()) {
-		progressBar.setNote("[PE: " + curPe +
-				    " ] Reading Entry Point Usage.");
-		progressBar.setProgress(progressCount);
-	    } else {
-		break;
-	    }
-	    float rawData[][]=MainWindow.runObject[myRun].GetUsageData(curPe,data.begintime,data.endtime,data.phaselist);
 
-            createSingleProcSource(rawData, curPe);
+        for(Integer pe : data.plist) {
 
-            //The 0 column is left for the average one
-            progressCount++;
-            dataSource[progressCount] = sDataSrc;
-            colorMap[progressCount] = sColorMap;
-            nameMap[progressCount] = sNameMap;
+        	if (!progressBar.isCanceled()) {
+        		progressBar.setNote("[PE: " + pe + " ] Reading Entry Point Usage.");
+        		progressBar.setProgress(progressCount);
+        	} else {
+        		break;
+        	}
+        	float rawData[][]=MainWindow.runObject[myRun].GetUsageData(pe,data.begintime,data.endtime,data.phaselist);
 
-	}
-	progressBar.close();
+        	createSingleProcSource(rawData, pe);
+
+        	//The 0 column is left for the average one
+        	progressCount++;
+        	dataSource[progressCount] = sDataSrc;
+        	colorMap[progressCount] = sColorMap;
+        	nameMap[progressCount] = sNameMap;
+
+        }
+        progressBar.close();
     }
 
     private void createSingleProcSource(float[][] rawData, int procNum){

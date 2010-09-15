@@ -86,6 +86,18 @@ public class RangeQueryArrayList <T extends Range1D> implements Query1D<T>{
 	public <E> E[] toArray(E[] a) {
 		return backingStorage.toArray(a);
 	}
+
+
+	@Override
+	public void removeEntriesOutsideRange(long startTime, long endTime) {
+		Iterator<T> iter = backingStorage.iterator();
+		while(iter.hasNext()){
+			Range1D n = iter.next();
+			if(n.upperBound() < startTime || n.lowerBound() > endTime)
+				iter.remove();
+		}
+		
+	}
 	
 	
 }

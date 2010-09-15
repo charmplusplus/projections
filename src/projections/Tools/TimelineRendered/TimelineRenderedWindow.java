@@ -113,11 +113,9 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 			final List<Runnable> readyReaders = new LinkedList<Runnable>();
 
 			// Iterate over user-specified processors
-			processorList.reset();
 			int pIdx=0;		
-			while (processorList.hasMoreElements()) {
-				int nextPe = processorList.nextElement();
-				readyReaders.add( new ThreadedFileReader(nextPe, startTime, endTime, backgroundColor, foregroundColor, width) );
+			for(Integer pe : processorList){
+				readyReaders.add( new ThreadedFileReader(pe, startTime, endTime, backgroundColor, foregroundColor, width) );
 				pIdx++;
 			}
 

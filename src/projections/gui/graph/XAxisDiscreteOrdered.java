@@ -9,13 +9,14 @@ public class XAxisDiscreteOrdered
     private int discreteList[];
     
     public XAxisDiscreteOrdered(String title, OrderedIntList discreteList) {
-	this.title = title;
-	this.discreteList = new int[discreteList.size()];
-	int count = 0;
-	discreteList.reset();
-	while (discreteList.hasMoreElements()) {
-	    this.discreteList[count++] = discreteList.nextElement();
-	}
+    	this.title = title;
+    	this.discreteList = new int[discreteList.size()];
+    	int count = 0;
+
+    	for(Integer n : discreteList){
+    		this.discreteList[count++] = n;		
+    	}
+
     }
 
     public String getTitle() {

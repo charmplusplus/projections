@@ -17,5 +17,7 @@ public interface Query1D<T extends Range1D> extends Iterable<T>, Collection<T> {
  	 * Behavior of existing iterators are undefined if the underlying collection is modified.
 	 */
 	public Iterator<T> iterator(long lowerBound, long upperBound);
-	
+
+	public void removeEntriesOutsideRange(long startTime, long endTime);
+
 }

@@ -338,12 +338,15 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 				// Verify we don't contain any nulls, and compute the bounds for this node
 				long lb=Long.MAX_VALUE, ub=Long.MIN_VALUE;
 				for(T o : data){
-					if(o == null)
+					if(o == null){
 						System.out.println("FAILURE: node " + nodeID + " contains null entry");
+						return false;
+					}
 					if(o.lowerBound() < lb)
 						lb = o.lowerBound();
 					if(o.upperBound() > ub)
 						ub = o.upperBound();
+
 				}
 				if(lowerBound != lb || upperBound != ub){
 					System.out.println("FAILURE: Bounds for node " + nodeID + " are " + lowerBound + "," + upperBound + " but should be " + lb + "," + ub);

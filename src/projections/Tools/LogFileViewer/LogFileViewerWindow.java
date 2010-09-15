@@ -106,16 +106,14 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 			tabbedPane.removeAll();
 			
 			// Access the list of PEs chosen by the user:
-			validPEs.reset(); // start at the beginning of the list
-			while(validPEs.hasMoreElements()){ // check if there are more items in the list
-				int p = validPEs.nextElement(); // get the next item from the list
+			for(Integer pe : validPEs){
 				
 				// Create a text area to put in the tab for this PE 
 				LogFileViewerTextArea textArea = new LogFileViewerTextArea();
 				// Have the text area load the logfile data
-				textArea.setPE(p,startTime,endTime);		
+				textArea.setPE(pe,startTime,endTime);		
 				// Add a tab for the PE
-				tabbedPane.add("PE " + p, textArea);
+				tabbedPane.add("PE " + pe, textArea);
 				
 			}
 			

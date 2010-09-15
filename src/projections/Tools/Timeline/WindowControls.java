@@ -156,10 +156,8 @@ ItemListener {
 					}
 					parentWindow.data.skipLoadingUserEvents(toolSpecificDialogPanel.dialogEnableUserEventFiltering.isSelected());
 
-					System.out.println("-------- post dialog box A");
-						System.out.println("-------- post dialog box B (in synchronized block)");
-						parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
-						cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
+					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
+					cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
 					return null;
 				}
 

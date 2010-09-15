@@ -1639,7 +1639,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	/** Determines the PE for a given vertical position */
 	protected int whichPE(Integer verticalPosition) {
-		if(verticalPosition < this.numPs()){
+		if(verticalPosition < this.numPs() && verticalPosition >= 0){
 			return peToLine.get(verticalPosition);
 		} else {
 			return -1;

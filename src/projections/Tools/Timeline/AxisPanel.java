@@ -86,8 +86,6 @@ class AxisPanel extends JPanel implements Scrollable, MouseListener, MouseMotion
 	{
 		synchronized(data){
 
-			System.out.println("MainPanel paintComponent width=" + getWidth());
-
 			g.setFont(data.axisFont);
 			FontMetrics fm = g.getFontMetrics();
 

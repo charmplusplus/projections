@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -56,7 +55,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	/** A thread pool for use in rendering if RenderInParallel is true */
 	private static ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
 
-	
+
 	/** Stores information about mouse dragging in window */
 	private int viewX, viewY;
 
@@ -65,7 +64,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	private Data data;
 	private MainHandler handler;
 
-	
+
 	/** Construct a main Timeline Panel */
 	public MainPanel(Data data, MainHandler handler){
 		this.handler = handler;
@@ -75,7 +74,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		this.setFocusCycleRoot(true);
 		this.setFocusTraversalPolicy(new NullFocusTraversalPolicy());
 
-		
+
 		setAutoscrolls(true); //enable synthetic drag events
 
 		addMouseMotionListener(this); 
@@ -88,8 +87,8 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		this.setOpaque(true);
 	}
-	
-	
+
+
 	/** A little class to help render a sub-region of the graphics */
 	public class SliceRenderer implements Runnable {
 		private Graphics2D g;
@@ -97,22 +96,22 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		private int destinationY;
 		private BufferedImage b;
 		public long paintedEntities;
-		
-		
+
+
 		public SliceRenderer(Graphics2D g, BufferedImage b, int destinationX, int destinationY) {
 			this.g = g;
 			this.b = b;
 			this.destinationX = destinationX;
 			this.destinationY = destinationY;
 		}
-		
+
 		public void run() {
 			paintedEntities = paintAll(g);
 		}
-		
+
 	}
-	
-	
+
+
 	/** Paint the entire opaque panel*/
 	public void paintComponent(Graphics g) {
 		synchronized(data){
@@ -137,14 +136,14 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint (sequential version): " + (duration/1000000) + " ms");
 
 	}
-	
+
 	/** Use the thread pool to render slices (rows) of the display */
 	public void paintInParallel(Graphics g){
-		
+
 		final long startTime = System.nanoTime();
 
 		Rectangle clip = g.getClipBounds();
-		
+
 		MainWindow.performanceLogger.log(Level.INFO,"Rendering MainPanel with clip: " + clip.x + "," +clip.y + " " + clip.width + "," + clip.height);
 
 		int piecesToRender = Runtime.getRuntime().availableProcessors();
@@ -160,11 +159,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			int endYPixel = (1+i)*(heightOfEachSlice) - 1;
 			if(endYPixel > clip.height-1)
 				endYPixel = clip.height-1;
-			
+
 			int heightOfSlice = endYPixel - startYPixel + 1;		
-			
-//			System.out.println("slice: startYPixel="+startYPixel+" endYPixel="+endYPixel+" heightOfSlice="+heightOfSlice + " clip.height=" + clip.height);
-			
+
+			//			System.out.println("slice: startYPixel="+startYPixel+" endYPixel="+endYPixel+" heightOfSlice="+heightOfSlice + " clip.height=" + clip.height);
+
 			if(heightOfSlice > 0){
 				BufferedImage b = new BufferedImage(clip.width, heightOfSlice, BufferedImage.TYPE_INT_RGB);
 				Graphics2D g2d = b.createGraphics();
@@ -178,8 +177,8 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				futures.add(f);
 			}
 		}
-		
-		
+
+
 		// Await completion of all threads
 		for(Future f : futures){
 			try {
@@ -192,16 +191,16 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				System.exit(200);
 			} 
 		}
-		
-		
+
+
 		// Paint final results based on renderings of each thread
 		int count = 0;
 		for(SliceRenderer s : renderers) {
 			g.drawImage(s.b, s.destinationX, s.destinationY, null);
 			count += s.paintedEntities;
 		}
-		
-		
+
+
 		final long endTime = System.nanoTime();
 		final long duration = endTime - startTime;
 		MainWindow.performanceLogger.log(Level.INFO,"Time To Paint " + count + " entities using " + piecesToRender +  " threads: " + (duration/1000000) + " ms");
@@ -220,13 +219,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		// Find time ranges to draw
 		long leftClipTime = data.screenToTime(clip.x-5);
 		long rightClipTime = data.screenToTime(clip.x+clip.width+5);
-		
+
 		// Draw entry method invocations
 		int count1 = -1;
 
 		// Determine which PEs are within the clip range:
 		Collection<Integer> pesToRender = data.processorsInPixelYRange(clip.y, clip.y+clip.height-1);
-		
+
 		for(Integer pe : pesToRender){
 			Query1D<EntryMethodObject> l = data.allEntryMethodObjects.get(pe);
 
@@ -239,15 +238,15 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				}
 			}
 		}
-		
-		
-		
+
+
+
 		// FIXME make this a range query of some sort so that only the appropriate PEs are painted
 		// Draw user events
 		int count2 = 0;
 		if(data.showUserEvents()){
 			count2 = 0;
-			
+
 			for(Integer pe : pesToRender){
 				Query1D<UserEventObject> l = data.allUserEventObjects.get(pe);
 
@@ -259,7 +258,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 						count2 ++;
 					}
 				}
-				
+
 			}
 		}
 
@@ -347,12 +346,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	/** Dynamically generate the tooltip mouseover text when needed */
 	@Override
 	public String getToolTipText(MouseEvent evt){
-			SpecialMouseHandler o = getObjectRenderedAtEvtLocation(evt);
-			if(o != null){
-				return o.getToolTipText();
-			} else {
-				return null;
-			}
+		SpecialMouseHandler o = getObjectRenderedAtEvtLocation(evt);
+		if(o != null){
+			return o.getToolTipText();
+		} else {
+			return null;
+		}
 	}
 
 
@@ -369,14 +368,14 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		// keeplines describes if the lines from message creation
 		// to execution are to be retained or not.
-//		setCursor(new Cursor(Cursor.WAIT_CURSOR));
+		//		setCursor(new Cursor(Cursor.WAIT_CURSOR));
 
 		data.createTLOArray(useHelperThreads, rootWindow, showProgress);
-		
+
 		handler.setData(data);
-//		handler.refreshDisplay(true);
-//		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	
+		//		handler.refreshDisplay(true);
+		//		setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+
 	}
 
 
@@ -454,65 +453,85 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 
 	private SpecialMouseHandler getObjectRenderedAtEvtLocation(MouseEvent evt){
-		// Check to see which pe we are on
-		
-		final int whichPERow = evt.getY() / data.singleTimelineHeight();
-		final int verticalOffsetWithinRow = evt.getY() % data.singleTimelineHeight();
 
-		final int PE = data.whichPE(whichPERow);
+		// Sometimes it is hard to mouseover a single pixel wide object, so we expand searches until we find something nearby if necessary
 
-		if(PE >= 0){
+		for(int verticalSlackPixels = 0; verticalSlackPixels< 5; verticalSlackPixels++){
+			int verticalSlack = 0;
+			switch(verticalSlackPixels){
+			case 0:
+				verticalSlack = 0;    // first look at actual coordinate
+				break;
+			case 1:
+				verticalSlack = -1;   // Then look one pixel above ...
+				break;
+			case 2:
+				verticalSlack = 1;
+				break;
+			case 3:
+				verticalSlack = -2;
+				break;
+			case 4:
+				verticalSlack = 2;
+				break;
+			}
 
+			// Check to see which pe we are on
+			final int whichPERow = (evt.getY()+verticalSlack) / data.singleTimelineHeight();
+			final int verticalOffsetWithinRow = (evt.getY()+verticalSlack) % data.singleTimelineHeight();
+
+			final int PE = data.whichPE(whichPERow);
 			RepresentedEntity what = data.representedAtPixelYOffsetInRow(verticalOffsetWithinRow);
+			if(PE >= 0){
+				// Also allow a little slack horizontally within each PEs row
+				for(int slackPixels = 0; slackPixels < 3; slackPixels++){
 
-			// Sometimes it is hard to mouseover a single pixel wide object, so we expand searches until we find something nearby if necessary
-			for(int slackPixels = 0; slackPixels < 3; slackPixels++){
-				
-				final long timeL = data.screenToTime(evt.getX()   - slackPixels);
-				final long timeR = data.screenToTime(evt.getX()+1 + slackPixels);
+					final long timeL = data.screenToTime(evt.getX()   - slackPixels);
+					final long timeR = data.screenToTime(evt.getX()+1 + slackPixels);
 
-				if(what == RepresentedEntity.ENTRY_METHOD){
+					if(what == RepresentedEntity.ENTRY_METHOD){
 
-					// Find an entry method invocation that occurred at this time, and display its tooltip instead
-					Query1D<EntryMethodObject> a = data.allEntryMethodObjects.get(PE);
-					// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
-					// unfortunately we can't synchronize on data because this executes in some GUI thread which had better not block, as it may block the progress bar which blocks the loading of data
-					if(a == null)
-						return null;
-					
-					Iterator<EntryMethodObject> b = a.iterator(timeL, timeR);
+						// Find an entry method invocation that occurred at this time, and display its tooltip instead
+						Query1D<EntryMethodObject> a = data.allEntryMethodObjects.get(PE);
+						// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
+						// unfortunately we can't synchronize on data because this executes in some GUI thread which had better not block, as it may block the progress bar which blocks the loading of data
+						if(a == null)
+							return null;
 
-					// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
-					EntryMethodObject frontmostVisibleObject = null;
-					while(b.hasNext()){
-						EntryMethodObject o = b.next();
-						if(o.isDisplayed())
-							frontmostVisibleObject = o;
+						Iterator<EntryMethodObject> b = a.iterator(timeL, timeR);
+
+						// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
+						EntryMethodObject frontmostVisibleObject = null;
+						while(b.hasNext()){
+							EntryMethodObject o = b.next();
+							if(o.isDisplayed())
+								frontmostVisibleObject = o;
+						}
+
+						if(frontmostVisibleObject != null){
+							return frontmostVisibleObject;
+						}
+
 					}
+					else if(what == RepresentedEntity.USER_EVENT){
 
-					if(frontmostVisibleObject != null){
-						return frontmostVisibleObject;
-					}
+						// Find an entry method invocation that occurred at this time, and display its tooltip instead
+						Query1D<UserEventObject> a = data.allUserEventObjects.get(PE);
 
-				}
-				else if(what == RepresentedEntity.USER_EVENT){
+						// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
+						if(a == null)
+							return null;
 
-					// Find an entry method invocation that occurred at this time, and display its tooltip instead
-					Query1D<UserEventObject> a = data.allUserEventObjects.get(PE);
+						Iterator<UserEventObject> b = a.iterator(timeL, timeR);
 
-					// FIXME: Somehow there may be a race condition where the number of processors changes, but data is not yet loaded.
-					if(a == null)
-						return null;
-					
-					Iterator<UserEventObject> b = a.iterator(timeL, timeR);
-
-					// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
-					UserEventObject o = null;
-					while(b.hasNext()){
-						o = b.next();
-					}
-					if(o != null){
-						return o;
+						// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
+						UserEventObject o = null;
+						while(b.hasNext()){
+							o = b.next();
+						}
+						if(o != null){
+							return o;
+						}
 					}
 				}
 			}

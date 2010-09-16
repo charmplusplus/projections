@@ -22,7 +22,6 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 	protected JCheckBox dialogEnableEntryFiltering;
 	protected TimeTextField dialogMinEntryFiltering;
 
-	protected JCheckBox dialogEnableIdleFiltering;
 	protected JCheckBox dialogEnableMsgFiltering;
 	protected JCheckBox dialogEnableUserEventFiltering;
 
@@ -53,8 +52,6 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		    p1.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
 		    p1.add(Box.createHorizontalGlue());
 		    dialogEnableEntryFiltering.addItemListener(this);
-
-		    dialogEnableIdleFiltering = new JCheckBox("Filter out idle time regions");
 		    
 		    dialogEnableMsgFiltering = new JCheckBox("Filter out messages");
 		    
@@ -62,7 +59,6 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		    
 		    // Put the various rows into the panel
 		    p.add(p1);
-		    p.add(new LeftAlignedPanel(dialogEnableIdleFiltering));
 		    p.add(new LeftAlignedPanel(dialogEnableMsgFiltering));
 		    p.add(new LeftAlignedPanel(dialogEnableUserEventFiltering));
 

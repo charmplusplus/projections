@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.io.File;
 import java.net.URL;
 import java.text.DecimalFormat;
 
@@ -107,7 +108,6 @@ ItemListener {
 	private JMenuItem mShowHideUserEvents;
 	
 	private JCheckBoxMenuItem cbDontLoadMessages;
-	private JCheckBoxMenuItem cbDontLoadIdle;
 	
 
 	private JMenuItem mDisplayLegend;
@@ -149,7 +149,6 @@ ItemListener {
 			final SwingWorker worker = new SwingWorker() {
 				public Object doInBackground() {
 
-					parentWindow.data.skipLoadingIdleRegions(toolSpecificDialogPanel.dialogEnableIdleFiltering.isSelected(), false);
 					parentWindow.data.skipLoadingMessages(toolSpecificDialogPanel.dialogEnableMsgFiltering.isSelected(), false);
 					if(toolSpecificDialogPanel.dialogEnableEntryFiltering.isSelected()){
 						data.setFilterEntryShorterThan(toolSpecificDialogPanel.dialogMinEntryFiltering.getValue());
@@ -166,6 +165,17 @@ ItemListener {
 
 					parentWindow.refreshDisplay(true);
 					parentWindow.setVisible(true);
+					
+
+					// Check for tachyons
+					long largestTachyon = data.findLargestTachyon();
+					if(largestTachyon > 20){
+						JLabel message = new JLabel("<html><body>There are Tachyons (messages sent backwards in time) present<br>in this data. Would you like them to be automatically corrected?<br>The longest one is of size " + largestTachyon + " us.</body></html>");
+						int result = JOptionPane.showConfirmDialog(null, message, "Perform Tachyon Correction?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+						if(result == JOptionPane.YES_OPTION){
+							data.fixTachyons();
+						}
+					}					
 
 				}
 			};
@@ -622,10 +632,6 @@ ItemListener {
 		cbDontLoadMessages.setSelected(false);
 		cbDontLoadMessages.addItemListener(this);
 		submenu.add(cbDontLoadMessages);
-		cbDontLoadIdle = new JCheckBoxMenuItem("Don't Load Idle Time Blocks");
-		cbDontLoadIdle.setSelected(false);
-		cbDontLoadIdle.addItemListener(this);
-		submenu.add(cbDontLoadIdle);
 		experimentalMenu.add(submenu);
 
 		
@@ -775,9 +781,6 @@ ItemListener {
 
 		else if(c == cbNestedUserEvents)
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);
-
-		else if(c == cbDontLoadIdle)
-			data.skipLoadingIdleRegions(evt.getStateChange() == ItemEvent.SELECTED, true);
 
 		else if(c == cbDontLoadMessages)
 			data.skipLoadingMessages(evt.getStateChange() == ItemEvent.SELECTED, true);

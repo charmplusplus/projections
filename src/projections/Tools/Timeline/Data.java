@@ -908,7 +908,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		case VIEW_SUPERCOMPACT :
 			return 1;
 		default	 :
-			return 16;
+			return 15;
 		}
 	}
 
@@ -931,7 +931,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		else if (this.drawNestedUserEventRows)
 			return 12;
 		else
-			return 8;	
+			return 7;	
 	}
 
 
@@ -1499,6 +1499,34 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 	
 	
+	/** find the duration of the longest tachyon present in this data */
+	public long findLargestTachyon(){
+		long minLatency = Integer.MAX_VALUE;
+
+		for(Entry<Integer, Query1D<EntryMethodObject> > e: allEntryMethodObjects.entrySet()){
+			// For all PEs
+			Integer pe = e.getKey();
+			Query1D<EntryMethodObject> objs = e.getValue();
+
+			// Iterate through all entry methods, and compare their execution times to the message send times
+			for(EntryMethodObject obj : objs){
+				TimelineMessage m = obj.creationMessage();
+				if(m!=null){
+					long sendTime = m.Time;
+					long executeTime = obj.getBeginTime();
+					long latency = executeTime - sendTime;
+
+					if(minLatency > latency ){
+						minLatency = latency;
+					}
+				}
+			}
+		}
+
+		return -1*minLatency;
+	}
+
+	
 	
 	public void setViewType(ViewType vt) {
 		viewType = vt;
@@ -1982,12 +2010,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return hiddenUserEvents.contains(id);
 	}
 
-	protected void skipLoadingIdleRegions(boolean b, boolean filterAlreadyLoaded) {
-		skipIdleRegions = b;
-		if(skipIdleRegions && filterAlreadyLoaded){
-			pruneOutIdleRegions();	
-		}
-	}
 
 	protected void skipLoadingMessages(boolean b, boolean filterAlreadyLoaded) {
 		skipLoadingMessages = b;
@@ -2002,31 +2024,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	private boolean skipLoadingUserEvents(){
 		return skipLoadingUserEvents;
-	}
-
-
-	/** Remove from allEntryMethodObjects any idle EntryMethodObjects */
-	private void pruneOutIdleRegions() {
-		// FIXME: may not work with new queryable data structure for allEntryMethodObjects
-		System.err.println("pruneOutIdleRegions() may not work in this version of projections");
-		MainWindow.performanceLogger.log(Level.INFO,"pruneOutIdleRegions");
-		Iterator<Integer> iter = allEntryMethodObjects.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = iter.next();
-			Query1D<EntryMethodObject> list = allEntryMethodObjects.get(pe);
-
-			Iterator<EntryMethodObject> iter2 = list.iterator();
-			while(iter2.hasNext()){
-				EntryMethodObject o = iter2.next();
-				if(o.isIdleEvent()){
-					iter2.remove();
-				}
-			}
-		}
-
-		modificationHandler.notifyProcessorListHasChanged(); // Really it is the set of objects that has changed
-		displayMustBeRedrawn();
-
 	}
 
 

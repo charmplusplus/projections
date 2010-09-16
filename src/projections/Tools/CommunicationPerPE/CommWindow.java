@@ -20,8 +20,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import projections.analysis.Analysis;
 import projections.analysis.TimedProgressThreadExecutor;
-import projections.gui.Analysis;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
@@ -351,9 +351,7 @@ implements ItemListener, ActionListener, Clickable
 		// Create a list of worker threads
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
-		OrderedIntList processorList = pes.copyOf();
-		while (processorList.hasMoreElements()) {
-			int nextPe = processorList.nextElement();
+    	for(Integer nextPe : pes){
 			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, exclusiveRecv, exclusiveBytesRecv, hopCount ) );
 			pIdx++;
 		}

@@ -11,6 +11,8 @@ import java.io.ObjectOutputStream;
 import java.util.AbstractList;
 import java.util.TreeMap;
 
+import projections.analysis.Analysis;
+
 
 /**
  *  Manages colors for an Analysis object.
@@ -27,7 +29,7 @@ public class ColorManager
 		this.a = a;
 	}
 
-	protected Color[][] initializeColors() throws Exception {
+	public Color[][] initializeColors() throws Exception {
 		Exception exception = null;
 		Color[][] colorToReturn = null;
 		File f = new File(filename);
@@ -153,7 +155,7 @@ public class ColorManager
 /** Write out the colors to the file. Make sure that this output format is readable 
  *  by initializeColors() above.
  */
-	protected void saveColors(TreeMap<Integer,Color> overrideMapping) 
+	public void saveColors(TreeMap<Integer,Color> overrideMapping) 
 	{
 		try {
 			System.out.println("Saving colors in new format");

@@ -360,8 +360,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			// Create a list of worker threads
 			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
-			while (processorList.hasMoreElements()) {
-				int nextPe = processorList.nextElement();
+			for(Integer nextPe : processorList){
 				readyReaders.add( new ThreadedFileReader(nextPe, myRun, intervalSize, startInterval, endInterval, timeScalingFactor));
 			}
 

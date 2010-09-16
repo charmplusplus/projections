@@ -11,7 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import projections.gui.Analysis;
+import projections.analysis.Analysis;
 import projections.gui.JIntTextField;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;

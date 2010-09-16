@@ -3,6 +3,10 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -24,10 +28,11 @@ import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
+import projections.analysis.Analysis;
 import projections.analysis.PackTime;
+import projections.analysis.TachyonShifts;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
-import projections.gui.Analysis;
 import projections.gui.ColorManager;
 import projections.gui.ColorUpdateNotifier;
 import projections.gui.EntryMethodVisibility;
@@ -437,7 +442,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		for(Integer pe : peToLine){
 			if(!allEntryMethodObjects.containsKey(pe)) {
-				readyReaders.add(new ThreadedFileReader(pe,this));
+				readyReaders.add(new TimelineRunnableFileReader(pe,this));
 			} else {
 				// data exists for this pe already
 			}
@@ -656,7 +661,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	{
 		// Sanity checks first
 		if(pe >= MainWindow.runObject[myRun].getSts().getProcessorCount()){
-			String err = "Your sts file only specifies " + MainWindow.runObject[myRun].getSts().getProcessorCount() + " PEs, but you are trying somehow to load pe " + pe;
+			String err = "The sts file only specifies " + MainWindow.runObject[myRun].getSts().getProcessorCount() + " PEs, but you are trying somehow to load pe " + pe;
 			throw new RuntimeException(err);
 		}
 
@@ -1431,99 +1436,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 
 
-//	/** Fixup the messages that were sent back in time, breaking the causality assumptions many hold to be true */
-//	protected void fixTachyons() {
-//		System.out.println("The fix tachyons feature is still experimental. It will probably not work well if new processors are loaded, or ranges are changed");
-//
-//		synchronized(this){
-//
-//
-//			int numIterations = 2*numPEs();
-//			long threshold_us = 10;
-//
-//			System.out.println("Executing at most " + numIterations + " times or until no tachyons longer than " + threshold_us + "us are found");
-//
-//			for(int iteration = 0; iteration < numIterations; iteration++){
-//
-//				long minLatency = Integer.MAX_VALUE;
-//				//			int minSender = -1;
-//				int minDest = -1;
-//
-//				// Iterate through all entry methods, and compare their execution times to the message send times
-//				Iterator<Integer> pe_iter = allEntryMethodObjects.keySet().iterator();
-//				while(pe_iter.hasNext()){
-//					Integer pe = pe_iter.next();
-//					List<EntryMethodObject> objs = allEntryMethodObjects.get(pe);
-//					Iterator<EntryMethodObject> obj_iter = objs.iterator();
-//					while(obj_iter.hasNext()){ 
-//						EntryMethodObject obj = obj_iter.next();
-//
-//						TimelineMessage m = obj.creationMessage();
-//						if(m!=null){
-//							long sendTime = m.Time;
-//							long executeTime = obj.getBeginTime();
-//
-//							long latency = executeTime - sendTime;
-//
-//							//						int senderPE = m.srcPE;
-//							int executingPE = obj.pe;
-//
-//							if(minLatency> latency ){
-//								minLatency = latency;
-//								//							minSender = senderPE;
-//								minDest = executingPE;	
-//							}
-//						}
-//					}
-//				}
-//
-//				//			System.out.println("Processor skew is greatest between " + sender + " and " + dest);
-//
-//				System.out.println("Processor " + minDest + " is lagging behind by " + (-1*minLatency) + "us");
-//
-//				// Adjust times for all objects and messages associated with processor dest
-//				Integer laggingPE = Integer.valueOf(minDest);
-//
-//				long shift = -1*minLatency;
-//
-//
-//				if(shift < threshold_us){
-//					System.out.println("No tachyons go back further than "+threshold_us+" us");
-//					break;
-//				}
-//
-//
-//				// Shift all events on the lagging pe	
-//				Iterator<EntryMethodObject> iter = (allEntryMethodObjects.get(laggingPE)).iterator();
-//				while(iter.hasNext()){
-//					EntryMethodObject e = iter.next();
-//					e.shiftTimesBy(shift);
-//
-//					// Shift all messages sent by the entry method
-//					Iterator<TimelineMessage> msg_iter = e.messages.iterator();
-//					while(msg_iter.hasNext()){
-//						TimelineMessage msg = msg_iter.next();
-//						msg.shiftTimesBy(shift);
-//					}
-//
-//				}
-//
-//				// Shift all user event objects on lagging pe
-//				allEntryMethodObjects.get(laggingPE).shiftAllEntriesBy(shift);
-//				allUserEventObjects.get(laggingPE).shiftAllEntriesBy(shift);
-//
-//
-//			}
-//
-//		}
-//		displayMustBeRedrawn();
-//	}
-
 
 	/** Fixup the messages that were sent back in time, breaking the causality assumptions many hold to be true */
 	protected void fixTachyons() {
 		System.out.println("The fix tachyons feature is still experimental. It may not work well if new processors are loaded, or ranges are changed");
 
+		TachyonShifts tachyonShifts = MainWindow.runObject[myRun].tachyonShifts;
+		
 		synchronized(this){
 			int numIterations = numPEs();
 			long threshold_us = 10;
@@ -1560,6 +1479,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 //						System.out.println("Shifting Processor " + pe + " by " + shift + "us");
 						allEntryMethodObjects.get(pe).shiftAllEntriesBy(shift);
 						allUserEventObjects.get(pe).shiftAllEntriesBy(shift);
+						tachyonShifts.accumulateTachyonShifts(shift, pe);
 					}
 					if(shift > largestShift)
 						largestShift = shift;
@@ -1573,12 +1493,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					break;
 				}
 
-
 			}
-			
 		}
+		tachyonShifts.writeTachyonShiftMap();
 	}
-
+	
+	
+	
 	public void setViewType(ViewType vt) {
 		viewType = vt;
 		displayMustBeRedrawn();

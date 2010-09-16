@@ -1,4 +1,4 @@
-package projections.gui;
+package projections.analysis;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -10,15 +10,11 @@ import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
-import projections.analysis.IntervalData;
-import projections.analysis.LogLoader;
-import projections.analysis.LogReader;
-import projections.analysis.PoseDopReader;
-import projections.analysis.ProjMain;
-import projections.analysis.ProjectionsConfigurationReader;
-import projections.analysis.StsReader;
-import projections.analysis.SumAnalyzer;
-import projections.analysis.UsageCalc;
+import projections.gui.ColorManager;
+import projections.gui.MainWindow;
+import projections.gui.OrderedIntList;
+import projections.gui.RangeDialogPersistantData;
+import projections.gui.SanitizeForHTML;
 import projections.misc.FileUtils;
 import projections.misc.LogLoadException;
 import projections.misc.SummaryFormatException;
@@ -84,7 +80,7 @@ public class Analysis {
 
   /** ************** Constants ********************** */
   
-  protected static final int NUM_ACTIVITIES = 4;
+  public static final int NUM_ACTIVITIES = 4;
   public static final int PROJECTIONS = 0;
   public static final int USER_EVENTS = 1;
   public static final int FUNCTIONS = 2;
@@ -111,6 +107,8 @@ public class Analysis {
   public static int isOverhead = -2;
   public static int isIdle = -1;
   
+  public TachyonShifts tachyonShifts;
+  
   public Analysis() {
     // empty constructor for now. initAnalysis is still the "true"
     // constructor until multiple run data is supported.
@@ -131,7 +129,7 @@ public class Analysis {
    *  3) total time of the run should be known.
    *
    */    
-  protected void initAnalysis(String filename, Component rootComponent) 
+  public void initAnalysis(String filename, Component rootComponent) 
     throws IOException 
     {
 	  guiRoot = rootComponent;
@@ -156,7 +154,9 @@ public class Analysis {
 		  // Load saved color information from file
 		  try {loadColors();}
 		  catch(Exception e) {};
-
+		  
+		  tachyonShifts = new TachyonShifts(getLogDirectory());
+		  
 		  // Build Summary Data
 		  if (hasSumFiles()) {
 			  sumAnalyzer = null;
@@ -301,7 +301,7 @@ public class Analysis {
   /**
    * Creating AMPI usage profile
    */
-  protected void createAMPIUsage(int procId, long beginTime, 
+  public void createAMPIUsage(int procId, long beginTime, 
 			      long endTime, Vector procThdVec){
     try {
       if (hasLogFiles()) {
@@ -320,7 +320,7 @@ public class Analysis {
     /**
      * Create AMPI Functions' Time profile
      */
-  protected void createAMPITimeProfile(int procId, long beginTime, 
+  public void createAMPITimeProfile(int procId, long beginTime, 
 					     long endTime, Vector procThdVec){
         try {
 	    if (hasLogFiles()) {
@@ -349,7 +349,7 @@ public class Analysis {
      *  "type" here refers to the type of usage data (ie. Idle, System Queue
      *  length or CPU usage).
      */
-  protected int[][] getSystemUsageData(int type) {
+  public int[][] getSystemUsageData(int type) {
 	return systemUsageData[type];
     }
 
@@ -431,42 +431,42 @@ public class Analysis {
 	
 	The returned values are in percent CPU time spent. 
     */
-    protected float[][] GetUsageData(int pnum, long begintime, 
-					 long endtime, OrderedIntList phases) {
-	if( hasLogFiles()) { //.log files
-	    UsageCalc u=new UsageCalc();
-	    return u.usage(pnum, begintime, endtime, getVersion() );
-	}
-	int numUserEntries=getSts().getEntryCount();
-	long[][] data;
-	long[][] phasedata;
-	/*BAD: silently ignores begintime and endtime*/
-	if( sumAnalyzer.getPhaseCount()>1 ) {
-	phases.reset();
-	data = sumAnalyzer.getPhaseChareTime( phases.nextElement() );
-	if (phases.hasMoreElements()) {
-	    while (phases.hasMoreElements() && ( pnum > -1 )) {
-		phasedata = 
-		    sumAnalyzer.getPhaseChareTime(phases.nextElement());
-		for(int q=0; q<numUserEntries; q++) {
-		    data[pnum][q] += phasedata[pnum][q];
-		}
-	    }
-	}
-	} else {
-	data = sumAnalyzer.getChareTime();
-	}
-	float ret[][]=new float[2][numUserEntries+4];
-	//Convert to percent-- .sum entries are always over the 
-	// entire program run.
-	double scale=100.0/getTotalTime();
-	for (int q=0;q<numUserEntries;q++){
-	ret[0][q]=(float)(scale*data[pnum][q]);
-	// dummy value for message send time at the moment .. 
-	// summary file reader needs to be fixed first
-	ret[1][q] = (float )0.0; 
-	}
-	return ret;
+    public float[][] GetUsageData(int pnum, long begintime, 
+    		long endtime, OrderedIntList phases) {
+    	if( hasLogFiles()) { //.log files
+    		UsageCalc u=new UsageCalc();
+    		return u.usage(pnum, begintime, endtime, getVersion() );
+    	}
+    	int numUserEntries=getSts().getEntryCount();
+    	long[][] data;
+    	long[][] phasedata;
+    	
+    	/*BAD: silently ignores begintime and endtime*/
+    	if( sumAnalyzer.getPhaseCount()>1 ) {
+    		phases.reset();
+    		data = sumAnalyzer.getPhaseChareTime( phases.nextElement() );
+    		if (phases.hasMoreElements()) {
+    			while (phases.hasMoreElements() && ( pnum > -1 )) {
+    				phasedata =   sumAnalyzer.getPhaseChareTime(phases.nextElement());
+    				for(int q=0; q<numUserEntries; q++) {
+    					data[pnum][q] += phasedata[pnum][q];
+    				}
+    			}
+    		}
+    	} else {
+    		data = sumAnalyzer.getChareTime();
+    	}
+    	float ret[][]=new float[2][numUserEntries+4];
+    	//Convert to percent-- .sum entries are always over the 
+    	// entire program run.
+    	double scale=100.0/getTotalTime();
+    	for (int q=0;q<numUserEntries;q++){
+    		ret[0][q]=(float)(scale*data[pnum][q]);
+    		// dummy value for message send time at the moment .. 
+    		// summary file reader needs to be fixed first
+    		ret[1][q] = (float )0.0; 
+    	}
+    	return ret;
     }
     
 //    // a == entry point index, t == type of data
@@ -498,7 +498,7 @@ public class Analysis {
      *  For other tools that need to be parallel, use that reader, or create a similar one.
      *
      */
-    protected void LoadGraphData(long intervalSize, 
+    public void LoadGraphData(long intervalSize, 
 			      int intervalStart, int intervalEnd,
 			      boolean byEntryPoint, 
 			      OrderedIntList processorList) 
@@ -607,7 +607,7 @@ public class Analysis {
     }
 
     // *** Data File-related accessors (from sts reader) ***
-    protected boolean hasSummaryData() {
+    public boolean hasSummaryData() {
 	return (hasSumFiles() || hasSumAccumulatedFile());
     }
 
@@ -876,7 +876,7 @@ public class Analysis {
      *	when jumping from TimelineWindow to other graphs
      */
     public void setJTimeAvailable(boolean jBoo) { jTimeAvailable = jBoo; }
-    protected boolean checkJTimeAvailable()        { return jTimeAvailable; }
+    public boolean checkJTimeAvailable()        { return jTimeAvailable; }
 //    public void setJTime(long start, long end)  { jStartTime = start;
 //    							 jEndTime = end; }
     public long getJStart()                     { return jStartTime; }
@@ -962,7 +962,7 @@ public class Analysis {
     	return fileNameHandler.getCanonicalFileName(pnum, ProjMain.DOP);
     }
 
-    protected void closeRC() {
+    public void closeRC() {
     	if (rcReader != null) {
     		rcReader.close();
     	}

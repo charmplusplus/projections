@@ -11,11 +11,11 @@ import projections.Tools.NoiseMiner.NoiseMiner.Duration;
 import projections.Tools.NoiseMiner.NoiseMiner.Event;
 import projections.Tools.NoiseMiner.NoiseMiner.EventWindow;
 import projections.Tools.NoiseMiner.NoiseMiner.Histogram;
+import projections.analysis.Analysis;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.TimelineEvent;
-import projections.gui.Analysis;
 import projections.misc.LogEntryData;
 
 class NoiseMinerThread implements Runnable {

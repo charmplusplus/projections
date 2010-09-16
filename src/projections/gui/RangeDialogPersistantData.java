@@ -8,7 +8,7 @@ public class RangeDialogPersistantData { // NO_UCD
 	protected long begintime;
 	protected long endtime;
 
-	protected RangeDialogPersistantData(OrderedIntList plist, long begintime, long endtime){
+	public RangeDialogPersistantData(OrderedIntList plist, long begintime, long endtime){
 		this.plist = plist;
 		this.begintime = begintime;
 		this.endtime = endtime;

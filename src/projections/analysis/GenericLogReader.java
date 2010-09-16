@@ -10,7 +10,6 @@ import java.io.InputStreamReader;
 import java.util.InputMismatchException;
 import java.util.zip.GZIPInputStream;
 
-import projections.gui.Analysis;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 
@@ -54,13 +53,17 @@ implements PointCapableReader
 
 	private boolean endComputationOccurred;
 	
+	
+
+	long shiftAmount = 0;
 		
 	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
 	public GenericLogReader(int peNum, double Nversion) {
 		super(MainWindow.runObject[myRun].getLog(peNum), String.valueOf(Nversion));
 		
 		sourceFile = MainWindow.runObject[myRun].getLog(peNum);
-
+		shiftAmount = MainWindow.runObject[myRun].tachyonShifts.getShiftAmount(peNum);
+		
 		
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);
@@ -139,6 +142,7 @@ implements PointCapableReader
 	{
 		LogEntryData data = new LogEntryData();
 
+		
 		String line = reader.readLine();
 	    
 		if (line == null)
@@ -165,31 +169,31 @@ implements PointCapableReader
 		data.type = (int) sc.nextLong();
 		switch (data.type) {
 		case BEGIN_IDLE:
-			lastBeginEvent.time = data.time = sc.nextLong();
+			lastBeginEvent.time = data.time = sc.nextLong() + shiftAmount;
 			lastBeginEvent.pe = data.pe = (int) sc.nextLong();
 			lastBeginEvent.setValid(true);
 			break;
 		case END_IDLE: 
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.pe = (int) sc.nextLong();
 			lastBeginEvent.setValid(false);
 			break;
 		case BEGIN_PACK: case END_PACK:
 		case BEGIN_UNPACK: case END_UNPACK:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.pe = (int) sc.nextLong();
 			break;
 		case USER_SUPPLIED:
 			data.userSupplied = new Integer((int) sc.nextLong());
 			break;
 		case USER_SUPPLIED_NOTE:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			sc.nextLong(); // strlen
 			String r = "";//sc.nextLine();
 			data.note = interpretNote(r);
 			break;
 		case USER_SUPPLIED_BRACKETED_NOTE:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.endTime = sc.nextLong();
 			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID;
@@ -198,12 +202,12 @@ implements PointCapableReader
 			break;
 		case MEMORY_USAGE:
 			data.memoryUsage = sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			break;
 		case CREATION:
 			data.mtype = (int) sc.nextLong();
 			data.entry = (int) sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
@@ -212,13 +216,13 @@ implements PointCapableReader
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
-				data.sendTime = sc.nextLong();
+				data.sendTime = sc.nextLong() + shiftAmount;
 			}
 			break;
 		case CREATION_BCAST:
 			data.mtype = (int) sc.nextLong();
 			data.entry = (int) sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
@@ -227,14 +231,14 @@ implements PointCapableReader
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
-				data.sendTime = sc.nextLong();
+				data.sendTime = sc.nextLong() + shiftAmount;
 			}
 			data.numPEs = (int) sc.nextLong();
 			break;
 		case CREATION_MULTICAST:
 			data.mtype = (int) sc.nextLong();
 			data.entry = (int) sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
@@ -243,7 +247,7 @@ implements PointCapableReader
 				data.msglen = -1;
 			}
 			if (version >= 5.0) {
-				data.sendTime = sc.nextLong();
+				data.sendTime = sc.nextLong() + shiftAmount;
 			}
 			data.numPEs = (int) sc.nextLong();
 			data.destPEs = new int[data.numPEs];
@@ -254,7 +258,7 @@ implements PointCapableReader
 		case BEGIN_PROCESSING: 
 			lastBeginEvent.mtype = data.mtype = (int) sc.nextLong();
 			lastBeginEvent.entry = data.entry = (int) sc.nextLong();
-			lastBeginEvent.time = data.time = sc.nextLong();
+			lastBeginEvent.time = data.time = sc.nextLong() + shiftAmount;
 			lastBeginEvent.event = data.event = (int) sc.nextLong();
 			lastBeginEvent.pe = data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
@@ -263,8 +267,7 @@ implements PointCapableReader
 				lastBeginEvent.msglen = data.msglen = -1;
 			}
 			if (version >= 4.0) {
-				lastBeginEvent.recvTime = data.recvTime = 
-					sc.nextLong();
+				lastBeginEvent.recvTime = data.recvTime = sc.nextLong() + shiftAmount;
 				lastBeginEvent.id[0] = data.id[0] = (int) sc.nextLong();
 				lastBeginEvent.id[1] = data.id[1] = (int) sc.nextLong();
 				lastBeginEvent.id[2] = data.id[2] = (int) sc.nextLong();
@@ -273,17 +276,14 @@ implements PointCapableReader
 				lastBeginEvent.id[3] = data.id[3] = (int) sc.nextLong();
 			}
 			if (version >= 6.5) {
-				lastBeginEvent.cpuStartTime = data.cpuStartTime = 
-					sc.nextLong();
+				lastBeginEvent.cpuStartTime = data.cpuStartTime = sc.nextLong() + shiftAmount;
 			}
 			if (version >= 6.6) {
-				lastBeginEvent.numPerfCounts = data.numPerfCounts = 
-					(int) sc.nextLong();
+				lastBeginEvent.numPerfCounts = data.numPerfCounts = (int) sc.nextLong();
 				lastBeginEvent.perfCounts = new long[data.numPerfCounts];
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
-					lastBeginEvent.perfCounts[i] = data.perfCounts[i] = 
-						sc.nextLong();
+					lastBeginEvent.perfCounts[i] = data.perfCounts[i] = sc.nextLong();
 				}
 			}
 			lastBeginEvent.setValid(true);
@@ -291,7 +291,7 @@ implements PointCapableReader
 		case END_PROCESSING:
 			data.mtype = (int) sc.nextLong();
 			data.entry = (int) sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			if (version >= 2.0) {
@@ -300,7 +300,7 @@ implements PointCapableReader
 				data.msglen = -1;
 			}
 			if (version >= 6.5) {
-				data.cpuEndTime = sc.nextLong();
+				data.cpuEndTime = sc.nextLong() + shiftAmount;
 			}
 			if (version >= 6.6) {
 				data.numPerfCounts = (int) sc.nextLong();
@@ -311,7 +311,7 @@ implements PointCapableReader
 			}
 			break;
 		case BEGIN_TRACE: 
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			// invalidates the last Begin Event. BEGIN_TRACE happens
 			// in the context of an entry method that is *not* traced.
 			// Hence when a BEGIN_TRACE event is encountered, no
@@ -320,7 +320,7 @@ implements PointCapableReader
 			lastBeginEvent.setValid(false);
 			break;
 		case END_TRACE:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			// END_TRACE happens in the context of an existing
 			// entry method and hence should logically "end" it.
 			// This means any client taking note of END_TRACE must
@@ -328,51 +328,51 @@ implements PointCapableReader
 			// reasonable data.
 			break;
 		case BEGIN_FUNC:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.entry = (int) sc.nextLong();
 			data.lineNo = (int) sc.nextLong();
 			data.funcName = "";//sc.nextLine();
 			break;
 		case END_FUNC:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.entry = (int) sc.nextLong();
 			break;
 		case MESSAGE_RECV:
 			data.mtype = (int) sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			data.msglen = (int) sc.nextLong();
 			break;
 		case ENQUEUE: case DEQUEUE:
 			data.mtype = (int) sc.nextLong();
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			break;
 		case BEGIN_INTERRUPT: case END_INTERRUPT:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			break;
 		case BEGIN_COMPUTATION:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			break;
 		case END_COMPUTATION:
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			endComputationOccurred = true;
 			break;
 		case USER_EVENT:
 			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID; 
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			break;
 		case USER_EVENT_PAIR:
 			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID;
-			data.time = sc.nextLong();
+			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			break;

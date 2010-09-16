@@ -153,7 +153,7 @@ class FunctionTool extends GenericGraphWindow
 	// setup the reader to read all data.
 	LogEntryData logEntry = new LogEntryData();
 	OrderedIntList validPEs = MainWindow.runObject[myRun].getValidProcessorList();
-	validPEs.reset();
+
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 	CallStackManager stack = new CallStackManager();
 	int activeThread[] = new int[3];
@@ -161,14 +161,14 @@ class FunctionTool extends GenericGraphWindow
 	// read data and look only for functions.
 	countData = new double[validPEs.size()][numFunc];
 	timeData = new double[validPEs.size()][numFunc];
-	int pe;
 
 	int curPeArrayIndex = 0;
 	ProgressMonitor progressBar =
 	    new ProgressMonitor(this, "Reading log files",
 				"", 0, validPEs.size());
-	while (validPEs.hasMoreElements()) {
-	    pe = validPEs.nextElement();
+	
+	for(Integer pe : validPEs){
+
 		GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		try {
 		if (!progressBar.isCanceled()) {

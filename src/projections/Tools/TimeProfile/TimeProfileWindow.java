@@ -350,9 +350,8 @@ implements ActionListener, Clickable
 
 
 						int pIdx=0;		
-						while (processorList.hasMoreElements()) {
-							int nextPe = processorList.nextElement();
-							readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, myRun, 
+						for(Integer pe : processorList){
+							readyReaders.add( new ThreadedFileReader(pe, intervalSize, myRun, 
 									startInterval, endInterval, phaseMarkers, 
 									graphDataAccumulators[pIdx%numResultAccumulators]) );
 							pIdx++;
@@ -404,10 +403,12 @@ implements ActionListener, Clickable
 						}
 
 						int[][] temp = MainWindow.runObject[myRun].sumAnalyzer.getSystemUsageData(startInterval, endInterval, intervalSize);
-						processorList.reset();
 						systemUsageData[1] = new int[processorList.size()][endInterval-startInterval+1];
-						for (int pIdx=0; pIdx<processorList.size(); pIdx++) {
-							systemUsageData[1][pIdx] = temp[processorList.nextElement()];
+						
+						int pIdx=0;
+						for(Integer pe : processorList) {
+							systemUsageData[1][pIdx] = temp[pe];
+							pIdx++;
 						} 
 
 

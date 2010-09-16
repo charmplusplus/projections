@@ -584,6 +584,7 @@ public class LogLoader extends ProjDefs
 	public void createtimeline(int pe, long Begin, long End, Deque<TimelineEvent> timeline, Collection<UserEventObject>  userEventVector, long minEntryDuration)
 	throws LogLoadException
 	{
+		
 		long BeginTime = 0;
 
 		long              Time        = Long.MIN_VALUE;
@@ -595,6 +596,9 @@ public class LogLoader extends ProjDefs
 		PackTime          PT          = null;
 		boolean tempte;
 
+		// See if we need to use some predefined offsets to adjust the times read from the file:
+		long shiftAmount = MainWindow.runObject[myRun].tachyonShifts.getShiftAmount(pe);
+		
 		// open the file
 		GenericLogReader reader = new GenericLogReader(pe,MainWindow.runObject[myRun].getVersion());
 

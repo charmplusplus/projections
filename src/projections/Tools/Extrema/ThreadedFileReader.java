@@ -3,10 +3,10 @@ package projections.Tools.Extrema;
 
 import java.io.IOException;
 
+import projections.analysis.Analysis;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
-import projections.gui.Analysis;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
 

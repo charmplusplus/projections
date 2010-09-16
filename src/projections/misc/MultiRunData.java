@@ -178,9 +178,7 @@ public class MultiRunData
 		OrderedIntList validPEs;
 		for (int run=0; run<numRuns; run++) {
 		    int numPE = pesPerRun[run];
-		    validPEs = 
-			validPESets[run][ProjMain.SUMMARY];
-		    validPEs.reset();
+		    validPEs = validPESets[run][ProjMain.SUMMARY];
 		    // approximates any incomplete data by scaling the values
 		    // actually read by a scale factor.
 		    double scale = numPE/(validPEs.size()*1.0);
@@ -194,8 +192,8 @@ public class MultiRunData
 		    // lower time threshold would also be helpful.
 		    progressBar.setMillisToPopup(1000);
 		    int count = 0;
-		    while (validPEs.hasMoreElements()) {
-			int pe = validPEs.nextElement();
+		    
+		    for(Integer pe : validPEs) {
 			if (!progressBar.isCanceled()) {
 			    progressBar.setNote("[PE: " + pe +
 						" ] Reading Processor data.");

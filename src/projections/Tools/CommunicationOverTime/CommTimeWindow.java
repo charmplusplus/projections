@@ -327,9 +327,7 @@ implements ItemListener, ActionListener
 		// Create a list of worker threads
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
-		processorList.reset();
-		while (processorList.hasMoreElements()) {
-			int nextPe = processorList.nextElement();
+		for (Integer nextPe : processorList){
 			readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount) );
 			pIdx++;
 		}

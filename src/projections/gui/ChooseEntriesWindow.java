@@ -22,6 +22,7 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import projections.Tools.Timeline.Data;
+import projections.analysis.Analysis;
 
 /** A class that displays a color and selection chooser for entry methods */
 public class ChooseEntriesWindow extends JFrame

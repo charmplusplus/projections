@@ -53,10 +53,14 @@ public class OrderedIntList implements Iterable<Integer>
 	public OrderedIntList copyOf() {
 		OrderedIntList listcopy = new OrderedIntList();
 		listcopy.data.addAll(data);
+		listcopy.reset();
 		return listcopy;
 	}   
 
 
+	public OrderedIntList(){
+		reset();
+	}
 
 
 	public void insert(int eleValue) {

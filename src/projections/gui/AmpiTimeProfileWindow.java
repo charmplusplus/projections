@@ -306,11 +306,9 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
 	    } else if (b == setRanges) {
 		showDialog();
 
-                processorList.reset();
                 int index=0;
-                while(processorList.hasMoreElements()){
-                    int procId = processorList.nextElement();
-                    createAMPITimeProfileData(procId,index++);
+            	for(Integer pe : processorList){
+                    createAMPITimeProfileData(pe,index++);
                 }
 
                 setOutputGraphData(true);

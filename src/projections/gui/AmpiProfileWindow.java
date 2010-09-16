@@ -473,13 +473,11 @@ class AmpiProfileWindow extends ProjectionsWindow
          * content to display. The better way is to displaying the data on the table at the same time analyzing
          * the data. This could be later implemented!
          */
-        int curPe = -1;
-        data.plist.reset();
         Vector[] ampiProcessVec = new Vector[data.plist.size()];
         int pCnt=0;
         int totalLine=0;
-        while(data.plist.hasMoreElements()){
-            curPe = data.plist.nextElement();
+        
+		for(Integer curPe : data.plist){
             ampiProcessVec[pCnt] = new Vector();
             MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
             Vector v = ampiProcessVec[pCnt];
@@ -495,12 +493,9 @@ class AmpiProfileWindow extends ProjectionsWindow
         df.setMaximumFractionDigits(3);
         long totalExecTime = data.endtime - data.begintime;
         Object[][] tData = new Object[totalLine][];
-        curPe = -1;
-        data.plist.reset();
         pCnt=0;
         int lineCnt=0;
-        while(data.plist.hasMoreElements()){
-            curPe = data.plist.nextElement();
+		for(Integer curPe : data.plist){
             Vector v = ampiProcessVec[pCnt++];
             for(int i=0; i<v.size(); i++){
                 AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
@@ -535,24 +530,18 @@ class AmpiProfileWindow extends ProjectionsWindow
 	int numPes = data.plist.size();
 	accTime = new float[numPes][]; //[numFunc+1] and we need [1..numFunc-1]
 	int progressCount = 0;
-	int curPe = 0;
 	UsageCalc u = new UsageCalc();
-        ProgressMonitor progressBar =
-	    new ProgressMonitor(this,
-				"Computing Usage Values",
-				"", 0, data.numPs);
-	data.plist.reset();
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.nextElement();
-	    if (!progressBar.isCanceled()) {
-                progressBar.setNote("[PE: " + curPe + " ] Computing Average.");
-		progressBar.setProgress(progressCount);
-	    } else {
-		break;
-	    }
-	    accTime[progressCount] = u.ampiUsage(curPe, data.begintime, data.endtime,
-					 MainWindow.runObject[myRun].getVersion());
-	    progressCount++;
+	ProgressMonitor progressBar = new ProgressMonitor(this, "Computing Usage Values", "", 0, data.numPs);
+	for(Integer curPe : data.plist){
+		if (!progressBar.isCanceled()) {
+			progressBar.setNote("[PE: " + curPe + " ] Computing Average.");
+			progressBar.setProgress(progressCount);
+		} else {
+			break;
+		}
+		accTime[progressCount] = u.ampiUsage(curPe, data.begintime, data.endtime,
+				MainWindow.runObject[myRun].getVersion());
+		progressCount++;
 	}
 	progressBar.close();
     }
@@ -626,10 +615,9 @@ class AmpiProfileWindow extends ProjectionsWindow
 
         String[] xNames = new String[data.plist.size()+1];
         xNames[0] = "Avg";
-        data.plist.reset();
         int cnt=1;
-        while(data.plist.hasMoreElements()){
-            xNames[cnt++] = ""+data.plist.nextElement();
+    	for(Integer curPe : data.plist){
+            xNames[cnt++] = "" + curPe;
         }
 
         procNames = xNames; //store this in order for the usage of usage table
@@ -659,7 +647,6 @@ class AmpiProfileWindow extends ProjectionsWindow
 	double avgScale=1.0/data.plist.size();
 
 	int progressCount = 0;
-        int curPe = -1;
         ProgressMonitor progressBar =
 	    new ProgressMonitor(this,
 				"Computing Usage Values",
@@ -698,9 +685,7 @@ class AmpiProfileWindow extends ProjectionsWindow
         nameMap[0] = sNameMap;
 
         progressCount = 0;
-	data.plist.reset();
-	while (data.plist.hasMoreElements()) {
-	    curPe = data.plist.nextElement();
+    	for(Integer curPe : data.plist){
 	    if (!progressBar.isCanceled()) {
 		progressBar.setNote("[PE: " + curPe +
 				    " ] Reading Entry Point Usage.");

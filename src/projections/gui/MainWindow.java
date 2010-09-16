@@ -24,6 +24,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.SwingWorker;
 
+import projections.analysis.Analysis;
 import projections.analysis.IntervalUtils;
 import projections.analysis.ProjMain;
 import projections.gui.graph.Graph;
@@ -56,7 +57,7 @@ implements ScalePanel.StatusDisplay
 	// Runtime flags -
 	// **CW** Note: These are now tentatively mirrored from ProjMain
 	// until the new interface can be cleanly handled by other tools.
-	protected static double CUR_VERSION;
+	public static double CUR_VERSION;
 	public static boolean IGNORE_IDLE;
 	public static boolean BLUEGENE;
 	public static int BLUEGENE_SIZE[];

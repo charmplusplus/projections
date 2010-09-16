@@ -174,10 +174,7 @@ implements ActionListener, EntryMethodVisibility
                                         // Create a list of worker threads
                                         LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
-                                        OrderedIntList processorList = dialog.getSelectedProcessors();
-
-                    while (processorList.hasMoreElements()) {
-                                                int nextPe = processorList.nextElement();
+                                        for(Integer nextPe : dialog.getSelectedProcessors()){
                                                 readyReaders.add( new ThreadedFileReader(counts, nextPe, dialog.getStartTime(), dialog.getEndTime(), timeNumBins, timeBinSize, timeMinBinSize, msgNumBins, msgBinSize, msgMinBinSize, executionTime));
                                         }
 

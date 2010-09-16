@@ -63,8 +63,7 @@ public class CallTable extends ProjDefs
 			new ProgressMonitor(parent, "Generating Call Table",
 					"", 0, numPe);
 
-		while (peList.hasMoreElements()) {
-			int pe = peList.nextElement();
+		for (Integer pe : peList){
 			if (!progressBar.isCanceled()) {
 				progressBar.setNote("[PE: " + pe + " ] Reading data.");
 				progressBar.setProgress(currPeIndex+1);

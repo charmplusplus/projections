@@ -1,12 +1,12 @@
 package projections.Tools.Timeline;
 
 /** The reader threads for timeline */
-class ThreadedFileReader implements Runnable  {
+class TimelineRunnableFileReader implements Runnable  {
 	
 	private int pe;
 	private Data data;
 	
-	protected ThreadedFileReader(int pe, Data data){
+	protected TimelineRunnableFileReader(int pe, Data data){
 		this.data = data;
 		this.pe = pe;
 	}

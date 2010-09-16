@@ -72,10 +72,9 @@ public class IntervalData
 	    rawData = new Vector[SumDetailReader.NUM_TAGS][numPEs][];
 	    OrderedIntList availablePEs = 
 		MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
-	    availablePEs.reset();
-	    while (availablePEs.hasMoreElements()) {
-		int pe = availablePEs.nextElement();
-		try {
+
+	    for(Integer pe : availablePEs) {
+	    try {
 		    summaryDetails[pe] = 
 			new SumDetailReader(MainWindow.runObject[myRun].getSumDetailLog(pe),
 					    MainWindow.runObject[myRun].getVersion());
@@ -123,10 +122,7 @@ public class IntervalData
 	}
 	double tempData[][] = null;
 	int processorCount = 0;
-	int curPe = 0;
-	processorList.reset();
-	while (processorList.hasMoreElements()) {
-	    curPe = processorList.nextElement();
+	for(Integer curPe : processorList) {
 	    // get standard data
 	    tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart,
 			       intervalEnd-intervalStart+1);

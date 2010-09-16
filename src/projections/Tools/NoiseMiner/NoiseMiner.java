@@ -744,15 +744,11 @@ class NoiseMiner extends ProjDefs
 	/** Do the gathering and processing of the data */
 	public void gatherData(Component parent)
 	{
-		
-		peList.reset();
-		int numPs = peList.size();
 				
 		// Create a list of worker threads	
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		
-		for (int p=0; p<numPs; p++) {
-			int pe = peList.nextElement();
+		for(Integer pe : peList) {
 			readyReaders.add(new NoiseMinerThread(pe, MainWindow.runObject[myRun], this));
 		}	
 		

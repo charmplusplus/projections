@@ -692,7 +692,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			c = makeMoreLikeBackground(c);
 		}
 		
-			
+		
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = width;
 		int rectHeight = data.barheight();
@@ -704,7 +704,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		// Idle regions are thinner vertically
 		if(entryIndex==-1 && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT){
-			rectHeight -= 6;
+			rectHeight -= 7;
 			verticalInset += 3;
 		}
 		

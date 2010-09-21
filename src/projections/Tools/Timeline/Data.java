@@ -406,7 +406,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					if(peToLine.contains(pe)){
 						objs.removeEntriesOutsideRange(startTime, endTime);
 					} else {
-						iter.remove();
+						iter.remove(); // remove unused PE data
 					}
 				}
 
@@ -420,7 +420,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					if(peToLine.contains(pe)){
 						objs.removeEntriesOutsideRange(startTime, endTime);
 					} else {
-						iter2.remove();
+						iter2.remove(); // remove unused PE data
 					}				
 				}
 
@@ -442,9 +442,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		for(Integer pe : peToLine){
 			if(!allEntryMethodObjects.containsKey(pe)) {
+				// No data exist for the pe, so load it
 				readyReaders.add(new TimelineRunnableFileReader(pe,this));
 			} else {
-				// data exists for this pe already
+				// data exists for this pe already, but reload it from scratch
+				allEntryMethodObjects.remove(pe);
+				allUserEventObjects.remove(pe);
+				readyReaders.add(new TimelineRunnableFileReader(pe,this));
 			}
 		}
 

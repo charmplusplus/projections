@@ -63,7 +63,8 @@ implements PointCapableReader
 		
 		sourceFile = MainWindow.runObject[myRun].getLog(peNum);
 		shiftAmount = MainWindow.runObject[myRun].tachyonShifts.getShiftAmount(peNum);
-		
+
+		//System.out.println("pe["+peNum+"]{" + sourceFile.getAbsolutePath() + "}"); 
 		
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);

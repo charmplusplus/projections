@@ -702,7 +702,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		allUserEventObjects.put(pe,userEvents);
 		allEntryMethodObjects.put(pe,perPEObjects);
-
+		
+		//System.out.println("on pe "+pe+": "+tl.size()+" timeline objects");
 
 
 		long minMemThisPE = Long.MAX_VALUE;

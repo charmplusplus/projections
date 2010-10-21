@@ -20,6 +20,9 @@ import projections.gui.OrderedIntList;
 
 public class FileUtils {
 
+	private class FileTreeMap extends TreeMap<Integer, File>{
+	}
+
 	private OrderedIntList validPEs[];
 	private String validPEStrings[];
 	private boolean hasFiles[];
@@ -32,7 +35,7 @@ public class FileUtils {
 	}
 	
 	/** The file for the log for each specified pe */
-	private TreeMap<Integer, File> logFiles;
+	private FileTreeMap logFiles[];
 	
 	public FileUtils(String filename){
 //		System.out.println("FileUtils created with filename: " + filename);	
@@ -88,18 +91,22 @@ public class FileUtils {
 
 
 		// Scan for log files and record what we find
-		logFiles = new TreeMap<Integer, File>();
+		logFiles = new FileTreeMap[ProjMain.NUM_TYPES];
 		
 		
 		for (int type=0; type<ProjMain.NUM_TYPES; type++) {
 			validPEs[type] = new OrderedIntList();
+			logFiles[type] = new FileTreeMap(); 
 
 			detectFiles(type);
 			validPEStrings[type] = validPEs[type].listToString();
 		}
 		
-		
-		System.out.println("Found " + logFiles.size() + " log files");
+		for(int type=0; type<ProjMain.NUM_TYPES; type++){
+			int numfiles = logFiles[type].size();
+			if(numfiles!=0)
+				System.out.println("Found " + numfiles + " " + getTypeExtension(type) + " files");
+		}
 		
 	}
 
@@ -141,7 +148,7 @@ public class FileUtils {
 			String filename = f.getName();
 			String extension = getTypeExtension(type);
 
-//			System.out.println("Examining " + filename);
+			//System.out.println("Examining " + filename + " with extension "+extension);
 			
 			if(filename.startsWith(prefix_s)){
 				
@@ -169,13 +176,13 @@ public class FileUtils {
 							int pe = Integer.parseInt(splits[numSplits-2]);
 							validPEs[type].insert(pe);
 							hasFiles[type] = true;
-							logFiles.put(pe, f);
+							logFiles[type].put(pe, f);
 							//						System.out.println("Found " + extension + " for pe " + pe);
 						} else if(splits[numSplits-2].equals(extension)  &&  splits[numSplits-1].equals("gz") ){
 							int pe = Integer.parseInt(splits[numSplits-3]);
 							validPEs[type].insert(pe);
 							hasFiles[type] = true;
-							logFiles.put(pe, f);
+							logFiles[type].put(pe, f);
 							//						System.out.println("Found " + extension + ".gz for pe " + pe);
 						} else {
 							// The file does not appear to match the desired names
@@ -276,7 +283,7 @@ public class FileUtils {
 
     /** Return a File for the log for a PE */
     public File getLogFile(int pe){
-    	return logFiles.get(pe);
+    	return logFiles[ProjMain.LOG].get(pe);
     }
     
     

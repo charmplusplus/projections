@@ -1602,9 +1602,11 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 	protected void movePEToLine(int PE, int newPos){
-		Integer p = Integer.valueOf(PE);
-		peToLine.remove(p);
-		peToLine.add(newPos, p);
+		if (newPos < peToLine.size()) {
+			Integer p = Integer.valueOf(PE);
+			peToLine.remove(p);
+			peToLine.add(newPos, p);
+		}
 		this.displayMustBeRedrawn();
 	}
 

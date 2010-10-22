@@ -102,6 +102,7 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 							g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 						}
 						else {
+							g.setColor(data.getForegroundColor());
 							String peString = "PE "+pe;
 							int stringWidth = fm.stringWidth(peString);			
 							g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());

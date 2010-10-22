@@ -263,6 +263,11 @@ implements ScalePanel.StatusDisplay
 					InvalidFileDialog ifd =
 						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
+				} catch (OutOfMemoryError e){
+					e.printStackTrace();
+					System.err.println("ERROR: PROJECTIONS RUNNING OUT oF MEMORY");
+					System.err.println("POSSIBLE SOLUTION: Set more memory for projections OR use \"projections64\"");
+					System.exit(1);
 				}
 				return null;
 			}

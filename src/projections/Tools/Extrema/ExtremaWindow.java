@@ -207,9 +207,11 @@ Clickable
 				}
 				public void done() {
 					// GUI code after Long non-gui code (above) is done.
-					
-					setGraphSpecificData();
-					thisWindow.setVisible(true);
+					//outlierList may be null if threads are interrupted by cancel button
+					if (outlierList != null) {
+						setGraphSpecificData();
+						thisWindow.setVisible(true);
+					}
 				}
 			};
 			worker.execute();

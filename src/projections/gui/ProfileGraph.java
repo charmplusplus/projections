@@ -263,11 +263,12 @@ class ProfileGraph extends JPanel
     private void showPopup(int xVal, int yVal, int xPos, int yPos){        
 	Point offset = getBubbleOffset();
 	//String text[] = dataSource.getPopup(xVal, yVal);
-        String[] text = new String[2];
+        String[] text = new String[3];
         text[0] = sectionNames[xVal][yVal];
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(3);        
         text[1] = "Usage: "+df.format(dataSource[xVal][yVal])+"%";
+        text[2] = "PE: " + xNames[xVal];
 		
 	// old popup still exists, but mouse has moved over a new 
 	// section that has its own popup

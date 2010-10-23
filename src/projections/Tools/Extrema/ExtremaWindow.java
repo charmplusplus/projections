@@ -193,7 +193,8 @@ Clickable
 		}
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-			threshold = outlierDialogPanel.getThreshold();
+			OrderedIntList selectedPEs = dialog.getSelectedProcessors().copyOf();
+			threshold = selectedPEs.size() < outlierDialogPanel.getThreshold() ? selectedPEs.size() : outlierDialogPanel.getThreshold();
 			selectedActivity = outlierDialogPanel.getCurrentActivity();
 			selectedAttribute = outlierDialogPanel.getCurrentAttribute();
 			k = outlierDialogPanel.getK();

@@ -116,7 +116,11 @@ class ThreadedFileReader implements Runnable  {
 						nestingLevel--;
 						if(nestingLevel == 0){
 							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6|| selectedAttribute == 7) {
-								myData[logData.entry] += logData.time - prevBeginProc.time;
+								if (logData.time <= endTime && logData.time >= startTime) {
+									if (prevBeginProc.time < startTime)
+										prevBeginProc.time = startTime;
+									myData[logData.entry] += logData.time - prevBeginProc.time;
+								}
 							}
 							prevBeginProc = null;	
 						} else if(nestingLevel < 0){
@@ -131,8 +135,13 @@ class ThreadedFileReader implements Runnable  {
 						break;
 
 					case ProjDefs.END_IDLE:
+						//selectedAttribute 2 and 3 are not yet implemented
 						if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6 || selectedAttribute == 7) {
-							myData[numActivities] += logData.time - prevBeginIdle.time;
+							if (logData.time <= endTime && logData.time >= startTime) {
+								if (prevBeginIdle.time < startTime)
+									prevBeginIdle.time = startTime;
+								myData[numActivities] += logData.time - prevBeginIdle.time;
+							}
 						}
 						prevBeginIdle = null;
 						break;

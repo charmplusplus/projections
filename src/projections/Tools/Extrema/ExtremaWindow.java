@@ -98,8 +98,8 @@ Clickable
 
 	private final static int ATTR_CLUSTERING = 0;
 	protected final static int ATTR_LEASTIDLE = 1;
-	private final static int ATTR_MSGSSENT = 2;
-	private final static int ATTR_BYTESSENT = 3;
+	protected final static int ATTR_MSGSSENT = 2;
+	protected final static int ATTR_BYTESSENT = 3;
 	protected final static int ATTR_MOSTIDLE = 4;
 	private final static int ATTR_ACTIVEENTRY = 5;
 	private final static int ATTR_OVERHEAD = 6;

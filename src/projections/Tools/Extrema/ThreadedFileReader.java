@@ -98,9 +98,9 @@ class ThreadedFileReader implements Runnable  {
 
 					case ProjDefs.CREATION:
 						int eventIndex = logData.entry;
-						if (selectedAttribute == 2) {
+						if (selectedAttribute == ExtremaWindow.ATTR_MSGSSENT) {
 							myData[eventIndex]++;
-						} else if (selectedAttribute == 3) {
+						} else if (selectedAttribute == ExtremaWindow.ATTR_BYTESSENT) {
 							myData[eventIndex] += logData.msglen;
 						}	
 						break;

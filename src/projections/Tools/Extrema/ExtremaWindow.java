@@ -422,7 +422,7 @@ Clickable
 				   int numActivities, int k,
 				   int sortedMap[]) {
 	int numPEs = data.length;
-	int threshold = sortedMap.length;
+	int threshold = numPEs < sortedMap.length ? numPEs : sortedMap.length;
 	int offset = numPEs - threshold;
 
 	switch (selectedAttribute) {

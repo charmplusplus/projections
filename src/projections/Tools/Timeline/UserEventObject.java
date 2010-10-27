@@ -169,7 +169,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	public String getToolTipText(){
 		if(note == null) 
 			return "<html><body><p><i>User Traced Event:</i> <b>" + getName() + "</b></p><p><i>Duration:</i> " + (endTime-beginTime) + " us</p><p><i>event:</i> " + userEventID + "</p><p><i>occurred on PE:</i> " + pe + "</p></html></body>";
-		else if(endTime - beginTime > 0)
+		else if(endTime - beginTime <= 0)
 			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "</html></body>";
 		else
 			return "<html><body><p><i>User Supplied Note:</i></p><p></p>" + note + "<p><i>Duration</i>: " + (endTime-beginTime) + "us</p></html></body>";

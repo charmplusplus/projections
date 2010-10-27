@@ -189,17 +189,16 @@ implements PointCapableReader
 			break;
 		case USER_SUPPLIED_NOTE:
 			data.time = sc.nextLong() + shiftAmount;
-			sc.nextLong(); // strlen
-			String r = "";//sc.nextLine();
-			data.note = interpretNote(r);
+			int strLen = (int)sc.nextLong(); // strlen
+			data.note = interpretNote(sc.nextString(strLen));
 			break;
 		case USER_SUPPLIED_BRACKETED_NOTE:
 			data.time = sc.nextLong() + shiftAmount;
 			data.endTime = sc.nextLong();
 			data.userEventID = (int) sc.nextLong();
 			data.entry = data.userEventID;
-			sc.nextLong(); // strlen
-			data.note = interpretNote(""); //sc.nextLine()
+			int brStrLen = (int)sc.nextLong(); // strlen
+			data.note = interpretNote(sc.nextString(brStrLen)); 
 			break;
 		case MEMORY_USAGE:
 			data.memoryUsage = sc.nextLong();

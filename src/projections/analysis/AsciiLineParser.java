@@ -44,9 +44,15 @@ class AsciiLineParser {
 		}
 	}
 
-	protected String restOfLine() {
-    	return line.substring(pos);
-    }
+	final protected String restOfLine() {
+    		return line.substring(pos);
+    	}
+
+	final protected String nextString(int strlen) {
+    		String ret = line.substring(pos, pos+strlen);
+		pos += strlen;
+		return ret;
+    	}
 
 
 	//Read a positive long from the current file 

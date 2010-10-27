@@ -952,6 +952,7 @@ public class LogLoader extends ProjDefs
 						break;
 					case USER_SUPPLIED_BRACKETED_NOTE:
 						UserEventObject note2 = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.Type.PAIR, LE.note);
+						note2.beginTime = LE.Time;
 						note2.endTime = LE.endTime;
 						userEventVector.add(note2);
 						break;

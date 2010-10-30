@@ -357,6 +357,15 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		if(!peToLine.contains(p)){
 			peToLine.addLast(p);
 			MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe + " to peToLine size=" + peToLine.size() );
+			
+			if(isSMPRun()){
+				int commPE = getCommThdPE(p);
+				if(!peToLine.contains(commPE)){
+					peToLine.addLast(commPE);
+					MainWindow.performanceLogger.log(Level.FINE,"Add processor " + commPE + " to peToLine size=" + peToLine.size() );
+				}
+			}
+			
 			modificationHandler.notifyProcessorListHasChanged();
 			storeRangeToPersistantStorage();
 			displayMustBeRedrawn();
@@ -374,13 +383,52 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
 	public void setProcessorList(OrderedIntList processorList){
 		peToLine.clear();
-		Integer line = 0;
 
-		for(Integer pe : processorList){
-			peToLine.addLast(pe);
-			line ++;
-		}
-
+		if(isSMPRun()){
+			TreeSet<Integer> commPEs = new TreeSet<Integer>();
+			commPEs.clear();
+			int prevNID = -1;			
+			int prevCommPE = -1;
+			boolean isLastAdded = false;
+			//insert the comm PE to proper position.
+			for(Integer pe: processorList){
+				if(isCommThd(pe)){
+					//as comm thds are always at the end of this processorList 
+					//(i.e. their PEs are always larger than workers' PEs.
+					if(!isLastAdded && prevCommPE!=-1){
+						peToLine.addLast(prevCommPE);
+						commPEs.add(prevCommPE);
+						isLastAdded = true;
+					}
+					if(commPEs.contains(pe)) continue;
+					peToLine.addLast(pe);
+					continue;
+				}
+				
+				if(prevNID==-1){
+					prevNID = getNodeID(pe);
+					prevCommPE = getCommThdPE(pe);
+					peToLine.addLast(pe);
+				}else{
+					int curNID = getNodeID(pe);
+					if(curNID != prevNID){
+						//encounter a new set of PEs of a node, add the comm thd
+						//of the previous node
+						peToLine.addLast(prevCommPE);						
+						commPEs.add(prevCommPE);
+						
+						prevNID = curNID;
+						prevCommPE = getCommThdPE(pe);
+					}
+					peToLine.addLast(pe);
+				}
+			}
+			if(!isLastAdded) peToLine.addLast(prevCommPE);			
+		}else{
+			for(Integer pe : processorList){
+				peToLine.addLast(pe);				
+			}
+		}		
 	}
 
 
@@ -821,6 +869,12 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 	protected boolean isSMPRun(){
 		return MainWindow.runObject[myRun].getSts().isSMPRun();
+	}
+	protected int getCommThdPE(int pe){
+		int nid = getNodeID(pe);
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		return sts.getNodeSize()*sts.getSMPNodeCount()+nid;
+		
 	}
 
 	/** Load the Timeline data for one processor (pe)

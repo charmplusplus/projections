@@ -30,6 +30,7 @@ import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.Data.RepresentedEntity;
 import projections.Tools.Timeline.RangeQueries.Query1D;
+import projections.Tools.Timeline.Data.SMPMsgGroup;
 import projections.gui.MainWindow;
 
 
@@ -264,6 +265,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
 		paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);
+		paintSMPMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForSMPObjectsAlt);
 
 		return count1 + count2;
 	}
@@ -340,7 +342,65 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 	}
 
+	private void paintSMPMessageSendLines(Graphics g, Color c, Color bgColor, Set<SMPMsgGroup> drawMessagesForObjects){
+		Graphics2D g2d = (Graphics2D) g;
+		// paint the message send lines
+		if (drawMessagesForObjects.size()>0) {
+			for(SMPMsgGroup obj : drawMessagesForObjects){
+				EntryMethodObject swObj = obj.sendWPe;				
+				EntryMethodObject scObj = obj.sendCPe;
+				EntryMethodObject rcObj = obj.recvCPe;
+				EntryMethodObject rwObj = obj.recvWPe;
+				
+				if(scObj.creationMessage() != null && 
+					rcObj.creationMessage() != null &&
+					rwObj.creationMessage() != null){
+					
+					
+					// Message Creation point (worker thd on send side)
+					int x1 = data.timeToScreenPixel(scObj.creationMessage().Time);			
+					double y1 = data.messageSendLocationY(swObj.pe);
+					
+					// Message executed (comm thd on send side) 
+					int x2Begin =  data.timeToScreenPixel(scObj.getBeginTime());
+					int x2End = data.timeToScreenPixel(scObj.getEndTime());
+					double y2 = data.messageRecvLocationY(scObj.pe);
 
+					//Message executed (comm thd on recv side)	
+					int x3Begin =  data.timeToScreenPixel(rcObj.getBeginTime());
+					int x3End = data.timeToScreenPixel(rcObj.getEndTime());
+					double y3 = data.messageRecvLocationY(rcObj.pe);
+
+					//Message executed (worker thd on recv side)	
+					int x4 =  data.timeToScreenPixel(rwObj.getBeginTime());
+					double y4 = data.messageRecvLocationY(rwObj.pe);
+
+					// Draw thick background Then thin foreground
+					g2d.setPaint(bgColor);
+					g2d.setStroke(new BasicStroke(4.0f));
+					g2d.drawLine(x1,(int)y1,x2Begin,(int)y2);
+					g2d.setPaint(c);
+					g2d.setStroke(new BasicStroke(2.0f));
+					g2d.drawLine(x1,(int)y1,x2Begin,(int)y2);
+
+					g2d.setPaint(bgColor);
+					g2d.setStroke(new BasicStroke(4.0f));
+					g2d.drawLine(x2End,(int)y2,x3Begin,(int)y3);
+					g2d.setPaint(c);
+					g2d.setStroke(new BasicStroke(2.0f));
+					g2d.drawLine(x2End,(int)y2,x3Begin,(int)y3);
+
+					g2d.setPaint(bgColor);
+					g2d.setStroke(new BasicStroke(4.0f));
+					g2d.drawLine(x3End,(int)y3,x4,(int)y4);
+					g2d.setPaint(c);
+					g2d.setStroke(new BasicStroke(2.0f));
+					g2d.drawLine(x3End,(int)y3,x4,(int)y4);
+				}
+			}
+		}
+
+	}
 
 
 	/** Dynamically generate the tooltip mouseover text when needed */

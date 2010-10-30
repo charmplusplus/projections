@@ -40,6 +40,7 @@ import projections.gui.MainWindow;
 import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
 import projections.misc.LogLoadException;
+import projections.analysis.StsReader;
 
 
 /**
@@ -82,6 +83,53 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	public enum ColorScheme {
 		BlueGradientColors, RandomColors
+	}
+
+	public class SMPMsgGroup implements Comparable{
+		public EntryMethodObject sendWPe;
+		public EntryMethodObject sendCPe;
+		public EntryMethodObject recvCPe;
+		public EntryMethodObject recvWPe;
+		
+		@Override
+		public int compareTo(Object o){
+			SMPMsgGroup obj = (SMPMsgGroup)o;
+/*
+			//A simple way, but may not be that efficient because of the possible more
+			//function calls
+			int[] val=new int[4];
+			val[0] = sendWPe.compareTo(obj.sendWPe);
+			val[1] = sendCPe.compareTo(obj.sendCPe);
+			val[2] = recvCPe.compareTo(obj.recvCPe);
+			val[3] = recvWPe.compareTo(obj.recvWPe);
+			
+			for(int i=0; i<4; i++){
+				if(val[i]!=0) return val[i];
+			}
+			return 0;
+*/			
+			int swval = sendWPe.compareTo(obj.sendWPe);
+			if(swval == 0){
+				int scval = sendCPe.compareTo(obj.sendCPe);
+				if(scval == 0){
+					int rcval = recvCPe.compareTo(obj.recvCPe);
+					if(rcval == 0){
+						return recvWPe.compareTo(obj.recvWPe);						
+					}else
+						return rcval;
+				}else
+					return scval;
+			}else
+				return swval;			
+		}
+		
+		@Override
+		public boolean equals(Object o){
+			if(this == o) return true;
+			if(!(o instanceof SMPMsgGroup)) return false;
+			if(compareTo(o) == 0) return true;
+			else return false;
+		}
 	}
 
 	// meaning in future versions of Projections that support multiple
@@ -212,6 +260,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	protected Set<EntryMethodObject> drawMessagesForTheseObjects;
 	/** A set of objects for which we draw their creation message lines in an alternate color */
 	protected Set<EntryMethodObject> drawMessagesForTheseObjectsAlt;
+	/** A set of SMP group objects for which we draw their creation message lines in an alternate color */
+	protected Set<SMPMsgGroup> drawMessagesForSMPObjectsAlt;
 
 
 	private boolean useCustomColors=false;
@@ -268,6 +318,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		drawMessagesForTheseObjects = new HashSet<EntryMethodObject>();
 		drawMessagesForTheseObjectsAlt = new HashSet<EntryMethodObject>();
+		drawMessagesForSMPObjectsAlt = new HashSet<SMPMsgGroup>();
 
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		makeFrequencyMap(entries);
@@ -588,28 +639,123 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 */
 	private void toggleMessageCalledByThisLine(EntryMethodObject obj) {
 		List<TimelineMessage> tleMsg = obj.getTLmsgs();
+
+		ArrayList<EntryMethodObject> smpGrpObjs = new ArrayList<EntryMethodObject>(4);		
+		
 		if (tleMsg!=null) {
 			for (int i=0; i<tleMsg.size(); i++) { //when to empty the drawMsgsForTheseObjsAlt?
 				Set<EntryMethodObject> entMethSet = this.messageStructures.getMessageToExecutingObjectsMap().get(tleMsg.get(i));
 				if (entMethSet!=null) {
+					smpGrpObjs.add(obj); //always add the "obj" to be the first object
 					Iterator<EntryMethodObject> iter = entMethSet.iterator();
 					while (iter.hasNext()) {
 						EntryMethodObject emo = iter.next();
 						if (drawMessagesForTheseObjectsAlt.contains(emo))
-							drawMessagesForTheseObjectsAlt.remove(emo);
+							drawMessagesForTheseObjectsAlt.remove(emo);							
 						else
-							drawMessagesForTheseObjectsAlt.add(emo);
+							drawMessagesForTheseObjectsAlt.add(emo);													
+						smpGrpObjs.add(emo);
 					}
+					
+					checkSMPMsgGroup(smpGrpObjs); //may remove elements from drawMessagesForTheseObjectsAlt									
+					smpGrpObjs.clear();
 				}
 			}
 			displayMustBeRepainted();
 		}
+	}
+	
+	private void checkSMPMsgGroup(ArrayList<EntryMethodObject> smpGrpObjs){
+		if(smpGrpObjs.size()!=4) return;
+		
+		//only consider the SMP Msg group that has 4 objects
+		//simple assumption here: these 4 objects should consist of a SMPMsgGroup
+		int swidx = 0; //the worker thread of the sender side
+		int scidx = 0; //the comm thread of the sender side
+		int rwidx = 0; //the worker thread of the recv side
+		int rcidx = 0; //the comm thread of the recv side
+		int sendNID = getNodeID(smpGrpObjs.get(0).pe);
+		int nid1 = getNodeID(smpGrpObjs.get(1).pe);
+		int nid2 = getNodeID(smpGrpObjs.get(2).pe);
+		int nid3 = getNodeID(smpGrpObjs.get(3).pe);						
+		//System.out.println("Checking one group of PES: "+smpGrpObjs.get(0).pe+":"+smpGrpObjs.get(1).pe
+		//	+":"+smpGrpObjs.get(2).pe+":"+smpGrpObjs.get(3).pe);
+		if(nid1 == sendNID && isCommThd(smpGrpObjs.get(1).pe)){
+			scidx = 1;
+			if(nid2 == nid3){
+				if(isCommThd(smpGrpObjs.get(2).pe)){
+					rcidx = 2; rwidx = 3;
+				}else{
+					rcidx = 3; rwidx = 2;
+				}										
+			}else{
+				System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid2!=nid3");
+				return;
+			}
+		}else if(nid2 == sendNID && isCommThd(smpGrpObjs.get(2).pe)){
+			scidx = 2;
+			if(nid1 == nid3){
+				if(isCommThd(smpGrpObjs.get(1).pe)){
+					rcidx = 1; rwidx = 3;
+				}else{
+					rcidx = 3; rwidx = 1;
+				}										
+			}else{
+				System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid3");
+				return;
+			}
+		}else if(nid3 == sendNID && isCommThd(smpGrpObjs.get(3).pe)){
+			scidx = 3;
+			if(nid1 == nid2){
+				if(isCommThd(smpGrpObjs.get(1).pe)){
+					rcidx = 1; rwidx = 2;
+				}else{
+					rcidx = 2; rwidx = 1;
+				}										
+			}else{
+				System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid2");
+				return;
+			}
+		}else{
+			System.err.println("Something may be wrong in Data::checkSMPMsgGroup as none is equal to sendNID");
+			return;
+		}
+		
+		SMPMsgGroup one = new SMPMsgGroup();
+		one.sendWPe = smpGrpObjs.get(swidx);
+		one.sendCPe = smpGrpObjs.get(scidx);
+		one.recvWPe = smpGrpObjs.get(rwidx);
+		one.recvCPe = smpGrpObjs.get(rcidx);
+		
+		SMPMsgGroup oldOne = null;
+		for(SMPMsgGroup obj : drawMessagesForSMPObjectsAlt){
+			if(obj.equals(one)){
+				oldOne = obj;
+				break;
+			}
+		}
+		
+		//since those two EntryMethodObjects are not contained in the set when previously clicked
+		//as they are removed by the code in the "else" branch. We still need to remove them
+		drawMessagesForTheseObjectsAlt.remove(one.sendCPe);
+		drawMessagesForTheseObjectsAlt.remove(one.recvCPe);
+		drawMessagesForTheseObjectsAlt.remove(one.recvWPe);
+		if(oldOne!=null){
+			//System.out.println("removed one SMPMsgGroup");
+			drawMessagesForSMPObjectsAlt.remove(oldOne);
+		}
+		else{
+			//System.out.println("added one SMPMsgGroup");
+			drawMessagesForSMPObjectsAlt.add(one);
+		}
+		//System.out.println("num SMPMsgGroup objs="+drawMessagesForSMPObjectsAlt.size());
 	}
 
 	/**Remove all lines from forward and backward tracing from Timelines display*/
 	protected void removeLines() {
 		drawMessagesForTheseObjectsAlt.clear();
 		drawMessagesForTheseObjects.clear();
+		drawMessagesForSMPObjectsAlt.clear();
 		displayMustBeRepainted();
 	}
 
@@ -631,6 +777,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	protected void clearMessageSendLines() {
 		drawMessagesForTheseObjects.clear();
 		drawMessagesForTheseObjectsAlt.clear();
+		drawMessagesForSMPObjectsAlt.clear();
 	}
 
 
@@ -653,6 +800,28 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return MainWindow.runObject[myRun].background;
 	}
 
+	protected int getSMPNodeSize(){
+		return MainWindow.runObject[myRun].getSts().getNodeSize();
+	}
+	protected boolean isCommThd(int pe){
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		int totalPes = sts.getProcessorCount();
+		int totalNodes = sts.getSMPNodeCount();
+		int nodesize = sts.getNodeSize();
+		if(pe>=totalNodes*nodesize && pe<totalPes) return true;
+		return false;
+	}
+	protected int getNodeID(int pe){
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		int totalPes = sts.getProcessorCount();
+		int totalNodes = sts.getSMPNodeCount();
+		int nodesize = sts.getNodeSize();
+		if(pe>=totalNodes*nodesize && pe<totalPes) return pe-totalNodes*nodesize;
+		return pe/nodesize;		
+	}
+	protected boolean isSMPRun(){
+		return MainWindow.runObject[myRun].getSts().isSMPRun();
+	}
 
 	/** Load the Timeline data for one processor (pe)
 	 * 
@@ -2105,6 +2274,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		messageStructures = null;
 		drawMessagesForTheseObjects = null;
 		drawMessagesForTheseObjectsAlt = null;
+		drawMessagesForSMPObjectsAlt = null;
 		super.finalize(); //not necessary if extending Object.
 	} 
 

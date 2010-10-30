@@ -995,7 +995,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		// System.out.println(usage);
 	}
 
-
+	@Override
 	public int compareTo(Object o) {
 		EntryMethodObject obj = (EntryMethodObject) o;
 		if(pCreation != obj.pCreation)

@@ -42,6 +42,11 @@ public class StsReader extends ProjDefs
 //    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
  
+
+    //SMP mode
+    private int NumNodes=0;
+    private int NodeSize = 1;
+    private int NumCommThdPerNode = 0;
     
     /** Entry Names */
     private int entryIndex = 0; ///< The next available index
@@ -101,6 +106,9 @@ public class StsReader extends ProjDefs
 		    Machine = st.nextToken();
 		} else if (s1.equals("PROCESSORS")) {
 		    NumPe = Integer.parseInt(st.nextToken());
+		} else if (s1.equals("SMPMODE")) {
+		    NodeSize = Integer.parseInt(st.nextToken());
+ 		    NumNodes = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 //		    ChareList   = new Chare[TotalChares];
@@ -196,11 +204,25 @@ public class StsReader extends ProjDefs
 	    }
 		
 	    InFile.close();
+		
+		//post-processing for SMP related data fields
+		if(NumNodes == 0){
+			//indicate a non-SMP run
+			NumNodes = NumPe;		
+		}else{
+			int workPes = NumNodes*NodeSize;
+			NumCommThdPerNode = (NumPe-workPes)/NumNodes;
+			if((NodeSize+NumCommThdPerNode)*NumNodes != NumPe){
+				System.err.println("ERROR: node size and number of nodes doesn't match!");
+				throw new LogLoadException(FileName);
+			}
+		}
+		
 	} catch (FileNotFoundException e) {
 	    throw new LogLoadException (FileName);
 	} catch (IOException e) {
 	    throw new LogLoadException (FileName);
-	}
+	}	
     }
 
     /** ************** Private working/util Methods ************** */
@@ -372,8 +394,19 @@ public class StsReader extends ProjDefs
 		return result;
 	}
 
-
-
+	public int getNodeSize() {
+		return NodeSize;
+	}
+	//SMP in the sense of Charm SMP layer	
+	public int getSMPNodeCount() {
+		return NumNodes;
+	}
+	public int getNumCommThdPerNode(){
+		return NumCommThdPerNode;
+	}
+	public boolean isSMPRun(){
+		return NumNodes<NumPe;
+	}
 
 }
 

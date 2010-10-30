@@ -351,11 +351,14 @@ class ProfileGraph extends JPanel
         g.setFont(font);
         fm = g.getFontMetrics(font);
         drawXAxis(g);
+
+        // Draw 100% line
+        g.drawLine(originX, gTitleH, canvasWidth+originX, gTitleH);
+
         drawYAxis(g, gTitleH);
         
         //begin to draw the bar graph
         drawBarGraph(g);
-        
     }
 
     /* The following methods are very similar to the corresponding methods

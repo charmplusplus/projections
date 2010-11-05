@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 import javax.swing.JButton;
@@ -166,10 +167,10 @@ Clickable
 			int count = 0;
 			if(e.getSource() == bAddToTimelineJButton){
 				// load each outlier PE into the Timeline Window
-				Iterator<Integer> iter2 = outlierPEs.iterator();
-				while(iter2.hasNext() && count < 5){
+				ListIterator<Integer> iter2 = outlierPEs.listIterator(outlierPEs.size());
+				while(iter2.hasPrevious() && count < 5){
 					count++;
-					int pe = iter2.next();
+					int pe = iter2.previous();
 					parentWindow.addProcessor(pe);
 				}
 			}

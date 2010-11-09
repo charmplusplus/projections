@@ -17,10 +17,12 @@ import java.io.InputStreamReader;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
+import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 
@@ -140,20 +142,22 @@ Clickable
 	}
 
 	private JButton bAddToTimelineJButton;
+	private JTextField bNumOfPEsToAdd;
 
 	private void createLayout() {
-		bAddToTimelineJButton =  new JButton("Add Top 5 Extrema PEs to Timeline");
+		bAddToTimelineJButton =  new JButton("Add Top Extrema PEs to Timeline: ");
 		bAddToTimelineJButton.setToolTipText("The Timeline Tool must already be open!");
 		bAddToTimelineJButton.addActionListener(new buttonHandler());
 		
+		bNumOfPEsToAdd =  new JTextField("5", 5);
+
 		GridBagConstraints gbc = new GridBagConstraints();
 		GridBagLayout gbl = new GridBagLayout();
 		gbc.fill = GridBagConstraints.BOTH;
 		getContentPane().setLayout(gbl);
-		Util.gblAdd(getContentPane(), getMainPanel(),    gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(getContentPane(), getMainPanel(),    gbc, 0,0, 2,1	, 1,1);
 		Util.gblAdd(getContentPane(), bAddToTimelineJButton,      gbc, 0,1, 1,1, 0,0);
-		gbc.fill = GridBagConstraints.NONE;
-		Util.gblAdd(getContentPane(), bAddToTimelineJButton,      gbc, 0,1, 1,1, 0,0);
+		Util.gblAdd(getContentPane(), bNumOfPEsToAdd,      gbc, 1,1, 1,1, 0,0);
 	}
 
 
@@ -166,10 +170,10 @@ Clickable
 			int count = 0;
 			if(e.getSource() == bAddToTimelineJButton){
 				// load each outlier PE into the Timeline Window
-				Iterator<Integer> iter2 = outlierPEs.iterator();
-				while(iter2.hasNext() && count < 5){
+				ListIterator<Integer> iter2 = outlierPEs.listIterator(outlierPEs.size());
+				while(iter2.hasPrevious() && count < Integer.parseInt(bNumOfPEsToAdd.getText())){
 					count++;
-					int pe = iter2.next();
+					int pe = iter2.previous();
 					parentWindow.addProcessor(pe);
 				}
 			}

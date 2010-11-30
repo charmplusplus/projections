@@ -394,18 +394,17 @@ implements ItemListener, ActionListener
 			receivedExternalByteOutput =
 				new double[numIntervals][outSize];
 
-			int count=0;
 			for (int ep=0; ep<numEPs; ep++) {
 				if (stateArray[ep]) {
 					for (int interval=0; interval<numIntervals; interval++) {
-						sentMsgOutput[interval][count] = sentMsgCount[interval][ep];
-						sentByteOutput[interval][count] = sentByteCount[interval][ep];
-						receivedMsgOutput[interval][count] = receivedMsgCount[interval][ep];
-						receivedByteOutput[interval][count] = receivedByteCount[interval][ep];
+						sentMsgOutput[interval][ep] = sentMsgCount[interval][ep];
+						sentByteOutput[interval][ep] = sentByteCount[interval][ep];
+						receivedMsgOutput[interval][ep] = receivedMsgCount[interval][ep];
+						receivedByteOutput[interval][ep] = receivedByteCount[interval][ep];
 						//sentExternalMsgOutput[interval][count] = sentExternalMsgCount[interval][ep];
 						//sentExternalByteOutput[interval][count] = sentExternalByteCount[interval][ep];
-						receivedExternalMsgOutput[interval][count] = receivedExternalMsgCount[interval][ep];
-						receivedExternalByteOutput[interval][count] = receivedExternalByteCount[interval][ep];
+						receivedExternalMsgOutput[interval][ep] = receivedExternalMsgCount[interval][ep];
+						receivedExternalByteOutput[interval][ep] = receivedExternalByteCount[interval][ep];
 					}
 				}
 			}

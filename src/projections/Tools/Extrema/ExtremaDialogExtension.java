@@ -76,8 +76,8 @@ class ExtremaDialogExtension extends RangeDialogExtensionPanel
 		
 
 		JLabel kLabel = new JLabel("Number of Clusters: ", JLabel.RIGHT);
-		// initialize k-means choice of k to be default to 5
-		kField = new JIntTextField(5, 3);
+		// initialize k-means choice of k to be default to number of processors
+		kField = new JIntTextField(MainWindow.runObject[myRun].getNumProcessors(), 3);
 
 		errorText = new JTextArea();
 		errorText.setRows(3);

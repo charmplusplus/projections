@@ -22,6 +22,7 @@ import java.util.StringTokenizer;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JTextField;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
@@ -201,7 +202,17 @@ Clickable
 			threshold = selectedPEs.size() < outlierDialogPanel.getThreshold() ? selectedPEs.size() : outlierDialogPanel.getThreshold();
 			selectedActivity = outlierDialogPanel.getCurrentActivity();
 			selectedAttribute = outlierDialogPanel.getCurrentAttribute();
-			k = outlierDialogPanel.getK();
+			
+			if (outlierDialogPanel.getK()>selectedPEs.size()) {
+				k=selectedPEs.size();
+				JOptionPane.showMessageDialog(this,
+						"The number of clusters cannot be greater than the number \n" +
+						"of processors.  Number of clusters has been set to number \n" +
+						"of processors.", "Warning", 
+						JOptionPane.WARNING_MESSAGE);
+			}
+			else
+				k = outlierDialogPanel.getK();
 			thisWindow.setVisible(false);
 
 			final SwingWorker worker =  new SwingWorker() {

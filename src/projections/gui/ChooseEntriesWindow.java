@@ -70,7 +70,7 @@ public class ChooseEntriesWindow extends JFrame
 	}
 	
 	private void addIdleOverhead() {
-		if (data.handleIdleOverhead()) {
+		if (data!= null && data.handleIdleOverhead() || data==null) {
 			entryNames.put(Analysis.isOverhead, "Overhead");
 			entryNames.put(Analysis.isIdle, "Idle");
 		}

@@ -15,6 +15,7 @@ import java.text.DecimalFormat;
 import java.util.LinkedList;
 
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
@@ -53,6 +54,7 @@ implements ItemListener, ActionListener
 	private JPanel         controlPanel;
 
 	private JButton	   setRanges;
+	private JLabel totalCount;
 	//    private JButton	   epSelection;
 
 	private CheckboxGroup  cbg;
@@ -194,12 +196,15 @@ implements ItemListener, ActionListener
 		// control panel items
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
+
+		totalCount = new JLabel();
 		//	epSelection = new JButton("Select Entry Points");
 		//	epSelection.addActionListener(this);
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 		//	Util.gblAdd(controlPanel, epSelection, gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, setRanges,   gbc, 0,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, totalCount,   gbc, 1,0, 1,1, 0,0);
 
 		graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel,     gbc, 0,1, 1,1, 1,1);
@@ -216,6 +221,16 @@ implements ItemListener, ActionListener
 		}
 	}
 
+	public long accumulateArray(double arr[][]) {
+		long total = 0;
+		for (int i = 0; i < arr.length; i++) {
+			for (int j = 0; j < arr[i].length; j++) {
+				total += arr[i][j];
+			}
+		}
+		return total;
+	}
+
 	public void setCheckboxData(Checkbox cb) {
 		if(cb == sentMsgs) {
 			setDataSource("Messages Sent Over Time", sentMsgOutput, 
@@ -224,6 +239,7 @@ implements ItemListener, ActionListener
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
 			setYAxis("Messages Sent", "");
+			totalCount.setText("Total messages sent: " + accumulateArray(sentMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == sentBytes){
@@ -233,6 +249,7 @@ implements ItemListener, ActionListener
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
 			setYAxis("Bytes Sent", "");
+			totalCount.setText("Total bytes sent: " + accumulateArray(sentByteOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedMsgs){
@@ -242,6 +259,7 @@ implements ItemListener, ActionListener
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
 			setYAxis("Messages Received", "");
+			totalCount.setText("Total messages received: " + accumulateArray(receivedMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedBytes){
@@ -251,6 +269,7 @@ implements ItemListener, ActionListener
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
 			setYAxis("Bytes Received", "");
+			totalCount.setText("Total bytes received: " + accumulateArray(receivedByteOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedExternalMsgs){
@@ -260,6 +279,7 @@ implements ItemListener, ActionListener
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
 			setYAxis("Messages Received Externally", "");
+			totalCount.setText("Total external messages received: " + accumulateArray(receivedExternalMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedExternalBytes){
@@ -269,6 +289,7 @@ implements ItemListener, ActionListener
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
 			setYAxis("Bytes Received Externally", "");
+			totalCount.setText("Total external bytes received: " + accumulateArray(receivedExternalByteOutput));
 			super.refreshGraph();
 		}
 	}

@@ -10,7 +10,7 @@ import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
 import projections.misc.LogEntryData;
-
+import projections.analysis.StsReader;
 
 /** The reader threads for Communication Per PE Tool. */
 class ThreadedFileReader implements Runnable  {
@@ -27,6 +27,8 @@ class ThreadedFileReader implements Runnable  {
 	private double[][] exclusiveRecv;
 	private double[][] exclusiveBytesRecv;
 	private int[][] hopCount;
+	
+	private boolean isCommThd;
 
 	public ArrayList<Integer>	localHistogram = new ArrayList<Integer>();
 
@@ -44,6 +46,15 @@ class ThreadedFileReader implements Runnable  {
 		this.exclusiveRecv = exclusiveRecv;
 		this.exclusiveBytesRecv = exclusiveBytesRecv;
 		this.hopCount = hopCount;
+		
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		int totalPes = sts.getProcessorCount();
+		int totalNodes = sts.getSMPNodeCount();
+		int nodesize = sts.getNodeSize();
+		if(pe>=totalNodes*nodesize && pe<totalPes)
+			isCommThd = true;
+		else
+			isCommThd = false;
 	}
 
 
@@ -77,10 +88,9 @@ class ThreadedFileReader implements Runnable  {
 						// past endtime. no more to do.
 						break;
 					}
-				}
-				logdata = reader.nextEvent();
+				}				
 				if (logdata.type == ProjDefs.CREATION) {
-					int EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
+					int EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);					
 					sentMsgCount[pIdx][EPid]++;
 					sentByteCount[pIdx][EPid] += 
 						logdata.msglen;
@@ -93,7 +103,7 @@ class ThreadedFileReader implements Runnable  {
 					sentByteCount[pIdx][EPid] +=
 						(logdata.msglen * logdata.numPEs);
 				} else if (logdata.type == ProjDefs.BEGIN_PROCESSING) {
-					int EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);
+					int EPid = MainWindow.runObject[myRun].getEntryIndex(logdata.entry);					
 					receivedMsgCount[pIdx][EPid]++;
 					receivedByteCount[pIdx][EPid] += 
 						logdata.msglen;
@@ -107,7 +117,25 @@ class ThreadedFileReader implements Runnable  {
 								CommWindow.manhattanDistance(pe,logdata.pe);
 						}
 					}
+					
+					if(isCommThd){
+						//process the messages' count for communication threads
+						//as the messages to be sent are treated same as messages
+						//that are recved. Such emulation of message recv is used to track
+						//the time taken by comm thread to call the underlying system's 
+						//send operation and when this message is going to be sent by
+						//comm thread. An example of this is MPI-SMP comm thread
+						//trace. So we have to subtract those msgs that are sent to external
+						//charm smp nodes. -Chao Mei
+						int pcreation = logdata.pe;						
+						if(pcreation!=pe && isSameNode(pcreation)){
+							receivedMsgCount[pIdx][EPid]--;
+							receivedByteCount[pIdx][EPid] -= logdata.msglen;
+						}						
+					}
+
 				}
+				logdata = reader.nextEvent();
 			}
 		} catch (EndOfLogSuccess e) {
 			// Successfully reached end of log file
@@ -122,10 +150,19 @@ class ThreadedFileReader implements Runnable  {
 		} catch (IOException e1) {
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
-		
-
 	}
-
+	
+	private boolean isSameNode(int p1){
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		int totalPes = sts.getProcessorCount();
+		int totalNodes = sts.getSMPNodeCount();
+		int nodesize = sts.getNodeSize();
+		int n1 = p1/nodesize;
+		if(p1>=totalNodes*nodesize && p1<totalPes) n1 = p1- totalNodes*nodesize;
+		int selfN = pe/nodesize;
+		if(pe>=totalNodes*nodesize && pe<totalPes) selfN = pe - totalNodes*nodesize;
+		return n1==selfN;
+	}
 }
 
 

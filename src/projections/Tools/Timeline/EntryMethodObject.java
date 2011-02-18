@@ -433,7 +433,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 			if(data.traceMessagesBackOnHover()){
 				EntryMethodObject obj = this;
-
 				boolean done;
 				do{
 					done = true;
@@ -475,8 +474,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 						if(msgToCalledEntryMethod != null){
 							//if there is a mapping for this message, find objects that are called by this message.
 							//if this object isn't null or equal to this, go through while loop again
-							if (!data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod).isEmpty()) {
-								Iterator<EntryMethodObject> i = data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod).iterator();
+							Set<EntryMethodObject> objset = data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod);
+							if (objset!=null && !objset.isEmpty()) {
+								Iterator<EntryMethodObject> i = objset.iterator();
 								obj = i.next();
 								if(obj != null && obj!=this){
 									done = false;
@@ -1078,5 +1078,4 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		// TODO Auto-generated method stub
 		
 	}
-
 }

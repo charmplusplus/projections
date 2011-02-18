@@ -189,9 +189,9 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 		if(data.isSMPRun()){
 			int nid = data.getNodeID(pe);
 			if(data.isCommThd(pe))
-				return "Comm PE (NE "+nid+")";
+				return "CommP (N"+nid+")";
 			else
-				return "PE "+pe+" (NE "+nid+")";
+				return "P"+pe+" (N"+nid+")";
 		}else{
 			return "PE "+pe;
 		}

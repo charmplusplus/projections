@@ -63,8 +63,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 	/** The backing model/view information for the Timeline */
 	private Data data;
-	private MainHandler handler;
-
+	private MainHandler handler;	
 
 	/** Construct a main Timeline Panel */
 	public MainPanel(Data data, MainHandler handler){
@@ -86,7 +85,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		ToolTipManager toolTipManager = ToolTipManager.sharedInstance();
 		toolTipManager.registerComponent(this);
 
-		this.setOpaque(true);
+		this.setOpaque(true);		
 	}
 
 
@@ -264,8 +263,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		}
 
 		paintMessageSendLines(g, data.getMessageColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjects);
-		paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);
-		paintSMPMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForSMPObjectsAlt);
+		paintMessageSendLines(g, data.getMessageAltColor(), data.getBackgroundColor(), data.drawMessagesForTheseObjectsAlt);		
 
 		return count1 + count2;
 	}
@@ -318,91 +316,93 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 		// paint the message send lines
 		if (drawMessagesForObjects.size()>0) {
 			for(EntryMethodObject obj : drawMessagesForObjects){
-				if(obj.creationMessage() != null){
+				TimelineMessage createdMsg = obj.creationMessage();
+				if(createdMsg != null){					
 					int pCreation = obj.pCreation;
 					int pExecution = obj.pe;
+					
+					boolean smpMsgGrpFound = false;
+					if(data.isSMPRun()){
+						EntryMethodObject creatingObj = data.messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+						if(creatingObj!=null){
+							int creatingObjN = data.getNodeID(creatingObj.pe);
+							int thisN = data.getNodeID(pExecution);
+							if(thisN != creatingObjN){
+								Set<EntryMethodObject> objsets = data.messageStructures.getMessageToExecutingObjectsMap().get(createdMsg);								
+								smpMsgGrpFound = data.makeSMPMsgGroup(creatingObj, objsets);
+							}
+						}						
+					}
 
-					// Message Creation point
-					int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
-					double y1 = data.messageSendLocationY(pCreation);
-					// Message executed (entry method starts) 
-					int x2 =  data.timeToScreenPixel(obj.getBeginTime());
-					double y2 = data.messageRecvLocationY(pExecution);
+					if(smpMsgGrpFound){
+						EntryMethodObject scObj = data.toPaintSMPMsgGrp.sendCPe;
+						EntryMethodObject rcObj = data.toPaintSMPMsgGrp.recvCPe;
+						
+						// Message Creation point
+						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
+						double y1 = data.messageSendLocationY(pCreation);
+	
+						// Message executed (comm thd on send side) 
+						int x2Begin =  data.timeToScreenPixel(scObj.getBeginTime());
+						int x2End = data.timeToScreenPixel(scObj.getEndTime());
+						double y2Begin = data.messageRecvLocationY(scObj.pe);
+						double y2End = y2Begin+data.barheight();
 
-					// Draw thick background Then thin foreground
-					g2d.setPaint(bgColor);
-					g2d.setStroke(new BasicStroke(4.0f));
-					g2d.drawLine(x1,(int)y1,x2,(int)y2);
-					g2d.setPaint(c);
-					g2d.setStroke(new BasicStroke(2.0f));
-					g2d.drawLine(x1,(int)y1,x2,(int)y2);
+						//Message executed (comm thd on recv side)	
+						int x3Begin =  data.timeToScreenPixel(rcObj.getBeginTime());
+						int x3End = data.timeToScreenPixel(rcObj.getEndTime());
+						double y3Begin = data.messageRecvLocationY(rcObj.pe);
+						double y3End = y3Begin+data.barheight();
+						
+						// Message executed (entry method starts) 
+						int x4 =  data.timeToScreenPixel(obj.getBeginTime());
+						double y4 = data.messageRecvLocationY(pExecution);
+					
+						// Draw thick background Then thin foreground
+						g2d.setPaint(bgColor);
+						g2d.setStroke(new BasicStroke(4.0f));
+						g2d.drawLine(x1,(int)y1,x2Begin,(int)y2Begin);
+						g2d.setPaint(c);
+						g2d.setStroke(new BasicStroke(2.0f));
+						g2d.drawLine(x1,(int)y1,x2Begin,(int)y2Begin);
+
+						g2d.setPaint(bgColor);
+						g2d.setStroke(new BasicStroke(4.0f));
+						g2d.drawLine(x2End,(int)y2End,x3Begin,(int)y3Begin);
+						g2d.setPaint(c);
+						g2d.setStroke(new BasicStroke(2.0f));
+						g2d.drawLine(x2End,(int)y2End,x3Begin,(int)y3Begin);
+
+						g2d.setPaint(bgColor);
+						g2d.setStroke(new BasicStroke(4.0f));
+						g2d.drawLine(x3End,(int)y3End,x4,(int)y4);
+						g2d.setPaint(c);
+						g2d.setStroke(new BasicStroke(2.0f));
+						g2d.drawLine(x3End,(int)y3End,x4,(int)y4);
+					}else{
+						// Message Creation point
+						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
+						double y1 = data.messageSendLocationY(pCreation);						
+						
+						// Message executed (entry method starts) 
+						int x2 =  data.timeToScreenPixel(obj.getBeginTime());
+						double y2 = data.messageRecvLocationY(pExecution);
+
+						// Draw thick background Then thin foreground
+						g2d.setPaint(bgColor);
+						g2d.setStroke(new BasicStroke(4.0f));
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);
+						g2d.setPaint(c);
+						g2d.setStroke(new BasicStroke(2.0f));
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);					
+					}
 				}
 			}
 		}
 
 	}
 
-	private void paintSMPMessageSendLines(Graphics g, Color c, Color bgColor, Set<SMPMsgGroup> drawMessagesForObjects){
-		Graphics2D g2d = (Graphics2D) g;
-		// paint the message send lines
-		if (drawMessagesForObjects.size()>0) {
-			for(SMPMsgGroup obj : drawMessagesForObjects){
-				EntryMethodObject swObj = obj.sendWPe;				
-				EntryMethodObject scObj = obj.sendCPe;
-				EntryMethodObject rcObj = obj.recvCPe;
-				EntryMethodObject rwObj = obj.recvWPe;
-				
-				if(scObj.creationMessage() != null && 
-					rcObj.creationMessage() != null &&
-					rwObj.creationMessage() != null){
-					
-					
-					// Message Creation point (worker thd on send side)
-					int x1 = data.timeToScreenPixel(scObj.creationMessage().Time);			
-					double y1 = data.messageSendLocationY(swObj.pe);
-					
-					// Message executed (comm thd on send side) 
-					int x2Begin =  data.timeToScreenPixel(scObj.getBeginTime());
-					int x2End = data.timeToScreenPixel(scObj.getEndTime());
-					double y2 = data.messageRecvLocationY(scObj.pe);
-
-					//Message executed (comm thd on recv side)	
-					int x3Begin =  data.timeToScreenPixel(rcObj.getBeginTime());
-					int x3End = data.timeToScreenPixel(rcObj.getEndTime());
-					double y3 = data.messageRecvLocationY(rcObj.pe);
-
-					//Message executed (worker thd on recv side)	
-					int x4 =  data.timeToScreenPixel(rwObj.getBeginTime());
-					double y4 = data.messageRecvLocationY(rwObj.pe);
-
-					// Draw thick background Then thin foreground
-					g2d.setPaint(bgColor);
-					g2d.setStroke(new BasicStroke(4.0f));
-					g2d.drawLine(x1,(int)y1,x2Begin,(int)y2);
-					g2d.setPaint(c);
-					g2d.setStroke(new BasicStroke(2.0f));
-					g2d.drawLine(x1,(int)y1,x2Begin,(int)y2);
-
-					g2d.setPaint(bgColor);
-					g2d.setStroke(new BasicStroke(4.0f));
-					g2d.drawLine(x2End,(int)y2,x3Begin,(int)y3);
-					g2d.setPaint(c);
-					g2d.setStroke(new BasicStroke(2.0f));
-					g2d.drawLine(x2End,(int)y2,x3Begin,(int)y3);
-
-					g2d.setPaint(bgColor);
-					g2d.setStroke(new BasicStroke(4.0f));
-					g2d.drawLine(x3End,(int)y3,x4,(int)y4);
-					g2d.setPaint(c);
-					g2d.setStroke(new BasicStroke(2.0f));
-					g2d.drawLine(x3End,(int)y3,x4,(int)y4);
-				}
-			}
-		}
-
-	}
-
-
+	
 	/** Dynamically generate the tooltip mouseover text when needed */
 	@Override
 	public String getToolTipText(MouseEvent evt){

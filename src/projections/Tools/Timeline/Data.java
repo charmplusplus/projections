@@ -260,9 +260,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	protected Set<EntryMethodObject> drawMessagesForTheseObjects;
 	/** A set of objects for which we draw their creation message lines in an alternate color */
 	protected Set<EntryMethodObject> drawMessagesForTheseObjectsAlt;
-	/** A set of SMP group objects for which we draw their creation message lines in an alternate color */
-	protected Set<SMPMsgGroup> drawMessagesForSMPObjectsAlt;
-
+	
+	protected SMPMsgGroup toPaintSMPMsgGrp;
 
 	private boolean useCustomColors=false;
 
@@ -317,8 +316,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		endTime = MainWindow.runObject[myRun].getTotalTime();
 
 		drawMessagesForTheseObjects = new HashSet<EntryMethodObject>();
-		drawMessagesForTheseObjectsAlt = new HashSet<EntryMethodObject>();
-		drawMessagesForSMPObjectsAlt = new HashSet<SMPMsgGroup>();
+		drawMessagesForTheseObjectsAlt = new HashSet<EntryMethodObject>();		
+		toPaintSMPMsgGrp = new SMPMsgGroup();
 
 		entries = new int[MainWindow.runObject[myRun].getNumUserEntries()];
 		makeFrequencyMap(entries);
@@ -686,124 +685,92 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 *  by the object the mouse is over
 	 */
 	private void toggleMessageCalledByThisLine(EntryMethodObject obj) {
-		List<TimelineMessage> tleMsg = obj.getTLmsgs();
-
-		ArrayList<EntryMethodObject> smpGrpObjs = new ArrayList<EntryMethodObject>(4);		
+		List<TimelineMessage> tleMsg = obj.getTLmsgs();		
 		
 		if (tleMsg!=null) {
 			for (int i=0; i<tleMsg.size(); i++) { //when to empty the drawMsgsForTheseObjsAlt?
 				Set<EntryMethodObject> entMethSet = this.messageStructures.getMessageToExecutingObjectsMap().get(tleMsg.get(i));
-				if (entMethSet!=null) {
-					smpGrpObjs.add(obj); //always add the "obj" to be the first object
+				if (entMethSet!=null) {					
 					Iterator<EntryMethodObject> iter = entMethSet.iterator();
 					while (iter.hasNext()) {
 						EntryMethodObject emo = iter.next();
 						if (drawMessagesForTheseObjectsAlt.contains(emo))
 							drawMessagesForTheseObjectsAlt.remove(emo);							
 						else
-							drawMessagesForTheseObjectsAlt.add(emo);													
-						smpGrpObjs.add(emo);
-					}
-					
-					checkSMPMsgGroup(smpGrpObjs); //may remove elements from drawMessagesForTheseObjectsAlt									
-					smpGrpObjs.clear();
+							drawMessagesForTheseObjectsAlt.add(emo);
+					}					
 				}
 			}
 			displayMustBeRepainted();
 		}
 	}
 	
-	private void checkSMPMsgGroup(ArrayList<EntryMethodObject> smpGrpObjs){
-		if(smpGrpObjs.size()!=4) return;
+	protected boolean makeSMPMsgGroup(EntryMethodObject sendObj, Set<EntryMethodObject> recvObjs){
+		if(recvObjs.size()!=3) return false;
 		
-		//only consider the SMP Msg group that has 4 objects
-		//simple assumption here: these 4 objects should consist of a SMPMsgGroup
-		int swidx = 0; //the worker thread of the sender side
-		int scidx = 0; //the comm thread of the sender side
-		int rwidx = 0; //the worker thread of the recv side
-		int rcidx = 0; //the comm thread of the recv side
-		int sendNID = getNodeID(smpGrpObjs.get(0).pe);
-		int nid1 = getNodeID(smpGrpObjs.get(1).pe);
-		int nid2 = getNodeID(smpGrpObjs.get(2).pe);
-		int nid3 = getNodeID(smpGrpObjs.get(3).pe);						
+		//only consider the SMP Msg group that has 4 objects		
+		EntryMethodObject recvObj1, recvObj2, recvObj3;
+		Iterator<EntryMethodObject> iter = recvObjs.iterator();
+		recvObj1 = iter.next();
+		recvObj2 = iter.next();
+		recvObj3 = iter.next();		
+		int sendNID = getNodeID(sendObj.pe);
+		int nid1 = getNodeID(recvObj1.pe);
+		int nid2 = getNodeID(recvObj2.pe);
+		int nid3 = getNodeID(recvObj3.pe);
+		
 		//System.out.println("Checking one group of PES: "+smpGrpObjs.get(0).pe+":"+smpGrpObjs.get(1).pe
 		//	+":"+smpGrpObjs.get(2).pe+":"+smpGrpObjs.get(3).pe);
-		if(nid1 == sendNID && isCommThd(smpGrpObjs.get(1).pe)){
-			scidx = 1;
+		
+		toPaintSMPMsgGrp.sendWPe = sendObj;
+		if(nid1 == sendNID && isCommThd(recvObj1.pe)){
+			toPaintSMPMsgGrp.sendCPe = recvObj1;
 			if(nid2 == nid3){
-				if(isCommThd(smpGrpObjs.get(2).pe)){
-					rcidx = 2; rwidx = 3;
+				if(isCommThd(recvObj2.pe)){
+					toPaintSMPMsgGrp.recvCPe = recvObj2; toPaintSMPMsgGrp.recvWPe=recvObj3;
 				}else{
-					rcidx = 3; rwidx = 2;
+					toPaintSMPMsgGrp.recvCPe = recvObj3; toPaintSMPMsgGrp.recvWPe=recvObj2;
 				}										
 			}else{
-				System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid2!=nid3");
-				return;
+				//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid2!=nid3");
+				return false;
 			}
-		}else if(nid2 == sendNID && isCommThd(smpGrpObjs.get(2).pe)){
-			scidx = 2;
+		}else if(nid2 == sendNID && isCommThd(recvObj2.pe)){
+			toPaintSMPMsgGrp.sendCPe = recvObj2;
 			if(nid1 == nid3){
-				if(isCommThd(smpGrpObjs.get(1).pe)){
-					rcidx = 1; rwidx = 3;
+				if(isCommThd(recvObj1.pe)){
+					toPaintSMPMsgGrp.recvCPe = recvObj1; toPaintSMPMsgGrp.recvWPe=recvObj3;
 				}else{
-					rcidx = 3; rwidx = 1;
+					toPaintSMPMsgGrp.recvCPe = recvObj3; toPaintSMPMsgGrp.recvWPe=recvObj1;
 				}										
 			}else{
-				System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid3");
-				return;
+				//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid3");
+				return false;
 			}
-		}else if(nid3 == sendNID && isCommThd(smpGrpObjs.get(3).pe)){
-			scidx = 3;
+		}else if(nid3 == sendNID && isCommThd(recvObj3.pe)){
+			toPaintSMPMsgGrp.sendCPe = recvObj3;
 			if(nid1 == nid2){
-				if(isCommThd(smpGrpObjs.get(1).pe)){
-					rcidx = 1; rwidx = 2;
+				if(isCommThd(recvObj1.pe)){
+					toPaintSMPMsgGrp.recvCPe = recvObj1; toPaintSMPMsgGrp.recvWPe=recvObj2;
 				}else{
-					rcidx = 2; rwidx = 1;
+					toPaintSMPMsgGrp.recvCPe = recvObj2; toPaintSMPMsgGrp.recvWPe=recvObj1;
 				}										
 			}else{
-				System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid2");
-				return;
+				//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid2");
+				return false;
 			}
 		}else{
-			System.err.println("Something may be wrong in Data::checkSMPMsgGroup as none is equal to sendNID");
-			return;
+			//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as none is equal to sendNID");
+			return false;
 		}
 		
-		SMPMsgGroup one = new SMPMsgGroup();
-		one.sendWPe = smpGrpObjs.get(swidx);
-		one.sendCPe = smpGrpObjs.get(scidx);
-		one.recvWPe = smpGrpObjs.get(rwidx);
-		one.recvCPe = smpGrpObjs.get(rcidx);
-		
-		SMPMsgGroup oldOne = null;
-		for(SMPMsgGroup obj : drawMessagesForSMPObjectsAlt){
-			if(obj.equals(one)){
-				oldOne = obj;
-				break;
-			}
-		}
-		
-		//since those two EntryMethodObjects are not contained in the set when previously clicked
-		//as they are removed by the code in the "else" branch. We still need to remove them
-		drawMessagesForTheseObjectsAlt.remove(one.sendCPe);
-		drawMessagesForTheseObjectsAlt.remove(one.recvCPe);
-		drawMessagesForTheseObjectsAlt.remove(one.recvWPe);
-		if(oldOne!=null){
-			//System.out.println("removed one SMPMsgGroup");
-			drawMessagesForSMPObjectsAlt.remove(oldOne);
-		}
-		else{
-			//System.out.println("added one SMPMsgGroup");
-			drawMessagesForSMPObjectsAlt.add(one);
-		}
-		//System.out.println("num SMPMsgGroup objs="+drawMessagesForSMPObjectsAlt.size());
+		return true;
 	}
-
+	
 	/**Remove all lines from forward and backward tracing from Timelines display*/
 	protected void removeLines() {
 		drawMessagesForTheseObjectsAlt.clear();
-		drawMessagesForTheseObjects.clear();
-		drawMessagesForSMPObjectsAlt.clear();
+		drawMessagesForTheseObjects.clear();		
 		displayMustBeRepainted();
 	}
 
@@ -824,8 +791,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	protected void clearMessageSendLines() {
 		drawMessagesForTheseObjects.clear();
-		drawMessagesForTheseObjectsAlt.clear();
-		drawMessagesForSMPObjectsAlt.clear();
+		drawMessagesForTheseObjectsAlt.clear();		
 	}
 
 
@@ -2327,8 +2293,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		entryUsageList = null;
 		messageStructures = null;
 		drawMessagesForTheseObjects = null;
-		drawMessagesForTheseObjectsAlt = null;
-		drawMessagesForSMPObjectsAlt = null;
+		drawMessagesForTheseObjectsAlt = null;		
 		super.finalize(); //not necessary if extending Object.
 	} 
 

@@ -11,6 +11,7 @@ import java.util.InputMismatchException;
 import java.util.zip.GZIPInputStream;
 
 import projections.gui.MainWindow;
+import projections.analysis.StsReader;
 import projections.misc.LogEntryData;
 
 /**
@@ -142,7 +143,7 @@ implements PointCapableReader
 	public LogEntryData nextEvent() throws InputMismatchException, IOException, EndOfLogSuccess
 	{
 		LogEntryData data = new LogEntryData();
-
+		StsReader stsinfo = MainWindow.runObject[myRun].getSts();
 		
 		String line = reader.readLine();
 	    
@@ -279,7 +280,8 @@ implements PointCapableReader
 				lastBeginEvent.cpuStartTime = data.cpuStartTime = sc.nextLong() + shiftAmount;
 			}
 			if (version >= 6.6) {
-				lastBeginEvent.numPerfCounts = data.numPerfCounts = (int) sc.nextLong();
+				//lastBeginEvent.numPerfCounts = data.numPerfCounts = (int) sc.nextLong();
+				lastBeginEvent.numPerfCounts = data.numPerfCounts = stsinfo.getNumPerfCounts();
 				lastBeginEvent.perfCounts = new long[data.numPerfCounts];
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
@@ -303,7 +305,8 @@ implements PointCapableReader
 				data.cpuEndTime = sc.nextLong() + shiftAmount;
 			}
 			if (version >= 6.6) {
-				data.numPerfCounts = (int) sc.nextLong();
+				//data.numPerfCounts = (int) sc.nextLong();
+				data.numPerfCounts = stsinfo.getNumPerfCounts();
 				data.perfCounts = new long[data.numPerfCounts];
 				for (int i=0; i<data.numPerfCounts; i++) {
 					data.perfCounts[i] = sc.nextLong();

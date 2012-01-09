@@ -399,7 +399,7 @@ class ProfileWindow extends ProjectionsWindow
         usageFrame.setTitle("Entry Points Usage Percent Table");
         usageFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        String[] tHeading ={"Proc#","Entry Name","Usage Percent (%)"};
+        String[] tHeading ={"Proc#","Entry Name","Usage Percent (%)", "Usage Time(ms)"};
         int totalEntry=0;
         //skip column "0" as it is for average usage
         for(int i=1; i<dataSource.length; i++)
@@ -409,12 +409,14 @@ class ProfileWindow extends ProjectionsWindow
         df.setMaximumFractionDigits(3);
         //fill up tData
         int entryCnt=0;
+        double timerange = (data.endtime - data.begintime)*0.001; //ms
         for(int i=1; i<dataSource.length; i++){
             for(int j=0; j<dataSource[i].length; j++){
-                tData[entryCnt] = new Object[3];
+                tData[entryCnt] = new Object[4];
                 tData[entryCnt][0] = procNames[i];
                 tData[entryCnt][1] = nameMap[i][j];
                 tData[entryCnt][2] = df.format(dataSource[i][j])+"%";
+                tData[entryCnt][3] = df.format(dataSource[i][j]*0.01*timerange);
                 entryCnt++;
             }
         }
@@ -629,37 +631,37 @@ class ProfileWindow extends ProjectionsWindow
     private void createDisplayDataSource(){
         // extra column is that of the average data.
         int procCnt = data.plist.size()+1;
-	data.numPs = procCnt;
+	    data.numPs = procCnt;
 
         dataSource = new float[procCnt][];
         colorMap = new int[procCnt][];
         nameMap = new String[procCnt][];
 
         int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
-	// the first row is for entry method execution time the second is for
-	//time spent sending messages in that entry method
-	float[][] avg=new float[2][numEPs+NUM_SYS_EPS];
+        // the first row is for entry method execution time the second is for
+        // time spent sending messages in that entry method
+        float[][] avg=new float[2][numEPs+NUM_SYS_EPS];
         for (int i =0;i<numEPs+NUM_SYS_EPS;i++) {
-	    avg[0][i] = 0.0f;
-	    avg[1][i] = 0.0f;
-	}
+            avg[0][i] = 0.0f;
+            avg[1][i] = 0.0f;
+        }
 
         avgData = avg; //set instance's avg data
 
-	double avgScale=1.0/data.plist.size();
+        double avgScale=1.0/data.plist.size();
 
 
-	int progressCount = 0;
-	ProgressMonitor progressBar;
+        int progressCount = 0;
+        ProgressMonitor progressBar;
 
-	// Profile really should be cleanly rewritten.
-	// split the original loop:
-	// Phase 1a - compute average work
-	// Phase 1b - assign colors based on average work
-	// Phase 2 - create display data sources
+        // Profile really should be cleanly rewritten.
+        // // split the original loop:
+        // // Phase 1a - compute average work
+        // // Phase 1b - assign colors based on average work
+        // // Phase 2 - create display data sources
 
 
-	// Phase 1a: compute average work
+        // Phase 1a: compute average work
         progressBar =
 	    new ProgressMonitor(this,
 				"Computing Usage Values",
@@ -761,8 +763,8 @@ class ProfileWindow extends ProjectionsWindow
         sNameMap = nMap;
 
         DecimalFormat format_ = new DecimalFormat();
-	format_.setMaximumFractionDigits(5);
-	format_.setMinimumFractionDigits(5);
+        format_.setMaximumFractionDigits(5);
+        format_.setMinimumFractionDigits(5);
 
         int sigCnt=-1;
         int epIndex;
@@ -787,10 +789,11 @@ class ProfileWindow extends ProjectionsWindow
 
             //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
             //This is especially important for CPAIMD!!! Here we ignore
-            if ((procNum >= 0) && MainWindow.PRINT_USAGE) {
-		 System.out.println(procNum + " " + epIndex + " " +
-				       format_.format(usage) +
-				       " " + nMap[sigCnt]);
+            if ((procNum >= 0) && MainWindow.PRINT_USAGE) 
+            {
+                System.out.println(procNum + " " + epIndex + " " +
+                        format_.format(usage) +
+                        " " + nMap[sigCnt]);
             }
         }
 

@@ -1,9 +1,11 @@
 package projections.gui;
 
+import java.io.*;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
@@ -64,7 +66,7 @@ class ProfileWindow extends ProjectionsWindow
     private int ampiDisplayPanelTabIndex;
 
 
-    private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY;
+    private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY, btnExportToFile;
     private JFloatTextField txtScaleX, txtScaleY;
 
     //usage greater than "thresh" will be displayed!
@@ -272,7 +274,26 @@ class ProfileWindow extends ProjectionsWindow
 		scaleY = (float)((int)(oldScaleY * 4)+1)/4;
 	    } else if (b == btnResY) {
 		scaleY = (float)1.0;
-	    }
+	    } else if (b == btnExportToFile) {
+         try{
+             // Create file 
+             DecimalFormat df = new DecimalFormat();
+             df.setMaximumFractionDigits(3);
+             double timerange = (data.endtime - data.begintime)*0.001; //ms
+             FileWriter fstream = new FileWriter("usagetable.txt");
+             BufferedWriter out = new BufferedWriter(fstream);
+             out.write("Proc#,\t"+ "Entry Name,\t" + "Usage Percent (%),\t" + "Usage Time(ms)\n");
+             for(int i=1; i<dataSource.length; i++){
+                 for(int j=0; j<dataSource[i].length; j++){
+                     out.write(procNames[i] + ",\t" + nameMap[i][j] + ",\t" + df.format(dataSource[i][j])+"%,\t" + df.format(dataSource[i][j]*0.01*timerange)+"\n"); 
+                 }
+             }
+             out.close();
+             System.out.println("Usage table is saved to file usagetable.txt");
+         }catch (Exception e){//Catch exception if any
+             System.err.println("Error: " + e.getMessage());
+         } 
+        }
 	    // minimum value is 1.0, this is used to test if
 	    // the which flag was set.
 	    if ((scaleX != oldScaleX) && (scaleX > 0.0)) {
@@ -429,7 +450,11 @@ class ProfileWindow extends ProjectionsWindow
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
         p.add(sp);*/
-        usageFrame.getContentPane().add(sp);
+        btnExportToFile = new JButton("Export to file");
+        btnExportToFile.addActionListener(this); 
+        usageFrame.getContentPane().add(BorderLayout.NORTH, btnExportToFile);
+
+        usageFrame.getContentPane().add(BorderLayout.CENTER, sp);
 
         usageFrame.setLocationRelativeTo(parentWindow);
         usageFrame.setSize(500,250);

@@ -97,13 +97,13 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 						else if(clickedOnPE >=0 && 	verticalPosition == mouseLast.y / data.singleTimelineHeight()){
 							// draw the PE we are dragging around here
 							g.setColor(Color.red);
-							String peString = getPEString(clickedOnPE);
+							String peString = data.getPEString(clickedOnPE);
 							int stringWidth = fm.stringWidth(peString);			
 							g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 						}
 						else {
 							g.setColor(data.getForegroundColor());
-							String peString = getPEString(pe);
+							String peString = data.getPEString(pe);
 							int stringWidth = fm.stringWidth(peString);			
 							g.drawString(peString, preferredWidth()-stringWidth, fm.getHeight()/2+data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 						}
@@ -118,7 +118,7 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 							// draw the PE we are dragging around here
 							g.setColor(Color.red);
 
-							String peString = getPEString(clickedOnPE);
+							String peString = data.getPEString(clickedOnPE);
 							g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 
 							String percentString = "(" + (int)(100 - data.idleUsage[clickedOnPE]) + ", " + (int)(data.processorUsage[clickedOnPE]) + ")";
@@ -127,7 +127,7 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 						else {
 							g.setColor(data.getForegroundColor());
 
-							String peString = getPEString(pe);
+							String peString = data.getPEString(pe);
 							g.drawString(peString, 10, data.singleTimelineHeight()/2 + verticalPosition*data.singleTimelineHeight());
 
 							String percentString = "(?,?)";
@@ -184,18 +184,5 @@ class LabelPanel extends JPanel implements MouseListener, MouseMotionListener {
 
 	public void mouseMoved(MouseEvent e) {
 	}
-	
-	private String getPEString(int pe){
-		if(data.isSMPRun()){
-			int nid = data.getNodeID(pe);
-			if(data.isCommThd(pe))
-				return "CommP (N"+nid+")";
-			else
-				return "P"+pe+" (N"+nid+")";
-		}else{
-			return "PE "+pe;
-		}
-	}
-
 }
 

@@ -705,68 +705,49 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 	}
 	
-	protected boolean makeSMPMsgGroup(EntryMethodObject sendObj, Set<EntryMethodObject> recvObjs){
-		if(recvObjs.size()!=3) return false;
-		
-		//only consider the SMP Msg group that has 4 objects		
-		EntryMethodObject recvObj1, recvObj2, recvObj3;
-		Iterator<EntryMethodObject> iter = recvObjs.iterator();
-		recvObj1 = iter.next();
-		recvObj2 = iter.next();
-		recvObj3 = iter.next();		
-		int sendNID = getNodeID(sendObj.pe);
-		int nid1 = getNodeID(recvObj1.pe);
-		int nid2 = getNodeID(recvObj2.pe);
-		int nid3 = getNodeID(recvObj3.pe);
-		
-		//System.out.println("Checking one group of PES: "+smpGrpObjs.get(0).pe+":"+smpGrpObjs.get(1).pe
-		//	+":"+smpGrpObjs.get(2).pe+":"+smpGrpObjs.get(3).pe);
-		
-		toPaintSMPMsgGrp.sendWPe = sendObj;
-		if(nid1 == sendNID && isCommThd(recvObj1.pe)){
-			toPaintSMPMsgGrp.sendCPe = recvObj1;
-			if(nid2 == nid3){
-				if(isCommThd(recvObj2.pe)){
-					toPaintSMPMsgGrp.recvCPe = recvObj2; toPaintSMPMsgGrp.recvWPe=recvObj3;
-				}else{
-					toPaintSMPMsgGrp.recvCPe = recvObj3; toPaintSMPMsgGrp.recvWPe=recvObj2;
-				}										
-			}else{
-				//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid2!=nid3");
-				return false;
-			}
-		}else if(nid2 == sendNID && isCommThd(recvObj2.pe)){
-			toPaintSMPMsgGrp.sendCPe = recvObj2;
-			if(nid1 == nid3){
-				if(isCommThd(recvObj1.pe)){
-					toPaintSMPMsgGrp.recvCPe = recvObj1; toPaintSMPMsgGrp.recvWPe=recvObj3;
-				}else{
-					toPaintSMPMsgGrp.recvCPe = recvObj3; toPaintSMPMsgGrp.recvWPe=recvObj1;
-				}										
-			}else{
-				//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid3");
-				return false;
-			}
-		}else if(nid3 == sendNID && isCommThd(recvObj3.pe)){
-			toPaintSMPMsgGrp.sendCPe = recvObj3;
-			if(nid1 == nid2){
-				if(isCommThd(recvObj1.pe)){
-					toPaintSMPMsgGrp.recvCPe = recvObj1; toPaintSMPMsgGrp.recvWPe=recvObj2;
-				}else{
-					toPaintSMPMsgGrp.recvCPe = recvObj2; toPaintSMPMsgGrp.recvWPe=recvObj1;
-				}										
-			}else{
-				//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as nid1!=nid2");
-				return false;
-			}
-		}else{
-			//System.err.println("Something may be wrong in Data::checkSMPMsgGroup as none is equal to sendNID");
+	protected boolean makeSMPMsgGroup(EntryMethodObject recvWPe){
+		TimelineMessage createdMsg = recvWPe.creationMessage();
+
+		//recvCPe is a msg recv operation on CommThd
+		//trace back to its sender
+		EntryMethodObject recvCPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		if(!recvCPe.isCommThreadMsgRecv()) return false;
+		createdMsg = recvCPe.creationMessage();
+		if(createdMsg == null){
+			//this should never happen!!
+			return false;			 
+		}
+		//sendCPe should be a msg send operation on CommThd
+		EntryMethodObject sendCPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		if(sendCPe == null) {
+			//this should never happen!!
+			return false;
+		}
+
+		if(!isCommThd(sendCPe.pe)) {
+			//this should not happen!
+			return false;
+		}
+
+		createdMsg = sendCPe.creationMessage();
+		if(createdMsg == null){
+			//this should never happen!!
+			return false;			 
+		}
+
+		EntryMethodObject sendWPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		if(sendWPe == null) {
+			//this should never happen!!
 			return false;
 		}
 		
+		toPaintSMPMsgGrp.recvWPe = recvWPe;
+		toPaintSMPMsgGrp.recvCPe = recvCPe;
+		toPaintSMPMsgGrp.sendCPe = sendCPe;
+		toPaintSMPMsgGrp.sendWPe = sendWPe;
 		return true;
 	}
-	
+
 	/**Remove all lines from forward and backward tracing from Timelines display*/
 	protected void removeLines() {
 		drawMessagesForTheseObjectsAlt.clear();
@@ -841,6 +822,18 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		StsReader sts = MainWindow.runObject[myRun].getSts();
 		return sts.getNodeSize()*sts.getSMPNodeCount()+nid;
 		
+	}
+
+	protected String getPEString(int pe){
+		if(isSMPRun()){
+			int nid = getNodeID(pe);
+			if(isCommThd(pe))
+				return "CommP (N"+nid+")";
+			else
+				return "P"+pe+" (N"+nid+")";
+		}else{
+			return "PE "+pe;
+		}
 	}
 
 	/** Load the Timeline data for one processor (pe)
@@ -1365,6 +1358,20 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return 5;
 		}
 	}
+
+	/** The height of the rectangle that indicates the entry
+	 *  method is a msg recv on communication thread */
+	protected int smpMessageRecvBarHeight(){
+		if(viewType == ViewType.VIEW_NORMAL) {
+			return 3;
+		}else if(viewType == ViewType.VIEW_COMPACT){
+			return 2;
+		}else
+			return 0;
+	}
+	 
+
+
 	/** The height of the rectangle that displays the message pack time below the entry method */
 	protected int messagePackHeight() {
 		return 3;

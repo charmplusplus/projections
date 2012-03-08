@@ -82,6 +82,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private static DecimalFormat format_ = new DecimalFormat();
 	private AmpiFunctionData funcData[];
 
+	private boolean isCommThdRecv = false;
+
 	protected EntryMethodObject(Data data,  TimelineEvent tle, 
 			ArrayList<TimelineMessage> msgs, ArrayList<PackTime> packs,
 			int p1)
@@ -100,6 +102,12 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		this.packs= packs;
 		pe  = p1;
 		pCreation = tle.SrcPe;
+		if(data.isCommThd(pe)) {
+			int myNode = data.getNodeID(pe);
+			int creationNode = data.getNodeID(pCreation);
+			isCommThdRecv = (myNode != creationNode);
+		}
+
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
 		recvTime = tle.RecvTime;
@@ -192,7 +200,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			else 
 				infoString.append("<i>Msgs created</i>: 0<br>");
 
-			infoString.append("<i>Created by processor</i>: " + pCreation + "<br>");
+			infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
 			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
 			if(tleUserEventName!=null)
 				infoString.append("<i>Associated User Event</i>: "+tleUserEventName+ "<br>");
@@ -731,6 +739,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		if(rectWidth > 1 || entryIndex!=-1){
 			g2d.fillRect(left, topCoord+verticalInset, rectWidth, rectHeight);
 //			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
+			if(isCommThdRecv) {
+				g2d.setColor(data.getForegroundColor());
+				g2d.fillRect(left, topCoord+verticalInset+rectHeight, rectWidth, data.smpMessageRecvBarHeight());
+			}
 		}
 
 		// Paint the edges of the rectangle lighter/darker to give an embossed look
@@ -1008,6 +1020,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	public ObjectId getTid() {
 		return tid;
+	}
+
+	public boolean isCommThreadMsgRecv(){
+		return isCommThdRecv;
 	}
 
 	/** Shift all the times associated with this entry method by given amount */

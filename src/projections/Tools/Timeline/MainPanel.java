@@ -323,65 +323,75 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					
 					boolean smpMsgGrpFound = false;
 					if(data.isSMPRun()){
-						EntryMethodObject creatingObj = data.messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
-						if(creatingObj!=null){
-							int creatingObjN = data.getNodeID(creatingObj.pe);
-							int thisN = data.getNodeID(pExecution);
-							if(thisN != creatingObjN){
-								Set<EntryMethodObject> objsets = data.messageStructures.getMessageToExecutingObjectsMap().get(createdMsg);								
-								smpMsgGrpFound = data.makeSMPMsgGroup(creatingObj, objsets);
-							}
-						}						
+						smpMsgGrpFound = data.makeSMPMsgGroup(obj);						
 					}
 
 					if(smpMsgGrpFound){
-						EntryMethodObject scObj = data.toPaintSMPMsgGrp.sendCPe;
-						EntryMethodObject rcObj = data.toPaintSMPMsgGrp.recvCPe;
-						
-						// Message Creation point
-						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
-						double y1 = data.messageSendLocationY(pCreation);
-	
-						// Message executed (comm thd on send side) 
-						int x2Begin =  data.timeToScreenPixel(scObj.getBeginTime());
-						int x2End = data.timeToScreenPixel(scObj.getEndTime());
-						double y2Begin = data.messageRecvLocationY(scObj.pe);
-						double y2End = y2Begin+data.barheight();
+						int x1, x2;
+						double y1, y2;
+						EntryMethodObject recvObj;
+						TimelineMessage oneMsg;
+						int sendPe, recvPe;
 
-						//Message executed (comm thd on recv side)	
-						int x3Begin =  data.timeToScreenPixel(rcObj.getBeginTime());
-						int x3End = data.timeToScreenPixel(rcObj.getEndTime());
-						double y3Begin = data.messageRecvLocationY(rcObj.pe);
-						double y3End = y3Begin+data.barheight();
+						recvObj = data.toPaintSMPMsgGrp.recvWPe;
+						oneMsg = recvObj.creationMessage();
+						sendPe = recvObj.pCreation;
+						recvPe = recvObj.pe;
+						x1 = data.timeToScreenPixel(oneMsg.Time);			
+						y1 = data.messageSendLocationY(sendPe);
 						
 						// Message executed (entry method starts) 
-						int x4 =  data.timeToScreenPixel(obj.getBeginTime());
-						double y4 = data.messageRecvLocationY(pExecution);
-					
-						// Draw thick background Then thin foreground
-						g2d.setPaint(bgColor);
-						g2d.setStroke(new BasicStroke(4.0f));
-						g2d.drawLine(x1,(int)y1,x2Begin,(int)y2Begin);
-						g2d.setPaint(c);
-						g2d.setStroke(new BasicStroke(2.0f));
-						g2d.drawLine(x1,(int)y1,x2Begin,(int)y2Begin);
+						x2 =  data.timeToScreenPixel(recvObj.getBeginTime());
+						y2 = data.messageRecvLocationY(recvPe);
 
+						// Draw thick background Then thin foreground recvCPe->recvWPe
 						g2d.setPaint(bgColor);
 						g2d.setStroke(new BasicStroke(4.0f));
-						g2d.drawLine(x2End,(int)y2End,x3Begin,(int)y3Begin);
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);
 						g2d.setPaint(c);
 						g2d.setStroke(new BasicStroke(2.0f));
-						g2d.drawLine(x2End,(int)y2End,x3Begin,(int)y3Begin);
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);
 
+						recvObj = data.toPaintSMPMsgGrp.recvCPe;
+						oneMsg = recvObj.creationMessage();
+						sendPe = recvObj.pCreation;
+						recvPe = recvObj.pe;
+						x1 = data.timeToScreenPixel(oneMsg.Time);			
+						y1 = data.messageSendLocationY(sendPe);
+						
+						// Message executed (entry method starts) 
+						x2 =  data.timeToScreenPixel(recvObj.getBeginTime());
+						y2 = data.messageRecvLocationY(recvPe);
+
+						// Draw thick background Then thin foreground sendCPe->recvCPe
 						g2d.setPaint(bgColor);
 						g2d.setStroke(new BasicStroke(4.0f));
-						g2d.drawLine(x3End,(int)y3End,x4,(int)y4);
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);
 						g2d.setPaint(c);
 						g2d.setStroke(new BasicStroke(2.0f));
-						g2d.drawLine(x3End,(int)y3End,x4,(int)y4);
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);
+
+						recvObj = data.toPaintSMPMsgGrp.sendCPe;
+						oneMsg = recvObj.creationMessage();
+						sendPe = recvObj.pCreation;
+						recvPe = recvObj.pe;
+						x1 = data.timeToScreenPixel(oneMsg.Time);			
+						y1 = data.messageSendLocationY(sendPe);
+						
+						// Message executed (entry method starts) 
+						x2 =  data.timeToScreenPixel(recvObj.getBeginTime());
+						y2 = data.messageRecvLocationY(recvPe);
+
+						// Draw thick background Then thin foreground sendWPe->recvCPe
+						g2d.setPaint(bgColor);
+						g2d.setStroke(new BasicStroke(4.0f));
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);
+						g2d.setPaint(c);
+						g2d.setStroke(new BasicStroke(2.0f));
+						g2d.drawLine(x1,(int)y1,x2,(int)y2);						
 					}else{
 						// Message Creation point
-						int x1 = data.timeToScreenPixel(obj.creationMessage().Time);			
+						int x1 = data.timeToScreenPixel(createdMsg.Time);			
 						double y1 = data.messageSendLocationY(pCreation);						
 						
 						// Message executed (entry method starts) 

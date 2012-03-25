@@ -23,6 +23,7 @@ class ThreadedFileReader implements Runnable  {
 
 	private int myRun = 0;
 
+    private int PesPerNode = 7;
 	// Global data that must be safely accumulated into:
 	private double[][] globalMessagesSend;
 	private double[][] globalMessagesRecv;
@@ -30,6 +31,8 @@ class ThreadedFileReader implements Runnable  {
 	private double[][] globalBytesRecv;
 	private double[][] globalExternalMessageRecv;
 	private double[][] globalExternalBytesRecv;
+	private double[][] globalExternalNodeMessageRecv;
+	private double[][] globalExternalNodeBytesRecv;
 	
 
 	/** Construct a file reading thread that will generate data for one PE. */
@@ -45,8 +48,25 @@ class ThreadedFileReader implements Runnable  {
 		this.globalBytesRecv = globalBytesRecv;
 		this.globalExternalMessageRecv = globalExternalMessageRecv;
 		this.globalExternalBytesRecv = globalExternalBytesRecv;
-
 	}
+
+    protected ThreadedFileReader(int pe, long intervalSize, long startInterval, long endInterval, double[][] globalMessagesSend,double[][] globalMessagesRecv, double[][] globalBytesSend, double [][] globalBytesRecv, double[][] globalExternalMessageRecv, double[][] globalExternalBytesRecv,
+        double[][] globalExternalNodeMessageRecv, double[][] globalExternalNodeBytesRecv){
+		this.pe = pe;
+		this.startInterval = startInterval;
+		this.endInterval = endInterval;
+		this.intervalSize = intervalSize;
+
+		this.globalMessagesSend = globalMessagesSend;
+		this.globalMessagesRecv = globalMessagesRecv;
+		this.globalBytesSend = globalBytesSend;
+		this.globalBytesRecv = globalBytesRecv;
+		this.globalExternalMessageRecv = globalExternalMessageRecv;
+		this.globalExternalBytesRecv = globalExternalBytesRecv;
+		this.globalExternalNodeMessageRecv = globalExternalNodeMessageRecv;
+		this.globalExternalNodeBytesRecv = globalExternalNodeBytesRecv;
+	}
+
 
 
 	public void run() { 
@@ -64,6 +84,8 @@ class ThreadedFileReader implements Runnable  {
 		double[][] localExternalMessageRecv = new double[numIntervals][numEPs];
 		double[][] localExternalBytesRecv = new double[numIntervals][numEPs];	
 
+		double[][] localExternalNodeMessageRecv = new double[numIntervals][numEPs];
+		double[][] localExternalNodeBytesRecv = new double[numIntervals][numEPs];	
 
 		try	{
 
@@ -104,6 +126,13 @@ class ThreadedFileReader implements Runnable  {
 							localExternalMessageRecv[timeInterval][currEPindex]++;
 							localExternalBytesRecv[timeInterval][currEPindex]+=logdata.msglen;
 						}
+                        if(pe/PesPerNode != srcPe/PesPerNode)
+                        {
+                            // Update message and byte received external arrays
+							localExternalNodeMessageRecv[timeInterval][currEPindex]++;
+							localExternalNodeBytesRecv[timeInterval][currEPindex]+=logdata.msglen;
+
+                        }
 					}
 				}
 
@@ -166,11 +195,28 @@ class ThreadedFileReader implements Runnable  {
 		synchronized (globalExternalBytesRecv) {
 			for(int i=0; i< numIntervals; i++){
 				for(int j=0; j< numEPs; j++){
+					globalExternalBytesRecv[i][j] += localExternalNodeBytesRecv[i][j];
+				}
+			}
+		}
+		
+        synchronized (globalExternalNodeMessageRecv) {
+			for(int i=0; i< numIntervals; i++){
+				for(int j=0; j< numEPs; j++){
+					globalExternalNodeMessageRecv[i][j] += localExternalNodeMessageRecv[i][j];
+				}
+			}
+		}
+		
+		synchronized (globalExternalBytesRecv) {
+			for(int i=0; i< numIntervals; i++){
+				for(int j=0; j< numEPs; j++){
 					globalExternalBytesRecv[i][j] += localExternalBytesRecv[i][j];
 				}
 			}
 		}
 		
+
 		
 	}
 

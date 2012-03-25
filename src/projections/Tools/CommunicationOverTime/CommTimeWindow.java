@@ -67,6 +67,8 @@ implements ItemListener, ActionListener
 	private Checkbox	   receivedExternalMsgs;
 	private Checkbox	   receivedExternalBytes;
 
+    private Checkbox	   receivedExternalNodeMsgs;
+	private Checkbox	   receivedExternalNodeBytes;
 	private int		   startInterval;
 	private int		   endInterval;
 	private int		   numIntervals;
@@ -91,6 +93,8 @@ implements ItemListener, ActionListener
 	//private double[][]     sentExternalByteCount;
 	private double[][]	   receivedExternalMsgCount;
 	private double[][]     receivedExternalByteCount;
+	private double[][]	   receivedExternalNodeMsgCount;
+	private double[][]     receivedExternalNodeByteCount;
 
 	// output arrays    
 	private double[][]     sentMsgOutput;
@@ -102,6 +106,8 @@ implements ItemListener, ActionListener
 	private double[][]     receivedExternalMsgOutput;
 	private double[][]     receivedExternalByteOutput;
 
+	private double[][]     receivedExternalNodeMsgOutput;
+	private double[][]     receivedExternalNodeByteOutput;
 	// format for output
 	private DecimalFormat  _format;
 
@@ -185,6 +191,10 @@ implements ItemListener, ActionListener
 		receivedExternalMsgs.addItemListener(this);
 		receivedExternalBytes = new Checkbox("External Bytes Recv", cbg, false);
 		receivedExternalBytes.addItemListener(this);
+		receivedExternalNodeMsgs = new Checkbox("External Node Msgs Recv", cbg, false);
+		receivedExternalNodeMsgs.addItemListener(this);
+		receivedExternalNodeBytes = new Checkbox("External Node Bytes Recv", cbg, false);
+		receivedExternalNodeBytes.addItemListener(this);
 		checkBoxPanel = new JPanel();
 		Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
@@ -192,6 +202,8 @@ implements ItemListener, ActionListener
 		Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, receivedExternalMsgs, gbc, 4,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, receivedExternalBytes, gbc, 5,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, receivedExternalNodeMsgs, gbc, 6,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, receivedExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
 
 		// control panel items
 		setRanges = new JButton("Select New Range");
@@ -292,6 +304,26 @@ implements ItemListener, ActionListener
 			totalCount.setText("Total external bytes received: " + accumulateArray(receivedExternalByteOutput));
 			super.refreshGraph();
 		}
+        else if(cb == receivedExternalNodeMsgs){
+			setDataSource("Received External Node Messages Over Time", receivedExternalNodeMsgOutput,
+					commTimeColors, this);
+			setPopupText("receivedExternalNodeMsgCount");
+			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
+					startInterval*intervalSize, intervalSize);
+			setYAxis("Messages Received Externally Node ", "");
+			totalCount.setText("Total external node messages received: " + accumulateArray(receivedExternalNodeMsgOutput));
+			super.refreshGraph();
+		}
+		else if(cb == receivedExternalNodeBytes){
+			setDataSource("Received External Node Bytes Over Time", receivedExternalNodeByteOutput,
+					commTimeColors, this);
+			setPopupText("receivedExternalNodeByteCount");
+			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
+					startInterval*intervalSize, intervalSize);
+			setYAxis("Bytes Received Externally Node", "");
+			totalCount.setText("Total external node bytes received: " + accumulateArray(receivedExternalNodeByteOutput));
+			super.refreshGraph();
+		}
 	}
 
 
@@ -343,13 +375,15 @@ implements ItemListener, ActionListener
 		receivedByteCount = new double[numIntervals][numEPs];
 		receivedExternalMsgCount = new double[numIntervals][numEPs];
 		receivedExternalByteCount = new double[numIntervals][numEPs];
-		
+		receivedExternalNodeMsgCount = new double[numIntervals][numEPs];
+		receivedExternalNodeByteCount = new double[numIntervals][numEPs];
 		
 		// Create a list of worker threads
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
 		for (Integer nextPe : processorList){
-			readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount) );
+			//readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount) );
+			readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount, receivedExternalNodeMsgCount, receivedExternalNodeByteCount) );
 			pIdx++;
 		}
 
@@ -414,6 +448,10 @@ implements ItemListener, ActionListener
 				new double[numIntervals][outSize];
 			receivedExternalByteOutput =
 				new double[numIntervals][outSize];
+            receivedExternalNodeMsgOutput = 
+				new double[numIntervals][outSize];
+			receivedExternalNodeByteOutput =
+				new double[numIntervals][outSize];
 
 			for (int ep=0; ep<numEPs; ep++) {
 				if (stateArray[ep]) {
@@ -426,6 +464,8 @@ implements ItemListener, ActionListener
 						//sentExternalByteOutput[interval][count] = sentExternalByteCount[interval][ep];
 						receivedExternalMsgOutput[interval][ep] = receivedExternalMsgCount[interval][ep];
 						receivedExternalByteOutput[interval][ep] = receivedExternalByteCount[interval][ep];
+						receivedExternalNodeMsgOutput[interval][ep] = receivedExternalNodeMsgCount[interval][ep];
+						receivedExternalNodeByteOutput[interval][ep] = receivedExternalNodeByteCount[interval][ep];
 					}
 				}
 			}
@@ -508,6 +548,19 @@ implements ItemListener, ActionListener
 			rString[3] = "Bytes = " + 
 			_format.format(receivedExternalByteOutput[xVal][yVal]);
 		}
+        else if(currentArrayName.equals("receivedExternalNodeMsgCount")) {
+			rString[1] = "Dest. Chare: " + epClassName;
+			rString[2] = "Dest. EPid: " + epName;	    
+			rString[3] = "Count = " + 
+			_format.format(receivedExternalNodeMsgOutput[xVal][yVal]);
+		}
+		else if(currentArrayName.equals("receivedExternalNodeByteCount")) {
+			rString[1] = "Dest. Chare: " + epClassName;
+			rString[2] = "Dest. EPid: " + epName;	    
+			rString[3] = "Bytes = " + 
+			_format.format(receivedExternalNodeByteOutput[xVal][yVal]);
+		}
+
 		return rString;
 	}
 

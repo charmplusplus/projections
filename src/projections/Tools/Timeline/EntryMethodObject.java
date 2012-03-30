@@ -47,9 +47,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private final static String popupChangeColor = "Change Entry Point Color";
 	private final static String popupShowDetails = "Show details";
 	private final static String popupTraceSender = "Trace message to sender";
+	private final static String popupTracePath = "Trace message path";
 	private final static String popupDropPEsForObject = "Drop all PEs unrelated to this entry method";
 	private final static String popupDropPEsForPE = "Drop all PEs unrelated to entry methods on this PE";
-	
+
 	
 	/** Data specified by the user, likely a timestep. Null if nonspecified */
 	Integer userSuppliedData;
@@ -395,7 +396,30 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
 				// Left Click
-				data.clickTraceSender(this);	
+            if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
+						
+                Set<EntryMethodObject>fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
+                Set<EntryMethodObject> back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
+
+                HashSet<Object> fwdGeneric = new HashSet<Object>();
+                HashSet<Object> backGeneric =  new HashSet<Object>();
+                fwdGeneric.addAll(fwd); // this function acts differently depending on data.traceMessagesForwardOnHover()
+                backGeneric.addAll(back); // this function acts differently depending on data.traceMessagesBackOnHover()
+
+                // Highlight the forward and backward messages
+                //data.clearMessageSendLines();
+                data.addMessageSendLine(back);
+                data.addMessageSendLineAlt(fwd);
+			
+                // highlight the objects as well
+                data.highlightObjects(fwdGeneric);
+                data.highlightObjects(backGeneric);
+			
+                data.displayMustBeRepainted();
+			//needRepaint=true;
+		}else{
+	
+				data.clickTraceSender(this);}	
 			} else {	
 				// non-left click: display popup menu
 				JPopupMenu popup = new JPopupMenu();
@@ -409,7 +433,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		        menuItem.addActionListener(this);
 		        popup.add(menuItem);
 		        
-		        menuItem = new JMenuItem(popupChangeColor);
+		        menuItem = new JMenuItem(popupTracePath);
+		        menuItem.addActionListener(this);
+		        popup.add(menuItem);
+		        
+                menuItem = new JMenuItem(popupChangeColor);
 		        menuItem.addActionListener(this);
 		        popup.add(menuItem);
 		        
@@ -546,13 +574,13 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		boolean needRepaint = false;
 		
 		// Highlight the messages linked to this object
-		if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
+		/*if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
 						
-			Set<EntryMethodObject> fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
-			Set<EntryMethodObject> back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
+			fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
+			back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
 				
-			HashSet<Object> fwdGeneric = new HashSet<Object>();
-			HashSet<Object> backGeneric =  new HashSet<Object>();
+		//	HashSet<Object> fwdGeneric = new HashSet<Object>();
+		//	HashSet<Object> backGeneric =  new HashSet<Object>();
 			fwdGeneric.addAll(fwd); // this function acts differently depending on data.traceMessagesForwardOnHover()
 			backGeneric.addAll(back); // this function acts differently depending on data.traceMessagesBackOnHover()
 						
@@ -568,7 +596,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			needRepaint=true;
 		}
 			
-		
+		*/
 		// Highlight any Entry Method invocations for the same chare array element
 		if(data.traceOIDOnHover()){
 			synchronized(data.messageStructures){
@@ -587,6 +615,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	public void mouseExited(MouseEvent evt)
 	{
+        /*
 		boolean needRepaint = false;
 		
 		if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
@@ -601,7 +630,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				
 		if(needRepaint)
 			data.displayMustBeRepainted();
-		
+		*/
 	}   
 
 //
@@ -1062,6 +1091,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				OpenMessageWindow();
 			} 
 			else if(arg.equals(popupTraceSender)) {
+				data.clickTraceSender(this);				
+			} 
+			else if(arg.equals(popupTracePath)) {
 				data.clickTraceSender(this);				
 			} 
 			else if(arg.equals(popupDropPEsForObject)) {	

@@ -45,6 +45,11 @@ author = idooley2
 		<pathelement location="${jfreechart-experimental.jar}"/>
 		<pathelement location="${jcommon.jar}"/>
 		<pathelement location="${itext.jar}"/>
+
+		<!-- Java3D jar files -->
+		<pathelement location="src/j3dcore.jar"/>
+		<pathelement location="src/j3dutils.jar"/>
+		<pathelement location="src/vecmath.jar"/>
 	</path>
 
   	
@@ -60,7 +65,8 @@ author = idooley2
 	       deprecation="${compile.deprecation}"
 	       target="1.5"
 	       source="1.5"
-	       optimize="${compile.optimize}" >
+	       optimize="${compile.optimize}"
+	       includeantruntime="false">
 	  <classpath refid="build.classpath" />
 	  <include name="**/*"/>
 	</javac>

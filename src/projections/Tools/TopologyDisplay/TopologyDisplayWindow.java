@@ -7,18 +7,26 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 
 import javax.media.j3d.Appearance;
+import javax.media.j3d.Background;
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.BoundingSphere;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.ColoringAttributes;
+import javax.media.j3d.DirectionalLight;
+import javax.media.j3d.LineArray;
+import javax.media.j3d.QuadArray;
+import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
+import javax.media.j3d.TransparencyAttributes;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.vecmath.AxisAngle4f;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
@@ -27,6 +35,8 @@ import javax.vecmath.Vector3f;
 import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
 import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
 import com.sun.j3d.utils.behaviors.mouse.MouseZoom;
+import com.sun.j3d.utils.geometry.Cone;
+import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import com.sun.j3d.utils.universe.ViewingPlatform;
 
@@ -195,19 +205,249 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	/************* Scene Creation *************/
 
 	private void createSceneGraph(BoundingSphere backgroundBounds) {
-	
+		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
+		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
+		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
+		objRotate.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		objRotate.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+
+		// set up background to be white.
+		Background back = new Background();
+		back.setCapability(Background.ALLOW_COLOR_WRITE);
+		back.setColor(1.0f, 1.0f, 1.0f);
+		back.setApplicationBounds(backgroundBounds);
+		objRotate.addChild(back);
+		
+		// set up light.
+		TransformGroup transformGroup = new TransformGroup();
+		
+		Color3f lightColor = new Color3f(1.0f, 1.0f, 1.0f);
+		Vector3f lightDir = new Vector3f(0.0f, 0.0f, -1.0f);
+		DirectionalLight light = new DirectionalLight(lightColor, lightDir);
+		
+		Transform3D transform = new Transform3D();
+		transform.setTranslation(new Vector3f(0, 0, 2));
+		
+		transformGroup.setTransform(transform);
+		transformGroup.addChild(light);
+		objRotate.addChild(transformGroup);
+		
+		// add coordinates.
+		TextIO.readFile("test/namd2.prj.topo");
+		
+		// ignore first 4 lines.
+		TextIO.getln();
+		TextIO.getln();
+		TextIO.getln();
+		TextIO.getln();
+		
+		// start reading actual data.
+		while (TextIO.eof() == false) {
+			TextIO.getInt();		// ignore the rank
+			TextIO.getChar();		// ignore '-' char
+			
+			int x = TextIO.getInt();
+			int y = TextIO.getInt();
+			int z = TextIO.getInt();
+			
+			this.AddPoint(x, y, z);
+			
+			TextIO.getln();			// ignore the rest of line
+			TextIO.skipBlanks();
+		}
+		
+		// reset light bounds.
+		double boundRadius = Math.max(Math.max((maxX - minX), (maxY - minY)), maxZ - minZ) / 2 + 5.0;
+		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), boundRadius);
+		light.setInfluencingBounds(bounds);
+	}
+
+	private void AddPoint(int x, int y, int z) {
+		// update the bounds.
+		if (x > maxX) {
+			maxX = x;
+		} else if (x < minX) {
+			minX = x;
+		}
+		if (y > maxY) {
+			maxY = y;
+		} else if (y < minY) {
+			minY = y;
+		}
+		if (z > maxZ) {
+			maxZ = z;
+		} else if (z < minZ) {
+			minZ = z;
+		}
+		
+		TransformGroup transformGroup = new TransformGroup();
+		
+		Transform3D transform = new Transform3D();
+		transform.setTranslation(new Vector3f(x, y, z));		
+		transformGroup.setTransform(transform);
+		
+		Sphere point = new Sphere(pointRadius);
+		transformGroup.addChild(point);
+		
+		objRotate.addChild(transformGroup);
 	}
 
 	private void createAxes() {
+		// create X axis.
+		LineArray axisXLines = new LineArray(2, LineArray.COORDINATES | LineArray.COLOR_3);
+		axisXLines.setColor(0, new Color3f(1.0f, 0.0f, 0.0f));
+		axisXLines.setColor(1, new Color3f(1.0f, 0.0f, 0.0f));
+		objRotate.addChild(new Shape3D(axisXLines));
+
+		axisXLines.setCoordinate(0, new Point3f(this.minX - axisExt, 0.0f, 0.0f));
+		axisXLines.setCoordinate(1, new Point3f(this.maxX + axisExt, 0.0f, 0.0f));
+
+		// add cone.
+		Cone xAxisCone = new Cone(coneRadius, coneHeight);
+		xAxisCone.setAppearance(redAppearance);
+
+		TransformGroup xTransformGroup = new TransformGroup();
+		Transform3D xTransform = new Transform3D();
+		xTransform.setRotation(new AxisAngle4f(new Vector3f(0, 0, 1), -1.57079633f));
+		xTransform.setTranslation(new Vector3f(this.maxX + axisExt, 0.0f, 0.0f));
+		xTransformGroup.setTransform(xTransform);
+		xTransformGroup.addChild(xAxisCone);
+		objRotate.addChild(xTransformGroup);
+		
+		// create Y axis.
+		LineArray axisYLines = new LineArray(2, LineArray.COORDINATES | LineArray.COLOR_3);
+		axisYLines.setColor(0, new Color3f(0.0f, 1.0f, 0.0f));
+		axisYLines.setColor(1, new Color3f(0.0f, 1.0f, 0.0f));
+		objRotate.addChild(new Shape3D(axisYLines));
+
+		axisYLines.setCoordinate(0, new Point3f(0.0f, this.minY - axisExt, 0.0f));
+		axisYLines.setCoordinate(1, new Point3f(0.0f, this.maxY + axisExt, 0.0f));
+
+		// add cone.
+		Cone yAxisCone = new Cone(coneRadius, coneHeight);
+		yAxisCone.setAppearance(greenAppearance);
+
+		TransformGroup yTransformGroup = new TransformGroup();
+		Transform3D yTransform = new Transform3D();
+		yTransform.setTranslation(new Vector3f(0.0f, this.maxY + axisExt, 0.0f));
+		yTransformGroup.setTransform(yTransform);
+		yTransformGroup.addChild(yAxisCone);
+		objRotate.addChild(yTransformGroup);
+
+		// create Z axis.
+		LineArray axisZLines = new LineArray(10, LineArray.COORDINATES | LineArray.COLOR_3);
+		axisZLines.setColor(0, new Color3f(0.0f, 0.0f, 1.0f));
+		axisZLines.setColor(1, new Color3f(0.0f, 0.0f, 1.0f));
+		objRotate.addChild(new Shape3D(axisZLines));
+
+		axisZLines.setCoordinate(0, new Point3f(0.0f, 0.0f, this.minZ - axisExt));
+		axisZLines.setCoordinate(1, new Point3f(0.0f, 0.0f, this.maxZ + axisExt));
+
+		// add cone.
+		Cone zAxisCone = new Cone(coneRadius, coneHeight);
+		zAxisCone.setAppearance(blueAppearance);
+
+		TransformGroup zTransformGroup = new TransformGroup();
+		Transform3D zTransform = new Transform3D();
+		zTransform.setRotation(new AxisAngle4f(new Vector3f(1, 0, 0), 1.57079633f));
+		zTransform.setTranslation(new Vector3f(0.0f, 0.0f, this.maxZ + axisExt));
+		zTransformGroup.setTransform(zTransform);
+		zTransformGroup.addChild(zAxisCone);
+		objRotate.addChild(zTransformGroup);
 	}
 
 	/************* Optional Scene Creation *************/
 
 	private void initBoxGroup() {
+		Color lineColor = Color.BLACK;
+		this.boxGroup = new BranchGroup();
+		boxGroup.setCapability(BranchGroup.ALLOW_DETACH);
+		
+		Appearance appearance = new Appearance();
+		appearance.setColoringAttributes(new ColoringAttributes(new Color3f(lineColor), 1));
+		appearance.setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.3f));
+		
+		// XY wall
+		QuadArray polygonXY = new QuadArray(4, QuadArray.COORDINATES);
+		polygonXY.setCoordinate (0, new Point3f (minX, minY, minZ));
+		polygonXY.setCoordinate (1, new Point3f (maxX, minY, minZ));
+		polygonXY.setCoordinate (2, new Point3f (maxX, maxY, minZ));
+		polygonXY.setCoordinate (3, new Point3f (minX, maxY, minZ));
+		
+		boxGroup.addChild(new Shape3D(polygonXY, appearance));
+		
+		// XZ wall
+		QuadArray polygonXZ = new QuadArray(4, QuadArray.COORDINATES);
+		polygonXZ.setCoordinate (0, new Point3f (maxX, minY, maxZ));
+		polygonXZ.setCoordinate (1, new Point3f (maxX, minY, minZ));
+		polygonXZ.setCoordinate (2, new Point3f (minX, minY, minZ));
+		polygonXZ.setCoordinate (3, new Point3f (minX, minY, maxZ));
+		
+		boxGroup.addChild(new Shape3D(polygonXZ, appearance));
+    	
+		// YZ wall
+		QuadArray polygonYZ = new QuadArray(4, QuadArray.COORDINATES);
+		polygonYZ.setCoordinate (0, new Point3f (minX, minY, maxZ));
+		polygonYZ.setCoordinate (1, new Point3f (minX, minY, minZ));
+		polygonYZ.setCoordinate (2, new Point3f (minX, maxY, minZ));
+		polygonYZ.setCoordinate (3, new Point3f (minX, maxY, maxZ));
+		
+		boxGroup.addChild(new Shape3D(polygonYZ, appearance));
+		
+		// along X-axis.
+		for (int x = (int) this.minX; x <= (int) this.maxX; x++) {
+			LineArray lines = new LineArray(4, LineArray.COORDINATES | LineArray.COLOR_3);
+			lines.setColor(0, new Color3f(lineColor));
+			lines.setColor(1, new Color3f(lineColor));
+			lines.setColor(2, new Color3f(lineColor));
+			lines.setColor(3, new Color3f(lineColor));
+			boxGroup.addChild(new Shape3D(lines));
+		    
+			// y
+			lines.setCoordinate(0, new Point3f(x, minY, minZ));
+			lines.setCoordinate(1, new Point3f(x, minY, maxZ));
+			// z
+			lines.setCoordinate(2, new Point3f(x, minY, minZ));
+			lines.setCoordinate(3, new Point3f(x, maxY, minZ));
+		}
+		
+		// along Y-axis.
+		for (int y = (int) this.minY; y <= (int) this.maxY; y++) {
+			LineArray lines = new LineArray(4, LineArray.COORDINATES | LineArray.COLOR_3);
+			lines.setColor(0, new Color3f(lineColor));
+			lines.setColor(1, new Color3f(lineColor));
+			lines.setColor(2, new Color3f(lineColor));
+			lines.setColor(3, new Color3f(lineColor));
+			boxGroup.addChild(new Shape3D(lines));
+		    
+			// x
+			lines.setCoordinate(0, new Point3f(minX, y, minZ));
+			lines.setCoordinate(1, new Point3f(minX, y, maxZ));
+			// z
+			lines.setCoordinate(2, new Point3f(minX, y, minZ));
+			lines.setCoordinate(3, new Point3f(maxX, y, minZ));
+		}
+		
+		// along Z-axis.
+		for (int z = (int) this.minZ; z <= (int) this.maxZ; z++) {
+			LineArray lines = new LineArray(4, LineArray.COORDINATES | LineArray.COLOR_3);
+			lines.setColor(0, new Color3f(lineColor));
+			lines.setColor(1, new Color3f(lineColor));
+			lines.setColor(2, new Color3f(lineColor));
+			lines.setColor(3, new Color3f(lineColor));
+			boxGroup.addChild(new Shape3D(lines));
+		    
+			// x
+			lines.setCoordinate(0, new Point3f(minX, minY, z));
+			lines.setCoordinate(1, new Point3f(minX, maxY, z));
+			// y
+			lines.setCoordinate(2, new Point3f(minX, minY, z));
+			lines.setCoordinate(3, new Point3f(maxX, minY, z));
+		}
 	}
-    
+	
 	/************* Controls *************/
-
+	
 	private void addMouseRotator(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
 		// Rotation.
 		MouseRotate myMouseRotate = new MouseRotate();

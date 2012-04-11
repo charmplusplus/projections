@@ -6,17 +6,29 @@ import projections.gui.ProjectionsWindow;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
+import java.awt.BorderLayout;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.BranchGroup;
+import javax.media.j3d.BoundingSphere;
+import javax.media.j3d.Canvas3D;
 import javax.media.j3d.ColoringAttributes;
+import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.vecmath.Color3f;
+import javax.vecmath.Point3d;
+import javax.vecmath.Point3f;
+import javax.vecmath.Vector3f;
 
+import com.sun.j3d.utils.behaviors.mouse.MouseRotate;
+import com.sun.j3d.utils.behaviors.mouse.MouseTranslate;
+import com.sun.j3d.utils.behaviors.mouse.MouseZoom;
 import com.sun.j3d.utils.universe.SimpleUniverse;
+import com.sun.j3d.utils.universe.ViewingPlatform;
 
 /**
  * The main window for the TopologyDisplay Projections Tool
@@ -41,7 +53,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private Appearance greenAppearance;
 	private Appearance blueAppearance;
 
-	private SimpleUniverse univserse;
+	private SimpleUniverse universe;
 	private BranchGroup scene;
 	private TransformGroup objRotate;
 	private BranchGroup boxGroup;
@@ -128,22 +140,97 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.initCommonAppearance();
 		this.initUI();
 
+		setLayout(new BorderLayout());
+		
+		Canvas3D canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
+		add("Center", canvas);
+
+		// initialize the universe and scene etc...
+		this.universe = new SimpleUniverse(canvas);
+		this.scene = new BranchGroup();
+		this.objRotate = new TransformGroup();
+		this.boxGroup = new BranchGroup();
+
+		BoundingSphere backgroundBounds = new BoundingSphere(
+				  new Point3d(0, 0, 0), 100.0);
+		scene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+		scene.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+
+		this.createSceneGraph(backgroundBounds);	// add points
+		this.createAxes();								// add axes
+		this.initBoxGroup();								// init box
+
+		// init more stuffs
+		addMouseRotator(scene, objRotate, backgroundBounds);
+		addMouseTranslation(scene, objRotate, backgroundBounds);
+		addMouseZoom(scene, objRotate, backgroundBounds);
+
+		setViewPlatform();
+		
+		// add everything together
+		this.objRotate.addChild(boxGroup);
+		this.scene.addChild(objRotate);
+		this.scene.compile();
+		this.universe.addBranchGraph(scene);
+
 		showDialog();
+	}
+
+	private void setViewPlatform() {
+		// set the initial location of the view/camera.
+		ViewingPlatform vp = universe.getViewingPlatform();
+		TransformGroup viewTransformGroup = vp.getMultiTransformGroup().getTransformGroup(0);
+
+		Transform3D viewTransform3D = new Transform3D();
+		viewTransformGroup.getTransform(viewTransform3D);
+
+		viewTransform3D.setTranslation(new Vector3f(0.0f, 0.0f, 20.0f));
+		viewTransformGroup.setTransform(viewTransform3D);
 	}
 
 	protected void showDialog() {
 		this.setVisible(true);
 	}
 
-
 	/************* Scene Creation *************/
 
+	private void createSceneGraph(BoundingSphere backgroundBounds) {
+	
+	}
+
+	private void createAxes() {
+	}
 
 	/************* Optional Scene Creation *************/
 
+	private void initBoxGroup() {
+	}
     
 	/************* Controls *************/
 
+	private void addMouseRotator(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
+		// Rotation.
+		MouseRotate myMouseRotate = new MouseRotate();
+		myMouseRotate.setTransformGroup(objGroup);
+		myMouseRotate.setSchedulingBounds(bounds);
+		scene.addChild(myMouseRotate);
+	}
+	
+	private void addMouseTranslation(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
+		// Translation.
+		MouseTranslate translateBehavior = new MouseTranslate();
+		translateBehavior.setTransformGroup(objGroup);
+		translateBehavior.setSchedulingBounds(bounds);
+		scene.addChild(translateBehavior);
+	}
+	
+	private void addMouseZoom(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
+		// Zoom in/out.
+		MouseZoom zoomBehavior = new MouseZoom();
+		zoomBehavior.setTransformGroup(objGroup);
+		zoomBehavior.setSchedulingBounds(bounds);
+		scene.addChild(zoomBehavior);
+	}
 
 	/************* Implemented Listeners *************/
 

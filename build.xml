@@ -88,6 +88,9 @@ author = idooley2
 		<zipfileset src="${jfreechart-experimental.jar}"/>
 		<zipfileset src="${jcommon.jar}"/>
 		<zipfileset src="${itext.jar}"/>
+		<zipfileset excludes="META-INF/**/*" src="src/j3dcore.jar"/>
+		<zipfileset excludes="META-INF/**/*" src="src/j3dutils.jar"/>
+		<zipfileset excludes="META-INF/**/*" src="src/vecmath.jar"/>
     </jar>
 
   </target>

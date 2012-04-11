@@ -3,11 +3,14 @@ package projections.Tools.TopologyDisplay;
 import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
 
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+
+import java.io.File;
 
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Background;
@@ -23,6 +26,7 @@ import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.media.j3d.TransparencyAttributes;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -82,7 +86,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		JMenu fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
 
-		JMenuItem inputFileItem = new JMenuItem("Input File");
+		JMenuItem inputFileItem = new JMenuItem("Open File");
 		inputFileItem.addActionListener(this);
 		fileMenu.add(inputFileItem);
 
@@ -473,6 +477,26 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	}
 
 	/************* Implemented Listeners *************/
+
+	@Override
+	public void actionPerformed(ActionEvent ae) {
+		JMenuItem source = (JMenuItem) ae.getSource();
+
+		if (source.getText().equals("Open File")) {
+			// open a File Chooser
+			JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+			fc.setFileFilter(new TopologyFileFilter());
+
+			int returnVal = fc.showOpenDialog(this);
+			if (returnVal == JFileChooser.APPROVE_OPTION) {
+				File file = fc.getSelectedFile();
+				// This is where a real application would open the file.
+				// log.append("Opening: " + file.getName() + "." + newline);
+			}
+		} else {
+		
+		}
+	}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {

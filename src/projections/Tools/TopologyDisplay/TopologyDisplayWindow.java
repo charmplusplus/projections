@@ -72,12 +72,18 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private TransformGroup objRotate;
 	private BranchGroup boxGroup;
 	private BranchGroup coordinatesGroup;
+	private BranchGroup wrapperGraph;
 	private BoundingSphere backgroundBounds;
+
+	private DirectionalLight light;
 
 	private int maxX, minX;
 	private int maxY, minY;
 	private int maxZ, minZ;
 	static final float axisExt = 1.5f;
+
+	private JCheckBoxMenuItem showBoxItem;
+	private JCheckBoxMenuItem showCoordItem;
 
 	/************* Initialization *************/
 
@@ -100,12 +106,12 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		JMenu optionsMenu = new JMenu("Options");
 		menuBar.add(optionsMenu);
 
-		JCheckBoxMenuItem showBoxItem = new JCheckBoxMenuItem("Show Box");
+		showBoxItem = new JCheckBoxMenuItem("Show Box");
 		showBoxItem.setSelected(true);
 		showBoxItem.addItemListener(this);
 		optionsMenu.add(showBoxItem);
 
-		JCheckBoxMenuItem showCoordItem = new JCheckBoxMenuItem("Show Coordinates");
+		showCoordItem = new JCheckBoxMenuItem("Show Coordinates");
 		showCoordItem.addItemListener(this);
 		optionsMenu.add(showCoordItem);
 
@@ -164,32 +170,24 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		// initialize the universe and scene etc...
 		this.universe = new SimpleUniverse(canvas);
 		this.scene = new BranchGroup();
+		this.wrapperGraph = new BranchGroup();
 		this.objRotate = new TransformGroup();
 		this.boxGroup = new BranchGroup();
 		this.coordinatesGroup = new BranchGroup();
 		this.backgroundBounds = new BoundingSphere(
 				  new Point3d(0, 0, 0), 100.0);
-		
-		scene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
-		scene.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
 
-		this.createSceneGraph(backgroundBounds);	// add points
-		this.createAxes();								// add axes
-		this.initBoxGroup();								// init box
+		setCapabilities();
 
 		// init more stuffs
-		addMouseRotator(scene, objRotate, backgroundBounds);
-		addMouseTranslation(scene, objRotate, backgroundBounds);
-		addMouseZoom(scene, objRotate, backgroundBounds);
+		addMouseRotator(scene, objRotate);
+		addMouseTranslation(scene, objRotate);
+		addMouseZoom(scene, objRotate);
 
 		setViewPlatform();
-		
-		// add everything together
-		this.objRotate.addChild(boxGroup);
-		this.scene.addChild(objRotate);
-		this.scene.compile();
-		this.universe.addBranchGraph(scene);
 
+		this.scene.addChild(wrapperGraph);
+		this.universe.addBranchGraph(scene);
 		showDialog();
 	}
 
@@ -209,15 +207,64 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.setVisible(true);
 	}
 
-	/************* Scene Creation *************/
+	/************* Capabilities *************/
 
-	private void createSceneGraph(BoundingSphere backgroundBounds) {
+	private void setCapabilities() {
+		scene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+		scene.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
+		scene.setCapability(BranchGroup.ALLOW_CHILDREN_EXTEND);
+
+		wrapperGraph.setCapability(BranchGroup.ALLOW_DETACH);
+
 		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
 		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
 		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
 		objRotate.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 		objRotate.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+	
+		boxGroup.setCapability(BranchGroup.ALLOW_DETACH);
 
+		coordinatesGroup.setCapability(BranchGroup.ALLOW_DETACH);
+	}
+
+	/************* Scene Refresh *************/
+
+	private void ClearScreen() {
+		maxX = 0;
+		minX = 0;
+		maxY = 0;
+		minY = 0;
+		maxZ = 0;
+		minZ = 0;
+
+		// remove everything
+		scene.removeChild(wrapperGraph);
+		wrapperGraph.removeAllChildren();
+		objRotate.removeAllChildren();
+		boxGroup.removeAllChildren();
+		coordinatesGroup.removeAllChildren();
+	}
+
+	private void RefreshScreen(String filePath) {
+		initSceneGraph();
+		AddAllPoints(filePath);
+		createAxes();
+		initBoxGroup();
+
+		if (showBoxItem.isSelected()) {
+			this.objRotate.addChild(boxGroup);
+		}
+		
+		wrapperGraph = new BranchGroup();
+		wrapperGraph.setCapability(BranchGroup.ALLOW_DETACH);
+		wrapperGraph.addChild(this.objRotate);
+
+		this.scene.addChild(wrapperGraph);
+	}
+
+	/************* Scene Creation *************/
+
+	private void initSceneGraph() {
 		// set up background to be white.
 		Background back = new Background();
 		back.setCapability(Background.ALLOW_COLOR_WRITE);
@@ -230,7 +277,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		
 		Color3f lightColor = new Color3f(1.0f, 1.0f, 1.0f);
 		Vector3f lightDir = new Vector3f(0.0f, 0.0f, -1.0f);
-		DirectionalLight light = new DirectionalLight(lightColor, lightDir);
+		this.light = new DirectionalLight(lightColor, lightDir);
 		
 		Transform3D transform = new Transform3D();
 		transform.setTranslation(new Vector3f(0, 0, 2));
@@ -238,9 +285,11 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		transformGroup.setTransform(transform);
 		transformGroup.addChild(light);
 		objRotate.addChild(transformGroup);
-		
+	}
+
+	private void AddAllPoints(String filePath) {
 		// add coordinates.
-		TextIO.readFile("test/namd2.prj.topo");
+		TextIO.readFile(filePath);
 		
 		// ignore first 4 lines.
 		TextIO.getln();
@@ -268,7 +317,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		// reset light bounds.
 		double boundRadius = Math.max(Math.max((maxX - minX), (maxY - minY)), maxZ - minZ) / 2 + 5.0;
 		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), boundRadius);
-		light.setInfluencingBounds(bounds);
+		this.light.setInfluencingBounds(bounds);
 	}
 
 	private void AddPoint(int x, int y, int z) {
@@ -369,8 +418,6 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	private void initBoxGroup() {
 		Color lineColor = Color.BLACK;
-		this.boxGroup = new BranchGroup();
-		boxGroup.setCapability(BranchGroup.ALLOW_DETACH);
 		
 		Appearance appearance = new Appearance();
 		appearance.setColoringAttributes(new ColoringAttributes(new Color3f(lineColor), 1));
@@ -457,27 +504,27 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	
 	/************* Controls *************/
 	
-	private void addMouseRotator(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
+	private void addMouseRotator(BranchGroup scene, TransformGroup objGroup) {
 		// Rotation.
 		MouseRotate myMouseRotate = new MouseRotate();
 		myMouseRotate.setTransformGroup(objGroup);
-		myMouseRotate.setSchedulingBounds(bounds);
+		myMouseRotate.setSchedulingBounds(backgroundBounds);
 		scene.addChild(myMouseRotate);
 	}
 	
-	private void addMouseTranslation(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
+	private void addMouseTranslation(BranchGroup scene, TransformGroup objGroup) {
 		// Translation.
 		MouseTranslate translateBehavior = new MouseTranslate();
 		translateBehavior.setTransformGroup(objGroup);
-		translateBehavior.setSchedulingBounds(bounds);
+		translateBehavior.setSchedulingBounds(backgroundBounds);
 		scene.addChild(translateBehavior);
 	}
 	
-	private void addMouseZoom(BranchGroup scene, TransformGroup objGroup, BoundingSphere bounds) {
+	private void addMouseZoom(BranchGroup scene, TransformGroup objGroup) {
 		// Zoom in/out.
 		MouseZoom zoomBehavior = new MouseZoom();
 		zoomBehavior.setTransformGroup(objGroup);
-		zoomBehavior.setSchedulingBounds(bounds);
+		zoomBehavior.setSchedulingBounds(backgroundBounds);
 		scene.addChild(zoomBehavior);
 	}
 
@@ -495,8 +542,12 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 			int returnVal = fc.showOpenDialog(this);
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
-				// This is where a real application would open the file.
-				// log.append("Opening: " + file.getName() + "." + newline);
+				
+				String absFilePath = file.getAbsolutePath();
+		
+				// clear the screen, and load the newly selected file
+				ClearScreen();
+				RefreshScreen(absFilePath);
 			}
 		} else {
 		
@@ -507,9 +558,9 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	public void itemStateChanged(ItemEvent e) {
 		JCheckBoxMenuItem source = (JCheckBoxMenuItem) e.getSource();
 
-		if (source.getText().equals("Show Box")) {
+		if (source == showBoxItem) {
 		
-		} else if (source.getText().equals("Show Coordinates")) {
+		} else if (source == showCoordItem) {
 		
 		}
 	}

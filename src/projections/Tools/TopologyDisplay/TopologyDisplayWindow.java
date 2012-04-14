@@ -71,6 +71,8 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private BranchGroup scene;
 	private TransformGroup objRotate;
 	private BranchGroup boxGroup;
+	private BranchGroup coordinatesGroup;
+	private BoundingSphere backgroundBounds;
 
 	private int maxX, minX;
 	private int maxY, minY;
@@ -164,9 +166,10 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.scene = new BranchGroup();
 		this.objRotate = new TransformGroup();
 		this.boxGroup = new BranchGroup();
-
-		BoundingSphere backgroundBounds = new BoundingSphere(
+		this.coordinatesGroup = new BranchGroup();
+		this.backgroundBounds = new BoundingSphere(
 				  new Point3d(0, 0, 0), 100.0);
+		
 		scene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
 		scene.setCapability(BranchGroup.ALLOW_CHILDREN_READ);
 
@@ -259,6 +262,8 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 			TextIO.getln();			// ignore the rest of line
 			TextIO.skipBlanks();
 		}
+
+		objRotate.addChild(coordinatesGroup);
 		
 		// reset light bounds.
 		double boundRadius = Math.max(Math.max((maxX - minX), (maxY - minY)), maxZ - minZ) / 2 + 5.0;
@@ -293,7 +298,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		Sphere point = new Sphere(pointRadius);
 		transformGroup.addChild(point);
 		
-		objRotate.addChild(transformGroup);
+		coordinatesGroup.addChild(transformGroup);
 	}
 
 	private void createAxes() {

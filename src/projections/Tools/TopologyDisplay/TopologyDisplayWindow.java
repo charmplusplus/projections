@@ -82,6 +82,9 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private int maxZ, minZ;
 	static final float axisExt = 1.5f;
 
+	private MainWindow parentWindow;
+	private JMenuItem inputFileItem;
+	private JMenuItem quitItem;
 	private JCheckBoxMenuItem showBoxItem;
 	private JCheckBoxMenuItem showCoordItem;
 
@@ -94,11 +97,11 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		JMenu fileMenu = new JMenu("File");
 		menuBar.add(fileMenu);
 
-		JMenuItem inputFileItem = new JMenuItem("Open File");
+		inputFileItem = new JMenuItem("Open File");
 		inputFileItem.addActionListener(this);
 		fileMenu.add(inputFileItem);
 
-		JMenuItem quitItem = new JMenuItem("Quit");
+		quitItem = new JMenuItem("Quit");
 		quitItem.addActionListener(this);
 		fileMenu.add(quitItem);
 
@@ -151,6 +154,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 		setTitle("Projections 3D Topology");
 		setSize(500, 500);
+		this.parentWindow = parentWindow;
 
 		maxX = 0;
 		minX = 0;
@@ -534,7 +538,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	public void actionPerformed(ActionEvent ae) {
 		JMenuItem source = (JMenuItem) ae.getSource();
 
-		if (source.getText().equals("Open File")) {
+		if (source == inputFileItem) {
 			// open a File Chooser
 			JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
 			fc.setFileFilter(new TopologyFileFilter());
@@ -549,8 +553,8 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 				ClearScreen();
 				RefreshScreen(absFilePath);
 			}
-		} else {
-		
+		} else if (source == quitItem) {
+			this.close();
 		}
 	}
 

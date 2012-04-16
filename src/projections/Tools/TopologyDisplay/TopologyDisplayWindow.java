@@ -1,5 +1,6 @@
 package projections.Tools.TopologyDisplay;
 
+import projections.gui.OffScreenCanvas3DToImage;
 import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
 
@@ -9,6 +10,7 @@ import java.awt.event.ItemListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Point;
 
 import java.io.File;
 
@@ -21,6 +23,7 @@ import javax.media.j3d.ColoringAttributes;
 import javax.media.j3d.DirectionalLight;
 import javax.media.j3d.LineArray;
 import javax.media.j3d.QuadArray;
+import javax.media.j3d.Screen3D;
 import javax.media.j3d.Shape3D;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
@@ -82,11 +85,17 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private int maxZ, minZ;
 	static final float axisExt = 1.5f;
 
+	static int screenshotCount = 0;
+
 	private MainWindow parentWindow;
+	private Canvas3D canvas;
+	private OffScreenCanvas3D offScreenCanvas;
+
 	private JMenuItem inputFileItem;
 	private JMenuItem quitItem;
 	private JCheckBoxMenuItem showBoxItem;
 	private JCheckBoxMenuItem showCoordItem;
+	private JMenuItem screenshotItem;
 
 	/************* Initialization *************/
 
@@ -122,7 +131,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		JMenu screenshotMenu = new JMenu("Screenshot");
 		menuBar.add(screenshotMenu);
 
-		JMenuItem screenshotItem = new JMenuItem("Take Screenshot");
+		screenshotItem = new JMenuItem("Take Screenshot");
 		screenshotItem.addActionListener(this);
 		screenshotMenu.add(screenshotItem);
 
@@ -168,7 +177,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 		setLayout(new BorderLayout());
 		
-		Canvas3D canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
+		canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
 		add("Center", canvas);
 
 		// initialize the universe and scene etc...
@@ -180,6 +189,15 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.coordinatesGroup = new BranchGroup();
 		this.backgroundBounds = new BoundingSphere(
 				  new Point3d(0, 0, 0), 100.0);
+
+		// set up the off screen canvas
+		offScreenCanvas = new OffScreenCanvas3D(SimpleUniverse.getPreferredConfiguration(), true);
+		Screen3D sOn = canvas.getScreen3D();
+		Screen3D sOff = offScreenCanvas.getScreen3D();
+		sOff.setSize(sOn.getSize());
+		sOff.setPhysicalScreenWidth(sOn.getPhysicalScreenWidth());
+		sOff.setPhysicalScreenHeight(sOn.getPhysicalScreenHeight());
+		this.universe.getViewer().getView().addCanvas3D(offScreenCanvas);
 
 		setCapabilities();
 
@@ -539,7 +557,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		JMenuItem source = (JMenuItem) ae.getSource();
 
 		if (source == inputFileItem) {
-			// open a File Chooser
+			// Open a file.
 			JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
 			fc.setFileFilter(new TopologyFileFilter());
 
@@ -554,7 +572,19 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 				RefreshScreen(absFilePath);
 			}
 		} else if (source == quitItem) {
+			// Exit the window.
 			this.close();
+		} else if (source == screenshotItem) { 
+			// Take a screenshot of visible window.
+			screenshotCount++;
+			String fileName = String.format("./TopologyScreenshot%03d.png", screenshotCount);
+
+			Point loc = canvas.getLocationOnScreen();
+			offScreenCanvas.setOffScreenLocation(loc);
+
+			OffScreenCanvas3DToImage.saveToFileChooserSelection(offScreenCanvas,
+					  "Save Topology Image", fileName, canvas.getSize().width,
+					  canvas.getSize().height);
 		}
 	}
 

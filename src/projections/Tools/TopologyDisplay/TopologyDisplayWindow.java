@@ -221,13 +221,16 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		Transform3D viewTransform3D = new Transform3D();
 		viewTransformGroup.getTransform(viewTransform3D);
 
-		viewTransform3D.setTranslation(new Vector3f(0.0f, 0.0f, 20.0f));
+		// put camera at the right location
+		float cameraZ = maxZ * 1.2f;
+		viewTransform3D.setTranslation(new Vector3f(0.0f, 0.0f, cameraZ));
+
 		viewTransformGroup.setTransform(viewTransform3D);
 
 		// set the clipping.
-		double backClipDistance = Math.abs(minZ) * 10;
+		double backClipDistance = (cameraZ + Math.abs(minZ)) * 5;
 		if (backClipDistance < 1.0) {
-			backClipDistance = 10.0;
+			backClipDistance = 20.0;
 		}
 		this.universe.getViewer().getView().setBackClipDistance(backClipDistance);
 	}
@@ -279,6 +282,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		AddAllPoints(filePath);
 		createAxes();
 		initBoxGroup();
+		addLight();
 
 		if (showBoxItem.isSelected()) {
 			this.objRotate.addChild(boxGroup);
@@ -294,14 +298,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	/************* Scene Creation *************/
 
-	private void initSceneGraph() {
-		// set up background to be white.
-		Background back = new Background();
-		back.setCapability(Background.ALLOW_COLOR_WRITE);
-		back.setColor(1.0f, 1.0f, 1.0f);
-		back.setApplicationBounds(backgroundBounds);
-		objRotate.addChild(back);
-		
+	private void addLight() {
 		// set up light.
 		TransformGroup transformGroup = new TransformGroup();
 		
@@ -310,11 +307,31 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.light = new DirectionalLight(lightColor, lightDir);
 		
 		Transform3D transform = new Transform3D();
-		transform.setTranslation(new Vector3f(0, 0, 2));
+		float cameraZ = maxZ * 1.5f;
+		if (cameraZ < 0) {
+			cameraZ = 10.0f;
+		}
+		Vector3f lightLocation = new Vector3f(0.0f, 0.0f, cameraZ);
+		Point3d lightPoint = new Point3d(0.0, 0.0f, cameraZ);
+		transform.setTranslation(lightLocation);
 		
 		transformGroup.setTransform(transform);
 		transformGroup.addChild(light);
 		objRotate.addChild(transformGroup);
+
+		// set light bounds (best estimate).
+		double boundRadius = 3.0 * (cameraZ + Math.abs(minZ));
+		BoundingSphere bounds = new BoundingSphere(lightPoint, boundRadius);
+		this.light.setInfluencingBounds(bounds);
+	}
+
+	private void initSceneGraph() {
+		// set up background to be white.
+		Background back = new Background();
+		back.setCapability(Background.ALLOW_COLOR_WRITE);
+		back.setColor(1.0f, 1.0f, 1.0f);
+		back.setApplicationBounds(backgroundBounds);
+		objRotate.addChild(back);
 	}
 
 	private void AddAllPoints(String filePath) {
@@ -343,11 +360,6 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		}
 
 		objRotate.addChild(coordinatesGroup);
-		
-		// reset light bounds.
-		double boundRadius = Math.max(Math.max((maxX - minX), (maxY - minY)), maxZ - minZ) / 2 + 5.0;
-		BoundingSphere bounds = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), boundRadius);
-		this.light.setInfluencingBounds(bounds);
 	}
 
 	private void AddPoint(int x, int y, int z) {

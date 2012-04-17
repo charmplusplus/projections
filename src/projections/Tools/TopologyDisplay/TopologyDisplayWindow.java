@@ -7,6 +7,8 @@ import projections.gui.ProjectionsWindow;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -62,7 +64,7 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
  * @author wang103
  */
 public class TopologyDisplayWindow extends ProjectionsWindow 
-		implements ItemListener {
+		implements ItemListener, KeyListener {
  	
 	static final float pointRadius = 0.13f;
 	static final float coneRadius = 0.12f;
@@ -207,6 +209,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		addMouseRotator(scene, objRotate);
 		addMouseTranslation(scene, objRotate);
 		addMouseZoom(scene, objRotate);
+		canvas.addKeyListener(this);
 
 		this.scene.addChild(wrapperGraph);
 		this.universe.addBranchGraph(scene);
@@ -555,7 +558,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		}
 	}
 	
-	/************* Controls *************/
+	/************* Mouse Controls *************/
 	
 	private void addMouseRotator(BranchGroup scene, TransformGroup objGroup) {
 		// Rotation.
@@ -579,6 +582,33 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		zoomBehavior.setTransformGroup(objGroup);
 		zoomBehavior.setSchedulingBounds(backgroundBounds);
 		scene.addChild(zoomBehavior);
+	}
+
+	/************* Keyboard Control *************/
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// Perform rotation.
+		switch(e.getKeyCode()) {
+			case KeyEvent.VK_LEFT:
+				break;
+			case KeyEvent.VK_RIGHT:
+				break;
+			case KeyEvent.VK_UP:
+				break;
+			case KeyEvent.VK_DOWN:
+				break;
+		}
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// Not used.
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// Not used.
 	}
 
 	/************* Implemented Listeners *************/

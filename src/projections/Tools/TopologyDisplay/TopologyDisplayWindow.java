@@ -57,10 +57,15 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
  * This interactive window allows the user to see 3D topology using Java3D.
  *
  * Controls:
- * Rotate: mouse left click and dragging OR arrow keys
+ * Rotate: mouse left click and dragging
  * Translate: mouse right click and dragging
  * Zoom in/out: mouse middle click and dragging
  * 
+ * Rotation w/o mouse:
+ * Up/Donw: rotate around X axis
+ * Left/Right: rotate around Y axis
+ * M/N: rotate around Z axis
+ *
  * @author wang103
  */
 public class TopologyDisplayWindow extends ProjectionsWindow 
@@ -70,8 +75,8 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	static final float coneRadius = 0.12f;
 	static final float coneHeight = 0.3f;
 
-	static final float rotationStepRadian = 0.0523598776f;	// 3 degree
-
+	static final float rotationStepRadian = 0.0174532925f;	// 1 degree
+	
 	private Appearance redAppearance;
 	private Appearance greenAppearance;
 	private Appearance blueAppearance;
@@ -601,14 +606,15 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		// Retrieve the old translation.
+		float rotateX = 0.0f;
+		float rotateY = 0.0f;
+		float rotateZ = 0.0f;
+
+ 		// Retrieve the old translation.
 		Transform3D oldTransform = new Transform3D();
 		Vector3f oldTranslation = new Vector3f();
 		objRotate.getTransform(oldTransform);
 		oldTransform.get(oldTranslation);
-
-		System.out.println("Before:");	
-		System.out.println(oldTransform);
 
 		// Move to the center.
 		oldTransform.setTranslation(centerOfCube);
@@ -616,24 +622,37 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		// Perform rotation.
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
-				oldTransform.rotY(-rotationStepRadian);
+				rotateY = -rotationStepRadian;
 				break;
 			case KeyEvent.VK_RIGHT:
-				oldTransform.rotY(rotationStepRadian);
+				rotateY = rotationStepRadian;
 				break;
 			case KeyEvent.VK_UP:
-				oldTransform.rotX(-rotationStepRadian);
+				rotateX = -rotationStepRadian;
 				break;
 			case KeyEvent.VK_DOWN:
-				oldTransform.rotX(rotationStepRadian);
+				rotateX = rotationStepRadian;
+				break;
+			case KeyEvent.VK_N:
+				rotateZ = -rotationStepRadian;
+				break;
+			case KeyEvent.VK_M:
+				rotateZ = rotationStepRadian;
 				break;
 		}
 
+		Transform3D yRotation = new Transform3D();
+		yRotation.rotY(rotateY);
+		Transform3D xRotation = new Transform3D();
+		xRotation.rotX(rotateX);
+		Transform3D zRotation = new Transform3D();
+		zRotation.rotZ(rotateZ);
+		oldTransform.mul(yRotation);
+		oldTransform.mul(xRotation);
+		oldTransform.mul(zRotation);
+
 		// Move back to where it was.
 		oldTransform.setTranslation(oldTranslation);
-	
-		System.out.println("After:");	
-		System.out.println(oldTransform);
 	
 		objRotate.setTransform(oldTransform);
 	}

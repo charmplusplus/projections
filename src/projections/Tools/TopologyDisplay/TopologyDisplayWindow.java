@@ -57,7 +57,7 @@ import com.sun.j3d.utils.universe.ViewingPlatform;
  * This interactive window allows the user to see 3D topology using Java3D.
  *
  * Controls:
- * Rotate: mouse left click and dragging
+ * Rotate: mouse left click and dragging OR arrow keys
  * Translate: mouse right click and dragging
  * Zoom in/out: mouse middle click and dragging
  * 
@@ -69,6 +69,8 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	static final float pointRadius = 0.13f;
 	static final float coneRadius = 0.12f;
 	static final float coneHeight = 0.3f;
+
+	static final float rotationStepRadian = 0.0523598776f;	// 3 degree
 
 	private Appearance redAppearance;
 	private Appearance greenAppearance;
@@ -88,6 +90,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private int maxY, minY;
 	private int maxZ, minZ;
 	static final float axisExt = 1.5f;
+	private Vector3f centerOfCube;
 
 	static int screenshotCount = 0;
 
@@ -212,6 +215,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		canvas.addKeyListener(this);
 
 		this.scene.addChild(wrapperGraph);
+		this.scene.compile();
 		this.universe.addBranchGraph(scene);
 		showDialog();
 	}
@@ -285,6 +289,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		AddAllPoints(filePath);
 		createAxes();
 		initBoxGroup();
+		initCenterPoint();
 		addLight();
 
 		if (showBoxItem.isSelected()) {
@@ -326,6 +331,14 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		double boundRadius = 3.0 * (cameraZ + Math.abs(minZ));
 		BoundingSphere bounds = new BoundingSphere(lightPoint, boundRadius);
 		this.light.setInfluencingBounds(bounds);
+	}
+
+	private void initCenterPoint() {
+		float x = maxX - (maxX - minX) / 2.0f;
+		float y = maxY - (maxY - minY) / 2.0f;
+		float z = maxZ - (maxZ - minZ) / 2.0f;
+		
+		centerOfCube = new Vector3f(x, y, z);
 	}
 
 	private void initSceneGraph() {
@@ -588,17 +601,41 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		// Retrieve the old translation.
+		Transform3D oldTransform = new Transform3D();
+		Vector3f oldTranslation = new Vector3f();
+		objRotate.getTransform(oldTransform);
+		oldTransform.get(oldTranslation);
+
+		System.out.println("Before:");	
+		System.out.println(oldTransform);
+
+		// Move to the center.
+		oldTransform.setTranslation(centerOfCube);
+		
 		// Perform rotation.
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
+				oldTransform.rotY(-rotationStepRadian);
 				break;
 			case KeyEvent.VK_RIGHT:
+				oldTransform.rotY(rotationStepRadian);
 				break;
 			case KeyEvent.VK_UP:
+				oldTransform.rotX(-rotationStepRadian);
 				break;
 			case KeyEvent.VK_DOWN:
+				oldTransform.rotX(rotationStepRadian);
 				break;
 		}
+
+		// Move back to where it was.
+		oldTransform.setTranslation(oldTranslation);
+	
+		System.out.println("After:");	
+		System.out.println(oldTransform);
+	
+		objRotate.setTransform(oldTransform);
 	}
 
 	@Override

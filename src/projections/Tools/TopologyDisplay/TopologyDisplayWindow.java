@@ -14,6 +14,8 @@ import java.awt.Point;
 
 import java.io.File;
 
+import java.lang.Math;
+
 import javax.media.j3d.Appearance;
 import javax.media.j3d.Background;
 import javax.media.j3d.BranchGroup;
@@ -206,8 +208,6 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		addMouseTranslation(scene, objRotate);
 		addMouseZoom(scene, objRotate);
 
-		setViewPlatform();
-
 		this.scene.addChild(wrapperGraph);
 		this.universe.addBranchGraph(scene);
 		showDialog();
@@ -223,6 +223,13 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 		viewTransform3D.setTranslation(new Vector3f(0.0f, 0.0f, 20.0f));
 		viewTransformGroup.setTransform(viewTransform3D);
+
+		// set the clipping.
+		double backClipDistance = Math.abs(minZ) * 10;
+		if (backClipDistance < 1.0) {
+			backClipDistance = 10.0;
+		}
+		this.universe.getViewer().getView().setBackClipDistance(backClipDistance);
 	}
 
 	protected void showDialog() {
@@ -282,6 +289,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		wrapperGraph.addChild(this.objRotate);
 
 		this.scene.addChild(wrapperGraph);
+		this.setViewPlatform();
 	}
 
 	/************* Scene Creation *************/

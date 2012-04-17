@@ -2367,4 +2367,28 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	public boolean handleIdleOverhead() {
 		return true;
 	}
+
+    public  EntryMethodObject   getPreviousEntry(EntryMethodObject currentObj, int currentPe) {
+        Query1D<EntryMethodObject> objs=null;    
+        EntryMethodObject       previous = null;
+        Iterator<Entry<Integer, Query1D<EntryMethodObject>>> iter = allEntryMethodObjects.entrySet().iterator();
+        while(iter.hasNext()){
+            Entry<Integer, Query1D<EntryMethodObject>> e = iter.next();
+            Integer pe = e.getKey();
+            if( pe.intValue() == currentPe)
+            {
+                objs = e.getValue();
+                for(EntryMethodObject obj : objs) {
+                    if(obj.equals(currentObj))
+                    {
+                        break;
+                    }
+                    previous = obj;
+                }
+
+                break;
+            }
+        }
+        return previous;
+    }
 }

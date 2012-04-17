@@ -466,26 +466,38 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	 */
 	protected Set<EntryMethodObject> traceBackwardDependencies(){
 		synchronized(data.messageStructures){
+            int length = 0;
 			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 			if(data.traceMessagesBackOnHover()){
 				EntryMethodObject obj = this;
 				boolean done;
 				do{
+                    length++;
 					done = true;
 					v.add(obj);
-
-					if (obj.entry != -1 && obj.pCreation <= data.numPEs() ){
+                    System.out.println(" pe " + obj.pCreation + " " + obj.entry + "  " + obj.beginTime);
+					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && obj.endTime > data.leftSelectionTime()  ){
 						// Find message that created the object
+                        data.addProcessor(obj.pCreation);
 						TimelineMessage created_message = obj.creationMessage();
 						if(created_message != null){
 							// Find object that created the message
 							obj = data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
 							if(obj != null){
 								done = false;
+							}else
+                                System.out.println(" create_msg=null");
+
+						}else 
+                        {
+                            System.out.println(" pcreation create_msg=null");
+                            obj = data.getPreviousEntry(obj, obj.pCreation);
+							if(obj != null){
+								done = false;
 							}
-						}
+                        }
 					}
-				}while(!done);
+				}while(!done && length < 30);
 			}
 			return v;
 		}

@@ -460,11 +460,22 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	private void initBoxGroup() {
 		Color lineColor = Color.BLACK;
-		
-		Appearance appearance = new Appearance();
-		appearance.setColoringAttributes(new ColoringAttributes(new Color3f(lineColor), 1));
-		appearance.setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.3f));
-		
+		Color3f xyWallColor = new Color3f(0.2f, 0.2f, 0.2f);
+		Color3f yzWallColor = new Color3f(0.4f, 0.4f, 0.4f);
+		Color3f xzWallColor = new Color3f(0.6f, 0.6f, 0.6f);
+
+		Appearance xyAppearance = new Appearance();
+		xyAppearance.setColoringAttributes(new ColoringAttributes(xyWallColor, 1));
+		xyAppearance.setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.3f));
+	
+		Appearance yzAppearance = new Appearance();
+		yzAppearance.setColoringAttributes(new ColoringAttributes(yzWallColor, 1));
+		yzAppearance.setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.3f));
+	
+		Appearance xzAppearance = new Appearance();
+		xzAppearance.setColoringAttributes(new ColoringAttributes(xzWallColor, 1));
+		xzAppearance.setTransparencyAttributes(new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.3f));
+				
 		// XY wall
 		QuadArray polygonXY = new QuadArray(4, QuadArray.COORDINATES);
 		polygonXY.setCoordinate (0, new Point3f (minX, minY, minZ));
@@ -472,7 +483,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		polygonXY.setCoordinate (2, new Point3f (maxX, maxY, minZ));
 		polygonXY.setCoordinate (3, new Point3f (minX, maxY, minZ));
 		
-		boxGroup.addChild(new Shape3D(polygonXY, appearance));
+		boxGroup.addChild(new Shape3D(polygonXY, xyAppearance));
 		
 		// XZ wall
 		QuadArray polygonXZ = new QuadArray(4, QuadArray.COORDINATES);
@@ -481,7 +492,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		polygonXZ.setCoordinate (2, new Point3f (minX, minY, minZ));
 		polygonXZ.setCoordinate (3, new Point3f (minX, minY, maxZ));
 		
-		boxGroup.addChild(new Shape3D(polygonXZ, appearance));
+		boxGroup.addChild(new Shape3D(polygonXZ, xzAppearance));
     	
 		// YZ wall
 		QuadArray polygonYZ = new QuadArray(4, QuadArray.COORDINATES);
@@ -490,7 +501,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		polygonYZ.setCoordinate (2, new Point3f (minX, maxY, minZ));
 		polygonYZ.setCoordinate (3, new Point3f (minX, maxY, maxZ));
 		
-		boxGroup.addChild(new Shape3D(polygonYZ, appearance));
+		boxGroup.addChild(new Shape3D(polygonYZ, yzAppearance));
 		
 		// along X-axis.
 		for (int x = (int) this.minX; x <= (int) this.maxX; x++) {

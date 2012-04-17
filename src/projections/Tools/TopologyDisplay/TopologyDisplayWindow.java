@@ -214,7 +214,8 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		setCapabilities();
 
 		// init more stuffs
-		addMouseRotator(scene, objRotate);
+		// MouseRotator is not intuitive, disable it for now.
+		// addMouseRotator(scene, objRotate);
 		addMouseTranslation(scene, objRotate);
 		addMouseZoom(scene, objRotate);
 		canvas.addKeyListener(this);

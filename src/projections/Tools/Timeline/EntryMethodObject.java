@@ -200,8 +200,15 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
 			else 
 				infoString.append("<i>Msgs created</i>: 0<br>");
-
-			infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
+            EntryMethodObject obj = this;
+            TimelineMessage created_message = obj.creationMessage();
+            long latency;
+            if(created_message != null)
+            {
+                latency = beginTime - created_message.Time ;
+                infoString.append("<i>Msg latency is </i>: " + latency + "<br>");
+            }
+            infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
 			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
 			if(tleUserEventName!=null)
 				infoString.append("<i>Associated User Event</i>: "+tleUserEventName+ "<br>");
@@ -471,17 +478,20 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			if(data.traceMessagesBackOnHover()){
 				EntryMethodObject obj = this;
 				boolean done;
+                long max_time = 0;
+                long begin_max = 0;
 				do{
                     length++;
 					done = true;
 					v.add(obj);
-                    System.out.println(" pe " + obj.pCreation + " " + obj.entry + "  " + obj.beginTime);
+                    System.out.println(" pe " + obj.pCreation  + " MAX msg time=" + max_time/1000.0 + ", msg time=" + begin_max);
 					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && obj.endTime > data.leftSelectionTime()  ){
 						// Find message that created the object
                         data.addProcessor(obj.pCreation);
 						TimelineMessage created_message = obj.creationMessage();
 						if(created_message != null){
-							// Find object that created the message
+							if ( obj.beginTime - created_message.Time > max_time) { max_time = obj.beginTime - created_message.Time; begin_max = created_message.Time;}
+                            // Find object that created the message
 							obj = data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
 							if(obj != null){
 								done = false;

@@ -634,10 +634,10 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 				rotateX = rotationStepRadian;
 				break;
 			case KeyEvent.VK_N:
-				rotateZ = -rotationStepRadian;
+				rotateZ = rotationStepRadian;
 				break;
 			case KeyEvent.VK_M:
-				rotateZ = rotationStepRadian;
+				rotateZ = -rotationStepRadian;
 				break;
 		}
 

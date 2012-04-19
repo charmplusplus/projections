@@ -86,6 +86,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private TransformGroup objTrans;
 	private TransformGroup objRotate;
 	private BranchGroup boxGroup;
+	private BranchGroup centerGroup;
 	private BranchGroup coordinatesGroup;
 	private BranchGroup wrapperGraph;
 	private BoundingSphere backgroundBounds;
@@ -108,6 +109,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private JMenuItem quitItem;
 	private JCheckBoxMenuItem showBoxItem;
 	private JCheckBoxMenuItem showCoordItem;
+	private JCheckBoxMenuItem showCenterItem;
 	private JMenuItem screenshotItem;
 
 	/************* Initialization *************/
@@ -139,6 +141,10 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		showCoordItem = new JCheckBoxMenuItem("Show Coordinates");
 		showCoordItem.addItemListener(this);
 		optionsMenu.add(showCoordItem);
+
+		showCenterItem = new JCheckBoxMenuItem("Show Center Point");
+		showCenterItem.addItemListener(this);
+		optionsMenu.add(showCenterItem);
 
 		// set screenshot menu
 		JMenu screenshotMenu = new JMenu("Screenshot");
@@ -200,6 +206,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.objTrans = new TransformGroup();
 		this.objRotate = new TransformGroup();
 		this.boxGroup = new BranchGroup();
+		this.centerGroup = new BranchGroup();
 		this.coordinatesGroup = new BranchGroup();
 		this.backgroundBounds = new BoundingSphere(
 				  new Point3d(0, 0, 0), 100.0);
@@ -275,6 +282,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		objRotate.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
 	
 		boxGroup.setCapability(BranchGroup.ALLOW_DETACH);
+		centerGroup.setCapability(BranchGroup.ALLOW_DETACH);
 
 		coordinatesGroup.setCapability(BranchGroup.ALLOW_DETACH);
 	}
@@ -295,6 +303,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		objTrans.removeAllChildren();
 		objRotate.removeAllChildren();
 		boxGroup.removeAllChildren();
+		centerGroup.removeAllChildren();
 		coordinatesGroup.removeAllChildren();
 	}
 
@@ -304,6 +313,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		createAxes();
 		initBoxGroup();
 		initCenterPoint();
+		initCenterGroup();
 		addLight();
 
 		if (showBoxItem.isSelected()) {
@@ -325,7 +335,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.setViewPlatform();
 	}
 
-	/************* Scene Creation *************/
+	/************* Scene Creation *************/	
 
 	private void addLight() {
 		// set up light.
@@ -360,6 +370,10 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		float z = maxZ - (maxZ - minZ) / 2.0f;
 		
 		centerOfCube = new Vector3f(-x, -y, -z);
+	}
+
+	private void initCenterGroup() {
+		
 	}
 
 	private void initSceneGraph() {
@@ -735,9 +749,19 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		JCheckBoxMenuItem source = (JCheckBoxMenuItem) e.getSource();
 
 		if (source == showBoxItem) {
-		
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				this.objRotate.addChild(boxGroup);
+			} else {
+				this.objRotate.removeChild(boxGroup);
+			}
 		} else if (source == showCoordItem) {
 		
+		} else if (source == showCenterItem) {
+			if (e.getStateChange() == ItemEvent.SELECTED) {
+				this.objRotate.addChild(centerGroup);
+			} else {
+				this.objRotate.removeChild(centerGroup);
+			}
 		}
 	}
 }

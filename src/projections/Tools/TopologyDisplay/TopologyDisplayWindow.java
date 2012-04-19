@@ -372,8 +372,23 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		centerOfCube = new Vector3f(-x, -y, -z);
 	}
 
+	/**
+	 * Center Group contains only the center point of the cube.
+	 */
 	private void initCenterGroup() {
+		Vector3f posCenter = Util.neg(centerOfCube);
+
+		TransformGroup transformGroup = new TransformGroup();
+		Transform3D transform = new Transform3D();
+		transform.setTranslation(posCenter);
+		transformGroup.setTransform(transform);
 		
+		Sphere point = new Sphere(pointRadius + 0.2f);
+		point.setAppearance(redAppearance);
+
+		transformGroup.addChild(point);
+		
+		centerGroup.addChild(transformGroup);
 	}
 
 	private void initSceneGraph() {
@@ -409,18 +424,6 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 			TextIO.getln();			// ignore the rest of line
 			TextIO.skipBlanks();
 		}
-
-		// debugging only!
-		initCenterPoint();
-		TransformGroup transformGroup = new TransformGroup();
-		Transform3D transform = new Transform3D();
-		Vector3f center = Util.neg(centerOfCube);
-		transform.setTranslation(center);
-		transformGroup.setTransform(transform);
-		Sphere point = new Sphere(0.75f);
-		transformGroup.addChild(point);
-		coordinatesGroup.addChild(transformGroup);
-		// debugging end!
 
 		objRotate.addChild(coordinatesGroup);
 	}

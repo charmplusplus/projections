@@ -83,6 +83,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	private SimpleUniverse universe;
 	private BranchGroup scene;
+	private TransformGroup objTrans;
 	private TransformGroup objRotate;
 	private BranchGroup boxGroup;
 	private BranchGroup coordinatesGroup;
@@ -94,7 +95,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 	private int maxX, minX;
 	private int maxY, minY;
 	private int maxZ, minZ;
-	static final float axisExt = 1.5f;
+	static final float axisExt = 1.0f;
 	private Vector3f centerOfCube;
 
 	static int screenshotCount = 0;
@@ -196,6 +197,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		this.universe = new SimpleUniverse(canvas);
 		this.scene = new BranchGroup();
 		this.wrapperGraph = new BranchGroup();
+		this.objTrans = new TransformGroup();
 		this.objRotate = new TransformGroup();
 		this.boxGroup = new BranchGroup();
 		this.coordinatesGroup = new BranchGroup();
@@ -214,9 +216,9 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		setCapabilities();
 
 		// init more stuffs
-		addMouseRotator(scene, objRotate);
-		addMouseTranslation(scene, objRotate);
-		addMouseZoom(scene, objRotate);
+		addMouseRotator(scene, objTrans);
+		addMouseTranslation(scene, objTrans);
+		addMouseZoom(scene, objTrans);
 		canvas.addKeyListener(this);
 
 		this.scene.addChild(wrapperGraph);
@@ -260,6 +262,12 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 		wrapperGraph.setCapability(BranchGroup.ALLOW_DETACH);
 
+		objTrans.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
+		objTrans.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
+		objTrans.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
+		objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+		objTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);
+
 		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_WRITE);
 		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_READ);
 		objRotate.setCapability(TransformGroup.ALLOW_CHILDREN_EXTEND);
@@ -284,6 +292,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		// remove everything
 		scene.removeChild(wrapperGraph);
 		wrapperGraph.removeAllChildren();
+		objTrans.removeAllChildren();
 		objRotate.removeAllChildren();
 		boxGroup.removeAllChildren();
 		coordinatesGroup.removeAllChildren();
@@ -300,12 +309,19 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		if (showBoxItem.isSelected()) {
 			this.objRotate.addChild(boxGroup);
 		}
+
+		// Set the center of rotation to be the center of the cube.
+		Transform3D centerTrans = new Transform3D();
+		centerTrans.setTranslation(centerOfCube);
+		this.objRotate.setTransform(centerTrans);
 		
+		// Add the rest of scene objects together.
+		this.objTrans.addChild(this.objRotate);
 		wrapperGraph = new BranchGroup();
 		wrapperGraph.setCapability(BranchGroup.ALLOW_DETACH);
-		wrapperGraph.addChild(this.objRotate);
-
+		wrapperGraph.addChild(this.objTrans);
 		this.scene.addChild(wrapperGraph);
+
 		this.setViewPlatform();
 	}
 
@@ -343,7 +359,7 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		float y = maxY - (maxY - minY) / 2.0f;
 		float z = maxZ - (maxZ - minZ) / 2.0f;
 		
-		centerOfCube = new Vector3f(x, y, z);
+		centerOfCube = new Vector3f(-x, -y, -z);
 	}
 
 	private void initSceneGraph() {
@@ -379,6 +395,18 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 			TextIO.getln();			// ignore the rest of line
 			TextIO.skipBlanks();
 		}
+
+		// debugging only!
+		initCenterPoint();
+		TransformGroup transformGroup = new TransformGroup();
+		Transform3D transform = new Transform3D();
+		Vector3f center = Util.neg(centerOfCube);
+		transform.setTranslation(center);
+		transformGroup.setTransform(transform);
+		Sphere point = new Sphere(0.75f);
+		transformGroup.addChild(point);
+		coordinatesGroup.addChild(transformGroup);
+		// debugging end!
 
 		objRotate.addChild(coordinatesGroup);
 	}
@@ -606,19 +634,18 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		// Rotate 'objRotate' by rotating 'objTrans'.
+		// 'objRotate' is already centered at the center of the cube, so
+		// no need to translate!
+
 		float rotateX = 0.0f;
 		float rotateY = 0.0f;
 		float rotateZ = 0.0f;
 
  		// Retrieve the old translation.
 		Transform3D oldTransform = new Transform3D();
-		Vector3f oldTranslation = new Vector3f();
-		objRotate.getTransform(oldTransform);
-		oldTransform.get(oldTranslation);
+		objTrans.getTransform(oldTransform);
 
-		// Move to the center.
-		oldTransform.setTranslation(centerOfCube);
-		
 		// Perform rotation.
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_LEFT:
@@ -641,20 +668,18 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 				break;
 		}
 
-		Transform3D yRotation = new Transform3D();
-		yRotation.rotY(rotateY);
 		Transform3D xRotation = new Transform3D();
 		xRotation.rotX(rotateX);
+		Transform3D yRotation = new Transform3D();
+		yRotation.rotY(rotateY);
 		Transform3D zRotation = new Transform3D();
 		zRotation.rotZ(rotateZ);
-		oldTransform.mul(yRotation);
+
 		oldTransform.mul(xRotation);
+		oldTransform.mul(yRotation);
 		oldTransform.mul(zRotation);
 
-		// Move back to where it was.
-		oldTransform.setTranslation(oldTranslation);
-	
-		objRotate.setTransform(oldTransform);
+		objTrans.setTransform(oldTransform);
 	}
 
 	@Override

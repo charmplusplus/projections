@@ -168,14 +168,14 @@ ItemListener {
 					
 
 					// Check for tachyons
-					long largestTachyon = data.findLargestTachyon();
-					if(largestTachyon > 20){
-						JLabel message = new JLabel("<html><body>There are Tachyons (messages sent backwards in time) present<br>in this data. Would you like them to be automatically corrected?<br>The longest one is of size " + largestTachyon + " us.</body></html>");
-						int result = JOptionPane.showConfirmDialog(null, message, "Perform Tachyon Correction?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
-						if(result == JOptionPane.YES_OPTION){
-							data.fixTachyons();
-						}
-					}					
+					// long largestTachyon = data.findLargestTachyon();
+					// if(largestTachyon > 20){
+					// 	JLabel message = new JLabel("<html><body>There are Tachyons (messages sent backwards in time) present<br>in this data. Would you like them to be automatically corrected?<br>The longest one is of size " + largestTachyon + " us.</body></html>");
+					// 	int result = JOptionPane.showConfirmDialog(null, message, "Perform Tachyon Correction?", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+					// 	if(result == JOptionPane.YES_OPTION){
+					// 		data.fixTachyons();
+					// 	}
+					// }					
 
 				}
 			};

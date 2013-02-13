@@ -106,7 +106,7 @@ class ThreadedFileReader implements Runnable  {
 		long adjustedTime;
 		long adjustedSize;
 
-		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+		int numEPs = MainWindow.runObject[myRun].getNumUserEntries()+1;
         /* YH Sun added */
 		double[][][] countData = new double[HistogramWindow.NUM_TYPES][][];
         double _sun_execution_time[] = new double[numEPs];
@@ -137,7 +137,7 @@ class ThreadedFileReader implements Runnable  {
 						prevBegin = logdata;
 					}
 					break;
-				case ProjDefs.END_PROCESSING:
+                case ProjDefs.END_PROCESSING:
 					nestingLevel--;
 					if(nestingLevel == 0){
 						if(logdata.time >= startTime && logdata.time <= endTime){
@@ -160,6 +160,28 @@ class ThreadedFileReader implements Runnable  {
 						prevBegin = null;
 					}
 					break;
+                case ProjDefs.BEGIN_IDLE:
+						prevBegin = logdata;
+					break;
+                case ProjDefs.END_IDLE:
+                    if(logdata.time >= startTime && logdata.time <= endTime){
+                        executionTime = logdata.time - prevBegin.time;
+                        adjustedTime = executionTime - timeMinBinSize;
+                        // respect user threshold
+                        if (adjustedTime >= 0) {
+                            int targetBin = (int)(adjustedTime/timeBinSize);
+                            if (targetBin >= timeNumBins) {
+                                targetBin = timeNumBins;
+                            }
+                            countData[HistogramWindow.TYPE_TIME][targetBin][numEPs-1] += 1.0;
+                            countData[HistogramWindow.TYPE_ACCTIME][targetBin][numEPs-1] += executionTime;
+							}
+                        _sun_execution_time[logdata.entry] += executionTime;
+                        System.out.println("idle time is " + executionTime );
+                    }
+                    prevBegin = null;	
+					break;
+
 				case ProjDefs.CREATION:
 					if (logdata.time > endTime) {
 						break;
@@ -199,7 +221,7 @@ class ThreadedFileReader implements Runnable  {
 		// Variables for use with the analysis
 		long executionTime;
 
-		int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+		int numEPs = MainWindow.runObject[myRun].getNumUserEntries()+1;
         /* YH Sun added */
         double _sun_execution_time[][] = new double[4][numEPs];
 
@@ -240,6 +262,25 @@ class ThreadedFileReader implements Runnable  {
 						prevBegin = null;
 					}
 					break;
+
+                case ProjDefs.BEGIN_IDLE:
+						prevBegin = logdata;
+					break;
+                case ProjDefs.END_IDLE:
+                    if(logdata.time >= startTime && logdata.time <= endTime){
+                        executionTime = logdata.time - prevBegin.time;
+                        _sun_execution_time[0][numEPs-1] += executionTime;
+                        if(_sun_execution_time[1][numEPs-1] < executionTime)
+                            _sun_execution_time[1][numEPs-1] = executionTime;
+                        if(_sun_execution_time[2][numEPs-1] > executionTime)
+                            _sun_execution_time[2][numEPs-1] = executionTime;
+                        _sun_execution_time[3][numEPs-1]++;
+                        System.out.println("idle time is " + executionTime );
+                    }
+                    prevBegin = null;	
+					break;
+
+
 				case ProjDefs.CREATION:
 					if (logdata.time > endTime) {
 						break;

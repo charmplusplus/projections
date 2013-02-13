@@ -154,7 +154,9 @@ implements ActionListener, EntryMethodVisibility
                                         counts = new double[HistogramWindow.NUM_TYPES][][];
                                         counts_display = new double[HistogramWindow.NUM_TYPES][][];
                                         // we create an extra bin to hold overflows.
-                                        numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+                                        //YSun Changed
+                                        //numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+                                        numEPs = MainWindow.runObject[myRun].getNumUserEntries()+1;
                                         counts[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
                                         counts[HistogramWindow.TYPE_ACCTIME] = new double[timeNumBins+1][numEPs];
                                         counts[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
@@ -390,10 +392,18 @@ implements ActionListener, EntryMethodVisibility
                         setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
                         setYAxis("Number of Occurrences", "");
                         setDataSource("Histogram", counts_display[TYPE_TIME], thisWindow);
+                        for(int i=0; i<timeNumBins+1; i++)
+                        {
+                            System.out.println(" ocurrence " + i + " : " + counts_display[TYPE_TIME][i][numEPs-1]);
+                        }
                 }if (binType == TYPE_ACCTIME) {
             setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
                         setYAxis("Time in Bin range (us)", "");
                         setDataSource("Histogram", counts_display[TYPE_ACCTIME], thisWindow);
+                        for(int i=0; i<timeNumBins+1; i++)
+                        {
+                            System.out.println(" ocurrence " + i + " : " + counts_display[TYPE_ACCTIME][i][numEPs-1]);
+                        }
 
         }else if (binType == TYPE_MSG_SIZE) {
                         setXAxis("Message Size (at " +  _format.format(msgBinSize) + " byte resolution)",  "", msgMinBinSize, msgBinSize);

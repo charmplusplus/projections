@@ -69,8 +69,8 @@ ItemListener {
 
 	private JCheckBox cbPacks, cbMsgs, cbIdle, cbUser, cbUserTable;
 
-	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceArrayElementID, 
-								cbNestedUserEvents, cbTraceForwardOnClick;
+	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceCriticalPath, cbTraceArrayElementID, 
+								cbNestedUserEvents, cbTraceCriticalPathOnClick, cbTraceForwardOnClick;
 	private JRadioButton cbNormalView, cbCompactView, cbSuperCompactView;
 	
 	private UserEventWindow userEventWindow;
@@ -550,21 +550,27 @@ ItemListener {
 
 		cbTraceMessages = new JCheckBoxMenuItem("Trace Messages Back");
 		cbTraceMessagesForward = new JCheckBoxMenuItem("Trace Messages Forward");
+		cbTraceCriticalPath = new JCheckBoxMenuItem("Trace Critical Path");
 		cbTraceArrayElementID = new JCheckBoxMenuItem("Trace Event ID(Chare Array Index)");
 		cbTraceArrayRemoveLines = new JMenuItem("Clear all message tracing lines");
 		cbTraceForwardOnClick = new JCheckBoxMenuItem("Trace Messages Forward on Left-Click");
+		cbTraceCriticalPathOnClick = new JCheckBoxMenuItem("Trace Critical Path on Left-Click");
 
 		tracingMenu.add(cbTraceMessages);
 		tracingMenu.add(cbTraceMessagesForward);
+		tracingMenu.add(cbTraceCriticalPath);
 		tracingMenu.add(cbTraceArrayElementID);
 		tracingMenu.add(cbTraceArrayRemoveLines);
 		tracingMenu.add(cbTraceForwardOnClick);
+		tracingMenu.add(cbTraceCriticalPathOnClick);
 
 		cbTraceMessages.addItemListener(this);
 		cbTraceMessagesForward.addItemListener(this);
+		cbTraceCriticalPath.addItemListener(this);
 		cbTraceArrayElementID.addItemListener(this);
 		cbTraceArrayRemoveLines.addActionListener(this);
 		cbTraceForwardOnClick.addItemListener(this);
+		cbTraceCriticalPathOnClick.addItemListener(this);
 
 		mbar.add(tracingMenu);
 
@@ -776,8 +782,14 @@ ItemListener {
 		else if (c == cbTraceMessagesForward)
 			data.setTraceMessagesForwardOnHover(evt.getStateChange() == ItemEvent.SELECTED);
 		
-		else if (c == cbTraceForwardOnClick)
+        else if (c == cbTraceForwardOnClick)
 			data.setTraceMessagesForwardOnClick(evt.getStateChange() == ItemEvent.SELECTED);
+
+		else if (c == cbTraceCriticalPath)
+			data.setTraceCriticalPathOnHover(evt.getStateChange() == ItemEvent.SELECTED);
+		
+        else if (c == cbTraceCriticalPathOnClick)
+			data.setTraceCriticalPathOnClick(evt.getStateChange() == ItemEvent.SELECTED);
 
 		else if(c == cbNestedUserEvents)
 			data.showNestedUserEvents(evt.getStateChange() == ItemEvent.SELECTED);

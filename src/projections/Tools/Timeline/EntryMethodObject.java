@@ -403,24 +403,30 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		if (entry >= 0) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
 				// Left Click
-            if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()){
-						
+            if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()  || data.traceCriticalPathOnHover()){
+					
+                System.out.println("mouse left clicked ");
                 Set<EntryMethodObject>fwd = traceForwardDependencies(); // this function acts differently depending on data.traceMessagesForwardOnHover()
                 Set<EntryMethodObject> back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
+                Set<EntryMethodObject> criticalpath = traceCriticalPathDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
 
                 HashSet<Object> fwdGeneric = new HashSet<Object>();
                 HashSet<Object> backGeneric =  new HashSet<Object>();
+                HashSet<Object> criticalpathGeneric =  new HashSet<Object>();
                 fwdGeneric.addAll(fwd); // this function acts differently depending on data.traceMessagesForwardOnHover()
                 backGeneric.addAll(back); // this function acts differently depending on data.traceMessagesBackOnHover()
+                criticalpathGeneric.addAll(criticalpath); // this function acts differently depending on data.traceCriticalPathOnHover()
 
                 // Highlight the forward and backward messages
                 //data.clearMessageSendLines();
                 data.addMessageSendLine(back);
                 data.addMessageSendLineAlt(fwd);
+                data.addMessageSendLine(criticalpath);
 			
                 // highlight the objects as well
                 data.highlightObjects(fwdGeneric);
                 data.highlightObjects(backGeneric);
+                data.highlightObjects(criticalpathGeneric);
 			
                 data.displayMustBeRepainted();
 			//needRepaint=true;
@@ -484,7 +490,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                     length++;
 					done = true;
 					v.add(obj);
-                    System.out.println(" pe " + obj.pCreation  + " MAX msg time=" + max_time/1000.0 + ", msg time=" + begin_max);
+                    System.out.println("backward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry);
 					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && obj.endTime > data.leftSelectionTime()  ){
 						// Find message that created the object
                         data.addProcessor(obj.pCreation);
@@ -496,18 +502,18 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 							if(obj != null){
 								done = false;
 							}else
-                                System.out.println(" create_msg=null");
+                                System.out.println(" create object null");
 
 						}else 
                         {
                             System.out.println(" pcreation create_msg=null");
-                            obj = data.getPreviousEntry(obj, obj.pCreation);
+                            obj = data.getPreviousEntry(obj, obj.pe);
 							if(obj != null){
 								done = false;
 							}
                         }
 					}
-				}while(!done && length < 30);
+				}while(!done && length < 25);
 			}
 			return v;
 		}
@@ -523,27 +529,38 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				ArrayList<TimelineMessage> tleMsg = this.TLmsgs;
 				
 				boolean done = false;
-				while(!done){
+                v.add(obj); //add this object to the set that is returned
+				do{
 					done = true;
-					v.add(obj); //add this object to the set that is returned
+                    System.out.println(" forward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry + "forwarding msgs:" + tleMsg.size());
 					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && tleMsg != null && !tleMsg.isEmpty()){
-						// Find messages called by current entry method
-						TimelineMessage msgToCalledEntryMethod = tleMsg.get(0);
+						for(int j=0; j<tleMsg.size(); j++)
+                        {
+                        // Find messages called by current entry method
+						TimelineMessage msgToCalledEntryMethod = tleMsg.get(j);
 						if(msgToCalledEntryMethod != null){
 							//if there is a mapping for this message, find objects that are called by this message.
 							//if this object isn't null or equal to this, go through while loop again
+                            //data.addProcessor( mm); 
 							Set<EntryMethodObject> objset = data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod);
+                            //System.out.println("fowarding  " + j + "; obj ");
+                            msgToCalledEntryMethod.printMe();
+
 							if (objset!=null && !objset.isEmpty()) {
 								Iterator<EntryMethodObject> i = objset.iterator();
 								obj = i.next();
+                                //System.out.println("not empty fowarding  " + j );
 								if(obj != null && obj!=this){
-									done = false;
-									tleMsg=obj.TLmsgs;
+									//done = false;
+									//tleMsg=obj.TLmsgs;
+                                    v.add(obj);
+                                    //System.out.println("finally not empty fowarding  " + j );
 								}
 							}
 						}
-					}
-				}
+                        }
+                    }
+				}while(!done);
 			}
 			v.remove(this);
 			return v;
@@ -551,6 +568,55 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 
 	
+    /** Iteratively trace the critical path that 
+	 * led to this entry method, without loading any 
+	 * additional processor timelines 
+	 * 
+	 * return a set of entry method objects and 
+	 * TimelineMessage objects associated with the 
+	 * trace
+	 * 
+	 */
+	protected Set<EntryMethodObject> traceCriticalPathDependencies(){
+		synchronized(data.messageStructures){
+            int length = 0;
+			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
+			if(data.traceCriticalPathOnHover()){
+				EntryMethodObject obj = this;
+				EntryMethodObject previous_obj = null;
+				boolean done;
+				do{
+                    length++;
+					done = true;
+					v.add(obj);
+                    System.out.println(" pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry);
+					if (obj.entry != -1 && obj.pe <= data.numPEs() && obj.endTime > data.leftSelectionTime()  ){
+						// Find message that created the object
+                        previous_obj = data.getPreviousEntry(obj, obj.pe);
+                        if( previous_obj!= null && previous_obj.entry != -1 ){
+                            System.out.println("It has previous entry");
+                            obj = previous_obj; 
+                            done = false;
+                        }else
+                        {
+                            data.addProcessor(obj.pCreation);
+						    TimelineMessage created_message = obj.creationMessage();
+                            if(created_message != null) {
+                                obj = data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
+                                if(obj != null){
+                                    System.out.println("Switch to other processor");
+                                    done = false;
+                                }
+                            }
+                        }
+                    }
+				}while(!done && length < 20);
+			}
+			return v;
+		}
+	}
+
+
 	
 	/** Return the message that caused the entry method to execute. Complexity=O(1) time */
 	protected TimelineMessage creationMessage(){

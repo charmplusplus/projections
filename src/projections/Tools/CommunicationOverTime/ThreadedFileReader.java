@@ -23,7 +23,7 @@ class ThreadedFileReader implements Runnable  {
 
 	private int myRun = 0;
 
-    private int PesPerNode = 7;
+    private int PesPerNode = 28;
 	// Global data that must be safely accumulated into:
 	private double[][] globalMessagesSend;
 	private double[][] globalMessagesRecv;
@@ -195,7 +195,7 @@ class ThreadedFileReader implements Runnable  {
 		synchronized (globalExternalBytesRecv) {
 			for(int i=0; i< numIntervals; i++){
 				for(int j=0; j< numEPs; j++){
-					globalExternalBytesRecv[i][j] += localExternalNodeBytesRecv[i][j];
+					globalExternalBytesRecv[i][j] += localExternalBytesRecv[i][j];
 				}
 			}
 		}
@@ -208,10 +208,10 @@ class ThreadedFileReader implements Runnable  {
 			}
 		}
 		
-		synchronized (globalExternalBytesRecv) {
+		synchronized (globalExternalNodeBytesRecv) {
 			for(int i=0; i< numIntervals; i++){
 				for(int j=0; j< numEPs; j++){
-					globalExternalBytesRecv[i][j] += localExternalBytesRecv[i][j];
+					globalExternalNodeBytesRecv[i][j] += localExternalNodeBytesRecv[i][j];
 				}
 			}
 		}

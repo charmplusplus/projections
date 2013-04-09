@@ -1195,7 +1195,7 @@ public class LogLoader extends ProjDefs
 				}
 				LogEntryData data2 = reader.nextEvent();
 				LE = new LogEntry(data2);
-				// this will still eventually end because of the 
+				// this will
 				// END COMPUTATION event.
 				if (LE.Entry != -1) {
 					if ((LE.Time - BeginTime) > End) {

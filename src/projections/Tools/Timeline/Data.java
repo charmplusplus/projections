@@ -1395,6 +1395,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	/** Highlight the message links to the object upon mouseover */
 	private boolean traceMessagesBackOnHover;
+	
+	/** Highlight the message on critical path */
+    private boolean traceCriticalPathOnHover;
 
 	/** Highlight the message links forward from the object upon mouseover */
 	private boolean traceMessagesForwardOnHover;
@@ -1405,8 +1408,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** Forward tracing by one step when left-clicking on an entry method */
 	private boolean traceMessagesForwardOnClick;
 
+	/** Forward tracing by one step when left-clicking on an entry method */
+	private boolean traceCriticalPathOnClick;
 
-	public static enum ViewType {
+    public static enum ViewType {
 		/** The normal display mode */
 		VIEW_NORMAL, 
 		/** Compact the entry margins around the entry method objects, and eliminate user events */
@@ -1451,6 +1456,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return traceMessagesForwardOnHover;
 	}
 
+	protected boolean traceCriticalPathOnHover() {
+		return traceCriticalPathOnHover;
+	}
 	//	protected boolean traceMessagesForwardOnClick() {
 	//		return traceMessagesForwardOnClick;
 	//	}
@@ -1483,7 +1491,22 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		this.traceMessagesForwardOnClick = traceMessagesForwardOnClick;
 	}
 
-	public void setTraceOIDOnHover(boolean showOIDOnHover) {
+	public void setTraceCriticalPathOnHover(boolean traceCriticalPathOnHover) {
+    
+        this.traceCriticalPathOnHover = traceCriticalPathOnHover;
+
+		if(traceCriticalPathOnHover)
+			setToolTipDelayLarge();
+		else
+			setToolTipDelaySmall();
+
+    }
+	
+    public void setTraceCriticalPathOnClick(boolean traceCriticalPathOnClick) {
+		this.traceCriticalPathOnClick = traceCriticalPathOnClick;
+    }
+   
+    public void setTraceOIDOnHover(boolean showOIDOnHover) {
 		this.traceOIDOnHover = showOIDOnHover;
 	}
 
@@ -1652,7 +1675,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 			for(int iteration = 0; iteration < numIterations; iteration++) {
 				long largestShift = 0;
-
+                long largePe = -1;
 				for(Entry<Integer, Query1D<EntryMethodObject> > e: allEntryMethodObjects.entrySet()){
 					// For all PEs
 					Integer pe = e.getKey();
@@ -1681,13 +1704,14 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 						allEntryMethodObjects.get(pe).shiftAllEntriesBy(shift);
 						allUserEventObjects.get(pe).shiftAllEntriesBy(shift);
 						tachyonShifts.accumulateTachyonShifts(shift, pe);
-					}
+					    largePe = pe;
+                    }
 					if(shift > largestShift)
 						largestShift = shift;
 
 				}
 
-				System.out.println("Tachyons: iteration " + iteration  + " largestShift= " + largestShift);
+				System.out.println("Tachyons: iteration " + iteration  + " largestShift= " + largestShift + " large PE= " + largePe);
 
 				if(largestShift <= threshold_us) {
 					System.out.println("No tachyons go back further than "+largestShift+" us");

@@ -544,7 +544,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                             //data.addProcessor( mm); 
 							Set<EntryMethodObject> objset = data.messageStructures.getMessageToExecutingObjectsMap().get(msgToCalledEntryMethod);
                             //System.out.println("fowarding  " + j + "; obj ");
-                            msgToCalledEntryMethod.printMe();
+                            //msgToCalledEntryMethod.printMe();
 
 							if (objset!=null && !objset.isEmpty()) {
 								Iterator<EntryMethodObject> i = objset.iterator();

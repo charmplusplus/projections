@@ -239,7 +239,12 @@ implements ActionListener, EntryMethodVisibility
     {
         for(int i=0; i<HistogramWindow.NUM_TYPES; i++)
         {
-            for(int j=0; j<timeNumBins+1; j++)
+	    int bound;
+	    if (i == TYPE_MSG_SIZE)
+		bound = msgNumBins + 1;
+	    else
+		bound = timeNumBins + 1;
+            for(int j=0; j<bound; j++)
             {
                 for(int m=0; m<numEPs; m++)
                 {

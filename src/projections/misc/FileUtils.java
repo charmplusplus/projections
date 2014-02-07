@@ -131,7 +131,7 @@ public class FileUtils {
 	
 	
 	/** a recursive function to find log files in the directory or subdirectories */
-	private void findFilesInDirectory(File myDir, int type){
+	private void findFilesInDirectory(File myDir, final int type){
 		if(! myDir.isDirectory()){
 			System.err.println("Internal Error: Path [" + myDir.getAbsolutePath() + "] " +
 					"supplied for file detection is not a " +
@@ -141,12 +141,13 @@ public class FileUtils {
 		
 		File prefix = new File( baseName );
 		String prefix_s = prefix.getName();
+		String extension = getTypeExtension(type);
+		final int prefixNumSplits = prefix_s.split("\\.").length;
 		
 //		System.out.println("FileUtils.dirFromFile(baseName) = " + FileUtils.dirFromFile(baseName) );
 
 		for(File f : myDir.listFiles()){
 			String filename = f.getName();
-			String extension = getTypeExtension(type);
 
 			//System.out.println("Examining " + filename + " with extension "+extension);
 			
@@ -171,8 +172,8 @@ public class FileUtils {
 				} else if(f.isFile()) {
 					String[] splits = filename.split("\\.");
 					int numSplits = splits.length;
-					if(numSplits > 1){
-						if(splits[numSplits-1].equals(extension) ){
+					if(numSplits > prefixNumSplits){
+						if(splits[numSplits-1].equals(extension)){
 							int pe = Integer.parseInt(splits[numSplits-2]);
 							validPEs[type].insert(pe);
 							hasFiles[type] = true;

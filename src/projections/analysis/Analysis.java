@@ -204,7 +204,7 @@ public class Analysis {
 
   private void findEndTime() {
     // If the Configuration file has saved data, then use it!
-    if (rcReader.RC_GLOBAL_END_TIME.longValue() >= 0) {
+    if (rcReader.RC_GLOBAL_END_TIME.longValue() > 0) {
       totalTime =
 	rcReader.RC_GLOBAL_END_TIME.longValue();
     } else {
@@ -236,7 +236,7 @@ public class Analysis {
       }
       // From log files
       if (hasLogFiles()) {
-	long temp = 
+	long temp =
 	  logLoader.determineEndTime(getValidProcessorList(ProjMain.LOG));
 	if (temp > totalTime) {
 	  totalTime = temp;
@@ -386,7 +386,16 @@ public class Analysis {
     public long getSummaryIntervalSize() {
 	return sumAnalyzer.getIntervalSize();
     }
+    public double getSumDetailIntervalSize() {
+        return intervalData.getIntervalSize();
+    }
+    public double getSumDetailNumIntervals(){
+        return intervalData.getNumIntervals();
+    }
 
+    public int[][] getSumDetailData() {
+        return intervalData.sumDetailData();
+    }
     public Color getEntryColor(int entryIdx) {
     	if (entryIdx == isIdle) {
     		Paint p = getIdleColor();
@@ -513,10 +522,15 @@ public class Analysis {
 //	    userEntryData = logReader.getUserEntries();
 //	    logReaderIntervalSize = logReader.getIntervalSize();
 	} else if (hasSumDetailFiles()) {
-	    IntervalData intervalData = new IntervalData();
-	    intervalData.loadIntervalData(intervalSize, intervalStart,
-					  intervalEnd, byEntryPoint,
-					  processorList);
+	    //intervalData.loadIntervalData(intervalSize, intervalStart,
+		//			  intervalEnd, byEntryPoint,
+		//			  processorList);
+        try {
+            intervalData.loadSumDetailIntervalData(intervalSize, intervalStart,intervalEnd,processorList);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 	    systemUsageData = intervalData.getSystemUsageData();
 //	    systemMsgsData = intervalData.getSystemMsgs();
 //	    userEntryData = intervalData.getUserEntries();

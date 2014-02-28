@@ -24,6 +24,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
 
 import projections.analysis.LogReader;
+import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Clickable;
@@ -308,21 +309,31 @@ implements ActionListener, Clickable
 	}
 
 	public void showDialog() {
-
 		if (dialog == null) {
 			intervalPanel = new IntervalChooserPanel();
-			dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
-		}
-
+            if(MainWindow.runObject[myRun].hasLogFiles())
+                dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
+            else //only has summary files
+		       dialog = new RangeDialog(this, "Select Range", intervalPanel, true);
+        }
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-			intervalSize = intervalPanel.getIntervalSize();
-			startInterval = (int)intervalPanel.getStartInterval();
-			endInterval = (int)intervalPanel.getEndInterval();
-			processorList = dialog.getSelectedProcessors();
-			startTime = dialog.getStartTime();
+            startInterval = (int)intervalPanel.getStartInterval();
+            endInterval = (int)intervalPanel.getEndInterval();
+            processorList = dialog.getSelectedProcessors();
+            startTime = dialog.getStartTime();
+            if(MainWindow.runObject[myRun].hasLogFiles()){
+			    intervalSize = intervalPanel.getIntervalSize();
+            }
+            else{//sum detail mode
+                startInterval = 0;
+                endInterval = (int) MainWindow.runObject[myRun].getSumDetailNumIntervals() - 1;
+                intervalSize = (long) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+            }
 
-			//set range values for time profile window
+            System.out.println("Props: intervalSize:"+intervalSize+"- startInterval:"+startInterval+"- endInterval:"+endInterval+"- startTime:" + startTime);
+
+            //set range values for time profile window
 			if(ampiTraceOn){
 				ampiGraphPanel.getRangeVals(startInterval, endInterval, intervalSize, processorList);
 			}
@@ -338,7 +349,7 @@ implements ActionListener, Clickable
 					int numProcessors = processorList.size();
 					int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
 
-					if( MainWindow.runObject[myRun].hasLogFiles() || MainWindow.runObject[myRun].hasSumDetailFiles() ) {
+					if(MainWindow.runObject[myRun].hasLogFiles()) { //Bilge
 						// Do parallel loading because we have full logs
 
 						// Create a list of worker threads
@@ -383,6 +394,38 @@ implements ActionListener, Clickable
 
 
 					}
+                    else if( MainWindow.runObject[myRun].hasSumDetailFiles()) //Bilge
+                    {
+					    // Do serial file reading because all we have is the sum files	    	
+                        //System.out.println("hasSumDetailFiles - LOAD DATA. numIntervals: " + numIntervals);
+                        OrderedIntList availablePEs =
+                                MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
+                        MainWindow.runObject[myRun].LoadGraphData(intervalSize, 0, numIntervals-1, false, availablePEs);
+                        int[][] sumDetailData = MainWindow.runObject[myRun].getSumDetailData();
+
+                        for(int i=0;i<numIntervals;i++){
+						    //for(int j=0;j<numEPs+special;j++){
+                            for(int j=0;j<numEPs;j++){
+                                graphData[i][j] += sumDetailData[i][j];
+                                    //if(sumDetailData[i][j] != 0)
+                                        //System.out.println("X: " + sumDetailData[i][j]);
+                                //graphData[i][j] = 1;
+                            }
+						}
+                        //Use sum files to get the idle data, sumDetail log files do not contain idle data
+                        int[][] idleTemp = MainWindow.runObject[myRun].sumAnalyzer.getSystemUsageData(startInterval, endInterval, intervalSize);
+
+                        // Determine a component to show the progress bar with
+						Component guiRootForProgressBar = null;
+						if(thisWindow!=null && thisWindow.isVisible()) {
+							guiRootForProgressBar = thisWindow;
+						} else if(mainWindow!=null && mainWindow.isVisible()){
+							guiRootForProgressBar = mainWindow;
+						} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+							guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+						}
+
+                    }
 					else if( MainWindow.runObject[myRun].hasSumFiles()){
 						// Do serial file reading because all we have is the sum files	    	
 
@@ -432,14 +475,31 @@ implements ActionListener, Clickable
 								}
 							}
 						}					
-					}
+					}//end of summary
 
 					// Scale raw data into percents
 					for (int interval=0; interval<graphData.length; interval++) {
 						for(int e=0; e< graphData[interval].length; e++){
-							graphData[interval][e] = graphData[interval][e] * 100.0 / ((double)intervalSize * (double)numProcessors);		
+							graphData[interval][e] = graphData[interval][e] * 100.0 / ((double)intervalSize * (double)numProcessors);
 						}
 					}
+                    //Bilge
+                    if( MainWindow.runObject[myRun].hasSumDetailFiles()){
+                        //idle time calculation for sum detail
+                        int[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentage();
+                        for(int i=0;i<numIntervals;i++){
+                            graphData[i][numEPs+1] = idlePercentage[i];
+                        }
+                        //overhead time calculation for sum detail
+                        for(int i=0;i<numIntervals;i++){
+                            graphData[i][numEPs] = 100;
+                            for(int j=0;j<numEPs;j++){
+                                graphData[i][numEPs] -= graphData[i][j];
+                            }
+                            graphData[i][numEPs] -= graphData[i][numEPs+1];
+                        }
+
+                    }
 
 					// Filter Out any bad data
 					for (int interval=0; interval<graphData.length; interval++) {
@@ -463,8 +523,7 @@ implements ActionListener, Clickable
 						}
 
 					}
-
-					// set the exists array to accept non-zero 
+					// set the exists array to accept non-zero
 					// entries only have initial state also 
 					// display all existing data. Only do this 
 					// once in the beginning
@@ -558,12 +617,12 @@ implements ActionListener, Clickable
 				}
 
 			}
-			setYAxis("Percentage Utilization", "%");		
+
+			setYAxis("Percentage Utilization", "%");
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
 			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals), thisWindow);
 			graphCanvas.setMarkers(phaseMarkers);
-
 			refreshGraph();
 		}
 	}

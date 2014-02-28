@@ -35,10 +35,10 @@ import projections.gui.OrderedIntList;
 	 *  graphData[interval][numEP] contains idle time.
 	 *  
 	 *  The resulting output data will be accumulated into the array specified in a synchronized manner
-	 * @param phaseMarkers 
-	 *  
-	 *  */
-	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, 
+     * @param intervalSize
+     * @param phaseMarkers
+     * */
+	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval,
 			TreeMap<Double, String> phaseMarkers, double[][] graphData){
 		this.phaseMarkers = phaseMarkers;
 		this.pe = pe;
@@ -76,7 +76,7 @@ import projections.gui.OrderedIntList;
 	 * If this class is extended for other tools, this might need to be handled differently.
 	 *  
 	 */
-	private void LoadGraphDataForOnePe(long intervalSize, 
+	private void LoadGraphDataForOnePe(long intervalSize,
 			int intervalStart, int intervalEnd,
 			boolean byEntryPoint, 
 			int pe) 

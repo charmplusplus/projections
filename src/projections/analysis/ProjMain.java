@@ -163,7 +163,7 @@ public class ProjMain {
     	mainWindow.setVisible(true);
 
     	// Load Data if specified on command line
-    	if (loadSts!=null) { 
+    	if (loadSts!=null) {
     		mainWindow.openFile(loadSts); 
     	}
     	

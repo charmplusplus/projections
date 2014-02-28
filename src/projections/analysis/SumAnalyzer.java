@@ -47,6 +47,7 @@ public class SumAnalyzer extends ProjDefs
     private int[][] IdlePercentage;
 
     private int mode = NORMAL_MODE;
+    private int nPe;
 
     private AccumulatedSummaryReader accumulatedReader;
 
@@ -68,10 +69,11 @@ public class SumAnalyzer extends ProjDefs
     {
 	int tokenType;
 	int CurrentUserEntry;
-	int nPe=1,numEntry=0;
+	int numEntry=0;
 	double versionNum = 0.0;
 	IntervalCount=0;
 	TotalTime=0;
+    nPe = 1;
 	//ChareTime= new long [NumProcessors][NumUserEntries];			
 	//NumEntryMsgs = new int [NumProcessors][NumUserEntries];
 
@@ -615,5 +617,15 @@ public class SumAnalyzer extends ProjDefs
 	    throw new SummaryFormatException("Couldn't read string "+
 					     description);
 	return tokenizer.sval;
+    }
+
+    public int[] getTotalIdlePercentage(){
+        int[] totalIdlePercentage = new int[IntervalCount];
+        for(int i=0; i<nPe; i++){
+            for(int j=0; j<IntervalCount; j++){
+                totalIdlePercentage[j] = IdlePercentage[i][j];
+            }
+        }
+        return totalIdlePercentage;
     }
 }

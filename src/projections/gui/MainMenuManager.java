@@ -96,7 +96,7 @@ implements ActionListener, ItemListener
 		createMenus();
 	}
 
-	private void stateChanged(int state) {
+	private void stateChanged(int state, int sumDetail) {
 		switch (state) {
 		case NO_DATA :
 			
@@ -143,7 +143,10 @@ implements ActionListener, ItemListener
 			histogramsMenuItem.setEnabled(false);
 			overviewMenuItem.setEnabled(true);
 			animationMenuItem.setEnabled(true);
-			timeProfileGraphMenuItem.setEnabled(false);
+                        if(sumDetail==1)
+			    timeProfileGraphMenuItem.setEnabled(true);
+			else
+                            timeProfileGraphMenuItem.setEnabled(false);
 			userEventsMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
@@ -296,7 +299,7 @@ implements ActionListener, ItemListener
 		
 		parent.setJMenuBar(menubar);
 
-		stateChanged(NO_DATA);
+		stateChanged(NO_DATA, 0);
 	}
 
 	
@@ -357,9 +360,10 @@ implements ActionListener, ItemListener
 			else if (mi == animationMenuItem)	
 				parent.openTool(new AnimationWindow(parent) );
 			
-			else if (mi == timeProfileGraphMenuItem)	
+			else if (mi == timeProfileGraphMenuItem)	{
+                                System.out.println("timeProfileGraphMenuItem is being created\n");
 				parent.openTool(new TimeProfileWindow(parent) );
-			
+			}
 			else if (mi == userEventsMenuItem)	
 				parent.openTool(new UserEventsWindow(parent) );
 			
@@ -398,15 +402,15 @@ implements ActionListener, ItemListener
 
 	// Interface methods to MainWindow
 	protected void fileOpened() {
-		stateChanged(OPENED_FILES);
+		stateChanged(OPENED_FILES, 0);
 	}
 
 	protected void lastFileClosed() {
-		stateChanged(NO_DATA);
+		stateChanged(NO_DATA, 0);
 	}
 
-	protected void summaryOnly() {
-		stateChanged(OPENED_SUMMARY);
+	protected void summaryOnly(int sumDetail) {
+		stateChanged(OPENED_SUMMARY, sumDetail);
 	}
 
 }

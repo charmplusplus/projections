@@ -252,7 +252,7 @@ implements ScalePanel.StatusDisplay
 		final SwingWorker worker = new SwingWorker() {
 			public Object doInBackground() {
 				try {
-					MainWindow.runObject[myRun].initAnalysis(newfile, 
+					MainWindow.runObject[myRun].initAnalysis(newfile,
 							mainWindow);
 				} catch (IOException e) {
 					InvalidFileDialog ifd =
@@ -401,7 +401,9 @@ implements ScalePanel.StatusDisplay
 				if (MainWindow.runObject[myRun].hasLogData()) {
 					menuManager.fileOpened();
 				} else if (MainWindow.runObject[myRun].hasSummaryData()) {
-					menuManager.summaryOnly();
+                                    if(MainWindow.runObject[myRun].hasSumDetailData())
+					menuManager.summaryOnly(1);
+				    else menuManager.summaryOnly(0);
 				}
 				/* Removed to avoid confusing readers of the manual.
 		 This is a still-being-developed feature.

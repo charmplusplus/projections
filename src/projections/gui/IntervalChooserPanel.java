@@ -68,7 +68,7 @@ public class IntervalChooserPanel extends RangeDialogExtensionPanel implements I
 
 
 	public void setParentDialogBox(RangeDialog parent) {
-		this.parent = parent;	
+		this.parent = parent;
 		sizeField.addActionListener(parent);
 		sizeField.addKeyListener(parent);
 		sizeField.addFocusListener(parent);

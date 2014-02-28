@@ -39,14 +39,14 @@ class SumDetailReader extends ProjectionsReader
     // header values
     private int numIntervals;
     private int numEPs;
-    private double intervalSize;
+    private long intervalSize;
 
     // Compressed Data
     // A Vector of RLEBlocks for each Type, EP combination
     // Dim 0 - indexed by data type.
     // Dim 1 - indexed by EP, a not-quite-as dense format as the actual file
     //                 but good enough.
-    private Vector rawData[][];
+    private Vector<RLEBlock> rawData[][];
 
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
@@ -63,55 +63,61 @@ class SumDetailReader extends ProjectionsReader
 	return sourceFile.canRead();
     }
 
-//    protected void readStaticData() 
-//	throws IOException
-//    {
-//	reader = new BufferedReader(new FileReader(sourceString));
-//	// Set up the tokenizer  
-//	tokenizer=new ParseTokenizer(reader);
-//	tokenizer.parseNumbers();
-//	tokenizer.eolIsSignificant(true);
-//	tokenizer.whitespaceChars('/','/'); 
-//	tokenizer.whitespaceChars(':',':');
-//	tokenizer.whitespaceChars('[','[');
-//	tokenizer.whitespaceChars(']',']');
-//	tokenizer.wordChars('a','z');
-//	tokenizer.wordChars('A','Z');
-//	tokenizer.wordChars('+','+');
-//
-//	// Read the first line (Header information)
-//	tokenizer.checkNextString("ver");
-//	versionNum = tokenizer.nextNumber("Version Number");
-//	/* **CW** It is still unclear how we should handle versioning
-//	 *	  in projections. This feature is tentatively dropped.
-//	 */
-//	/*
-//	if (versionNum != Double.parseDouble(expectedVersion)) {
-//	    throw new ProjectionsFormatException(expectedVersion,
-//						 "File version [" + 
-//						 versionNum + "] conflicts " +
-//						 "with expected version.");
-//	}
-//	*/
-//	tokenizer.checkNextString("cpu");
-//	myPE = (int)tokenizer.nextNumber("processor number");
-//	numPE = (int)tokenizer.nextNumber("number of processors");
-//	tokenizer.checkNextString("numIntervals");
-//	numIntervals = (int)tokenizer.nextNumber("numIntervals");
-//	tokenizer.checkNextString("numEPs");
-//	numEPs = (int)tokenizer.nextNumber("number of entry methods");
-//	tokenizer.checkNextString("intervalSize");
-//	intervalSize = 
-//	    tokenizer.nextScientific("processor usage sample interval"); 
-//	if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
-//	    throw new ProjectionsFormatException(expectedVersion, 
-//						 "extra garbage at end of " +
-//						 "header line");
-//	}
-//
-//	reader.close();
-//	reader = null;
-//    }
+    protected void readStaticData() 
+	throws IOException
+    {
+	reader = new BufferedReader(new FileReader(sourceFile));
+	// Set up the tokenizer  
+	tokenizer=new ParseTokenizer(reader);
+	tokenizer.parseNumbers();
+	tokenizer.eolIsSignificant(true);
+	tokenizer.whitespaceChars('/','/'); 
+	tokenizer.whitespaceChars(':',':');
+	tokenizer.whitespaceChars('[','[');
+	tokenizer.whitespaceChars(']',']');
+	tokenizer.wordChars('a','z');
+	tokenizer.wordChars('A','Z');
+	tokenizer.wordChars('+','+');
+
+	// Read the first line (Header information)
+	tokenizer.checkNextString("ver");
+	double versionNum = tokenizer.nextNumber("Version Number");
+	/* **CW** It is still unclear how we should handle versioning
+	 *	  in projections. This feature is tentatively dropped.
+	 */
+	/*
+	if (versionNum != Double.parseDouble(expectedVersion)) {
+	    throw new ProjectionsFormatException(expectedVersion,
+						 "File version [" + 
+						 versionNum + "] conflicts " +
+						 "with expected version.");
+	}
+	*/
+	tokenizer.checkNextString("cpu");
+	int myPE = (int)tokenizer.nextNumber("processor number");
+	int numPE = (int)tokenizer.nextNumber("number of processors");
+	tokenizer.checkNextString("numIntervals");
+	numIntervals = (int)tokenizer.nextNumber("numIntervals");
+	tokenizer.checkNextString("numEPs");
+	numEPs = (int)tokenizer.nextNumber("number of entry methods");
+        System.out.println("numEPs: "+ numEPs);
+	tokenizer.checkNextString("intervalSize");
+	double interval =
+	    tokenizer.nextScientific("processor usage sample interval");
+    intervalSize = (long)Math.floor(interval*1000000);
+
+        System.out.println("intervalSize: "+ intervalSize);
+
+        if (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+        System.out.println("\nEX\n");
+	    throw new ProjectionsFormatException(expectedVersion, 
+						 "extra garbage at end of " +
+						 "header line");
+	}
+
+	reader.close();
+	reader = null;
+    }
 
     
     protected void read() 
@@ -179,6 +185,7 @@ class SumDetailReader extends ProjectionsReader
     private void buildTable(int type) 
 	throws IOException
     {
+            System.out.println("buildTable\n");
 	int epIdx = 0;
 	int intervalsLeft = numIntervals;
 
@@ -209,7 +216,12 @@ class SumDetailReader extends ProjectionsReader
 		    RLEBlock newBlock = new RLEBlock();
 		    newBlock.value = value;
 		    newBlock.count = intervalsLeft;
-		    rawData[type][epIdx++].add(newBlock);
+		    try{
+		    boolean r = rawData[type][epIdx++].add(newBlock);
+		    }catch(Exception e){
+		    System.out.println("\nADD EXCEPTION: " + e.toString());
+		    break;
+		    }
 		    count -= intervalsLeft;
 		    intervalsLeft = numIntervals;
 		}

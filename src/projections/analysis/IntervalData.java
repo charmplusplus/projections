@@ -59,6 +59,8 @@ public class IntervalData
     private int numIntervals = 0;
     private double intervalSize = 0;
 
+    private int sumDetailData[][] = null;
+
     /**
      *  The constructor
      */
@@ -72,12 +74,13 @@ public class IntervalData
 	    rawData = new Vector[SumDetailReader.NUM_TAGS][numPEs][];
 	    OrderedIntList availablePEs = 
 		MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
-
 	    for(Integer pe : availablePEs) {
-	    try {
-		    summaryDetails[pe] = 
+
+            try {
+		    summaryDetails[pe] =
 			new SumDetailReader(MainWindow.runObject[myRun].getSumDetailLog(pe),
 					    MainWindow.runObject[myRun].getVersion());
+		    summaryDetails[pe].readStaticData();
 		    summaryDetails[pe].read();
 		    for (int type=0; type<SumDetailReader.NUM_TAGS; type++) {
 			rawData[type][pe] = summaryDetails[pe].getData(type);
@@ -90,18 +93,36 @@ public class IntervalData
 		    // **CW** do nothing for now. No rebinning facilities in
 		    // place yet.
 		    intervalSize = summaryDetails[pe].getIntervalSize();
-		} catch (IOException e) {
+
+        } catch (IOException e) {
 		    // This exception, in future, should simply cause the
 		    // necessary adjustments to the list of available PEs
 		    // listed in MainWindow.runObject for summary detail files.
 		    System.err.println("Warning: Failed to read summary " +
 				       "detail file for processor " + pe);
+            e.printStackTrace();
 		    continue;
 		}
 	    }
+        System.out.println("IntervalData - hasSumDetailData + numIntervals: "+numIntervals+" intervalSize: " + intervalSize);
 	}
     }
-    
+    public void loadSumDetailIntervalData(long intervalSize, int intervalStart,
+                                          int intervalEnd,
+                                          OrderedIntList processorList){
+        int numIntervals = intervalEnd - intervalStart + 1;
+
+        sumDetailData = new int[numIntervals][numEPs];
+        double[][] tempData;
+        for(Integer curPe : processorList) {
+            tempData = getData(curPe, TYPE_TIME);
+            for(int i=0; i<numIntervals; i++){
+                for(int e=0; e<numEPs; e++){
+                    sumDetailData[i][e] += tempData[e][i];
+                }
+            }
+        }
+    }
     /**
      *  This is a method for use with the older way of doing things only.
      *  Regretably, it's needed to get things working for now.
@@ -113,7 +134,7 @@ public class IntervalData
     public void loadIntervalData(long intervalSize, int intervalStart,
 				 int intervalEnd, boolean byEntryPoint,
 				 OrderedIntList processorList) {
-	int numIntervals = intervalEnd - intervalStart + 1;
+        int numIntervals = intervalEnd - intervalStart + 1;
 	systemUsageData = new int[3][processorList.size()][numIntervals];
 	systemMsgsData = new int[5][3][processorList.size()][numIntervals];
 	if (byEntryPoint) {
@@ -157,6 +178,8 @@ public class IntervalData
 	    processorCount++;
 	}
     }
+
+    public int[][] sumDetailData() {return  sumDetailData; };
 
     public int[][][] getSystemUsageData() {
 	return systemUsageData;

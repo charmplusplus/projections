@@ -193,7 +193,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			p.add(mainPanel);
 			p.add(historyPanel);
 			p.add(stepsPanel);
-			if(toolSpecificPanel != null){    	
+			if(toolSpecificPanel != null && !disableTimeRange){
 				toolSpecificPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 				p.add(Box.createRigidArea(new Dimension(0,10))); // add some vertical padding
 				p.add(toolSpecificPanel);

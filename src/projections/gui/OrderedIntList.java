@@ -67,6 +67,11 @@ public class OrderedIntList implements Iterable<Integer>
 		data.add(eleValue);
 	}   
 
+    public boolean contains(int eleValue)
+    {
+        return data.contains(eleValue);
+
+    }
 
 	public String listToString() {
 		return listToString(data);

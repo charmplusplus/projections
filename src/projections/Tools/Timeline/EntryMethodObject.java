@@ -50,6 +50,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private final static String popupTracePath = "Trace message path";
 	private final static String popupDropPEsForObject = "Drop all PEs unrelated to this entry method";
 	private final static String popupDropPEsForPE = "Drop all PEs unrelated to entry methods on this PE";
+    private final static String loadNeighbors = "Load neighbors";
 
 	
 	/** Data specified by the user, likely a timestep. Null if nonspecified */
@@ -462,6 +463,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		        menuItem.addActionListener(this);
 		        popup.add(menuItem);
 		            
+				menuItem = new JMenuItem(loadNeighbors);
+				menuItem.addActionListener(this);
+				popup.add(menuItem);
+
 		        popup.show(parent, evt.getX(), evt.getY());			
 			}
 		}
@@ -1190,6 +1195,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			else if(arg.equals(popupDropPEsForPE)) {
 				data.dropPEsUnrelatedToPE(this.pe);
 			}
+            else if (arg.equals(loadNeighbors))
+            {
+                System.out.println("---load neighbors ");
+                data.addNeighbors(this.pe);
+            }
 
 		}
 

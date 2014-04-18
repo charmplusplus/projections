@@ -1197,7 +1197,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			}
             else if (arg.equals(loadNeighbors))
             {
-                System.out.println("---load neighbors ");
                 data.addNeighbors(this.pe);
             }
 

@@ -43,6 +43,7 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 	private JTabbedPane tabbedPane;
 	private JPanel timeBinPanel;
 	private JPanel msgBinPanel;
+	private JPanel idleBinPanel;
 
 	// Time-based bins
 	private JLabel timeNumBinsLabel;
@@ -63,6 +64,16 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 	private JIntTextField msgNumBinsField;
 	private JLongTextField msgBinSizeField;
 	private JLongTextField msgMinBinSizeField;
+
+	// Idle Percentage-based bins
+	private JLabel idleNumBinsLabel;
+	private JLabel idleBinSizeLabel;
+	private JLabel idleMinBinSizeLabel;
+	private JLabel idleBinRangeLabel;
+
+	private JIntTextField idleNumBinsField;
+	private JLongTextField idleBinSizeField;
+	private JLongTextField idleMinBinSizeField;
 
 	// A reference to the parent dialog box that I'm extending
 	private RangeDialog parent;
@@ -125,9 +136,35 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 		Util.gblAdd(msgBinPanel, msgMinBinSizeField, gbc, 1,1, 2,1, 1,1);
 		Util.gblAdd(msgBinPanel, msgBinRangeLabel,   gbc, 0,2, 4,1, 1,1);
 
+		// Idle Percentages Panel
+		idleBinPanel = new JPanel();
+		idleBinPanel.setLayout(gbl);
+		idleBinPanel.setBorder(new TitledBorder(new LineBorder(Color.black),
+		"IDLE PERCENTAGE-BASED BINS"));
+
+		idleNumBinsLabel = new JLabel("# of Idle % Bins:", JLabel.LEFT);
+		idleNumBinsField = new JIntTextField(-1,5);
+
+		idleBinSizeLabel = new JLabel("Idle % Bin Size", JLabel.LEFT);
+		idleBinSizeField = new JLongTextField(-1,12);
+
+		idleMinBinSizeLabel = new JLabel("Starting Bin Size:", JLabel.LEFT);
+		idleMinBinSizeField = new JLongTextField(-1,12);
+
+		idleBinRangeLabel = new JLabel("", JLabel.LEFT);
+
+		Util.gblAdd(idleBinPanel, idleNumBinsLabel,    gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(idleBinPanel, idleNumBinsField,    gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(idleBinPanel, idleBinSizeLabel,    gbc, 2,0, 1,1, 1,1);
+		Util.gblAdd(idleBinPanel, idleBinSizeField,    gbc, 3,0, 1,1, 1,1);
+		Util.gblAdd(idleBinPanel, idleMinBinSizeLabel, gbc, 0,1, 2,1, 1,1);
+		Util.gblAdd(idleBinPanel, idleMinBinSizeField, gbc, 1,1, 2,1, 1,1);
+		Util.gblAdd(idleBinPanel, idleBinRangeLabel,   gbc, 0,2, 4,1, 1,1);
+		
 		tabbedPane = new JTabbedPane();
 		tabbedPane.addTab("Time", null, timeBinPanel, "Time-based bins");
 		tabbedPane.addTab("Msgs", null, msgBinPanel, "Message Sizes");
+		tabbedPane.addTab("Idle %", null, idleBinPanel, "Idle percentage-based bins");
 
 		this.setLayout(new BorderLayout());
 		this.add(tabbedPane, BorderLayout.CENTER);
@@ -191,7 +228,34 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 		parent.someInputChanged();
 	}
 
-	
+	// Idle Percentages
+	public int getIdleNumBins() {
+		return idleNumBinsField.getValue();
+	}
+
+	public void setIdleNumBins(int numBins) {
+		idleNumBinsField.setValue(numBins);
+		parent.someInputChanged();
+	}
+
+	public long getIdleBinSize() {
+		return idleBinSizeField.getValue();
+	}
+
+	public void setIdleBinSize(long binSize) {
+		idleBinSizeField.setValue(binSize);
+		parent.someInputChanged();
+	}
+
+	public long getIdleMinBinSize() {
+		return idleMinBinSizeField.getValue();
+	}
+
+	public void setIdleMinBinSize(long size) {
+		idleMinBinSizeField.setValue(size);
+		parent.someInputChanged();
+	}
+
 	public boolean isInputValid() {
 		return true;	
 	}
@@ -207,6 +271,11 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 		msgNumBinsField.setText("200");
 		msgBinSizeField.setText("100");
 		msgMinBinSizeField.setText("0");
+
+		// default values for idle percentages at 1% resolution to 100% total
+		idleNumBinsField.setText("100");
+		idleBinSizeField.setText("1");
+		idleMinBinSizeField.setText("0");
 	
 		updateFields();
 	}
@@ -231,6 +300,15 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 		msgMinBinSizeField.addActionListener(parent);
 		msgMinBinSizeField.addKeyListener(parent);
 		msgMinBinSizeField.addFocusListener(parent);
+		idleNumBinsField.addActionListener(parent);
+		idleNumBinsField.addKeyListener(parent);
+		idleNumBinsField.addFocusListener(parent);
+		idleBinSizeField.addActionListener(parent);
+		idleBinSizeField.addKeyListener(parent);
+		idleBinSizeField.addFocusListener(parent);
+		idleMinBinSizeField.addActionListener(parent);
+		idleMinBinSizeField.addKeyListener(parent);
+		idleMinBinSizeField.addFocusListener(parent);
 	}
 
 	public void updateFields() {
@@ -251,14 +329,25 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 						msgNumBinsField.getValue() *
 						msgBinSizeField.getValue()) + " bytes.");
 
+		idleBinRangeLabel.setText("Bin size ranges from : " +
+				_format.format(idleMinBinSizeField.getValue()) + 
+				"% to " +
+				_format.format(idleMinBinSizeField.getValue() +
+							idleNumBinsField.getValue() *
+							idleBinSizeField.getValue()) + "%.");
 	}
 
 
-	public int getSelectedType() {
-		if(tabbedPane.getSelectedComponent() == timeBinPanel){
+	public int getSelectedType()
+	{
+		if(tabbedPane.getSelectedComponent() == timeBinPanel)
+		{
 			return HistogramWindow.TYPE_TIME;
-		} else {
+		}
+		else if(tabbedPane.getSelectedComponent() == msgBinPanel)
+		{
 			return HistogramWindow.TYPE_MSG_SIZE;
 		}
-	}
+		else return HistogramWindow.TYPE_IDLE_PERC;
+	}	
 }

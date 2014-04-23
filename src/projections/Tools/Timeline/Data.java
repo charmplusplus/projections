@@ -2089,6 +2089,18 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return singleTimelineHeight()*yidx + topOffset() + totalUserEventRectsHeight();
 	}
 
+    protected void addNeighbors(Integer pe)
+    {
+        OrderedIntList processorList = MainWindow.runObject[myRun].getValidProcessorList();
+        int intpe = pe.intValue();
+        for(int i=-4; i<4;i++)
+        {
+            int newPE = intpe+i;
+            if(processorList.contains(newPE))
+                addProcessor(i+intpe);
+        }
+    }
+
 
 	protected void dropPEsUnrelatedToPE(Integer pe) {
 		dropPEsUnrelatedToObjects(allEntryMethodObjects.get(pe));

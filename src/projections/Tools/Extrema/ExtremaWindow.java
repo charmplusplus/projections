@@ -73,40 +73,43 @@ Clickable
 	// control panel gui objects and support variables
 	// **CW** Not so good for now, used by both Dialog and Window
 	private String attributes[][] = {
-			{ "Extrema by Clustering",
-				"Least Idle Time",
-				"Msgs Sent by Activity <not yet implemented>", 
-				"Bytes Sent by Activity  <not yet implemented>",
+			{	"Least Idle Time",
 				"Most Idle Time",
+			 	"Overhead",
 				"Active Entry Methods",
-				"Overhead",
-			"Average Grain Size"},
-			{ "Execution Time (us)",
+				"Average Grain Size",
+				"Extrema by Clustering",
+				"Msgs Sent by Activity <not yet implemented>", 
+				"Bytes Sent by Activity  <not yet implemented>"
+			},
+			{ 	"Utilization Percentage",
 				"Utilization Percentage",
-				"Number of Messages",
-				"Number of Bytes",
-				"Utilization Percentage",
+				"Time (us)",
 				" ",
 				"Time (us)",
-			"Time (us)"},
-			{ "us",
+				"Execution Time (us)",
+				"Number of Messages",
+				"Number of Bytes"
+			},
+			{ 	"us",
+				"us",
 				"us",
 				"",
-				"" ,
+				"us",
 				"us",
 				"",
-				"us",
-			"us"}
+				""
+			}
 	};
 
-	private final static int ATTR_CLUSTERING = 0;
-	protected final static int ATTR_LEASTIDLE = 1;
-	protected final static int ATTR_MSGSSENT = 2;
-	protected final static int ATTR_BYTESSENT = 3;
-	protected final static int ATTR_MOSTIDLE = 4;
-	private final static int ATTR_ACTIVEENTRY = 5;
-	private final static int ATTR_OVERHEAD = 6;
-	private final static int ATTR_GRAINSIZE = 7;
+	protected final static int ATTR_LEASTIDLE = 0;
+	protected final static int ATTR_MOSTIDLE = 1;
+	private final static int ATTR_OVERHEAD = 2;
+	private final static int ATTR_ACTIVEENTRY = 3;
+	private final static int ATTR_GRAINSIZE = 4;
+	private final static int ATTR_CLUSTERING = 5;
+	protected final static int ATTR_MSGSSENT = 6;
+	protected final static int ATTR_BYTESSENT = 7;
 
 		
 	// derived data after analysis

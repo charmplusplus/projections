@@ -17,7 +17,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingWorker;
-import javax.swing.JOptionPane;//added this
+import javax.swing.JOptionPane;
 
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.ChooseEntriesWindow;
@@ -598,7 +598,7 @@ implements ActionListener, EntryMethodVisibility
 	{
 		String bubbleText[] = new String[3];
 
-		bubbleText[0] = "Idle Percentage";//MainWindow.runObject[myRun].getEntryNameByIndex(yVal);//change later?
+		bubbleText[0] = "Idle Percentage";
 		bubbleText[1] = "Count: " + counts_display[TYPE_IDLE_PERC][xVal][yVal];
 		if (xVal < idleNumBins)
 		{

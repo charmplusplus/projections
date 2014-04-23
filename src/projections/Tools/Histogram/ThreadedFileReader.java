@@ -120,10 +120,10 @@ class ThreadedFileReader implements Runnable  {
 		long executionTime;
 		long adjustedTime;
 		long adjustedSize;
-		long totalIdleTime = 0;//added this
-		long totalStart = 0;//added this
-		long totalStop = 0;//added this
-		long idleStart = 0;//added this
+		long totalIdleTime = 0;
+		long totalStart = 0;
+		long totalStop = 0;
+		long idleStart = 0;
 
 		int numEPs = MainWindow.runObject[myRun].getNumUserEntries()+1;
         	/* YH Sun added */
@@ -145,8 +145,8 @@ class ThreadedFileReader implements Runnable  {
 		try
 		{
 			int nestingLevel = 0;
-			boolean logEnd = false;//This may have been breaking the other codes too, since time and msg wouldnt be evaluated. Fix this?
-			LogEntryData prevBegin = null;//^^^ or maybe timelog ends when idlelog ends? then id have to add timelog stuff when endlog activates. Idk same 4 msg?
+			boolean logEnd = false;
+			LogEntryData prevBegin = null;
 			
 			while (true) 
 			{ // EndOfLogException will terminate loop when end of log file is reached
@@ -311,7 +311,7 @@ class ThreadedFileReader implements Runnable  {
 							{
 								targetBin = timeNumBins;
 							}
-							countData[HistogramWindow.TYPE_TIME][targetBin][numEPs-1] += 1.0;//change from logdata.entry to numEPs-1?
+							countData[HistogramWindow.TYPE_TIME][targetBin][numEPs-1] += 1.0;
 							countData[HistogramWindow.TYPE_ACCTIME][targetBin][numEPs-1] += executionTime;
 							}
                             			_sun_execution_time[logdata.entry] += executionTime;
@@ -360,7 +360,7 @@ class ThreadedFileReader implements Runnable  {
 						idleTargetBin = (int)(idleTargetBin - idleMinBinSize);
 						if (idleTargetBin >= 0)
 						{
-							idleTargetBin = (int)(idleTargetBin/idleBinSize);//does not take into account dividing by zero.
+							idleTargetBin = (int)(idleTargetBin/idleBinSize);
 							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0; 
 						}
 					}
@@ -392,7 +392,7 @@ class ThreadedFileReader implements Runnable  {
 					if (logdata.time >= endTime)
 					{
 						logEnd = true;
-						//since processor is starting after endtime, it's total idle time must be zero
+						//since processor is starting after endtime, its total idle time must be zero
 						int idleTargetBin = (int)(0 - idleMinBinSize);
 						if (idleTargetBin >= 0)
 						{

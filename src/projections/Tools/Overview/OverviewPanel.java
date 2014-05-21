@@ -41,8 +41,8 @@ class OverviewPanel extends ScalePanel.Child
 
 	// idleData & mergedData (for supporting - utilization for now - 
 	// the other two data formats)
-	private int[][] idleData; // [processor idx][interval]
-	private int[][] utilData; // [processor idx][interval]
+	private int[][] idleDataNormalized; // [processor idx][interval]
+	private int[][] utilizationDataNormalized; // [processor idx][interval]
 
 	private int[][] colors; //The color per processor per interval
 	private int intervalSize;//Length of an interval, in microseconds
@@ -72,18 +72,18 @@ class OverviewPanel extends ScalePanel.Child
 		long t=(long)time;
 		if (t<0 || t>=totalTime())
 			return " ";
-		if (selectedPEs != null ) {
+		if (selectedPEs != null && selectedPEs.size() > p) {
 			int count=0;
 			int pe=0;
 
 			for(Integer tmp : selectedPEs){
-				if (count > p){
-					pe = tmp;
-					break;
-				}
 				count++;
-			}
-			
+				if (count > p)
+				{
+					pe = tmp;
+					break;		
+				}
+			}	
 						
 			//			int numEP = MainWindow.runObject[myRun].getNumUserEntries();
 			int interval = (int)(t/intervalSize);
@@ -94,19 +94,19 @@ class OverviewPanel extends ScalePanel.Child
 			}
 			if (mode == OverviewWindow.MODE_UTILIZATION) {
 				return "Processor " + pe + 
-				": Usage = " + utilData[p][interval]+"%" +
-				" IDLE = " + idleData[p][interval]+"%" +
+				": Usage = " + utilizationDataNormalized[p][interval]+"%" +
+				" IDLE = " + idleDataNormalized[p][interval]+"%" + 
 				" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
 			} else if(mode == OverviewWindow.MODE_EP) {
 				if (entryData[p][interval] > 0) {
 					return "Processor "+pe+": Usage = "+
-					utilData[p][interval]+"%"+
+					utilizationDataNormalized[p][interval]+"%"+
 					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us)." +
 					" EP = " + 
 					entryName(entryData[p][interval]);
 				} else {
 					return "Processor "+pe+": Usage = "+
-					utilData[p][interval]+"%"+
+					utilizationDataNormalized[p][interval]+"%"+
 					" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
 				}
 			}
@@ -327,6 +327,7 @@ class OverviewPanel extends ScalePanel.Child
 			trialintervalSize = (totalTime()/desiredIntervals);
 		}
 
+	
 		intervalSize = (int )trialintervalSize;
 		startInterval = (int)(startTime/intervalSize);
 		endInterval = (int)(endTime/intervalSize);
@@ -358,13 +359,14 @@ class OverviewPanel extends ScalePanel.Child
 		int numIntervals = endInterval - startInterval;
 		
 		entryData = new int[selectedPEs.size()][numIntervals];
+		float[][] idleData = new float[selectedPEs.size()][numIntervals];
 		float[][] utilizationData = new float[selectedPEs.size()][numIntervals];
 		
 		int pIdx=0;		
 		
 		for(Integer pe : selectedPEs){
 			readyReaders.add( new ThreadedFileReader(pe, intervalSize, myRun, 
-					startInterval, endInterval, entryData[pIdx], utilizationData[pIdx]) );
+					startInterval, endInterval, entryData[pIdx], utilizationData[pIdx], idleData[pIdx]) );
 			pIdx++;
 		}
 		
@@ -373,11 +375,13 @@ class OverviewPanel extends ScalePanel.Child
 		threadManager.runAll();
 		
 		// For historical reasons, we use a utilization range of 0 to 100
-		utilData = new int[utilizationData.length][utilizationData[0].length];
+		utilizationDataNormalized = new int[utilizationData.length][utilizationData[0].length];
+		idleDataNormalized = new int[idleData.length][idleData[0].length];
 
 		for (int i=0; i<utilizationData.length; i++) {
 			for (int j=0; j<utilizationData[i].length; j++) {
-				utilData[i][j] = (int) (100.0f * utilizationData[i][j]);
+				utilizationDataNormalized[i][j] = (int) (100.0f * utilizationData[i][j]);
+				idleDataNormalized[i][j] = (int) (100.0f * idleData[i][j]);
 			}
 		}
 		
@@ -396,7 +400,7 @@ class OverviewPanel extends ScalePanel.Child
 
 	protected void colorByUtil() {
 		mode = OverviewWindow.MODE_UTILIZATION;
-		applyColorMap(utilData, false);
+		applyColorMap(utilizationDataNormalized, false);
 	}
 	
 	

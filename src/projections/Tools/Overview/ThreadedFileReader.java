@@ -23,6 +23,7 @@ class ThreadedFileReader implements Runnable  {
 	
 	private int entryData[];       // [interval]  which EP is most prevalent in each interval
 	private float utilizationData[]; // [interval]  Utilization for each interval
+	private float idleData[];	// [interval] Idle times for each interval, used to initialize idleDataNormalized[] in OverviewPanel
 
 	
 	/** Construct a file reading thread that will determine the best EP representative for each interval
@@ -31,7 +32,7 @@ class ThreadedFileReader implements Runnable  {
 	 * @param utilizationData 
 	 *  
 	 *  */
-	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData){
+	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval, int[] entryData, float[] utilizationData, float[] idleData){
 		this.pe = pe;
 		this.intervalSize = intervalSize;
 		this.myRun = myRun;
@@ -40,6 +41,7 @@ class ThreadedFileReader implements Runnable  {
 //		this.ampiTraceOn = ampiTraceOn;
 		this.entryData = entryData;
 		this.utilizationData = utilizationData;
+		this.idleData = idleData;
 	}
 
 
@@ -100,25 +102,26 @@ class ThreadedFileReader implements Runnable  {
 			int[][] entryData = myUserEntryData[ep][LogReader.TIME];
 			for (int interval=0; interval<numIntervals; interval++) {
 				utilData[interval][ep] += entryData[0][interval];
-				utilData[interval][numEPs] -= entryData[0][interval]; // overhead -= work time										
+				utilData[interval][numEPs] -= entryData[0][interval]; // overhead -= work time
 			}
 		}
 
 		// Idle time SYS_IDLE=2
-		int[][] idleData = mySystemUsageData[2]; //percent
+		int[][] sysIdleData = mySystemUsageData[2]; //percent
 		for (int interval=0; interval<numIntervals; interval++) {
-			if(idleData[0] != null && idleData[0].length>interval){				
-				utilData[interval][numEPs+1] += idleData[0][interval] * 0.01 * intervalSize; // idle
-				utilData[interval][numEPs] -= idleData[0][interval] * 0.01 * intervalSize; //overhead -= idle time
+			if(sysIdleData[0] != null && sysIdleData[0].length>interval){				
+				utilData[interval][numEPs+1] += sysIdleData[0][interval] * 0.01 * intervalSize; // idle
+				utilData[interval][numEPs] -= sysIdleData[0][interval] * 0.01 * intervalSize; //overhead -= idle time
 				utilData[interval][numEPs] += intervalSize; // overhead
 			}
 		}
 		
 		
-		// Condense the utilization data down
+		// Condense the utilization and idle data down
 		for(int i=0; i<numIntervals; i++){
 			// Because we have already computed the overhead time. The utilization is 1.0 - overhead - idle
 			utilizationData[i] = (float) (1.0 - (utilData[i][numEPs] + utilData[i][numEPs+1])/(double)intervalSize);
+			idleData[i] = (float)(utilData[i][numEPs+1]/(double)intervalSize);
 		}
 		
 		// Now find the most commonly occurring EP for each interval

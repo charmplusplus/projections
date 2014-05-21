@@ -82,7 +82,7 @@ public class LogReader
     	else { //Processing an entry method
     		sysUsgData[SYS_CPU][curPeIdx][j-intervalStart] += extra;
     		if (byEntryPoint) {
-    			userEntries[MainWindow.runObject[myRun].getEntryIndex(currentEntry)][TIME][curPeIdx][j-intervalStart] += extra; 
+    			userEntries[MainWindow.runObject[myRun].getEntryIndex(currentEntry)][TIME][curPeIdx][j-intervalStart] += extra;
     			int catIdx = mtypeToCategoryIdx(currentMtype); 
     			if (catIdx!=-1) {
     				categorized[catIdx][TIME][curPeIdx][j-intervalStart] += extra;
@@ -308,10 +308,11 @@ public class LogReader
     		int nLines = 2;
 
     		GenericLogReader reader = new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
+
+		boolean isProcessing = false;
+		LogEntryData lastBeginData = null;
     		
     		try { 
-    			int nestingLevel = 0;
-    			
     			while (true) { //EndOfLogException will terminate loop
     				curData = reader.nextEvent();
     				nLines++;
@@ -324,24 +325,34 @@ public class LogReader
     							curData.entry, curData.time);
     					break;
     				case BEGIN_PROCESSING: 
-    					nestingLevel++;
-    					if(nestingLevel == 1){
-    						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
+    					if(isProcessing){
+						// We add a "pretend" end event to accomodate
+						// the prior begin processing event.
+						intervalCalc(END_PROCESSING, lastBeginData.mtype, lastBeginData.entry, curData.time);
     					}
+					// Normal case of handling EPs
+					isProcessing = true;
+					lastBeginData = null;
+					intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
+					lastBeginData = curData;
     					break;
     				case END_PROCESSING:
-    					nestingLevel--;
-    					if(nestingLevel == 0){
+    					if(isProcessing){
     						intervalCalc(curData.type, curData.mtype, curData.entry, curData.time);
-    					} else if(nestingLevel < 0){
-    						nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
-    					}
+					}
+					isProcessing = false;
     					break;
     				case ENQUEUE:
     					intervalCalc(curData.type, curData.mtype, 
     							0, curData.time);
     					break;
     				case END_COMPUTATION:
+					if (isProcessing) {
+						// If the last begin_processing has no end event,
+						// add a "pretend" end event.
+						intervalCalc(END_PROCESSING, lastBeginData.mtype, lastBeginData.entry, lastBeginData.time);
+					}
+					isProcessing = false;
     					fillToInterval(numIntervals);
     					break;
     				case BEGIN_TRACE:

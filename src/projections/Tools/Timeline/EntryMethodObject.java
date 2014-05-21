@@ -518,7 +518,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 							}
                         }
 					}
-				}while(!done && length < 25);
+				}while(!done && length < 8);
 			}
 			return v;
 		}

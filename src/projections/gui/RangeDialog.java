@@ -23,7 +23,16 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.SwingWorker;
 
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
@@ -148,13 +157,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			bRemoveFromHistory.setEnabled(false);
 		}
 
-	}
+	}	
 
 
-    //Temporarily hardcoded. The is the threshold of popping up warning for a large log file.
-    private final static long WARN_THRESHOLD = 12800000000L;
-
-    public void displayDialog() {
+	public void displayDialog() {
 		//  layout the dialog the first time it is used
 		if (!layoutComplete) {
 			addWindowListener(new WindowAdapter()
@@ -203,36 +209,16 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		initializeToolSpecificData();
 		pack();
 		setLocationRelativeTo(parentWindow);
+		setVisible(true);
 
-		int selectedNumCores;
-        long selectedTime;
-        long estTotalTime;
 
-        while(true){
-            setVisible(true);
-            if(dialogState == DIALOG_CANCELLED) {
-                break;
-            }
+		// This is after the dialog box is closed:
 
-            /** Store the newly chosen time/PE range */
-            storeRangeToPersistantStorage();
-
-            selectedNumCores = getNumSelectedProcessors();
-            selectedTime = getSelectedTotalTime();
-            estTotalTime = selectedNumCores * selectedTime;
-
-            //If a small range is selected, jump out of the loop
-            if(estTotalTime < WARN_THRESHOLD)
-                break;
-
-            int choice = JOptionPane.showConfirmDialog(this, "This analysis may take long time.\n " +
-                            "Do you want to continue?", "Warning",
-                    JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
-            );
-
-            if (choice == 0)
-                break;
-        }
+		/** Store the newly chosen time/PE range */
+		if(dialogState != DIALOG_CANCELLED){
+			// Store this new time range for future use by this or other dialog boxes
+			storeRangeToPersistantStorage();
+		}
 
 	}
 

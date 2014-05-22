@@ -33,6 +33,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
+import javax.swing.JOptionPane;
 
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
@@ -112,6 +113,9 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private int dialogState;
 	private boolean disableTimeRange = false;
 
+	//Temporarily hardcoded. The is the threshold of popping up warning for a large log file.
+	private final static long WARN_THRESHOLD = 12800000000L;
+
 	/**
 	 *  Constructor.
 	 *  
@@ -157,8 +161,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			bRemoveFromHistory.setEnabled(false);
 		}
 
-	}	
-
+	}
 
 	public void displayDialog() {
 		//  layout the dialog the first time it is used
@@ -209,16 +212,36 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		initializeToolSpecificData();
 		pack();
 		setLocationRelativeTo(parentWindow);
-		setVisible(true);
 
+		int selectedNumCores;
+		long selectedTime;
+		long estTotalTime;
 
-		// This is after the dialog box is closed:
+		while(true){
+			setVisible(true);
+			if(dialogState == DIALOG_CANCELLED) {
+				break;
+			}
+
+			selectedNumCores = getNumSelectedProcessors();
+			selectedTime = getSelectedTotalTime();
+			estTotalTime = selectedNumCores * selectedTime;
+
+			//If a small range is selected, jump out of the loop
+			if(estTotalTime < WARN_THRESHOLD)
+				break;
+
+			int choice = JOptionPane.showConfirmDialog(this, "This analysis may take a long time.\n " +
+							"Do you want to continue?", "Warning",
+					JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE
+			);
+
+			if (choice == 0)
+				break;
+		}
 
 		/** Store the newly chosen time/PE range */
-		if(dialogState != DIALOG_CANCELLED){
-			// Store this new time range for future use by this or other dialog boxes
-			storeRangeToPersistantStorage();
-		}
+		storeRangeToPersistantStorage();
 
 	}
 
@@ -627,41 +650,41 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 				} catch (IOException e1) {
 					System.err.println("Error: could not close log file reader for processor " + pe );
 				}
-			    				
+								
 				
 				return null;
 			}
 			
-		    public void done() {
-		    	stepsPanel.removeAll();
-					    	
-		    	// Create the first drop down menu
-		    	JComboBox popupStart = new JComboBox(availableStepStrings);
-		    	popupStart.setSelectedIndex(0);
-		    	popupStart.setEditable(false);
-		    	PopupHandler phStart = new PopupHandler();
-		    	phStart.useForStartTime();
-		    	popupStart.addActionListener(phStart);
-		    	   	
-		    	// Create the second drop down menu
-		    	JComboBox popupEnd = new JComboBox(availableStepStrings);
-		    	popupEnd.setSelectedIndex(availableStepStrings.size()-1);
-		    	popupEnd.setEditable(false);
-		    	PopupHandler phEnd = new PopupHandler();
-		    	phEnd.useForEndTime();
-		    	popupEnd.addActionListener(phEnd);
+			public void done() {
+				stepsPanel.removeAll();
+							
+				// Create the first drop down menu
+				JComboBox popupStart = new JComboBox(availableStepStrings);
+				popupStart.setSelectedIndex(0);
+				popupStart.setEditable(false);
+				PopupHandler phStart = new PopupHandler();
+				phStart.useForStartTime();
+				popupStart.addActionListener(phStart);
+					
+				// Create the second drop down menu
+				JComboBox popupEnd = new JComboBox(availableStepStrings);
+				popupEnd.setSelectedIndex(availableStepStrings.size()-1);
+				popupEnd.setEditable(false);
+				PopupHandler phEnd = new PopupHandler();
+				phEnd.useForEndTime();
+				popupEnd.addActionListener(phEnd);
 
-		    	// Assemble these drop down manus with some labels into stepsPanel		    	
-		    	stepsPanel.setLayout(new GridBagLayout());
-		    	GridBagConstraints gbc = new GridBagConstraints();    	
-		    	Util.gblAdd(stepsPanel, new JLabel("Choose a start time:",JLabel.RIGHT), gbc, 0, 0, 1,1, 1,1, 1,1,1,1);
-		    	Util.gblAdd(stepsPanel, popupStart, gbc, 1, 0, 1,1, 1,1, 1,1,1,1);
-		    	Util.gblAdd(stepsPanel, new JLabel("Choose an end time:",JLabel.RIGHT), gbc, 0, 1, 1,1, 1,1, 1,1,1,1);
-		    	Util.gblAdd(stepsPanel, popupEnd, gbc, 1, 1, 1,1, 1,1, 1,1,1,1);
-		    			
+				// Assemble these drop down manus with some labels into stepsPanel		    	
+				stepsPanel.setLayout(new GridBagLayout());
+				GridBagConstraints gbc = new GridBagConstraints();    	
+				Util.gblAdd(stepsPanel, new JLabel("Choose a start time:",JLabel.RIGHT), gbc, 0, 0, 1,1, 1,1, 1,1,1,1);
+				Util.gblAdd(stepsPanel, popupStart, gbc, 1, 0, 1,1, 1,1, 1,1,1,1);
+				Util.gblAdd(stepsPanel, new JLabel("Choose an end time:",JLabel.RIGHT), gbc, 0, 1, 1,1, 1,1, 1,1,1,1);
+				Util.gblAdd(stepsPanel, popupEnd, gbc, 1, 1, 1,1, 1,1, 1,1,1,1);
+						
 				stepsPanel.invalidate();
 				pack();
-		    }
+			}
 		};
 
 		worker.execute();

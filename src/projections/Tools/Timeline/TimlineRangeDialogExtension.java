@@ -13,6 +13,7 @@ import javax.swing.JPanel;
 import projections.gui.RangeDialog;
 import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.TimeTextField;
+import projections.gui.JIntTextField;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by adding GUI components for filtering out data. */
 class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener
@@ -24,6 +25,9 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 
 	protected JCheckBox dialogEnableMsgFiltering;
 	protected JCheckBox dialogEnableUserEventFiltering;
+
+	protected JCheckBox dialogEnableTopTimes;
+	protected JIntTextField dialogAmountTopTimes;
 
 	
 	private class LeftAlignedPanel extends JPanel {
@@ -37,30 +41,45 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 	/** Create a panel of input items specific to the timeline tool */
 	public TimlineRangeDialogExtension() {
 
-			JPanel p = this;
-		    p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
+		JPanel p = this;
+		p.setLayout(new BoxLayout(p, BoxLayout.PAGE_AXIS));
 		    
-		    // Create a JPanel for filtering out small entry methods
-		    JPanel p1 = new JPanel();
-		    p1.setLayout(new BoxLayout(p1, BoxLayout.LINE_AXIS));
-		    dialogEnableEntryFiltering = new JCheckBox();
-		    p1.add(dialogEnableEntryFiltering);
-		    p1.add(new JLabel("Filter out entries shorter than"));
-		    dialogMinEntryFiltering = new TimeTextField("30us", 7);
-			dialogMinEntryFiltering.setEditable(false);
-		    p1.add(dialogMinEntryFiltering);
-		    p1.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
-		    p1.add(Box.createHorizontalGlue());
-		    dialogEnableEntryFiltering.addItemListener(this);
+		// Create a JPanel for filtering out small entry methods
+		JPanel p1 = new JPanel();
+		p1.setLayout(new BoxLayout(p1, BoxLayout.LINE_AXIS));
+		dialogEnableEntryFiltering = new JCheckBox();
+		p1.add(dialogEnableEntryFiltering);
+		p1.add(new JLabel("Filter out entries shorter than"));
+		dialogMinEntryFiltering = new TimeTextField("30us", 7);
+		dialogMinEntryFiltering.setEditable(false);
+		p1.add(dialogMinEntryFiltering);
+		p1.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
+		p1.add(Box.createHorizontalGlue());
+		dialogEnableEntryFiltering.addItemListener(this);
 		    
-		    dialogEnableMsgFiltering = new JCheckBox("Filter out messages");
+		dialogEnableMsgFiltering = new JCheckBox("Filter out messages");
 		    
-		    dialogEnableUserEventFiltering = new JCheckBox("Filter out user events");
+		dialogEnableUserEventFiltering = new JCheckBox("Filter out user events");
+
+		//create JPanel for filtering longest methods		
+		JPanel p2 = new JPanel();
+		p2.setLayout(new BoxLayout(p2, BoxLayout.LINE_AXIS));
+		dialogEnableTopTimes = new JCheckBox();
+		p2.add(dialogEnableTopTimes);
+		p2.add(new JLabel("Highlight the top "));
+		dialogAmountTopTimes = new JIntTextField(10,5);
+		dialogAmountTopTimes.setEditable(false);
+		p2.add(dialogAmountTopTimes);
+		p2.add(new JLabel(" longest idle and entry times"));
+		p2.add(Box.createHorizontalStrut(200)); // Add some empty space so that the textbox isn't huge
+		p2.add(Box.createHorizontalGlue());
+		dialogEnableTopTimes.addItemListener(this);
 		    
-		    // Put the various rows into the panel
-		    p.add(p1);
-		    p.add(new LeftAlignedPanel(dialogEnableMsgFiltering));
-		    p.add(new LeftAlignedPanel(dialogEnableUserEventFiltering));
+		// Put the various rows into the panel
+		p.add(p1);
+		p.add(new LeftAlignedPanel(dialogEnableMsgFiltering));
+		p.add(new LeftAlignedPanel(dialogEnableUserEventFiltering));
+	  	p.add(p2);
 
 
 	}
@@ -68,10 +87,15 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 	
 	
 	public void itemStateChanged(ItemEvent evt) {
-		if(evt.getSource() == dialogEnableEntryFiltering){
+		if(evt.getSource() == dialogEnableEntryFiltering)
+		{
 			dialogMinEntryFiltering.setEditable(dialogEnableEntryFiltering.isSelected());
-			return;
+		}		
+		if(evt.getSource() == dialogEnableTopTimes)
+		{	
+			dialogAmountTopTimes.setEditable(dialogEnableTopTimes.isSelected());
 		}
+			return;
 	}
 	
 

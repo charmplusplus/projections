@@ -784,7 +784,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		if(isDisplayed() == false){
 			return;
 		}
-		
+
 		// If this is an idle time region, we may not display it
 		if 	(isIdleEvent() && data.showIdle() == false) 
 			return;
@@ -819,7 +819,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		// Dim this object if we want to focus on some objects (for some reason or another)
 		if(data.isObjectDimmed(this)){
-			c = makeMoreLikeBackground(c);
+			if (isIdleEvent()) c = Color.lightGray;
+			else c = makeMoreLikeBackground(c);
 		}
 		
 		

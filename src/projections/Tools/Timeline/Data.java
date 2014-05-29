@@ -3,6 +3,7 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.text.DecimalFormat;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -25,6 +26,12 @@ import java.util.logging.Level;
 
 import javax.swing.ProgressMonitor;
 import javax.swing.ToolTipManager;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
 import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
@@ -251,6 +258,15 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** Only load entry methods that have  at least this duration */
 	private long minEntryDuration;
 
+	/** If true, we will display the top idle and entry times for this range */
+	private boolean displayTopTimes;
+
+	/** Only display the top X longest idle and entry times */
+	private int amountTopTimes;
+
+	/** Used to display the list of longest idle and entry times */
+	private String topTimesText;
+
 	/** The font used by the LabelPanel */
 	protected Font labelFont;
 	/** The font used by the time labels on the TimelineAxisCanvas */
@@ -341,7 +357,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		skipIdleRegions = false;
 		skipLoadingMessages = false;
 		skipLoadingUserEvents = false;
+		displayTopTimes = false;
 		minEntryDuration = 0;
+		amountTopTimes = 0;
 
 		// Get the list of PEs to display
 		loadGlobalPEList();
@@ -590,21 +608,65 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 				packUsage[p] = 0;
 			}
 
-
+			EntryMethodObject[] idleArray = new EntryMethodObject[amountTopTimes()];
+			EntryMethodObject[] entryArray = new EntryMethodObject[amountTopTimes()];
+			long[] objEndTimes = new long[amountTopTimes()];
+			//long[] idleEndTimes = new long[amountTopTimes()];
 			for(Integer pe : allEntryMethodObjects.keySet()) {	
-				for(EntryMethodObject obj : allEntryMethodObjects.get(pe)){
+				for(EntryMethodObject obj : allEntryMethodObjects.get(pe))
+				{
 
 					float usage = obj.getUsage();
 					int entryIndex = obj.getEntryIndex();
 
 
-					if (entryIndex >=0) {
+					if (entryIndex >=0)
+					{
 						entries[entryIndex]++;
 						processorUsage[pe.intValue()] += usage;
 						packUsage[pe.intValue()] += obj.getPackUsage();
 						entryUsageArray[entryIndex] += obj.getNonPackUsage();
-					} else {
+						if (displayTopTimes())
+						{
+							for (int i = 0; i < amountTopTimes(); i++)//Finds the top X longest entry methods
+							{
+								if ((entryArray[i] == null) || ((obj.getEndTime() - obj.getBeginTime()) > (entryArray[i].getEndTime() - entryArray[i].getBeginTime())))
+								{
+									for (int j = amountTopTimes()-1; j > i; j--)
+									{
+										entryArray[j] = entryArray[j-1];
+									}
+									entryArray[i] = obj;
+									break;
+								}
+							}
+						}
+					}
+					else
+					{
 						idleUsage[pe.intValue()] += usage;
+						if (displayTopTimes())
+						{
+							long objEndTimeLong = obj.getEndTime();//prevents bug where end time >= Long.MAX_VALUE
+							if (objEndTimeLong > endTime())
+							{
+								objEndTimeLong = endTime();
+							}
+							for (int i = 0; i < amountTopTimes(); i++)//Finds the top X longest idle sessions
+							{	
+								if ((idleArray[i] == null) || ((objEndTimeLong - obj.getBeginTime()) > (objEndTimes[i] - idleArray[i].getBeginTime())))
+								{
+									for (int j = amountTopTimes()-1; j > i; j--)//doubly linked list would work better
+									{
+										idleArray[j] = idleArray[j-1];
+										objEndTimes[j] = objEndTimes[j-1];
+									}
+									idleArray[i] = obj;
+									objEndTimes[i] = objEndTimeLong;
+									break;
+								}
+							}
+						}
 					}
 
 				}
@@ -617,7 +679,39 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					}
 				}
 
-			} 
+			}
+
+			if (displayTopTimes())
+			{			
+				topTimesText = "<html>";
+				topTimesText+="The longest idle times in descending order are: <br>";
+				Set<EntryMethodObject> longestObjectsSet = new HashSet<EntryMethodObject>();
+				for (int i = 0; i < amountTopTimes(); i++)
+				{
+					if ((idleArray[i] == null) || (idleArray[i].getBeginTime() == objEndTimes[i]))
+					{
+						break;
+					}
+					topTimesText+=(i+1 +": " + (objEndTimes[i] - idleArray[i].getBeginTime()));
+					topTimesText+=(" Begin: " + idleArray[i].getBeginTime() + " End: " + objEndTimes[i] + " PE: " + idleArray[i].pe + "<br>");
+					longestObjectsSet.add(idleArray[i]);
+				}
+
+				topTimesText+="<br>";
+				topTimesText+=("The longest entry times in descending order are: <br>");
+				for (int i = 0; i < amountTopTimes(); i++)
+				{
+					if (entryArray[i] == null) break;
+					topTimesText+=(i+1 +": " + (entryArray[i].getEndTime() - entryArray[i].getBeginTime()));
+					topTimesText+=(" Begin: " + entryArray[i].getBeginTime() + " End: " + entryArray[i].getEndTime());
+					topTimesText+=(" PE: " + entryArray[i].pe + " Name: " + MainWindow.runObject[myRun].getEntryFullNameByID(entryArray[i].getEntryID()) + "<br>");
+					longestObjectsSet.add(entryArray[i]);
+				}
+				topTimesText+="</html>";
+				HashSet<Object> objsToHilite = new HashSet<Object>();
+				objsToHilite.addAll(longestObjectsSet);
+				highlightObjects(objsToHilite);
+			}
 
 			// Spawn a thread that computes some secondary message related data structures
 			messageStructures.create(useHelperThreads);
@@ -1541,6 +1635,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return showUserEvents;
 	}
 
+	protected void restoreHighlights() {
+		clearObjectHighlights();
+		displayMustBeRepainted();
+	}
 
 	protected void setColorByDefault() {
 		colorByObjectId = false;
@@ -2265,6 +2363,42 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		return skipLoadingUserEvents;
 	}
 
+	protected void displayTopTimes(boolean b){
+		displayTopTimes = b;
+	}
+
+	private boolean displayTopTimes(){
+		return displayTopTimes;
+	}
+
+	private int amountTopTimes(){
+		return amountTopTimes;
+	}
+
+	protected void amountTopTimes(int i){
+		amountTopTimes = i;
+	}
+
+	protected void displayTopTimesText() {
+		if (topTimesText == null)//if the user didn't select to display the top N longest times, then tell them they need to first do that
+		{
+			JOptionPane.showMessageDialog(null, "You must first choose to display the longest idle and entry methods in the Ranges menu.", "Error", 				JOptionPane.ERROR_MESSAGE); 
+		}
+		else
+		{
+			JFrame frame = new JFrame("Top " + amountTopTimes() + " Idle and Entry Times");
+			frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+			JLabel lbl = new JLabel(topTimesText);
+			JPanel pnl = new JPanel();
+			pnl.add(lbl);
+			JScrollPane scp = new JScrollPane(pnl, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			scp.getVerticalScrollBar().setUnitIncrement(16);
+			frame.add(scp);
+			frame.setSize(500,400);
+			frame.setVisible(true);
+		}
+
+	}
 
 	private void pruneOutMessages() {
 		MainWindow.performanceLogger.log(Level.INFO,"pruneOutMessages");

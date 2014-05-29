@@ -90,6 +90,7 @@ ItemListener {
 	private JMenuItem mColorChooser;
 	private JMenuItem mSaveColors;
 	private JMenuItem mRestoreColors;
+	private JMenuItem mHighlightRestore;
 
 	private JMenuItem mColorByDefault;
 	private JMenuItem mColorByObjectID;
@@ -111,6 +112,8 @@ ItemListener {
 	
 
 	private JMenuItem mDisplayLegend;
+
+	private JMenuItem mDisplayTopTimesText;
 	
 	protected WindowControls(TimelineWindow parentWindow_,
 			Data data_) {
@@ -154,6 +157,11 @@ ItemListener {
 						data.setFilterEntryShorterThan(toolSpecificDialogPanel.dialogMinEntryFiltering.getValue());
 					}
 					parentWindow.data.skipLoadingUserEvents(toolSpecificDialogPanel.dialogEnableUserEventFiltering.isSelected());
+					parentWindow.data.displayTopTimes(toolSpecificDialogPanel.dialogEnableTopTimes.isSelected());
+
+					if(toolSpecificDialogPanel.dialogEnableTopTimes.isSelected()){
+						data.amountTopTimes(toolSpecificDialogPanel.dialogAmountTopTimes.getValue());	
+					}
 
 					parentWindow.mainPanel.loadTimelineObjects(true, parentWindow, true);
 					cbUserTable.setText("View " + data.getNumUserEvents() + " User Events");
@@ -340,6 +348,10 @@ ItemListener {
 			new ChooseEntriesWindow(data, true, data);
 		}
 
+		else if(c == mHighlightRestore){
+			data.restoreHighlights();
+		}
+
 		else if(c == mColorByDefault) {
 			MainWindow.runObject[myRun].setDefaultColors();
 			data.displayMustBeRepainted();
@@ -394,6 +406,10 @@ ItemListener {
 		
 		else if(c == mDisplayLegend){
 			data.displayLegend();
+		}
+
+		else if(c == mDisplayTopTimesText){
+			data.displayTopTimesText();
 		}
 		
 		else if(c == mDetermineTimeRangesUserSupplied){
@@ -493,6 +509,7 @@ ItemListener {
 		mSaveColors = new JMenuItem("Save Entry Point Colors");
 		mRestoreColors = new JMenuItem("Restore Entry Point Colors");
 		mColorChooser = new JMenuItem("Choose Entry Point Colors");
+		mHighlightRestore = new JMenuItem("Restore Highlighting");
 		
 		
 		mColorByDefault = new JMenuItem("Color by Default");
@@ -513,6 +530,7 @@ ItemListener {
 		colorMenu.add(mSaveColors);
 		colorMenu.add(mRestoreColors);
 		colorMenu.add(mColorChooser);
+		colorMenu.add(mHighlightRestore);
 		colorMenu.addSeparator();
 		colorMenu.add(mColorByDefault);
 		colorMenu.add(mColorByEntryMethod);
@@ -530,6 +548,7 @@ ItemListener {
 		mSaveColors.addActionListener(this);
 		mRestoreColors.addActionListener(this);
 		mColorChooser.addActionListener(this);
+		mHighlightRestore.addActionListener(this);
 		mColorByDefault.addActionListener(this);
 		mColorByObjectID.addActionListener(this);
 		mColorByEntryMethod.addActionListener(this);
@@ -613,6 +632,10 @@ ItemListener {
 		mDisplayLegend = new JMenuItem("Display Legend");
 		mDisplayLegend.addActionListener(this);
 		viewMenu.add(mDisplayLegend);
+
+		mDisplayTopTimesText = new JMenuItem("Display List of Longest Entry and Idle Times");
+		mDisplayTopTimesText.addActionListener(this);
+		viewMenu.add(mDisplayTopTimesText);
 		
 		mbar.add(viewMenu);
 

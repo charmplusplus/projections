@@ -562,16 +562,43 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		else if (evt.getSource() == bAddToHistory) {
 			long start = getStartTime();
 			long end = getEndTime();
-			history.add(start, end);
-			String historyString = U.humanReadableString(start) + " to " + U.humanReadableString(end);
-			historyList.insertItemAt(historyString,0);
-			historyList.setSelectedIndex(0);
+			String procRange = processorsField.getValue().listToString();
+			boolean invalidName = true;
+			String s = "";
+			while (invalidName)
+			{
+				s = JOptionPane.showInputDialog(null, "Enter a name for this time range,"
+					+ " or leave blank. \nDo not use spaces," +
+					" \"cancel\", \"ENTRY\", or \"NAMEENTRY\".");
+				if (s == null)
+				{
+					s = "cancel";
+					break;
+				}
+				if (!s.contains(" ")) invalidName = false;
+				if (s.equals("ENTRY") || s.equals("NAMEENTRY") || s.equals("cancel")) invalidName=true;
+			}
+			if (!s.equals("cancel"))
+			{
+				String historyString = U.humanReadableString(start) + " to " + U.humanReadableString(end);
+				if (procRange.length() > 10) historyString += " Procs: " + procRange.substring(0,10)+"...";
+				else historyString += " Procs: " + procRange;
+				if (!s.equals(""))
+				{
+					if (s.length() > 10) historyString += " (" + s.substring(0,10)+"...)";
+					else historyString += " (" + s + ")";
+				}
+				history.add(start, end, s, procRange);
+				historyList.insertItemAt(historyString,0);
+				historyList.setSelectedIndex(0);
+			}
 		} 
 
 		else if (evt.getSource()  == bRemoveFromHistory) {
 			int selected = historyList.getSelectedIndex();
 			if (selected != -1) {
 				history.remove(selected);
+				historyList.setSelectedIndex(-1);
 				historyList.removeItemAt(selected);
 			}
 		}
@@ -591,6 +618,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			}
 			startTimeField.setValue(history.getStartValue(selection));
 			endTimeField.setValue(history.getEndValue(selection));
+			String procRange = history.getProcRange(selection);
+			if (procRange != null) processorsField.setText(history.getProcRange(selection));
 		}
 
 		someInputChanged();

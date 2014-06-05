@@ -1,22 +1,26 @@
 package projections.Tools.Timeline;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import projections.gui.JIntTextField;
+import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.RangeDialogExtensionPanel;
 import projections.gui.TimeTextField;
-import projections.gui.JIntTextField;
 
 /** A JPanel that can be used to extend the standard RangeDialog dialog box by adding GUI components for filtering out data. */
-class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener
+class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements ItemListener, ActionListener
 {
 
 	// Additional GUI objects
@@ -28,6 +32,12 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 
 	protected JCheckBox dialogEnableTopTimes;
 	protected JIntTextField dialogAmountTopTimes;
+
+	protected JButton dialogAdjustRanges;
+
+	protected RangeDialog parent;
+
+	private int myRun = 0;
 
 	
 	private class LeftAlignedPanel extends JPanel {
@@ -61,7 +71,10 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		    
 		dialogEnableUserEventFiltering = new JCheckBox("Filter out user events");
 
-		//create JPanel for filtering longest methods		
+		dialogAdjustRanges = new JButton("Adjust ranges to show useful information");
+		dialogAdjustRanges.addActionListener(this);
+
+		//create JPanel for filtering longest methods
 		JPanel p2 = new JPanel();
 		p2.setLayout(new BoxLayout(p2, BoxLayout.LINE_AXIS));
 		dialogEnableTopTimes = new JCheckBox();
@@ -79,7 +92,8 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		p.add(p1);
 		p.add(new LeftAlignedPanel(dialogEnableMsgFiltering));
 		p.add(new LeftAlignedPanel(dialogEnableUserEventFiltering));
-	  	p.add(p2);
+		p.add(p2);
+		p.add(new LeftAlignedPanel(dialogAdjustRanges));
 
 
 	}
@@ -90,17 +104,26 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		if(evt.getSource() == dialogEnableEntryFiltering)
 		{
 			dialogMinEntryFiltering.setEditable(dialogEnableEntryFiltering.isSelected());
-		}		
+		}
 		if(evt.getSource() == dialogEnableTopTimes)
-		{	
+		{
 			dialogAmountTopTimes.setEditable(dialogEnableTopTimes.isSelected());
 		}
-			return;
+		return;
 	}
-	
+
+	public void actionPerformed(ActionEvent event){
+		if (event.getSource() == dialogAdjustRanges)
+		{
+			long adjustedTime = MainWindow.runObject[myRun].findEarliestBeginEventTime(parent.getSelectedProcessors(), MainWindow.runObject[myRun].getValidProcessorList());
+			if (parent.getStartTime() < adjustedTime) parent.setStartTime(adjustedTime);
+			adjustedTime = MainWindow.runObject[myRun].findLatestEndEventTime(parent.getSelectedProcessors(), MainWindow.runObject[myRun].getValidProcessorList());
+			if (parent.getEndTime() > adjustedTime) parent.setEndTime(adjustedTime);
+		}
+	}
 
 	public void setParentDialogBox(RangeDialog parent) {
-//		this.parent = parent;	
+		this.parent = parent;
 	}
 
 

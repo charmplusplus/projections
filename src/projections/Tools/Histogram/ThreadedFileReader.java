@@ -136,7 +136,7 @@ class ThreadedFileReader implements Runnable  {
 		countData[HistogramWindow.TYPE_TIME] = new double[timeNumBins+1][numEPs];
 		countData[HistogramWindow.TYPE_ACCTIME] = new double[timeNumBins+1][numEPs];
 		countData[HistogramWindow.TYPE_MSG_SIZE] = new double[msgNumBins+1][numEPs];
-		countData[HistogramWindow.TYPE_IDLE_PERC] = new double[idleNumBins+1][numEPs];//added this
+		countData[HistogramWindow.TYPE_IDLE_PERC] = new double[idleNumBins+1][numEPs];
 
 		int curPeCount = 0;
 
@@ -147,6 +147,7 @@ class ThreadedFileReader implements Runnable  {
 			int nestingLevel = 0;
 			boolean logEnd = false;
 			LogEntryData prevBegin = null;
+			LogEntryData prevIdleBegin = null;
 			
 			while (true) 
 			{ // EndOfLogException will terminate loop when end of log file is reached
@@ -170,7 +171,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0;
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 							break;
 						}
 						
@@ -230,7 +235,11 @@ class ThreadedFileReader implements Runnable  {
 							if (idleTargetBin >= 0)
 							{
 								idleTargetBin = (int)(idleTargetBin/idleBinSize);
-								countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0;
+								if (idleTargetBin >= idleNumBins)
+								{
+									idleTargetBin = idleNumBins;
+								}
+								countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 								break;
 							}
 						}
@@ -245,8 +254,8 @@ class ThreadedFileReader implements Runnable  {
                 
 				case ProjDefs.BEGIN_IDLE:
 					if (logEnd == true) break;
-					prevBegin = logdata;
-					idleStart = prevBegin.time;
+					prevIdleBegin = logdata;
+					idleStart = prevIdleBegin.time;
 					if (logdata.time >= endTime)
 					{
 						logEnd = true;
@@ -256,7 +265,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0;
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 							break;
 						}
 					}
@@ -269,9 +282,9 @@ class ThreadedFileReader implements Runnable  {
 					{
 						if (idleStart <= startTime)//idleStart <= startTime <= endIdle <= endTime
 						{
-							prevBegin.time = startTime;
+							prevIdleBegin.time = startTime;
 						}
-						executionTime = logdata.time - prevBegin.time;
+						executionTime = logdata.time - prevIdleBegin.time;
                         			adjustedTime = executionTime - timeMinBinSize;
                         			// respect user threshold
                         			if (adjustedTime >= 0)
@@ -322,7 +335,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0;
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 							break;
 						}
 					}
@@ -330,7 +347,7 @@ class ThreadedFileReader implements Runnable  {
 					{
 						//nothing is added to idle times because OST hasnt started yet
 					}
-					prevBegin = null;
+					prevIdleBegin = null;
 					break;	
 
 				case ProjDefs.CREATION:
@@ -361,7 +378,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0; 
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 						}
 					}
 					else if (logdata.time <= startTime)
@@ -371,7 +392,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0; 
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 						}
 					}
 					else
@@ -381,7 +406,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0; 
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 						}
 					}
 					break;
@@ -397,7 +426,11 @@ class ThreadedFileReader implements Runnable  {
 						if (idleTargetBin >= 0)
 						{
 							idleTargetBin = (int)(idleTargetBin/idleBinSize);
-							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][numEPs-1] += 1.0;
+							if (idleTargetBin >= idleNumBins)
+							{
+								idleTargetBin = idleNumBins;
+							}
+							countData[HistogramWindow.TYPE_IDLE_PERC][idleTargetBin][0] += 1.0;
 							break;
 						}
 					}
@@ -450,6 +483,7 @@ class ThreadedFileReader implements Runnable  {
 		{
 			int nestingLevel = 0;
 			LogEntryData prevBegin = null;
+			LogEntryData prevIdleBegin = null;
 			
 			while (true)
 			{ // EndOfLogException will terminate loop when end of log file is reached
@@ -489,13 +523,14 @@ class ThreadedFileReader implements Runnable  {
 					break;
 
                 		case ProjDefs.BEGIN_IDLE:
-					prevBegin = logdata;
+					prevIdleBegin = logdata;
 					break;
 
                 		case ProjDefs.END_IDLE:
+					if (prevIdleBegin == null) break;
                     			if(logdata.time >= startTime && logdata.time <= endTime)
 					{
-                        			executionTime = logdata.time - prevBegin.time;
+                        			executionTime = logdata.time - prevIdleBegin.time;
                         			_sun_execution_time[0][numEPs-1] += executionTime;
                         			if(_sun_execution_time[1][numEPs-1] < executionTime)
                             			_sun_execution_time[1][numEPs-1] = executionTime;
@@ -504,7 +539,7 @@ class ThreadedFileReader implements Runnable  {
                         			_sun_execution_time[3][numEPs-1]++;
                         			System.out.println("idle time is " + executionTime );
                     			}
-                    			prevBegin = null;	
+                    			prevIdleBegin = null;
 					break;
 
 

@@ -87,7 +87,7 @@ class ThreadedFileReader implements Runnable  {
 				}
 			} else {
 
-				int nestingLevel = 0;
+				boolean isProcessing = false;
 				LogEntryData prevBeginProc = null;
 				LogEntryData prevBeginIdle = null;
 
@@ -106,15 +106,25 @@ class ThreadedFileReader implements Runnable  {
 						break;
 
 					case ProjDefs.BEGIN_PROCESSING:
-						nestingLevel++;
-						if(nestingLevel == 1){
-							prevBeginProc = logData;
+						if (isProcessing)
+						{
+						// We add a "pretend" end event to accomodate
+						// the prior begin processing event.
+						if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4 || selectedAttribute == 5 || selectedAttribute == 6 || selectedAttribute == 7)
+							{
+								if (logData.time <= endTime && logData.time >= startTime)
+								{
+									if (prevBeginProc.time < startTime) prevBeginProc.time = startTime;
+									myData[prevBeginProc.entry] += logData.time - prevBeginProc.time;
+								}
+							}
 						}
+						isProcessing = true;
+						prevBeginProc = logData;
 						break;
 
 					case ProjDefs.END_PROCESSING:
-						nestingLevel--;
-						if(nestingLevel == 0){
+						if(isProcessing){
 							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6|| selectedAttribute == 7) {
 								if (logData.time <= endTime && logData.time >= startTime) {
 									if (prevBeginProc.time < startTime)
@@ -123,14 +133,28 @@ class ThreadedFileReader implements Runnable  {
 								}
 							}
 							prevBeginProc = null;	
-						} else if(nestingLevel < 0){
-							nestingLevel = 0; // Reset to 0 because we didn't get to see an appropriate matching BEGIN_PROCESSING.
-							prevBeginProc = null;
 						}
+						isProcessing = false;
 						break;
 
 					case ProjDefs.BEGIN_IDLE:
 						// Assume Idles are never nested
+						if (isProcessing)
+						{
+						// We add a "pretend" end event to accomodate
+						// the prior begin processing event.
+						if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4 || selectedAttribute == 5 || selectedAttribute == 6 || selectedAttribute == 7)
+							{
+								if (logData.time <= endTime && logData.time >= startTime)
+								{
+									if (prevBeginProc.time < startTime) prevBeginProc.time = startTime;
+									myData[prevBeginProc.entry] += logData.time - prevBeginProc.time;
+									prevBeginProc = null;
+									isProcessing = false;
+								}
+							}	
+						}
+						isProcessing = false;
 						prevBeginIdle = logData;
 						break;
 
@@ -146,8 +170,23 @@ class ThreadedFileReader implements Runnable  {
 						prevBeginIdle = null;
 						break;
 
+					case ProjDefs.END_COMPUTATION:
+						if (isProcessing)
+						{
+							// If the last begin_processing has no end event,
+							// add a "pretend" end event.
+							if (selectedAttribute == 0 || selectedAttribute == 1 || selectedAttribute == 4||  selectedAttribute == 5||selectedAttribute == 6|| selectedAttribute == 7) {
+								if (logData.time <= endTime && logData.time >= startTime) {
+									if (prevBeginProc.time < startTime)
+										prevBeginProc.time = startTime;
+									myData[prevBeginProc.entry] += logData.time - prevBeginProc.time;
+								}
+							}
+							prevBeginProc = null;
+						}
+						isProcessing = false;
+						break;
 					}
-
 				}
 
 			}

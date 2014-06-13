@@ -963,7 +963,7 @@ Clickable
 			String arg = ((JMenuItem)e.getSource()).getText();
 			if (arg.equals("Close")) {
 				close();
-			} else if(arg.equals("Select Processors")) {
+			} else if(arg.equals("Set Range")) {
 				showDialog();
 			}
 		}

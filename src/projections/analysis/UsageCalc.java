@@ -64,7 +64,9 @@ public class UsageCalc extends ProjDefs
 		case END_PROCESSING:
 			// curEntry == -1 means that there was no corresponding 
 			// BEGIN_PROCESSING event, if so ignore the entrypoint
-			if (curEntry != -1)		
+			if (curEntry == -1) break;
+			curEntry = MainWindow.runObject[myRun].getEntryIndex(entry);
+			if (curEntry != -1)
 				data[0][curEntry] += 
 					((time - startTime) - packtime - unpacktime);
 			break;
@@ -254,24 +256,33 @@ public class UsageCalc extends ProjDefs
 		startTime = 0;
 		long time=0;
 		boolean isProcessing = false;
+		LogEntryData lastBeginData = null;
+		long prevTime = 0;
 		try { 
 			while (time<endTime) { //EOF exception terminates loop
 				logEntry = reader.nextEvent();
 				time = logEntry.time;
 				switch(logEntry.type) {
 				case BEGIN_IDLE: case END_IDLE:
+					if (isProcessing) {
+						intervalCalc(data, END_PROCESSING, lastBeginData.entry, logEntry.time);
+						isProcessing = false;
+						lastBeginData = null;
+					}
+					intervalCalc(data, logEntry.type, 0, time);
+					break;
 				case BEGIN_PACK: case END_PACK:
 				case BEGIN_UNPACK: case END_UNPACK:
 					intervalCalc(data, logEntry.type, 0, time);
 					break;
-				case BEGIN_PROCESSING: 
+				case BEGIN_PROCESSING:
 					if (isProcessing) {
-						// bad, ignore.
-						break;
+						intervalCalc(data, END_PROCESSING, lastBeginData.entry, logEntry.time);
 					}
 					intervalCalc(data, logEntry.type, 
 							logEntry.entry, time);
 					isProcessing = true;
+					lastBeginData = logEntry;
 					break;
 				case END_PROCESSING:
 					if (!isProcessing) {

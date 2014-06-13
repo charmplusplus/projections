@@ -479,11 +479,11 @@ class ProfileGraph extends JPanel
                 int intSH = ((int)sH)==0?1:(int)sH;
                 //sometimes the presenting data will be overflow due to the error in input
                 //so cut the overflow part, keep a bit higher than 100%
-                if(barStartY - intSH>gTitleH-5){                
+                if(barStartY - intSH>gTitleH){
                     g.fillRect((int)barStartX, (int)(barStartY-intSH), (int)barWidth, intSH);
                 }
                 else{                    
-                    g.fillRect((int)barStartX, gTitleH-5, (int)barWidth, (int)barStartY-gTitleH+5);
+                    g.fillRect((int)barStartX, gTitleH, (int)barWidth, (int)barStartY-gTitleH);
                     break;
                 }
                        

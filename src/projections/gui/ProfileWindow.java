@@ -2,6 +2,8 @@ package projections.gui;
 
 import java.io.*;
 import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.Paint;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -30,9 +32,10 @@ import javax.swing.event.ChangeListener;
 
 import projections.analysis.AmpiFunctionData;
 import projections.analysis.AmpiProcessProfile;
+import projections.gui.ChooseEntriesWindow;
 
 class ProfileWindow extends ProjectionsWindow
-    implements ActionListener, ChangeListener
+    implements ActionListener, ChangeListener, ColorUpdateNotifier
 {
 
 	private static final int NUM_SYS_EPS = 3;
@@ -381,37 +384,17 @@ class ProfileWindow extends ProjectionsWindow
 
 
     private void showChangeColorDialog() {
-//        int noEPs = MainWindow.runObject[myRun].getNumUserEntries();
-//        if (entryDialog == null) {
-//            String typeLabelStrings[] = {"Entry Points"};
-//
-//            boolean existsArray[] =
-//                new boolean[noEPs+NUM_SYS_EPS];
-//            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
-//                existsArray[i] = true;
-//            }
-//
-//            boolean stateArray[] =
-//                new boolean[noEPs+NUM_SYS_EPS];
-//            for (int i=0; i<noEPs+NUM_SYS_EPS; i++) {
-//                stateArray[i] = true;
-//            }
-//
-//            String entryNames[] =
-//                new String[noEPs+NUM_SYS_EPS];
-//            for (int i=0; i<noEPs; i++) {
-//                entryNames[i] =
-//                    MainWindow.runObject[myRun].getEntryNameByIndex(i);
-//            }
-//            // cannot seem to avoid a hardcode
-//            entryNames[noEPs] = "Pack Time";
-//            entryNames[noEPs+1] = "Unpack Time";
-//            entryNames[noEPs+2] = "Idle Time";
-//
-//            entryDialog = new EntrySelectionDialog(this, typeLabelStrings, stateArray, colors, existsArray, entryNames);
-//        }
-//        entryDialog.showDialog();
+		new ChooseEntriesWindow(this);
     }
+
+	public void colorsHaveChanged() {
+		colorsSet = false;
+		setDisplayProfileData();
+		if (ampiTraceOn)
+		{
+    			setAmpiDisplayProfileData();
+    		}
+	}
 
     private void showUsageTable(){
         if(dataSource==null) return;
@@ -490,7 +473,7 @@ class ProfileWindow extends ProjectionsWindow
         String[] tHeading ={"Processor#","Function Name","Source File Name","Line#","%/Total","%/Process"};
 
         /**
-         * Fisrt get whole data for displaying. It is inefficient considering the case when there are huge
+         * First get whole data for displaying. It is inefficient considering the case when there are huge
          * content to display. The better way is to displaying the data on the table at the same time analyzing
          * the data. This could be later implemented!
          */
@@ -712,7 +695,7 @@ class ProfileWindow extends ProjectionsWindow
         	progressCount++;
         }
 
-	// Phase1b: Assigning colors based on the average usage}
+	// Phase1b: Assigning colors based on the average usage
         Vector sigElements = new Vector();
 	// we only wish to compute for EPs
 	for (int i=0; i<numEPs; i++) {
@@ -735,7 +718,9 @@ class ProfileWindow extends ProjectionsWindow
                 colors[i] = entryColors[i];
             colors[numEPs] = Color.black; //PACKING
             colors[numEPs+1] = Color.orange; //UNPACKING
-            colors[numEPs+2] = Color.white; //IDLE
+	    Paint p = MainWindow.runObject[myRun].getIdleColor(); //IDLE
+	    if (p instanceof GradientPaint) colors[numEPs+2] = ((GradientPaint)p).getColor1();
+	    else colors[numEPs+2] = (Color)p;
             colorsSet = true;
 	}
 
@@ -838,7 +823,7 @@ class ProfileWindow extends ProjectionsWindow
                 } else if(epIndex==numUserEntries+2) {
                     nMap[sigCnt] = prefix+"IDLE";
                 } else {
-                    nMap[sigCnt] = MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
+                    nMap[sigCnt] = prefix+MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
                 }
 
                 //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!

@@ -33,7 +33,6 @@ class PieChartWindow extends Frame{
 	private int rightBuf;
 	private int topBuf;
 	private int bottomBuf;
-    private String[][]      names;
 
     // PieChart Values
     private int             diameter;
@@ -205,13 +204,13 @@ class PieChartWindow extends Frame{
 		
 		degree = (int)Math.toDegrees(Math.atan(dY/dX));
 		
-		if((currX < centerX) && (currY <= centerY)) 		// Cursor in second quadrent 
+		if((currX < centerX) && (currY <= centerY)) 		// Cursor in second quadrant
 		    degree = 180 - degree;
-		else if((currX < centerX) && (currY > centerY)) 	// Cursor in thrid quadrent
+		else if((currX < centerX) && (currY > centerY)) 	// Cursor in thrid quadrant
 		    degree += 180;
-		else if((currX > centerX) && (currY >= centerY))	// Cursor in fourth quadrent
+		else if((currX > centerX) && (currY >= centerY))	// Cursor in fourth quadrant
 		    degree = 360 - degree;
-		// Cursor in first quadrent
+		// Cursor in first quadrant
 		
 		int inArc = 0;
 		for(int k=0; k<numArcs; k++){
@@ -255,7 +254,7 @@ class PieChartWindow extends Frame{
 		    int y = currY + 40 + pcw.getBounds().y;
 		    
 		    if(currArcIndex < numEntries)
-			bString[0] = names[currArcIndex][1] + "::" +names[currArcIndex][0];
+			bString[0] = MainWindow.runObject[myRun].getEntryFullNameByID(currArcIndex);
 		    else if (currArcIndex == numEntries)
 			bString[0] = "PACKING";
 		    else if (currArcIndex == numEntries+1)

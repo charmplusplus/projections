@@ -78,10 +78,11 @@ public class U
     /*
       Return a human-readable version of this time, 
       given in microseconds. 02/23/2005 - **CW** added default
-      wrapper with 3 dec pl.
+      wrapper with 3 dec pl. 06/16/2014 - Changed 3 dec places
+      to number of digits in us to ensure entire log file is read.
     */
     public static String humanReadableString(long us) {
-	return humanReadableString(us, 3);
+	return humanReadableString(us, String.valueOf(us).length());
     }
 
     public static String humanReadableString(long us, int places)

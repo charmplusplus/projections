@@ -39,6 +39,7 @@ class AnimationDisplayPanel extends JPanel
     private float fontOffset = (float)0.90;
     private FontMetrics fm = null;
     private Font font = null;
+    private OrderedIntList chosenPEs;
     
 
     // -1 is an initial "invalid" value. Once a valid is set by someone,
@@ -144,9 +145,12 @@ class AnimationDisplayPanel extends JPanel
 	}
 
 	int p = 0;
+	int curPE = 0;
+	chosenPEs.reset();
 	for (int r=0; r<numrows; r++) {
 	    for (int c=0; c<numcols; c++) {
 		int usage = data[p++][I];
+		curPE = chosenPEs.nextElement();
 		if (usage >=0 && usage <=100) {
 		    g.setColor(colors[usage]);
 		    g.fillRect(c*pwidth, r*pheight, pw, ph); 
@@ -154,8 +158,8 @@ class AnimationDisplayPanel extends JPanel
 		    if ((fm.stringWidth(String.valueOf(numPs)) <= (fontOffset*pw))
 		    && (fm.getHeight() <= (fontOffset*ph))) {
 		    	g.setColor(Color.black);
-		    	g.drawString(String.valueOf(p-1), 
-			    c*pwidth + (pw-fm.stringWidth(String.valueOf(p-1)))/2,
+			g.drawString(String.valueOf(curPE),
+			    c*pwidth + (pw-fm.stringWidth(String.valueOf(curPE)))/2,
 			    r*pheight + (ph+fm.getHeight())/2);		    
 		    }   
 		} 
@@ -242,6 +246,7 @@ class AnimationDisplayPanel extends JPanel
     protected void setParameters()
     {
 	OrderedIntList selectedPEs = animationWindow.selectedPEs;
+	chosenPEs = selectedPEs;
 	numPs = selectedPEs.size();
 	Isize = animationWindow.intervalSize;
 	data = getAnimationData(Isize,
@@ -269,7 +274,7 @@ class AnimationDisplayPanel extends JPanel
 	    
 	    animationWindow.setTitleInfo(curI);
 	    clearScreen();
-	}   
+	}
     }   
 
     private int[][] getAnimationData(long intervalSize, 
@@ -281,22 +286,16 @@ class AnimationDisplayPanel extends JPanel
 	int startI = (int)(startTime/intervalSize);
 	int endI = (int)(endTime/intervalSize);
 	int numPs = desiredPEs.size();
-	
-	MainWindow.runObject[myRun].LoadGraphData(intervalSize,startI,endI-1,false, null);
+	MainWindow.runObject[myRun].LoadGraphData(intervalSize,startI,endI-1,false, desiredPEs);
 	int[][] animationdata = new int[ numPs ][ endI-startI ];
-	
-	int pInfo = desiredPEs.nextElement();
 	int p = 0;
-	
-	while(pInfo != -1){
+	while(p < numPs){
 	    for( int t = 0; t <(endI-startI); t++ ){
 		animationdata[ p ][ t ] = 
-		    MainWindow.runObject[myRun].getSystemUsageData(1)[ pInfo ][ t ];
+		    MainWindow.runObject[myRun].getSystemUsageData(1)[ p ][ t ];
 	    }
-	    pInfo = desiredPEs.nextElement();
 	    p++;
 	}
-	
 	return animationdata;
     }
 

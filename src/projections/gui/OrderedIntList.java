@@ -22,8 +22,8 @@ import projections.Tools.Timeline.RangeQueries.UnitTest;
  
  int e;
  list.reset();
- while (e=nextElement()) != -1) { 
-   System.out.println(e);
+ while (list.hasMoreElements()) { 
+   System.out.println(e=list.nextElement());
  }
  
  will print out: 2, 5, 8 on separate lines

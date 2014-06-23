@@ -5,24 +5,25 @@ import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Panel;
-import java.awt.Scrollbar;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
-class CallTableTextArea extends Panel
+import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+
+class CallTableTextArea extends JPanel
    implements AdjustmentListener
 {
 
 
-	// Temporary hardcode. This variable will be assigned appropriate
-    // meaning in future versions of Projections that support multiple
-    // runs.
-	private int myRun = 0;
+   // Temporary hardcode. This variable will be assigned appropriate
+   // meaning in future versions of Projections that support multiple
+   // runs.
+   private int myRun = 0;
 
-   private Scrollbar VSB;
+   private JScrollBar VSB;
    private String[][] text;
    private FontMetrics fm;
    private int lineheight;
@@ -30,6 +31,9 @@ class CallTableTextArea extends Panel
    private Image offscreen;
    private int linenumwidth;
    private int timewidth;
+   private Color sourceEntryColor;
+   private Color destEntryColor;
+   private Color statsColor;
    
    public CallTableTextArea()
    {
@@ -37,28 +41,33 @@ class CallTableTextArea extends Panel
 	  {
 		 public void componentResized(ComponentEvent e)
 		 {
-			setBounds();  
+			setBounds();
 		 }
 	  });
 	  
 	  setLayout(null);
-	  setBackground(Color.black);
+	  this.setBackground(Color.black);
 	  
-	  VSB = new Scrollbar(Scrollbar.VERTICAL, 0, 1, 0, 1);
+	  VSB = new JScrollBar(JScrollBar.VERTICAL, 0, 1, 0, 1);
 	  VSB.setVisible(false);
 	  VSB.setBackground(Color.lightGray);
 	  VSB.addAdjustmentListener(this);
 	  add(VSB);
+
+	  sourceEntryColor = Color.green;
+	  destEntryColor = Color.yellow;
+	  statsColor = Color.white;
    }   
    public void adjustmentValueChanged(AdjustmentEvent evt)
    {
-	  repaint();
+	  setBounds();
    }   
    //Make sure we aren't made too tiny
    public Dimension getMinimumSize() {return new Dimension(150,100);}   
    public Dimension getPreferredSize() {return new Dimension(500,300);}   
-   public void paint(Graphics g)
+   public void paintComponent(Graphics g)
    {
+	  super.paintComponent(g);
 	  if(fm == null)
 		 setBounds();
 		 
@@ -93,11 +102,11 @@ class CallTableTextArea extends Panel
 		 if (s != "") {
 		     char[] str = s.toCharArray();
 		     if (str[0] != ' ')  //line is sourceEP
-		         g.setColor(Color.green);
+		         g.setColor(sourceEntryColor);
 		     else if (str[8] != ' ')  //line is destEP
-		         g.setColor(Color.yellow);
+		         g.setColor(destEntryColor);
 		     else  //line is stats
-		         g.setColor(Color.white);
+		         g.setColor(statsColor);
 		 }
 		 else
 		     g.setColor(Color.white);
@@ -169,8 +178,9 @@ class CallTableTextArea extends Panel
 		 VSB.setVisible(true);
 	  }
 	  else
+	  {
 		 VSB.setVisible(false);
-		 
+	  }
 	  try
 	  {
 		 offscreen = createImage(w, h+titleheight);
@@ -207,5 +217,37 @@ class CallTableTextArea extends Panel
 	  }
 	  
 	  paint(g);
-   }   
+   }
+   public void setSourceEntryColor(Color c)
+   {
+	  sourceEntryColor = c;
+	  repaint();
+   }
+   public void setDestEntryColor(Color c)
+   {
+	  destEntryColor = c;
+	  repaint();
+   }
+   public void setStatsColor(Color c)
+   {
+	  statsColor = c;
+	  repaint();
+   }
+   public Color getSourceEntryColor()
+   {
+	  return sourceEntryColor;
+   }
+   public Color getDestEntryColor()
+   {
+	  return destEntryColor;
+   }
+   public Color getStatsColor()
+   {
+	  return statsColor;
+   }
+   public void setTextAreaBackgroundColor()
+   {
+	setBounds();
+   }
+
 }

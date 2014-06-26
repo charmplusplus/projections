@@ -1,5 +1,6 @@
 package projections.misc;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -12,6 +13,9 @@ import projections.analysis.GenericSummaryReader;
 import projections.analysis.ProjMain;
 import projections.analysis.StsReader;
 import projections.gui.MainWindow;
+
+import projections.misc.FileUtils;
+
 
 /**
  *
@@ -80,12 +84,15 @@ public class MultiRunData
     private String[] epNames;
     private String[] runNames;
 
+    // Keeps track of the basenames since we do not initialize any Analysis objects
+    private FileUtils[] fileNameHandlers;
+
     /**
      *  Constructs the sets of StsReaders and SummaryReaders (which on 
      *  construction, reads the appropriate files and holds its data).
      *  These entities can then be probed for information.
      */
-    public MultiRunData(String listOfStsFilenames[]) 
+    public MultiRunData(String listOfStsFilenames[], Component rootComponent)
 	throws IOException
     {
 	try {
@@ -98,6 +105,7 @@ public class MultiRunData
 	    }
 
 	    stsReaders = new StsReader[numRuns];
+	    fileNameHandlers = new FileUtils[numRuns];
 	    int pesPerRun[] = new int[numRuns];
 
 	    // The run sequence supplied by the sts file list MUST BE
@@ -113,6 +121,7 @@ public class MultiRunData
 	    for (int run=0; run<numRuns; run++) {
 		stsReaders[run] =
 		    new StsReader(listOfStsFilenames[run]);
+		fileNameHandlers[run] = new FileUtils(listOfStsFilenames[run]);
 		pesPerRun[run] = stsReaders[run].getProcessorCount();
 	    }
 	    // ensure that both the stsReaders array and pesPerRun array
@@ -132,7 +141,7 @@ public class MultiRunData
 	    boolean hasSummary = true;
 	    boolean hasLog = true;
 	    for (int run=0; run<numRuns; run++) {
-		validPESets.add(run, detectFiles(stsReaders[run]));
+		validPESets.add(run, detectFiles(stsReaders[run], fileNameHandlers[run]));
 		hasSummary = 
 		    (hasSummary && 
 		     !(validPESets.get(run).get(ProjMain.SUMMARY).isEmpty()));
@@ -186,7 +195,7 @@ public class MultiRunData
 		    // actually read by a scale factor.
 		    double scale = numPE/(validPEs.size()*1.0);
 		    progressBar =
-			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, 
+			new ProgressMonitor(rootComponent,
 					    "Reading summary Data for run " +
 					    run + " of " + numRuns,
 					    "", 0, validPEs.size());
@@ -210,8 +219,8 @@ public class MultiRunData
 			    System.exit(-1);
 			}
 			reader = 
-			    new GenericSummaryReader(MainWindow.runObject[myRun].getSumName(pe),
-						     MainWindow.runObject[myRun].getVersion());
+			    new GenericSummaryReader(fileNameHandlers[run].getCanonicalFileName(pe, ProjMain.SUMMARY),
+						     stsReaders[run].getVersion());
 			for (int ep=0; ep<numEPs; ep++) {
 			    dataTable[TYPE_TIME][run][ep] += 
 				reader.epData[ep][GenericSummaryReader.TOTAL_TIME] * scale;
@@ -322,7 +331,7 @@ public class MultiRunData
 	return typeNames[dataType];
     }
 
-    private static ArrayList<SortedSet<Integer>> detectFiles(StsReader sts) {
+    private static ArrayList<SortedSet<Integer>> detectFiles(StsReader sts, FileUtils fileNameHandler) {
 	// determine if any of the desired data files exist for each
 	// sts file. This is copied from MainWindow.runObject[myRun].java just because
 	// Multirun cannot understand that silly static Class.
@@ -333,13 +342,13 @@ public class MultiRunData
 	}
 
 	for (int i=0;i<sts.getProcessorCount();i++) {
-	    if ((new File(MainWindow.runObject[myRun].getSumName(i))).isFile()) {
+	    if ((new File(fileNameHandler.getCanonicalFileName(i, ProjMain.SUMMARY))).isFile()) {
 		validPEs.get(ProjMain.SUMMARY).add(i);
 	    }
-	    if ((new File(MainWindow.runObject[myRun].getSumDetailName(i))).isFile()) {
+	    if ((new File(fileNameHandler.getCanonicalFileName(i, ProjMain.SUMDETAIL))).isFile()) {
 		validPEs.get(ProjMain.SUMDETAIL).add(i);
 	    }
-	    if ((new File(MainWindow.runObject[myRun].getLogName(i))).isFile()) {
+	    if ((new File(fileNameHandler.getCanonicalFileName(i, ProjMain.LOG))).isFile()) {
 		validPEs.get(ProjMain.LOG).add(i);
 	    }
 	}

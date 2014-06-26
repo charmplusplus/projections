@@ -100,7 +100,7 @@ class MultiRunWindow extends ProjectionsWindow
 		public Object doInBackground() {
 		    try {
 			data = 
-			    new MultiRunData(fc.userSelect_returnVal);
+			    new MultiRunData(fc.userSelect_returnVal, thisWindow);
 			analyzer = new MultiRunDataAnalyzer(data);
 			// setting default data type
 			selectedDataType = MultiRunData.TYPE_TIME;

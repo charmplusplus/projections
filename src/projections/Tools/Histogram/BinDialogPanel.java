@@ -174,7 +174,11 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 
 	// Accessor methods
 	public int getTimeNumBins() {
-		return timeNumBinsField.getValue();
+		if (timeNumBinsField.getValue()-1 >= 0)
+		{
+			return timeNumBinsField.getValue()-1;
+		}
+		else return 0;
 	}
 
 	public void setTimeNumBins(int numBins) {
@@ -202,7 +206,11 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 
 	// Messages
 	public int getMsgNumBins() {
-		return msgNumBinsField.getValue();
+		if (msgNumBinsField.getValue()-1 >= 0)
+		{
+			return msgNumBinsField.getValue()-1;
+		}
+		else return 0;
 	}
 
 	public void setMsgNumBins(int numBins) {
@@ -230,7 +238,11 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 
 	// Idle Percentages
 	public int getIdleNumBins() {
-		return idleNumBinsField.getValue();
+		if (idleNumBinsField.getValue()-1 >= 0)
+		{
+			return idleNumBinsField.getValue()-1;
+		}
+		else return 0;
 	}
 
 	public void setIdleNumBins(int numBins) {
@@ -263,17 +275,17 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 	public void setInitialFields() {
 		
 		// default values for time 1ms to 100ms
-		timeNumBinsField.setText("100");
+		timeNumBinsField.setText("101");
 		timeBinSizeField.setText("1000");
 		timeMinBinSizeField.setText("0");
 
 		// default values for messages 100 bytes to 2k
-		msgNumBinsField.setText("200");
+		msgNumBinsField.setText("201");
 		msgBinSizeField.setText("100");
 		msgMinBinSizeField.setText("0");
 
 		// default values for idle percentages at 1% resolution to 100% total
-		idleNumBinsField.setText("100");
+		idleNumBinsField.setText("101");
 		idleBinSizeField.setText("1");
 		idleMinBinSizeField.setText("0");
 	
@@ -317,7 +329,7 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 				U.humanReadableString(timeMinBinSizeField.getValue()) +
 				" to " +
 				U.humanReadableString(timeMinBinSizeField.getValue() +
-						timeNumBinsField.getValue() *
+						(getTimeNumBins()) *
 						timeBinSizeField.getValue()));
 
 		DecimalFormat _format = new DecimalFormat();
@@ -326,14 +338,14 @@ class BinDialogPanel extends RangeDialogExtensionPanel
 				_format.format(msgMinBinSizeField.getValue()) +
 				" bytes to " + 
 				_format.format(msgMinBinSizeField.getValue() +
-						msgNumBinsField.getValue() *
+						(getMsgNumBins()) *
 						msgBinSizeField.getValue()) + " bytes.");
 
 		idleBinRangeLabel.setText("Bin size ranges from : " +
 				_format.format(idleMinBinSizeField.getValue()) + 
 				"% to " +
 				_format.format(idleMinBinSizeField.getValue() +
-							idleNumBinsField.getValue() *
+							(getIdleNumBins()) *
 							idleBinSizeField.getValue()) + "%.");
 	}
 

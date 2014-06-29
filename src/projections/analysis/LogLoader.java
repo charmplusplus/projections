@@ -28,8 +28,73 @@ public class LogLoader extends ProjDefs
 	private int myRun = 0;
 
 	private boolean ampiTraceOn = false;
-		
-	
+
+	/**Determine the earliest begin event time for timeline range adjustment */
+	public long determineEarliestBeginEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs)
+	{
+
+		//==========================================
+		// Do multithreaded file reading
+
+		// Create a list of worker threads
+		LinkedList workerThreads = new LinkedList();
+
+		for(Integer pe : selectedPEs){
+			if (validPEs.contains(pe)) workerThreads.add(new LogLoaderBeginEventThread(pe) );
+		}
+
+		if (workerThreads.size() == 0) return 0; // If user entered only invalid PEs, return default start time.
+
+		// Pass this list of threads to a class that manages/runs the threads nicely
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Computing Earliest Begin Event Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot, true);
+		threadManager.runAll();
+
+
+		Iterator iter = workerThreads.iterator();
+		long earliestTimeFound = Long.MAX_VALUE;
+		while(iter.hasNext()){
+			LogLoaderBeginEventThread worker = (LogLoaderBeginEventThread) iter.next();
+			if(worker.result < earliestTimeFound ){
+				earliestTimeFound = worker.result;
+			}
+		}
+
+		return earliestTimeFound;
+	}
+
+	/**Determine the latest end event time for timeline range adjustment */
+	public long determineLatestEndEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs)
+	{
+
+		//==========================================
+		// Do multithreaded file reading
+
+		// Create a list of worker threads
+		LinkedList workerThreads = new LinkedList();
+
+		for(Integer pe : selectedPEs){
+			if (validPEs.contains(pe)) workerThreads.add(new LogLoaderEndEventThread(pe) );
+		}
+
+		if (workerThreads.size() == 0) return MainWindow.runObject[myRun].getTotalTime(); // If user entered only invalid PEs, return default end time.
+
+		// Pass this list of threads to a class that manages/runs the threads nicely
+		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Computing Latest End Event Time in Parallel", workerThreads, MainWindow.runObject[myRun].guiRoot, true);
+		threadManager.runAll();
+
+
+		Iterator iter = workerThreads.iterator();
+		long latestTimeFound = Long.MIN_VALUE;
+		while(iter.hasNext()){
+			LogLoaderEndEventThread worker = (LogLoaderEndEventThread) iter.next();
+			if(worker.result > latestTimeFound ){
+				latestTimeFound = worker.result;
+			}
+		}
+
+		return latestTimeFound;
+	}
+
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
 	public long determineEndTime(OrderedIntList validPEs)
 	{

@@ -202,6 +202,26 @@ public class Analysis {
 	  
     }
 
+  public long findEarliestBeginEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs) {
+	if (hasLogFiles()){
+		logLoader = new LogLoader();
+		return logLoader.determineEarliestBeginEventTime(selectedPEs, validPEs);
+	}
+	else {
+		return 0;
+	}
+    }
+
+  public long findLatestEndEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs) {
+	if (hasLogFiles()){
+		logLoader = new LogLoader();
+		return logLoader.determineLatestEndEventTime(selectedPEs, validPEs);
+	}
+	else {
+		return getTotalTime();
+	}
+    }
+
   private void findEndTime() {
     // If the Configuration file has saved data, then use it!
     if (rcReader.RC_GLOBAL_END_TIME.longValue() > 0) {

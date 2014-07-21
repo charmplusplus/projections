@@ -411,18 +411,43 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		TextIO.getln();
 		
 		// start reading actual data.
-		while (TextIO.eof() == false) {
-			TextIO.getInt();		// ignore the rank
-			TextIO.getChar();		// ignore '-' char
+		if (MainWindow.BLUEGENE)
+		{
+			while (TextIO.eof() == false) {
+				TextIO.getInt();		//ignore the rank
+				TextIO.getChar();		//ignore '-' char
+
+				int x = TextIO.getInt();
+				int y = TextIO.getInt();
+				int z = TextIO.getInt();
 			
-			int x = TextIO.getInt();
-			int y = TextIO.getInt();
-			int z = TextIO.getInt();
+				this.AddPoint(x, y, z);
+
+				TextIO.getln();			// ignore the rest of line
+				TextIO.skipBlanks();
+			}
+		}
+		else
+		{
+			while (TextIO.eof() == false) {
+				TextIO.getInt();		// ignore the GlobalPe
+				TextIO.getChar();		// ignore '/' char
+				TextIO.getInt();		// ignore the GlobalNode
+				TextIO.getChar();		// ignore '-' char
+				TextIO.getInt();		// ignore the LocalPe
+				TextIO.getChar();		// ignore '/' char
+				TextIO.getInt();		// ignore the LocalNode
+				TextIO.getChar();		// ignore '-' char
+
+				int x = TextIO.getInt();
+				int y = TextIO.getInt();
+				int z = TextIO.getInt();
 			
-			this.AddPoint(x, y, z);
-			
-			TextIO.getln();			// ignore the rest of line
-			TextIO.skipBlanks();
+				this.AddPoint(x, y, z);
+
+				TextIO.getln();			// ignore the rest of line
+				TextIO.skipBlanks();
+			}
 		}
 
 		objRotate.addChild(coordinatesGroup);
@@ -768,4 +793,5 @@ public class TopologyDisplayWindow extends ProjectionsWindow
 		}
 	}
 }
+
 

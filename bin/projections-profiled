@@ -12,5 +12,5 @@ fi
 
 
 #java -Xms4G -Xmx4G -ms4G -mx4G -XX:+UseParallelGC -classpath $jarpath projections.analysis.ProjMain $*
-java -agentlib:hprof=cpu=samples,thread=y,verbose=y,interval=20,depth=5 -d64 -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain $*
+java -agentlib:hprof=cpu=samples,thread=y,verbose=y,interval=20,depth=5 -d64 -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain ${1+"$@"}
 #java -classpath $jarpath projections.analysis.ProjMain $*

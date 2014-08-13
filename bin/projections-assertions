@@ -13,4 +13,4 @@ fi
 java -enableassertions \
   -ms256000000 -mx1000000000 \
   -classpath $jarpath \
-  projections.analysis.ProjMain $*
+  projections.analysis.ProjMain ${1+"$@"}

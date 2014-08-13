@@ -10,4 +10,4 @@ then
   fi 
 fi
 
-java -d64 -Xms512M -Xmx5G -ms512M -mx5G -classpath $jarpath projections.streaming.StreamingTool $*
+java -d64 -Xms512M -Xmx5G -ms512M -mx5G -classpath $jarpath projections.streaming.StreamingTool ${1+"$@"}

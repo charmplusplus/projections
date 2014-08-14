@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.io.IOException;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.ProgressMonitor;
@@ -51,6 +52,8 @@ class FunctionTool extends GenericGraphWindow
     private String currentArrayName = "";
 
     private FunctionTool thisWindow;
+
+    protected OrderedIntList selectedPEs;
 
     protected FunctionTool(MainWindow mainWindow) {
 	super("Function tracing", mainWindow);
@@ -111,12 +114,12 @@ class FunctionTool extends GenericGraphWindow
 	if (currentArrayName.equals("timeData")) {
 	    setDataSource("Total Function Time", timeData, 
 	    		new FunctionColorer(), thisWindow);
-	    setXAxis("Processor", "");
+	    setXAxis("Processor", selectedPEs);
 	    setYAxis("Time Spent in Function", "us");
 	} else if (currentArrayName.equals("countData")) {
 	    setDataSource("Total Function Calls", countData, 
 			  new FunctionColorer(), thisWindow);
-	    setXAxis("Processor", "");
+	    setXAxis("Processor", selectedPEs);
 	    setYAxis("# Times Called", "");
 	}
 	super.refreshGraph();
@@ -129,7 +132,7 @@ class FunctionTool extends GenericGraphWindow
 	
 	dialog.displayDialog();
 	if (!dialog.isCancelled()){
-
+	    selectedPEs = dialog.getSelectedProcessors();
 	    final SwingWorker worker =  new SwingWorker() {
 	    	public Object doInBackground() {
 	    		getData();
@@ -152,7 +155,7 @@ class FunctionTool extends GenericGraphWindow
     private void getData() {
 	// setup the reader to read all data.
 	LogEntryData logEntry = new LogEntryData();
-	OrderedIntList validPEs = MainWindow.runObject[myRun].getValidProcessorList();
+	OrderedIntList validPEs = selectedPEs;
 
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 	CallStackManager stack = new CallStackManager();
@@ -306,6 +309,14 @@ class FunctionTool extends GenericGraphWindow
 		setGraphSpecificData();
 	    }
 	}
+	else if (ae.getSource() instanceof JMenuItem) {
+            String arg = ((JMenuItem)ae.getSource()).getText();
+            if (arg.equals("Close")) {
+                close();
+            } else if(arg.equals("Set Range")) {
+                showDialog();
+            }
+        }
 	super.actionPerformed(ae);
     }
 
@@ -324,4 +335,5 @@ class FunctionTool extends GenericGraphWindow
 
 	return popupText;
     }
+
 }

@@ -27,12 +27,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ProgressMonitor;
 import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import projections.analysis.AmpiFunctionData;
 import projections.analysis.AmpiProcessProfile;
 import projections.gui.ChooseEntriesWindow;
+import projections.gui.FormattedNumber;
 
 class ProfileWindow extends ProjectionsWindow
     implements ActionListener, ChangeListener, ColorUpdateNotifier
@@ -417,15 +419,26 @@ class ProfileWindow extends ProjectionsWindow
         for(int i=1; i<dataSource.length; i++){
             for(int j=0; j<dataSource[i].length; j++){
                 tData[entryCnt] = new Object[4];
-                tData[entryCnt][0] = procNames[i];
+                tData[entryCnt][0] = new FormattedNumber(Integer.parseInt(procNames[i]), df);
                 tData[entryCnt][1] = nameMap[i][j];
-                tData[entryCnt][2] = df.format(dataSource[i][j])+"%";
-                tData[entryCnt][3] = df.format(dataSource[i][j]*0.01*timerange);
+                tData[entryCnt][2] = new FormattedNumber(dataSource[i][j], df);
+                tData[entryCnt][3] = new FormattedNumber(dataSource[i][j]*0.01*timerange, df);
                 entryCnt++;
             }
         }
 
-        JTable t = new JTable(tData, tHeading);
+	DefaultTableModel model = new DefaultTableModel(tData, tHeading)
+	{
+		@Override
+		public Class getColumnClass(int columnIndex)
+		{
+			if (columnIndex == 1) return java.lang.String.class;
+			else return projections.gui.FormattedNumber.class;
+		}
+	};
+
+	JTable t = new JTable(model);
+	t.setAutoCreateRowSorter(true);
         //t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         JScrollPane sp = new JScrollPane(t);
 

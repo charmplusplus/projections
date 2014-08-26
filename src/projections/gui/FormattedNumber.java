@@ -2,7 +2,8 @@ package projections.gui;
 import java.text.NumberFormat;
 
   /** To enable the correct format for both int and scientific. */
-  public class FormattedNumber extends Number {
+  public class FormattedNumber extends Number
+  implements Comparable<FormattedNumber> {
 
 	  private double       number;
     private NumberFormat format;
@@ -17,4 +18,10 @@ import java.text.NumberFormat;
     public long longValue() { return (long) number; }
     public short shortValue() { return (short) number; }
     public String toString() { return format.format(number); }
+    public int compareTo(FormattedNumber otherNum)
+    {
+	if (this.number < otherNum.number) return -1;
+	else if (this.number == otherNum.number) return 0;
+	else return 1;
+    }
   }

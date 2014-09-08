@@ -1,5 +1,7 @@
 package projections.gui;
 
+import java.util.SortedSet;
+
 class ProfileData
 {
     // Temporary hardcode. This variable will be assigned appropriate
@@ -8,8 +10,8 @@ class ProfileData
 	private int myRun = 0;
    
    int numPs;
-   OrderedIntList plist;
-   OrderedIntList phaselist;
+   SortedSet<Integer> plist;
+   SortedSet<Integer> phaselist;
    long begintime, endtime;
    
    protected ProfileData()

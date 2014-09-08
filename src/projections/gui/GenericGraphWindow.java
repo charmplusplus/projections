@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
+import java.util.SortedSet;
 
 import javax.swing.BoxLayout;
 import javax.swing.JMenu;
@@ -149,7 +150,7 @@ implements PopUpAble, ColorUpdateNotifier
 	//  Typically used for getting a subset of the processor list that is
 	//  sorted in increasing processor number.
 	//
-	protected void setXAxis(String title,OrderedIntList discreteList){
+	protected void setXAxis(String title, SortedSet<Integer> discreteList){
 		xAxis = new XAxisDiscreteOrdered(title,discreteList);	
 	}
 

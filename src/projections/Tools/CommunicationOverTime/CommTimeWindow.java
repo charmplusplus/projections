@@ -13,6 +13,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -25,7 +27,6 @@ import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
@@ -74,7 +75,7 @@ implements ItemListener, ActionListener
 	private int		   numIntervals;
 	private int		   numEPs;
 	private long	   intervalSize;
-	private OrderedIntList processorList;
+	private SortedSet<Integer> processorList;
 
 	private String	   currentArrayName;
 
@@ -344,7 +345,7 @@ implements ItemListener, ActionListener
 			startInterval = (int)intervalPanel.getStartInterval();
 			endInterval = (int)intervalPanel.getEndInterval();
 			numIntervals = endInterval-startInterval+1;
-			processorList = dialog.getSelectedProcessors().copyOf();
+			processorList = new TreeSet<Integer>(dialog.getSelectedProcessors());
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {

@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.SortedSet;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -41,7 +42,6 @@ import projections.analysis.ProjDefs;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
@@ -236,7 +236,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			}
 			dialog.displayDialog();
 			if (!dialog.isCancelled()) {
-				final OrderedIntList pes = dialog.getSelectedProcessors();
+				final SortedSet<Integer> pes = dialog.getSelectedProcessors();
 				intervalSize = intervalPanel.getIntervalSize();
 				startInterval = intervalPanel.getStartInterval();
 				endInterval = intervalPanel.getEndInterval();
@@ -335,7 +335,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	}
 
 
-	private void loadData(final OrderedIntList processorList) {
+	private void loadData(final SortedSet<Integer> processorList) {
 		
 		// Determine how to scale the x axis values&units
 		double timeSpan = (endInterval - startInterval) * intervalSize;
@@ -387,10 +387,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 				memorySamples.put(r.getPe(), r.getMemorySamples());
 				memoryData.put(r.getPe(), r.getData());
 			}
-
-
 		}
-
 	}
 
 

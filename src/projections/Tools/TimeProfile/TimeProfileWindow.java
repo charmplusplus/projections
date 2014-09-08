@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
+import java.util.SortedSet;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -33,7 +34,6 @@ import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
@@ -85,7 +85,7 @@ implements ActionListener, Clickable
 
 	
 	// data used for intervalgraphdialog
-	private OrderedIntList processorList;
+	private SortedSet<Integer> processorList;
 
 	// data required for entry selection dialog
 	private int numEPs;
@@ -398,7 +398,7 @@ implements ActionListener, Clickable
                     {
 					    // Do serial file reading because all we have is the sum files	    	
                         //System.out.println("hasSumDetailFiles - LOAD DATA. numIntervals: " + numIntervals);
-                        OrderedIntList availablePEs =
+                        SortedSet<Integer> availablePEs =
                                 MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
                         MainWindow.runObject[myRun].LoadGraphData(intervalSize, 0, numIntervals-1, false, availablePEs);
                         int[][] sumDetailData = MainWindow.runObject[myRun].getSumDetailData();

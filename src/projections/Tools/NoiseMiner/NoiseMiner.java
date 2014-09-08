@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.Vector;
+import java.util.SortedSet;
 
 import javax.swing.JButton;
 
@@ -16,7 +17,6 @@ import projections.analysis.ProjDefs;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.analysis.TimelineEvent;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.misc.MiscUtil;
 
 
@@ -43,7 +43,7 @@ class NoiseMiner extends ProjDefs
 
 	private long startTime;	     //Interval begin
 	private long endTime;	     //Interval end
-	private OrderedIntList peList;   //List of processors
+	private SortedSet<Integer> peList;   //List of processors
 
 	private String loggingText;
 
@@ -702,7 +702,7 @@ class NoiseMiner extends ProjDefs
 
 
 	protected NoiseMiner(long startInterval, long endInterval,
-			OrderedIntList processorList)
+			SortedSet<Integer> processorList)
 	{
 		//Initialize class variables
 		peList = processorList;

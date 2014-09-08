@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.SortedSet;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -255,7 +256,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private void initializeData(){
 		startTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.begintime);
 		endTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.endtime);
-		processorsField.setText(MainWindow.runObject[myRun].persistantRangeData.plist.listToString());
+		processorsField.setText(Util.listToString(MainWindow.runObject[myRun].persistantRangeData.plist));
 	}
 
 	private void initializeToolSpecificData() {
@@ -517,13 +518,13 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	}
 
 
-	public void setSelectedProcessors(OrderedIntList validPEs) {
-		processorsField.setText(validPEs.listToString());		
+	public void setSelectedProcessors(SortedSet<Integer> validPEs) {
+		processorsField.setText(Util.listToString(validPEs));
 		someInputChanged();
 	}
 
 
-	public OrderedIntList getSelectedProcessors() {
+	public SortedSet<Integer> getSelectedProcessors() {
 		return processorsField.getValue();
 	}
 
@@ -562,7 +563,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		else if (evt.getSource() == bAddToHistory) {
 			long start = getStartTime();
 			long end = getEndTime();
-			String procRange = processorsField.getValue().listToString();
+			String procRange = Util.listToString(processorsField.getValue());
 			boolean invalidName = true;
 			String s = "";
 			while (invalidName)

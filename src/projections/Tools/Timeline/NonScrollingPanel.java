@@ -2,11 +2,12 @@ package projections.Tools.Timeline;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.JPanel;
 
 import projections.Tools.Timeline.Data.ViewType;
-import projections.gui.OrderedIntList;
 
 
 /**
@@ -40,8 +41,8 @@ public class NonScrollingPanel extends JPanel implements MainHandler{
 		endTime=endTime_;
 		PE=PE_;
 
-		OrderedIntList validPEs = new OrderedIntList();
-		validPEs.insert(PE);
+		SortedSet<Integer> validPEs = new TreeSet<Integer>();
+		validPEs.add(PE);
 		
 		// setup the Data for this panel 
 		data = new Data(null);

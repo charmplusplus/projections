@@ -2,6 +2,9 @@ package projections.misc;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.ProgressMonitor;
 
@@ -9,7 +12,6 @@ import projections.analysis.GenericSummaryReader;
 import projections.analysis.ProjMain;
 import projections.analysis.StsReader;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 
 /**
  *
@@ -124,17 +126,18 @@ public class MultiRunData
 	    // else read log files. This must be uniformly true for all
 	    // runs. The PE file set need not be complete ... we'll work
 	    // with whatever information we have and approximate from there.
-	    OrderedIntList[][] validPESets =
-		new OrderedIntList[numRuns][];
+	    ArrayList<ArrayList<SortedSet<Integer>>> validPESets =
+				new ArrayList<ArrayList<SortedSet<Integer>>>(numRuns);
+
 	    boolean hasSummary = true;
 	    boolean hasLog = true;
 	    for (int run=0; run<numRuns; run++) {
-		validPESets[run] = detectFiles(stsReaders[run]);
+		validPESets.add(run, detectFiles(stsReaders[run]));
 		hasSummary = 
 		    (hasSummary && 
-		     !(validPESets[run][ProjMain.SUMMARY].isEmpty()));
+		     !(validPESets.get(run).get(ProjMain.SUMMARY).isEmpty()));
 		hasLog = (hasLog && 
-			  !(validPESets[run][ProjMain.LOG].isEmpty()));
+			  !(validPESets.get(run).get(ProjMain.LOG).isEmpty()));
 	    }
 
 	    // there has to be at least one run and all sts files have to
@@ -175,10 +178,10 @@ public class MultiRunData
 	    ProgressMonitor progressBar;
 	    if (hasSummary) {
 		GenericSummaryReader reader;
-		OrderedIntList validPEs;
+		SortedSet<Integer> validPEs;
 		for (int run=0; run<numRuns; run++) {
 		    int numPE = pesPerRun[run];
-		    validPEs = validPESets[run][ProjMain.SUMMARY];
+		    validPEs = validPESets.get(run).get(ProjMain.SUMMARY);
 		    // approximates any incomplete data by scaling the values
 		    // actually read by a scale factor.
 		    double scale = numPE/(validPEs.size()*1.0);
@@ -319,25 +322,25 @@ public class MultiRunData
 	return typeNames[dataType];
     }
 
-    private static OrderedIntList[] detectFiles(StsReader sts) {
+    private static ArrayList<SortedSet<Integer>> detectFiles(StsReader sts) {
 	// determine if any of the desired data files exist for each
 	// sts file. This is copied from MainWindow.runObject[myRun].java just because
 	// Multirun cannot understand that silly static Class.
 
-	OrderedIntList[] validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
+	ArrayList<SortedSet<Integer>> validPEs = new ArrayList<SortedSet<Integer>>(ProjMain.NUM_TYPES);
 	for (int i=0; i<ProjMain.NUM_TYPES; i++) {
-	    validPEs[i] = new OrderedIntList();
+	    validPEs.add(new TreeSet<Integer>());
 	}
 
 	for (int i=0;i<sts.getProcessorCount();i++) {
 	    if ((new File(MainWindow.runObject[myRun].getSumName(i))).isFile()) {
-		validPEs[ProjMain.SUMMARY].insert(i);
+		validPEs.get(ProjMain.SUMMARY).add(i);
 	    }
 	    if ((new File(MainWindow.runObject[myRun].getSumDetailName(i))).isFile()) {
-		validPEs[ProjMain.SUMDETAIL].insert(i);
+		validPEs.get(ProjMain.SUMDETAIL).add(i);
 	    }
 	    if ((new File(MainWindow.runObject[myRun].getLogName(i))).isFile()) {
-		validPEs[ProjMain.LOG].insert(i);
+		validPEs.get(ProjMain.LOG).add(i);
 	    }
 	}
 	return validPEs;

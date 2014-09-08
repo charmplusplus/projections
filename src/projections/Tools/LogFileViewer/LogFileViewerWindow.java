@@ -5,13 +5,13 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.SortedSet;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
 
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 
@@ -28,7 +28,7 @@ public class LogFileViewerWindow extends ProjectionsWindow implements ActionList
 	private JButton bOpen;
 	
 	/** Remember what the user put in the dialog box */
-	private OrderedIntList validPEs;
+	private SortedSet<Integer> validPEs;
 	private long startTime;
 	private long endTime;
 

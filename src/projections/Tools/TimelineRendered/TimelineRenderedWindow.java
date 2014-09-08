@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
 
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
@@ -26,7 +27,6 @@ import projections.Tools.Timeline.MainHandler;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.Util;
@@ -100,7 +100,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
 
-			OrderedIntList processorList = dialog.getSelectedProcessors();
+			SortedSet<Integer> processorList = dialog.getSelectedProcessors();
 			long startTime = dialog.getStartTime();
 			long endTime = dialog.getEndTime();
 			backgroundColor = Color.white;

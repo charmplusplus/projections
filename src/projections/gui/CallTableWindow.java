@@ -12,6 +12,7 @@ import java.awt.event.ItemListener;
 
 import javax.swing.ButtonGroup;
 import java.awt.Insets;
+import java.util.SortedSet;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
@@ -55,7 +56,7 @@ class CallTableWindow extends ProjectionsWindow
     private JRadioButton	 statsOn;
     private JRadioButton	 statsOff;
     
-    private OrderedIntList       validPEs;
+    private SortedSet<Integer>   validPEs;
     private long                 startTime;
     private long                 endTime;
     

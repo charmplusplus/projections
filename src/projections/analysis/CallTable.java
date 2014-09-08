@@ -3,12 +3,12 @@ package projections.analysis;
 import java.awt.Component;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.SortedSet;
 import java.util.Stack;
 
 import javax.swing.ProgressMonitor;
 
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.misc.LogEntryData;
 
 public class CallTable extends ProjDefs
@@ -29,11 +29,11 @@ public class CallTable extends ProjDefs
 	private boolean[] exists;	     //Array to remember if sourceEP sent any messages
 	private long startTime;	     //Interval begin
 	private long endTime;	     //Interval end
-	private OrderedIntList peList;   //List of processors
+	private SortedSet<Integer> peList;   //List of processors
 	private DecimalFormat _format;   //Format for output
 
 	public CallTable(long startInterval, long endInterval, 
-			OrderedIntList processorList)
+			SortedSet<Integer> processorList)
 	{
 		//Initialize class variables
 		peList = processorList;

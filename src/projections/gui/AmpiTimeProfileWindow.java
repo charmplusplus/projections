@@ -5,7 +5,9 @@ import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.SortedSet;
 import java.util.Stack;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.JButton;
@@ -45,7 +47,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     private int startInterval;
     private int endInterval;
     private long intervalSize; //in terms of microseconds!
-    private OrderedIntList processorList;    
+    private SortedSet<Integer> processorList;
     private Vector[] processProfiles = null; //every vector element is an instance of AmpiProcessProfile
 
     // The tool specific GUI for the dialog
@@ -141,11 +143,11 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         MainWindow.runObject[myRun].createAMPITimeProfile(procId,0,MainWindow.runObject[myRun].getTotalTime(), processProfiles[index]);
     }
     
-    public void getRangeVals(int beginI, int endI, long iSize, OrderedIntList procList){
+    public void getRangeVals(int beginI, int endI, long iSize, SortedSet<Integer> procList){
         startInterval = beginI;
         endInterval = endI;
         intervalSize = iSize;
-        processorList = procList.copyOf();
+        processorList = new TreeSet<Integer>(procList);
         processProfiles = new Vector[processorList.size()];        
     }
 

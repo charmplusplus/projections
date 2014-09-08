@@ -584,7 +584,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
         //set ampi's profile graph parameters!
         String[] gTitles = new String[2];
-        gTitles[0] = "Profile of Usage per Functions in AMPI programs "+data.plist.listToString();
+        gTitles[0] = "Profile of Usage per Functions in AMPI programs "+Util.listToString(data.plist);
         gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
         ampiDisplayCanvas.setGraphTiltes(gTitles);
 
@@ -609,7 +609,7 @@ class AmpiProfileWindow extends ProjectionsWindow
 
 
         String[] gTitles = new String[2];
-        gTitles[0] = "Profile of Usage for Processors "+data.plist.listToString();
+        gTitles[0] = "Profile of Usage for Processors "+Util.listToString(data.plist);
         gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
         displayCanvas.setGraphTiltes(gTitles);
 

@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.SortedSet;
 import java.util.Vector;
 
 import javax.swing.AbstractCellEditor;
@@ -31,7 +32,6 @@ import org.jfree.data.xy.XYSeries;
 
 import projections.Tools.NoiseMiner.NoiseMiner.NoiseResultButton;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 
@@ -121,7 +121,7 @@ implements ItemListener
 		dialog.displayDialog();
 		if (!dialog.isCancelled()) {
 
-			final OrderedIntList validPEs = dialog.getSelectedProcessors();
+			final SortedSet<Integer> validPEs = dialog.getSelectedProcessors();
 			final long startTime = dialog.getStartTime();
 			final long endTime = dialog.getEndTime();
 			

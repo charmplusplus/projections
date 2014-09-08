@@ -1,10 +1,13 @@
 package projections.misc;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import projections.analysis.ProjMain;
-import projections.gui.OrderedIntList;
+import projections.gui.Util;
 
 /**
  *  FileUtils.java
@@ -23,7 +26,7 @@ public class FileUtils {
 	private class FileTreeMap extends TreeMap<Integer, File>{
 	}
 
-	private OrderedIntList validPEs[];
+	private ArrayList<TreeSet<Integer>> validPEs;
 	private String validPEStrings[];
 	private boolean hasFiles[];
 	
@@ -86,7 +89,7 @@ public class FileUtils {
 		// We assume they are automatically valid and this is reflected
 		// in the validPEs. 
 		hasFiles = new boolean[ProjMain.NUM_TYPES];
-		validPEs = new OrderedIntList[ProjMain.NUM_TYPES];
+		validPEs = new ArrayList<TreeSet<Integer>>(ProjMain.NUM_TYPES);
 		validPEStrings = new String[ProjMain.NUM_TYPES];
 
 
@@ -95,11 +98,11 @@ public class FileUtils {
 		
 		
 		for (int type=0; type<ProjMain.NUM_TYPES; type++) {
-			validPEs[type] = new OrderedIntList();
+			validPEs.add(type, new TreeSet<Integer>());
 			logFiles[type] = new FileTreeMap(); 
 
 			detectFiles(type);
-			validPEStrings[type] = validPEs[type].listToString();
+			validPEStrings[type] = Util.listToString(validPEs.get(type));
 		}
 		
 		for(int type=0; type<ProjMain.NUM_TYPES; type++){
@@ -175,13 +178,13 @@ public class FileUtils {
 					if(numSplits > prefixNumSplits){
 						if(splits[numSplits-1].equals(extension)){
 							int pe = Integer.parseInt(splits[numSplits-2]);
-							validPEs[type].insert(pe);
+							validPEs.get(type).add(pe);
 							hasFiles[type] = true;
 							logFiles[type].put(pe, f);
 							//						System.out.println("Found " + extension + " for pe " + pe);
 						} else if(splits[numSplits-2].equals(extension)  &&  splits[numSplits-1].equals("gz") ){
 							int pe = Integer.parseInt(splits[numSplits-3]);
-							validPEs[type].insert(pe);
+							validPEs.get(type).add(pe);
 							hasFiles[type] = true;
 							logFiles[type].put(pe, f);
 							//						System.out.println("Found " + extension + ".gz for pe " + pe);
@@ -250,7 +253,7 @@ public class FileUtils {
 	return fileExt;
     }
 
-    public OrderedIntList getValidProcessorList(int type) {
+    public SortedSet<Integer> getValidProcessorList(int type) {
 	String errorMsg = "";
 	switch (type) {
 	case ProjMain.LOG:
@@ -275,11 +278,11 @@ public class FileUtils {
 	if (!hasFiles[type]) {
 	    System.err.println(errorMsg);
 	}
-	return validPEs[type];
+	return validPEs.get(type);
     }
 
     public String getValidProcessorString(int type) {
-	return getValidProcessorList(type).listToString();
+	return Util.listToString(getValidProcessorList(type));
     }
 
     /** Return a File for the log for a PE */

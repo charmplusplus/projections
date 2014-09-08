@@ -1,12 +1,13 @@
 package projections.Tools.TimelineRendered;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import projections.Tools.Timeline.Data;
 import projections.Tools.Timeline.MainHandler;
 import projections.Tools.Timeline.MainPanel;
 import projections.gui.JPanelToImage;
-import projections.gui.OrderedIntList;
 
 /** A runnable object that acts like a MainHandler and renders an image of a single PE's Timeline. */
 class ThreadedFileReader implements MainHandler, Runnable {
@@ -28,8 +29,8 @@ class ThreadedFileReader implements MainHandler, Runnable {
 
 	public void run() { 
 
-		OrderedIntList validPEs = new OrderedIntList();
-		validPEs.insert(PE);
+		SortedSet<Integer> validPEs = new TreeSet<Integer>();
+		validPEs.add(PE);
 
 		// setup the Data for this panel 
 		Data data = new Data(null);

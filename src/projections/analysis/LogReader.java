@@ -1,12 +1,13 @@
 package projections.analysis;
 
 import java.io.IOException;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.ProgressMonitor;
 
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.misc.LogEntryData;
 
 public class LogReader 
@@ -244,7 +245,7 @@ public class LogReader
      */
     public void read(long reqIntervalSize,
     		int NintervalStart, int NintervalEnd,
-    		boolean NbyEntryPoint, OrderedIntList processorList,
+    		boolean NbyEntryPoint, SortedSet<Integer> processorList,
     		boolean showProgress, TreeMap<Double, String> phaseMarkers)  {
     	
     	numProcessors = MainWindow.runObject[myRun].getNumProcessors();
@@ -257,7 +258,7 @@ public class LogReader
 
     	// assume full range of processors if null
     	if (processorList == null) {
-    		processorList = MainWindow.runObject[myRun].getValidProcessorList().copyOf();
+    		processorList = new TreeSet<Integer>(MainWindow.runObject[myRun].getValidProcessorList());
     	}
 
     	numProcessors = processorList.size();

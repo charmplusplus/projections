@@ -1,5 +1,7 @@
 package projections.gui;
 
+import java.util.SortedSet;
+
 class AmpiProfileData
 {
 //   AmpiProfileWindow profileWindow;
@@ -10,7 +12,7 @@ class AmpiProfileData
 	private int myRun = 0;
 
    int numPs;
-   OrderedIntList plist;
+   SortedSet<Integer> plist;
    long begintime, endtime;
    
    protected AmpiProfileData()

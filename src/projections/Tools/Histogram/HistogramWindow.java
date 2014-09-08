@@ -24,7 +24,6 @@ import projections.gui.ChooseEntriesWindow;
 import projections.gui.EntryMethodVisibility;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;

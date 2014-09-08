@@ -20,6 +20,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.SortedSet;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -34,7 +35,6 @@ import projections.gui.ChooseEntriesWindow;
 import projections.gui.ColorMap;
 import projections.gui.ColorUpdateNotifier;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.ScalePanel;
@@ -166,7 +166,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 		stl.setColorMap(utilColorMap);
 	}  
 
-	private void setStlPanelData(long startTime, long endTime, OrderedIntList pes){
+	private void setStlPanelData(long startTime, long endTime, SortedSet<Integer> pes){
 		double horSize, verSize;
 		if (pes == null) {
 			horSize=MainWindow.runObject[myRun].getTotalTime();
@@ -211,7 +211,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 			}
 			dialog.displayDialog();
 			if (!dialog.isCancelled()) {
-				final OrderedIntList pes = dialog.getSelectedProcessors();
+				final SortedSet<Integer> pes = dialog.getSelectedProcessors();
 				final long startTime = dialog.getStartTime();
 				final long endTime = dialog.getEndTime();
 				thisWindow.setVisible(false);

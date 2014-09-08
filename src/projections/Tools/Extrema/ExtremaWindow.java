@@ -19,6 +19,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -37,7 +39,6 @@ import projections.gui.Clickable;
 import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
@@ -201,7 +202,7 @@ Clickable
 		}
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-			OrderedIntList selectedPEs = dialog.getSelectedProcessors().copyOf();
+			SortedSet<Integer> selectedPEs = new TreeSet<Integer>(dialog.getSelectedProcessors());
 			threshold = selectedPEs.size() < outlierDialogPanel.getThreshold() ? selectedPEs.size() : outlierDialogPanel.getThreshold();
 			selectedActivity = outlierDialogPanel.getCurrentActivity();
 			selectedAttribute = outlierDialogPanel.getCurrentAttribute();
@@ -300,7 +301,7 @@ Clickable
 		
 		int numActivityPlusSpecial = numActivities+numSpecials;
 
-		OrderedIntList selectedPEs = dialog.getSelectedProcessors().copyOf();
+		SortedSet<Integer> selectedPEs = new TreeSet<Integer>(dialog.getSelectedProcessors());
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
 
@@ -784,7 +785,7 @@ Clickable
 			statsLine = InFile.readLine();
 			st = new StringTokenizer(statsLine);
 			int offset = 0;
-			OrderedIntList peList = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.LOG);
+			SortedSet<Integer> peList = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.LOG);
 			if (peList.size() > threshold) {
 				offset = peList.size() - threshold;
 			}

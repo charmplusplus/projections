@@ -11,6 +11,8 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.util.Iterator;
+import java.util.SortedSet;
 
 import javax.swing.JPanel;
 
@@ -39,7 +41,7 @@ class AnimationDisplayPanel extends JPanel
     private float fontOffset = (float)0.90;
     private FontMetrics fm = null;
     private Font font = null;
-    private OrderedIntList chosenPEs;
+    private SortedSet<Integer> chosenPEs;
     
 
     // -1 is an initial "invalid" value. Once a valid is set by someone,
@@ -146,11 +148,11 @@ class AnimationDisplayPanel extends JPanel
 
 	int p = 0;
 	int curPE = 0;
-	chosenPEs.reset();
+	Iterator<Integer> iter = chosenPEs.iterator();
 	for (int r=0; r<numrows; r++) {
 	    for (int c=0; c<numcols; c++) {
 		int usage = data[p++][I];
-		curPE = chosenPEs.nextElement();
+		curPE = iter.next();
 		if (usage >=0 && usage <=100) {
 		    g.setColor(colors[usage]);
 		    g.fillRect(c*pwidth, r*pheight, pw, ph); 
@@ -202,10 +204,9 @@ class AnimationDisplayPanel extends JPanel
 	    // need to translate curP to actual PE number
 	    int count = 0;
 	    int pe = 0;
-	    OrderedIntList validPEs = animationWindow.selectedPEs;
-	    validPEs.reset();
+	    Iterator<Integer> iter = animationWindow.selectedPEs.iterator();
 	    while (count <= curP) {
-		pe = validPEs.nextElement();
+		pe = iter.next();
 		count++;
 	    }
 	    if ((curP >= 0) && (curI != -1)) {
@@ -245,7 +246,7 @@ class AnimationDisplayPanel extends JPanel
 
     protected void setParameters()
     {
-	OrderedIntList selectedPEs = animationWindow.selectedPEs;
+	SortedSet<Integer> selectedPEs = animationWindow.selectedPEs;
 	chosenPEs = selectedPEs;
 	numPs = selectedPEs.size();
 	Isize = animationWindow.intervalSize;
@@ -279,7 +280,7 @@ class AnimationDisplayPanel extends JPanel
 
     private int[][] getAnimationData(long intervalSize, 
 				    long startTime, long endTime, 
-				    OrderedIntList desiredPEs) {
+				    SortedSet<Integer> desiredPEs) {
 	if (intervalSize >= endTime-startTime) {
 	    intervalSize = endTime-startTime;
 	}

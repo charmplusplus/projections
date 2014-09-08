@@ -6,6 +6,7 @@ import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.SortedSet;
 
 import javax.swing.JButton;
 import javax.swing.JMenuItem;
@@ -45,7 +46,7 @@ class UserEventsWindow extends GenericGraphWindow
     private int startInterval;
     private int endInterval;
     private long intervalSize;
-    private OrderedIntList processorList;
+    private SortedSet<Integer> processorList;
 
     // meta data variables
     private int numActivities;

@@ -18,6 +18,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.util.LinkedList;
+import java.util.SortedSet;
 
 import javax.swing.JOptionPane;
 
@@ -25,7 +26,6 @@ import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.ColorMap;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.ScalePanel;
 import projections.gui.U;
 
@@ -48,7 +48,7 @@ class OverviewPanel extends ScalePanel.Child
 	private int intervalSize;//Length of an interval, in microseconds
 
 	private int nPe;//Number of processors
-	private OrderedIntList selectedPEs;
+	private SortedSet<Integer> selectedPEs;
 	private long startTime,endTime;
 	private int startInterval;
 	private int endInterval;
@@ -306,7 +306,7 @@ class OverviewPanel extends ScalePanel.Child
 	}
 
 	/** Setup the time ranges before loading the EP or utilization data */
-	protected void setRanges(OrderedIntList selectedPEs, long startTime, long endTime)
+	protected void setRanges(SortedSet<Integer> selectedPEs, long startTime, long endTime)
 	{
 		this.selectedPEs = selectedPEs;
 		this.startTime = startTime;

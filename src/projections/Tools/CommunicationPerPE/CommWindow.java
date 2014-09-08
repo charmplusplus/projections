@@ -15,6 +15,9 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -25,7 +28,6 @@ import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphWindow;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 import projections.gui.Util;
 
@@ -48,7 +50,7 @@ implements ItemListener, ActionListener, Clickable
 	private double[][]  avgHopCount;
 	private double[][]  avgPeHopCount;
 
-	private ArrayList<Integer>	histogram;
+	private ArrayList<Integer> histogram;
 	private int[]	histArray;
 	private String 	currentArrayName;
 
@@ -68,7 +70,7 @@ implements ItemListener, ActionListener, Clickable
 
 	private CommWindow  thisWindow;
 
-	private OrderedIntList peList;
+	private SortedSet<Integer> peList;
 
 
 	public CommWindow(MainWindow mainWindow) {
@@ -315,7 +317,7 @@ implements ItemListener, ActionListener, Clickable
 			
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
-					peList = dialog.getSelectedProcessors().copyOf();
+					peList = new TreeSet<Integer>(dialog.getSelectedProcessors());
 					getData(dialog.getStartTime(), dialog.getEndTime(), dialog.getSelectedProcessors());
 					return null;
 				}
@@ -333,7 +335,7 @@ implements ItemListener, ActionListener, Clickable
 	}
 
 
-	private void getData(long startTime, long endTime, OrderedIntList pes){
+	private void getData(long startTime, long endTime, SortedSet<Integer> pes){
 		sentMsgCount = new double[pes.size()][];
 		sentByteCount = new double[pes.size()][];
 		receivedMsgCount = new double[pes.size()][];

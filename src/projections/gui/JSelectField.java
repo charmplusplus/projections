@@ -3,6 +3,9 @@ package projections.gui;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
 /** This class is used for the input of processor range
 *   validates for proper range */
 
@@ -79,11 +82,11 @@ class JSelectField extends JTextField
 	  return tmp;
    }   
 
-    private OrderedIntList getValue(int limit)
+    private SortedSet<Integer> getValue(int limit)
     {  
 	limit--;
 
-	OrderedIntList tmpList = new OrderedIntList();
+	SortedSet<Integer> tmpList = new TreeSet<Integer>();
 
 	String tmp = cleanItUp(getText());
 	  
@@ -155,27 +158,27 @@ class JSelectField extends JTextField
 		}
 		for (int j=min; j<=max; j+=interval) {
 		    if (j <= limit) 
-			tmpList.insert(j);
+			tmpList.add(j);
 		}
 	    } 
 	} catch(NumberFormatException e) {
-	    tmpList.removeAll();
-	    tmpList.insert(0);
+	    tmpList.clear();
+	    tmpList.add(0);
 	} catch(StringIndexOutOfBoundsException e) {
-	    tmpList.removeAll();
-	    tmpList.insert(0);
+	    tmpList.clear();
+	    tmpList.add(0);
 	}   
 	if (tmpList.size()==0)
-	    tmpList.insert(0);
+	    tmpList.add(0);
 	  
-	lastValue = tmpList.listToString();
+	lastValue = Util.listToString(tmpList);
 	setText(lastValue); 
 
 	return tmpList;
     }   
     
 
-    public OrderedIntList getValue() {
+    public SortedSet<Integer> getValue() {
  	   return getValue(Integer.MAX_VALUE);
     }  
 

@@ -11,11 +11,11 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Stack;
 import java.util.Vector;
+import java.util.SortedSet;
 
 import projections.Tools.Timeline.TimelineMessage;
 import projections.Tools.Timeline.UserEventObject;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.misc.LogEntryData;
 import projections.misc.LogLoadException;
 
@@ -30,7 +30,7 @@ public class LogLoader extends ProjDefs
 	private boolean ampiTraceOn = false;
 
 	/**Determine the earliest begin event time for timeline range adjustment */
-	public long determineEarliestBeginEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs)
+	public long determineEarliestBeginEventTime(SortedSet<Integer> selectedPEs, SortedSet<Integer> validPEs)
 	{
 
 		//==========================================
@@ -63,7 +63,7 @@ public class LogLoader extends ProjDefs
 	}
 
 	/**Determine the latest end event time for timeline range adjustment */
-	public long determineLatestEndEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs)
+	public long determineLatestEndEventTime(SortedSet<Integer> selectedPEs, SortedSet<Integer> validPEs)
 	{
 
 		//==========================================
@@ -96,7 +96,7 @@ public class LogLoader extends ProjDefs
 	}
 
 	/** Determine the max endtime from any trace file, by seeking to the end and looking at the last few records */
-	public long determineEndTime(OrderedIntList validPEs)
+	public long determineEndTime(SortedSet<Integer> validPEs)
 	{
 				
 		//==========================================	

@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.LinkedList;
+import java.util.SortedSet;
 
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -13,7 +14,6 @@ import javax.swing.SwingWorker;
 
 import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialog;
 
 
@@ -55,7 +55,7 @@ public class ScanLogFiles implements ActionListener
 		RangeDialog dialog = new RangeDialog(null, "Select Range", null, false);
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-			final OrderedIntList processorList = dialog.getSelectedProcessors();
+			final SortedSet<Integer> processorList = dialog.getSelectedProcessors();
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {

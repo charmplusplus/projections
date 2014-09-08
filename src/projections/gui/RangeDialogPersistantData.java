@@ -1,20 +1,22 @@
 package projections.gui;
 
 
+import java.util.SortedSet;
+
 /** Store data that is used by the range dialog boxes for all the tools */
 public class RangeDialogPersistantData { // NO_UCD
 
-	protected OrderedIntList plist;
+	protected SortedSet<Integer> plist;
 	protected long begintime;
 	protected long endtime;
 
-	public RangeDialogPersistantData(OrderedIntList plist, long begintime, long endtime){
+	public RangeDialogPersistantData(SortedSet<Integer> plist, long begintime, long endtime){
 		this.plist = plist;
 		this.begintime = begintime;
 		this.endtime = endtime;
 			}
 
-	public void update(long begintime, long endtime, OrderedIntList plist) {
+	public void update(long begintime, long endtime, SortedSet<Integer> plist) {
 		this.plist = plist;
 		this.begintime = begintime;
 		this.endtime = endtime;	

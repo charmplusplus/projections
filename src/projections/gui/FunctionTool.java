@@ -5,6 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
+import java.util.SortedSet;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JMenuItem;
@@ -53,7 +54,7 @@ class FunctionTool extends GenericGraphWindow
 
     private FunctionTool thisWindow;
 
-    protected OrderedIntList selectedPEs;
+    protected SortedSet<Integer> selectedPEs;
 
     protected FunctionTool(MainWindow mainWindow) {
 	super("Function tracing", mainWindow);
@@ -155,7 +156,7 @@ class FunctionTool extends GenericGraphWindow
     private void getData() {
 	// setup the reader to read all data.
 	LogEntryData logEntry = new LogEntryData();
-	OrderedIntList validPEs = selectedPEs;
+	SortedSet<Integer> validPEs = selectedPEs;
 
 	int numFunc = MainWindow.runObject[myRun].getNumFunctionEvents();
 	CallStackManager stack = new CallStackManager();

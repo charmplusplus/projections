@@ -3,11 +3,11 @@ package projections.analysis;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.SortedSet;
 
 import javax.swing.ProgressMonitor;
 
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 
 public class PoseDopReader
 {
@@ -30,7 +30,7 @@ public class PoseDopReader
     private long totalRealTime;
     private long totalVirtualTime;
 
-    private OrderedIntList validPEs;
+    private SortedSet<Integer> validPEs;
 
     // **************************************************************
     // * The default constructor will check to see if Pose end times
@@ -64,7 +64,6 @@ public class PoseDopReader
      *  This routine computes both real and virtual end times
      */
     private void computeEndTimes() {
-	int curPe;
 	int curPeIdx = 0;
 	int numProcessors = validPEs.size();
 	
@@ -74,9 +73,9 @@ public class PoseDopReader
 	ProgressMonitor progressBar =
 	    new ProgressMonitor(MainWindow.runObject[myRun].guiRoot, "Computing End Times",
 				"", 0, numProcessors);
-	validPEs.reset();
-	curPe = validPEs.nextElement();
-	while (curPe != -1) {
+	for (int curPe : validPEs) {
+		if (curPe == -1)
+			break;
 	    progressBar.setProgress(curPeIdx);
 	    progressBar.setNote("[PE: " + curPe + "] Getting End Time ...");
 	    try {
@@ -109,7 +108,6 @@ public class PoseDopReader
 		System.err.println(e.toString());
 		System.exit(-1);
 	    }
-	    curPe = validPEs.nextElement();
 	    curPeIdx++;
 	}
 	progressBar.close();

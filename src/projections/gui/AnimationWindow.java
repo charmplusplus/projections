@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.util.SortedSet;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -52,7 +53,7 @@ class AnimationWindow extends ProjectionsWindow
 
     // basic parameter variables consistent with IntervalRangeDialog
     protected long intervalSize;
-    protected OrderedIntList selectedPEs;
+    protected SortedSet<Integer> selectedPEs;
     protected long startTime;
     protected long endTime;
     

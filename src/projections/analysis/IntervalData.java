@@ -2,11 +2,11 @@ package projections.analysis;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.SortedSet;
 import java.util.Vector;
 
 import projections.analysis.SumDetailReader.RLEBlock;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 
 /**
  *  IntervalData represents the abstraction for interval-based data
@@ -72,7 +72,7 @@ public class IntervalData
 	if (MainWindow.runObject[myRun].hasSumDetailData()) {
 	    summaryDetails = new SumDetailReader[numPEs];
 	    rawData = new Vector[SumDetailReader.NUM_TAGS][numPEs][];
-	    OrderedIntList availablePEs = 
+	    SortedSet<Integer> availablePEs =
 		MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
 	    for(Integer pe : availablePEs) {
 
@@ -109,7 +109,7 @@ public class IntervalData
     }
     public void loadSumDetailIntervalData(long intervalSize, int intervalStart,
                                           int intervalEnd,
-                                          OrderedIntList processorList){
+                                          SortedSet<Integer> processorList){
         int numIntervals = intervalEnd - intervalStart + 1;
 
         sumDetailData = new int[numIntervals][numEPs];
@@ -133,7 +133,7 @@ public class IntervalData
      */
     public void loadIntervalData(long intervalSize, int intervalStart,
 				 int intervalEnd, boolean byEntryPoint,
-				 OrderedIntList processorList) {
+				 SortedSet<Integer> processorList) {
         int numIntervals = intervalEnd - intervalStart + 1;
 	systemUsageData = new int[3][processorList.size()][numIntervals];
 	systemMsgsData = new int[5][3][processorList.size()][numIntervals];

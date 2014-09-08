@@ -3,11 +3,6 @@ package projections.Tools.Timeline;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
-import java.text.DecimalFormat;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,17 +16,17 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.SortedSet;
+
 import java.util.Map.Entry;
 import java.util.logging.Level;
 
-import javax.swing.ProgressMonitor;
 import javax.swing.ToolTipManager;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
 
 import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.Tools.Timeline.RangeQueries.RangeQueryTree;
@@ -44,7 +39,6 @@ import projections.gui.ColorManager;
 import projections.gui.ColorUpdateNotifier;
 import projections.gui.EntryMethodVisibility;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.OrderedUsageList;
 import projections.misc.LogLoadException;
 import projections.analysis.StsReader;
@@ -398,7 +392,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
-	public void setProcessorList(OrderedIntList processorList){
+	public void setProcessorList(SortedSet<Integer> processorList){
 		peToLine.clear();
 
 		if(isSMPRun()){
@@ -451,19 +445,19 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	/** Load the set of PEs found in MainWindow.runObject[myRun].getValidProcessorList() */
 	private void loadGlobalPEList(){
-		OrderedIntList processorList = MainWindow.runObject[myRun].getValidProcessorList().copyOf();
+		SortedSet<Integer> processorList = new TreeSet<Integer>(MainWindow.runObject[myRun].getValidProcessorList());
 		setProcessorList(processorList);
 	}
 
 
 	/** Get the set of PEs as an OrderedIntList. The internal storage for the PE list is not a sorted list. */
-	private OrderedIntList processorListOrdered(){
-		OrderedIntList processorList = new OrderedIntList();
+	private SortedSet<Integer> processorListOrdered(){
+		SortedSet<Integer> processorList = new TreeSet<Integer>();
 
 		Iterator<Integer> iter = peToLine.iterator();
 		while(iter.hasNext()){
 			Integer pe = iter.next();
-			processorList.insert(pe);
+			processorList.add(pe);
 		}
 
 		return processorList;
@@ -2189,7 +2183,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
     protected void addNeighbors(Integer pe)
     {
-        OrderedIntList processorList = MainWindow.runObject[myRun].getValidProcessorList();
+        SortedSet<Integer> processorList = MainWindow.runObject[myRun].getValidProcessorList();
         int intpe = pe.intValue();
         for(int i=-4; i<4;i++)
         {

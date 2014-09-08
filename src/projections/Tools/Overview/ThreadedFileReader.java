@@ -2,7 +2,9 @@ package projections.Tools.Overview;
 
 import projections.analysis.LogReader;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
+
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
 class ThreadedFileReader implements Runnable  {
@@ -76,8 +78,8 @@ class ThreadedFileReader implements Runnable  {
 			int pe) 
 	{
 		LogReader logReader = new LogReader();
-		OrderedIntList processorList = new OrderedIntList();
-		processorList.insert(pe);
+		SortedSet<Integer> processorList = new TreeSet<Integer>();
+		processorList.add(pe);
 
 		if( MainWindow.runObject[myRun].hasLogFiles()) { // .log files
 			logReader.read(intervalSize, 

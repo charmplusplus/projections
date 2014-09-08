@@ -6,13 +6,14 @@ import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.SortedSet;
 import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
 import projections.gui.ColorManager;
 import projections.gui.MainWindow;
-import projections.gui.OrderedIntList;
 import projections.gui.RangeDialogPersistantData;
 import projections.gui.SanitizeForHTML;
 import projections.misc.FileUtils;
@@ -202,7 +203,7 @@ public class Analysis {
 	  
     }
 
-  public long findEarliestBeginEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs) {
+  public long findEarliestBeginEventTime(SortedSet<Integer> selectedPEs, SortedSet<Integer> validPEs) {
 	if (hasLogFiles()){
 		logLoader = new LogLoader();
 		return logLoader.determineEarliestBeginEventTime(selectedPEs, validPEs);
@@ -212,7 +213,7 @@ public class Analysis {
 	}
     }
 
-  public long findLatestEndEventTime(OrderedIntList selectedPEs, OrderedIntList validPEs) {
+  public long findLatestEndEventTime(SortedSet<Integer> selectedPEs, SortedSet<Integer> validPEs) {
 	if (hasLogFiles()){
 		logLoader = new LogLoader();
 		return logLoader.determineLatestEndEventTime(selectedPEs, validPEs);
@@ -460,8 +461,8 @@ public class Analysis {
 	
 	The returned values are in percent CPU time spent. 
     */
-    public float[][] GetUsageData(int pnum, long begintime, 
-    		long endtime, OrderedIntList phases) {
+    public float[][] GetUsageData(int pnum, long begintime,
+               long endtime, SortedSet<Integer> phases) {
     	if( hasLogFiles()) { //.log files
     		UsageCalc u=new UsageCalc();
     		return u.usage(pnum, begintime, endtime, getVersion() );
@@ -472,16 +473,18 @@ public class Analysis {
     	
     	/*BAD: silently ignores begintime and endtime*/
     	if( sumAnalyzer.getPhaseCount()>1 ) {
-    		phases.reset();
-    		data = sumAnalyzer.getPhaseChareTime( phases.nextElement() );
-    		if (phases.hasMoreElements()) {
-    			while (phases.hasMoreElements() && ( pnum > -1 )) {
-    				phasedata =   sumAnalyzer.getPhaseChareTime(phases.nextElement());
-    				for(int q=0; q<numUserEntries; q++) {
+			Iterator<Integer> iter = phases.iterator();
+			data = sumAnalyzer.getPhaseChareTime(iter.next());
+
+			while (iter.hasNext() && pnum > -1)
+			{
+				phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
+				{
+					for(int q=0; q<numUserEntries; q++) {
     					data[pnum][q] += phasedata[pnum][q];
     				}
-    			}
-    		}
+				}
+			}
     	} else {
     		data = sumAnalyzer.getChareTime();
     	}
@@ -530,7 +533,7 @@ public class Analysis {
     public void LoadGraphData(long intervalSize, 
 			      int intervalStart, int intervalEnd,
 			      boolean byEntryPoint, 
-			      OrderedIntList processorList) 
+			      SortedSet<Integer> processorList)
     {
 	if( hasLogFiles()) { // .log files
 	    LogReader logReader = new LogReader();
@@ -566,7 +569,7 @@ public class Analysis {
     // yet another version of summary load for processor subsets.
     private void loadSummaryData(long intervalSize, 
     		int intervalStart, int intervalEnd,
-    		OrderedIntList processorList) {
+			SortedSet<Integer> processorList) {
     	systemUsageData = new int[3][][];
     	int[][][] temp = new int[3][][];
     	temp[1] =
@@ -926,7 +929,7 @@ public class Analysis {
 	return fileNameHandler.getValidProcessorString(type);
     }
 
-    public OrderedIntList getValidProcessorList(int type) {
+    public SortedSet<Integer> getValidProcessorList(int type) {
 	return fileNameHandler.getValidProcessorList(type);
     }
 
@@ -950,7 +953,7 @@ public class Analysis {
 	}
     }
 
-    public OrderedIntList getValidProcessorList() {
+    public SortedSet<Integer> getValidProcessorList() {
 	if (hasLogFiles()) {
 	    return getValidProcessorList(ProjMain.LOG);
 	} else if (hasSumFiles()) {

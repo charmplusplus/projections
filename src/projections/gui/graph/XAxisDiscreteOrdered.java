@@ -1,6 +1,6 @@
 package projections.gui.graph;
 
-import projections.gui.OrderedIntList;
+import java.util.SortedSet;
 
 public class XAxisDiscreteOrdered
     extends XAxis
@@ -8,7 +8,7 @@ public class XAxisDiscreteOrdered
     private String title;
     private int discreteList[];
     
-    public XAxisDiscreteOrdered(String title, OrderedIntList discreteList) {
+    public XAxisDiscreteOrdered(String title, SortedSet<Integer> discreteList) {
     	this.title = title;
     	this.discreteList = new int[discreteList.size()];
     	int count = 0;
@@ -16,7 +16,6 @@ public class XAxisDiscreteOrdered
     	for(Integer n : discreteList){
     		this.discreteList[count++] = n;		
     	}
-
     }
 
     public String getTitle() {

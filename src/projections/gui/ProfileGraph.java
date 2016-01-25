@@ -65,6 +65,8 @@ class ProfileGraph extends JPanel
     private String yTitle;
     private double pixelIncY;
 
+    private boolean enableGrid = true;
+
     //About font settings on the canvas
     private static final int FONT_SIZE = 12;   
     private Font font = null;
@@ -119,6 +121,13 @@ class ProfileGraph extends JPanel
         colorsMap = cMap;
         colorsPool = c;
         sectionNames = n;
+    }
+
+    public void setGridEnabled(boolean val) {
+        enableGrid = val;
+
+        revalidate();
+        repaint();
     }
 
     public void setScaleX(double val) {
@@ -449,6 +458,7 @@ class ProfileGraph extends JPanel
 	g.drawLine(originX, originY, originX , gTitleH);
 
         canvasHeight = originY-gTitleH;
+        canvasWidth = (int)((baseWidth-30-originX)*xscale);
 	pixelIncY = (double)canvasHeight / 100;
 	//setBestIncrements(Y_AXIS, pixelincrementY, (long)maxvalueY);
         int fH = fm.getHeight();
@@ -457,9 +467,15 @@ class ProfileGraph extends JPanel
         int tickW = 2;
         for(int i=0; i<=100; i++){
             if(i%5==0){
-                g.drawLine(originX, (int)cury, originX-unitW, (int)cury);
+                if (enableGrid) {
+                    g.drawLine(originX - unitW, (int) cury, originX + canvasWidth, (int) cury);
+                }
+                else {
+                    g.drawLine(originX - unitW, (int) cury, originX, (int) cury);
+                }
+
                 String l = ""+i;
-                g.drawString(l, originX-fm.stringWidth(l)-5, (int)cury+fH/2);
+                g.drawString(l, originX-fm.stringWidth(l)-7, (int)cury+fH/2);
             } else {
                 g.drawLine(originX, (int)cury, originX-tickW, (int)cury);
             }             

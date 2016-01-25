@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -70,7 +71,7 @@ class ProfileWindow extends ProjectionsWindow
     private JScrollPane ampiDisplayPanel;
     private int ampiDisplayPanelTabIndex;
 
-
+    private JCheckBox chkEnableGrid;
     private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY, btnExportToFile;
     private JFloatTextField txtScaleX, txtScaleY;
 
@@ -171,6 +172,15 @@ class ProfileWindow extends ProjectionsWindow
             tabPane.addChangeListener(this);
         }
 
+        JPanel gridPanel = new JPanel();
+        gridPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Grid"));
+        gridPanel.setLayout(gbl);
+
+        chkEnableGrid = new JCheckBox();
+        chkEnableGrid.setSelected(true);
+        chkEnableGrid.addActionListener(this);
+        Util.gblAdd(gridPanel, chkEnableGrid, gbc, 0, 0, 1, 1, 0, 0);
+
         //create x-y scale panel
         JPanel xScalePanel = new JPanel();
 	xScalePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "x-scale"));
@@ -216,13 +226,14 @@ class ProfileWindow extends ProjectionsWindow
         Container wholeContainer = getContentPane();
         wholeContainer.setLayout(gbl);
         if(ampiTraceOn){
-            Util.gblAdd(wholeContainer, tabPane, gbc, 0,0, 2,1, 1,1, 5,5,5,5);
+            Util.gblAdd(wholeContainer, tabPane, gbc, 0,0, 3,1, 1,1, 5,5,5,5);
         } else {
-            Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 2,1, 1,1, 5,5,5,5);
+            Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 3,1, 1,1, 5,5,5,5);
         }
 
-        Util.gblAdd(wholeContainer, xScalePanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
-        Util.gblAdd(wholeContainer, yScalePanel, gbc, 1,1, 1,1, 1,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer,   gridPanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer, xScalePanel, gbc, 1,1, 1,1, 5,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer, yScalePanel, gbc, 2,1, 1,1, 5,0, 2,2,2,2);
     }
 
     public void showDialog(){
@@ -260,7 +271,10 @@ class ProfileWindow extends ProjectionsWindow
 	// clean current slate
 	float scaleX = 0;
 	float scaleY = 0;
-
+        if  (evt.getSource() instanceof JCheckBox) {
+            JCheckBox chk = (JCheckBox) evt.getSource();
+            displayCanvas.setGridEnabled(chk.isSelected());
+        }
 	if (evt.getSource() instanceof JButton) {
 	    JButton b = (JButton) evt.getSource();
  	    if (b == btnDecX) {

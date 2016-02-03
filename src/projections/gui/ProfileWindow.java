@@ -695,6 +695,8 @@ class ProfileWindow extends ProjectionsWindow
         // // Phase 1b - assign colors based on average work
         // // Phase 2 - create display data sources
 
+        float[][][] rawData = new float[data.plist.size()][][];
+
 
         // Phase 1a: compute average work
         progressBar =
@@ -713,11 +715,11 @@ class ProfileWindow extends ProjectionsWindow
         	// the first row is for entry method execution time
         	// the second is for time spent sending messages in
         	// that entry method
-        	float cur[][] =
+        	rawData[progressCount] =
         		MainWindow.runObject[myRun].GetUsageData(pe,data.begintime,data.endtime,data.phaselist);
-        	for (int i=0;i<avg[0].length && i<cur[0].length;i++) {
-        		avg[0][i]+=(float)(cur[0][i]*avgScale);
-        		avg[1][i]+=(float)(cur[1][i]*avgScale);
+        	for (int i=0;i<avg[0].length && i<rawData[progressCount][0].length;i++) {
+        		avg[0][i]+=(float)(rawData[progressCount][0][i]*avgScale);
+        		avg[1][i]+=(float)(rawData[progressCount][1][i]*avgScale);
         	}
         	progressCount++;
         }
@@ -768,9 +770,8 @@ class ProfileWindow extends ProjectionsWindow
         	} else {
         		break;
         	}
-        	float rawData[][]=MainWindow.runObject[myRun].GetUsageData(pe,data.begintime,data.endtime,data.phaselist);
 
-        	createSingleProcSource(rawData, pe);
+        	createSingleProcSource(rawData[progressCount], pe);
 
         	//The 0 column is left for the average one
         	progressCount++;

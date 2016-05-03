@@ -39,7 +39,6 @@ import projections.gui.ColorManager;
 import projections.gui.ColorUpdateNotifier;
 import projections.gui.EntryMethodVisibility;
 import projections.gui.MainWindow;
-import projections.gui.OrderedUsageList;
 import projections.misc.LogLoadException;
 import projections.analysis.StsReader;
 
@@ -210,9 +209,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** pack usage indexed by PE */
 	private float[] packUsage;
 
-	/** entry usage list indexed by PE */
-	private OrderedUsageList[] entryUsageList;
-
 	/** The start time for the time range. */
 	private long startTime; 
 
@@ -309,7 +305,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		oldET = -1;
 
 		processorUsage = null;
-		entryUsageList = null;
 
 		minMem = Integer.MAX_VALUE;
 		maxMem = Integer.MIN_VALUE;	
@@ -586,7 +581,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			}
 
 			processorUsage = new float[numPEs()];
-			entryUsageList = new OrderedUsageList[numPEs()];
 			float[] entryUsageArray = new float[MainWindow.runObject[myRun].getNumUserEntries()];
 			idleUsage  = new float[numPEs()];
 			packUsage  = new float[numPEs()];
@@ -664,15 +658,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					}
 
 				}
-
-				entryUsageList[pe.intValue()] = new OrderedUsageList();
-
-				for (int i=0; i<MainWindow.runObject[myRun].getNumUserEntries(); i++) {
-					if (entryUsageArray[i] > 0) {
-						entryUsageList[pe.intValue()].insert(entryUsageArray[i]);
-					}
-				}
-
 			}
 
 			if (displayTopTimes())
@@ -2454,19 +2439,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 
 	}
-
-	public void finalize() throws Throwable
-	{
-		entries = null;
-		hiddenEntryPoints = null;
-		processorUsage = null;
-		packUsage = null;
-		entryUsageList = null;
-		messageStructures = null;
-		drawMessagesForTheseObjects = null;
-		drawMessagesForTheseObjectsAlt = null;		
-		super.finalize(); //not necessary if extending Object.
-	} 
 
 	public void makeFrequencyMap(int[] frequencyOfEntries) {
 		TreeMap<Integer, LinkedList<Integer>> mapToReturn = new TreeMap<Integer, LinkedList<Integer>>();

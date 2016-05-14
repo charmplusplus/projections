@@ -701,26 +701,28 @@ public class Graph extends JPanel
     		if (GraphStacked) {
     			int y = 0;
     			for (int k=0; k<numY; k++) {
-    				// calculating lowerbound of box, which StackArray
-    				// allready contains
-    				y = originY() - (int)(stackArray[i][k]*pixelincrementY());
-    				
-    				g.setPaint(dataSource.getColor(k));
-    				
-    				// using data[i] to get the height of this bar
-    				if (valuesPerTickX == 1) {
-    					g.fillRect(originX() + (int)(i*pixelincrementX() +
-    							tickIncrementX/2 -
-    							barWidth/2), y,
-    							(int)barWidth,
-    							(int)(data[k]*pixelincrementY()));
+			        if (data[k] > 0) {
+					// calculating lowerbound of box, which StackArray
+					// allready contains
+					y = originY() - (int) (stackArray[i][k] * pixelincrementY());
 
-    				} else {
-    					g.fillRect(originX() + (int)(i*pixelincrementX()), y, 
-    							(int)((i+1)*pixelincrementX()) - 
-    							(int)(i*pixelincrementX()), 
-    							(int)(data[k]*pixelincrementY()));
-    				}
+					g.setPaint(dataSource.getColor(k));
+
+					// using data[i] to get the height of this bar
+					if (valuesPerTickX == 1) {
+						g.fillRect(originX() + (int) (i * pixelincrementX() +
+								tickIncrementX / 2 -
+								barWidth / 2), y,
+								(int) barWidth,
+								(int) (data[k] * pixelincrementY()));
+
+					} else {
+						g.fillRect(originX() + (int) (i * pixelincrementX()), y,
+								(int) ((i + 1) * pixelincrementX()) -
+								(int) (i * pixelincrementX()),
+								(int) (data[k] * pixelincrementY()));
+					}
+				}
     			}
     		} else {
     			// unstacked.. sort the values and then display them

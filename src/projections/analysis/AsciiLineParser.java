@@ -75,6 +75,33 @@ class AsciiLineParser {
 			ret=10*ret+toDigit(c);
 		return ret*multiplier;
 	}
+	//Reads in a double.
+        protected final double nextDouble() throws IOException {
+		if(line == null){
+			throw new IOException();
+		}
+
+		int multiplier = 1;
+		char c;
+		int counter = 0;
+ 		boolean decimal = false;
+		while (isSpace(c=nextChar())) {}
+		if (c == '-') {
+			multiplier = -1;
+			c=nextChar();
+		}
+		double ret=toDigit(c);
+		while (!isSpace(c=nextChar())) {
+                	if(c == '.') {
+				decimal = true;
+				continue;
+			}
+			if(decimal)
+				counter=counter+1;
+			ret=10*ret+toDigit(c);
+		}
+		return ret*multiplier / Math.pow(10,counter);
+	}
 
 	final private int toDigit(char c) {
 		return (c)-('0');

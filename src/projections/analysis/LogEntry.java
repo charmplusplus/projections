@@ -21,7 +21,9 @@ class LogEntry
 	long papiCounts[];
 	private Integer userSupplied;
 	private long memoryUsage;
-
+	//UserStat variables
+	double stat;
+	double userTime;
 	// AMPI function tracing. The duplication is unfortunate but required.
 	int FunctionID;
 	AmpiFunctionData ampiData;
@@ -49,9 +51,9 @@ class LogEntry
 		id = new ObjectId(data.id[0],data.id[1],data.id[2],data.id[3]);
 		userSupplied = data.userSupplied;
 		memoryUsage = data.memoryUsage;
-
+		stat = data.stat;
 		note = data.note;
-
+		userTime = data.userTime;
 		numPEs = data.numPEs;
 
 		if (data.destPEs != null) {

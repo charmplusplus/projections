@@ -83,8 +83,9 @@ public class LogEntryData extends ProjDefs
     public int lineNo;          // line number of the function call.
     public String funcName;     // the name of the function
 
-
-
+    // 6/7/16 - added User Stats support
+    public double stat;
+    public double userTime;
 
     public boolean isValid() {
 	return isValid;
@@ -134,6 +135,12 @@ public class LogEntryData extends ProjDefs
 		case (ProjDefs.USER_EVENT_PAIR):
 			String name =  MainWindow.runObject[myRun].getUserEventName(userEventID);
 			return ( "<font color=\"#F7D331\">Bracketed User Event (comes in pairs)</font>: " + name);
+		case (ProjDefs.USER_STAT):
+			String statName = MainWindow.runObject[myRun].getUserStatName(userEventID);
+			String formattedString = "<font size=+1 color=\"#F7D331\">User Stat</font>: " + statName + " updated to " + stat;
+			if(userTime != -1)
+				formattedString = formattedString + " at user defined time " + userTime; 		//Prints User time if specified.
+			return formattedString;
 		case (ProjDefs.USER_EVENT):
 			String name2 =  MainWindow.runObject[myRun].getUserEventName(userEventID);
 			return ( "<font color=\"#F7D331\">User Event</font>: " + name2);

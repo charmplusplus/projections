@@ -379,6 +379,13 @@ implements PointCapableReader
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
 			break;
+		case USER_STAT:
+			data.time = sc.nextLong() + shiftAmount; //Wall Time
+			data.userTime = sc.nextDouble();	//User time
+			data.stat = sc.nextDouble();
+			data.pe = (int) sc.nextLong();
+			data.userEventID = (int) sc.nextLong();
+			break;
 		default:
 			data.type = -1;
 		break;

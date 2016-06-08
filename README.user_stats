@@ -1,0 +1,64 @@
+This README details how to track User Stats and graph them with projections
+
+How to enable userStats:
+
+	Must have Charm++, built with --enable-tracing flag.
+
+	The following must be added to the desired Charm++ program
+
+	int traceRegisterUserStat(const char * statName, int e)
+		-statName = Desired Name for stat in Projections
+		-e = value used to track stat.
+		-called once at beginning of code
+
+	void updateStat(int e, double stat)
+		-updates stat to new value
+		-e = value used to track stat
+		-stat = new value for the stat
+		-called many times through code as desired
+
+	void updateStatPair(int e, double stat, double time)
+		-updates stat to new value
+		-e = value used to track stat
+		-stat = new value for the stat
+		-time = user defined time for custom x axis in projections
+		-will still store real time, so that real/user defined x values can be graphed interchangably
+		-called many times through code as desired
+
+	flags to add
+		-tracemode projections
+
+
+	Projections can be built as normal: make
+
+
+Features:
+
+	User stats are properly read and can be viewed in the HTML logfile viewer
+	User stats can be graphed with the two User Stats Tools in projections
+
+UserStatsOverTime:
+
+	Shows the progression of the user stats over the program execution.
+	Extremely customizable. The user can set:
+		1) Time and PE range
+		2) How the PE's are aggregated (sum, min, max, avg)
+		3) Which X values are used (Wall Time, Ordered, User Specified)
+		4) Left or Right Y Axis
+		5) Line color
+		6) Whether to display lines/points/both
+		7) Which stat to plot
+	The user can add many of these and compare them. 
+	Each line can be toggled on and off.
+	Overall min, max, avg for each stat is given in a table.
+
+	SAVING IMAGE:
+		User can save image as png/jpg using the button on the bottom of the Graph panel.
+		IMPORTANT: The user can change the titles and other aspects of the graph
+			   by right clicking the graph.
+
+
+UserStatsPerPE:
+	Creates a bar graph graphing the overall value (min, max, avg) for each stat on each PE.
+	Useful for comparing overall performance across PEs.
+

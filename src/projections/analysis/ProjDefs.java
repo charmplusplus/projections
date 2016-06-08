@@ -48,7 +48,7 @@ protected static final int USER_SUPPLIED_BRACKETED_NOTE            = 29;
 
 
 public static final int USER_EVENT_PAIR          = 100;
-
+public static final int USER_STAT 		 = 32;
 /* *** USER category *** */
 protected static final int NEW_CHARE_MSG            = 0;
 //public static final int NEW_CHARE_NO_BALANCE_MSG = 1;

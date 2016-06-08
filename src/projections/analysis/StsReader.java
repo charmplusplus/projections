@@ -5,11 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
+import java.util.*;
 
 import projections.misc.LogLoadException;
 
@@ -74,7 +70,16 @@ public class StsReader extends ProjDefs
     /// The same user event names as in userEvents, but packed into an array in same manner
     private String userEventNames[];
 
-    
+    /// A mapping from the sparse user supplied ids for the user stats to a compact set of integers used for coloring the user stats
+    private HashMap<Integer, Integer> userStatIndices = new HashMap<Integer, Integer>();
+    /// Used to make values in userStatIndices unique
+    private int userStatIndex = 0;
+
+    /// The user stat names index by Integer
+    private TreeMap<Integer, String> userStats = new TreeMap<Integer, String>();
+    /// The same user stat names as in userStats, but packed into an array in same manner
+    private String userStatNames[];
+
     
     // AMPI Functions tracing
     private int functionEventIndex = 0;
@@ -198,6 +203,22 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("TOTAL_EVENTS")) {
 		    // restored by Chee Wai - 7/29/2002
 		    userEventNames = 
+			new String[Integer.parseInt(st.nextToken())];
+		} else if (s1.equals("STAT")) {
+		    Integer key = new Integer(st.nextToken());
+		    if (!userStats.containsKey(key)) {
+			String statName = "";
+			while (st.hasMoreTokens()) {
+			    statName = statName + st.nextToken() + " ";
+			}
+			userStats.put(key, statName);
+			userStatNames[userStatIndex] = statName;
+			userStatIndices.put(key,
+					     new Integer(userStatIndex++));
+		    }
+		//Read in number of stats
+		} else if (s1.equals("TOTAL_STATS")) {
+		    userStatNames =
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals("TOTAL_FUNCTIONS")) {
 		    functionEventNames = 
@@ -332,11 +353,36 @@ public class StsReader extends ProjDefs
 	return userEventNames;
     }
     
-    public Map<Integer, String>  getUserEventNameMap() {
+    public Map<Integer, String> getUserEventNameMap() {
     	// gets an array by logical (not user-given) index
     	return userEvents;
     }
-    
+
+
+    // *** user stat accessors ***
+    public int getNumUserDefinedStats() {
+	return userStats.size();
+    }
+
+    public Integer getUserStatIndex(int eventID) {
+        return userStatIndices.getOrDefault(eventID, null);
+    }
+
+    public String getUserStatName(int eventID) {
+	Integer key = new Integer(eventID);
+	return userStats.get(key);
+    }
+
+    public String[] getUserStatNames() {
+	// gets an array by logical (not user-given) index
+	return userStatNames;
+    }
+
+    public Map<Integer, String>  getUserStatNameMap() {
+    	// gets an array by logical (not user-given) index
+    	return userStats;
+    }
+
 
     // *** function event accessors ***
     public int getNumFunctionEvents() {

@@ -26,6 +26,8 @@ import projections.Tools.Streaming.StreamingTool;
 import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
 import projections.Tools.TimelineRendered.TimelineRenderedWindow;
+import projections.Tools.UserStatsOverTime.UserStatsTimeWindow;
+import projections.Tools.UserStatsPerPE.UserStatsProcWindow;
 import projections.analysis.ProjMain;
 
 /* ***************************************************
@@ -79,6 +81,10 @@ implements ActionListener, ItemListener
 	private JMenuItem histogramsMenuItem;
 	private JMenuItem overviewMenuItem;
 	private JMenuItem userEventsMenuItem;
+	//Menu Items for the User Stat Tools
+	private JMenuItem userStatsTimeMenuItem;
+	private JMenuItem userStatsProcMenuItem;
+
 	private JMenuItem outlierAnalysisMenuItem;
 	private JMenuItem animationMenuItem;
 	private JMenuItem timeProfileGraphMenuItem;
@@ -120,6 +126,8 @@ implements ActionListener, ItemListener
 			timeProfileGraphMenuItem.setEnabled(false);
 			perfCounterMenuItem.setEnabled(false);
 			userEventsMenuItem.setEnabled(false);
+			userStatsTimeMenuItem.setEnabled(false);
+			userStatsProcMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
 			functionToolMenuItem.setEnabled(false);
@@ -152,6 +160,8 @@ implements ActionListener, ItemListener
                             timeProfileGraphMenuItem.setEnabled(false);
 			perfCounterMenuItem.setEnabled(false);
 			userEventsMenuItem.setEnabled(false);
+			userStatsTimeMenuItem.setEnabled(false);
+			userStatsProcMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
 			functionToolMenuItem.setEnabled(false);
@@ -186,6 +196,8 @@ implements ActionListener, ItemListener
 				perfCounterMenuItem.setEnabled(false);
 			}
 			userEventsMenuItem.setEnabled(true);
+			userStatsTimeMenuItem.setEnabled(true);
+			userStatsProcMenuItem.setEnabled(true);
 			outlierAnalysisMenuItem.setEnabled(true);
 			multirunAnalysisMenuItem.setEnabled(true);
 			functionToolMenuItem.setEnabled(true);
@@ -242,6 +254,8 @@ implements ActionListener, ItemListener
 		timeProfileGraphMenuItem = new JMenuItem("Time Profile");
 		perfCounterMenuItem = new JMenuItem("Performance Counters");
 		userEventsMenuItem = new JMenuItem("User Events");
+		userStatsTimeMenuItem = new JMenuItem("User Stats over Time");
+		userStatsProcMenuItem = new JMenuItem("User Stats Per Processor");
 		outlierAnalysisMenuItem = new JMenuItem("Extrema Analysis");
 		multirunAnalysisMenuItem = new JMenuItem("Multirun Analysis");
 		functionToolMenuItem = new JMenuItem("Function Tool");
@@ -264,6 +278,8 @@ implements ActionListener, ItemListener
 		timeProfileGraphMenuItem.addActionListener(this);
 		perfCounterMenuItem.addActionListener(this);
 		userEventsMenuItem.addActionListener(this);
+		userStatsTimeMenuItem.addActionListener(this);
+		userStatsProcMenuItem.addActionListener(this);
 		outlierAnalysisMenuItem.addActionListener(this);
 		multirunAnalysisMenuItem.addActionListener(this);
 		functionToolMenuItem.addActionListener(this);
@@ -286,6 +302,8 @@ implements ActionListener, ItemListener
 		toolMenu.add(timeProfileGraphMenuItem);
 		toolMenu.add(perfCounterMenuItem);
 		toolMenu.add(userEventsMenuItem);
+		toolMenu.add(userStatsTimeMenuItem);
+		toolMenu.add(userStatsProcMenuItem);
 		toolMenu.add(outlierAnalysisMenuItem);
 		toolMenu.add(multirunAnalysisMenuItem);
 		toolMenu.add(functionToolMenuItem);
@@ -384,6 +402,12 @@ implements ActionListener, ItemListener
 			else if (mi == userEventsMenuItem)	
 				parent.openTool(new UserEventsWindow(parent) );
 			
+			else if (mi == userStatsTimeMenuItem)
+				parent.openTool(new UserStatsTimeWindow(parent) );
+	
+			else if (mi == userStatsProcMenuItem)
+				parent.openTool(new UserStatsProcWindow(parent) );
+
 			else if (mi == outlierAnalysisMenuItem)	
 				parent.openTool(new ExtremaWindow(parent) );
 			

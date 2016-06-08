@@ -810,6 +810,26 @@ public class Analysis {
     	return getSts().getUserEventNames();
     }
 
+    //These following functions mirror the event ones and return useful info about the stats
+    public int getNumUserDefinedStats() {
+	return getSts().getNumUserDefinedStats();
+    }
+
+    public int getUserDefinedStatIndex(int eventID) {
+	return getSts().getUserStatIndex(eventID);
+    }
+
+    public String getUserStatName(int eventID) {
+    	String name = getSts().getUserStatName(eventID);
+    	if(name != null)
+    		return name;
+    	else
+    		return "";
+    }
+
+    public String[] getUserStatNames() {
+    	return getSts().getUserStatNames();
+    }
 //    public int getNumPerfCounts() {
 //	return getSts().getNumPerfCounts();
 //    }

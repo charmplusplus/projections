@@ -1,0 +1,57 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile 'org.freehep:freehep-graphicsbase:2.4'
+  compile 'org.freehep:freehep-graphics2d:2.4'
+  compile 'org.freehep:freehep-graphicsio:2.4'
+  compile 'org.freehep:freehep-graphicsio-pdf:2.4'
+  compile 'org.freehep:freehep-graphicsio-svg:2.4'
+  compile 'org.freehep:freehep-graphicsio-ps:2.4'
+  compile 'org.freehep:freehep-vectorgraphics:2.4'
+
+  compile 'org.jfree:jcommon:1.0.23'
+  compile 'org.jfree:jfreechart:1.0.19'
+
+  compile group: 'java3d', name: 'j3d-core', version: '1.3.1'
+  compile group: 'java3d', name: 'j3d-core-utils', version: '1.3.1'
+  compile group: 'java3d', name: 'vecmath', version: '1.3.1'
+}
+
+mainClassName = 'projections.analysis.ProjMain'
+sourceCompatibility = 1.5
+version = '6.7'
+
+sourceSets {
+  main {
+    java {
+      srcDir 'src/projections'
+    }
+  }
+}
+
+task fatJar(type: Jar) {
+  manifest {
+    attributes 'Implementation-Title': 'Projections',
+               'Implementation-Version': version
+  }
+  baseName = project.name + '-all'
+  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  into ('projections/images') {
+      from('src/projections/images') {
+          include '*'
+      }
+  }
+
+  with jar
+}
+
+task copyJarToBin(type: Copy) {
+  from fatJar
+  into 'bin/'
+  rename 'projections-all-' + version + '.jar', 'projections.jar'
+}

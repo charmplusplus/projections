@@ -705,12 +705,17 @@ ItemListener {
 
 		// BUTTON PANEL
 
-		URL zoomInURL = ((Object)this).getClass().getResource("/projections/images/ZoomIn24.gif");
-		URL zoomOutURL = ((Object)this).getClass().getResource("/projections/images/ZoomOut24.gif");
+		try {
+			URL zoomInURL = ((Object) this).getClass().getResource("/projections/images/ZoomIn24.gif");
+			URL zoomOutURL = ((Object) this).getClass().getResource("/projections/images/ZoomOut24.gif");
 
-		bDecrease = new JButton(new ImageIcon(zoomOutURL));
-		bIncrease = new JButton(new ImageIcon(zoomInURL));
-
+			bDecrease = new JButton(new ImageIcon(zoomOutURL));
+			bIncrease = new JButton(new ImageIcon(zoomInURL));
+		}
+		catch (Exception ex) {
+			bDecrease = new JButton("-");
+			bIncrease = new JButton("+");
+		}
 		bReset = new JButton("Reset Zoom");
 
 		bDecrease.addActionListener(this);

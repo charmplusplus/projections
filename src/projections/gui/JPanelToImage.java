@@ -7,6 +7,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -16,15 +17,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
+import org.freehep.graphicsio.pdf.PDFExportFileType;
+import org.freehep.graphicsio.pdf.PDFGraphics2D;
+import org.freehep.graphicsbase.util.export.ExportDialog;
+
 import projections.Tools.Timeline.ImageFilter;
 
 /**
- * Renders & Saves images for any displayed JPanel. The JPanel must already be layed out.
+ * Renders & Saves images for any displayed JPanel. The JPanel must already be laid out.
  */
 
 public class JPanelToImage {
-
-
 	/** Create an image and paint the panel into the image. */
 	public static BufferedImage generateImage(JPanel panelToRender){
 		//		 Create an image for the constructed panel.
@@ -53,8 +56,21 @@ public class JPanelToImage {
 	
 	/** Generate an image of the panel and save it into a file chosen by the user in a file chooser dialog box. */
 	public static void saveToFileChooserSelection(JPanel panelToRender, String dialogTitle, String defaultFilename){
-		BufferedImage image = generateImage(panelToRender);
-		saveToFileChooserSelection(image, dialogTitle, defaultFilename);
+		ExportDialog export = new ExportDialog();
+		Properties properties = new Properties();
+
+		// Key name found from lines 40-41 of https://github.com/freehep/freehep-vectorgraphics/blob/25e9edc5ab3421e759652aac8e2ca48d55f8134f/freehep-graphicsbase/src/main/java/org/freehep/graphicsbase/util/export/ExportDialog.java
+		// Set pdf as default export type
+		properties.setProperty(ExportDialog.class.getName() + ".SaveAsType", new PDFExportFileType().getFileFilter().getDescription());
+
+		// For pdfs, set custom page size and margins so that the result doesn't have any extraneous whitespace
+		properties.setProperty(PDFGraphics2D.PAGE_SIZE, PDFGraphics2D.CUSTOM_PAGE_SIZE);
+		properties.setProperty(PDFGraphics2D.CUSTOM_PAGE_SIZE, panelToRender.getWidth() + ", " + panelToRender.getHeight());
+		properties.setProperty(PDFGraphics2D.PAGE_MARGINS, "0, 0, 0, 0");
+
+		export.setUserProperties(properties);
+
+		export.showExportDialog(panelToRender, dialogTitle, panelToRender, defaultFilename);
 	}
 	
 	/** Generate an image of the panel and save it into a file chosen by the user in a file chooser dialog box. */

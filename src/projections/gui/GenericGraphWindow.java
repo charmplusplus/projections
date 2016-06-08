@@ -119,7 +119,7 @@ implements PopUpAble, ColorUpdateNotifier
 		
 		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Save To Image");
-		mSaveScreenshot = new JMenuItem("Save Plot as JPG or PNG");
+		mSaveScreenshot = new JMenuItem("Save Plot as Image");
 		mSaveScreenshot.addActionListener(new MenuHandler());
 		saveMenu.add(mSaveScreenshot);
 		menuBar.add(saveMenu);
@@ -230,7 +230,7 @@ implements PopUpAble, ColorUpdateNotifier
 				MainWindow.runObject[myRun].foreground = Color.white;
 				graphCanvas.repaint();
 			} else if(e.getSource() == mSaveScreenshot){
-				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File", "./ProjectionsPlot.png");
+				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File...", "ProjectionsPlot.pdf");
 			} else if (e.getSource() == mChooseColors){
 				new ChooseEntriesWindow(gw);
 			} else if (e.getSource() == mLoadColors){

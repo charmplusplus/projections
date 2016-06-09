@@ -215,13 +215,7 @@ class ProfileGraph extends JPanel
 	    pg.setFont(font);
 	    fm = pg.getFontMetrics(font);
 	}
-	Color oldBackground = MainWindow.runObject[myRun].background;
-	Color oldForeground = MainWindow.runObject[myRun].foreground;
-	MainWindow.runObject[myRun].background = Color.white;
-	MainWindow.runObject[myRun].foreground = Color.black;
 	drawDisplay(pg);
-	MainWindow.runObject[myRun].background = oldBackground;
-	MainWindow.runObject[myRun].foreground = oldForeground;
     }
 
     /**
@@ -466,6 +460,7 @@ class ProfileGraph extends JPanel
         int unitW = 5;
         int tickW = 2;
         for(int i=0; i<=100; i++){
+            cury = (int)(originY - ((double)i * canvasHeight) / 100);
             if(i%5==0){
                 if (enableGrid) {
                     g.drawLine(originX - unitW, (int) cury, originX + canvasWidth, (int) cury);
@@ -478,8 +473,7 @@ class ProfileGraph extends JPanel
                 g.drawString(l, originX-fm.stringWidth(l)-7, (int)cury+fH/2);
             } else {
                 g.drawLine(originX, (int)cury, originX-tickW, (int)cury);
-            }             
-            cury -= pixelIncY;
+            }
         }
     }
 

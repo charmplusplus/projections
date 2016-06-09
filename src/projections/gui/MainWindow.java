@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.imageio.ImageIO;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -148,8 +149,7 @@ implements ScalePanel.StatusDisplay
 	private void createLayout()
 	{
 		try {
-			URL imageURL = ((Object)this).getClass().getResource("/projections/images/bgimage.jpg");
-			bgimage = Toolkit.getDefaultToolkit().getImage(imageURL);
+			bgimage = ImageIO.read(getClass().getResourceAsStream("/projections/images/bgimage.jpg"));
 			// mainPanel is used to draw the wall paper and serves as the
 			// MainWindow's contentPane.
 			background = new BackGroundImagePanel(bgimage, true);

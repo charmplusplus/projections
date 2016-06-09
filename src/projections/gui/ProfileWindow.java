@@ -138,6 +138,12 @@ class ProfileWindow extends ProjectionsWindow
                                 this));
         }
 
+        mbar.add(Util.makeJMenu("Save to Image", new Object[]
+                {
+                        "Save Plot as Image"
+                },
+                this));
+
 	setJMenuBar(mbar);
     }
 
@@ -380,9 +386,16 @@ class ProfileWindow extends ProjectionsWindow
 	    	showUsageTable();
 	    } else if (arg.equals("Usage Profile")) {
 	    	showAMPIUsageProfile();
-	    }
+	    } else if (arg.equals("Save Plot as Image")) {
+            exportImage();
+        }
 	}
 
+    }
+
+    private void exportImage() {
+        ProfileGraph current = (ampiTraceOn) ? ampiDisplayCanvas : displayCanvas;
+        JPanelToImage.saveToFileChooserSelection(current, "Save Plot To File...", "UsageProfile.pdf");
     }
 
     public void stateChanged(ChangeEvent e){

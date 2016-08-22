@@ -7,6 +7,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import projections.analysis.ProjMain;
+import projections.analysis.StsReader;
 import projections.gui.Util;
 
 /**
@@ -29,34 +30,18 @@ public class FileUtils {
 	private ArrayList<TreeSet<Integer>> validPEs;
 	private String validPEStrings[];
 	private boolean hasFiles[];
-	
+
+	private StsReader sts;
 	private String baseName;
-	
-	
-	public String getBaseName(){
-		return baseName;
-	}
+
 	
 	/** The file for the log for each specified pe */
 	private FileTreeMap logFiles[];
 	
-	public FileUtils(String filename){
-//		System.out.println("FileUtils created with filename: " + filename);	
-	
-		// Extract base name
-		if (filename.endsWith(".sum.sts")) {
-			baseName = filename.substring(0, filename.length()-8);
-		} else if (filename.endsWith(".sts")) {
-			baseName = filename.substring(0, filename.length()-4); 
-		} else {
-			System.err.println("Invalid sts filename! Exiting ...");
-			System.exit(-1);
-		}
-//		System.out.println("FileUtils extracted basename: " + baseName);	
-		
-		
+	public FileUtils(StsReader sts){
+		this.sts = sts;
+		baseName = sts.getBaseName();
 		detectFiles();
-	
 	}
 	
 	
@@ -146,7 +131,8 @@ public class FileUtils {
 		String prefix_s = prefix.getName();
 		String extension = getTypeExtension(type);
 		final int prefixNumSplits = prefix_s.split("\\.").length;
-		
+		final int numPEs = sts.getProcessorCount();
+
 //		System.out.println("FileUtils.dirFromFile(baseName) = " + FileUtils.dirFromFile(baseName) );
 
 		for(File f : myDir.listFiles()){
@@ -178,15 +164,19 @@ public class FileUtils {
 					if(numSplits > prefixNumSplits){
 						if(splits[numSplits-1].equals(extension)){
 							int pe = Integer.parseInt(splits[numSplits-2]);
-							validPEs.get(type).add(pe);
-							hasFiles[type] = true;
-							logFiles[type].put(pe, f);
+							if (pe < numPEs) {
+								validPEs.get(type).add(pe);
+								hasFiles[type] = true;
+								logFiles[type].put(pe, f);
+							}
 							//						System.out.println("Found " + extension + " for pe " + pe);
 						} else if(splits[numSplits-2].equals(extension)  &&  splits[numSplits-1].equals("gz") ){
 							int pe = Integer.parseInt(splits[numSplits-3]);
-							validPEs.get(type).add(pe);
-							hasFiles[type] = true;
-							logFiles[type].put(pe, f);
+							if (pe < numPEs) {
+								validPEs.get(type).add(pe);
+								hasFiles[type] = true;
+								logFiles[type].put(pe, f);
+							}
 							//						System.out.println("Found " + extension + ".gz for pe " + pe);
 						} else {
 							// The file does not appear to match the desired names
@@ -222,7 +212,7 @@ public class FileUtils {
 
     /** @TODO: Make this private so that the names don't leak out of here to be used in bad ways */
     public String getCanonicalFileName(int pnum, int type){
-    	return getBaseName() + "." + pnum + "." + getTypeExtension(type);
+        return baseName + "." + pnum + "." + getTypeExtension(type);
     }
 
 

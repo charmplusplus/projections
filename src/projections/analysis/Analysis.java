@@ -135,9 +135,6 @@ public class Analysis {
     {
 	  guiRoot = rootComponent;
 	  try {
-		  
-		  fileNameHandler = new FileUtils(filename);
-
 		  setSts(new StsReader(filename));
 
 		  // Version Check (Kind of a hack, since the format of the Sts file
@@ -150,6 +147,7 @@ public class Analysis {
 			  System.exit(-1);
 		  }
 
+		  fileNameHandler = new FileUtils(sts);
 		  rcReader = new ProjectionsConfigurationReader(fileNameHandler);
 
 		  // Load saved color information from file
@@ -668,14 +666,9 @@ public class Analysis {
     	return fileNameHandler.withoutDir();
     }
 
-    public String getFilename() { 
-    	return fileNameHandler.getBaseName();
+    public String getFilename() {
+        return sts.getBaseName();
     }
-
-    
-    public String getBaseFilename() { 
-    	return fileNameHandler.getBaseName();
-    }   
     
     // *** Activity Management *** */
 
@@ -1053,7 +1046,7 @@ public class Analysis {
 	}
 
 	public String getOutlierFilename() {
-		return getBaseFilename() + ".outlier";	
+		return sts.getBaseName() + ".outlier";
 	}
 
 

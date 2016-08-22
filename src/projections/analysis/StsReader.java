@@ -28,6 +28,8 @@ import projections.misc.LogLoadException;
 public class StsReader extends ProjDefs
 {
     private boolean hasPAPI = false;
+
+	private String baseName;
 	
     // Sts header information
     private double version;
@@ -93,8 +95,19 @@ public class StsReader extends ProjDefs
 	throws LogLoadException   
     {
 	try {
-	    BufferedReader InFile = 
+	    BufferedReader InFile =
 		new BufferedReader(new InputStreamReader(new FileInputStream(FileName)));
+
+		// Extract base name
+		if (FileName.endsWith(".sum.sts")) {
+			baseName = FileName.substring(0, FileName.length()-8);
+		} else if (FileName.endsWith(".sts")) {
+			baseName = FileName.substring(0, FileName.length()-4);
+		} else {
+			System.err.println("Invalid sts filename! Exiting ...");
+			System.exit(-1);
+		}
+
 	    int ID,ChareID;
 	    String Line,Name;
 	    while ((Line = InFile.readLine()) != null) {
@@ -229,7 +242,9 @@ public class StsReader extends ProjDefs
     
     /** ****************** Accessor Methods ******************* */
 
-    // *** Data accessors ***
+	public String getBaseName() { return baseName; }
+
+	// *** Data accessors ***
     public double getVersion() {
 	return version;
     }

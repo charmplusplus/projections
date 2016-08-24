@@ -242,16 +242,20 @@ public class MultiRunDataAnalyzer {
 	    boolean lastIncremented = true;
 	    double avgChange = 0.0;
 	    double prevValue = dataTable[dataType][0][ep];
-	    if (dataTable[dataType][1][ep] > prevValue) {
-		consecutiveIncrements = 1;
-		avgChange += dataTable[dataType][1][ep] - prevValue;
-		lastIncremented = true;
-	    } else if (dataTable[dataType][1][ep] < prevValue) {
-		consecutiveDecrements = 1;
-		avgChange += prevValue - dataTable[dataType][1][ep];
-		lastIncremented = false;
+
+	    if (numRuns > 1) {
+	        if (dataTable[dataType][1][ep] > prevValue) {
+			    consecutiveIncrements = 1;
+			    avgChange += dataTable[dataType][1][ep] - prevValue;
+			    lastIncremented = true;
+	        } else if (dataTable[dataType][1][ep] < prevValue) {
+			    consecutiveDecrements = 1;
+			    avgChange += prevValue - dataTable[dataType][1][ep];
+			    lastIncremented = false;
+	        }
+	        prevValue = dataTable[dataType][1][ep];
 	    }
-	    prevValue = dataTable[dataType][1][ep];
+
 	    for (int run=2; run<numRuns; run++) {
 		if (dataTable[dataType][run][ep] > prevValue) {
 		    double change =

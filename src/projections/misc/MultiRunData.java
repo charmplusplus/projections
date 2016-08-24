@@ -141,7 +141,7 @@ public class MultiRunData
 	    boolean hasSummary = true;
 	    boolean hasLog = true;
 	    for (int run=0; run<numRuns; run++) {
-		validPESets.add(run, detectFiles(stsReaders[run], fileNameHandlers[run]));
+		validPESets.add(run, detectFiles(fileNameHandlers[run]));
 		hasSummary = 
 		    (hasSummary && 
 		     !(validPESets.get(run).get(ProjMain.SUMMARY).isEmpty()));
@@ -331,28 +331,17 @@ public class MultiRunData
 	return typeNames[dataType];
     }
 
-    private static ArrayList<SortedSet<Integer>> detectFiles(StsReader sts, FileUtils fileNameHandler) {
+    private static ArrayList<SortedSet<Integer>> detectFiles(FileUtils fileNameHandler) {
 	// determine if any of the desired data files exist for each
 	// sts file. This is copied from MainWindow.runObject[myRun].java just because
 	// Multirun cannot understand that silly static Class.
+		ArrayList<SortedSet<Integer>> validPEs = new ArrayList<SortedSet<Integer>>(ProjMain.NUM_TYPES);
 
-	ArrayList<SortedSet<Integer>> validPEs = new ArrayList<SortedSet<Integer>>(ProjMain.NUM_TYPES);
-	for (int i=0; i<ProjMain.NUM_TYPES; i++) {
-	    validPEs.add(new TreeSet<Integer>());
-	}
+		validPEs.add(ProjMain.LOG, fileNameHandler.getValidProcessorList(ProjMain.LOG));
+		validPEs.add(ProjMain.SUMMARY, fileNameHandler.getValidProcessorList(ProjMain.SUMMARY));
+		validPEs.add(ProjMain.SUMDETAIL, fileNameHandler.getValidProcessorList(ProjMain.SUMDETAIL));
 
-	for (int i=0;i<sts.getProcessorCount();i++) {
-	    if ((new File(fileNameHandler.getCanonicalFileName(i, ProjMain.SUMMARY))).isFile()) {
-		validPEs.get(ProjMain.SUMMARY).add(i);
-	    }
-	    if ((new File(fileNameHandler.getCanonicalFileName(i, ProjMain.SUMDETAIL))).isFile()) {
-		validPEs.get(ProjMain.SUMDETAIL).add(i);
-	    }
-	    if ((new File(fileNameHandler.getCanonicalFileName(i, ProjMain.LOG))).isFile()) {
-		validPEs.get(ProjMain.LOG).add(i);
-	    }
-	}
-	return validPEs;
+		return validPEs;
     }
 }
 

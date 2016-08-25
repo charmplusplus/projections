@@ -239,7 +239,7 @@ implements ActionListener, ItemListener
 		histogramsMenuItem = new JMenuItem("Histograms");
 		overviewMenuItem = new JMenuItem("Overview");
 		animationMenuItem = new JMenuItem("Animation");
-		timeProfileGraphMenuItem = new JMenuItem("Time Profile Graph");
+		timeProfileGraphMenuItem = new JMenuItem("Time Profile");
 		perfCounterMenuItem = new JMenuItem("Performance Counters");
 		userEventsMenuItem = new JMenuItem("User Events");
 		outlierAnalysisMenuItem = new JMenuItem("Extrema Analysis");

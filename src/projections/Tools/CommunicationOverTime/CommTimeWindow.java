@@ -508,8 +508,9 @@ implements ItemListener, ActionListener
 		else if(currentArrayName.equals("sentByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Bytes = " + 
-			_format.format(sentByteOutput[xVal][yVal]);
+			rString[3] = String.format("Bytes = %s (%s MB/s)",
+				_format.format(sentByteOutput[xVal][yVal]),
+				_format.format(sentByteOutput[xVal][yVal] / intervalSize));
 		}
 		else if(currentArrayName.equals("receivedMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
@@ -520,8 +521,9 @@ implements ItemListener, ActionListener
 		else if(currentArrayName.equals("receivedByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Bytes = " + 
-			_format.format(receivedByteOutput[xVal][yVal]);
+			rString[3] = String.format("Bytes = %s (%s MB/s)",
+				_format.format(receivedByteOutput[xVal][yVal]),
+				_format.format(receivedByteOutput[xVal][yVal] / intervalSize));
 		}
 		/*
 	else if (currentArrayName.equals("sentExternalMsgCount")) {
@@ -546,8 +548,9 @@ implements ItemListener, ActionListener
 		else if(currentArrayName.equals("receivedExternalByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Bytes = " + 
-			_format.format(receivedExternalByteOutput[xVal][yVal]);
+			rString[3] = String.format("Bytes = %s (%s MB/s)",
+				_format.format(receivedExternalByteOutput[xVal][yVal]),
+				_format.format(receivedExternalByteOutput[xVal][yVal] / intervalSize));
 		}
         else if(currentArrayName.equals("receivedExternalNodeMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
@@ -558,8 +561,9 @@ implements ItemListener, ActionListener
 		else if(currentArrayName.equals("receivedExternalNodeByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Bytes = " + 
-			_format.format(receivedExternalNodeByteOutput[xVal][yVal]);
+			rString[3] = String.format("Bytes = %s (%s MB/s)",
+				_format.format(receivedExternalNodeByteOutput[xVal][yVal]),
+				_format.format(receivedExternalNodeByteOutput[xVal][yVal] / intervalSize));
 		}
 
 		return rString;

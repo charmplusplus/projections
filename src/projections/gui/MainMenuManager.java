@@ -70,7 +70,7 @@ implements ActionListener, ItemListener
 
 	// The menu items for each tool in the tool menu
 	private JMenuItem timelinesMenuItem;
-	private JMenuItem renderedTimelinesMenuItem;
+	//private JMenuItem renderedTimelinesMenuItem;
 	private JMenuItem usageProfileMenuItem;
 	private JMenuItem communicationMenuItem;
 	private JMenuItem communicationVsTimeMenuItem;
@@ -107,7 +107,7 @@ implements ActionListener, ItemListener
 			fileCloseAllMenuItem.setEnabled(false);
 			fileQuitMenuItem.setEnabled(true);
 
-			renderedTimelinesMenuItem.setEnabled(false);
+			//renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(false);
 			communicationMenuItem.setEnabled(false);
@@ -136,7 +136,7 @@ implements ActionListener, ItemListener
 			fileCloseAllMenuItem.setEnabled(true);
 			fileQuitMenuItem.setEnabled(true);
 
-			renderedTimelinesMenuItem.setEnabled(false);
+			//renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(true);
 			communicationMenuItem.setEnabled(false);
@@ -168,7 +168,7 @@ implements ActionListener, ItemListener
 			fileCloseAllMenuItem.setEnabled(true);
 			fileQuitMenuItem.setEnabled(true);
 
-			renderedTimelinesMenuItem.setEnabled(true);
+			//renderedTimelinesMenuItem.setEnabled(true);
 			timelinesMenuItem.setEnabled(true);
 			usageProfileMenuItem.setEnabled(true);
 			communicationMenuItem.setEnabled(true);
@@ -230,7 +230,7 @@ implements ActionListener, ItemListener
 		toolMenu = new JMenu("Tools");
 
 		timelinesMenuItem = new JMenuItem("Timelines");
-		renderedTimelinesMenuItem = new JMenuItem("Timelines - rendered to image");
+		//renderedTimelinesMenuItem = new JMenuItem("Timelines - rendered to image");
 		usageProfileMenuItem = new JMenuItem("Usage Profile");
 		communicationMenuItem = new JMenuItem("Communication Per Processor");
 		communicationVsTimeMenuItem = new JMenuItem("Communication Over Time");
@@ -252,7 +252,7 @@ implements ActionListener, ItemListener
 		topologyDisplayMenuItem = new JMenuItem("Topology Display");
 
 		timelinesMenuItem.addActionListener(this);
-		renderedTimelinesMenuItem.addActionListener(this);
+		//renderedTimelinesMenuItem.addActionListener(this);
 		usageProfileMenuItem.addActionListener(this);
 		communicationMenuItem.addActionListener(this);
 		communicationVsTimeMenuItem.addActionListener(this);
@@ -274,7 +274,7 @@ implements ActionListener, ItemListener
 		topologyDisplayMenuItem.addActionListener(this);
 
 		toolMenu.add(timelinesMenuItem);
-		toolMenu.add(renderedTimelinesMenuItem);
+		//toolMenu.add(renderedTimelinesMenuItem);
 		toolMenu.add(usageProfileMenuItem);
 		toolMenu.add(communicationMenuItem);
 		toolMenu.add(communicationVsTimeMenuItem);
@@ -346,8 +346,8 @@ implements ActionListener, ItemListener
 			else if (mi == timelinesMenuItem)
 				parent.openTool(new TimelineWindow(parent) );
 
-			else if (mi == renderedTimelinesMenuItem)
-				parent.openTool(new TimelineRenderedWindow(parent) );
+			//else if (mi == renderedTimelinesMenuItem)
+			//	parent.openTool(new TimelineRenderedWindow(parent) );
 			
 			else if (mi == usageProfileMenuItem)
 				parent.openTool(new ProfileWindow(parent) ); 

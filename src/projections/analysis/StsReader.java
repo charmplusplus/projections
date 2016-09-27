@@ -365,7 +365,10 @@ public class StsReader extends ProjDefs
     }
 
     public Integer getUserStatIndex(int eventID) {
-        return userStatIndices.getOrDefault(eventID, null);
+        if (userStatIndices.containsKey(eventID)) {
+            return userStatIndices.get(eventID);
+        }
+        return null;
     }
 
     public String getUserStatName(int eventID) {

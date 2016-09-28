@@ -96,8 +96,8 @@ class AxisPanel extends JPanel implements Scrollable, MouseListener, MouseMotion
 			int maxx = getWidth();
 
 			// Determine the left and right pixel coordinates where we will be drawing the timeline
-			int xLeft = data.offset();
-			int xRight = maxx-data.offset();
+			int xLeft = data.getOffset();
+			int xRight = maxx-data.getOffset();
 
 			// Draw horizontal line
 			g.setColor(data.getForegroundColor());

@@ -290,9 +290,9 @@ implements LayoutManager, ScrollPaneConstants
 
 				int oldViewPositionCenter = originalViewPosition.x + originalViewWidth / 2 ;
 				
-				double relativePosition = ((double)(oldViewPositionCenter-data.offset()))/((double)(originalScaledWidth-2*data.offset()));
+				double relativePosition = ((double)(oldViewPositionCenter-data.getOffset()))/((double)(originalScaledWidth-2*data.getOffset()));
 
-				newViewPositionCenter = data.offset()+(int)(relativePosition* (scaledWidth-2*data.offset()));
+				newViewPositionCenter = data.getOffset()+(int)(relativePosition* (scaledWidth-2*data.getOffset()));
 				
 				data.keepViewCentered(false);
 

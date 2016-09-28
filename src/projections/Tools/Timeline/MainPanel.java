@@ -305,7 +305,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 				int y = data.horizontalLineLocationTop(i);
 
-				g.drawLine(0+data.offset(), y, width-data.offset(), y);
+				g.drawLine(0+data.getOffset(), y, width-data.getOffset(), y);
 			}
 		}		
 	}

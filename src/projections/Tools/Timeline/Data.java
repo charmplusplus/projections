@@ -262,6 +262,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	/** The font used by the time labels on the TimelineAxisCanvas */
 	protected Font axisFont;
 
+	/** The left/right margins for the timeline & axis */
+	private int offset;
+
 	/** A set of objects for which we draw their creation message lines */
 	protected Set<EntryMethodObject> drawMessagesForTheseObjects;
 	/** A set of objects for which we draw their creation message lines in an alternate color */
@@ -349,6 +352,8 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		displayTopTimes = false;
 		minEntryDuration = 0;
 		amountTopTimes = 0;
+
+		setOffset();
 
 		// Get the list of PEs to display
 		loadGlobalPEList();
@@ -1070,7 +1075,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	/**	 the width of the timeline portion that is drawn(fit so that labels are onscreen) */
 	protected int lineWidth(int actualDisplayWidth) {
-		return actualDisplayWidth - 2*offset();
+		return actualDisplayWidth - 2* getOffset();
 	}
 
 	protected int maxLabelLen(){
@@ -1090,17 +1095,21 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 * Needed because text labels may extend before and 
 	 * after the painted line 
 	 */
-	protected int offset(){
+	private void setOffset(){
 		if(viewType == ViewType.VIEW_MINIMAL)
-			return maxLabelLen()/2;
+			offset = maxLabelLen()/2;
 		else
-			return 5 + maxLabelLen()/2;
+			offset = 5 + maxLabelLen()/2;
 
+	}
+
+	protected int getOffset() {
+		return offset;
 	}
 
 	/** return pixel offset for left margin */
 	private int leftOffset(){
-		return offset();
+		return getOffset();
 	}
 
 
@@ -1321,7 +1330,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 */
 	long screenToTime(int xPixelCoord){
 		double fractionAlongAxis = ((double) (xPixelCoord-leftOffset())) /
-		((double)(mostRecentScaledScreenWidth-2*offset()));
+		((double)(mostRecentScaledScreenWidth-2* getOffset()));
 
 		return Math.round(startTime + fractionAlongAxis*(endTime-startTime));	
 	}
@@ -1335,7 +1344,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 */
 	protected int timeToScreenPixelRight(double time) {
 		double fractionAlongTimeAxis =  ((time+0.5-startTime)) /((endTime-startTime));
-		return offset() + (int)Math.floor(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
+		return getOffset() + (int)Math.floor(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2* getOffset()));
 	}
 
 	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel
@@ -1345,32 +1354,32 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 */
 	protected int timeToScreenPixelLeft(double time) {
 		double fractionAlongTimeAxis =  ((time-0.5-startTime)) /((endTime-startTime));
-		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
+		return getOffset() + (int)Math.ceil(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2* getOffset()));
 	}
 
 
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
 	protected int timeToScreenPixel(double time) {
 		double fractionAlongTimeAxis =  ((time-startTime)) /((endTime-startTime));
-		return offset() + (int)(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2*offset()));
+		return getOffset() + (int)(fractionAlongTimeAxis*(mostRecentScaledScreenWidth-2* getOffset()));
 	}
 
 	/** Convert time to screen coordinate, The returned pixel is the central pixel for this time if a microsecond is longer than one pixel */
 	protected int timeToScreenPixel(double time, int assumedScreenWidth) {
 		double fractionAlongTimeAxis =  ((time-startTime)) /((endTime-startTime));
-		return offset() + (int)(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
+		return getOffset() + (int)(fractionAlongTimeAxis*(assumedScreenWidth-2* getOffset()));
 	}
 
 	/** Convert time to screen coordinate, The returned pixel is the leftmost pixel for this time if a microsecond is longer than one pixel */
 	protected int timeToScreenPixelLeft(double time, int assumedScreenWidth) {
 		double fractionAlongTimeAxis =  ((time-0.5-startTime)) /((endTime-startTime));
-		return offset() + (int)Math.ceil(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
+		return getOffset() + (int)Math.ceil(fractionAlongTimeAxis*(assumedScreenWidth-2* getOffset()));
 	}
 
 	/** Convert time to screen coordinate, The returned pixel is the rightmost pixel for this time if a microsecond is longer than one pixel */
 	protected int timeToScreenPixelRight(double time, int assumedScreenWidth) {
 		double fractionAlongTimeAxis =  ( (time+0.5-startTime)) /((endTime-startTime));
-		return offset() + (int)Math.floor(fractionAlongTimeAxis*(assumedScreenWidth-2*offset()));
+		return getOffset() + (int)Math.floor(fractionAlongTimeAxis*(assumedScreenWidth-2* getOffset()));
 	}
 
 
@@ -1822,6 +1831,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	
 	public void setViewType(ViewType vt) {
 		viewType = vt;
+		setOffset();
 		displayMustBeRedrawn();
 	}
 

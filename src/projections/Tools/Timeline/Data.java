@@ -445,15 +445,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	/** Get the set of PEs as an OrderedIntList. The internal storage for the PE list is not a sorted list. */
 	private SortedSet<Integer> processorListOrdered(){
-		SortedSet<Integer> processorList = new TreeSet<Integer>();
-
-		Iterator<Integer> iter = peToLine.iterator();
-		while(iter.hasNext()){
-			Integer pe = iter.next();
-			processorList.add(pe);
-		}
-
-		return processorList;
+		return new TreeSet<Integer>(peToLine);
 	}
 
 
@@ -1879,10 +1871,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			throw new RuntimeException("peToLine is null");
 		}
 
-		if(!peToLine.contains(Integer.valueOf(PE))){
+		if(!peToLine.contains(PE)){
 			throw new RuntimeException("peToLine does not contain pe " + PE);
 		}
-		return peToLine.indexOf(Integer.valueOf(PE));
+		return peToLine.indexOf(PE);
 	}
 
 
@@ -2120,17 +2112,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		int r1 = rowForPixel(y1);
 		int r2 = rowForPixel(y2);
 
-		ArrayList<Integer> results = new ArrayList();
-
-		int count = 0;
-		for(Integer pe : peToLine){
-			if(count >= r1 && count <= r2){
-				results.add(pe);
-			} 
-			count++;
-		}
-
-		return results;
+		if (r1 < 0) { r1 = 0; }
+		if (r2 >= peToLine.size() - 1) { r2 = peToLine.size() - 1; }
+		return peToLine.subList(r1, r2 + 1);
 	}
 
 
@@ -2207,38 +2191,14 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			// Find all PEs related to this object
 			HashSet<Integer> relatedPEs = new HashSet<Integer>();
 
-			Iterator<EntryMethodObject> iter = allRelatedEntries.iterator();
-			while(iter.hasNext()){
-				EntryMethodObject o = iter.next();
-				relatedPEs.add(o.pe); 
+			for (EntryMethodObject method : allRelatedEntries) {
+				relatedPEs.add(method.pe);
 			}
 
-			dropPEsNotInList(relatedPEs);
+			peToLine.retainAll(relatedPEs);
+			modificationHandler.notifyProcessorListHasChanged();
+			displayMustBeRedrawn();
 		}
-	}
-
-
-
-	// Drop timelines from any PEs not in the provided list
-	private void dropPEsNotInList(Set<Integer> keepPEs){
-		// Drop any PEs not in the list
-		Set<Integer> currentPEs = new HashSet<Integer>();
-		currentPEs.addAll(peToLine);
-
-		Iterator<Integer> currPEiter = currentPEs.iterator();
-		while(currPEiter.hasNext()){
-			Integer p = currPEiter.next();
-			if(keepPEs.contains(p)){
-				// Keep this PE 
-			} else {
-				// Drop this PE
-				peToLine.remove(p);		
-			}
-		}
-
-		modificationHandler.notifyProcessorListHasChanged();
-		displayMustBeRedrawn();
-
 	}
 
 

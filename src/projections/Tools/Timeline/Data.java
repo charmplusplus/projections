@@ -153,7 +153,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	private int mostRecentScaledScreenWidth;
 
 	/** The list of pes displayed, in display order*/
-	public LinkedList<Integer> peToLine;
+	public ArrayList<Integer> peToLine;
 
 	/** If true, color entry method invocations by Object ID */
 	private boolean colorByObjectId;
@@ -292,7 +292,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		showIdle  = true;
 		showUserEvents = true;
 
-		peToLine = new LinkedList<Integer>();
+		peToLine = new ArrayList<Integer>();
 
 		messageStructures = new MessageStructures(this);
 
@@ -361,13 +361,13 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe);
 		Integer p = Integer.valueOf(pe);
 		if(!peToLine.contains(p)){
-			peToLine.addLast(p);
+			peToLine.add(p);
 			MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe + " to peToLine size=" + peToLine.size() );
 			
 			if(isSMPRun()){
 				int commPE = getCommThdPE(p);
 				if(!peToLine.contains(commPE)){
-					peToLine.addLast(commPE);
+					peToLine.add(commPE);
 					MainWindow.performanceLogger.log(Level.FINE,"Add processor " + commPE + " to peToLine size=" + peToLine.size() );
 				}
 			}
@@ -402,38 +402,36 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					//as comm thds are always at the end of this processorList 
 					//(i.e. their PEs are always larger than workers' PEs.
 					if(!isLastAdded && prevCommPE!=-1){
-						peToLine.addLast(prevCommPE);
+						peToLine.add(prevCommPE);
 						commPEs.add(prevCommPE);
 						isLastAdded = true;
 					}
 					if(commPEs.contains(pe)) continue;
-					peToLine.addLast(pe);
+					peToLine.add(pe);
 					continue;
 				}
 				
 				if(prevNID==-1){
 					prevNID = getNodeID(pe);
 					prevCommPE = getCommThdPE(pe);
-					peToLine.addLast(pe);
+					peToLine.add(pe);
 				}else{
 					int curNID = getNodeID(pe);
 					if(curNID != prevNID){
 						//encounter a new set of PEs of a node, add the comm thd
 						//of the previous node
-						peToLine.addLast(prevCommPE);						
+						peToLine.add(prevCommPE);
 						commPEs.add(prevCommPE);
 						
 						prevNID = curNID;
 						prevCommPE = getCommThdPE(pe);
 					}
-					peToLine.addLast(pe);
+					peToLine.add(pe);
 				}
 			}
-			if(!isLastAdded) peToLine.addLast(prevCommPE);			
+			if(!isLastAdded) peToLine.add(prevCommPE);
 		}else{
-			for(Integer pe : processorList){
-				peToLine.addLast(pe);				
-			}
+			peToLine.addAll(processorList);
 		}		
 	}
 

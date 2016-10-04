@@ -51,7 +51,7 @@ import projections.gui.MainWindow;
 public class MainPanel extends JPanel  implements Scrollable, MouseListener, MouseMotionListener 
 {
 	/** Should the painting be performed in multiple threads */
-	private static final boolean RenderInParallel = true;
+	private static final boolean RenderInParallel = false;
 
 	/** A thread pool for use in rendering if RenderInParallel is true */
 	private static ExecutorService threadExecutor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
@@ -231,10 +231,15 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 			if(l != null){ // FIXME: this shouldn't be here but is to fix a race condition with reloading ranges once something is displayed
 				Iterator<EntryMethodObject> iter = l.iterator(leftClipTime, rightClipTime);
+				int maxFilledX = 0; // Tracks maximum x index of filled pixels for this PE, used to optimize away
+				                    // drawing of multiple overlapping single pixel entry methods
 				while(iter.hasNext()){
 					EntryMethodObject o = iter.next();
-					o.paintMe((Graphics2D) g, getWidth());
-					count1 ++;
+					int emoMaxFilledX = o.paintMe((Graphics2D) g, getWidth(), maxFilledX);
+					if (emoMaxFilledX > maxFilledX) {
+						maxFilledX = emoMaxFilledX;
+						count1++;
+					}
 				}
 			}
 		}

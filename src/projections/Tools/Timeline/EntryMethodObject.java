@@ -774,10 +774,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 	
 	
-	public void paintMe(Graphics2D g2d, int actualDisplayWidth){
+	public int paintMe(Graphics2D g2d, int actualDisplayWidth, int maxFilledX){
 		// If it is hidden, we may not display it
 		if(!isDisplayed()){
-			return;
+			return -1;
 		}
 		
 		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
@@ -788,84 +788,75 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		if(beginTime < data.startTime())
 			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
-		
-		int width = rightCoord-leftCoord+1;
 
-		if(width < 1)
-			width = 1;
-		
 		int topCoord = data.entryMethodLocationTop(pe);
 //		int height = data.entryMethodLocationHeight();
-	
-		
 
-		// Determine the base color
-		Paint c = determineColor();
-		
-
-		// Dim this object if we want to focus on some objects (for some reason or another)
-		if(data.isObjectDimmed(this)){
-			if (isIdleEvent()) c = Color.lightGray;
-			else c = makeMoreLikeBackground(c);
-		}
-		
-		
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
-		int rectWidth = width;
+		int rectWidth = Math.max(1, rightCoord - leftCoord + 1);
 		int rectHeight = data.barheight();
 
-	
+		int left  = leftCoord+0;
+		int right = leftCoord+rectWidth-1;
 
 		// The distance from the top or bottom to the rectangle
 		int verticalInset = 0;
 
 		// Idle regions are thinner vertically
-		if(entryIndex==-1 && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT){
+		if (entryIndex == -1 && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT) {
 			rectHeight -= 7;
 			verticalInset += 3;
 		}
-		
-		int left  = leftCoord+0;
-		int right = leftCoord+rectWidth-1;
-			
-		
-		if(beginTime < data.startTime())
-		{
-			drawLeftArrow(g2d, c, topCoord+verticalInset, leftCoord, rectHeight);
-			rectWidth -= 5;
-			left += 5;
-		}
 
-		if(endTime > data.endTime())
-		{
-			drawRightArrow(g2d, c, topCoord+verticalInset, leftCoord, rectHeight, rectWidth);
-			rectWidth -= 5;
-			right -= 5;
-		}
+		// Only draw this EMO if it covers some pixel that hasn't been filled yet
+		if (right > maxFilledX) {
 
-		// Paint the main rectangle for the object, as long as it is not a skinny idle event
-		g2d.setPaint(c);
-		if(rectWidth > 1 || entryIndex!=-1){
-			g2d.fillRect(left, topCoord+verticalInset, rectWidth, rectHeight);
-//			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
-			if(isCommThdRecv) {
-				g2d.setColor(data.getForegroundColor());
-				g2d.fillRect(left, topCoord+verticalInset+rectHeight, rectWidth, data.smpMessageRecvBarHeight());
+			// Determine the base color
+			Paint c = determineColor();
+
+
+			// Dim this object if we want to focus on some objects (for some reason or another)
+			if (data.isObjectDimmed(this)) {
+				if (isIdleEvent()) c = Color.lightGray;
+				else c = makeMoreLikeBackground(c);
 			}
-		}
 
-		// Paint the edges of the rectangle lighter/darker to give an embossed look
-		if(rectWidth > 2 && !data.colorByMemoryUsage() && rectHeight > 1)
-		{
-			g2d.setPaint(makeMoreLikeForeground(c));			
-			g2d.drawLine(left, topCoord+verticalInset, right, topCoord+verticalInset);
-			if(left == leftCoord)
-				g2d.drawLine(left, topCoord+verticalInset, left, topCoord+verticalInset+rectHeight-1);
 
-			g2d.setPaint(makeMoreLikeBackground(c));
-			g2d.drawLine(left, topCoord+verticalInset+rectHeight-1, right, topCoord+verticalInset+rectHeight-1);
-			if(right == rectWidth-1)
-				g2d.drawLine(right, topCoord+verticalInset, right, topCoord+verticalInset+rectHeight-1);
+			if (beginTime < data.startTime()) {
+				drawLeftArrow(g2d, c, topCoord + verticalInset, leftCoord, rectHeight);
+				rectWidth -= 5;
+				left += 5;
+			}
+
+			if (endTime > data.endTime()) {
+				drawRightArrow(g2d, c, topCoord + verticalInset, leftCoord, rectHeight, rectWidth);
+				rectWidth -= 5;
+				right -= 5;
+			}
+
+			// Paint the main rectangle for the object, as long as it is not a skinny idle event
+			g2d.setPaint(c);
+			if (rectWidth > 1 || entryIndex != -1) {
+				g2d.fillRect(left, topCoord + verticalInset, rectWidth, rectHeight);
+//			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
+				if (isCommThdRecv) {
+					g2d.setColor(data.getForegroundColor());
+					g2d.fillRect(left, topCoord + verticalInset + rectHeight, rectWidth, data.smpMessageRecvBarHeight());
+				}
+			}
+
+			// Paint the edges of the rectangle lighter/darker to give an embossed look
+			if (rectWidth > 2 && !data.colorByMemoryUsage() && rectHeight > 1) {
+				g2d.setPaint(makeMoreLikeForeground(c));
+				g2d.drawLine(left, topCoord + verticalInset, right, topCoord + verticalInset);
+				if (left == leftCoord)
+					g2d.drawLine(left, topCoord + verticalInset, left, topCoord + verticalInset + rectHeight - 1);
+
+				g2d.setPaint(makeMoreLikeBackground(c));
+				g2d.drawLine(left, topCoord + verticalInset + rectHeight - 1, right, topCoord + verticalInset + rectHeight - 1);
+				if (right == rectWidth - 1)
+					g2d.drawLine(right, topCoord + verticalInset, right, topCoord + verticalInset + rectHeight - 1);
+			}
 		}
 
 
@@ -923,6 +914,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				}
 			}
 		}
+
+		return right;
 	}
 
 		

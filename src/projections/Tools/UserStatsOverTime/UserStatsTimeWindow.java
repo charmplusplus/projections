@@ -14,6 +14,8 @@ import java.awt.BorderLayout;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -78,6 +80,7 @@ implements ItemListener, ActionListener
 
 	private JButton	   setRanges;
 	private JButton	   saveImage;
+	private JButton	   dataDumpButton;
 	//    private JButton	   epSelection;
 
 	private StatDialog 	statDialog;
@@ -97,6 +100,10 @@ implements ItemListener, ActionListener
 	private List<Double>	minValue;
 	private List<Integer>	numCalls;
 	private List<List<Object>> tableData;
+
+	//This List holds the wall time and user time for each line. It is only used for dumpData()
+	private List<XYSeries> dumpedTimes;
+	private List<String> statInfo;
 
 	private final String[] columnNames = {
 			"Stat Name",
@@ -140,6 +147,8 @@ implements ItemListener, ActionListener
 		tableData = new ArrayList<List<Object>>();
 		graphedData = new ArrayList<XYSeriesCollection>();
 		renderers = new ArrayList<XYLineAndShapeRenderer>();
+		dumpedTimes = new ArrayList<XYSeries>();
+		statInfo = new ArrayList<String>();
 
 		//initialize curRow, which indicates which row the next new Stat plot would occupy
 		curRow = 0;
@@ -173,6 +182,8 @@ implements ItemListener, ActionListener
 		saveImage = new JButton("Save to Image");
 		saveImage.addActionListener(this);
 
+		dataDumpButton = new JButton("Data Dump");
+		dataDumpButton.addActionListener(this);
 
 		graphPanel = new JPanel();
 		tableModel = new StatTableModel(columnNames, 0);
@@ -189,6 +200,7 @@ implements ItemListener, ActionListener
 		controlPanel = new JPanel();
 		controlPanel.add(setRanges);
 
+		controlPanel.add(dataDumpButton);
 		controlPanel.add(saveImage);
 		mainPanel.add(tabbedPane, BorderLayout.CENTER);
 		mainPanel.add(controlPanel,BorderLayout.SOUTH);
@@ -359,6 +371,11 @@ implements ItemListener, ActionListener
 			else seriesName+=pe.toString() + ", ";
 		}
 		XYSeries data = new XYSeries(seriesName,true);
+		XYSeries dumpedData = new XYSeries(seriesName, true);
+
+		//Get full string to print out for dumping this line
+		statInfo.add(seriesName + "   Aggregate: " + xAgg + "   StartTime: " + startTime + "  EndTime: " + endTime);
+
 		int numPes = 0;
 		//Loop through every PE
 		for(Integer pe : processorList) {
@@ -394,6 +411,7 @@ implements ItemListener, ActionListener
 						//If this is the first PE, just store the point
 						if(numPes==1) {
 							data.add(time,logData.stat);
+							dumpedData.add(logData.time,logData.userTime);
 						}
 
 						//Otherwise, we have to store according to our aggregating rules
@@ -472,9 +490,50 @@ implements ItemListener, ActionListener
 
 		//Put our data into a XySeriesCollection and add it to the graphedData Vector
 		graphedData.add(new XYSeriesCollection(data));
+
+		//store the time data into our dumpedTimes Vector
+		dumpedTimes.add(dumpedData);
+
 		return true;
 
    	 }
+
+
+	//Dump all current graph data into .dat files
+	public void dumpData() {
+		int lineIdx = 0;
+		//Loop through every plot, and create a file for it.
+		for (XYSeriesCollection curLine : graphedData) {
+			//The XYSeriesCollection for each line only holds one XYSeries
+			XYSeries curSeries = curLine.getSeries(0);
+			int size = curSeries.getItemCount();
+			double[][] curTimes = dumpedTimes.get(lineIdx).toArray();
+			FileOutputStream out;
+			try {
+				out = new FileOutputStream("./line" + lineIdx + ".dat");
+			}  catch (FileNotFoundException e) {
+				System.err.println("Error opening file for line " + lineIdx);
+				continue;
+			}
+			//Print header
+			String header = "# " + statInfo.get(lineIdx) + "\n# point no.  walltime  userX  userY\n";
+			try {
+				out.write(header.getBytes());
+				//Loop through every point in line
+				for (int i = 0; i < size; i++) {
+					String curRow = i + "\t" + curTimes[0][i] + "\t" + curTimes[1][i] + "\t" + curSeries.getY(i) + "\n";
+					out.write(curRow.getBytes());
+				}
+				out.close();
+			} catch (IOException e) {
+				System.err.println("Error writing data for line " + lineIdx);
+			}
+
+			lineIdx++;
+		}
+
+	}
+
 	//Handle the button actions appropriately
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JButton) {
@@ -484,6 +543,9 @@ implements ItemListener, ActionListener
 			}
 			else if (b == saveImage) {
 				JPanelToImage.saveToFileChooserSelection(graphPanel, "Save Plot To File", "./ProjectionsPlot.png");
+			}
+			else if (b == dataDumpButton) {
+				dumpData();
 			}
 
 		} else if (e.getSource() instanceof JMenuItem) {

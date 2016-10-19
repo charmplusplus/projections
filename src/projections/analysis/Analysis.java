@@ -247,8 +247,7 @@ public class Analysis {
       // From summary detail files
       if (hasSumDetailFiles()) {
 	long temp = ((long)(intervalData.getNumIntervals()*
-			    intervalData.getIntervalSize()*
-			    1000000));
+			    intervalData.getIntervalSize()));
 	if (temp > totalTime) {
 	  totalTime = temp;
 	}

@@ -23,7 +23,8 @@ dependencies {
 }
 
 mainClassName = 'projections.analysis.ProjMain'
-sourceCompatibility = 1.5
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
 version = '6.7'
 
 sourceSets {

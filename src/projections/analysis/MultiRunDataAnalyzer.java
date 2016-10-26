@@ -1,7 +1,7 @@
 package projections.analysis;
 
 import java.awt.Color;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import projections.gui.ColorManager;
 import projections.gui.U;
@@ -68,7 +68,7 @@ public class MultiRunDataAnalyzer {
     // Dimension 0 - indexed by data type.
     // Dimension 1 - indexed by the category ID. 
     // Each vector is the list of EPs that fall into the category.
-    private Vector categories[][];
+    private ArrayList<Integer> categories[][];
     private String catNames[];
 
     // accompanying static data needs to be published for the TableModel
@@ -185,14 +185,14 @@ public class MultiRunDataAnalyzer {
     private void constructCategories() {
 	// prepare categorization data structures
 	categories = 
-	    new Vector[MultiRunData.NUM_TYPES][NUM_CATEGORIES];
+	    new ArrayList[MultiRunData.NUM_TYPES][NUM_CATEGORIES];
 	catNames = new String[NUM_CATEGORIES];
 	for (int cat=0; cat<NUM_CATEGORIES; cat++) {
 	    catNames[cat] = getCategoryName(cat);
 	}
 	for (int type=0; type<MultiRunData.NUM_TYPES; type++) {
 	    for (int category=0; category<NUM_CATEGORIES; category++) {
-		categories[type][category] = new Vector();
+		categories[type][category] = new ArrayList<Integer>();
 	    }
 	    categorize(type);
 	}
@@ -229,7 +229,7 @@ public class MultiRunDataAnalyzer {
 		}
 	    }
 	    if (insigCount > numRuns/2) {
-		categories[dataType][CAT_EP_INSIGNIFICANT].add(new Integer(ep));
+		categories[dataType][CAT_EP_INSIGNIFICANT].add(ep);
 		continue;
 	    }
 	    // TEST #2 - Change
@@ -285,14 +285,14 @@ public class MultiRunDataAnalyzer {
 		prevValue = dataTable[dataType][run][ep];
 	    }
 	    if (numRuns == 1) {
-		categories[dataType][CAT_EP_NO_CHANGE].add(new Integer(ep));
+		categories[dataType][CAT_EP_NO_CHANGE].add(ep);
 	    } else {		
 		if (((consecutiveIncrements > (numRuns-1)*0.5) || 
 		     (consecutiveDecrements > (numRuns-1)*0.5)) &&
 		    (avgChange > dataTable[dataType][0][ep]*0.1)) {
-		    categories[dataType][CAT_EP_CHANGE].add(new Integer(ep));
+		    categories[dataType][CAT_EP_CHANGE].add(ep);
 		} else {
-		    categories[dataType][CAT_EP_NO_CHANGE].add(new Integer(ep));
+		    categories[dataType][CAT_EP_NO_CHANGE].add(ep);
 		}
 	    }
 	}
@@ -300,7 +300,7 @@ public class MultiRunDataAnalyzer {
 	for (int entry=0; entry<NUM_EXTR_ENTRIES; entry++) {
 	    switch (entry) {
 	    case EXTR_OVERHEAD:
-		categories[dataType][CAT_OVERHEAD_IDLE].add(new Integer(numEPs+EXTR_OVERHEAD));
+		categories[dataType][CAT_OVERHEAD_IDLE].add(numEPs+EXTR_OVERHEAD);
 		break;
 	    }
 	}
@@ -339,7 +339,7 @@ public class MultiRunDataAnalyzer {
     public Object getTableValueAt(int dataType, int categoryIndex, 
 				  int row, int col) {
 	int epIndex = 
-	    ((Integer)categories[dataType][categoryIndex].elementAt(row)).intValue();
+	    categories[dataType][categoryIndex].get(row);
 
 	// column 0 is always the entry point name/description
 	if (col == 0) {
@@ -469,7 +469,7 @@ public class MultiRunDataAnalyzer {
 	    category = CAT_EP_NO_CHANGE;
 	    int catIdx = yVal;
 	    int epIdx = 
-		((Integer)categories[dataType][category].elementAt(catIdx)).intValue();
+		categories[dataType][category].get(catIdx);
 	    returnStrings[2] = "Entry Point: " + epNames[epIdx];
 	} else if (yVal < numNoChange + 1) {
 	    category = CAT_EP_INSIGNIFICANT;
@@ -478,7 +478,7 @@ public class MultiRunDataAnalyzer {
 	    category = CAT_EP_CHANGE;
 	    int catIdx = yVal-1-numNoChange;
 	    int epIdx = 
-		((Integer)categories[dataType][category].elementAt(catIdx)).intValue();
+		categories[dataType][category].get(catIdx);
 	    returnStrings[2] = "Entry Point: " + epNames[epIdx];
 	} else {
 	    category = CAT_OVERHEAD_IDLE;
@@ -524,7 +524,7 @@ public class MultiRunDataAnalyzer {
 	int numNoChange = categories[dataType][CAT_EP_NO_CHANGE].size();
 	for (int catIdx=0; catIdx<numNoChange; catIdx++) {
 	    int epIdx = 
-		((Integer)categories[dataType][CAT_EP_NO_CHANGE].elementAt(catIdx)).intValue();
+		categories[dataType][CAT_EP_NO_CHANGE].get(catIdx);
 	    for (int run=0; run<numRuns; run++) {
 		data[run][entry] = dataTable[dataType][run][epIdx];
 	    }
@@ -536,7 +536,7 @@ public class MultiRunDataAnalyzer {
 	for (int run=0; run<numRuns; run++) {
 	    for (int catIdx=0; catIdx<numInsignificant; catIdx++) {
 		int epIdx =
-		    ((Integer)categories[dataType][CAT_EP_INSIGNIFICANT].elementAt(catIdx)).intValue();
+		    categories[dataType][CAT_EP_INSIGNIFICANT].get(catIdx);
 		data[run][entry] += dataTable[dataType][run][epIdx];
 	    }
 	}
@@ -546,7 +546,7 @@ public class MultiRunDataAnalyzer {
 	    categories[dataType][CAT_EP_CHANGE].size();
 	for (int catIdx=0; catIdx<numChanged; catIdx++) {
 	    int epIdx = 
-		((Integer)categories[dataType][CAT_EP_CHANGE].elementAt(catIdx)).intValue();
+		categories[dataType][CAT_EP_CHANGE].get(catIdx);
 	    for (int run=0; run<numRuns; run++) {
 		data[run][entry] = dataTable[dataType][run][epIdx];
 	    }
@@ -558,7 +558,7 @@ public class MultiRunDataAnalyzer {
 	for (int catIdx=0; catIdx<numOverhead; catIdx++) {
 	    int entryIdx =
 		numEPs -
-		((Integer)categories[dataType][CAT_OVERHEAD_IDLE].elementAt(catIdx)).intValue();
+		categories[dataType][CAT_OVERHEAD_IDLE].get(catIdx);
 	    for (int run=0; run<numRuns; run++) {
 		// testing.
 		// data[run][entry] = 0;

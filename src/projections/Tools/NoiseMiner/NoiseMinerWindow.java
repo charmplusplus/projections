@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.Vector;
 
@@ -130,7 +131,7 @@ implements ItemListener
 					noiseMiner = new NoiseMiner(startTime, endTime, validPEs);
 					noiseMiner.gatherData(thisWindow);
 					mainText.setText(noiseMiner.getText());
-					addResultsToTable(noiseMiner.getResultsTable());
+					addResultsToTable(new Vector(noiseMiner.getResultsTable()));
 					addDataToHistogram(noiseMiner.histogramToDisplay);
 					return null;
 				}

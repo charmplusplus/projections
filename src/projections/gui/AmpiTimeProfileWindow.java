@@ -5,10 +5,7 @@ import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeSet;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -48,7 +45,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     private int endInterval;
     private long intervalSize; //in terms of microseconds!
     private SortedSet<Integer> processorList;
-    private Vector[] processProfiles = null; //every vector element is an instance of AmpiProcessProfile
+    private List<AmpiProcessProfile>[] processProfiles = null;
 
     // The tool specific GUI for the dialog
     private IntervalChooserPanel intervalPanel;
@@ -129,7 +126,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     		startInterval = (int)intervalPanel.getStartInterval();
     		endInterval = (int)intervalPanel.getEndInterval();
     		processorList = dialog.getSelectedProcessors();
-    		processProfiles = new Vector[processorList.size()];
+    		processProfiles = new ArrayList[processorList.size()];
     	}        
     }
 
@@ -138,7 +135,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
      * index: the order of this processor in the processorList
      */
     private void createAMPITimeProfileData(int procId, int index){        
-        processProfiles[index] = new Vector();
+        processProfiles[index] = new ArrayList<AmpiProcessProfile>();
         //currently read all log data thus obtaining the time profile across the whole timeline!
         MainWindow.runObject[myRun].createAMPITimeProfile(procId,0,MainWindow.runObject[myRun].getTotalTime(), processProfiles[index]);
     }
@@ -148,7 +145,7 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         endInterval = endI;
         intervalSize = iSize;
         processorList = new TreeSet<Integer>(procList);
-        processProfiles = new Vector[processorList.size()];        
+        processProfiles = new ArrayList[processorList.size()];
     }
 
 
@@ -158,9 +155,9 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
     private void fillGraphData() {
         int funcCnt=0;
         for(int i=0; i<processProfiles.length; i++){
-            Vector v = processProfiles[i];
+            List<AmpiProcessProfile> v = processProfiles[i];
             for(int j=0; j<v.size(); j++){
-                AmpiProcessProfile p = (AmpiProcessProfile)v.get(j);
+                AmpiProcessProfile p = v.get(j);
                 Stack funcStk = p.getFinalCallFuncStack();
                 funcCnt += funcStk.size();
             }
@@ -194,9 +191,9 @@ public class AmpiTimeProfileWindow extends GenericGraphWindow
         long rangeStart = startInterval*intervalSize;
         long rangeEnd = endInterval*intervalSize;        
         for(int i=0; i<processProfiles.length; i++){
-            Vector v = processProfiles[i];
+            List<AmpiProcessProfile> v = processProfiles[i];
             for(int j=0; j<v.size(); j++){
-                AmpiProcessProfile p = (AmpiProcessProfile)v.get(j);
+                AmpiProcessProfile p = v.get(j);
                 Stack funcStk = p.getFinalCallFuncStack();                
                 for(int k=0; k<funcStk.size(); k++){
                     AmpiFunctionData funcData = (AmpiFunctionData)funcStk.get(k);

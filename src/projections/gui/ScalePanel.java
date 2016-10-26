@@ -16,7 +16,8 @@ import java.awt.Panel;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ScalePanel extends Panel
    implements MouseMotionListener, MouseListener
@@ -59,15 +60,15 @@ public class ScalePanel extends Panel
 			return "At ("+x+","+y+").";
 		}
 		//Add this parent to our list
-		private Vector parents=new Vector();
+		private List<ScalePanel> parents=new ArrayList<ScalePanel>();
 		private void addParent(ScalePanel p) {
-			parents.insertElementAt(p,parents.size());
+			parents.add(p);
 		}
 		//We get redrawn by requesting all our parents to redraw
 		public void repaint() {
 			int i;
 			for (i=0;i<parents.size();i++)
-				((ScalePanel)parents.elementAt(i)).repaint();
+				parents.get(i).repaint();
 		}
 	}
 	/* An axis maps screen coordinates to panel coordinates.

@@ -8,10 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.JFrame;
 
@@ -70,7 +67,7 @@ private //	DefaultTableXYDataset sizeDataset;
 	/** Store the portion of the dataset that is to be plotted */
 	private TreeMap<Integer, TreeMap<String, Double> > streamingData;
 	private ArrayList<String> categories;
-	private Vector<byte[]> detailedData;
+	private List<byte[]> detailedData;
 
 	private int updateCount = 0;
 
@@ -85,7 +82,7 @@ private //	DefaultTableXYDataset sizeDataset;
 
 		streamingData = new TreeMap<Integer, TreeMap<String, Double> >();
 		categories = new ArrayList<String>();
-		detailedData = new Vector<byte[]>();
+		detailedData = new ArrayList<byte[]>();
 
 
 		System.out.println("StreamingDataHandler constructor");
@@ -457,7 +454,7 @@ private //	DefaultTableXYDataset sizeDataset;
 		if(detailedData.size() < 1)
 			return;
 
-		byte[] data = detailedData.lastElement();		
+		byte[] data = detailedData.get(detailedData.size() - 1);
 
 		if(data.length<=1)
 			return;

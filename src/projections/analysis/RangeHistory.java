@@ -6,8 +6,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.List;
 
 import projections.gui.U;
 
@@ -17,40 +18,40 @@ public class RangeHistory
 
     private String filename;
     private int numEntries;
-    private Vector rangeSet;
-    private Vector rangeName;
-    private Vector rangeProcs;
+    private List<Long> rangeSet;
+    private List<String> rangeName;
+    private List<String> rangeProcs;
 
-    private Vector historyStringVector;
+    private List<String> historyStringVector;
 
     public RangeHistory(String logDirectory) 
     {
 	this.filename = logDirectory + "ranges.hst";
 	if (!(new File(this.filename)).exists()) {
-	    rangeSet = new Vector();
-	    rangeName = new Vector();
-	    rangeProcs = new Vector();
-	    historyStringVector = new Vector();
+	    rangeSet = new ArrayList<Long>();
+	    rangeName = new ArrayList<String>();
+	    rangeProcs = new ArrayList<String>();
+	    historyStringVector = new ArrayList<String>();
 	} else {
 	    try {
 		loadRanges();
-		historyStringVector = new Vector();
+		historyStringVector = new ArrayList<String>();
 		for (int i=0; i<rangeSet.size()/2; i++) {
 			String historyString =
-			U.humanReadableString(((Long)rangeSet.elementAt(i*2)).longValue()) + 
+			U.humanReadableString(rangeSet.get(i*2)) +
 			" to " + 
-			U.humanReadableString(((Long)rangeSet.elementAt(i*2+1)).longValue());
+			U.humanReadableString(rangeSet.get(i*2+1));
 			if (rangeProcs != null && rangeProcs.size() !=0 && rangeProcs.size() > i)
 			{
-				String temp = (String)rangeProcs.elementAt(i);
+				String temp = rangeProcs.get(i);
 				if (temp.length() > 10) historyString += " Procs:" + temp.substring(0,10)+"...";
 				else historyString += " Procs:" + temp;
 			}
-			if (rangeName != null && rangeName.size() !=0 && !rangeName.elementAt(i).equals(null) && !rangeName.elementAt(i).equals("cancel"))
+			if (rangeName != null && rangeName.size() !=0 && !rangeName.get(i).equals(null) && !rangeName.get(i).equals("cancel"))
 			{
-				String temp = (String)rangeName.elementAt(i);
+				String temp = rangeName.get(i);
 				if (temp.length() > 10) historyString += " (" + temp.substring(0,10)+"...)";
- 				else historyString += " (" + rangeName.elementAt(i) + ")";
+				else historyString += " (" + rangeName.get(i) + ")";
 			}
 			historyStringVector.add(historyString);
 		}
@@ -63,9 +64,9 @@ public class RangeHistory
     private void loadRanges() 
 	throws IOException
     {
-	rangeSet = new Vector();
-	rangeName = new Vector();
-	rangeProcs = new Vector();
+	rangeSet = new ArrayList<Long>();
+	rangeName = new ArrayList<String>();
+	rangeProcs = new ArrayList<String>();
 	String line;
 	StringTokenizer st;
 	BufferedReader reader = 
@@ -116,14 +117,14 @@ public class RangeHistory
 		for (int i=0; i<numEntries; i++)
 		{
 			writer.print("ENTRY ");
-			writer.print(((Long)rangeSet.elementAt(i*2)).longValue());
+			writer.print(rangeSet.get(i*2));
 			writer.print(" ");
-			writer.println(((Long)rangeSet.elementAt(i*2+1)).longValue());
+			writer.println(rangeSet.get(i*2+1));
 			writer.print("NAMEENTRY ");
-			if (rangeName.size() > i) writer.println(rangeName.elementAt(i));
+			if (rangeName.size() > i) writer.println(rangeName.get(i));
 			else writer.println("cancel");
 			writer.print("PROCENTRY ");
-			if (rangeProcs.size() > i) writer.println(rangeProcs.elementAt(i));
+			if (rangeProcs.size() > i) writer.println(rangeProcs.get(i));
 		}
 	}
 
@@ -138,7 +139,7 @@ public class RangeHistory
 	    numEntries--;
 	}
 	// added in reverse order starting from the front of the vector.
-	if (rangeName == null) rangeName = new Vector();
+	if (rangeName == null) rangeName = new ArrayList<String>();
 	rangeName.add(0, new String(name));
 	rangeSet.add(0, new Long(end));
 	rangeSet.add(0, new Long(start));
@@ -174,13 +175,13 @@ public class RangeHistory
     // NOTE: history string is only used at the start of initializing
     // the history list in the GUI. Any further updates to this string
     // is quite meaningless.
-    public Vector getHistoryStrings() {
+    public List<String> getHistoryStrings() {
 	return historyStringVector;
     }
 
     public String getProcRange(int index) {
 	if (rangeProcs == null || rangeProcs.size() <= index || index < 0) return null;
-	return (String)rangeProcs.elementAt(index);
+	return rangeProcs.get(index);
     }
 
     public long getStartValue(int index) {
@@ -192,7 +193,7 @@ public class RangeHistory
 			       ". Please report to developers!");
 	    System.exit(-1);
 	}
-	return ((Long)rangeSet.elementAt(index*2)).longValue();
+	return rangeSet.get(index*2);
     }
 
     public long getEndValue(int index) {
@@ -204,6 +205,6 @@ public class RangeHistory
 			       ". Please report to developers!");
 	    System.exit(-1);
 	}
-	return ((Long)rangeSet.elementAt(index*2+1)).longValue();
+	return rangeSet.get(index*2+1);
     }
 }

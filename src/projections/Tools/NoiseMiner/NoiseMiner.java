@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.SortedSet;
 
 import javax.swing.JButton;
@@ -877,14 +876,14 @@ class NoiseMiner extends ProjDefs
 	}
 
 	/** Create an array of objects representing the internal noise components */
-	public Vector<Vector<Object>> getResultsTable(){
+	public List<List<Object>> getResultsTable(){
 		Collections.sort(finalResults);
 
 		// scan through results to find only the ones with periodicity close to or longer than the OS time quanta
 
 //		int numResultRows = finalResults.size();
 
-		Vector<Vector<Object>> resultTable = new Vector<Vector<Object>>();
+		List<List<Object>> resultTable = new ArrayList<List<Object>>();
 
 
 		Iterator<NoiseResult> itr = finalResults.iterator();
@@ -892,7 +891,7 @@ class NoiseMiner extends ProjDefs
 		while(itr.hasNext()){
 			NoiseResult v = itr.next();
 			
-			Vector<Object> row = new Vector<Object>();
+			List<Object> row = new ArrayList<Object>();
 			
 			row.add(new String("" + v.duration ));
 			row.add(new String("" + v.pe_toString() ));
@@ -914,7 +913,7 @@ class NoiseMiner extends ProjDefs
 
 		// If we have no data, put a string into the table
 		if(resultTable.size() == 0){
-			Vector<Object> row = new Vector<Object>();
+			List<Object> row = new ArrayList<Object>();
 			row.add(new String("No Noise Components Found"));
 			row.add(new String("n/a"));
 			row.add(new String("n/a"));

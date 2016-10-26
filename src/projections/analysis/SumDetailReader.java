@@ -5,7 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StreamTokenizer;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /** 
  *  Written by Chee Wai Lee
@@ -46,7 +47,7 @@ class SumDetailReader extends ProjectionsReader
     // Dim 0 - indexed by data type.
     // Dim 1 - indexed by EP, a not-quite-as dense format as the actual file
     //                 but good enough.
-    private Vector<RLEBlock> rawData[][];
+    private List<RLEBlock> rawData[][];
 
     private BufferedReader reader;
     private ParseTokenizer tokenizer;
@@ -141,10 +142,10 @@ class SumDetailReader extends ProjectionsReader
 	tokenizer.skipLine();
 
 	// prepare to store summary data into arrays
-	rawData = new Vector[NUM_TAGS][numEPs];
+	rawData = new ArrayList[NUM_TAGS][numEPs];
 	for (int type=0; type<NUM_TAGS; type++) {
 	    for (int ep=0; ep<numEPs; ep++) {
-		rawData[type][ep] = new Vector();
+		rawData[type][ep] = new ArrayList();
 	    }
 	}
 
@@ -268,7 +269,7 @@ class SumDetailReader extends ProjectionsReader
 	return numIntervals;
     }
 
-    protected Vector[] getData(int type) {
+    protected List<RLEBlock>[] getData(int type) {
 	return rawData[type];
     }
 }

@@ -9,12 +9,7 @@ import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.Vector;
-import java.util.SortedSet;
+import java.util.*;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -259,7 +254,7 @@ implements ActionListener, Clickable
 
 	private void generateLegend(boolean useShortenedNames){
 
-		List<SortableEPs> l = new Vector<SortableEPs>();
+		List<SortableEPs> l = new ArrayList<SortableEPs>();
 
 		// Accumulate data shown in graph
 		double[] sums = new double[numEPs+2];
@@ -290,8 +285,8 @@ implements ActionListener, Clickable
 
 
 		// Extract data from list into structures for legend
-		Vector<String>  names = new Vector<String>();			
-		Vector<Paint>  paints = new Vector<Paint>();				
+		List<String>  names = new ArrayList<String>();
+		List<Paint>  paints = new ArrayList<Paint>();
 
 		Iterator<SortableEPs> iter = l.iterator();
 		while(iter.hasNext()){

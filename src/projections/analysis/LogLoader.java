@@ -3,15 +3,7 @@ package projections.analysis;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Deque;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Stack;
-import java.util.Vector;
-import java.util.SortedSet;
+import java.util.*;
 
 import projections.Tools.Timeline.TimelineMessage;
 import projections.Tools.Timeline.UserEventObject;
@@ -133,7 +125,7 @@ public class LogLoader extends ProjDefs
 	 * have different id (specified by LogEntry's field "id") 
 	 */
 	public void createAMPIUsageProfile(int procId, long beginTime, 
-			long endTime, Vector procThdVec)
+			long endTime, List<AmpiProcessProfile> procThdVec)
 	throws LogLoadException
 	{
 		GenericLogReader logFileRd = null;
@@ -396,7 +388,7 @@ public class LogLoader extends ProjDefs
 	 * the stub!!!
 	 */
 	public void createAMPIFuncTimeProfile(int procId, long beginTime, 
-			long endTime, Vector procThdVec)
+			long endTime, List<AmpiProcessProfile> procThdVec)
 	throws LogLoadException        
 	{
 

@@ -7,10 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -29,8 +26,8 @@ public class ChooseEntriesWindow extends JFrame
 {
 	private EntryMethodVisibility data;
 	private Map<Integer, String> entryNames;
-	private Vector<Vector> tabledata;
-	private Vector<String> columnNames;
+	private List<List> tabledata;
+	private List<String> columnNames;
 	private boolean displayVisibilityCheckboxes;
 	private ColorUpdateNotifier gw;
 	private int myRun = 0;
@@ -82,7 +79,7 @@ public class ChooseEntriesWindow extends JFrame
 		while(iter.hasNext()){
 			Integer id = iter.next();
 			String name = entryNames.get(id);
-			Vector tableRow = new Vector();
+			List tableRow = new ArrayList(4);
 
 			if (displayVisibilityCheckboxes) {
 				Boolean b = data.entryIsVisibleID(id);
@@ -104,14 +101,15 @@ public class ChooseEntriesWindow extends JFrame
 
 
 		// create a table of the data
-		columnNames = new Vector();
+		columnNames = new ArrayList<String>(4);
 		if (displayVisibilityCheckboxes)
-			columnNames.add(new String("Visible"));
-		columnNames.add(new String("Entry Method"));
-		columnNames.add(new String("ID"));
-		columnNames.add(new String("Color"));
+			columnNames.add("Visible");
+		columnNames.add("Entry Method");
+		columnNames.add("ID");
+		columnNames.add("Color");
 
-		tabledata  = new Vector();
+		// set initial size to number of EPs
+		tabledata  = new ArrayList<List>(entryNames.keySet().size());
 
 		if (data!=null && data.hasEntryList())
 			onlyEntryMethodsInRange();
@@ -188,9 +186,9 @@ public class ChooseEntriesWindow extends JFrame
 	}
 
 	public void changeVisibility(boolean visible, MyTableModel tableModel) {
-		Iterator<Vector> iter= tabledata.iterator();
+		Iterator<List> iter= tabledata.iterator();
 		while(iter.hasNext()) {
-			Vector v = iter.next();
+			List v = iter.next();
 			Integer id = (Integer) v.get(2);
 			if (visible)
 				data.makeEntryVisibleID(id);
@@ -254,10 +252,10 @@ class MyTableModel extends AbstractTableModel implements ActionListener {
 	EntryMethodVisibility data;
 	JCheckBox displayAllEntryMethods;
 	boolean displayVisibilityCheckboxes;
-	Vector<Vector> tabledata;
-	Vector<String> columnNames;
+	List<List> tabledata;
+	List<String> columnNames;
 
-	public MyTableModel(Vector<Vector> TD, Vector<String> CN, EntryMethodVisibility data_, boolean checkboxesVisible) {
+	public MyTableModel(List<List> TD, List<String> CN, EntryMethodVisibility data_, boolean checkboxesVisible) {
 		tabledata=TD;
 		columnNames=CN;
 		data = data_;

@@ -9,7 +9,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -86,7 +86,7 @@ class ProjectionsFileChooser
 	int returnVal = fChoose_.showDialog(null, "Open/Search");
 	try {
 	    if (returnVal == JFileChooser.APPROVE_OPTION) {
-		Vector files = 
+		List<File> files =
 		    filterFiles(fChoose_.getSelectedFiles(), 
 				fChoose_.getFileFilter());
 		// ask user to subselect all files found
@@ -237,36 +237,27 @@ class ProjectionsFileChooser
      *  Recursively search through all the subdirectories and finds those
      *  files specified by the filter 
      */
-    private Vector filterFiles(File[] files, 
+    private List<File> filterFiles(File[] files,
 			       javax.swing.filechooser.FileFilter filter)
     {
-	Vector fileVector = new Vector();
-	Vector fileList = new Vector(files.length);
-	for (int i=0; i<files.length; i++) { 
-	    fileList.addElement(files[i]); 
-	}
-	recurseFilterFiles(fileList, fileVector, filter);
-	return fileVector;
+		List<File> fileVector = new ArrayList<File>();
+		recurseFilterFiles(files, fileVector, filter);
+		return fileVector;
     }
 
     /** 
      *  Given a list of files in fileList, expand the directories and filter
      *  for "sts" files 
      */
-    private void recurseFilterFiles(Vector fileList, Vector fileVector,
+    private void recurseFilterFiles(File[] fileList, List<File> fileVector,
 				    javax.swing.filechooser.FileFilter filter)
     {
-	for (int i=0; i<fileList.size(); i++) {
-	    File file = (File) fileList.elementAt(i);
+	for (int i=0; i<fileList.length; i++) {
+	    File file = fileList[i];
 	    if (file.isDirectory()) {
-		String[] dirFileStr = file.list();
-		Vector newFileList = new Vector();
-		for (int j=0; j<dirFileStr.length; j++) {
-		    newFileList.addElement(new File(file, dirFileStr[j]));
-		}
-		recurseFilterFiles(newFileList, fileVector, filter);
+			recurseFilterFiles(file.listFiles(), fileVector, filter);
 	    }
-	    else if (filter.accept(file)) { fileVector.addElement(file); }
+	    else if (filter.accept(file)) { fileVector.add(file); }
 	}
     }
 
@@ -274,16 +265,16 @@ class ProjectionsFileChooser
      *  From the filtered files, now ask the user to pick which ones they
      *  really want. 
      */
-    private String[] userSubselect(Vector files) {
+    private String[] userSubselect(List<File> files) {
 	String[] filesStr = new String[files.size()];
 	int[] selectAll = new int[files.size()];
 	
 	for (int i=0; i<filesStr.length; i++) {
-	    File file = (File) files.elementAt(i);
+	    File file = files.get(i);
 	    try {
 		filesStr[i]=file.getCanonicalPath();
 	    } catch (IOException e) {
-		System.out.println("exception in USersubselect");
+		System.out.println("exception in Usersubselect");
 		filesStr[i]="IOException index "+i; }
 	    selectAll[i] = i;
 	}

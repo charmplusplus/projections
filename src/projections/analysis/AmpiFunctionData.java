@@ -1,5 +1,7 @@
 package projections.analysis;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
+
 
 import projections.gui.MainWindow;
 
@@ -16,14 +18,13 @@ public class AmpiFunctionData {
     private long accExecTime;
     private long lastBeginTime;
 
-    private Vector execIntervals;
+    private List<AmpiFuncExecInterval> execIntervals = new ArrayList<AmpiFuncExecInterval>();
 
     public AmpiFunctionData() {
         FunctionID = LineNo = 0;
         sourceFileName = null;
         accExecTime = 0;
-	lastBeginTime = 0;
-        execIntervals = new Vector();
+        lastBeginTime = 0;
     }
 
 //    public AmpiFunctionData(int funcId, int line, String srcFileName) {
@@ -50,7 +51,7 @@ public class AmpiFunctionData {
     }
 
     public AmpiFuncExecInterval getIntervalAt(int i){
-        return (AmpiFuncExecInterval)execIntervals.get(i);
+        return execIntervals.get(i);
     }
 
     public int execIntervalCnt(){

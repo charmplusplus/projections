@@ -7,8 +7,8 @@ import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.SortedSet;
-import java.util.Vector;
 
 import javax.swing.SwingWorker;
 
@@ -320,7 +320,7 @@ public class Analysis {
    * Creating AMPI usage profile
    */
   public void createAMPIUsage(int procId, long beginTime, 
-			      long endTime, Vector procThdVec){
+			      long endTime, List<AmpiProcessProfile> procThdVec){
     try {
       if (hasLogFiles()) {
 	if (logLoader == null) {
@@ -339,7 +339,7 @@ public class Analysis {
      * Create AMPI Functions' Time profile
      */
   public void createAMPITimeProfile(int procId, long beginTime, 
-					     long endTime, Vector procThdVec){
+					     long endTime, List<AmpiProcessProfile> procThdVec){
         try {
 	    if (hasLogFiles()) {
 		if (logLoader == null) {

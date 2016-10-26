@@ -10,11 +10,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.TreeMap;
-import java.util.Vector;
-import java.util.SortedSet;
+import java.util.*;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -71,8 +67,8 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	private JMenuItem mViewDataAsText;
 	private JMenuItem mViewPhaseInfoAsText;
 	
-	private Vector<String> availableStepStrings;
-	private Vector<Long> availableStepTimes;
+	private List<String> availableStepStrings;
+	private List<Long> availableStepTimes;
 
 	private IntervalChooserPanel intervalPanel;
 	
@@ -136,7 +132,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 			String info = "Copy & paste into your favorite spreadsheet or plotting tool:\n\nTime\tMaximum memory Usage Across All PEs:\n";
 
 			for(int i=0;i<availableStepTimes.size(); i++){
-				info += "" + projections.gui.U.humanReadableString(availableStepTimes.elementAt(i)) + "\t" + availableStepStrings.elementAt(i) + "\n";
+				info += "" + projections.gui.U.humanReadableString(availableStepTimes.get(i)) + "\t" + availableStepStrings.get(i) + "\n";
 			}
 			System.out.println("Phase Info:\n" + info + "\n");
 
@@ -191,7 +187,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		public void actionPerformed(ActionEvent e) {
 			String info = "";
 			for(int i=0;i<availableStepTimes.size(); i++){
-				info += "" + projections.gui.U.humanReadableString(availableStepTimes.elementAt(i)) + "\t" + availableStepStrings.elementAt(i) + "\n";
+				info += "" + projections.gui.U.humanReadableString(availableStepTimes.get(i)) + "\t" + availableStepStrings.get(i) + "\n";
 			}
 			System.out.println("Phase Info:\n" + info + "\n");
 
@@ -313,7 +309,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		// Add markers to mark each iteration:
 		determineStepsFromPEZero();
 		for(int i=0; i<availableStepTimes.size(); i++){
-			ValueMarker m = new ValueMarker(availableStepTimes.elementAt(i) * timeScalingFactor, Color.black, new BasicStroke(1.0f) );
+			ValueMarker m = new ValueMarker(availableStepTimes.get(i) * timeScalingFactor, Color.black, new BasicStroke(1.0f) );
 			//			m.setLabel(this.availableStepStrings.elementAt(i));
 			plot.addDomainMarker(m);
 		}
@@ -391,10 +387,10 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 	}
 
 
-	private Vector<Long> determineStepsFromPEZero() {
+	private List<Long> determineStepsFromPEZero() {
 		// Labels containing the user notes found in the log
-		availableStepStrings = new Vector<String>();
-		availableStepTimes = new Vector<Long>();
+		availableStepStrings = new ArrayList<String>();
+		availableStepTimes = new ArrayList<Long>();
 
 		if (!(MainWindow.runObject[myRun].hasLogData())){
 			return availableStepTimes;

@@ -5,7 +5,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Vector;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -34,14 +33,16 @@ import javax.swing.JTextField;
 		JPanel handlerRowPane = new JPanel();
 		handlerRowPane.setLayout(new BoxLayout(handlerRowPane, BoxLayout.LINE_AXIS));
 		JLabel handlerLabel = new JLabel("Choose CCS Handler:");
-		Vector<String> handlerStrings = new Vector<String>();
-		handlerStrings.add("CkPerfSummaryCcsClientCB");
-		handlerStrings.add("CkPerfSummaryCcsClientCB uchar");
-		handlerStrings.add("CkPerfSumDetail compressed");
+
+		String[] handlerStrings = {
+				"CkPerfSummaryCcsClientCB",
+				"CkPerfSummaryCcsClientCB uchar",
+				"CkPerfSumDetail compressed"
+		};
 		
 		handlerComboBox = new JComboBox(handlerStrings);
 		handlerComboBox.setEditable(false);
-		handlerComboBox.setMaximumRowCount(handlerStrings.size());
+		handlerComboBox.setMaximumRowCount(handlerStrings.length);
 		handlerComboBox.setSelectedIndex(2); // nothing selected at first	
 		handlerRowPane.add(handlerLabel);
 		handlerRowPane.add(Box.createRigidArea(new Dimension(10, 0)));

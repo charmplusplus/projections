@@ -9,7 +9,7 @@ import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
-import java.util.Vector;
+import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -29,12 +29,12 @@ class Legend implements MouseListener {
 	// runs.
 	private static int myRun = 0;
 	
-	private Vector<String> names;
+	private List<String> names;
 	
 	private Font namesFont;
 	private Font legendFont;
 	
-	Legend( String title, Vector<String> names, Vector<Paint> paints){
+	Legend(String title, List<String> names, List<Paint> paints){
 		this.names = names;
 		
 		namesFont = new Font("SansSerif", Font.PLAIN, fontSizeNames() ); 

@@ -1,7 +1,8 @@
 package projections.Tools.Streaming;
 
 import java.awt.BorderLayout;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -20,8 +21,8 @@ class SingleSeriesHandler {
 
 	private CcsThread ccs;
 
-	private Vector<Float> averageTimes;
-	private Vector<Float> allTimes;
+	private List<Float> averageTimes;
+	private List<Float> allTimes;
 
 	private XYPlot plot;
 
@@ -95,7 +96,7 @@ class SingleSeriesHandler {
 				for(int i=previousEntries; (i+numInputPerDataPoint-1)<allTimes.size(); i+=numInputPerDataPoint){
 					double s = 0.0;
 					for(int j=0;j<numInputPerDataPoint;j++){
-						s += allTimes.elementAt(j+i);		
+						s += allTimes.get(j+i);
 					}
 					double avg = s / numInputPerDataPoint;
 					dataSeries.add(i,avg);
@@ -131,8 +132,8 @@ class SingleSeriesHandler {
 
 		System.out.println("StreamingDataHandler constructor");
 
-		averageTimes = new Vector<Float>();
-		allTimes = new Vector<Float>();
+		averageTimes = new ArrayList<Float>();
+		allTimes = new ArrayList<Float>();
 
 		this.server = hostname;
 		this.ccsHandler = ccsHandler;
@@ -168,7 +169,7 @@ class SingleSeriesHandler {
 				int count=0;
 				double sum = 0.0;
 				for(int j=0;j<numInputPerDataPoint;j++){
-					sum += allTimes.elementAt(i+j);
+					sum += allTimes.get(i+j);
 					count++;
 				}
 				newDataSeries.add(i,sum/count);

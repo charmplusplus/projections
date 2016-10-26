@@ -12,10 +12,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.BorderLayout;
 import java.text.DecimalFormat;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.Vector;
-import java.util.Iterator;
+import java.util.*;
 import java.io.IOException;
 
 import javax.swing.JButton;
@@ -89,19 +86,26 @@ implements ItemListener, ActionListener
 
 	private SortedSet<Integer> processorList;
 
-	private Vector<XYLineAndShapeRenderer> renderers;
+	private List<XYLineAndShapeRenderer> renderers;
 
 	/*This Vector holds all our desired data. Each element of the Vector is a different
 	plot. XYSeriesCollection is necessary because we can change Y Axis on the XYSeriesCollection level, but
 	not on the XYSeries level  */
-	private Vector<XYSeriesCollection> graphedData;
-	private Vector<Double> 	globalSum;
-	private Vector<Double>	maxValue;
-	private Vector<Double>	minValue;
-	private Vector<Integer>	numCalls;
-	private Vector<Vector<Object>> tableData;
+	private List<XYSeriesCollection> graphedData;
+	private List<Double> 	globalSum;
+	private List<Double>	maxValue;
+	private List<Double>	minValue;
+	private List<Integer>	numCalls;
+	private List<List<Object>> tableData;
 
-	private final Vector<String> columnNames;
+	private final String[] columnNames = {
+			"Stat Name",
+			"PEs",
+			"Average Value",
+			"Max Value",
+			"Min Value",
+			"Visible?"
+	};
 
 	private String[]	statNames;
 	private int 		numStats;
@@ -126,24 +130,16 @@ implements ItemListener, ActionListener
 		thisWindow = this;
 		_format = new DecimalFormat("###,###.###");
 
-		//Create Column Names
-		columnNames = new Vector<String>();
-		columnNames.add(new String("Stat Name"));
-		columnNames.add(new String("PEs"));
-		columnNames.add(new String("Average Value"));
-		columnNames.add(new String("Max Value"));
-		columnNames.add(new String("Min Value"));
-		columnNames.add(new String("Visible?"));
-		numColumns = 6;
+		numColumns = columnNames.length;
 
 		//Initialize global vectors to hold overall data
-		globalSum = new Vector<Double>();
-		maxValue = new Vector<Double>();
-		minValue = new Vector<Double>();
-		numCalls = new Vector<Integer>();
-		tableData = new Vector<Vector<Object>>();
-		graphedData = new Vector<XYSeriesCollection>();
-		renderers = new Vector<XYLineAndShapeRenderer>();
+		globalSum = new ArrayList<Double>();
+		maxValue = new ArrayList<Double>();
+		minValue = new ArrayList<Double>();
+		numCalls = new ArrayList<Integer>();
+		tableData = new ArrayList<List<Object>>();
+		graphedData = new ArrayList<XYSeriesCollection>();
+		renderers = new ArrayList<XYLineAndShapeRenderer>();
 
 		//initialize curRow, which indicates which row the next new Stat plot would occupy
 		curRow = 0;
@@ -513,13 +509,10 @@ implements ItemListener, ActionListener
 	and allows us to read in the last column as a boolean*/
 	public class StatTableModel extends DefaultTableModel {
 
-		public StatTableModel(Vector columnNames, int rowCount){
+		public StatTableModel(String[] columnNames, int rowCount){
 			super(columnNames,rowCount);
 		}
 
-		public StatTableModel(Vector data, Vector columnNames){
-			super(data,columnNames);
-		}
 		//Only the last column (Visible?)  should be editable
 		public boolean isCellEditable(int row, int column){
 

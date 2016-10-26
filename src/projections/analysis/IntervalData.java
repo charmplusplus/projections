@@ -1,9 +1,7 @@
 package projections.analysis;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.SortedSet;
-import java.util.Vector;
+import java.util.*;
 
 import projections.analysis.SumDetailReader.RLEBlock;
 import projections.gui.MainWindow;
@@ -41,7 +39,7 @@ public class IntervalData
     // Dim 1 - indexed by PE
     // Dim 2 - indexed by EP, a not-quite-as dense format as the actual file
     //                 but good enough.
-    private Vector rawData[][][];
+    private List rawData[][][];
 
     // Uncompressed Data (the old way of doing things) for supporting
     // old tools.
@@ -71,7 +69,7 @@ public class IntervalData
 	// load at least the summary detail data.
 	if (MainWindow.runObject[myRun].hasSumDetailData()) {
 	    summaryDetails = new SumDetailReader[numPEs];
-	    rawData = new Vector[SumDetailReader.NUM_TAGS][numPEs][];
+	    rawData = new ArrayList[SumDetailReader.NUM_TAGS][numPEs][];
 	    SortedSet<Integer> availablePEs =
 		MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
 	    for(Integer pe : availablePEs) {
@@ -201,10 +199,10 @@ public class IntervalData
     private double[][] getData(int pe, int type) {
 	double returnData[][] = new double[numEPs][numIntervals];
 	for (int ep=0; ep<numEPs; ep++) {
-	    Iterator blockIterator = rawData[type][pe][ep].iterator();
+	    Iterator<RLEBlock> blockIterator = rawData[type][pe][ep].iterator();
 	    int curInterval = 0;
 	    while (blockIterator.hasNext()) {
-		RLEBlock nextBlock = (RLEBlock)blockIterator.next();
+		RLEBlock nextBlock = blockIterator.next();
 		for (int offset=0; offset<nextBlock.count; offset++) {
 		    returnData[ep][curInterval+offset] = nextBlock.value;
 		}

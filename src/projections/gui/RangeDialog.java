@@ -21,6 +21,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.Vector;
 
@@ -386,7 +387,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		// Default history layout
 		JPanel historyPanel = new JPanel();
 		historyPanel.setLayout(gbl);
-		historyList = new JComboBox(history.getHistoryStrings());
+		historyList = new JComboBox(history.getHistoryStrings().toArray());
 		historyList.setEditable(false);
 		historyList.setMaximumRowCount(RangeHistory.MAX_ENTRIES);
 		historyList.setSelectedIndex(-1); // nothing selected at first
@@ -626,6 +627,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		someInputChanged();
 	}
 
+	// These are Vectors because they're used with JComboBox
 	private Vector<String> availableStepStrings;
 //	Vector<String> availableStepStringsEnd;
 	private Vector<Long> availableStepTimes;

@@ -7,9 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.util.Enumeration;
-import java.util.Stack;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -473,18 +471,18 @@ class AmpiProfileWindow extends ProjectionsWindow
          * content to display. The better way is to displaying the data on the table at the same time analyzing
          * the data. This could be later implemented!
          */
-        Vector[] ampiProcessVec = new Vector[data.plist.size()];
+        List<AmpiProcessProfile>[] ampiProcessVec = new ArrayList[data.plist.size()];
         int pCnt=0;
         int totalLine=0;
         
 		for(Integer curPe : data.plist){
-            ampiProcessVec[pCnt] = new Vector();
+            ampiProcessVec[pCnt] = new ArrayList<AmpiProcessProfile>();
             MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
-            Vector v = ampiProcessVec[pCnt];
-            for(int i=0; i<v.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
+
+            for (AmpiProcessProfile p : ampiProcessVec[pCnt]) {
                 totalLine += p.getFinalCallFuncStack().size();
             }
+
             pCnt++;
         }
 
@@ -496,23 +494,22 @@ class AmpiProfileWindow extends ProjectionsWindow
         pCnt=0;
         int lineCnt=0;
 		for(Integer curPe : data.plist){
-            Vector v = ampiProcessVec[pCnt++];
-            for(int i=0; i<v.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
+            for (AmpiProcessProfile p : ampiProcessVec[pCnt]) {
                 long processTotalExecTime = p.getAccExecTime();
                 Stack stk = p.getFinalCallFuncStack();
-                for(Enumeration e=stk.elements(); e.hasMoreElements();){
-                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
+                for(Enumeration e=stk.elements(); e.hasMoreElements();) {
+                    AmpiFunctionData d = (AmpiFunctionData) (e.nextElement());
                     tData[lineCnt] = new Object[tHeading.length];
-                    tData[lineCnt][0] = ""+curPe;
+                    tData[lineCnt][0] = "" + curPe;
                     tData[lineCnt][1] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID);
                     tData[lineCnt][2] = d.sourceFileName;
-                    tData[lineCnt][3] = ""+d.LineNo;
-                    tData[lineCnt][4] = df.format(d.getAccExecTime()/(double)totalExecTime*100)+"%";
-                    tData[lineCnt][5] = df.format(d.getAccExecTime()/(double)processTotalExecTime*100)+"%";
+                    tData[lineCnt][3] = "" + d.LineNo;
+                    tData[lineCnt][4] = df.format(d.getAccExecTime() / (double) totalExecTime * 100) + "%";
+                    tData[lineCnt][5] = df.format(d.getAccExecTime() / (double) processTotalExecTime * 100) + "%";
                     lineCnt++;
                 }
             }
+            pCnt++;
         }
 
         JTable t = new JTable(tData, tHeading);

@@ -670,7 +670,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 				} catch (EndOfLogSuccess e) {			
 					// Successfully read log file
-					availableStepStrings.add(new String("End"));
+					availableStepStrings.add("End");
 					availableStepTimes.add(MainWindow.runObject[myRun].getTotalTime());
 				} catch (IOException e) {
 					System.err.println("Error occured while reading data for pe " + pe);

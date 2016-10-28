@@ -3,8 +3,9 @@ package projections.analysis;
 import java.awt.Component;
 import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.SortedSet;
-import java.util.Stack;
 
 import javax.swing.ProgressMonitor;
 
@@ -79,19 +80,19 @@ public class CallTable extends ProjDefs
 				logdata = reader.nextEventOnOrAfter(startTime);
 				//Now we have entered into the time interval
 
-				Stack creationStack = new Stack();
+				Deque<Integer> creationStack = new ArrayDeque<Integer>();
 				while ( (logdata.time<endTime)&&(logdata.type!=BEGIN_PROCESSING) ) {
 					//Account for any Creations encountered after a BP but before an EP
 					// Basically, the start interval begins inside a Processing Block
 					if (logdata.type == CREATION) {
-						creationStack.push(new Integer(logdata.entry));
-						creationStack.push(new Integer(logdata.msglen));
+						creationStack.push(logdata.entry);
+						creationStack.push(logdata.msglen);
 					}
 					if (logdata.type == END_PROCESSING) {
 						sourceEP = logdata.entry;
-						while(!creationStack.empty()) {
-							int msglen = ((Integer)creationStack.pop()).intValue();
-							int destEP = ((Integer)creationStack.pop()).intValue();
+						while(creationStack.size() != 0) {
+							int msglen = creationStack.pop();
+							int destEP = creationStack.pop();
 							if ( (minStats[sourceEP][destEP]>msglen) ||
 									(minStats[sourceEP][destEP]==0) )
 								minStats[sourceEP][destEP] = msglen;

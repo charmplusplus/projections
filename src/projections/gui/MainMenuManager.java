@@ -196,8 +196,14 @@ implements ActionListener, ItemListener
 				perfCounterMenuItem.setEnabled(false);
 			}
 			userEventsMenuItem.setEnabled(true);
-			userStatsTimeMenuItem.setEnabled(true);
-			userStatsProcMenuItem.setEnabled(true);
+			if (MainWindow.runObject[0].getSts().getNumUserDefinedStats() > 0) {
+				userStatsTimeMenuItem.setEnabled(true);
+				userStatsProcMenuItem.setEnabled(true);
+			}
+			else {
+				userStatsTimeMenuItem.setEnabled(false);
+				userStatsProcMenuItem.setEnabled(false);
+			}
 			outlierAnalysisMenuItem.setEnabled(true);
 			multirunAnalysisMenuItem.setEnabled(true);
 			functionToolMenuItem.setEnabled(true);

@@ -59,7 +59,7 @@ class TimlineRangeDialogExtension extends RangeDialogExtensionPanel implements I
 		p1.setLayout(new BoxLayout(p1, BoxLayout.LINE_AXIS));
 		dialogEnableEntryFiltering = new JCheckBox();
 		p1.add(dialogEnableEntryFiltering);
-		p1.add(new JLabel("Filter out entries shorter than"));
+		p1.add(new JLabel("Filter out entries shorter than "));
 		dialogMinEntryFiltering = new TimeTextField("30us", 7);
 		dialogMinEntryFiltering.setEditable(false);
 		p1.add(dialogMinEntryFiltering);

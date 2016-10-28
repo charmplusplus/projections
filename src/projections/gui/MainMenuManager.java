@@ -254,7 +254,7 @@ implements ActionListener, ItemListener
 		timeProfileGraphMenuItem = new JMenuItem("Time Profile");
 		perfCounterMenuItem = new JMenuItem("Performance Counters");
 		userEventsMenuItem = new JMenuItem("User Events");
-		userStatsTimeMenuItem = new JMenuItem("User Stats over Time");
+		userStatsTimeMenuItem = new JMenuItem("User Stats Over Time");
 		userStatsProcMenuItem = new JMenuItem("User Stats Per Processor");
 		outlierAnalysisMenuItem = new JMenuItem("Extrema Analysis");
 		multirunAnalysisMenuItem = new JMenuItem("Multirun Analysis");

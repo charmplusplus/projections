@@ -312,7 +312,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		startTimeField = new TimeTextField(" ", 12);
 		endTextLabel = new JLabel("End Time :", JLabel.LEFT);
 		endTimeField = new TimeTextField(" ", 12);
-		totalTimeTextLabel = new JLabel("Total Time selected :", JLabel.LEFT);
+		totalTimeTextLabel = new JLabel("Total Time Selected :", JLabel.LEFT);
 		totalTimeLabel = new JLabel(U.humanReadableString(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
 
 		if (disableTimeRange) {
@@ -393,7 +393,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		historyList.setSelectedIndex(-1); // nothing selected at first
 
 		bAddToHistory = new JButton("Add to History List");
-		bRemoveFromHistory = new JButton("Remove selected History");
+		bRemoveFromHistory = new JButton("Remove Selected History");
 		bSaveHistory = new JButton("Save History to Disk");
 
 
@@ -426,7 +426,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private JPanel createloadStepsLayout() {
 		JPanel loadStepsPanel = new JPanel();
 		loadStepsPanel.setLayout(new BorderLayout());
-		loadUserNotesButton = new JButton("Find annotated timesteps");
+		loadUserNotesButton = new JButton("Find Annotated Timesteps");
 		loadUserNotesButton.addActionListener(this);
 		loadUserNotesButton.setToolTipText("Choose start/end times from a list of user supplied notes on PE 0 that contain \"***\".");
 		loadStepsPanel.add(loadUserNotesButton, BorderLayout.WEST);

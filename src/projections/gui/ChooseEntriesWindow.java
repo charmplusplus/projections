@@ -108,8 +108,7 @@ public class ChooseEntriesWindow extends JFrame
 		columnNames.add("ID");
 		columnNames.add("Color");
 
-		// set initial size to number of EPs
-		tabledata  = new ArrayList<List>(entryNames.keySet().size());
+		tabledata = new ArrayList<List>();
 
 		if (data!=null && data.hasEntryList())
 			onlyEntryMethodsInRange();

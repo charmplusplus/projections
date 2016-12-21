@@ -30,7 +30,7 @@ import projections.misc.ProjectionsStatistics;
  */
 public class MultiRunDataAnalyzer {
 
-    private MultiRunData data;
+    private MultiRunData mrData;
 
     // data table - acquired from MultiRunData
     private double dataTable[][][];
@@ -102,14 +102,14 @@ public class MultiRunDataAnalyzer {
 	timeStats = new ProjectionsStatistics();
 //	numCallsStats = new ProjectionsStatistics();
 
-	this.data = data;
-	numEPs = data.getNumEPs();
-	numRuns = data.getNumRuns();
+	mrData = data;
+	numEPs = mrData.getNumEPs();
+	numRuns = mrData.getNumRuns();
 
-	epNames = data.getEPNames();
-	runNames = data.getRunNames();
+	epNames = mrData.getEPNames();
+	runNames = mrData.getRunNames();
 
-	dataTable = data.getData();
+	dataTable = mrData.getData();
 
 	// perform analysis phase 1 - compute basic statistical info
 	computeDerivedInformation();
@@ -160,12 +160,13 @@ public class MultiRunDataAnalyzer {
 	extraTable = 
 	    new double[MultiRunData.NUM_TYPES][numRuns][NUM_EXTR_ENTRIES];
 
-	double runWallTimes[] = data.getRunWallTimes();
-	// Overhead and Idle time only applies to the time type. All other
+	double runWallTimes[] = mrData.getRunWallTimes();
+	// Overhead and Idle time only applies to the time and percent time types. All other
 	// information is (correctly) left at zero.
 	for (int run=0; run<numRuns; run++) {
-	    extraTable[MultiRunData.TYPE_TIME][run][EXTR_OVERHEAD] =
-		runWallTimes[run] - runTimeSum[run];
+		extraTable[MultiRunData.TYPE_TIME][run][EXTR_OVERHEAD] = runWallTimes[run] - runTimeSum[run];
+		extraTable[MultiRunData.TYPE_PERCENT_TIME][run][EXTR_OVERHEAD] =
+				(runWallTimes[run] - runTimeSum[run]) / runWallTimes[run] * 100;
 	}
     }
 
@@ -191,10 +192,17 @@ public class MultiRunDataAnalyzer {
 	    catNames[cat] = getCategoryName(cat);
 	}
 	for (int type=0; type<MultiRunData.NUM_TYPES; type++) {
-	    for (int category=0; category<NUM_CATEGORIES; category++) {
-		categories[type][category] = new ArrayList<Integer>();
+		if (type != MultiRunData.TYPE_PERCENT_TIME) {
+			for (int category=0; category<NUM_CATEGORIES; category++) {
+				categories[type][category] = new ArrayList<Integer>();
+			}
+			categorize(type);
+		}
+		else {
+			// Assumes that MultiRunData.TYPE_PERCENT_TIME > MultiRunData.TYPE_TIME and will
+			// thus be initialized before we do this
+			categories[type] = categories[MultiRunData.TYPE_TIME];
 	    }
-	    categorize(type);
 	}
     }
 
@@ -390,16 +398,19 @@ public class MultiRunDataAnalyzer {
 	String titleString = "";
 	switch (dataType) {
 	case MultiRunData.TYPE_TIME:
-	    titleString = "Time taken";
+	    titleString = "Time Taken";
 	    break;
+	case MultiRunData.TYPE_PERCENT_TIME:
+		titleString = "% Time Spent";
+		break;
 	case MultiRunData.TYPE_TIMES_CALLED:
-	    titleString = "Number of times called";
+	    titleString = "Number of Times Called";
 	    break;
 	case MultiRunData.TYPE_NUM_MSG_SENT:
-	    titleString = "Messages sent per processor";
+	    titleString = "Messages Sent per Processor";
 	    break;
 	case MultiRunData.TYPE_SIZE_MSG:
-	    titleString = "Amount of data sent";
+	    titleString = "Amount of Data Sent";
 	    break;
 	}
 
@@ -428,6 +439,10 @@ public class MultiRunDataAnalyzer {
 	    title = "Time summed across processors (us)";
 	    outAxisType = MultiRunYAxis.TIME;
 	    break;
+	case MultiRunData.TYPE_PERCENT_TIME:
+		title = "% Time Spent";
+		outAxisType = MultiRunYAxis.PERCENTAGE;
+		break;
 	case MultiRunData.TYPE_TIMES_CALLED:
 	    title = "Number of times entry point was called";
 	    outAxisType = MultiRunYAxis.MSG;
@@ -492,7 +507,12 @@ public class MultiRunDataAnalyzer {
 	    returnStrings[3] = "Exec Time: " + 
 		U.humanReadableString((long)outputData[xVal][yVal]);
 	    break;
-	case MultiRunData.TYPE_TIMES_CALLED:
+	case MultiRunData.TYPE_PERCENT_TIME:
+		returnStrings[3] = "% Time Spent: " +
+				String.format("%.2f", outputData[xVal][yVal]);
+		break;
+
+		case MultiRunData.TYPE_TIMES_CALLED:
 	    returnStrings[3] = "Times called: " + (long)outputData[xVal][yVal];
 	    break;
 	case MultiRunData.TYPE_NUM_MSG_SENT:
@@ -523,7 +543,7 @@ public class MultiRunDataAnalyzer {
 	// CAT_EP_NO_CHANGE
 	int numNoChange = categories[dataType][CAT_EP_NO_CHANGE].size();
 	for (int catIdx=0; catIdx<numNoChange; catIdx++) {
-	    int epIdx = 
+	    int epIdx =
 		categories[dataType][CAT_EP_NO_CHANGE].get(catIdx);
 	    for (int run=0; run<numRuns; run++) {
 		data[run][entry] = dataTable[dataType][run][epIdx];
@@ -566,7 +586,7 @@ public class MultiRunDataAnalyzer {
 	    }
 	    entry++;
 	}
-    }
+	}
 
     /**
      *  convenience method for generating the appropriate color map

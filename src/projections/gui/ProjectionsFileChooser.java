@@ -140,8 +140,7 @@ class ProjectionsFileChooser
 	fc.setAccessory(instructions);
 	fc.setMultiSelectionEnabled(true);
 	fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-	fc.addChoosableFileFilter(new GrepFileFilter("sts", 
-						     "STS Files (*sts*)"));
+	fc.setFileFilter(new GrepFileFilter("sts","STS Files (*sts*)"));
 	return fc;
     }
 
@@ -179,31 +178,9 @@ class ProjectionsFileChooser
 		    list_.setSelectedIndices(selectAll);
 		}
 	    });
-	JButton button2 = new JButton("Select .sts");
-	button2.addActionListener(new ActionListener() {
-		public void actionPerformed(ActionEvent ae) {
-			ArrayList<Integer> selection = new ArrayList<Integer>();
-		    for (int i=0; i<listSize_; i++) {
-				String temp = (String)list_.getModel().getElementAt(i);
-				if (temp.endsWith("sts"))
-				{
-					selection.add(i);
-				}
-		    }
 
-			int[] selectionArr = new int[selection.size()];
-			for (int i=0; i < selectionArr.length; i++)
-			{
-				selectionArr[i] = selection.get(i).intValue();
-			}
-
-		    list_.setSelectedIndices(selectionArr);
-		}
-	    });
-
-	// JButton button2 = new WaitButton("OK", wait_);
-	JButton button3 = new JButton("OK");
-	button3.addActionListener( new ActionListener() {
+	JButton button2 = new JButton("OK");
+	button2.addActionListener( new ActionListener() {
 		public void actionPerformed(ActionEvent ae){
 		    userSelect_selected = list_.getSelectedIndices();
 		    userSelect_returnVal = 
@@ -228,8 +205,8 @@ class ProjectionsFileChooser
 	JPanel panel = new JPanel();
 	panel.add(button1);
 	panel.add(button2);
-	panel.add(button3);
 	d.getContentPane().add(panel, BorderLayout.SOUTH);
+
 	return d;
     }
 

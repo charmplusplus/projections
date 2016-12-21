@@ -6,7 +6,8 @@ public class MultiRunYAxis
     // mode constants
     public static final int TIME = 1;
     public static final int MSG = 2;
-    private static final int FP_NUMBER = 3;
+    public static final int PERCENTAGE = 3;
+    private static final int FP_NUMBER = 4;
 
     private int mode = TIME; // default
     private String title;
@@ -69,7 +70,9 @@ public class MultiRunYAxis
 	if (mode == TIME) {
 	    return Long.toString((long)value)+"us";
 	} else if (mode == MSG) {
-	    return Long.toString((long)value);
+        return Long.toString((long) value);
+	} else if (mode == PERCENTAGE){
+	    return Integer.toString((int)value) + "%";
 	} else if (mode == FP_NUMBER) {
 	    return Double.toString(value);
 	}

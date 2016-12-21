@@ -57,28 +57,29 @@ implements PointCapableReader
 	
 
 	long shiftAmount = 0;
-		
+
 	/** Create a reader for the text log file or a compressed version of it ending in ".gz" */
 	public GenericLogReader(int peNum, double Nversion) {
-		super(MainWindow.runObject[myRun].getLog(peNum), String.valueOf(Nversion));
-		
-		sourceFile = MainWindow.runObject[myRun].getLog(peNum);
-		shiftAmount = MainWindow.runObject[myRun].tachyonShifts.getShiftAmount(peNum);
+		this(peNum, Nversion, MainWindow.runObject[myRun]);
+	}
 
-		//System.out.println("pe["+peNum+"]{" + sourceFile.getAbsolutePath() + "}"); 
-		
+	public GenericLogReader(int peNum, double Nversion, Analysis analysis) {
+		super(analysis.getLog(peNum), String.valueOf(Nversion));
+
+		sourceFile = analysis.getLog(peNum);
+		shiftAmount = analysis.tachyonShifts.getShiftAmount(peNum);
+
 		lastBeginEvent = new LogEntryData();
 		lastBeginEvent.setValid(false);
 		endComputationOccurred = false;
-		
-		reader = createBufferedReader(sourceFile); 
+
+		reader = createBufferedReader(sourceFile);
 		version = Nversion;
 		try {
 			reader.readLine(); // skip over the header (already read)
 		} catch (IOException e) {
 			System.err.println("Error reading file");
-		} 
-
+		}
 	}
 
 
@@ -128,6 +129,68 @@ implements PointCapableReader
 			}		
 		}
 		return modified;
+	}
+
+	public LogEntryData nextProcessingEvent() throws IOException, EndOfLogSuccess
+	{
+		LogEntryData data = new LogEntryData();
+
+		while (true) {
+			String line = reader.readLine();
+
+			if (line == null || endComputationOccurred) {
+				throw new EndOfLogSuccess();
+			}
+
+			AsciiLineParser sc = new AsciiLineParser(line);
+
+			data.type = (int) sc.nextLong();
+
+			switch (data.type) {
+				case BEGIN_PROCESSING:
+					data.mtype = (int) sc.nextLong();
+					data.entry = (int) sc.nextLong();
+					data.time = sc.nextLong() + shiftAmount;
+					data.event = (int) sc.nextLong();
+					data.pe = (int) sc.nextLong();
+					if (version >= 2.0) {
+						data.msglen = (int) sc.nextLong();
+					} else {
+						data.msglen = -1;
+					}
+					if (version >= 4.0) {
+						data.recvTime = sc.nextLong() + shiftAmount;
+						data.id[0] = (int) sc.nextLong();
+						data.id[1] = (int) sc.nextLong();
+						data.id[2] = (int) sc.nextLong();
+					}
+					if (version >= 7.0) {
+						data.id[3] = (int) sc.nextLong();
+					}
+					if (version >= 6.5) {
+						data.cpuStartTime = sc.nextLong() + shiftAmount;
+					}
+
+					return data;
+				case END_PROCESSING:
+					data.mtype = (int) sc.nextLong();
+					data.entry = (int) sc.nextLong();
+					data.time = sc.nextLong() + shiftAmount;
+					data.event = (int) sc.nextLong();
+					data.pe = (int) sc.nextLong();
+					if (version >= 2.0) {
+						data.msglen = (int) sc.nextLong();
+					} else {
+						data.msglen = -1;
+					}
+					if (version >= 6.5) {
+						data.cpuEndTime = sc.nextLong() + shiftAmount;
+					}
+					return data;
+				default:
+					break;
+			}
+		}
 	}
 	
 

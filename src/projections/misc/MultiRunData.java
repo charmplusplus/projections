@@ -9,12 +9,13 @@ import java.util.TreeSet;
 
 import javax.swing.ProgressMonitor;
 
-import projections.analysis.GenericSummaryReader;
-import projections.analysis.ProjMain;
-import projections.analysis.StsReader;
+import projections.analysis.*;
 import projections.gui.MainWindow;
 
 import projections.misc.FileUtils;
+
+import static projections.analysis.ProjDefs.BEGIN_PROCESSING;
+import static projections.analysis.ProjDefs.END_PROCESSING;
 
 
 /**
@@ -55,17 +56,18 @@ public class MultiRunData
 
     // accompanying static data for dataTable. These types are publically
     // published for use by the GUI and Data Analyzer(s).
-    public static final int NUM_TYPES = 4;
+    public static final int NUM_TYPES = 5;
     public static final int TYPE_TIME = 0;
-    public static final int TYPE_TIMES_CALLED = 1;
-    public static final int TYPE_NUM_MSG_SENT = 2;
-    public static final int TYPE_SIZE_MSG = 3;    
+    public static final int TYPE_PERCENT_TIME = 1;
+    public static final int TYPE_TIMES_CALLED = 2;
+    public static final int TYPE_NUM_MSG_SENT = 3;
+    public static final int TYPE_SIZE_MSG = 4;
 
     // Short names of data types associated with Multirun data. Can
     // be used by GUIs to automatically generate components like buttons
     // or radio boxes.
     private static final String typeNames[] =
-    {"Execution Time", "Num Msgs Received", "Num Msgs Sent", "Msg Size"};
+    {"Execution Time", "% Time Spent", "Num Msgs Received", "Num Msgs Sent", "Msg Size"};
 
     // Non-standard data entries from summary files.
     // runTimes - The total absolute wall time the run took summed across
@@ -128,6 +130,7 @@ public class MultiRunData
 	    // are sorted and consistent.
 	    sortedStsMap = MiscUtil.sortAndMap(pesPerRun);
 	    MiscUtil.applyMap(stsReaders, sortedStsMap);
+		MiscUtil.applyMap(listOfStsFilenames, sortedStsMap);
 
 	    // ***** Apply consistency checks ***** 
 
@@ -218,7 +221,7 @@ public class MultiRunData
 					       " a complete read!");
 			    System.exit(-1);
 			}
-			reader = 
+			reader =
 			    new GenericSummaryReader(fileNameHandlers[run].getCanonicalFileName(pe, ProjMain.SUMMARY),
 						     stsReaders[run].getVersion());
 			for (int ep=0; ep<numEPs; ep++) {
@@ -227,13 +230,54 @@ public class MultiRunData
 			    dataTable[TYPE_TIMES_CALLED][run][ep] +=
 				reader.epData[ep][GenericSummaryReader.NUM_MSGS] * scale;
 			}
+
 			runWallTimes[run] += reader.numIntervals *
 			    reader.intervalSize * 1000000.0 * scale;
 			count++;
 		    }
+
+			for (int entry = 0; entry < dataTable[TYPE_TIME][run].length; entry++) {
+				dataTable[TYPE_PERCENT_TIME][run][entry] = dataTable[TYPE_TIME][run][entry] / runWallTimes[run] * 100;
+			}
 		    progressBar.close();
 		}
 	    } else if (hasLog) {
+			GenericLogReader reader;
+			SortedSet<Integer> validPEs;
+			for (int run = 0; run < numRuns; run++) {
+				Analysis runAnalyzer = new Analysis();
+				runAnalyzer.initAnalysis(listOfStsFilenames[run],null);
+
+				int numPE = pesPerRun[run];
+				validPEs = validPESets.get(run).get(ProjMain.LOG);
+				// approximates any incomplete data by scaling the values
+				// actually read by a scale factor.
+				double scale = numPE/(validPEs.size()*1.0);
+
+				runWallTimes[run] += runAnalyzer.getTotalTime() * numPE;
+
+				for (int PE : validPEs) {
+					reader = new GenericLogReader(PE, runAnalyzer.getVersion(), runAnalyzer);
+					try {
+						LogEntryData lastBeginData = null;
+						while (true) {
+							LogEntryData data = reader.nextProcessingEvent();
+							if (data.type == BEGIN_PROCESSING)
+								lastBeginData = data;
+							else if (data.type == END_PROCESSING) {
+								dataTable[TYPE_TIME][run][data.entry] +=
+										(data.time - lastBeginData.time) * scale;
+								dataTable[TYPE_TIMES_CALLED][run][data.entry] +=
+										scale;
+							}
+						}
+					} catch (EndOfLogSuccess e) {}
+				}
+
+				for (int entry = 0; entry < dataTable[TYPE_TIME][run].length; entry++) {
+					dataTable[TYPE_PERCENT_TIME][run][entry] = dataTable[TYPE_TIME][run][entry] / runWallTimes[run] * 100;
+				}
+			}
 	    } else {
 		// no data available!!! BAD!!!
 		System.err.println("No data available! Catastrophic error!");

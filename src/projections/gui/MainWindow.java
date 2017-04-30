@@ -52,7 +52,7 @@ implements ScalePanel.StatusDisplay
 
 
 	/** References to all open tool windows */
-	private LinkedList<ProjectionsWindow> openToolWindows; 
+	private LinkedList<ProjectionsWindow> openToolWindows;
 
 
 	// Runtime flags -
@@ -90,15 +90,15 @@ implements ScalePanel.StatusDisplay
 	private Label                status;
 	private Image bgimage;
 	private GridBagConstraints gbc;
-	private GridBagLayout gbl;   
+	private GridBagLayout gbl;
 
-	
-	
+
+
 	/** The place where messages about the performance of projections itself should go. These messages should help anyone who is trying to optimize projections. */
 	public static Logger performanceLogger = Logger.getLogger("ProjectionsPerformance");
 
-	
-	
+
+
 	public MainWindow()
 	{
 		mainWindow = this;
@@ -112,15 +112,15 @@ implements ScalePanel.StatusDisplay
 
 		// Disable logging unless someone explicitly turns it on from the menu item
 		performanceLogger.setLevel(Level.OFF);
-				
-		
+
+
 		// static screen information.
 		ScreenInfo.init();
 
 		int numProcs = Runtime.getRuntime().availableProcessors();
-		performanceLogger.log(Level.INFO,"Number of processors available to the Java Virtual Machine: " + numProcs);		
+		performanceLogger.log(Level.INFO,"Number of processors available to the Java Virtual Machine: " + numProcs);
 
-		
+
 		addWindowListener(new WindowAdapter()
 		{
 			public void windowClosing(WindowEvent e)
@@ -216,7 +216,7 @@ implements ScalePanel.StatusDisplay
 			ProjectionsWindow w = iter.next();
 			if (w instanceof projections.Tools.Timeline.TimelineWindow) {
 				((projections.Tools.Timeline.TimelineWindow)w).refreshDisplay(false);
-			} else { 
+			} else {
 				w.repaint();
 			}
 
@@ -274,7 +274,7 @@ implements ScalePanel.StatusDisplay
 			public void done() {
 				setTitle("Projections - " + newfile);
 				if (MainWindow.runObject[myRun].hasSummaryData()) {
-					//		MainWindow.runObject[myRun].loadSummaryData();	  
+					//		MainWindow.runObject[myRun].loadSummaryData();
 					double[][] data = MainWindow.runObject[myRun].getSummaryAverageData();
 					long originalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
 					// if summary override, perform sanity check
@@ -285,16 +285,16 @@ implements ScalePanel.StatusDisplay
 						{
 							// re-use defaults while printing warning message
 							System.out.println("Warning: Specified Summary " +
-									"parameters of [" + 
+									"parameters of [" +
 									ProjMain.SUM_START_INT + "," +
 									ProjMain.SUM_END_INT + "," +
 									ProjMain.SUM_INT_SIZE + "] " +
 									"is inconsistent. " +
 									"Real Summary Data " +
-									"has [" + 0 + "," + 
-									data.length + 
+									"has [" + 0 + "," +
+									data.length +
 									"," +
-									originalSize + "]. " + 
+									originalSize + "]. " +
 									"Reverting to default " +
 							"main summary display.");
 							ProjMain.SUM_OVERRIDE = false;
@@ -318,22 +318,22 @@ implements ScalePanel.StatusDisplay
 						}
 						double[] tempTimeData;
 						double[] tempIdleData;
-					        // if there are changes    
+					        // if there are changes
 						// transform the data into absolute time first.
-						IntervalUtils.utilToTime(timeData,	  
+						IntervalUtils.utilToTime(timeData,
 								originalSize);
-						IntervalUtils.utilToTime(idleData,	  
+						IntervalUtils.utilToTime(idleData,
 								originalSize);
 
 						// transform the re-binned data back to percentages.
-						tempTimeData = IntervalUtils.rebin(timeData, originalSize,	        
+						tempTimeData = IntervalUtils.rebin(timeData, originalSize,
 										   bestSize);
-						IntervalUtils.timeToUtil(tempTimeData,	 
-									 bestSize);	 
-						tempIdleData = IntervalUtils.rebin(idleData, originalSize,	        
+						IntervalUtils.timeToUtil(tempTimeData,
+									 bestSize);
+						tempIdleData = IntervalUtils.rebin(idleData, originalSize,
 										   bestSize);
-						IntervalUtils.timeToUtil(tempIdleData,	 
-									 bestSize);	 
+						IntervalUtils.timeToUtil(tempIdleData,
+									 bestSize);
 
 						// default case
 						newdata = new double[tempTimeData.length][2];
@@ -362,7 +362,7 @@ implements ScalePanel.StatusDisplay
 					    }
 					}
 					try {
-					        dataDump = 
+					        dataDump =
 						    new PrintWriter(new FileWriter(MainWindow.runObject[myRun].getLogDirectory() + File.separator +
 										   "SummaryDump.out"));
 					        dataDump.println("--- Summary Graph ---");
@@ -383,18 +383,18 @@ implements ScalePanel.StatusDisplay
 						System.err.println(e);
 					}
 					if (ProjMain.SUM_OVERRIDE) {
-						sumXAxis =	    
+						sumXAxis =
 							new SummaryXAxis(ProjMain.SUM_START_INT,
 									ProjMain.SUM_INT_SIZE);
 						sumDataSource = new SummaryDataSource(newdata,ProjMain.SUM_START_INT);
-					} else {		  
-						sumXAxis =	    
-							new SummaryXAxis(0,	bestSize);	  
+					} else {
+						sumXAxis =
+							new SummaryXAxis(0,	bestSize);
 						sumDataSource = new SummaryDataSource(newdata,0);
 					}
-					sumYAxis = new SummaryYAxis();	 
+					sumYAxis = new SummaryYAxis();
 					graphPanel =
-						new GraphPanel(new Graph(sumDataSource, 
+						new GraphPanel(new Graph(sumDataSource,
 								sumXAxis, sumYAxis));
 					summaryGraphPanel.add("data", graphPanel, "run data");
 				}
@@ -418,8 +418,7 @@ implements ScalePanel.StatusDisplay
 
 	/* called by the childWindows to remove references to themselves */
 	protected void closeChildWindow(ProjectionsWindow child)
-	{	
-		System.out.println("Removing window from openToolWindows");
+	{
 		openToolWindows.remove(child);
 	}
 
@@ -451,7 +450,7 @@ implements ScalePanel.StatusDisplay
 
 
 	protected void closeCurrent() {
-		closeAll();	
+		closeAll();
 	}
 
 	/** Keep a reference to a newly opened tool window  */

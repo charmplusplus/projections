@@ -28,6 +28,8 @@ class LogEntry
 	int FunctionID;
 	AmpiFunctionData ampiData;
 
+	int nestedID; // Nested thread ID, e.g. virtual AMPI ranks
+
 	String note;
 
 	private void setAmpiData(int functionID, int lineNo, 
@@ -55,6 +57,7 @@ class LogEntry
 		note = data.note;
 		userTime = data.userTime;
 		numPEs = data.numPEs;
+		nestedID = data.nestedID;
 
 		if (data.destPEs != null) {
 			destPEs = new int[data.destPEs.length];

@@ -44,16 +44,21 @@ class AsciiLineParser {
 		}
 	}
 
-	final protected String restOfLine() {
-    		return line.substring(pos);
-    	}
-
 	final protected String nextString(int strlen) {
     		String ret = line.substring(pos, pos+strlen);
 		pos += strlen;
 		return ret;
     	}
 
+    // Checks whether there is another field available in the line, without
+    // returning that field or modifying the line.
+    final protected boolean hasNextField() {
+        while (pos < line.length() && isSpace(line.charAt(pos))) {
+            pos++;
+        }
+
+        return (pos < line.length() && !isSpace(line.charAt(pos)));
+    }
 
 	//Read a positive long from the current file 
 	//With version 7.0, negative numbers have to be

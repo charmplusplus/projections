@@ -71,6 +71,7 @@ public class LogEntryData extends ProjDefs
     /// An arbitrary string provided by the user. Should be displayed as a user event
 	public String note;
  
+	public int nestedID; // Nested thread ID, e.g. virtual AMPI ranks
     
     public LogEntryData() {
 	// this is fixed (since it is based on a 3D tuple)

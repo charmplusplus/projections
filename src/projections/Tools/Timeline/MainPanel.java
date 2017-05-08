@@ -598,11 +598,14 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 							return null;
 
 						Iterator<UserEventObject> b = a.iterator(timeL, timeR);
+						int row = data.getNumUserEventRows() - (verticalOffsetWithinRow / data.singleUserEventRectHeight()) - 1;
 
 						// Iterate through all the things matching this timestamp so we can get the last one (which should be painted in front)
 						UserEventObject o = null;
 						while(b.hasNext()){
 							o = b.next();
+							if (o.getNestedRow() == row)
+								return o;
 						}
 						if(o != null){
 							return o;

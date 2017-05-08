@@ -1131,7 +1131,7 @@ public class LogLoader extends ProjDefs
 						// written.
 						userEventObject = new UserEventObject(pe, LE.Time-BeginTime,
 								LE.Entry, LE.EventID,
-								UserEventObject.Type.PAIR); 
+								UserEventObject.Type.PAIR, LE.nestedID);
 						// assume the end time to be the end of range
 						// in case the ending userevent gets cut off.
 						userEventObject.endTime = End;

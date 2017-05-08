@@ -71,7 +71,12 @@ class UserEventWindow extends JFrame
 		private int index_;
 
 		protected UserEventTable(int i) { index_ = i; }
-		public int getColumnCount() { return 4; }
+		public int getColumnCount() {
+			if (data.getNumNestedIDs() > 0)
+				return 5;
+			else
+				return 4;
+		}
 		public int getRowCount() { 
 			if (events_ != null && events_[index_] != null) { 
 				return events_[index_].length; 
@@ -84,6 +89,7 @@ class UserEventWindow extends JFrame
 			case 1: return "Begin Time";
 			case 2: return "End Time";
 			case 3: return "Delta Time";
+			case 4: return "Nested ID";
 			default: return "ERROR";
 			}
 		}
@@ -96,6 +102,7 @@ class UserEventWindow extends JFrame
 				case 2:  return new FormattedNumber(((UserEventObject)events_[index_][row]).endTime, format_);
 				case 3:  return new FormattedNumber(((UserEventObject)events_[index_][row]).endTime-
 						((UserEventObject)events_[index_][row]).beginTime, format_);
+				case 4:  return new FormattedNumber(((UserEventObject)events_[index_][row]).getNestedID(), format_);
 				default: return "ERROR";
 				}
 			}

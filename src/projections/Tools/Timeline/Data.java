@@ -280,6 +280,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 	private int numUserEventRows = 1;
 	private boolean drawNestedUserEventRows = false;
+	private int numNestedIDs = -1;
 	protected long minUserSupplied = 0;
 	protected long maxUserSupplied = 0;
 
@@ -696,7 +697,9 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 	}
 
-
+	public int getNumNestedIDs() {
+		return numNestedIDs;
+	}
 
 	private void printNumLoadedObjects(){
 		int objCount = 0;
@@ -1001,6 +1004,11 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 		}
+
+		int n = determineNumNestedIDs();
+		// Only show nestedIDs if there are at least two of them
+		if (n > 0)
+			numNestedIDs = n;
 
 		// Thread-safe merge of the min/max values
 		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE, minUserSuppliedThisPE, maxUserSuppliedThisPE);
@@ -1984,8 +1992,32 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 	}
 
+	// Determine the total number of nested threads (e.g. virtual AMPI ranks)
+	private int determineNumNestedIDs(){
+		int numNestedIDs = 0;
 
+		for (Collection<UserEventObject> c : allUserEventObjects.values()) {
+			for (UserEventObject obj : c)
+				numNestedIDs = Math.max(obj.getNestedID(), numNestedIDs);
+		}
+		return numNestedIDs+1;
+	}
 
+	// Determine how many rows are needed for displaying nested bracketed user
+	// events, in case nested threads are used (e.g. virtual AMPI ranks).
+	private int determineUserEventNestingsWithNestedIDs(){
+		int nestedIDs_per_pe = (int)Math.ceil(numNestedIDs / numPEs());
+
+		for (Collection<UserEventObject> c : allUserEventObjects.values()) {
+			for (UserEventObject obj : c) {
+				// Notify this event of its depth in the stack, relative to
+				// the PE it is assigned to.
+				obj.setNestedRow(obj.getNestedID() % nestedIDs_per_pe);
+			}
+		}
+
+		return nestedIDs_per_pe;
+	}
 
 	/** Determine how many rows are needed for displaying nested bracketed user events. 
 	 *  Choose the new size for the User Event rows, and cause a redraw
@@ -2042,7 +2074,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		drawNestedUserEventRows = b;
 		if(b == true){
-			setNumUserEventRows(determineUserEventNestings());
+			if (numNestedIDs > 0)
+				setNumUserEventRows(determineUserEventNestingsWithNestedIDs());
+			else
+				setNumUserEventRows(determineUserEventNestings());
 		} else {
 			setNumUserEventRows(1);
 		}

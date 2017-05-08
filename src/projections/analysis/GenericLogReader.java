@@ -441,6 +441,10 @@ implements PointCapableReader
 			data.time = sc.nextLong() + shiftAmount;
 			data.event = (int) sc.nextLong();
 			data.pe = (int) sc.nextLong();
+
+			// Charm++ before 6.8 did not have a nestedID for USER_EVENT_PAIR
+			if (sc.hasNextField())
+				data.nestedID = (int) sc.nextLong();
 			break;
 		case USER_STAT:
 			data.time = sc.nextLong() + shiftAmount; //Wall Time

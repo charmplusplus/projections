@@ -36,6 +36,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	public int    charmEventID; // for matching with end time
 	
 	private int pe;
+	private int nestedID = -1; // Nested thread ID, e.g. virtual AMPI ranks
 
 	private String note = null;
 	
@@ -60,7 +61,15 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		this.userEventID=-1;
 	}
 
-
+	/** Create a user event that has as nested ID (such as a virtual AMPI rank) */
+	public UserEventObject(int pe, long t, int e, int event, Type type, int nestedID) {
+		this.type=type;
+		this.beginTime=endTime=t;
+		this.userEventID=e;
+		this.charmEventID=event;
+		this.pe = pe;
+		this.nestedID = nestedID;
+	}
 	
 	
 	public UserEventObject(int pe, long t, int e, int event, Type type, String note) {
@@ -80,6 +89,8 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		String userEventName = MainWindow.runObject[myRun].getUserEventName(userEventID);
 		if(userEventName != null){
 			name += userEventName;
+			if (nestedID >= 0)
+				name += "(VP " + nestedID + ")";
 			addNewline = true;
 		}
 
@@ -100,7 +111,9 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 			return data.getForegroundColor();
 	}
 	
-	
+	public int getNestedID() {
+		return nestedID;
+	}
 
 	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
 
@@ -203,6 +216,10 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 
 	public void setNestedRow(int row) {
 		nestedRow = row;
+	}
+
+	public int getNestedRow() {
+		return nestedRow;
 	}
 
 	Data dataForLastClick;

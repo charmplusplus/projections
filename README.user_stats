@@ -22,7 +22,7 @@ How to enable userStats:
 		-e = value used to track stat
 		-stat = new value for the stat
 		-time = user defined time for custom x axis in projections
-		-will still store real time, so that real/user defined x values can be graphed interchangably
+		-will still store real time, so that real/user defined x values can be graphed interchangeably
 		-called many times through code as desired
 
 	flags to add

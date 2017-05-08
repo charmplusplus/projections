@@ -88,7 +88,7 @@ data:
 
    - Processors:  Choose which processor(s) you want to see a timeline for.
                     To enter multiple values, separate them with a comma or a
-                    dash (for ranges).  Strides can be specifed by
+                    dash (for ranges).  Strides can be specified by
                     using a colon to denote the stride size.  Some
                     examples:
 
@@ -126,7 +126,7 @@ data:
    performance data, click on "Adjust ranges to show useful
    information" at the bottom of the window.
 
-   When you are satisifed with your time and processor ranges, click on 'OK'.
+   When you are satisfied with your time and processor ranges, click on 'OK'.
    Projections will then get the Timeline data for you.  The time for this step
    depends on the number of items in your time range and the number of
    processors you have chosen.

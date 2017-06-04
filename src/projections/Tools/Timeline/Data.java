@@ -1940,51 +1940,38 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		HashMap<Integer, String> name = new HashMap<Integer, String>();
 
 
-		Iterator<Integer> iter = allUserEventObjects.keySet().iterator();
-		while(iter.hasNext()){
-			Integer pe = iter.next();
-
-			Iterator<UserEventObject> eventiter = allUserEventObjects.get(pe).iterator();
-			while(eventiter.hasNext()){
-				UserEventObject obj = eventiter.next();
-				if(obj.type == UserEventObject.Type.PAIR){
+		for (Query1D<UserEventObject> query : allUserEventObjects.values()) {
+			for (UserEventObject obj : query) {
+				if (obj.type == UserEventObject.Type.PAIR) {
 					long BeginTime = obj.beginTime;
 					long EndTime = obj.endTime;
-					Integer UserEventID = Integer.valueOf(obj.userEventID); 
+					Integer UserEventID = obj.userEventID;
 
-					long duration = EndTime-BeginTime;
+					long duration = EndTime - BeginTime;
 
-					if(! min.containsKey(UserEventID)){
-						min.put(UserEventID, new Long(duration));
-						max.put(UserEventID, new Long(duration));
-						total.put(UserEventID, new Long(duration));
-						count.put(UserEventID, Long.valueOf(1));
+					if (!min.containsKey(UserEventID)) {
+						min.put(UserEventID, duration);
+						max.put(UserEventID, duration);
+						total.put(UserEventID, duration);
+						count.put(UserEventID, 1L);
 						name.put(UserEventID, obj.getName());
 					} else {
-
-						if(min.get(UserEventID) > duration){
-							min.put(UserEventID, Long.valueOf(duration));
+						if (min.get(UserEventID) > duration) {
+							min.put(UserEventID, duration);
 						}
 
-						if(max.get(UserEventID) < duration){
-							max.put(UserEventID, Long.valueOf(duration));
+						if (max.get(UserEventID) < duration) {
+							max.put(UserEventID, duration);
 						}
 
-						total.put(UserEventID, total.get(UserEventID) + Long.valueOf(duration));
-						count.put(UserEventID, count.get(UserEventID) + Long.valueOf(1));
-
+						total.put(UserEventID, total.get(UserEventID) + duration);
+						count.put(UserEventID, count.get(UserEventID) + 1);
 					}
-
 				}
-
 			}
-
 		}
 
-		iter = min.keySet().iterator();
-		while(iter.hasNext()){
-			Integer UserEventID = iter.next();
-
+		for (int UserEventID : min.keySet()) {
 			double avg = total.get(UserEventID).doubleValue() /	count.get(UserEventID).doubleValue();
 
 			System.out.print("User Event #" + UserEventID + "  \"" + name.get(UserEventID) + "\"");

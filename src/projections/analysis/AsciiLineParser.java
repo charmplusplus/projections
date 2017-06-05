@@ -24,12 +24,6 @@ class AsciiLineParser {
 		pos = 0;
 	}
 	
-	    
-	final private boolean isSpace(char c) {
-		return c==' '||c=='\n'||c=='\t';
-	}
-
-	
 	/// Read an character from the string. if at end of string, produce '\n'
 	final private char nextChar() throws IOException {
 		if(pos > line.length()){
@@ -53,11 +47,11 @@ class AsciiLineParser {
     // Checks whether there is another field available in the line, without
     // returning that field or modifying the line.
     final protected boolean hasNextField() {
-        while (pos < line.length() && isSpace(line.charAt(pos))) {
+        while (pos < line.length() && Character.isWhitespace(line.charAt(pos))) {
             pos++;
         }
 
-        return (pos < line.length() && !isSpace(line.charAt(pos)));
+        return (pos < line.length() && !Character.isWhitespace(line.charAt(pos)));
     }
 
 	//Read a positive long from the current file 
@@ -70,13 +64,13 @@ class AsciiLineParser {
 
 		int multiplier = 1;
 		char c;
-		while (isSpace(c=nextChar())) {}
+		while (Character.isWhitespace(c=nextChar())) {}
 		if (c == '-') {
 			multiplier = -1;
 			c=nextChar();
 		}
 		long ret=toDigit(c);
-		while (!isSpace(c=nextChar())) 
+		while (!Character.isWhitespace(c=nextChar()))
 			ret=10*ret+toDigit(c);
 		return ret*multiplier;
 	}
@@ -90,13 +84,13 @@ class AsciiLineParser {
 		char c;
 		int counter = 0;
  		boolean decimal = false;
-		while (isSpace(c=nextChar())) {}
+		while (Character.isWhitespace(c=nextChar())) {}
 		if (c == '-') {
 			multiplier = -1;
 			c=nextChar();
 		}
 		double ret=toDigit(c);
-		while (!isSpace(c=nextChar())) {
+		while (!Character.isWhitespace(c=nextChar())) {
                 	if(c == '.') {
 				decimal = true;
 				continue;

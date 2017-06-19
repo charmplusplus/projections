@@ -623,7 +623,7 @@ public class SumAnalyzer extends ProjDefs
         int[] totalIdlePercentage = new int[IntervalCount];
         for(int i=0; i<nPe; i++){
             for(int j=0; j<IntervalCount; j++){
-                totalIdlePercentage[j] = IdlePercentage[i][j];
+                totalIdlePercentage[j] += IdlePercentage[i][j] / IntervalCount;
             }
         }
         return totalIdlePercentage;

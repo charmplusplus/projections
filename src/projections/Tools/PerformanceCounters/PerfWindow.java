@@ -13,15 +13,12 @@ import java.util.*;
 public class PerfWindow extends GenericGraphWindow
 implements ActionListener, Clickable
 {
-
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
 	private static int myRun = 0;
 
 	private double[][][] perfCounters;
-
-	private ArrayList<Integer> histogram;
 
 	private JPanel mainPanel;
 	private JPanel graphPanel;
@@ -42,10 +39,8 @@ implements ActionListener, Clickable
 		super("Projections Performance Counters- " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 		mainPanel = new JPanel();
 		setLayout(mainPanel);
-		//getContentPane().add(mainPanel);
 		createMenus();
 		createLayout();
-		// setPopupText("histArray");
 		pack();
 		thisWindow = this;
 		showDialog();
@@ -76,7 +71,6 @@ implements ActionListener, Clickable
 				thisWindow.repaint();
 			}
 			catch (NumberFormatException ex) {
-
 			}
 		}
 	}
@@ -178,8 +172,6 @@ implements ActionListener, Clickable
 	private void getData(long startTime, long endTime, SortedSet<Integer> pes){
 		perfCounters = new double[numPerfCounts][pes.size()][];
 
-		histogram = new ArrayList<Integer>();
-		
 		// Create a list of worker threads
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
@@ -187,7 +179,7 @@ implements ActionListener, Clickable
 			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, numPerfCounts, startTime, endTime, perfCounters) );
 			pIdx++;
 		}
-		
+
 		// Determine a component to show the progress bar with
 		Component guiRootForProgressBar = null;
 		if(thisWindow!=null && thisWindow.isVisible()) {
@@ -207,12 +199,5 @@ implements ActionListener, Clickable
 			catch (InterruptedException ex)
 			{}
 		}
-
-
-//		Iterator<Runnable> iter = readyReaders.iterator();
-
-//		while(iter.hasNext()){
-//			ThreadedFileReader t = (ThreadedFileReader) iter.next();
-//		}
 	}
 }

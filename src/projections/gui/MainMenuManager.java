@@ -22,10 +22,10 @@ import projections.Tools.LogFileViewer.LogFileViewerWindow;
 import projections.Tools.MemoryUsage.MemoryUsageWindow;
 import projections.Tools.NoiseMiner.NoiseMinerWindow;
 import projections.Tools.Overview.OverviewWindow;
+import projections.Tools.EntryMethodProfile.MethodProfileWindow;
 import projections.Tools.Streaming.StreamingTool;
 import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
-import projections.Tools.TimelineRendered.TimelineRenderedWindow;
 import projections.Tools.UserStatsOverTime.UserStatsTimeWindow;
 import projections.Tools.UserStatsPerPE.UserStatsProcWindow;
 import projections.analysis.ProjMain;
@@ -96,6 +96,7 @@ implements ActionListener, ItemListener
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
 	private JMenuItem topologyDisplayMenuItem;
+	private JMenuItem methodProfileMenuItem;
 
 	private JCheckBoxMenuItem perfLogMenuItem;
 
@@ -135,6 +136,7 @@ implements ActionListener, ItemListener
 			noiseMinerMenuItem.setEnabled(false);
 			memoryUsageMenuItem.setEnabled(false);
 			topologyDisplayMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_SUMMARY:
@@ -169,6 +171,7 @@ implements ActionListener, ItemListener
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
 			topologyDisplayMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_FILES :
@@ -211,6 +214,7 @@ implements ActionListener, ItemListener
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
 			topologyDisplayMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(true);
 
 			break;
 		}
@@ -270,6 +274,7 @@ implements ActionListener, ItemListener
 		streamingMenuItem = new JMenuItem("Streaming CCS");
 		memoryUsageMenuItem = new JMenuItem("Memory Usage");
 		topologyDisplayMenuItem = new JMenuItem("Topology Display");
+		methodProfileMenuItem = new JMenuItem("Entry Method Profile");
 
 		timelinesMenuItem.addActionListener(this);
 		//renderedTimelinesMenuItem.addActionListener(this);
@@ -294,6 +299,7 @@ implements ActionListener, ItemListener
 		streamingMenuItem.addActionListener(this);
 		memoryUsageMenuItem.addActionListener(this);
 		topologyDisplayMenuItem.addActionListener(this);
+		methodProfileMenuItem.addActionListener(this);
 
 		toolMenu.add(timelinesMenuItem);
 		//toolMenu.add(renderedTimelinesMenuItem);
@@ -318,6 +324,7 @@ implements ActionListener, ItemListener
 		toolMenu.add(streamingMenuItem);
 		toolMenu.add(memoryUsageMenuItem);
 		toolMenu.add(topologyDisplayMenuItem);
+		toolMenu.add(methodProfileMenuItem);
 
 		menubar.add(toolMenu);
 
@@ -437,6 +444,9 @@ implements ActionListener, ItemListener
 			
 			else if (mi == topologyDisplayMenuItem)
 				parent.openTool(new TopologyDisplayWindow(parent) );
+				
+			else if (mi == methodProfileMenuItem)
+				parent.openTool(new MethodProfileWindow(parent) );
 
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);

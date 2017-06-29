@@ -25,6 +25,7 @@ import projections.Tools.LogFileViewer.LogFileViewerWindow;
 import projections.Tools.MemoryUsage.MemoryUsageWindow;
 import projections.Tools.NoiseMiner.NoiseMinerWindow;
 import projections.Tools.Overview.OverviewWindow;
+import projections.Tools.EntryMethodProfile.MethodProfileWindow;
 import projections.Tools.Streaming.StreamingTool;
 import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
@@ -96,6 +97,7 @@ implements ActionListener, ItemListener
 	private JMenuItem noiseMinerMenuItem;
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
+	private JMenuItem methodProfileMenuItem;
 
 	private JCheckBoxMenuItem perfLogMenuItem;
 
@@ -132,6 +134,7 @@ implements ActionListener, ItemListener
 			multirunAnalysisMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(false);
 			memoryUsageMenuItem.setEnabled(false);
+			methodProfileMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_SUMMARY:
@@ -163,6 +166,7 @@ implements ActionListener, ItemListener
 			multirunAnalysisMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_FILES :
@@ -202,6 +206,7 @@ implements ActionListener, ItemListener
 			multirunAnalysisMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(true);
 
 			break;
 		}
@@ -263,6 +268,7 @@ implements ActionListener, ItemListener
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
 		streamingMenuItem = new JMenuItem("Streaming CCS");
 		memoryUsageMenuItem = new JMenuItem("Memory Usage");
+		methodProfileMenuItem = new JMenuItem("Entry Method Profile");
 
 		timelinesMenuItem.addActionListener(this);
 		//renderedTimelinesMenuItem.addActionListener(this);
@@ -284,6 +290,7 @@ implements ActionListener, ItemListener
 		noiseMinerMenuItem.addActionListener(this);
 		streamingMenuItem.addActionListener(this);
 		memoryUsageMenuItem.addActionListener(this);
+		methodProfileMenuItem.addActionListener(this);
 
 		toolMenu.add(timelinesMenuItem);
 		//toolMenu.add(renderedTimelinesMenuItem);
@@ -305,6 +312,7 @@ implements ActionListener, ItemListener
 		toolMenu.add(noiseMinerMenuItem);
 		toolMenu.add(streamingMenuItem);
 		toolMenu.add(memoryUsageMenuItem);
+		toolMenu.add(methodProfileMenuItem);
 
 		menubar.add(toolMenu);
 
@@ -416,6 +424,9 @@ implements ActionListener, ItemListener
 			else if (mi == streamingMenuItem)	
 				new StreamingTool();
 			
+			else if (mi == methodProfileMenuItem)
+				parent.openTool(new MethodProfileWindow(parent) );
+
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);
 			

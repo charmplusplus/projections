@@ -352,7 +352,7 @@ class ThreadedFileReader implements Runnable  {
 
 				case ProjDefs.CREATION:
 					//if (logEnd == true) break;
-					if (logdata.time > endTime) {
+					if (logdata.time < startTime || logdata.time > endTime) {
 						break;
 					}
 					// respect the user threshold.

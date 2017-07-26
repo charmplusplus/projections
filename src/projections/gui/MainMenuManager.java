@@ -16,6 +16,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
+import projections.Tools.MessageSizeEvolution.MessageSizeEvolutionWindow;
 import projections.Tools.PerformanceCounters.PerfWindow;
 import projections.Tools.CommunicationOverTime.CommTimeWindow;
 import projections.Tools.CommunicationPerPE.CommWindow;
@@ -98,6 +99,7 @@ implements ActionListener, ItemListener
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
 	private JMenuItem methodProfileMenuItem;
+	private JMenuItem messageSizeEvolutionMenuItem;
 
 	private JCheckBoxMenuItem perfLogMenuItem;
 
@@ -135,6 +137,7 @@ implements ActionListener, ItemListener
 			noiseMinerMenuItem.setEnabled(false);
 			memoryUsageMenuItem.setEnabled(false);
 			methodProfileMenuItem.setEnabled(false);
+			messageSizeEvolutionMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_SUMMARY:
@@ -167,6 +170,7 @@ implements ActionListener, ItemListener
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
 			methodProfileMenuItem.setEnabled(false);
+			messageSizeEvolutionMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_FILES :
@@ -207,6 +211,7 @@ implements ActionListener, ItemListener
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
 			methodProfileMenuItem.setEnabled(true);
+			messageSizeEvolutionMenuItem.setEnabled(true);
 
 			break;
 		}
@@ -269,6 +274,7 @@ implements ActionListener, ItemListener
 		streamingMenuItem = new JMenuItem("Streaming CCS");
 		memoryUsageMenuItem = new JMenuItem("Memory Usage");
 		methodProfileMenuItem = new JMenuItem("Entry Method Profile");
+		messageSizeEvolutionMenuItem = new JMenuItem("Message Size Evolution");
 
 		timelinesMenuItem.addActionListener(this);
 		//renderedTimelinesMenuItem.addActionListener(this);
@@ -291,6 +297,7 @@ implements ActionListener, ItemListener
 		streamingMenuItem.addActionListener(this);
 		memoryUsageMenuItem.addActionListener(this);
 		methodProfileMenuItem.addActionListener(this);
+		messageSizeEvolutionMenuItem.addActionListener(this);
 
 		toolMenu.add(timelinesMenuItem);
 		//toolMenu.add(renderedTimelinesMenuItem);
@@ -313,6 +320,7 @@ implements ActionListener, ItemListener
 		toolMenu.add(streamingMenuItem);
 		toolMenu.add(memoryUsageMenuItem);
 		toolMenu.add(methodProfileMenuItem);
+		toolMenu.add(messageSizeEvolutionMenuItem);
 
 		menubar.add(toolMenu);
 
@@ -426,6 +434,9 @@ implements ActionListener, ItemListener
 			
 			else if (mi == methodProfileMenuItem)
 				parent.openTool(new MethodProfileWindow(parent) );
+
+			else if(mi == messageSizeEvolutionMenuItem)
+				parent.openTool(new MessageSizeEvolutionWindow(parent));
 
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);

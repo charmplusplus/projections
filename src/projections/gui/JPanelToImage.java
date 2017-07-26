@@ -1,8 +1,6 @@
 package projections.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics2D;
-import java.awt.Image;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.File;
@@ -55,7 +53,7 @@ public class JPanelToImage {
 
 	
 	/** Generate an image of the panel and save it into a file chosen by the user in a file chooser dialog box. */
-	public static void saveToFileChooserSelection(JPanel panelToRender, String dialogTitle, String defaultFilename){
+	public static void saveToFileChooserSelection(Container panelToRender, String dialogTitle, String defaultFilename){
 		ExportDialog export = new ExportDialog();
 		Properties properties = new Properties();
 

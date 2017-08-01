@@ -11,6 +11,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.BorderLayout;
+import java.io.File;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.io.IOException;
@@ -25,6 +26,7 @@ import javax.swing.SwingWorker;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JFileChooser;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -95,6 +97,7 @@ implements ItemListener, ActionListener
 	plot. XYSeriesCollection is necessary because we can change Y Axis on the XYSeriesCollection level, but
 	not on the XYSeries level  */
 	private List<XYSeriesCollection> graphedData;
+	private List<String>	seriesName;
 	private List<Double> 	globalSum;
 	private List<Double>	maxValue;
 	private List<Double>	minValue;
@@ -106,6 +109,7 @@ implements ItemListener, ActionListener
 	private List<String> statInfo;
 
 	private final String[] columnNames = {
+			"Series Name",
 			"Stat Name",
 			"PEs",
 			"Average Value",
@@ -140,6 +144,7 @@ implements ItemListener, ActionListener
 		numColumns = columnNames.length;
 
 		//Initialize global vectors to hold overall data
+		seriesName = new ArrayList<String>();
 		globalSum = new ArrayList<Double>();
 		maxValue = new ArrayList<Double>();
 		minValue = new ArrayList<Double>();
@@ -289,6 +294,7 @@ implements ItemListener, ActionListener
 		}
 		Vector<Object> row = new Vector<Object>();
 
+		row.add("" + seriesName.get(curRow));
 		row.add(new String("" +statNames[curStat]  ));
 		row.add(pes);
 		row.add(new String("" + globalSum.get(curRow)/ numCalls.get(curRow) ));
@@ -359,22 +365,17 @@ implements ItemListener, ActionListener
 		double  max= 0;
 		double  min=0;
 		int nCalls=0;
+		seriesName.add(statDialog.getSeriesName());
+		String currSeriesName = statDialog.getSeriesName();
 		//Get User choices
 		String xType = statDialog.getXValue();
 		String xAgg = statDialog.getAggregate();
 		curStat = statDialog.getStatIndex();
-		//Get name of series for Legend based off stat name and PE's used
-		String seriesName = statNames[curStat] + ": ";
-		for(Integer pe : processorList) {
-			if( pe.equals(processorList.last()))
-				seriesName+=pe.toString();
-			else seriesName+=pe.toString() + ", ";
-		}
-		XYSeries data = new XYSeries(seriesName,true);
-		XYSeries dumpedData = new XYSeries(seriesName, true);
+		XYSeries data = new XYSeries(currSeriesName,true);
+		XYSeries dumpedData = new XYSeries(currSeriesName, true);
 
 		//Get full string to print out for dumping this line
-		statInfo.add(seriesName + "   Aggregate: " + xAgg + "   StartTime: " + startTime + "  EndTime: " + endTime);
+		statInfo.add(currSeriesName + "   Aggregate: " + xAgg + "   StartTime: " + startTime + "  EndTime: " + endTime);
 
 		int numPes = 0;
 		//Loop through every PE
@@ -501,6 +502,23 @@ implements ItemListener, ActionListener
 
 	//Dump all current graph data into .dat files
 	public void dumpData() {
+
+		String currDir;
+		JFileChooser fc = new JFileChooser();
+		fc.setCurrentDirectory(new File("."));
+		fc.setDialogTitle("Choose destination folder");
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		fc.setAcceptAllFileFilterUsed(false);
+
+		if(fc.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+			if(fc.getSelectedFile().isDirectory())
+				currDir = fc.getSelectedFile().getAbsolutePath();
+			else
+				currDir = fc.getCurrentDirectory().getAbsolutePath();
+		} else {
+			return;
+		}
+
 		int lineIdx = 0;
 		//Loop through every plot, and create a file for it.
 		for (XYSeriesCollection curLine : graphedData) {
@@ -510,7 +528,7 @@ implements ItemListener, ActionListener
 			double[][] curTimes = dumpedTimes.get(lineIdx).toArray();
 			FileOutputStream out;
 			try {
-				out = new FileOutputStream("./line" + lineIdx + ".dat");
+				out = new FileOutputStream(currDir + "/" + seriesName.get(lineIdx) + ".dat");
 			}  catch (FileNotFoundException e) {
 				System.err.println("Error opening file for line " + lineIdx);
 				continue;

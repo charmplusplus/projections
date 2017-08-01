@@ -33,6 +33,7 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 import javax.swing.JOptionPane;
+import javax.swing.JTextField;
 
 /*
 	Stat Dialog created by Joshua Lew 7/5/16
@@ -45,6 +46,7 @@ import javax.swing.JOptionPane;
 	Color
 	Lines/Points/Both
 	Which Stat to plot
+	Series name
 
 	This Dialog is specialized for the UserStatOverTime tool
 	 and would require a little work to use with other tools
@@ -74,6 +76,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private JSelectField processorsField;
 	private TimeTextField startTimeField;
 	private TimeTextField endTimeField;
+	private JTextField seriesNameField;
 
 	private JPanel timePanel, processorsPanel,statPanel;
 	private JButton bOK, bCancel;
@@ -121,6 +124,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		if(isInputValid()){
 			//			System.out.println("Input is valid");
 			totalTimeLabel.setText(U.humanReadableString(getSelectedTotalTime()));
+			bOK.setEnabled(true);
 		}
 		 else {
 			//			System.out.println("Input is NOT valid");
@@ -226,6 +230,16 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc.fill = GridBagConstraints.BOTH;
 		gbc.insets = new Insets(2, 2, 2, 2);
+
+		JPanel seriesPanel = new JPanel();
+		seriesPanel.setLayout(gbl);
+		JLabel seriesNameLabel = new JLabel("Series Name :", JLabel.LEFT);
+		seriesNameField = new JTextField("", 12);
+		seriesNameField.addActionListener(this);
+		seriesNameField.addKeyListener(this);
+		seriesNameField.addFocusListener(this);
+		Util.gblAdd(seriesPanel, seriesNameLabel, gbc, 0, 0, 1, 1, 1, 1);
+		Util.gblAdd(seriesPanel, seriesNameField, gbc, 1, 0, 3, 1, 1, 1);
 
 		// Default processor range layout
 		processorsPanel = new JPanel();
@@ -355,12 +369,14 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 		// general layout
 		inputPanel.setLayout(gbl);
-		Util.gblAdd(inputPanel, processorsPanel,
+		Util.gblAdd(inputPanel, seriesPanel,
 				gbc, 0,0, 1,1, 1,1);
-		Util.gblAdd(inputPanel, timePanel,
+		Util.gblAdd(inputPanel, processorsPanel,
 				gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(inputPanel, statPanel,
+		Util.gblAdd(inputPanel, timePanel,
 				gbc, 0,2, 1,1, 1,1);
+		Util.gblAdd(inputPanel, statPanel,
+				gbc, 0,3, 1,1, 1,1);
 
 		return inputPanel;
 	}
@@ -389,6 +405,11 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 	/** Check for validity of the input fields in this dialog box and any contained tool-specific Jpanel */
 	private boolean isInputValid(){
+
+		if(seriesNameField.getText().trim().equals("")) {
+			seriesNameField.setForeground(Color.red);
+			return false;
+		}
 
 		// start time cannot be greater or equal to end time
 		if (getStartTime() >= getEndTime()) {
@@ -425,6 +446,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		endTimeField.setForeground(Color.black);
 		processorTextLabel.setForeground(Color.black);
 		processorsField.setForeground(Color.black);
+		seriesNameField.setForeground(Color.black);
 
 
 		return true;
@@ -439,6 +461,9 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		return (dialogState == DIALOG_CANCELLED);
 	}
 
+	public String getSeriesName() {
+		return seriesNameField.getText();
+	}
 
 	public long getStartTime() {
 		return startTimeField.getValue();

@@ -25,7 +25,7 @@ import projections.Tools.Overview.OverviewWindow;
 import projections.Tools.Streaming.StreamingTool;
 import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
-import projections.Tools.TimelineRendered.TimelineRenderedWindow;
+import projections.Tools.UserEvents.UserEventsWindow;
 import projections.Tools.UserStatsOverTime.UserStatsTimeWindow;
 import projections.Tools.UserStatsPerPE.UserStatsProcWindow;
 import projections.analysis.ProjMain;

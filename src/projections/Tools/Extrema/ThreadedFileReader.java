@@ -78,7 +78,9 @@ class ThreadedFileReader implements Runnable  {
 					// process pair read previously
 					eventIndex = 
 						MainWindow.runObject[myRun].getUserDefinedEventIndex(logData.userEventID);
-					myData[eventIndex] += logDataEnd.time - logData.time;
+					if (eventIndex != -1) {
+                        myData[eventIndex] += logDataEnd.time - logData.time;
+                    }
 					logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 					logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR );
 					if (logDataEnd.time > endTime) {

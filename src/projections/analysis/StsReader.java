@@ -336,11 +336,14 @@ public class StsReader extends ProjDefs
     }
 
     public Integer getUserEventIndex(int eventID) {
-	Integer key = new Integer(eventID);
+	Integer key = eventID;
 	if(userEventIndices.containsKey(key))
 		return (userEventIndices.get(key));
-	else
-		return null;
+	else {
+		// returning null will lead to null pointer exception when
+		// trying to convert back to int, instead use -1
+		return -1;
+	}
     }
 
     public String getUserEventName(int eventID) { 

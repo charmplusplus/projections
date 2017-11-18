@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
-
+import java.text.DecimalFormat;
 
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -50,6 +50,14 @@ implements ItemListener, ActionListener, Clickable
 	private double[][]  avgHopCount;
 	private double[][]  avgPeHopCount;
 
+	// in microseconds, so 1 = "per us", 1000 = "per ms", 1000000 = "per s"
+	// user will be able to change this from the UI
+	private double unitTime = 1000.0;
+	private double timeInterval;
+	private String unitTimeStr = "ms";
+
+	private DecimalFormat _format;
+
 	private ArrayList<Integer> histogram;
 	private int[]	histArray;
 	private String 	currentArrayName;
@@ -58,6 +66,7 @@ implements ItemListener, ActionListener, Clickable
 	private JPanel	graphPanel;
 	private JPanel	checkBoxPanel;
 	private JPanel      blueGenePanel;
+	private JPanel	unitPanel;
 
 	private Checkbox    sentMsgs;
 	private Checkbox	sentBytes;
@@ -68,6 +77,10 @@ implements ItemListener, ActionListener, Clickable
 	private Checkbox    hopCountCB;
 	private Checkbox    peHopCountCB;
 
+	private Checkbox 	microseconds;
+	private Checkbox 	milliseconds;
+	private Checkbox 	seconds;	
+
 	private CommWindow  thisWindow;
 
 	private SortedSet<Integer> peList;
@@ -76,6 +89,7 @@ implements ItemListener, ActionListener, Clickable
 	public CommWindow(MainWindow mainWindow) {
 		super("Projections Communication - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
 		mainPanel = new JPanel();
+		_format = new DecimalFormat("###,###.###");
 		setLayout(mainPanel);
 		//getContentPane().add(mainPanel);
 		createMenus();
@@ -106,46 +120,46 @@ implements ItemListener, ActionListener, Clickable
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			Checkbox cb = (Checkbox)ae.getSource();
 			if (cb == sentMsgs) {
-				setDataSource("Total #Msgs Sent", sentMsgCount, this);
+				setDataSource("Rate of Msgs Sent", sentMsgCount, this);
 				setPopupText("sentMsgCount");
-				setYAxis("Messages Sent", "");
+				setYAxis("Rate of Messages Sent", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
 			}else if(cb == sentBytes){
 				//System.out.println("bytes");
-				setDataSource("Total Bytes Sent", sentByteCount, this);
+				setDataSource("Rate of Bytes Sent", sentByteCount, this);
 				setPopupText("sentByteCount");
-				setYAxis("Bytes Sent", "bytes");
+				setYAxis("Rate of Bytes Sent", "bytes");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
 			}else if(cb == receivedMsgs){
-				setDataSource("Total #Msgs Received", receivedMsgCount, this);
+				setDataSource("Rate of Msgs Received", receivedMsgCount, this);
 				setPopupText("receivedMsgCount");
-				setYAxis("Messages Received", "");
+				setYAxis("Rate of Messages Received", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
 			}else if(cb == receivedBytes){
-				setDataSource("Total Bytes Received", 
+				setDataSource("Rate of Bytes Received", 
 						receivedByteCount, this);
 				setPopupText("receivedByteCount");
-				setYAxis("Bytes Received", "");
+				setYAxis("Rate of Bytes Received", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
 			}else if(cb == recvExclusive){
-				setDataSource("#Msgs Received Externally", 
+				setDataSource("Rate of Msgs Received Externally", 
 						exclusiveRecv, this);
 				setPopupText("exclusiveRecv");
-				setYAxis("Messages Received Externally", "");
+				setYAxis("Rate of Messages Received Externally", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
 			} else if(cb == recvExclusiveBytes){
-				setDataSource("Bytes Received Externally", 
+				setDataSource("Rate of Bytes Received Externally", 
 						exclusiveBytesRecv, this);
 				setPopupText("exclusiveBytesRecv");
-				setYAxis("Bytes Received Externally", "");
+				setYAxis("Rate of Bytes Received Externally", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
-			}else if (cb == hopCountCB) {
+			} else if (cb == hopCountCB) {
 				if (avgHopCount == null) {
 					avgHopCount = averageHops(hopCount, receivedMsgCount);
 				}
@@ -155,7 +169,7 @@ implements ItemListener, ActionListener, Clickable
 				setYAxis("Average Message Hop Counts", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
-			}else if (cb == peHopCountCB) {
+			} else if (cb == peHopCountCB) {
 				if (avgPeHopCount == null) {
 					avgPeHopCount = averagePEHops(hopCount, receivedMsgCount);
 				}
@@ -165,9 +179,36 @@ implements ItemListener, ActionListener, Clickable
 				setYAxis("Average Message Hop Counts (by PE)", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
+			} else if (cb == microseconds) {
+				scaleHistogramData(1.0);
+				super.refreshGraph();
+			} else if (cb == milliseconds) {
+				scaleHistogramData(1000.0);
+				super.refreshGraph();
+			} else if (cb == seconds) {
+				scaleHistogramData(1000000.0);
+				super.refreshGraph();
 			}
 			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
+	}
+
+	private void scaleHistogramData(double newUnit) {
+		double scale = newUnit / unitTime;
+		for (int pIdx = 0; pIdx < sentMsgCount.length; pIdx++) {
+			for (int ep = 0; ep < sentMsgCount[pIdx].length; ep++) {
+				sentMsgCount[pIdx][ep] *= scale;
+				sentByteCount[pIdx][ep] *= scale;
+				receivedMsgCount[pIdx][ep] *= scale;
+				receivedByteCount[pIdx][ep] *= scale;
+				exclusiveRecv[pIdx][ep] *= scale;
+				exclusiveBytesRecv[pIdx][ep] *= scale;
+			}
+		}
+		unitTime = newUnit;
+        if (unitTime == 1.0) unitTimeStr = "us";
+        else if (unitTime == 1000.0) unitTimeStr = "ms";
+        else unitTimeStr = "s";
 	}
 
 	private void setPopupText(String input){
@@ -188,31 +229,52 @@ implements ItemListener, ActionListener, Clickable
 
 		if(currentArrayName.equals("sentMsgCount")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Count = " + sentMsgCount[xVal][yVal];
+			rString[2] = String.format("Rate = %s messages/%s (%s messages)",
+			 	_format.format(sentMsgCount[xVal][yVal]),
+				unitTimeStr,
+			 	_format.format(sentMsgCount[xVal][yVal] * timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if(currentArrayName.equals("sentByteCount")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Bytes = " + sentByteCount[xVal][yVal];
+			rString[2] = String.format("Rate = %s B/%s (%s bytes)",
+				_format.format(sentByteCount[xVal][yVal]),
+				unitTimeStr,
+				_format.format(sentByteCount[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if(currentArrayName.equals("receivedMsgCount")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Count = " + receivedMsgCount[xVal][yVal];
+			rString[2] = String.format("Rate = %s messages/%s (%s messages)",
+				_format.format(receivedMsgCount[xVal][yVal]),
+				unitTimeStr,
+				_format.format(receivedMsgCount[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if(currentArrayName.equals("receivedByteCount")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Count = " + receivedByteCount[xVal][yVal];
+			rString[2] = String.format("Rate = %s B/%s (%s bytes)",
+				_format.format(receivedByteCount[xVal][yVal]),
+				unitTimeStr,
+				_format.format(receivedByteCount[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if(currentArrayName.equals("exclusiveRecv")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Count = " + exclusiveRecv[xVal][yVal];
+			rString[2] = String.format("Rate = %s messages/%s (%s messages)",
+				_format.format(exclusiveRecv[xVal][yVal]),
+				unitTimeStr,
+				_format.format(exclusiveRecv[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if(currentArrayName.equals("exclusiveBytesRecv")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Bytes = " + exclusiveBytesRecv[xVal][yVal];
+			rString[2] = String.format("Rate = %s B/%s (%s bytes)",
+				_format.format(exclusiveBytesRecv[xVal][yVal]),
+				unitTimeStr,
+				_format.format(exclusiveBytesRecv[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if (currentArrayName.equals("avgHopCount")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
-			rString[2] = "Count = " + avgHopCount[xVal][yVal];
+			rString[2] = String.format("Rate = %s hops/%s (%s hops)",
+				_format.format(avgHopCount[xVal][yVal]),
+				unitTimeStr,
+				_format.format(avgHopCount[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if (currentArrayName.equals("avgPeHopCount")) {
 			rString[1] = "Count = " + avgPeHopCount[xVal][yVal];
@@ -248,6 +310,7 @@ implements ItemListener, ActionListener, Clickable
 
 		graphPanel = getMainPanel();
 		checkBoxPanel = new JPanel();
+		unitPanel = new JPanel();
 		if (MainWindow.BLUEGENE) {
 			blueGenePanel = new JPanel();
 		}
@@ -293,11 +356,27 @@ implements ItemListener, ActionListener, Clickable
 			Util.gblAdd(blueGenePanel, peHopCountCB, gbc, 1,0, 1,1, 1,1);
 		}
 
+		CheckboxGroup unit_cbg = new CheckboxGroup();
+		microseconds = new Checkbox("Microseconds", unit_cbg, false);
+		milliseconds = new Checkbox("Milliseconds", unit_cbg, true);
+		seconds = new Checkbox("Seconds", unit_cbg, false);
+
+		microseconds.addItemListener(this);
+		milliseconds.addItemListener(this);
+		seconds.addItemListener(this);
+
+		Util.gblAdd(unitPanel, microseconds, gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(unitPanel, milliseconds, gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(unitPanel, seconds, gbc, 2,0, 1,1, 1,1);
+
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, checkBoxPanel, gbc, 0,2, 1,1, 0,0);
 
 		if (MainWindow.BLUEGENE) {
 			Util.gblAdd(mainPanel, blueGenePanel, gbc, 0,3, 1,1, 0,0);
+			Util.gblAdd(mainPanel, unitPanel, gbc, 0,4, 1,1, 0,0);
+		} else {
+			Util.gblAdd(mainPanel, unitPanel, gbc, 0,3, 1,1, 0,0);
 		}
 	}
 
@@ -322,6 +401,7 @@ implements ItemListener, ActionListener, Clickable
 					return null;
 				}
 				public void done() {
+					sentMsgs.setState(true);
 					setDataSource("Communications", sentMsgCount, thisWindow);
 					setPopupText("sentMsgCount");
 					setYAxis("Messages Sent", "");
@@ -347,6 +427,8 @@ implements ItemListener, ActionListener, Clickable
 		} else {
 			hopCount = null;
 		}
+
+		this.timeInterval = endTime - startTime;
 
 		histogram = new ArrayList<Integer>();
 		

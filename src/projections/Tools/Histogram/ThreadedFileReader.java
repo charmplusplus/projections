@@ -298,7 +298,7 @@ class ThreadedFileReader implements Runnable  {
                             				countData[HistogramWindow.TYPE_ACCTIME][targetBin][numEPs-1] += executionTime;
 						}
                         			_sun_execution_time[logdata.entry] += executionTime;
-                        			System.out.println("idle time is " + executionTime );
+                        			//System.out.println("idle time is " + executionTime );
 						//now consider idle percentage calculations
 						if (idleStart <= startTime)//beginIdle <= startTime <= endIdle <= endTime
 						{
@@ -462,7 +462,20 @@ class ThreadedFileReader implements Runnable  {
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
 	    
-		
+	    // divide the TYPE_TIME and TYPE_MSG_SIZE counts by the length of the specified time interval
+	    // to obtain the # occurences per unit time (right now is millisecond)
+	    double interval = (endTime-startTime)/1000.0;
+	    for (int bin = 0; bin < timeNumBins+1; bin++) {
+	    	for (int ep = 0; ep < numEPs; ep++) {
+	    		countData[HistogramWindow.TYPE_TIME][bin][ep] /= interval;
+	    	}
+	    }
+	    for (int bin = 0; bin < msgNumBins+1; bin++) {
+	    	for (int ep = 0; ep < numEPs; ep++) {
+	    		countData[HistogramWindow.TYPE_MSG_SIZE][bin][ep] /= interval;
+	    	}
+	    }
+
 		return countData;
 	}
 
@@ -537,7 +550,7 @@ class ThreadedFileReader implements Runnable  {
                         			if(_sun_execution_time[2][numEPs-1] > executionTime)
                             			_sun_execution_time[2][numEPs-1] = executionTime;
                         			_sun_execution_time[3][numEPs-1]++;
-                        			System.out.println("idle time is " + executionTime );
+                        			//System.out.println("idle time is " + executionTime );
                     			}
                     			prevIdleBegin = null;
 					break;

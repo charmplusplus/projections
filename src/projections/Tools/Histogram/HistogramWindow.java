@@ -97,9 +97,9 @@ implements ActionListener, EntryMethodVisibility
 	private long idleBinSize;
 	private long idleMinBinSize;
 
-    private double unitTime = 1000.0;
-    private double timeInterval;
-    private String unitTimeStr = "ms";
+	private double unitTime = 1000.0;
+	private double timeInterval;
+	private String unitTimeStr = "ms";
 
         private HistogramWindow thisWindow;
 
@@ -134,7 +134,6 @@ implements ActionListener, EntryMethodVisibility
                 });
                 getContentPane().add(getMainPanel());
 
-
                 pack();
                 showDialog();
         }
@@ -163,7 +162,7 @@ implements ActionListener, EntryMethodVisibility
                         final SwingWorker worker = new SwingWorker()
                         {
                                 public Object doInBackground()
-			                    {
+				{
                                         timeNumBins = binpanel.getTimeNumBins();
                                         timeBinSize = binpanel.getTimeBinSize();
                                         timeMinBinSize = binpanel.getTimeMinBinSize();
@@ -286,7 +285,7 @@ implements ActionListener, EntryMethodVisibility
     	{
         	for(int i=0; i<HistogramWindow.NUM_TYPES; i++)
         	{
-                int bound = counts[i].length;
+			int bound = counts[i].length;
             		for(int j=0; j<bound; j++)
             		{
                 		for(int m=0; m<numEPs; m++)
@@ -306,121 +305,121 @@ implements ActionListener, EntryMethodVisibility
 
         public void actionPerformed(ActionEvent e)
         {
-            if (e.getSource() instanceof JMenuItem)
-            {
-                JMenuItem m = (JMenuItem)e.getSource();
-                if(m.getText().equals("Set Range"))
-                {
-                    showDialog();
-                }                        
-    			else if(m.getText().equals("Close"))
-    			{
-                    close();
-    			}
-            }
-    		else if (e.getSource()  == timeBinButton)
-    		{
-                binType = TYPE_TIME;
-                setGraphSpecificData();
-                refreshGraph();
-            }
-    		else if(e.getSource() == timeAccumulateBinButton)
-    		{
+                if (e.getSource() instanceof JMenuItem)
+		{
+                        JMenuItem m = (JMenuItem)e.getSource();
+                        if(m.getText().equals("Set Range"))
+			{
+                                showDialog();
+			}                        
+			else if(m.getText().equals("Close"))
+			{
+                                close();
+			}
+                }
+		else if (e.getSource()  == timeBinButton)
+		{
+                        binType = TYPE_TIME;
+                        setGraphSpecificData();
+                        refreshGraph();
+                }
+		else if(e.getSource() == timeAccumulateBinButton)
+		{
  		        binType = TYPE_ACCTIME;
-                setGraphSpecificData();
-                refreshGraph();
+                        setGraphSpecificData();
+                        refreshGraph();
         	}
-    		else if (e.getSource()  ==  msgSizeBinButton)
-    		{
-                binType = TYPE_MSG_SIZE;
-                setGraphSpecificData();
-                refreshGraph();
-            } 
-    		else if (e.getSource() == idleButton)
-    		{
-    			binType = TYPE_IDLE_PERC;
-    			setGraphSpecificData();
-    			refreshGraph();
-    		}
-    		  else if (e.getSource() == entrySelectionButton)
-    		{
-                System.out.println("selecting entries for display");
-            }
-    		else if (e.getSource() == epTableButton)
-    		{
-                System.out.println("Showing out of range entries");
-            }
-            else if(e.getSource() == allEntriesButton)
+		else if (e.getSource()  ==  msgSizeBinButton)
+		{
+                        binType = TYPE_MSG_SIZE;
+                        setGraphSpecificData();
+                        refreshGraph();
+                }
+		else if (e.getSource() == idleButton)
+		{
+			binType = TYPE_IDLE_PERC;
+			setGraphSpecificData();
+			refreshGraph();
+		}
+		  else if (e.getSource() == entrySelectionButton)
+		{
+                        System.out.println("selecting entries for display");
+                }
+		else if (e.getSource() == epTableButton)
+		{
+                        System.out.println("Showing out of range entries");
+                }
+		else if(e.getSource() == allEntriesButton)
         	{
-        		System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_ALL_ENTRIES);
-        		if(entryDisplayType != TYPE_ALL_ENTRIES)
-        		{
-            		entryDisplayType = TYPE_ALL_ENTRIES;
-            		for(int m=0; m<numEPs; m++)
+            		System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_ALL_ENTRIES);
+            		if(entryDisplayType != TYPE_ALL_ENTRIES)
             		{
-                			display_mask[m] = true;
+                		entryDisplayType = TYPE_ALL_ENTRIES;
+                		for(int m=0; m<numEPs; m++)
+                		{
+                    			display_mask[m] = true;
+                		}
+                		calcDisplayData();
             		}
-            		calcDisplayData();
-        		}
-        		setGraphSpecificData();
-        		refreshGraph();
-    		}
-    		else if (e.getSource() ==  chooseEntriesButton)
+            		setGraphSpecificData();
+            		refreshGraph();
+		}
+		else if (e.getSource() ==  chooseEntriesButton)
         	{
         		entryDisplayType = TYPE_CHOOSE_ENTRIES;
         		setGraphSpecificData();
         		refreshGraph();
         	}
-            else if(e.getSource() == longestEntryButton)
+		else if(e.getSource() == longestEntryButton)
         	{
-            	System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_LONGEST_ENTRIES);
-        		if(entryDisplayType != TYPE_LONGEST_ENTRIES)
-        		{
-            		entryDisplayType = TYPE_LONGEST_ENTRIES;
-            		for(int m=0; m<numEPs; m++)
+                	System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_LONGEST_ENTRIES);
+            		if(entryDisplayType != TYPE_LONGEST_ENTRIES)
             		{
-                			display_mask[m] = false;
+                		entryDisplayType = TYPE_LONGEST_ENTRIES;
+                		for(int m=0; m<numEPs; m++)
+                		{
+                    			display_mask[m] = false;
+                		}
+                		display_mask[maxAccEntryIndex] = true;
+                		calcDisplayData();
             		}
-            		display_mask[maxAccEntryIndex] = true;
-            		calcDisplayData();
-        		}
-        		setGraphSpecificData();
-        		refreshGraph();
+            		setGraphSpecificData();
+            		refreshGraph();
         	}
-            else if (e.getSource() == microseconds) {
-                scaleHistogramData(1.0);
-                setGraphSpecificData();
-                refreshGraph();
-            }
-            else if (e.getSource() == milliseconds) {
-                scaleHistogramData(1000.0);
-                setGraphSpecificData();
-                refreshGraph();
-            }
-            else if (e.getSource() == seconds) {
-                scaleHistogramData(1000000.0);
-                setGraphSpecificData();
-                refreshGraph();
-            }
-        }
+		else if (e.getSource() == microseconds) {
+			scaleHistogramData(1.0);
+			setGraphSpecificData();
+			refreshGraph();
+		}
+		else if (e.getSource() == milliseconds) {
+			scaleHistogramData(1000.0);
+			setGraphSpecificData();
+			refreshGraph();
+		}
+		else if (e.getSource() == seconds) {
+			scaleHistogramData(1000000.0);
+			setGraphSpecificData();
+			refreshGraph();
+		}
+	}
 
-        private void scaleHistogramData(double newUnit) {
-            double scale = newUnit / unitTime;
-            for (int bin = 0; bin < timeNumBins+1; bin++) {
-                for (int ep = 0; ep < numEPs; ep++) {
-                    counts_display[TYPE_TIME][bin][ep] *= scale;
-                }
-            }
-            for (int bin = 0; bin < msgNumBins+1; bin++) {
-                for (int ep = 0; ep < numEPs; ep++) {
-                    counts_display[TYPE_MSG_SIZE][bin][ep] *= scale;
-                }
-            }
-            unitTime = newUnit;
-            if (unitTime == 1.0) unitTimeStr = "us";
-            else if (unitTime == 1000.0) unitTimeStr = "ms";
-            else unitTimeStr = "s";
-        }
+	private void scaleHistogramData(double newUnit) {
+		double scale = newUnit / unitTime;
+		for (int bin = 0; bin < timeNumBins; bin++) {
+			for (int ep = 0; ep < numEPs; ep++) {
+				counts_display[TYPE_TIME][bin][ep] *= scale;
+			}
+		}
+		for (int bin = 0; bin < msgNumBins; bin++) {
+			for (int ep = 0; ep < numEPs; ep++) {
+				counts_display[TYPE_MSG_SIZE][bin][ep] *= scale;
+			}
+		}
+		unitTime = newUnit;
+		if (unitTime == 1.0) unitTimeStr = "us";
+		else if (unitTime == 1000.0) unitTimeStr = "ms";
+		else unitTimeStr = "s";
+	}
 
         protected JPanel getMainPanel()
         {
@@ -596,7 +595,7 @@ implements ActionListener, EntryMethodVisibility
 		{
                         bubbleText[4] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
                         " to " + U.humanReadableString((xVal+1)*timeBinSize+timeMinBinSize);
-                } 
+                }
 		else
 		{
                         bubbleText[4] = "Bin: > " + U.humanReadableString(timeNumBins*timeBinSize+

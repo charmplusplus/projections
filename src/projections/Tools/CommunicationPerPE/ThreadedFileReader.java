@@ -77,7 +77,6 @@ class ThreadedFileReader implements Runnable  {
 				}
 			}
 
-
 			LogEntryData logdata = reader.nextEventOnOrAfter(startTime);
 			// we'll just use the EndOfLogException to break us out of
 			// this loop :)
@@ -137,8 +136,19 @@ class ThreadedFileReader implements Runnable  {
 				}
 				logdata = reader.nextEvent();
 			}
+			/**/
 		} catch (EndOfLogSuccess e) {
-			// Successfully reached end of log file
+			// Successfully reached end of log file, divide counts by the time interval to compute rates
+			double timeInterval = (endTime - startTime)/1000.0;
+
+			for (int ep = 0; ep < numEPs; ep++) {
+				sentMsgCount[pIdx][ep] /= timeInterval;
+				sentByteCount[pIdx][ep] /= timeInterval;
+				receivedMsgCount[pIdx][ep] /= timeInterval;
+				receivedByteCount[pIdx][ep] /= timeInterval;
+				exclusiveRecv[pIdx][ep] /= timeInterval;
+				exclusiveBytesRecv[pIdx][ep] /= timeInterval;
+			}
 		} catch (IOException e) {
 			System.out.println("Exception: " +e);
 			e.printStackTrace();

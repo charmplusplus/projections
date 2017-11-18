@@ -140,6 +140,24 @@ class ThreadedFileReader implements Runnable  {
 
 		} catch (EndOfLogSuccess e) {
 			// Successfully reached end of log file
+			
+			double intervalSizeMs = intervalSize/1000.0;
+			// Calculate the rate using milliseconds
+			for (int interval = 0; interval < numIntervals; interval++) {
+				for (int ep = 0; ep < numEPs; ep++) {
+					localMessagesSend[interval][ep] /= intervalSizeMs;
+					localMessagesRecv[interval][ep] /= intervalSizeMs;
+
+					localBytesSend[interval][ep] /= intervalSizeMs;
+					localBytesRecv[interval][ep] /= intervalSizeMs;
+
+					localExternalMessageRecv[interval][ep] /= intervalSizeMs;
+					localExternalBytesRecv[interval][ep] /= intervalSizeMs;
+
+					localExternalNodeMessageRecv[interval][ep] /= intervalSizeMs;
+					localExternalNodeBytesRecv[interval][ep] /= intervalSizeMs;
+				}
+			}
 		} catch (java.io.IOException e) {
 			System.out.println("Exception: " +e);
 			e.printStackTrace();

@@ -66,6 +66,10 @@ implements ActionListener, EntryMethodVisibility
     	private JRadioButton   chooseEntriesButton;
     	private JRadioButton   longestEntryButton;
 
+        private JRadioButton microseconds;
+        private JRadioButton milliseconds;
+        private JRadioButton seconds;
+
     	private ButtonGroup entryTypeGroup;
 
         private BinDialogPanel binpanel;
@@ -93,6 +97,10 @@ implements ActionListener, EntryMethodVisibility
 	private long idleBinSize;
 	private long idleMinBinSize;
 
+    private double unitTime = 1000.0;
+    private double timeInterval;
+    private String unitTimeStr = "ms";
+
         private HistogramWindow thisWindow;
 
         private DecimalFormat _format;
@@ -112,7 +120,7 @@ implements ActionListener, EntryMethodVisibility
 
                 binType = TYPE_TIME;
                 entryDisplayType = TYPE_ALL_ENTRIES;
-        	_format = new DecimalFormat();
+                _format = new DecimalFormat();
 
                 setTitle("Projections Histograms - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
@@ -125,6 +133,7 @@ implements ActionListener, EntryMethodVisibility
                         }
                 });
                 getContentPane().add(getMainPanel());
+
 
                 pack();
                 showDialog();
@@ -149,11 +158,12 @@ implements ActionListener, EntryMethodVisibility
 
                 dialog.displayDialog();
                 if (!dialog.isCancelled())
-		{
+                {
+                        timeInterval = dialog.getEndTime() - dialog.getStartTime();
                         final SwingWorker worker = new SwingWorker()
-			{
+                        {
                                 public Object doInBackground()
-				{
+			                    {
                                         timeNumBins = binpanel.getTimeNumBins();
                                         timeBinSize = binpanel.getTimeBinSize();
                                         timeMinBinSize = binpanel.getTimeMinBinSize();
@@ -273,7 +283,7 @@ implements ActionListener, EntryMethodVisibility
     	{
         	for(int i=0; i<HistogramWindow.NUM_TYPES; i++)
         	{
-			int bound = counts[i].length;
+                int bound = counts[i].length;
             		for(int j=0; j<bound; j++)
             		{
                 		for(int m=0; m<numEPs; m++)
@@ -293,89 +303,121 @@ implements ActionListener, EntryMethodVisibility
 
         public void actionPerformed(ActionEvent e)
         {
-                if (e.getSource() instanceof JMenuItem)
-		{
-                        JMenuItem m = (JMenuItem)e.getSource();
-                        if(m.getText().equals("Set Range"))
-			{
-                                showDialog();
-			}                        
-			else if(m.getText().equals("Close"))
-			{
-                                close();
-			}
-                }
-		else if (e.getSource()  == timeBinButton)
-		{
-                        binType = TYPE_TIME;
-                        setGraphSpecificData();
-                        refreshGraph();
-                }
-		else if(e.getSource() == timeAccumulateBinButton)
-		{
+            if (e.getSource() instanceof JMenuItem)
+            {
+                JMenuItem m = (JMenuItem)e.getSource();
+                if(m.getText().equals("Set Range"))
+                {
+                    showDialog();
+                }                        
+    			else if(m.getText().equals("Close"))
+    			{
+                    close();
+    			}
+            }
+    		else if (e.getSource()  == timeBinButton)
+    		{
+                binType = TYPE_TIME;
+                setGraphSpecificData();
+                refreshGraph();
+            }
+    		else if(e.getSource() == timeAccumulateBinButton)
+    		{
  		        binType = TYPE_ACCTIME;
-                        setGraphSpecificData();
-                        refreshGraph();
+                setGraphSpecificData();
+                refreshGraph();
         	}
-		else if (e.getSource()  ==  msgSizeBinButton)
-		{
-                        binType = TYPE_MSG_SIZE;
-                        setGraphSpecificData();
-                        refreshGraph();
-                } 
-		else if (e.getSource() == idleButton)
-		{
-			binType = TYPE_IDLE_PERC;
-			setGraphSpecificData();
-			refreshGraph();
-		}
-		  else if (e.getSource() == entrySelectionButton)
-		{
-                        System.out.println("selecting entries for display");
-                }
-		else if (e.getSource() == epTableButton)
-		{
-                        System.out.println("Showing out of range entries");
-                }
-		else if(e.getSource() == allEntriesButton)
+    		else if (e.getSource()  ==  msgSizeBinButton)
+    		{
+                binType = TYPE_MSG_SIZE;
+                setGraphSpecificData();
+                refreshGraph();
+            } 
+    		else if (e.getSource() == idleButton)
+    		{
+    			binType = TYPE_IDLE_PERC;
+    			setGraphSpecificData();
+    			refreshGraph();
+    		}
+    		  else if (e.getSource() == entrySelectionButton)
+    		{
+                System.out.println("selecting entries for display");
+            }
+    		else if (e.getSource() == epTableButton)
+    		{
+                System.out.println("Showing out of range entries");
+            }
+            else if(e.getSource() == allEntriesButton)
         	{
-            		System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_ALL_ENTRIES);
-            		if(entryDisplayType != TYPE_ALL_ENTRIES)
+        		System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_ALL_ENTRIES);
+        		if(entryDisplayType != TYPE_ALL_ENTRIES)
+        		{
+            		entryDisplayType = TYPE_ALL_ENTRIES;
+            		for(int m=0; m<numEPs; m++)
             		{
-                		entryDisplayType = TYPE_ALL_ENTRIES;
-                		for(int m=0; m<numEPs; m++)
-                		{
-                    			display_mask[m] = true;
-                		}
-                		calcDisplayData();
+                			display_mask[m] = true;
             		}
-            		setGraphSpecificData();
-            		refreshGraph();
-		}
-		else if (e.getSource() ==  chooseEntriesButton)
+            		calcDisplayData();
+        		}
+        		setGraphSpecificData();
+        		refreshGraph();
+    		}
+    		else if (e.getSource() ==  chooseEntriesButton)
         	{
-            		entryDisplayType = TYPE_CHOOSE_ENTRIES;
-            		setGraphSpecificData();
-            		refreshGraph();
+        		entryDisplayType = TYPE_CHOOSE_ENTRIES;
+        		setGraphSpecificData();
+        		refreshGraph();
         	}
-		else if(e.getSource() == longestEntryButton)
+            else if(e.getSource() == longestEntryButton)
         	{
-                	System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_LONGEST_ENTRIES);
-            		if(entryDisplayType != TYPE_LONGEST_ENTRIES)
+            	System.out.println("Before in type"+entryDisplayType + "Switching to" + TYPE_LONGEST_ENTRIES);
+        		if(entryDisplayType != TYPE_LONGEST_ENTRIES)
+        		{
+            		entryDisplayType = TYPE_LONGEST_ENTRIES;
+            		for(int m=0; m<numEPs; m++)
             		{
-                		entryDisplayType = TYPE_LONGEST_ENTRIES;
-                		for(int m=0; m<numEPs; m++)
-                		{
-                    			display_mask[m] = false;
-                		}
-                		display_mask[maxAccEntryIndex] = true;
-                		calcDisplayData();
+                			display_mask[m] = false;
             		}
-            		setGraphSpecificData();
-            		refreshGraph();
+            		display_mask[maxAccEntryIndex] = true;
+            		calcDisplayData();
+        		}
+        		setGraphSpecificData();
+        		refreshGraph();
         	}
+            else if (e.getSource() == microseconds) {
+                scaleHistogramData(1.0);
+                setGraphSpecificData();
+                refreshGraph();
+            }
+            else if (e.getSource() == milliseconds) {
+                scaleHistogramData(1000.0);
+                setGraphSpecificData();
+                refreshGraph();
+            }
+            else if (e.getSource() == seconds) {
+                scaleHistogramData(1000000.0);
+                setGraphSpecificData();
+                refreshGraph();
+            }
         }
 
+        private void scaleHistogramData(double newUnit) {
+            double scale = newUnit / unitTime;
+            for (int bin = 0; bin < timeNumBins; bin++) {
+                for (int ep = 0; ep < numEPs; ep++) {
+                    counts_display[TYPE_TIME][bin][ep] *= scale;
+                }
+            }
+            for (int bin = 0; bin < msgNumBins; bin++) {
+                for (int ep = 0; ep < numEPs; ep++) {
+                    counts_display[TYPE_MSG_SIZE][bin][ep] *= scale;
+                }
+            }
+            unitTime = newUnit;
+            if (unitTime == 1.0) unitTimeStr = "us";
+            else if (unitTime == 1000.0) unitTimeStr = "ms";
+            else unitTimeStr = "s";
+        }
 
         protected JPanel getMainPanel()
         {
@@ -447,8 +489,28 @@ implements ActionListener, EntryMethodVisibility
         	//buttonPanel.add(entrySelectionButton);
 		//buttonPanel.add(epTableButton);
 
+            ButtonGroup unit_bg = new ButtonGroup();
+            microseconds = new JRadioButton("Microseconds", false);
+            milliseconds = new JRadioButton("Milliseconds", true);
+            seconds = new JRadioButton("Seconds", false);
+
+            microseconds.addActionListener(this);
+            milliseconds.addActionListener(this);
+            seconds.addActionListener(this);
+
+            unit_bg.add(microseconds);
+            unit_bg.add(milliseconds);
+            unit_bg.add(seconds);
+
+            JPanel unitPanel = new JPanel();
+            unitPanel.setLayout(gbl);
+            unitPanel.add(microseconds);
+            unitPanel.add(milliseconds);
+            unitPanel.add(seconds);
+
                 Util.gblAdd(mainPanel, graphPanel,  gbc, 0,0, 1,1, 1,1);
                 Util.gblAdd(mainPanel, buttonPanel, gbc, 0,1, 1,1, 0,0);
+                Util.gblAdd(mainPanel, unitPanel,   gbc, 0,2, 1,1, 1,1);
 
                 return mainPanel;
         }
@@ -458,7 +520,7 @@ implements ActionListener, EntryMethodVisibility
                 if (binType == TYPE_TIME)
 		{
                         setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
-                        setYAxis("Number of Occurrences", "");
+                        setYAxis("Number of Occurrences/" + unitTimeStr, "");
                         setDataSource("Histogram", counts_display[TYPE_TIME], thisWindow);
                         for(int i=0; i<timeNumBins+1; i++)
                         {
@@ -478,7 +540,7 @@ implements ActionListener, EntryMethodVisibility
 		else if (binType == TYPE_MSG_SIZE)
 		{
                         setXAxis("Message Size (at " +  _format.format(msgBinSize) + " byte resolution)",  "", msgMinBinSize, msgBinSize);
-                        setYAxis("Number of Occurrences", "");
+                        setYAxis("Number of Occurrences/" + unitTimeStr + ")", "");
                         setDataSource("Histogram", counts_display[TYPE_MSG_SIZE], thisWindow);
                 }
 		else if (binType == TYPE_IDLE_PERC)
@@ -521,9 +583,12 @@ implements ActionListener, EntryMethodVisibility
         	String bubbleText[] = new String[5];
 
                 bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-                bubbleText[1] = "Count: " + counts_display[TYPE_TIME][xVal][yVal];
-                bubbleText[2] = "Time:"+counts_display[TYPE_ACCTIME][xVal][yVal];
-                bubbleText[3] = "Time Percentage:"+(df.format((counts_display[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
+                bubbleText[1] = String.format("Rate = %s occurences/%s (%s occurences)",
+                    _format.format(counts_display[TYPE_TIME][xVal][yVal]),
+                    unitTimeStr,
+                    _format.format(counts_display[TYPE_TIME][xVal][yVal] * timeInterval/unitTime));
+                bubbleText[2] = "Time: "+counts_display[TYPE_ACCTIME][xVal][yVal];
+                bubbleText[3] = "Time Percentage: "+(df.format((counts_display[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
                 if (xVal < timeNumBins)
 		{
                         bubbleText[4] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
@@ -544,8 +609,8 @@ implements ActionListener, EntryMethodVisibility
 
                 bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
                 bubbleText[1] = "Time: " + counts_display[TYPE_ACCTIME][xVal][yVal];
-                bubbleText[2] = "Count:"+counts_display[TYPE_TIME][xVal][yVal];
-                bubbleText[3] = "Time Percentage:"+(df.format((counts_display[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
+                bubbleText[2] = "Count: " + counts_display[TYPE_TIME][xVal][yVal] * timeInterval/unitTime;
+                bubbleText[3] = "Time Percentage: "+(df.format((counts_display[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
                 if (xVal < timeNumBins)
 		{
                         bubbleText[4] = "Bin: " + U.humanReadableString(xVal*timeBinSize+timeMinBinSize) +
@@ -564,7 +629,10 @@ implements ActionListener, EntryMethodVisibility
                 String bubbleText[] = new String[3];
 
                 bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-                bubbleText[1] = "Count: " + counts_display[TYPE_MSG_SIZE][xVal][yVal];
+                bubbleText[1] = String.format("Rate: %s messages/%s (%s messages)",
+                    _format.format(counts_display[TYPE_MSG_SIZE][xVal][yVal]),
+                    unitTimeStr,
+                    _format.format(counts_display[TYPE_MSG_SIZE][xVal][yVal] * timeInterval/unitTime));
                 if (xVal < msgNumBins)
 		{
                         bubbleText[2] = "Bin: " +

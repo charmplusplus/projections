@@ -413,6 +413,10 @@ implements ItemListener, ActionListener
 					return null;
 				}
 				public void done() {
+					milliseconds.setState(true);
+					unitTime = 1000.0;
+					unitTimeStr = "ms";
+
 					setOutputGraphData();
 					Checkbox cb = cbg.getSelectedCheckbox();
 					setCheckboxData(cb);

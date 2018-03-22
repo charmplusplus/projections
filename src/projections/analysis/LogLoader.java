@@ -653,6 +653,8 @@ public class LogLoader extends ProjDefs
 		PackTime          PT          = null;
 		boolean tempte;
 
+		ArrayList<UserEventObject> userEventPairStarts = new ArrayList<UserEventObject>();
+
 		// See if we need to use some predefined offsets to adjust the times read from the file:
 		long shiftAmount = MainWindow.runObject[myRun].tachyonShifts.getShiftAmount(pe);
 		
@@ -1172,6 +1174,33 @@ public class LogLoader extends ProjDefs
 								}
 								//System.out.println("Encountering user name: "+userEvent.Name);
 
+							}
+						}
+						break;
+					case BEGIN_USER_EVENT_PAIR:
+						final UserEventObject temp = new UserEventObject(pe, LE.Time - BeginTime,
+								LE.Entry, LE.EventID,
+								UserEventObject.Type.PAIR, LE.nestedID);
+						userEventPairStarts.add(temp);
+						break;
+					case END_USER_EVENT_PAIR:
+						for (int i = 0; i < userEventPairStarts.size(); ++i) {
+							final UserEventObject candidate = userEventPairStarts.get(i);
+							if (candidate.userEventID == LE.Entry &&
+									candidate.getNestedID() == LE.nestedID &&
+									candidate.beginTime <= LE.Time - BeginTime) {
+								userEventPairStarts.remove(i);
+								candidate.endTime = LE.Time - BeginTime;
+								userEventVector.add(candidate);
+								if (!timeline.isEmpty()) {
+									TimelineEvent curLastOne = timeline.getLast();
+									long tleBeginTime = curLastOne.BeginTime;
+									if (tleBeginTime <= candidate.beginTime &&
+											candidate.beginTime - tleBeginTime <= TimelineEvent.USEREVENTMAXGAP) {
+										curLastOne.userEventName = candidate.getName();
+									}
+								}
+								break;
 							}
 						}
 						break;

@@ -446,6 +446,15 @@ implements PointCapableReader
 			if (sc.hasNextField())
 				data.nestedID = (int) sc.nextLong();
 			break;
+		case BEGIN_USER_EVENT_PAIR:
+		case END_USER_EVENT_PAIR:
+			data.userEventID = (int) sc.nextLong();
+			data.entry = data.userEventID;
+			data.time = sc.nextLong() + shiftAmount;
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
+			data.nestedID = (int) sc.nextLong();
+			break;
 		case USER_STAT:
 			data.time = sc.nextLong() + shiftAmount; //Wall Time
 			data.userTime = sc.nextDouble();	//User time

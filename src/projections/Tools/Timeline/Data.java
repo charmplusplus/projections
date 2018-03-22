@@ -4,8 +4,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -923,7 +925,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 
 
-		LinkedList<TimelineEvent> tl = new LinkedList<TimelineEvent>();
+		Deque<TimelineEvent> tl = new ArrayDeque<TimelineEvent>();
 
 		/** Stores all user events from the currently loaded PE/time range. It must be sorted,
 		 *  so the nesting of bracketed user events can be efficiently processed.

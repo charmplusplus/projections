@@ -574,6 +574,12 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		synchronized(this){
 			//==========================================	
 			//  Perform some post processing
+
+			int n = determineNumNestedIDs();
+			// Only show nestedIDs if there are at least two of them
+			if (n > 0)
+				numNestedIDs = n;
+
 			for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 				entries[e] = 0;
 			}
@@ -1006,11 +1012,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 		}
-
-		int n = determineNumNestedIDs();
-		// Only show nestedIDs if there are at least two of them
-		if (n > 0)
-			numNestedIDs = n;
 
 		// Thread-safe merge of the min/max values
 		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE, minUserSuppliedThisPE, maxUserSuppliedThisPE);

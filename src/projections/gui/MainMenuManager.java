@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.Toolkit;
+
 import java.util.logging.Level;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -11,6 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
 import projections.Tools.PerformanceCounters.PerfWindow;
 import projections.Tools.TopologyDisplay.TopologyDisplayWindow;
@@ -226,9 +230,14 @@ implements ActionListener, ItemListener
 		// FILE MENU	
 		fileMenu = new JMenu("File");		
 		fileOpenMenuItem = new JMenuItem("Open File(s)");
+		fileOpenMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+			Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
 		fileCloseMenuItem= new JMenuItem("Close current data");
 		fileCloseAllMenuItem= new JMenuItem("Close all data");
 		fileQuitMenuItem= new JMenuItem("Quit");	
+		fileQuitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+			Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		fileMenu.addActionListener(this);
 		fileOpenMenuItem.addActionListener(this);

@@ -103,6 +103,9 @@ implements ScalePanel.StatusDisplay
 	{
 		mainWindow = this;
 
+		// take the menu bar off the jframe
+		System.setProperty("apple.laf.useScreenMenuBar", "true");
+
 		// Get information from ProjMain
 		CUR_VERSION = ProjMain.CUR_VERSION;
 		IGNORE_IDLE = ProjMain.IGNORE_IDLE;

@@ -133,64 +133,7 @@ implements PointCapableReader
 
 	public LogEntryData nextProcessingEvent() throws IOException, EndOfLogSuccess
 	{
-		LogEntryData data = new LogEntryData();
-
-		while (true) {
-			String line = reader.readLine();
-
-			if (line == null || endComputationOccurred) {
-				throw new EndOfLogSuccess();
-			}
-
-			AsciiLineParser sc = new AsciiLineParser(line);
-
-			data.type = (int) sc.nextLong();
-
-			switch (data.type) {
-				case BEGIN_PROCESSING:
-					data.mtype = (int) sc.nextLong();
-					data.entry = (int) sc.nextLong();
-					data.time = sc.nextLong() + shiftAmount;
-					data.event = (int) sc.nextLong();
-					data.pe = (int) sc.nextLong();
-					if (version >= 2.0) {
-						data.msglen = (int) sc.nextLong();
-					} else {
-						data.msglen = -1;
-					}
-					if (version >= 4.0) {
-						data.recvTime = sc.nextLong() + shiftAmount;
-						data.id[0] = (int) sc.nextLong();
-						data.id[1] = (int) sc.nextLong();
-						data.id[2] = (int) sc.nextLong();
-					}
-					if (version >= 7.0) {
-						data.id[3] = (int) sc.nextLong();
-					}
-					if (version >= 6.5) {
-						data.cpuStartTime = sc.nextLong() + shiftAmount;
-					}
-
-					return data;
-				case END_PROCESSING:
-					data.mtype = (int) sc.nextLong();
-					data.entry = (int) sc.nextLong();
-					data.time = sc.nextLong() + shiftAmount;
-					data.event = (int) sc.nextLong();
-					data.pe = (int) sc.nextLong();
-					if (version >= 2.0) {
-						data.msglen = (int) sc.nextLong();
-					} else {
-						data.msglen = -1;
-					}
-					if (version >= 6.5) {
-						data.cpuEndTime = sc.nextLong() + shiftAmount;
-					}
-					return data;
-				default:
-					break;
-			}
-		}
+		return nextEventOfType(BEGIN_PROCESSING, END_PROCESSING);
 	}
 	
 
@@ -498,14 +441,16 @@ implements PointCapableReader
 	/**
 	 *  Return the next log event with the given eventType.
 	 */
-	public LogEntryData nextEventOfType(int eventType) 
+	public LogEntryData nextEventOfType(int... eventTypes)
 	throws IOException, EndOfLogSuccess
 	{
-		LogEntryData data = new LogEntryData();
+		LogEntryData data;
 		while (true) {
 			data = nextEvent();
-			if (data.type == eventType) {
-				return data;
+			for (int eventType : eventTypes) {
+				if (data.type == eventType) {
+					return data;
+				}
 			}
 		}
 	}

@@ -999,6 +999,7 @@ public class LogLoader extends ProjDefs
 								TE.papiCounts[i] = LE.papiCounts[i] -
 								TE.papiCounts[i];
 							}
+							TE.compactLists();
 						}
 						TE = null;
 						isProcessing = false;

@@ -108,6 +108,12 @@ protected void addPack(PackTime p)
 	PackTimes.add(p);
 }
 
+protected void compactLists()
+{
+	if (MsgsSent != null) MsgsSent.trimToSize();
+	if (PackTimes != null) PackTimes.trimToSize();
+}
+
 @SuppressWarnings("ucd")
 public int compareTo(Object o) {
 	return MiscUtil.sign(this.BeginTime - ((TimelineEvent)o).BeginTime);

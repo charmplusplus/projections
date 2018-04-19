@@ -21,7 +21,7 @@ public class ProjMain {
     // is capable of reading. Any logs that are of a higher version
     // cannot be read and this will be indicated by an unrecoverable
     // error when attempted.
-    public static double CUR_VERSION = 8.0;
+    public static double CUR_VERSION = 9.0;
     public static boolean IGNORE_IDLE = false;
     public static boolean BLUEGENE = false;
     public static int BLUEGENE_SIZE[] = new int[3];

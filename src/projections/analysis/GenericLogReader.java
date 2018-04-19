@@ -275,12 +275,23 @@ implements PointCapableReader
 			}
 			if (version >= 4.0) {
 				lastBeginEvent.recvTime = data.recvTime = sc.nextLong() + shiftAmount;
-				lastBeginEvent.id[0] = data.id[0] = (int) sc.nextLong();
-				lastBeginEvent.id[1] = data.id[1] = (int) sc.nextLong();
-				lastBeginEvent.id[2] = data.id[2] = (int) sc.nextLong();
-			}
-			if (version >= 7.0) {
-				lastBeginEvent.id[3] = data.id[3] = (int) sc.nextLong();
+				if (version < 9.0) {
+					lastBeginEvent.id[0] = data.id[0] = (int) sc.nextLong();
+					lastBeginEvent.id[1] = data.id[1] = (int) sc.nextLong();
+					lastBeginEvent.id[2] = data.id[2] = (int) sc.nextLong();
+
+					if (version >= 7.0) {
+						lastBeginEvent.id[3] = data.id[3] = (int) sc.nextLong();
+					}
+				} else {
+					// In version 9.0 and above, IDs for chare arrays have exactly as many values as they
+					// have dimensions. So if the current event corresponds to a chare array, check how
+					// many dimensions it has and read that many values
+					int dimensions = stsinfo.getEntryChareDimensionsByID(data.entry);
+					for (int i = 0; i < dimensions; i++) {
+						lastBeginEvent.id[i] = data.id[i] = (int) sc.nextLong();
+					}
+				}
 			}
 			if (version >= 6.5) {
 				lastBeginEvent.cpuStartTime = data.cpuStartTime = sc.nextLong() + shiftAmount;

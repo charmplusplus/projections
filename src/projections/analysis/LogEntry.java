@@ -50,7 +50,7 @@ class LogEntry
 		Pe = data.pe;
 		MsgLen = data.msglen;
 		recvTime = data.recvTime;
-		id = new ObjectId(data.id[0],data.id[1],data.id[2],data.id[3]);
+		id = new ObjectId(data.id);
 		userSupplied = data.userSupplied;
 		memoryUsage = data.memoryUsage;
 		stat = data.stat;

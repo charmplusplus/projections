@@ -210,7 +210,16 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                 infoString.append("<i>Msg latency is </i>: " + latency + "<br>");
             }
             infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
-			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
+			int dimension = MainWindow.runObject[data.myRun].getSts().getEntryChareDimensionsByID(entry);
+			if (dimension < 0) {
+				infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
+			} else {
+				infoString.append("<i>Id [" + dimension + "D]</i>");
+				for (int i = 0; i < dimension; i++) {
+					infoString.append(":" + tid.id[i]);
+				}
+				infoString.append("<br>");
+			}
 			if(tleUserEventName!=null)
 				infoString.append("<i>Associated User Event</i>: "+tleUserEventName+ "<br>");
 			

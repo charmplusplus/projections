@@ -35,8 +35,24 @@ public class StsReader extends ProjDefs
     private int EntryCount;
     private int TotalMsgs;
 
+    private class Chare
+    {
+        protected String name;
+        protected int dimensions;
+
+        public Chare(String name, int dimensions) {
+            this.name = name;
+            this.dimensions = dimensions;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
     // Sts data
-    private String ClassNames[];    // indexed by chare id
+    private Chare Chares[];    // indexed by chare id
 //    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
  
@@ -52,7 +68,7 @@ public class StsReader extends ProjDefs
     /** index by Integer ID in STS file, return String name */
     private Map<Integer, String> entryNames = new TreeMap<Integer, String>();
     /** index by Integer ID in STS file, return String name */
-    public Map<Integer, String>  entryChareNames = new TreeMap<Integer, String>(); 
+    public Map<Integer, Chare> entryChares = new TreeMap<Integer, Chare>();
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
     private Map<Integer, Integer>  entryFlatToID = new TreeMap<Integer, Integer>();
     /** keys are the IDs given in STS file, values are indexes into flat arrays */
@@ -129,8 +145,7 @@ public class StsReader extends ProjDefs
  		    NumNodes = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
-//		    ChareList   = new Chare[TotalChares];
-		    ClassNames  = new String[TotalChares];
+		    Chares = new Chare[TotalChares];
 		} else if (s1.equals("TOTAL_EPS")) {
 		    EntryCount   = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("TOTAL_MSGS")) {
@@ -139,12 +154,11 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("CHARE") || Line.equals("BOC")) {
 		    ID = Integer.parseInt(st.nextToken());
 		    String name = st.nextToken();
-//		    ChareList[ID]            = new Chare();
-//		    ChareList[ID].ChareID    = ID;
-//		    ChareList[ID].NumEntries = 0;
-//		    ChareList[ID].Name       = name;
-//		    ChareList[ID].Type       = new String(s1);
-		    ClassNames[ID]      = name;
+			int dimensions = -1;
+			if (version >= 9.0) {
+				dimensions = Integer.parseInt(st.nextToken());
+			}
+			Chares[ID] = new Chare(name, dimensions);
 		} else if (s1.equals("ENTRY")) {
 			st.nextToken(); // type
 			ID      = Integer.parseInt(st.nextToken());
@@ -168,7 +182,7 @@ public class StsReader extends ProjDefs
 			entryIDToFlat.put(ID,entryIndex);
 			entryIndex++;
 			getEntryNames().put(ID,Name);
-			getEntryChareNames().put(ID,ClassNames [ChareID]);
+			getEntryChare().put(ID, Chares[ChareID]);
 		} else if (s1.equals("MESSAGE")) {
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
@@ -309,12 +323,20 @@ public class StsReader extends ProjDefs
     }
     
     private String getEntryChareNameByID(int ID) {
-    	return getEntryChareNames().get(ID);
+	return getEntryChare().get(ID).name;
     }   
     
     public String getEntryChareNameByIndex(int index) {
-    	return getEntryChareNames().get(entryFlatToID.get(index));
+	return getEntryChare().get(entryFlatToID.get(index)).name;
     }   
+
+    public int getEntryChareDimensionsByID(int ID) {
+	return getEntryChare().get(ID).dimensions;
+    }
+
+    public int getEntryChareDimensionsByIndex(int index) {
+	return getEntryChare().get(entryFlatToID.get(index)).dimensions;
+    }
 
     public String getEntryFullNameByID(int ID) {
     	return  getEntryChareNameByID(ID) + "::" + getEntryNameByID(ID);
@@ -440,22 +462,22 @@ public class StsReader extends ProjDefs
 	}
 
 
-	public Map<Integer, String>  getEntryChareNames() {
-		return entryChareNames;
+	public Map<Integer, Chare> getEntryChare() {
+		return entryChares;
 	}
 
 	
 	/** Produce a mapping from EP to a pretty version of the entry point's name */
 	public Map<Integer, String>  getPrettyEntryNames() {
 		Map<Integer, String> entryNames = getEntryNames();
-		Map<Integer, String> entryChareNames = getEntryChareNames();
+		Map<Integer, Chare> entryChareNames = getEntryChare();
 
 		TreeMap<Integer, String> result = new TreeMap<Integer, String>();
 	
 		Iterator<Integer> iter = entryNames.keySet().iterator();
 		while(iter.hasNext()){
 			Integer id = iter.next();
-			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
+			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id).name);
 		}
 		
 		return result;

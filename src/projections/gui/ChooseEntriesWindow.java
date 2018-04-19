@@ -56,7 +56,7 @@ public class ChooseEntriesWindow extends JFrame
 			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.getEntriesArray()[i]!=0)
 				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) + 
 						"::" + 
-						MainWindow.runObject[myRun].getSts().entryChareNames.get(i));
+						MainWindow.runObject[myRun].getSts().entryChares.get(i));
 		}
 		addIdleOverhead();
 	}

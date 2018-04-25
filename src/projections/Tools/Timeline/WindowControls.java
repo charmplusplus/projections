@@ -23,7 +23,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
+import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
@@ -71,7 +71,7 @@ ItemListener {
 
 	private JCheckBoxMenuItem cbTraceMessages, cbTraceMessagesForward, cbTraceCriticalPath, cbTraceArrayElementID, 
 								cbNestedUserEvents, cbTraceCriticalPathOnClick, cbTraceForwardOnClick;
-	private JRadioButton cbNormalView, cbCompactView, cbSuperCompactView;
+	private JRadioButtonMenuItem cbNormalView, cbCompactView, cbSuperCompactView;
 	
 	private UserEventWindow userEventWindow;
 
@@ -596,16 +596,16 @@ ItemListener {
 		// View Menu
 		JMenu viewMenu = new JMenu("View");
 
-		cbNormalView = new JRadioButton("Normal View");
+		cbNormalView = new JRadioButtonMenuItem("Normal View");
 		cbNormalView.addActionListener(this);
 		cbNormalView.setSelected(true);
 		viewMenu.add(cbNormalView);
 
-		cbCompactView = new JRadioButton("Compact View");
+		cbCompactView = new JRadioButtonMenuItem("Compact View");
 		cbCompactView.addActionListener(this);
 		viewMenu.add(cbCompactView);
 
-		cbSuperCompactView = new JRadioButton("Super-Compact View");
+		cbSuperCompactView = new JRadioButtonMenuItem("Super-Compact View");
 		cbSuperCompactView.addActionListener(this);
 		viewMenu.add(cbSuperCompactView);
 

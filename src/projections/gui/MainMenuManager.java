@@ -17,7 +17,6 @@ import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
 import projections.Tools.PerformanceCounters.PerfWindow;
-import projections.Tools.TopologyDisplay.TopologyDisplayWindow;
 import projections.Tools.CommunicationOverTime.CommTimeWindow;
 import projections.Tools.CommunicationPerPE.CommWindow;
 import projections.Tools.Extrema.ExtremaWindow;
@@ -99,7 +98,6 @@ implements ActionListener, ItemListener
 	private JMenuItem noiseMinerMenuItem;
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
-	private JMenuItem topologyDisplayMenuItem;
 
 	private JCheckBoxMenuItem perfLogMenuItem;
 
@@ -138,7 +136,6 @@ implements ActionListener, ItemListener
 			AMPIUsageProfileMenuItem.setEnabled(false);
 			noiseMinerMenuItem.setEnabled(false);
 			memoryUsageMenuItem.setEnabled(false);
-			topologyDisplayMenuItem.setEnabled(true);
 
 			break;
 		case OPENED_SUMMARY:
@@ -172,7 +169,6 @@ implements ActionListener, ItemListener
 			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
-			topologyDisplayMenuItem.setEnabled(true);
 
 			break;
 		case OPENED_FILES :
@@ -214,7 +210,6 @@ implements ActionListener, ItemListener
 			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
-			topologyDisplayMenuItem.setEnabled(true);
 
 			break;
 		}
@@ -278,7 +273,6 @@ implements ActionListener, ItemListener
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
 		streamingMenuItem = new JMenuItem("Streaming CCS");
 		memoryUsageMenuItem = new JMenuItem("Memory Usage");
-		topologyDisplayMenuItem = new JMenuItem("Topology Display");
 
 		timelinesMenuItem.addActionListener(this);
 		//renderedTimelinesMenuItem.addActionListener(this);
@@ -302,7 +296,6 @@ implements ActionListener, ItemListener
 		noiseMinerMenuItem.addActionListener(this);
 		streamingMenuItem.addActionListener(this);
 		memoryUsageMenuItem.addActionListener(this);
-		topologyDisplayMenuItem.addActionListener(this);
 
 		toolMenu.add(timelinesMenuItem);
 		//toolMenu.add(renderedTimelinesMenuItem);
@@ -326,7 +319,6 @@ implements ActionListener, ItemListener
 		toolMenu.add(noiseMinerMenuItem);
 		toolMenu.add(streamingMenuItem);
 		toolMenu.add(memoryUsageMenuItem);
-		toolMenu.add(topologyDisplayMenuItem);
 
 		menubar.add(toolMenu);
 
@@ -444,9 +436,6 @@ implements ActionListener, ItemListener
 			else if (mi == streamingMenuItem)	
 				new StreamingTool();
 			
-			else if (mi == topologyDisplayMenuItem)
-				parent.openTool(new TopologyDisplayWindow(parent) );
-
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);
 			

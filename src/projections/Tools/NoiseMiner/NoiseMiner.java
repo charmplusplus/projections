@@ -186,7 +186,6 @@ class NoiseMiner extends ProjDefs
 			pes = new TreeSet<Integer>();
 			this.ew = ew;
 			pes.add(new Integer(pe));
-			//periodicity_FFT = p_fft;
 			duration = d;
 			occurrences = o;
 		}
@@ -319,62 +318,6 @@ class NoiseMiner extends ProjDefs
 			return d;
 		}
 		
-//		public Duration periodFromFFT(){
-//			return prominentPeriod;
-//		}
-//		
-//		public void buildFFT(){
-//			int size=1024;
-//
-//			Duration first = new Duration(getFirst());
-//			Duration last = new Duration(getLast());
-//			Duration range = new Duration(first.us(),last.us());
-//			float sum = 1.0f;
-//
-//			float data[] = new float[size];
-//
-//			for(int i=0;i<size;i++){
-//				data[i]=0.0f;
-//			}
-//
-//			// Iterate through the events in the queue and fill in their time-domain values
-//
-//			Iterator<Long> it = occurrences.iterator();
-//			while(it.hasNext()){
-//				long t = it.next();
-//				double d2 = (double)(t-first.us()) / (double)(last.us()-first.us());
-//				int d = (int)(d2*(size-1));
-//				data[d] += 1.0;
-//				sum+=1.0;
-//			}
-//
-//			// Remove DC offset
-//			for(int i=0;i<size;i++){
-//				data[i] -= sum/((float)size);
-//			}
-//
-//
-//			// Perform an FFT
-//			RealFloatFFT_Radix2 fft = new RealFloatFFT_Radix2(size);
-//
-//			fft.transform(data, 0, 1);
-//		
-//			float largestVal = 0.0f;
-//			int largest = 0;
-//			
-//			for(int i=1;i<size/2;i++){
-//			
-//				float valSqr = data[i]*data[i] + data[size-i]*data[size-i];
-//				if( valSqr > largestVal ){
-//					largest = i;
-//					largestVal = valSqr;
-//					prominentPeriod.set_us(((double)(last.us()-first.us())/(double)i)); // period associated with this fft entry
-//				}
-//				
-//			}
-//
-//		}
-
 	}
 
 

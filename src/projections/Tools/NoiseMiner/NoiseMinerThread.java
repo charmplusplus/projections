@@ -162,14 +162,9 @@ class NoiseMinerThread implements Runnable {
 		int n = 1;
 		while(h_pe.hasNthNoiseComponent(n)) {
 
-			//			h_pe.nthNoise(n).events.buildFFT();
-
 			EventWindow ew = h_pe.nthNoise(n).events;
 			long occurrences = h_pe.nthNoise(n).count();
 			Duration duration = h_pe.nthNoise(n).mean();
-
-//			Duration periodicity = ew.period();
-//			Duration periodicity_fft = ew.periodFromFFT();
 
 			results.add(parent.new NoiseResult(duration, occurrences, pe, ew));
 

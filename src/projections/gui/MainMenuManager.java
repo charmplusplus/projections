@@ -93,8 +93,6 @@ implements ActionListener, ItemListener
 	private JMenuItem timeProfileGraphMenuItem;
 	private JMenuItem perfCounterMenuItem;
 	private JMenuItem multirunAnalysisMenuItem;
-	private JMenuItem functionToolMenuItem;
-	private JMenuItem AMPIUsageProfileMenuItem;
 	private JMenuItem noiseMinerMenuItem;
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
@@ -132,8 +130,6 @@ implements ActionListener, ItemListener
 			userStatsProcMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
-			functionToolMenuItem.setEnabled(false);
-			AMPIUsageProfileMenuItem.setEnabled(false);
 			noiseMinerMenuItem.setEnabled(false);
 			memoryUsageMenuItem.setEnabled(false);
 
@@ -165,8 +161,6 @@ implements ActionListener, ItemListener
 			userStatsProcMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
-			functionToolMenuItem.setEnabled(false);
-			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
 
@@ -206,8 +200,6 @@ implements ActionListener, ItemListener
 			}
 			outlierAnalysisMenuItem.setEnabled(true);
 			multirunAnalysisMenuItem.setEnabled(true);
-			functionToolMenuItem.setEnabled(true);
-			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
 
@@ -268,8 +260,6 @@ implements ActionListener, ItemListener
 		userStatsProcMenuItem = new JMenuItem("User Stats Per Processor");
 		outlierAnalysisMenuItem = new JMenuItem("Extrema Analysis");
 		multirunAnalysisMenuItem = new JMenuItem("Multirun Analysis");
-		functionToolMenuItem = new JMenuItem("Function Tool");
-		AMPIUsageProfileMenuItem = new JMenuItem("AMPI Usage Profile");
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
 		streamingMenuItem = new JMenuItem("Streaming CCS");
 		memoryUsageMenuItem = new JMenuItem("Memory Usage");
@@ -291,8 +281,6 @@ implements ActionListener, ItemListener
 		userStatsProcMenuItem.addActionListener(this);
 		outlierAnalysisMenuItem.addActionListener(this);
 		multirunAnalysisMenuItem.addActionListener(this);
-		functionToolMenuItem.addActionListener(this);
-		AMPIUsageProfileMenuItem.addActionListener(this);
 		noiseMinerMenuItem.addActionListener(this);
 		streamingMenuItem.addActionListener(this);
 		memoryUsageMenuItem.addActionListener(this);
@@ -314,8 +302,6 @@ implements ActionListener, ItemListener
 		toolMenu.add(userStatsProcMenuItem);
 		toolMenu.add(outlierAnalysisMenuItem);
 		toolMenu.add(multirunAnalysisMenuItem);
-		toolMenu.add(functionToolMenuItem);
-		toolMenu.add(AMPIUsageProfileMenuItem);
 		toolMenu.add(noiseMinerMenuItem);
 		toolMenu.add(streamingMenuItem);
 		toolMenu.add(memoryUsageMenuItem);
@@ -420,13 +406,7 @@ implements ActionListener, ItemListener
 			
 			else if (mi == multirunAnalysisMenuItem)	
 				parent.openTool(new MultiRunWindow(parent) );
-			
-			else if (mi == functionToolMenuItem)	
-				parent.openTool(new FunctionTool(parent) );
-			
-			else if (mi == AMPIUsageProfileMenuItem)	
-				parent.openTool(new AmpiProfileWindow(parent) );
-			
+
 			else if (mi == noiseMinerMenuItem)	
 				parent.openTool(new NoiseMinerWindow(parent) );
 			

@@ -22,7 +22,6 @@ import javax.swing.SwingWorker;
 import projections.analysis.LogReader;
 import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
-import projections.gui.AmpiTimeProfileWindow;
 import projections.gui.Clickable;
 import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
@@ -99,15 +98,6 @@ implements ActionListener, Clickable
 	// flag signifying callgraph has just begun
 	private boolean	   startFlag;
 
-	//Chao Mei: variables related with ampi time profile    
-	private JTabbedPane tabPane = null;
-	private AmpiTimeProfileWindow ampiGraphPanel = null;
-	private JPanel epPanel = null;
-	private boolean ampiTraceOn = false;
-	//	protected int ampiPanelTabIndex;
-	//	protected int epPanelTabIndex;
-
-
 	// the following data are statically known and can be initialized
 	// here overhead, idle time
 	private final static int special = 2;
@@ -133,14 +123,6 @@ implements ActionListener, Clickable
 
 		mainPanel = new JPanel();
 		getContentPane().add(mainPanel);
-
-		//creating ampi tabbed pane
-		if(MainWindow.runObject[myRun].getNumFunctionEvents() > 0)
-			ampiTraceOn = true;
-		if(ampiTraceOn){
-			tabPane = new JTabbedPane();
-			ampiGraphPanel = new AmpiTimeProfileWindow(mainWindow);
-		}
 
 		createMenus();
 		createLayout();
@@ -202,26 +184,9 @@ implements ActionListener, Clickable
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 
-
-		if(ampiTraceOn){            
-			epPanel = new JPanel();
-			epPanel.setLayout(gbl);
-			JPanel graphPanel = getMainPanel();
-			Util.gblAdd(epPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
-			Util.gblAdd(epPanel, controlPanel, gbc, 0,1, 1,0, 0,0);
-
-			JPanel ampiPanel = ampiGraphPanel.getAmpiMainPanel();
-			tabPane.add("Entry Points", epPanel);
-			tabPane.add("AMPI Functions", ampiPanel);
-			//			epPanelTabIndex = tabPane.indexOfComponent(epPanel);
-			//			ampiPanelTabIndex = tabPane.indexOfComponent(ampiPanel);
-			mainPanel.setLayout(new GridLayout(1,1));
-			mainPanel.add(tabPane);
-		} else {
-			JPanel graphPanel = getMainPanel();
-			Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
-			Util.gblAdd(mainPanel, controlPanel, gbc, 0,1, 1,0, 0,0);
-		}		
+		JPanel graphPanel = getMainPanel();
+		Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(mainPanel, controlPanel, gbc, 0,1, 1,0, 0,0);
 	}
 
 	public void setGraphSpecificData() {
@@ -327,12 +292,6 @@ implements ActionListener, Clickable
             }
 
             System.out.println("Props: intervalSize:"+intervalSize+"- startInterval:"+startInterval+"- endInterval:"+endInterval+"- startTime:" + startTime);
-
-            //set range values for time profile window
-			if(ampiTraceOn){
-				ampiGraphPanel.getRangeVals(startInterval, endInterval, intervalSize, processorList);
-			}
-
 
 			final SwingWorker worker =  new SwingWorker() {
 				public Object doInBackground() {
@@ -542,9 +501,6 @@ implements ActionListener, Clickable
 				}
 				public void done() {
 					setOutputGraphData();
-					if(ampiTraceOn){
-						ampiGraphPanel.setOutputGraphData(true);
-					}
 					thisWindow.setVisible(true);                        
 				}
 			};

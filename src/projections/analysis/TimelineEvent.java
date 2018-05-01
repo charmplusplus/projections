@@ -24,7 +24,6 @@ public long RecvTime;
     public Integer UserSpecifiedData;
     public long memoryUsage;
     
-    public boolean isFunction = false;
     public Stack callStack;
 
     //this indicates the name of the user event which is the most closely

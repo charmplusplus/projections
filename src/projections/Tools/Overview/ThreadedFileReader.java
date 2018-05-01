@@ -15,7 +15,6 @@ class ThreadedFileReader implements Runnable  {
 	private int myRun;
 	private int startInterval;
 	private int endInterval;
-//	boolean ampiTraceOn;
 
 	private int[][][] mySystemUsageData;   // [type][pe list index][interval]
 //	int[][][][] mySystemMsgsData;  // [categoryIdx][type][][]
@@ -40,7 +39,6 @@ class ThreadedFileReader implements Runnable  {
 		this.myRun = myRun;
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
-//		this.ampiTraceOn = ampiTraceOn;
 		this.entryData = entryData;
 		this.utilizationData = utilizationData;
 		this.idleData = idleData;

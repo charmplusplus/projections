@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import projections.Tools.Timeline.RangeQueries.Range1D;
-import projections.analysis.AmpiFunctionData;
 import projections.analysis.ObjectId;
 import projections.analysis.PackTime;
 import projections.analysis.TimelineEvent;
@@ -79,10 +78,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private int numPapiCounts = 0;
 	private long papiCounts[];
 
-	private boolean isFunction = false;
-
 	private static DecimalFormat format_ = new DecimalFormat();
-	private AmpiFunctionData funcData[];
 
 	private boolean isCommThdRecv = false;
 
@@ -126,22 +122,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		numPapiCounts = tle.numPapiCounts;
 		papiCounts    = tle.papiCounts;
 
-		isFunction = tle.isFunction;
-
 		format_.setGroupingUsed(true);
 	
 		setUsage();
-		setPackUsage();
-
-		if (isFunction) {
-			// copy the callstack	
-			funcData = new AmpiFunctionData[tle.callStack.size()];
-			tle.callStack.copyInto(funcData);
-					
-		} else if (tle.EntryPoint >= 0) {
-		}
-		
-		
+		setPackUsage();		
 	} 
 	
 	/** Dynamically generate the tooltip mouseover text when needed */
@@ -152,24 +136,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		StringBuilder infoString = new StringBuilder(5000);
 
 		
-		// **CW** special treatment for functions. There really should
-		// be a general way of dealing with this.
-		if (isFunction) {			
-			infoString.append("<i>Function</i>: " + MainWindow.runObject[data.myRun].getFunctionName(entry) + "<br>" );
-			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime) + "<br>");
-			infoString.append("<i>End Time</i>: " + format_.format(endTime) + "<br>");
-			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>");
-			infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
-			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
-			infoString.append("<hr><br><i>Function Callstack</i>:<br>");
-
-			// look at the call stack
-			for(int i=0;i<funcData.length;i++){
-				AmpiFunctionData functionData = funcData[i];
-				infoString.append("<i>[Func]</i>: " + MainWindow.runObject[data.myRun].getFunctionName(functionData.FunctionID) + "<br>");
-				infoString.append("&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>");
-			}
-		} else if (entry >= 0) {
+		if (entry >= 0) {
 
 			infoString.append("<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"); 
 
@@ -950,8 +917,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			return MainWindow.runObject[data.myRun].getIdleColor();
 		} else if (entryIndex == -2) { // unknown domain
 			return MainWindow.runObject[data.myRun].getOverheadColor();
-		} else if (isFunction) {
-			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 		}
 		
 		// color the objects by memory usage with a nice blue - red gradient

@@ -79,11 +79,6 @@ public class LogEntryData extends ProjDefs
 	id = new int[6];
     }
 
-    // 9/14/2004 - added AMPI Function tracing support
-    // "entry" in the case of functions will be the function ID.
-    public int lineNo;          // line number of the function call.
-    public String funcName;     // the name of the function
-
     // 6/7/16 - added User Stats support
     public double stat;
     public double userTime;
@@ -163,7 +158,6 @@ public class LogEntryData extends ProjDefs
 				(type == BEGIN_UNPACK) ||
 				(type == BEGIN_PROCESSING) ||
 				(type == BEGIN_TRACE) ||
-				(type == BEGIN_FUNC) ||
 				(type == BEGIN_INTERRUPT));
 	}
 
@@ -173,7 +167,6 @@ public class LogEntryData extends ProjDefs
 				(type == END_UNPACK) ||
 				(type == END_PROCESSING) ||
 				(type == END_TRACE) ||
-				(type == END_FUNC) ||
 				(type == END_INTERRUPT));
 	}
     

@@ -24,22 +24,10 @@ class LogEntry
 	//UserStat variables
 	double stat;
 	double userTime;
-	// AMPI function tracing. The duplication is unfortunate but required.
-	int FunctionID;
-	AmpiFunctionData ampiData;
 
 	int nestedID; // Nested thread ID, e.g. virtual AMPI ranks
 
 	String note;
-
-	private void setAmpiData(int functionID, int lineNo, 
-			String sourceFileName) {
-		ampiData = new AmpiFunctionData();
-		ampiData.FunctionID = functionID;
-		ampiData.LineNo = lineNo;
-		ampiData.sourceFileName = sourceFileName;
-	}
-
 
 	protected LogEntry(LogEntryData data) {
 		endTime = data.endTime;
@@ -72,12 +60,6 @@ class LogEntry
 		papiCounts = new long[numPapiCounts];
 		for (int i=0;i<numPapiCounts;i++) {
 			papiCounts[i] = data.perfCounts[i];
-		}
-
-		FunctionID = data.entry; // Kinda wierd alternative to entry
-		if (data.funcName != null) {
-			setAmpiData(data.entry, data.lineNo, 
-					new String(data.funcName));
 		}
 
 	}

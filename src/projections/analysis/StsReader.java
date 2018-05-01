@@ -95,13 +95,6 @@ public class StsReader extends ProjDefs
     private TreeMap<Integer, String> userStats = new TreeMap<Integer, String>();
     /// The same user stat names as in userStats, but packed into an array in same manner
     private String userStatNames[];
-
-    
-    // AMPI Functions tracing
-    private int functionEventIndex = 0;
-    private Hashtable<Integer, Integer> functionEventIndices = new Hashtable<Integer, Integer>();
-    private Hashtable<Integer, String> functionEvents = new Hashtable<Integer, String>();
-    private String functionEventNames[];
     
     private int numPapiEvents;
     private String papiEventNames[];
@@ -187,21 +180,6 @@ public class StsReader extends ProjDefs
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
 		    MsgTable[ID] = Size;
-		} else if (s1.equals("FUNCTION")) {
-		    Integer key = new Integer(st.nextToken());
-		    if (!functionEvents.containsKey(key)) {
-			// Allow the presence of spaces in the descriptor.
-			String functionEventName = "";
-			while (st.hasMoreTokens()) {
-			    functionEventName += st.nextToken() + " ";
-			}
-			functionEvents.put(key, functionEventName);
-			functionEventNames[functionEventIndex] = 
-			    functionEventName;
-			functionEventIndices.put(key,
-						 new Integer(functionEventIndex));
-		    }
-		    functionEventIndex++;
 		} else if (s1.equals("EVENT")) {
 		    Integer key = new Integer(st.nextToken());
 		    if (!userEvents.containsKey(key)) {
@@ -233,9 +211,6 @@ public class StsReader extends ProjDefs
 		//Read in number of stats
 		} else if (s1.equals("TOTAL_STATS")) {
 		    userStatNames =
-			new String[Integer.parseInt(st.nextToken())];
-		} else if (s1.equals("TOTAL_FUNCTIONS")) {
-		    functionEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals ("TOTAL_PAPI_EVENTS")) {
 		    hasPAPI = true;
@@ -409,36 +384,6 @@ public class StsReader extends ProjDefs
     public Map<Integer, String>  getUserStatNameMap() {
     	// gets an array by logical (not user-given) index
     	return userStats;
-    }
-
-
-    // *** function event accessors ***
-    public int getNumFunctionEvents() {
-	// **FIXME**
-	// ** create a new function called getFunctionArraySize **
-	// ** getNumFunctionEvents does not semantically mean the same thing!
-	//
-	// the +1 is a silly hack because function id counts does not begin
-	// from 0. No easy solution is visible in the near-future.
-	if (functionEvents.size() == 0) {
-	    return 0;
-	} else {
-	    return functionEvents.size()+1;
-	}
-    }
-
-    public int getFunctionEventIndex(int eventID) {
-	Integer key = new Integer(eventID);
-	return (functionEventIndices.get(key)).intValue();
-    }
-
-    public String getFunctionEventDescriptor(int eventID) {
-	Integer key = new Integer(eventID);
-	return functionEvents.get(key);
-    }
-
-    public String[] getFunctionEventDescriptors() {
-	return functionEventNames;
     }
 
     public int getNumPerfCounts() {

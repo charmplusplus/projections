@@ -347,16 +347,6 @@ implements PointCapableReader
 			// take into account lastBeginEvent in order to get
 			// reasonable data.
 			break;
-		case BEGIN_FUNC:
-			data.time = sc.nextLong() + shiftAmount;
-			data.entry = (int) sc.nextLong();
-			data.lineNo = (int) sc.nextLong();
-			data.funcName = "";//sc.nextLine();
-			break;
-		case END_FUNC:
-			data.time = sc.nextLong() + shiftAmount;
-			data.entry = (int) sc.nextLong();
-			break;
 		case MESSAGE_RECV:
 			data.mtype = (int) sc.nextLong();
 			data.time = sc.nextLong() + shiftAmount;

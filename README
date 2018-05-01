@@ -71,11 +71,9 @@ data:
   14. User Stats Per Processor
   15. Extrema Analysis
   16. Multirun Analysis
-  17. Function Tool
-  18. AMPI Usage Profile
-  19. Noise Miner
-  20. Streaming CCS
-  21. Memory Usage
+  17. Noise Miner
+  18. Streaming CCS
+  19. Memory Usage
 
 
 1. Timelines
@@ -317,26 +315,14 @@ data:
    memory constraints.
 
 
-17. Function Tool:
---------------
-   This tool provides a usage profile like view for AMPI programs.
-
-
-18. AMPI Usage Profile:
---------------
-   This tool provides a usage profile like view for AMPI programs. It
-   differs from "Function Tool" in that information displayed also
-   includes time spent in events outside of AMPI.
-
-
-19. Noise Miner:
+17. Noise Miner:
 --------------
    This tool identifies abnormally long entry methods to detect
    symptoms consistent with computational noise.  Long events are
    filtered and clustered to provide a summary of such occurrences.
 
 
-20. Streaming CCS:
+18. Streaming CCS:
 --------------
    This tool uses the Converse Client Server feature of Charm++ to
    stream performance data from running programs.  To use it, the
@@ -344,7 +330,7 @@ data:
    executed with "++server ++server-port <port number>".
 
 
-21. Memory Usage:
+19. Memory Usage:
 --------------
    This tool provides a view of memory utilization in the application
    when it is linked with the memory tracing module.

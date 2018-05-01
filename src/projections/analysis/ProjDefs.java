@@ -33,8 +33,6 @@ protected static final int END_UNPACK               = 19;
 public static final int CREATION_BCAST           = 20;
 
 public static final int CREATION_MULTICAST       = 21;
-public static final int BEGIN_FUNC               = 22;
-public static final int END_FUNC                 = 23;
 
 /** A record for a user supplied integer value, likely a timestep */
 protected static final int USER_SUPPLIED            = 26;

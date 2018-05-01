@@ -2475,7 +2475,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		a.activityColors = a.colorManager.defaultColorMap();
 		a.entryColors = ColorManager.entryColorsByFrequency(ColorManager.createComplementaryColorMap(entries.length), frequencyVector);
 		a.userEventColors = a.activityColors[Analysis.USER_EVENTS];
-		a.functionColors = a.activityColors[Analysis.FUNCTIONS];
 	}
 	public ViewType getViewType() {
 		return viewType;

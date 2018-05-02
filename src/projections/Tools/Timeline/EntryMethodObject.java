@@ -202,14 +202,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			else 
 				infoString.append("<i>Msgs created</i>: 0<br>");
 
-            EntryMethodObject obj = this;
-            TimelineMessage created_message = obj.creationMessage();
-            long latency;
+			TimelineMessage created_message = this.creationMessage();
 			boolean usedCommThreadSender = false;
-            if(created_message != null)
-            {
-                latency = beginTime - created_message.Time ;
-                infoString.append("<i>Msg latency is </i>: " + latency + "<br>");
+			if(created_message != null)
+			{
+				infoString.append("<i>Msg latency is </i>: " + (beginTime - created_message.Time) + "<br>");
 
 				// If the message came from a comm thread, trace back to the actual creator if possible
 				if (data.isCommThd(pCreation)) {

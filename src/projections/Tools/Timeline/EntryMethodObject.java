@@ -201,15 +201,31 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
 			else 
 				infoString.append("<i>Msgs created</i>: 0<br>");
+
             EntryMethodObject obj = this;
             TimelineMessage created_message = obj.creationMessage();
             long latency;
+			boolean usedCommThreadSender = false;
             if(created_message != null)
             {
                 latency = beginTime - created_message.Time ;
                 infoString.append("<i>Msg latency is </i>: " + latency + "<br>");
-            }
-            infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
+
+				// If the message came from a comm thread, trace back to the actual creator if possible
+				if (data.isCommThd(pCreation)) {
+					TimelineMessage origMsg = data.messageStructures.getMessageToSendingObjectsMap().get(created_message).creationMessage();
+					if (origMsg != null) {
+						EntryMethodObject origSender = data.messageStructures.getMessageToSendingObjectsMap().get(origMsg);
+						if (origSender != null) {
+							infoString.append("<i>Created by </i>: " + data.getPEString(origSender.pe) + " via " + data.getPEString(pCreation) + "<br>");
+							usedCommThreadSender = true;
+						}
+					}
+				}
+			}
+			if (!usedCommThreadSender) {
+				infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
+			}
 			int dimension = MainWindow.runObject[data.myRun].getSts().getEntryChareDimensionsByID(entry);
 			if (dimension < 0) {
 				infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");

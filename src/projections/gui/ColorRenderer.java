@@ -19,7 +19,7 @@ implements TableCellRenderer {
 		if(color instanceof Color){
 			setBackground((Color) color);
 		}else if(color instanceof ClickableColorBox){
-			setBackground(((ClickableColorBox) color).c);
+			setBackground(((ClickableColorBox) color).getColor());
 		}
 		return this;
 	}

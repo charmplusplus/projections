@@ -186,7 +186,7 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("ENTRY")) {
 			st.nextToken(); // type
 			ID      = Integer.parseInt(st.nextToken());
-			StringBuffer nameBuf=new StringBuffer(matchQuotes(st));
+			StringBuilder nameBuf=new StringBuilder(matchQuotes(st));
 			Name = nameBuf.toString();
 			if (-1!=Name.indexOf('(') && -1==Name.indexOf(')')) {
 				//Parse strings until we find the close-paren

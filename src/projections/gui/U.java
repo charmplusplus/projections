@@ -41,7 +41,7 @@ public class U
 	// the fraction part of d (which must be positive).
 	private final static String printDecimals(double d,int nDec)
 	{
-		StringBuffer ret=new StringBuffer();
+		StringBuilder ret=new StringBuilder();
 		ret.append(".");
 		d-=(int)d;//Remove non-fraction part
 		d+=0.000000001; // This seems like a bad idea to Isaac :( Why is this here ????

@@ -10,7 +10,7 @@ public class ClickableColorBox {
     final private int id;
     final private GenericGraphColorer colorer;
 
-    ClickableColorBox(int id_, Color c_, int myRun_, ColorUpdateNotifier gw_) {
+    public ClickableColorBox(int id_, Color c_, int myRun_, ColorUpdateNotifier gw_) {
         id = id_;
         c = c_;
         myRun = myRun_;
@@ -18,7 +18,7 @@ public class ClickableColorBox {
         colorer = null;
     }
 
-    ClickableColorBox(int id_, Color c_, int myRun_, ColorUpdateNotifier gw_, GenericGraphColorer colorer_) {
+    public ClickableColorBox(int id_, Color c_, int myRun_, ColorUpdateNotifier gw_, GenericGraphColorer colorer_) {
         id = id_;
         c = c_;
         myRun = myRun_;

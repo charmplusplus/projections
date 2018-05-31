@@ -188,16 +188,24 @@ implements PopUpAble, ColorUpdateNotifier
 	// This should be the correct way of setting a data source with a partial
 	// set of colors
 	protected void setDataSource(String title, double data[][], GenericGraphColorer colorer, GenericGraphWindow parent) {
+		setDataSource(title, data, colorer, parent, null);
+	}
+
+	protected void setDataSource(String title, double data[][], GenericGraphWindow parent) {
+		setDataSource( title,  data, new GenericGraphDefaultColors(),  parent, null);
+	}
+
+	protected void setDataSource(String title, double data[][], GenericGraphColorer colorer, GenericGraphWindow parent, boolean[] mask) {
 		dataSource = new DataSource2D(title, data, parent);
+		if (mask != null) {
+			// Set display_mask
+			dataSource.setMask(mask);
+		}
 		this.colorer = colorer;
 		dataSource.setColors(colorer.getColorMap());
 		if (yAxis != null) {
 			yAxis = new YAxisAuto(yAxis.getTitle(),yAxis.getUnits(),dataSource);
 		}
-	}
-	
-	protected void setDataSource(String title, double data[][], GenericGraphWindow parent) {
-		setDataSource( title,  data, new GenericGraphDefaultColors(),  parent);
 	}
 	
 	// refresh graph

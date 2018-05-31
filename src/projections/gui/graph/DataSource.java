@@ -92,6 +92,7 @@ public abstract class DataSource
 		this.paints = paints;
 	}
 
+	public abstract void setMask(boolean[] mask);
 
     /**
      *  Return the values associated with this index.

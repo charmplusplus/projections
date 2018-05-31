@@ -12,7 +12,7 @@ public class MyTableModel extends AbstractTableModel implements ActionListener {
     final private List<List> tabledata;
     final private List<String> columnNames;
 
-    MyTableModel(List<List> TD, List<String> CN, EntryMethodVisibility data_, boolean checkboxesVisible) {
+    public MyTableModel(List<List> TD, List<String> CN, EntryMethodVisibility data_, boolean checkboxesVisible) {
         tabledata = TD;
         columnNames = CN;
         data = data_;

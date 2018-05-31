@@ -24,7 +24,7 @@ import projections.gui.*;
  *  Legends are in place (and probably replace the name)
  */
 public class UserEventsWindow extends GenericGraphWindow
-    implements ActionListener
+    implements ActionListener, EntryMethodVisibility
 {
 
 	private UserEventsWindow thisWindow;
@@ -54,6 +54,8 @@ public class UserEventsWindow extends GenericGraphWindow
     private double[][] graphData;
     private double[][] timeSpent;
     private double[][] callRate;
+    private boolean[] display_mask;
+    private GenericGraphColorer colorer;
 
     // buttons to switch between displaying "time spent" vs "call rate"
     private JRadioButton timeSpentButton;
@@ -69,7 +71,8 @@ public class UserEventsWindow extends GenericGraphWindow
     private double unitTime = 1;
     private String unitTimeStr = "ms";
 
-    private DecimalFormat _format;
+    private static DecimalFormat decimalFormatter = new DecimalFormat("###,###.###");
+    private static DecimalFormat scientificFormatter = new DecimalFormat("0.###E0");
     
     public UserEventsWindow(MainWindow mainWindow) {
     	super("Projections User Events Tool - " + 
@@ -77,11 +80,26 @@ public class UserEventsWindow extends GenericGraphWindow
     	// hardcode start. Usually derived from MainWindow.runObject[myRun].java
     	numActivities = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
     	activityNames = MainWindow.runObject[myRun].getUserEventNames();
-    	// Normally would set activity names here.
-
-    	_format = new DecimalFormat("###,###.###");
+	display_mask = new boolean[numActivities];
+	for(int i = 0; i < numActivities; i++)
+		display_mask[i] = true;
+	colorer = new GenericGraphColorer() {
+		private final Paint[] colorMap = ColorManager.createColorMap(numActivities);
+		@Override
+		public Paint[] getColorMap() {
+			return colorMap;
+		}
+	};
 
     	createMenus();
+	if(mChooseColors.getActionListeners()[0] != null)
+		mChooseColors.removeActionListener(mChooseColors.getActionListeners()[0]);
+	mChooseColors.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+			new ChooseUserEntriesWindow(thisWindow, thisWindow, colorer, MainWindow.runObject[myRun].getSts().getUserEventNameMap(), "Event", activityNames);
+		}
+	});
     	createLayout();
     	pack();
     	thisWindow = this;
@@ -224,33 +242,14 @@ public class UserEventsWindow extends GenericGraphWindow
 	graphData = timeSpent;
     }
     
-    
-    
-    
-    
-
-	/** A class that provides the colors for the display */
-	public class UserEventColorer implements GenericGraphColorer {
-		public Paint[] getColorMap() {
-			int numUserEvents = MainWindow.runObject[myRun].getNumUserDefinedEvents(); 
-			Paint[]  outColors = ColorManager.createColorMap(numUserEvents);
-			return outColors;
-		}
-	}
-    
-    
-    
-    
     protected void setGraphSpecificData() {
 	setXAxis("Processors", processorList);
     setYAxisLabelAndUnits();
 	setYAxis(yAxisLabel, yAxisUnits);
-	setDataSource("User Events", graphData, new UserEventColorer() , this);
+	setDataSource("User Events", graphData, colorer, this, display_mask);
 	refreshGraph();
     }
 
-    
-    
     public String[] getPopup(int xVal, int yVal) {
 	if ((xVal < 0) || (yVal < 0)) {
 	    return null;
@@ -260,9 +259,9 @@ public class UserEventsWindow extends GenericGraphWindow
 	rString[0] = "Name: " + activityNames[yVal];
 	rString[1] = "Time Spent: " + U.humanReadableString((long)(timeSpent[xVal][yVal]));
 	rString[2] = String.format("Rate: %s calls/%s (%s calls)",
-		_format.format(callRate[xVal][yVal]),
+		formatNumber(callRate[xVal][yVal]),
 		unitTimeStr,
-		_format.format(callRate[xVal][yVal] * intervalSize/unitTime));
+		formatNumber(callRate[xVal][yVal] * intervalSize/unitTime));
 	return rString;
     }	
 
@@ -284,17 +283,14 @@ public class UserEventsWindow extends GenericGraphWindow
 	    else if (e.getSource() == microseconds) {
             scaleHistogramData(0.001);
             setGraphSpecificData();
-            refreshGraph();
         }
         else if (e.getSource() == milliseconds) {
             scaleHistogramData(1.0);
             setGraphSpecificData();
-            refreshGraph();
         }
         else if (e.getSource() == seconds) {
             scaleHistogramData(1000.0);
             setGraphSpecificData();
-            refreshGraph();
         }
     }
 
@@ -321,4 +317,46 @@ public class UserEventsWindow extends GenericGraphWindow
     	}
     }
 
+    @Override
+    public void displayMustBeRedrawn() {
+        setGraphSpecificData();
+        refreshGraph();
+    }
+
+    @Override
+    public boolean entryIsVisibleID(Integer id) {
+        return display_mask[id];
+    }
+
+    @Override
+    public int[] getEntriesArray() {
+        return null;
+    }
+
+    @Override
+    public void makeEntryInvisibleID(Integer id) {
+        display_mask[id] = false;
+    }
+
+    @Override
+    public void makeEntryVisibleID(Integer id) {
+        display_mask[id] = true;
+    }
+
+    @Override
+    public boolean hasEntryList() {
+        return false;
+    }
+
+    @Override
+    public boolean handleIdleOverhead() {
+        return false;
+    }
+
+    private static String formatNumber(double number) {
+        String formatted = decimalFormatter.format(number);
+        if (formatted.equals("0"))
+            formatted = scientificFormatter.format(number);
+        return formatted;
+    }
 }

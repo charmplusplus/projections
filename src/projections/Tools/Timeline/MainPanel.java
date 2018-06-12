@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -115,10 +116,12 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	/** Paint the entire opaque panel*/
 	public void paintComponent(Graphics g) {
 		synchronized(data){
+			Graphics2D g2 = (Graphics2D)g;
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			if(RenderInParallel && data.numPs()>1){
-				paintInParallel((Graphics2D)g);
+				paintInParallel(g2);
 			} else {
-				paintSequentially((Graphics2D)g);
+				paintSequentially(g2);
 			}
 		}
 	}

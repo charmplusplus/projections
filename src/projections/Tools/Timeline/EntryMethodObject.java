@@ -763,10 +763,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 	
 	
-	public int paintMe(Graphics2D g2d, int actualDisplayWidth, int maxFilledX){
+	public boolean paintMe(Graphics2D g2d, int actualDisplayWidth, MainPanel.MaxFilledX maxFilledX){
+		boolean paintedEP = false;
 		// If it is hidden, we may not display it
 		if(!isDisplayed()){
-			return -1;
+			return paintedEP;
 		}
 		
 		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
@@ -798,7 +799,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		}
 
 		// Only draw this EMO if it covers some pixel that hasn't been filled yet
-		if (right > maxFilledX) {
+		if (right > maxFilledX.ep) {
+			maxFilledX.ep = right;
+			paintedEP = true;
 
 			// Determine the base color
 			Paint c = determineColor();
@@ -878,7 +881,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 					// Compute the end pixel coordinate relative to the containing panel
 					int packEndCoordX = data.timeToScreenPixelRight(packEndTime);
 
-					g2d.fillRect(packBeginCoordX, topCoord+verticalInset+rectHeight, (packEndCoordX-packBeginCoordX+1), data.messagePackHeight());
+					if (packEndCoordX > maxFilledX.pack) {
+						maxFilledX.pack = packEndCoordX;
+						g2d.fillRect(packBeginCoordX, topCoord + verticalInset + rectHeight, (packEndCoordX - packBeginCoordX + 1), data.messagePackHeight());
+					}
 
 				}
 			}
@@ -898,13 +904,15 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				{
 					// Compute the pixel coordinate relative to the containing panel
 					int msgCoordX = data.timeToScreenPixel(msgtime);
-
-					g2d.drawLine(msgCoordX, topCoord+verticalInset+rectHeight, msgCoordX, topCoord+verticalInset+rectHeight+data.messageSendHeight());
+					if (msgCoordX > maxFilledX.msg) {
+						maxFilledX.msg = msgCoordX;
+						g2d.drawLine(msgCoordX, topCoord + verticalInset + rectHeight, msgCoordX, topCoord + verticalInset + rectHeight + data.messageSendHeight());
+					}
 				}
 			}
 		}
 
-		return right;
+		return paintedEP;
 	}
 
 		

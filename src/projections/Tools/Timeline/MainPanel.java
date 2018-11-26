@@ -211,6 +211,18 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	}
 
 	/**
+	 * Stores the maximum x coordinates of what has been drawn so far to avoid unnecessary overlapped drawing
+	 */
+	public class MaxFilledX {
+		public int ep, pack, msg;
+
+		public MaxFilledX() {
+			ep = 0;
+			pack = 0;
+			msg = 0;
+		}
+	}
+	/**
 	 * Paint the desired clipped region for this component 
 	 * 
 	 * @return Number of entities rendered (for performance tuning)
@@ -234,13 +246,14 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 
 			if(l != null){ // FIXME: this shouldn't be here but is to fix a race condition with reloading ranges once something is displayed
 				Iterator<EntryMethodObject> iter = l.iterator(leftClipTime, rightClipTime);
-				int maxFilledX = 0; // Tracks maximum x index of filled pixels for this PE, used to optimize away
-				                    // drawing of multiple overlapping single pixel entry methods
+
+				// Saves the furthest right position EPs and msg lines have been drawn in
+				// order to optimize performance by only drawing when new pixels will be colored in
+				MaxFilledX maxFilledX = new MaxFilledX();
+
 				while(iter.hasNext()){
 					EntryMethodObject o = iter.next();
-					int emoMaxFilledX = o.paintMe((Graphics2D) g, getWidth(), maxFilledX);
-					if (emoMaxFilledX > maxFilledX) {
-						maxFilledX = emoMaxFilledX;
+					if(o.paintMe((Graphics2D) g, getWidth(), maxFilledX)) {
 						count1++;
 					}
 				}

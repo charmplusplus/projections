@@ -9,8 +9,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
+import java.io.FileReader;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Scanner;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
@@ -26,6 +29,7 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.JFileChooser;
 
 import projections.gui.ChooseEntriesWindow;
 import projections.gui.FloatJTextField;
@@ -59,7 +63,7 @@ ItemListener {
 	// basic zoom controls
 	private JButton bDecrease, bIncrease, bReset;
 
-	private JButton bZoomSelected, bLoadSelected, bRanges;
+	private JButton bZoomSelected, bLoadSelected, bRanges, bOrder;
 
 	private JTextField highlightTime, selectionBeginTime, selectionEndTime,	selectionDiff;
 
@@ -114,7 +118,9 @@ ItemListener {
 	private JMenuItem mDisplayLegend;
 
 	private JMenuItem mDisplayTopTimesText;
-	
+
+	private JFileChooser chooseOrderfc;
+
 	protected WindowControls(TimelineWindow parentWindow_,
 			Data data_) {
 
@@ -132,7 +138,40 @@ ItemListener {
 		userEventWindow = new UserEventWindow(cbUserTable);
 
 	}
-	
+
+
+	protected void showOrderDialog() {
+		chooseOrderfc = new JFileChooser();
+		int returnVal = chooseOrderfc.showOpenDialog(parentWindow);
+		if(returnVal == JFileChooser.APPROVE_OPTION) {
+			String chosenFile = chooseOrderfc.getSelectedFile().getName();
+			String homeDir = System.getProperty("user.home");
+			String fullPath = String.join(File.separator, homeDir, chosenFile);
+
+			ArrayList<Integer> orderedList = readOrderFromFile(fullPath);
+			data.setProcessorList(orderedList);
+			parentWindow.refreshDisplay(true);
+			parentWindow.setVisible(true);
+		}
+
+	}
+
+	protected ArrayList<Integer> readOrderFromFile(String fileName) {
+		Scanner in = null;
+		try {
+			in = new Scanner(new FileReader(fileName));
+		} catch (java.io.FileNotFoundException ex) {
+			System.out.println("File not found: " + fileName);
+		}
+		ArrayList<Integer> orderedList = new ArrayList<Integer>();
+		String pe = null;
+
+		while (in.hasNextInt()) {
+			orderedList.add(in.nextInt());
+		}
+		in.close();
+		return orderedList;
+	}
 
 	protected void showDialog() {
 		if(dialog == null){
@@ -422,6 +461,10 @@ ItemListener {
 
 		else if (c  == bRanges) {
 			showDialog();
+		}
+
+		else if (c  == bOrder) {
+			showOrderDialog();
 		}
 
 		else if (c  == bLoadSelected) {
@@ -743,6 +786,7 @@ ItemListener {
 		bZoomSelected = new JButton("Zoom Selection");
 		bLoadSelected = new JButton("Load Selection");
 		bRanges = new JButton("Load New Time/PE Range");
+		bOrder = new JButton("Set PE Order");
 
 		bZoomSelected.setEnabled(false);
 		bLoadSelected.setEnabled(false);
@@ -751,6 +795,7 @@ ItemListener {
 		bZoomSelected.addActionListener(this);
 		bLoadSelected.addActionListener(this);
 		bRanges.addActionListener(this);
+		bOrder.addActionListener(this);
 
 
 		highlightTime = new JTextField(" ");
@@ -774,6 +819,7 @@ ItemListener {
 		Util.gblAdd(zoomPanel, selectionEndTime,   gbc, 4, 2, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, selectionDiff,      gbc, 5, 2, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, bRanges,            gbc, 0, 1, 1, 1, 1, 1);
+		Util.gblAdd(zoomPanel, bOrder,             gbc, 1, 1, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, new JLabel("Time At Mouse Cursor", JLabel.CENTER), gbc, 2, 1, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, new JLabel("Selection Begin Time", JLabel.CENTER), gbc, 3, 1, 1, 1, 1, 1);
 		Util.gblAdd(zoomPanel, new JLabel("Selection End Time", JLabel.CENTER),	  gbc, 4, 1, 1, 1, 1, 1);

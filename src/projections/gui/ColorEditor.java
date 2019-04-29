@@ -39,8 +39,8 @@ ActionListener {
 		if (EDIT.equals(e.getActionCommand())) {
 			//The user has clicked the cell, so
 			//bring up the dialog.
-			button.setBackground(currentColorBox.c);
-			colorChooser.setColor(currentColorBox.c);
+			button.setBackground(currentColorBox.getColor());
+			colorChooser.setColor(currentColorBox.getColor());
 			dialog.setVisible(true);
 				fireEditingStopped(); //Make the renderer reappear.
 			} else { //User pressed dialog's "OK" button.

@@ -22,6 +22,7 @@ public class MultiRunDataSource extends DataSource
     private Color colorMap[]=null;       // colors associated with each value
     private String title;
     private MultiRunDataAnalyzer parent;
+    private boolean[] mask = null;
 
     /**
      *  Constructor. Ndata and NcolorMap are expected to be allocated
@@ -107,6 +108,10 @@ public class MultiRunDataSource extends DataSource
 	}
     }
 
+    public void setMask(boolean[] mask) {
+        this.mask = mask;
+    }
+
     /**
      * Return the values associated with this index.
      *  The index passed in is between 0 and getIndexCount()-1, inclusive.
@@ -121,7 +126,7 @@ public class MultiRunDataSource extends DataSource
      */
     public void getValues(int index, double[] values) {
 	for (int j=0; j<getValueCount(); j++) {
-	    values[j] = dataValues[index][j];
+	    values[j] = (mask != null && !mask[j]) ? 0 : dataValues[index][j];
 	}
     }
 

@@ -395,7 +395,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
-	public void setProcessorList(SortedSet<Integer> processorList){
+	public void setProcessorList(Collection<Integer> processorList){
 		peToLine.clear();
 
 		if(isSMPRun()){
@@ -428,8 +428,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					if(curNID != prevNID){
 						//encounter a new set of PEs of a node, add the comm thd
 						//of the previous node
-						peToLine.add(prevCommPE);
-						commPEs.add(prevCommPE);
+						if (!commPEs.contains(prevCommPE)) {
+							peToLine.add(prevCommPE);
+							commPEs.add(prevCommPE);
+						}
 						
 						prevNID = curNID;
 						prevCommPE = getCommThdPE(pe);
@@ -437,7 +439,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					peToLine.add(pe);
 				}
 			}
-			if(!isLastAdded) peToLine.add(prevCommPE);
+			if(!commPEs.contains(prevCommPE) && !isLastAdded) peToLine.add(prevCommPE);
 		}else{
 			peToLine.addAll(processorList);
 		}		

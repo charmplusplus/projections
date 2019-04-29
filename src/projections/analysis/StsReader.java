@@ -99,6 +99,37 @@ public class StsReader extends ProjDefs
     private int numPapiEvents;
     private String papiEventNames[];
 
+    /**
+     * Matches quotes for those values in the STS file that are supposed to be quoted.
+     * Earlier version of the STS file were not quoted, this should also match those.
+     * @param st
+     * @return Matched string value, or "" if unmatched
+     */
+    private static String matchQuotes(StringTokenizer st) {
+        String current = st.nextToken();
+        // If string doesn't start with a quote, then we've already matched
+        if (!current.startsWith("\"")){
+           return current;
+        }
+
+        // If it starts and ends with a quote, then we've already matched
+        if (current.endsWith("\"")) {
+            return current.substring(1, current.length() - 1);
+        }
+
+        // Otherwise, start concatenating strings until we find a closing quote
+        StringBuilder value = new StringBuilder(current.substring(1));
+        while (st.hasMoreTokens()) {
+            current = st.nextToken();
+            value.append(current);
+            if (current.endsWith("\"")) {
+                return value.substring(0, value.length() - 1);
+            }
+        }
+
+        return "";
+    }
+
     /** 
      *  The StsReader constructor reads the .sts file indicated.
      *  @exception LogLoadException if an error occurs while reading in the
@@ -130,7 +161,7 @@ public class StsReader extends ProjDefs
 		if (s1.equals("VERSION")) {
 		    version = Double.parseDouble(st.nextToken());
 		} else if (s1.equals("MACHINE")) {
-		    Machine = st.nextToken();
+		    Machine = matchQuotes(st);
 		} else if (s1.equals("PROCESSORS")) {
 		    NumPe = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("SMPMODE")) {
@@ -146,7 +177,7 @@ public class StsReader extends ProjDefs
 		    MsgTable  = new long[TotalMsgs];
 		} else if (s1.equals("CHARE") || Line.equals("BOC")) {
 		    ID = Integer.parseInt(st.nextToken());
-		    String name = st.nextToken();
+		    String name = matchQuotes(st);
 			int dimensions = -1;
 			if (version >= 9.0) {
 				dimensions = Integer.parseInt(st.nextToken());
@@ -155,7 +186,7 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("ENTRY")) {
 			st.nextToken(); // type
 			ID      = Integer.parseInt(st.nextToken());
-			StringBuffer nameBuf=new StringBuffer(st.nextToken());
+			StringBuilder nameBuf=new StringBuilder(matchQuotes(st));
 			Name = nameBuf.toString();
 			if (-1!=Name.indexOf('(') && -1==Name.indexOf(')')) {
 				//Parse strings until we find the close-paren

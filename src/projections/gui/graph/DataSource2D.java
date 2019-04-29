@@ -17,6 +17,7 @@ public class DataSource2D extends DataSource
     private double[][] data; /*The data to be graphed*/
     private int xValues;
     private ResponsiveToMouse parent;
+    private boolean[] mask = null;
     
     protected DataSource2D(String title_, double[][] data_) {
 	title=title_;
@@ -120,10 +121,14 @@ public class DataSource2D extends DataSource
 	return data[0].length; 
     }  
   
+    public void setMask(boolean[] mask) {
+        this.mask = mask;
+	}
+
     public void getValues(int index,double[] values)
     {
 	for(int j=0;j<data[index].length;j++)
-	    values[j]=data[index][j];
+	    values[j] = (mask != null && !mask[j]) ? 0 : data[index][j];
     }
 
 //    private double[][] intToDouble(int[][] data) {

@@ -15,6 +15,7 @@ public class SummaryDataSource extends DataSource
     private int startInterval;
     private int numIntervals;
     private double dataValues[][];
+    private boolean[] mask = null;
     
     public SummaryDataSource(double[][] data, int startInt) {
 	dataValues = data;
@@ -47,6 +48,10 @@ public class SummaryDataSource extends DataSource
 	return null;
     }
 
+    public void setMask(boolean[] mask) {
+        this.mask = mask;
+    }
+
     /**
      * Return the values associated with this index.
      *  The index passed in is between 0 and getIndexCount()-1, inclusive.
@@ -61,7 +66,7 @@ public class SummaryDataSource extends DataSource
      */
     public void getValues(int index, double[] values) {
 	for (int val=0; val<getValueCount(); val++) {
-	    values[val] = dataValues[index][val];
+	    values[val] = (mask != null && !mask[val]) ? 0 : dataValues[index][val];
 	}
     }
     

@@ -113,17 +113,6 @@ class ExtremaDialogExtension extends RangeDialogExtensionPanel
 			return false;
 		}
 
-		
-		if ( activityList.getSelectedIndex() == Analysis.FUNCTIONS && attributeList.getSelectedIndex() >= 1 ) {
-			attributeLabel.setForeground(Color.red);
-			activityLabel.setForeground(Color.red);
-			errorText.setForeground(Color.red);
-			errorText.setText("ERROR: Attribute " +	attributeList.getSelectedItem() +
-					" is incompatible with Activity " + activityList.getSelectedItem() );
-			return false;
-		}
-
-		
 		// Everything is valid, so clear all warning messages
 		errorText.setText("");
 		attributeLabel.setForeground(Color.black);

@@ -32,8 +32,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import projections.analysis.AmpiFunctionData;
-import projections.analysis.AmpiProcessProfile;
 import projections.gui.ChooseEntriesWindow;
 import projections.gui.FormattedNumber;
 
@@ -67,9 +65,6 @@ class ProfileWindow extends ProjectionsWindow
     private ProfileGraph displayCanvas;
     private JScrollPane displayPanel;
     private int displayPanelTabIndex;
-    private ProfileGraph ampiDisplayCanvas;
-    private JScrollPane ampiDisplayPanel;
-    private int ampiDisplayPanelTabIndex;
 
     private JCheckBox chkEnableGrid;
     private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY, btnExportToFile;
@@ -83,8 +78,6 @@ class ProfileWindow extends ProjectionsWindow
 
 //    private EntrySelectionDialog entryDialog;
 
-    private boolean ampiTraceOn = false;
-
     public ProfileWindow(MainWindow parentWindow){
         super(parentWindow);
 
@@ -93,8 +86,6 @@ class ProfileWindow extends ProjectionsWindow
 
         thresh = 0.01f;
 
-        if(MainWindow.runObject[myRun].getNumFunctionEvents() > 0)
-            ampiTraceOn = true;
 
 	setBackground(Color.lightGray);
 	setTitle("Projections Usage Profile - " + MainWindow.runObject[myRun].getFilename() + ".sts");
@@ -119,25 +110,13 @@ class ProfileWindow extends ProjectionsWindow
                                     "Close"
                                 },
                                 this));
-        if(ampiTraceOn){
-            mbar.add(Util.makeJMenu("Tools", new Object[]
-                                {
-                                    "Pie Chart",
-                                    "Change Colors",
-                                    "Usage Table",
-                                    new String[] {"AMPI", "Usage Profile"}
-                                },
-                                this));
-        } else{
-            mbar.add(Util.makeJMenu("Tools", new Object[]
+        mbar.add(Util.makeJMenu("Tools", new Object[]
                                 {
                                     "Pie Chart",
                                     "Change Colors",
                                     "Usage Table"
                                 },
                                 this));
-        }
-
         mbar.add(Util.makeJMenu("Save to Image", new Object[]
                 {
                         "Save Plot as Image"
@@ -162,21 +141,6 @@ class ProfileWindow extends ProjectionsWindow
 	//p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
 	displayPanel = new JScrollPane(displayCanvas);
 	//p.add(displayPanel);
-
-        if(ampiTraceOn){
-            ampiDisplayCanvas = new ProfileGraph();
-            //JPanel ampiP = new JPanel();
-            //ampiP.setLayout(new BoxLayout(ampiP, BoxLayout.X_AXIS));
-    	ampiDisplayPanel = new JScrollPane(ampiDisplayCanvas);
-    	//ampiP.add(ampiDisplayPanel);
-
-            tabPane = new JTabbedPane();
-            tabPane.add("Entry Points",displayPanel);
-            tabPane.add("AMPI Functions", ampiDisplayPanel);
-            displayPanelTabIndex = tabPane.indexOfComponent(displayPanel);
-            ampiDisplayPanelTabIndex = tabPane.indexOfComponent(ampiDisplayPanel);
-            tabPane.addChangeListener(this);
-        }
 
         JPanel gridPanel = new JPanel();
         gridPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Grid"));
@@ -231,11 +195,8 @@ class ProfileWindow extends ProjectionsWindow
         //add dispalyPanel and x-y scale panel to the window
         Container wholeContainer = getContentPane();
         wholeContainer.setLayout(gbl);
-        if(ampiTraceOn){
-            Util.gblAdd(wholeContainer, tabPane, gbc, 0,0, 3,1, 1,1, 5,5,5,5);
-        } else {
-            Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 3,1, 1,1, 5,5,5,5);
-        }
+
+        Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 3,1, 1,1, 5,5,5,5);
 
         Util.gblAdd(wholeContainer,   gridPanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
         Util.gblAdd(wholeContainer, xScalePanel, gbc, 1,1, 1,1, 5,0, 2,2,2,2);
@@ -259,9 +220,6 @@ class ProfileWindow extends ProjectionsWindow
     		final Thread t = new Thread() {
     			public void run() {
     				setDisplayProfileData();
-    				if (ampiTraceOn) {
-    					setAmpiDisplayProfileData();
-    				}
     				setLocationRelativeTo(parentWindow);
     				setVisible(true);
     			}
@@ -323,27 +281,11 @@ class ProfileWindow extends ProjectionsWindow
 	    // the which flag was set.
 	    if ((scaleX != oldScaleX) && (scaleX > 0.0)) {
 		txtScaleX.setText("" + scaleX);
-                if(ampiTraceOn){
-                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleX(scaleX);
-                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleX(scaleX);
-                    }
-                } else {
-                    displayCanvas.setScaleX(scaleX);
-                }
+                displayCanvas.setScaleX(scaleX);
 	    }
 	    if ((scaleY != oldScaleY) && (scaleY > 0.0)) {
 		txtScaleY.setText("" + scaleY);
-                if(ampiTraceOn){
-                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleY(scaleY);
-                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleY(scaleY);
-                    }
-                } else {
-                    displayCanvas.setScaleY(scaleY);
-                }
+                displayCanvas.setScaleY(scaleY);
 	    }
 	} else if (evt.getSource() instanceof JFloatTextField) {
 	    JFloatTextField field = (JFloatTextField)evt.getSource();
@@ -351,26 +293,10 @@ class ProfileWindow extends ProjectionsWindow
 	    // hence the conservative approach.
 	    if (field == txtScaleX) {
 		scaleX = oldScaleX;
-		if(ampiTraceOn){
-                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleX(scaleX);
-                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleX(scaleX);
-                    }
-                } else {
-                    displayCanvas.setScaleX(scaleX);
-                }
+                displayCanvas.setScaleX(scaleX);
 	    } else if (field == txtScaleY) {
 		scaleY = oldScaleY;
-		if(ampiTraceOn){
-                    if(tabPane.getSelectedIndex() == displayPanelTabIndex){
-                        displayCanvas.setScaleY(scaleY);
-                    } else if (tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex) {
-                        ampiDisplayCanvas.setScaleY(scaleY);
-                    }
-                } else {
-                    displayCanvas.setScaleY(scaleY);
-                }
+                displayCanvas.setScaleY(scaleY);
 	    }
 	} else if(evt.getSource() instanceof JMenuItem) {
             String arg = ((JMenuItem)evt.getSource()).getText();
@@ -384,8 +310,6 @@ class ProfileWindow extends ProjectionsWindow
 	    	showChangeColorDialog();
 	    } else if (arg.equals("Usage Table")){
 	    	showUsageTable();
-	    } else if (arg.equals("Usage Profile")) {
-	    	showAMPIUsageProfile();
 	    } else if (arg.equals("Save Plot as Image")) {
             exportImage();
         }
@@ -394,7 +318,7 @@ class ProfileWindow extends ProjectionsWindow
     }
 
     private void exportImage() {
-        ProfileGraph current = (ampiTraceOn) ? ampiDisplayCanvas : displayCanvas;
+        ProfileGraph current = displayCanvas;
         JPanelToImage.saveToFileChooserSelection(current, "Save Plot To File...", "UsageProfile.pdf");
     }
 
@@ -403,9 +327,6 @@ class ProfileWindow extends ProjectionsWindow
             if(tabPane.getSelectedIndex() == displayPanelTabIndex){
                 txtScaleX.setText(displayCanvas.getScaleX()+"");
                 txtScaleY.setText(displayCanvas.getScaleY()+"");
-            } else if(tabPane.getSelectedIndex() == ampiDisplayPanelTabIndex){
-                txtScaleX.setText(ampiDisplayCanvas.getScaleX()+"");
-                txtScaleY.setText(ampiDisplayCanvas.getScaleY()+"");
             }
         }
     }
@@ -419,10 +340,6 @@ class ProfileWindow extends ProjectionsWindow
 	public void colorsHaveChanged() {
 		colorsSet = false;
 		setDisplayProfileData();
-		if (ampiTraceOn)
-		{
-    			setAmpiDisplayProfileData();
-    		}
 	}
 
     private void showUsageTable(){
@@ -483,163 +400,6 @@ class ProfileWindow extends ProjectionsWindow
         usageFrame.setSize(500,250);
         //usageFrame.pack();
         usageFrame.setVisible(true);
-    }
-
-    private void showAMPIUsageProfile(){
-        /* Console version
-        int curPe = -1;
-        data.plist.reset();
-        Vector ampiProcessVec = new Vector();
-        while(data.plist.hasMoreElements()){
-            curPe = data.plist.nextElement();
-            ampiProcessVec.clear();
-            MainWindow.runObject[myRun].createAMPIUsage(curPe,data.begintime,data.endtime,ampiProcessVec);
-            System.out.println("Processor: "+curPe+":: ampiProcess#"+ampiProcessVec.size());
-            for(int i=0; i<ampiProcessVec.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)ampiProcessVec.get(i);
-                System.out.println("Processing total execution time: "+p.getAccExecTime());
-                Stack stk = p.getFinalCallFuncStack();
-                for(Enumeration e=stk.elements(); e.hasMoreElements();){
-                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
-                    System.out.println(d+"::"+MainWindow.runObject[myRun].getFunctionName(d.FunctionID));
-                }
-            }
-        }*/
-
-        JFrame profileFrame = new JFrame();
-        profileFrame.setTitle("AMPI Function Profile Table");
-        profileFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-        String[] tHeading ={"Processor#","Function Name","Source File Name","Line#","%/Total","%/Process"};
-
-        /**
-         * First get whole data for displaying. It is inefficient considering the case when there are huge
-         * content to display. The better way is to displaying the data on the table at the same time analyzing
-         * the data. This could be later implemented!
-         */
-        Vector[] ampiProcessVec = new Vector[data.plist.size()];
-        int pCnt=0;
-        int totalLine=0;
-        
-        for(Integer pe : data.plist) {
-        	ampiProcessVec[pCnt] = new Vector();
-        	MainWindow.runObject[myRun].createAMPIUsage(pe,data.begintime,data.endtime,ampiProcessVec[pCnt]);
-        	Vector v = ampiProcessVec[pCnt];
-        	for(int i=0; i<v.size(); i++){
-        		AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
-        		totalLine += p.getFinalCallFuncStack().size();
-        	}
-        	pCnt++;
-        }
-
-        //formating data to display
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(3);
-        long totalExecTime = data.endtime - data.begintime;
-        Object[][] tData = new Object[totalLine][];
-      
-        pCnt=0;
-        int lineCnt=0;
-
-        for(Integer pe : data.plist) {
-        	Vector v = ampiProcessVec[pCnt++];
-            for(int i=0; i<v.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)v.get(i);
-                long processTotalExecTime = p.getAccExecTime();
-                Stack stk = p.getFinalCallFuncStack();
-                for(Enumeration e=stk.elements(); e.hasMoreElements();){
-                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
-                    tData[lineCnt] = new Object[tHeading.length];
-                    tData[lineCnt][0] = ""+pe;
-                    tData[lineCnt][1] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID);
-                    tData[lineCnt][2] = d.sourceFileName;
-                    tData[lineCnt][3] = ""+d.LineNo;
-                    tData[lineCnt][4] = df.format(d.getAccExecTime()/(double)totalExecTime*100)+"%";
-                    tData[lineCnt][5] = df.format(d.getAccExecTime()/(double)processTotalExecTime*100)+"%";
-                    lineCnt++;
-                }
-            }
-        }
-
-        JTable t = new JTable(tData, tHeading);
-        //t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        JScrollPane sp = new JScrollPane(t);
-
-        profileFrame.getContentPane().add(sp);
-
-        profileFrame.setLocationRelativeTo(this);
-        profileFrame.setSize(500,250);
-        profileFrame.setVisible(true);
-
-    }
-
-    private void setAmpiDisplayProfileData(){
-
-        String[] xNames = new String[data.plist.size()];
-
-        Vector ampiProcess = null;
-        int pCnt=0;
-
-        float[][] ampiDataSrc = new float[data.plist.size()][];
-        String[][] ampiFuncNameMap = new String[data.plist.size()][];
-
-        long totalExecTime = data.endtime - data.begintime;
-
-        //firstly, create the usage percent and every sections' name
-        for(Integer pe : data.plist) {
-            
-            ampiProcess = new Vector();
-            MainWindow.runObject[myRun].createAMPIUsage(pe,data.begintime,data.endtime,ampiProcess);
-            int total = 0;
-            for(int i=0; i<ampiProcess.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)ampiProcess.get(i);
-                total += p.getFinalCallFuncStack().size();
-            }
-
-            ampiDataSrc[pCnt] = new float[total];
-            ampiFuncNameMap[pCnt] = new String[total];
-            total = 0;
-            for(int i=0; i<ampiProcess.size(); i++){
-                AmpiProcessProfile p = (AmpiProcessProfile)ampiProcess.get(i);
-                Stack stk = p.getFinalCallFuncStack();
-                for(Enumeration e=stk.elements(); e.hasMoreElements();){
-                    AmpiFunctionData d = (AmpiFunctionData)(e.nextElement());
-                    ampiFuncNameMap[pCnt][total] = MainWindow.runObject[myRun].getFunctionName(d.FunctionID)+"@"+
-                        d.sourceFileName+"("+d.LineNo+")";
-                    ampiDataSrc[pCnt][total] = d.getAccExecTime()/(float)totalExecTime*100;
-                    total++;
-                }
-            }
-            xNames[pCnt] = pe+"";
-            pCnt++;
-        }
-
-        //secondly, create the color map (using the easiest color mapping creation)
-        int colorNum = 0;
-        for(int i=0; i<ampiDataSrc.length; i++)
-            colorNum += ampiDataSrc[i].length;
-
-        Color[] ampiFuncColors = ColorManager.createColorMap(colorNum);
-        int[][] ampiFuncColorMap = new int [ampiDataSrc.length][];
-        colorNum = 0;
-        for(int i=0; i<ampiDataSrc.length; i++){
-            ampiFuncColorMap[i] = new int[ampiDataSrc[i].length];
-            for(int j=0; j<ampiDataSrc[i].length; j++)
-                ampiFuncColorMap[i][j] = colorNum++;
-        }
-
-
-        //set ampi's profile graph parameters!
-
-        String[] gTitles = new String[2];
-        gTitles[0] = "Profile of Usage for Functions in AMPI programs "+Util.listToString(data.plist);
-        gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
-        ampiDisplayCanvas.setGraphTiltes(gTitles);
-
-        ampiDisplayCanvas.setXAxis("",xNames);
-        ampiDisplayCanvas.setYAxis("Usage Percent % (over processor)");
-        ampiDisplayCanvas.setDisplayDataSource(ampiDataSrc, ampiFuncColorMap, ampiFuncColors, ampiFuncNameMap);
-        ampiDisplayCanvas.repaint();
     }
 
     private void setDisplayProfileData(){

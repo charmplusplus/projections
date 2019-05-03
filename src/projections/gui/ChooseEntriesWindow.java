@@ -56,7 +56,7 @@ public class ChooseEntriesWindow extends JFrame
 			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.getEntriesArray()[i]!=0)
 				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) + 
 						"::" + 
-						MainWindow.runObject[myRun].getSts().entryChareNames.get(i));
+						MainWindow.runObject[myRun].getSts().entryChares.get(i));
 		}
 		addIdleOverhead();
 	}
@@ -222,104 +222,5 @@ public class ChooseEntriesWindow extends JFrame
 			column.setPreferredWidth(50);
 		}
 
-	}
-}
-
-
-/// A class that incorporates an integer identifier and its corresponding paint
-class ClickableColorBox {
-	public int myRun;
-	public ColorUpdateNotifier gw;
-	int id;
-	Color c;
-
-	public ClickableColorBox(int id_, Color c_, int myRun_, ColorUpdateNotifier gw_) {
-		id = id_;
-		c = c_;
-		myRun = myRun_;
-		gw=gw_;
-	}
-
-	public void setColor(Color c){
-		this.c = c;
-		MainWindow.runObject[myRun].setEntryColor(id, c);
-		gw.colorsHaveChanged();
-	}
-}
-
-class MyTableModel extends AbstractTableModel implements ActionListener {
-	EntryMethodVisibility data;
-	JCheckBox displayAllEntryMethods;
-	boolean displayVisibilityCheckboxes;
-	List<List> tabledata;
-	List<String> columnNames;
-
-	public MyTableModel(List<List> TD, List<String> CN, EntryMethodVisibility data_, boolean checkboxesVisible) {
-		tabledata=TD;
-		columnNames=CN;
-		data = data_;
-		if (data!=null)
-			data.displayMustBeRedrawn();
-		displayVisibilityCheckboxes = checkboxesVisible;
-	}
-
-	public boolean isCellEditable(int row, int col) {
-		if (displayVisibilityCheckboxes && (col == 0 || col == 3)) {
-			return true;
-		} else if (col == 2) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	public int getColumnCount() {
-		if (displayVisibilityCheckboxes)
-			return 4;
-		else
-			return 3;
-	}
-
-	public Class getColumnClass(int c) {
-		return getValueAt(0, c).getClass();
-	}
-
-	public int getRowCount() {
-		return tabledata.size();
-	}
-
-	public Object getValueAt(int rowIndex, int columnIndex) {
-		return tabledata.get(rowIndex).get(columnIndex);
-	}
-
-	public String getColumnName(int col) {
-		return columnNames.get(col);
-	}
-
-	public void setValueAt(Object value, int row, int col) {
-		if(col==0 && displayVisibilityCheckboxes){
-			Boolean newValue = (Boolean) value;
-			Integer id = (Integer) tabledata.get(row).get(2);
-
-			if(newValue){
-				// remove from list of disabled entry methods
-				data.makeEntryVisibleID(id);
-			} else {
-				// add to list of disabled entry methods
-				data.makeEntryInvisibleID(id);
-			}
-			data.displayMustBeRedrawn();
-		} else {
-//			System.out.println("setValueAt col = " + col);
-		}
-
-		tabledata.get(row).set(col,value);
-		fireTableCellUpdated(row, col);
-	}
-
-	public void actionPerformed(ActionEvent e) {
-		System.out.println("Action for object: " + e.getSource());
-		fireTableDataChanged();
-		data.displayMustBeRedrawn();
 	}
 }

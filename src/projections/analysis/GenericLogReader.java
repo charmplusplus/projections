@@ -133,64 +133,7 @@ implements PointCapableReader
 
 	public LogEntryData nextProcessingEvent() throws IOException, EndOfLogSuccess
 	{
-		LogEntryData data = new LogEntryData();
-
-		while (true) {
-			String line = reader.readLine();
-
-			if (line == null || endComputationOccurred) {
-				throw new EndOfLogSuccess();
-			}
-
-			AsciiLineParser sc = new AsciiLineParser(line);
-
-			data.type = (int) sc.nextLong();
-
-			switch (data.type) {
-				case BEGIN_PROCESSING:
-					data.mtype = (int) sc.nextLong();
-					data.entry = (int) sc.nextLong();
-					data.time = sc.nextLong() + shiftAmount;
-					data.event = (int) sc.nextLong();
-					data.pe = (int) sc.nextLong();
-					if (version >= 2.0) {
-						data.msglen = (int) sc.nextLong();
-					} else {
-						data.msglen = -1;
-					}
-					if (version >= 4.0) {
-						data.recvTime = sc.nextLong() + shiftAmount;
-						data.id[0] = (int) sc.nextLong();
-						data.id[1] = (int) sc.nextLong();
-						data.id[2] = (int) sc.nextLong();
-					}
-					if (version >= 7.0) {
-						data.id[3] = (int) sc.nextLong();
-					}
-					if (version >= 6.5) {
-						data.cpuStartTime = sc.nextLong() + shiftAmount;
-					}
-
-					return data;
-				case END_PROCESSING:
-					data.mtype = (int) sc.nextLong();
-					data.entry = (int) sc.nextLong();
-					data.time = sc.nextLong() + shiftAmount;
-					data.event = (int) sc.nextLong();
-					data.pe = (int) sc.nextLong();
-					if (version >= 2.0) {
-						data.msglen = (int) sc.nextLong();
-					} else {
-						data.msglen = -1;
-					}
-					if (version >= 6.5) {
-						data.cpuEndTime = sc.nextLong() + shiftAmount;
-					}
-					return data;
-				default:
-					break;
-			}
-		}
+		return nextEventOfType(BEGIN_PROCESSING, END_PROCESSING);
 	}
 	
 
@@ -332,12 +275,23 @@ implements PointCapableReader
 			}
 			if (version >= 4.0) {
 				lastBeginEvent.recvTime = data.recvTime = sc.nextLong() + shiftAmount;
-				lastBeginEvent.id[0] = data.id[0] = (int) sc.nextLong();
-				lastBeginEvent.id[1] = data.id[1] = (int) sc.nextLong();
-				lastBeginEvent.id[2] = data.id[2] = (int) sc.nextLong();
-			}
-			if (version >= 7.0) {
-				lastBeginEvent.id[3] = data.id[3] = (int) sc.nextLong();
+				if (version < 9.0) {
+					lastBeginEvent.id[0] = data.id[0] = (int) sc.nextLong();
+					lastBeginEvent.id[1] = data.id[1] = (int) sc.nextLong();
+					lastBeginEvent.id[2] = data.id[2] = (int) sc.nextLong();
+
+					if (version >= 7.0) {
+						lastBeginEvent.id[3] = data.id[3] = (int) sc.nextLong();
+					}
+				} else {
+					// In version 9.0 and above, IDs for chare arrays have exactly as many values as they
+					// have dimensions. So if the current event corresponds to a chare array, check how
+					// many dimensions it has and read that many values
+					int dimensions = stsinfo.getEntryChareDimensionsByID(data.entry);
+					for (int i = 0; i < dimensions; i++) {
+						lastBeginEvent.id[i] = data.id[i] = (int) sc.nextLong();
+					}
+				}
 			}
 			if (version >= 6.5) {
 				lastBeginEvent.cpuStartTime = data.cpuStartTime = sc.nextLong() + shiftAmount;
@@ -393,16 +347,6 @@ implements PointCapableReader
 			// take into account lastBeginEvent in order to get
 			// reasonable data.
 			break;
-		case BEGIN_FUNC:
-			data.time = sc.nextLong() + shiftAmount;
-			data.entry = (int) sc.nextLong();
-			data.lineNo = (int) sc.nextLong();
-			data.funcName = "";//sc.nextLine();
-			break;
-		case END_FUNC:
-			data.time = sc.nextLong() + shiftAmount;
-			data.entry = (int) sc.nextLong();
-			break;
 		case MESSAGE_RECV:
 			data.mtype = (int) sc.nextLong();
 			data.time = sc.nextLong() + shiftAmount;
@@ -445,6 +389,15 @@ implements PointCapableReader
 			// Charm++ before 6.8 did not have a nestedID for USER_EVENT_PAIR
 			if (sc.hasNextField())
 				data.nestedID = (int) sc.nextLong();
+			break;
+		case BEGIN_USER_EVENT_PAIR:
+		case END_USER_EVENT_PAIR:
+			data.userEventID = (int) sc.nextLong();
+			data.entry = data.userEventID;
+			data.time = sc.nextLong() + shiftAmount;
+			data.event = (int) sc.nextLong();
+			data.pe = (int) sc.nextLong();
+			data.nestedID = (int) sc.nextLong();
 			break;
 		case USER_STAT:
 			data.time = sc.nextLong() + shiftAmount; //Wall Time
@@ -489,14 +442,16 @@ implements PointCapableReader
 	/**
 	 *  Return the next log event with the given eventType.
 	 */
-	public LogEntryData nextEventOfType(int eventType) 
+	public LogEntryData nextEventOfType(int... eventTypes)
 	throws IOException, EndOfLogSuccess
 	{
-		LogEntryData data = new LogEntryData();
+		LogEntryData data;
 		while (true) {
 			data = nextEvent();
-			if (data.type == eventType) {
-				return data;
+			for (int eventType : eventTypes) {
+				if (data.type == eventType) {
+					return data;
+				}
 			}
 		}
 	}

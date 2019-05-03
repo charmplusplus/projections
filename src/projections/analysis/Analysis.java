@@ -84,9 +84,7 @@ public class Analysis {
   public static final int NUM_ACTIVITIES = 4;
   public static final int PROJECTIONS = 0;
   public static final int USER_EVENTS = 1;
-  public static final int FUNCTIONS = 2;
-  //    public static final int POSE_DOP = 3;
-  public static final String NAMES[] = {"PROJECTIONS", "USER_EVENTS", "FUNCTIONS"};
+  public static final String NAMES[] = {"PROJECTIONS", "USER_EVENTS"};
   
   
   /** *************** Color Maps 6/27/2002 ************ */
@@ -97,7 +95,6 @@ public class Analysis {
   public Color foreground = Color.white;
   
   public Color[] userEventColors;
-  public Color[] functionColors;
   public Color[][] activityColors =
   new Color[NUM_ACTIVITIES][];
   
@@ -295,7 +292,6 @@ public class Analysis {
 		  activityColors = colorManager.initializeColors();
 		  entryColors = activityColors[PROJECTIONS];
 		  userEventColors = activityColors[USER_EVENTS];
-		  functionColors = activityColors[FUNCTIONS];
 	  }
 	  catch (Exception e) {
 		  setDefaultColors();
@@ -307,61 +303,12 @@ public class Analysis {
 	  activityColors = colorManager.defaultColorMap();
 	  entryColors = activityColors[PROJECTIONS];
 	  userEventColors = activityColors[USER_EVENTS];
-	  functionColors = activityColors[FUNCTIONS];
 
   }
   
   public void saveColors() {
   	colorManager.saveColors(null);
   }
-
-    
-  /**
-   * Creating AMPI usage profile
-   */
-  public void createAMPIUsage(int procId, long beginTime, 
-			      long endTime, List<AmpiProcessProfile> procThdVec){
-    try {
-      if (hasLogFiles()) {
-	if (logLoader == null) {
-	  logLoader = new LogLoader();
-	}
-	logLoader.createAMPIUsageProfile(procId,beginTime,endTime,procThdVec);
-      } else {
-	System.err.println("createAMPIUsage: No log files available!");
-      }
-    } catch (LogLoadException e) {
-      System.err.println("LOG LOAD EXCEPTION " + e.getStackTrace());	    
-    }
-  }
-
-    /**
-     * Create AMPI Functions' Time profile
-     */
-  public void createAMPITimeProfile(int procId, long beginTime, 
-					     long endTime, List<AmpiProcessProfile> procThdVec){
-        try {
-	    if (hasLogFiles()) {
-		if (logLoader == null) {
-		    logLoader = new LogLoader();
-		}
-		logLoader.createAMPIFuncTimeProfile(procId,beginTime,
-						    endTime,procThdVec);
-	    } else {
-		System.err.println("createAMPIUsage: No log files available!");
-	    }
-	} catch (LogLoadException e) {
-	    System.err.println("LOG LOAD EXCEPTION " + e.getStackTrace());	    
-	}
-    }
-
-//    public int getNumPhases() {
-//	if (sumAnalyzer!=null)
-//	    return sumAnalyzer.getPhaseCount();
-//	return 0;
-//    }
-
-
 
     /**
      *  "type" here refers to the type of usage data (ie. Idle, System Queue
@@ -676,10 +623,6 @@ public class Analysis {
 	    return PROJECTIONS;
 	} else if (name.equals("USER_EVENTS")) {
 	    return USER_EVENTS;
-	} else if (name.equals("FUNCTIONS")) {
-	    return FUNCTIONS;
-	    //	} else if (name.equals("POSE_DOP")) {
-	    //	    return ActivityManager.POSE_DOP;
 	} else {
 	    return -1;  // error condition
 	}
@@ -691,8 +634,6 @@ public class Analysis {
 	    return getNumUserEntries();
 	case USER_EVENTS:
 	    return getNumUserDefinedEvents();
-	case FUNCTIONS:
-	    return getNumFunctionEvents();
 	}
 	return 0;
     }
@@ -707,9 +648,6 @@ public class Analysis {
 	    return getEntryNameByIndex(index);
 	case USER_EVENTS:
 	    tempNames = getUserEventNames();
-	    return tempNames[index];
-	case FUNCTIONS:
-	    tempNames = getFunctionNames();
 	    return tempNames[index];
 	}
 	return "";
@@ -837,26 +775,6 @@ public class Analysis {
 	return getSts().getPerfCountNames();
     }
 
-    public int getNumFunctionEvents() {
-	return getSts().getNumFunctionEvents();
-    }
-
-    public Color getFunctionColor(int eventID) {
-	return functionColors[getSts().getFunctionEventIndex(eventID)];
-    }
-
-    public Color[] getFunctionColors() {
-	return functionColors;
-    }
-
-
-    public String getFunctionName(int funcID) {
-	return getSts().getFunctionEventDescriptor(funcID);
-    }
-
-    public String[] getFunctionNames() {
-	return getSts().getFunctionEventDescriptors();
-    }
     
 //    /**
 //     *  This applies to interval-based data. If none exists, an error

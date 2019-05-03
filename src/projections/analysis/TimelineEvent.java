@@ -24,7 +24,6 @@ public long RecvTime;
     public Integer UserSpecifiedData;
     public long memoryUsage;
     
-    public boolean isFunction = false;
     public Stack callStack;
 
     //this indicates the name of the user event which is the most closely
@@ -106,6 +105,12 @@ protected void addPack(PackTime p)
 {
 	if (PackTimes==null) PackTimes=new ArrayList();
 	PackTimes.add(p);
+}
+
+protected void compactLists()
+{
+	if (MsgsSent != null) MsgsSent.trimToSize();
+	if (PackTimes != null) PackTimes.trimToSize();
 }
 
 @SuppressWarnings("ucd")

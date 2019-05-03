@@ -120,7 +120,8 @@ implements ActionListener, EntryMethodVisibility
 
                 binType = TYPE_TIME;
                 entryDisplayType = TYPE_ALL_ENTRIES;
-                _format = new DecimalFormat();
+
+                _format = new DecimalFormat("###,###.######");
 
                 setTitle("Projections Histograms - " + MainWindow.runObject[myRun].getFilename() + ".sts");
 
@@ -233,6 +234,9 @@ implements ActionListener, EntryMethodVisibility
                                 
 				protected void done()
 				{
+                    milliseconds.setSelected(true);
+                    unitTimeStr = "ms";
+                    unitTime = 1000.0;
                                         // Make the gui status reflect what was chosen in the dialog box
                                         if(binType == TYPE_MSG_SIZE)
                                                 msgSizeBinButton.setSelected(true);
@@ -403,12 +407,12 @@ implements ActionListener, EntryMethodVisibility
 
         private void scaleHistogramData(double newUnit) {
             double scale = newUnit / unitTime;
-            for (int bin = 0; bin < timeNumBins; bin++) {
+            for (int bin = 0; bin < timeNumBins+1; bin++) {
                 for (int ep = 0; ep < numEPs; ep++) {
                     counts_display[TYPE_TIME][bin][ep] *= scale;
                 }
             }
-            for (int bin = 0; bin < msgNumBins; bin++) {
+            for (int bin = 0; bin < msgNumBins+1; bin++) {
                 for (int ep = 0; ep < numEPs; ep++) {
                     counts_display[TYPE_MSG_SIZE][bin][ep] *= scale;
                 }
@@ -510,7 +514,7 @@ implements ActionListener, EntryMethodVisibility
 
                 Util.gblAdd(mainPanel, graphPanel,  gbc, 0,0, 1,1, 1,1);
                 Util.gblAdd(mainPanel, buttonPanel, gbc, 0,1, 1,1, 0,0);
-                Util.gblAdd(mainPanel, unitPanel,   gbc, 0,2, 1,1, 1,1);
+                Util.gblAdd(mainPanel, unitPanel,   gbc, 0,2, 1,1, 0,0);
 
                 return mainPanel;
         }
@@ -540,7 +544,7 @@ implements ActionListener, EntryMethodVisibility
 		else if (binType == TYPE_MSG_SIZE)
 		{
                         setXAxis("Message Size (at " +  _format.format(msgBinSize) + " byte resolution)",  "", msgMinBinSize, msgBinSize);
-                        setYAxis("Number of Occurrences/" + unitTimeStr + ")", "");
+                        setYAxis("Number of Occurrences/" + unitTimeStr, "");
                         setDataSource("Histogram", counts_display[TYPE_MSG_SIZE], thisWindow);
                 }
 		else if (binType == TYPE_IDLE_PERC)

@@ -53,6 +53,7 @@ implements ItemListener, ActionListener
 	private JPanel	   graphPanel;
 	private JPanel	   checkBoxPanel;
 	private JPanel         controlPanel;
+	private JPanel		unitPanel;
 
 	private JButton	   setRanges;
 	private JLabel totalCount;
@@ -70,6 +71,11 @@ implements ItemListener, ActionListener
 
     private Checkbox	   receivedExternalNodeMsgs;
 	private Checkbox	   receivedExternalNodeBytes;
+
+	private Checkbox 		microseconds;
+	private Checkbox 		milliseconds;
+	private Checkbox 		seconds;	
+
 	private int		   startInterval;
 	private int		   endInterval;
 	private int		   numIntervals;
@@ -109,6 +115,10 @@ implements ItemListener, ActionListener
 
 	private double[][]     receivedExternalNodeMsgOutput;
 	private double[][]     receivedExternalNodeByteOutput;
+
+	private double unitTime = 1000.0;
+	private String unitTimeStr = "ms";
+
 	// format for output
 	private DecimalFormat  _format;
 
@@ -206,6 +216,20 @@ implements ItemListener, ActionListener
 		Util.gblAdd(checkBoxPanel, receivedExternalNodeMsgs, gbc, 6,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, receivedExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
 
+		CheckboxGroup unit_cbg = new CheckboxGroup();
+		microseconds = new Checkbox("Microseconds", unit_cbg, false);
+		milliseconds = new Checkbox("Milliseconds", unit_cbg, true);
+		seconds = new Checkbox("Seconds", unit_cbg, false);
+
+		microseconds.addItemListener(this);
+		milliseconds.addItemListener(this);
+		seconds.addItemListener(this);
+
+		unitPanel = new JPanel();
+		Util.gblAdd(unitPanel, microseconds, gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(unitPanel, milliseconds, gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(unitPanel, seconds, gbc, 2,0, 1,1, 1,1);
+
 		// control panel items
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
@@ -222,7 +246,8 @@ implements ItemListener, ActionListener
 		graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel,     gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, checkBoxPanel,  gbc, 0,2, 1,1, 0,0);
-		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,3, 1,0, 0,0);
+		Util.gblAdd(mainPanel, unitPanel, 	   gbc, 0,3, 1,1, 0,0);
+		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,4, 1,0, 0,0);
 	}
 
 	public void itemStateChanged(ItemEvent ae){
@@ -325,6 +350,41 @@ implements ItemListener, ActionListener
 			totalCount.setText("Total external node bytes received: " + accumulateArray(receivedExternalNodeByteOutput));
 			super.refreshGraph();
 		}
+		else if (cb == microseconds) {
+			scaleHistogramData(1.0);
+			super.refreshGraph();
+		}
+		else if (cb == milliseconds) {
+			scaleHistogramData(1000.0);
+			super.refreshGraph();
+		}
+		else if (cb == seconds) {
+			scaleHistogramData(1000000.0);
+			super.refreshGraph();
+		}
+	}
+
+	private void scaleHistogramData(double newUnit) {
+		double scale = newUnit / unitTime;
+		for (int interval = 0; interval < numIntervals; interval++) {
+			for (int ep = 0; ep < numEPs; ep++) {
+				sentMsgOutput[interval][ep] *= scale;
+				receivedMsgOutput[interval][ep] *= scale;
+
+				sentByteOutput[interval][ep] *= scale;
+				receivedByteOutput[interval][ep] *= scale;
+
+				receivedExternalMsgOutput[interval][ep] *= scale;
+				receivedExternalByteOutput[interval][ep] *= scale;
+
+				receivedExternalNodeMsgOutput[interval][ep] *= scale;
+				receivedExternalNodeByteOutput[interval][ep] *= scale;
+			}
+		}
+		unitTime = newUnit;
+        if (unitTime == 1.0) unitTimeStr = "us";
+        else if (unitTime == 1000.0) unitTimeStr = "ms";
+        else unitTimeStr = "s";
 	}
 
 
@@ -353,6 +413,10 @@ implements ItemListener, ActionListener
 					return null;
 				}
 				public void done() {
+					milliseconds.setState(true);
+					unitTime = 1000.0;
+					unitTimeStr = "ms";
+
 					setOutputGraphData();
 					Checkbox cb = cbg.getSelectedCheckbox();
 					setCheckboxData(cb);
@@ -502,28 +566,34 @@ implements ItemListener, ActionListener
 		if (currentArrayName.equals("sentMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;
-			rString[3] = "Count = " + 
-			_format.format(sentMsgOutput[xVal][yVal]);    	
+			rString[3] = String.format("Rate = %s messages/%s (%s messages)",
+				_format.format(sentMsgOutput[xVal][yVal]),
+				unitTimeStr,
+				_format.format(sentMsgOutput[xVal][yVal] * intervalSize/unitTime));    	
 		}
 		else if(currentArrayName.equals("sentByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Bytes = %s (%s MB/s)",
+			rString[3] = String.format("Rate = %s B/%s (%s bytes)",
 				_format.format(sentByteOutput[xVal][yVal]),
-				_format.format(sentByteOutput[xVal][yVal] / intervalSize));
+				unitTimeStr,
+				_format.format(sentByteOutput[xVal][yVal] * intervalSize/unitTime));
 		}
 		else if(currentArrayName.equals("receivedMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Count = " + 
-			_format.format(receivedMsgOutput[xVal][yVal]);
+			rString[3] = String.format("Rate = %s messages/%s (%s messages)", 
+				_format.format(receivedMsgOutput[xVal][yVal]),
+				unitTimeStr,
+				_format.format(receivedMsgOutput[xVal][yVal] * intervalSize/unitTime));
 		}
 		else if(currentArrayName.equals("receivedByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Bytes = %s (%s MB/s)",
+			rString[3] = String.format("Rate = %s B/%s (%s bytes)",
 				_format.format(receivedByteOutput[xVal][yVal]),
-				_format.format(receivedByteOutput[xVal][yVal] / intervalSize));
+				unitTimeStr,
+				_format.format(receivedByteOutput[xVal][yVal] * intervalSize/unitTime));
 		}
 		/*
 	else if (currentArrayName.equals("sentExternalMsgCount")) {
@@ -542,28 +612,34 @@ implements ItemListener, ActionListener
 		else if(currentArrayName.equals("receivedExternalMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Count = " + 
-			_format.format(receivedExternalMsgOutput[xVal][yVal]);
+			rString[3] = String.format("Rate = %s messages/%s (%s messages)", 
+				_format.format(receivedExternalMsgOutput[xVal][yVal]),
+				unitTimeStr,
+				_format.format(receivedExternalMsgOutput[xVal][yVal] * intervalSize/unitTime));
 		}
 		else if(currentArrayName.equals("receivedExternalByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Bytes = %s (%s MB/s)",
+			rString[3] = String.format("Rate = %s B/%s (%s bytes)",
 				_format.format(receivedExternalByteOutput[xVal][yVal]),
-				_format.format(receivedExternalByteOutput[xVal][yVal] / intervalSize));
+				unitTimeStr,
+				_format.format(receivedExternalByteOutput[xVal][yVal] * intervalSize/unitTime));
 		}
         else if(currentArrayName.equals("receivedExternalNodeMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = "Count = " + 
-			_format.format(receivedExternalNodeMsgOutput[xVal][yVal]);
+			rString[3] = String.format("Rate = %s messages/%s (%s messages)",
+				_format.format(receivedExternalMsgOutput[xVal][yVal]),
+				unitTimeStr,
+				_format.format(receivedExternalNodeMsgOutput[xVal][yVal] * intervalSize/unitTime));
 		}
 		else if(currentArrayName.equals("receivedExternalNodeByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Bytes = %s (%s MB/s)",
+			rString[3] = String.format("Rate = %s B/%s (%s bytes)",
 				_format.format(receivedExternalNodeByteOutput[xVal][yVal]),
-				_format.format(receivedExternalNodeByteOutput[xVal][yVal] / intervalSize));
+				unitTimeStr,
+				_format.format(receivedExternalNodeByteOutput[xVal][yVal] * intervalSize/unitTime));
 		}
 
 		return rString;

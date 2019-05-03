@@ -17,14 +17,7 @@ import java.io.IOException;
 import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -82,6 +75,12 @@ implements ItemListener, ActionListener
 	private JButton	   saveImage;
 	private JButton	   dataDumpButton;
 	//    private JButton	   epSelection;
+
+    private JRadioButton microseconds;
+    private JRadioButton milliseconds;
+    private JRadioButton seconds;
+
+    private double unitTime = 1000.0;
 
 	private StatDialog 	statDialog;
 	private NumberAxis 	domainAxis, range1Axis, range2Axis;
@@ -157,7 +156,7 @@ implements ItemListener, ActionListener
 		domainAxis = new NumberAxis("Time (microseconds)");
       		domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 		domainAxis.setAutoRangeIncludesZero(false);
-       		range1Axis = new NumberAxis("Value");
+       		range1Axis = new NumberAxis("Statistic/ms");
        		range2Axis = new NumberAxis("Value");
 		plot = new XYPlot();
 		plot.setDomainAxis(domainAxis);
@@ -202,8 +201,30 @@ implements ItemListener, ActionListener
 
 		controlPanel.add(dataDumpButton);
 		controlPanel.add(saveImage);
+
+        JPanel unitPanel = new JPanel();
+        ButtonGroup unit_bg = new ButtonGroup();
+        microseconds = new JRadioButton("Microseconds", false);
+        milliseconds = new JRadioButton("Milliseconds", true);
+        seconds = new JRadioButton("Seconds", false);
+
+        microseconds.addActionListener(this);
+        milliseconds.addActionListener(this);
+        seconds.addActionListener(this);
+
+        unit_bg.add(microseconds);
+        unit_bg.add(milliseconds);
+        unit_bg.add(seconds);
+        unitPanel.add(microseconds);
+        unitPanel.add(milliseconds);
+        unitPanel.add(seconds);
+
+        JPanel botPanel = new JPanel();
+        botPanel.setLayout(new BoxLayout(botPanel, BoxLayout.Y_AXIS));
+        botPanel.add(controlPanel);
+        botPanel.add(unitPanel);
 		mainPanel.add(tabbedPane, BorderLayout.CENTER);
-		mainPanel.add(controlPanel,BorderLayout.SOUTH);
+		mainPanel.add(botPanel,BorderLayout.SOUTH);
 		table.revalidate();
 		table.repaint();
 
@@ -475,6 +496,12 @@ implements ItemListener, ActionListener
 				return false;
 			}
 		}
+
+        double interval = (endTime - startTime)/unitTime;
+        for (int i = 0; i < data.getItemCount(); i++) {
+            data.updateByIndex(i, data.getY(i).doubleValue() / interval);
+        }
+
 		//Add all our values to the overall Vectors.
 		globalSum.add(sum);
 		maxValue.add(max);
@@ -556,7 +583,32 @@ implements ItemListener, ActionListener
 				showDialog();
 			}
 		}
+        else if (e.getSource() == microseconds) {
+            scaleHistogramData(1.0);
+            plotData();
+        }
+        else if (e.getSource() == milliseconds) {
+            scaleHistogramData(1000.0);
+            plotData();
+        }
+        else if (e.getSource() == seconds) {
+            scaleHistogramData(1000000.0);
+            plotData();
+        }
 	}
+
+    private void scaleHistogramData(double newUnit) {
+        double scale = newUnit / unitTime;
+        for (XYSeriesCollection series : graphedData) {
+            for (int i = 0; i < series.getItemCount(0); i++) {
+                series.getSeries(0).updateByIndex(i, series.getSeries(0).getY(i).doubleValue() * scale);
+            }
+        }
+        unitTime = newUnit;
+        if (unitTime == 1.0) plot.getRangeAxis(0).setLabel("Statistics/us");
+        else if (unitTime == 1000.0) plot.getRangeAxis(0).setLabel("Statistics/ms");
+        else plot.getRangeAxis(0).setLabel("Statistics/s");
+    }
 
 	//Change cursor depending on situation
 	public void itemStateChanged(ItemEvent ae){

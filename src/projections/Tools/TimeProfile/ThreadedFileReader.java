@@ -16,7 +16,6 @@ import projections.gui.MainWindow;
 	private int myRun;
 	private int startInterval;
 	private int endInterval;
-//	boolean ampiTraceOn;
 
 	private int[][][] mySystemUsageData;   // [type][pe list index][interval]
 //	int[][][][] mySystemMsgsData; // [categoryIdx][type][][]
@@ -47,7 +46,6 @@ import projections.gui.MainWindow;
 		this.myRun = myRun;
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
-//		this.ampiTraceOn = ampiTraceOn;
 		this.graphData = graphData;
 	}
 

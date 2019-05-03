@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import projections.Tools.Timeline.RangeQueries.Range1D;
-import projections.analysis.AmpiFunctionData;
 import projections.analysis.ObjectId;
 import projections.analysis.PackTime;
 import projections.analysis.TimelineEvent;
@@ -79,10 +78,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private int numPapiCounts = 0;
 	private long papiCounts[];
 
-	private boolean isFunction = false;
-
 	private static DecimalFormat format_ = new DecimalFormat();
-	private AmpiFunctionData funcData[];
 
 	private boolean isCommThdRecv = false;
 
@@ -126,22 +122,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		numPapiCounts = tle.numPapiCounts;
 		papiCounts    = tle.papiCounts;
 
-		isFunction = tle.isFunction;
-
 		format_.setGroupingUsed(true);
 	
 		setUsage();
-		setPackUsage();
-
-		if (isFunction) {
-			// copy the callstack	
-			funcData = new AmpiFunctionData[tle.callStack.size()];
-			tle.callStack.copyInto(funcData);
-					
-		} else if (tle.EntryPoint >= 0) {
-		}
-		
-		
+		setPackUsage();		
 	} 
 	
 	/** Dynamically generate the tooltip mouseover text when needed */
@@ -152,24 +136,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		StringBuilder infoString = new StringBuilder(5000);
 
 		
-		// **CW** special treatment for functions. There really should
-		// be a general way of dealing with this.
-		if (isFunction) {			
-			infoString.append("<i>Function</i>: " + MainWindow.runObject[data.myRun].getFunctionName(entry) + "<br>" );
-			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime) + "<br>");
-			infoString.append("<i>End Time</i>: " + format_.format(endTime) + "<br>");
-			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>");
-			infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
-			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
-			infoString.append("<hr><br><i>Function Callstack</i>:<br>");
-
-			// look at the call stack
-			for(int i=0;i<funcData.length;i++){
-				AmpiFunctionData functionData = funcData[i];
-				infoString.append("<i>[Func]</i>: " + MainWindow.runObject[data.myRun].getFunctionName(functionData.FunctionID) + "<br>");
-				infoString.append("&nbsp&nbps&nbsp&nbps<i>line</i>:" + functionData.LineNo + " <i>file</i>: " + functionData.sourceFileName + "<br>");
-			}
-		} else if (entry >= 0) {
+		if (entry >= 0) {
 
 			infoString.append("<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"); 
 
@@ -201,16 +168,38 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
 			else 
 				infoString.append("<i>Msgs created</i>: 0<br>");
-            EntryMethodObject obj = this;
-            TimelineMessage created_message = obj.creationMessage();
-            long latency;
-            if(created_message != null)
-            {
-                latency = beginTime - created_message.Time ;
-                infoString.append("<i>Msg latency is </i>: " + latency + "<br>");
-            }
-            infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
-			infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
+
+			TimelineMessage created_message = this.creationMessage();
+			boolean usedCommThreadSender = false;
+			if(created_message != null)
+			{
+				infoString.append("<i>Msg latency is </i>: " + (beginTime - created_message.Time) + "<br>");
+
+				// If the message came from a comm thread, trace back to the actual creator if possible
+				if (data.isCommThd(pCreation)) {
+					TimelineMessage origMsg = data.messageStructures.getMessageToSendingObjectsMap().get(created_message).creationMessage();
+					if (origMsg != null) {
+						EntryMethodObject origSender = data.messageStructures.getMessageToSendingObjectsMap().get(origMsg);
+						if (origSender != null) {
+							infoString.append("<i>Created by </i>: " + data.getPEString(origSender.pe) + " via " + data.getPEString(pCreation) + "<br>");
+							usedCommThreadSender = true;
+						}
+					}
+				}
+			}
+			if (!usedCommThreadSender) {
+				infoString.append("<i>Created by </i>: " + data.getPEString(pCreation) + "<br>");
+			}
+			int dimension = MainWindow.runObject[data.myRun].getSts().getEntryChareDimensionsByID(entry);
+			if (dimension < 0) {
+				infoString.append("<i>Id</i>: " + tid.id[0] + ":" + tid.id[1] + ":" + tid.id[2] + "<br>");
+			} else {
+				infoString.append("<i>Id [" + dimension + "D]</i>");
+				for (int i = 0; i < dimension; i++) {
+					infoString.append(":" + tid.id[i]);
+				}
+				infoString.append("<br>");
+			}
 			if(tleUserEventName!=null)
 				infoString.append("<i>Associated User Event</i>: "+tleUserEventName+ "<br>");
 			
@@ -774,10 +763,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 	
 	
-	public int paintMe(Graphics2D g2d, int actualDisplayWidth, int maxFilledX){
+	public boolean paintMe(Graphics2D g2d, int actualDisplayWidth, MainPanel.MaxFilledX maxFilledX){
+		boolean paintedEP = false;
 		// If it is hidden, we may not display it
 		if(!isDisplayed()){
-			return -1;
+			return paintedEP;
 		}
 		
 		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
@@ -809,7 +799,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		}
 
 		// Only draw this EMO if it covers some pixel that hasn't been filled yet
-		if (right > maxFilledX) {
+		if (right > maxFilledX.ep) {
+			maxFilledX.ep = right;
+			paintedEP = true;
 
 			// Determine the base color
 			Paint c = determineColor();
@@ -889,7 +881,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 					// Compute the end pixel coordinate relative to the containing panel
 					int packEndCoordX = data.timeToScreenPixelRight(packEndTime);
 
-					g2d.fillRect(packBeginCoordX, topCoord+verticalInset+rectHeight, (packEndCoordX-packBeginCoordX+1), data.messagePackHeight());
+					if (packEndCoordX > maxFilledX.pack) {
+						maxFilledX.pack = packEndCoordX;
+						g2d.fillRect(packBeginCoordX, topCoord + verticalInset + rectHeight, (packEndCoordX - packBeginCoordX + 1), data.messagePackHeight());
+					}
 
 				}
 			}
@@ -909,13 +904,15 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				{
 					// Compute the pixel coordinate relative to the containing panel
 					int msgCoordX = data.timeToScreenPixel(msgtime);
-
-					g2d.drawLine(msgCoordX, topCoord+verticalInset+rectHeight, msgCoordX, topCoord+verticalInset+rectHeight+data.messageSendHeight());
+					if (msgCoordX > maxFilledX.msg) {
+						maxFilledX.msg = msgCoordX;
+						g2d.drawLine(msgCoordX, topCoord + verticalInset + rectHeight, msgCoordX, topCoord + verticalInset + rectHeight + data.messageSendHeight());
+					}
 				}
 			}
 		}
 
-		return right;
+		return paintedEP;
 	}
 
 		
@@ -928,8 +925,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			return MainWindow.runObject[data.myRun].getIdleColor();
 		} else if (entryIndex == -2) { // unknown domain
 			return MainWindow.runObject[data.myRun].getOverheadColor();
-		} else if (isFunction) {
-			return MainWindow.runObject[data.myRun].getFunctionColor(entryIndex);
 		}
 		
 		// color the objects by memory usage with a nice blue - red gradient

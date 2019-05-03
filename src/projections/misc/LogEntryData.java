@@ -54,7 +54,7 @@ public class LogEntryData extends ProjDefs
     public long recvTime;       // the time the processor *actually* received
                                 // the message.
     public int id[];            // the thread id (3D array tuple).
-                                // as of ver 7.0, it is a 4-tuple
+                                // as of ver 9.0, it is a 6-tuple
 
     public long cpuStartTime;   // start of cpu timer
     public long cpuEndTime;     // end of cpu timer
@@ -75,14 +75,9 @@ public class LogEntryData extends ProjDefs
     
     public LogEntryData() {
 	// this is fixed (since it is based on a 3D tuple)
-        // As of version 7.0, it is a 4-tuple which includes array ID.
-	id = new int[4];
+        // As of version 9.0, it is a 6-tuple which includes array ID.
+	id = new int[6];
     }
-
-    // 9/14/2004 - added AMPI Function tracing support
-    // "entry" in the case of functions will be the function ID.
-    public int lineNo;          // line number of the function call.
-    public String funcName;     // the name of the function
 
     // 6/7/16 - added User Stats support
     public double stat;
@@ -163,7 +158,6 @@ public class LogEntryData extends ProjDefs
 				(type == BEGIN_UNPACK) ||
 				(type == BEGIN_PROCESSING) ||
 				(type == BEGIN_TRACE) ||
-				(type == BEGIN_FUNC) ||
 				(type == BEGIN_INTERRUPT));
 	}
 
@@ -173,7 +167,6 @@ public class LogEntryData extends ProjDefs
 				(type == END_UNPACK) ||
 				(type == END_PROCESSING) ||
 				(type == END_TRACE) ||
-				(type == END_FUNC) ||
 				(type == END_INTERRUPT));
 	}
     

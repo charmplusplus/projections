@@ -35,8 +35,24 @@ public class StsReader extends ProjDefs
     private int EntryCount;
     private int TotalMsgs;
 
+    private class Chare
+    {
+        protected String name;
+        protected int dimensions;
+
+        public Chare(String name, int dimensions) {
+            this.name = name;
+            this.dimensions = dimensions;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
     // Sts data
-    private String ClassNames[];    // indexed by chare id
+    private Chare Chares[];    // indexed by chare id
 //    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
  
@@ -52,7 +68,7 @@ public class StsReader extends ProjDefs
     /** index by Integer ID in STS file, return String name */
     private Map<Integer, String> entryNames = new TreeMap<Integer, String>();
     /** index by Integer ID in STS file, return String name */
-    public Map<Integer, String>  entryChareNames = new TreeMap<Integer, String>(); 
+    public Map<Integer, Chare> entryChares = new TreeMap<Integer, Chare>();
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
     private Map<Integer, Integer>  entryFlatToID = new TreeMap<Integer, Integer>();
     /** keys are the IDs given in STS file, values are indexes into flat arrays */
@@ -79,16 +95,40 @@ public class StsReader extends ProjDefs
     private TreeMap<Integer, String> userStats = new TreeMap<Integer, String>();
     /// The same user stat names as in userStats, but packed into an array in same manner
     private String userStatNames[];
-
-    
-    // AMPI Functions tracing
-    private int functionEventIndex = 0;
-    private Hashtable<Integer, Integer> functionEventIndices = new Hashtable<Integer, Integer>();
-    private Hashtable<Integer, String> functionEvents = new Hashtable<Integer, String>();
-    private String functionEventNames[];
     
     private int numPapiEvents;
     private String papiEventNames[];
+
+    /**
+     * Matches quotes for those values in the STS file that are supposed to be quoted.
+     * Earlier version of the STS file were not quoted, this should also match those.
+     * @param st
+     * @return Matched string value, or "" if unmatched
+     */
+    private static String matchQuotes(StringTokenizer st) {
+        String current = st.nextToken();
+        // If string doesn't start with a quote, then we've already matched
+        if (!current.startsWith("\"")){
+           return current;
+        }
+
+        // If it starts and ends with a quote, then we've already matched
+        if (current.endsWith("\"")) {
+            return current.substring(1, current.length() - 1);
+        }
+
+        // Otherwise, start concatenating strings until we find a closing quote
+        StringBuilder value = new StringBuilder(current.substring(1));
+        while (st.hasMoreTokens()) {
+            current = st.nextToken();
+            value.append(current);
+            if (current.endsWith("\"")) {
+                return value.substring(0, value.length() - 1);
+            }
+        }
+
+        return "";
+    }
 
     /** 
      *  The StsReader constructor reads the .sts file indicated.
@@ -121,7 +161,7 @@ public class StsReader extends ProjDefs
 		if (s1.equals("VERSION")) {
 		    version = Double.parseDouble(st.nextToken());
 		} else if (s1.equals("MACHINE")) {
-		    Machine = st.nextToken();
+		    Machine = matchQuotes(st);
 		} else if (s1.equals("PROCESSORS")) {
 		    NumPe = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("SMPMODE")) {
@@ -129,8 +169,7 @@ public class StsReader extends ProjDefs
  		    NumNodes = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
-//		    ChareList   = new Chare[TotalChares];
-		    ClassNames  = new String[TotalChares];
+		    Chares = new Chare[TotalChares];
 		} else if (s1.equals("TOTAL_EPS")) {
 		    EntryCount   = Integer.parseInt(st.nextToken());
 		} else if (s1.equals("TOTAL_MSGS")) {
@@ -138,17 +177,16 @@ public class StsReader extends ProjDefs
 		    MsgTable  = new long[TotalMsgs];
 		} else if (s1.equals("CHARE") || Line.equals("BOC")) {
 		    ID = Integer.parseInt(st.nextToken());
-		    String name = st.nextToken();
-//		    ChareList[ID]            = new Chare();
-//		    ChareList[ID].ChareID    = ID;
-//		    ChareList[ID].NumEntries = 0;
-//		    ChareList[ID].Name       = name;
-//		    ChareList[ID].Type       = new String(s1);
-		    ClassNames[ID]      = name;
+		    String name = matchQuotes(st);
+			int dimensions = -1;
+			if (version >= 9.0) {
+				dimensions = Integer.parseInt(st.nextToken());
+			}
+			Chares[ID] = new Chare(name, dimensions);
 		} else if (s1.equals("ENTRY")) {
 			st.nextToken(); // type
 			ID      = Integer.parseInt(st.nextToken());
-			StringBuffer nameBuf=new StringBuffer(st.nextToken());
+			StringBuilder nameBuf=new StringBuilder(matchQuotes(st));
 			Name = nameBuf.toString();
 			if (-1!=Name.indexOf('(') && -1==Name.indexOf(')')) {
 				//Parse strings until we find the close-paren
@@ -168,26 +206,11 @@ public class StsReader extends ProjDefs
 			entryIDToFlat.put(ID,entryIndex);
 			entryIndex++;
 			getEntryNames().put(ID,Name);
-			getEntryChareNames().put(ID,ClassNames [ChareID]);
+			getEntryChare().put(ID, Chares[ChareID]);
 		} else if (s1.equals("MESSAGE")) {
 		    ID  = Integer.parseInt(st.nextToken());
 		    int Size  = Integer.parseInt(st.nextToken());
 		    MsgTable[ID] = Size;
-		} else if (s1.equals("FUNCTION")) {
-		    Integer key = new Integer(st.nextToken());
-		    if (!functionEvents.containsKey(key)) {
-			// Allow the presence of spaces in the descriptor.
-			String functionEventName = "";
-			while (st.hasMoreTokens()) {
-			    functionEventName += st.nextToken() + " ";
-			}
-			functionEvents.put(key, functionEventName);
-			functionEventNames[functionEventIndex] = 
-			    functionEventName;
-			functionEventIndices.put(key,
-						 new Integer(functionEventIndex));
-		    }
-		    functionEventIndex++;
 		} else if (s1.equals("EVENT")) {
 		    Integer key = new Integer(st.nextToken());
 		    if (!userEvents.containsKey(key)) {
@@ -219,9 +242,6 @@ public class StsReader extends ProjDefs
 		//Read in number of stats
 		} else if (s1.equals("TOTAL_STATS")) {
 		    userStatNames =
-			new String[Integer.parseInt(st.nextToken())];
-		} else if (s1.equals("TOTAL_FUNCTIONS")) {
-		    functionEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals ("TOTAL_PAPI_EVENTS")) {
 		    hasPAPI = true;
@@ -309,12 +329,20 @@ public class StsReader extends ProjDefs
     }
     
     private String getEntryChareNameByID(int ID) {
-    	return getEntryChareNames().get(ID);
+	return getEntryChare().get(ID).name;
     }   
     
     public String getEntryChareNameByIndex(int index) {
-    	return getEntryChareNames().get(entryFlatToID.get(index));
+	return getEntryChare().get(entryFlatToID.get(index)).name;
     }   
+
+    public int getEntryChareDimensionsByID(int ID) {
+	return getEntryChare().get(ID).dimensions;
+    }
+
+    public int getEntryChareDimensionsByIndex(int index) {
+	return getEntryChare().get(entryFlatToID.get(index)).dimensions;
+    }
 
     public String getEntryFullNameByID(int ID) {
     	return  getEntryChareNameByID(ID) + "::" + getEntryNameByID(ID);
@@ -336,11 +364,14 @@ public class StsReader extends ProjDefs
     }
 
     public Integer getUserEventIndex(int eventID) {
-	Integer key = new Integer(eventID);
+	Integer key = eventID;
 	if(userEventIndices.containsKey(key))
 		return (userEventIndices.get(key));
-	else
-		return null;
+	else {
+		// returning null will lead to null pointer exception when
+		// trying to convert back to int, instead use -1
+		return -1;
+	}
     }
 
     public String getUserEventName(int eventID) { 
@@ -386,36 +417,6 @@ public class StsReader extends ProjDefs
     	return userStats;
     }
 
-
-    // *** function event accessors ***
-    public int getNumFunctionEvents() {
-	// **FIXME**
-	// ** create a new function called getFunctionArraySize **
-	// ** getNumFunctionEvents does not semantically mean the same thing!
-	//
-	// the +1 is a silly hack because function id counts does not begin
-	// from 0. No easy solution is visible in the near-future.
-	if (functionEvents.size() == 0) {
-	    return 0;
-	} else {
-	    return functionEvents.size()+1;
-	}
-    }
-
-    public int getFunctionEventIndex(int eventID) {
-	Integer key = new Integer(eventID);
-	return (functionEventIndices.get(key)).intValue();
-    }
-
-    public String getFunctionEventDescriptor(int eventID) {
-	Integer key = new Integer(eventID);
-	return functionEvents.get(key);
-    }
-
-    public String[] getFunctionEventDescriptors() {
-	return functionEventNames;
-    }
-
     public int getNumPerfCounts() {
 	if (hasPAPI) {
 	    return numPapiEvents;
@@ -437,22 +438,22 @@ public class StsReader extends ProjDefs
 	}
 
 
-	public Map<Integer, String>  getEntryChareNames() {
-		return entryChareNames;
+	public Map<Integer, Chare> getEntryChare() {
+		return entryChares;
 	}
 
 	
 	/** Produce a mapping from EP to a pretty version of the entry point's name */
 	public Map<Integer, String>  getPrettyEntryNames() {
 		Map<Integer, String> entryNames = getEntryNames();
-		Map<Integer, String> entryChareNames = getEntryChareNames();
+		Map<Integer, Chare> entryChareNames = getEntryChare();
 
 		TreeMap<Integer, String> result = new TreeMap<Integer, String>();
 	
 		Iterator<Integer> iter = entryNames.keySet().iterator();
 		while(iter.hasNext()){
 			Integer id = iter.next();
-			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id));
+			result.put(id,entryNames.get(id) + "::" + entryChareNames.get(id).name);
 		}
 		
 		return result;

@@ -17,11 +17,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.io.IOException;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
@@ -74,6 +70,7 @@ implements ItemListener, ActionListener
 	private double[][]	maxValue;
 	private double[][]	minValue;
 	private int[][]		numCalls;
+	private double[][]  statRate;
 
 	private int 		numStats;
 	private int 		numPEs;
@@ -82,9 +79,17 @@ implements ItemListener, ActionListener
 	private DecimalFormat  _format;
 
 	private JPanel	checkBoxPanel;
+	private Checkbox statRateBox;
 	private Checkbox avgValueBox;
 	private Checkbox maxValueBox;
 	private Checkbox minValueBox;
+
+	private JRadioButton microseconds;
+	private JRadioButton milliseconds;
+	private JRadioButton seconds;
+
+	private double unitTime = 1000.0;
+	private String unitTimeStr = "ms";
 
 	public UserStatsProcWindow(MainWindow mainWindow) {
 		super("User Stats over Time Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
@@ -116,15 +121,35 @@ implements ItemListener, ActionListener
 
 		// checkbox panel items
 		CheckboxGroup cbg = new CheckboxGroup();
-		avgValueBox = new Checkbox("Average Value", cbg, true);
+		statRateBox = new Checkbox("Statistic Rate", cbg, true);
+		statRateBox.addItemListener(this);
+		avgValueBox = new Checkbox("Average Value", cbg, false);
 		avgValueBox.addItemListener(this);
 		maxValueBox = new Checkbox("Max Value", cbg, false);
 		maxValueBox.addItemListener(this);
 		minValueBox = new Checkbox("Min Value", cbg, false);
 		minValueBox.addItemListener(this);
-		Util.gblAdd(checkBoxPanel, avgValueBox, gbc, 0,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, maxValueBox, gbc, 1,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, minValueBox, gbc, 2,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, statRateBox, gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, avgValueBox, gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, maxValueBox, gbc, 2,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, minValueBox, gbc, 3,0, 1,1, 1,1);
+
+        JPanel unitPanel = new JPanel();
+        ButtonGroup unit_bg = new ButtonGroup();
+        microseconds = new JRadioButton("Microseconds", false);
+        milliseconds = new JRadioButton("Milliseconds", true);
+        seconds = new JRadioButton("Seconds", false);
+
+        microseconds.addActionListener(this);
+        milliseconds.addActionListener(this);
+        seconds.addActionListener(this);
+
+        unit_bg.add(microseconds);
+        unit_bg.add(milliseconds);
+        unit_bg.add(seconds);
+        unitPanel.add(microseconds);
+        unitPanel.add(milliseconds);
+        unitPanel.add(seconds);
 
 		// control panel items
 		setRanges = new JButton("Select New Range");
@@ -136,16 +161,17 @@ implements ItemListener, ActionListener
 
 		graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel,     gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,3, 1,0, 0,0);
+		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,4, 1,0, 0,0);
 
 		Util.gblAdd(mainPanel, checkBoxPanel,   gbc, 0,2, 1,1, 0,0);
+	    Util.gblAdd(mainPanel, unitPanel,       gbc, 0,3, 1,1, 0,0);
 	}
 
 	//Set graph data.
 	protected void setGraphSpecificData(){
 		setXAxis("Processor",processorList );
-		setYAxis("value", "");
-		setDataSource("User Stats", avgValue,new MyColorer(), this);
+		setYAxis("Statistic/ms", "");
+		setDataSource("User Stats", statRate,new MyColorer(), this);
 		refreshGraph();
 	}
 
@@ -169,6 +195,10 @@ implements ItemListener, ActionListener
 					return null;
 				}
 				public void done() {
+				    statRateBox.setState(true);
+                    milliseconds.setSelected(true);
+                    unitTime = 1000.0;
+                    unitTimeStr = "ms";
 					setGraphSpecificData();
 					thisWindow.setVisible(true);
 					thisWindow.repaint();
@@ -187,6 +217,8 @@ implements ItemListener, ActionListener
 		maxValue = new double[numPEs][numStats];
 		minValue = new double[numPEs][numStats];
 		numCalls = new int[numPEs][numStats];
+		statRate = new double[numPEs][numStats];
+
 		int peIdx = 0;
 		for(Integer pe : processorList) {
 
@@ -208,6 +240,7 @@ implements ItemListener, ActionListener
 					statIndex = MainWindow.runObject[myRun].getUserDefinedStatIndex(logData.userEventID);
 					//Store the data accordingly
 					avgValue[peIdx][statIndex] += logData.stat;
+					statRate[peIdx][statIndex] += logData.stat;
 					//keeps track of how many times this specific stat was updated on this specific PE
 					numCalls[peIdx][statIndex]+=1;
 					//Set min and max accordingly.
@@ -243,12 +276,14 @@ implements ItemListener, ActionListener
 
 		}
 
+		double interval = (endTime - startTime)/1000.0;
 		/*To make avgValue, we must divide each element, which currently holds its sum,
 		by the number of times it was called to get an avg value*/
 		for(int i = 0; i<numPEs;i+=1) {
 
 			for( int j = 0; j<numStats; j+=1) {
 				avgValue[i][j] = avgValue[i][j] / numCalls[i][j];
+				statRate[i][j] = statRate[i][j] / interval;
 			}
 		}
    	 }
@@ -260,12 +295,13 @@ implements ItemListener, ActionListener
 			return null;
 
 
-		String[] rString = new String[5];
+		String[] rString = new String[6];
 		rString[0] = "Processor " + xAxis.getIndexName(xVal);
 		rString[1] = "Name: " + statNames[yVal];
-		rString[2] = "Avg Value: " +avgValue[xVal][yVal];
-		rString[3] = "Max Value: " +maxValue[xVal][yVal];
-		rString[4] = "Min Value: " +minValue[xVal][yVal];
+		rString[2] = "Call Rate: " + _format.format(statRate[xVal][yVal]) + " (per " + unitTimeStr + ")";
+		rString[3] = "Avg Value: " +avgValue[xVal][yVal];
+		rString[4] = "Max Value: " +maxValue[xVal][yVal];
+		rString[5] = "Min Value: " +minValue[xVal][yVal];
 
 		return rString;
 	}
@@ -286,20 +322,55 @@ implements ItemListener, ActionListener
 				showDialog();
 			}
 		}
+        else if (e.getSource() == microseconds) {
+            scaleHistogramData(1.0);
+        }
+        else if (e.getSource() == milliseconds) {
+            scaleHistogramData(1000.0);
+        }
+        else if (e.getSource() == seconds) {
+            scaleHistogramData(1000000.0);
+        }
 	}
+
+    private void scaleHistogramData(double newUnit) {
+        double scale = newUnit / unitTime;
+        for (int pe = 0; pe < numPEs; pe++) {
+            for (int stat = 0; stat < numStats; stat++) {
+                statRate[pe][stat] *= scale;
+            }
+        }
+        unitTime = newUnit;
+        if (unitTime == 1.0) unitTimeStr = "us";
+        else if (unitTime == 1000.0) unitTimeStr = "ms";
+        else unitTimeStr = "s";
+
+        if (statRateBox.getState()) {
+            setYAxis("Statistic/" + unitTimeStr, "");
+            setDataSource("Statistic Rate", statRate, new MyColorer(), this);
+            super.refreshGraph();
+        }
+    }
 
 	//Change the dataSource depending on which checkbox is currently clicked.
 	public void itemStateChanged(ItemEvent ae){
 		if(ae.getSource() instanceof Checkbox){
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			Checkbox cb = (Checkbox)ae.getSource();
-			if (cb == avgValueBox) {
+			if (cb == statRateBox) {
+			    setYAxis("Statistic/" + unitTimeStr, "");
+			    setDataSource("Statistic Rate", statRate, new MyColorer(), this);
+			    super.refreshGraph();
+            } else if((cb == avgValueBox)) {
+                setYAxis("Value", "");
 				setDataSource("Average Value",avgValue ,new MyColorer(), this);
 				super.refreshGraph();
 			}else if(cb == maxValueBox){
+                setYAxis("Value", "");
 				setDataSource("Max Value",maxValue ,new MyColorer(), this);
 				super.refreshGraph();
 			}else if(cb == minValueBox){
+                setYAxis("Value", "");
 				setDataSource("Min Value", minValue,new MyColorer(), this);
 				super.refreshGraph();
 			}

@@ -4,6 +4,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.Toolkit;
+
 import java.util.logging.Level;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -11,9 +14,10 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
 
+import projections.Tools.MessageSizeEvolution.MessageSizeEvolutionWindow;
 import projections.Tools.PerformanceCounters.PerfWindow;
-import projections.Tools.TopologyDisplay.TopologyDisplayWindow;
 import projections.Tools.CommunicationOverTime.CommTimeWindow;
 import projections.Tools.CommunicationPerPE.CommWindow;
 import projections.Tools.Extrema.ExtremaWindow;
@@ -22,10 +26,11 @@ import projections.Tools.LogFileViewer.LogFileViewerWindow;
 import projections.Tools.MemoryUsage.MemoryUsageWindow;
 import projections.Tools.NoiseMiner.NoiseMinerWindow;
 import projections.Tools.Overview.OverviewWindow;
+import projections.Tools.EntryMethodProfile.MethodProfileWindow;
 import projections.Tools.Streaming.StreamingTool;
 import projections.Tools.TimeProfile.TimeProfileWindow;
 import projections.Tools.Timeline.TimelineWindow;
-import projections.Tools.TimelineRendered.TimelineRenderedWindow;
+import projections.Tools.UserEvents.UserEventsWindow;
 import projections.Tools.UserStatsOverTime.UserStatsTimeWindow;
 import projections.Tools.UserStatsPerPE.UserStatsProcWindow;
 import projections.analysis.ProjMain;
@@ -90,12 +95,11 @@ implements ActionListener, ItemListener
 	private JMenuItem timeProfileGraphMenuItem;
 	private JMenuItem perfCounterMenuItem;
 	private JMenuItem multirunAnalysisMenuItem;
-	private JMenuItem functionToolMenuItem;
-	private JMenuItem AMPIUsageProfileMenuItem;
 	private JMenuItem noiseMinerMenuItem;
 	private JMenuItem streamingMenuItem;
 	private JMenuItem memoryUsageMenuItem;
-	private JMenuItem topologyDisplayMenuItem;
+	private JMenuItem methodProfileMenuItem;
+	private JMenuItem messageSizeEvolutionMenuItem;
 
 	private JCheckBoxMenuItem perfLogMenuItem;
 
@@ -130,11 +134,10 @@ implements ActionListener, ItemListener
 			userStatsProcMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
-			functionToolMenuItem.setEnabled(false);
-			AMPIUsageProfileMenuItem.setEnabled(false);
 			noiseMinerMenuItem.setEnabled(false);
 			memoryUsageMenuItem.setEnabled(false);
-			topologyDisplayMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(false);
+			messageSizeEvolutionMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_SUMMARY:
@@ -164,11 +167,10 @@ implements ActionListener, ItemListener
 			userStatsProcMenuItem.setEnabled(false);
 			outlierAnalysisMenuItem.setEnabled(false);
 			multirunAnalysisMenuItem.setEnabled(true);
-			functionToolMenuItem.setEnabled(false);
-			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
-			topologyDisplayMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(false);
+			messageSizeEvolutionMenuItem.setEnabled(false);
 
 			break;
 		case OPENED_FILES :
@@ -206,11 +208,10 @@ implements ActionListener, ItemListener
 			}
 			outlierAnalysisMenuItem.setEnabled(true);
 			multirunAnalysisMenuItem.setEnabled(true);
-			functionToolMenuItem.setEnabled(true);
-			AMPIUsageProfileMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);
-			topologyDisplayMenuItem.setEnabled(true);
+			methodProfileMenuItem.setEnabled(true);
+			messageSizeEvolutionMenuItem.setEnabled(true);
 
 			break;
 		}
@@ -226,9 +227,14 @@ implements ActionListener, ItemListener
 		// FILE MENU	
 		fileMenu = new JMenu("File");		
 		fileOpenMenuItem = new JMenuItem("Open File(s)");
+		fileOpenMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+			Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
+
 		fileCloseMenuItem= new JMenuItem("Close current data");
 		fileCloseAllMenuItem= new JMenuItem("Close all data");
 		fileQuitMenuItem= new JMenuItem("Quit");	
+		fileQuitMenuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q,
+			Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()));
 
 		fileMenu.addActionListener(this);
 		fileOpenMenuItem.addActionListener(this);
@@ -264,12 +270,11 @@ implements ActionListener, ItemListener
 		userStatsProcMenuItem = new JMenuItem("User Stats Per Processor");
 		outlierAnalysisMenuItem = new JMenuItem("Extrema Analysis");
 		multirunAnalysisMenuItem = new JMenuItem("Multirun Analysis");
-		functionToolMenuItem = new JMenuItem("Function Tool");
-		AMPIUsageProfileMenuItem = new JMenuItem("AMPI Usage Profile");
 		noiseMinerMenuItem = new JMenuItem("Noise Miner");
 		streamingMenuItem = new JMenuItem("Streaming CCS");
 		memoryUsageMenuItem = new JMenuItem("Memory Usage");
-		topologyDisplayMenuItem = new JMenuItem("Topology Display");
+		methodProfileMenuItem = new JMenuItem("Entry Method Profile");
+		messageSizeEvolutionMenuItem = new JMenuItem("Message Size Evolution");
 
 		timelinesMenuItem.addActionListener(this);
 		//renderedTimelinesMenuItem.addActionListener(this);
@@ -288,12 +293,11 @@ implements ActionListener, ItemListener
 		userStatsProcMenuItem.addActionListener(this);
 		outlierAnalysisMenuItem.addActionListener(this);
 		multirunAnalysisMenuItem.addActionListener(this);
-		functionToolMenuItem.addActionListener(this);
-		AMPIUsageProfileMenuItem.addActionListener(this);
 		noiseMinerMenuItem.addActionListener(this);
 		streamingMenuItem.addActionListener(this);
 		memoryUsageMenuItem.addActionListener(this);
-		topologyDisplayMenuItem.addActionListener(this);
+		methodProfileMenuItem.addActionListener(this);
+		messageSizeEvolutionMenuItem.addActionListener(this);
 
 		toolMenu.add(timelinesMenuItem);
 		//toolMenu.add(renderedTimelinesMenuItem);
@@ -312,12 +316,11 @@ implements ActionListener, ItemListener
 		toolMenu.add(userStatsProcMenuItem);
 		toolMenu.add(outlierAnalysisMenuItem);
 		toolMenu.add(multirunAnalysisMenuItem);
-		toolMenu.add(functionToolMenuItem);
-		toolMenu.add(AMPIUsageProfileMenuItem);
 		toolMenu.add(noiseMinerMenuItem);
 		toolMenu.add(streamingMenuItem);
 		toolMenu.add(memoryUsageMenuItem);
-		toolMenu.add(topologyDisplayMenuItem);
+		toolMenu.add(methodProfileMenuItem);
+		toolMenu.add(messageSizeEvolutionMenuItem);
 
 		menubar.add(toolMenu);
 
@@ -419,13 +422,7 @@ implements ActionListener, ItemListener
 			
 			else if (mi == multirunAnalysisMenuItem)	
 				parent.openTool(new MultiRunWindow(parent) );
-			
-			else if (mi == functionToolMenuItem)	
-				parent.openTool(new FunctionTool(parent) );
-			
-			else if (mi == AMPIUsageProfileMenuItem)	
-				parent.openTool(new AmpiProfileWindow(parent) );
-			
+
 			else if (mi == noiseMinerMenuItem)	
 				parent.openTool(new NoiseMinerWindow(parent) );
 			
@@ -435,8 +432,11 @@ implements ActionListener, ItemListener
 			else if (mi == streamingMenuItem)	
 				new StreamingTool();
 			
-			else if (mi == topologyDisplayMenuItem)
-				parent.openTool(new TopologyDisplayWindow(parent) );
+			else if (mi == methodProfileMenuItem)
+				parent.openTool(new MethodProfileWindow(parent) );
+
+			else if(mi == messageSizeEvolutionMenuItem)
+				parent.openTool(new MessageSizeEvolutionWindow(parent));
 
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);

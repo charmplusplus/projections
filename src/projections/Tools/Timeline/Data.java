@@ -4,8 +4,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -393,7 +395,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 	/** Use the new set of PEs. The PEs will be stored internally in a Linked List */
-	public void setProcessorList(SortedSet<Integer> processorList){
+	public void setProcessorList(Collection<Integer> processorList){
 		peToLine.clear();
 
 		if(isSMPRun()){
@@ -426,8 +428,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					if(curNID != prevNID){
 						//encounter a new set of PEs of a node, add the comm thd
 						//of the previous node
-						peToLine.add(prevCommPE);
-						commPEs.add(prevCommPE);
+						if (!commPEs.contains(prevCommPE)) {
+							peToLine.add(prevCommPE);
+							commPEs.add(prevCommPE);
+						}
 						
 						prevNID = curNID;
 						prevCommPE = getCommThdPE(pe);
@@ -435,7 +439,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					peToLine.add(pe);
 				}
 			}
-			if(!isLastAdded) peToLine.add(prevCommPE);
+			if(!commPEs.contains(prevCommPE) && !isLastAdded) peToLine.add(prevCommPE);
 		}else{
 			peToLine.addAll(processorList);
 		}		
@@ -572,6 +576,12 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		synchronized(this){
 			//==========================================	
 			//  Perform some post processing
+
+			int n = determineNumNestedIDs();
+			// Only show nestedIDs if there are at least two of them
+			if (n > 0)
+				numNestedIDs = n;
+
 			for (int e=0; e<MainWindow.runObject[myRun].getNumUserEntries(); e++) {
 				entries[e] = 0;
 			}
@@ -923,7 +933,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		}
 
 
-		LinkedList<TimelineEvent> tl = new LinkedList<TimelineEvent>();
+		Deque<TimelineEvent> tl = new ArrayDeque<TimelineEvent>();
 
 		/** Stores all user events from the currently loaded PE/time range. It must be sorted,
 		 *  so the nesting of bracketed user events can be efficiently processed.
@@ -1004,11 +1014,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 
 		}
-
-		int n = determineNumNestedIDs();
-		// Only show nestedIDs if there are at least two of them
-		if (n > 0)
-			numNestedIDs = n;
 
 		// Thread-safe merge of the min/max values
 		getDataSyncSaveMemUsage(minMemThisPE, maxMemThisPE, minUserSuppliedThisPE, maxUserSuppliedThisPE);
@@ -2472,7 +2477,6 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		a.activityColors = a.colorManager.defaultColorMap();
 		a.entryColors = ColorManager.entryColorsByFrequency(ColorManager.createComplementaryColorMap(entries.length), frequencyVector);
 		a.userEventColors = a.activityColors[Analysis.USER_EVENTS];
-		a.functionColors = a.activityColors[Analysis.FUNCTIONS];
 	}
 	public ViewType getViewType() {
 		return viewType;

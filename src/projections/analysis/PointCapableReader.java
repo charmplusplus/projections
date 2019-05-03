@@ -13,7 +13,7 @@ interface PointCapableReader {
     public LogEntryData nextEventOnOrAfter(long timestamp)
         throws IOException, EndOfLogSuccess;    
 
-    public LogEntryData nextEventOfType(int eventType)
+    public LogEntryData nextEventOfType(int... eventType)
         throws IOException, EndOfLogSuccess;
 
 }

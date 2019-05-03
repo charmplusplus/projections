@@ -401,6 +401,10 @@ implements ItemListener, ActionListener, Clickable
 					return null;
 				}
 				public void done() {
+
+					milliseconds.setState(true);
+					unitTime = 1000.0;
+					unitTimeStr = "ms";
 					sentMsgs.setState(true);
 					setDataSource("Communications", sentMsgCount, thisWindow);
 					setPopupText("sentMsgCount");

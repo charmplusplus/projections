@@ -11,7 +11,7 @@ then
 fi
 
 #java -Xms4G -Xmx4G -ms4G -mx4G -XX:+UseParallelGC -classpath $jarpath projections.analysis.ProjMain $*
-java -d64 -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain ${1+"$@"}
+java -Dapple.awt.application.name="Projections" -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain ${1+"$@"}
 #java -classpath $jarpath projections.analysis.ProjMain $*
 
 #java -d64 -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.gui.OrderedIntList $*

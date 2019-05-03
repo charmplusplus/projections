@@ -12,6 +12,7 @@ public class DataSource1D extends DataSource
   private String title;
   private GenericGraphWindow parent;
   private int[] data; /*The data to be graphed*/
+  private boolean[] mask = null;
   
     // **CW** why oh why do I hack like this ...
     private boolean usePopUpAbleParent = false;
@@ -36,9 +37,13 @@ public class DataSource1D extends DataSource
   public int getIndexCount() {return data.length;}
   public int getValueCount() {return 1; /*Because it's 1D data*/ }
   
+  public void setMask(boolean[] mask) {
+    this.mask = mask;
+  }
+
   public void getValues(int index,double[] values)
   {
-    values[0]=data[index];
+    values[0] = (mask != null && !mask[index]) ? 0 : data[index];
   }
   
   public String[] getPopup(int xVal, int yVal){

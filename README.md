@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/UIUC-PPL/projections.svg?branch=master)](https://travis-ci.org/UIUC-PPL/projections)
 
-TO COMPILE PROJECTIONS:
+To Compile Projections:
 ----------------------
 
 1) Make sure the JDK commands `java`, `javac` and `jar`
@@ -20,26 +20,23 @@ TO COMPILE PROJECTIONS:
       `projections.jar`       : archive of all the java and image files
 
 
-TO RUN PROJECTIONS:
+To Run Projections:
 ------------------
 
-1.) From any location, type `> PROJECTIONS_LOCATION/bin/projections`
+1.) Run `$ ./bin/projections` from the root of the Projections directory.
 
-where `PROJECTIONS_LOCATION` is the path to the main projections
-directory.
-
-HOW TO USE PROJECTIONS:
+How to Use Projections:
 -----------------------
 Projections is a visualization tool to help you understand and analyze what it
 happening in your parallel (Charm++) program.  To use Projections, you first
 have to make sure that Charm++ is compiled with tracing enabled and that your
 program is compiled with the Projections tracemode.  Usually, this means adding
-'--enable-tracing' to your Charm++ build options and '-tracemode projections'
+`--enable-tracing` to your Charm++ build options and `-tracemode projections`
 to your program compile options.  When you run your program compiled with this
 tracemode, a log file will be created for each processor.  An additional state
-file will also be created.  The names of the log files will be NAME.#.log, where
-NAME is the name of your executable and # is the processor #.  The name of the
-state file is NAME.sts.
+file will also be created.  The names of the log files will be `NAME.#.log{.gz}`,
+where NAME is the name of your executable and # is the processor #.  The name of
+the state file is NAME.sts.
 
 If your environment is set up correctly, as described in the previous section,
 all you have to do to start Projections is type 'projections' at the prompt.
@@ -49,7 +46,7 @@ options, File, Tools, and Debug.
 
 To begin using Projections, use "File -> Open File(s)" to select the data you
 want to analyze.  To do so, navigate to the directory containing your data and
-select the *.sts file.  If you have selected a valid file, Projections will load
+select the \*.sts file.  If you have selected a valid file, Projections will load
 in some preliminary data from the files and then activate the rest of the buttons
 in the main window.  If your file is invalid, you will be shown an error dialog.
 
@@ -75,6 +72,7 @@ data:
   17. Noise Miner
   18. Streaming CCS
   19. Memory Usage
+------------
 
 
 1. Timelines

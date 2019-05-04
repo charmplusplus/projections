@@ -1,7 +1,6 @@
 [![Build Status](https://travis-ci.org/UIUC-PPL/projections.svg?branch=master)](https://travis-ci.org/UIUC-PPL/projections)
 
-To Compile Projections:
-----------------------
+# To Compile Projections:
 
 1) Make sure the JDK commands `java`, `javac` and `jar`
    are in your path. You should use at least Java version 1.6,
@@ -20,13 +19,12 @@ To Compile Projections:
       `projections.jar`       : archive of all the java and image files
 
 
-To Run Projections:
-------------------
+# To Run Projections:
 
 Run `$ ./bin/projections` from the root of the Projections directory.
 
-How to Use Projections:
------------------------
+# How to Use Projections:
+
 Projections is a visualization tool to help you understand and analyze what it
 happening in your parallel (Charm++) program.  To use Projections, you first
 have to make sure that Charm++ is compiled with tracing enabled and that your
@@ -337,7 +335,7 @@ data:
 
 
 
-Notes
-------------------
- Charts in some tools are produced by JFreeChart.
- Image output is performed by FreeHEP.
+# Notes
+
+Charts in some tools are produced by JFreeChart.
+Image output is performed by FreeHEP.

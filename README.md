@@ -3,28 +3,29 @@
 TO COMPILE PROJECTIONS:
 ----------------------
 
-1) Make sure the JDK commands "java", "javac" and "jar"
-   are in your path. You should use at least java version 1.6,
+1) Make sure the JDK commands `java`, `javac` and `jar`
+   are in your path. You should use at least Java version 1.6,
    and your java and javac should be of the same version.
-   You also need "gradle" (https://gradle.org/) and, optionally,
-   the GNU tool "make".
+   You also need [`gradle`](https://gradle.org/) and, optionally,
+   the GNU tool `make`.
 
-2) Type "make" (or "gradle copyJarToBin" if you don't have "make").
+2) Type `make` (or `gradle copyJarToBin` if you don't have `make`).
 
-3) The following files will be located in 'bin':
+3) The following files will be located in `bin`:
 
-      projections           : Starts projections, for UNIX machines
-      projections.bat       : Starts projections, for Windows machines
-      projections.jar       : archive of all the java and image files
+      `projections`          : Starts projections, for UNIX machines
+      
+      `projections.bat`       : Starts projections, for Windows machines
+      
+      `projections.jar`       : archive of all the java and image files
 
 
 TO RUN PROJECTIONS:
 ------------------
 
-1.) From any location, type
-	> PROJECTIONS_LOCATION/bin/projections
+1.) From any location, type `> PROJECTIONS_LOCATION/bin/projections`
 
-where PROJECTIONS_LOCATION is the path to the main projections
+where `PROJECTIONS_LOCATION` is the path to the main projections
 directory.
 
 HOW TO USE PROJECTIONS:

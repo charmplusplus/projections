@@ -23,7 +23,7 @@ To Compile Projections:
 To Run Projections:
 ------------------
 
-1.) Run `$ ./bin/projections` from the root of the Projections directory.
+Run `$ ./bin/projections` from the root of the Projections directory.
 
 How to Use Projections:
 -----------------------
@@ -325,8 +325,8 @@ data:
 --------------
    This tool uses the Converse Client Server feature of Charm++ to
    stream performance data from running programs.  To use it, the
-   Charm++ program must be compiled with "-tracemode utilization", and
-   executed with "++server ++server-port <port number>".
+   Charm++ program must be compiled with `-tracemode utilization`, and
+   executed with `++server ++server-port <port number>`.
 
 
 19. Memory Usage:

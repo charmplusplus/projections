@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/UIUC-PPL/projections.svg?branch=master)](https://travis-ci.org/UIUC-PPL/projections)
 
-Propjections is a tool to visusalize execution traces of Charm++ and AMPI applications.
+Projections is a tool to visusalize execution traces of Charm++ and AMPI applications.
 
 # Compiling Projections
 

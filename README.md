@@ -5,7 +5,7 @@ Projections is a tool to visusalize execution traces of Charm++ and AMPI applica
 # Compiling Projections
 
 1) Make sure the JDK commands `java`, `javac` and `jar`
-   are in your path. You should use at least Java version 1.6,
+   are in your path. You should use at least Java version 8,
    and your java and javac should be of the same version.
    You also need [`gradle`](https://gradle.org/) and, optionally,
    the GNU tool `make`.

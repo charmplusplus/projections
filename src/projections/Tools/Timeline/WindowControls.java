@@ -475,20 +475,17 @@ ItemListener {
 		else if (c  == bDecrease) {
 			data.keepViewCentered(true); // Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
 			data.decreaseScaleFactor();
-			scaleField.setText("" + data.getScaleFactor());
 			parentWindow.refreshDisplay(true);
 		} 
 
 		else if (c  == bIncrease) {
 			data.keepViewCentered(true);// Instruct the layout manager(on its next layout) to keep the scrollbar in the same place
 			data.increaseScaleFactor();
-			scaleField.setText("" + data.getScaleFactor());
 			parentWindow.refreshDisplay(true);
 		} 
 
 		else if (c  == bReset) {
 			data.setScaleFactor(1.0f);
-			scaleField.setText("" + data.getScaleFactor());
 			parentWindow.refreshDisplay(true);
 		}
 

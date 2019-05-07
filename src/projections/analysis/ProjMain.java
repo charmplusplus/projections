@@ -80,6 +80,8 @@ public class ProjMain {
     	/// The sts file to load
     	String loadSts=null;
     	boolean done = false;
+	// Exit projections after loading file (for testing)
+	boolean doExitAfterFileLoad = false;
     	// If no sts file is given, then we will search in the current directory to find sts files
     	if(args.length == 0){
     		File currentdir =new File (".");
@@ -117,6 +119,9 @@ public class ProjMain {
     			System.out.println("Projections version: " + CUR_VERSION);
     			System.exit(0);
     		}
+            else if (args[i].equals("--exit")) {
+                doExitAfterFileLoad = true;
+            }
     		else if (args[i].equals("-u") ||
     				args[i].equals("-use-version")) {
     			i++;
@@ -164,9 +169,9 @@ public class ProjMain {
 
     	// Load Data if specified on command line
     	if (loadSts!=null) {
-    		mainWindow.openFile(loadSts); 
+		mainWindow.openFile(loadSts, doExitAfterFileLoad);
     	}
-    	
+
     }
     
     

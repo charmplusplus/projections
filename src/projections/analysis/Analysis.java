@@ -154,7 +154,9 @@ public class Analysis {
 		  tachyonShifts = new TachyonShifts(getLogDirectory());
 		  
 		  // Build Summary Data
-		  if (hasSumFiles()) {
+      // If rootComponent == null, we are just checking if the file
+      // exists (via doExitAfterFileLoad), and don't bother running the SumAnalyzer
+		  if (hasSumFiles() && rootComponent != null) {
 			  sumAnalyzer = null;
 			  sumAnalyzer = new SumAnalyzer();
 		  }

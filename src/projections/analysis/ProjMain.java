@@ -5,6 +5,7 @@ import java.io.File;
 import javax.swing.JOptionPane;
 
 import projections.gui.MainWindow;
+import projections.analysis.Analysis;
 
 /**
  *  ProjMain.java
@@ -163,14 +164,26 @@ public class ProjMain {
     		i++;
     	}
 
+	if (doExitAfterFileLoad) {
+		Analysis a = new Analysis();
+		try {
+			MainWindow.CUR_VERSION = CUR_VERSION;
+			a.initAnalysis(loadSts, null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		System.exit(0);
+	}
+
     	mainWindow = new MainWindow();
     	mainWindow.pack();
     	mainWindow.setTitle("Projections");
     	mainWindow.setVisible(true);
 
-    	// Load Data if specified on command line
+	// Load Data if specified on command line
 	if (loadSts!=null) {
-		mainWindow.openFile(loadSts, doExitAfterFileLoad);
+		mainWindow.openFile(loadSts);
 	}
 
     }

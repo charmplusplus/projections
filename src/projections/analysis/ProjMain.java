@@ -172,7 +172,7 @@ public class ProjMain {
     	if (loadSts!=null) {
     		mainWindow.openFile(loadSts, doExitAfterFileLoad);
     	}
-
+    	
     }
     
     

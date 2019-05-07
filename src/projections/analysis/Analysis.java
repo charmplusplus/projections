@@ -238,7 +238,7 @@ public class Analysis {
 	*/
       }
       // From summary files
-      if (hasSumFiles()) {
+      if (hasSumFiles() && sumAnalyzer!=null) {
 	if (sumAnalyzer.getTotalTime() > totalTime) {
 	  totalTime = sumAnalyzer.getTotalTime();
 	}

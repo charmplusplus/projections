@@ -58,6 +58,7 @@ public class ProjMain {
 	System.out.println("-h --help: show this page");
 	System.out.println("-V --version: show Projections version");
 	System.out.println("-u --use-version <ver>: use old version format");
+	System.out.println("--exit: exit Projections after loading input file");
 	System.out.println("-no-idle: ignore idle time in analysis");
 	System.out.println("-bgsize <x> <y> <z>: bluegene torus emulation");
 	System.out.println("-print_usage: details written to stdout when " +

@@ -239,11 +239,11 @@ implements ScalePanel.StatusDisplay
 		int returnval = d.showOpenDialog(this);
 		if (returnval == JFileChooser.APPROVE_OPTION) {
 			setTitle("Projections -" + d.getSelectedFile());
-			openFile(d.getSelectedFile().getAbsolutePath());
+			openFile(d.getSelectedFile().getAbsolutePath(), false);
 		}
 	}
 
-	public void openFile(String filename) {
+	public void openFile(String filename, boolean doExitAfterFileLoad) {
 		// clear the old summary data away, otherwise chance of
 		// running out of memory is great.
 		final String newfile = filename;
@@ -258,20 +258,26 @@ implements ScalePanel.StatusDisplay
 					MainWindow.runObject[myRun].initAnalysis(newfile,
 							mainWindow);
 				} catch (IOException e) {
+					if (doExitAfterFileLoad)
+						System.exit(11);
 					InvalidFileDialog ifd =
 						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
 				} catch (StringIndexOutOfBoundsException e) {
 					e.printStackTrace();
+					if (doExitAfterFileLoad)
+						System.exit(12);
 					InvalidFileDialog ifd =
 						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
 				} catch (OutOfMemoryError e){
 					e.printStackTrace();
-					System.err.println("ERROR: PROJECTIONS RUNNING OUT oF MEMORY");
-					System.err.println("POSSIBLE SOLUTION: Set more memory for projections OR use \"projections64\"");
+					System.err.println("Error: Projections running out of memory");
+					System.err.println("Possible solution: Set more memory for projections in bin/projections");
 					System.exit(1);
 				}
+				if (doExitAfterFileLoad)
+					System.exit(0);
 				return null;
 			}
 			public void done() {

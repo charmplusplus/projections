@@ -239,11 +239,11 @@ implements ScalePanel.StatusDisplay
 		int returnval = d.showOpenDialog(this);
 		if (returnval == JFileChooser.APPROVE_OPTION) {
 			setTitle("Projections -" + d.getSelectedFile());
-			openFile(d.getSelectedFile().getAbsolutePath(), false);
+			openFile(d.getSelectedFile().getAbsolutePath());
 		}
 	}
 
-	public void openFile(String filename, boolean doExitAfterFileLoad) {
+	public void openFile(String filename) {
 		// clear the old summary data away, otherwise chance of
 		// running out of memory is great.
 		final String newfile = filename;
@@ -258,15 +258,11 @@ implements ScalePanel.StatusDisplay
 					MainWindow.runObject[myRun].initAnalysis(newfile,
 							mainWindow);
 				} catch (IOException e) {
-					if (doExitAfterFileLoad)
-						System.exit(11);
 					InvalidFileDialog ifd =
 						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
 				} catch (StringIndexOutOfBoundsException e) {
 					e.printStackTrace();
-					if (doExitAfterFileLoad)
-						System.exit(12);
 					InvalidFileDialog ifd =
 						new InvalidFileDialog(mainWindow, e);
 					ifd.setVisible(true);
@@ -276,8 +272,6 @@ implements ScalePanel.StatusDisplay
 					System.err.println("Possible solution: Set more memory for projections in bin/projections");
 					System.exit(1);
 				}
-				if (doExitAfterFileLoad)
-					System.exit(0);
 				return null;
 			}
 			public void done() {

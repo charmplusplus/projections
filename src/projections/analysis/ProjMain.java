@@ -183,7 +183,7 @@ public class ProjMain {
 
     	// Load Data if specified on command line
     	if (loadSts!=null) {
-    		mainWindow.openFile(loadSts);
+    		mainWindow.openFile(loadSts); 
     	}
     	
     }

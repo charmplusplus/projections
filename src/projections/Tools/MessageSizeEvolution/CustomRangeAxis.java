@@ -7,8 +7,8 @@ import org.jfree.chart.axis.LogTick;
 import org.jfree.chart.axis.TickType;
 import org.jfree.chart.util.AttrStringUtils;
 
-import org.jfree.text.TextUtilities;
-import org.jfree.ui.RectangleEdge;
+import org.jfree.chart.text.TextUtils;
+import org.jfree.chart.ui.RectangleEdge;
 
 import projections.gui.U;
 
@@ -76,7 +76,7 @@ class CustomRangeAxis
                         result = U.humanReadableString(num.longValue() + timeMinBinSize);
                     } else
                         result = text;
-                    TextUtilities.drawRotatedString(result, g2,
+                    TextUtils.drawRotatedString(result, g2,
                             anchorPoint[0], anchorPoint[1],
                             tick.getTextAnchor(), tick.getAngle(),
                             tick.getRotationAnchor());

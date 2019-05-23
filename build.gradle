@@ -14,8 +14,7 @@ dependencies {
   compile 'org.freehep:freehep-graphicsio-ps:2.4'
   compile 'org.freehep:freehep-vectorgraphics:2.4'
 
-  compile 'org.jfree:jcommon:1.0.23'
-  compile 'org.jfree:jfreechart:1.0.19'
+  compile 'org.jfree:jfreechart:1.5.0'
 }
 
 mainClassName = 'projections.analysis.ProjMain'

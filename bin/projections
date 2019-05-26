@@ -12,8 +12,8 @@ fi
 
 IS_WAYLAND=`env | grep -i wayland`
 if [ -n "$IS_WAYLAND" ]
-	then
-		export _JAVA_AWT_WM_NONREPARENTING=1
+then
+  export _JAVA_AWT_WM_NONREPARENTING=1
 fi
 
 #java -Xms4G -Xmx4G -ms4G -mx4G -XX:+UseParallelGC -classpath $jarpath projections.analysis.ProjMain $*

@@ -461,20 +461,6 @@ class ThreadedFileReader implements Runnable  {
 		{
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
-	    
-	    // divide the TYPE_TIME and TYPE_MSG_SIZE counts by the length of the specified time interval
-	    // to obtain the # occurences per unit time (right now is millisecond)
-	    double interval = (endTime-startTime)/1000.0;
-	    for (int bin = 0; bin < timeNumBins+1; bin++) {
-	    	for (int ep = 0; ep < numEPs; ep++) {
-	    		countData[HistogramWindow.TYPE_TIME][bin][ep] /= interval;
-	    	}
-	    }
-	    for (int bin = 0; bin < msgNumBins+1; bin++) {
-	    	for (int ep = 0; ep < numEPs; ep++) {
-	    		countData[HistogramWindow.TYPE_MSG_SIZE][bin][ep] /= interval;
-	    	}
-	    }
 
 		return countData;
 	}

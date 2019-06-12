@@ -1,3 +1,5 @@
+# Projections
+
 [![Build Status](https://travis-ci.org/UIUC-PPL/projections.svg?branch=master)](https://travis-ci.org/UIUC-PPL/projections)
 [![Documentation Status](https://readthedocs.org/projects/charm/badge/?version=latest)](https://charm.readthedocs.io/en/latest/projections/manual.html)
 

@@ -8,7 +8,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 
@@ -146,13 +146,13 @@ class ThreadedFileReader implements Runnable  {
 		{
 			int nestingLevel = 0;
 			boolean logEnd = false;
-			LogEntryData prevBegin = null;
-			LogEntryData prevIdleBegin = null;
+			LogEntry prevBegin = null;
+			LogEntry prevIdleBegin = null;
 			
 			while (true) 
 			{ // EndOfLogException will terminate loop when end of log file is reached
 
-				LogEntryData logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
+				LogEntry logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
 				
 				switch (logdata.type) 
 				{
@@ -481,13 +481,13 @@ class ThreadedFileReader implements Runnable  {
 		try
 		{
 			int nestingLevel = 0;
-			LogEntryData prevBegin = null;
-			LogEntryData prevIdleBegin = null;
+			LogEntry prevBegin = null;
+			LogEntry prevIdleBegin = null;
 			
 			while (true)
 			{ // EndOfLogException will terminate loop when end of log file is reached
 
-				LogEntryData logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
+				LogEntry logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
 
 				switch (logdata.type) {
 				case ProjDefs.BEGIN_PROCESSING:

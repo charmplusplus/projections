@@ -3,7 +3,7 @@ package projections.analysis;
 import java.io.IOException;
 
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 public class UsageCalc extends ProjDefs
 {
@@ -122,7 +122,7 @@ public class UsageCalc extends ProjDefs
 		dataLen = numUserEntries + 4;
 
 		GenericLogReader reader;
-		LogEntryData logEntry;
+		LogEntry logEntry;
 
 		float[][] data = new float[2][dataLen];
 		// initialization
@@ -132,13 +132,13 @@ public class UsageCalc extends ProjDefs
 		}
 
 		reader = new GenericLogReader( procnum, version);
-		logEntry = new LogEntryData();
+		logEntry = new LogEntry();
 		curEntry = -1;
 
 		startTime = 0;
 		long time=0;
 		boolean isProcessing = false;
-		LogEntryData lastBeginData = null;
+		LogEntry lastBeginData = null;
 		long prevTime = 0;
 		try { 
 			while (time<endTime) { //EOF exception terminates loop

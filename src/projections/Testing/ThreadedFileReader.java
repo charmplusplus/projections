@@ -7,7 +7,7 @@ import java.io.IOException;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 /** The reader threads for Scan Logs tool. */
@@ -38,7 +38,7 @@ class ThreadedFileReader implements Runnable  {
 		try {	  
 			fakeCounter = 0.0;
 			while (true) {
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 				fakeCounter += data.time;
 			}
 

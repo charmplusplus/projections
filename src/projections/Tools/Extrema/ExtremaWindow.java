@@ -42,7 +42,7 @@ import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 /**
  *  OutlierAnalysisWindow
@@ -845,7 +845,7 @@ Clickable
 		GenericLogReader reader = 
 			new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		try {
-			LogEntryData logData = new LogEntryData();
+			LogEntry logData = new LogEntry();
 			logData.time = 0;
 			// Jump to the first valid event
 			boolean markedBegin = false;

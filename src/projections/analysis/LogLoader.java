@@ -8,7 +8,7 @@ import java.util.*;
 import projections.Tools.Timeline.TimelineMessage;
 import projections.Tools.Timeline.UserEventObject;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.misc.LogLoadException;
 
 /** This class reads in .log files and turns them into a timeline.  */
@@ -158,28 +158,28 @@ public class LogLoader extends ProjDefs
 //			
 			
 			while (true) { //Seek to time Begin
-				LogEntryData data = reader.nextEvent();
-				LE = new LogEntry(data);
-				if (LE.Time >= Begin) {
+				LogEntry data = reader.nextEvent();
+				LE = data;
+				if (data.time >= Begin) {
 					break;
 				}
-				if (LE.Entry == -1) {
+				if (LE.entry == -1) {
 					continue;
 				}
 				// This is still not ideal. There are cases which may cause
 				// a rogue begin event to have data dropped at the beginning.
-				if ((LE.TransactionType == BEGIN_PROCESSING) && 
-						(LE.Entry != -1)) {
-					Time       = LE.Time - BeginTime;
+				if ((LE.type == BEGIN_PROCESSING) &&
+						(LE.entry != -1)) {
+					Time       = LE.time - BeginTime;
 					lastBeginEvent = LE;
-				} else if ((LE.TransactionType == END_PROCESSING) &&
-						(LE.Entry != -1)) {
-					Time       = LE.Time - BeginTime;
+				} else if ((LE.type == END_PROCESSING) &&
+						(LE.entry != -1)) {
+					Time       = LE.time - BeginTime;
 					lastBeginEvent = null;
-				} else if (LE.TransactionType == BEGIN_IDLE) {
-					Time = LE.Time - BeginTime;
+				} else if (LE.type == BEGIN_IDLE) {
+					Time = LE.time - BeginTime;
 					lastBeginEvent = LE;
-				} else if (LE.TransactionType == END_IDLE) {
+				} else if (LE.type == END_IDLE) {
 					lastBeginEvent = null;
 				}
 			}
@@ -190,8 +190,8 @@ public class LogLoader extends ProjDefs
 			if (Time == Long.MIN_VALUE) {
 				Time = Begin;
 			}
-			if (LE.Time > End) {
-				switch (LE.TransactionType) {
+			if (LE.time > End) {
+				switch (LE.type) {
 				case BEGIN_PROCESSING:
 					// the whole line must be empty
 					System.out.println("finished empty timeline for " + 
@@ -202,13 +202,13 @@ public class LogLoader extends ProjDefs
 					// in this case, we know the actual bounds of the entry 
 					// method
 					if ((lastBeginEvent != null) &&
-							(lastBeginEvent.TransactionType==BEGIN_PROCESSING) &&
-							(lastBeginEvent.Entry == LE.Entry)) {
+							(lastBeginEvent.type ==BEGIN_PROCESSING) &&
+							(lastBeginEvent.entry == LE.entry)) {
 						timeline.add(TE=
-							new TimelineEvent(lastBeginEvent.Time-BeginTime,
-									LE.Time-BeginTime,
-									lastBeginEvent.Entry,
-									lastBeginEvent.Pe));
+							new TimelineEvent(lastBeginEvent.time -BeginTime,
+									LE.time -BeginTime,
+									lastBeginEvent.entry,
+									lastBeginEvent.pe));
 					}
 					return;
 				case BEGIN_IDLE:
@@ -220,10 +220,10 @@ public class LogLoader extends ProjDefs
 					// the whole line is straddled by idle time.
 					// we also know the complete bounds of the idle time.
 					if ((lastBeginEvent != null) &&
-							(lastBeginEvent.TransactionType==BEGIN_IDLE)) {
+							(lastBeginEvent.type ==BEGIN_IDLE)) {
 						timeline.add(TE=
-							new TimelineEvent(lastBeginEvent.Time-BeginTime,
-									LE.Time-BeginTime,
+							new TimelineEvent(lastBeginEvent.time -BeginTime,
+									LE.time -BeginTime,
 									-1, -1));
 					}
 					return;
@@ -233,17 +233,17 @@ public class LogLoader extends ProjDefs
 					// the actual end time. If not, the empty timeline is
 					// returned.
 					if (lastBeginEvent != null) {
-						switch (lastBeginEvent.TransactionType) {
+						switch (lastBeginEvent.type) {
 						case BEGIN_PROCESSING:
 							timeline.add(TE=
-								new TimelineEvent(lastBeginEvent.Time-BeginTime,
+								new TimelineEvent(lastBeginEvent.time -BeginTime,
 										End-BeginTime,
-										lastBeginEvent.Entry,
-										lastBeginEvent.Pe));
+										lastBeginEvent.entry,
+										lastBeginEvent.pe));
 							break;
 						case BEGIN_IDLE:
 							timeline.add(TE=
-								new TimelineEvent(lastBeginEvent.Time-BeginTime,
+								new TimelineEvent(lastBeginEvent.time -BeginTime,
 										End-BeginTime,
 										-1, -1));
 							break;
@@ -257,11 +257,10 @@ public class LogLoader extends ProjDefs
 			}
 			//Throws EndOfLogException at end of file; break if past endTime
 			CallStackManager cstack = new CallStackManager();
-			LogEntry enclosingDummy = null;
 			ObjectId tid = null;
 			while(true) {
-				if (LE.Entry != -1) {
-					switch (LE.TransactionType) {
+				if (LE.entry != -1) {
+					switch (LE.type) {
 					case BEGIN_PROCESSING:
 						
 						lastBeginEvent = null;
@@ -269,7 +268,7 @@ public class LogLoader extends ProjDefs
 							// We add a "pretend" end event to accomodate
 							// the prior begin processing event.
 							if (TE != null) {
-								TE.EndTime = LE.Time - BeginTime;
+								TE.EndTime = LE.time - BeginTime;
 								// If the entry was not long enough, remove it from the timeline
 								if(TE.EndTime - TE.BeginTime < minEntryDuration){
 									timeline.removeLast();
@@ -279,14 +278,14 @@ public class LogLoader extends ProjDefs
 						}
 						isProcessing = true;
 
-						TE = new TimelineEvent(LE.Time-BeginTime, 
-								LE.Time-BeginTime,
-								LE.Entry, LE.Pe,
-								LE.MsgLen, LE.recvTime, 
-								LE.id,LE.EventID,
-								LE.cpuBegin, LE.cpuEnd,
-								LE.numPapiCounts,
-								LE.papiCounts);
+						TE = new TimelineEvent(LE.time -BeginTime,
+								LE.time -BeginTime,
+								LE.entry, LE.pe,
+								LE.msglen, LE.recvTime,
+								LE.id,LE.event,
+								LE.cpuStartTime, LE.cpuEndTime,
+								LE.numPerfCounts,
+								LE.perfCounts);
 						timeline.add(TE);
 						lastBeginTimelineEvent = TE;
 						break;
@@ -295,15 +294,15 @@ public class LogLoader extends ProjDefs
 						// after the start time. If so, lastBeginEvent
 						// is the matching pair.
 						if ((lastBeginEvent != null) &&
-								(lastBeginEvent.TransactionType==BEGIN_PROCESSING) &&
-								(lastBeginEvent.Entry == LE.Entry)) {
+								(lastBeginEvent.type ==BEGIN_PROCESSING) &&
+								(lastBeginEvent.entry == LE.entry)) {
 
-							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
-									LE.Time-BeginTime,
-									lastBeginEvent.Entry,
-									lastBeginEvent.Pe);
+							TE = new TimelineEvent(lastBeginEvent.time -BeginTime,
+									LE.time -BeginTime,
+									lastBeginEvent.entry,
+									lastBeginEvent.pe);
 
-							if(LE.Time - lastBeginEvent.Time >= minEntryDuration){
+							if(LE.time - lastBeginEvent.time >= minEntryDuration){
 								// Just don't add this event if it is too small. We need to create the event because other following entries might refer to it???
 								timeline.add(TE);
 							}
@@ -314,14 +313,14 @@ public class LogLoader extends ProjDefs
 						lastBeginEvent = null;
 						
 						if (TE != null) {
-							TE.EndTime = LE.Time - BeginTime;
-							TE.cpuEnd = LE.cpuEnd;
+							TE.EndTime = LE.time - BeginTime;
+							TE.cpuEnd = LE.cpuEndTime;
 							// If the entry was not long enough, remove it from the timeline
 							if(TE.EndTime - TE.BeginTime < minEntryDuration){
 								timeline.removeLast();
 							}
-							for (int i=0; i<LE.numPapiCounts; i++) {
-								TE.papiCounts[i] = LE.papiCounts[i] -
+							for (int i = 0; i<LE.numPerfCounts; i++) {
+								TE.papiCounts[i] = LE.perfCounts[i] -
 								TE.papiCounts[i];
 							}
 							TE.compactLists();
@@ -332,18 +331,18 @@ public class LogLoader extends ProjDefs
 					
 					case USER_SUPPLIED:
 						// Tag the last begin TimelineEvent with the user supplied value(likely a timestep number)
-						if(LE.userSuppliedValue() != null && lastBeginTimelineEvent!=null)
-							lastBeginTimelineEvent.UserSpecifiedData = LE.userSuppliedValue();
+						if(LE.userSupplied != null && lastBeginTimelineEvent!=null)
+							lastBeginTimelineEvent.UserSpecifiedData = LE.userSupplied;
 						break;
 					case USER_SUPPLIED_BRACKETED_NOTE:
-						UserEventObject note2 = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.Type.PAIR, LE.note);
-						note2.beginTime = LE.Time;
+						UserEventObject note2 = new UserEventObject(pe, LE.time -BeginTime, LE.entry, LE.event, UserEventObject.Type.PAIR, LE.note);
+						note2.beginTime = LE.time;
 						note2.endTime = LE.endTime;
 						userEventVector.add(note2);
 						break;
 					case MEMORY_USAGE:
-						if(LE.memoryUsage() != 0 && lastBeginTimelineEvent!=null)
-							lastBeginTimelineEvent.memoryUsage = LE.memoryUsage();
+						if(LE.memoryUsage != 0 && lastBeginTimelineEvent!=null)
+							lastBeginTimelineEvent.memoryUsage = LE.memoryUsage;
 						break;
 						
 					
@@ -353,11 +352,11 @@ public class LogLoader extends ProjDefs
 						// based on the lastBeginEvent and attach the CREATION
 						// event to that block.
 						if ((lastBeginEvent != null) &&
-								(lastBeginEvent.TransactionType==BEGIN_PROCESSING)) {
-							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
+								(lastBeginEvent.type ==BEGIN_PROCESSING)) {
+							TE = new TimelineEvent(lastBeginEvent.time -BeginTime,
 									End-BeginTime,
-									lastBeginEvent.Entry,
-									lastBeginEvent.Pe);
+									lastBeginEvent.entry,
+									lastBeginEvent.pe);
 							timeline.add(TE);
 							isProcessing = true;
 						}
@@ -365,15 +364,15 @@ public class LogLoader extends ProjDefs
 						tempte = false;
 						//Start a new dummy event
 						if (TE == null) { 
-							TE = new TimelineEvent(LE.Time-BeginTime,
-									LE.Time-BeginTime,
-									-2,LE.Pe,LE.MsgLen);
+							TE = new TimelineEvent(LE.time -BeginTime,
+									LE.time -BeginTime,
+									-2,LE.pe,LE.msglen);
 							timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(pe, LE.Time - BeginTime,
-								LE.Entry, LE.MsgLen,
-								LE.EventID);
+						TM = new TimelineMessage(pe, LE.time - BeginTime,
+								LE.entry, LE.msglen,
+								LE.event);
 						TE.addMessage(TM);
 						if (tempte) {
 							TE = null;
@@ -385,28 +384,28 @@ public class LogLoader extends ProjDefs
 						// block based on the lastBeginEvent and attach 
 						// the CREATION event to that block.
 						if ((lastBeginEvent != null) &&
-								(lastBeginEvent.TransactionType ==
+								(lastBeginEvent.type ==
 									BEGIN_PROCESSING)) {
-							TE = new TimelineEvent(lastBeginEvent.Time -
+							TE = new TimelineEvent(lastBeginEvent.time -
 									BeginTime,
 									End - BeginTime,
-									lastBeginEvent.Entry,
-									lastBeginEvent.Pe);
+									lastBeginEvent.entry,
+									lastBeginEvent.pe);
 							timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
 						tempte = false;
 						if (TE == null) {
-							TE = new TimelineEvent(LE.Time - BeginTime,
-									LE.Time - BeginTime,
-									-2, LE.Pe, LE.MsgLen);
+							TE = new TimelineEvent(LE.time - BeginTime,
+									LE.time - BeginTime,
+									-2, LE.pe, LE.msglen);
 							timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(pe, LE.Time - BeginTime,
-								LE.Entry, LE.MsgLen,
-								LE.EventID, LE.numPEs);
+						TM = new TimelineMessage(pe, LE.time - BeginTime,
+								LE.entry, LE.msglen,
+								LE.event, LE.numPEs);
 						TE.addMessage(TM);
 						if (tempte) {
 							TE = null;
@@ -419,26 +418,26 @@ public class LogLoader extends ProjDefs
 						// based on the lastBeginEvent and attach the CREATION
 						// event to that block.
 						if ((lastBeginEvent != null) &&
-								(lastBeginEvent.TransactionType==BEGIN_PROCESSING)) {
-							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
+								(lastBeginEvent.type ==BEGIN_PROCESSING)) {
+							TE = new TimelineEvent(lastBeginEvent.time -BeginTime,
 									End-BeginTime,
-									lastBeginEvent.Entry,
-									lastBeginEvent.Pe);
+									lastBeginEvent.entry,
+									lastBeginEvent.pe);
 							timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
 						tempte = false;
 						if (TE == null) {
-							TE = new TimelineEvent(LE.Time-BeginTime,
-									LE.Time-BeginTime,
-									-2, LE.Pe, LE.MsgLen);
+							TE = new TimelineEvent(LE.time -BeginTime,
+									LE.time -BeginTime,
+									-2, LE.pe, LE.msglen);
 							timeline.add(TE);
 							tempte = true;
 						}
-						TM = new TimelineMessage(pe, LE.Time - BeginTime,
-								LE.Entry, LE.MsgLen,
-								LE.EventID, LE.destPEs);
+						TM = new TimelineMessage(pe, LE.time - BeginTime,
+								LE.entry, LE.msglen,
+								LE.event, LE.destPEs);
 						TE.addMessage(TM);
 						if (tempte) {
 							TE = null;
@@ -446,19 +445,19 @@ public class LogLoader extends ProjDefs
 						break;
 					case USER_EVENT:
 						// don't mess with TE, that's just for EPs
-						UserEventObject event = new UserEventObject(pe, LE.Time-BeginTime, LE.Entry, LE.EventID, UserEventObject.Type.SINGLE);
+						UserEventObject event = new UserEventObject(pe, LE.time -BeginTime, LE.entry, LE.event, UserEventObject.Type.SINGLE);
 						userEventVector.add(event);
 						break;
 					case USER_SUPPLIED_NOTE:
-						UserEventObject note = new UserEventObject(pe, LE.Time-BeginTime, LE.note);
+						UserEventObject note = new UserEventObject(pe, LE.time -BeginTime, LE.note);
 						userEventVector.add(note);
 						break;
 					case USER_EVENT_PAIR:
 						// **CW** UserEventPairs come in a two-line block
 						// because of the way the tracing code is currently
 						// written.
-						userEventObject = new UserEventObject(pe, LE.Time-BeginTime,
-								LE.Entry, LE.EventID,
+						userEventObject = new UserEventObject(pe, LE.time -BeginTime,
+								LE.entry, LE.event,
 								UserEventObject.Type.PAIR, LE.nestedID);
 						// assume the end time to be the end of range
 						// in case the ending userevent gets cut off.
@@ -466,10 +465,9 @@ public class LogLoader extends ProjDefs
 
 						// Now, expect to read the second entry and handle
 						// errors if necessary.
-						LogEntryData data2 = reader.nextEvent();
-						LE = new LogEntry(data2);
+						LE = reader.nextEvent();
 
-						if (LE.TransactionType != USER_EVENT_PAIR) {
+						if (LE.type != USER_EVENT_PAIR) {
 							// DANGLING - throw away the old event
 							// just pass the read data to the next
 							// loop iteration.
@@ -479,13 +477,13 @@ public class LogLoader extends ProjDefs
 						// MISMATCHED EVENT PAIRS - again, nullify
 						// the first read event and pass the newly
 						// read entry back through the loop
-						if (userEventObject.charmEventID != LE.EventID || 
-								userEventObject.userEventID != LE.Entry) {
+						if (userEventObject.charmEventID != LE.event ||
+								userEventObject.userEventID != LE.entry) {
 							userEventObject = null;
 							continue;
 						} else {
 
-							userEventObject.endTime = LE.Time-BeginTime;
+							userEventObject.endTime = LE.time -BeginTime;
 							userEventVector.add(userEventObject);
 							if(!timeline.isEmpty()) {
 								//If the log is loaded somewhere in the middle where
@@ -504,19 +502,19 @@ public class LogLoader extends ProjDefs
 						}
 						break;
 					case BEGIN_USER_EVENT_PAIR:
-						final UserEventObject temp = new UserEventObject(pe, LE.Time - BeginTime,
-								LE.Entry, LE.EventID,
+						final UserEventObject temp = new UserEventObject(pe, LE.time - BeginTime,
+								LE.entry, LE.event,
 								UserEventObject.Type.PAIR, LE.nestedID);
 						userEventPairStarts.add(temp);
 						break;
 					case END_USER_EVENT_PAIR:
 						for (int i = 0; i < userEventPairStarts.size(); ++i) {
 							final UserEventObject candidate = userEventPairStarts.get(i);
-							if (candidate.userEventID == LE.Entry &&
+							if (candidate.userEventID == LE.entry &&
 									candidate.getNestedID() == LE.nestedID &&
-									candidate.beginTime <= LE.Time - BeginTime) {
+									candidate.beginTime <= LE.time - BeginTime) {
 								userEventPairStarts.remove(i);
-								candidate.endTime = LE.Time - BeginTime;
+								candidate.endTime = LE.time - BeginTime;
 								userEventVector.add(candidate);
 								if (!timeline.isEmpty()) {
 									TimelineEvent curLastOne = timeline.getLast();
@@ -537,27 +535,27 @@ public class LogLoader extends ProjDefs
 						// based on the lastBeginEvent and attach the PACK
 						// event to that block.
 						if ((lastBeginEvent != null) &&
-								(lastBeginEvent.TransactionType==BEGIN_PROCESSING)) {
-							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
+								(lastBeginEvent.type ==BEGIN_PROCESSING)) {
+							TE = new TimelineEvent(lastBeginEvent.time -BeginTime,
 									End-BeginTime,
-									lastBeginEvent.Entry,
-									lastBeginEvent.Pe);
+									lastBeginEvent.entry,
+									lastBeginEvent.pe);
 							timeline.add(TE);
 							isProcessing = true;
 						}
 						lastBeginEvent = null;
 						// Start a new dummy event
 						if (TE == null) {
-							TE = new TimelineEvent(LE.Time-BeginTime,
-									LE.Time-BeginTime,-2,
-									LE.Pe);
+							TE = new TimelineEvent(LE.time -BeginTime,
+									LE.time -BeginTime,-2,
+									LE.pe);
 							timeline.add(TE);
 						}
-						TE.addPack (PT=new PackTime(LE.Time-BeginTime));
+						TE.addPack (PT=new PackTime(LE.time -BeginTime));
 						break;
 					case END_PACK:
 						if (PT!=null) {
-							PT.EndTime = LE.Time-BeginTime;
+							PT.EndTime = LE.time -BeginTime;
 						}
 						PT=null;
 						if (TE != null) {
@@ -571,7 +569,7 @@ public class LogLoader extends ProjDefs
 						if (MainWindow.IGNORE_IDLE) {
 							break;
 						}
-						TE = new TimelineEvent(LE.Time - BeginTime,
+						TE = new TimelineEvent(LE.time - BeginTime,
 								Long.MAX_VALUE,
 								-1,-1); 
 						timeline.add(TE);
@@ -586,8 +584,8 @@ public class LogLoader extends ProjDefs
 						// based on the lastBeginEvent and attach the CREATION
 						// event to that block.
 						if ((lastBeginEvent != null) &&
-								(lastBeginEvent.TransactionType == BEGIN_IDLE)) {
-							TE = new TimelineEvent(lastBeginEvent.Time-BeginTime,
+								(lastBeginEvent.type == BEGIN_IDLE)) {
+							TE = new TimelineEvent(lastBeginEvent.time -BeginTime,
 									End-BeginTime,
 									-1, -1);
 							timeline.add(TE);
@@ -595,7 +593,7 @@ public class LogLoader extends ProjDefs
 						}
 						lastBeginEvent = null;
 						if (TE != null) {   
-							TE.EndTime = LE.Time - BeginTime;
+							TE.EndTime = LE.time - BeginTime;
 							// If the entry was not long enough, remove it from the timeline
 							if(TE.EndTime - TE.BeginTime < minEntryDuration){
 								timeline.removeLast();
@@ -605,12 +603,11 @@ public class LogLoader extends ProjDefs
 						break;
 					}
 				}
-				LogEntryData data2 = reader.nextEvent();
-				LE = new LogEntry(data2);
+				LE = reader.nextEvent();
 				// this will
 				// END COMPUTATION event.
-				if (LE.Entry != -1) {
-					if ((LE.Time - BeginTime) > End) {
+				if (LE.entry != -1) {
+					if ((LE.time - BeginTime) > End) {
 						break;
 					}
 				}
@@ -619,9 +616,9 @@ public class LogLoader extends ProjDefs
 			// check to see if we are stopping in the middle of a message.
 			// if so, we need to keep reading to get its end time
 			while (TE != null) {
-				if (LE.Entry != -1) {
-					if (LE.TransactionType == END_PROCESSING) {
-						TE.EndTime = LE.Time - BeginTime;
+				if (LE.entry != -1) {
+					if (LE.type == END_PROCESSING) {
+						TE.EndTime = LE.time - BeginTime;
 						// If the entry was not long enough, remove it from the timeline
 						if(TE.EndTime - TE.BeginTime < minEntryDuration){
 							timeline.removeLast();
@@ -629,8 +626,7 @@ public class LogLoader extends ProjDefs
 						TE=null;
 					}
 				}
-				LogEntryData data2 = reader.nextEvent();
-				LE = new LogEntry(data2);
+				LE = reader.nextEvent();
 			}
 		} catch (EndOfLogSuccess e) { 
 			/* Reached end of the log file */ 

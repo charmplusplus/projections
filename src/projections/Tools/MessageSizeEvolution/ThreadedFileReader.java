@@ -4,7 +4,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 import java.io.IOException;
 
@@ -66,7 +66,7 @@ class ThreadedFileReader
         GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
         try {
             while (true) {
-                LogEntryData logData = reader.nextEvent();
+                LogEntry logData = reader.nextEvent();
                 if (logData.time > endTime)
                     break;
 

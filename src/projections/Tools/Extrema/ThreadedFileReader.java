@@ -8,7 +8,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 /** The reader threads for Extrema tool. */
@@ -63,8 +63,8 @@ class ThreadedFileReader implements Runnable  {
 
 		try {
 			if (selectedActivity == Analysis.USER_EVENTS) {
-				LogEntryData logData;
-				LogEntryData logDataEnd;
+				LogEntry logData;
+				LogEntry logDataEnd;
 
 				logData = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR);
 				logDataEnd = reader.nextEventOfType(ProjDefs.USER_EVENT_PAIR );
@@ -90,11 +90,11 @@ class ThreadedFileReader implements Runnable  {
 			} else {
 
 				boolean isProcessing = false;
-				LogEntryData prevBeginProc = null;
-				LogEntryData prevBeginIdle = null;
+				LogEntry prevBeginProc = null;
+				LogEntry prevBeginIdle = null;
 
 				while (true) {
-					LogEntryData logData = reader.nextEvent();	
+					LogEntry logData = reader.nextEvent();
 
 					switch (logData.type) {
 

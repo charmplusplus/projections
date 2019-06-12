@@ -8,7 +8,7 @@ import java.util.*;
 import projections.Tools.Timeline.TimelineMessage;
 import projections.Tools.Timeline.UserEventObject;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.misc.LogLoadException;
 
 /** This class reads in .log files and turns them into a timeline.  */
@@ -125,7 +125,7 @@ public class LogLoader extends ProjDefs
 		long BeginTime = 0;
 
 		long              Time        = Long.MIN_VALUE;
-		LogEntryData      LE          = null;
+		LogEntry          LE          = null;
 		TimelineEvent     TE          = null;
 		// just for temp purposes
 		UserEventObject         userEventObject   = null;  
@@ -144,7 +144,7 @@ public class LogLoader extends ProjDefs
 		try {
 
 			boolean isProcessing = false;
-			LogEntryData lastBeginEvent = null;
+			LogEntry lastBeginEvent = null;
 			TimelineEvent lastBeginTimelineEvent = null;
 			
 //			// We will lookup a good seek point from the index file
@@ -158,7 +158,7 @@ public class LogLoader extends ProjDefs
 //			
 			
 			while (true) { //Seek to time Begin
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 				LE = data;
 				if (data.time >= Begin) {
 					break;

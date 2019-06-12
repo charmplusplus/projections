@@ -41,7 +41,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.RangeHistory;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 /**
  *  RangeDialogNew
@@ -657,7 +657,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 					int c = 0;
 					while (true) {
-						LogEntryData data = reader.nextEvent();
+						LogEntry data = reader.nextEvent();
 
 						if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
 							if(data.note.contains("***")){

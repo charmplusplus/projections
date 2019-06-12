@@ -10,7 +10,7 @@ import java.util.SortedSet;
 import javax.swing.ProgressMonitor;
 
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 public class CallTable extends ProjDefs
 {
@@ -55,7 +55,7 @@ public class CallTable extends ProjDefs
 	public void GatherData(Component parent)
 	{
 		GenericLogReader reader;
-		LogEntryData logdata;
+		LogEntry logdata;
 
 		int currPeIndex = 0;
 		int sourceEP;

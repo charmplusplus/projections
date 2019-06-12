@@ -3,7 +3,7 @@ package projections.analysis;
 import java.io.IOException;
 
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.analysis.ProjDefs;
 
 
@@ -25,7 +25,7 @@ class LogLoaderBeginEventThread  implements Runnable {
 
 		try {	  
 			while (true) {
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 				if (data.isBeginType() && (data.time < result))
 				{
 					result = data.time;

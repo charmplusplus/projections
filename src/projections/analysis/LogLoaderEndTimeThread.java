@@ -3,7 +3,7 @@ package projections.analysis;
 import java.io.IOException;
 
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 /** This thread's run() method will lookup the endtime for an input log file */
@@ -24,7 +24,7 @@ class LogLoaderEndTimeThread  implements Runnable {
 
 		try {	  
 			while (true) {
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 				if (data.time > result)
 					result = data.time;
 			}		

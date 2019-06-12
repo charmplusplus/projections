@@ -9,7 +9,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.analysis.StsReader;
 
 /** The reader threads for Communication Per PE Tool. */
@@ -77,7 +77,7 @@ class ThreadedFileReader implements Runnable  {
 				}
 			}
 
-			LogEntryData logdata = reader.nextEventOnOrAfter(startTime);
+			LogEntry logdata = reader.nextEventOnOrAfter(startTime);
 			// we'll just use the EndOfLogException to break us out of
 			// this loop :)
 			while (true) {

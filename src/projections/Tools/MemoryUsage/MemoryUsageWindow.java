@@ -41,7 +41,7 @@ import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 
@@ -402,7 +402,7 @@ public class MemoryUsageWindow extends ProjectionsWindow {
 		try{
 			int c = 0;
 			while (true) {
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 
 				if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
 					if(data.note.contains("***")){

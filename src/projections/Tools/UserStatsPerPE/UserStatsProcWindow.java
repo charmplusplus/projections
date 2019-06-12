@@ -27,7 +27,7 @@ import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
 import projections.gui.ColorManager;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.analysis.ProjDefs;
 import projections.analysis.GenericLogReader;
 import projections.analysis.EndOfLogSuccess;
@@ -224,7 +224,7 @@ implements ItemListener, ActionListener
 
 			GenericLogReader reader = new GenericLogReader( pe,
 					MainWindow.runObject[myRun].getVersion());
-			LogEntryData logData;
+			LogEntry logData;
 
 			// Skip to the first begin.
 			try {

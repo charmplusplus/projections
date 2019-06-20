@@ -59,8 +59,10 @@ class ScrollingPanel extends JPanel implements MouseWheelListener {
 		
 		scrollpane.getViewport().setBackground(data.getBackgroundColor());
 
+		// Empirically, using BACKINGSTORE_SCROLL_MODE is much more performant than BLIT_SCROLL_MODE,
+		// but that may be due to issues in the painting pipeline. If trying to tune for performace,
+		// it's worth playing with both.
 		scrollpane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // This should be tuned for performance
-//		scrollpane.getViewport().setScrollMode(JViewport.BLIT_SCROLL_MODE); // This should be tuned for performance
 
 		// Add listener to enable Ctrl+scroll to zoom
 		mainPanel.addMouseWheelListener(this);

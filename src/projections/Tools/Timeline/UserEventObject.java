@@ -153,19 +153,19 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 			g.drawLine(rightCoord, topCoord, rightCoord, bottomCoord);
 		}
 
-		// Draw the name of the user event
-		if(getName() != null){
-			int leftpad = 3;
-			int rightpad = 3;
-			int toppad = 1;
-			int bottompad = 1;
-			int fontsize = height - toppad - bottompad;
+		final int leftpad = 3;
+		final int rightpad = 3;
+		final int toppad = 1;
+		final int bottompad = 1;
+		final int fontsize = height - toppad - bottompad;
 
+		// Draw the name of the user event
+		if(fontsize >= 9 && getName() != null){
 			g.setFont(data.labelFont);
 			FontMetrics fm = g.getFontMetrics();
 			int stringWidth = fm.stringWidth(getName());		
 
-			if( fontsize >=9 && stringWidth < width - leftpad - rightpad){
+			if(stringWidth < width - leftpad - rightpad){
 				g.setColor(Color.black);
 				g.drawString(getName(), leftCoord+leftpad, topCoord+toppad + fontsize);
 

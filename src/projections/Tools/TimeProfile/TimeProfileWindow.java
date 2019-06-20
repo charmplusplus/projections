@@ -586,10 +586,12 @@ implements ActionListener, Clickable
 			rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
 			StackedXYBarRenderer stackedRenderer = new StackedXYBarRenderer();
 			stackedRenderer.setDefaultToolTipGenerator((XYToolTipGenerator) new CustomToolTipGenerator());
+			stackedRenderer.setShadowVisible(false);
 
 			XYPlot plot = new XYPlot(dataset, domainAxis, rangeAxis, stackedRenderer);
 
 			JFreeChart chart = new JFreeChart("Time Profile", plot);
+			chart.setAntiAlias(false);
 			ChartPanel chartPanel = new ChartPanel(chart);
 			// arbitrarily large size to prevent stretching of fonts
 			chartPanel.setMaximumDrawHeight(100000);

@@ -158,9 +158,8 @@ public class LogLoader extends ProjDefs
 //			
 			
 			while (true) { //Seek to time Begin
-				LogEntry data = reader.nextEvent();
-				LE = data;
-				if (data.time >= Begin) {
+				LE = reader.nextEvent();
+				if (LE.time >= Begin) {
 					break;
 				}
 				if (LE.entry == -1) {

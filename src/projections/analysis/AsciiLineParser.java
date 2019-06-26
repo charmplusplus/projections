@@ -17,18 +17,20 @@ class AsciiLineParser {
 	/// The next position in the string
 	private int pos;
 	
-	private String line;
+	final private String line;
+	final private int lineLength;
 	
 	protected AsciiLineParser(String _line){
 		line = _line;
+		lineLength = line.length();
 		pos = 0;
 	}
 	
 	/// Read an character from the string. if at end of string, produce '\n'
 	final private char nextChar() throws IOException {
-		if(pos > line.length()){
+		if(pos > lineLength){
 			throw new IOException();
-		} else if(pos == line.length()){
+		} else if(pos == lineLength){
 			pos++;
 			return '\n';
  		} else {
@@ -47,11 +49,11 @@ class AsciiLineParser {
     // Checks whether there is another field available in the line, without
     // returning that field or modifying the line.
     final protected boolean hasNextField() {
-        while (pos < line.length() && Character.isWhitespace(line.charAt(pos))) {
+        while (pos < lineLength && Character.isWhitespace(line.charAt(pos))) {
             pos++;
         }
 
-        return (pos < line.length() && !Character.isWhitespace(line.charAt(pos)));
+        return (pos < lineLength && !Character.isWhitespace(line.charAt(pos)));
     }
 
 	//Read a positive long from the current file 

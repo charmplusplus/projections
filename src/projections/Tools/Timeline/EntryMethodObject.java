@@ -41,7 +41,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private ObjectId tid; 
 	int pe;
 	int pCreation;
-	private ArrayList<TimelineMessage> TLmsgs; //stores TimelineEvent object's MsgsSent vector
 	
 	private final static String popupChangeColor = "Change Entry Point Color";
 	private final static String popupShowDetails = "Show details";
@@ -87,7 +86,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			int p1)
 	{
 	
-		TLmsgs=tle.MsgsSent;
 		this.data = data;
 		beginTime = tle.BeginTime;
 		endTime   = tle.EndTime;
@@ -520,7 +518,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			HashSet<EntryMethodObject> v = new HashSet<EntryMethodObject>();
 			if(data.traceMessagesForwardOnHover()){
 				EntryMethodObject obj = this;
-				ArrayList<TimelineMessage> tleMsg = this.TLmsgs;
+				ArrayList<TimelineMessage> tleMsg = messages;
 				
 				boolean done = false;
                 v.add(obj); //add this object to the set that is returned
@@ -1180,7 +1178,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 
 	public ArrayList<TimelineMessage> getTLmsgs() {
-		return TLmsgs;
+		return messages;
 	}
 
 	@Override

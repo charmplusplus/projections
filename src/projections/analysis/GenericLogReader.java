@@ -329,6 +329,7 @@ implements PointCapableReader
 					data.perfCounts[i] = sc.nextLong();
 				}
 			}
+			lastBeginEvent.setValid(false);
 			break;
 		case BEGIN_TRACE: 
 			data.time = sc.nextLong() + shiftAmount;
@@ -457,7 +458,7 @@ implements PointCapableReader
 	}
 
 	
-	public LogEntry getLastBE() {
+	public LogEntry getLastOpenBE() {
 		if (lastBeginEvent.isValid()) {
 			return lastBeginEvent;
 		}

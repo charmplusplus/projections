@@ -211,7 +211,9 @@ public class LogLoader extends ProjDefs
 				return;
 				}
 			}
-			//Throws EndOfLogException at end of file; break if past endTime
+			// Throws EndOfLogException at end of file; break if past endTime
+			// Note that the LE object is reused, filled with new data every iteration.
+			// Ensure that stale data from a past read for another type is not used.
 			CallStackManager cstack = new CallStackManager();
 			ObjectId tid = null;
 			while(true) {
@@ -420,7 +422,7 @@ public class LogLoader extends ProjDefs
 
 						// Now, expect to read the second entry and handle
 						// errors if necessary.
-						LE = reader.nextEvent();
+						LE = reader.nextEvent(LE);
 
 						if (LE.type != USER_EVENT_PAIR) {
 							// DANGLING - throw away the old event
@@ -558,7 +560,7 @@ public class LogLoader extends ProjDefs
 						break;
 					}
 				}
-				LE = reader.nextEvent();
+				LE = reader.nextEvent(LE);
 				// this will
 				// END COMPUTATION event.
 				if (LE.entry != -1) {

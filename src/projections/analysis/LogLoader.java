@@ -1,7 +1,6 @@
 package projections.analysis;
 
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
 
@@ -141,41 +140,11 @@ public class LogLoader extends ProjDefs
 		try {
 
 			boolean isProcessing = false;
-			LogEntry lastBeginEvent = null;
 			TimelineEvent lastBeginTimelineEvent = null;
-			
-//			// We will lookup a good seek point from the index file
-//			long offsetToBeginRecord = index.lookupIndexOffset(PeNum,Begin);
-//			
-//			// If we found a file offset to seek, we do the seek
-//			if(offsetToBeginRecord != -1){
-//				System.out.println("Found offset "+ offsetToBeginRecord + " in index file for pe "+PeNum);
-//				reader.seek(offsetToBeginRecord);
-//			}		
-//			
-			
-			while (true) { //Seek to time Begin
-				LE = reader.nextEvent();
-				if (LE.time >= Begin) {
-					break;
-				}
-				if (LE.entry == -1) {
-					continue;
-				}
-				// This is still not ideal. There are cases which may cause
-				// a rogue begin event to have data dropped at the beginning.
-				if ((LE.type == BEGIN_PROCESSING) &&
-						(LE.entry != -1)) {
-					lastBeginEvent = LE;
-				} else if ((LE.type == END_PROCESSING) &&
-						(LE.entry != -1)) {
-					lastBeginEvent = null;
-				} else if (LE.type == BEGIN_IDLE) {
-					lastBeginEvent = LE;
-				} else if (LE.type == END_IDLE) {
-					lastBeginEvent = null;
-				}
-			}
+
+			// Seek to time Begin
+			LE = reader.nextEventOnOrAfter(Begin);
+			LogEntry lastBeginEvent = reader.getLastOpenBE();
 			
 			if (LE.time > End) {
 				switch (LE.type) {

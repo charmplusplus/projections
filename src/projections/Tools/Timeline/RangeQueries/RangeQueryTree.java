@@ -31,7 +31,7 @@ import java.util.Iterator;
  * */
 public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 
-	static int MAX_ENTRIES_PER_NODE = 100;
+	static int MAX_ENTRIES_PER_NODE = 1000;
 
 	TreeNode root;
 	

@@ -171,7 +171,10 @@ public class ProjMain {
 		}
 		Analysis a = new Analysis();
 		try {
-			MainWindow.CUR_VERSION = CUR_VERSION;
+			mainWindow = new MainWindow();
+    	mainWindow.pack();
+    	mainWindow.setTitle("Projections");
+    	mainWindow.setVisible(true);
 			a.initAnalysis(loadSts, null);
 		} catch (Exception e) {
 			e.printStackTrace();

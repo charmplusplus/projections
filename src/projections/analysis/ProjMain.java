@@ -171,7 +171,7 @@ public class ProjMain {
 		}
 		try {
 			mainWindow = new MainWindow();
-			mainWindow.runObject[0].initAnalysis(loadSts, null);
+			mainWindow.runObject[0].initAnalysis(loadSts, mainWindow);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

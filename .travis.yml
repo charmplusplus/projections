@@ -5,5 +5,5 @@ dist: xenial
 services:
   - xvfb
 
-after_success:
+before_deploy:
   - xvfb-run -e /dev/stdout -a make test

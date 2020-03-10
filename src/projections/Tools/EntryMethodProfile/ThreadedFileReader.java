@@ -7,7 +7,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 class ThreadedFileReader implements Runnable {
 
@@ -36,12 +36,12 @@ class ThreadedFileReader implements Runnable {
 
         // First take data and put it into intervals.
         load = new TreeMap<Integer, Long>();
-        Deque<LogEntryData> stack = new ArrayDeque<LogEntryData>();
+        Deque<LogEntry> stack = new ArrayDeque<LogEntry>();
         lastIndex = -1;
 
         try {
             while (true) {
-                LogEntryData data = reader.nextProcessingEvent();
+                LogEntry data = reader.nextProcessingEvent();
 
                 if (data.time > endTime)
                     break;
@@ -54,7 +54,7 @@ class ThreadedFileReader implements Runnable {
                         if (stack.isEmpty()) {
                             break;
                         }
-                        LogEntryData beginData = stack.pop();
+                        LogEntry beginData = stack.pop();
                         if (beginData.entry != data.entry) {
                             break;
                         } else if ((data.time - beginData.time) > 0 && data.time < endTime && beginData.time >= startTime) {

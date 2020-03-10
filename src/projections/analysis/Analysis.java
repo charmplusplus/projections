@@ -154,8 +154,8 @@ public class Analysis {
 		  tachyonShifts = new TachyonShifts(getLogDirectory());
 		  
 		  // Build Summary Data
-      // If rootComponent == null, we are just checking if the file
-      // exists (via doExitAfterFileLoad), and don't bother running the SumAnalyzer
+	          // If rootComponent == null, we are just checking if the file
+	          // exists (via doExitAfterFileLoad), and don't bother running the SumAnalyzer
 		  if (hasSumFiles() && rootComponent != null) {
 			  sumAnalyzer = null;
 			  sumAnalyzer = new SumAnalyzer();
@@ -808,17 +808,26 @@ public class Analysis {
 //	}
 //    }
 
-    
-    /// Get user event color given one of the potentially sparse ids used provided by the program
-    public Color getUserEventColor(int eventID) {
-    	if (getSts() != null) { 
-    		Integer idx = getSts().getUserEventIndex(eventID);
-    		if(idx!=null)
-    			return userEventColors[idx.intValue()]; 
-    	} 
-
-    	return null; 
-    }
+	private static boolean printedError = false;
+	/// Get user event color given one of the potentially sparse ids used provided by the program
+	public Color getUserEventColor(int eventID) {
+		if (getSts() != null) {
+			Integer idx = getSts().getUserEventIndex(eventID);
+			if(idx != null) {
+				int val = idx.intValue();
+				if (val >= 0 && val < userEventColors.length) {
+					return userEventColors[val];
+				} else {
+					if (!printedError) {
+						System.err.println("User Event Color Index (" + eventID + ") out of bounds!\n");
+						printedError = true;
+					}
+					return userEventColors[0];
+				}
+			}
+		}
+		return null;
+	}
 
     
     public void setUserEventColor(int eventID, Color c) {

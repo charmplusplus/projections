@@ -164,31 +164,35 @@ public class ProjMain {
     		i++;
     	}
 
-    	if (doExitAfterFileLoad) {
-    		Analysis a = new Analysis();
-    		try {
-    			MainWindow.CUR_VERSION = CUR_VERSION;
-    			a.initAnalysis(loadSts, null);
-    		} catch (Exception e) {
-    			e.printStackTrace();
-    			System.exit(1);
-    		}
-    		System.exit(0);
-    	}
+	if (doExitAfterFileLoad) {
+		if (loadSts == null) {
+			System.out.println("Error: --exit specified but no sts filename given!");
+			System.exit(2);
+		}
+		Analysis a = new Analysis();
+		try {
+			MainWindow.CUR_VERSION = CUR_VERSION;
+			a.initAnalysis(loadSts, null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		System.exit(0);
+	}
 
     	mainWindow = new MainWindow();
     	mainWindow.pack();
     	mainWindow.setTitle("Projections");
     	mainWindow.setVisible(true);
 
-    	// Load Data if specified on command line
-    	if (loadSts!=null) {
-    		mainWindow.openFile(loadSts); 
-    	}
-    	
+	// Load Data if specified on command line
+	if (loadSts!=null) {
+		mainWindow.openFile(loadSts);
+	}
+
     }
-    
-    
+
+
     public static void main(String args[])
     {	
     	startup(args);

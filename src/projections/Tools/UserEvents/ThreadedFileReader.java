@@ -4,7 +4,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 import java.io.IOException;
 
@@ -34,8 +34,8 @@ class ThreadedFileReader implements Runnable {
     public void run() {
         // READ - nothing here
         GenericLogReader reader = new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
-        LogEntryData logData;
-        LogEntryData logDataEnd;
+        LogEntry logData;
+        LogEntry logDataEnd;
 
         int numActivities = MainWindow.runObject[myRun].getNumUserDefinedEvents();
 

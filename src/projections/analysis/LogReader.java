@@ -8,7 +8,7 @@ import java.util.TreeSet;
 import javax.swing.ProgressMonitor;
 
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 public class LogReader 
     extends ProjDefs
@@ -56,14 +56,14 @@ public class LogReader
     private boolean byEntryPoint;
 
     // **CW** 8/23/2005 Make LogReader use GenericLogReader instead
-    private LogEntryData curData;
+    private LogEntry curData;
 
     public long getIntervalSize() {
 	return intervalSize;
     }
 	
     public LogReader() {
-    	curData = new LogEntryData();
+		curData = new LogEntry();
     }
 
     /**
@@ -311,7 +311,7 @@ public class LogReader
     		GenericLogReader reader = new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
 
 		boolean isProcessing = false;
-		LogEntryData lastBeginData = null;
+		LogEntry lastBeginData = null;
     		
     		try { 
     			while (true) { //EndOfLogException will terminate loop

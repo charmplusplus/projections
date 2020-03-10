@@ -7,48 +7,48 @@ import projections.gui.MainWindow;
  *  Written by Chee Wai Lee
  *  4/12/2002
  *
- *  LogEntryData encapsulates data that can potentially be read from a
+ *  LogEntry encapsulates data that can potentially be read from a
  *  projections log entry.
  *
  */
 
-public class LogEntryData extends ProjDefs
+public class LogEntry extends ProjDefs
 {
-	
+
 	static private int myRun = 0;
-	
+
     private boolean isValid = true;
 
     /** type of the event eg: BEGIN_PROCESSING	 */
-    public int type;	 	
-    
+    public int type;
+
     /** determines	 */
-    public int mtype;	 
-   
+    public int mtype;
+
     /** timestamp */
-    public long time;	 
-	
+    public long time;
+
     /** used for bracketed user supplied notes, and all bracketed events in the future */
-    public long endTime; 
-    
+    public long endTime;
+
     /** EntryPoint number found in sts file */
-    public int entry;	 
-    
+    public int entry;
+
     /** Unique sequence number assigned to Events. This is a unique sequence number set by the sender for BEGIN_PROCESSING */
-    public int event;	 
-    
+    public int event;
+
     /** processor number where the event occurred */
     public int pe;
 
     /** Number of processors a message was sent to. Used for CREATION_BCAST and CREATION_MULTICAST */
-    public int numPEs;   
+    public int numPEs;
 
 
     // version 2.0 constructs
     public int msglen;	 // only for CREATION events
 
     public int userEventID;     // for USER_EVENT_PAIR events only
-    public long sendTime;	// sendTime 
+    public long sendTime;	// sendTime
 
     // version 4.0 constructs
     public long recvTime;       // the time the processor *actually* received
@@ -65,15 +65,15 @@ public class LogEntryData extends ProjDefs
     public int destPEs[];       ///< list of multicast destination processors
 
     public Integer userSupplied;
-    
+
     public long memoryUsage;
-    
+
     /// An arbitrary string provided by the user. Should be displayed as a user event
 	public String note;
- 
+
 	public int nestedID; // Nested thread ID, e.g. virtual AMPI ranks
-    
-    public LogEntryData() {
+
+    public LogEntry() {
 	// this is fixed (since it is based on a 3D tuple)
         // As of version 9.0, it is a 6-tuple which includes array ID.
 	id = new int[6];
@@ -90,12 +90,12 @@ public class LogEntryData extends ProjDefs
     public void setValid(boolean flag) {
 	isValid = flag;
     }
-    
-    
-    
+
+
+
     public String htmlFormattedDescription(){
-    	
-    	switch( type ) {
+
+	switch( type ) {
 		case ( ProjDefs.CREATION ):
 			return ( "<font size=+1 color=\"#660000\">CREATE</font> message to be sent to <em> " + MainWindow.runObject[myRun].getEntryFullNameByID(entry) + "</em>");
 		case ( ProjDefs.CREATION_BCAST ):
@@ -144,14 +144,14 @@ public class LogEntryData extends ProjDefs
 			if(note != null)
 				return ( "<font size=+1 color=\"#880000\">USER SUPPLIED NOTE:</font> " + note);
 			else
-				return ( "<font size=+1 color=\"#880000\">USER SUPPLIED NOTE:</font> <i>blank</i>" );		
+				return ( "<font size=+1 color=\"#880000\">USER SUPPLIED NOTE:</font> <i>blank</i>" );
 		default:
 			System.out.println("Unknown event type");
 		return ( "Unknown Event Type:" + type + " !!!");
 		}
 	}
-    	
-        
+
+
 	public boolean isBeginType() {
 		return ((type == BEGIN_IDLE) ||
 				(type == BEGIN_PACK) ||
@@ -169,5 +169,5 @@ public class LogEntryData extends ProjDefs
 				(type == END_TRACE) ||
 				(type == END_INTERRUPT));
 	}
-    
+
 }

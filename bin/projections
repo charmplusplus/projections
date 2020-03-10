@@ -22,6 +22,7 @@ HEADLESS_ARG=""
 for var in "$@"; do
   if [ $var = "--exit" ]; then
     HEADLESS_ARG="-Djava.awt.headless=true"
+    echo $HEADLESS_ARG
   fi
 done
 

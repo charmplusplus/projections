@@ -5,4 +5,4 @@ services:
   - xvfb
 
 after_success:
-  - xvfb-run -e /dev/stdout  make test
+  - xvfb-run -e /dev/stdout -a make test

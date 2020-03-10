@@ -7,3 +7,5 @@ services:
 
 before_deploy:
   - xvfb-run -e /dev/stdout -a make test
+
+deploy:

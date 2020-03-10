@@ -1,8 +1,4 @@
 language: java
 
-dist: xenial
-services:
-  - xvfb
-
 after_success:
-  - xvfb-run -e /dev/stdout -a make test
+  - make test

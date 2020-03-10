@@ -169,13 +169,9 @@ public class ProjMain {
 			System.out.println("Error: --exit specified but no sts filename given!");
 			System.exit(2);
 		}
-		Analysis a = new Analysis();
 		try {
 			mainWindow = new MainWindow();
-    	mainWindow.pack();
-    	mainWindow.setTitle("Projections");
-    	mainWindow.setVisible(true);
-			a.initAnalysis(loadSts, null);
+			mainWindow.runObject[0].initAnalysis(loadSts, null);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);

@@ -16,18 +16,9 @@ then
   export _JAVA_AWT_WM_NONREPARENTING=1
 fi
 
-HEADLESS_ARG=""
-
-# Check if the --exit flag was given and add HEADLESS execution if yes
-for var in "$@"; do
-  if [ $var = "--exit" ]; then
-    HEADLESS_ARG="-Djava.awt.headless=true"
-    echo $HEADLESS_ARG
-  fi
-done
 
 #java -Xms4G -Xmx4G -ms4G -mx4G -XX:+UseParallelGC -classpath $jarpath projections.analysis.ProjMain $*
-java $HEADLESS______ARG -Dapple.awt.application.name="Projections" -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain ${1+"$@"}
+java -Dapple.awt.application.name="Projections" -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.analysis.ProjMain ${1+"$@"}
 #java -classpath $jarpath projections.analysis.ProjMain $*
 
 #java -d64 -Xms2G -Xmx5G -ms2G -mx5G -classpath $jarpath projections.gui.OrderedIntList $*

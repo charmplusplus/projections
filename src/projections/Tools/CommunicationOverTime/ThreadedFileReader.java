@@ -6,7 +6,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 /** The reader threads for Communication over Time Tool. 
@@ -90,7 +90,7 @@ class ThreadedFileReader implements Runnable  {
 		try	{
 
 			while(true){
-				LogEntryData logdata = reader.nextEvent();
+				LogEntry logdata = reader.nextEvent();
 
 				//Now we have entered into the time interval
 

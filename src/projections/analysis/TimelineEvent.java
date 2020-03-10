@@ -75,6 +75,25 @@ public long RecvTime;
 	userEventName = null;
 }
 
+	protected TimelineEvent(long bt,long et, int ep,int pe, int mlen, long r,
+							int[] d,int eventid, long cpubegin, long cpuend,
+							int numPapiCounts, long papiCounts[])
+	{
+		setDefaultValues();
+		BeginTime=bt; EndTime=et;
+		cpuBegin = cpubegin;
+		cpuEnd = cpuend;
+		EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
+		RecvTime = r;
+
+		id = new ObjectId(d);
+		EventID = eventid;
+		this.numPapiCounts = numPapiCounts;
+		this.papiCounts = papiCounts;
+
+		userEventName = null;
+	}
+
 
 public TimelineEvent(){
 	setDefaultValues();

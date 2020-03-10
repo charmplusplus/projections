@@ -10,7 +10,7 @@ import javax.swing.JTextPane;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 /** This class displays a log file as html formatted text inside a JPanel 
@@ -81,7 +81,7 @@ class LogFileViewerTextArea extends JPanel
 			GenericLogReader reader = new GenericLogReader(PE, MainWindow.runObject[myRun].getVersion());
 
 			while (true) {
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 
 
 				if(data.time >= startTime && data.time <= endTime){

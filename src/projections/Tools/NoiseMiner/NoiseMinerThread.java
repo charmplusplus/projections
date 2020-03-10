@@ -16,7 +16,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.TimelineEvent;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 class NoiseMinerThread implements Runnable {
 	private int pe;
@@ -41,7 +41,7 @@ class NoiseMinerThread implements Runnable {
 		
 //		System.out.println("PE " + pe + " loading");
 		
-		LogEntryData logdata = new LogEntryData();
+		LogEntry logdata = new LogEntry();
 
 		long previous_begin_time = -1;
 		int previous_begin_entry = -1;

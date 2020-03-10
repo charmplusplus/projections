@@ -269,7 +269,7 @@ implements ScalePanel.StatusDisplay
 				} catch (OutOfMemoryError e){
 					e.printStackTrace();
 					System.err.println("ERROR: PROJECTIONS RUNNING OUT oF MEMORY");
-					System.err.println("POSSIBLE SOLUTION: Set more memory for projections in bin/projections OR use \"projections64\"");
+					System.err.println("POSSIBLE SOLUTION: Set more memory for projections OR use \"projections64\"");
 					System.exit(1);
 				}
 				return null;

@@ -5,7 +5,6 @@ dist: xenial
 services:
   - xvfb
 
-before_deploy:
+script:
+  - gradle build
   - xvfb-run -e /dev/stdout -a make test
-
-deploy:

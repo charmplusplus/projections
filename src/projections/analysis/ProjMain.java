@@ -165,6 +165,10 @@ public class ProjMain {
     	}
 
 	if (doExitAfterFileLoad) {
+		if (loadSts == null) {
+			System.out.println("Error: --exit specified but no sts filename given!");
+			System.exit(2);
+		}
 		Analysis a = new Analysis();
 		try {
 			MainWindow.CUR_VERSION = CUR_VERSION;

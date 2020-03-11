@@ -1,1 +1,10 @@
 language: java
+
+dist: xenial
+
+services:
+  - xvfb
+
+script:
+  - gradle build
+  - xvfb-run -e /dev/stdout -a make test

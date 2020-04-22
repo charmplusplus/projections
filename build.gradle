@@ -33,9 +33,9 @@ sourceSets {
 task fatJar(type: Jar) {
   manifest {
     attributes 'Implementation-Title': 'Projections',
-               'Implementation-Version': archiveVersion
+               'Implementation-Version': project.version
   }
-  archiveBaseName = 'projections-all'
+  project.archivesBaseName = 'projections-all'
   into ('projections/images') {
       from('src/projections/images') {
           include '*'

@@ -453,12 +453,14 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			return false;
 		}
 
+		/*
 		// ending time cannot be greater than total time
 		if (getEndTime() > getTotalTime()) {
 			endTextLabel.setForeground(Color.red);
 			endTimeField.setForeground(Color.red);
 			return false;
 		}
+		*/
 
 		if(! processorsField.rangeVerifier.verify(processorsField) ){
 			processorTextLabel.setForeground(Color.red);

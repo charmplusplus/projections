@@ -405,6 +405,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			return false;
 		}
 
+		// this block is disabled to allow setting arbitrary end times, useful for precisely matching x-axis scale
 		/*
 		// ending time cannot be greater than total time
 		if (getEndTime() > getTotalTime()) {

@@ -121,7 +121,7 @@ public class StsReader extends ProjDefs
         StringBuilder value = new StringBuilder(current.substring(1));
         while (st.hasMoreTokens()) {
             current = st.nextToken();
-            value.append(current);
+            value.append(" " + current);
             if (current.endsWith("\"")) {
                 return value.substring(0, value.length() - 1);
             }

@@ -38,7 +38,7 @@ public class StsReader extends ProjDefs
     private int EntryCount;
     private int TotalMsgs;
     private ZonedDateTime timestamp;
-    private String runline;
+    private String commandline;
 
     private class Chare
     {
@@ -175,8 +175,8 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("TIMESTAMP")) {
 			timestamp = ZonedDateTime.ofInstant(Instant.parse(st.nextToken()), ZoneId.systemDefault());
 			String result = timestamp.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
-		} else if (s1.equals("RUNLINE")) {
-			runline = matchQuotes(st);
+		} else if (s1.equals("COMMANDLINE")) {
+			commandline = matchQuotes(st);
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -312,8 +312,8 @@ public class StsReader extends ProjDefs
 	return Machine;
     }
     
-    public String getRunline() {
-		return runline;
+    public String getCommandline() {
+		return commandline;
 	}
 
 	public ZonedDateTime getTimestamp() {

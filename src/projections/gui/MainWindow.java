@@ -447,10 +447,10 @@ implements ScalePanel.StatusDisplay
 		builder.append("<html>");
 		final String basename = sts.getBaseName();
 		builder.append("Name: " + basename + "<br>");
-		final String runline = sts.getRunline();
+		final String runline = sts.getCommandline();
 		if (runline != null) {
-			builder.append("Runline: ");
-			builder.append(sts.getRunline());
+			builder.append("Commandline: ");
+			builder.append(sts.getCommandline());
 			builder.append("<br>");
 		}
 		final ZonedDateTime dateTime = sts.getTimestamp();

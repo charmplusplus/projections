@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 
 import projections.misc.LogLoadException;
@@ -34,6 +37,8 @@ public class StsReader extends ProjDefs
     private int TotalChares;
     private int EntryCount;
     private int TotalMsgs;
+    private ZonedDateTime timestamp;
+    private String runline;
 
     private class Chare
     {
@@ -167,6 +172,11 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("SMPMODE")) {
 		    NodeSize = Integer.parseInt(st.nextToken());
  		    NumNodes = Integer.parseInt(st.nextToken());
+		} else if (s1.equals("TIMESTAMP")) {
+			timestamp = ZonedDateTime.ofInstant(Instant.parse(st.nextToken()), ZoneId.systemDefault());
+			String result = timestamp.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+		} else if (s1.equals("RUNLINE")) {
+			runline = matchQuotes(st);
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -302,6 +312,13 @@ public class StsReader extends ProjDefs
 	return Machine;
     }
     
+    public String getRunline() {
+		return runline;
+	}
+
+	public ZonedDateTime getTimestamp() {
+		return timestamp;
+	}
 
     
     public String getEntryNameByID(int ID) {

@@ -447,6 +447,12 @@ implements ScalePanel.StatusDisplay
 		builder.append("<html>");
 		final String basename = sts.getBaseName();
 		builder.append("Name: " + basename + "<br>");
+		final String machine = sts.getMachineName();
+		if (machine != null) {
+			builder.append("Machine layer: ");
+			builder.append(sts.getMachineName());
+			builder.append("<br>");
+		}
 		final String runline = sts.getCommandline();
 		if (runline != null) {
 			builder.append("Commandline: ");

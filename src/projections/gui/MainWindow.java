@@ -450,26 +450,26 @@ implements ScalePanel.StatusDisplay
 		final String machine = sts.getMachineName();
 		if (machine != null) {
 			builder.append("Machine layer: ");
-			builder.append(sts.getMachineName());
+			builder.append(machine);
 			builder.append("<br>");
 		}
 		final String charmVersion = sts.getCharmVersion();
 		if (charmVersion != null) {
 			builder.append("Charm++ Version: ");
-			builder.append(sts.getCharmVersion());
+			builder.append(charmVersion);
 			builder.append("<br>");
 		}
 		final String runline = sts.getCommandline();
 		if (runline != null) {
 			builder.append("Commandline: ");
-			builder.append(sts.getCommandline());
+			builder.append(runline);
 			builder.append("<br>");
 		}
 		final ZonedDateTime dateTime = sts.getTimestamp();
 		if (dateTime != null) {
 			builder.append("Run started at: ");
 			try {
-				builder.append(sts.getTimestamp().format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)));
+				builder.append(dateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)));
 			} catch (NumberFormatException ex) { }
 		}
 

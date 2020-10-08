@@ -39,6 +39,7 @@ public class StsReader extends ProjDefs
     private int TotalMsgs;
     private ZonedDateTime timestamp;
     private String commandline;
+    private String charmVersion;
 
     private class Chare
     {
@@ -177,6 +178,8 @@ public class StsReader extends ProjDefs
 			String result = timestamp.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
 		} else if (s1.equals("COMMANDLINE")) {
 			commandline = matchQuotes(st);
+		} else if (s1.equals("CHARMVERSION")) {
+			charmVersion = st.nextToken();
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -320,6 +323,9 @@ public class StsReader extends ProjDefs
 		return timestamp;
 	}
 
+	public String getCharmVersion() {
+		return charmVersion;
+	}
     
     public String getEntryNameByID(int ID) {
     	return getEntryNames().get(ID);

@@ -5,6 +5,7 @@ import java.io.File;
 import javax.swing.JOptionPane;
 
 import projections.gui.MainWindow;
+import projections.analysis.Analysis;
 
 /**
  *  ProjMain.java
@@ -58,6 +59,7 @@ public class ProjMain {
 	System.out.println("-h --help: show this page");
 	System.out.println("-V --version: show Projections version");
 	System.out.println("-u --use-version <ver>: use old version format");
+	System.out.println("--exit: exit Projections after loading input file");
 	System.out.println("-no-idle: ignore idle time in analysis");
 	System.out.println("-bgsize <x> <y> <z>: bluegene torus emulation");
 	System.out.println("-print_usage: details written to stdout when " +
@@ -80,6 +82,8 @@ public class ProjMain {
     	/// The sts file to load
     	String loadSts=null;
     	boolean done = false;
+    	// Exit projections after loading file (for testing)
+    	boolean doExitAfterFileLoad = false;
     	// If no sts file is given, then we will search in the current directory to find sts files
     	if(args.length == 0){
     		File currentdir =new File (".");
@@ -117,6 +121,9 @@ public class ProjMain {
     			System.out.println("Projections version: " + CUR_VERSION);
     			System.exit(0);
     		}
+            else if (args[i].equals("--exit")) {
+                doExitAfterFileLoad = true;
+            }
     		else if (args[i].equals("-u") ||
     				args[i].equals("-use-version")) {
     			i++;
@@ -157,19 +164,34 @@ public class ProjMain {
     		i++;
     	}
 
+	if (doExitAfterFileLoad) {
+		if (loadSts == null) {
+			System.out.println("Error: --exit specified but no sts filename given!");
+			System.exit(2);
+		}
+		try {
+			mainWindow = new MainWindow();
+			mainWindow.runObject[0].initAnalysis(loadSts, mainWindow);
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		System.exit(0);
+	}
+
     	mainWindow = new MainWindow();
     	mainWindow.pack();
     	mainWindow.setTitle("Projections");
     	mainWindow.setVisible(true);
 
-    	// Load Data if specified on command line
-    	if (loadSts!=null) {
-    		mainWindow.openFile(loadSts); 
-    	}
-    	
+	// Load Data if specified on command line
+	if (loadSts!=null) {
+		mainWindow.openFile(loadSts);
+	}
+
     }
-    
-    
+
+
     public static void main(String args[])
     {	
     	startup(args);

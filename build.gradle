@@ -6,21 +6,21 @@ repositories {
 }
 
 dependencies {
-  compile 'org.freehep:freehep-graphicsbase:2.4'
-  compile 'org.freehep:freehep-graphics2d:2.4'
-  compile 'org.freehep:freehep-graphicsio:2.4'
-  compile 'org.freehep:freehep-graphicsio-pdf:2.4'
-  compile 'org.freehep:freehep-graphicsio-svg:2.4'
-  compile 'org.freehep:freehep-graphicsio-ps:2.4'
-  compile 'org.freehep:freehep-vectorgraphics:2.4'
+  implementation 'org.freehep:freehep-graphicsbase:2.4'
+  implementation 'org.freehep:freehep-graphics2d:2.4'
+  implementation 'org.freehep:freehep-graphicsio:2.4'
+  implementation 'org.freehep:freehep-graphicsio-pdf:2.4'
+  implementation 'org.freehep:freehep-graphicsio-svg:2.4'
+  implementation 'org.freehep:freehep-graphicsio-ps:2.4'
+  implementation 'org.freehep:freehep-vectorgraphics:2.4'
 
-  compile 'org.jfree:jfreechart:1.5.0'
+  implementation 'org.jfree:jfreechart:1.5.0'
 }
 
 mainClassName = 'projections.analysis.ProjMain'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-version = '6.8.0'
+version = '6.10.0'
 
 sourceSets {
   main {
@@ -33,10 +33,9 @@ sourceSets {
 task fatJar(type: Jar) {
   manifest {
     attributes 'Implementation-Title': 'Projections',
-               'Implementation-Version': version
+               'Implementation-Version': project.version
   }
-  baseName = 'projections-all'
-  from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+  project.archivesBaseName = 'projections-all'
   into ('projections/images') {
       from('src/projections/images') {
           include '*'

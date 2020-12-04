@@ -14,7 +14,5 @@ jobs:
           java-version: 11
       - name: Build with Gradle
         run: gradle build
-      - name: Setup xvfb
-        run: sudo apt-get update && sudo apt-get install xvfb
       - name: Run test
         run: xvfb-run -e /dev/stdout -a make test

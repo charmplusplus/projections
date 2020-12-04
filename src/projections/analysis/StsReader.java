@@ -40,6 +40,7 @@ public class StsReader extends ProjDefs
     private ZonedDateTime timestamp;
     private String commandline;
     private String charmVersion;
+    private String username;
 
     private class Chare
     {
@@ -180,6 +181,8 @@ public class StsReader extends ProjDefs
 			commandline = matchQuotes(st);
 		} else if (s1.equals("CHARMVERSION")) {
 			charmVersion = st.nextToken();
+		} else if (s1.equals("USERNAME")) {
+			username = matchQuotes(st);
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -326,7 +329,11 @@ public class StsReader extends ProjDefs
 	public String getCharmVersion() {
 		return charmVersion;
 	}
-    
+
+	public String getUsername() {
+		return username;
+	}
+
     public String getEntryNameByID(int ID) {
     	return getEntryNames().get(ID);
     }   

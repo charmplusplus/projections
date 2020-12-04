@@ -1,6 +1,6 @@
 # Projections
 
-[![Build Status](https://travis-ci.org/UIUC-PPL/projections.svg?branch=master)](https://travis-ci.org/UIUC-PPL/projections)
+![Projections CI](https://github.com/UIUC-PPL/projections/workflows/Projections%20CI/badge.svg)
 [![Documentation Status](https://readthedocs.org/projects/charm/badge/?version=latest)](https://charm.readthedocs.io/en/latest/projections/manual.html)
 [![DOI](https://zenodo.org/badge/86751036.svg)](https://zenodo.org/badge/latestdoi/86751036)
 

@@ -442,44 +442,28 @@ implements ScalePanel.StatusDisplay
 		resetStatus();
 	}
 
+	private String generateInfoPanelHTML(String name, String value) {
+		if (value != null)
+			return "<tr><td style=\"text-align: right\">" + name + ":</td><td>" + value + "</td></tr>";
+		return "";
+	}
+
 	private void updateStatusSTS(StsReader sts) {
 		StringBuilder builder = new StringBuilder();
-		builder.append("<html>");
-		final String basename = sts.getBaseName();
-		builder.append("Name: " + basename + "<br>");
-		final String machine = sts.getMachineName();
-		if (machine != null) {
-			builder.append("Machine layer: ");
-			builder.append(machine);
-			builder.append("<br>");
-		}
-		final String charmVersion = sts.getCharmVersion();
-		if (charmVersion != null) {
-			builder.append("Charm++ Version: ");
-			builder.append(charmVersion);
-			builder.append("<br>");
-		}
-		final String username = sts.getUsername();
-		if (username != null) {
-			builder.append("Username: ");
-			builder.append(username);
-			builder.append("<br>");
-		}
-		final String runline = sts.getCommandline();
-		if (runline != null) {
-			builder.append("Commandline: ");
-			builder.append(runline);
-			builder.append("<br>");
-		}
+		builder.append("<html><table>");
+		builder.append(generateInfoPanelHTML("Name", sts.getBaseName()));
+		builder.append(generateInfoPanelHTML("Machine layer", sts.getMachineName()));
+		builder.append(generateInfoPanelHTML("Charm++ Version", sts.getCharmVersion()));
+		builder.append(generateInfoPanelHTML("Username", sts.getUsername()));
+		builder.append(generateInfoPanelHTML("Commandline", sts.getCommandline()));
 		final ZonedDateTime dateTime = sts.getTimestamp();
 		if (dateTime != null) {
-			builder.append("Run started at: ");
 			try {
-				builder.append(dateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG)));
-			} catch (NumberFormatException ex) { }
+				final String dtString = dateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+				builder.append(generateInfoPanelHTML("Run started at", dtString));
+			} catch (NumberFormatException ignored) { }
 		}
-
-		builder.append("</html>");
+		builder.append("</table></html>");
 		setStatus(builder.toString());
 	}
 

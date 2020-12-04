@@ -459,6 +459,12 @@ implements ScalePanel.StatusDisplay
 			builder.append(charmVersion);
 			builder.append("<br>");
 		}
+		final String username = sts.getUsername();
+		if (username != null) {
+			builder.append("Username: ");
+			builder.append(username);
+			builder.append("<br>");
+		}
 		final String runline = sts.getCommandline();
 		if (runline != null) {
 			builder.append("Commandline: ");

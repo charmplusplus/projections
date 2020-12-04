@@ -444,7 +444,7 @@ implements ScalePanel.StatusDisplay
 
 	private String generateInfoPanelHTML(String name, String value) {
 		if (value != null)
-			return "<tr><td style=\"text-align: right\">" + name + ":</td><td>" + value + "</td>";
+			return "<tr><td style=\"text-align: right\">" + name + ":</td><td>" + value + "</td></tr>";
 		return "";
 	}
 

@@ -1,0 +1,24 @@
+name: Projections CI
+
+on: 
+  pull_request: {}
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [8, 11, 15]
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Build with Gradle
+        run: gradle build
+      - name: Run test
+        run: xvfb-run -e /dev/stdout -a make test

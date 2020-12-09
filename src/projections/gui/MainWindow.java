@@ -455,6 +455,7 @@ implements ScalePanel.StatusDisplay
 		builder.append(generateInfoPanelHTML("Machine layer", sts.getMachineName()));
 		builder.append(generateInfoPanelHTML("Charm++ Version", sts.getCharmVersion()));
 		builder.append(generateInfoPanelHTML("Username", sts.getUsername()));
+		builder.append(generateInfoPanelHTML("Hostname", sts.getHostname()));
 		builder.append(generateInfoPanelHTML("Commandline", sts.getCommandline()));
 		final ZonedDateTime dateTime = sts.getTimestamp();
 		if (dateTime != null) {

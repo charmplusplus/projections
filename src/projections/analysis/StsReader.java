@@ -41,6 +41,7 @@ public class StsReader extends ProjDefs
     private String commandline;
     private String charmVersion;
     private String username;
+    private String hostname;
 
     private class Chare
     {
@@ -183,6 +184,8 @@ public class StsReader extends ProjDefs
 			charmVersion = st.nextToken();
 		} else if (s1.equals("USERNAME")) {
 			username = matchQuotes(st);
+		} else if (s1.equals("HOSTNAME")) {
+			hostname = matchQuotes(st);
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -332,6 +335,10 @@ public class StsReader extends ProjDefs
 
 	public String getUsername() {
 		return username;
+	}
+
+	public String getHostname() {
+		return hostname;
 	}
 
     public String getEntryNameByID(int ID) {

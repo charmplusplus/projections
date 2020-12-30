@@ -43,6 +43,13 @@ public class StsReader extends ProjDefs
     private String username;
     private String hostname;
 
+    //SMP mode
+    private int NumNodes = 0;
+    private int NodeSize = 1;
+    private int NumCommThdPerNode = 0;
+	private boolean isSMP = false;
+	private boolean isCommTracingEnabled = false;
+
     private class Chare
     {
         protected String name;
@@ -63,12 +70,7 @@ public class StsReader extends ProjDefs
     private Chare Chares[];    // indexed by chare id
 //    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
- 
-
-    //SMP mode
-    private int NumNodes=0;
-    private int NodeSize = 1;
-    private int NumCommThdPerNode = 0;
+	
     
     /** Entry Names */
     private int entryIndex = 0; ///< The next available index
@@ -172,9 +174,10 @@ public class StsReader extends ProjDefs
 		    Machine = matchQuotes(st);
 		} else if (s1.equals("PROCESSORS")) {
 		    NumPe = Integer.parseInt(st.nextToken());
-		} else if (s1.equals("SMPMODE")) {
-		    NodeSize = Integer.parseInt(st.nextToken());
- 		    NumNodes = Integer.parseInt(st.nextToken());
+		} else if (s1.equals("SMPMODE")) { 
+			NodeSize = Integer.parseInt(st.nextToken());
+			NumNodes = Integer.parseInt(st.nextToken());
+			isSMP = true;
 		} else if (s1.equals("TIMESTAMP")) {
 			timestamp = ZonedDateTime.ofInstant(Instant.parse(st.nextToken()), ZoneId.systemDefault());
 			String result = timestamp.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
@@ -277,8 +280,9 @@ public class StsReader extends ProjDefs
 	    }
 		
 	    InFile.close();
-		
+	    
 		//post-processing for SMP related data fields
+		isCommTracingEnabled = NodeSize * NumNodes < NumPe;
 		if(NumNodes == 0){
 			//indicate a non-SMP run
 			NumNodes = NumPe;		
@@ -506,8 +510,11 @@ public class StsReader extends ProjDefs
 	public int getNumCommThdPerNode(){
 		return NumCommThdPerNode;
 	}
-	public boolean isSMPRun(){
-		return NumNodes<NumPe;
+	public boolean hasCommThdTrace(){
+		return isCommTracingEnabled;
+	}
+	public boolean isSMPRun() {
+		return isSMP;
 	}
 
 }

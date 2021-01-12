@@ -372,7 +372,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			peToLine.add(p);
 			MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe + " to peToLine size=" + peToLine.size() );
 			
-			if(isSMPRun()){
+			if(hasCommThdTrace()){
 				int commPE = getCommThdPE(p);
 				if(!peToLine.contains(commPE)){
 					peToLine.add(commPE);
@@ -398,7 +398,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	public void setProcessorList(Collection<Integer> processorList){
 		peToLine.clear();
 
-		if(isSMPRun()){
+		if(hasCommThdTrace()){
 			TreeSet<Integer> commPEs = new TreeSet<Integer>();
 			commPEs.clear();
 			int prevNID = -1;			
@@ -895,7 +895,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		if(pe>=totalNodes*nodesize && pe<totalPes) return pe-totalNodes*nodesize;
 		return pe/nodesize;		
 	}
-	protected boolean isSMPRun(){
+	protected boolean hasCommThdTrace(){
+		return MainWindow.runObject[myRun].getSts().hasCommThdTrace();
+	}
+	protected boolean isSMPRun() {
 		return MainWindow.runObject[myRun].getSts().isSMPRun();
 	}
 	protected int getCommThdPE(int pe){

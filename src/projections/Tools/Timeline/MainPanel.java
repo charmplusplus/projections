@@ -31,7 +31,6 @@ import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.Data.RepresentedEntity;
 import projections.Tools.Timeline.RangeQueries.Query1D;
-import projections.Tools.Timeline.Data.SMPMsgGroup;
 import projections.gui.MainWindow;
 
 
@@ -343,7 +342,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					int pExecution = obj.pe;
 					
 					boolean smpMsgGrpFound = false;
-					if(data.isSMPRun()){
+					if(data.hasCommThdTrace()){
 						smpMsgGrpFound = data.makeSMPMsgGroup(obj);						
 					}
 

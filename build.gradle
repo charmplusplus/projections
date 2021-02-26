@@ -36,6 +36,12 @@ task fatJar(type: Jar) {
                'Implementation-Version': project.version
   }
   project.archivesBaseName = 'projections-all'
+  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+  from {
+    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
+
   into ('projections/images') {
       from('src/projections/images') {
           include '*'
@@ -56,3 +62,4 @@ task copyJarToBin(type: Copy) {
   into 'bin/'
   rename 'projections-all-' + version + '.jar', 'projections.jar'
 }
+

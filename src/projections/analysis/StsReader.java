@@ -286,7 +286,7 @@ public class StsReader extends ProjDefs
 			//indicate a non-SMP run
 			NumNodes = NumPe;		
 		}else{
-			isCommTracingEnabled = NodeSize * NumNodes < NumPe;
+			isCommTracingEnabled = (NodeSize * NumNodes) < NumPe;
 			int workPes = NumNodes*NodeSize;
 			NumCommThdPerNode = (NumPe-workPes)/NumNodes;
 			if((NodeSize+NumCommThdPerNode)*NumNodes != NumPe){
@@ -518,4 +518,3 @@ public class StsReader extends ProjDefs
 	}
 
 }
-

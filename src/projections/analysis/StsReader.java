@@ -282,11 +282,11 @@ public class StsReader extends ProjDefs
 	    InFile.close();
 	    
 		//post-processing for SMP related data fields
-		isCommTracingEnabled = NodeSize * NumNodes < NumPe;
 		if(NumNodes == 0){
 			//indicate a non-SMP run
 			NumNodes = NumPe;		
 		}else{
+			isCommTracingEnabled = (NodeSize * NumNodes) < NumPe;
 			int workPes = NumNodes*NodeSize;
 			NumCommThdPerNode = (NumPe-workPes)/NumNodes;
 			if((NodeSize+NumCommThdPerNode)*NumNodes != NumPe){
@@ -518,4 +518,3 @@ public class StsReader extends ProjDefs
 	}
 
 }
-

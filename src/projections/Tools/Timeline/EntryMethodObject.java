@@ -30,9 +30,7 @@ import projections.misc.MiscUtil;
 class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPanel.SpecialMouseHandler
 {
 
-	private MessageWindow msgwindow;
 	private long beginTime, endTime, recvTime;
-	private long cpuTime;
 	private long cpuBegin, cpuEnd;
 	private int entry;
 	private int entryIndex;
@@ -57,10 +55,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	/** Memory usage at some point in this entry method. Null if nonspecified */
 	private long memoryUsage;
 	
-	/** The duration of the visible portion of this event */
-	private double  usage;
-	private float packusage;
-	private long packtime;
+	/** Total time spent packing in this event */
+	private int packtime;
 	
 	
 	
@@ -74,7 +70,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 	private ArrayList<PackTime> packs;
 
-	private int numPapiCounts = 0;
 	private long papiCounts[];
 
 	private static DecimalFormat format_ = new DecimalFormat();
@@ -91,7 +86,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		endTime   = tle.EndTime;
 		cpuBegin  = tle.cpuBegin;
 		cpuEnd    = tle.cpuEnd;
-		cpuTime   = cpuEnd - cpuBegin;
 		entry     = tle.EntryPoint;
 		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
@@ -117,12 +111,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		
 		tleUserEventName = tle.userEventName;
 
-		numPapiCounts = tle.numPapiCounts;
-		papiCounts    = tle.papiCounts;
+		if (tle.numPapiCounts > 0)
+			papiCounts = tle.papiCounts;
 
 		format_.setGroupingUsed(true);
-	
-		setUsage();
+
 		setPackUsage();		
 	} 
 	
@@ -141,7 +134,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			if(msglen > 0) {
 				infoString.append("<i>Msg Len</i>: " + msglen + "<br>");
 			}
-			
+
+			final long cpuTime = cpuEnd - cpuBegin;
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
 			if (cpuTime > 0) 
 				infoString.append(" (" + format_.format(cpuBegin) + ")");
@@ -205,9 +199,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append("<i>Recv Time</i>: " + recvTime + "<br>");
 			}	
 			
-			if (numPapiCounts > 0) {
+			if (papiCounts != null) {
 				infoString.append("<i>*** PAPI counts ***</i>" + "<br>");
-				for (int i=0; i<numPapiCounts; i++) {
+				for (int i=0; i<papiCounts.length; i++) {
 					infoString.append(MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>");
 				}
 			}
@@ -220,6 +214,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			infoString.append("<i>Unaccounted Time</i>" + "<br>");
 			
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
+
+			final long cpuTime = cpuEnd - cpuBegin;
 			if (cpuTime > 0) 
 				infoString.append(" (" + format_.format(cpuBegin) + ")");
 			infoString.append("<br>");
@@ -354,7 +350,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 	public float getNonPackUsage()
 	{
-		return (float)usage - packusage;
+		return getUsage() - getPackUsage();
 	}   
 
 	public int getNumMsgs()
@@ -367,7 +363,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	public float getPackUsage()
 	{
-		return packusage;
+		return packtime * 100.0f / (data.endTime() - data.startTime());
 	}   
 
 	public int getPCreation()
@@ -382,8 +378,29 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	public float getUsage()
 	{
-		return (float)usage;
-	}   
+		if (entryIndex < -1) {
+			// if I am not a standard entry method, I do not contribute
+			// to the usage
+			//
+			// 2006/10/02 - **CW** changed it such that idle time gets
+			//              usage accounted for.
+			return 0;
+		}
+
+		float usage = endTime - beginTime;
+
+		if (beginTime < data.startTime()) {
+			usage -= (data.startTime() - beginTime);
+		}
+		if (endTime > data.endTime()) {
+			usage -= (endTime - data.endTime());
+		}
+
+		usage /= (data.endTime() - data.startTime());
+		usage *= 100;
+
+		return usage;
+	}
 
 	
 	public void mouseClicked(MouseEvent evt, JPanel parent, Data data)
@@ -726,12 +743,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	private void OpenMessageWindow()
 	{
-		if(msgwindow == null) {
-			msgwindow = new MessageWindow(this);
-			Dimension d = msgwindow.getPreferredSize();
-			msgwindow.setSize(480, d.width);
-		}
-
+		MessageWindow msgwindow = new MessageWindow(this);
+		Dimension d = msgwindow.getPreferredSize();
+		msgwindow.setSize(480, d.width);
 		msgwindow.setVisible(true);
 	} 
 	
@@ -1065,43 +1079,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				if(pt.EndTime > data.endTime())
 					packtime -= (pt.EndTime - data.endTime());
 			}
-			packusage = packtime * 100;
-			packusage /= (data.endTime() - data.startTime());
 		}
 	}   
-
-	private void setUsage()
-	{
-		//       System.out.println(beginTime + " " + endTime + " " +
-		//			  data.beginTime + " " + data.endTime);
-		if (entryIndex < -1) {
-			// if I am not a standard entry method, I do not contribute
-			// to the usage
-			//
-			// 2006/10/02 - **CW** changed it such that idle time gets
-			//              usage accounted for.
-			return;
-		}
-
-		usage = endTime - beginTime;
-		//	  usage = endTime - beginTime + 1;
-
-		//	  System.out.println("Raw usage : " + usage);
-
-		if (beginTime < data.startTime()) {
-			usage -= (data.startTime() - beginTime);
-		}
-		if (endTime > data.endTime()) {
-			usage -= (endTime - data.endTime());
-		}
-		//	  System.out.println("Final usage : " + usage);
-		//	  System.out.println();
-
-		usage /= (data.endTime() - data.startTime());
-		usage *= 100;
-		// System.out.println(usage);
-	}
-
+	
 	@Override
 	public int compareTo(Object o) {
 		EntryMethodObject obj = (EntryMethodObject) o;

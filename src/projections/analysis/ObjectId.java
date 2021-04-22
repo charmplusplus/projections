@@ -2,7 +2,7 @@ package projections.analysis;
 
 public class ObjectId implements Comparable
 {
-    private int ID_SIZE = 6;
+    private final static int ID_SIZE = 6;
     public int id[];
 
     public ObjectId() {

@@ -41,10 +41,13 @@ public class SumAnalyzer extends ProjDefs
     private long TotalTime;//Length of run, microseconds
     private long[][][] PhaseChareTime;
     private int[][][] PhaseNumEntryMsgs;
+
+    // The values in ProcessorUtilization and IdlePercentage are integer percentages
+	// (0-100), so they are byte arrays to save space
     //Holds the second line of summary data
-    private int[][] ProcessorUtilization; 
+    private byte[][] ProcessorUtilization; 
     // Holds the seventh line of summary data
-    private int[][] IdlePercentage;
+    private byte[][] IdlePercentage;
 
     private int mode = NORMAL_MODE;
     private int nPe;
@@ -195,14 +198,14 @@ public class SumAnalyzer extends ProjDefs
 	    if (StreamTokenizer.TT_EOL!=tokenizer.nextToken())
 		throw new SummaryFormatException("extra garbage at end of line 1");
 	    if (p==0) {
-		ProcessorUtilization = new int[nPe][];
-		IdlePercentage = new int[nPe][];
+		ProcessorUtilization = new byte[nPe][];
+		IdlePercentage = new byte[nPe][];
 		ChareTime= new long [nPe][numEntry];
 		NumEntryMsgs = new int [nPe][numEntry];
 		MaxEntryTime = new int [nPe][numEntry];
 	    }
-	    ProcessorUtilization[p] = new int[IntervalCount];
-	    IdlePercentage[p] = new int[IntervalCount];
+	    ProcessorUtilization[p] = new byte[IntervalCount];
+	    IdlePercentage[p] = new byte[IntervalCount];
 	    
 	    //Read the SECOND line (processor usage)
 	    int nUsageRead=0;
@@ -215,7 +218,7 @@ public class SumAnalyzer extends ProjDefs
 		if (tokenType == StreamTokenizer.TT_NUMBER) {
                     val =  (int)tokenizer.nval;
 		    for (int f=0; f<factor; f++) {
-			ProcessorUtilization[p][nUsageRead++] = val;
+			ProcessorUtilization[p][nUsageRead++] = (byte)val;
 		    }
                     if ((tokenType=tokenizer.nextToken()) == '+') {
                         tokenType=tokenizer.nextToken();
@@ -234,7 +237,7 @@ public class SumAnalyzer extends ProjDefs
 			}
                         for (int i=1; i<extraCount; i++) {
 			    for (int f=0; f<factor; f++) {
-				ProcessorUtilization[p][nUsageRead++] = val;
+				ProcessorUtilization[p][nUsageRead++] = (byte)val;
 			    }
 			}
                     } else {
@@ -393,7 +396,7 @@ public class SumAnalyzer extends ProjDefs
 		    if (tokenType == StreamTokenizer.TT_NUMBER) {
 			val =  (int)tokenizer.nval;
 			for (int f=0; f<factor; f++) {
-			    IdlePercentage[p][nIdleRead++] = val;
+			    IdlePercentage[p][nIdleRead++] = (byte)val;
 			}
 			if ((tokenType=tokenizer.nextToken()) == '+') {
 			    tokenType=tokenizer.nextToken();
@@ -413,7 +416,7 @@ public class SumAnalyzer extends ProjDefs
 			    }
 			    for (int i=1; i<extraCount; i++) {
 				for (int f=0; f<factor; f++) {
-				    IdlePercentage[p][nIdleRead++] = val;
+				    IdlePercentage[p][nIdleRead++] = (byte)val;
 				}
 			    }
 			} else {

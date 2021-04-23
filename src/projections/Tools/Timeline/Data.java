@@ -770,7 +770,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		
 		if (tleMsg!=null) {
 			for (int i=0; i<tleMsg.size(); i++) { //when to empty the drawMsgsForTheseObjsAlt?
-				Set<EntryMethodObject> entMethSet = this.messageStructures.getMessageToExecutingObjectsMap().get(tleMsg.get(i));
+				Set<EntryMethodObject> entMethSet = tleMsg.get(i).getRecipients();
 				if (entMethSet!=null) {					
 					Iterator<EntryMethodObject> iter = entMethSet.iterator();
 					while (iter.hasNext()) {

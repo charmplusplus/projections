@@ -89,6 +89,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		entry     = tle.EntryPoint;
 		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
+		if (messages != null) {
+			for (TimelineMessage msg : messages) {
+				msg.setSender(this);
+			}
+		}
 		this.packs= packs;
 		pe  = p1;
 		pCreation = tle.SrcPe;
@@ -169,12 +174,15 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 				// If the message came from a comm thread, trace back to the actual creator if possible
 				if (data.isCommThd(pCreation)) {
-					TimelineMessage origMsg = data.messageStructures.getMessageToSendingObjectsMap().get(created_message).creationMessage();
-					if (origMsg != null) {
-						EntryMethodObject origSender = data.messageStructures.getMessageToSendingObjectsMap().get(origMsg);
-						if (origSender != null) {
-							infoString.append("<i>Created by </i>: " + data.getPEString(origSender.pe) + " via " + data.getPEString(pCreation) + "<br>");
-							usedCommThreadSender = true;
+					final EntryMethodObject commThreadSender = created_message.getSender();
+					if (commThreadSender != null) {
+						TimelineMessage origMsg = commThreadSender.creationMessage();
+						if (origMsg != null) {
+							EntryMethodObject origSender = origMsg.getSender();
+							if (origSender != null) {
+								infoString.append("<i>Created by </i>: " + data.getPEString(origSender.pe) + " via " + data.getPEString(pCreation) + "<br>");
+								usedCommThreadSender = true;
+							}
 						}
 					}
 				}
@@ -507,7 +515,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 						if(created_message != null){
 							if ( obj.beginTime - created_message.Time > max_time) { max_time = obj.beginTime - created_message.Time; begin_max = created_message.Time;}
                             // Find object that created the message
-							obj = data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
+							obj = created_message.getSender();
 							if(obj != null){
 								done = false;
 							}else
@@ -611,7 +619,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                             data.addProcessor(obj.pCreation);
 						    TimelineMessage created_message = obj.creationMessage();
                             if(created_message != null) {
-                                obj = data.messageStructures.getMessageToSendingObjectsMap().get(created_message);
+                                obj = created_message.getSender();
                                 if(obj != null){
                                     System.out.println("Switch to other processor");
                                     done = false;

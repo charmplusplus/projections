@@ -22,6 +22,11 @@ public class TimelineMessage implements Comparable
 
 	private int srcPE;
 
+	// The sending EntryMethodObject will set this field via setSender when it is
+	// created. If this is null, then there is no known sender (which can happen
+	// for dummy sends, for example)
+	private EntryMethodObject sender;
+
 	/** A messages sent from srcPE, with eventid EventID */
 
 	/** Single message constructor */
@@ -107,5 +112,11 @@ public class TimelineMessage implements Comparable
 		Time += shift;
 	}
 	
-	
+	protected void setSender(EntryMethodObject obj) {
+		sender = obj;
+	}
+
+	protected EntryMethodObject getSender() {
+		return sender;
+	}
 }

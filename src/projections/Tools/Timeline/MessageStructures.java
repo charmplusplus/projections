@@ -34,9 +34,6 @@ class MessageStructures {
 	/** Map from a message to the the resulting entry methods entry object invocations */
 	private Map<TimelineMessage, Set<EntryMethodObject>> messageToExecutingObjectsMap;
 
-	/** Map from a message to its invoking entry method instance */
-	private Map<TimelineMessage, EntryMethodObject> messageToSendingObjectsMap;
-
 	/** Map from Chare Array element id's to the corresponding known entry method invocations */
 	private Map<ObjectId, List<EntryMethodObject> > oidToEntryMethodObjectsMap;
 
@@ -62,7 +59,6 @@ class MessageStructures {
 			for(int i=0;i<pe;i++)
 				eventIDToEntryMethodMap[i] = new HashMap();
 
-			messageToSendingObjectsMap = new HashMap<TimelineMessage, EntryMethodObject>();
 			messageToExecutingObjectsMap = new HashMap<TimelineMessage, Set<EntryMethodObject>>();
 
 			oidToEntryMethodObjectsMap = new TreeMap();
@@ -92,10 +88,6 @@ class MessageStructures {
 		return eventIDToMessageMap;
 	}
 
-	public Map<TimelineMessage, EntryMethodObject> getMessageToSendingObjectsMap() {
-		return messageToSendingObjectsMap;
-	}
-
 	public void setOidToEntryMethodObjectsMap(Map oidToEntryMethodObjectsMap) {
 		this.oidToEntryMethodObjectsMap = oidToEntryMethodObjectsMap;
 	}
@@ -119,10 +111,6 @@ class MessageStructures {
 
 	public Map<TimelineMessage, Set<EntryMethodObject>> getMessageToExecutingObjectsMap() {
 		return messageToExecutingObjectsMap;
-	}
-
-	public void setMessageToSendingObjectsMap(Map<TimelineMessage, EntryMethodObject> messageToSendingObjectsMap) {
-		this.messageToSendingObjectsMap = messageToSendingObjectsMap;
 	}
 
 	protected void kill() {
@@ -178,32 +166,6 @@ class MessageStructures {
 				EntryMethodObject obj = obj_iter.next();
 				getEventIDToEntryMethodMap()[pe.intValue()].put(Integer.valueOf(obj.EventID), obj);
 			}
-		}
-
-
-		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
-
-		pe_iter = data.allEntryMethodObjects.keySet().iterator();
-		while(pe_iter.hasNext()){
-			
-			if(structures!=null) {
-				synchronized(structures){
-					if(structures.stop)
-						return;					
-				}
-			}	
-			
-			Integer pe =  pe_iter.next();
-			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
-
-			for(EntryMethodObject obj : objs) {
-				if(obj.messages != null){
-					for(TimelineMessage msg : obj.messages) {
-						// put all the messages created by obj into the map, listing obj as the creator
-						getMessageToSendingObjectsMap().put(msg, obj);
-					}
-				}
-			}				
 		}
 
 
@@ -289,7 +251,6 @@ class MessageStructures {
 				eventIDToMessageMap[i].clear();
 			for(int i=0;i<pe;i++)
 				eventIDToEntryMethodMap[i].clear();
-			messageToSendingObjectsMap.clear();
 			messageToExecutingObjectsMap.clear();
 			oidToEntryMethodObjectsMap.clear();
 		}		

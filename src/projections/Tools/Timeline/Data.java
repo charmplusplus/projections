@@ -791,7 +791,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		//recvCPe is a msg recv operation on CommThd
 		//trace back to its sender
-		EntryMethodObject recvCPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		EntryMethodObject recvCPe = createdMsg.getSender();
 		if(!recvCPe.isCommThreadMsgRecv()) return false;
 		createdMsg = recvCPe.creationMessage();
 		if(createdMsg == null){
@@ -799,7 +799,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return false;			 
 		}
 		//sendCPe should be a msg send operation on CommThd
-		EntryMethodObject sendCPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		EntryMethodObject sendCPe = createdMsg.getSender();
 		if(sendCPe == null) {
 			//this should never happen!!
 			return false;
@@ -816,7 +816,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return false;			 
 		}
 
-		EntryMethodObject sendWPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		EntryMethodObject sendWPe = createdMsg.getSender();
 		if(sendWPe == null) {
 			//this should never happen!!
 			return false;

@@ -2,6 +2,9 @@ package projections.Tools.Timeline;
 
 import projections.misc.MiscUtil;
 
+import java.util.Set;
+import java.util.TreeSet;
+
 
 public class TimelineMessage implements Comparable
 {
@@ -26,6 +29,7 @@ public class TimelineMessage implements Comparable
 	// created. If this is null, then there is no known sender (which can happen
 	// for dummy sends, for example)
 	private EntryMethodObject sender;
+	private Set<EntryMethodObject> recipients;
 
 	/** A messages sent from srcPE, with eventid EventID */
 
@@ -118,5 +122,17 @@ public class TimelineMessage implements Comparable
 
 	protected EntryMethodObject getSender() {
 		return sender;
+	}
+
+	protected void addRecipient(EntryMethodObject obj) {
+		synchronized (this) {
+			if (recipients == null)
+				recipients = new TreeSet<>();
+			recipients.add(obj);
+		}
+	}
+
+	protected Set<EntryMethodObject> getRecipients() {
+		return recipients;
 	}
 }

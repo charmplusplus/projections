@@ -49,20 +49,29 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private final static String popupDropPEsForPE = "Drop all PEs unrelated to entry methods on this PE";
     private final static String loadNeighbors = "Load neighbors";
 
-	
-	/** Data specified by the user, likely a timestep. Null if nonspecified */
-	Integer userSuppliedData;
-	
-	/** Memory usage at some point in this entry method. Null if nonspecified */
-	private long memoryUsage;
-	
+	private class Extra
+	{
+		final Integer userSuppliedData;
+		final String tleUserEventName;
+		final long papiCounts[];
+		final long memoryUsage;
+
+		public Extra(TimelineEvent tle) {
+			userSuppliedData = tle.UserSpecifiedData;
+			memoryUsage = tle.memoryUsage;
+			tleUserEventName = tle.userEventName;
+
+			if (tle.numPapiCounts > 0)
+				papiCounts = tle.papiCounts;
+			else
+				papiCounts = null;
+		}
+	}
+
+	private Extra extraFields;
+
 	/** Total time spent packing in this event */
 	private int packtime;
-	
-	
-	
-	private String tleUserEventName;
-
 
 	private Data data = null;
 	
@@ -70,8 +79,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	protected ArrayList<TimelineMessage> messages;
 	
 	private ArrayList<PackTime> packs;
-
-	private long papiCounts[];
 
 	private static DecimalFormat format_ = new DecimalFormat();
 
@@ -112,13 +119,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		} else {
 			tid = new ObjectId();
 		}
-		userSuppliedData = tle.UserSpecifiedData;
-		memoryUsage = tle.memoryUsage;
 		
-		tleUserEventName = tle.userEventName;
-
-		if (tle.numPapiCounts > 0)
-			papiCounts = tle.papiCounts;
+		if (tle.UserSpecifiedData != null || tle.memoryUsage > 0 ||
+				tle.userEventName != null || tle.numPapiCounts > 0) {
+			extraFields = new Extra(tle);
+		}
 
 		format_.setGroupingUsed(true);
 
@@ -201,17 +206,17 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				}
 				infoString.append("<br>");
 			}
-			if(tleUserEventName!=null)
-				infoString.append("<i>Associated User Event</i>: "+tleUserEventName+ "<br>");
+			if(extraFields != null && extraFields.tleUserEventName!=null)
+				infoString.append("<i>Associated User Event</i>: "+extraFields.tleUserEventName+ "<br>");
 			
 			if(recvTime > 0){
 				infoString.append("<i>Recv Time</i>: " + recvTime + "<br>");
 			}	
 			
-			if (papiCounts != null) {
+			if (extraFields != null && extraFields.papiCounts != null) {
 				infoString.append("<i>*** PAPI counts ***</i>" + "<br>");
-				for (int i=0; i<papiCounts.length; i++) {
-					infoString.append(MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(papiCounts[i]) + "<br>");
+				for (int i=0; i<extraFields.papiCounts.length; i++) {
+					infoString.append(MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(extraFields.papiCounts[i]) + "<br>");
 				}
 			}
 		} else if (entry == -1) {
@@ -251,12 +256,12 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			infoString.append("<i>Num Msgs created</i>: " + numMsgs + "<br>");
 		}
 
-		if(userSuppliedData != null){
-			infoString.append("<i>User Supplied Parameter(timestep):</i> " + userSuppliedData.intValue() + "<br>");
+		if(getUserSuppliedData() != null){
+			infoString.append("<i>User Supplied Parameter(timestep):</i> " + getUserSuppliedData().intValue() + "<br>");
 		}
 			
-		if(memoryUsage != 0){
-			infoString.append("<i>Memory Usage:</i> " + memoryUsage/1024/1024 + " MB<br>");
+		if(extraFields != null && extraFields.memoryUsage != 0){
+			infoString.append("<i>Memory Usage:</i> " + extraFields.memoryUsage/1024/1024 + " MB<br>");
 		}
 			
 		return "<html><body>" + infoString.toString() + "</html></body>";
@@ -950,11 +955,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		
 		// color the objects by memory usage with a nice blue - red gradient
 		if(data.colorByMemoryUsage()){
-			if(this.memoryUsage == 0){
+			if(extraFields == null || extraFields.memoryUsage == 0){
 				colToSave = Color.darkGray;
 			}else{
 				// scale the memory usage to the interval [0,1]
-				float normalizedValue = (float)(memoryUsage - data.minMemBColorRange()) / (float)(data.maxMemBColorRange()-data.minMemBColorRange());
+				float normalizedValue = (float)(extraFields.memoryUsage - data.minMemBColorRange()) / (float)(data.maxMemBColorRange()-data.minMemBColorRange());
 				if( normalizedValue<0.0 || normalizedValue>1.0 )
 					colToSave = Color.darkGray;
 				else {
@@ -966,8 +971,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		// color the objects by user supplied values with a nice blue gradient
 		if(data.colorByUserSupplied() && data.colorSchemeForUserSupplied==Data.ColorScheme.BlueGradientColors){
-			if(userSuppliedData !=  null){
-				long value = userSuppliedData.longValue();
+			if(getUserSuppliedData() !=  null){
+				long value = getUserSuppliedData().longValue();
 				float normalizedValue = (float)(value - data.minUserSupplied) / (float)(data.maxUserSupplied-data.minUserSupplied);
 				colToSave = Color.getHSBColor(0.25f-normalizedValue*0.75f, 1.0f, 1.0f); 
 			} 	else {
@@ -996,13 +1001,13 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			}
 
 
-			if(data.colorByUserSupplied() && userSuppliedData != null){
-				color += (userSuppliedData * 359) % 4903;
+			if(data.colorByUserSupplied() && getUserSuppliedData() != null){
+				color += (getUserSuppliedData() * 359) % 4903;
 			}
 
 
-			if(data.colorByMemoryUsage() && memoryUsage != 0){
-				color += (memoryUsage * 6121) % 5953;
+			if(data.colorByMemoryUsage() && extraFields != null && extraFields.memoryUsage != 0){
+				color += (extraFields.memoryUsage * 6121) % 5953;
 			}
 
 			 // Should range from 0.0 to 2.0
@@ -1184,5 +1189,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	public void mouseMoved(MouseEvent evt) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	/** Data specified by the user, likely a timestep. Null if nonspecified */
+	public Integer getUserSuppliedData() {
+		return (extraFields == null) ? null :  extraFields.userSuppliedData;
 	}
 }

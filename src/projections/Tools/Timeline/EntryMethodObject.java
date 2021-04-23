@@ -12,6 +12,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import javax.swing.JColorChooser;
@@ -559,7 +560,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 							//if there is a mapping for this message, find objects that are called by this message.
 							//if this object isn't null or equal to this, go through while loop again
                             //data.addProcessor( mm); 
-							Set<EntryMethodObject> objset = msgToCalledEntryMethod.getRecipients();
+							List<EntryMethodObject> objset = msgToCalledEntryMethod.getRecipients();
                             //System.out.println("fowarding  " + j + "; obj ");
                             //msgToCalledEntryMethod.printMe();
 

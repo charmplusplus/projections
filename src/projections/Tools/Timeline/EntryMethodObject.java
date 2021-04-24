@@ -31,8 +31,10 @@ import projections.misc.MiscUtil;
 class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPanel.SpecialMouseHandler
 {
 
-	private long beginTime, endTime, recvTime;
-	private long cpuBegin, cpuEnd;
+	private long beginTime;
+	private int elapsedTime, recvTimeOffset;
+	private long cpuBegin;
+	private int cpuElapsed;
 	private int entry;
 	private int entryIndex;
 	private int msglen;
@@ -91,9 +93,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 		this.data = data;
 		beginTime = tle.BeginTime;
-		endTime   = tle.EndTime;
-		cpuBegin  = tle.cpuBegin;
-		cpuEnd    = tle.cpuEnd;
+		elapsedTime = (int)(tle.EndTime - tle.BeginTime);
+		// If the incoming RecvTime is 0, then it is invalid, so use MIN_VALUE to represent it in the offset
+		recvTimeOffset = (tle.RecvTime == 0) ? Integer.MIN_VALUE : (int)(tle.RecvTime - tle.BeginTime);
+		cpuBegin = tle.cpuBegin;
+		cpuElapsed = (int)(tle.cpuEnd - tle.cpuBegin);
 		entry     = tle.EntryPoint;
 		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
@@ -113,7 +117,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
-		recvTime = tle.RecvTime;
 		if (tle.id != null) {
 			tid = new ObjectId(tle.id);
 		} else {
@@ -146,25 +149,25 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append("<i>Msg Len</i>: " + msglen + "<br>");
 			}
 
-			final long cpuTime = cpuEnd - cpuBegin;
+			
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
-			if (cpuTime > 0) 
+			if (cpuElapsed > 0)
 				infoString.append(" (" + format_.format(cpuBegin) + ")");
 			infoString.append("<br>");
 			
-			infoString.append("<i>End Time</i>: " + format_.format(endTime) );
-			if (cpuTime > 0)
-				infoString.append(" (" + format_.format(cpuEnd) + ")");
+			infoString.append("<i>End Time</i>: " + format_.format(beginTime + elapsedTime) );
+			if (cpuElapsed > 0)
+				infoString.append(" (" + format_.format(cpuBegin + cpuElapsed) + ")");
 			infoString.append("<br>");
 			
-			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime));
-			if (cpuTime > 0)
-				infoString.append(" (" + U.humanReadableString(cpuTime) + ")");
+			infoString.append("<i>Total Time</i>: " + U.humanReadableString(elapsedTime));
+			if (cpuElapsed > 0)
+				infoString.append(" (" + U.humanReadableString(cpuElapsed) + ")");
 			infoString.append("<br>");
 			
 			infoString.append("<i>Packing</i>: " + U.humanReadableString(packtime));
 			if (packtime > 0)
-				infoString.append(" (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)");
+				infoString.append(" (" + (100*(float)packtime/(elapsedTime+1)) + "%)");
 			infoString.append("<br>");
 			
 			if(messages!=null)
@@ -209,8 +212,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			if(extraFields != null && extraFields.tleUserEventName!=null)
 				infoString.append("<i>Associated User Event</i>: "+extraFields.tleUserEventName+ "<br>");
 			
-			if(recvTime > 0){
-				infoString.append("<i>Recv Time</i>: " + recvTime + "<br>");
+			if(recvTimeOffset != Integer.MIN_VALUE){
+				infoString.append("<i>Recv Time</i>: " + format_.format(beginTime + recvTimeOffset) + "<br>");
 			}	
 			
 			if (extraFields != null && extraFields.papiCounts != null) {
@@ -222,31 +225,30 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		} else if (entry == -1) {
 			infoString.append("<b>Idle Time</b><br><br>");
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>");
-			infoString.append("<i>End Time</i>: " + format_.format(endTime) + "<br>");
-			infoString.append("<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime) + "<br>");
+			infoString.append("<i>End Time</i>: " + format_.format(beginTime + elapsedTime) + "<br>");
+			infoString.append("<i>Total Time</i>: " + U.humanReadableString(elapsedTime) + "<br>");
 		} else if (entry == -2) {
 			infoString.append("<i>Unaccounted Time</i>" + "<br>");
 			
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
 
-			final long cpuTime = cpuEnd - cpuBegin;
-			if (cpuTime > 0) 
+			if (cpuElapsed > 0)
 				infoString.append(" (" + format_.format(cpuBegin) + ")");
 			infoString.append("<br>");
 			
-			infoString.append("<i>End Time</i>: " + format_.format(endTime));
-			if (cpuTime > 0) 
-				infoString.append( " (" + format_.format(cpuEnd) + ")");
+			infoString.append("<i>End Time</i>: " + format_.format(beginTime + elapsedTime));
+			if (cpuElapsed > 0)
+				infoString.append( " (" + format_.format(cpuBegin + cpuElapsed) + ")");
 			infoString.append( "<br>");
 			
-			infoString.append( "<i>Total Time</i>: " + U.humanReadableString(endTime-beginTime));
-			if (cpuTime > 0) 
-				infoString.append( " (" + (cpuTime) + ")");
+			infoString.append( "<i>Total Time</i>: " + U.humanReadableString(elapsedTime));
+			if (cpuElapsed > 0)
+				infoString.append( " (" + (cpuElapsed) + ")");
 			infoString.append( "<br>");
 			
 			infoString.append( "<i>Packing</i>: " + U.humanReadableString(packtime));
 			if (packtime > 0) 
-				infoString.append( " (" + (100*(float)packtime/(endTime-beginTime+1)) + "%)");
+				infoString.append( " (" + (100*(float)packtime/(elapsedTime+1)) + "%)");
 			infoString.append("<br>");
 			
 			
@@ -336,7 +338,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	public long getEndTime()
 	{
-		return endTime;
+		return beginTime + elapsedTime;
 	}   
 
 	public int getEntryID()
@@ -401,13 +403,13 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			return 0;
 		}
 
-		float usage = endTime - beginTime;
+		float usage = elapsedTime;
 
 		if (beginTime < data.startTime()) {
 			usage -= (data.startTime() - beginTime);
 		}
-		if (endTime > data.endTime()) {
-			usage -= (endTime - data.endTime());
+		if (beginTime + elapsedTime > data.endTime()) {
+			usage -= (beginTime + elapsedTime - data.endTime());
 		}
 
 		usage /= (data.endTime() - data.startTime());
@@ -514,7 +516,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 					done = true;
 					v.add(obj);
                     System.out.println("backward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry);
-					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && obj.endTime > data.leftSelectionTime()  ){
+					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && obj.beginTime + obj.elapsedTime > data.leftSelectionTime()  ){
 						// Find message that created the object
                         data.addProcessor(obj.pCreation);
 						TimelineMessage created_message = obj.creationMessage();
@@ -613,7 +615,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 					done = true;
 					v.add(obj);
                     System.out.println(" pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry);
-					if (obj.entry != -1 && obj.pe <= data.numPEs() && obj.endTime > data.leftSelectionTime()  ){
+					if (obj.entry != -1 && obj.pe <= data.numPEs() && obj.beginTime + obj.elapsedTime > data.leftSelectionTime()  ){
 						// Find message that created the object
                         previous_obj = data.getPreviousEntry(obj, obj.pe);
                         if( previous_obj!= null && previous_obj.entry != -1 ){
@@ -796,6 +798,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			return paintedEP;
 		}
 		
+		final long endTime = beginTime + elapsedTime;
 		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
 		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
 
@@ -1119,10 +1122,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	@Override
 	public void shiftTimesBy(long s){
 		beginTime += s;
-		endTime += s;
-		recvTime += s;
 		cpuBegin += s;
-		cpuEnd += s;
 
 		if(messages != null){
 			for(TimelineMessage msg : messages){
@@ -1182,7 +1182,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	@Override
 	public long upperBound() {
-		return endTime;
+		return beginTime + elapsedTime;
 	}
 
 	@Override

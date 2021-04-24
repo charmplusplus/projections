@@ -689,7 +689,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					if (entryArray[i] == null) break;
 					topTimesText+=(i+1 +": " + (entryArray[i].getEndTime() - entryArray[i].getBeginTime()));
 					topTimesText+=(" Begin: " + entryArray[i].getBeginTime() + " End: " + entryArray[i].getEndTime());
-					topTimesText+=(" PE: " + entryArray[i].pe + " Name: " + MainWindow.runObject[myRun].getEntryFullNameByID(entryArray[i].getEntryID()) + "<br>");
+					topTimesText+=(" PE: " + entryArray[i].pe + " Name: " + MainWindow.runObject[myRun].getEntryFullNameByID(entryArray[i].getEntry()) + "<br>");
 					longestObjectsSet.add(entryArray[i]);
 				}
 				topTimesText+="</html>";

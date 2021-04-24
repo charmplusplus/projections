@@ -393,7 +393,7 @@ public class StsReader extends ProjDefs
     	return getEntryChareNameByIndex(index) + "::" + getEntryNameByIndex(index);
     }   
     
-	public Integer getEntryIndex(Integer ID) {
+	public Integer getEntryIndex(int ID) {
 		if(ID<0)
     		return ID;
 		return entryIDToFlat.get(ID);

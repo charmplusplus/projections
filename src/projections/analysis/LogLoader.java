@@ -180,7 +180,7 @@ public class LogLoader extends ProjDefs
 						timeline.add(TE=
 							new TimelineEvent(lastBeginEvent.time,
 									LE.time,
-									-1, -1));
+									Analysis.IDLE_ENTRY_POINT, -1));
 					}
 					return;
 				default:
@@ -201,7 +201,7 @@ public class LogLoader extends ProjDefs
 							timeline.add(TE=
 								new TimelineEvent(lastBeginEvent.time,
 										End,
-										-1, -1));
+										Analysis.IDLE_ENTRY_POINT, -1));
 							break;
 						}
 					} else {
@@ -217,7 +217,7 @@ public class LogLoader extends ProjDefs
 			CallStackManager cstack = new CallStackManager();
 			ObjectId tid = null;
 			while(true) {
-				if (LE.entry != -1) {
+				if (LE.entry != Analysis.IDLE_ENTRY_POINT) {
 					switch (LE.type) {
 					case BEGIN_PROCESSING:
 						
@@ -324,7 +324,7 @@ public class LogLoader extends ProjDefs
 						if (TE == null) { 
 							TE = new TimelineEvent(LE.time,
 									LE.time,
-									-2,LE.pe,LE.msglen);
+									Analysis.OVERHEAD_ENTRY_POINT,LE.pe,LE.msglen);
 							timeline.add(TE);
 							tempte = true;
 						}
@@ -356,7 +356,7 @@ public class LogLoader extends ProjDefs
 						if (TE == null) {
 							TE = new TimelineEvent(LE.time,
 									LE.time,
-									-2, LE.pe, LE.msglen);
+									Analysis.OVERHEAD_ENTRY_POINT, LE.pe, LE.msglen);
 							timeline.add(TE);
 							tempte = true;
 						}
@@ -388,7 +388,7 @@ public class LogLoader extends ProjDefs
 						if (TE == null) {
 							TE = new TimelineEvent(LE.time,
 									LE.time,
-									-2, LE.pe, LE.msglen);
+									Analysis.OVERHEAD_ENTRY_POINT, LE.pe, LE.msglen);
 							timeline.add(TE);
 							tempte = true;
 						}
@@ -504,7 +504,7 @@ public class LogLoader extends ProjDefs
 						// Start a new dummy event
 						if (TE == null) {
 							TE = new TimelineEvent(LE.time,
-									LE.time,-2,
+									LE.time,Analysis.OVERHEAD_ENTRY_POINT,
 									LE.pe);
 							timeline.add(TE);
 						}
@@ -516,7 +516,7 @@ public class LogLoader extends ProjDefs
 						}
 						PT=null;
 						if (TE != null) {
-							if (TE.EntryPoint == -2) {
+							if (TE.EntryPoint == Analysis.OVERHEAD_ENTRY_POINT) {
 								TE=null;
 							}
 						}
@@ -528,7 +528,7 @@ public class LogLoader extends ProjDefs
 						}
 						TE = new TimelineEvent(LE.time,
 								Long.MAX_VALUE,
-								-1,-1); 
+								Analysis.IDLE_ENTRY_POINT,-1); 
 						timeline.add(TE);
 						break;
 					case END_IDLE:
@@ -544,7 +544,7 @@ public class LogLoader extends ProjDefs
 								(lastBeginEvent.type == BEGIN_IDLE)) {
 							TE = new TimelineEvent(lastBeginEvent.time,
 									End,
-									-1, -1);
+									Analysis.IDLE_ENTRY_POINT, -1);
 							timeline.add(TE);
 							isProcessing = true;
 						}
@@ -563,7 +563,7 @@ public class LogLoader extends ProjDefs
 				LE = reader.nextEvent(LE);
 				// this will
 				// END COMPUTATION event.
-				if (LE.entry != -1) {
+				if (LE.entry != Analysis.IDLE_ENTRY_POINT) {
 					if (LE.time > End) {
 						break;
 					}
@@ -573,7 +573,7 @@ public class LogLoader extends ProjDefs
 			// check to see if we are stopping in the middle of a message.
 			// if so, we need to keep reading to get its end time
 			while (TE != null) {
-				if (LE.entry != -1) {
+				if (LE.entry != Analysis.IDLE_ENTRY_POINT) {
 					if (LE.type == END_PROCESSING) {
 						TE.EndTime = LE.time;
 						// If the entry was not long enough, remove it from the timeline

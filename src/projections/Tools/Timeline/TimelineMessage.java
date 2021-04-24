@@ -11,7 +11,7 @@ public class TimelineMessage implements Comparable
 	/** Message send time */
 	protected long Time;
 	
-	protected int Entry;
+	private short Entry;
 	
 	/** Message Length */
 	protected int MsgLen;
@@ -42,7 +42,7 @@ public class TimelineMessage implements Comparable
 	public TimelineMessage(int srcPE, long t, int e, int mlen, int EventID, int destPEs[]) {
 		this.srcPE = srcPE;
 		Time=t;
-		Entry=e;
+		Entry=(short)e;
 		MsgLen=mlen;
 		this.EventID = EventID;
 		if (destPEs != null) {
@@ -57,7 +57,7 @@ public class TimelineMessage implements Comparable
 	public TimelineMessage(int srcPE, long t, int e, int mlen, int EventID, int numPEs) {
 		Time=t;
 		this.srcPE = srcPE;
-		Entry=e;
+		Entry=(short)e;
 		MsgLen=mlen;
 		this.EventID = EventID;
 		this.numPEs = numPEs;
@@ -134,5 +134,9 @@ public class TimelineMessage implements Comparable
 
 	protected List<EntryMethodObject> getRecipients() {
 		return recipients;
+	}
+
+	protected int getEntry() {
+		return Short.toUnsignedInt(Entry);
 	}
 }

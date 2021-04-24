@@ -140,9 +140,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
 		if (tle.id != null) {
-			tid = new ObjectId(tle.id);
+			tid = ObjectId.createObjectId(tle.id);
 		} else {
-			tid = new ObjectId();
+			tid = ObjectId.createObjectId();
 		}
 		
 		if (tle.UserSpecifiedData != null || tle.memoryUsage > 0 ||

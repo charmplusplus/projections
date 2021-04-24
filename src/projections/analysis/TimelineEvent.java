@@ -66,7 +66,7 @@ public long RecvTime;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 
-	id = new ObjectId(d);
+	id = ObjectId.createObjectId(d);
 	EventID = eventid;
 	this.numPapiCounts = numPapiCounts;
 	this.papiCounts = papiCounts;
@@ -85,7 +85,7 @@ public long RecvTime;
 		EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
 		RecvTime = r;
 
-		id = new ObjectId(d);
+		id = ObjectId.createObjectId(d);
 		EventID = eventid;
 		this.numPapiCounts = numPapiCounts;
 		this.papiCounts = papiCounts;

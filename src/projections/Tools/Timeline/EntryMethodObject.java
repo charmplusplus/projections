@@ -21,6 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import projections.Tools.Timeline.RangeQueries.Range1D;
+import projections.analysis.Analysis;
 import projections.analysis.ObjectId;
 import projections.analysis.PackTime;
 import projections.analysis.TimelineEvent;
@@ -35,8 +36,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private int elapsedTime, recvTimeOffset;
 	private long cpuBegin;
 	private int cpuElapsed;
-	private int entry;
-	private int entryIndex;
+	// entryPoint is an unsigned short on the tracing side, so use short here to
+	// save space. Take care to convert to an unsigned int when using, as Java
+	// has no unsigned short type.
+	private short entryPoint;
 	private int msglen;
 	int EventID;
 	private ObjectId tid; 
@@ -84,7 +87,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	private static DecimalFormat format_ = new DecimalFormat();
 
-	private boolean isCommThdRecv = false;
+	private final byte epFlags;
+	private static final byte COMM_THD_RECV_MASK = 0x1;
+	private static final byte IDLE_EP_MASK = 0x2;
+	private static final byte OVERHEAD_EP_MASK = 0x4;
 
 	protected EntryMethodObject(Data data,  TimelineEvent tle, 
 			ArrayList<TimelineMessage> msgs, ArrayList<PackTime> packs,
@@ -92,14 +98,37 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	{
 	
 		this.data = data;
+
+		pe = p1;
+		pCreation = tle.SrcPe;
+
+		byte flags = 0;
+		if(data.isCommThd(pe)) {
+			final int myNode = data.getNodeID(pe);
+			final int creationNode = data.getNodeID(pCreation);
+			if (myNode != creationNode)
+				flags |= COMM_THD_RECV_MASK;
+		}
+
+		switch (tle.EntryPoint) {
+			case Analysis.IDLE_ENTRY_POINT:
+				flags |= IDLE_EP_MASK;
+				break;
+			case Analysis.OVERHEAD_ENTRY_POINT:
+				flags |= OVERHEAD_EP_MASK;
+				break;
+			default:
+				entryPoint = (short)tle.EntryPoint;
+		}
+
+		epFlags = flags;
+
 		beginTime = tle.BeginTime;
 		elapsedTime = (int)(tle.EndTime - tle.BeginTime);
 		// If the incoming RecvTime is 0, then it is invalid, so use MIN_VALUE to represent it in the offset
 		recvTimeOffset = (tle.RecvTime == 0) ? Integer.MIN_VALUE : (int)(tle.RecvTime - tle.BeginTime);
 		cpuBegin = tle.cpuBegin;
 		cpuElapsed = (int)(tle.cpuEnd - tle.cpuBegin);
-		entry     = tle.EntryPoint;
-		entryIndex = MainWindow.runObject[data.myRun].getEntryIndex(entry);
 		messages  = msgs; // Set of TimelineMessage
 		if (messages != null) {
 			for (TimelineMessage msg : messages) {
@@ -107,13 +136,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			}
 		}
 		this.packs= packs;
-		pe  = p1;
-		pCreation = tle.SrcPe;
-		if(data.isCommThd(pe)) {
-			int myNode = data.getNodeID(pe);
-			int creationNode = data.getNodeID(pCreation);
-			isCommThdRecv = (myNode != creationNode);
-		}
 
 		EventID = tle.EventID;
 		msglen = tle.MsgLen;
@@ -140,7 +162,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		StringBuilder infoString = new StringBuilder(5000);
 
-		
+		final int entry = getEntry();
 		if (entry >= 0) {
 
 			infoString.append("<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"); 
@@ -222,12 +244,12 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 					infoString.append(MainWindow.runObject[data.myRun].getPerfCountNames()[i] + " = " + format_.format(extraFields.papiCounts[i]) + "<br>");
 				}
 			}
-		} else if (entry == -1) {
+		} else if (isIdleEvent()) {
 			infoString.append("<b>Idle Time</b><br><br>");
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime)+ "<br>");
 			infoString.append("<i>End Time</i>: " + format_.format(beginTime + elapsedTime) + "<br>");
 			infoString.append("<i>Total Time</i>: " + U.humanReadableString(elapsedTime) + "<br>");
-		} else if (entry == -2) {
+		} else if (isUnaccountedTime()) {
 			infoString.append("<i>Unaccounted Time</i>" + "<br>");
 			
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
@@ -341,14 +363,16 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		return beginTime + elapsedTime;
 	}   
 
-	public int getEntryID()
+	public int getEntry()
 	{
-		return entry;
+		if (isIdleEvent()) return Analysis.IDLE_ENTRY_POINT;
+		else if (isUnaccountedTime()) return Analysis.OVERHEAD_ENTRY_POINT;
+		else return Short.toUnsignedInt(entryPoint);
 	}   
 
 	public int getEntryIndex()
 	{
-		return MainWindow.runObject[data.myRun].getEntryIndex(entry);
+		return MainWindow.runObject[data.myRun].getEntryIndex(getEntry());
 	}
 	
 	/** Return a set of messages for this entry method */
@@ -394,12 +418,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 	public float getUsage()
 	{
-		if (entryIndex < -1) {
-			// if I am not a standard entry method, I do not contribute
+		if (isUnaccountedTime()) {
+			// if I am not idle or a standard entry method, I do not contribute
 			// to the usage
-			//
-			// 2006/10/02 - **CW** changed it such that idle time gets
-			//              usage accounted for.
 			return 0;
 		}
 
@@ -421,7 +442,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 	public void mouseClicked(MouseEvent evt, JPanel parent, Data data)
 	{
-		if (entry >= 0) {
+		if (!isUnaccountedTime() && !isIdleEvent()) {
 			if (evt.getModifiers()==MouseEvent.BUTTON1_MASK) {
 				// Left Click
             if(data.traceMessagesBackOnHover() || data.traceMessagesForwardOnHover()  || data.traceCriticalPathOnHover()){
@@ -515,8 +536,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                     length++;
 					done = true;
 					v.add(obj);
-                    System.out.println("backward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry);
-					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && obj.beginTime + obj.elapsedTime > data.leftSelectionTime()  ){
+                    System.out.println("backward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.getEntry());
+					if (!obj.isIdleEvent() && obj.pCreation <= data.numPEs() && obj.beginTime + obj.elapsedTime > data.leftSelectionTime()  ){
 						// Find message that created the object
                         data.addProcessor(obj.pCreation);
 						TimelineMessage created_message = obj.creationMessage();
@@ -557,8 +578,8 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                 v.add(obj); //add this object to the set that is returned
 				do{
 					done = true;
-                    System.out.println(" forward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry + "forwarding msgs:" + tleMsg.size());
-					if (obj.entry != -1 && obj.pCreation <= data.numPEs() && tleMsg != null && !tleMsg.isEmpty()){
+                    System.out.println(" forward pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.getEntry() + "forwarding msgs:" + tleMsg.size());
+					if (!obj.isIdleEvent() && obj.pCreation <= data.numPEs() && tleMsg != null && !tleMsg.isEmpty()){
 						for(int j=0; j<tleMsg.size(); j++)
                         {
                         // Find messages called by current entry method
@@ -614,11 +635,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                     length++;
 					done = true;
 					v.add(obj);
-                    System.out.println(" pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.entry);
-					if (obj.entry != -1 && obj.pe <= data.numPEs() && obj.beginTime + obj.elapsedTime > data.leftSelectionTime()  ){
+                    System.out.println(" pe " + obj.pe + ", msg time=" + obj.beginTime + ", entry=" + obj.getEntry());
+					if (!obj.isIdleEvent() && obj.pe <= data.numPEs() && obj.beginTime + obj.elapsedTime > data.leftSelectionTime()  ){
 						// Find message that created the object
                         previous_obj = data.getPreviousEntry(obj, obj.pe);
-                        if( previous_obj!= null && previous_obj.entry != -1 ){
+                        if( previous_obj!= null && !previous_obj.isIdleEvent()){
                             System.out.println("It has previous entry");
                             obj = previous_obj; 
                             done = false;
@@ -767,18 +788,18 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 	/** Is this an idle event */
 	public boolean isIdleEvent(){
-		return (entry==-1);
+		return getFlag(IDLE_EP_MASK);
 	}
 	
 	public boolean isUnaccountedTime(){
-		return (entry == -2);
+		return getFlag(OVERHEAD_EP_MASK);
 	}
 	
 	
 /** Whether this object is displayed or hidden (for example when idle's are not displayed this might be false) */
 	public boolean isDisplayed() {
 		// If it is hidden, we may not display it
-		if(data.entryIsHiddenID(entry)) {
+		if(data.entryIsHiddenID(getEntry())) {
 			return false;
 		}
 		
@@ -821,8 +842,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		// The distance from the top or bottom to the rectangle
 		int verticalInset = 0;
 
+		final boolean isIdle = isIdleEvent();
 		// Idle regions are thinner vertically
-		if (entryIndex == -1 && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT) {
+		if (isIdle && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT) {
 			rectHeight -= 7;
 			verticalInset += 3;
 		}
@@ -838,7 +860,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 			// Dim this object if we want to focus on some objects (for some reason or another)
 			if (data.isObjectDimmed(this)) {
-				if (isIdleEvent()) c = Color.lightGray;
+				if (isIdle) c = Color.lightGray;
 				else c = makeMoreLikeBackground(c);
 			}
 
@@ -857,10 +879,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 			// Paint the main rectangle for the object, as long as it is not a skinny idle event
 			g2d.setPaint(c);
-			if (rectWidth > 1 || entryIndex != -1) {
+			if (rectWidth > 1 || !isIdle) {
 				g2d.fillRect(left, topCoord + verticalInset, rectWidth, rectHeight);
 //			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
-				if (isCommThdRecv) {
+				if (isCommThreadMsgRecv()) {
 					g2d.setColor(data.getForegroundColor());
 					g2d.fillRect(left, topCoord + verticalInset + rectHeight, rectWidth, data.smpMessageRecvBarHeight());
 				}
@@ -952,7 +974,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		// First handle the simple cases of idle, unknown and function events
 		if (isIdleEvent()) { 	
 			return MainWindow.runObject[data.myRun].getIdleColor();
-		} else if (entryIndex == -2) { // unknown domain
+		} else if (isUnaccountedTime()) { // unknown domain
 			return MainWindow.runObject[data.myRun].getOverheadColor();
 		}
 		
@@ -1000,7 +1022,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 
 			if(data.colorByEID()){
-				color += (entryIndex * 251) % 5113;
+				color += (getEntry() * 251) % 5113;
 			}
 
 
@@ -1031,10 +1053,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		}
 		if (colToSave == null) {
-			return MainWindow.runObject[data.myRun].entryColors[entryIndex];
+			return MainWindow.runObject[data.myRun].entryColors[getEntryIndex()];
 		}
 		else {
-			MainWindow.runObject[data.myRun].entryColors[entryIndex] = colToSave;
+			MainWindow.runObject[data.myRun].entryColors[getEntryIndex()] = colToSave;
 			return colToSave;
 		}
 
@@ -1115,7 +1137,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 
 	public boolean isCommThreadMsgRecv(){
-		return isCommThdRecv;
+		return getFlag(COMM_THD_RECV_MASK);
 	}
 
 	/** Shift all the times associated with this entry method by given amount */
@@ -1139,6 +1161,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		if (e.getSource() instanceof JMenuItem) {
 			String arg = ((JMenuItem) e.getSource()).getText();
 			if (arg.equals(popupChangeColor)){
+				final int entry = getEntry();
 				Color old = MainWindow.runObject[data.myRun].getEntryColor(entry);
 				Color c = JColorChooser.showDialog(null, "Choose new color", old); 
 				if(c !=null){
@@ -1194,5 +1217,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	/** Data specified by the user, likely a timestep. Null if nonspecified */
 	public Integer getUserSuppliedData() {
 		return (extraFields == null) ? null :  extraFields.userSuppliedData;
+	}
+
+	private boolean getFlag(final byte mask)
+	{
+		return (epFlags & mask) != 0;
 	}
 }

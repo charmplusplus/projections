@@ -1,7 +1,6 @@
 package projections.gui;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -15,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumn;
 
 import projections.Tools.Timeline.Data;
@@ -68,8 +66,8 @@ public class ChooseEntriesWindow extends JFrame
 	
 	private void addIdleOverhead() {
 		if (data!= null && data.handleIdleOverhead() || data==null) {
-			entryNames.put(Analysis.isOverhead, "Overhead");
-			entryNames.put(Analysis.isIdle, "Idle");
+			entryNames.put(Analysis.OVERHEAD_ENTRY_POINT, "Overhead");
+			entryNames.put(Analysis.IDLE_ENTRY_POINT, "Idle");
 		}
 	}
 

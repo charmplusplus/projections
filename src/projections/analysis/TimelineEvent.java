@@ -9,7 +9,6 @@ import projections.misc.MiscUtil;
 /** A class that represents an event from the log, Eventually an EntryMethod object or UserEventObject will be created from this data */
 public class TimelineEvent implements Comparable
 {
- 
 public long BeginTime;
 public long EndTime;
 public long RecvTime;

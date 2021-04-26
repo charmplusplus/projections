@@ -1,40 +1,44 @@
 package projections.Tools.Timeline.RangeQueries;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
-public class MergedIterator<E> implements Iterator<E>{
+public final class MergedIterator<E> implements Iterator<E> {
 	private final Iterator<E> iterators[];
 	private int index;
+	private boolean internalHasNext;
 
-	public MergedIterator(Iterator<E>... iters){
+	public MergedIterator(Iterator<E>... iters) {
 		iterators = iters;
 		index = 0;
+		loadHasNext();
 	}
-	
-	
+
 	@Override
-	public boolean hasNext() {
+	public final boolean hasNext() {
+		return internalHasNext;
+	}
+
+	@Override
+	public final E next() {
+		if (internalHasNext) {
+			E next = iterators[index].next();
+			loadHasNext();
+			return next;
+		}
+		else
+			throw new NoSuchElementException();
+	}
+
+	private final void loadHasNext() {
 		while (index < iterators.length && !iterators[index].hasNext()) {
 			index++;
 		}
-
-		return index < iterators.length;
+		internalHasNext = index < iterators.length;
 	}
 
 	@Override
-	public E next() {
-		if (hasNext()) {
-			return iterators[index].next();
-		}
-
-		throw new NoSuchElementException();
-	}
-
-	@Override
-	public void remove() {
+	public final void remove() {
 		throw new UnsupportedOperationException();
 	}
-
 }

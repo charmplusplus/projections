@@ -40,7 +40,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	// save space. Take care to convert to an unsigned int when using, as Java
 	// has no unsigned short type.
 	private short entryPoint;
-	private int msglen;
 	int EventID;
 	private ObjectId tid; 
 	int pe;
@@ -138,7 +137,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		this.packs= packs;
 
 		EventID = tle.EventID;
-		msglen = tle.MsgLen;
 		if (tle.id != null) {
 			tid = ObjectId.createObjectId(tle.id);
 		} else {
@@ -167,11 +165,11 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 			infoString.append("<b>" + MainWindow.runObject[data.myRun].getEntryFullNameByID(entry, true) + "</b><br><br>"); 
 
-			if(msglen > 0) {
-				infoString.append("<i>Msg Len</i>: " + msglen + "<br>");
+			final TimelineMessage creationMessage = this.creationMessage();
+			if(creationMessage != null && creationMessage.MsgLen > 0) {
+				infoString.append("<i>Msg Len</i>: " + creationMessage.MsgLen + "<br>");
 			}
 
-			
 			infoString.append("<i>Begin Time</i>: " + format_.format(beginTime));
 			if (cpuElapsed > 0)
 				infoString.append(" (" + format_.format(cpuBegin) + ")");
@@ -196,16 +194,15 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				infoString.append("<i>Msgs created</i>: " + messages.size() + "<br>");
 			else 
 				infoString.append("<i>Msgs created</i>: 0<br>");
-
-			TimelineMessage created_message = this.creationMessage();
+			
 			boolean usedCommThreadSender = false;
-			if(created_message != null)
+			if(creationMessage != null)
 			{
-				infoString.append("<i>Msg latency is </i>: " + (beginTime - created_message.Time) + "<br>");
+				infoString.append("<i>Msg latency is </i>: " + (beginTime - creationMessage.Time) + "<br>");
 
 				// If the message came from a comm thread, trace back to the actual creator if possible
 				if (data.isCommThd(pCreation)) {
-					final EntryMethodObject commThreadSender = created_message.getSender();
+					final EntryMethodObject commThreadSender = creationMessage.getSender();
 					if (commThreadSender != null) {
 						TimelineMessage origMsg = commThreadSender.creationMessage();
 						if (origMsg != null) {

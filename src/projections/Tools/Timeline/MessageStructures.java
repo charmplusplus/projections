@@ -1,12 +1,11 @@
 package projections.Tools.Timeline;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.analysis.ObjectId;
@@ -56,7 +55,7 @@ class MessageStructures {
 			for(int i=0;i<pe;i++)
 				eventIDToEntryMethodMap[i] = new HashMap();
 			
-			oidToEntryMethodObjectsMap = new TreeMap();
+			oidToEntryMethodObjectsMap = new TreeMap<>();
 		}		
 	}
 
@@ -87,7 +86,7 @@ class MessageStructures {
 		this.oidToEntryMethodObjectsMap = oidToEntryMethodObjectsMap;
 	}
 
-	public Map getOidToEntryMethodObjectsMap() {
+	public Map<ObjectId, List<EntryMethodObject>> getOidToEntryMethodObjectsMap() {
 		return oidToEntryMethodObjectsMap;
 	}
 
@@ -204,11 +203,11 @@ class MessageStructures {
 
 					if(getOidToEntryMethodObjectsMap().containsKey(id)){
 						// add obj to the existing set
-						TreeSet<EntryMethodObject> s = (TreeSet<EntryMethodObject>) getOidToEntryMethodObjectsMap().get(id);
+						List<EntryMethodObject> s = getOidToEntryMethodObjectsMap().get(id);
 						s.add(obj);
 					} else {
 						// create a set for the id
-						TreeSet<EntryMethodObject> s = new TreeSet<EntryMethodObject>();
+						ArrayList<EntryMethodObject> s = new ArrayList<EntryMethodObject>();
 						s.add(obj);
 						getOidToEntryMethodObjectsMap().put(id, s);
 					}

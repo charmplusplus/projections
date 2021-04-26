@@ -452,9 +452,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
                 Set<EntryMethodObject> back = traceBackwardDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
                 Set<EntryMethodObject> criticalpath = traceCriticalPathDependencies();// this function acts differently depending on data.traceMessagesBackOnHover()
 
-                HashSet<Object> fwdGeneric = new HashSet<Object>();
-                HashSet<Object> backGeneric =  new HashSet<Object>();
-                HashSet<Object> criticalpathGeneric =  new HashSet<Object>();
+                HashSet<EntryMethodObject> fwdGeneric = new HashSet<>();
+                HashSet<EntryMethodObject> backGeneric =  new HashSet<>();
+                HashSet<EntryMethodObject> criticalpathGeneric =  new HashSet<>();
                 fwdGeneric.addAll(fwd); // this function acts differently depending on data.traceMessagesForwardOnHover()
                 backGeneric.addAll(back); // this function acts differently depending on data.traceMessagesBackOnHover()
                 criticalpathGeneric.addAll(criticalpath); // this function acts differently depending on data.traceCriticalPathOnHover()
@@ -734,7 +734,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		// Highlight any Entry Method invocations for the same chare array element
 		if(data.traceOIDOnHover()){
 			synchronized(data.messageStructures){
-			Set allWithSameId = (Set) data.messageStructures.getOidToEntryMethodObjectsMap().get(tid);
+			List<EntryMethodObject> allWithSameId = data.messageStructures.getOidToEntryMethodObjectsMap().get(tid);
 			data.highlightObjects(allWithSameId);
 			needRepaint=true;
 			}

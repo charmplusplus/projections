@@ -126,8 +126,10 @@ public class TimelineMessage implements Comparable
 
 	protected void addRecipient(EntryMethodObject obj) {
 		synchronized (this) {
-			if (recipients == null)
-				recipients = new ArrayList<>();
+			if (recipients == null) {
+				// Set initialCapacity to 1 to prevent recipients from allocating more memory than needed
+				recipients = new ArrayList<>(1);
+			}
 			recipients.add(obj);
 		}
 	}

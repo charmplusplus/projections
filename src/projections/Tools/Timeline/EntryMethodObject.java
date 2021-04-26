@@ -811,12 +811,17 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 	
 	public boolean paintMe(Graphics2D g2d, final int actualDisplayWidth, final int topCoord, MainPanel.MaxFilledX maxFilledX){
-		boolean paintedEP = false;
-		// If it is hidden, we may not display it
-		if(!isDisplayed()){
-			return paintedEP;
+		// The internals of isDisplayed() are replicated here since this function is on
+		// the hot path, doing this allows us to skip a call to isIdleEvent() later on
+		// and means we don't have to rely on the JVM to inline this
+		final int entry = getEntry();
+		if (data.entryIsHiddenID(entry)) return false;
+
+		final boolean isIdle = entry == Analysis.IDLE_ENTRY_POINT;
+		if (isIdle && (!data.showIdle() || MainWindow.IGNORE_IDLE)) {
+			return false;
 		}
-		
+
 		final long endTime = beginTime + elapsedTime;
 		int leftCoord = data.timeToScreenPixel(beginTime, actualDisplayWidth);
 		int rightCoord = data.timeToScreenPixel(endTime, actualDisplayWidth);
@@ -831,19 +836,19 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		int rectWidth = Math.max(1, rightCoord - leftCoord + 1);
 		int rectHeight = data.barheight();
 
-		int left  = leftCoord+0;
+		int left  = leftCoord;
 		int right = leftCoord+rectWidth-1;
 
 		// The distance from the top or bottom to the rectangle
 		int verticalInset = 0;
 
-		final boolean isIdle = isIdleEvent();
 		// Idle regions are thinner vertically
 		if (isIdle && data.getViewType() != Data.ViewType.VIEW_SUPERCOMPACT) {
 			rectHeight -= 7;
 			verticalInset += 3;
 		}
 
+		boolean paintedEP = false;
 		// Only draw this EMO if it covers some pixel that hasn't been filled yet
 		if (right > maxFilledX.ep) {
 			maxFilledX.ep = right;

@@ -87,9 +87,13 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	private static DecimalFormat format_ = new DecimalFormat();
 
 	private final byte epFlags;
-	private static final byte COMM_THD_RECV_MASK = 0x1;
-	private static final byte IDLE_EP_MASK = 0x2;
-	private static final byte OVERHEAD_EP_MASK = 0x4;
+
+	private static final byte IS_IDLE_EP = 0x1;
+	private static final byte IS_OVERHEAD_EP = 0x2;
+	private static final byte IS_COMM_THD_RECV = 0x4;
+
+	// Specifies which flag bits represent the type of the EP (e.g. idle, overhead)
+	private static final byte EP_TYPE_MASK = 0x3;
 
 	protected EntryMethodObject(Data data,  TimelineEvent tle, 
 			ArrayList<TimelineMessage> msgs, ArrayList<PackTime> packs,
@@ -106,15 +110,15 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			final int myNode = data.getNodeID(pe);
 			final int creationNode = data.getNodeID(pCreation);
 			if (myNode != creationNode)
-				flags |= COMM_THD_RECV_MASK;
+				flags |= IS_COMM_THD_RECV;
 		}
 
 		switch (tle.EntryPoint) {
 			case Analysis.IDLE_ENTRY_POINT:
-				flags |= IDLE_EP_MASK;
+				flags |= IS_IDLE_EP;
 				break;
 			case Analysis.OVERHEAD_ENTRY_POINT:
-				flags |= OVERHEAD_EP_MASK;
+				flags |= IS_OVERHEAD_EP;
 				break;
 			default:
 				entryPoint = (short)tle.EntryPoint;
@@ -360,11 +364,13 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		return beginTime + elapsedTime;
 	}   
 
-	public int getEntry()
+	public final int getEntry()
 	{
-		if (isIdleEvent()) return Analysis.IDLE_ENTRY_POINT;
-		else if (isUnaccountedTime()) return Analysis.OVERHEAD_ENTRY_POINT;
-		else return Short.toUnsignedInt(entryPoint);
+		switch (epFlags & EP_TYPE_MASK) {
+			case IS_IDLE_EP: return Analysis.IDLE_ENTRY_POINT;
+			case IS_OVERHEAD_EP: return Analysis.OVERHEAD_ENTRY_POINT;
+			default: return Short.toUnsignedInt(entryPoint);
+		}
 	}   
 
 	public int getEntryIndex()
@@ -784,12 +790,12 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	} 
 	
 	/** Is this an idle event */
-	public boolean isIdleEvent(){
-		return getFlag(IDLE_EP_MASK);
+	public final boolean isIdleEvent(){
+		return getFlag(IS_IDLE_EP);
 	}
 	
-	public boolean isUnaccountedTime(){
-		return getFlag(OVERHEAD_EP_MASK);
+	public final boolean isUnaccountedTime(){
+		return getFlag(IS_OVERHEAD_EP);
 	}
 	
 	
@@ -1137,7 +1143,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 
 	public boolean isCommThreadMsgRecv(){
-		return getFlag(COMM_THD_RECV_MASK);
+		return getFlag(IS_COMM_THD_RECV);
 	}
 
 	/** Shift all the times associated with this entry method by given amount */

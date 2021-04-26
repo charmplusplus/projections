@@ -812,7 +812,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	}
 	
 	
-	public boolean paintMe(Graphics2D g2d, int actualDisplayWidth, MainPanel.MaxFilledX maxFilledX){
+	public boolean paintMe(Graphics2D g2d, final int actualDisplayWidth, final int topCoord, MainPanel.MaxFilledX maxFilledX){
 		boolean paintedEP = false;
 		// If it is hidden, we may not display it
 		if(!isDisplayed()){
@@ -828,9 +828,6 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		if(beginTime < data.startTime())
 			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
-
-		int topCoord = data.entryMethodLocationTop(pe);
-//		int height = data.entryMethodLocationHeight();
 
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
 		int rectWidth = Math.max(1, rightCoord - leftCoord + 1);

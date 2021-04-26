@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /** Provides a collection interface that provides efficient range queries via iterators. 
  *  Does not allow insertion of null objects. 
@@ -232,24 +233,31 @@ public class RangeQueryTree <T extends Range1D> implements Query1D<T>{
 			return iterator(Long.MIN_VALUE, Long.MAX_VALUE);
 		}
 		
-		public Iterator iterator(long lb, long ub) {
-//			System.out.println("Creating iterator for node " + nodeID + " data=" + data);
+		public Iterator<T> iterator(long lb, long ub) {
+			ArrayList<Iterator<T>> accumulator = new ArrayList<>();
+			iteratorHelper(lb, ub, accumulator);
+
+			if(accumulator.isEmpty())
+				accumulator.add(new NullIterator<>());
+
+			// Copying to a zero length array is a bit faster since the JVM avoids zeroing the array
+			// (see https://shipilev.net/blog/2016/arrays-wisdom-ancients/ for more detail)
+			return new MergedIterator<T>(accumulator.toArray(new Iterator[0]));
+		}
+
+		// Recursively create a flat tree of iterators in accumulator by walking the range query tree
+		private void iteratorHelper(long lb, long ub, List<Iterator<T>> accumulator) {
 			if(data == null){
 				boolean useLeft = leftChild.lowerBound <= ub && leftChild.upperBound >= lb;
 				boolean useRight = rightChild.lowerBound <= ub && rightChild.upperBound >= lb;
 
-				if(useLeft && useRight)
-					return new MergedIterator(leftChild.iterator(lb, ub), rightChild.iterator(lb, ub));
-				else if(useLeft)
-					return leftChild.iterator(lb, ub);
-				else if(useRight)
-					return rightChild.iterator(lb, ub);
-				else
-					return new NullIterator();
-								
+				if(useLeft)
+					leftChild.iteratorHelper(lb, ub, accumulator);
+				if(useRight)
+					rightChild.iteratorHelper(lb, ub, accumulator);
 			} else {
 				// A local range iterator:
-				return new RangeIterator(data.iterator(), lb, ub);
+				accumulator.add(new RangeIterator(data.iterator(), lb, ub));
 			}
 		}
 

@@ -911,7 +911,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		 */
 
-		if(data.showPacks() && packs != null)
+		if(packs != null && data.showPacks())
 		{
 			g2d.setColor(Color.pink);
 			for(PackTime pt : packs){
@@ -938,7 +938,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		// Show the message sends. See note above for the message packing areas
 		// Don't change this without changing MainPanel's paintComponent which draws message send lines
-		if(data.showMsgs() == true && messages != null)
+		if(messages != null && data.showMsgs())
 		{
 			g2d.setColor(data.getForegroundColor());
 			

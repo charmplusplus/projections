@@ -798,13 +798,14 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 	
 /** Whether this object is displayed or hidden (for example when idle's are not displayed this might be false) */
 	public boolean isDisplayed() {
+		final int entry = getEntry();
 		// If it is hidden, we may not display it
-		if(data.entryIsHiddenID(getEntry())) {
+		if(data.entryIsHiddenID(entry)) {
 			return false;
 		}
 		
 		// If this is an idle time region, we may not display it
-		if (isIdleEvent() && (!data.showIdle() || MainWindow.IGNORE_IDLE)) {
+		if (entry == Analysis.IDLE_ENTRY_POINT && (!data.showIdle() || MainWindow.IGNORE_IDLE)) {
 			return false;
 		}
 

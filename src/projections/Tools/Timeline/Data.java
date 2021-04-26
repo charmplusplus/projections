@@ -670,7 +670,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			{			
 				topTimesText = "<html>";
 				topTimesText+="The longest idle times in descending order are: <br>";
-				Set<EntryMethodObject> longestObjectsSet = new HashSet<EntryMethodObject>();
+				HashSet<EntryMethodObject> longestObjectsSet = new HashSet<EntryMethodObject>();
 				for (int i = 0; i < amountTopTimes(); i++)
 				{
 					if ((idleArray[i] == null) || (idleArray[i].getBeginTime() == objEndTimes[i]))
@@ -693,9 +693,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					longestObjectsSet.add(entryArray[i]);
 				}
 				topTimesText+="</html>";
-				HashSet<Object> objsToHilite = new HashSet<Object>();
-				objsToHilite.addAll(longestObjectsSet);
-				highlightObjects(objsToHilite);
+				highlightObjects(longestObjectsSet);
 			}
 
 			// Spawn a thread that computes some secondary message related data structures
@@ -1521,7 +1519,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 
 	/** Highlight the given set of timeline objects */
-	protected void highlightObjects(Set<Object> objects) {
+	protected void highlightObjects(Collection<EntryMethodObject> objects) {
 		highlightedObjects.addAll(objects);
 	}
 
@@ -1529,7 +1527,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 * If there are any objects set to be highlighted, 
 	 * all others will be dimmed 
 	 */
-	protected boolean isObjectDimmed(Object o){
+	protected boolean isObjectDimmed(EntryMethodObject o){
 		if(highlightedObjects.size() == 0)
 			return false;
 		else

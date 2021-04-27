@@ -1118,7 +1118,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		{   
 			for(PackTime pt : packs){
 				// packtime += packs[p].EndTime - packs[p].BeginTime + 1;
-				packtime += pt.EndTime - pt.BeginTime;
+				packtime += (int)(pt.EndTime - pt.BeginTime);
 				if(pt.BeginTime < data.startTime())
 					packtime -= (data.startTime() - pt.BeginTime);
 				if(pt.EndTime > data.endTime())

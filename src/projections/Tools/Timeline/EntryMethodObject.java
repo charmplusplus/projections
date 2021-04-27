@@ -850,7 +850,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			leftCoord = data.timeToScreenPixelLeft(data.startTime(), actualDisplayWidth);
 
 		// Determine the coordinates and sizes of the components of the graphical representation of the object
-		int rectWidth = Math.max(1, rightCoord - leftCoord + 1);
+		int rectWidth = Math.max(1, rightCoord - leftCoord);
 		int rectHeight = data.barheight();
 
 		int left  = leftCoord;

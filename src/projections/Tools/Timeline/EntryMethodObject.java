@@ -866,8 +866,19 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		}
 
 		boolean paintedEP = false;
-		// Only draw this EMO if it covers some pixel that hasn't been filled yet
-		if (right > maxFilledX.ep) {
+		// Only draw this EMO if it covers some pixel that hasn't been filled yet or it is covers a previously idle pixel
+		if (right > maxFilledX.ep || (maxFilledX.epIsIdle && !isIdle)) {
+			// Generally, maxFilledX.ep should contain the pixel before the pixel corresponding
+			// to the end time of the previous block, avoiding overlap if the current block
+			// happens to start immediately after the previous one. However, if the previous
+			// block was short enough that it started and ended on the same pixel, it may
+			// overlap the start of this one; this checks and corrects for that case.
+			if (left == maxFilledX.ep && !maxFilledX.epIsIdle) {
+				left++;
+				rectWidth--;
+			}
+
+			maxFilledX.epIsIdle = isIdle;
 			maxFilledX.ep = right;
 			paintedEP = true;
 
@@ -894,9 +905,9 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				right -= 5;
 			}
 
-			// Paint the main rectangle for the object, as long as it is not a skinny idle event
+			// Paint the main rectangle for the object
 			g2d.setPaint(c);
-			if (rectWidth > 1 || !isIdle) {
+			if (rectWidth > 0) {
 				g2d.fillRect(left, topCoord + verticalInset, rectWidth, rectHeight);
 //			System.out.println("Entry method painting at (" + left + "," + (topCoord+verticalInset) + "," +  rectWidth + "," + rectHeight + ")");
 				if (isCommThreadMsgRecv()) {
@@ -906,7 +917,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 			}
 
 			// Paint the edges of the rectangle lighter/darker to give an embossed look
-			if (rectWidth > 2 && !data.colorByMemoryUsage() && rectHeight > 1) {
+			if (rectWidth > 3 && !isIdle && !data.colorByMemoryUsage() && rectHeight > 1) {
 				g2d.setPaint(makeMoreLikeForeground(c));
 				g2d.drawLine(left, topCoord + verticalInset, right, topCoord + verticalInset);
 				if (left == leftCoord)

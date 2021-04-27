@@ -214,11 +214,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	 */
 	public class MaxFilledX {
 		public int ep, pack, msg;
+		public boolean epIsIdle;
 
 		public MaxFilledX() {
 			ep = 0;
 			pack = 0;
 			msg = 0;
+			epIsIdle = false;
 		}
 	}
 	/**

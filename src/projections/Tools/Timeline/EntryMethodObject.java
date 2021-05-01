@@ -128,10 +128,21 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 
 		beginTime = tle.BeginTime;
 		elapsedTime = (int)(tle.EndTime - tle.BeginTime);
+		if (tle.EndTime - tle.BeginTime != elapsedTime) {
+			throw new IllegalArgumentException("Total time of entry method does not fit in type int");
+		}
 		// If the incoming RecvTime is 0, then it is invalid, so use MIN_VALUE to represent it in the offset
 		recvTimeOffset = (tle.RecvTime == 0) ? Integer.MIN_VALUE : (int)(tle.RecvTime - tle.BeginTime);
+		if (tle.RecvTime != 0 && tle.RecvTime - tle.BeginTime != recvTimeOffset) {
+			throw new IllegalArgumentException("Difference between receive time and begin time for entry method does not fit in type int");
+		}
 		cpuBegin = tle.cpuBegin;
-		cpuElapsed = (int)(tle.cpuEnd - tle.cpuBegin);
+		if (cpuBegin > 0) {
+			cpuElapsed = (int) (tle.cpuEnd - tle.cpuBegin);
+			if (tle.cpuEnd - tle.cpuBegin != cpuElapsed) {
+				throw new IllegalArgumentException("Total CPU time of entry method does not fit in type int");
+			}
+		}
 		messages  = msgs; // Set of TimelineMessage
 		if (messages != null) {
 			for (TimelineMessage msg : messages) {

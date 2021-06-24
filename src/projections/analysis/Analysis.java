@@ -7,7 +7,6 @@ import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.SortedSet;
 
 import javax.swing.SwingWorker;
@@ -102,8 +101,8 @@ public class Analysis {
   
   Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
   Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
-  public static int isOverhead = -2;
-  public static int isIdle = -1;
+  public static final int OVERHEAD_ENTRY_POINT = -2;
+  public static final int IDLE_ENTRY_POINT = -1;
   
   public TachyonShifts tachyonShifts;
   
@@ -362,14 +361,14 @@ public class Analysis {
         return intervalData.sumDetailData();
     }
     public Color getEntryColor(int entryIdx) {
-    	if (entryIdx == isIdle) {
+    	if (entryIdx == IDLE_ENTRY_POINT) {
     		Paint p = getIdleColor();
     		if (p instanceof GradientPaint)
     			return ((GradientPaint)p).getColor1();
     		else
     			return (Color)p;
     	}
-    	else if (entryIdx == isOverhead) {
+    	else if (entryIdx == OVERHEAD_ENTRY_POINT) {
     		Paint p = getOverheadColor();
     		if (p instanceof GradientPaint)
     			return ((GradientPaint)p).getColor1();
@@ -385,9 +384,9 @@ public class Analysis {
 
 
     public void setEntryColor(int entryIdx, Color color) {
-    	if (entryIdx == isIdle)
+    	if (entryIdx == IDLE_ENTRY_POINT)
     		idle = color;
-    	else if (entryIdx == isOverhead)
+    	else if (entryIdx == OVERHEAD_ENTRY_POINT)
     		overhead = color;
     	else if (entryIdx < getSts().getEntryCount())
     		entryColors[entryIdx] = color;

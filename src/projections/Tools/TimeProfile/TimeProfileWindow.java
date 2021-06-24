@@ -352,9 +352,7 @@ implements ActionListener, Clickable
                     {
 					    // Do serial file reading because all we have is the sum files	    	
                         //System.out.println("hasSumDetailFiles - LOAD DATA. numIntervals: " + numIntervals);
-                        SortedSet<Integer> availablePEs =
-                                MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
-                        MainWindow.runObject[myRun].LoadGraphData(intervalSize, 0, numIntervals-1, false, availablePEs);
+                        MainWindow.runObject[myRun].LoadGraphData(intervalSize, 0, numIntervals-1, false, processorList);
                         int[][] sumDetailData = MainWindow.runObject[myRun].getSumDetailData();
 
                         for(int i=0;i<numIntervals;i++){

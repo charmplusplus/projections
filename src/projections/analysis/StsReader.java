@@ -40,6 +40,15 @@ public class StsReader extends ProjDefs
     private ZonedDateTime timestamp;
     private String commandline;
     private String charmVersion;
+    private String username;
+    private String hostname;
+
+    //SMP mode
+    private int NumNodes = 0;
+    private int NodeSize = 1;
+    private int NumCommThdPerNode = 0;
+	private boolean isSMP = false;
+	private boolean isCommTracingEnabled = false;
 
     private class Chare
     {
@@ -61,12 +70,7 @@ public class StsReader extends ProjDefs
     private Chare Chares[];    // indexed by chare id
 //    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
- 
-
-    //SMP mode
-    private int NumNodes=0;
-    private int NodeSize = 1;
-    private int NumCommThdPerNode = 0;
+	
     
     /** Entry Names */
     private int entryIndex = 0; ///< The next available index
@@ -170,9 +174,10 @@ public class StsReader extends ProjDefs
 		    Machine = matchQuotes(st);
 		} else if (s1.equals("PROCESSORS")) {
 		    NumPe = Integer.parseInt(st.nextToken());
-		} else if (s1.equals("SMPMODE")) {
-		    NodeSize = Integer.parseInt(st.nextToken());
- 		    NumNodes = Integer.parseInt(st.nextToken());
+		} else if (s1.equals("SMPMODE")) { 
+			NodeSize = Integer.parseInt(st.nextToken());
+			NumNodes = Integer.parseInt(st.nextToken());
+			isSMP = true;
 		} else if (s1.equals("TIMESTAMP")) {
 			timestamp = ZonedDateTime.ofInstant(Instant.parse(st.nextToken()), ZoneId.systemDefault());
 			String result = timestamp.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
@@ -180,6 +185,10 @@ public class StsReader extends ProjDefs
 			commandline = matchQuotes(st);
 		} else if (s1.equals("CHARMVERSION")) {
 			charmVersion = st.nextToken();
+		} else if (s1.equals("USERNAME")) {
+			username = matchQuotes(st);
+		} else if (s1.equals("HOSTNAME")) {
+			hostname = matchQuotes(st);
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -271,12 +280,13 @@ public class StsReader extends ProjDefs
 	    }
 		
 	    InFile.close();
-		
+	    
 		//post-processing for SMP related data fields
 		if(NumNodes == 0){
 			//indicate a non-SMP run
 			NumNodes = NumPe;		
 		}else{
+			isCommTracingEnabled = (NodeSize * NumNodes) < NumPe;
 			int workPes = NumNodes*NodeSize;
 			NumCommThdPerNode = (NumPe-workPes)/NumNodes;
 			if((NodeSize+NumCommThdPerNode)*NumNodes != NumPe){
@@ -326,7 +336,15 @@ public class StsReader extends ProjDefs
 	public String getCharmVersion() {
 		return charmVersion;
 	}
-    
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
     public String getEntryNameByID(int ID) {
     	return getEntryNames().get(ID);
     }   
@@ -375,7 +393,7 @@ public class StsReader extends ProjDefs
     	return getEntryChareNameByIndex(index) + "::" + getEntryNameByIndex(index);
     }   
     
-	public Integer getEntryIndex(Integer ID) {
+	public Integer getEntryIndex(int ID) {
 		if(ID<0)
     		return ID;
 		return entryIDToFlat.get(ID);
@@ -492,9 +510,11 @@ public class StsReader extends ProjDefs
 	public int getNumCommThdPerNode(){
 		return NumCommThdPerNode;
 	}
-	public boolean isSMPRun(){
-		return NumNodes<NumPe;
+	public boolean hasCommThdTrace(){
+		return isCommTracingEnabled;
+	}
+	public boolean isSMPRun() {
+		return isSMP;
 	}
 
 }
-

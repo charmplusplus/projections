@@ -115,7 +115,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		return nestedID;
 	}
 
-	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
+	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data, final int baseBottomCoord) {
 
 		if(data.userEventIsHiddenID(userEventID)){
 			return;
@@ -135,9 +135,9 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 
 		if(width < 1)
 			width = 1;
-		
-		int topCoord = data.userEventLocationBottom(pe) - (1+nestedRow) * data.singleUserEventRectHeight();
+
 		int height = data.singleUserEventRectHeight();
+		int topCoord = baseBottomCoord - (1+nestedRow) * height;
 		int bottomCoord = topCoord+height-1;
 		
 		Color c = getColor(data);

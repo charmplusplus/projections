@@ -11,3 +11,6 @@ clean:
 
 run: bin/projections.jar
 	bin/projections test/hello.sts
+
+test: bin/projections.jar
+	bin/projections --exit test/hello.sts

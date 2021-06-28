@@ -24,10 +24,10 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 	// runs.
 	private static int myRun = 0;
 
-	public static final int SINGLE=1;   // if this just marks one point in time
-	public static final int PAIR=2;  // if this has a begin and end point
-
-	public enum Type { SINGLE, PAIR }
+	public enum Type {
+		SINGLE, // if this just marks one point in time
+		PAIR // if this has a begin and end point
+	}
 	
 	protected Type    type;         // should be SINGLE or PAIR
 	public long   beginTime;    // Begin Time
@@ -115,7 +115,7 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 		return nestedID;
 	}
 
-	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data) {
+	protected void paintMe(Graphics2D g, int actualDisplayWidth, Data data, final int baseBottomCoord) {
 
 		if(data.userEventIsHiddenID(userEventID)){
 			return;
@@ -135,9 +135,9 @@ public class UserEventObject implements Comparable, Range1D, ActionListener, Mai
 
 		if(width < 1)
 			width = 1;
-		
-		int topCoord = data.userEventLocationBottom(pe) - (1+nestedRow) * data.singleUserEventRectHeight();
+
 		int height = data.singleUserEventRectHeight();
+		int topCoord = baseBottomCoord - (1+nestedRow) * height;
 		int bottomCoord = topCoord+height-1;
 		
 		Color c = getColor(data);

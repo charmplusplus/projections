@@ -372,7 +372,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			peToLine.add(p);
 			MainWindow.performanceLogger.log(Level.FINE,"Add processor " + pe + " to peToLine size=" + peToLine.size() );
 			
-			if(isSMPRun()){
+			if(hasCommThdTrace()){
 				int commPE = getCommThdPE(p);
 				if(!peToLine.contains(commPE)){
 					peToLine.add(commPE);
@@ -398,7 +398,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	public void setProcessorList(Collection<Integer> processorList){
 		peToLine.clear();
 
-		if(isSMPRun()){
+		if(hasCommThdTrace()){
 			TreeSet<Integer> commPEs = new TreeSet<Integer>();
 			commPEs.clear();
 			int prevNID = -1;			
@@ -670,7 +670,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			{			
 				topTimesText = "<html>";
 				topTimesText+="The longest idle times in descending order are: <br>";
-				Set<EntryMethodObject> longestObjectsSet = new HashSet<EntryMethodObject>();
+				HashSet<EntryMethodObject> longestObjectsSet = new HashSet<EntryMethodObject>();
 				for (int i = 0; i < amountTopTimes(); i++)
 				{
 					if ((idleArray[i] == null) || (idleArray[i].getBeginTime() == objEndTimes[i]))
@@ -689,13 +689,11 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 					if (entryArray[i] == null) break;
 					topTimesText+=(i+1 +": " + (entryArray[i].getEndTime() - entryArray[i].getBeginTime()));
 					topTimesText+=(" Begin: " + entryArray[i].getBeginTime() + " End: " + entryArray[i].getEndTime());
-					topTimesText+=(" PE: " + entryArray[i].pe + " Name: " + MainWindow.runObject[myRun].getEntryFullNameByID(entryArray[i].getEntryID()) + "<br>");
+					topTimesText+=(" PE: " + entryArray[i].pe + " Name: " + MainWindow.runObject[myRun].getEntryFullNameByID(entryArray[i].getEntry()) + "<br>");
 					longestObjectsSet.add(entryArray[i]);
 				}
 				topTimesText+="</html>";
-				HashSet<Object> objsToHilite = new HashSet<Object>();
-				objsToHilite.addAll(longestObjectsSet);
-				highlightObjects(objsToHilite);
+				highlightObjects(longestObjectsSet);
 			}
 
 			// Spawn a thread that computes some secondary message related data structures
@@ -770,7 +768,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		
 		if (tleMsg!=null) {
 			for (int i=0; i<tleMsg.size(); i++) { //when to empty the drawMsgsForTheseObjsAlt?
-				Set<EntryMethodObject> entMethSet = this.messageStructures.getMessageToExecutingObjectsMap().get(tleMsg.get(i));
+				List<EntryMethodObject> entMethSet = tleMsg.get(i).getRecipients();
 				if (entMethSet!=null) {					
 					Iterator<EntryMethodObject> iter = entMethSet.iterator();
 					while (iter.hasNext()) {
@@ -791,7 +789,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 
 		//recvCPe is a msg recv operation on CommThd
 		//trace back to its sender
-		EntryMethodObject recvCPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		EntryMethodObject recvCPe = createdMsg.getSender();
 		if(!recvCPe.isCommThreadMsgRecv()) return false;
 		createdMsg = recvCPe.creationMessage();
 		if(createdMsg == null){
@@ -799,7 +797,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return false;			 
 		}
 		//sendCPe should be a msg send operation on CommThd
-		EntryMethodObject sendCPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		EntryMethodObject sendCPe = createdMsg.getSender();
 		if(sendCPe == null) {
 			//this should never happen!!
 			return false;
@@ -816,7 +814,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 			return false;			 
 		}
 
-		EntryMethodObject sendWPe = messageStructures.getMessageToSendingObjectsMap().get(createdMsg);
+		EntryMethodObject sendWPe = createdMsg.getSender();
 		if(sendWPe == null) {
 			//this should never happen!!
 			return false;
@@ -895,7 +893,10 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 		if(pe>=totalNodes*nodesize && pe<totalPes) return pe-totalNodes*nodesize;
 		return pe/nodesize;		
 	}
-	protected boolean isSMPRun(){
+	protected boolean hasCommThdTrace(){
+		return MainWindow.runObject[myRun].getSts().hasCommThdTrace();
+	}
+	protected boolean isSMPRun() {
 		return MainWindow.runObject[myRun].getSts().isSMPRun();
 	}
 	protected int getCommThdPE(int pe){
@@ -1518,7 +1519,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	}
 
 	/** Highlight the given set of timeline objects */
-	protected void highlightObjects(Set<Object> objects) {
+	protected void highlightObjects(Collection<EntryMethodObject> objects) {
 		highlightedObjects.addAll(objects);
 	}
 
@@ -1526,7 +1527,7 @@ public class Data implements ColorUpdateNotifier, EntryMethodVisibility
 	 * If there are any objects set to be highlighted, 
 	 * all others will be dimmed 
 	 */
-	protected boolean isObjectDimmed(Object o){
+	protected boolean isObjectDimmed(EntryMethodObject o){
 		if(highlightedObjects.size() == 0)
 			return false;
 		else

@@ -135,20 +135,29 @@ implements PointCapableReader
 	{
 		return nextEventOfType(BEGIN_PROCESSING, END_PROCESSING);
 	}
-	
+
+	/**
+	 * Helper function which allocates new LogEntry object for nextEvent(LogEntry data)
+	 */
+	public LogEntry nextEvent() throws InputMismatchException, IOException, EndOfLogSuccess
+	{
+		LogEntry data = new LogEntry();
+		return nextEvent(data);
+	}
 
 	/** 
-	 * Create a new LogEntryData by reading/parsing the next line from the log 
+	 * Fill in a LogEntry by reading/parsing the next line from the log
 	 * 
 	 * Upon reaching the end of the file, a fake END_COMPUTATION event will be produced if none was found in the log file.
 	 * After the end of the file is reached and after some END_COMPUTATION has been returned, an EndOfLogException will be thrown
 	 * 
 	 * If any problem is detected when reading within a line, an IOException is produced
 	 * 
+	 * Use the LogEntry object passed in rather than allocating a new one to avoid excessive object creation,
+	 * particularly useful in Timeline
 	 * */
-	public LogEntry nextEvent() throws InputMismatchException, IOException, EndOfLogSuccess
+	public LogEntry nextEvent(LogEntry data) throws InputMismatchException, IOException, EndOfLogSuccess
 	{
-		LogEntry data = new LogEntry();
 		StsReader stsinfo = MainWindow.runObject[myRun].getSts();
 		
 		String line = reader.readLine();
@@ -329,6 +338,7 @@ implements PointCapableReader
 					data.perfCounts[i] = sc.nextLong();
 				}
 			}
+			lastBeginEvent.setValid(false);
 			break;
 		case BEGIN_TRACE: 
 			data.time = sc.nextLong() + shiftAmount;
@@ -457,7 +467,7 @@ implements PointCapableReader
 	}
 
 	
-	public LogEntry getLastBE() {
+	public LogEntry getLastOpenBE() {
 		if (lastBeginEvent.isValid()) {
 			return lastBeginEvent;
 		}

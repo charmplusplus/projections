@@ -2,13 +2,16 @@ package projections.Tools.Timeline;
 
 import projections.misc.MiscUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class TimelineMessage implements Comparable
 {
 	/** Message send time */
 	protected long Time;
 	
-	protected int Entry;
+	private short Entry;
 	
 	/** Message Length */
 	protected int MsgLen;
@@ -22,6 +25,12 @@ public class TimelineMessage implements Comparable
 
 	private int srcPE;
 
+	// The sending EntryMethodObject will set this field via setSender when it is
+	// created. If this is null, then there is no known sender (which can happen
+	// for dummy sends, for example)
+	private EntryMethodObject sender;
+	private List<EntryMethodObject> recipients;
+
 	/** A messages sent from srcPE, with eventid EventID */
 
 	/** Single message constructor */
@@ -33,7 +42,7 @@ public class TimelineMessage implements Comparable
 	public TimelineMessage(int srcPE, long t, int e, int mlen, int EventID, int destPEs[]) {
 		this.srcPE = srcPE;
 		Time=t;
-		Entry=e;
+		Entry=(short)e;
 		MsgLen=mlen;
 		this.EventID = EventID;
 		if (destPEs != null) {
@@ -48,7 +57,7 @@ public class TimelineMessage implements Comparable
 	public TimelineMessage(int srcPE, long t, int e, int mlen, int EventID, int numPEs) {
 		Time=t;
 		this.srcPE = srcPE;
-		Entry=e;
+		Entry=(short)e;
 		MsgLen=mlen;
 		this.EventID = EventID;
 		this.numPEs = numPEs;
@@ -107,5 +116,29 @@ public class TimelineMessage implements Comparable
 		Time += shift;
 	}
 	
-	
+	protected void setSender(EntryMethodObject obj) {
+		sender = obj;
+	}
+
+	protected EntryMethodObject getSender() {
+		return sender;
+	}
+
+	protected void addRecipient(EntryMethodObject obj) {
+		synchronized (this) {
+			if (recipients == null) {
+				// Set initialCapacity to 1 to prevent recipients from allocating more memory than needed
+				recipients = new ArrayList<>(1);
+			}
+			recipients.add(obj);
+		}
+	}
+
+	protected List<EntryMethodObject> getRecipients() {
+		return recipients;
+	}
+
+	protected int getEntry() {
+		return Short.toUnsignedInt(Entry);
+	}
 }

@@ -405,12 +405,15 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			return false;
 		}
 
+		// this block is disabled to allow setting arbitrary end times, useful for precisely matching x-axis scale
+		/*
 		// ending time cannot be greater than total time
 		if (getEndTime() > getTotalTime()) {
 			endTextLabel.setForeground(Color.red);
 			endTimeField.setForeground(Color.red);
 			return false;
 		}
+		*/
 
 		if(! processorsField.rangeVerifier.verify(processorsField) ){
 			processorTextLabel.setForeground(Color.red);

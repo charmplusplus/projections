@@ -1,13 +1,18 @@
-#!/bin/sh
+#!/bin/bash
 
 jarpath="`dirname $0`/projections.jar"
 
+if [[ ! -f $jarpath ]]; then
+  echo "'$jarpath' is missing. Did you run 'make'?"
+  exit 1
+fi
+
 if test -x /usr/bin/cygpath
-then 
+then
   if test "`uname -o`" = "Cygwin"
   then
     jarpath=`/usr/bin/cygpath -w -a $jarpath`
-  fi 
+  fi
 fi
 
 IS_WAYLAND=`env | grep -i wayland`

@@ -1,35 +1,46 @@
 package projections.analysis;
 
-public class ObjectId implements Comparable
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
+
+public final class ObjectId implements Comparable
 {
-    private int ID_SIZE = 6;
-    public int id[];
+    private final static int ID_SIZE = 6;
+    public final int id[];
 
-    public ObjectId() {
-        id = new int[ID_SIZE];
-        id[0] = id[1] = id[2] = id[3] = id[4] = id[5] = -1;
-    }
-    public ObjectId(ObjectId d) {
-        if (d!=null) id = d.id.clone();
-        else {
-            id = new int[ID_SIZE];
-            id[0] = id[1] = id[2] = id[3] = id[4] = id[5] = -1;
-        }
-    }
+    private static ConcurrentHashMap<ObjectId, ObjectId> instances = new ConcurrentHashMap<>();
 
-    protected ObjectId(int[] data) {
+    private ObjectId(final int[] data) {
         if (data.length > ID_SIZE)
             throw new IndexOutOfBoundsException("Attempted to assign " + data.length + "elements to ID of size " + ID_SIZE);
         id = new int[ID_SIZE];
-        for (int i = 0; i < data.length; i++) {
+        for (int i = 0; i < ID_SIZE; i++) {
             id[i] = data[i];
         }
     }
 
+    public static ObjectId createObjectId() {
+        final int[] dummy = new int[ID_SIZE];
+        dummy[0] = dummy[1] = dummy[2] = dummy[3] = dummy[4] = dummy[5] = -1;
+        return createObjectId(dummy);
+    }
+
+    public static ObjectId createObjectId(ObjectId d) {
+        if (d == null)
+            return createObjectId();
+        else return d;
+    }
+
+    protected static ObjectId createObjectId(final int[] data) {
+        ObjectId candidate = new ObjectId(data);
+        ObjectId canonical = instances.putIfAbsent(candidate, candidate);
+        if (canonical == null)
+            canonical = candidate;
+        return canonical;
+    }
+
     public boolean equals(ObjectId comp) {
-        System.out.println("EQUALS");
-        return (id[0] == comp.id[0]) && (id[1] == comp.id[1]) && (id[2] == comp.id[2]) &&
-               (id[3] == comp.id[3]) && (id[4] == comp.id[4]) && (id[5] == comp.id[5]);
+        return Arrays.equals(id, comp.id);
     }
 
     public boolean equals(Object o) {
@@ -37,7 +48,13 @@ public class ObjectId implements Comparable
         return this.equals(comp);
     }
 
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(id);
+    }
+
     /** Needed for putting these as keys in a TreeSet */
+    @Override
     @SuppressWarnings("ucd")
     public int compareTo(Object o) {
         ObjectId oid = (ObjectId)o;

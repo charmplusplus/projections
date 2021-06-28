@@ -9,7 +9,6 @@ import projections.misc.MiscUtil;
 /** A class that represents an event from the log, Eventually an EntryMethod object or UserEventObject will be created from this data */
 public class TimelineEvent implements Comparable
 {
- 
 public long BeginTime;
 public long EndTime;
 public long RecvTime;
@@ -67,7 +66,7 @@ public long RecvTime;
 	EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
         RecvTime = r;
 
-	id = new ObjectId(d);
+	id = ObjectId.createObjectId(d);
 	EventID = eventid;
 	this.numPapiCounts = numPapiCounts;
 	this.papiCounts = papiCounts;
@@ -86,7 +85,7 @@ public long RecvTime;
 		EntryPoint=ep; SrcPe=pe; MsgLen=mlen;
 		RecvTime = r;
 
-		id = new ObjectId(d);
+		id = ObjectId.createObjectId(d);
 		EventID = eventid;
 		this.numPapiCounts = numPapiCounts;
 		this.papiCounts = papiCounts;

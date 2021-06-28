@@ -1,33 +1,27 @@
 package projections.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Label;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URL;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
-import javax.swing.JColorChooser;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import projections.analysis.Analysis;
 import projections.analysis.IntervalUtils;
 import projections.analysis.ProjMain;
+import projections.analysis.StsReader;
 import projections.gui.graph.Graph;
 import projections.gui.graph.GraphPanel;
 import projections.gui.graph.SummaryDataSource;
@@ -87,7 +81,7 @@ implements ScalePanel.StatusDisplay
 	private SummaryXAxis         sumXAxis;
 	private SummaryYAxis         sumYAxis;
 	private GraphPanel           graphPanel;
-	private Label                status;
+	private JLabel               status;
 	private Image bgimage;
 	private GridBagConstraints gbc;
 	private GridBagLayout gbl;
@@ -171,13 +165,21 @@ implements ScalePanel.StatusDisplay
 		titlePanel  = new MainTitlePanel();
 		runStatusPanel = new MainRunStatusPanel();
 		summaryGraphPanel = new MainSummaryGraphPanel(this, runStatusPanel);
+		status = new JLabel();
+		status.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 18));
+		status.setOpaque(true);
+		status.setBackground(Color.white);
+		status.setForeground(Color.black);
+		resetStatus();
 
 		Util.gblAdd(background, titlePanel,
 				gbc, 0,0, 1,1, 1,0, 0,0,0,0);
+		Util.gblAdd(background, status,
+				gbc, 0,1, 1,1, 1,0, 0,20,20,20);
 		Util.gblAdd(background, runStatusPanel,
-				gbc, 0,1, 1,1, 1,0, 0,20,0,20);
+				gbc, 0,2, 1,1, 1,0, 0,20,0,20);
 		Util.gblAdd(background, summaryGraphPanel,
-				gbc, 0,2, 1,1, 1,1, 0,20,20,20);
+				gbc, 0,3, 1,1, 1,1, 0,20,20,20);
 
 		background.setPreferredSize(new Dimension(ScreenInfo.screenWidth,
 				ScreenInfo.screenHeight));
@@ -276,6 +278,7 @@ implements ScalePanel.StatusDisplay
 			}
 			public void done() {
 				setTitle("Projections - " + newfile);
+				updateStatusSTS(MainWindow.runObject[myRun].getSts());
 				if (MainWindow.runObject[myRun].hasSummaryData()) {
 					//		MainWindow.runObject[myRun].loadSummaryData();
 					double[][] data = MainWindow.runObject[myRun].getSummaryAverageData();
@@ -436,11 +439,41 @@ implements ScalePanel.StatusDisplay
 		menuManager.lastFileClosed();
 		MainWindow.runObject[myRun].closeRC();
 		setTitle("Projections");
+		resetStatus();
 	}
 
+	private String generateInfoPanelHTML(String name, String value) {
+		if (value != null)
+			return "<tr><td style=\"text-align: right\">" + name + ":</td><td>" + value + "</td></tr>";
+		return "";
+	}
 
-	public void setStatus(String msg) {
-		status.setText(msg);
+	private void updateStatusSTS(StsReader sts) {
+		StringBuilder builder = new StringBuilder();
+		builder.append("<html><table>");
+		builder.append(generateInfoPanelHTML("Name", sts.getBaseName()));
+		builder.append(generateInfoPanelHTML("Machine layer", sts.getMachineName()));
+		builder.append(generateInfoPanelHTML("Charm++ Version", sts.getCharmVersion()));
+		builder.append(generateInfoPanelHTML("Username", sts.getUsername()));
+		builder.append(generateInfoPanelHTML("Hostname", sts.getHostname()));
+		builder.append(generateInfoPanelHTML("Commandline", sts.getCommandline()));
+		final ZonedDateTime dateTime = sts.getTimestamp();
+		if (dateTime != null) {
+			try {
+				final String dtString = dateTime.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+				builder.append(generateInfoPanelHTML("Run started at", dtString));
+			} catch (NumberFormatException ignored) { }
+		}
+		builder.append("</table></html>");
+		setStatus(builder.toString());
+	}
+
+	public void setStatus(String text) {
+		status.setText(text);
+	}
+
+	public void resetStatus() {
+		setStatus("No file loaded.");
 	}
 
 	public void addProcessor(int pe) {

@@ -33,10 +33,10 @@ public class ProjectionsConfigurationReader
   // For convenience of coding, these are static. This will have to
   // be changed once multiple runs are supported generically in
   // Projections.
-  public Long RC_GLOBAL_END_TIME = new Long(-1);
-  public Long RC_POSE_REAL_TIME = new Long(-1);
-  public Long RC_POSE_VIRT_TIME = new Long(-1);    
-  public Boolean RC_OUTLIER_FILTERED = Boolean.valueOf(false);
+  public Long RC_GLOBAL_END_TIME = (long) -1;
+  public Long RC_POSE_REAL_TIME = (long) -1;
+  public Long RC_POSE_VIRT_TIME = (long) -1;
+  public Boolean RC_OUTLIER_FILTERED = Boolean.FALSE;
   
   public ProjectionsConfigurationReader(FileUtils fileNameHandler)
   {

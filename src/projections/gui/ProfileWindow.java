@@ -503,7 +503,7 @@ class ProfileWindow extends ProjectionsWindow
 	for (int i=0; i<numEPs; i++) {
 	    // anything greater than 5% is "significant"
 	    if (avg[0][i]+avg[1][i] > 1.0) {
-		sigElements.add(new Integer(i));
+		sigElements.add(i);
 	    }
 	}
 	// copy to an array for Color assignment (maybe that should be

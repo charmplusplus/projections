@@ -481,7 +481,7 @@ private //	DefaultTableXYDataset sizeDataset;
 				return;
 
 			if(b==0)
-				addKnownCategories(new Integer(b), newDataset);
+				addKnownCategories(b, newDataset);
 
 
 			// Read the number of entries for this bin
@@ -502,7 +502,7 @@ private //	DefaultTableXYDataset sizeDataset;
 				if(u > 0.0){
 					// add datapoint to plot
 					String epName = getName(ep,1000);
-					newDataset.addValue(u, epName, new Integer(b));
+					newDataset.addValue(u, epName, Integer.valueOf(b));
 				}
 
 			}
@@ -519,7 +519,7 @@ private //	DefaultTableXYDataset sizeDataset;
 		//		TreeMap<Integer, TreeMap<String, Double> > plotData;
 
 		Iterator<Integer> stepIter = streamingData.keySet().iterator();
-		Integer xValue = new Integer(0);
+		Integer xValue = 0;
 
 		boolean firstTime = true;
 

@@ -97,8 +97,8 @@ public class CcsServer
    	if (ip_int<0) ip_int+=(1L<<32); //Make unsigned
    	String ip_dot="";
    	for (int b=3;b>=0;b--) {
-   		Long l=new Long(0xff&(ip_int>>(8*b)));
-		ip_dot=ip_dot+l.toString();
+		long l = 0xff & (ip_int >> (8 * b));
+		ip_dot = ip_dot + l;
 		if (b>0) ip_dot=ip_dot+".";
 	}
    	

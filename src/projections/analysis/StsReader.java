@@ -234,7 +234,7 @@ public class StsReader extends ProjDefs
 		    int Size  = Integer.parseInt(st.nextToken());
 		    MsgTable[ID] = Size;
 		} else if (s1.equals("EVENT")) {
-		    Integer key = new Integer(st.nextToken());
+		    int key = Integer.parseInt(st.nextToken());
 		    if (!userEvents.containsKey(key)) {
 			String eventName = "";
 			while (st.hasMoreTokens()) {
@@ -242,15 +242,14 @@ public class StsReader extends ProjDefs
 			}
 			userEvents.put(key, eventName);
 			userEventNames[userEventIndex] = eventName;
-			userEventIndices.put(key, 
-					     new Integer(userEventIndex++));
+			userEventIndices.put(key, userEventIndex++);
 		    }
 		} else if (s1.equals("TOTAL_EVENTS")) {
 		    // restored by Chee Wai - 7/29/2002
 		    userEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals("STAT")) {
-		    Integer key = new Integer(st.nextToken());
+		    int key = Integer.parseInt(st.nextToken());
 		    if (!userStats.containsKey(key)) {
 			String statName = "";
 			while (st.hasMoreTokens()) {
@@ -258,8 +257,7 @@ public class StsReader extends ProjDefs
 			}
 			userStats.put(key, statName);
 			userStatNames[userStatIndex] = statName;
-			userStatIndices.put(key,
-					     new Integer(userStatIndex++));
+			userStatIndices.put(key, userStatIndex++);
 		    }
 		//Read in number of stats
 		} else if (s1.equals("TOTAL_STATS")) {
@@ -416,8 +414,7 @@ public class StsReader extends ProjDefs
     }
 
     public String getUserEventName(int eventID) { 
-	Integer key = new Integer(eventID);
-	return userEvents.get(key);
+		return userEvents.get(eventID);
     }
 
     public String[] getUserEventNames() {
@@ -444,8 +441,7 @@ public class StsReader extends ProjDefs
     }
 
     public String getUserStatName(int eventID) {
-	Integer key = new Integer(eventID);
-	return userStats.get(key);
+		return userStats.get(eventID);
     }
 
     public String[] getUserStatNames() {

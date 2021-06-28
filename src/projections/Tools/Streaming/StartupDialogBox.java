@@ -137,7 +137,7 @@ import javax.swing.JTextField;
 			String hostname = hostnameTextField.getText();	
 			String portString = portTextField.getText();
 			String stsFilename = stsFilenameTextField.getText();
-			int port = new Integer(portString);
+			int port = Integer.parseInt(portString);
 			String ccsHandler = (String) handlerComboBox.getSelectedItem();
 
 			boolean saveReplies = saveRepliesCheckBox.isSelected();

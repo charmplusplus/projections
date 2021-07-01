@@ -93,7 +93,7 @@ class ThreadedFileReader implements Runnable  {
 					sentMsgCount[pIdx][EPid]++;
 					sentByteCount[pIdx][EPid] += 
 						logdata.msglen;
-					localHistogram.add(new Integer(logdata.msglen));
+					localHistogram.add(logdata.msglen);
 				} else if ((logdata.type == ProjDefs.CREATION_BCAST) ||
 						(logdata.type == 
 							ProjDefs.CREATION_MULTICAST)) {

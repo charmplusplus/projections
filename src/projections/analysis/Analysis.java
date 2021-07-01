@@ -256,7 +256,7 @@ public class Analysis {
 	  totalTime = temp;
 	}
       }
-      rcReader.setValue("RC_GLOBAL_END_TIME", new Long(totalTime));
+      rcReader.setValue("RC_GLOBAL_END_TIME", totalTime);
     }
     
     // Find Pose End Time Data
@@ -273,8 +273,8 @@ public class Analysis {
     				return null;
     			}
     			public void done() {
-    				rcReader.setValue("RC_POSE_REAL_TIME", new Long(poseTotalTime));
-    				rcReader.setValue("RC_POSE_VIRT_TIME", new Long(poseTotalVirtualTime));	    }
+    				rcReader.setValue("RC_POSE_REAL_TIME", poseTotalTime);
+    				rcReader.setValue("RC_POSE_VIRT_TIME", poseTotalVirtualTime);	    }
     		};
     		worker.execute();
     	}

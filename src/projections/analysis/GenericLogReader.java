@@ -201,7 +201,7 @@ implements PointCapableReader
 			data.pe = (int) sc.nextLong();
 			break;
 		case USER_SUPPLIED:
-			data.userSupplied = new Integer((int) sc.nextLong());
+			data.userSupplied = (int) sc.nextLong();
 			break;
 		case USER_SUPPLIED_NOTE:
 			data.time = sc.nextLong() + shiftAmount;

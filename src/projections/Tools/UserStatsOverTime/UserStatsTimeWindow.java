@@ -265,7 +265,7 @@ implements ItemListener, ActionListener
 							if(model.getRowCount()==0) return;
 							for(int row = e.getFirstRow(); row<=e.getLastRow();row++){
 								if(row<0) continue;
-								if(model.getValueAt(row,numColumns -1).equals(new Boolean(true))) {
+								if(model.getValueAt(row,numColumns -1).equals(Boolean.TRUE)) {
 									/*If dataset at row is marked Visible, Set the dataset
 								   	For that row to be the XYSeriesCollection meant for that row */
 									plot.setDataset(row,graphedData.get(row));

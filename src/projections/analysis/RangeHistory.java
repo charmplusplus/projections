@@ -56,7 +56,7 @@ public class RangeHistory
 			historyStringVector.add(historyString);
 		}
 	    } catch (IOException e) {
-		System.err.println("Error: " + e.toString());
+		System.err.println("Error: " + e);
 	    }
 	}
     }
@@ -140,10 +140,10 @@ public class RangeHistory
 	}
 	// added in reverse order starting from the front of the vector.
 	if (rangeName == null) rangeName = new ArrayList<String>();
-	rangeName.add(0, new String(name));
-	rangeSet.add(0, new Long(end));
-	rangeSet.add(0, new Long(start));
-	rangeProcs.add(0, new String(procs));
+	rangeName.add(0, name);
+	rangeSet.add(0, end);
+	rangeSet.add(0, start);
+	rangeProcs.add(0, procs);
 	numEntries++;
     }
 

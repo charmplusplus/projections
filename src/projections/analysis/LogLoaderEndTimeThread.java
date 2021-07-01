@@ -9,12 +9,12 @@ import projections.misc.LogEntry;
 /** This thread's run() method will lookup the endtime for an input log file */
 class LogLoaderEndTimeThread  implements Runnable {
 
-	protected Long result;
+	protected long result;
 	private int myRun = 0;
 	private int pe;
 
 	protected LogLoaderEndTimeThread(int pe) {
-		result = new Long(0);
+		result = 0L;
 		this.pe = pe;
 	}
 

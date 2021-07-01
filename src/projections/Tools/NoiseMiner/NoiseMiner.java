@@ -185,7 +185,7 @@ class NoiseMiner extends ProjDefs
 		protected NoiseResult(Duration d, long o, int pe, EventWindow ew){
 			pes = new TreeSet<Integer>();
 			this.ew = ew;
-			pes.add(new Integer(pe));
+			pes.add(pe);
 			duration = d;
 			occurrences = o;
 		}

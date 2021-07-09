@@ -39,15 +39,12 @@ public class SumAnalyzer extends ProjDefs
     private long IntervalSize;//Length of interval, microseconds
     private int IntervalCount;//Number of intervals
     private long TotalTime;//Length of run, microseconds
-    private long[][][] PhaseChareTime;
+    private double[][][] PhaseChareTime;
     private int[][][] PhaseNumEntryMsgs;
-
-    // The values in ProcessorUtilization and IdlePercentage are integer percentages
-	// (0-100), so they are byte arrays to save space
     //Holds the second line of summary data
-    private byte[][] ProcessorUtilization; 
+    private double[][] ProcessorUtilization; 
     // Holds the seventh line of summary data
-    private byte[][] IdlePercentage;
+    private int[][] IdlePercentage;
 
     private int mode = NORMAL_MODE;
     private int nPe;
@@ -198,14 +195,14 @@ public class SumAnalyzer extends ProjDefs
 	    if (StreamTokenizer.TT_EOL!=tokenizer.nextToken())
 		throw new SummaryFormatException("extra garbage at end of line 1");
 	    if (p==0) {
-		ProcessorUtilization = new byte[nPe][];
-		IdlePercentage = new byte[nPe][];
+		ProcessorUtilization = new double[nPe][];
+		IdlePercentage = new int[nPe][];
 		ChareTime= new long [nPe][numEntry];
 		NumEntryMsgs = new int [nPe][numEntry];
 		MaxEntryTime = new int [nPe][numEntry];
 	    }
-	    ProcessorUtilization[p] = new byte[IntervalCount];
-	    IdlePercentage[p] = new byte[IntervalCount];
+	    ProcessorUtilization[p] = new double[IntervalCount];
+	    IdlePercentage[p] = new int[IntervalCount];
 	    
 	    //Read the SECOND line (processor usage)
 	    int nUsageRead=0;
@@ -218,7 +215,7 @@ public class SumAnalyzer extends ProjDefs
 		if (tokenType == StreamTokenizer.TT_NUMBER) {
                     val =  (int)tokenizer.nval;
 		    for (int f=0; f<factor; f++) {
-			ProcessorUtilization[p][nUsageRead++] = (byte)val;
+			ProcessorUtilization[p][nUsageRead++] = val;
 		    }
                     if ((tokenType=tokenizer.nextToken()) == '+') {
                         tokenType=tokenizer.nextToken();
@@ -237,7 +234,7 @@ public class SumAnalyzer extends ProjDefs
 			}
                         for (int i=1; i<extraCount; i++) {
 			    for (int f=0; f<factor; f++) {
-				ProcessorUtilization[p][nUsageRead++] = (byte)val;
+				ProcessorUtilization[p][nUsageRead++] = val;
 			    }
 			}
                     } else {
@@ -342,7 +339,7 @@ public class SumAnalyzer extends ProjDefs
 		    throw new SummaryFormatException("extra garbage at end of line 6");
 		if (PhaseCount > 1) {				
 		    if (p == 0) {
-			PhaseChareTime= new long [PhaseCount][nPe][numEntry];
+			PhaseChareTime= new double [PhaseCount][nPe][numEntry];
 			PhaseNumEntryMsgs = new int [PhaseCount][nPe][numEntry];
 		    }
 		    for(int m=0; m<PhaseCount; m++) {		
@@ -396,7 +393,7 @@ public class SumAnalyzer extends ProjDefs
 		    if (tokenType == StreamTokenizer.TT_NUMBER) {
 			val =  (int)tokenizer.nval;
 			for (int f=0; f<factor; f++) {
-			    IdlePercentage[p][nIdleRead++] = (byte)val;
+			    IdlePercentage[p][nIdleRead++] = val;
 			}
 			if ((tokenType=tokenizer.nextToken()) == '+') {
 			    tokenType=tokenizer.nextToken();
@@ -416,7 +413,7 @@ public class SumAnalyzer extends ProjDefs
 			    }
 			    for (int i=1; i<extraCount; i++) {
 				for (int f=0; f<factor; f++) {
-				    IdlePercentage[p][nIdleRead++] = (byte)val;
+				    IdlePercentage[p][nIdleRead++] = val;
 				}
 			    }
 			} else {
@@ -469,8 +466,11 @@ public class SumAnalyzer extends ProjDefs
     {
 	return ChareTime;
     }
+	public double[][] getProcessorUtilization() {
+		return ProcessorUtilization;
+	}
 
-    public long[][] getPhaseChareTime(int Phase)
+    public double[][] getPhaseChareTime(int Phase)
     {
 	return PhaseChareTime[Phase];
     }
@@ -497,8 +497,7 @@ public class SumAnalyzer extends ProjDefs
 		for (int i=intervalStart; 
 		     (i<intervalEnd) && (i<ProcessorUtilization[p].length); 
 		     i++) {
-		    ret[p][i-intervalStart] = 
-			ProcessorUtilization[p][i];
+		    ret[p][i-intervalStart] = (int)ProcessorUtilization[p][i];
 		}
 	    }
 	    return ret;

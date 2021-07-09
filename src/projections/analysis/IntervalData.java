@@ -58,6 +58,8 @@ public class IntervalData
     private double intervalSize = 0;
 
     private int sumDetailData[][] = null;
+	private double sumDetailDataperproc[][] = null;
+
 
     /**
      *  The constructor
@@ -105,22 +107,26 @@ public class IntervalData
         System.out.println("IntervalData - hasSumDetailData + numIntervals: "+numIntervals+" intervalSize: " + intervalSize);
 	}
     }
-    public void loadSumDetailIntervalData(long intervalSize, int intervalStart,
-                                          int intervalEnd,
-                                          SortedSet<Integer> processorList){
-        int numIntervals = intervalEnd - intervalStart + 1;
+	public void loadSumDetailIntervalData(long intervalSize, int intervalStart, int intervalEnd,
+			SortedSet<Integer> processorList) {
+		int numIntervals = intervalEnd - intervalStart + 1;
 
-        sumDetailData = new int[numIntervals][numEPs];
-        double[][] tempData;
-        for(Integer curPe : processorList) {
-            tempData = getData(curPe, TYPE_TIME);
-            for(int i=0; i<numIntervals; i++){
-                for(int e=0; e<numEPs; e++){
-                    sumDetailData[i][e] += tempData[e][i];
-                }
-            }
-        }
-    }
+		sumDetailData = new int[numIntervals][numEPs];
+		sumDetailDataperproc = new double[processorList.size()][numEPs];
+
+		double[][] tempData;
+		for (Integer curPe : processorList) {
+			int ii = intervalStart;
+			tempData = getData(curPe, TYPE_TIME);
+			for (int i = 0; i < numIntervals; i++) {
+				for (int e = 0; e < numEPs; e++) {
+					sumDetailData[i][e] += tempData[e][ii];
+					sumDetailDataperproc[curPe][e] += tempData[e][ii];
+				}
+				ii++;
+			}
+		}
+	}
     /**
      *  This is a method for use with the older way of doing things only.
      *  Regretably, it's needed to get things working for now.
@@ -178,6 +184,9 @@ public class IntervalData
     }
 
     public int[][] sumDetailData() {return  sumDetailData; };
+	public double[][] sumDetailDataperproc() {
+		return sumDetailDataperproc;
+	};
 
     public int[][][] getSystemUsageData() {
 	return systemUsageData;

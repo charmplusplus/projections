@@ -405,45 +405,95 @@ public class Analysis {
 	
 	The returned values are in percent CPU time spent. 
     */
-    public float[][] GetUsageData(int pnum, long begintime,
-               long endtime, SortedSet<Integer> phases) {
-    	if( hasLogFiles()) { //.log files
-    		UsageCalc u=new UsageCalc();
-    		return u.usage(pnum, begintime, endtime, getVersion() );
-    	}
-    	int numUserEntries=getSts().getEntryCount();
-    	long[][] data;
-    	long[][] phasedata;
-    	
-    	/*BAD: silently ignores begintime and endtime*/
-    	if( sumAnalyzer.getPhaseCount()>1 ) {
-			Iterator<Integer> iter = phases.iterator();
-			data = sumAnalyzer.getPhaseChareTime(iter.next());
+	public float[][] GetUsageData(int pnum, long begintime, long endtime, SortedSet<Integer> phases) {
+		if (hasLogFiles()) { // .log files
+			UsageCalc u = new UsageCalc();
+			return u.usage(pnum, begintime, endtime, getVersion());
+		}
+		if (hasSumDetailFiles()) {
+			// the fsumd file has 290 for time 0 then 290 for next time interval and so on
+			int numUserEntries = getSts().getEntryCount();
+			double[][] data;
+			double[][] phasedata;
+			/* BAD: silently ignores begintime and endtime */
+			if (sumAnalyzer.getPhaseCount() > 1) {
+				Iterator<Integer> iter = phases.iterator();
+				data = sumAnalyzer.getPhaseChareTime(iter.next());
 
-			while (iter.hasNext() && pnum > -1)
-			{
-				phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
-				{
-					for(int q=0; q<numUserEntries; q++) {
-    					data[pnum][q] += phasedata[pnum][q];
-    				}
+				while (iter.hasNext() && pnum > -1) {
+					phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
+					{
+						for (int q = 0; q < numUserEntries; q++) {
+							data[pnum][q] += phasedata[pnum][q];
+						}
+					}
 				}
+			} else {
+				SortedSet<Integer> availablePEs = MainWindow.runObject[0].getValidProcessorList(ProjMain.SUMDETAIL);
+				MainWindow.runObject[0].LoadGraphData((long) intervalData.getIntervalSize(),
+						(int) begintime / (int) intervalData.getIntervalSize(),
+						(int) endtime / (int) intervalData.getIntervalSize(), false, availablePEs);
+				data = intervalData.sumDetailDataperproc();
 			}
-    	} else {
-    		data = sumAnalyzer.getChareTime();
-    	}
-    	float ret[][]=new float[2][numUserEntries+4];
-    	//Convert to percent-- .sum entries are always over the 
-    	// entire program run.
-    	double scale=100.0/getTotalTime();
-    	for (int q=0;q<numUserEntries;q++){
-    		ret[0][q]=(float)(scale*data[pnum][q]);
-    		// dummy value for message send time at the moment .. 
-    		// summary file reader needs to be fixed first
-    		ret[1][q] = (float )0.0; 
-    	}
-    	return ret;
-    }
+			float ret[][] = new float[2][numUserEntries + 4];
+			// Convert to percent-- .sum entries are always over the
+			// entire program run.
+			double scale = 100.0 / (1 * ((int) endtime - (int) begintime));
+
+			for (int q = 0; q < numUserEntries; q++) {
+				ret[0][q] = (float) (scale * data[pnum][q]);
+				// dummy value for message send time at the moment ..
+				// summary file reader needs to be fixed first
+				ret[1][q] = (float) 0.0;
+			}
+			return ret;
+
+		}
+		if (hasSumFiles()) {
+			int numUserEntries = getSts().getEntryCount();
+			double[][] data;
+
+			double[][] phasedata;
+			double avg = 0.0;
+			float ret[][] = new float[2][numUserEntries + 4];
+
+			if (sumAnalyzer.getPhaseCount() > 1) {
+				Iterator<Integer> iter = phases.iterator();
+				data = sumAnalyzer.getPhaseChareTime(iter.next());
+
+				while (iter.hasNext() && pnum > -1) {
+					phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
+					{
+						for (int q = 0; q < numUserEntries; q++) {
+							data[pnum][q] += phasedata[pnum][q];
+						}
+					}
+				}
+			} else {
+				data = sumAnalyzer.getProcessorUtilization();
+				for (int i = (int) begintime / (int) sumAnalyzer.getIntervalSize(); i < (int) endtime
+						/ (int) sumAnalyzer.getIntervalSize() - 1; i++) {
+					avg += data[pnum][i];
+				}
+				ret[0][0] = (float) (1000.0 * avg / (1.0 * (endtime - begintime)));
+				return ret;
+			}
+
+			// Convert to percent-- .sum entries are always over the
+			// entire program run.
+			double scale = 100.0 / getTotalTime();
+			for (int q = 0; q < numUserEntries; q++) {
+				ret[0][q] = (float) (scale * data[pnum][q]);
+				// dummy value for message send time at the moment ..
+				// summary file reader needs to be fixed first
+				ret[1][q] = (float) 0.0;
+			}
+			return ret;
+
+		}
+		return null;
+
+	}
     
 //    // a == entry point index, t == type of data
 //    public int[][] getUserEntryData( int a, int t ) {
@@ -493,7 +543,7 @@ public class Analysis {
 		//			  intervalEnd, byEntryPoint,
 		//			  processorList);
         try {
-            intervalData.loadSumDetailIntervalData(intervalSize, intervalStart,intervalEnd,processorList);
+            intervalData.loadSumDetailIntervalData(intervalSize, intervalStart,intervalEnd-1,processorList);
 
         }catch (Exception e){
             e.printStackTrace();

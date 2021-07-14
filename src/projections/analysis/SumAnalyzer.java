@@ -630,4 +630,15 @@ public class SumAnalyzer extends ProjDefs
         }
         return totalIdlePercentage;
     }
+    public double[] getTotalIdlePercentageperproc(int startInterv,int endInterv){
+		System.out.println("Interval is "+IntervalCount);
+		int numofintervs=endInterv-startInterv;
+        double[] totalIdlePercentageperproc = new double[nPe];
+        for(int i=0; i<nPe; i++){
+            for(int j=startInterv; j<endInterv; j++){
+                totalIdlePercentageperproc[i] += IdlePercentage[i][j] / (numofintervs*1.0);
+            }
+        }
+        return totalIdlePercentageperproc;
+    }
 }

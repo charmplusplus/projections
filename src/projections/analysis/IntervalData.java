@@ -113,11 +113,13 @@ public class IntervalData
         sumDetailData = new int[numIntervals][numEPs];
         double[][] tempData;
         for(Integer curPe : processorList) {
+            int ii = intervalStart;
             tempData = getData(curPe, TYPE_TIME);
             for(int i=0; i<numIntervals; i++){
                 for(int e=0; e<numEPs; e++){
-                    sumDetailData[i][e] += tempData[e][i];
+                    sumDetailData[i][e] += tempData[e][ii];
                 }
+                ii++;
             }
         }
     }

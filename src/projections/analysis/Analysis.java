@@ -6,8 +6,10 @@ import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.SwingWorker;
 
@@ -411,31 +413,44 @@ public class Analysis {
     		return u.usage(pnum, begintime, endtime, getVersion() );
     	}
     	int numUserEntries=getSts().getEntryCount();
-    	long[][] data;
-    	long[][] phasedata;
+    	long[] data;
 		float ret[][] = new float[2][numUserEntries + 4];
 
     	/*BAD: silently ignores begintime and endtime*/
     	if( sumAnalyzer.getPhaseCount()>1 ) {
 			Iterator<Integer> iter = phases.iterator();
-			data = sumAnalyzer.getPhaseChareTime(iter.next());
+			data = sumAnalyzer.getPhaseChareTime(iter.next())[pnum].clone();
 
 			while (iter.hasNext() && pnum > -1)
 			{
-				phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
+				long[] phasedata = sumAnalyzer.getPhaseChareTime(iter.next())[pnum];
 				{
 					for(int q=0; q<numUserEntries; q++) {
-    					data[pnum][q] += phasedata[pnum][q];
-    				}
+						data[q] += phasedata[q];
+					}
 				}
 			}
 		}
 		else if (hasSumDetailFiles()) {
-			SortedSet<Integer> availablePEs = MainWindow.runObject[0].getValidProcessorList(ProjMain.SUMDETAIL);
+			SortedSet<Integer> peSet = new TreeSet<>();
+			peSet.add(pnum);
+
+			double intervalSize = intervalData.getIntervalSize();
+			int intervalStart = (int) (begintime / intervalSize);
+			int intervalEnd = (int) Math.ceil(endtime / intervalSize) - 1;
+			int numIntervals = intervalEnd - intervalStart + 1;
+
 			MainWindow.runObject[0].LoadGraphData((long) intervalData.getIntervalSize(),
-					(int) (begintime / intervalData.getIntervalSize()),
-					(int) Math.ceil(endtime / intervalData.getIntervalSize()) - 1, false, availablePEs);
-			data = intervalData.sumDetailDataperproc();
+					intervalStart,
+					intervalEnd, false, peSet);
+
+			int sumDetailData[][] = intervalData.sumDetailData();
+			data = new long[numUserEntries];
+			for (int interval = 0; interval < numIntervals; interval++) {
+				for (int entry = 0; entry < numUserEntries; entry++) {
+					data[entry] += sumDetailData[interval][entry];
+				}
+			}
 		}
 		else if (hasSumFiles()) {
 			long total = 0;
@@ -456,7 +471,7 @@ public class Analysis {
 		// Convert to percent
 		double scale = 100.0 / (endtime - begintime);
 		for (int q = 0; q < numUserEntries; q++) {
-			ret[0][q] = (float) (scale * data[pnum][q]);
+			ret[0][q] = (float) (scale * data[q]);
 			// dummy value for message send time at the moment
 			// summary file reader needs to be fixed first
 			ret[1][q] = (float) 0.0;

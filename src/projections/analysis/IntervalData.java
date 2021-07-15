@@ -58,7 +58,6 @@ public class IntervalData
     private double intervalSize = 0;
 
     private int sumDetailData[][] = null;
-	private long sumDetailDataperproc[][] = null;
 
 
     /**
@@ -113,7 +112,6 @@ public class IntervalData
         int numIntervals = intervalEnd - intervalStart + 1;
 
         sumDetailData = new int[numIntervals][numEPs];
-        sumDetailDataperproc = new long[processorList.size()][numEPs];
 
         double[][] tempData;
         for(Integer curPe : processorList) {
@@ -122,7 +120,6 @@ public class IntervalData
             for(int i=0; i<numIntervals; i++){
                 for(int e=0; e<numEPs; e++){
                     sumDetailData[i][e] += tempData[e][ii];
-                    sumDetailDataperproc[curPe][e] += tempData[e][ii];
                 }
                 ii++;
             }
@@ -185,10 +182,6 @@ public class IntervalData
     }
 
     public int[][] sumDetailData() {return  sumDetailData; };
-
-    public long[][] sumDetailDataperproc() {
-        return sumDetailDataperproc;
-    };
 
     public int[][][] getSystemUsageData() {
 	return systemUsageData;

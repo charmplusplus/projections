@@ -59,7 +59,6 @@ public class IntervalData
 
     private int sumDetailData[][] = null;
 
-
     /**
      *  The constructor
      */
@@ -112,7 +111,6 @@ public class IntervalData
         int numIntervals = intervalEnd - intervalStart + 1;
 
         sumDetailData = new int[numIntervals][numEPs];
-
         double[][] tempData;
         for(Integer curPe : processorList) {
             int ii = intervalStart;

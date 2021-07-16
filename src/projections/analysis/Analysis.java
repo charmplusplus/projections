@@ -432,7 +432,7 @@ public class Analysis {
 			}
 		}
 	    	else if(endtime-begintime==totalTime){
-			data = sumAnalyzer.getChareTime();
+			data = sumAnalyzer.getChareTime()[pnum];
 		}
 		else if (hasSumDetailFiles()) {
 			SortedSet<Integer> peSet = new TreeSet<>();

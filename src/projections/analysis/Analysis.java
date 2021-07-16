@@ -431,6 +431,9 @@ public class Analysis {
 				}
 			}
 		}
+	    	else if(endtime-begintime==totalTime){
+			data = sumAnalyzer.getChareTime();
+		}
 		else if (hasSumDetailFiles()) {
 			SortedSet<Integer> peSet = new TreeSet<>();
 			peSet.add(pnum);

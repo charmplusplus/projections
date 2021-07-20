@@ -19,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.util.LinkedList;
 import java.util.SortedSet;
+import projections.analysis.ProjMain;
 
 import javax.swing.JOptionPane;
 
@@ -89,7 +90,8 @@ class OverviewPanel extends ScalePanel.Child
 			int interval = (int)(t/intervalSize);
 
 			long  timedisplay = t+startTime;
-			if (interval >= entryData[p].length) {
+			
+			if (MainWindow.runObject[myRun].hasLogData() && interval >= entryData[p].length) {
 				return "some bug has occurred"; // strange bug.
 			}
 			if (mode == OverviewWindow.MODE_UTILIZATION) {
@@ -329,6 +331,10 @@ class OverviewPanel extends ScalePanel.Child
 
 	
 		intervalSize = (int )trialintervalSize;
+		if (MainWindow.runObject[myRun].hasSumDetailData()){
+			intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+		}
+			
 		startInterval = (int)(startTime/intervalSize);
 		endInterval = (int)(endTime/intervalSize);
 
@@ -342,55 +348,72 @@ class OverviewPanel extends ScalePanel.Child
 	 *  for each interval */
 	
 	protected void loadData(boolean saveImage) {
-		if (!MainWindow.runObject[myRun].hasLogData()) {
-			System.err.println("No log files are available.");
-			JOptionPane.showMessageDialog(null, "No log files are available.");
-			return;
-		}
-
-		this.saveImage = saveImage;
-		mode = OverviewWindow.MODE_EP;
-	
-		// Create a list of worker threads
-		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
-
-		selectedPEs.size();
-
 		int numIntervals = endInterval - startInterval;
-		
-		entryData = new int[selectedPEs.size()][numIntervals];
 		float[][] idleData = new float[selectedPEs.size()][numIntervals];
 		float[][] utilizationData = new float[selectedPEs.size()][numIntervals];
-		
-		int pIdx=0;		
-		
-		for(Integer pe : selectedPEs){
-			readyReaders.add( new ThreadedFileReader(pe, intervalSize, myRun, 
-					startInterval, endInterval, entryData[pIdx], utilizationData[pIdx], idleData[pIdx]) );
-			pIdx++;
-		}
-		
-		// Pass this list of threads to a class that manages/runs the threads nicely
-		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Overview in Parallel", readyReaders, this, true);
-		threadManager.runAll();
-		
-		// For historical reasons, we use a utilization range of 0 to 100
 		utilizationDataNormalized = new int[utilizationData.length][utilizationData[0].length];
 		idleDataNormalized = new int[idleData.length][idleData[0].length];
-
-		for (int i=0; i<utilizationData.length; i++) {
-			for (int j=0; j<utilizationData[i].length; j++) {
-				utilizationDataNormalized[i][j] = (int) (100.0f * utilizationData[i][j]);
-				idleDataNormalized[i][j] = (int) (100.0f * idleData[i][j]);
+		if (MainWindow.runObject[myRun].hasLogData()) {	
+			this.saveImage = saveImage;
+			mode = OverviewWindow.MODE_EP;
+			// Create a list of worker threads
+			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+			selectedPEs.size();
+			entryData = new int[selectedPEs.size()][numIntervals];
+			int pIdx=0;
+			for(Integer pe : selectedPEs){
+				readyReaders.add( new ThreadedFileReader(pe, intervalSize, myRun, 
+						startInterval, endInterval, entryData[pIdx], utilizationData[pIdx], idleData[pIdx]) );
+				pIdx++;
 			}
-		}
-		
-		// dispose of unneeded utilizationData
-		utilizationData = null;
-	
+			// Pass this list of threads to a class that manages/runs the threads nicely
+			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Overview in Parallel", readyReaders, this, true);
+			threadManager.runAll();
+					// For historical reasons, we use a utilization range of 0 to 100		
+			for (int i=0; i<utilizationData.length; i++) {
+				for (int j=0; j<utilizationData[i].length; j++) {
+					utilizationDataNormalized[i][j] = (int) (100.0f * utilizationData[i][j]);
+					idleDataNormalized[i][j] = (int) (100.0f * idleData[i][j]);
+				}
+			}
+			utilizationData = null;
+			
 		// We default to coloring by entry method
-		colorByEntry();
+		//colorby util for sumdetail
+			colorByEntry();
+	
+
+	
+		} else if (MainWindow.runObject[myRun].hasSumDetailData()) {
+			
+			SortedSet<Integer> availablePEs = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
+			int intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+			int startInterval2=(int)startTime/intervalSize;
+			int endInterval2=(int)endTime/intervalSize - 1;
+			int numIntervals2 = endInterval2-startInterval2;
+			utilizationDataNormalized = new int[selectedPEs.size()][numIntervals2];
+			idleDataNormalized = new int[selectedPEs.size()][numIntervals2];
 		
+			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval2, endInterval2, false,availablePEs);
+			int[][] utilizationDatavals = new int[selectedPEs.size()][numIntervals];			
+			
+			utilizationDatavals = MainWindow.runObject[myRun].getSumDetailDataperprocbytime();
+			byte[][] idleDataNormalized_helper = MainWindow.runObject[myRun].sumAnalyzer.IdlePercentage();		
+			
+			double scale = 1.0 /10;
+	
+			for(int i =0;i<utilizationDatavals.length;i++){
+				for(int j =0;j<utilizationDatavals[i].length-1;j++){
+					utilizationDataNormalized[i][j] =(int)(scale*utilizationDatavals[i][j]); 
+					idleDataNormalized[i][j] =(int)idleDataNormalized_helper[i][j]; 
+				}
+			}
+			colorByUtil();
+		}else{
+			System.err.println("Does not work for sum files");
+			JOptionPane.showMessageDialog(null, "Does not work for sum files");			
+			return ;
+		}		
 	}
 
 	protected void colorByEntry() {

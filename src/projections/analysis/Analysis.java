@@ -360,6 +360,13 @@ public class Analysis {
     public int[][] getSumDetailData() {
         return intervalData.sumDetailData();
     }
+	public int[][] getSumDetailDataperproc() {
+        return intervalData.sumDetailDataperproc();
+    }
+	public int[][] getSumDetailDataperprocbytime() {
+        return intervalData.sumDetailDataperprocbytime();
+    }
+
     public Color getEntryColor(int entryIdx) {
     	if (entryIdx == IDLE_ENTRY_POINT) {
     		Paint p = getIdleColor();

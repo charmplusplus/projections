@@ -57,7 +57,7 @@ public class IntervalData
     private int numIntervals = 0;
     private double intervalSize = 0;
 
-    private int sumDetailData[][] = null;
+    private int sumDetailData[][][] = null;
 
     /**
      *  The constructor
@@ -109,15 +109,17 @@ public class IntervalData
                                           int intervalEnd,
                                           SortedSet<Integer> processorList){
         int numIntervals = intervalEnd - intervalStart + 1;
+        sumDetailData = new int[processorList.size()][numIntervals][numEPs];
 
-        sumDetailData = new int[numIntervals][numEPs];
         double[][] tempData;
         for(Integer curPe : processorList) {
+			int ii = intervalStart;
             tempData = getData(curPe, TYPE_TIME);
             for(int i=0; i<numIntervals; i++){
                 for(int e=0; e<numEPs; e++){
-                    sumDetailData[i][e] += tempData[e][i];
+            		sumDetailData[curPe][i][e]=(int)tempData[e][ii];
                 }
+				ii++;
             }
         }
     }
@@ -177,8 +179,39 @@ public class IntervalData
 	}
     }
 
-    public int[][] sumDetailData() {return  sumDetailData; };
-
+    public int[][] sumDetailData() {
+		int[][] temp = new int[sumDetailData[0].length][sumDetailData[0][0].length];
+		for(int i =0;i<sumDetailData.length;i++){
+			for(int j =0;j<sumDetailData[0].length;j++){
+				for(int k =0;k<sumDetailData[0][0].length;k++){
+					temp[j][k]+=sumDetailData[i][j][k];
+				}	
+			}	
+		}
+		return  temp; 
+	};
+    public int[][] sumDetailDataperproc() {
+		int[][] temp = new int[sumDetailData.length][sumDetailData[0][0].length];
+		for(int i =0;i<sumDetailData.length;i++){
+			for(int j =0;j<sumDetailData[0].length;j++){
+				for(int k =0;k<sumDetailData[0][0].length;k++){
+					temp[i][k]+=sumDetailData[i][j][k];
+				}	
+			}	
+		}
+		return  temp;  
+	};
+    public int[][] sumDetailDataperprocbytime() {
+		int[][] temp = new int[sumDetailData.length][sumDetailData[0].length];
+		for(int i =0;i<sumDetailData.length;i++){
+			for(int j =0;j<sumDetailData[0].length;j++){
+				for(int k =0;k<sumDetailData[0][0].length;k++){
+					temp[i][j]+=sumDetailData[i][j][k];
+				}	
+			}	
+		}
+		return  temp; 
+	};
     public int[][][] getSystemUsageData() {
 	return systemUsageData;
     }

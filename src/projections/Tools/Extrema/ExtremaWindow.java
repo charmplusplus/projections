@@ -305,38 +305,71 @@ Clickable
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
 
-		// Create a list of worker threads
-		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+		if(MainWindow.runObject[myRun].hasLogData()){
 
-		int pIdx=0;		
-		
-		for(Integer pe : selectedPEs){
-			readyReaders.add( new ThreadedFileReader(pe, startTime, endTime, 
-					numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
-			pIdx++;
+			// Create a list of worker threads
+			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+
+			int pIdx=0;		
+			
+			for(Integer pe : selectedPEs){
+				readyReaders.add( new ThreadedFileReader(pe, startTime, endTime, 
+						numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
+				pIdx++;
+			}
+
+
+			// Determine a component to show the progress bar with
+			Component guiRootForProgressBar = null;
+			if(thisWindow!=null && thisWindow.isVisible()) {
+				guiRootForProgressBar = thisWindow;
+			} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+				guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+			}
+
+			// Pass this list of threads to a class that manages/runs the threads nicely
+			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
+			threadManager.runAll();
+
+
+			// Retrieve results from each thread, storing them into tempData
+			int pIdx2=0;
+			Iterator<Runnable> iter = readyReaders.iterator();
+			while (iter.hasNext()) {
+				ThreadedFileReader r = (ThreadedFileReader) iter.next();
+				tempData[pIdx2] = r.myData;
+				pIdx2++;
+			}
 		}
+		else if(MainWindow.runObject[myRun].hasSumDetailData()){
+			int intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+			int startInterval=(int)startTime/intervalSize;
+			int endInterval=(int)endTime/intervalSize -1;
+			
+			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,selectedPEs);
+
+			int[][] sumDetailDataperproc = MainWindow.runObject[myRun].getSumDetailData_PE_EP();
+
+	// Use sum files to get the idle data, sumDetail log files do not contain idle
+	// data
+
+			double scale = 100.0 / (1 * ((int) endTime - (int) startTime));
+			double[] idleTemp = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentageperproc(startInterval,endInterval);
 
 
-		// Determine a component to show the progress bar with
-		Component guiRootForProgressBar = null;
-		if(thisWindow!=null && thisWindow.isVisible()) {
-			guiRootForProgressBar = thisWindow;
-		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
-			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
-		}
-
-		// Pass this list of threads to a class that manages/runs the threads nicely
-		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runAll();
+			for(int i =0;i <sumDetailDataperproc.length;i++){
+				double  lis[] =new double[sumDetailDataperproc[i].length+2]; 
+				double sum=0.0;
+				for(int j =0;j<sumDetailDataperproc[i].length;j++){
+					lis[j]=sumDetailDataperproc[i][j]*scale;
+					sum+=lis[j];
+				}
 
 
-		// Retrieve results from each thread, storing them into tempData
-		int pIdx2=0;
-		Iterator<Runnable> iter = readyReaders.iterator();
-		while (iter.hasNext()) {
-			ThreadedFileReader r = (ThreadedFileReader) iter.next();
-			tempData[pIdx2] = r.myData;
-			pIdx2++;
+				lis[sumDetailDataperproc[i].length] = idleTemp[i];
+				lis[sumDetailDataperproc[i].length+1] = 100.0-sum-lis[sumDetailDataperproc[i].length];
+				tempData[i]=lis;	
+			}
 		}
 
 		// Compute Extrema elements depending on attribute type.

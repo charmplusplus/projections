@@ -488,9 +488,7 @@ public class Analysis {
 //	    userEntryData = logReader.getUserEntries();
 //	    logReaderIntervalSize = logReader.getIntervalSize();
 	} else if (hasSumDetailFiles()) {
-	    //intervalData.loadIntervalData(intervalSize, intervalStart,
-		//			  intervalEnd, byEntryPoint,
-		//			  processorList);
+	    intervalData.loadIntervalData(intervalSize, intervalStart,intervalEnd, byEntryPoint,processorList);
         try {
             intervalData.loadSumDetailIntervalData(intervalSize, intervalStart,intervalEnd,processorList);
 

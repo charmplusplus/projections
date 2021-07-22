@@ -470,6 +470,10 @@ public class SumAnalyzer extends ProjDefs
 	return ChareTime;
     }
 
+    public byte[][] getProcessorUtilization() {
+        return ProcessorUtilization;
+    }
+
     public long[][] getPhaseChareTime(int Phase)
     {
 	return PhaseChareTime[Phase];

@@ -431,9 +431,6 @@ public class Analysis {
 				}
 			}
 		}
-	    	else if(endtime-begintime==totalTime){
-			data = sumAnalyzer.getChareTime()[pnum];
-		}
 		else if (hasSumDetailFiles()) {
 			SortedSet<Integer> peSet = new TreeSet<>();
 			peSet.add(pnum);
@@ -456,17 +453,24 @@ public class Analysis {
 			}
 		}
 		else if (hasSumFiles()) {
-			long total = 0;
-			byte utilData[][] = sumAnalyzer.getProcessorUtilization();
-			int intervalStart = (int) (begintime / getSummaryIntervalSize());
-			int intervalEnd = (int) Math.ceil(endtime / getSummaryIntervalSize()) - 1;
-			for (int i = intervalStart; i <= intervalEnd; i++) {
-				total += utilData[pnum][i];
+			// The log has per-EP times across the entire execution, so use that when the whole interval is selected
+			if (endtime - begintime == totalTime) {
+				data = sumAnalyzer.getChareTime()[pnum];
 			}
-			// Processor utilization data is already in terms of percent, so return it directly after averaging over the
-			// intervals rather than proceeding to the time -> percent conversion at the end of this function
-			ret[0][0] = ((float) total) / (intervalEnd - intervalStart + 1);
-			return ret;
+			// Otherwise, the best we can do is to use the utilization data without EP info
+			else {
+				long total = 0;
+				byte utilData[][] = sumAnalyzer.getProcessorUtilization();
+				int intervalStart = (int) (begintime / getSummaryIntervalSize());
+				int intervalEnd = (int) Math.ceil(endtime / getSummaryIntervalSize()) - 1;
+				for (int i = intervalStart; i <= intervalEnd; i++) {
+					total += utilData[pnum][i];
+				}
+				// Processor utilization data is already in terms of percent, so return it directly after averaging over the
+				// intervals rather than proceeding to the time -> percent conversion at the end of this function
+				ret[0][0] = ((float) total) / (intervalEnd - intervalStart + 1);
+				return ret;
+			}
 		}
 		else {
 			return null;

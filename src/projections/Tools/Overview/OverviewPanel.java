@@ -379,36 +379,33 @@ class OverviewPanel extends ScalePanel.Child
 			utilizationData = null;
 			
 		// We default to coloring by entry method
-		//colorby util for sumdetail
 			colorByEntry();
 	
 
 	
 		} else if (MainWindow.runObject[myRun].hasSumDetailData()) {
 			
-			SortedSet<Integer> availablePEs = MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
 			int intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
-			int startInterval2=(int)startTime/intervalSize;
-			int endInterval2=(int)endTime/intervalSize - 1;
-			int numIntervals2 = endInterval2-startInterval2;
-			utilizationDataNormalized = new int[selectedPEs.size()][numIntervals2];
-			idleDataNormalized = new int[selectedPEs.size()][numIntervals2];
+			startInterval=(int)startTime/intervalSize;
+			endInterval=(int) Math.ceil(((double)endTime) / intervalSize) - 1;;
+			numIntervals = endInterval-startInterval+1;
+			utilizationDataNormalized = new int[selectedPEs.size()][numIntervals];
+			idleDataNormalized = new int[selectedPEs.size()][numIntervals];
 		
-			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval2, endInterval2, false,availablePEs);
-			int[][] utilizationDatavals = new int[selectedPEs.size()][numIntervals];			
+			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,selectedPEs);
 			
-			utilizationDatavals = MainWindow.runObject[myRun].getSumDetailDataperprocbytime();
+			utilizationDataNormalized = MainWindow.runObject[myRun].getSumDetailDataperprocbytime();
 			byte[][] idleDataNormalized_helper = MainWindow.runObject[myRun].sumAnalyzer.IdlePercentage();		
-			
-			double scale = 1.0 /10;
+			double scale = 100.0 /intervalSize;
 	
-			for(int i =0;i<utilizationDatavals.length;i++){
-				for(int j =0;j<utilizationDatavals[i].length-1;j++){
-					utilizationDataNormalized[i][j] =(int)(scale*utilizationDatavals[i][j]); 
+			for(int i =0;i<utilizationDataNormalized.length;i++){
+				for(int j =0;j<utilizationDataNormalized[i].length-1;j++){
+					utilizationDataNormalized[i][j] =(int)(scale*utilizationDataNormalized[i][j]); 
 					idleDataNormalized[i][j] =(int)idleDataNormalized_helper[i][j]; 
 				}
 			}
 			colorByUtil();
+			//colorby util for sumdetail
 		}else{
 			System.err.println("Does not work for sum files");
 			JOptionPane.showMessageDialog(null, "Does not work for sum files");			

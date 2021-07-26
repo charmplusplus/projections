@@ -179,34 +179,34 @@ public class IntervalData
 	}
     }
 
-    public int[][] sumDetailData() {
+    public int[][] getsumDetailData_interval_EP() {
 		int[][] temp = new int[sumDetailData[0].length][sumDetailData[0][0].length];
-		for(int i =0;i<sumDetailData.length;i++){
-			for(int j =0;j<sumDetailData[0].length;j++){
-				for(int k =0;k<sumDetailData[0][0].length;k++){
-					temp[j][k]+=sumDetailData[i][j][k];
+		for(int pe =0;pe<sumDetailData.length;pe++){
+			for(int interval =0;interval<sumDetailData[0].length;interval++){
+				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
+					temp[interval][ep]+=sumDetailData[pe][interval][ep];
 				}	
 			}	
 		}
 		return  temp; 
 	};
-    public int[][] sumDetailDataperproc() {
+    public int[][] getsumDetailData_PE_EP() {
 		int[][] temp = new int[sumDetailData.length][sumDetailData[0][0].length];
-		for(int i =0;i<sumDetailData.length;i++){
-			for(int j =0;j<sumDetailData[0].length;j++){
-				for(int k =0;k<sumDetailData[0][0].length;k++){
-					temp[i][k]+=sumDetailData[i][j][k];
+		for(int pe =0;pe<sumDetailData.length;pe++){
+			for(int interval =0;interval<sumDetailData[0].length;interval++){
+				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
+					temp[pe][ep]+=sumDetailData[pe][interval][ep];
 				}	
 			}	
 		}
 		return  temp;  
 	};
-    public int[][] sumDetailDataperprocbytime() {
+    public int[][] getsumDetailData_PE_interval() {
 		int[][] temp = new int[sumDetailData.length][sumDetailData[0].length];
-		for(int i =0;i<sumDetailData.length;i++){
-			for(int j =0;j<sumDetailData[0].length;j++){
-				for(int k =0;k<sumDetailData[0][0].length;k++){
-					temp[i][j]+=sumDetailData[i][j][k];
+		for(int pe =0;pe<sumDetailData.length;pe++){
+			for(int interval =0;interval<sumDetailData[0].length;interval++){
+				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
+					temp[pe][interval]+=sumDetailData[pe][interval][ep];
 				}	
 			}	
 		}

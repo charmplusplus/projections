@@ -394,7 +394,7 @@ class OverviewPanel extends ScalePanel.Child
 		
 			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,selectedPEs);
 			
-			utilizationDataNormalized = MainWindow.runObject[myRun].getSumDetailDataperprocbytime();
+			utilizationDataNormalized = MainWindow.runObject[myRun].getsumDetailData_PE_interval();
 			byte[][] idleDataNormalized_helper = MainWindow.runObject[myRun].sumAnalyzer.IdlePercentage();		
 			double scale = 100.0 /intervalSize;
 	

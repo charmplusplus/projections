@@ -357,14 +357,14 @@ public class Analysis {
         return intervalData.getNumIntervals();
     }
 
-    public int[][] getSumDetailData() {
-        return intervalData.sumDetailData();
+    public int[][] getsumDetailData_interval_EP() {
+        return intervalData.getsumDetailData_interval_EP();
     }
-	public int[][] getSumDetailDataperproc() {
-        return intervalData.sumDetailDataperproc();
+	public int[][] getsumDetailData_PE_EP() {
+        return intervalData.getsumDetailData_PE_EP();
     }
-	public int[][] getSumDetailDataperprocbytime() {
-        return intervalData.sumDetailDataperprocbytime();
+	public int[][] getsumDetailData_PE_interval() {
+        return intervalData.getsumDetailData_PE_interval();
     }
 
     public Color getEntryColor(int entryIdx) {

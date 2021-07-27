@@ -57,7 +57,7 @@ public class IntervalData
     private int numIntervals = 0;
     private double intervalSize = 0;
 
-    private int sumDetailData[][] = null;
+    private int sumDetailData[][][] = null;
 
     /**
      *  The constructor
@@ -109,17 +109,17 @@ public class IntervalData
                                           int intervalEnd,
                                           SortedSet<Integer> processorList){
         int numIntervals = intervalEnd - intervalStart + 1;
+        sumDetailData = new int[processorList.size()][numIntervals][numEPs];
 
-        sumDetailData = new int[numIntervals][numEPs];
         double[][] tempData;
         for(Integer curPe : processorList) {
-            int ii = intervalStart;
+			int ii = intervalStart;
             tempData = getData(curPe, TYPE_TIME);
             for(int i=0; i<numIntervals; i++){
                 for(int e=0; e<numEPs; e++){
-                    sumDetailData[i][e] += tempData[e][ii];
+            		sumDetailData[curPe][i][e]=(int)tempData[e][ii];
                 }
-                ii++;
+				ii++;
             }
         }
     }
@@ -179,7 +179,39 @@ public class IntervalData
 	}
     }
 
-    public int[][] sumDetailData() {return  sumDetailData; };
+    public int[][] getsumDetailData_interval_EP() {
+		int[][] temp = new int[sumDetailData[0].length][sumDetailData[0][0].length];
+		for(int pe =0;pe<sumDetailData.length;pe++){
+			for(int interval =0;interval<sumDetailData[0].length;interval++){
+				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
+					temp[interval][ep]+=sumDetailData[pe][interval][ep];
+				}	
+			}	
+		}
+		return  temp; 
+	};
+    public int[][] getsumDetailData_PE_EP() {
+		int[][] temp = new int[sumDetailData.length][sumDetailData[0][0].length];
+		for(int pe =0;pe<sumDetailData.length;pe++){
+			for(int interval =0;interval<sumDetailData[0].length;interval++){
+				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
+					temp[pe][ep]+=sumDetailData[pe][interval][ep];
+				}	
+			}	
+		}
+		return  temp;  
+	};
+    public int[][] getsumDetailData_PE_interval() {
+		int[][] temp = new int[sumDetailData.length][sumDetailData[0].length];
+		for(int pe =0;pe<sumDetailData.length;pe++){
+			for(int interval =0;interval<sumDetailData[0].length;interval++){
+				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
+					temp[pe][interval]+=sumDetailData[pe][interval][ep];
+				}	
+			}	
+		}
+		return  temp; 
+	};
 
     public int[][][] getSystemUsageData() {
 	return systemUsageData;

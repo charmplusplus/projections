@@ -360,7 +360,7 @@ implements ActionListener, Clickable
                         MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,
                                 processorList);
 
-                        int[][] sumDetailData = MainWindow.runObject[myRun].getSumDetailData();
+                        int[][] sumDetailData = MainWindow.runObject[myRun].getsumDetailData_interval_EP();
 
                         for(int i=0;i<numIntervals;i++){
 						    //for(int j=0;j<numEPs+special;j++){

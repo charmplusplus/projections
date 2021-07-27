@@ -359,10 +359,16 @@ public class Analysis {
         return intervalData.getNumIntervals();
     }
 
-    public int[][] getSumDetailData() {
-        return intervalData.sumDetailData();
+	public int[][] getsumDetailData_interval_EP() {
+        return intervalData.getsumDetailData_interval_EP();
     }
-    public Color getEntryColor(int entryIdx) {
+	public int[][] getsumDetailData_PE_EP() {
+        return intervalData.getsumDetailData_PE_EP();
+    }
+	public int[][] getsumDetailData_PE_interval() {
+        return intervalData.getsumDetailData_PE_interval();
+    }
+	public Color getEntryColor(int entryIdx) {
     	if (entryIdx == IDLE_ENTRY_POINT) {
     		Paint p = getIdleColor();
     		if (p instanceof GradientPaint)
@@ -444,7 +450,7 @@ public class Analysis {
 					intervalStart,
 					intervalEnd, false, peSet);
 
-			int sumDetailData[][] = intervalData.sumDetailData();
+			int sumDetailData[][] = intervalData.getsumDetailData_interval_EP();
 			data = new long[numUserEntries];
 			for (int interval = 0; interval < numIntervals; interval++) {
 				for (int entry = 0; entry < numUserEntries; entry++) {

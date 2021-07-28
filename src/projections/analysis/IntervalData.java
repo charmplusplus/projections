@@ -57,7 +57,9 @@ public class IntervalData
     private int numIntervals = 0;
     private double intervalSize = 0;
 
-    private int sumDetailData[][][] = null;
+	private int sumDetailData_interval_EP[][] = null;
+	private int sumDetailData_PE_EP[][] = null;
+	private int sumDetailData_PE_interval[][] = null;
 
     /**
      *  The constructor
@@ -109,17 +111,21 @@ public class IntervalData
                                           int intervalEnd,
                                           SortedSet<Integer> processorList){
         int numIntervals = intervalEnd - intervalStart + 1;
-        sumDetailData = new int[processorList.size()][numIntervals][numEPs];
 
+        sumDetailData_interval_EP = new int[numIntervals][numEPs];
+        sumDetailData_PE_EP = new int[numPEs][numEPs];
+        sumDetailData_PE_interval = new int[numPEs][numIntervals];
         double[][] tempData;
         for(Integer curPe : processorList) {
-			int ii = intervalStart;
+            int ii = intervalStart;
             tempData = getData(curPe, TYPE_TIME);
             for(int i=0; i<numIntervals; i++){
                 for(int e=0; e<numEPs; e++){
-            		sumDetailData[curPe][i][e]=(int)tempData[e][ii];
+                    sumDetailData_interval_EP[i][e] += (int)tempData[e][ii];
+                    sumDetailData_PE_EP[curPe][e] += (int)tempData[e][ii];
+                    sumDetailData_PE_interval[curPe][i] += (int)tempData[e][ii];
                 }
-				ii++;
+                ii++;
             }
         }
     }
@@ -179,39 +185,17 @@ public class IntervalData
 	}
     }
 
-    public int[][] getsumDetailData_interval_EP() {
-		int[][] temp = new int[sumDetailData[0].length][sumDetailData[0][0].length];
-		for(int pe =0;pe<sumDetailData.length;pe++){
-			for(int interval =0;interval<sumDetailData[0].length;interval++){
-				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
-					temp[interval][ep]+=sumDetailData[pe][interval][ep];
-				}	
-			}	
-		}
-		return  temp; 
-	};
-    public int[][] getsumDetailData_PE_EP() {
-		int[][] temp = new int[sumDetailData.length][sumDetailData[0][0].length];
-		for(int pe =0;pe<sumDetailData.length;pe++){
-			for(int interval =0;interval<sumDetailData[0].length;interval++){
-				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
-					temp[pe][ep]+=sumDetailData[pe][interval][ep];
-				}	
-			}	
-		}
-		return  temp;  
-	};
-    public int[][] getsumDetailData_PE_interval() {
-		int[][] temp = new int[sumDetailData.length][sumDetailData[0].length];
-		for(int pe =0;pe<sumDetailData.length;pe++){
-			for(int interval =0;interval<sumDetailData[0].length;interval++){
-				for(int ep =0;ep<sumDetailData[0][0].length;ep++){
-					temp[pe][interval]+=sumDetailData[pe][interval][ep];
-				}	
-			}	
-		}
-		return  temp; 
-	};
+	public int[][] getSumDetailData_interval_EP() {
+		return sumDetailData_interval_EP;
+	}
+
+	public int[][] getSumDetailData_PE_EP() {
+		return sumDetailData_PE_EP;
+	}
+
+	public int[][] getSumDetailData_PE_interval() {
+		return sumDetailData_PE_interval;
+	}
 
     public int[][][] getSystemUsageData() {
 	return systemUsageData;

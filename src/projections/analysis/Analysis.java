@@ -6,7 +6,6 @@ import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -359,14 +358,14 @@ public class Analysis {
         return intervalData.getNumIntervals();
     }
 
-	public int[][] getsumDetailData_interval_EP() {
-        return intervalData.getsumDetailData_interval_EP();
+	public int[][] getSumDetailData_interval_EP() {
+        return intervalData.getSumDetailData_interval_EP();
     }
-	public int[][] getsumDetailData_PE_EP() {
-        return intervalData.getsumDetailData_PE_EP();
+	public int[][] getSumDetailData_PE_EP() {
+        return intervalData.getSumDetailData_PE_EP();
     }
-	public int[][] getsumDetailData_PE_interval() {
-        return intervalData.getsumDetailData_PE_interval();
+	public int[][] getSumDetailData_PE_interval() {
+        return intervalData.getSumDetailData_PE_interval();
     }
 
     public Color getEntryColor(int entryIdx) {
@@ -451,7 +450,7 @@ public class Analysis {
 					intervalStart,
 					intervalEnd, false, peSet);
 
-			int sumDetailData[][] = intervalData.getsumDetailData_interval_EP();
+			int sumDetailData[][] = intervalData.getSumDetailData_interval_EP();
 			data = new long[numUserEntries];
 			for (int interval = 0; interval < numIntervals; interval++) {
 				for (int entry = 0; entry < numUserEntries; entry++) {

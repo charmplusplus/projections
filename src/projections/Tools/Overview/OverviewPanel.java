@@ -19,7 +19,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.MemoryImageSource;
 import java.util.LinkedList;
 import java.util.SortedSet;
-import projections.analysis.ProjMain;
 
 import javax.swing.JOptionPane;
 
@@ -42,7 +41,7 @@ class OverviewPanel extends ScalePanel.Child
 
 	// idleData & mergedData (for supporting - utilization for now - 
 	// the other two data formats)
-	private int[][] idleDataNormalized; // [processor idx][interval]
+	private byte[][] idleDataNormalized; // [processor idx][interval]
 	private int[][] utilizationDataNormalized; // [processor idx][interval]
 
 	private int[][] colors; //The color per processor per interval
@@ -90,16 +89,16 @@ class OverviewPanel extends ScalePanel.Child
 			int interval = (int)(t/intervalSize);
 
 			long  timedisplay = t+startTime;
-			
-			if (MainWindow.runObject[myRun].hasLogData() && interval >= entryData[p].length) {
-				return "some bug has occurred"; // strange bug.
-			}
+
 			if (mode == OverviewWindow.MODE_UTILIZATION) {
 				return "Processor " + pe + 
 				": Usage = " + utilizationDataNormalized[p][interval]+"%" +
 				" IDLE = " + idleDataNormalized[p][interval]+"%" + 
 				" at "+U.humanReadableString(timedisplay)+" ("+timedisplay+" us). ";
 			} else if(mode == OverviewWindow.MODE_EP) {
+				if (interval >= entryData[p].length) {
+					return "some bug has occurred"; // strange bug.
+				}
 				if (entryData[p][interval] > 0) {
 					return "Processor "+pe+": Usage = "+
 					utilizationDataNormalized[p][interval]+"%"+
@@ -331,10 +330,9 @@ class OverviewPanel extends ScalePanel.Child
 
 	
 		intervalSize = (int )trialintervalSize;
-		if (MainWindow.runObject[myRun].hasSumDetailData()){
-			intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+		if (MainWindow.runObject[myRun].hasSumDetailData()) {
+			intervalSize = (int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
 		}
-			
 		startInterval = (int)(startTime/intervalSize);
 		endInterval = (int)(endTime/intervalSize);
 
@@ -348,70 +346,67 @@ class OverviewPanel extends ScalePanel.Child
 	 *  for each interval */
 	
 	protected void loadData(boolean saveImage) {
-		int numIntervals = endInterval - startInterval;
-		float[][] idleData = new float[selectedPEs.size()][numIntervals];
-		float[][] utilizationData = new float[selectedPEs.size()][numIntervals];
-		utilizationDataNormalized = new int[utilizationData.length][utilizationData[0].length];
-		idleDataNormalized = new int[idleData.length][idleData[0].length];
-		if (MainWindow.runObject[myRun].hasLogData()) {	
-			this.saveImage = saveImage;
+		this.saveImage = saveImage;
+		if (MainWindow.runObject[myRun].hasLogData()) {
+			int numIntervals = endInterval - startInterval;
 			mode = OverviewWindow.MODE_EP;
+
 			// Create a list of worker threads
 			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
-			selectedPEs.size();
+
 			entryData = new int[selectedPEs.size()][numIntervals];
-			int pIdx=0;
-			for(Integer pe : selectedPEs){
-				readyReaders.add( new ThreadedFileReader(pe, intervalSize, myRun, 
-						startInterval, endInterval, entryData[pIdx], utilizationData[pIdx], idleData[pIdx]) );
+			int pIdx = 0;
+			float[][] idleData = new float[selectedPEs.size()][numIntervals];
+			float[][] utilizationData = new float[selectedPEs.size()][numIntervals];
+			for (Integer pe : selectedPEs) {
+				readyReaders.add(new ThreadedFileReader(pe, intervalSize, myRun,
+						startInterval, endInterval, entryData[pIdx], utilizationData[pIdx], idleData[pIdx]));
 				pIdx++;
 			}
+
 			// Pass this list of threads to a class that manages/runs the threads nicely
 			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Overview in Parallel", readyReaders, this, true);
 			threadManager.runAll();
-					// For historical reasons, we use a utilization range of 0 to 100		
-			for (int i=0; i<utilizationData.length; i++) {
-				for (int j=0; j<utilizationData[i].length; j++) {
+
+			// For historical reasons, we use a utilization range of 0 to 100
+			utilizationDataNormalized = new int[utilizationData.length][utilizationData[0].length];
+			idleDataNormalized = new byte[idleData.length][idleData[0].length];
+			for (int i = 0; i < utilizationData.length; i++) {
+				for (int j = 0; j < utilizationData[i].length; j++) {
 					utilizationDataNormalized[i][j] = (int) (100.0f * utilizationData[i][j]);
-					idleDataNormalized[i][j] = (int) (100.0f * idleData[i][j]);
+					idleDataNormalized[i][j] = (byte) (100.0f * idleData[i][j]);
 				}
 			}
-			utilizationData = null;
-			
-		// We default to coloring by entry method for log files
+			// We default to coloring by entry method for log files
 			colorByEntry();
-	
-
-	
 		} else if (MainWindow.runObject[myRun].hasSumDetailData()) {
-			
-			int intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
-			startInterval=(int)startTime/intervalSize;
-			endInterval=(int) Math.ceil(((double)endTime) / intervalSize) - 1;;
-			numIntervals = endInterval-startInterval+1;
+			int intervalSize = (int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+			startInterval = (int) startTime / intervalSize;
+			endInterval = (int) Math.ceil(((double) endTime) / intervalSize) - 1;
+			int numIntervals = endInterval - startInterval + 1;
+
 			utilizationDataNormalized = new int[selectedPEs.size()][numIntervals];
-			idleDataNormalized = new int[selectedPEs.size()][numIntervals];
-		
-			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,selectedPEs);
-			
-			utilizationDataNormalized = MainWindow.runObject[myRun].getsumDetailData_PE_interval();
-			byte[][] idleDataNormalized_helper = MainWindow.runObject[myRun].sumAnalyzer.IdlePercentage();		
-			double scale = 100.0 /intervalSize;
-	
-			for(int i =0;i<utilizationDataNormalized.length;i++){
-				for(int j =0;j<utilizationDataNormalized[i].length-1;j++){
-					utilizationDataNormalized[i][j] =(int)(scale*utilizationDataNormalized[i][j]); 
-					idleDataNormalized[i][j] =(int)idleDataNormalized_helper[i][j]; 
+			idleDataNormalized = new byte[selectedPEs.size()][numIntervals];
+
+			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false, selectedPEs);
+
+			utilizationDataNormalized = MainWindow.runObject[myRun].getSumDetailData_PE_interval();
+			idleDataNormalized = MainWindow.runObject[myRun].sumAnalyzer.getIdlePercentage();
+			double scale = 100.0 / intervalSize;
+
+			// idleDataNormalized is already in terms of percentage, so don't convert it
+			for (int i = 0; i < utilizationDataNormalized.length; i++) {
+				for (int j = 0; j < utilizationDataNormalized[i].length - 1; j++) {
+					utilizationDataNormalized[i][j] = (int) (scale * utilizationDataNormalized[i][j]);
 				}
 			}
+			// Color by utilization for sumdetail
 			colorByUtil();
-			//colorby util for sumdetail
-
-		}else{
+		} else {
 			System.err.println("Does not work for sum files");
-			JOptionPane.showMessageDialog(null, "Does not work for sum files");			
-			return ;
-		}		
+			JOptionPane.showMessageDialog(null, "Does not work for sum files");
+			return;
+		}
 	}
 
 	protected void colorByEntry() {

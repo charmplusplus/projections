@@ -121,10 +121,10 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 		
 		mChooseColors = new JButton("Choose Entry Method Colors");
 		mChooseColors.addActionListener(this);
-		ButtonGroup group = new ButtonGroup();		
+		ButtonGroup group = new ButtonGroup();
 		JPanel radioPanel = new JPanel();
-	    radioPanel.setLayout(new GridBagLayout());   
-	    Util.gblAdd(radioPanel, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
+		radioPanel.setLayout(new GridBagLayout());
+		Util.gblAdd(radioPanel, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
 
 		if(MainWindow.runObject[myRun].hasLogFiles()){
 			colorByEntryMethod = new JRadioButton("Entry Method");
@@ -141,7 +141,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 			colorByUtil.setSelected(true);
 		}
 		
-		Util.gblAdd(radioPanel, colorByUtil, gbc, 2,0, 1,1, 1,1); 	
+		Util.gblAdd(radioPanel, colorByUtil, gbc, 2,0, 1,1, 1,1);
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		Util.gblAdd(windowPane, radioPanel, gbc, 0,3, 1,1, 0,0, 1,1,1,1);
 		Util.gblAdd(windowPane, mChooseColors, gbc, 1,3, 1,1, 0,0, 1,1,1,1);

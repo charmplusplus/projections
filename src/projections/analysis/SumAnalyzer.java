@@ -635,7 +635,7 @@ public class SumAnalyzer extends ProjDefs
         }
         return totalIdlePercentage;
     }
-	public byte[][] IdlePercentage(){
+	public byte[][] getIdlePercentage(){
 		return IdlePercentage;
 	}
 }

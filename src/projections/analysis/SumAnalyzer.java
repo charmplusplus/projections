@@ -470,6 +470,10 @@ public class SumAnalyzer extends ProjDefs
 	return ChareTime;
     }
 
+    public byte[][] getProcessorUtilization() {
+        return ProcessorUtilization;
+    }
+
     public long[][] getPhaseChareTime(int Phase)
     {
 	return PhaseChareTime[Phase];
@@ -631,4 +635,7 @@ public class SumAnalyzer extends ProjDefs
         }
         return totalIdlePercentage;
     }
+	public byte[][] getIdlePercentage(){
+		return IdlePercentage;
+	}
 }

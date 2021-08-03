@@ -6,7 +6,6 @@ import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -359,9 +358,16 @@ public class Analysis {
         return intervalData.getNumIntervals();
     }
 
-    public int[][] getSumDetailData() {
-        return intervalData.sumDetailData();
+	public int[][] getSumDetailData_interval_EP() {
+        return intervalData.getSumDetailData_interval_EP();
     }
+	public int[][] getSumDetailData_PE_EP() {
+        return intervalData.getSumDetailData_PE_EP();
+    }
+	public int[][] getSumDetailData_PE_interval() {
+        return intervalData.getSumDetailData_PE_interval();
+    }
+
     public Color getEntryColor(int entryIdx) {
     	if (entryIdx == IDLE_ENTRY_POINT) {
     		Paint p = getIdleColor();
@@ -444,7 +450,7 @@ public class Analysis {
 					intervalStart,
 					intervalEnd, false, peSet);
 
-			int sumDetailData[][] = intervalData.sumDetailData();
+			int sumDetailData[][] = intervalData.getSumDetailData_interval_EP();
 			data = new long[numUserEntries];
 			for (int interval = 0; interval < numIntervals; interval++) {
 				for (int entry = 0; entry < numUserEntries; entry++) {

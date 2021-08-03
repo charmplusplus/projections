@@ -57,9 +57,9 @@ public class IntervalData
     private int numIntervals = 0;
     private double intervalSize = 0;
 
-	private int sumDetailData_interval_EP[][] = null;
-	private int sumDetailData_PE_EP[][] = null;
-	private int sumDetailData_PE_interval[][] = null;
+    private int sumDetailData_interval_EP[][] = null;
+    private int sumDetailData_PE_EP[][] = null;
+    private int sumDetailData_PE_interval[][] = null;
 
     /**
      *  The constructor

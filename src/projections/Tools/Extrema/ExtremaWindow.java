@@ -42,7 +42,7 @@ import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 /**
  *  OutlierAnalysisWindow
@@ -305,38 +305,62 @@ Clickable
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
 
-		// Create a list of worker threads
-		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+		if (MainWindow.runObject[myRun].hasLogData()) {
+			// Create a list of worker threads
+			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
-		int pIdx=0;		
-		
-		for(Integer pe : selectedPEs){
-			readyReaders.add( new ThreadedFileReader(pe, startTime, endTime, 
-					numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
-			pIdx++;
-		}
+			for (Integer pe : selectedPEs) {
+				readyReaders.add(new ThreadedFileReader(pe, startTime, endTime,
+						numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute));
+			}
 
+			// Determine a component to show the progress bar with
+			Component guiRootForProgressBar = null;
+			if (thisWindow != null && thisWindow.isVisible()) {
+				guiRootForProgressBar = thisWindow;
+			} else if (MainWindow.runObject[myRun].guiRoot != null && MainWindow.runObject[myRun].guiRoot.isVisible()) {
+				guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+			}
 
-		// Determine a component to show the progress bar with
-		Component guiRootForProgressBar = null;
-		if(thisWindow!=null && thisWindow.isVisible()) {
-			guiRootForProgressBar = thisWindow;
-		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
-			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
-		}
+			// Pass this list of threads to a class that manages/runs the threads nicely
+			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
+			threadManager.runAll();
 
-		// Pass this list of threads to a class that manages/runs the threads nicely
-		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runAll();
+			// Retrieve results from each thread, storing them into tempData
+			int pIdx = 0;
+			Iterator<Runnable> iter = readyReaders.iterator();
+			while (iter.hasNext()) {
+				ThreadedFileReader r = (ThreadedFileReader) iter.next();
+				tempData[pIdx] = r.myData;
+				pIdx++;
+			}
+		} else if (MainWindow.runObject[myRun].hasSumDetailData()) {
+			int intervalSize = (int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+			int startInterval = (int) ((float) startTime / intervalSize);
+			int endInterval = (int) Math.ceil((float) endTime / intervalSize) - 1;
 
+			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false, selectedPEs);
 
-		// Retrieve results from each thread, storing them into tempData
-		int pIdx2=0;
-		Iterator<Runnable> iter = readyReaders.iterator();
-		while (iter.hasNext()) {
-			ThreadedFileReader r = (ThreadedFileReader) iter.next();
-			tempData[pIdx2] = r.myData;
-			pIdx2++;
+			int[][] sumDetailData_PE_EP = MainWindow.runObject[myRun].getSumDetailData_PE_EP();
+
+			double scale = 100.0 / (endTime - startTime);
+			// Use sum files to get the idle data, sumDetail files do not contain idle data
+			double[] idleTemp = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerPE(startInterval, endInterval);
+
+			// Assume that each PE has the same number of EPs
+			final int numEPs = sumDetailData_PE_EP[0].length;
+			for (int pe = 0; pe < sumDetailData_PE_EP.length; pe++) {
+				double lis[] = new double[numEPs + 2];
+				double sum = 0.0;
+				for (int ep = 0; ep < numEPs; ep++) {
+					lis[ep] = sumDetailData_PE_EP[pe][ep] * scale;
+					sum += lis[ep];
+				}
+
+				lis[numEPs] = idleTemp[pe];
+				lis[numEPs + 1] = 100.0 - sum - lis[numEPs];
+				tempData[pe] = lis;
+			}
 		}
 
 		// Compute Extrema elements depending on attribute type.
@@ -845,7 +869,7 @@ Clickable
 		GenericLogReader reader = 
 			new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
 		try {
-			LogEntryData logData = new LogEntryData();
+			LogEntry logData = new LogEntry();
 			logData.time = 0;
 			// Jump to the first valid event
 			boolean markedBegin = false;

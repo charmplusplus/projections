@@ -3,17 +3,17 @@ package projections.analysis;
 
 import java.io.IOException;
 
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 interface PointCapableReader {
     
-    public LogEntryData nextEvent()
+    public LogEntry nextEvent()
         throws IOException, EndOfLogSuccess;
 
-    public LogEntryData nextEventOnOrAfter(long timestamp)
+    public LogEntry nextEventOnOrAfter(long timestamp)
         throws IOException, EndOfLogSuccess;    
 
-    public LogEntryData nextEventOfType(int... eventType)
+    public LogEntry nextEventOfType(int... eventType)
         throws IOException, EndOfLogSuccess;
 
 }

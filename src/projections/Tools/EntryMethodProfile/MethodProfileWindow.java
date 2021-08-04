@@ -5,8 +5,8 @@ import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.general.DefaultPieDataset;
-import org.jfree.ui.RectangleEdge;
-import org.jfree.util.SortOrder;
+import org.jfree.chart.ui.RectangleEdge;
+import org.jfree.chart.util.SortOrder;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.*;
 

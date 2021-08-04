@@ -187,7 +187,7 @@ public class MessageSizeEvolutionWindow
 
         CategoryPlot plot = chart.getCategoryPlot();
         StackedRenderer renderer = new StackedRenderer(heatMap, maxVal);
-        renderer.setBaseToolTipGenerator(new CustomToolTipGenerator(heatMap, timeNumBins, timeBinSize, startTime, msgNumBins, msgBinSize, msgMinBinSize, msgLogScale));
+        renderer.setDefaultToolTipGenerator(new CustomToolTipGenerator(heatMap, timeNumBins, timeBinSize, startTime, msgNumBins, msgBinSize, msgMinBinSize, msgLogScale));
         plot.setRenderer(renderer);
 
         CustomRangeAxis rangeAxis = new CustomRangeAxis(startTime);

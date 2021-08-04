@@ -178,7 +178,7 @@ class SumDetailReader extends ProjectionsReader
     
     class RLEBlock {
         int count = 0;
-        double value = 0.0;
+        int value = 0;
     }
 
     
@@ -190,13 +190,13 @@ class SumDetailReader extends ProjectionsReader
 	int epIdx = 0;
 	int intervalsLeft = numIntervals;
 
-	double value = 0;
+	int value = 0;
 	int count = 1;
 	while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
 	    switch (tokenizer.ttype) {
 	    case StreamTokenizer.TT_NUMBER:
 
-		value = tokenizer.nval;
+		value = (int)tokenizer.nval;
 		count = 1;
 
 		if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {

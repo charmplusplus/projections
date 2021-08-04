@@ -2,6 +2,8 @@ package projections.Tools.Timeline;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -12,7 +14,7 @@ import javax.swing.ToolTipManager;
  * A scrolling panel that holds all the graphical pieces of the visualization
  * 
  */
-class ScrollingPanel extends JPanel {
+class ScrollingPanel extends JPanel implements MouseWheelListener {
 
 	private JScrollPane scrollpane;
 		
@@ -57,9 +59,13 @@ class ScrollingPanel extends JPanel {
 		
 		scrollpane.getViewport().setBackground(data.getBackgroundColor());
 
-//		scrollpane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // This should be tuned for performance
-		scrollpane.getViewport().setScrollMode(JViewport.BLIT_SCROLL_MODE); // This should be tuned for performance
+		// Empirically, using BACKINGSTORE_SCROLL_MODE is much more performant than BLIT_SCROLL_MODE,
+		// but that may be due to issues in the painting pipeline. If trying to tune for performace,
+		// it's worth playing with both.
+		scrollpane.getViewport().setScrollMode(JViewport.BACKINGSTORE_SCROLL_MODE); // This should be tuned for performance
 
+		// Add listener to enable Ctrl+scroll to zoom
+		mainPanel.addMouseWheelListener(this);
 		
 		axisPanel.setVisible(true);
 		mainPanel.setVisible(true);
@@ -70,9 +76,24 @@ class ScrollingPanel extends JPanel {
 		data.setToolTipDelaySmall();
 		ToolTipManager.sharedInstance().registerComponent(mainPanel);
 	}
-	
-	
-	
+
+	/**
+	 * Zoom when Ctrl+scroll happens over the main view
+	 * @param e Details of the mouse wheel event
+	 */
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		if (e.isControlDown()) {
+			data.keepViewCentered(true);
+			if (e.getWheelRotation() < 0) {
+				data.increaseScaleFactor();
+			} else {
+				data.decreaseScaleFactor();
+			}
+		} else {
+			scrollpane.dispatchEvent(e);
+		}
+	}
+
 	void updateBackgroundColor(){
 		scrollpane.getHorizontalScrollBar().setBackground(data.getBackgroundColor());
 		scrollpane.getViewport().setBackground(data.getBackgroundColor());

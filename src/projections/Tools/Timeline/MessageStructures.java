@@ -1,12 +1,11 @@
 package projections.Tools.Timeline;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import projections.Tools.Timeline.RangeQueries.Query1D;
 import projections.analysis.ObjectId;
@@ -30,13 +29,7 @@ class MessageStructures {
 
 	/** A Map for each PE, key = eventID value = EntryMethodObject */
 	private Map<Integer, EntryMethodObject> []eventIDToEntryMethodMap;
-
-	/** Map from a message to the the resulting entry methods entry object invocations */
-	private Map<TimelineMessage, Set<EntryMethodObject>> messageToExecutingObjectsMap;
-
-	/** Map from a message to its invoking entry method instance */
-	private Map<TimelineMessage, EntryMethodObject> messageToSendingObjectsMap;
-
+	
 	/** Map from Chare Array element id's to the corresponding known entry method invocations */
 	private Map<ObjectId, List<EntryMethodObject> > oidToEntryMethodObjectsMap;
 
@@ -61,11 +54,8 @@ class MessageStructures {
 			eventIDToEntryMethodMap = new HashMap[pe];
 			for(int i=0;i<pe;i++)
 				eventIDToEntryMethodMap[i] = new HashMap();
-
-			messageToSendingObjectsMap = new HashMap<TimelineMessage, EntryMethodObject>();
-			messageToExecutingObjectsMap = new HashMap<TimelineMessage, Set<EntryMethodObject>>();
-
-			oidToEntryMethodObjectsMap = new TreeMap();
+			
+			oidToEntryMethodObjectsMap = new TreeMap<>();
 		}		
 	}
 
@@ -92,15 +82,11 @@ class MessageStructures {
 		return eventIDToMessageMap;
 	}
 
-	public Map<TimelineMessage, EntryMethodObject> getMessageToSendingObjectsMap() {
-		return messageToSendingObjectsMap;
-	}
-
 	public void setOidToEntryMethodObjectsMap(Map oidToEntryMethodObjectsMap) {
 		this.oidToEntryMethodObjectsMap = oidToEntryMethodObjectsMap;
 	}
 
-	public Map getOidToEntryMethodObjectsMap() {
+	public Map<ObjectId, List<EntryMethodObject>> getOidToEntryMethodObjectsMap() {
 		return oidToEntryMethodObjectsMap;
 	}
 
@@ -111,20 +97,7 @@ class MessageStructures {
 	public Map [] getEventIDToEntryMethodMap() {
 		return eventIDToEntryMethodMap;
 	}
-
-	public void setMessageToExecutingObjectsMap(
-			Map<TimelineMessage, Set<EntryMethodObject>> messageToExecutingObjectsMap) {
-		this.messageToExecutingObjectsMap = messageToExecutingObjectsMap;
-	}
-
-	public Map<TimelineMessage, Set<EntryMethodObject>> getMessageToExecutingObjectsMap() {
-		return messageToExecutingObjectsMap;
-	}
-
-	public void setMessageToSendingObjectsMap(Map<TimelineMessage, EntryMethodObject> messageToSendingObjectsMap) {
-		this.messageToSendingObjectsMap = messageToSendingObjectsMap;
-	}
-
+	
 	protected void kill() {
 		if(secondaryWorkers != null){
 			secondaryWorkers.stopThread();
@@ -181,32 +154,6 @@ class MessageStructures {
 		}
 
 
-		/** Create a mapping from TimelineMessage objects to their creator EntryMethod's */
-
-		pe_iter = data.allEntryMethodObjects.keySet().iterator();
-		while(pe_iter.hasNext()){
-			
-			if(structures!=null) {
-				synchronized(structures){
-					if(structures.stop)
-						return;					
-				}
-			}	
-			
-			Integer pe =  pe_iter.next();
-			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
-
-			for(EntryMethodObject obj : objs) {
-				if(obj.messages != null){
-					for(TimelineMessage msg : obj.messages) {
-						// put all the messages created by obj into the map, listing obj as the creator
-						getMessageToSendingObjectsMap().put(msg, obj);
-					}
-				}
-			}				
-		}
-
-
 		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
 
 		pe_iter = data.allEntryMethodObjects.keySet().iterator();
@@ -227,18 +174,7 @@ class MessageStructures {
 
 				TimelineMessage msg = obj.creationMessage();
 				if(msg!=null){
-					// for each EntryMethodObject, add its creation Message to the map
-					if(getMessageToExecutingObjectsMap().containsKey(msg)){
-						// add it to the TreeSet in the map
-						Object o= getMessageToExecutingObjectsMap().get(msg);
-						TreeSet<EntryMethodObject> ts = (TreeSet<EntryMethodObject>)o;
-						ts.add(obj);
-					} else {
-						// create a new TreeSet and put it in the map
-						TreeSet<EntryMethodObject> ts = new TreeSet<EntryMethodObject>();
-						ts.add(obj);
-						getMessageToExecutingObjectsMap().put(msg, ts);
-					}
+					msg.addRecipient(obj);
 				}
 
 			}
@@ -267,11 +203,11 @@ class MessageStructures {
 
 					if(getOidToEntryMethodObjectsMap().containsKey(id)){
 						// add obj to the existing set
-						TreeSet<EntryMethodObject> s = (TreeSet<EntryMethodObject>) getOidToEntryMethodObjectsMap().get(id);
+						List<EntryMethodObject> s = getOidToEntryMethodObjectsMap().get(id);
 						s.add(obj);
 					} else {
 						// create a set for the id
-						TreeSet<EntryMethodObject> s = new TreeSet<EntryMethodObject>();
+						ArrayList<EntryMethodObject> s = new ArrayList<EntryMethodObject>();
 						s.add(obj);
 						getOidToEntryMethodObjectsMap().put(id, s);
 					}
@@ -289,8 +225,6 @@ class MessageStructures {
 				eventIDToMessageMap[i].clear();
 			for(int i=0;i<pe;i++)
 				eventIDToEntryMethodMap[i].clear();
-			messageToSendingObjectsMap.clear();
-			messageToExecutingObjectsMap.clear();
 			oidToEntryMethodObjectsMap.clear();
 		}		
 	}

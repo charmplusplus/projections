@@ -259,9 +259,9 @@ public class MultiRunData
 				for (int PE : validPEs) {
 					reader = new GenericLogReader(PE, runAnalyzer.getVersion(), runAnalyzer);
 					try {
-						LogEntryData lastBeginData = null;
+						LogEntry lastBeginData = null;
 						while (true) {
-							LogEntryData data = reader.nextProcessingEvent();
+							LogEntry data = reader.nextProcessingEvent();
 							if (data.type == BEGIN_PROCESSING)
 								lastBeginData = data;
 							else if (data.type == END_PROCESSING) {

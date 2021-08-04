@@ -8,7 +8,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 
@@ -146,13 +146,13 @@ class ThreadedFileReader implements Runnable  {
 		{
 			int nestingLevel = 0;
 			boolean logEnd = false;
-			LogEntryData prevBegin = null;
-			LogEntryData prevIdleBegin = null;
+			LogEntry prevBegin = null;
+			LogEntry prevIdleBegin = null;
 			
 			while (true) 
 			{ // EndOfLogException will terminate loop when end of log file is reached
 
-				LogEntryData logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
+				LogEntry logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
 				
 				switch (logdata.type) 
 				{
@@ -461,20 +461,6 @@ class ThreadedFileReader implements Runnable  {
 		{
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
-	    
-	    // divide the TYPE_TIME and TYPE_MSG_SIZE counts by the length of the specified time interval
-	    // to obtain the # occurences per unit time (right now is millisecond)
-	    double interval = (endTime-startTime)/1000.0;
-	    for (int bin = 0; bin < timeNumBins+1; bin++) {
-	    	for (int ep = 0; ep < numEPs; ep++) {
-	    		countData[HistogramWindow.TYPE_TIME][bin][ep] /= interval;
-	    	}
-	    }
-	    for (int bin = 0; bin < msgNumBins+1; bin++) {
-	    	for (int ep = 0; ep < numEPs; ep++) {
-	    		countData[HistogramWindow.TYPE_MSG_SIZE][bin][ep] /= interval;
-	    	}
-	    }
 
 		return countData;
 	}
@@ -495,13 +481,13 @@ class ThreadedFileReader implements Runnable  {
 		try
 		{
 			int nestingLevel = 0;
-			LogEntryData prevBegin = null;
-			LogEntryData prevIdleBegin = null;
+			LogEntry prevBegin = null;
+			LogEntry prevIdleBegin = null;
 			
 			while (true)
 			{ // EndOfLogException will terminate loop when end of log file is reached
 
-				LogEntryData logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
+				LogEntry logdata = reader.nextEvent(); // Scan through all events, hopefully there are no missing BEGIN_PROCESSING, or our nesting will be broken
 
 				switch (logdata.type) {
 				case ProjDefs.BEGIN_PROCESSING:

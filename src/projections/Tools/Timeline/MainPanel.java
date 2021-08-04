@@ -31,7 +31,6 @@ import javax.swing.ToolTipManager;
 
 import projections.Tools.Timeline.Data.RepresentedEntity;
 import projections.Tools.Timeline.RangeQueries.Query1D;
-import projections.Tools.Timeline.Data.SMPMsgGroup;
 import projections.gui.MainWindow;
 
 
@@ -215,11 +214,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 	 */
 	public class MaxFilledX {
 		public int ep, pack, msg;
+		public boolean epIsIdle;
 
 		public MaxFilledX() {
 			ep = 0;
 			pack = 0;
 			msg = 0;
+			epIsIdle = false;
 		}
 	}
 	/**
@@ -250,10 +251,11 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 				// Saves the furthest right position EPs and msg lines have been drawn in
 				// order to optimize performance by only drawing when new pixels will be colored in
 				MaxFilledX maxFilledX = new MaxFilledX();
+				final int topCoord = data.entryMethodLocationTop(pe);
 
 				while(iter.hasNext()){
 					EntryMethodObject o = iter.next();
-					if(o.paintMe((Graphics2D) g, getWidth(), maxFilledX)) {
+					if(o.paintMe((Graphics2D) g, getWidth(), topCoord, maxFilledX)) {
 						count1++;
 					}
 				}
@@ -271,11 +273,13 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 			for(Integer pe : pesToRender){
 				Query1D<UserEventObject> l = data.allUserEventObjects.get(pe);
 
+				final int bottomCoord = data.userEventLocationBottom(pe);
+
 				if(l != null){ // FIXME: this shouldn't be here but is to fix a race condition with reloading ranges once something is displayed
 					Iterator<UserEventObject> iter = l.iterator(leftClipTime, rightClipTime);
 					while(iter.hasNext()){
 						UserEventObject o = iter.next();
-						o.paintMe((Graphics2D) g, getWidth(), data);
+						o.paintMe((Graphics2D) g, getWidth(), data, bottomCoord);
 						count2 ++;
 					}
 				}
@@ -343,7 +347,7 @@ public class MainPanel extends JPanel  implements Scrollable, MouseListener, Mou
 					int pExecution = obj.pe;
 					
 					boolean smpMsgGrpFound = false;
-					if(data.isSMPRun()){
+					if(data.hasCommThdTrace()){
 						smpMsgGrpFound = data.makeSMPMsgGroup(obj);						
 					}
 

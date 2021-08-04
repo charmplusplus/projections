@@ -34,7 +34,7 @@ class UserSuppliedAnalyzer extends JFrame {
 		
 		for(Query1D<EntryMethodObject> objs : data.allEntryMethodObjects.values()){
 			for(EntryMethodObject obj : objs){
-				Integer param = obj.userSuppliedData;
+				Integer param = obj.getUserSuppliedData();
 				long start = obj.getBeginTime();
 				long end = obj.getEndTime();
 				

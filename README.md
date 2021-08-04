@@ -1,11 +1,16 @@
-[![Build Status](https://travis-ci.org/UIUC-PPL/projections.svg?branch=master)](https://travis-ci.org/UIUC-PPL/projections)
+# Projections
+
+![Projections CI](https://github.com/UIUC-PPL/projections/workflows/Projections%20CI/badge.svg?event=push)
+[![Documentation Status](https://readthedocs.org/projects/charm/badge/?version=latest)](https://charm.readthedocs.io/en/latest/projections/manual.html)
+[![DOI](https://zenodo.org/badge/86751036.svg)](https://zenodo.org/badge/latestdoi/86751036)
+
 
 Projections is a tool to visusalize execution traces of Charm++ and AMPI applications.
 
-# Compiling Projections
+## Compiling Projections
 
 1) Make sure the JDK commands `java`, `javac` and `jar`
-   are in your path. You should use at least Java version 1.6,
+   are in your path. You should use at least Java version 8,
    and your java and javac should be of the same version.
    You also need [`gradle`](https://gradle.org/) and, optionally,
    the GNU tool `make`.
@@ -21,11 +26,11 @@ Projections is a tool to visusalize execution traces of Charm++ and AMPI applica
       `projections.jar`       : archive of all the java and image files
 
 
-# Running Projections
+## Running Projections
 
 Run `$ ./bin/projections` from the root of the Projections directory.
 
-# Using Projections
+## Using Projections
 
 Projections is a visualization tool to help you understand and analyze what it
 happening in your parallel (Charm++) program.  To use Projections, you first
@@ -73,9 +78,9 @@ data:
 18. Streaming CCS
 19. Memory Usage
 
-## Tool descriptions
+### Tool descriptions
 
-### 1. Timelines
+#### 1. Timelines
 
 The Timelines window lets you look at what a specific processor is doing at
 each moment of the program.
@@ -183,7 +188,7 @@ The Timeline Window consists of two parts:
      into the selected area or reload the selected area.
 
 
-### 2. Usage Profile:
+#### 2. Usage Profile:
 
 The Usage Profile window lets you see percentage-wise what each processor
 spends its time on during a specified period.
@@ -207,7 +212,7 @@ portion of the bar, a pop-up window will appear telling you the name of the
 item, what percent of the usage it has, and the processor it is on.
 
 
-### 3. Communication Per Processor:
+#### 3. Communication Per Processor:
 
 This tool shows communication over the interval per selected
 PE. This view is in the processor domain. It can show the number of
@@ -215,7 +220,7 @@ messages or bytes sent or received, depending on the option
 selected at the bottom of the window.
 
 
-### 4. Communication Over Time:
+#### 4. Communication Over Time:
 
 This tool shows communication over time across all selected PEs.
 This view is in the time domain. It can show the number of messages
@@ -223,7 +228,7 @@ or bytes sent or received, depending on the option selected at the
 bottom of the window.
 
 
-### 5. Call Table:
+#### 5. Call Table:
 
 This tool shows all the entry methods invoked by other entry
 methods. The left aligned entry method name indicates the current
@@ -234,7 +239,7 @@ or the number of total messages received, bytes received, and
 statistics on the received bytes, respectively.
 
 
-### 6. View Log Files:
+#### 6. View Log Files:
 
 This tool shows raw log files for the selected PEs and time
 interval. The log files are parsed by Projections and event types,
@@ -242,14 +247,14 @@ entry method names, etc. are printed rather than the raw integers
 of the actual logs.
 
 
-### 7. Histograms:
+#### 7. Histograms:
 
 This tool creates histograms for various properties of the program,
 execution time, accumulated execution time, message size, and idle
 percentage.
 
 
-### 8. Overview:
+#### 8. Overview:
 
 This tool shows a high level overview of execution across the
 selected PEs and time interval. It displays a dense, quantized view
@@ -258,7 +263,7 @@ or utilization.  Essentially, it provides a coarser view of the
 same information as Timeline (see #1).
 
 
-### 9. Animations:
+#### 9. Animations:
 
 This window animates the processor usage by displaying
 different colors for different amount of usage.
@@ -267,7 +272,7 @@ The left box allows you to select the real time between frames;
 the right box the processor time between frames.
 
 
-### 10. Time Profile:
+#### 10. Time Profile:
 
 This tool shows execution across the selected PEs and time
 interval. This view is in the time domain. This tool shows a high
@@ -278,41 +283,41 @@ Essentially, it provides a coarser view of the same information as
 Timeline (see #1).
 
 
-### 11. Performance Counters:
+#### 11. Performance Counters:
 
 This tool shows the values of performance counters per entry point
 and PE. This option is disabled unless Charm++ was compiled with
 support for PAPI counters.
 
 
-### 12. User Events:
+#### 12. User Events:
 
 This tool shows the summation of bracketed user events per PE
 across the selected PEs and time interval.
 
 
-### 13. User Stats Over Time:
+#### 13. User Stats Over Time:
 
 This tool shows the values of user stats over the program execution
 across the selected PEs and time interval. This view is in the
 time domain.
 
 
-### 14. User Stats Per Processor:
+#### 14. User Stats Per Processor:
 
 This tool shows the values of user stats per PE
 across the selected PEs and time interval. This view is in the
 PE domain.
 
 
-### 15. Extrema Analysis:
+#### 15. Extrema Analysis:
 
 This tool identifies extreme clusters of particular attributes
 through the execution. The attribute, activity, extrema threshold,
 and number of clusters are customizable when selecting a time range.
 
 
-### 16. Multirun Analysis:
+#### 16. Multirun Analysis:
 
 This tool compares multiple executions of a program to each other,
 showing how time spent in entry methods changes across the
@@ -320,14 +325,14 @@ execution. Currently, this view only works with summary data due to
 memory constraints.
 
 
-### 17. Noise Miner:
+#### 17. Noise Miner:
 
 This tool identifies abnormally long entry methods to detect
 symptoms consistent with computational noise.  Long events are
 filtered and clustered to provide a summary of such occurrences.
 
 
-### 18. Streaming CCS:
+#### 18. Streaming CCS:
 
 This tool uses the Converse Client Server feature of Charm++ to
 stream performance data from running programs.  To use it, the
@@ -335,14 +340,14 @@ Charm++ program must be compiled with `-tracemode utilization`, and
 executed with `++server ++server-port <port number>`.
 
 
-### 19. Memory Usage:
+#### 19. Memory Usage:
 
 This tool provides a view of memory utilization in the application
 when it is linked with the memory tracing module.
 
 
 
-# Notes
+## Notes
 
 Charts in some tools are produced by JFreeChart.
 Image output is performed by FreeHEP.

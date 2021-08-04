@@ -31,7 +31,7 @@ import projections.gui.MainWindow;
 import projections.gui.StatDialog;
 import projections.gui.ColorManager;
 import projections.gui.JPanelToImage;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.analysis.ProjDefs;
 import projections.analysis.GenericLogReader;
 import projections.analysis.EndOfLogSuccess;
@@ -265,7 +265,7 @@ implements ItemListener, ActionListener
 							if(model.getRowCount()==0) return;
 							for(int row = e.getFirstRow(); row<=e.getLastRow();row++){
 								if(row<0) continue;
-								if(model.getValueAt(row,numColumns -1).equals(new Boolean(true))) {
+								if(model.getValueAt(row,numColumns -1).equals(Boolean.TRUE)) {
 									/*If dataset at row is marked Visible, Set the dataset
 								   	For that row to be the XYSeriesCollection meant for that row */
 									plot.setDataset(row,graphedData.get(row));
@@ -404,7 +404,7 @@ implements ItemListener, ActionListener
 			int pointIndex = 0;
 			GenericLogReader reader = new GenericLogReader( pe,
 					MainWindow.runObject[myRun].getVersion());
-			LogEntryData logData;
+			LogEntry logData;
 
 			// Skip to the first begin.
 			try {

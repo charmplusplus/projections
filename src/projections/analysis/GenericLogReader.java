@@ -12,7 +12,7 @@ import java.util.zip.GZIPInputStream;
 
 import projections.gui.MainWindow;
 import projections.analysis.StsReader;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 /**
  *  Written by Chee Wai Lee  4/12/2002
@@ -50,7 +50,7 @@ implements PointCapableReader
 
 	/** Book-keeping data. Used for consistency when event-blocks 
 	 * happen to straddle user-specified time-boundaries. */
-	private LogEntryData lastBeginEvent = null;
+	private LogEntry lastBeginEvent = null;
 
 	private boolean endComputationOccurred;
 	
@@ -69,7 +69,7 @@ implements PointCapableReader
 		sourceFile = analysis.getLog(peNum);
 		shiftAmount = analysis.tachyonShifts.getShiftAmount(peNum);
 
-		lastBeginEvent = new LogEntryData();
+		lastBeginEvent = new LogEntry();
 		lastBeginEvent.setValid(false);
 		endComputationOccurred = false;
 
@@ -131,24 +131,33 @@ implements PointCapableReader
 		return modified;
 	}
 
-	public LogEntryData nextProcessingEvent() throws IOException, EndOfLogSuccess
+	public LogEntry nextProcessingEvent() throws IOException, EndOfLogSuccess
 	{
 		return nextEventOfType(BEGIN_PROCESSING, END_PROCESSING);
 	}
-	
+
+	/**
+	 * Helper function which allocates new LogEntry object for nextEvent(LogEntry data)
+	 */
+	public LogEntry nextEvent() throws InputMismatchException, IOException, EndOfLogSuccess
+	{
+		LogEntry data = new LogEntry();
+		return nextEvent(data);
+	}
 
 	/** 
-	 * Create a new LogEntryData by reading/parsing the next line from the log 
+	 * Fill in a LogEntry by reading/parsing the next line from the log
 	 * 
 	 * Upon reaching the end of the file, a fake END_COMPUTATION event will be produced if none was found in the log file.
 	 * After the end of the file is reached and after some END_COMPUTATION has been returned, an EndOfLogException will be thrown
 	 * 
 	 * If any problem is detected when reading within a line, an IOException is produced
 	 * 
+	 * Use the LogEntry object passed in rather than allocating a new one to avoid excessive object creation,
+	 * particularly useful in Timeline
 	 * */
-	public LogEntryData nextEvent() throws InputMismatchException, IOException, EndOfLogSuccess
+	public LogEntry nextEvent(LogEntry data) throws InputMismatchException, IOException, EndOfLogSuccess
 	{
-		LogEntryData data = new LogEntryData();
 		StsReader stsinfo = MainWindow.runObject[myRun].getSts();
 		
 		String line = reader.readLine();
@@ -192,7 +201,7 @@ implements PointCapableReader
 			data.pe = (int) sc.nextLong();
 			break;
 		case USER_SUPPLIED:
-			data.userSupplied = new Integer((int) sc.nextLong());
+			data.userSupplied = (int) sc.nextLong();
 			break;
 		case USER_SUPPLIED_NOTE:
 			data.time = sc.nextLong() + shiftAmount;
@@ -329,6 +338,7 @@ implements PointCapableReader
 					data.perfCounts[i] = sc.nextLong();
 				}
 			}
+			lastBeginEvent.setValid(false);
 			break;
 		case BEGIN_TRACE: 
 			data.time = sc.nextLong() + shiftAmount;
@@ -422,10 +432,10 @@ implements PointCapableReader
 	 *
 	 *  An EndOfLogException indicates that no such event was found.
 	 */
-	public LogEntryData nextEventOnOrAfter(long timestamp) 
+	public LogEntry nextEventOnOrAfter(long timestamp)
 	throws IOException, EndOfLogSuccess
 	{
-		LogEntryData data = new LogEntryData();
+		LogEntry data = new LogEntry();
 		while (true) {
 			data = nextEvent();
 			// skip unrecognized tags
@@ -442,10 +452,10 @@ implements PointCapableReader
 	/**
 	 *  Return the next log event with the given eventType.
 	 */
-	public LogEntryData nextEventOfType(int... eventTypes)
+	public LogEntry nextEventOfType(int... eventTypes)
 	throws IOException, EndOfLogSuccess
 	{
-		LogEntryData data;
+		LogEntry data;
 		while (true) {
 			data = nextEvent();
 			for (int eventType : eventTypes) {
@@ -457,7 +467,7 @@ implements PointCapableReader
 	}
 
 	
-	public LogEntryData getLastBE() {
+	public LogEntry getLastOpenBE() {
 		if (lastBeginEvent.isValid()) {
 			return lastBeginEvent;
 		}

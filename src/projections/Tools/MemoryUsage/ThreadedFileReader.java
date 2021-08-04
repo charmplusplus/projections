@@ -8,7 +8,7 @@ import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 
 
 class ThreadedFileReader implements Runnable  {
@@ -50,7 +50,7 @@ class ThreadedFileReader implements Runnable  {
 		try {
 			while (true) {
 //				System.out.println("c before " + (count));
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 //				System.out.println("c after " + (count));
 				count++;
 

@@ -205,11 +205,7 @@ class ProfileWindow extends ProjectionsWindow
 
     public void showDialog(){
     	if (dialog == null) {
-    		if ((!MainWindow.runObject[myRun].hasLogData()) && (!MainWindow.runObject[myRun].hasSumDetailData())) {
-    			dialog = new RangeDialog(this, "Usage Profile", null, true);
-    		} else {
-    			dialog = new RangeDialog(this, "Usage Profile", null, false);
-    		}
+    		dialog = new RangeDialog(this, "Usage Profile", null, false);
     	} 
 
     	dialog.displayDialog();
@@ -503,7 +499,7 @@ class ProfileWindow extends ProjectionsWindow
 	for (int i=0; i<numEPs; i++) {
 	    // anything greater than 5% is "significant"
 	    if (avg[0][i]+avg[1][i] > 1.0) {
-		sigElements.add(new Integer(i));
+		sigElements.add(i);
 	    }
 	}
 	// copy to an array for Color assignment (maybe that should be

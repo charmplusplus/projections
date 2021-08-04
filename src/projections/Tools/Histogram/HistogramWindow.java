@@ -66,10 +66,6 @@ implements ActionListener, EntryMethodVisibility
     	private JRadioButton   chooseEntriesButton;
     	private JRadioButton   longestEntryButton;
 
-        private JRadioButton microseconds;
-        private JRadioButton milliseconds;
-        private JRadioButton seconds;
-
     	private ButtonGroup entryTypeGroup;
 
         private BinDialogPanel binpanel;
@@ -96,10 +92,6 @@ implements ActionListener, EntryMethodVisibility
 	private int idleNumBins;
 	private long idleBinSize;
 	private long idleMinBinSize;
-
-    private double unitTime = 1000.0;
-    private double timeInterval;
-    private String unitTimeStr = "ms";
 
         private HistogramWindow thisWindow;
 
@@ -159,7 +151,6 @@ implements ActionListener, EntryMethodVisibility
                 dialog.displayDialog();
                 if (!dialog.isCancelled())
                 {
-                        timeInterval = dialog.getEndTime() - dialog.getStartTime();
                         final SwingWorker worker = new SwingWorker()
                         {
                                 public Object doInBackground()
@@ -233,9 +224,6 @@ implements ActionListener, EntryMethodVisibility
                                 
 				protected void done()
 				{
-                    milliseconds.setSelected(true);
-                    unitTimeStr = "ms";
-                    unitTime = 1000.0;
                                         // Make the gui status reflect what was chosen in the dialog box
                                         if(binType == TYPE_MSG_SIZE)
                                                 msgSizeBinButton.setSelected(true);
@@ -387,39 +375,6 @@ implements ActionListener, EntryMethodVisibility
         		setGraphSpecificData();
         		refreshGraph();
         	}
-            else if (e.getSource() == microseconds) {
-                scaleHistogramData(1.0);
-                setGraphSpecificData();
-                refreshGraph();
-            }
-            else if (e.getSource() == milliseconds) {
-                scaleHistogramData(1000.0);
-                setGraphSpecificData();
-                refreshGraph();
-            }
-            else if (e.getSource() == seconds) {
-                scaleHistogramData(1000000.0);
-                setGraphSpecificData();
-                refreshGraph();
-            }
-        }
-
-        private void scaleHistogramData(double newUnit) {
-            double scale = newUnit / unitTime;
-            for (int bin = 0; bin < timeNumBins+1; bin++) {
-                for (int ep = 0; ep < numEPs; ep++) {
-                    counts_display[TYPE_TIME][bin][ep] *= scale;
-                }
-            }
-            for (int bin = 0; bin < msgNumBins+1; bin++) {
-                for (int ep = 0; ep < numEPs; ep++) {
-                    counts_display[TYPE_MSG_SIZE][bin][ep] *= scale;
-                }
-            }
-            unitTime = newUnit;
-            if (unitTime == 1.0) unitTimeStr = "us";
-            else if (unitTime == 1000.0) unitTimeStr = "ms";
-            else unitTimeStr = "s";
         }
 
         protected JPanel getMainPanel()
@@ -492,28 +447,8 @@ implements ActionListener, EntryMethodVisibility
         	//buttonPanel.add(entrySelectionButton);
 		//buttonPanel.add(epTableButton);
 
-            ButtonGroup unit_bg = new ButtonGroup();
-            microseconds = new JRadioButton("Microseconds", false);
-            milliseconds = new JRadioButton("Milliseconds", true);
-            seconds = new JRadioButton("Seconds", false);
-
-            microseconds.addActionListener(this);
-            milliseconds.addActionListener(this);
-            seconds.addActionListener(this);
-
-            unit_bg.add(microseconds);
-            unit_bg.add(milliseconds);
-            unit_bg.add(seconds);
-
-            JPanel unitPanel = new JPanel();
-            unitPanel.setLayout(gbl);
-            unitPanel.add(microseconds);
-            unitPanel.add(milliseconds);
-            unitPanel.add(seconds);
-
                 Util.gblAdd(mainPanel, graphPanel,  gbc, 0,0, 1,1, 1,1);
                 Util.gblAdd(mainPanel, buttonPanel, gbc, 0,1, 1,1, 0,0);
-                Util.gblAdd(mainPanel, unitPanel,   gbc, 0,2, 1,1, 0,0);
 
                 return mainPanel;
         }
@@ -523,7 +458,7 @@ implements ActionListener, EntryMethodVisibility
                 if (binType == TYPE_TIME)
 		{
                         setXAxis("Entry Method Duration (at " + U.humanReadableString(timeBinSize) + " resolution)", "Time", timeMinBinSize, timeBinSize);
-                        setYAxis("Number of Occurrences/" + unitTimeStr, "");
+                        setYAxis("Number of Occurrences", "");
                         setDataSource("Histogram", counts_display[TYPE_TIME], thisWindow);
                         for(int i=0; i<timeNumBins+1; i++)
                         {
@@ -543,7 +478,7 @@ implements ActionListener, EntryMethodVisibility
 		else if (binType == TYPE_MSG_SIZE)
 		{
                         setXAxis("Message Size (at " +  _format.format(msgBinSize) + " byte resolution)",  "", msgMinBinSize, msgBinSize);
-                        setYAxis("Number of Occurrences/" + unitTimeStr, "");
+                        setYAxis("Number of Occurrences", "");
                         setDataSource("Histogram", counts_display[TYPE_MSG_SIZE], thisWindow);
                 }
 		else if (binType == TYPE_IDLE_PERC)
@@ -586,10 +521,7 @@ implements ActionListener, EntryMethodVisibility
         	String bubbleText[] = new String[5];
 
                 bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-                bubbleText[1] = String.format("Rate = %s occurences/%s (%s occurences)",
-                    _format.format(counts_display[TYPE_TIME][xVal][yVal]),
-                    unitTimeStr,
-                    _format.format(counts_display[TYPE_TIME][xVal][yVal] * timeInterval/unitTime));
+                bubbleText[1] = "Count: " + counts_display[TYPE_TIME][xVal][yVal];
                 bubbleText[2] = "Time: "+counts_display[TYPE_ACCTIME][xVal][yVal];
                 bubbleText[3] = "Time Percentage: "+(df.format((counts_display[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
                 if (xVal < timeNumBins)
@@ -612,7 +544,7 @@ implements ActionListener, EntryMethodVisibility
 
                 bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
                 bubbleText[1] = "Time: " + counts_display[TYPE_ACCTIME][xVal][yVal];
-                bubbleText[2] = "Count: " + counts_display[TYPE_TIME][xVal][yVal] * timeInterval/unitTime;
+                bubbleText[2] = "Count: " + counts_display[TYPE_TIME][xVal][yVal];
                 bubbleText[3] = "Time Percentage: "+(df.format((counts_display[TYPE_ACCTIME][xVal][yVal]/totalExecutionTime)*100))+"%";
                 if (xVal < timeNumBins)
 		{
@@ -632,10 +564,7 @@ implements ActionListener, EntryMethodVisibility
                 String bubbleText[] = new String[3];
 
                 bubbleText[0] = MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-                bubbleText[1] = String.format("Rate: %s messages/%s (%s messages)",
-                    _format.format(counts_display[TYPE_MSG_SIZE][xVal][yVal]),
-                    unitTimeStr,
-                    _format.format(counts_display[TYPE_MSG_SIZE][xVal][yVal] * timeInterval/unitTime));
+                bubbleText[1] = "Count: " + counts_display[TYPE_MSG_SIZE][xVal][yVal];
                 if (xVal < msgNumBins)
 		{
                         bubbleText[2] = "Bin: " +

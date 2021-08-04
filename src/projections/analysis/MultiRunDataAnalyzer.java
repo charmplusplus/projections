@@ -360,9 +360,9 @@ public class MultiRunDataAnalyzer {
 	} else {
 	    // if extra info, use different array.
 	    if (epIndex >= numEPs) {
-		return new Double(extraTable[dataType][col-1][numEPs-epIndex]);
+		return extraTable[dataType][col - 1][numEPs - epIndex];
 	    } else {
-		return new Double(dataTable[dataType][col-1][epIndex]);
+		return dataTable[dataType][col - 1][epIndex];
 	    }
 	}
     }

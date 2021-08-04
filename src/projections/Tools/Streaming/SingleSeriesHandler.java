@@ -74,7 +74,7 @@ class SingleSeriesHandler {
 
 				numData = data.length / 1;
 				for(int i=0; i<numData; i++){
-					Float v = new Float(ByteParser.unsignedByteToInt(data[i]));
+					float v = (float) ByteParser.unsignedByteToInt(data[i]);
 
 					// Range of values supplied by this ccs handler is 0 to 200. Convert to percentages.
 					v /= 2.0f;

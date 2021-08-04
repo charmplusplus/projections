@@ -7,8 +7,8 @@ import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.SwingWorker;
 
@@ -102,8 +102,8 @@ public class Analysis {
   
   Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
   Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
-  public static int isOverhead = -2;
-  public static int isIdle = -1;
+  public static final int OVERHEAD_ENTRY_POINT = -2;
+  public static final int IDLE_ENTRY_POINT = -1;
   
   public TachyonShifts tachyonShifts;
   
@@ -257,7 +257,7 @@ public class Analysis {
 	  totalTime = temp;
 	}
       }
-      rcReader.setValue("RC_GLOBAL_END_TIME", new Long(totalTime));
+      rcReader.setValue("RC_GLOBAL_END_TIME", totalTime);
     }
     
     // Find Pose End Time Data
@@ -274,8 +274,8 @@ public class Analysis {
     				return null;
     			}
     			public void done() {
-    				rcReader.setValue("RC_POSE_REAL_TIME", new Long(poseTotalTime));
-    				rcReader.setValue("RC_POSE_VIRT_TIME", new Long(poseTotalVirtualTime));	    }
+    				rcReader.setValue("RC_POSE_REAL_TIME", poseTotalTime);
+    				rcReader.setValue("RC_POSE_VIRT_TIME", poseTotalVirtualTime);	    }
     		};
     		worker.execute();
     	}
@@ -358,18 +358,25 @@ public class Analysis {
         return intervalData.getNumIntervals();
     }
 
-    public int[][] getSumDetailData() {
-        return intervalData.sumDetailData();
+	public int[][] getSumDetailData_interval_EP() {
+        return intervalData.getSumDetailData_interval_EP();
     }
+	public int[][] getSumDetailData_PE_EP() {
+        return intervalData.getSumDetailData_PE_EP();
+    }
+	public int[][] getSumDetailData_PE_interval() {
+        return intervalData.getSumDetailData_PE_interval();
+    }
+
     public Color getEntryColor(int entryIdx) {
-    	if (entryIdx == isIdle) {
+    	if (entryIdx == IDLE_ENTRY_POINT) {
     		Paint p = getIdleColor();
     		if (p instanceof GradientPaint)
     			return ((GradientPaint)p).getColor1();
     		else
     			return (Color)p;
     	}
-    	else if (entryIdx == isOverhead) {
+    	else if (entryIdx == OVERHEAD_ENTRY_POINT) {
     		Paint p = getOverheadColor();
     		if (p instanceof GradientPaint)
     			return ((GradientPaint)p).getColor1();
@@ -385,9 +392,9 @@ public class Analysis {
 
 
     public void setEntryColor(int entryIdx, Color color) {
-    	if (entryIdx == isIdle)
+    	if (entryIdx == IDLE_ENTRY_POINT)
     		idle = color;
-    	else if (entryIdx == isOverhead)
+    	else if (entryIdx == OVERHEAD_ENTRY_POINT)
     		overhead = color;
     	else if (entryIdx < getSts().getEntryCount())
     		entryColors[entryIdx] = color;
@@ -412,39 +419,78 @@ public class Analysis {
     		return u.usage(pnum, begintime, endtime, getVersion() );
     	}
     	int numUserEntries=getSts().getEntryCount();
-    	long[][] data;
-    	long[][] phasedata;
-    	
+    	long[] data;
+		float ret[][] = new float[2][numUserEntries + 4];
+
     	/*BAD: silently ignores begintime and endtime*/
     	if( sumAnalyzer.getPhaseCount()>1 ) {
 			Iterator<Integer> iter = phases.iterator();
-			data = sumAnalyzer.getPhaseChareTime(iter.next());
+			data = sumAnalyzer.getPhaseChareTime(iter.next())[pnum].clone();
 
 			while (iter.hasNext() && pnum > -1)
 			{
-				phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
+				long[] phasedata = sumAnalyzer.getPhaseChareTime(iter.next())[pnum];
 				{
 					for(int q=0; q<numUserEntries; q++) {
-    					data[pnum][q] += phasedata[pnum][q];
-    				}
+						data[q] += phasedata[q];
+					}
 				}
 			}
-    	} else {
-    		data = sumAnalyzer.getChareTime();
-    	}
-    	float ret[][]=new float[2][numUserEntries+4];
-    	//Convert to percent-- .sum entries are always over the 
-    	// entire program run.
-    	double scale=100.0/getTotalTime();
-    	for (int q=0;q<numUserEntries;q++){
-    		ret[0][q]=(float)(scale*data[pnum][q]);
-    		// dummy value for message send time at the moment .. 
-    		// summary file reader needs to be fixed first
-    		ret[1][q] = (float )0.0; 
-    	}
-    	return ret;
-    }
-    
+		}
+		else if (hasSumDetailFiles()) {
+			SortedSet<Integer> peSet = new TreeSet<>();
+			peSet.add(pnum);
+
+			double intervalSize = intervalData.getIntervalSize();
+			int intervalStart = (int) (begintime / intervalSize);
+			int intervalEnd = (int) Math.ceil(endtime / intervalSize) - 1;
+			int numIntervals = intervalEnd - intervalStart + 1;
+
+			MainWindow.runObject[0].LoadGraphData((long) intervalData.getIntervalSize(),
+					intervalStart,
+					intervalEnd, false, peSet);
+
+			int sumDetailData[][] = intervalData.getSumDetailData_interval_EP();
+			data = new long[numUserEntries];
+			for (int interval = 0; interval < numIntervals; interval++) {
+				for (int entry = 0; entry < numUserEntries; entry++) {
+					data[entry] += sumDetailData[interval][entry];
+				}
+			}
+		}
+		else if (hasSumFiles()) {
+			// The log has per-EP times across the entire execution, so use that when the whole interval is selected
+			if (endtime - begintime == totalTime) {
+				data = sumAnalyzer.getChareTime()[pnum];
+			}
+			// Otherwise, the best we can do is to use the utilization data without EP info
+			else {
+				long total = 0;
+				byte utilData[][] = sumAnalyzer.getProcessorUtilization();
+				int intervalStart = (int) (begintime / getSummaryIntervalSize());
+				int intervalEnd = (int) Math.ceil(endtime / getSummaryIntervalSize()) - 1;
+				for (int i = intervalStart; i <= intervalEnd; i++) {
+					total += utilData[pnum][i];
+				}
+				// Processor utilization data is already in terms of percent, so return it directly after averaging over the
+				// intervals rather than proceeding to the time -> percent conversion at the end of this function
+				ret[0][0] = ((float) total) / (intervalEnd - intervalStart + 1);
+				return ret;
+			}
+		}
+		else {
+			return null;
+		}
+		// Convert to percent
+		double scale = 100.0 / (endtime - begintime);
+		for (int q = 0; q < numUserEntries; q++) {
+			ret[0][q] = (float) (scale * data[q]);
+			// dummy value for message send time at the moment
+			// summary file reader needs to be fixed first
+			ret[1][q] = (float) 0.0;
+		}
+		return ret;
+	}
 //    // a == entry point index, t == type of data
 //    public int[][] getUserEntryData( int a, int t ) {
 //	return userEntryData[ a ][ t ];
@@ -806,17 +852,26 @@ public class Analysis {
 //	}
 //    }
 
-    
-    /// Get user event color given one of the potentially sparse ids used provided by the program
-    public Color getUserEventColor(int eventID) {
-    	if (getSts() != null) { 
-    		Integer idx = getSts().getUserEventIndex(eventID);
-    		if(idx!=null)
-    			return userEventColors[idx.intValue()]; 
-    	} 
-
-    	return null; 
-    }
+	private static boolean printedError = false;
+	/// Get user event color given one of the potentially sparse ids used provided by the program
+	public Color getUserEventColor(int eventID) {
+		if (getSts() != null) {
+			Integer idx = getSts().getUserEventIndex(eventID);
+			if(idx != null) {
+				int val = idx.intValue();
+				if (val >= 0 && val < userEventColors.length) {
+					return userEventColors[val];
+				} else {
+					if (!printedError) {
+						System.err.println("User Event Color Index (" + eventID + ") out of bounds!\n");
+						printedError = true;
+					}
+					return userEventColors[0];
+				}
+			}
+		}
+		return null;
+	}
 
     
     public void setUserEventColor(int eventID, Color c) {

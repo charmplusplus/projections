@@ -43,7 +43,6 @@ import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.RangeHistory;
 import projections.analysis.PhaseHistory;
-import projections.misc.LogEntryData;
 
 /**
  *  RangeDialogNew
@@ -494,12 +493,15 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			return false;
 		}
 
+		// this block is disabled to allow setting arbitrary end times, useful for precisely matching x-axis scale
+		/*
 		// ending time cannot be greater than total time
 		if (getEndTime() > getTotalTime()) {
 			endTextLabel.setForeground(Color.red);
 			endTimeField.setForeground(Color.red);
 			return false;
 		}
+		*/
 
 		if(! processorsField.rangeVerifier.verify(processorsField) ){
 			processorTextLabel.setForeground(Color.red);
@@ -788,7 +790,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 					int c = 0;
 					while (true) {
-						LogEntryData data = reader.nextEvent();
+						LogEntry data = reader.nextEvent();
 
 						if(data.type == ProjDefs.USER_SUPPLIED_NOTE){
 							if(data.note.contains("***")){

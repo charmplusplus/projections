@@ -3,19 +3,19 @@ package projections.analysis;
 import java.io.IOException;
 
 import projections.gui.MainWindow;
-import projections.misc.LogEntryData;
+import projections.misc.LogEntry;
 import projections.analysis.ProjDefs;
 
 
 /** This thread's run() method will lookup the end computation time for an input log file */
 class LogLoaderEndEventThread  implements Runnable {
 
-	protected Long result;
+	protected long result;
 	private int myRun = 0;
 	private int pe;
 
 	protected LogLoaderEndEventThread(int pe) {
-		result = new Long(Long.MIN_VALUE);
+		result = Long.MIN_VALUE;
 		this.pe = pe;
 	}
 
@@ -25,7 +25,7 @@ class LogLoaderEndEventThread  implements Runnable {
 
 		try {	  
 			while (true) {
-				LogEntryData data = reader.nextEvent();
+				LogEntry data = reader.nextEvent();
 				if (data.isEndType() && (data.time > result))
 				{
 					result = data.time;

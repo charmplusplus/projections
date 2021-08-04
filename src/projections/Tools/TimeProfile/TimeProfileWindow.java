@@ -270,26 +270,31 @@ implements ActionListener, Clickable
 
 	public void showDialog() {
 		if (dialog == null) {
-			intervalPanel = new IntervalChooserPanel();
-            if(MainWindow.runObject[myRun].hasLogFiles())
-                dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
-            else //only has summary files
-		       dialog = new RangeDialog(this, "Select Range", intervalPanel, true);
-        }
+			if (MainWindow.runObject[myRun].hasLogFiles())
+				intervalPanel = new IntervalChooserPanel();
+			else // Intervals are fixed for the summary modes, so don't display choosable interval panel
+				intervalPanel = null;
+			dialog = new RangeDialog(this, "Select Range", intervalPanel, false);
+		}
+
 		dialog.displayDialog();
 		if (!dialog.isCancelled()){
-            startInterval = (int)intervalPanel.getStartInterval();
-            endInterval = (int)intervalPanel.getEndInterval();
             processorList = dialog.getSelectedProcessors();
             startTime = dialog.getStartTime();
-            if(MainWindow.runObject[myRun].hasLogFiles()){
-			    intervalSize = intervalPanel.getIntervalSize();
-            }
-            else{//sum detail mode
-                startInterval = 0;
-                endInterval = (int) MainWindow.runObject[myRun].getSumDetailNumIntervals() - 1;
-                intervalSize = (long) MainWindow.runObject[myRun].getSumDetailIntervalSize();
-            }
+
+			if (MainWindow.runObject[myRun].hasLogFiles()) {
+				intervalSize = intervalPanel.getIntervalSize();
+				startInterval = (int)intervalPanel.getStartInterval();
+				endInterval = (int)intervalPanel.getEndInterval();
+
+			} else { // sum detail mode
+				intervalSize = (long) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+				startInterval = (int) (startTime / intervalSize);
+				final long endTime = dialog.getEndTime();
+				// For intervalSize of 1, endTime of 2 should give endInterval of 1 ([1,2)), endTime of 2.5 should give
+				// endInterval of 2 ([2, 3)), so take ceil and subtract one
+				endInterval = (int) Math.ceil(((double)endTime) / intervalSize) - 1;
+			}
 
             System.out.println("Props: intervalSize:"+intervalSize+"- startInterval:"+startInterval+"- endInterval:"+endInterval+"- startTime:" + startTime);
 
@@ -352,10 +357,10 @@ implements ActionListener, Clickable
                     {
 					    // Do serial file reading because all we have is the sum files	    	
                         //System.out.println("hasSumDetailFiles - LOAD DATA. numIntervals: " + numIntervals);
-                        SortedSet<Integer> availablePEs =
-                                MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
-                        MainWindow.runObject[myRun].LoadGraphData(intervalSize, 0, numIntervals-1, false, availablePEs);
-                        int[][] sumDetailData = MainWindow.runObject[myRun].getSumDetailData();
+                        MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,
+                                processorList);
+
+                        int[][] sumDetailData = MainWindow.runObject[myRun].getSumDetailData_interval_EP();
 
                         for(int i=0;i<numIntervals;i++){
 						    //for(int j=0;j<numEPs+special;j++){
@@ -440,7 +445,7 @@ implements ActionListener, Clickable
                     //Bilge
                     if( MainWindow.runObject[myRun].hasSumDetailFiles()){
                         //idle time calculation for sum detail
-                        int[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentage();
+                        double[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerInterval();
                         for(int i=0;i<numIntervals;i++){
                             graphData[i][numEPs+1] = idlePercentage[i];
                         }

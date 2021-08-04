@@ -5,6 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.*;
 
 import projections.misc.LogLoadException;
@@ -34,6 +37,18 @@ public class StsReader extends ProjDefs
     private int TotalChares;
     private int EntryCount;
     private int TotalMsgs;
+    private ZonedDateTime timestamp;
+    private String commandline;
+    private String charmVersion;
+    private String username;
+    private String hostname;
+
+    //SMP mode
+    private int NumNodes = 0;
+    private int NodeSize = 1;
+    private int NumCommThdPerNode = 0;
+	private boolean isSMP = false;
+	private boolean isCommTracingEnabled = false;
 
     private class Chare
     {
@@ -55,12 +70,7 @@ public class StsReader extends ProjDefs
     private Chare Chares[];    // indexed by chare id
 //    private Chare ChareList[];
     private long MsgTable[];        // indexed by msg id
- 
-
-    //SMP mode
-    private int NumNodes=0;
-    private int NodeSize = 1;
-    private int NumCommThdPerNode = 0;
+	
     
     /** Entry Names */
     private int entryIndex = 0; ///< The next available index
@@ -121,7 +131,7 @@ public class StsReader extends ProjDefs
         StringBuilder value = new StringBuilder(current.substring(1));
         while (st.hasMoreTokens()) {
             current = st.nextToken();
-            value.append(current);
+            value.append(" " + current);
             if (current.endsWith("\"")) {
                 return value.substring(0, value.length() - 1);
             }
@@ -164,9 +174,21 @@ public class StsReader extends ProjDefs
 		    Machine = matchQuotes(st);
 		} else if (s1.equals("PROCESSORS")) {
 		    NumPe = Integer.parseInt(st.nextToken());
-		} else if (s1.equals("SMPMODE")) {
-		    NodeSize = Integer.parseInt(st.nextToken());
- 		    NumNodes = Integer.parseInt(st.nextToken());
+		} else if (s1.equals("SMPMODE")) { 
+			NodeSize = Integer.parseInt(st.nextToken());
+			NumNodes = Integer.parseInt(st.nextToken());
+			isSMP = true;
+		} else if (s1.equals("TIMESTAMP")) {
+			timestamp = ZonedDateTime.ofInstant(Instant.parse(st.nextToken()), ZoneId.systemDefault());
+			String result = timestamp.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.LONG));
+		} else if (s1.equals("COMMANDLINE")) {
+			commandline = matchQuotes(st);
+		} else if (s1.equals("CHARMVERSION")) {
+			charmVersion = st.nextToken();
+		} else if (s1.equals("USERNAME")) {
+			username = matchQuotes(st);
+		} else if (s1.equals("HOSTNAME")) {
+			hostname = matchQuotes(st);
 		} else if (s1.equals("TOTAL_CHARES")) {
 		    TotalChares = Integer.parseInt(st.nextToken());
 		    Chares = new Chare[TotalChares];
@@ -212,7 +234,7 @@ public class StsReader extends ProjDefs
 		    int Size  = Integer.parseInt(st.nextToken());
 		    MsgTable[ID] = Size;
 		} else if (s1.equals("EVENT")) {
-		    Integer key = new Integer(st.nextToken());
+		    int key = Integer.parseInt(st.nextToken());
 		    if (!userEvents.containsKey(key)) {
 			String eventName = "";
 			while (st.hasMoreTokens()) {
@@ -220,15 +242,14 @@ public class StsReader extends ProjDefs
 			}
 			userEvents.put(key, eventName);
 			userEventNames[userEventIndex] = eventName;
-			userEventIndices.put(key, 
-					     new Integer(userEventIndex++));
+			userEventIndices.put(key, userEventIndex++);
 		    }
 		} else if (s1.equals("TOTAL_EVENTS")) {
 		    // restored by Chee Wai - 7/29/2002
 		    userEventNames = 
 			new String[Integer.parseInt(st.nextToken())];
 		} else if (s1.equals("STAT")) {
-		    Integer key = new Integer(st.nextToken());
+		    int key = Integer.parseInt(st.nextToken());
 		    if (!userStats.containsKey(key)) {
 			String statName = "";
 			while (st.hasMoreTokens()) {
@@ -236,8 +257,7 @@ public class StsReader extends ProjDefs
 			}
 			userStats.put(key, statName);
 			userStatNames[userStatIndex] = statName;
-			userStatIndices.put(key,
-					     new Integer(userStatIndex++));
+			userStatIndices.put(key, userStatIndex++);
 		    }
 		//Read in number of stats
 		} else if (s1.equals("TOTAL_STATS")) {
@@ -258,12 +278,13 @@ public class StsReader extends ProjDefs
 	    }
 		
 	    InFile.close();
-		
+	    
 		//post-processing for SMP related data fields
 		if(NumNodes == 0){
 			//indicate a non-SMP run
 			NumNodes = NumPe;		
 		}else{
+			isCommTracingEnabled = (NodeSize * NumNodes) < NumPe;
 			int workPes = NumNodes*NodeSize;
 			NumCommThdPerNode = (NumPe-workPes)/NumNodes;
 			if((NodeSize+NumCommThdPerNode)*NumNodes != NumPe){
@@ -302,8 +323,26 @@ public class StsReader extends ProjDefs
 	return Machine;
     }
     
+    public String getCommandline() {
+		return commandline;
+	}
 
-    
+	public ZonedDateTime getTimestamp() {
+		return timestamp;
+	}
+
+	public String getCharmVersion() {
+		return charmVersion;
+	}
+
+	public String getUsername() {
+		return username;
+	}
+
+	public String getHostname() {
+		return hostname;
+	}
+
     public String getEntryNameByID(int ID) {
     	return getEntryNames().get(ID);
     }   
@@ -352,7 +391,7 @@ public class StsReader extends ProjDefs
     	return getEntryChareNameByIndex(index) + "::" + getEntryNameByIndex(index);
     }   
     
-	public Integer getEntryIndex(Integer ID) {
+	public Integer getEntryIndex(int ID) {
 		if(ID<0)
     		return ID;
 		return entryIDToFlat.get(ID);
@@ -375,8 +414,7 @@ public class StsReader extends ProjDefs
     }
 
     public String getUserEventName(int eventID) { 
-	Integer key = new Integer(eventID);
-	return userEvents.get(key);
+		return userEvents.get(eventID);
     }
 
     public String[] getUserEventNames() {
@@ -403,8 +441,7 @@ public class StsReader extends ProjDefs
     }
 
     public String getUserStatName(int eventID) {
-	Integer key = new Integer(eventID);
-	return userStats.get(key);
+		return userStats.get(eventID);
     }
 
     public String[] getUserStatNames() {
@@ -469,9 +506,11 @@ public class StsReader extends ProjDefs
 	public int getNumCommThdPerNode(){
 		return NumCommThdPerNode;
 	}
-	public boolean isSMPRun(){
-		return NumNodes<NumPe;
+	public boolean hasCommThdTrace(){
+		return isCommTracingEnabled;
+	}
+	public boolean isSMPRun() {
+		return isSMP;
 	}
 
 }
-

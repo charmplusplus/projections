@@ -57,7 +57,9 @@ public class IntervalData
     private int numIntervals = 0;
     private double intervalSize = 0;
 
-    private int sumDetailData[][] = null;
+    private int sumDetailData_interval_EP[][] = null;
+    private int sumDetailData_PE_EP[][] = null;
+    private int sumDetailData_PE_interval[][] = null;
 
     /**
      *  The constructor
@@ -110,14 +112,20 @@ public class IntervalData
                                           SortedSet<Integer> processorList){
         int numIntervals = intervalEnd - intervalStart + 1;
 
-        sumDetailData = new int[numIntervals][numEPs];
+        sumDetailData_interval_EP = new int[numIntervals][numEPs];
+        sumDetailData_PE_EP = new int[numPEs][numEPs];
+        sumDetailData_PE_interval = new int[numPEs][numIntervals];
         double[][] tempData;
         for(Integer curPe : processorList) {
+            int ii = intervalStart;
             tempData = getData(curPe, TYPE_TIME);
             for(int i=0; i<numIntervals; i++){
                 for(int e=0; e<numEPs; e++){
-                    sumDetailData[i][e] += tempData[e][i];
+                    sumDetailData_interval_EP[i][e] += (int)tempData[e][ii];
+                    sumDetailData_PE_EP[curPe][e] += (int)tempData[e][ii];
+                    sumDetailData_PE_interval[curPe][i] += (int)tempData[e][ii];
                 }
+                ii++;
             }
         }
     }
@@ -177,7 +185,17 @@ public class IntervalData
 	}
     }
 
-    public int[][] sumDetailData() {return  sumDetailData; };
+	public int[][] getSumDetailData_interval_EP() {
+		return sumDetailData_interval_EP;
+	}
+
+	public int[][] getSumDetailData_PE_EP() {
+		return sumDetailData_PE_EP;
+	}
+
+	public int[][] getSumDetailData_PE_interval() {
+		return sumDetailData_PE_interval;
+	}
 
     public int[][][] getSystemUsageData() {
 	return systemUsageData;

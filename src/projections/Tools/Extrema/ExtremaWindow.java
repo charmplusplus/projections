@@ -305,25 +305,20 @@ Clickable
 		int numPEs = selectedPEs.size();
 		tempData = new double[numPEs][];
 
-		if(MainWindow.runObject[myRun].hasLogData()){
-
+		if (MainWindow.runObject[myRun].hasLogData()) {
 			// Create a list of worker threads
 			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 
-			int pIdx=0;		
-			
-			for(Integer pe : selectedPEs){
-				readyReaders.add( new ThreadedFileReader(pe, startTime, endTime, 
-						numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute) );
-				pIdx++;
+			for (Integer pe : selectedPEs) {
+				readyReaders.add(new ThreadedFileReader(pe, startTime, endTime,
+						numActivities, numActivityPlusSpecial, selectedActivity, selectedAttribute));
 			}
-
 
 			// Determine a component to show the progress bar with
 			Component guiRootForProgressBar = null;
-			if(thisWindow!=null && thisWindow.isVisible()) {
+			if (thisWindow != null && thisWindow.isVisible()) {
 				guiRootForProgressBar = thisWindow;
-			} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+			} else if (MainWindow.runObject[myRun].guiRoot != null && MainWindow.runObject[myRun].guiRoot.isVisible()) {
 				guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
 			}
 
@@ -331,44 +326,40 @@ Clickable
 			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Extrema in Parallel", readyReaders, guiRootForProgressBar, true);
 			threadManager.runAll();
 
-
 			// Retrieve results from each thread, storing them into tempData
-			int pIdx2=0;
+			int pIdx = 0;
 			Iterator<Runnable> iter = readyReaders.iterator();
 			while (iter.hasNext()) {
 				ThreadedFileReader r = (ThreadedFileReader) iter.next();
-				tempData[pIdx2] = r.myData;
-				pIdx2++;
+				tempData[pIdx] = r.myData;
+				pIdx++;
 			}
-		}
-		else if(MainWindow.runObject[myRun].hasSumDetailData()){
-			int intervalSize =(int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
-			int startInterval=(int)startTime/intervalSize;
-			int endInterval=(int)endTime/intervalSize -1;
-			
-			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false,selectedPEs);
+		} else if (MainWindow.runObject[myRun].hasSumDetailData()) {
+			int intervalSize = (int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
+			int startInterval = (int) ((float) startTime / intervalSize);
+			int endInterval = (int) Math.ceil((float) endTime / intervalSize) - 1;
 
-			int[][] sumDetailDataperproc = MainWindow.runObject[myRun].getSumDetailData_PE_EP();
+			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false, selectedPEs);
 
-	// Use sum files to get the idle data, sumDetail log files do not contain idle
-	// data
+			int[][] sumDetailData_PE_EP = MainWindow.runObject[myRun].getSumDetailData_PE_EP();
 
-			double scale = 100.0 / (1 * ((int) endTime - (int) startTime));
-			double[] idleTemp = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentageperproc(startInterval,endInterval);
+			double scale = 100.0 / (endTime - startTime);
+			// Use sum files to get the idle data, sumDetail files do not contain idle data
+			double[] idleTemp = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerPE(startInterval, endInterval);
 
-
-			for(int i =0;i <sumDetailDataperproc.length;i++){
-				double  lis[] =new double[sumDetailDataperproc[i].length+2]; 
-				double sum=0.0;
-				for(int j =0;j<sumDetailDataperproc[i].length;j++){
-					lis[j]=sumDetailDataperproc[i][j]*scale;
-					sum+=lis[j];
+			// Assume that each PE has the same number of EPs
+			final int numEPs = sumDetailData_PE_EP[0].length;
+			for (int pe = 0; pe < sumDetailData_PE_EP.length; pe++) {
+				double lis[] = new double[numEPs + 2];
+				double sum = 0.0;
+				for (int ep = 0; ep < numEPs; ep++) {
+					lis[ep] = sumDetailData_PE_EP[pe][ep] * scale;
+					sum += lis[ep];
 				}
 
-
-				lis[sumDetailDataperproc[i].length] = idleTemp[i];
-				lis[sumDetailDataperproc[i].length+1] = 100.0-sum-lis[sumDetailDataperproc[i].length];
-				tempData[i]=lis;	
+				lis[numEPs] = idleTemp[pe];
+				lis[numEPs + 1] = 100.0 - sum - lis[numEPs];
+				tempData[pe] = lis;
 			}
 		}
 

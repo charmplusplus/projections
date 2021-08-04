@@ -626,15 +626,36 @@ public class SumAnalyzer extends ProjDefs
 	return tokenizer.sval;
     }
 
-    public int[] getTotalIdlePercentage(){
-        int[] totalIdlePercentage = new int[IntervalCount];
-        for(int i=0; i<nPe; i++){
-            for(int j=0; j<IntervalCount; j++){
-                totalIdlePercentage[j] += IdlePercentage[i][j] / IntervalCount;
-            }
-        }
-        return totalIdlePercentage;
-    }
+	public double[] getTotalIdlePercentagePerInterval() {
+		return getTotalIdlePercentagePerInterval(0, IntervalCount - 1);
+	}
+
+	public double[] getTotalIdlePercentagePerInterval(int startInterval, int endInterval) {
+		double numIntervals = endInterval - startInterval + 1;
+		double[] totalIdlePercentage = new double[(int) numIntervals];
+		for (int pe = 0; pe < nPe; pe++) {
+			for (int interval = startInterval; interval <= endInterval; interval++) {
+				totalIdlePercentage[interval - startInterval] += IdlePercentage[pe][interval] / numIntervals;
+			}
+		}
+		return totalIdlePercentage;
+	}
+
+	public double[] getTotalIdlePercentagePerPE() {
+		return getTotalIdlePercentagePerPE(0, IntervalCount - 1);
+	}
+
+	public double[] getTotalIdlePercentagePerPE(int startInterval, int endInterval) {
+		double numIntervals = endInterval - startInterval + 1;
+		double[] totalIdlePercentage = new double[nPe];
+		for (int pe = 0; pe < nPe; pe++) {
+			for (int interval = startInterval; interval <= endInterval; interval++) {
+				totalIdlePercentage[pe] += IdlePercentage[pe][interval] / numIntervals;
+			}
+		}
+		return totalIdlePercentage;
+	}
+
 	public byte[][] getIdlePercentage(){
 		return IdlePercentage;
 	}

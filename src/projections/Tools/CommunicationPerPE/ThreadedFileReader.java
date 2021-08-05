@@ -5,6 +5,7 @@ package projections.Tools.CommunicationPerPE;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import projections.Tools.ThreadedFileReaderBase;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
@@ -13,13 +14,12 @@ import projections.misc.LogEntry;
 import projections.analysis.StsReader;
 
 /** The reader threads for Communication Per PE Tool. */
-class ThreadedFileReader implements Runnable  {
+class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 
 	private int pe;
 	private int pIdx;
 	private long startTime;
 	private long endTime;
-	private int myRun = 0;
 	private double[][] sentMsgCount;
 	private double[][] sentByteCount;
 	private double[][] receivedMsgCount;
@@ -127,7 +127,7 @@ class ThreadedFileReader implements Runnable  {
 						//trace. So we have to subtract those msgs that are sent to external
 						//charm smp nodes. -Chao Mei
 						int pcreation = logdata.pe;						
-						if(pcreation!=pe && isSameNode(pcreation)){
+						if(pcreation!=pe && isSameNode(pe, pcreation)){
 							receivedMsgCount[pIdx][EPid]--;
 							receivedByteCount[pIdx][EPid] -= logdata.msglen;
 						}						
@@ -161,18 +161,7 @@ class ThreadedFileReader implements Runnable  {
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
 	}
-	
-	private boolean isSameNode(int p1){
-		StsReader sts = MainWindow.runObject[myRun].getSts();
-		int totalPes = sts.getProcessorCount();
-		int totalNodes = sts.getSMPNodeCount();
-		int nodesize = sts.getNodeSize();
-		int n1 = p1/nodesize;
-		if(p1>=totalNodes*nodesize && p1<totalPes) n1 = p1- totalNodes*nodesize;
-		int selfN = pe/nodesize;
-		if(pe>=totalNodes*nodesize && pe<totalPes) selfN = pe - totalNodes*nodesize;
-		return n1==selfN;
-	}
+
 }
 
 

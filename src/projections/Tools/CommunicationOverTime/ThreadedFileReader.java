@@ -2,6 +2,7 @@ package projections.Tools.CommunicationOverTime;
 
 import java.io.IOException;
 
+import projections.Tools.ThreadedFileReaderBase;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
@@ -15,16 +16,13 @@ import projections.misc.LogEntry;
  *  Written by Samir Mirza, Isaac Dooley, and possibly others
  * 
  */
-class ThreadedFileReader implements Runnable  {
+class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 
 	private int pe;
 	private long startInterval;
 	private long endInterval;
 	private long intervalSize;
 
-	private int myRun = 0;
-
-	private int PesPerNode;
 	// Global data that must be safely accumulated into:
 	private double[][] globalMessagesSend;
 	private double[][] globalMessagesRecv;
@@ -55,9 +53,6 @@ class ThreadedFileReader implements Runnable  {
 		this.globalExternalBytesRecv = globalExternalBytesRecv;
 		this.globalExternalNodeMessageRecv = globalExternalNodeMessageRecv;
 		this.globalExternalNodeBytesRecv = globalExternalNodeBytesRecv;
-
-		StsReader sts = MainWindow.runObject[myRun].getSts();
-		this.PesPerNode = sts.getNodeSize(); // 1 for non-SMP, value of ++ppn argument for SMP
 	}
 
 
@@ -119,7 +114,7 @@ class ThreadedFileReader implements Runnable  {
 							localExternalMessageRecv[timeInterval][currEPindex]++;
 							localExternalBytesRecv[timeInterval][currEPindex]+=logdata.msglen;
 						}
-                        if(pe/PesPerNode != srcPe/PesPerNode)
+                        if(!isSameNode(pe, srcPe))
                         {
                             // Update message and byte received external arrays
 							localExternalNodeMessageRecv[timeInterval][currEPindex]++;

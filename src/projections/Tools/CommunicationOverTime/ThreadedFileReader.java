@@ -5,6 +5,7 @@ import java.io.IOException;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
+import projections.analysis.StsReader;
 import projections.gui.MainWindow;
 import projections.misc.LogEntry;
 
@@ -23,7 +24,7 @@ class ThreadedFileReader implements Runnable  {
 
 	private int myRun = 0;
 
-    private int PesPerNode = 28;
+	private int PesPerNode;
 	// Global data that must be safely accumulated into:
 	private double[][] globalMessagesSend;
 	private double[][] globalMessagesRecv;
@@ -36,22 +37,11 @@ class ThreadedFileReader implements Runnable  {
 	
 
 	/** Construct a file reading thread that will generate data for one PE. */
-	protected ThreadedFileReader(int pe, long intervalSize, long startInterval, long endInterval, double[][] globalMessagesSend,double[][] globalMessagesRecv, double[][] globalBytesSend, double [][] globalBytesRecv, double[][] globalExternalMessageRecv, double[][] globalExternalBytesRecv ){
-		this.pe = pe;
-		this.startInterval = startInterval;
-		this.endInterval = endInterval;
-		this.intervalSize = intervalSize;
-
-		this.globalMessagesSend = globalMessagesSend;
-		this.globalMessagesRecv = globalMessagesRecv;
-		this.globalBytesSend = globalBytesSend;
-		this.globalBytesRecv = globalBytesRecv;
-		this.globalExternalMessageRecv = globalExternalMessageRecv;
-		this.globalExternalBytesRecv = globalExternalBytesRecv;
-	}
-
-    protected ThreadedFileReader(int pe, long intervalSize, long startInterval, long endInterval, double[][] globalMessagesSend,double[][] globalMessagesRecv, double[][] globalBytesSend, double [][] globalBytesRecv, double[][] globalExternalMessageRecv, double[][] globalExternalBytesRecv,
-        double[][] globalExternalNodeMessageRecv, double[][] globalExternalNodeBytesRecv){
+	protected ThreadedFileReader(int pe, long intervalSize, long startInterval, long endInterval,
+								 double[][] globalMessagesSend, double[][] globalMessagesRecv,
+								 double[][] globalBytesSend, double[][] globalBytesRecv,
+								 double[][] globalExternalMessageRecv, double[][] globalExternalBytesRecv,
+								 double[][] globalExternalNodeMessageRecv, double[][] globalExternalNodeBytesRecv) {
 		this.pe = pe;
 		this.startInterval = startInterval;
 		this.endInterval = endInterval;
@@ -65,6 +55,9 @@ class ThreadedFileReader implements Runnable  {
 		this.globalExternalBytesRecv = globalExternalBytesRecv;
 		this.globalExternalNodeMessageRecv = globalExternalNodeMessageRecv;
 		this.globalExternalNodeBytesRecv = globalExternalNodeBytesRecv;
+
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		this.PesPerNode = sts.getNodeSize(); // 1 for non-SMP, value of ++ppn argument for SMP
 	}
 
 

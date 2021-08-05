@@ -26,6 +26,8 @@ class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 	private double[][] receivedByteCount;
 	private double[][] externalRecv;
 	private double[][] externalBytesRecv;
+	private double[][] externalNodeRecv;
+	private double[][] externalNodeBytesRecv;
 	private int[][] hopCount;
 	
 	private boolean isCommThd;
@@ -33,7 +35,13 @@ class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 	public ArrayList<Integer>	localHistogram = new ArrayList<Integer>();
 
 	/** Construct a file reading thread that will generate data for one PE. */
-	protected ThreadedFileReader(int pe, int pIdx, long startTime, long endTime, double[][] sentMsgCount, double[][] sentByteCount, double[][] receivedMsgCount, double[][] receivedByteCount, double[][] externalRecv, double[][] externalBytesRecv, int[][] hopCount ){
+	protected ThreadedFileReader(int pe, int pIdx, long startTime, long endTime,
+								 double[][] sentMsgCount, double[][] sentByteCount,
+								 double[][] receivedMsgCount, double[][] receivedByteCount,
+								 double[][] externalRecv, double[][] externalBytesRecv,
+								 double[][] externalNodeRecv, double[][] externalNodeBytesRecv,
+								 int[][] hopCount)
+	{
 		this.pe = pe;
 		this.pIdx = pIdx;
 		this.startTime = startTime;
@@ -45,6 +53,8 @@ class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 		this.receivedByteCount = receivedByteCount;
 		this.externalRecv = externalRecv;
 		this.externalBytesRecv = externalBytesRecv;
+		this.externalNodeRecv = externalNodeRecv;
+		this.externalNodeBytesRecv = externalNodeBytesRecv;
 		this.hopCount = hopCount;
 		
 		StsReader sts = MainWindow.runObject[myRun].getSts();
@@ -72,6 +82,8 @@ class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 				receivedByteCount[pIdx] = new double[numEPs];
 				externalRecv[pIdx] = new double[numEPs];
 				externalBytesRecv[pIdx] = new double[numEPs];
+				externalNodeRecv[pIdx] = new double[numEPs];
+				externalNodeBytesRecv[pIdx] = new double[numEPs];
 				if (MainWindow.BLUEGENE) {
 					hopCount[pIdx] = new int[numEPs];
 				}
@@ -116,6 +128,11 @@ class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 								CommWindow.manhattanDistance(pe,logdata.pe);
 						}
 					}
+					// If the send was from outside the node
+					if (!isSameNode(pe, logdata.pe)) {
+						externalNodeRecv[pIdx][EPid]++;
+						externalNodeBytesRecv[pIdx][EPid] += logdata.msglen;
+					}
 					
 					if(isCommThd){
 						//process the messages' count for communication threads
@@ -148,6 +165,8 @@ class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 				receivedByteCount[pIdx][ep] /= timeInterval;
 				externalRecv[pIdx][ep] /= timeInterval;
 				externalBytesRecv[pIdx][ep] /= timeInterval;
+				externalNodeRecv[pIdx][ep] /= timeInterval;
+				externalNodeBytesRecv[pIdx][ep] /= timeInterval;
 			}
 		} catch (IOException e) {
 			System.out.println("Exception: " +e);

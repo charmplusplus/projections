@@ -445,7 +445,7 @@ implements ActionListener, Clickable
                     //Bilge
                     if( MainWindow.runObject[myRun].hasSumDetailFiles()){
                         //idle time calculation for sum detail
-                        int[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentage();
+                        double[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerInterval();
                         for(int i=0;i<numIntervals;i++){
                             graphData[i][numEPs+1] = idlePercentage[i];
                         }

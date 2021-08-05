@@ -165,7 +165,7 @@ implements ActionListener, ItemListener
 			userEventsMenuItem.setEnabled(false);
 			userStatsTimeMenuItem.setEnabled(false);
 			userStatsProcMenuItem.setEnabled(false);
-			outlierAnalysisMenuItem.setEnabled(false);
+			outlierAnalysisMenuItem.setEnabled(true);
 			multirunAnalysisMenuItem.setEnabled(true);
 			noiseMinerMenuItem.setEnabled(true);
 			memoryUsageMenuItem.setEnabled(true);

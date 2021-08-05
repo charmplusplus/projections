@@ -40,15 +40,15 @@ implements ItemListener, ActionListener, Clickable
 	// runs.
 	private static int myRun = 0;
 
-	private double[][] 	sentMsgCount;
-	private double[][] 	sentByteCount;
-	private double[][] 	receivedMsgCount;
-	private double[][] 	receivedByteCount;
-	private double[][]	exclusiveRecv;
-	private double[][]	exclusiveBytesRecv;
-	private int[][]     hopCount;
-	private double[][]  avgHopCount;
-	private double[][]  avgPeHopCount;
+	private double[][] sentMsgCount;
+	private double[][] sentByteCount;
+	private double[][] receivedMsgCount;
+	private double[][] receivedByteCount;
+	private double[][] externalRecv;
+	private double[][] externalBytesRecv;
+	private int[][]    hopCount;
+	private double[][] avgHopCount;
+	private double[][] avgPeHopCount;
 
 	// in microseconds, so 1 = "per us", 1000 = "per ms", 1000000 = "per s"
 	// user will be able to change this from the UI
@@ -72,8 +72,8 @@ implements ItemListener, ActionListener, Clickable
 	private Checkbox	sentBytes;
 	private Checkbox	receivedMsgs;
 	private Checkbox    receivedBytes;
-	private Checkbox	recvExclusive;
-	private Checkbox	recvExclusiveBytes;
+	private Checkbox    recvExternal;
+	private Checkbox    recvExternalBytes;
 	private Checkbox    hopCountCB;
 	private Checkbox    peHopCountCB;
 
@@ -145,17 +145,15 @@ implements ItemListener, ActionListener, Clickable
 				setYAxis("Rate of Bytes Received", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
-			}else if(cb == recvExclusive){
-				setDataSource("Rate of Msgs Received Externally", 
-						exclusiveRecv, this);
-				setPopupText("exclusiveRecv");
+			}else if(cb == recvExternal){
+				setDataSource("Rate of Msgs Received Externally", externalRecv, this);
+				setPopupText("externalRecv");
 				setYAxis("Rate of Messages Received Externally", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
-			} else if(cb == recvExclusiveBytes){
-				setDataSource("Rate of Bytes Received Externally", 
-						exclusiveBytesRecv, this);
-				setPopupText("exclusiveBytesRecv");
+			} else if(cb == recvExternalBytes){
+				setDataSource("Rate of Bytes Received Externally", externalBytesRecv, this);
+				setPopupText("externalBytesRecv");
 				setYAxis("Rate of Bytes Received Externally", "");
 				setXAxis("Processor", peList);
 				super.refreshGraph();
@@ -201,8 +199,8 @@ implements ItemListener, ActionListener, Clickable
 				sentByteCount[pIdx][ep] *= scale;
 				receivedMsgCount[pIdx][ep] *= scale;
 				receivedByteCount[pIdx][ep] *= scale;
-				exclusiveRecv[pIdx][ep] *= scale;
-				exclusiveBytesRecv[pIdx][ep] *= scale;
+				externalRecv[pIdx][ep] *= scale;
+				externalBytesRecv[pIdx][ep] *= scale;
 			}
 		}
 		unitTime = newUnit;
@@ -255,19 +253,19 @@ implements ItemListener, ActionListener, Clickable
 				unitTimeStr,
 				_format.format(receivedByteCount[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
-		} else if(currentArrayName.equals("exclusiveRecv")) {
+		} else if(currentArrayName.equals("externalRecv")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 			rString[2] = String.format("Rate = %s messages/%s (%s messages)",
-				_format.format(exclusiveRecv[xVal][yVal]),
+				_format.format(externalRecv[xVal][yVal]),
 				unitTimeStr,
-				_format.format(exclusiveRecv[xVal][yVal]*timeInterval/unitTime));
+				_format.format(externalRecv[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
-		} else if(currentArrayName.equals("exclusiveBytesRecv")) {
+		} else if(currentArrayName.equals("externalBytesRecv")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
 			rString[2] = String.format("Rate = %s B/%s (%s bytes)",
-				_format.format(exclusiveBytesRecv[xVal][yVal]),
+				_format.format(externalBytesRecv[xVal][yVal]),
 				unitTimeStr,
-				_format.format(exclusiveBytesRecv[xVal][yVal]*timeInterval/unitTime));
+				_format.format(externalBytesRecv[xVal][yVal]*timeInterval/unitTime));
 			rString[3] = "Processor = " + xAxis.getIndexName(xVal);
 		} else if (currentArrayName.equals("avgHopCount")) {
 			rString[1] = "EPid: " + a.getEntryNameByIndex(yVal);
@@ -321,9 +319,9 @@ implements ItemListener, ActionListener, Clickable
 		sentBytes = new Checkbox("Bytes Sent To", cbg, false);
 		receivedMsgs = new Checkbox("Msgs Recv By", cbg, false);
 		receivedBytes = new Checkbox("Bytes Recv By", cbg, false);
-		recvExclusive = new Checkbox("External Msgs Recv By", cbg, 
+		recvExternal = new Checkbox("External Msgs Recv By", cbg,
 				false);
-		recvExclusiveBytes = new Checkbox("External Bytes Recv By", cbg, 
+		recvExternalBytes = new Checkbox("External Bytes Recv By", cbg,
 				false);
 
 		if (MainWindow.BLUEGENE) {
@@ -336,8 +334,8 @@ implements ItemListener, ActionListener, Clickable
 		sentBytes.addItemListener(this);
 		receivedMsgs.addItemListener(this);
 		receivedBytes.addItemListener(this);
-		recvExclusive.addItemListener(this);
-		recvExclusiveBytes.addItemListener(this);
+		recvExternal.addItemListener(this);
+		recvExternalBytes.addItemListener(this);
 		if (MainWindow.BLUEGENE) {
 			hopCountCB.addItemListener(this);
 			peHopCountCB.addItemListener(this);
@@ -348,8 +346,8 @@ implements ItemListener, ActionListener, Clickable
 		Util.gblAdd(checkBoxPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
 		Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, recvExclusive, gbc, 4,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, recvExclusiveBytes, gbc, 5,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, recvExternal, gbc, 4,0, 1,1, 1,1);
+		Util.gblAdd(checkBoxPanel, recvExternalBytes, gbc, 5,0, 1,1, 1,1);
 
 		if (MainWindow.BLUEGENE) {
 			Util.gblAdd(blueGenePanel, hopCountCB, gbc, 0,0, 1,1, 1,1);
@@ -424,8 +422,8 @@ implements ItemListener, ActionListener, Clickable
 		sentByteCount = new double[pes.size()][];
 		receivedMsgCount = new double[pes.size()][];
 		receivedByteCount = new double[pes.size()][];
-		exclusiveRecv = new double[pes.size()][];
-		exclusiveBytesRecv = new double[pes.size()][];
+		externalRecv = new double[pes.size()][];
+		externalBytesRecv = new double[pes.size()][];
 		if (MainWindow.BLUEGENE) {
 			hopCount = new int[pes.size()][];
 		} else {
@@ -440,7 +438,7 @@ implements ItemListener, ActionListener, Clickable
 		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 		int pIdx = 0;
     	for(Integer nextPe : pes){
-			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, exclusiveRecv, exclusiveBytesRecv, hopCount ) );
+			readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, externalRecv, externalBytesRecv, hopCount ) );
 			pIdx++;
 		}
 		

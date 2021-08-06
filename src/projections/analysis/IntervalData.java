@@ -107,46 +107,35 @@ public class IntervalData
         System.out.println("IntervalData - hasSumDetailData + numIntervals: "+numIntervals+" intervalSize: " + intervalSize);
 	}
     }
-    public void loadSumDetailIntervalData(long intervalSize, int intervalStart,
-                                          int intervalEnd,
-                                          SortedSet<Integer> processorList){
-        int numIntervals = intervalEnd - intervalStart + 1;
 
-        sumDetailData_interval_EP = new int[numIntervals][numEPs];
-        sumDetailData_PE_EP = new int[numPEs][numEPs];
-        sumDetailData_PE_interval = new int[numPEs][numIntervals];
-        double[][] tempData;
-        for(Integer curPe : processorList) {
-            int ii = intervalStart;
-            tempData = getData(curPe, TYPE_TIME);
-            for(int i=0; i<numIntervals; i++){
-                for(int e=0; e<numEPs; e++){
-                    sumDetailData_interval_EP[i][e] += (int)tempData[e][ii];
-                    sumDetailData_PE_EP[curPe][e] += (int)tempData[e][ii];
-                    sumDetailData_PE_interval[curPe][i] += (int)tempData[e][ii];
-                }
-                ii++;
-            }
-        }
+	public void loadSumDetailIntervalData(long intervalSize, int intervalStart, int intervalEnd,
+										  SortedSet<Integer> processorList) {
+		int numIntervals = intervalEnd - intervalStart + 1;
 
+		sumDetailData_interval_EP = new int[numIntervals][numEPs];
+		sumDetailData_PE_EP = new int[numPEs][numEPs];
+		sumDetailData_PE_interval = new int[numPEs][numIntervals];
 		systemUsageData = new int[3][processorList.size()][numIntervals];
+
 		int processorCount = 0;
 
-		for(Integer curPe : processorList) {
-			// get standard data
-			tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart,
-					intervalEnd-intervalStart+1);
-			// accumulate into systemUsageData.
-			for (int i=0; i<numIntervals; i++) {
-				for (int ep=0; ep<numEPs; ep++) {
-					systemUsageData[1][processorCount][i] +=(int)tempData[ep][i];
+		for (Integer curPe : processorList) {
+			double[][] tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart, numIntervals);
+			for (int i = 0; i < numIntervals; i++) {
+				for (int ep = 0; ep < numEPs; ep++) {
+					sumDetailData_interval_EP[i][ep] += (int) tempData[ep][i];
+					sumDetailData_PE_EP[curPe][ep] += (int) tempData[ep][i];
+					sumDetailData_PE_interval[curPe][i] += (int) tempData[ep][i];
+					systemUsageData[1][processorCount][i] += (int) tempData[ep][i];
 				}
-			// after accumulation for systemUsageData, convert to %util
-				systemUsageData[1][processorCount][i] =(int)IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i],intervalSize);
+				// after accumulation for systemUsageData, convert to utilization percentage (0-100)
+				systemUsageData[1][processorCount][i] =
+						(int) IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i], intervalSize);
 			}
 			processorCount++;
 		}
-    }
+	}
+
 	public int[][] getSumDetailData_interval_EP() {
 		return sumDetailData_interval_EP;
 	}

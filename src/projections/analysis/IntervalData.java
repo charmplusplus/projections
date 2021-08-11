@@ -107,83 +107,34 @@ public class IntervalData
         System.out.println("IntervalData - hasSumDetailData + numIntervals: "+numIntervals+" intervalSize: " + intervalSize);
 	}
     }
-    public void loadSumDetailIntervalData(long intervalSize, int intervalStart,
-                                          int intervalEnd,
-                                          SortedSet<Integer> processorList){
-        int numIntervals = intervalEnd - intervalStart + 1;
 
-        sumDetailData_interval_EP = new int[numIntervals][numEPs];
-        sumDetailData_PE_EP = new int[numPEs][numEPs];
-        sumDetailData_PE_interval = new int[numPEs][numIntervals];
-        double[][] tempData;
-        for(Integer curPe : processorList) {
-            int ii = intervalStart;
-            tempData = getData(curPe, TYPE_TIME);
-            for(int i=0; i<numIntervals; i++){
-                for(int e=0; e<numEPs; e++){
-                    sumDetailData_interval_EP[i][e] += (int)tempData[e][ii];
-                    sumDetailData_PE_EP[curPe][e] += (int)tempData[e][ii];
-                    sumDetailData_PE_interval[curPe][i] += (int)tempData[e][ii];
-                }
-                ii++;
-            }
-        }
-    }
-    /**
-     *  This is a method for use with the older way of doing things only.
-     *  Regretably, it's needed to get things working for now.
-     *
-     *  The method fills 3 arrays - systemUsageData, systemMsgsData
-     *                              and userEntryData
-     *  given time-range specifications.
-     */
-    public void loadIntervalData(long intervalSize, int intervalStart,
-				 int intervalEnd, boolean byEntryPoint,
-				 SortedSet<Integer> processorList) {
-        int numIntervals = intervalEnd - intervalStart + 1;
-	systemUsageData = new int[3][processorList.size()][numIntervals];
-	systemMsgsData = new int[5][3][processorList.size()][numIntervals];
-	if (byEntryPoint) {
-	    userEntryData = 
-		new int[numEPs][3][processorList.size()][numIntervals];
-	}
-	double tempData[][] = null;
-	int processorCount = 0;
-	for(Integer curPe : processorList) {
-	    // get standard data
-	    tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart,
-			       intervalEnd-intervalStart+1);
-	    // copy into userEntryData, if byEntryPoint is true,
-	    // accumulate into systemUsageData.
-	    for (int i=0; i<numIntervals; i++) {
-		for (int ep=0; ep<numEPs; ep++) {
-		    if (byEntryPoint) {
-			userEntryData[ep][2][processorCount][i] =
-			    (int)tempData[ep][i];
-		    }
-		    systemUsageData[1][processorCount][i] +=
-			(int)tempData[ep][i];
+	public void loadSumDetailIntervalData(long intervalSize, int intervalStart, int intervalEnd,
+										  SortedSet<Integer> processorList) {
+		int numIntervals = intervalEnd - intervalStart + 1;
+
+		sumDetailData_interval_EP = new int[numIntervals][numEPs];
+		sumDetailData_PE_EP = new int[numPEs][numEPs];
+		sumDetailData_PE_interval = new int[numPEs][numIntervals];
+		systemUsageData = new int[3][processorList.size()][numIntervals];
+
+		int processorCount = 0;
+
+		for (Integer curPe : processorList) {
+			double[][] tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart, numIntervals);
+			for (int i = 0; i < numIntervals; i++) {
+				for (int ep = 0; ep < numEPs; ep++) {
+					sumDetailData_interval_EP[i][ep] += (int) tempData[ep][i];
+					sumDetailData_PE_EP[curPe][ep] += (int) tempData[ep][i];
+					sumDetailData_PE_interval[curPe][i] += (int) tempData[ep][i];
+					systemUsageData[1][processorCount][i] += (int) tempData[ep][i];
+				}
+				// after accumulation for systemUsageData, convert to utilization percentage (0-100)
+				systemUsageData[1][processorCount][i] =
+						(int) IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i], intervalSize);
+			}
+			processorCount++;
 		}
-		// after accumulation for systemUsageData, convert to %util
-		systemUsageData[1][processorCount][i] =
-		    (int)IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i],
-						  intervalSize);
-	    }
-
-	    // get message data
-	    tempData = getData(curPe, TYPE_NUM_MSGS, intervalSize,
-			       intervalStart, intervalEnd-intervalStart+1);
-	    // accumulate into systemMsgsData
-	    for (int i=0; i<numIntervals; i++) {
-		for (int ep=0; ep<numEPs; ep++) {
-		    systemMsgsData[1][2][processorCount][i] +=
-			(int)tempData[ep][i];
-		}
-	    }
-
-	    processorCount++;
 	}
-    }
 
 	public int[][] getSumDetailData_interval_EP() {
 		return sumDetailData_interval_EP;
@@ -201,13 +152,6 @@ public class IntervalData
 	return systemUsageData;
     }
 
-    public int[][][][] getSystemMsgs() {
-	return systemMsgsData;
-    }
-
-    public int[][][][] getUserEntries() {
-	return userEntryData;
-    }
 
     
     /**

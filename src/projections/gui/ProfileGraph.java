@@ -33,12 +33,10 @@ class ProfileGraph extends JPanel
     //Data source: display profile data such as float[][]
     //For convinience, currently set type to float[][]
     //dataSource[x][y] indicates the section y on bar x should have this amount of usage
-    private float[][] dataSource;
     //colorsPool[x][y] indicates the section y on bar x should use this color
-    private int[][] colorsMap;
     private Color[] colorsPool;
     //sectionNames[x][y] indicates the section y on bar x should have this name
-    private String[][] sectionNames;
+    private SparseArray_usage dataa;
     
     //About general view of the profile graph
     //The graph title may have several lines to display
@@ -84,7 +82,7 @@ class ProfileGraph extends JPanel
 	setPreferredSize(new Dimension(600,450));	
 	
         //need initialize data source etc later!!!!!!!
-        dataSource = null;
+        dataa= null;
         xscale = 1.0;
 	yscale = 1.0;
 	
@@ -115,12 +113,9 @@ class ProfileGraph extends JPanel
 
 
     // ***** API Interface to the control panel *****
-    protected void setDisplayDataSource(float[][] d, int[][] cMap, 
-				     Color[] c, String[][] n){
-        dataSource = d;
-        colorsMap = cMap;
+    protected void setDisplayDataSource( Color[] c,SparseArray_usage dataaa){
         colorsPool = c;
-        sectionNames = n;
+        dataa=dataaa;
     }
 
     public void setGridEnabled(boolean val) {
@@ -184,8 +179,8 @@ class ProfileGraph extends JPanel
         if(yPos<originY && yPos>gTitleH){
             int hPos;
             int dist = originY - yPos;
-            for(hPos=0; hPos<dataSource[xVal].length; hPos++){
-                double sH = dataSource[xVal][hPos]*pixelIncY;
+            for(hPos=0; hPos<dataa.length(xVal); hPos++){
+                double sH = dataa.get(xVal, hPos).dataSource*pixelIncY;
                 int intSH = ((int)sH==0)?1:(int)sH;
                 dist -= intSH;
                 if(dist<0) break;                      
@@ -223,7 +218,7 @@ class ProfileGraph extends JPanel
      */
     public void mouseMoved(MouseEvent e) {
 
-        if(dataSource==null) return; 
+        if(dataa==null) return; 
         
 	int x = e.getX();
     	int y = e.getY();
@@ -267,10 +262,10 @@ class ProfileGraph extends JPanel
 	Point offset = getBubbleOffset();
 	//String text[] = dataSource.getPopup(xVal, yVal);
         String[] text = new String[3];
-        text[0] = sectionNames[xVal][yVal];
+        text[0] = dataa.get(xVal, yVal).nameMap;
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(3);        
-        text[1] = "Usage: "+df.format(dataSource[xVal][yVal])+"%";
+        text[1] = "Usage: "+df.format(dataa.get(xVal, yVal).dataSource)+"%";
         text[2] = "PE: " + xNames[xVal];
 		
 	// old popup still exists, but mouse has moved over a new 
@@ -305,7 +300,7 @@ class ProfileGraph extends JPanel
 	g.clearRect(0, 0, canvasWidth, canvasHeight);
 
 	// if there's nothing to draw, don't draw anything!!!
-	if (dataSource == null) {
+	if (dataa == null) {
 	    return;
 	}
 
@@ -420,7 +415,7 @@ class ProfileGraph extends JPanel
     	canvasWidth = (int)((baseWidth-30-originX)*xscale);
 
 	// *NOTE* pixelincrementX = # pixels per value.
-        int barCnt = dataSource.length;
+        int barCnt = dataa.length();
 	pixelIncX = ((double)canvasWidth)/barCnt;
 
 	setBestIncrementX(pixelIncX, barCnt);
@@ -481,11 +476,11 @@ class ProfileGraph extends JPanel
         Color gColor = g.getColor();
         double barStartX = originX+pixelIncX/8;
         barWidth = pixelIncX*3/4;
-        for(int i=0;i<dataSource.length;i++) {            
+        for(int i=0;i<dataa.length();i++) {            
             double barStartY = originY;            
-            for(int j=0; j<dataSource[i].length; j++) {                
-                g.setColor(colorsPool[colorsMap[i][j]]);
-                double sH = dataSource[i][j]*pixelIncY;
+            for(int j=0; j<dataa.length(i); j++) {                
+                g.setColor(colorsPool[dataa.get(i, j).colorMap]);
+                double sH = dataa.get(i, j).dataSource*pixelIncY;
                 int intSH = ((int)sH)==0?1:(int)sH;
                 //sometimes the presenting data will be overflow due to the error in input
                 //so cut the overflow part, keep a bit higher than 100%

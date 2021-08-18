@@ -9,10 +9,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.util.Enumeration;
-import java.util.Stack;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
@@ -32,15 +29,13 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import projections.gui.ChooseEntriesWindow;
-import projections.gui.FormattedNumber;
 
 class ProfileWindow extends ProjectionsWindow
-    implements ActionListener, ChangeListener, ColorUpdateNotifier
+    implements ChangeListener, ColorUpdateNotifier
 {
 
 	private static final int NUM_SYS_EPS = 3;
-
+    SparseArray_usage dataa;
     // Temporary hardcode. This variable will be assigned appropriate
     // meaning in future versions of Projections that support multiple
     // runs.
@@ -51,14 +46,8 @@ class ProfileWindow extends ProjectionsWindow
     private Color[] colors; //every color corresponds to an entry point
 
     //related with data model of ProfileGraph
-    private float[][] dataSource = null;
-    private int[][] colorMap = null;
-    private String[][] nameMap = null;
     private String [] procNames = null;
     //temporary data for every single processor
-    private float[] sDataSrc = null;
-    private int[] sColorMap = null;
-    private String[] sNameMap = null;
 
     //Following varibles are related with responding to user events
     private JTabbedPane tabPane;
@@ -262,9 +251,9 @@ class ProfileWindow extends ProjectionsWindow
              FileWriter fstream = new FileWriter("usagetable.txt");
              BufferedWriter out = new BufferedWriter(fstream);
              out.write("Proc#,\t"+ "Entry Name,\t" + "Usage Percent (%),\t" + "Usage Time(ms)\n");
-             for(int i=1; i<dataSource.length; i++){
-                 for(int j=0; j<dataSource[i].length; j++){
-                     out.write(procNames[i] + ",\t" + nameMap[i][j] + ",\t" + df.format(dataSource[i][j])+"%,\t" + df.format(dataSource[i][j]*0.01*timerange)+"\n"); 
+             for(int i=1; i<dataa.length(); i++){
+                 for(int j=0; j<dataa.length(i); j++){
+                     out.write(procNames[i] + ",\t" + dataa.get(i, j).nameMap + ",\t" + df.format(dataa.get(i, j).dataSource)+"%,\t" + df.format(dataa.get(i, j).dataSource*0.01*timerange)+"\n"); 
                  }
              }
              out.close();
@@ -339,7 +328,7 @@ class ProfileWindow extends ProjectionsWindow
 	}
 
     private void showUsageTable(){
-        if(dataSource==null) return;
+        if(dataa==null) return;
 
         JFrame usageFrame = new JFrame();
         usageFrame.setTitle("Entry Points Usage Percent Table");
@@ -348,21 +337,21 @@ class ProfileWindow extends ProjectionsWindow
         String[] tHeading ={"Proc#","Entry Name","Usage Percent (%)", "Usage Time(ms)"};
         int totalEntry=0;
         //skip column "0" as it is for average usage
-        for(int i=1; i<dataSource.length; i++)
-            totalEntry += dataSource[i].length;
+        for(int i=1; i<dataa.length(); i++)
+            totalEntry += dataa.length(i);
         Object[][] tData = new Object[totalEntry][];
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(3);
         //fill up tData
         int entryCnt=0;
         double timerange = (data.endtime - data.begintime)*0.001; //ms
-        for(int i=1; i<dataSource.length; i++){
-            for(int j=0; j<dataSource[i].length; j++){
+        for(int i=1; i<dataa.length(); i++){
+            for(int j=0; j<dataa.length(i); j++){
                 tData[entryCnt] = new Object[4];
                 tData[entryCnt][0] = new FormattedNumber(Integer.parseInt(procNames[i]), df);
-                tData[entryCnt][1] = nameMap[i][j];
-                tData[entryCnt][2] = new FormattedNumber(dataSource[i][j], df);
-                tData[entryCnt][3] = new FormattedNumber(dataSource[i][j]*0.01*timerange, df);
+                tData[entryCnt][1] = dataa.get(i, j).nameMap;
+                tData[entryCnt][2] = new FormattedNumber(dataa.get(i, j).dataSource, df);
+                tData[entryCnt][3] = new FormattedNumber(dataa.get(i, j).dataSource*0.01*timerange, df);
                 entryCnt++;
             }
         }
@@ -428,7 +417,7 @@ class ProfileWindow extends ProjectionsWindow
 
         displayCanvas.setXAxis("",xNames);
         displayCanvas.setYAxis("Usage Percent %");
-        displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
+        displayCanvas.setDisplayDataSource( colors,dataa);
         displayCanvas.repaint();
     }
 
@@ -437,9 +426,6 @@ class ProfileWindow extends ProjectionsWindow
         int procCnt = data.plist.size()+1;
 	    data.numPs = procCnt;
 
-        dataSource = new float[procCnt][];
-        colorMap = new int[procCnt][];
-        nameMap = new String[procCnt][];
 
         int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
         // the first row is for entry method execution time the second is for
@@ -522,117 +508,112 @@ class ProfileWindow extends ProjectionsWindow
             colorsSet = true;
 	}
 
-	// Phase 2: create display data source
-        //first create average one
-        createSingleProcSource(avg,-1);
-        dataSource[0] = sDataSrc;
-        colorMap[0] = sColorMap;
-        nameMap[0] = sNameMap;
-
-        progressCount = 0;
-
-        for(Integer pe : data.plist) {
-
-        	if (!progressBar.isCanceled()) {
-        		progressBar.setNote("[PE: " + pe + " ] Reading Entry Point Usage.");
-        		progressBar.setProgress(progressCount);
-        	} else {
-        		break;
-        	}
-
-        	createSingleProcSource(rawData[progressCount], pe);
-
-        	//The 0 column is left for the average one
-        	progressCount++;
-        	dataSource[progressCount] = sDataSrc;
-        	colorMap[progressCount] = sColorMap;
-        	nameMap[progressCount] = sNameMap;
-
-        }
-        progressBar.close();
+    dataa = new SparseArray_usage(procCnt);
+    String prefix = "";
+    int idx = 0;
+    if (MainWindow.runObject[myRun].getVersion() > 4.9) {
+        //Computing the entry point message sendTime
+        prefix = "Message Send Time: ";
+        idx = 1;
     }
 
-    private void createSingleProcSource(float[][] rawData, int procNum){
-        //fisrt compute number of significant sections
-        int numSigSections = 0;
-        for(int i=0; i<rawData[0].length; i++){
-            if(rawData[0][i]>thresh)
+    int numSigSections=0;
+    for(int epIndex=0; epIndex<avg[idx].length; epIndex++){
+        float usage = avg[idx][epIndex];
+        if(usage<=thresh) {
+            continue;
+        }
+        numSigSections++;
+    }
+    dataa.add_element(0,numSigSections);
+    numSigSections=0;
+    for(int jj =1;jj<procCnt;jj++){
+        for(int i=0; i<rawData[jj-1][0].length; i++){
+            if(rawData[jj-1][0][i]>thresh)
                 numSigSections++;
-            if(rawData[1][i]>thresh)
+            if(rawData[jj-1][1][i]>thresh)
                 numSigSections++;
         }
-        float[] dSrc = new float[numSigSections];
-        int[] cMap = new int[numSigSections];
-        String[] nMap = new String[numSigSections];
+            dataa.add_element(jj,numSigSections);
+            numSigSections=0;
+        
+    }
 
-        sDataSrc = dSrc;
-        sColorMap = cMap;
-        sNameMap = nMap;
+	// Phase 2: create display data source
+            DecimalFormat format_ = new DecimalFormat();
+            format_.setMaximumFractionDigits(5);
+            format_.setMinimumFractionDigits(5);
+    
+            int sigCnt=-1;
+            int epIndex;
+            float usage;
+            int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
 
-        DecimalFormat format_ = new DecimalFormat();
-        format_.setMaximumFractionDigits(5);
-        format_.setMinimumFractionDigits(5);
-
-        int sigCnt=-1;
-        int epIndex;
-        float usage;
-        int numUserEntries = MainWindow.runObject[myRun].getNumUserEntries();
-
-        for(epIndex=0; epIndex<rawData[0].length; epIndex++){
-            usage = rawData[0][epIndex];
-            if(usage<=thresh) continue;
-            sigCnt++;
-            dSrc[sigCnt] = usage;
-            cMap[sigCnt] = epIndex;
-            if(epIndex==numUserEntries){
-                nMap[sigCnt] = "PACKING";
-            } else if(epIndex==numUserEntries+1) {
-                nMap[sigCnt] = "UNPACKING";
-            } else if(epIndex==numUserEntries+2) {
-                nMap[sigCnt] = "IDLE";
-            } else {
-                nMap[sigCnt] = MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
-            }
-
-            //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
-            //This is especially important for CPAIMD!!! Here we ignore
-            if ((procNum >= 0) && MainWindow.PRINT_USAGE) 
-            {
-                System.out.println(procNum + " " + epIndex + " " +
-                        format_.format(usage) +
-                        " " + nMap[sigCnt]);
-            }
-        }
-
-	if (MainWindow.runObject[myRun].getVersion() > 4.9) {
-            //Computing the entry point message sendTime
-            String prefix = "Message Send Time: ";
-            for(epIndex=0; epIndex<rawData[1].length; epIndex++){
-                usage = rawData[1][epIndex];
-                if(usage<=thresh) continue;
-                sigCnt++;
-                dSrc[sigCnt] = usage;
-                cMap[sigCnt] = epIndex;
-                if(epIndex==numUserEntries){
-                    nMap[sigCnt] = prefix+"PACKING";
-                } else if(epIndex==numUserEntries+1) {
-                    nMap[sigCnt] = prefix+"UNPACKING";
-                } else if(epIndex==numUserEntries+2) {
-                    nMap[sigCnt] = prefix+"IDLE";
-                } else {
-                    nMap[sigCnt] = prefix+MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
+                
+            for(epIndex=0; epIndex<avg[idx].length; epIndex++){
+                usage = avg[idx][epIndex];
+                if(usage<=thresh) {
+                    continue;
                 }
-
+                sigCnt++;
+                String val = "";
+                if(epIndex==numUserEntries){
+                    val = prefix+"PACKING";
+                } else if(epIndex==numUserEntries+1) {
+                    val = prefix+"UNPACKING";
+                } else if(epIndex==numUserEntries+2) {
+                    val = prefix+"IDLE";
+                } else {
+                    val = prefix+MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
+                }
+                dataa.add_data_point(0,sigCnt,usage,epIndex,val);
                 //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
                 //This is especially important for CPAIMD!!! Here we ignore
-                if ((procNum >= 0) && MainWindow.PRINT_USAGE) {
-    		 System.out.println(procNum + " " + epIndex + " " +
-    				       format_.format(usage) +
-    				       " " + nMap[sigCnt]);
-                }
+                
             }
+            progressCount = 0;
 
-        }
+            for(Integer pe : data.plist) {
+                int pe_idx=pe+1;
+                progressCount=pe;
+                if (!progressBar.isCanceled()) {
+                    progressBar.setNote("[PE: " + pe + " ] Reading Entry Point Usage.");
+                    progressBar.setProgress(progressCount);
+                } else {
+                    break;
+                }
+                
+                sigCnt=-1;
+                for(epIndex=0; epIndex<rawData[progressCount][idx].length; epIndex++){
+                    usage = rawData[progressCount][idx][epIndex];
+                    if(usage<=thresh) {
+                        continue;
+                    }
+                    sigCnt++;
+                    String val = "";
+                    if(epIndex==numUserEntries){
+                        val = prefix+"PACKING";
+                    } else if(epIndex==numUserEntries+1) {
+                        val = prefix+"UNPACKING";
+                    } else if(epIndex==numUserEntries+2) {
+                        val = prefix+"IDLE";
+                    } else {
+                        val = prefix+MainWindow.runObject[myRun].getEntryFullNameByIndex(epIndex);
+                    }
+                    dataa.add_data_point(pe_idx,sigCnt, usage,epIndex,val);
+                
+                    //!!!!we need to give a table to show the exact usage of every non-tiny entry!!!!
+                    //This is especially important for CPAIMD!!! Here we ignore
+                       System.out.println(pe + " " + epIndex + " " +
+                                format_.format(usage) +
+                                " " + dataa.get(pe_idx,sigCnt).nameMap);
+                    
+                }   
+            }
+    
+        
+        progressBar.close();
+
     }
-
 }
+//list_list

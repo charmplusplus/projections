@@ -5,6 +5,7 @@ package projections.Tools.CommunicationPerPE;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import projections.Tools.ThreadedFileReaderBase;
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
@@ -13,19 +14,20 @@ import projections.misc.LogEntry;
 import projections.analysis.StsReader;
 
 /** The reader threads for Communication Per PE Tool. */
-class ThreadedFileReader implements Runnable  {
+class ThreadedFileReader extends ThreadedFileReaderBase implements Runnable  {
 
 	private int pe;
 	private int pIdx;
 	private long startTime;
 	private long endTime;
-	private int myRun = 0;
 	private double[][] sentMsgCount;
 	private double[][] sentByteCount;
 	private double[][] receivedMsgCount;
 	private double[][] receivedByteCount;
-	private double[][] exclusiveRecv;
-	private double[][] exclusiveBytesRecv;
+	private double[][] externalRecv;
+	private double[][] externalBytesRecv;
+	private double[][] externalNodeRecv;
+	private double[][] externalNodeBytesRecv;
 	private int[][] hopCount;
 	
 	private boolean isCommThd;
@@ -33,7 +35,13 @@ class ThreadedFileReader implements Runnable  {
 	public ArrayList<Integer>	localHistogram = new ArrayList<Integer>();
 
 	/** Construct a file reading thread that will generate data for one PE. */
-	protected ThreadedFileReader(int pe, int pIdx, long startTime, long endTime, double[][] sentMsgCount, double[][] sentByteCount, double[][] receivedMsgCount, double[][] receivedByteCount, double[][] exclusiveRecv, double[][] exclusiveBytesRecv, int[][] hopCount ){
+	protected ThreadedFileReader(int pe, int pIdx, long startTime, long endTime,
+								 double[][] sentMsgCount, double[][] sentByteCount,
+								 double[][] receivedMsgCount, double[][] receivedByteCount,
+								 double[][] externalRecv, double[][] externalBytesRecv,
+								 double[][] externalNodeRecv, double[][] externalNodeBytesRecv,
+								 int[][] hopCount)
+	{
 		this.pe = pe;
 		this.pIdx = pIdx;
 		this.startTime = startTime;
@@ -43,8 +51,10 @@ class ThreadedFileReader implements Runnable  {
 		this.sentByteCount = sentByteCount;
 		this.receivedMsgCount = receivedMsgCount;
 		this.receivedByteCount = receivedByteCount;
-		this.exclusiveRecv = exclusiveRecv;
-		this.exclusiveBytesRecv = exclusiveBytesRecv;
+		this.externalRecv = externalRecv;
+		this.externalBytesRecv = externalBytesRecv;
+		this.externalNodeRecv = externalNodeRecv;
+		this.externalNodeBytesRecv = externalNodeBytesRecv;
 		this.hopCount = hopCount;
 		
 		StsReader sts = MainWindow.runObject[myRun].getSts();
@@ -70,8 +80,10 @@ class ThreadedFileReader implements Runnable  {
 				sentByteCount[pIdx] = new double[numEPs];
 				receivedMsgCount[pIdx] = new double[numEPs];
 				receivedByteCount[pIdx] = new double[numEPs];
-				exclusiveRecv[pIdx] = new double[numEPs];
-				exclusiveBytesRecv[pIdx] = new double[numEPs];
+				externalRecv[pIdx] = new double[numEPs];
+				externalBytesRecv[pIdx] = new double[numEPs];
+				externalNodeRecv[pIdx] = new double[numEPs];
+				externalNodeBytesRecv[pIdx] = new double[numEPs];
 				if (MainWindow.BLUEGENE) {
 					hopCount[pIdx] = new int[numEPs];
 				}
@@ -108,13 +120,18 @@ class ThreadedFileReader implements Runnable  {
 						logdata.msglen;
 					// testing if the send was from outside the processor
 					if (logdata.pe != pe) {
-						exclusiveRecv[pIdx][EPid]++;
-						exclusiveBytesRecv[pIdx][EPid] += 
+						externalRecv[pIdx][EPid]++;
+						externalBytesRecv[pIdx][EPid] +=
 							logdata.msglen;
 						if (MainWindow.BLUEGENE) {
 							hopCount[pIdx][EPid] +=
 								CommWindow.manhattanDistance(pe,logdata.pe);
 						}
+					}
+					// If the send was from outside the node
+					if (!isSameNode(pe, logdata.pe)) {
+						externalNodeRecv[pIdx][EPid]++;
+						externalNodeBytesRecv[pIdx][EPid] += logdata.msglen;
 					}
 					
 					if(isCommThd){
@@ -127,7 +144,7 @@ class ThreadedFileReader implements Runnable  {
 						//trace. So we have to subtract those msgs that are sent to external
 						//charm smp nodes. -Chao Mei
 						int pcreation = logdata.pe;						
-						if(pcreation!=pe && isSameNode(pcreation)){
+						if(pcreation!=pe && isSameNode(pe, pcreation)){
 							receivedMsgCount[pIdx][EPid]--;
 							receivedByteCount[pIdx][EPid] -= logdata.msglen;
 						}						
@@ -146,8 +163,10 @@ class ThreadedFileReader implements Runnable  {
 				sentByteCount[pIdx][ep] /= timeInterval;
 				receivedMsgCount[pIdx][ep] /= timeInterval;
 				receivedByteCount[pIdx][ep] /= timeInterval;
-				exclusiveRecv[pIdx][ep] /= timeInterval;
-				exclusiveBytesRecv[pIdx][ep] /= timeInterval;
+				externalRecv[pIdx][ep] /= timeInterval;
+				externalBytesRecv[pIdx][ep] /= timeInterval;
+				externalNodeRecv[pIdx][ep] /= timeInterval;
+				externalNodeBytesRecv[pIdx][ep] /= timeInterval;
 			}
 		} catch (IOException e) {
 			System.out.println("Exception: " +e);
@@ -161,18 +180,7 @@ class ThreadedFileReader implements Runnable  {
 			System.err.println("Error: could not close log file reader for processor " + pe );
 		}
 	}
-	
-	private boolean isSameNode(int p1){
-		StsReader sts = MainWindow.runObject[myRun].getSts();
-		int totalPes = sts.getProcessorCount();
-		int totalNodes = sts.getSMPNodeCount();
-		int nodesize = sts.getNodeSize();
-		int n1 = p1/nodesize;
-		if(p1>=totalNodes*nodesize && p1<totalPes) n1 = p1- totalNodes*nodesize;
-		int selfN = pe/nodesize;
-		if(pe>=totalNodes*nodesize && pe<totalPes) selfN = pe - totalNodes*nodesize;
-		return n1==selfN;
-	}
+
 }
 
 

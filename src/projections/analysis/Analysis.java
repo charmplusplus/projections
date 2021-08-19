@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.swing.SwingWorker;
 
@@ -357,9 +358,16 @@ public class Analysis {
         return intervalData.getNumIntervals();
     }
 
-    public int[][] getSumDetailData() {
-        return intervalData.sumDetailData();
+	public int[][] getSumDetailData_interval_EP() {
+        return intervalData.getSumDetailData_interval_EP();
     }
+	public int[][] getSumDetailData_PE_EP() {
+        return intervalData.getSumDetailData_PE_EP();
+    }
+	public int[][] getSumDetailData_PE_interval() {
+        return intervalData.getSumDetailData_PE_interval();
+    }
+
     public Color getEntryColor(int entryIdx) {
     	if (entryIdx == IDLE_ENTRY_POINT) {
     		Paint p = getIdleColor();
@@ -411,39 +419,78 @@ public class Analysis {
     		return u.usage(pnum, begintime, endtime, getVersion() );
     	}
     	int numUserEntries=getSts().getEntryCount();
-    	long[][] data;
-    	long[][] phasedata;
-    	
+    	long[] data;
+		float ret[][] = new float[2][numUserEntries + 4];
+
     	/*BAD: silently ignores begintime and endtime*/
     	if( sumAnalyzer.getPhaseCount()>1 ) {
 			Iterator<Integer> iter = phases.iterator();
-			data = sumAnalyzer.getPhaseChareTime(iter.next());
+			data = sumAnalyzer.getPhaseChareTime(iter.next())[pnum].clone();
 
 			while (iter.hasNext() && pnum > -1)
 			{
-				phasedata = sumAnalyzer.getPhaseChareTime(iter.next());
+				long[] phasedata = sumAnalyzer.getPhaseChareTime(iter.next())[pnum];
 				{
 					for(int q=0; q<numUserEntries; q++) {
-    					data[pnum][q] += phasedata[pnum][q];
-    				}
+						data[q] += phasedata[q];
+					}
 				}
 			}
-    	} else {
-    		data = sumAnalyzer.getChareTime();
-    	}
-    	float ret[][]=new float[2][numUserEntries+4];
-    	//Convert to percent-- .sum entries are always over the 
-    	// entire program run.
-    	double scale=100.0/getTotalTime();
-    	for (int q=0;q<numUserEntries;q++){
-    		ret[0][q]=(float)(scale*data[pnum][q]);
-    		// dummy value for message send time at the moment .. 
-    		// summary file reader needs to be fixed first
-    		ret[1][q] = (float )0.0; 
-    	}
-    	return ret;
-    }
-    
+		}
+		else if (hasSumDetailFiles()) {
+			SortedSet<Integer> peSet = new TreeSet<>();
+			peSet.add(pnum);
+
+			double intervalSize = intervalData.getIntervalSize();
+			int intervalStart = (int) (begintime / intervalSize);
+			int intervalEnd = (int) Math.ceil(endtime / intervalSize) - 1;
+			int numIntervals = intervalEnd - intervalStart + 1;
+
+			MainWindow.runObject[0].LoadGraphData((long) intervalData.getIntervalSize(),
+					intervalStart,
+					intervalEnd, false, peSet);
+
+			int sumDetailData[][] = intervalData.getSumDetailData_interval_EP();
+			data = new long[numUserEntries];
+			for (int interval = 0; interval < numIntervals; interval++) {
+				for (int entry = 0; entry < numUserEntries; entry++) {
+					data[entry] += sumDetailData[interval][entry];
+				}
+			}
+		}
+		else if (hasSumFiles()) {
+			// The log has per-EP times across the entire execution, so use that when the whole interval is selected
+			if (endtime - begintime == totalTime) {
+				data = sumAnalyzer.getChareTime()[pnum];
+			}
+			// Otherwise, the best we can do is to use the utilization data without EP info
+			else {
+				long total = 0;
+				byte utilData[][] = sumAnalyzer.getProcessorUtilization();
+				int intervalStart = (int) (begintime / getSummaryIntervalSize());
+				int intervalEnd = (int) Math.ceil(endtime / getSummaryIntervalSize()) - 1;
+				for (int i = intervalStart; i <= intervalEnd; i++) {
+					total += utilData[pnum][i];
+				}
+				// Processor utilization data is already in terms of percent, so return it directly after averaging over the
+				// intervals rather than proceeding to the time -> percent conversion at the end of this function
+				ret[0][0] = ((float) total) / (intervalEnd - intervalStart + 1);
+				return ret;
+			}
+		}
+		else {
+			return null;
+		}
+		// Convert to percent
+		double scale = 100.0 / (endtime - begintime);
+		for (int q = 0; q < numUserEntries; q++) {
+			ret[0][q] = (float) (scale * data[q]);
+			// dummy value for message send time at the moment
+			// summary file reader needs to be fixed first
+			ret[1][q] = (float) 0.0;
+		}
+		return ret;
+	}
 //    // a == entry point index, t == type of data
 //    public int[][] getUserEntryData( int a, int t ) {
 //	return userEntryData[ a ][ t ];

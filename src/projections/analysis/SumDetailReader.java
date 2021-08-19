@@ -42,6 +42,13 @@ class SumDetailReader extends ProjectionsReader
     private int numEPs;
     private long intervalSize;
 
+	private double[] msg_count; 
+	private double[] msg_size; 
+	private double[] msg_recv_count; 
+	private double[] msg_recv_size; 
+	private double[] msg_recv_count_ext; 
+	private double[] msg_recv_size_ext; 
+
     // Compressed Data
     // A Vector of RLEBlocks for each Type, EP combination
     // Dim 0 - indexed by data type.
@@ -165,7 +172,139 @@ class SumDetailReader extends ProjectionsReader
 		buildTable(TOTAL_TIME);
 	    } else if (label.equals("EPCallTimePerInterval")) {
 		buildTable(NUM_MSGS);
-	    } else {
+	    } else if (label.equals("MsgSentCount")) {
+			msg_count= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+			double val2=0.0;
+			int extraCount=0;
+			int tokenType;
+
+			while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+				if (tokenType == StreamTokenizer.TT_NUMBER) {
+					val2 =  (double)tokenizer.nval;
+					msg_count[nUsageRead++] = val2;				
+					if ((tokenType=tokenizer.nextToken()) == '+') {
+						tokenType=tokenizer.nextToken();
+						extraCount = (int)tokenizer.nval;
+						for (int i=1; i<extraCount; i++) {
+								msg_count[nUsageRead++] = val2;
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+				}
+			} 
+		} else if (label.equals("MsgSentSize")) {
+			msg_size= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+			double val2=0.0;
+			int extraCount=0;
+			int tokenType;
+
+			while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+				if (tokenType == StreamTokenizer.TT_NUMBER) {
+					val2 =  (double)tokenizer.nval;
+					msg_size[nUsageRead++] = val2;				
+					if ((tokenType=tokenizer.nextToken()) == '+') {
+						tokenType=tokenizer.nextToken();
+						extraCount = (int)tokenizer.nval;
+						for (int i=1; i<extraCount; i++) {
+							msg_size[nUsageRead++] = val2;
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+				}
+			}
+		} else if (label.equals("MsgRecvCount")) {
+			msg_recv_count= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+			double val2=0.0;
+			int extraCount=0;
+			int tokenType;
+
+			while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+				if (tokenType == StreamTokenizer.TT_NUMBER) {
+					val2 =  (double)tokenizer.nval;
+					msg_recv_count[nUsageRead++] = val2;				
+					if ((tokenType=tokenizer.nextToken()) == '+') {
+						tokenType=tokenizer.nextToken();
+						extraCount = (int)tokenizer.nval;
+						for (int i=1; i<extraCount; i++) {
+								msg_recv_count[nUsageRead++] = val2;
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+				}
+			} 
+		} else if (label.equals("MsgRecvSize")) {
+			msg_recv_size= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+			double val2=0.0;
+			int extraCount=0;
+			int tokenType;
+
+			while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+				if (tokenType == StreamTokenizer.TT_NUMBER) {
+					val2 =  (double)tokenizer.nval;
+					msg_recv_size[nUsageRead++] = val2;				
+					if ((tokenType=tokenizer.nextToken()) == '+') {
+						tokenType=tokenizer.nextToken();
+						extraCount = (int)tokenizer.nval;
+						for (int i=1; i<extraCount; i++) {
+							msg_recv_size[nUsageRead++] = val2;
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+				}
+			}
+		} else if (label.equals("ExternalMsgRecvCount")) {
+			msg_recv_count_ext= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+			double val2=0.0;
+			int extraCount=0;
+			int tokenType;
+
+			while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+				if (tokenType == StreamTokenizer.TT_NUMBER) {
+					val2 =  (double)tokenizer.nval;
+					msg_recv_count_ext[nUsageRead++] = val2;				
+					if ((tokenType=tokenizer.nextToken()) == '+') {
+						tokenType=tokenizer.nextToken();
+						extraCount = (int)tokenizer.nval;
+						for (int i=1; i<extraCount; i++) {
+							msg_recv_count_ext[nUsageRead++] = val2;
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+				}
+			} 
+		} else if (label.equals("ExternalMsgRecvSize")) {
+			msg_recv_size_ext= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+			double val2=0.0;
+			int extraCount=0;
+			int tokenType;
+
+			while ((tokenType=tokenizer.nextToken()) != StreamTokenizer.TT_EOL) {
+				if (tokenType == StreamTokenizer.TT_NUMBER) {
+					val2 =  (double)tokenizer.nval;
+					msg_recv_size_ext[nUsageRead++] = val2;				
+					if ((tokenType=tokenizer.nextToken()) == '+') {
+						tokenType=tokenizer.nextToken();
+						extraCount = (int)tokenizer.nval;
+						for (int i=1; i<extraCount; i++) {
+							msg_recv_size_ext[nUsageRead++] = val2;
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+				}
+			}
+		} else {
 		// do nothing. Unrecognized labels are not an error.
 		// this allows new formats to be implemented without
 		// immediately rendering this tool useless.
@@ -271,5 +410,32 @@ class SumDetailReader extends ProjectionsReader
 
     protected List<RLEBlock>[] getData(int type) {
 	return rawData[type];
+    }
+	public double[] getMsg_count() 
+    {
+	return msg_count;
+    }
+
+	public double[] getMsg_size() 
+    {
+	return msg_size;
+    }
+	public double[] getMsg_recv_count() 
+    {
+	return msg_recv_count;
+    }
+
+	public double[] getMsg_recv_size() 
+    {
+	return msg_recv_size;
+    }
+	public double[] getMsg_recv_count_ext() 
+    {
+	return msg_recv_count_ext;
+    }
+
+	public double[] getMsg_recv_size_ext() 
+    {
+	return msg_recv_size_ext;
     }
 }

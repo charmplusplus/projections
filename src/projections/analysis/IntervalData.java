@@ -47,6 +47,13 @@ public class IntervalData
     private int systemMsgsData[][][][] = null;
     private int userEntryData [][][][] = null;
 
+	private double[][] msg_count; 
+	private double[][] msg_size; 
+	private double[][] msg_recv_count; 
+	private double[][] msg_recv_size; 
+	private double[][] msg_recv_count_ext; 
+	private double[][] msg_recv_size_ext; 
+
     private int numEPs = 0;
     private int numPEs = 0;
     // numIntervals and intervalSize represents the canonical number of
@@ -72,6 +79,13 @@ public class IntervalData
 	if (MainWindow.runObject[myRun].hasSumDetailData()) {
 	    summaryDetails = new SumDetailReader[numPEs];
 	    rawData = new ArrayList[SumDetailReader.NUM_TAGS][numPEs][];
+		msg_count= new double[numPEs][];
+		msg_size= new double[numPEs][];
+		msg_recv_count= new double[numPEs][];
+		msg_recv_size= new double[numPEs][];
+		msg_recv_count_ext= new double[numPEs][];
+		msg_recv_size_ext= new double[numPEs][];
+
 	    SortedSet<Integer> availablePEs =
 		MainWindow.runObject[myRun].getValidProcessorList(ProjMain.SUMDETAIL);
 	    for(Integer pe : availablePEs) {
@@ -93,6 +107,12 @@ public class IntervalData
 		    // **CW** do nothing for now. No rebinning facilities in
 		    // place yet.
 		    intervalSize = summaryDetails[pe].getIntervalSize();
+			msg_count[pe] = summaryDetails[pe].getMsg_count();
+			msg_size[pe] = summaryDetails[pe].getMsg_size();
+			msg_recv_count[pe] = summaryDetails[pe].getMsg_recv_count();
+			msg_recv_size[pe] = summaryDetails[pe].getMsg_recv_size();
+			msg_recv_count_ext[pe] = summaryDetails[pe].getMsg_recv_count_ext();
+			msg_recv_size_ext[pe] = summaryDetails[pe].getMsg_recv_size_ext();
 
         } catch (IOException e) {
 		    // This exception, in future, should simply cause the
@@ -237,6 +257,34 @@ public class IntervalData
     public double getIntervalSize() {
 	return intervalSize;
     }
+	public double[][] getMsg_count() 
+    {
+	return msg_count;
+    }
+
+	public double[][] getMsg_size() 
+    {
+	return msg_size;
+    }
+	public double[][] getMsg_recv_count() 
+    {
+	return msg_recv_count;
+    }
+
+	public double[][] getMsg_recv_size() 
+    {
+	return msg_recv_size;
+    }
+	public double[][] getMsg_recv_count_ext() 
+    {
+	return msg_recv_count_ext;
+    }
+
+	public double[][] getMsg_recv_size_ext() 
+    {
+	return msg_recv_size_ext;
+    }
+
 
 //    /**
 //     *  Accumulate compressed interval data for a particular EP and type onto

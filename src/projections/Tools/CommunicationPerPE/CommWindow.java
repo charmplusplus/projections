@@ -478,7 +478,7 @@ implements ItemListener, ActionListener, Clickable
 			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
 			int pIdx = 0;
 			for(Integer nextPe : pes){
-				readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, externalRecv, externalBytesRecv, hopCount ) );
+				readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, externalRecv, externalBytesRecv,externalNodeRecv,externalNodeBytesRecv, hopCount ) );
 				pIdx++;
 			}
 			
@@ -510,6 +510,8 @@ implements ItemListener, ActionListener, Clickable
 			receivedByteCount = MainWindow.runObject[myRun].getMsg_recv_size();
 			externalRecv = MainWindow.runObject[myRun].getMsg_recv_count_ext();
 			externalBytesRecv = MainWindow.runObject[myRun].getMsg_recv_size_ext();
+			externalNodeRecv=MainWindow.runObject[myRun].getMsg_recv_count_ext();
+			externalNodeBytesRecv=	MainWindow.runObject[myRun].getMsg_recv_size_ext();
 		}
 	
 		// Do some post processing

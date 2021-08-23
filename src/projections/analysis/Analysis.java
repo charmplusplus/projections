@@ -357,6 +357,30 @@ public class Analysis {
     public double getSumDetailNumIntervals(){
         return intervalData.getNumIntervals();
     }
+	public double[][] getMsg_count() 
+    {
+	return intervalData.getMsg_count();
+    }
+	public double[][] getMsg_size() 
+    {
+	return intervalData.getMsg_size();
+    }
+	public double[][] getMsg_recv_count() 
+    {
+	return intervalData.getMsg_recv_count();
+    }
+	public double[][] getMsg_recv_size() 
+    {
+	return intervalData.getMsg_recv_size();
+    }
+	public double[][] getMsg_recv_count_ext() 
+    {
+	return intervalData.getMsg_recv_count_ext();
+    }
+	public double[][] getMsg_recv_size_ext() 
+    {
+	return intervalData.getMsg_recv_size_ext();
+    }
 
 	public int[][] getSumDetailData_interval_EP() {
         return intervalData.getSumDetailData_interval_EP();

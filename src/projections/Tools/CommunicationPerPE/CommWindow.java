@@ -473,40 +473,45 @@ implements ItemListener, ActionListener, Clickable
 
 		histogram = new ArrayList<Integer>();
 		
-		// Create a list of worker threads
-		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
-		int pIdx = 0;
-    	for(Integer nextPe : pes){
-			readyReaders.add(new ThreadedFileReader(nextPe, pIdx, startTime, endTime,
-					sentMsgCount, sentByteCount,
-					receivedMsgCount, receivedByteCount,
-					externalRecv, externalBytesRecv,
-					externalNodeRecv, externalNodeBytesRecv,
-					hopCount));
-			pIdx++;
+		if (MainWindow.runObject[myRun].hasLogData()) {		
+			// Create a list of worker threads
+			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+			int pIdx = 0;
+			for(Integer nextPe : pes){
+				readyReaders.add( new ThreadedFileReader(nextPe, pIdx, startTime, endTime, sentMsgCount, sentByteCount, receivedMsgCount, receivedByteCount, exclusiveRecv, exclusiveBytesRecv, hopCount ) );
+				pIdx++;
+			}
+			
+			// Determine a component to show the progress bar with
+			Component guiRootForProgressBar = null;
+			if(thisWindow!=null && thisWindow.isVisible()) {
+				guiRootForProgressBar = thisWindow;
+			} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+				guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+			}
+	
+			// Pass this list of threads to a class that manages/runs the threads nicely
+			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
+			threadManager.runAll();
+	
+			
+			// Combine histograms from all processors
+			
+			Iterator<Runnable> iter = readyReaders.iterator();
+			while(iter.hasNext()){
+				ThreadedFileReader t = (ThreadedFileReader) iter.next();
+				histogram.addAll(t.localHistogram);
+			}
+	
+		} else{
+			sentMsgCount = MainWindow.runObject[myRun].getMsg_count();
+			sentByteCount = MainWindow.runObject[myRun].getMsg_size();
+			receivedMsgCount = MainWindow.runObject[myRun].getMsg_recv_count();
+			receivedByteCount = MainWindow.runObject[myRun].getMsg_recv_size();
+			exclusiveRecv = MainWindow.runObject[myRun].getMsg_recv_count_ext();
+			exclusiveBytesRecv = MainWindow.runObject[myRun].getMsg_recv_size_ext();
 		}
-		
-		// Determine a component to show the progress bar with
-		Component guiRootForProgressBar = null;
-		if(thisWindow!=null && thisWindow.isVisible()) {
-			guiRootForProgressBar = thisWindow;
-		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
-			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
-		}
-
-		// Pass this list of threads to a class that manages/runs the threads nicely
-		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runAll();
-		
-		
-		// Combine histograms from all processors
-		
-		Iterator<Runnable> iter = readyReaders.iterator();
-		while(iter.hasNext()){
-			ThreadedFileReader t = (ThreadedFileReader) iter.next();
-			histogram.addAll(t.localHistogram);
-		}
-		
+	
 		// Do some post processing
 		
 		// **CW** Highly inefficient ... needs to be re-written as a

@@ -350,59 +350,113 @@ implements ItemListener, ActionListener
 			numIntervals = endInterval-startInterval+1;
 			processorList = new TreeSet<Integer>(dialog.getSelectedProcessors());
 
-			final SwingWorker worker =  new SwingWorker() {
-				public Object doInBackground() {
-					getData();
-					return null;
-				}
-				public void done() {
-					setOutputGraphData();
-					Checkbox cb = cbg.getSelectedCheckbox();
-					setCheckboxData(cb);
-					thisWindow.setVisible(true);
-					thisWindow.repaint();
-				}
-			};
+			final SwingWorker worker;
+			if (MainWindow.runObject[myRun].hasLogFiles()) {
+				worker =  new SwingWorker() {
+					public Object doInBackground() {
+						getData();
+						return null;
+					}
+					public void done() {
+						setOutputGraphData();
+						Checkbox cb = cbg.getSelectedCheckbox();
+						setCheckboxData(cb);
+						thisWindow.setVisible(true);
+						thisWindow.repaint();
+					}
+				};
+			}
+			else{
+				worker =  new SwingWorker() {
+					public Object doInBackground() {
+							return null;
+					}
+					public void done() {
+						getData();
+						setOutputGraphData();
+						Checkbox cb = cbg.getSelectedCheckbox();
+						setCheckboxData(cb);
+						thisWindow.setVisible(true);
+						thisWindow.repaint();
+					}
+				};
+			}
 			worker.execute();
 		}
 	}
 
 
 
-
 	private void getData() {
 
-		
-		sentMsgCount = new double[numIntervals][numEPs];
-		sentByteCount = new double[numIntervals][numEPs];
-		receivedMsgCount = new double[numIntervals][numEPs];
-		receivedByteCount = new double[numIntervals][numEPs];
-		receivedExternalMsgCount = new double[numIntervals][numEPs];
-		receivedExternalByteCount = new double[numIntervals][numEPs];
-		receivedExternalNodeMsgCount = new double[numIntervals][numEPs];
-		receivedExternalNodeByteCount = new double[numIntervals][numEPs];
-		
-		// Create a list of worker threads
-		LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
-		int pIdx = 0;
-		for (Integer nextPe : processorList){
-			//readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount) );
-			readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount, receivedExternalNodeMsgCount, receivedExternalNodeByteCount) );
-			pIdx++;
+			
+		if (MainWindow.runObject[myRun].hasLogData()) {		
+			sentMsgCount = new double[numIntervals][numEPs];
+			sentByteCount = new double[numIntervals][numEPs];
+			receivedMsgCount = new double[numIntervals][numEPs];
+			receivedByteCount = new double[numIntervals][numEPs];
+			receivedExternalMsgCount = new double[numIntervals][numEPs];
+			receivedExternalByteCount = new double[numIntervals][numEPs];
+			receivedExternalNodeMsgCount = new double[numIntervals][numEPs];
+			receivedExternalNodeByteCount = new double[numIntervals][numEPs];
+			
+			// Create a list of worker threads
+			LinkedList<Runnable> readyReaders = new LinkedList<Runnable>();
+			for (Integer nextPe : processorList){
+				//readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount) );
+				readyReaders.add( new ThreadedFileReader(nextPe, intervalSize, startInterval, endInterval, sentMsgCount, receivedMsgCount, sentByteCount, receivedByteCount, receivedExternalMsgCount, receivedExternalByteCount, receivedExternalNodeMsgCount, receivedExternalNodeByteCount) );
+			}
+	
+			// Determine a component to show the progress bar with
+			Component guiRootForProgressBar = null;
+			if(thisWindow!=null && thisWindow.isVisible()) {
+				guiRootForProgressBar = thisWindow;
+			} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
+				guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+			}
+	
+			// Pass this list of threads to a class that manages/runs the threads nicely
+			TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
+			threadManager.runAll();
 		}
-
-		// Determine a component to show the progress bar with
-		Component guiRootForProgressBar = null;
-		if(thisWindow!=null && thisWindow.isVisible()) {
-			guiRootForProgressBar = thisWindow;
-		} else if(MainWindow.runObject[myRun].guiRoot!=null && MainWindow.runObject[myRun].guiRoot.isVisible()){
-			guiRootForProgressBar = MainWindow.runObject[myRun].guiRoot;
+		else{
+			double[][] sentMsgCount_temp = MainWindow.runObject[myRun].getMsg_count();
+			double[][] sentByteCount_temp = MainWindow.runObject[myRun].getMsg_size();
+			double[][] receivedMsgCount_temp = MainWindow.runObject[myRun].getMsg_recv_count();
+			double[][] receivedByteCount_temp = MainWindow.runObject[myRun].getMsg_recv_size();
+			double[][] receivedExternalMsgCount_temp = MainWindow.runObject[myRun].getMsg_recv_count_ext();
+			double[][] receivedExternalByteCount_temp = MainWindow.runObject[myRun].getMsg_recv_size_ext();
+			int numIntervals2=sentMsgCount_temp[0].length/numEPs;
+			for(int i =0;i<sentMsgCount_temp.length;i++){
+				if((sentMsgCount_temp[i].length/numEPs) > numIntervals2){
+					numIntervals2=sentMsgCount_temp[i].length/numEPs;
+				}			
+			}
+			sentMsgCount = new double[numIntervals][numEPs];
+			sentByteCount = new double[numIntervals][numEPs];
+			receivedMsgCount = new double[numIntervals][numEPs];
+			receivedByteCount = new double[numIntervals][numEPs];
+			receivedExternalMsgCount = new double[numIntervals][numEPs];
+			receivedExternalByteCount = new double[numIntervals][numEPs];
+			receivedExternalNodeMsgCount = new double[numIntervals][numEPs];
+			receivedExternalNodeByteCount = new double[numIntervals][numEPs];
+			
+			for(int i =0;i<sentMsgCount_temp.length;i++){
+				for(int j =0;j<sentMsgCount_temp[i].length;j++){
+					int curInt= j/numEPs ;
+					int curEP= j-curInt*numEPs;
+					curInt = (curInt * 1000)/numIntervals2;
+					sentMsgCount[curInt][curEP]+=sentMsgCount_temp[i][j];
+					sentByteCount[curInt][curEP]+=sentByteCount_temp[i][j];
+					receivedMsgCount[curInt][curEP]+=receivedMsgCount_temp[i][j];
+					receivedByteCount[curInt][curEP]+=receivedByteCount_temp[i][j];
+					receivedExternalMsgCount[curInt][curEP]+=receivedExternalMsgCount_temp[i][j];
+					receivedExternalByteCount[curInt][curEP]+=receivedExternalByteCount_temp[i][j];
+					receivedExternalNodeMsgCount[curInt][curEP]+=receivedExternalMsgCount_temp[i][j];
+					receivedExternalNodeByteCount[curInt][curEP]+=receivedExternalByteCount_temp[i][j];
+				}
+			}
 		}
-
-		// Pass this list of threads to a class that manages/runs the threads nicely
-		TimedProgressThreadExecutor threadManager = new TimedProgressThreadExecutor("Loading Communication Data in Parallel", readyReaders, guiRootForProgressBar, true);
-		threadManager.runAll();
-
 		// Set the exists array to accept non-zero entries only
 		// Have initial state also display all existing data.
 

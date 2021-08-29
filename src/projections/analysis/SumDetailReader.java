@@ -368,7 +368,8 @@ class SumDetailReader extends ProjectionsReader
 
 	int value = 0;
 	int count = 1;
-	while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+	while (StreamTokenizer.TT_EOL != tokenizer.nextToken()
+			&& StreamTokenizer.TT_EOF != tokenizer.ttype) {
 	    switch (tokenizer.ttype) {
 	    case StreamTokenizer.TT_NUMBER:
 

@@ -27,9 +27,6 @@ class MessageStructures {
 	/** A Map for each PE, key = eventID value = Message */
 	private Map<Integer, TimelineMessage> []eventIDToMessageMap;
 
-	/** A Map for each PE, key = eventID value = EntryMethodObject */
-	private Map<Integer, EntryMethodObject> []eventIDToEntryMethodMap;
-	
 	/** Map from Chare Array element id's to the corresponding known entry method invocations */
 	private Map<ObjectId, List<EntryMethodObject> > oidToEntryMethodObjectsMap;
 
@@ -50,10 +47,6 @@ class MessageStructures {
 			eventIDToMessageMap = new HashMap[pe];
 			for(int i=0;i<pe;i++)
 				eventIDToMessageMap[i] = new HashMap();
-
-			eventIDToEntryMethodMap = new HashMap[pe];
-			for(int i=0;i<pe;i++)
-				eventIDToEntryMethodMap[i] = new HashMap();
 			
 			oidToEntryMethodObjectsMap = new TreeMap<>();
 		}		
@@ -90,14 +83,6 @@ class MessageStructures {
 		return oidToEntryMethodObjectsMap;
 	}
 
-	public void setEventIDToEntryMethodMap(Map [] eventIDToEntryMethodMap) {
-		this.eventIDToEntryMethodMap = eventIDToEntryMethodMap;
-	}
-
-	public Map [] getEventIDToEntryMethodMap() {
-		return eventIDToEntryMethodMap;
-	}
-	
 	protected void kill() {
 		if(secondaryWorkers != null){
 			secondaryWorkers.stopThread();
@@ -130,29 +115,6 @@ class MessageStructures {
 				}
 			}
 		}
-
-
-		/** Create a mapping from Entry Method EventIDs on each pe to EntryMethods */
-
-		pe_iter = data.allEntryMethodObjects.keySet().iterator();
-		while(pe_iter.hasNext()){
-
-			if(structures!=null) {
-				synchronized(structures){
-					if(structures.stop)
-						return;					
-				}
-			}	
-			
-			Integer pe =  pe_iter.next();
-			Query1D<EntryMethodObject> objs = data.allEntryMethodObjects.get(pe);
-			Iterator<EntryMethodObject> obj_iter = objs.iterator();
-			while(obj_iter.hasNext()){
-				EntryMethodObject obj = obj_iter.next();
-				getEventIDToEntryMethodMap()[pe.intValue()].put(Integer.valueOf(obj.EventID), obj);
-			}
-		}
-
 
 		/** Create a mapping from TimelineMessage objects to a set of the resulting execution EntryMethod objects */
 
@@ -223,8 +185,6 @@ class MessageStructures {
 			int pe = eventIDToMessageMap.length;
 			for(int i=0;i<pe;i++)
 				eventIDToMessageMap[i].clear();
-			for(int i=0;i<pe;i++)
-				eventIDToEntryMethodMap[i].clear();
 			oidToEntryMethodObjectsMap.clear();
 		}		
 	}

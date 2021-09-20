@@ -123,7 +123,7 @@ public class StsReader extends ProjDefs
         }
 
         // If it starts and ends with a quote, then we've already matched
-        if (current.endsWith("\"")) {
+        if (current.endsWith("\"") && current.length() >= 2) {
             return current.substring(1, current.length() - 1);
         }
 

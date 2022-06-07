@@ -41,6 +41,12 @@ class SumDetailReader extends ProjectionsReader
     private int numIntervals;
     private int numEPs;
     private long intervalSize;
+	private double[] msg_count; 
+	private double[] msg_size; 
+	private double[] msg_recv_count; 
+	private double[] msg_recv_size; 
+	private double[] msg_recv_count_ext; 
+	private double[] msg_recv_size_ext; 
 
     // Compressed Data
     // A Vector of RLEBlocks for each Type, EP combination
@@ -165,7 +171,177 @@ class SumDetailReader extends ProjectionsReader
 		buildTable(TOTAL_TIME);
 	    } else if (label.equals("EPCallTimePerInterval")) {
 		buildTable(NUM_MSGS);
-	    } else {
+	    } else if (label.equals("MsgSentCount")) {
+			msg_count= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+					
+			while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+				if(tokenizer.ttype==StreamTokenizer.TT_NUMBER){
+					int value = (int)tokenizer.nval;
+					int count = 1;
+			
+					if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {
+						String temp = tokenizer.sval;
+						if (temp.startsWith("+")) {
+						count = Integer.parseInt(temp.substring(1));
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+					if(nUsageRead==msg_count.length){
+						continue;
+					}
+					for (int i=0; i<count; i++) {
+						msg_count[nUsageRead++] = value;	
+						if(nUsageRead==msg_count.length){
+							break;
+						}
+					}
+				}
+			}		
+		} else if (label.equals("MsgSentSize")) {
+			msg_size= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+					
+			while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+				if(tokenizer.ttype==StreamTokenizer.TT_NUMBER){
+					int value = (int)tokenizer.nval;
+					int count = 1;
+			
+					if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {
+						String temp = tokenizer.sval;
+						if (temp.startsWith("+")) {
+						count = Integer.parseInt(temp.substring(1));
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+					if(nUsageRead==msg_count.length){
+						continue;
+					}
+					for (int i=0; i<count; i++) {
+						msg_size[nUsageRead++] = value;	
+						if(nUsageRead==msg_count.length){
+							break;
+						}
+					}
+
+				}
+			}
+		} else if (label.equals("MsgRecvCount")) {
+			msg_recv_count= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+					
+			while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+				if(tokenizer.ttype==StreamTokenizer.TT_NUMBER){
+					int value = (int)tokenizer.nval;
+					int count = 1;
+			
+					if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {
+						String temp = tokenizer.sval;
+						if (temp.startsWith("+")) {
+						count = Integer.parseInt(temp.substring(1));
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+					if(nUsageRead==msg_count.length){
+						continue;
+					}
+					for (int i=0; i<count; i++) {
+						msg_recv_count[nUsageRead++] = value;	
+						if(nUsageRead==msg_count.length){
+							break;
+						}
+					}
+				}
+			} 
+		} else if (label.equals("MsgRecvSize")) {
+			msg_recv_size= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+					
+			while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+				if(tokenizer.ttype==StreamTokenizer.TT_NUMBER){
+					int value = (int)tokenizer.nval;
+					int count = 1;
+			
+					if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {
+						String temp = tokenizer.sval;
+						if (temp.startsWith("+")) {
+						count = Integer.parseInt(temp.substring(1));
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+					if(nUsageRead==msg_count.length){
+						continue;
+					}
+					for (int i=0; i<count; i++) {
+						msg_recv_size[nUsageRead++] = value;	
+						if(nUsageRead==msg_count.length){
+							break;
+						}
+					}
+	
+				}
+			}
+		} else if (label.equals("ExternalMsgRecvCount")) {
+			msg_recv_count_ext= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+					
+			while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+				if(tokenizer.ttype==StreamTokenizer.TT_NUMBER){
+					int value = (int)tokenizer.nval;
+					int count = 1;
+			
+					if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {
+						String temp = tokenizer.sval;
+						if (temp.startsWith("+")) {
+						count = Integer.parseInt(temp.substring(1));
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+					if(nUsageRead==msg_count.length){
+						continue;
+					}
+					for (int i=0; i<count; i++) {
+						msg_recv_count_ext[nUsageRead++] = value;	
+						if(nUsageRead==msg_count.length){
+							break;
+						}
+					}
+				}
+			} 
+		} else if (label.equals("ExternalMsgRecvSize")) {
+			msg_recv_size_ext= new double[numEPs*numIntervals];
+			int nUsageRead=0;
+					
+			while (StreamTokenizer.TT_EOL!=tokenizer.nextToken()) {
+				if(tokenizer.ttype==StreamTokenizer.TT_NUMBER){
+					int value = (int)tokenizer.nval;
+					int count = 1;
+			
+					if (StreamTokenizer.TT_WORD==tokenizer.nextToken()) {
+						String temp = tokenizer.sval;
+						if (temp.startsWith("+")) {
+						count = Integer.parseInt(temp.substring(1));
+						}
+					} else {
+						tokenizer.pushBack();
+					}
+					if(nUsageRead==msg_count.length){
+						continue;
+					}
+					for (int i=0; i<count; i++) {
+						msg_recv_size_ext[nUsageRead++] = value;	
+						if(nUsageRead==msg_count.length){
+							break;
+						}
+					}
+				}
+			} 
+		} else {
 		// do nothing. Unrecognized labels are not an error.
 		// this allows new formats to be implemented without
 		// immediately rendering this tool useless.
@@ -273,4 +449,32 @@ class SumDetailReader extends ProjectionsReader
     protected List<RLEBlock>[] getData(int type) {
 	return rawData[type];
     }
+    	public double[] getMsg_count() 
+    {
+	return msg_count;
+    }
+
+	public double[] getMsg_size() 
+    {
+	return msg_size;
+    }
+	public double[] getMsg_recv_count() 
+    {
+	return msg_recv_count;
+    }
+
+	public double[] getMsg_recv_size() 
+    {
+	return msg_recv_size;
+    }
+	public double[] getMsg_recv_count_ext() 
+    {
+	return msg_recv_count_ext;
+    }
+
+	public double[] getMsg_recv_size_ext() 
+    {
+	return msg_recv_size_ext;
+    }
+
 }

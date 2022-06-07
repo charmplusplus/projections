@@ -150,8 +150,8 @@ implements ActionListener, ItemListener
 			//renderedTimelinesMenuItem.setEnabled(false);
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(true);
-			communicationMenuItem.setEnabled(false);
-			communicationVsTimeMenuItem.setEnabled(false);
+			communicationMenuItem.setEnabled(true);
+			communicationVsTimeMenuItem.setEnabled(true);
 			callTableMenuItem.setEnabled(false);
 			viewLogFilesMenuItem.setEnabled(false);
 			histogramsMenuItem.setEnabled(false);

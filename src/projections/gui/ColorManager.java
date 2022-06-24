@@ -193,20 +193,25 @@ public class ColorManager
 //		}
 //	}
 
-	
-	
 	public static Color[] createColorMap(int numColors) {
 		Color[] colors = new Color[numColors];
-		float H = (float)1.0;
-		float S = (float)1.0;
-		float B = (float)1.0;
-		float delta = (float)(1.0/numColors);
-		for(int i=0; i<numColors; i++) {
-			colors[i] = Color.getHSBColor(H, S, B);
-			H -= delta;
-			if(H < 0.0) { H = (float)1.0; }
+		for (int i = 0; i < numColors; i++) {
+			colors[i] = createFromLong((i * 251) % 5113);
 		}
 		return colors;
+	}
+
+	public static Color createFromLong(long color) {
+		// Should range from 0.0 to 1.0
+		final float H = (color * 29 % 512) / 512.0f;
+
+		float S = (color % 1536) / 512.0f;
+		S = (S < 1.0) ? 0.7f : 1.0f;
+
+		float B = (color % 1536) / 512.0f;
+		B = (B < 2.0) ? 1.0f : 0.6f;
+
+		return Color.getHSBColor(H, S, B);
 	}
 	
 	public static Color[] createComplementaryColorMap(int numUserEntries) {

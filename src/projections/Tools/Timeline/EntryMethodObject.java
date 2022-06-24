@@ -25,6 +25,7 @@ import projections.analysis.Analysis;
 import projections.analysis.ObjectId;
 import projections.analysis.PackTime;
 import projections.analysis.TimelineEvent;
+import projections.gui.ColorManager;
 import projections.gui.MainWindow;
 import projections.gui.U;
 import projections.misc.MiscUtil;
@@ -1063,21 +1064,7 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 				color += (extraFields.memoryUsage * 6121) % 5953;
 			}
 
-			 // Should range from 0.0 to 2.0
-			 float h2 = ((color+512) % 512) / 256.0f;
-			 // Should range from 0.0 to 1.0
-			 float h = ((color+512) % 512) / 512.0f;
-
-			
-			
-			float s = 1.0f;   // Should be 1.0
-
-			float b = 1.0f;   // Should be 0.5 or 1.0
-
-			if(h2 > 1.0)
-				b = 0.6f;
-
-			colToSave = Color.getHSBColor(h, s, b);
+			colToSave = ColorManager.createFromLong(color);
 
 		}
 		if (colToSave == null) {

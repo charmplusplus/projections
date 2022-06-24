@@ -1,7 +1,5 @@
 package projections.Tools.CommunicationPerPE;
 
-import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
@@ -19,9 +17,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.text.DecimalFormat;
 
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import projections.analysis.Analysis;
 import projections.analysis.TimedProgressThreadExecutor;
@@ -32,7 +28,7 @@ import projections.gui.RangeDialog;
 import projections.gui.Util;
 
 public class CommWindow extends GenericGraphWindow
-implements ItemListener, ActionListener, Clickable
+implements ActionListener, Clickable
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -66,24 +62,24 @@ implements ItemListener, ActionListener, Clickable
 
 	private JPanel	mainPanel;
 	private JPanel	graphPanel;
-	private JPanel	checkBoxPanel;
+	private JPanel viewSelectPanel;
 	private JPanel      blueGenePanel;
 	private JPanel	unitPanel;
 
-	private Checkbox    sentMsgs;
-	private Checkbox	sentBytes;
-	private Checkbox	receivedMsgs;
-	private Checkbox    receivedBytes;
-	private Checkbox    recvExternal;
-	private Checkbox    recvExternalBytes;
-	private Checkbox    recvExternalNode;
-	private Checkbox    recvExternalNodeBytes;
-	private Checkbox    hopCountCB;
-	private Checkbox    peHopCountCB;
+	private JRadioButton sentMsgs;
+	private JRadioButton sentBytes;
+	private JRadioButton receivedMsgs;
+	private JRadioButton receivedBytes;
+	private JRadioButton receivedExternalMsgs;
+	private JRadioButton receivedExternalBytes;
+	private JRadioButton receivedExternalNodeMsgs;
+	private JRadioButton receivedExternalNodeBytes;
+	private JRadioButton hopCountBt;
+	private JRadioButton peHopCountBt;
 
-	private Checkbox 	microseconds;
-	private Checkbox 	milliseconds;
-	private Checkbox 	seconds;	
+	private JRadioButton microseconds;
+	private JRadioButton milliseconds;
+	private JRadioButton seconds;
 
 	private CommWindow  thisWindow;
 
@@ -116,94 +112,81 @@ implements ItemListener, ActionListener, Clickable
 			} else if(arg.equals("Set Range")) {
 				showDialog();
 			}
+		} else if (e.getSource() instanceof JRadioButton) {
+			setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			handleBtn((JRadioButton)e.getSource());
+			super.refreshGraph();
+			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
 
-	public void itemStateChanged(ItemEvent ae){
-		if(ae.getSource() instanceof Checkbox){
-			setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			Checkbox cb = (Checkbox)ae.getSource();
-			if (cb == sentMsgs) {
-				setDataSource("Rate of Msgs Sent", sentMsgCount, this);
-				setPopupText("sentMsgCount");
-				setYAxis("Rate of Messages Sent", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			}else if(cb == sentBytes){
-				//System.out.println("bytes");
-				setDataSource("Rate of Bytes Sent", sentByteCount, this);
-				setPopupText("sentByteCount");
-				setYAxis("Rate of Bytes Sent", "bytes");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			}else if(cb == receivedMsgs){
-				setDataSource("Rate of Msgs Received", receivedMsgCount, this);
-				setPopupText("receivedMsgCount");
-				setYAxis("Rate of Messages Received", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			}else if(cb == receivedBytes){
-				setDataSource("Rate of Bytes Received", 
-						receivedByteCount, this);
-				setPopupText("receivedByteCount");
-				setYAxis("Rate of Bytes Received", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			}else if(cb == recvExternal){
-				setDataSource("Rate of External Msgs Received", externalRecv, this);
-				setPopupText("externalRecv");
-				setYAxis("Rate of External Messages Received", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			} else if(cb == recvExternalBytes){
-				setDataSource("Rate of External Bytes Received", externalBytesRecv, this);
-				setPopupText("externalBytesRecv");
-				setYAxis("Rate of External Bytes Received", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			} else if (cb == recvExternalNode) {
-				setDataSource("Rate of Node External Msgs Received", externalNodeRecv, this);
-				setPopupText("externalNodeRecv");
-				setYAxis("Rate of Node External Messages Received", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			} else if (cb == recvExternalNodeBytes) {
-				setDataSource("Rate of Node External Bytes Received", externalNodeBytesRecv, this);
-				setPopupText("externalNodeBytesRecv");
-				setYAxis("Rate of Node External Bytes Received", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			} else if (cb == hopCountCB) {
-				if (avgHopCount == null) {
-					avgHopCount = averageHops(hopCount, receivedMsgCount);
-				}
-				setDataSource("Average Hop Counts by Entry Point", 
-						avgHopCount, this);
-				setPopupText("avgHopCount");
-				setYAxis("Average Message Hop Counts", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			} else if (cb == peHopCountCB) {
-				if (avgPeHopCount == null) {
-					avgPeHopCount = averagePEHops(hopCount, receivedMsgCount);
-				}
-				setDataSource("Average Hop Counts by Processor", 
-						avgPeHopCount, this);
-				setPopupText("avgPeHopCount");
-				setYAxis("Average Message Hop Counts (by PE)", "");
-				setXAxis("Processor", peList);
-				super.refreshGraph();
-			} else if (cb == microseconds) {
-				scaleHistogramData(1.0);
-				super.refreshGraph();
-			} else if (cb == milliseconds) {
-				scaleHistogramData(1000.0);
-				super.refreshGraph();
-			} else if (cb == seconds) {
-				scaleHistogramData(1000000.0);
-				super.refreshGraph();
+	public void handleBtn(JRadioButton bt) {
+		if (bt == sentMsgs) {
+			setDataSource("Rate of Msgs Sent", sentMsgCount, this);
+			setPopupText("sentMsgCount");
+			setYAxis("Rate of Messages Sent", "");
+			setXAxis("Processor", peList);
+		} else if (bt == sentBytes) {
+			//System.out.println("bytes");
+			setDataSource("Rate of Bytes Sent", sentByteCount, this);
+			setPopupText("sentByteCount");
+			setYAxis("Rate of Bytes Sent", "bytes");
+			setXAxis("Processor", peList);
+		} else if (bt == receivedMsgs) {
+			setDataSource("Rate of Msgs Received", receivedMsgCount, this);
+			setPopupText("receivedMsgCount");
+			setYAxis("Rate of Messages Received", "");
+			setXAxis("Processor", peList);
+		} else if (bt == receivedBytes) {
+			setDataSource("Rate of Bytes Received",
+					receivedByteCount, this);
+			setPopupText("receivedByteCount");
+			setYAxis("Rate of Bytes Received", "");
+			setXAxis("Processor", peList);
+		} else if (bt == receivedExternalMsgs) {
+			setDataSource("Rate of External Msgs Received", externalRecv, this);
+			setPopupText("externalRecv");
+			setYAxis("Rate of External Messages Received", "");
+			setXAxis("Processor", peList);
+		} else if (bt == receivedExternalBytes) {
+			setDataSource("Rate of External Bytes Received", externalBytesRecv, this);
+			setPopupText("externalBytesRecv");
+			setYAxis("Rate of External Bytes Received", "");
+			setXAxis("Processor", peList);
+		} else if (bt == receivedExternalNodeMsgs) {
+			setDataSource("Rate of Node External Msgs Received", externalNodeRecv, this);
+			setPopupText("externalNodeRecv");
+			setYAxis("Rate of Node External Messages Received", "");
+			setXAxis("Processor", peList);
+		} else if (bt == receivedExternalNodeBytes) {
+			setDataSource("Rate of Node External Bytes Received", externalNodeBytesRecv, this);
+			setPopupText("externalNodeBytesRecv");
+			setYAxis("Rate of Node External Bytes Received", "");
+			setXAxis("Processor", peList);
+		} else if (bt == hopCountBt) {
+			if (avgHopCount == null) {
+				avgHopCount = averageHops(hopCount, receivedMsgCount);
 			}
-			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+			setDataSource("Average Hop Counts by Entry Point",
+					avgHopCount, this);
+			setPopupText("avgHopCount");
+			setYAxis("Average Message Hop Counts", "");
+			setXAxis("Processor", peList);
+		} else if (bt == peHopCountBt) {
+			if (avgPeHopCount == null) {
+				avgPeHopCount = averagePEHops(hopCount, receivedMsgCount);
+			}
+			setDataSource("Average Hop Counts by Processor",
+					avgPeHopCount, this);
+			setPopupText("avgPeHopCount");
+			setYAxis("Average Message Hop Counts (by PE)", "");
+			setXAxis("Processor", peList);
+		} else if (bt == microseconds) {
+			scaleHistogramData(1.0);
+		} else if (bt == milliseconds) {
+			scaleHistogramData(1000.0);
+		} else if (bt == seconds) {
+			scaleHistogramData(1000000.0);
 		}
 	}
 
@@ -339,73 +322,89 @@ implements ItemListener, ActionListener, Clickable
 		mainPanel.setLayout(gbl);
 
 		graphPanel = getMainPanel();
-		checkBoxPanel = new JPanel();
+		viewSelectPanel = new JPanel();
 		unitPanel = new JPanel();
 		if (MainWindow.BLUEGENE) {
 			blueGenePanel = new JPanel();
 		}
 
-		CheckboxGroup cbg = new CheckboxGroup();
-		//	histogramCB = new Checkbox("Histogram", cbg, true);
-		sentMsgs = new Checkbox("Msgs Sent To", cbg, true);
-		sentBytes = new Checkbox("Bytes Sent To", cbg, false);
-		receivedMsgs = new Checkbox("Msgs Recv By", cbg, false);
-		receivedBytes = new Checkbox("Bytes Recv By", cbg, false);
-		recvExternal = new Checkbox("External Msgs Recv By", cbg, false);
-		recvExternalBytes = new Checkbox("External Bytes Recv By", cbg, false);
-		recvExternalNode = new Checkbox("Node External Msgs Recv By", cbg, false);
-		recvExternalNodeBytes = new Checkbox("Node External Bytes Recv By", cbg, false);
+		sentMsgs = new JRadioButton("Msgs Sent");
+		sentMsgs.addActionListener(this);
+		sentMsgs.setToolTipText("Number of messages sent anywhere, including to same PE");
+		sentBytes = new JRadioButton("Bytes Sent");
+		sentBytes.addActionListener(this);
+		sentBytes.setToolTipText("Number of bytes sent anywhere, including to same PE");
+		receivedMsgs = new JRadioButton("Msgs Recv");
+		receivedMsgs.addActionListener(this);
+		receivedMsgs.setToolTipText("Number of messages received from anywhere, including from same PE");
+		receivedBytes = new JRadioButton("Bytes Recv");
+		receivedBytes.addActionListener(this);
+		receivedBytes.setToolTipText("Number of bytes received from anywhere, including from same PE");
+		receivedExternalMsgs = new JRadioButton("External Msgs Recv");
+		receivedExternalMsgs.addActionListener(this);
+		receivedExternalMsgs.setToolTipText("Number of messages received from a different PE");
+		receivedExternalBytes = new JRadioButton("External Bytes Recv");
+		receivedExternalBytes.addActionListener(this);
+		receivedExternalBytes.setToolTipText("Number of bytes received from a different PE");
+		receivedExternalNodeMsgs = new JRadioButton("External Node Msgs Recv", true);
+		receivedExternalNodeMsgs.addActionListener(this);
+		receivedExternalNodeMsgs.setToolTipText("Number of messages received from a different process");
+		receivedExternalNodeBytes = new JRadioButton("External Node Bytes Recv");
+		receivedExternalNodeBytes.addActionListener(this);
+		receivedExternalNodeBytes.setToolTipText("Number of bytes received from a different process");
 
-
-		if (MainWindow.BLUEGENE) {
-			hopCountCB = new Checkbox("Avg Hop Count (EP)", cbg, false);
-			peHopCountCB = new Checkbox("Avg Hop Count (procs)", cbg, false);
-		}
-
-		//	histogramCB.addItemListener(this);
-		sentMsgs.addItemListener(this);
-		sentBytes.addItemListener(this);
-		receivedMsgs.addItemListener(this);
-		receivedBytes.addItemListener(this);
-		recvExternal.addItemListener(this);
-		recvExternalBytes.addItemListener(this);
-		recvExternalNode.addItemListener(this);
-		recvExternalNodeBytes.addItemListener(this);
-		if (MainWindow.BLUEGENE) {
-			hopCountCB.addItemListener(this);
-			peHopCountCB.addItemListener(this);
-		}
-
-		//	Util.gblAdd(checkBoxPanel, histogramCB, gbc, 0,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, recvExternal, gbc, 4,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, recvExternalBytes, gbc, 5,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, recvExternalNode, gbc, 6,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, recvExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
+		ButtonGroup btg = new ButtonGroup();
+		btg.add(sentMsgs);
+		btg.add(sentBytes);
+		btg.add(receivedMsgs);
+		btg.add(receivedBytes);
+		btg.add(receivedExternalMsgs);
+		btg.add(receivedExternalBytes);
+		btg.add(receivedExternalNodeMsgs);
+		btg.add(receivedExternalNodeBytes);
 
 		if (MainWindow.BLUEGENE) {
-			Util.gblAdd(blueGenePanel, hopCountCB, gbc, 0,0, 1,1, 1,1);
-			Util.gblAdd(blueGenePanel, peHopCountCB, gbc, 1,0, 1,1, 1,1);
+			hopCountBt = new JRadioButton("Avg Hop Count (EP)");
+			hopCountBt.addActionListener(this);
+			btg.add(hopCountBt);
+
+			peHopCountBt = new JRadioButton("Avg Hop Count (procs)");
+			peHopCountBt.addActionListener(this);
+			btg.add(peHopCountBt);
 		}
 
-		CheckboxGroup unit_cbg = new CheckboxGroup();
-		microseconds = new Checkbox("Microseconds", unit_cbg, false);
-		milliseconds = new Checkbox("Milliseconds", unit_cbg, true);
-		seconds = new Checkbox("Seconds", unit_cbg, false);
+		Util.gblAdd(viewSelectPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalMsgs, gbc, 4,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalBytes, gbc, 5,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalNodeMsgs, gbc, 6,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
 
-		microseconds.addItemListener(this);
-		milliseconds.addItemListener(this);
-		seconds.addItemListener(this);
+		if (MainWindow.BLUEGENE) {
+			Util.gblAdd(blueGenePanel, hopCountBt, gbc, 0,0, 1,1, 1,1);
+			Util.gblAdd(blueGenePanel, peHopCountBt, gbc, 1,0, 1,1, 1,1);
+		}
+
+		microseconds = new JRadioButton("Microseconds");
+		microseconds.addActionListener(this);
+		milliseconds = new JRadioButton("Milliseconds", true);
+		milliseconds.addActionListener(this);
+		seconds = new JRadioButton("Seconds");
+		seconds.addActionListener(this);
+
+		ButtonGroup unit_btg = new ButtonGroup();
+		unit_btg.add(microseconds);
+		unit_btg.add(milliseconds);
+		unit_btg.add(seconds);
 
 		Util.gblAdd(unitPanel, microseconds, gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(unitPanel, milliseconds, gbc, 1,0, 1,1, 1,1);
 		Util.gblAdd(unitPanel, seconds, gbc, 2,0, 1,1, 1,1);
 
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(mainPanel, checkBoxPanel, gbc, 0,2, 1,1, 0,0);
+		Util.gblAdd(mainPanel, viewSelectPanel, gbc, 0,2, 1,1, 0,0);
 
 		if (MainWindow.BLUEGENE) {
 			Util.gblAdd(mainPanel, blueGenePanel, gbc, 0,3, 1,1, 0,0);
@@ -436,15 +435,10 @@ implements ItemListener, ActionListener, Clickable
 					return null;
 				}
 				public void done() {
-					milliseconds.setState(true);
-					unitTime = 1000.0;
-					unitTimeStr = "ms";
-					
-					sentMsgs.setState(true);
-					setDataSource("Communications", sentMsgCount, thisWindow);
-					setPopupText("sentMsgCount");
-					setYAxis("Messages Sent", "");
-					setXAxis("Processor", peList);
+					milliseconds.setSelected(true);
+					handleBtn(milliseconds);
+					sentMsgs.setSelected(true);
+					handleBtn(sentMsgs);
 					thisWindow.setVisible(true);
 					thisWindow.repaint();
 				}

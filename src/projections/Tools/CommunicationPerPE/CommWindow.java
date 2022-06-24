@@ -437,8 +437,8 @@ implements ActionListener, Clickable
 				public void done() {
 					milliseconds.setSelected(true);
 					handleBtn(milliseconds);
-					sentMsgs.setSelected(true);
-					handleBtn(sentMsgs);
+					receivedExternalNodeMsgs.setSelected(true);
+					handleBtn(receivedExternalNodeMsgs);
 					thisWindow.setVisible(true);
 					thisWindow.repaint();
 				}

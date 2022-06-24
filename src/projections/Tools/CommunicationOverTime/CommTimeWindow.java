@@ -173,7 +173,7 @@ implements ActionListener
 		gbc.fill = GridBagConstraints.BOTH;
 		mainPanel.setLayout(gbl);
 
-		sentMsgs = new JRadioButton("Msgs Sent", true);
+		sentMsgs = new JRadioButton("Msgs Sent");
 		sentMsgs.addActionListener(this);
 		sentMsgs.setToolTipText("Number of messages sent anywhere, including to same PE");
 		sentBytes = new JRadioButton("Bytes Sent");
@@ -191,7 +191,7 @@ implements ActionListener
 		receivedExternalBytes = new JRadioButton("External Bytes Recv");
 		receivedExternalBytes.addActionListener(this);
 		receivedExternalBytes.setToolTipText("Number of bytes received from a different PE");
-		receivedExternalNodeMsgs = new JRadioButton("External Node Msgs Recv");
+		receivedExternalNodeMsgs = new JRadioButton("External Node Msgs Recv", true);
 		receivedExternalNodeMsgs.addActionListener(this);
 		receivedExternalNodeMsgs.setToolTipText("Number of messages received from a different process");
 		receivedExternalNodeBytes = new JRadioButton("External Node Bytes Recv");

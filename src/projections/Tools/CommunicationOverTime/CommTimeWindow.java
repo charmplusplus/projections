@@ -1,7 +1,5 @@
 package projections.Tools.CommunicationOverTime;
 
-import java.awt.Checkbox;
-import java.awt.CheckboxGroup;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
@@ -9,18 +7,13 @@ import java.awt.GridBagLayout;
 import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
+import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.GenericGraphColorer;
@@ -33,7 +26,7 @@ import projections.gui.Util;
 
 
 public class CommTimeWindow extends GenericGraphWindow
-implements ItemListener, ActionListener
+implements ActionListener
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -51,25 +44,25 @@ implements ItemListener, ActionListener
 	private IntervalChooserPanel intervalPanel;
 
 	private JPanel	   graphPanel;
-	private JPanel	   checkBoxPanel;
+	private JPanel viewSelectPanel;
 	private JPanel         controlPanel;
 
 	private JButton	   setRanges;
 	private JLabel totalCount;
 	//    private JButton	   epSelection;
 
-	private CheckboxGroup  cbg;
-	private Checkbox	   sentMsgs;
-	private Checkbox	   sentBytes;
-	private Checkbox	   receivedMsgs;
-	private Checkbox	   receivedBytes;
-	//private Checkbox	   sentExternalMsgs;
-	//private Checkbox	   sentExternalBytes;
-	private Checkbox	   receivedExternalMsgs;
-	private Checkbox	   receivedExternalBytes;
+	private ButtonGroup btg;
+	private JRadioButton sentMsgs;
+	private JRadioButton sentBytes;
+	private JRadioButton receivedMsgs;
+	private JRadioButton receivedBytes;
+	//private JRadioButton sentExternalMsgs;
+	//private JRadioButton sentExternalBytes;
+	private JRadioButton receivedExternalMsgs;
+	private JRadioButton receivedExternalBytes;
 
-    private Checkbox	   receivedExternalNodeMsgs;
-	private Checkbox	   receivedExternalNodeBytes;
+    private JRadioButton receivedExternalNodeMsgs;
+	private JRadioButton receivedExternalNodeBytes;
 
 	private int		   startInterval;
 	private int		   endInterval;
@@ -180,33 +173,50 @@ implements ItemListener, ActionListener
 		gbc.fill = GridBagConstraints.BOTH;
 		mainPanel.setLayout(gbl);
 
-		// checkbox panel items
-		cbg = new CheckboxGroup();
-		sentMsgs = new Checkbox("Msgs Sent", cbg, true);
-		sentMsgs.addItemListener(this);
-		sentBytes = new Checkbox("Bytes Sent", cbg, false);
-		sentBytes.addItemListener(this);
-		receivedMsgs = new Checkbox("Msgs Recv", cbg, false);
-		receivedMsgs.addItemListener(this);
-		receivedBytes = new Checkbox("Bytes Recv", cbg, false);
-		receivedBytes.addItemListener(this);
-		receivedExternalMsgs = new Checkbox("External Msgs Recv", cbg, false);
-		receivedExternalMsgs.addItemListener(this);
-		receivedExternalBytes = new Checkbox("External Bytes Recv", cbg, false);
-		receivedExternalBytes.addItemListener(this);
-		receivedExternalNodeMsgs = new Checkbox("External Node Msgs Recv", cbg, false);
-		receivedExternalNodeMsgs.addItemListener(this);
-		receivedExternalNodeBytes = new Checkbox("External Node Bytes Recv", cbg, false);
-		receivedExternalNodeBytes.addItemListener(this);
-		checkBoxPanel = new JPanel();
-		Util.gblAdd(checkBoxPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedExternalMsgs, gbc, 4,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedExternalBytes, gbc, 5,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedExternalNodeMsgs, gbc, 6,0, 1,1, 1,1);
-		Util.gblAdd(checkBoxPanel, receivedExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
+		sentMsgs = new JRadioButton("Msgs Sent", true);
+		sentMsgs.addActionListener(this);
+		sentMsgs.setToolTipText("Number of messages sent anywhere, including to same PE");
+		sentBytes = new JRadioButton("Bytes Sent");
+		sentBytes.addActionListener(this);
+		sentBytes.setToolTipText("Number of bytes sent anywhere, including to same PE");
+		receivedMsgs = new JRadioButton("Msgs Recv");
+		receivedMsgs.addActionListener(this);
+		receivedMsgs.setToolTipText("Number of messages received from anywhere, including from same PE");
+		receivedBytes = new JRadioButton("Bytes Recv");
+		receivedBytes.addActionListener(this);
+		receivedBytes.setToolTipText("Number of bytes received from anywhere, including from same PE");
+		receivedExternalMsgs = new JRadioButton("External Msgs Recv");
+		receivedExternalMsgs.addActionListener(this);
+		receivedExternalMsgs.setToolTipText("Number of messages received from a different PE");
+		receivedExternalBytes = new JRadioButton("External Bytes Recv");
+		receivedExternalBytes.addActionListener(this);
+		receivedExternalBytes.setToolTipText("Number of bytes received from a different PE");
+		receivedExternalNodeMsgs = new JRadioButton("External Node Msgs Recv");
+		receivedExternalNodeMsgs.addActionListener(this);
+		receivedExternalNodeMsgs.setToolTipText("Number of messages received from a different process");
+		receivedExternalNodeBytes = new JRadioButton("External Node Bytes Recv");
+		receivedExternalNodeBytes.addActionListener(this);
+		receivedExternalNodeBytes.setToolTipText("Number of bytes received from a different process");
+
+		btg = new ButtonGroup();
+		btg.add(sentMsgs);
+		btg.add(sentBytes);
+		btg.add(receivedMsgs);
+		btg.add(receivedBytes);
+		btg.add(receivedExternalMsgs);
+		btg.add(receivedExternalBytes);
+		btg.add(receivedExternalNodeMsgs);
+		btg.add(receivedExternalNodeBytes);
+
+		viewSelectPanel = new JPanel();
+		Util.gblAdd(viewSelectPanel, sentMsgs, gbc, 0,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, sentBytes, gbc, 1,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedMsgs, gbc, 2,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedBytes, gbc, 3,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalMsgs, gbc, 4,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalBytes, gbc, 5,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalNodeMsgs, gbc, 6,0, 1,1, 1,1);
+		Util.gblAdd(viewSelectPanel, receivedExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
 
 		// control panel items
 		setRanges = new JButton("Select New Range");
@@ -223,17 +233,8 @@ implements ItemListener, ActionListener
 
 		graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel,     gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(mainPanel, checkBoxPanel,  gbc, 0,2, 1,1, 0,0);
+		Util.gblAdd(mainPanel, viewSelectPanel,  gbc, 0,2, 1,1, 0,0);
 		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,3, 1,0, 0,0);
-	}
-
-	public void itemStateChanged(ItemEvent ae){
-		if(ae.getSource() instanceof Checkbox){
-			setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			Checkbox cb = (Checkbox)ae.getSource();
-			setCheckboxData(cb);
-			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-		}
 	}
 
 	public long accumulateArray(double arr[][]) {
@@ -248,7 +249,7 @@ implements ItemListener, ActionListener
 		return Math.round(total * intervalSize / 1000);
 	}
 
-	public void setCheckboxData(Checkbox cb) {
+	public void changeView(JRadioButton cb) {
 		if(cb == sentMsgs) {
 			setDataSource("Messages Sent Over Time", sentMsgOutput, 
 					commTimeColors, this);
@@ -357,8 +358,14 @@ implements ItemListener, ActionListener
 				}
 				public void done() {
 					setOutputGraphData();
-					Checkbox cb = cbg.getSelectedCheckbox();
-					setCheckboxData(cb);
+					for (Enumeration<AbstractButton> buttons = btg.getElements(); buttons.hasMoreElements(); ) {
+						AbstractButton button = buttons.nextElement();
+
+						if (button.isSelected()) {
+							changeView((JRadioButton) button);
+						}
+					}
+
 					thisWindow.setVisible(true);
 					thisWindow.repaint();
 				}
@@ -579,20 +586,6 @@ implements ItemListener, ActionListener
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() instanceof JButton) {
 			JButton b = (JButton)e.getSource();
-			//	    if (b == epSelection) {
-			//		if (entryDialog == null) {
-			//		    entryDialog = 
-			//			new EntrySelectionDialog(this,
-			//						 typeLabelNames,
-			//						 stateArray,colorArray,
-			//						 existsArray,entryNames);
-			//		}
-			//		entryDialog.showDialog();
-			//		setOutputGraphData();
-			//		Checkbox cb = cbg.getSelectedCheckbox();
-			//		setCheckboxData(cb);
-			//	    } 
-
 			if (b == setRanges) {
 				showDialog();
 			}
@@ -604,6 +597,11 @@ implements ItemListener, ActionListener
 			} else if(arg.equals("Set Range")) {
 				showDialog();
 			}
+		}
+		else if (e.getSource() instanceof JRadioButton) {
+			setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			changeView((JRadioButton)e.getSource());
+			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 	}
 

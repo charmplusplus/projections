@@ -80,9 +80,9 @@ public class StsReader extends ProjDefs
     /** index by Integer ID in STS file, return String name */
     public Map<Integer, Chare> entryChares = new TreeMap<Integer, Chare>();
     /** keys are indexes into flat arrays, values are the IDs given in STS file */
-    private Map<Integer, Integer>  entryFlatToID = new TreeMap<Integer, Integer>();
+    private Map<Integer, Integer>  entryFlatToID = null;
     /** keys are the IDs given in STS file, values are indexes into flat arrays */
-    private Map<Integer, Integer> entryIDToFlat = new TreeMap<Integer, Integer>();
+    private Map<Integer, Integer> entryIDToFlat = null;
     
     
     
@@ -224,8 +224,19 @@ public class StsReader extends ProjDefs
 			ChareID = Integer.parseInt(st.nextToken());
 			st.nextToken(); // msgid
 
-			entryFlatToID.put(entryIndex, ID);
-			entryIDToFlat.put(ID,entryIndex);
+			// In general, Entry IDs will be contiguous starting from 0, so avoid
+			// creating the ID<->flat maps if possible. This code creates the map
+			// when it detects a non-contiguous case.
+			if (ID != entryIndex && entryFlatToID == null) {
+				entryFlatToID = new TreeMap<>();
+				for (int i = 0; i < entryIndex; i++)
+					entryFlatToID.put(i, i);
+				entryIDToFlat = new TreeMap<>(entryFlatToID);
+			}
+			if (entryFlatToID != null) {
+				entryFlatToID.put(entryIndex, ID);
+				entryIDToFlat.put(ID, entryIndex);
+			}
 			entryIndex++;
 			getEntryNames().put(ID,Name);
 			getEntryChare().put(ID, Chares[ChareID]);
@@ -348,8 +359,13 @@ public class StsReader extends ProjDefs
     }   
     
     public String getEntryNameByIndex(int index) {
-    	if(entryFlatToID.containsKey(index)){
-    		return getEntryNames().get(entryFlatToID.get(index));
+    	// Check if the ID is valid. If entryFlatToID exists, then check if 
+    	// there's a valid mapping for index there, otherwise the index is the
+    	// ID, so check in the entry names map directly.
+    	final boolean isValid = (entryFlatToID != null && entryFlatToID.containsKey(index)) ||
+    			(entryFlatToID == null && getEntryNames().containsKey(index));
+    	if (isValid) {
+    		return getEntryNames().get(getEntryID(index));
     	} else {
     		return "Unknown";
     	}
@@ -372,7 +388,7 @@ public class StsReader extends ProjDefs
     }   
     
     public String getEntryChareNameByIndex(int index) {
-	return getEntryChare().get(entryFlatToID.get(index)).name;
+	return getEntryChare().get(getEntryID(index)).name;
     }   
 
     public int getEntryChareDimensionsByID(int ID) {
@@ -380,7 +396,7 @@ public class StsReader extends ProjDefs
     }
 
     public int getEntryChareDimensionsByIndex(int index) {
-	return getEntryChare().get(entryFlatToID.get(index)).dimensions;
+	return getEntryChare().get(getEntryID(index)).dimensions;
     }
 
     public String getEntryFullNameByID(int ID) {
@@ -391,12 +407,16 @@ public class StsReader extends ProjDefs
     	return getEntryChareNameByIndex(index) + "::" + getEntryNameByIndex(index);
     }   
     
-	public Integer getEntryIndex(int ID) {
-		if(ID<0)
-    		return ID;
-		return entryIDToFlat.get(ID);
-	}
-         
+    public int getEntryIndex(int ID) {
+    	if(ID<0)
+      		return ID;
+    	return (entryIDToFlat == null) ? ID : entryIDToFlat.get(ID);
+    }
+
+    private int getEntryID(int index) {
+    	return (entryFlatToID == null) ? index : entryFlatToID.get(index);
+    }
+
     // *** user event accessors ***
     public int getNumUserDefinedEvents() {
 	return userEvents.size();

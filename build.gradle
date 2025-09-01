@@ -75,4 +75,3 @@ tasks.register('copyJarToBin', Copy) {
     into('bin/')
     rename { 'projections.jar' }
 }
-

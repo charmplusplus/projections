@@ -1,5 +1,6 @@
 package projections.Tools.TimeProfile;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.GridBagConstraints;
@@ -9,6 +10,7 @@ import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.*;
 
 import javax.swing.JButton;
@@ -18,6 +20,16 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingWorker;
+
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.renderer.xy.StackedXYBarRenderer;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.data.xy.CategoryTableXYDataset;
+import org.jfree.data.xy.XYDataset;
+import org.jfree.chart.labels.StandardXYToolTipGenerator;
+import org.jfree.chart.labels.XYToolTipGenerator;
 
 import projections.analysis.LogReader;
 import projections.analysis.ProjMain;
@@ -62,17 +74,13 @@ implements ActionListener, Clickable
 	private JMenuItem mDisplayLegend;
 	private JMenuItem mDisplayLegendFull;
 
-	private JCheckBox showMarkersCheckBox;
-	private JCheckBox analyzeSlopesCheckBox;
-	private JCheckBox hideMouseoversCheckBox;
+	private JPanel graphPanel;
 
 	private long intervalSize;
 	private int startInterval;
 	private int endInterval;
 
 	private long startTime;
-
-	private boolean displaySlopes = false;
 
 	// Markers that are drawn at certain times (doubles in units of x axis bins) to identify phases or iterations
 	private TreeMap<Double, String> phaseMarkers = new TreeMap<Double, String>();
@@ -101,6 +109,20 @@ implements ActionListener, Clickable
 	// the following data are statically known and can be initialized
 	// here overhead, idle time
 	private final static int special = 2;
+
+
+	public class CustomToolTipGenerator implements XYToolTipGenerator {
+		CustomToolTipGenerator() {
+			super();
+		}
+
+		public String generateToolTip(XYDataset dataset, int row, int column) {
+			String name = "Entry Method Name: " + dataset.getSeriesKey(row) + ", ";
+			String execTime = "Time Interval: " + U.humanReadableString((column+startInterval)*intervalSize) + " to " + U.humanReadableString((column+startInterval+1)*intervalSize) + ", ";
+			String timeTaken = "Time taken: " + dataset.getXValue(row, column) + " microseconds";
+			return (String) name + execTime + timeTaken;
+		}
+	}
 
 	public TimeProfileWindow(MainWindow mainWindow) {
 		super("Projections Time Profile Graph - " + MainWindow.runObject[myRun].getFilename() + ".sts", mainWindow);
@@ -162,29 +184,12 @@ implements ActionListener, Clickable
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
 
-		showMarkersCheckBox =  new JCheckBox("Show Iteration/Phase Markers");
-		showMarkersCheckBox.setSelected(false);
-		showMarkersCheckBox.setToolTipText("Draw vertical lines at time associated with any user supplied notes containing\"***\"?");
-		showMarkersCheckBox.addActionListener(this);
-		
-		analyzeSlopesCheckBox = new JCheckBox("Analyze slope");
-		analyzeSlopesCheckBox.setToolTipText("Select a point on the graph to measure the slope");
-		analyzeSlopesCheckBox.addActionListener(this);
-
-		hideMouseoversCheckBox = new JCheckBox("Hide Mouseovers");
-		hideMouseoversCheckBox.setSelected(false);
-		hideMouseoversCheckBox.setToolTipText("Disable the displaying of information associated with the data under the mouse pointer.");
-		hideMouseoversCheckBox.addActionListener(this);
-
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 //		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, setRanges,      gbc, 0,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, showMarkersCheckBox, gbc, 3,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 
-		JPanel graphPanel = getMainPanel();
+		graphPanel = new JPanel();
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
 		Util.gblAdd(mainPanel, controlPanel, gbc, 0,1, 1,0, 0,0);
 	}
@@ -562,24 +567,49 @@ implements ActionListener, Clickable
 		}
 		if (outSize > 0) {
 			// actually create and fill the data and color array
+			CategoryTableXYDataset dataset = new CategoryTableXYDataset();
 			int numIntervals = endInterval-startInterval+1;
-			outputData = new double[numIntervals][outSize];
+			outputData = new double[outSize][numIntervals];
 			for (int i=0; i<numIntervals; i++) {
 				int count = 0;
 				for (int ep=0; ep<numEPs+special; ep++) {
 					if (stateArray[ep]) {
-						outputData[i][count] = graphData[i][ep];
+						String epName = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
+						if (epName.length() > 30) {
+							epName = epName.substring(0,30);
+						}
+						dataset.add(i, (double) graphData[i][ep], epName);
+						outputData[count++][i] = graphData[i][ep];
+
 					}
 				}
 
 			}
+			NumberAxis domainAxis = new NumberAxis("Bin");
+			domainAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+			NumberAxis rangeAxis = new NumberAxis("Time in Microseconds");
+			rangeAxis.setStandardTickUnits(NumberAxis.createIntegerTickUnits());
+			StackedXYBarRenderer stackedRenderer = new StackedXYBarRenderer();
+			stackedRenderer.setDefaultToolTipGenerator((XYToolTipGenerator) new CustomToolTipGenerator());
+			stackedRenderer.setShadowVisible(false);
 
-			setYAxis("Percentage Utilization", "%");
-			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
-			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
-			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals), thisWindow);
-			graphCanvas.setMarkers(phaseMarkers);
-			refreshGraph();
+			XYPlot plot = new XYPlot(dataset, domainAxis, rangeAxis, stackedRenderer);
+
+			JFreeChart chart = new JFreeChart("Time Profile", plot);
+			chart.setAntiAlias(false);
+			ChartPanel chartPanel = new ChartPanel(chart);
+			// arbitrarily large size to prevent stretching of fonts
+			chartPanel.setMaximumDrawHeight(100000);
+			chartPanel.setMaximumDrawWidth(100000);
+
+
+
+			graphPanel.removeAll();
+			graphPanel.setLayout(new java.awt.BorderLayout());
+			graphPanel.add(chartPanel, BorderLayout.CENTER);
+			graphPanel.validate();
+			graphPanel.repaint();
+			pack();
 		}
 	}
 
@@ -638,20 +668,7 @@ implements ActionListener, Clickable
 //		} else 
 			
 			
-		if (e.getSource() == analyzeSlopesCheckBox) {
-			if(analyzeSlopesCheckBox.isSelected()){
-				displaySlopes = true;
-				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));	
-			} else {
-				displaySlopes = false;
-				graphCanvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));	
-				graphCanvas.clearPolynomial();
-			}
-		} else if (e.getSource() == showMarkersCheckBox){
-			graphCanvas.showMarkers(showMarkersCheckBox.isSelected());
-		} else if (e.getSource() == hideMouseoversCheckBox) {
-			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
-		} else if (e.getSource() == setRanges) {
+		if (e.getSource() == setRanges) {
 			showDialog();
 		} else if(e.getSource() == mDisplayLegend){
 			generateLegend(true);
@@ -713,18 +730,9 @@ implements ActionListener, Clickable
 
 
 	public void toolMouseMovedResponse(MouseEvent e, int xVal, int yVal) {
-		if(displaySlopes){
-			createPolynomial(xVal, yVal);
-		}
 	}	
 
 	public void toolClickResponse(MouseEvent e, int xVal, int yVal) {
-
-		if(displaySlopes){
-			// create a screenshot of the 
-			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.png");
-		}
-
 	}
 
 }

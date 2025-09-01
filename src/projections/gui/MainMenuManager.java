@@ -58,6 +58,7 @@ implements ActionListener, ItemListener
 	private JMenu fileMenu;
 	private JMenu toolMenu;
 	private JMenu debugMenu;
+	private JMenu phaseRangeMenu;
 
 
 	//    private static final int NUM_STATES = 4;
@@ -103,6 +104,11 @@ implements ActionListener, ItemListener
 
 	private JCheckBoxMenuItem perfLogMenuItem;
 
+	//The menu items for the phase/range menu
+	private JMenuItem addNewPhase;
+	private JMenuItem listPhases;
+	private JMenuItem listRanges;
+
 	protected MainMenuManager(JFrame parent) {
 		this.parent = (MainWindow)parent;
 		createMenus();
@@ -139,6 +145,10 @@ implements ActionListener, ItemListener
 			methodProfileMenuItem.setEnabled(false);
 			messageSizeEvolutionMenuItem.setEnabled(false);
 
+			addNewPhase.setEnabled(false);
+			listPhases.setEnabled(false);
+			listRanges.setEnabled(false);
+
 			break;
 		case OPENED_SUMMARY:
 
@@ -171,6 +181,13 @@ implements ActionListener, ItemListener
 			memoryUsageMenuItem.setEnabled(true);
 			methodProfileMenuItem.setEnabled(false);
 			messageSizeEvolutionMenuItem.setEnabled(false);
+
+			if(sumDetail == 1)
+				addNewPhase.setEnabled(true);
+			else
+				addNewPhase.setEnabled(false);
+			listPhases.setEnabled(true);
+			listRanges.setEnabled(true);
 
 			break;
 		case OPENED_FILES :
@@ -212,6 +229,10 @@ implements ActionListener, ItemListener
 			memoryUsageMenuItem.setEnabled(true);
 			methodProfileMenuItem.setEnabled(true);
 			messageSizeEvolutionMenuItem.setEnabled(true);
+
+			addNewPhase.setEnabled(true);
+			listPhases.setEnabled(true);
+			listRanges.setEnabled(true);
 
 			break;
 		}
@@ -335,7 +356,21 @@ implements ActionListener, ItemListener
 		debugMenu.add(perfLogMenuItem);
 		menubar.add(debugMenu);
 
-		
+		// Phase MENU
+		phaseRangeMenu = new JMenu("Phase & Range Info");
+		phaseRangeMenu.setToolTipText("To add new phase configs");
+
+		addNewPhase = new JMenuItem("Add new Phase Config");
+		addNewPhase.addActionListener(this);
+		listPhases = new JMenuItem("List all Phase Configs");
+		listPhases.addActionListener(this);
+		listRanges = new JMenuItem("List all Range Entries");
+		listRanges.addActionListener(this);
+
+		phaseRangeMenu.add(addNewPhase);
+		phaseRangeMenu.add(listPhases);
+		phaseRangeMenu.add(listRanges);
+		menubar.add(phaseRangeMenu);
 		
 		parent.setJMenuBar(menubar);
 
@@ -437,6 +472,15 @@ implements ActionListener, ItemListener
 
 			else if(mi == messageSizeEvolutionMenuItem)
 				parent.openTool(new MessageSizeEvolutionWindow(parent));
+
+			else if(mi == addNewPhase)
+				parent.openTool(new PhaseWindow(parent, -1));
+
+			else if(mi == listPhases)
+				parent.openTool(new PhaseListWindow(parent));
+
+			else if(mi == listRanges)
+				parent.openTool(new RangeListWindow(parent));
 
 			else 
 				System.out.println("ERROR: unknown menu item was selected" + mi);

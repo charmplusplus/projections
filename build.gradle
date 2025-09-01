@@ -1,5 +1,18 @@
-apply plugin: 'java'
-apply plugin: 'application'
+plugins {
+  id 'java'
+  id 'application'
+}
+
+application {
+  mainClass = 'projections.analysis.ProjMain'
+}
+
+java {
+  sourceCompatibility = 1.8
+  targetCompatibility = 1.8
+}
+
+version = '6.10.0'
 
 repositories {
   mavenCentral()
@@ -17,10 +30,6 @@ dependencies {
   implementation 'org.jfree:jfreechart:1.5.0'
 }
 
-mainClassName = 'projections.analysis.ProjMain'
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
-version = '6.10.0'
 
 sourceSets {
   main {
@@ -30,36 +39,40 @@ sourceSets {
   }
 }
 
-task fatJar(type: Jar) {
-  manifest {
-    attributes 'Implementation-Title': 'Projections',
-               'Implementation-Version': project.version
-  }
-  project.archivesBaseName = 'projections-all'
-  duplicatesStrategy = DuplicatesStrategy.INCLUDE
+tasks.register('fatJar', Jar) {
+    archiveBaseName.set('projections-all')
+    archiveVersion.set(project.version.toString())
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
-  from {
-    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-  }
-
-  into ('projections/images') {
-      from('src/projections/images') {
-          include '*'
-      }
-  }
-
-  into ('META-INF/services/') {
-    from ('src/projections/resources') {
-      include 'org.freehep.graphicsbase.util.export.ExportFileType'
+    manifest {
+        attributes(
+            'Implementation-Title': 'Projections',
+            'Implementation-Version': project.version
+        )
     }
-  }
 
-  with jar
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    into('projections/images') {
+        from('src/projections/images') {
+            include '*'
+        }
+    }
+
+    into('META-INF/services/') {
+        from('src/projections/resources') {
+            include 'org.freehep.graphicsbase.util.export.ExportFileType'
+        }
+    }
+
+    with tasks.jar
 }
 
-task copyJarToBin(type: Copy) {
-  from fatJar
-  into 'bin/'
-  rename 'projections-all-' + version + '.jar', 'projections.jar'
+tasks.register('copyJarToBin', Copy) {
+    from(tasks.named('fatJar'))
+    into('bin/')
+    rename { 'projections.jar' }
 }
 

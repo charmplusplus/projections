@@ -44,8 +44,8 @@ public class RangeHistory
 			if (rangeProcs != null && rangeProcs.size() !=0 && rangeProcs.size() > i)
 			{
 				String temp = rangeProcs.get(i);
-				if (temp.length() > 10) historyString += " Procs:" + temp.substring(0,10)+"...";
-				else historyString += " Procs:" + temp;
+				if (temp.length() > 10) historyString += " Proc(s):" + temp.substring(0,10)+"...";
+				else historyString += " Proc(s):" + temp;
 			}
 			if (rangeName != null && rangeName.size() !=0 && !rangeName.get(i).equals(null) && !rangeName.get(i).equals("cancel"))
 			{
@@ -147,6 +147,35 @@ public class RangeHistory
 	numEntries++;
     }
 
+    public void update(int index, long start, long end, String name, String procs) {
+		if ((index < 0) ||
+				(index >= numEntries)) {
+			System.err.println("Internal Error: Attempt to update " +
+					"invalid index " +
+					index + ". Max number of " +
+					"histories is " + numEntries +
+					". Please report to developers!");
+			System.exit(-1);
+		}
+
+		// remove the "same" index twice because the first remove
+		// has the side effect of changing the index.
+		rangeSet.remove(index * 2);
+		rangeSet.remove(index * 2);
+		rangeSet.add(index * 2, end);
+		rangeSet.add(index * 2, start);
+
+		if(name != null && rangeName != null && rangeName.size() > index) {
+			rangeName.remove(index);
+			rangeName.add(index, name);
+		}
+
+		if(procs != null && rangeProcs != null && rangeProcs.size() > index) {
+			rangeProcs.remove(index);
+			rangeProcs.add(index, procs);
+		}
+	}
+
     public void remove(int index) {
 	if ((index < 0) ||
 	    (index >= numEntries)) {
@@ -183,6 +212,12 @@ public class RangeHistory
 	if (rangeProcs == null || rangeProcs.size() <= index || index < 0) return null;
 	return rangeProcs.get(index);
     }
+
+    public String getName(int index) {
+    	if(rangeName == null || rangeName.size() <= index || index < 0)
+    		return null;
+    	return rangeName.get(index);
+	}
 
     public long getStartValue(int index) {
 	if ((index < 0) ||

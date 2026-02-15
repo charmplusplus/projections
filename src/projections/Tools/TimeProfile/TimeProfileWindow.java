@@ -23,12 +23,12 @@ import projections.analysis.LogReader;
 import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
-import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
+import projections.gui.TimeProfileColorer;
 import projections.gui.U;
 import projections.gui.Util;
 
@@ -513,45 +513,6 @@ implements ActionListener, Clickable
 		}
 	}
 
-
-	
-	/** A class that provides the colors for the display */
-	public class TimeProfileColorer implements GenericGraphColorer {
-		int myRun = 0;
-		int outSize;
-		int numIntervals;
-
-		TimeProfileColorer(int outSize, int numIntervals){
-			this.outSize = outSize;
-			this.numIntervals = numIntervals;
-		}
-
-		public Paint[] getColorMap() {
-			Paint[]  outColors = new Paint[outSize];
-			for (int i=0; i<numIntervals; i++) {
-				int count = 0;
-				for (int ep=0; ep<numEPs+special; ep++) {
-					if (stateArray[ep]) {
-						outputData[i][count] = graphData[i][ep];
-						if(ep == numEPs){
-							outColors[count++] = MainWindow.runObject[myRun].getOverheadColor();
-						}
-						else if (ep == numEPs+1){
-							outColors[count++] = MainWindow.runObject[myRun].getIdleColor();
-						}
-						else
-							outColors[count++] = MainWindow.runObject[myRun].getEPColorMap()[ep];
-					}
-				}
-			}
-
-			return outColors;
-		}
-
-	}
-
-	
-
 	private void setOutputGraphData() {
 		// need first pass to decide the size of the outputdata
 		int outSize = 0;
@@ -577,7 +538,7 @@ implements ActionListener, Clickable
 			setYAxis("Percentage Utilization", "%");
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
-			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals), thisWindow);
+			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals, numEPs, outputData, graphData, stateArray), thisWindow);
 			graphCanvas.setMarkers(phaseMarkers);
 			refreshGraph();
 		}

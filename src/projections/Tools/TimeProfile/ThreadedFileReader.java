@@ -8,7 +8,7 @@ import projections.analysis.LogReader;
 import projections.gui.MainWindow;
 
 /** The reader threads for Time Profile tool. This class ought to be generalized for all the other tools needing similar functionality. */
- class ThreadedFileReader implements Runnable  {
+ public class ThreadedFileReader implements Runnable  {
 
 	private int pe;
 //	int p;  // Which index am I into the flattened array of potentially sparse pe's
@@ -38,7 +38,7 @@ import projections.gui.MainWindow;
      * @param intervalSize
      * @param phaseMarkers
      * */
-	protected ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval,
+	public ThreadedFileReader(int pe, long intervalSize, int myRun, int startInterval, int endInterval,
 			TreeMap<Double, String> phaseMarkers, double[][] graphData){
 		this.phaseMarkers = phaseMarkers;
 		this.pe = pe;

@@ -21,7 +21,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.SortedSet;
 import java.util.Vector;
 
@@ -36,12 +35,14 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 import javax.swing.JOptionPane;
+import javax.swing.JRadioButton;
+import javax.swing.ButtonGroup;
 
 import projections.analysis.EndOfLogSuccess;
 import projections.analysis.GenericLogReader;
 import projections.analysis.ProjDefs;
 import projections.analysis.RangeHistory;
-import projections.misc.LogEntry;
+import projections.analysis.PhaseHistory;
 
 /**
  *  RangeDialogNew
@@ -85,7 +86,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private ProjectionsWindow parentWindow;
 	
 	// inheritable GUI objects
-	private JPanel mainPanel, historyPanel, buttonPanel, stepsPanel;
+	private JPanel stepsPanel;
 
 	/** A JPanel containing any other input components required by the tool using this dialog box */
 	private RangeDialogExtensionPanel toolSpecificPanel;
@@ -97,8 +98,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	private JPanel timePanel, processorsPanel;
 	private JButton bOK, bCancel;
 
-	private JComboBox historyList;
+	private JPanel phaseChoicePanel;
+	private JComboBox historyList, phaseList;
 	private JButton bAddToHistory, bRemoveFromHistory, bSaveHistory;
+	private JRadioButton brangeButton, bphaseButton;
 
 	private JButton loadUserNotesButton;
 
@@ -108,7 +111,8 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 
 	// history variables
-	private RangeHistory history;
+	private RangeHistory rangeHistory;
+	private PhaseHistory phaseHistory;
 
 	// flags
 	private boolean layoutComplete = false;
@@ -136,11 +140,13 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			toolSpecificPanel.setParentDialogBox(this);
 		}
 
-		history = new RangeHistory(MainWindow.runObject[myRun].getLogDirectory() +
+		rangeHistory = new RangeHistory(MainWindow.runObject[myRun].getLogDirectory() +
+				File.separator);
+		phaseHistory = new PhaseHistory(MainWindow.runObject[myRun].getLogDirectory() +
 				File.separator);
 		this.setModal(true);
 		dialogState = DIALOG_CANCELLED; // default state
-	}   
+	}
 
 
 	/** Called whenever any input item changes, either in this dialog box, or its possibly extended tool specific JPanel */
@@ -153,15 +159,17 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			if(toolSpecificPanel != null){
 				toolSpecificPanel.updateFields();
 			}
-			bOK.setEnabled(true);
-			bAddToHistory.setEnabled(true);
-			bRemoveFromHistory.setEnabled(true);
+			if(!disableTimeRange) {
+				bOK.setEnabled(true);
+				bAddToHistory.setEnabled(true);
+			}
 		} else {
 			//			System.out.println("Input is NOT valid");
 			bOK.setEnabled(false);
 			bAddToHistory.setEnabled(false);
-			bRemoveFromHistory.setEnabled(false);
 		}
+
+		pack();
 
 	}
 
@@ -177,13 +185,13 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 				}
 			});
 
-			mainPanel = createMainLayout();
+			JPanel mainPanel = createMainLayout();
 			mainPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
-			historyPanel = createHistoryLayout();
+			JPanel historyPanel = createHistoryLayout();
 			historyPanel.setBorder(BorderFactory.createEmptyBorder(15,5,5,5));
 
-			buttonPanel = createButtonLayout();
+			JPanel buttonPanel = createButtonLayout();
 			buttonPanel.setBorder(BorderFactory.createEmptyBorder(5,5,5,5));
 
 			getRootPane().setDefaultButton(bOK);
@@ -255,9 +263,11 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 
 	/** Load the previously used time/PE range */
 	private void initializeData(){
-		startTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.begintime);
-		endTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.endtime);
-		processorsField.setText(Util.listToString(MainWindow.runObject[myRun].persistantRangeData.plist));
+		if(!disableTimeRange) {
+			startTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.begintime);
+			endTimeField.setValue(MainWindow.runObject[myRun].persistantRangeData.endtime);
+			processorsField.setText(Util.listToString(MainWindow.runObject[myRun].persistantRangeData.plist));
+		}
 	}
 
 	private void initializeToolSpecificData() {
@@ -316,8 +326,10 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		totalTimeLabel = new JLabel(U.humanReadableString(MainWindow.runObject[myRun].getTotalTime()), JLabel.LEFT);
 
 		if (disableTimeRange) {
-			startTimeField.setEnabled(false);	    
+			startTimeField.setEnabled(false);
 			endTimeField.setEnabled(false);
+			startTimeField.setValue(0);
+			endTimeField.setValue(MainWindow.runObject[myRun].getTotalTime());
 		} else {
 			// set listeners
 			startTimeField.addActionListener(this);
@@ -377,6 +389,7 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		return buttonPanel;
 	}
 
+	@SuppressWarnings("unchecked")
 	private JPanel createHistoryLayout() {
 		// Standard Layout behavior for all subcomponents
 		GridBagLayout      gbl = new GridBagLayout();
@@ -387,38 +400,65 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		// Default history layout
 		JPanel historyPanel = new JPanel();
 		historyPanel.setLayout(gbl);
-		historyList = new JComboBox(history.getHistoryStrings().toArray());
+		historyList = new JComboBox(rangeHistory.getHistoryStrings().toArray());
 		historyList.setEditable(false);
 		historyList.setMaximumRowCount(RangeHistory.MAX_ENTRIES);
 		historyList.setSelectedIndex(-1); // nothing selected at first
 
-		bAddToHistory = new JButton("Add to History List");
-		bRemoveFromHistory = new JButton("Remove Selected History");
-		bSaveHistory = new JButton("Save History to Disk");
+		bAddToHistory = new JButton("Add to Range History List");
+		bRemoveFromHistory = new JButton("Remove Selected Range History");
+		bSaveHistory = new JButton("Save Range History to Disk");
 
+		ButtonGroup group = new ButtonGroup();
+		brangeButton = new JRadioButton("Range History");
+		bphaseButton = new JRadioButton("Phase History");
+		group.add(brangeButton);
+		group.add(bphaseButton);
+		brangeButton.setSelected(true);
+
+		JLabel phaseListLabel = new JLabel("Choose a Phase:", JLabel.LEFT);
+		phaseList = new JComboBox();
+		phaseList.setEditable(false);
+
+		phaseChoicePanel = new JPanel();
+		phaseChoicePanel.setVisible(false);
+		phaseChoicePanel.add(phaseListLabel);
+		phaseChoicePanel.add(phaseList);
 
 		if (disableTimeRange) {
 			historyList.setEnabled(false);
 			bAddToHistory.setEnabled(false);
 			bRemoveFromHistory.setEnabled(false);
 			bSaveHistory.setEnabled(false);
+			brangeButton.setEnabled(false);
+			bphaseButton.setEnabled(false);
+			phaseList.setEnabled(false);
 		} else {
 			// set listeners
 			historyList.addActionListener(this);
 			bAddToHistory.addActionListener(this);
 			bRemoveFromHistory.addActionListener(this);
 			bSaveHistory.addActionListener(this);
+			brangeButton.addActionListener(this);
+			bphaseButton.addActionListener(this);
+			phaseList.addActionListener(this);
 		}
 
 		// layout
-		Util.gblAdd(historyPanel, historyList,
+		Util.gblAdd(historyPanel, brangeButton,
 				gbc, 0,0, 1,1, 1,1);
-		Util.gblAdd(historyPanel, bSaveHistory,
+		Util.gblAdd(historyPanel, bphaseButton,
 				gbc, 1,0, 1,1, 1,1);
-		Util.gblAdd(historyPanel, bAddToHistory,
+		Util.gblAdd(historyPanel, historyList,
 				gbc, 0,1, 1,1, 1,1);
-		Util.gblAdd(historyPanel, bRemoveFromHistory,
+		Util.gblAdd(historyPanel, bSaveHistory,
 				gbc, 1,1, 1,1, 1,1);
+		Util.gblAdd(historyPanel, bAddToHistory,
+				gbc, 0,2, 1,1, 1,1);
+		Util.gblAdd(historyPanel, bRemoveFromHistory,
+				gbc, 1,2, 1,1, 1,1);
+		Util.gblAdd(historyPanel, phaseChoicePanel,
+				gbc, 0,3, 2,1, 1,1);
 
 		return historyPanel;
 	}
@@ -538,13 +578,14 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void actionPerformed(ActionEvent evt)
 	{
 		if (evt.getSource() == bOK) {   
 			dialogState = DIALOG_OK;
 			setVisible(false);
 			return;
-		}  
+		}
 
 		else if(evt.getSource() == bCancel){
 			dialogState = DIALOG_CANCELLED;
@@ -560,57 +601,75 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 			stepsPanel.add(new JLabel("Now Loading User Notes..."), BorderLayout.CENTER);
 			stepsPanel.add(progressBar, BorderLayout.EAST);
 			stepsPanel.invalidate();
-			pack();
 			determineStepsFromPEZero();			
 		}
 
 		else if (evt.getSource() == bAddToHistory) {
-			long start = getStartTime();
-			long end = getEndTime();
-			String procRange = Util.listToString(processorsField.getValue());
-			boolean invalidName = true;
-			String s = "";
-			while (invalidName)
-			{
-				s = JOptionPane.showInputDialog(null, "Enter a name for this time range,"
-					+ " or leave blank. \nDo not use spaces," +
-					" \"cancel\", \"ENTRY\", or \"NAMEENTRY\".");
-				if (s == null)
-				{
-					s = "cancel";
-					break;
+			if(brangeButton.isSelected()) {
+				long start = getStartTime();
+				long end = getEndTime();
+				String procRange = Util.listToString(processorsField.getValue());
+				boolean invalidName = true;
+				String s = "";
+				while (invalidName) {
+					s = JOptionPane.showInputDialog(null, "Enter a name for this time range,"
+							+ " or leave blank. \nDo not use spaces," +
+							" \"cancel\", \"ENTRY\", or \"NAMEENTRY\".");
+					if (s == null) {
+						s = "cancel";
+						break;
+					}
+					if (!s.contains(" ")) invalidName = false;
+					if (s.equals("ENTRY") || s.equals("NAMEENTRY") || s.equals("cancel")) invalidName = true;
 				}
-				if (!s.contains(" ")) invalidName = false;
-				if (s.equals("ENTRY") || s.equals("NAMEENTRY") || s.equals("cancel")) invalidName=true;
-			}
-			if (!s.equals("cancel"))
-			{
-				String historyString = U.humanReadableString(start) + " to " + U.humanReadableString(end);
-				if (procRange.length() > 10) historyString += " Procs: " + procRange.substring(0,10)+"...";
-				else historyString += " Procs: " + procRange;
-				if (!s.equals(""))
-				{
-					if (s.length() > 10) historyString += " (" + s.substring(0,10)+"...)";
-					else historyString += " (" + s + ")";
+				if (!s.equals("cancel")) {
+					String historyString = U.humanReadableString(start) + " to " + U.humanReadableString(end);
+					if (procRange.length() > 10) historyString += " Proc(s): " + procRange.substring(0, 10) + "...";
+					else historyString += " Proc(s): " + procRange;
+					if (!s.equals("")) {
+						if (s.length() > 10) historyString += " (" + s.substring(0, 10) + "...)";
+						else historyString += " (" + s + ")";
+					}
+					rangeHistory.add(start, end, s, procRange);
+					historyList.insertItemAt(historyString, 0);
+					historyList.setSelectedIndex(0);
+					if(bphaseButton.isSelected())
+						bAddToHistory.setText("Edit Phase Config Entry");
+					else if(brangeButton.isSelected())
+						bAddToHistory.setText("Add to Range History List");
 				}
-				history.add(start, end, s, procRange);
-				historyList.insertItemAt(historyString,0);
-				historyList.setSelectedIndex(0);
+			} else if(bphaseButton.isSelected()) {
+				dialogState = DIALOG_CANCELLED;
+				setVisible(false);
+				parentWindow.parentWindow.openTool(new PhaseWindow(parentWindow.parentWindow, historyList.getSelectedIndex()));
 			}
 		} 
 
 		else if (evt.getSource()  == bRemoveFromHistory) {
 			int selected = historyList.getSelectedIndex();
 			if (selected != -1) {
-				history.remove(selected);
+				if(brangeButton.isSelected()) {
+					rangeHistory.remove(selected);
+				} else if(bphaseButton.isSelected()) {
+					phaseHistory.remove(selected);
+				}
 				historyList.setSelectedIndex(-1);
 				historyList.removeItemAt(selected);
+				if(bphaseButton.isSelected()) {
+					phaseChoicePanel.setVisible(false);
+					bAddToHistory.setText("Add to Phase History List");
+				}
+				else if(brangeButton.isSelected())
+					bAddToHistory.setText("Add to Range History List");
 			}
 		}
 
 		else if (evt.getSource()  == bSaveHistory) {
 			try {
-				history.save();
+				if(brangeButton.isSelected())
+					rangeHistory.save();
+				else if(bphaseButton.isSelected())
+					phaseHistory.save();
 			} catch (IOException e) {
 				System.err.println("Error saving history to disk: " + e.toString());
 			}
@@ -619,12 +678,83 @@ implements ActionListener, KeyListener, FocusListener, ItemListener, MouseListen
 		else if (evt.getSource()  == historyList) {
 			int selection = historyList.getSelectedIndex();
 			if (selection == -1) {
+				if(bphaseButton.isSelected())
+					bAddToHistory.setText("Add to Phase History List");
+				else if(brangeButton.isSelected())
+					bAddToHistory.setText("Add to Range History List");
 				return;
 			}
-			startTimeField.setValue(history.getStartValue(selection));
-			endTimeField.setValue(history.getEndValue(selection));
-			String procRange = history.getProcRange(selection);
-			if (procRange != null) processorsField.setText(history.getProcRange(selection));
+			if(brangeButton.isSelected()) {
+				startTimeField.setValue(rangeHistory.getStartValue(selection));
+				endTimeField.setValue(rangeHistory.getEndValue(selection));
+				String procRange = rangeHistory.getProcRange(selection);
+				if (procRange != null) processorsField.setText(rangeHistory.getProcRange(selection));
+			} else if(bphaseButton.isSelected()) {
+				bAddToHistory.setText("Edit Phase Config Entry");
+
+				startTimeField.setValue(phaseHistory.getStartValue(selection));
+				endTimeField.setValue(phaseHistory.getEndValue(selection));
+				String procRange = phaseHistory.getProcRange(selection);
+				if (procRange != null)
+					processorsField.setText(phaseHistory.getProcRange(selection));
+
+				phaseList.removeActionListener(this);
+				phaseList.removeAllItems();
+				int size = phaseHistory.getNumPhases(selection);
+				for(int i = 0; i < size; i++) {
+					phaseList.addItem(phaseHistory.getPhaseString(selection, i));
+				}
+				phaseList.setMaximumRowCount(size);
+				phaseList.setSelectedIndex(-1);
+				phaseList.addActionListener(this);
+				phaseChoicePanel.setVisible(true);
+			}
+		}
+
+		else if (evt.getSource() == brangeButton) {
+			bAddToHistory.setText("Add to Range History List");
+			bRemoveFromHistory.setText("Remove Selected Range History");
+			bSaveHistory.setText("Save Range History to Disk");
+
+			historyList.removeActionListener(this);
+			historyList.removeAllItems();
+			for(Object o : rangeHistory.getHistoryStrings().toArray())
+				historyList.addItem(o);
+			historyList.setMaximumRowCount(RangeHistory.MAX_ENTRIES);
+			historyList.setSelectedIndex(-1); // nothing selected at first
+			historyList.addActionListener(this);
+			initializeData();
+
+			phaseChoicePanel.setVisible(false);
+		}
+
+		else if (evt.getSource() == bphaseButton) {
+			bAddToHistory.setText("Add to Phase History List");
+			bRemoveFromHistory.setText("Remove Selected Phase History");
+			bSaveHistory.setText("Save Phase History to Disk");
+
+			historyList.removeActionListener(this);
+			historyList.removeAllItems();
+			for(Object o : phaseHistory.getHistoryStrings().toArray())
+				historyList.addItem(o);
+			historyList.setMaximumRowCount(PhaseHistory.MAX_ENTRIES);
+			historyList.setSelectedIndex(-1);
+			historyList.addActionListener(this);
+
+			phaseChoicePanel.setVisible(false);
+		}
+
+		else if (evt.getSource() == phaseList) {
+			int selection = historyList.getSelectedIndex();
+			if (selection == -1) {
+				return;
+			}
+			int phaseSelection = phaseList.getSelectedIndex();
+			if (phaseSelection == -1) {
+				return;
+			}
+			startTimeField.setValue(phaseHistory.getStartOfPhase(selection, phaseSelection));
+			endTimeField.setValue(phaseHistory.getEndOfPhase(selection, phaseSelection));
 		}
 
 		someInputChanged();

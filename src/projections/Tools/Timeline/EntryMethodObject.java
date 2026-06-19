@@ -130,6 +130,10 @@ class EntryMethodObject implements Comparable, Range1D, ActionListener, MainPane
 		beginTime = tle.BeginTime;
 		elapsedTime = (int)(tle.EndTime - tle.BeginTime);
 		if (tle.EndTime - tle.BeginTime != elapsedTime) {
+			//print end time and begin time and elapsed time
+			System.out.println("End Time: " + tle.EndTime);
+			System.out.println("Begin Time: " + tle.BeginTime);
+			System.out.println("Elapsed Time: " + (tle.EndTime - tle.BeginTime));
 			throw new IllegalArgumentException("Total time of entry method does not fit in type int");
 		}
 		// If the incoming RecvTime is 0, then it is invalid, so use MIN_VALUE to represent it in the offset

@@ -11,7 +11,11 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
 
@@ -67,6 +71,9 @@ class ProfileWindow extends ProjectionsWindow
     private int displayPanelTabIndex;
 
     private JCheckBox chkEnableGrid;
+    private JCheckBox chkShowLegend;
+    private static final int LEGEND_TOP_N = 10;
+    private Legend legendWindow;
     private JButton btnIncX, btnDecX, btnResX, btnIncY, btnDecY, btnResY, btnExportToFile;
     private JFloatTextField txtScaleX, txtScaleY;
 
@@ -151,6 +158,16 @@ class ProfileWindow extends ProjectionsWindow
         chkEnableGrid.addActionListener(this);
         Util.gblAdd(gridPanel, chkEnableGrid, gbc, 0, 0, 1, 1, 0, 0);
 
+        JPanel legendPanel = new JPanel();
+        legendPanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "Legend"));
+        legendPanel.setLayout(gbl);
+
+        chkShowLegend = new JCheckBox("Top " + LEGEND_TOP_N);
+        chkShowLegend.setSelected(false);
+        chkShowLegend.setToolTipText("Movable window listing the " + LEGEND_TOP_N + " largest activities by average utilization; drag it over an empty part of the chart.");
+        chkShowLegend.addActionListener(this);
+        Util.gblAdd(legendPanel, chkShowLegend, gbc, 0, 0, 1, 1, 0, 0);
+
         //create x-y scale panel
         JPanel xScalePanel = new JPanel();
 	xScalePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createLineBorder(Color.black), "x-scale"));
@@ -196,11 +213,12 @@ class ProfileWindow extends ProjectionsWindow
         Container wholeContainer = getContentPane();
         wholeContainer.setLayout(gbl);
 
-        Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 3,1, 1,1, 5,5,5,5);
+        Util.gblAdd(wholeContainer, displayPanel, gbc, 0,0, 4,1, 1,1, 5,5,5,5);
 
         Util.gblAdd(wholeContainer,   gridPanel, gbc, 0,1, 1,1, 1,0, 2,2,2,2);
-        Util.gblAdd(wholeContainer, xScalePanel, gbc, 1,1, 1,1, 5,0, 2,2,2,2);
-        Util.gblAdd(wholeContainer, yScalePanel, gbc, 2,1, 1,1, 5,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer, legendPanel, gbc, 1,1, 1,1, 1,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer, xScalePanel, gbc, 2,1, 1,1, 5,0, 2,2,2,2);
+        Util.gblAdd(wholeContainer, yScalePanel, gbc, 3,1, 1,1, 5,0, 2,2,2,2);
     }
 
     public void showDialog(){
@@ -231,9 +249,14 @@ class ProfileWindow extends ProjectionsWindow
 	// clean current slate
 	float scaleX = 0;
 	float scaleY = 0;
-        if  (evt.getSource() instanceof JCheckBox) {
-            JCheckBox chk = (JCheckBox) evt.getSource();
-            displayCanvas.setGridEnabled(chk.isSelected());
+        if  (evt.getSource() == chkEnableGrid) {
+            displayCanvas.setGridEnabled(chkEnableGrid.isSelected());
+        } else if (evt.getSource() == chkShowLegend) {
+            if (chkShowLegend.isSelected()) {
+                showLegendWindow();
+            } else {
+                closeLegendWindow();
+            }
         }
 	if (evt.getSource() instanceof JButton) {
 	    JButton b = (JButton) evt.getSource();
@@ -328,6 +351,81 @@ class ProfileWindow extends ProjectionsWindow
     }
 
 
+
+    /** Open (or refresh) the movable top-N legend controlled by the checkbox.
+     *  Entries are ranked by average utilization over the selected PEs
+     *  (matching the Avg bar). IDLE is omitted: its color is fixed and
+     *  familiar to viewers. */
+    private void showLegendWindow() {
+        if (avgData == null) {
+            return;
+        }
+        int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+        final float[] value = new float[numEPs + NUM_SYS_EPS];
+        for (int i = 0; i < value.length; i++) {
+            value[i] = avgData[0][i] + avgData[1][i];
+        }
+        List<Integer> ranked = new ArrayList<Integer>();
+        for (int i = 0; i < value.length; i++) {
+            if (i == numEPs + 2) {
+                continue; // IDLE
+            }
+            if (value[i] > thresh) {
+                ranked.add(i);
+            }
+        }
+        Collections.sort(ranked, new Comparator<Integer>() {
+            public int compare(Integer a, Integer b) {
+                return Float.compare(value[b], value[a]);
+            }
+        });
+
+        List<String> names = new ArrayList<String>();
+        List<java.awt.Paint> paints = new ArrayList<java.awt.Paint>();
+        for (int k = 0; k < ranked.size() && k < LEGEND_TOP_N; k++) {
+            int ep = ranked.get(k);
+            String name;
+            if (ep == numEPs) {
+                name = "PACKING";
+            } else if (ep == numEPs + 1) {
+                name = "UNPACKING";
+            } else {
+                name = MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep);
+            }
+            names.add(String.format("%.1f%%  %s", value[ep], name));
+            paints.add(colors[ep]);
+        }
+        if (names.isEmpty()) {
+            return;
+        }
+
+        java.awt.Point oldLocation = null;
+        if (legendWindow != null) {
+            oldLocation = legendWindow.getFrame().getLocation();
+            legendWindow.dispose();
+        }
+        legendWindow = new Legend("Legend (top " + LEGEND_TOP_N + ")", names, paints);
+        if (oldLocation != null) {
+            legendWindow.getFrame().setLocation(oldLocation);
+        } else {
+            legendWindow.getFrame().setLocationRelativeTo(this);
+        }
+        // Keep the checkbox in sync if the user closes the legend window directly
+        legendWindow.getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                legendWindow = null;
+                chkShowLegend.setSelected(false);
+            }
+        });
+    }
+
+    private void closeLegendWindow() {
+        if (legendWindow != null) {
+            Legend l = legendWindow;
+            legendWindow = null;
+            l.dispose();
+        }
+    }
 
     private void showChangeColorDialog() {
 		new ChooseEntriesWindow(this);
@@ -430,6 +528,10 @@ class ProfileWindow extends ProjectionsWindow
         displayCanvas.setYAxis("Usage Percent %");
         displayCanvas.setDisplayDataSource(dataSource, colorMap, colors, nameMap);
         displayCanvas.repaint();
+
+        if (chkShowLegend != null && chkShowLegend.isSelected()) {
+            showLegendWindow();
+        }
     }
 
     private void createDisplayDataSource(){

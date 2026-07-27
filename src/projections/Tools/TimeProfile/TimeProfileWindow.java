@@ -196,7 +196,7 @@ implements ActionListener, Clickable
 		showLegendCheckBox.setToolTipText("Movable window listing the " + LEGEND_TOP_N + " largest activities in the displayed range; drag it over an empty part of the chart. The Legend menu shows the full list.");
 		showLegendCheckBox.addActionListener(this);
 
-		labelRegionsCheckBox = new JCheckBox("Label Large Regions");
+		labelRegionsCheckBox = new JCheckBox("Label Regions");
 		labelRegionsCheckBox.setSelected(false);
 		labelRegionsCheckBox.setToolTipText("Draw entry method names directly on large single-color regions of the chart; labeled entries are then omitted from the compact legend.");
 		labelRegionsCheckBox.addActionListener(this);
@@ -283,7 +283,8 @@ implements ActionListener, Clickable
 						}
 						labels.add(new Graph.RegionLabel(runStart, runEnd,
 								yBottom + graphData[mid][ep] / 2.0,
-								MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep)));
+								MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep),
+								MainWindow.runObject[myRun].getEPColorMap()[ep]));
 						overlaidEPs.add(ep);
 					}
 					runStart = -1;

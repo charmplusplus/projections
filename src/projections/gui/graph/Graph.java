@@ -127,12 +127,14 @@ public class Graph extends JPanel
         public final double endIndex;    // last bin of the run (inclusive)
         public final double yValue;      // vertical center, in data source units
         public final String text;
+        public final java.awt.Paint regionPaint; // color under the label, for contrast
 
-        public RegionLabel(double startIndex, double endIndex, double yValue, String text) {
+        public RegionLabel(double startIndex, double endIndex, double yValue, String text, java.awt.Paint regionPaint) {
             this.startIndex = startIndex;
             this.endIndex = endIndex;
             this.yValue = yValue;
             this.text = text;
+            this.regionPaint = regionPaint;
         }
     }
 
@@ -584,16 +586,26 @@ public class Graph extends JPanel
     		int tx = cx - fm.stringWidth(text) / 2;
     		int ty = cy + fm.getAscent() / 2;
 
-    		// White halo so the text is readable on any region color
-    		g.setColor(Color.white);
-    		g.drawString(text, tx-1, ty);
-    		g.drawString(text, tx+1, ty);
-    		g.drawString(text, tx, ty-1);
-    		g.drawString(text, tx, ty+1);
-    		g.setColor(Color.black);
+    		// Black text on light regions, white on dark ones
+    		g.setColor(contrastingTextColor(label.regionPaint));
     		g.drawString(text, tx, ty);
     	}
     	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
+    }
+
+    /** Black or white, whichever contrasts with the given paint. */
+    private static Color contrastingTextColor(java.awt.Paint p) {
+    	Color c = null;
+    	if (p instanceof Color) {
+    		c = (Color) p;
+    	} else if (p instanceof java.awt.GradientPaint) {
+    		c = ((java.awt.GradientPaint) p).getColor1();
+    	}
+    	if (c == null) {
+    		return Color.black;
+    	}
+    	double luminance = 0.299*c.getRed() + 0.587*c.getGreen() + 0.114*c.getBlue();
+    	return luminance < 128 ? Color.white : Color.black;
     }
 
 	private void drawXAxis(Graphics2D g) {

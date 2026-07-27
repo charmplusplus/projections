@@ -299,9 +299,10 @@ implements ActionListener, ItemListener
 		methodProfileMenuItem.addActionListener(this);
 		messageSizeEvolutionMenuItem.addActionListener(this);
 
+		toolMenu.add(timeProfileGraphMenuItem);
+		toolMenu.add(usageProfileMenuItem);
 		toolMenu.add(timelinesMenuItem);
 		//toolMenu.add(renderedTimelinesMenuItem);
-		toolMenu.add(usageProfileMenuItem);
 		toolMenu.add(communicationMenuItem);
 		toolMenu.add(communicationVsTimeMenuItem);
 		toolMenu.add(callTableMenuItem);
@@ -309,7 +310,6 @@ implements ActionListener, ItemListener
 		toolMenu.add(histogramsMenuItem);
 		toolMenu.add(overviewMenuItem);
 		toolMenu.add(animationMenuItem);
-		toolMenu.add(timeProfileGraphMenuItem);
 		toolMenu.add(perfCounterMenuItem);
 		toolMenu.add(userEventsMenuItem);
 		toolMenu.add(userStatsTimeMenuItem);

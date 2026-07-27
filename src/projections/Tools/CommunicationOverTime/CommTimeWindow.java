@@ -64,6 +64,12 @@ implements ActionListener
     private JRadioButton receivedExternalNodeMsgs;
 	private JRadioButton receivedExternalNodeBytes;
 
+	private ButtonGroup yScaleGroup;
+	private JRadioButton totalsButton;
+	private JRadioButton rateButton;
+	private JRadioButton ratePerPEButton;
+	private JPanel yScalePanel;
+
 	private int		   startInterval;
 	private int		   endInterval;
 	private int		   numIntervals;
@@ -218,6 +224,27 @@ implements ActionListener
 		Util.gblAdd(viewSelectPanel, receivedExternalNodeMsgs, gbc, 6,0, 1,1, 1,1);
 		Util.gblAdd(viewSelectPanel, receivedExternalNodeBytes, gbc, 7,0, 1,1, 1,1);
 
+		totalsButton = new JRadioButton("Totals per interval", true);
+		totalsButton.addActionListener(this);
+		totalsButton.setToolTipText("Each bar is the unnormalized total over its time interval, summed over the selected PEs");
+		rateButton = new JRadioButton("Rate (per second)");
+		rateButton.addActionListener(this);
+		rateButton.setToolTipText("Each bar is divided by the interval length in seconds; aggregated over the selected PEs, not per PE");
+		ratePerPEButton = new JRadioButton("Rate per PE (per second)");
+		ratePerPEButton.addActionListener(this);
+		ratePerPEButton.setToolTipText("Rate divided by the number of selected PEs: average communication intensity per PE. Multiply by PEs per logical/physical node for the per-node rate.");
+
+		yScaleGroup = new ButtonGroup();
+		yScaleGroup.add(totalsButton);
+		yScaleGroup.add(rateButton);
+		yScaleGroup.add(ratePerPEButton);
+
+		yScalePanel = new JPanel();
+		Util.gblAdd(yScalePanel, new JLabel("Y-axis scale:"), gbc, 0,0, 1,1, 0,0);
+		Util.gblAdd(yScalePanel, totalsButton, gbc, 1,0, 1,1, 0,0);
+		Util.gblAdd(yScalePanel, rateButton, gbc, 2,0, 1,1, 0,0);
+		Util.gblAdd(yScalePanel, ratePerPEButton, gbc, 3,0, 1,1, 0,0);
+
 		// control panel items
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
@@ -234,7 +261,8 @@ implements ActionListener
 		graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel,     gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, viewSelectPanel,  gbc, 0,2, 1,1, 0,0);
-		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,3, 1,0, 0,0);
+		Util.gblAdd(mainPanel, yScalePanel,    gbc, 0,3, 1,1, 0,0);
+		Util.gblAdd(mainPanel, controlPanel,   gbc, 0,4, 1,0, 0,0);
 	}
 
 	public long accumulateArray(double arr[][]) {
@@ -244,89 +272,131 @@ implements ActionListener
 				total += arr[i][j];
 			}
 		}
-		// arr is in terms of rates, so multiply summed rate by
-		// one interval in seconds to get total
-		return Math.round(total * intervalSize / 1000);
+		return Math.round(total);
+	}
+
+	private boolean rateSelected() {
+		return (rateButton != null && rateButton.isSelected()) || perPESelected();
+	}
+
+	private boolean perPESelected() {
+		return ratePerPEButton != null && ratePerPEButton.isSelected();
+	}
+
+	private double rateDivisor() {
+		double divisor = intervalSizeSeconds();
+		if (perPESelected()) {
+			divisor *= processorList.size();
+		}
+		return divisor;
+	}
+
+	// intervalSize is in microseconds
+	private double intervalSizeSeconds() {
+		return intervalSize / 1000000.0;
+	}
+
+	/** Return the array as-is (totals) or a copy scaled to per-second rates. */
+	private double[][] scaleForDisplay(double[][] arr) {
+		if (!rateSelected()) {
+			return arr;
+		}
+		double divisor = rateDivisor();
+		double[][] rates = new double[arr.length][];
+		for (int i = 0; i < arr.length; i++) {
+			rates[i] = new double[arr[i].length];
+			for (int j = 0; j < arr[i].length; j++) {
+				rates[i][j] = arr[i][j] / divisor;
+			}
+		}
+		return rates;
+	}
+
+	private String yAxisSuffix() {
+		if (perPESelected()) {
+			return " per Second per PE";
+		}
+		return rateSelected() ? " per Second" : "";
 	}
 
 	public void changeView(JRadioButton cb) {
 		if(cb == sentMsgs) {
-			setDataSource("Messages Sent Over Time", sentMsgOutput, 
+			setDataSource("Messages Sent Over Time", scaleForDisplay(sentMsgOutput), 
 					commTimeColors, this);
 			setPopupText("sentMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Messages Sent/s", "");
+			setYAxis("Messages Sent" + yAxisSuffix(), "");
 			totalCount.setText("Total messages sent: " + accumulateArray(sentMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == sentBytes){
-			setDataSource("Bytes Sent Over Time", sentByteOutput, 
+			setDataSource("Bytes Sent Over Time", scaleForDisplay(sentByteOutput), 
 					commTimeColors, this);
 			setPopupText("sentByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Bytes Sent/s", "");
+			setYAxis("Bytes Sent" + yAxisSuffix(), "");
 			totalCount.setText("Total bytes sent: " + accumulateArray(sentByteOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedMsgs){
-			setDataSource("Received Messages Over Time", receivedMsgOutput, 
+			setDataSource("Received Messages Over Time", scaleForDisplay(receivedMsgOutput), 
 					commTimeColors, this);
 			setPopupText("receivedMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Messages Received/s", "");
+			setYAxis("Messages Received" + yAxisSuffix(), "");
 			totalCount.setText("Total messages received: " + accumulateArray(receivedMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedBytes){
-			setDataSource("Received Bytes Over Time", receivedByteOutput, 
+			setDataSource("Received Bytes Over Time", scaleForDisplay(receivedByteOutput), 
 					commTimeColors, this);
 			setPopupText("receivedByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Bytes Received/s", "");
+			setYAxis("Bytes Received" + yAxisSuffix(), "");
 			totalCount.setText("Total bytes received: " + accumulateArray(receivedByteOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedExternalMsgs){
-			setDataSource("Received External Messages Over Time", receivedExternalMsgOutput,
+			setDataSource("Received External Messages Over Time", scaleForDisplay(receivedExternalMsgOutput),
 					commTimeColors, this);
 			setPopupText("receivedExternalMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Messages Received Externally/s", "");
+			setYAxis("Messages Received Externally" + yAxisSuffix(), "");
 			totalCount.setText("Total external messages received: " + accumulateArray(receivedExternalMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedExternalBytes){
-			setDataSource("Received External Bytes Over Time", receivedExternalByteOutput,
+			setDataSource("Received External Bytes Over Time", scaleForDisplay(receivedExternalByteOutput),
 					commTimeColors, this);
 			setPopupText("receivedExternalByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Bytes Received Externally/s", "");
+			setYAxis("Bytes Received Externally" + yAxisSuffix(), "");
 			totalCount.setText("Total external bytes received: " + accumulateArray(receivedExternalByteOutput));
 			super.refreshGraph();
 		}
         else if(cb == receivedExternalNodeMsgs){
-			setDataSource("Received External Node Messages Over Time", receivedExternalNodeMsgOutput,
+			setDataSource("Received External Node Messages Over Time", scaleForDisplay(receivedExternalNodeMsgOutput),
 					commTimeColors, this);
 			setPopupText("receivedExternalNodeMsgCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Messages Received Externally Node/s", "");
+			setYAxis("External Node Messages Received" + yAxisSuffix(), "");
 			totalCount.setText("Total external node messages received: " + accumulateArray(receivedExternalNodeMsgOutput));
 			super.refreshGraph();
 		}
 		else if(cb == receivedExternalNodeBytes){
-			setDataSource("Received External Node Bytes Over Time", receivedExternalNodeByteOutput,
+			setDataSource("Received External Node Bytes Over Time", scaleForDisplay(receivedExternalNodeByteOutput),
 					commTimeColors, this);
 			setPopupText("receivedExternalNodeByteCount");
 			setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 					startInterval*intervalSize, intervalSize);
-			setYAxis("Bytes Received Externally Node/s", "");
+			setYAxis("External Node Bytes Received" + yAxisSuffix(), "");
 			totalCount.setText("Total external node bytes received: " + accumulateArray(receivedExternalNodeByteOutput));
 			super.refreshGraph();
 		}
@@ -483,6 +553,19 @@ implements ActionListener
 		}
 	}
 
+	/** Format a popup value according to the selected y-axis scale. */
+	private String formatPopupValue(double count, boolean bytes) {
+		if (rateSelected()) {
+			String rateUnit = (bytes ? "B/s" : "messages/s") + (perPESelected() ? "/PE" : "");
+			return String.format("Rate = %s %s (%s %s)",
+				_format.format(count / rateDivisor()),
+				rateUnit,
+				_format.format(count),
+				bytes ? "bytes" : "messages");
+		}
+		return (bytes ? "Bytes: " : "Messages: ") + _format.format(count);
+	}
+
 	public String[] getPopup(int xVal, int yVal) {
 		//System.out.println("CommWindow.getPopup()");
 		//System.out.println(xVal +", " +yVal);
@@ -512,30 +595,22 @@ implements ActionListener
 		if (currentArrayName.equals("sentMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;
-			rString[3] = String.format("Rate = %s messages/s (%s messages)",
-				_format.format(sentMsgOutput[xVal][yVal]),
-				_format.format(sentMsgOutput[xVal][yVal] * intervalSize / 1000));    	
+			rString[3] = formatPopupValue(sentMsgOutput[xVal][yVal], false);
 		}
 		else if(currentArrayName.equals("sentByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s B/s (%s bytes)",
-				_format.format(sentByteOutput[xVal][yVal]),
-				_format.format(sentByteOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(sentByteOutput[xVal][yVal], true);
 		}
 		else if(currentArrayName.equals("receivedMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s messages/s (%s messages)", 
-				_format.format(receivedMsgOutput[xVal][yVal]),
-				_format.format(receivedMsgOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(receivedMsgOutput[xVal][yVal], false);
 		}
 		else if(currentArrayName.equals("receivedByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s B/s (%s bytes)",
-				_format.format(receivedByteOutput[xVal][yVal]),
-				_format.format(receivedByteOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(receivedByteOutput[xVal][yVal], true);
 		}
 		/*
 	else if (currentArrayName.equals("sentExternalMsgCount")) {
@@ -554,30 +629,22 @@ implements ActionListener
 		else if(currentArrayName.equals("receivedExternalMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s messages/s (%s messages)", 
-				_format.format(receivedExternalMsgOutput[xVal][yVal]),
-				_format.format(receivedExternalMsgOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(receivedExternalMsgOutput[xVal][yVal], false);
 		}
 		else if(currentArrayName.equals("receivedExternalByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s B/s (%s bytes)",
-				_format.format(receivedExternalByteOutput[xVal][yVal]),
-				_format.format(receivedExternalByteOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(receivedExternalByteOutput[xVal][yVal], true);
 		}
         else if(currentArrayName.equals("receivedExternalNodeMsgCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s messages/s (%s messages)",
-				_format.format(receivedExternalMsgOutput[xVal][yVal]),
-				_format.format(receivedExternalNodeMsgOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(receivedExternalNodeMsgOutput[xVal][yVal], false);
 		}
 		else if(currentArrayName.equals("receivedExternalNodeByteCount")) {
 			rString[1] = "Dest. Chare: " + epClassName;
 			rString[2] = "Dest. EPid: " + epName;	    
-			rString[3] = String.format("Rate = %s B/s (%s bytes)",
-				_format.format(receivedExternalNodeByteOutput[xVal][yVal]),
-				_format.format(receivedExternalNodeByteOutput[xVal][yVal] * intervalSize / 1000));
+			rString[3] = formatPopupValue(receivedExternalNodeByteOutput[xVal][yVal], true);
 		}
 
 		return rString;
@@ -600,7 +667,18 @@ implements ActionListener
 		}
 		else if (e.getSource() instanceof JRadioButton) {
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
-			changeView((JRadioButton)e.getSource());
+			JRadioButton source = (JRadioButton)e.getSource();
+			if (source == totalsButton || source == rateButton || source == ratePerPEButton) {
+				// y-scale changed: redisplay whichever view is selected
+				for (Enumeration<AbstractButton> buttons = btg.getElements(); buttons.hasMoreElements(); ) {
+					AbstractButton button = buttons.nextElement();
+					if (button.isSelected()) {
+						changeView((JRadioButton) button);
+					}
+				}
+			} else {
+				changeView(source);
+			}
 			setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 	}

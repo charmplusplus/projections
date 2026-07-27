@@ -7,9 +7,8 @@ application {
   mainClass = 'projections.analysis.ProjMain'
 }
 
-java {
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
+tasks.withType(JavaCompile).configureEach {
+  options.release = 17
 }
 
 version = '6.10.0'

@@ -27,6 +27,7 @@ import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
+import projections.gui.Legend;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
@@ -65,6 +66,10 @@ implements ActionListener, Clickable
 	private JCheckBox showMarkersCheckBox;
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
+	private JCheckBox showLegendCheckBox;
+
+	private static final int LEGEND_TOP_N = 10;
+	private Legend legendWindow;
 
 	private long intervalSize;
 	private int startInterval;
@@ -176,6 +181,11 @@ implements ActionListener, Clickable
 		hideMouseoversCheckBox.setToolTipText("Disable the displaying of information associated with the data under the mouse pointer.");
 		hideMouseoversCheckBox.addActionListener(this);
 
+		showLegendCheckBox = new JCheckBox("Show Legend (top " + LEGEND_TOP_N + ")");
+		showLegendCheckBox.setSelected(false);
+		showLegendCheckBox.setToolTipText("Movable window listing the " + LEGEND_TOP_N + " largest activities in the displayed range; drag it over an empty part of the chart. The Legend menu shows the full list.");
+		showLegendCheckBox.addActionListener(this);
+
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 //		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
@@ -183,6 +193,7 @@ implements ActionListener, Clickable
 		Util.gblAdd(controlPanel, showMarkersCheckBox, gbc, 3,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 6,0, 1,1, 0,0);
 
 		JPanel graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
@@ -218,6 +229,46 @@ implements ActionListener, Clickable
 	}
 
 	private void generateLegend(boolean useShortenedNames){
+		makeLegend("Legend", useShortenedNames, Integer.MAX_VALUE, false, true);
+	}
+
+	/** Open (or refresh) the movable top-N legend controlled by the checkbox. */
+	private void showLegendWindow() {
+		if (graphData == null) {
+			return;
+		}
+		java.awt.Point oldLocation = null;
+		if (legendWindow != null) {
+			oldLocation = legendWindow.getFrame().getLocation();
+			legendWindow.dispose();
+		}
+		legendWindow = makeLegend("Legend (top " + LEGEND_TOP_N + ")", true, LEGEND_TOP_N, true, false);
+		if (legendWindow == null) {
+			return;
+		}
+		if (oldLocation != null) {
+			legendWindow.getFrame().setLocation(oldLocation);
+		} else {
+			legendWindow.getFrame().setLocationRelativeTo(thisWindow);
+		}
+		// Keep the checkbox in sync if the user closes the legend window directly
+		legendWindow.getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+			public void windowClosing(java.awt.event.WindowEvent e) {
+				legendWindow = null;
+				showLegendCheckBox.setSelected(false);
+			}
+		});
+	}
+
+	private void closeLegendWindow() {
+		if (legendWindow != null) {
+			Legend l = legendWindow;
+			legendWindow = null;
+			l.dispose();
+		}
+	}
+
+	private Legend makeLegend(String title, boolean useShortenedNames, int maxEntries, boolean showPercent, boolean includeIdleOverhead){
 
 		List<SortableEPs> l = new ArrayList<SortableEPs>();
 
@@ -241,8 +292,12 @@ implements ActionListener, Clickable
 
 		}
 
-		l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor()));
-		l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor()));
+		// Idle (white) and Overhead (black) use fixed colors familiar to all
+		// viewers, so the compact legend omits them to save slots.
+		if (includeIdleOverhead) {
+			l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor()));
+			l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor()));
+		}
 
 
 		// sort list 
@@ -254,17 +309,23 @@ implements ActionListener, Clickable
 		List<Paint>  paints = new ArrayList<Paint>();
 
 		Iterator<SortableEPs> iter = l.iterator();
-		while(iter.hasNext()){
+		while(iter.hasNext() && names.size() < maxEntries){
 			SortableEPs s = iter.next();
 			if(s.value > grandTotal * 0.005){
-				names.add(s.name);
+				if(showPercent)
+					names.add(String.format("%.1f%%  %s", s.value * 100.0 / grandTotal, s.name));
+				else
+					names.add(s.name);
 				paints.add(s.paint);
 			}
 		}
 
+		if (names.isEmpty()) {
+			return null;
+		}
 
 		// Display the legend
-		new Legend("Legend", names, paints);
+		return new Legend(title, names, paints);
 
 	}
 
@@ -506,6 +567,9 @@ implements ActionListener, Clickable
 				}
 				public void done() {
 					setOutputGraphData();
+					if (showLegendCheckBox.isSelected()) {
+						showLegendWindow();
+					}
 					thisWindow.setVisible(true);                        
 				}
 			};
@@ -651,6 +715,12 @@ implements ActionListener, Clickable
 			graphCanvas.showMarkers(showMarkersCheckBox.isSelected());
 		} else if (e.getSource() == hideMouseoversCheckBox) {
 			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
+		} else if (e.getSource() == showLegendCheckBox) {
+			if (showLegendCheckBox.isSelected()) {
+				showLegendWindow();
+			} else {
+				closeLegendWindow();
+			}
 		} else if (e.getSource() == setRanges) {
 			showDialog();
 		} else if(e.getSource() == mDisplayLegend){

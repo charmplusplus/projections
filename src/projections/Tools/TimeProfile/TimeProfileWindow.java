@@ -225,11 +225,14 @@ implements ActionListener, Clickable
 		private double value;
 		private String name;
 		private Paint paint;
+		// utilization-weighted mean interval; orders phase-like EPs left-to-right
+		private double centroid;
 
-		private SortableEPs(double value, String name, Paint paint){
+		private SortableEPs(double value, String name, Paint paint, double centroid){
 			this.value = value;
 			this.name = name;
 			this.paint = paint;
+			this.centroid = centroid;
 		}
 
 		public int compareTo(Object o) {
@@ -245,7 +248,7 @@ implements ActionListener, Clickable
 	}
 
 	private void generateLegend(boolean useShortenedNames){
-		makeLegend("Legend", useShortenedNames, Integer.MAX_VALUE, false, true, false);
+		makeLegend("Legend", useShortenedNames, Integer.MAX_VALUE, false, true, false, false);
 	}
 
 	/** Recompute and apply (or clear) the on-chart region labels. */
@@ -304,7 +307,7 @@ implements ActionListener, Clickable
 			oldLocation = legendWindow.getFrame().getLocation();
 			legendWindow.dispose();
 		}
-		legendWindow = makeLegend("Legend (top " + LEGEND_TOP_N + ")", true, LEGEND_TOP_N, true, false, true);
+		legendWindow = makeLegend("Legend (top " + LEGEND_TOP_N + ")", true, LEGEND_TOP_N, true, false, true, true);
 		if (legendWindow == null) {
 			return;
 		}
@@ -330,18 +333,24 @@ implements ActionListener, Clickable
 		}
 	}
 
-	private Legend makeLegend(String title, boolean useShortenedNames, int maxEntries, boolean showPercent, boolean includeIdleOverhead, boolean omitOverlaid){
+	private Legend makeLegend(String title, boolean useShortenedNames, int maxEntries, boolean showPercent, boolean includeIdleOverhead, boolean omitOverlaid, boolean orderByAppearance){
 
 		List<SortableEPs> l = new ArrayList<SortableEPs>();
 
 		// Accumulate data shown in graph
 		double[] sums = new double[numEPs+2];
+		double[] firstMoment = new double[numEPs+2];
 		double grandTotal = 0.0;
 		for(int i=0; i<graphData.length; i++){
 			for(int ep=0; ep<graphData[i].length; ep++){
 				sums[ep] += graphData[i][ep];
+				firstMoment[ep] += i * graphData[i][ep];
 				grandTotal += graphData[i][ep];
 			}
+		}
+		double[] centroid = new double[numEPs+2];
+		for(int ep=0; ep<numEPs+2; ep++){
+			centroid[ep] = sums[ep] > 0 ? firstMoment[ep] / sums[ep] : 0;
 		}
 
 
@@ -350,17 +359,17 @@ implements ActionListener, Clickable
 			if(omitOverlaid && overlaidEPs.contains(ep))
 				continue;
 			if(useShortenedNames)
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep], centroid[ep]));
 			else
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep], centroid[ep]));
 
 		}
 
 		// Idle (white) and Overhead (black) use fixed colors familiar to all
 		// viewers, so the compact legend omits them to save slots.
 		if (includeIdleOverhead) {
-			l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor()));
-			l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor()));
+			l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor(), centroid[numEPs]));
+			l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor(), centroid[numEPs+1]));
 		}
 
 
@@ -372,16 +381,30 @@ implements ActionListener, Clickable
 		List<String>  names = new ArrayList<String>();
 		List<Paint>  paints = new ArrayList<Paint>();
 
+		List<SortableEPs> selected = new ArrayList<SortableEPs>();
 		Iterator<SortableEPs> iter = l.iterator();
-		while(iter.hasNext() && names.size() < maxEntries){
+		while(iter.hasNext() && selected.size() < maxEntries){
 			SortableEPs s = iter.next();
 			if(s.value > grandTotal * 0.005){
-				if(showPercent)
-					names.add(String.format("%.1f%%  %s", s.value * 100.0 / grandTotal, s.name));
-				else
-					names.add(s.name);
-				paints.add(s.paint);
+				selected.add(s);
 			}
+		}
+
+		if(orderByAppearance){
+			// Left-to-right chart order for phase-like entry methods
+			Collections.sort(selected, new Comparator<SortableEPs>() {
+				public int compare(SortableEPs a, SortableEPs b) {
+					return Double.compare(a.centroid, b.centroid);
+				}
+			});
+		}
+
+		for(SortableEPs s : selected){
+			if(showPercent)
+				names.add(String.format("%.1f%%  %s", s.value * 100.0 / grandTotal, s.name));
+			else
+				names.add(s.name);
+			paints.add(s.paint);
 		}
 
 		if (names.isEmpty()) {

@@ -36,16 +36,17 @@ public class Graph extends JPanel
 
 //    public static final int STACKED   = 0;  // type of the bar graph
 //    public static final int UNSTACKED = 1;  // single, multiple or stacked
-    protected static final int AREA      = 2;  // Area graph (stacked)
+    public static final int AREA      = 2;  // Area graph (stacked)
 //    public static final int SINGLE    = 3;  // take the average of all y-values
-    protected static final int BAR       = 4;  // Graph type, bar graph
-    protected static final int LINE      = 5;  // or line graph
+    public static final int BAR       = 4;  // Graph type, bar graph
+    public static final int LINE      = 5;  // or line graph
 
     private static final int X_AXIS = 0;
     private static final int Y_AXIS = 1;
     
     private int GraphType;
     private boolean GraphStacked;
+    private boolean showHorizontalGridlines = false;
     private DataSource dataSource;
     private XAxis xAxis;
     private YAxis yAxis;
@@ -208,6 +209,13 @@ public class Graph extends JPanel
 	return GraphType;
     }
 
+    /** Draw light horizontal gridlines across the plot at every other
+     *  y-axis tick (helpful for sparse line graphs). Off by default. */
+    public void setHorizontalGridlines(boolean isSet)
+    {
+	showHorizontalGridlines = isSet;
+    }
+
     public void setStackGraph(boolean isSet)
     {
 	GraphStacked = isSet;
@@ -312,8 +320,14 @@ public class Graph extends JPanel
     			} else{
     				return whichBar;
     			}
-    		} 
-    	}	
+    		} else if (GraphType == LINE) {
+    			// line samples sit at interval centers; the nearest one is fine
+    			if (dataSource != null && whichBar >= 0 &&
+    					whichBar < dataSource.getIndexCount()) {
+    				return whichBar;
+    			}
+    		}
+    	}
     	return -1;
     }
 	
@@ -327,9 +341,36 @@ public class Graph extends JPanel
      *  Hence, the array looping code is adequate for now.
      */
     private int getYValue(int xVal, int yPos) {
+    	if ((GraphType == LINE) && !GraphStacked) {
+    		// unstacked lines: pick the series whose sample at xVal is
+    		// closest to the mouse, within a small pixel tolerance
+    		if ( (xVal >= 0) &&
+    				(yPos < originY()) && (yPos > topMargin()) &&
+    				(dataSource != null) &&
+    				(xVal < dataSource.getIndexCount()) ) {
+    			int numY = dataSource.getValueCount();
+    			double[] values = new double[numY];
+    			dataSource.getValues(xVal, values);
+    			int best = -1;
+    			int bestDist = 9;
+    			for (int k=0; k<numY; k++) {
+    				if (Double.isNaN(values[k])) {
+    					continue;
+    				}
+    				int y = originY() - (int)(values[k]*pixelincrementY());
+    				int dist = Math.abs(yPos - y);
+    				if (dist < bestDist) {
+    					bestDist = dist;
+    					best = k;
+    				}
+    			}
+    			return best;
+    		}
+    		return -1;
+    	}
     	if ( (xVal >= 0)  &&
-    			(yPos < originY()) && (yPos > topMargin()) && 
-    			(stackArray != null) && 
+    			(yPos < originY()) && (yPos > topMargin()) &&
+    			(stackArray != null) &&
     			(xVal < stackArray.length) ) {
     		int numY = dataSource.getValueCount();
     		int y;
@@ -339,7 +380,7 @@ public class Graph extends JPanel
     				return k;
     			}
     		}
-    	}	
+    	}
     	return -1;
     }
 
@@ -440,7 +481,9 @@ public class Graph extends JPanel
     	}
 
     	if (bubble == null && showBubble) {
-    		if (GraphStacked) {
+    		// stacked graphs, and unstacked line graphs (whose getYValue
+    		// finds the nearest series), can locate the value under the mouse
+    		if (GraphStacked || GraphType == LINE) {
     			bubble = new Bubble(this, text);
     			bubble.setLocation(xPos+offset.x, yPos+offset.y);
     			bubble.setVisible(true);
@@ -485,7 +528,12 @@ public class Graph extends JPanel
     		// Width of available chart area depends on y axis label width stored in maxLabelWidth
     		setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
     		setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
-        	
+
+    		// gridlines go under the data
+    		if (showHorizontalGridlines) {
+    			drawYGridlines(g);
+    		}
+
     		if (GraphType == BAR) {
     			drawBarGraph(g);
     		} else if (GraphType == AREA) {
@@ -639,6 +687,22 @@ public class Graph extends JPanel
     			g.drawLine(curx, originY()+2, curx, originY());
     		}
     	}
+    }
+
+    /** Light horizontal lines at every other y tick, in a shade that stays
+     *  subtle on either background color. */
+    private void drawYGridlines(Graphics2D g) {
+    	Color background = MainWindow.runObject[myRun].background;
+    	int luminance = (background.getRed() + background.getGreen() + background.getBlue()) / 3;
+    	g.setColor(luminance > 128 ? new Color(220, 220, 220) : new Color(70, 70, 70));
+    	int tick = 0;
+    	for (long i=0; i<=maxvalueY(); i+=valuesPerTickY, tick++) {
+    		if (i > 0 && tick % 2 == 0) {
+    			int cury = originY() - (int)(i*pixelincrementY());
+    			g.drawLine(originX(), cury, originX()+availableWidth(), cury);
+    		}
+    	}
+    	g.setColor(MainWindow.runObject[myRun].foreground);
     }
 
     private void drawYAxis(Graphics2D g) {
@@ -880,31 +944,43 @@ public class Graph extends JPanel
 	// x1,y1 store previous values
 	int x1 = -1;
 	int [] y1 = new int[yValues];
+	// whether the previous interval had a value for this series;
+	// NaN values mark "no data here" and break the line into segments
+	boolean [] prevValid = new boolean[yValues];
 	// x2, y2 to store present values so that line graph can be drawn
-	int x2 = 0;		
-	int [] y2 = new int[yValues];  
+	int x2 = 0;
+	int [] y2 = new int[yValues];
 
 	for (int i=0; i<yValues; i++) {
 	    y1[i] = -1;
 	}
-	// do only till the window is reached 
-	for (int i=0; i < xValues; i++) {	
+	// do only till the window is reached
+	for (int i=0; i < xValues; i++) {
 	    if (GraphStacked) {
 		data = stackArray[i];
 	    } else {
 		dataSource.getValues(i,data);
 	    }
 	    //calculate x value
-	    x2 = originX() + (int)(i*pixelincrementX()) + 
-		(int)(pixelincrementX()/2);    
-	 
+	    x2 = originX() + (int)(i*pixelincrementX()) +
+		(int)(pixelincrementX()/2);
+
 	    for (int j=0; j<yValues; j++) {
+		if (Double.isNaN(data[j])) {
+		    prevValid[j] = false;
+		    continue;
+		}
 		g.setPaint(dataSource.getColor(j));
 		y2[j] = (originY() - (int)(data[j]*pixelincrementY()));
-		//is there any other condition that needs to be checked?
-		if(x1 != -1)	
+		if (x1 != -1 && prevValid[j]) {
 		    g.drawLine(x1,y1[j],x2,y2[j]);
-		y1[j] = y2[j];		
+		} else {
+		    // start of a segment (or an isolated sample surrounded by
+		    // gaps): mark it with a dot so it stays visible
+		    g.fillOval(x2-2, y2[j]-2, 5, 5);
+		}
+		y1[j] = y2[j];
+		prevValid[j] = true;
 	    }
 	    x1 = x2;
 	}

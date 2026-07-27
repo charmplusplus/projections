@@ -1,4 +1,4 @@
-package projections.Tools.TimeProfile;
+package projections.gui;
 
 
 
@@ -15,12 +15,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import projections.gui.JPanelToImage;
-import projections.gui.MainWindow;
-
 /** Display a legend in a new window (clickable to save image to file) */
-class Legend implements MouseListener {
+public class Legend implements MouseListener {
 	private BufferedImage image;
+	private JFrame frame;
 	private Paint fgColor;
 	private Paint bgColor;
 	
@@ -34,7 +32,7 @@ class Legend implements MouseListener {
 	private Font namesFont;
 	private Font legendFont;
 	
-	Legend(String title, List<String> names, List<Paint> paints){
+	public Legend(String title, List<String> names, List<Paint> paints){
 		this.names = names;
 		
 		namesFont = new Font("SansSerif", Font.PLAIN, fontSizeNames() ); 
@@ -87,7 +85,7 @@ class Legend implements MouseListener {
 		
 		// Display the thing
 		ImageIcon imageIcon = new ImageIcon(image);
-		JFrame f = new JFrame();
+		JFrame f = new JFrame(title);
 		JLabel l = new JLabel(imageIcon);
 		
 				
@@ -95,9 +93,18 @@ class Legend implements MouseListener {
 		f.getContentPane().add(l);
 		f.pack();
 		f.setVisible(true);
+		frame = f;
 		
 		g.dispose();
 			
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public void dispose() {
+		frame.dispose();
 	}
 
 	private int fontSizeLegend(){

@@ -120,6 +120,26 @@ public class Graph extends JPanel
     
     private boolean showMarkers = false;
 
+    /** A text label drawn on top of a horizontal run of bars/intervals.
+     *  Used by tools to name large single-color regions in stacked graphs. */
+    public static class RegionLabel {
+        public final double startIndex;  // first bin of the run
+        public final double endIndex;    // last bin of the run (inclusive)
+        public final double yValue;      // vertical center, in data source units
+        public final String text;
+        public final java.awt.Paint regionPaint; // color under the label, for contrast
+
+        public RegionLabel(double startIndex, double endIndex, double yValue, String text, java.awt.Paint regionPaint) {
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+            this.yValue = yValue;
+            this.text = text;
+            this.regionPaint = regionPaint;
+        }
+    }
+
+    private java.util.List<RegionLabel> regionLabels = null;
+
     
     /** Special construgraphCanvasctor. This can only be called from a projections tool!!! */
     public Graph()
@@ -196,6 +216,12 @@ public class Graph extends JPanel
 
     public void setMarkers(TreeMap<Double, String> phaseMarkers){
     	this.phaseMarkers = phaseMarkers;
+    	repaint();
+    }
+
+    /** Set (or clear, with null) labels drawn over large regions of the graph. */
+    public void setRegionLabels(java.util.List<RegionLabel> labels){
+    	this.regionLabels = labels;
     	repaint();
     }
 
@@ -472,6 +498,7 @@ public class Graph extends JPanel
     		drawYAxis(g);
     		
     		drawMarkers(g);
+    		drawRegionLabels(g);
     	}
 
     	
@@ -529,6 +556,57 @@ public class Graph extends JPanel
     	}    	
     }
 
+
+    private void drawRegionLabels(Graphics2D g) {
+    	if (regionLabels == null || regionLabels.isEmpty()) {
+    		return;
+    	}
+    	Font regionFont = new Font("SansSerif", Font.BOLD, 12);
+    	g.setFont(regionFont);
+    	FontMetrics fm = g.getFontMetrics(regionFont);
+    	Object oldHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+    	for (RegionLabel label : regionLabels) {
+    		double widthPx = (label.endIndex - label.startIndex + 1) * pixelincrementX();
+    		// Truncate the text if the region is narrow; skip if almost nothing fits
+    		String text = label.text;
+    		while (text.length() > 3 && fm.stringWidth(text) > widthPx * 0.95) {
+    			text = text.substring(0, text.length() - 2) + "\u2026";
+    		}
+    		if (fm.stringWidth(text) > widthPx * 0.95) {
+    			continue;
+    		}
+
+    		int cx = originX() + (int)(((label.startIndex + label.endIndex) / 2.0 + 0.5) * pixelincrementX());
+    		int cy = originY() - (int)(label.yValue * pixelincrementY());
+    		if (cy > originY() - fm.getHeight()/2 || cy < topMargin() + fm.getHeight()/2) {
+    			continue;
+    		}
+    		int tx = cx - fm.stringWidth(text) / 2;
+    		int ty = cy + fm.getAscent() / 2;
+
+    		// Black text on light regions, white on dark ones
+    		g.setColor(contrastingTextColor(label.regionPaint));
+    		g.drawString(text, tx, ty);
+    	}
+    	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
+    }
+
+    /** Black or white, whichever contrasts with the given paint. */
+    private static Color contrastingTextColor(java.awt.Paint p) {
+    	Color c = null;
+    	if (p instanceof Color) {
+    		c = (Color) p;
+    	} else if (p instanceof java.awt.GradientPaint) {
+    		c = ((java.awt.GradientPaint) p).getColor1();
+    	}
+    	if (c == null) {
+    		return Color.black;
+    	}
+    	double luminance = 0.299*c.getRed() + 0.587*c.getGreen() + 0.114*c.getBlue();
+    	return luminance < 128 ? Color.white : Color.black;
+    }
 
 	private void drawXAxis(Graphics2D g) {
     	g.setColor(MainWindow.runObject[myRun].foreground);

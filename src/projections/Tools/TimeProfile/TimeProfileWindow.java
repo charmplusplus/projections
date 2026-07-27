@@ -28,6 +28,7 @@ import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
 import projections.gui.Legend;
+import projections.gui.graph.Graph;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
@@ -67,9 +68,18 @@ implements ActionListener, Clickable
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
 	private JCheckBox showLegendCheckBox;
+	private JCheckBox labelRegionsCheckBox;
 
 	private static final int LEGEND_TOP_N = 10;
 	private Legend legendWindow;
+
+	// Regions must sustain at least this utilization share (percentage
+	// points) for at least 1/20 of the displayed intervals to get an
+	// on-chart label.
+	private static final double REGION_LABEL_MIN_PERCENT = 25.0;
+	private static final int REGION_LABEL_MIN_FRACTION = 20;
+	// EPs currently labeled on the chart, omitted from the compact legend
+	private Set<Integer> overlaidEPs = new HashSet<Integer>();
 
 	private long intervalSize;
 	private int startInterval;
@@ -186,6 +196,11 @@ implements ActionListener, Clickable
 		showLegendCheckBox.setToolTipText("Movable window listing the " + LEGEND_TOP_N + " largest activities in the displayed range; drag it over an empty part of the chart. The Legend menu shows the full list.");
 		showLegendCheckBox.addActionListener(this);
 
+		labelRegionsCheckBox = new JCheckBox("Label Large Regions");
+		labelRegionsCheckBox.setSelected(false);
+		labelRegionsCheckBox.setToolTipText("Draw entry method names directly on large single-color regions of the chart; labeled entries are then omitted from the compact legend.");
+		labelRegionsCheckBox.addActionListener(this);
+
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 //		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
@@ -194,6 +209,7 @@ implements ActionListener, Clickable
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 6,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, labelRegionsCheckBox, gbc, 7,0, 1,1, 0,0);
 
 		JPanel graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
@@ -229,7 +245,52 @@ implements ActionListener, Clickable
 	}
 
 	private void generateLegend(boolean useShortenedNames){
-		makeLegend("Legend", useShortenedNames, Integer.MAX_VALUE, false, true);
+		makeLegend("Legend", useShortenedNames, Integer.MAX_VALUE, false, true, false);
+	}
+
+	/** Recompute and apply (or clear) the on-chart region labels. */
+	private void updateRegionLabels() {
+		overlaidEPs.clear();
+		if (!labelRegionsCheckBox.isSelected() || graphData == null) {
+			graphCanvas.setRegionLabels(null);
+			return;
+		}
+		List<Graph.RegionLabel> labels = new ArrayList<Graph.RegionLabel>();
+		int numIntervals = graphData.length;
+		int minRun = Math.max(2, numIntervals / REGION_LABEL_MIN_FRACTION);
+		// Only real entry methods get labels; Idle and Overhead colors are
+		// fixed and familiar to viewers.
+		for (int ep = 0; ep < numEPs; ep++) {
+			if (!stateArray[ep]) {
+				continue;
+			}
+			int runStart = -1;
+			for (int i = 0; i <= numIntervals; i++) {
+				boolean inRegion = i < numIntervals && graphData[i][ep] >= REGION_LABEL_MIN_PERCENT;
+				if (inRegion && runStart < 0) {
+					runStart = i;
+				} else if (!inRegion && runStart >= 0) {
+					int runEnd = i - 1;
+					if (runEnd - runStart + 1 >= minRun) {
+						int mid = (runStart + runEnd) / 2;
+						// Vertical center of this EP's band in the stacked bar:
+						// EPs below it in the stack are those with smaller index
+						double yBottom = 0;
+						for (int under = 0; under < ep; under++) {
+							if (stateArray[under]) {
+								yBottom += graphData[mid][under];
+							}
+						}
+						labels.add(new Graph.RegionLabel(runStart, runEnd,
+								yBottom + graphData[mid][ep] / 2.0,
+								MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep)));
+						overlaidEPs.add(ep);
+					}
+					runStart = -1;
+				}
+			}
+		}
+		graphCanvas.setRegionLabels(labels);
 	}
 
 	/** Open (or refresh) the movable top-N legend controlled by the checkbox. */
@@ -242,7 +303,7 @@ implements ActionListener, Clickable
 			oldLocation = legendWindow.getFrame().getLocation();
 			legendWindow.dispose();
 		}
-		legendWindow = makeLegend("Legend (top " + LEGEND_TOP_N + ")", true, LEGEND_TOP_N, true, false);
+		legendWindow = makeLegend("Legend (top " + LEGEND_TOP_N + ")", true, LEGEND_TOP_N, true, false, true);
 		if (legendWindow == null) {
 			return;
 		}
@@ -268,7 +329,7 @@ implements ActionListener, Clickable
 		}
 	}
 
-	private Legend makeLegend(String title, boolean useShortenedNames, int maxEntries, boolean showPercent, boolean includeIdleOverhead){
+	private Legend makeLegend(String title, boolean useShortenedNames, int maxEntries, boolean showPercent, boolean includeIdleOverhead, boolean omitOverlaid){
 
 		List<SortableEPs> l = new ArrayList<SortableEPs>();
 
@@ -285,6 +346,8 @@ implements ActionListener, Clickable
 
 		// Put data into list	
 		for (int ep=0; ep<numEPs; ep++) {
+			if(omitOverlaid && overlaidEPs.contains(ep))
+				continue;
 			if(useShortenedNames)
 				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
 			else
@@ -567,6 +630,7 @@ implements ActionListener, Clickable
 				}
 				public void done() {
 					setOutputGraphData();
+					updateRegionLabels();
 					if (showLegendCheckBox.isSelected()) {
 						showLegendWindow();
 					}
@@ -720,6 +784,11 @@ implements ActionListener, Clickable
 				showLegendWindow();
 			} else {
 				closeLegendWindow();
+			}
+		} else if (e.getSource() == labelRegionsCheckBox) {
+			updateRegionLabels();
+			if (showLegendCheckBox.isSelected()) {
+				showLegendWindow(); // re-filter against the labeled EPs
 			}
 		} else if (e.getSource() == setRanges) {
 			showDialog();

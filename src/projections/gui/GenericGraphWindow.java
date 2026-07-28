@@ -129,6 +129,13 @@ implements PopUpAble, ColorUpdateNotifier
 
 	public abstract String[] getPopup(int xVal, int yVal);
 
+	/** Subclasses may return a filter so the "Choose Entry Colors" dialog
+	 *  lists only the entry methods present in the current view (like
+	 *  Timeline's chooser); null (the default) lists all entry methods. */
+	protected EntryMethodVisibility getEntryFilter(){
+		return null;
+	}
+
 	// create a standard layout which can be called from child class or 
 	// overridden by it
 	// returns a Main Panel with vertical box layout and graphPanel attached
@@ -253,7 +260,11 @@ implements PopUpAble, ColorUpdateNotifier
 			} else if(e.getSource() == mSaveScreenshot){
 				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File...", "ProjectionsPlot.pdf");
 			} else if (e.getSource() == mChooseColors){
-				new ChooseEntriesWindow(gw);
+				EntryMethodVisibility filter = getEntryFilter();
+				if (filter != null)
+					new ChooseEntriesWindow(filter, false, gw);
+				else
+					new ChooseEntriesWindow(gw);
 			} else if (e.getSource() == mLoadColors){
 				try {
 					MainWindow.runObject[myRun].loadColors();

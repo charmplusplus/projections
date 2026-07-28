@@ -23,6 +23,7 @@ import projections.analysis.LogReader;
 import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
+import projections.gui.EntryMethodVisibility;
 import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
@@ -41,7 +42,7 @@ import projections.gui.Util;
  * 
  */
 public class TimeProfileWindow extends GenericGraphWindow
-implements ActionListener, Clickable
+implements ActionListener, Clickable, EntryMethodVisibility
 {
 
 	private TimeProfileWindow thisWindow;
@@ -220,6 +221,44 @@ implements ActionListener, Clickable
 
 	}
 
+
+	/** Restrict "Choose Entry Colors" to the entry methods present in the
+	 *  loaded range (EntryMethodVisibility, consumed by ChooseEntriesWindow).
+	 *  Falls back to the full list until data has been loaded. */
+	protected EntryMethodVisibility getEntryFilter() {
+		return (graphData != null) ? this : null;
+	}
+
+	public int[] getEntriesArray() {
+		int[] present = new int[numEPs];
+		for (int ep=0; ep<numEPs; ep++) {
+			present[ep] = existsArray[ep] ? 1 : 0;
+		}
+		return present;
+	}
+
+	public boolean hasEntryList() {
+		return true;
+	}
+
+	public boolean handleIdleOverhead() {
+		return true;
+	}
+
+	public boolean entryIsVisibleID(Integer id) {
+		return true;
+	}
+
+	public void makeEntryVisibleID(Integer id) {
+		// visibility checkboxes are not shown for this tool's chooser
+	}
+
+	public void makeEntryInvisibleID(Integer id) {
+	}
+
+	public void displayMustBeRedrawn() {
+		repaint();
+	}
 
 	private static class SortableEPs implements Comparable{
 		private double value;

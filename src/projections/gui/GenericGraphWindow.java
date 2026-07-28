@@ -141,6 +141,12 @@ implements PopUpAble, ColorUpdateNotifier
 		return mainPanel;
 	}
 
+	/** The panel wrapping the graph canvas, for tools that need to switch
+	 *  graph type programmatically (see GraphPanel.selectGraphType). */
+	protected GraphPanel getGraphPanel(){
+		return graphPanel;
+	}
+
 
 	protected void setXAxis(String title,String units){
 		xAxis = new XAxisFixed(title,units);
@@ -181,7 +187,14 @@ implements PopUpAble, ColorUpdateNotifier
 			yAxis = new YAxisAuto(title,units,dataSource);
 		else
 			// create a dummy YAxis storing the title and units
-			yAxis = new YAxisFixed(title,units,0);	
+			yAxis = new YAxisFixed(title,units,0);
+	}
+
+	/** Install a fully custom y-axis (e.g. transformed scales whose tick
+	 *  labels are not the raw data values). Call after setDataSource, which
+	 *  would otherwise replace the axis with a YAxisAuto. */
+	protected void setYAxis(YAxis axis){
+		yAxis = axis;
 	}
 	
 		

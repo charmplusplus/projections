@@ -1,18 +1,26 @@
 package projections.Tools.Timeline;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
+import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 class ChooseUserEventsWindow extends JFrame
 {
@@ -20,6 +28,8 @@ class ChooseUserEventsWindow extends JFrame
 	private Map<Integer, String> names;
 	private Vector<Vector> tabledata;
 	private Vector<String> columnNames;
+	private JTextField searchField;
+	private TableRowSorter<MyTableModel> sorter;
 
 	ChooseUserEventsWindow(Data _data){
 		data = _data;
@@ -78,14 +88,37 @@ class ChooseUserEventsWindow extends JFrame
 		initColumnSizes(table);
 
 		table.setDefaultRenderer(Color.class, new ColorRenderer());
-		
+
+		// row sorter used only for the search filter; column-click sorting
+		// stays off (the color column is not comparable)
+		sorter = new TableRowSorter<MyTableModel>(tableModel);
+		for (int c=0; c<tableModel.getColumnCount(); c++) {
+			sorter.setSortable(c, false);
+		}
+		table.setRowSorter(sorter);
+
+		searchField = new JTextField();
+		searchField.setToolTipText("Type part of a user event name (or ID) to filter the list");
+		searchField.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) { updateFilter(); }
+			public void removeUpdate(DocumentEvent e) { updateFilter(); }
+			public void changedUpdate(DocumentEvent e) { updateFilter(); }
+		});
+		JPanel searchPanel = new JPanel();
+		searchPanel.setLayout(new BorderLayout());
+		searchPanel.add(new JLabel(" Search: "), BorderLayout.WEST);
+		searchPanel.add(searchField, BorderLayout.CENTER);
+
 		// put the table into a scrollpane
 		JScrollPane scroller = new JScrollPane(table);
 		scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		// put the scrollpane into our guiRoot
-
-		this.setContentPane(scroller);
+		JPanel p = new JPanel();
+		p.setLayout(new BorderLayout());
+		p.add(searchPanel, BorderLayout.NORTH);
+		p.add(scroller, BorderLayout.CENTER);
+		this.setContentPane(p);
 
 		// Display it all
 
@@ -95,6 +128,16 @@ class ChooseUserEventsWindow extends JFrame
 
 	}
 
+
+	/** Show only rows whose user event name (or ID) contains the search text */
+	private void updateFilter() {
+		String text = searchField.getText().trim();
+		if (text.isEmpty()) {
+			sorter.setRowFilter(null);
+			return;
+		}
+		sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(text), 1, 2));
+	}
 
 	private void initColumnSizes(JTable table) {
 		TableColumn column = null;

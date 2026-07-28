@@ -7,14 +7,21 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.RowFilter;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableRowSorter;
 
 import projections.Tools.Timeline.Data;
 import projections.analysis.Analysis;
@@ -33,6 +40,8 @@ public class ChooseEntriesWindow extends JFrame
 	private JButton checkAll;
 	private JButton uncheckAll;
 	private JCheckBox displayAllEntryMethods;
+	private JTextField searchField;
+	private TableRowSorter<MyTableModel> sorter;
 
 	public ChooseEntriesWindow(ColorUpdateNotifier _gw) {
 		data = null;
@@ -123,6 +132,26 @@ public class ChooseEntriesWindow extends JFrame
 		table.setDefaultRenderer(ClickableColorBox.class, new ColorRenderer());
 		table.setDefaultEditor(ClickableColorBox.class, new ColorEditor());
 
+		// row sorter used only for the search filter; column-click sorting
+		// stays off (the color column is not comparable)
+		sorter = new TableRowSorter<MyTableModel>(tableModel);
+		for (int c=0; c<tableModel.getColumnCount(); c++) {
+			sorter.setSortable(c, false);
+		}
+		table.setRowSorter(sorter);
+
+		searchField = new JTextField();
+		searchField.setToolTipText("Type part of an entry method name (or ID) to filter the list");
+		searchField.getDocument().addDocumentListener(new DocumentListener() {
+			public void insertUpdate(DocumentEvent e) { updateFilter(); }
+			public void removeUpdate(DocumentEvent e) { updateFilter(); }
+			public void changedUpdate(DocumentEvent e) { updateFilter(); }
+		});
+		JPanel searchPanel = new JPanel();
+		searchPanel.setLayout(new BorderLayout());
+		searchPanel.add(new JLabel(" Search: "), BorderLayout.WEST);
+		searchPanel.add(searchField, BorderLayout.CENTER);
+
 		// put the table into a scrollpane
 		JScrollPane scroller = new JScrollPane(table);
 		scroller.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
@@ -130,6 +159,10 @@ public class ChooseEntriesWindow extends JFrame
 		// put the scrollpane into our guiRoot
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
+
+		JPanel topPanel = new JPanel();
+		topPanel.setLayout(new BorderLayout());
+		topPanel.add(searchPanel, BorderLayout.SOUTH);
 
 		if (displayVisibilityCheckboxes) {
 			JPanel buttonPanel = new JPanel();
@@ -168,9 +201,10 @@ public class ChooseEntriesWindow extends JFrame
 				buttonPanel.add(displayAllEntryMethods);
 			}
 
-			p.add(buttonPanel, BorderLayout.NORTH);
+			topPanel.add(buttonPanel, BorderLayout.NORTH);
 		}
 
+		p.add(topPanel, BorderLayout.NORTH);
 		p.add(scroller, BorderLayout.CENTER);
 
 		this.setContentPane(p);
@@ -180,6 +214,18 @@ public class ChooseEntriesWindow extends JFrame
 		pack();
 		setSize(800,400);
 		setVisible(true);
+	}
+
+	/** Show only rows whose entry method name (or ID) contains the search text */
+	private void updateFilter() {
+		String text = searchField.getText().trim();
+		if (text.isEmpty()) {
+			sorter.setRowFilter(null);
+			return;
+		}
+		int nameColumn = displayVisibilityCheckboxes ? 1 : 0;
+		sorter.setRowFilter(RowFilter.regexFilter("(?i)" + Pattern.quote(text),
+				nameColumn, nameColumn+1));
 	}
 
 	public void changeVisibility(boolean visible, MyTableModel tableModel) {

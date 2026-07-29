@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.StreamTokenizer;
 
+import java.util.SortedSet;
+
 import javax.swing.ProgressMonitor;
 
 import projections.gui.MainWindow;
@@ -628,6 +630,34 @@ public class SumAnalyzer extends ProjDefs
 
 	public double[] getTotalIdlePercentagePerInterval() {
 		return getTotalIdlePercentagePerInterval(0, IntervalCount - 1);
+	}
+
+	/** Idle percentage per interval averaged over the given processors only.
+	 *  Tools that show a subset of PEs scale their other per-interval data by
+	 *  the size of that subset, so averaging idle over every PE instead would
+	 *  put the two on different scales.
+	 */
+	public double[] getTotalIdlePercentagePerInterval(SortedSet<Integer> peList) {
+		double[] totalIdlePercentage = new double[IntervalCount];
+		if (peList == null) {
+			return totalIdlePercentage;
+		}
+		int peCount = 0;
+		for (Integer pe : peList) {
+			if (pe == null || pe < 0 || pe >= nPe || IdlePercentage[pe] == null) {
+				continue;
+			}
+			for (int interval = 0; interval < IntervalCount; interval++) {
+				totalIdlePercentage[interval] += IdlePercentage[pe][interval];
+			}
+			peCount++;
+		}
+		if (peCount > 0) {
+			for (int interval = 0; interval < IntervalCount; interval++) {
+				totalIdlePercentage[interval] /= peCount;
+			}
+		}
+		return totalIdlePercentage;
 	}
 
 	public double[] getTotalIdlePercentagePerInterval(int startInterval, int endInterval) {

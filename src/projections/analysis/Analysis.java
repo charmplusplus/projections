@@ -473,7 +473,16 @@ public class Analysis {
 					idleCount++;
 				}
 				if (idleCount > 0) {
-					ret[0][numUserEntries + 2] = (float) (idleSum / idleCount);
+					// The .sum idle and the .sumd per-EP times are accumulated
+					// by independent paths in charm's trace-summary and can
+					// overlap, so cap idle at whatever the entry methods leave
+					// free instead of letting the bar exceed 100%.
+					double epPercent = 0.0;
+					for (int entry = 0; entry < numUserEntries; entry++) {
+						epPercent += data[entry] * 100.0 / (endtime - begintime);
+					}
+					ret[0][numUserEntries + 2] =
+						(float) Math.min(idleSum / idleCount, Math.max(0.0, 100.0 - epPercent));
 				}
 			}
 		}

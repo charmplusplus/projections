@@ -457,6 +457,25 @@ public class Analysis {
 					data[entry] += sumDetailData[interval][entry];
 				}
 			}
+
+			// sumd files carry no idle data; average the .sum files'
+			// per-interval idle percentage over the selected range.
+			// (+2 places idle at the top of the usage profile display)
+			byte idlePercentage[][] = sumAnalyzer.getIdlePercentage();
+			if (pnum >= 0 && idlePercentage != null
+					&& pnum < idlePercentage.length && idlePercentage[pnum] != null) {
+				int sumIntervalStart = (int) (begintime / getSummaryIntervalSize());
+				int sumIntervalEnd = (int) Math.ceil(endtime / (double) getSummaryIntervalSize()) - 1;
+				double idleSum = 0.0;
+				int idleCount = 0;
+				for (int i = sumIntervalStart; i <= sumIntervalEnd && i < idlePercentage[pnum].length; i++) {
+					idleSum += idlePercentage[pnum][i];
+					idleCount++;
+				}
+				if (idleCount > 0) {
+					ret[0][numUserEntries + 2] = (float) (idleSum / idleCount);
+				}
+			}
 		}
 		else if (hasSumFiles()) {
 			// The log has per-EP times across the entire execution, so use that when the whole interval is selected

@@ -631,11 +631,11 @@ public class SumAnalyzer extends ProjDefs
 	}
 
 	public double[] getTotalIdlePercentagePerInterval(int startInterval, int endInterval) {
-		double numIntervals = endInterval - startInterval + 1;
-		double[] totalIdlePercentage = new double[(int) numIntervals];
+		int numIntervals = endInterval - startInterval + 1;
+		double[] totalIdlePercentage = new double[numIntervals];
 		for (int pe = 0; pe < nPe; pe++) {
 			for (int interval = startInterval; interval <= endInterval; interval++) {
-				totalIdlePercentage[interval - startInterval] += IdlePercentage[pe][interval] / numIntervals;
+				totalIdlePercentage[interval - startInterval] += IdlePercentage[pe][interval] / (double) nPe;
 			}
 		}
 		return totalIdlePercentage;

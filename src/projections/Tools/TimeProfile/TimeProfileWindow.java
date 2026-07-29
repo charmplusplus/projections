@@ -647,17 +647,26 @@ implements ActionListener, Clickable, EntryMethodVisibility
 
                     }
 
-					// Filter Out any bad data
+					// Filter Out any bad data. Summary traces round each EP's
+					// time within an interval, so a fully busy PE can report a
+					// few us more than the interval size, driving the derived
+					// overhead slightly negative. Clamp such small negatives to
+					// zero; only discard intervals that are out of range by more
+					// than the 5% tolerance.
+					final double tolerance = 5.0;
 					for (int interval=0; interval<graphData.length; interval++) {
 						boolean valid = true;
 						double sumForInterval = 0.0;
 						for(int e=0; e< graphData[interval].length; e++){
+							if(graphData[interval][e] < 0.0 && graphData[interval][e] >= -tolerance){
+								graphData[interval][e] = 0.0;
+							}
 							sumForInterval += graphData[interval][e];
 							if(graphData[interval][e] < 0.0){
 								valid = false;
 							}
 						}
-						if(sumForInterval > 105.0){
+						if(sumForInterval > 100.0 + tolerance){
 							valid = false;
 						}
 

@@ -839,31 +839,44 @@ public class Graph extends JPanel
     	}
 
     	for (int i=0; i<numX; i++) {
+    		// Work out this bar's horizontal extent once, up front. When
+    		// there are more intervals than pixels most bars come out zero
+    		// pixels wide and draw nothing, so skip them before doing any
+    		// per-value work. Likewise skip slices that round to zero
+    		// pixels tall below. Neither changes what is drawn, but on a
+    		// trace with tens of thousands of intervals and hundreds of
+    		// EPs it removes millions of no-op fillRect calls.
+    		final int barX;
+    		final int barW;
+    		if (valuesPerTickX == 1) {
+    			barX = originX() + (int) (i * pixelincrementX() +
+    					tickIncrementX / 2 - barWidth / 2);
+    			barW = (int) barWidth;
+    		} else {
+    			barX = originX() + (int) (i * pixelincrementX());
+    			barW = (int) ((i + 1) * pixelincrementX()) -
+    					(int) (i * pixelincrementX());
+    		}
+    		if (barW <= 0) {
+    			continue;
+    		}
+
     		dataSource.getValues(i, data);
     		if (GraphStacked) {
-    			int y = 0;
     			for (int k=0; k<numY; k++) {
 			        if (data[k] > 0) {
+			        	int barH = (int) (data[k] * pixelincrementY());
+			        	if (barH <= 0) {
+			        		continue;
+			        	}
 					// calculating lowerbound of box, which StackArray
 					// allready contains
-					y = originY() - (int) (stackArray[i][k] * pixelincrementY());
+					int y = originY() - (int) (stackArray[i][k] * pixelincrementY());
 
 					g.setPaint(dataSource.getColor(k));
 
 					// using data[i] to get the height of this bar
-					if (valuesPerTickX == 1) {
-						g.fillRect(originX() + (int) (i * pixelincrementX() +
-								tickIncrementX / 2 -
-								barWidth / 2), y,
-								(int) barWidth,
-								(int) (data[k] * pixelincrementY()));
-
-					} else {
-						g.fillRect(originX() + (int) (i * pixelincrementX()), y,
-								(int) ((i + 1) * pixelincrementX()) -
-								(int) (i * pixelincrementX()),
-								(int) (data[k] * pixelincrementY()));
-					}
+					g.fillRect(barX, y, barW, barH);
 				}
     			}
     		} else {
@@ -898,20 +911,13 @@ public class Graph extends JPanel
     			}
     			// now display the graph
     			for(int k=0; k<numY; k++) {
-    				g.setPaint(dataSource.getColor((int)temp[k][0]));
-    				y = (originY()-(int)(temp[k][1]*pixelincrementY()));
-    				if (valuesPerTickX == 1) {
-    					g.fillRect(originX() + (int)(i*pixelincrementX() +
-    							tickIncrementX/2 -
-    							barWidth/2), y,
-    							(int)barWidth,
-    							(int)(temp[k][1]*pixelincrementY()));
-    				} else {				   
-    					g.fillRect(originX() + (int)(i*pixelincrementX()), y,
-    							(int)((i+1)*pixelincrementX()) -
-    							(int)(i*pixelincrementX()),
-    							(int)(temp[k][1]*pixelincrementY()));
+    				int barH = (int)(temp[k][1]*pixelincrementY());
+    				if (barH <= 0) {
+    					continue;
     				}
+    				g.setPaint(dataSource.getColor((int)temp[k][0]));
+    				y = originY() - barH;
+    				g.fillRect(barX, y, barW, barH);
     			}
     		}
     		/*  ** UNUSED for now **

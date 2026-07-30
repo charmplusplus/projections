@@ -631,29 +631,65 @@ implements ActionListener, Clickable, EntryMethodVisibility
 					}
                     //Bilge
                     if( MainWindow.runObject[myRun].hasSumDetailFiles()){
-                        //idle time calculation for sum detail
-                        double[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerInterval();
+                        // Idle comes from the .sum files while the per-EP times
+                        // come from the .sumd files. Charm's trace-summary
+                        // accumulates the two through independent code paths
+                        // (see SumLogPool::add() vs updateSummaryDetail()), and
+                        // they do not always agree: an interval's per-EP times
+                        // can overlap its reported idle by several percent, and
+                        // the per-EP times alone can even exceed the interval.
+                        // The per-EP breakdown is what this chart is about, so
+                        // trust it and give idle only the time left over,
+                        // rather than deriving a negative overhead from the
+                        // mismatch and discarding the interval.
+                        // The idle array is indexed from interval 0 of the whole
+                        // run and in the .sum files' own interval size, while
+                        // graphData[0] is the selected range's first interval,
+                        // so map through absolute time rather than assuming the
+                        // two line up.
+                        // Averaged over the selected PEs only -- the entry
+                        // method percentages above are scaled by
+                        // processorList.size(), so idle has to be on the same
+                        // footing or a PE subset makes the two irreconcilable.
+                        double[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerInterval(processorList);
+                        long sumIntervalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
+                        int overlapCount = 0;
+                        double worstOverlap = 0.0;
                         for(int i=0;i<numIntervals;i++){
-                            graphData[i][numEPs+1] = idlePercentage[i];
-                        }
-                        //overhead time calculation for sum detail
-                        for(int i=0;i<numIntervals;i++){
-                            graphData[i][numEPs] = 100;
+                            double epTotal = 0.0;
                             for(int j=0;j<numEPs;j++){
-                                graphData[i][numEPs] -= graphData[i][j];
+                                epTotal += graphData[i][j];
                             }
-                            graphData[i][numEPs] -= graphData[i][numEPs+1];
+                            int idleIdx = (int)(((long)(startInterval + i)) * intervalSize / sumIntervalSize);
+                            double idleHere = (idleIdx >= 0 && idleIdx < idlePercentage.length)
+                                              ? idlePercentage[idleIdx] : 0.0;
+                            double overlap = epTotal + idleHere - 100.0;
+                            if(overlap > 0.0){
+                                overlapCount++;
+                                if(overlap > worstOverlap) worstOverlap = overlap;
+                            }
+                            double idle = Math.min(idleHere,
+                                                   Math.max(0.0, 100.0 - epTotal));
+                            graphData[i][numEPs+1] = idle;
+                            graphData[i][numEPs] = Math.max(0.0, 100.0 - epTotal - idle);
                         }
-
+                        if(overlapCount > 0){
+                            System.err.println("Time Profile: in " + overlapCount + " of " +
+                                numIntervals + " intervals the .sumd entry-method times and the " +
+                                ".sum idle time overlap (worst " + String.format("%.1f", worstOverlap) +
+                                "%). Idle was reduced to fit; entry-method times are unchanged.");
+                        }
                     }
 
 					// Filter Out any bad data. Summary traces round each EP's
 					// time within an interval, so a fully busy PE can report a
-					// few us more than the interval size, driving the derived
-					// overhead slightly negative. Clamp such small negatives to
+					// few us more than the interval size, driving derived
+					// values slightly negative. Clamp such small negatives to
 					// zero; only discard intervals that are out of range by more
 					// than the 5% tolerance.
 					final double tolerance = 5.0;
+					int badIntervals = 0;
+					int firstBadInterval = -1;
 					for (int interval=0; interval<graphData.length; interval++) {
 						boolean valid = true;
 						double sumForInterval = 0.0;
@@ -671,12 +707,19 @@ implements ActionListener, Clickable, EntryMethodVisibility
 						}
 
 						if(!valid){
-							System.err.println("Time Profile found bad data for interval " + interval + ". The data for bad intervals will be zero-ed out. This problem is either a log file corruption issue, or a bug in Projections.");
+							badIntervals++;
+							if(firstBadInterval < 0) firstBadInterval = interval;
 							for(int e=0; e< graphData[interval].length; e++){
 								graphData[interval][e] = 0.0;
 							}
 						}
 
+					}
+					if(badIntervals > 0){
+						System.err.println("Time Profile found bad data in " + badIntervals +
+							" of " + graphData.length + " intervals (first: " + firstBadInterval +
+							"). Those intervals were zero-ed out. This problem is either a log " +
+							"file corruption issue, or a bug in Projections.");
 					}
 					// set the exists array to accept non-zero
 					// entries only have initial state also 

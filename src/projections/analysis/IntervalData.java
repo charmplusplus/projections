@@ -3,6 +3,8 @@ package projections.analysis;
 import java.io.IOException;
 import java.util.*;
 
+import javax.swing.ProgressMonitor;
+
 import projections.analysis.SumDetailReader.RLEBlock;
 import projections.gui.MainWindow;
 
@@ -119,7 +121,22 @@ public class IntervalData
 
 		int processorCount = 0;
 
+		// Expanding the RLE data costs numPEs * numIntervals * numEPs, which
+		// runs into minutes on a large trace, so show progress the same way
+		// the .sum reader does.
+		int numPes = processorList.size();
+		ProgressMonitor progressBar =
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot,
+					"Loading summary detail data", "", 0, numPes);
+
 		for (Integer curPe : processorList) {
+			if (progressBar.isCanceled()) {
+				progressBar.close();
+				return;
+			}
+			progressBar.setNote(processorCount + " of " + numPes + " PEs");
+			progressBar.setProgress(processorCount);
+
 			double[][] tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart, numIntervals);
 			for (int i = 0; i < numIntervals; i++) {
 				for (int ep = 0; ep < numEPs; ep++) {
@@ -134,6 +151,7 @@ public class IntervalData
 			}
 			processorCount++;
 		}
+		progressBar.close();
 	}
 
 	public int[][] getSumDetailData_interval_EP() {

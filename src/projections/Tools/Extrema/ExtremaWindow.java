@@ -349,7 +349,12 @@ Clickable
 
 			// Assume that each PE has the same number of EPs
 			final int numEPs = sumDetailData_PE_EP[0].length;
-			for (int pe = 0; pe < sumDetailData_PE_EP.length; pe++) {
+			// sumDetailData_PE_EP and idleTemp are indexed by absolute PE
+			// number and cover every PE in the run, while tempData has one
+			// row per *selected* PE, in selectedPEs order (the same order
+			// peNames is built in below).
+			int peIdx = 0;
+			for (Integer pe : selectedPEs) {
 				double lis[] = new double[numEPs + 2];
 				double sum = 0.0;
 				for (int ep = 0; ep < numEPs; ep++) {
@@ -357,9 +362,15 @@ Clickable
 					sum += lis[ep];
 				}
 
-				lis[numEPs] = idleTemp[pe];
-				lis[numEPs + 1] = 100.0 - sum - lis[numEPs];
-				tempData[pe] = lis;
+				// Idle comes from the .sum files and the entry method times
+				// from the .sumd files; charm accumulates the two through
+				// independent paths and they can overlap, so give idle only
+				// what the entry methods leave free instead of deriving a
+				// negative overhead from the mismatch.
+				lis[numEPs] = Math.min(idleTemp[pe], Math.max(0.0, 100.0 - sum));
+				lis[numEPs + 1] = Math.max(0.0, 100.0 - sum - lis[numEPs]);
+				tempData[peIdx] = lis;
+				peIdx++;
 			}
 		}
 

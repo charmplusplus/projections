@@ -38,6 +38,7 @@ class OverviewPanel extends ScalePanel.Child
 	private int myRun = 0;
 
 	private int[][] entryData;   // [pe][interval]
+	private int[] entriesPresent; // [ep] 1 if the EP appears in entryData
 
 	// idleData & mergedData (for supporting - utilization for now - 
 	// the other two data formats)
@@ -377,29 +378,60 @@ class OverviewPanel extends ScalePanel.Child
 					idleDataNormalized[i][j] = (byte) (100.0f * idleData[i][j]);
 				}
 			}
+			computeEntriesPresent();
 			// We default to coloring by entry method for log files
 			colorByEntry();
 		} else if (MainWindow.runObject[myRun].hasSumDetailData()) {
 			int intervalSize = (int) MainWindow.runObject[myRun].getSumDetailIntervalSize();
-			startInterval = (int) startTime / intervalSize;
+			startInterval = (int) (startTime / intervalSize);
 			endInterval = (int) Math.ceil(((double) endTime) / intervalSize) - 1;
 			int numIntervals = endInterval - startInterval + 1;
 
-			utilizationDataNormalized = new int[selectedPEs.size()][numIntervals];
-			idleDataNormalized = new byte[selectedPEs.size()][numIntervals];
-
 			MainWindow.runObject[myRun].LoadGraphData(intervalSize, startInterval, endInterval, false, selectedPEs);
 
-			utilizationDataNormalized = MainWindow.runObject[myRun].getSumDetailData_PE_interval();
-			idleDataNormalized = MainWindow.runObject[myRun].sumAnalyzer.getIdlePercentage();
-			double scale = 100.0 / intervalSize;
+			// Both of these are indexed by position in selectedPEs and are
+			// relative to startInterval, which is what this panel displays.
+			// systemUsageData[SYS_CPU] is already a 0-100 percentage.
+			utilizationDataNormalized = MainWindow.runObject[myRun].getSystemUsageData(1);
+			entryData = MainWindow.runObject[myRun].getSumDetailData_PE_interval_maxEP();
 
-			// idleDataNormalized is already in terms of percentage, so don't convert it
-			for (int i = 0; i < utilizationDataNormalized.length; i++) {
-				for (int j = 0; j < utilizationDataNormalized[i].length - 1; j++) {
-					utilizationDataNormalized[i][j] = (int) (scale * utilizationDataNormalized[i][j]);
+			// .sumd files carry no idle data, so idle has to come from the
+			// .sum files, which are indexed by absolute PE number and binned
+			// at their own interval size.
+			idleDataNormalized = new byte[selectedPEs.size()][numIntervals];
+			byte[][] sumIdle = (MainWindow.runObject[myRun].sumAnalyzer == null) ?
+					null : MainWindow.runObject[myRun].sumAnalyzer.getIdlePercentage();
+			long sumIntervalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
+			int pIdx = 0;
+			for (Integer pe : selectedPEs) {
+				for (int j = 0; j < numIntervals; j++) {
+					int idle = 0;
+					if (sumIdle != null && pe < sumIdle.length && sumIdle[pe] != null
+							&& sumIntervalSize > 0) {
+						int sumInterval = (int)
+							((long)(startInterval + j) * intervalSize / sumIntervalSize);
+						if (sumInterval < sumIdle[pe].length) {
+							idle = sumIdle[pe][sumInterval];
+						}
+					}
+					// The .sum idle and the .sumd per-EP times are accumulated by
+					// independent paths in charm's trace-summary and can overlap,
+					// so cap idle at whatever the entry methods leave free - the
+					// same reconciliation Time Profile and Usage Profile use.
+					int util = utilizationDataNormalized[pIdx][j];
+					idleDataNormalized[pIdx][j] =
+						(byte) Math.max(0, Math.min(idle, 100 - util));
+
+					// An interval with no recorded entry method time, or one the
+					// .sum file says was mostly idle, is drawn as idle rather than
+					// getting an entry method's color.
+					if (entryData[pIdx][j] < 0 || idleDataNormalized[pIdx][j] > util) {
+						entryData[pIdx][j] = numEPs + 1;
+					}
 				}
+				pIdx++;
 			}
+			computeEntriesPresent();
 			// Color by utilization for sumdetail
 			colorByUtil();
 		} else {
@@ -409,7 +441,38 @@ class OverviewPanel extends ScalePanel.Child
 		}
 	}
 
+	/** Which entry methods actually appear in the image. The color chooser
+	 *  uses this so it offers only the colors on screen instead of every
+	 *  entry method in the run. Null if no entry method data was loaded. */
+	protected int[] getEntriesPresent() {
+		return entriesPresent;
+	}
+
+	/** Scanned once per load; ChooseEntriesWindow asks for the array
+	 *  repeatedly, and on a large trace entryData is millions of cells. */
+	private void computeEntriesPresent() {
+		if (entryData == null) {
+			entriesPresent = null;
+			return;
+		}
+		entriesPresent = new int[numEPs];
+		for (int p = 0; p < entryData.length; p++) {
+			if (entryData[p] == null)
+				continue;
+			for (int i = 0; i < entryData[p].length; i++) {
+				int ep = entryData[p][i];
+				if (ep >= 0 && ep < numEPs)
+					entriesPresent[ep] = 1;
+			}
+		}
+	}
+
 	protected void colorByEntry() {
+		if (entryData == null) {
+			// No per-entry-method data was loaded; stay in utilization mode
+			colorByUtil();
+			return;
+		}
 		mode = OverviewWindow.MODE_EP;
 		applyColorMap(entryData, true);
 	}

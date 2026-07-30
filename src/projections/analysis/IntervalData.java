@@ -62,6 +62,9 @@ public class IntervalData
     private int sumDetailData_interval_EP[][] = null;
     private int sumDetailData_PE_EP[][] = null;
     private int sumDetailData_PE_interval[][] = null;
+    // [pe list index][interval] - which EP used the most time, or -1 for none.
+    // Indexed by position in the requested processor list, like systemUsageData.
+    private int sumDetailData_PE_interval_maxEP[][] = null;
 
     /**
      *  The constructor
@@ -117,6 +120,7 @@ public class IntervalData
 		sumDetailData_interval_EP = new int[numIntervals][numEPs];
 		sumDetailData_PE_EP = new int[numPEs][numEPs];
 		sumDetailData_PE_interval = new int[numPEs][numIntervals];
+		sumDetailData_PE_interval_maxEP = new int[processorList.size()][numIntervals];
 		systemUsageData = new int[3][processorList.size()][numIntervals];
 
 		int processorCount = 0;
@@ -139,12 +143,20 @@ public class IntervalData
 
 			double[][] tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart, numIntervals);
 			for (int i = 0; i < numIntervals; i++) {
+				int maxEP = -1;
+				double maxEPTime = 0.0;
 				for (int ep = 0; ep < numEPs; ep++) {
 					sumDetailData_interval_EP[i][ep] += (int) tempData[ep][i];
 					sumDetailData_PE_EP[curPe][ep] += (int) tempData[ep][i];
 					sumDetailData_PE_interval[curPe][i] += (int) tempData[ep][i];
 					systemUsageData[1][processorCount][i] += (int) tempData[ep][i];
+					if (tempData[ep][i] > maxEPTime) {
+						maxEPTime = tempData[ep][i];
+						maxEP = ep;
+					}
 				}
+				// Overview colors each PE/interval cell by its dominant EP
+				sumDetailData_PE_interval_maxEP[processorCount][i] = maxEP;
 				// after accumulation for systemUsageData, convert to utilization percentage (0-100)
 				systemUsageData[1][processorCount][i] =
 						(int) IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i], intervalSize);
@@ -164,6 +176,10 @@ public class IntervalData
 
 	public int[][] getSumDetailData_PE_interval() {
 		return sumDetailData_PE_interval;
+	}
+
+	public int[][] getSumDetailData_PE_interval_maxEP() {
+		return sumDetailData_PE_interval_maxEP;
 	}
 
     public int[][][] getSystemUsageData() {

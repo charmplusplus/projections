@@ -367,6 +367,9 @@ public class Analysis {
 	public int[][] getSumDetailData_PE_interval() {
         return intervalData.getSumDetailData_PE_interval();
     }
+	public int[][] getSumDetailData_PE_interval_maxEP() {
+        return intervalData.getSumDetailData_PE_interval_maxEP();
+    }
 
     public Color getEntryColor(int entryIdx) {
     	if (entryIdx == IDLE_ENTRY_POINT) {

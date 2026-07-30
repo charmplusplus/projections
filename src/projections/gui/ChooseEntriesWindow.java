@@ -59,8 +59,10 @@ public class ChooseEntriesWindow extends JFrame
 
 	private void onlyEntryMethodsInRange() {
 		entryNames = new TreeMap<Integer, String>();
-		for (int i = 0; i < data.getEntriesArray().length; i++) {
-			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && data.getEntriesArray()[i]!=0)
+		// asked for once: some tools scan their whole display to answer this
+		int[] entriesInRange = data.getEntriesArray();
+		for (int i = 0; i < entriesInRange.length; i++) {
+			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && entriesInRange[i]!=0)
 				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) + 
 						"::" + 
 						MainWindow.runObject[myRun].getSts().entryChares.get(i));
@@ -206,6 +208,19 @@ public class ChooseEntriesWindow extends JFrame
 
 		p.add(topPanel, BorderLayout.NORTH);
 		p.add(scroller, BorderLayout.CENTER);
+
+		// Color choices take effect as they are made; this just dismisses
+		// the window, which otherwise has no obvious way to be closed.
+		JButton done = new JButton("Done");
+		done.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dispose();
+			}
+		});
+		JPanel donePanel = new JPanel();
+		donePanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+		donePanel.add(done);
+		p.add(donePanel, BorderLayout.SOUTH);
 
 		this.setContentPane(p);
 

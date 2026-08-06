@@ -821,6 +821,9 @@ implements ActionListener, Clickable, EntryMethodVisibility
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
 			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals), thisWindow);
+			// Flank the chart title with what run this is and which PEs it shows
+			graphCanvas.setTitleAnnotations(Util.runProvenanceString(),
+					Util.processorSelectionString(processorList));
 			graphCanvas.setMarkers(phaseMarkers);
 			refreshGraph();
 		}

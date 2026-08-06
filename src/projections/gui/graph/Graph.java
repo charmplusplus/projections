@@ -56,9 +56,17 @@ public class Graph extends JPanel
     private Font fontAxisTitles;
     private Font fontChartTitle;
     private Font fontLabels;
+    private Font fontTitleAnnotations;
     private FontMetrics fmAxisTitles;
     private FontMetrics fmChartTitle;
     private FontMetrics fmLabels;
+    private FontMetrics fmTitleAnnotations;
+
+    // Optional small annotations drawn to the left and right of the chart
+    // title (provenance on the left, processor selection on the right).
+    // Either may be null. Ellipsized to whatever space the title leaves.
+    private String titleAnnotationLeft;
+    private String titleAnnotationRight;
 
     // Computed width of largest y axis label. The largest value is not necessarily the longest string
     private int maxYLabelWidth = 0;
@@ -185,6 +193,9 @@ public class Graph extends JPanel
 
     	// The font used for the numbers on the x and y axes:
     	fontLabels = new Font("SansSerif",Font.PLAIN,12);
+
+    	// The font used for the annotations flanking the chart title:
+    	fontTitleAnnotations = new Font("SansSerif",Font.PLAIN,13);
     }
     
     
@@ -390,7 +401,8 @@ public class Graph extends JPanel
     	fmLabels = g.getFontMetrics(fontLabels);
     	fmAxisTitles = g.getFontMetrics(fontAxisTitles);
     	fmChartTitle = g.getFontMetrics(fontChartTitle);
-    	
+    	fmTitleAnnotations = g.getFontMetrics(fontTitleAnnotations);
+
     	drawDisplay((Graphics2D) g);
     }
 
@@ -559,9 +571,13 @@ public class Graph extends JPanel
     	// display Graph title
     	String graphTitle = dataSource.getTitle();
     	g.setFont(fontChartTitle);
+    	int titleWidth = fmChartTitle.stringWidth(graphTitle);
+    	int titleLeftEdge = (getWidth()-titleWidth)/2;
     	g.drawString(graphTitle,
-    			(getWidth()-fmChartTitle.stringWidth(graphTitle))/2, 
+    			titleLeftEdge,
     			chartTitleBaseline() );
+
+    	drawTitleAnnotations(g, titleLeftEdge, titleWidth);
 
     	// display xAxis title 
     	// centered along x axis line
@@ -586,6 +602,78 @@ public class Graph extends JPanel
     }
 
     
+    /** Set the small texts drawn on either side of the chart title. Either may
+     *  be null to leave that side blank. They are ellipsized to fit whatever
+     *  room the centered title leaves, so long provenance strings are safe. */
+    public void setTitleAnnotations(String left, String right){
+    	titleAnnotationLeft = left;
+    	titleAnnotationRight = right;
+    	repaint();
+    }
+
+    private void drawTitleAnnotations(Graphics2D g, int titleLeftEdge, int titleWidth){
+    	if (titleAnnotationLeft == null && titleAnnotationRight == null) {
+    		return;
+    	}
+    	final int edgeMargin = 8;
+    	final int gapFromTitle = 20;
+    	g.setFont(fontTitleAnnotations);
+
+    	if (titleAnnotationLeft != null) {
+    		String s = fitToWidth(titleAnnotationLeft, titleLeftEdge - gapFromTitle - edgeMargin);
+    		if (s != null) {
+    			g.drawString(s, edgeMargin, chartTitleBaseline());
+    		}
+    	}
+
+    	if (titleAnnotationRight != null) {
+    		int rightEdge = getWidth() - edgeMargin;
+    		String s = fitToWidth(titleAnnotationRight, rightEdge - (titleLeftEdge+titleWidth+gapFromTitle));
+    		if (s != null) {
+    			g.drawString(s, rightEdge - fmTitleAnnotations.stringWidth(s), chartTitleBaseline());
+    		}
+    	}
+    }
+
+    /** Shorten s so it fits in availableWidth pixels: trailing components (the
+     *  annotations are " | " separated, least identifying part last) are dropped
+     *  whole, and whatever remains is ellipsized. Returns null if not even a few
+     *  characters would fit. */
+    private String fitToWidth(String s, int availableWidth){
+    	if (fmTitleAnnotations.stringWidth(s) <= availableWidth) {
+    		return s;
+    	}
+
+    	final String separator = " | ";
+    	int lastSeparator = s.lastIndexOf(separator);
+    	while (lastSeparator > 0) {
+    		s = s.substring(0, lastSeparator);
+    		if (fmTitleAnnotations.stringWidth(s) <= availableWidth) {
+    			return s;
+    		}
+    		lastSeparator = s.lastIndexOf(separator);
+    	}
+
+    	final String ellipsis = "...";
+    	int room = availableWidth - fmTitleAnnotations.stringWidth(ellipsis);
+    	if (room <= 0) {
+    		return null;
+    	}
+    	int chars = 0;
+    	int width = 0;
+    	while (chars < s.length()) {
+    		width += fmTitleAnnotations.charWidth(s.charAt(chars));
+    		if (width > room) {
+    			break;
+    		}
+    		chars++;
+    	}
+    	if (chars < 3) {
+    		return null;
+    	}
+    	return s.substring(0, chars) + ellipsis;
+    }
+
     public void showMarkers(boolean b){
     	showMarkers = b;
     	repaint();

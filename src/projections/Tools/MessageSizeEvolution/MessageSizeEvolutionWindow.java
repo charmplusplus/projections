@@ -46,6 +46,7 @@ public class MessageSizeEvolutionWindow
     private BinDialogPanel binpanel;
 
     private JFreeChart chart;
+    private ChartPanel chartPanel;
 
     // counts is indexed by msg bin index, then time bin index followed by ep id.
     // NOTE: bin indices need not be of the same size
@@ -194,7 +195,7 @@ public class MessageSizeEvolutionWindow
         plot.setRangeAxis(rangeAxis);
         plot.setBackgroundPaint(Color.WHITE);
 
-        final ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel = new ChartPanel(chart);
         chart.setBackgroundPaint(Color.LIGHT_GRAY);
 
         Container windowPane = thisWindow.getContentPane();
@@ -245,8 +246,8 @@ public class MessageSizeEvolutionWindow
         Object c = ae.getSource();
         if (c == mClose)
             this.close();
-        else if (c == mSaveScreenshot)
-            // TODO: Fix rendering to vector formats, it currently seems to rasterize them
-            JPanelToImage.saveToFileChooserSelection(thisWindow.getContentPane(), "Save Evolution Chart", "./MessageSizeEvolution.png");
+        else if (c == mSaveScreenshot && chartPanel != null)
+            JPanelToImage.saveToFileChooserSelection(chart, chartPanel.getWidth(), chartPanel.getHeight(),
+                    "Save Evolution Chart", "./MessageSizeEvolution.pdf");
     }
 }

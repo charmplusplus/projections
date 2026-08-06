@@ -126,7 +126,7 @@ class ProfileWindow extends ProjectionsWindow
                                 this));
         mbar.add(Util.makeJMenu("Save to Image", new Object[]
                 {
-                        "Save Plot as Image"
+                        "Save Plot as PDF or Image"
                 },
                 this));
 
@@ -329,7 +329,7 @@ class ProfileWindow extends ProjectionsWindow
 	    	showChangeColorDialog();
 	    } else if (arg.equals("Usage Table")){
 	    	showUsageTable();
-	    } else if (arg.equals("Save Plot as Image")) {
+	    } else if (arg.equals("Save Plot as PDF or Image")) {
             exportImage();
         }
 	}

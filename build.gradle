@@ -60,12 +60,6 @@ tasks.register('fatJar', Jar) {
         }
     }
 
-    into('META-INF/services/') {
-        from('src/projections/resources') {
-            include 'org.freehep.graphicsbase.util.export.ExportFileType'
-        }
-    }
-
     with tasks.jar
 }
 

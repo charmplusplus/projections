@@ -298,7 +298,7 @@ class OverviewPanel extends ScalePanel.Child
 				}
 			}
 			g.dispose();
-			JPanelToImage.saveToFileChooserSelection(image, "Save Overview to PNG or JPG",  "Overview.png");
+			JPanelToImage.saveToFileChooserSelection(image, "Save Overview to PDF or Image",  "Overview.pdf");
 		}
 				
 	}

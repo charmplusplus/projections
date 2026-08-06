@@ -35,6 +35,7 @@ public class MethodProfileWindow extends ProjectionsWindow implements ActionList
     private int lastPE;
 
     private JFreeChart chart;
+    private ChartPanel chartpanel;
 
     public MethodProfileWindow(MainWindow mainWindow) {
         super(mainWindow);
@@ -67,7 +68,7 @@ public class MethodProfileWindow extends ProjectionsWindow implements ActionList
         // Screenshot Menu
         JMenu saveMenu = new JMenu("Save To Image");
 
-        mSaveScreenshot = new JMenuItem("Save Profile Chart as JPG or PNG");
+        mSaveScreenshot = new JMenuItem("Save Profile Chart as PDF or Image");
         mSaveScreenshot.addActionListener(this);
         saveMenu.add(mSaveScreenshot);
 
@@ -82,8 +83,12 @@ public class MethodProfileWindow extends ProjectionsWindow implements ActionList
 
         if (c == mClose) {
             this.close();
-        } else if (c == mSaveScreenshot) {
-            JPanelToImage.saveToFileChooserSelection(chart.createBufferedImage(1100, 700), "Save Profile Chart", "./EntryMethodProfile.png");
+        } else if (c == mSaveScreenshot && chartpanel != null) {
+            // Export the chart itself rather than a rendered image of it, so that JFreeChart
+            // draws into the PDF and the result stays sharp when zoomed. The size on screen is
+            // used so that the saved chart is laid out the way the user currently sees it.
+            JPanelToImage.saveToFileChooserSelection(chart, chartpanel.getWidth(), chartpanel.getHeight(),
+                    "Save Profile Chart", "./EntryMethodProfile.pdf");
         }
     }
 
@@ -177,7 +182,7 @@ public class MethodProfileWindow extends ProjectionsWindow implements ActionList
 
         plot.setLabelGenerator(null);
 
-        ChartPanel chartpanel = new ChartPanel(chart);
+        chartpanel = new ChartPanel(chart);
         chartpanel.setMinimumDrawWidth(0);
         chartpanel.setMaximumDrawWidth(Integer.MAX_VALUE);
         chartpanel.setMinimumDrawHeight(0);

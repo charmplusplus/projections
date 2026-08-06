@@ -351,3 +351,15 @@ when it is linked with the memory tracing module.
 
 Charts in some tools are produced by JFreeChart.
 Image output is performed by FreeHEP.
+
+Views such as timelines, time profiles, usage profiles and legends can be saved
+from the "Save To Image" menu of the tool window, or by clicking on a legend
+window. The save dialog offers PDF (the default) and SVG as well as the raster
+formats PNG and JPG; the format follows the extension you type, or the one
+picked in the file type list. Views that draw themselves are written into PDF
+as vector graphics, so they stay sharp at any zoom; the Overview tool saves a
+bitmap, because its display is one pixel per processor per time interval.
+
+Note that FreeHEP's own export dialog is not used, as it cannot be constructed
+on Java 9 or later: it registers its file types in a javax.imageio
+ServiceRegistry, which rejects categories outside javax.imageio.spi.

@@ -119,7 +119,7 @@ implements PopUpAble, ColorUpdateNotifier
 		
 		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Save To Image");
-		mSaveScreenshot = new JMenuItem("Save Plot as Image");
+		mSaveScreenshot = new JMenuItem("Save Plot as PDF or Image");
 		mSaveScreenshot.addActionListener(new MenuHandler());
 		saveMenu.add(mSaveScreenshot);
 		menuBar.add(saveMenu);

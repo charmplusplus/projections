@@ -976,7 +976,7 @@ implements ActionListener, Clickable, EntryMethodVisibility
 
 		if(displaySlopes){
 			// create a screenshot of the 
-			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.png");
+			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.pdf");
 		}
 
 	}

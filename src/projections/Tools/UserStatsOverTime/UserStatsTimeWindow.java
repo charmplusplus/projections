@@ -569,7 +569,7 @@ implements ItemListener, ActionListener
 				showDialog();
 			}
 			else if (b == saveImage) {
-				JPanelToImage.saveToFileChooserSelection(graphPanel, "Save Plot To File", "./ProjectionsPlot.png");
+				JPanelToImage.saveToFileChooserSelection(graphPanel, "Save Plot To File", "./ProjectionsPlot.pdf");
 			}
 			else if (b == dataDumpButton) {
 				dumpData();

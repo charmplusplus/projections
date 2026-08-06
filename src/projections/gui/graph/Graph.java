@@ -551,6 +551,11 @@ public class Graph extends JPanel
 
     	
 
+    	// The chart data is drawn in its own colors (region labels in particular
+    	// end in whatever contrasts with the region they sit on), so restore the
+    	// foreground before the titles, which must always be readable.
+    	g.setColor(foreground);
+
     	// display Graph title
     	String graphTitle = dataSource.getTitle();
     	g.setFont(fontChartTitle);
@@ -639,6 +644,7 @@ public class Graph extends JPanel
     		g.drawString(text, tx, ty);
     	}
     	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
+    	g.setColor(MainWindow.runObject[myRun].foreground);
     }
 
     /** Black or white, whichever contrasts with the given paint. */

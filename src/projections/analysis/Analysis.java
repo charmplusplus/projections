@@ -100,8 +100,14 @@ public class Analysis {
   
   public Color[] entryColors;
   
-  Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
-  Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
+  // Plain colours, not the diagonally striped gradients these used to be: the
+  // stripes read as noise in a chart, and an exported PDF or SVG turns them into
+  // a flat colour anyway (a viewer clamps a gradient rather than repeating it),
+  // so a chart that was white on screen came out grey on paper. Overhead keeps
+  // the dark grey the gradient ended on rather than becoming pure black, so that
+  // it still stands out against the black background the tools draw on.
+  Paint overhead = new Color(50,50,50);
+  Paint idle = Color.white;
   public static final int OVERHEAD_ENTRY_POINT = -2;
   public static final int IDLE_ENTRY_POINT = -1;
   

@@ -34,6 +34,21 @@ import org.jfree.chart.JFreeChart;
  */
 
 public class JPanelToImage {
+	/** Set while a panel is drawing itself into a PDF or an SVG. Only ever read and written
+	 *  on the event dispatch thread, which is also the only thread that paints. */
+	private static boolean vectorExport = false;
+
+	/** Is a panel being drawn into a vector file right now?
+	 *
+	 *  Vector output is anti-aliased by whatever displays it, so abutting shapes leave a
+	 *  hairline seam where they meet, which a screen never shows. A panel that fills many
+	 *  small shapes side by side can merge them into one shape to avoid the seams -- but
+	 *  merging is much slower to draw, so it is worth doing only for a file that is written
+	 *  once, not for every repaint. Graph does this with the bars of a bar chart. */
+	public static boolean isVectorExport(){
+		return vectorExport;
+	}
+
 	/** Create an image and paint the panel into the image. */
 	public static BufferedImage generateImage(JPanel panelToRender){
 		//		 Create an image for the constructed panel.
@@ -134,7 +149,11 @@ public class JPanelToImage {
 
 	/** Write the panel into the file in the given format. */
 	private static void write(Container panelToRender, File file, String extension) throws IOException {
-		Dimension size = panelToRender.getSize();
+		// getWidth()/getHeight() rather than getSize(): a panel that draws something bigger
+		// than itself reports its real extent by overriding those two, and getSize() would
+		// answer from the underlying fields and miss it. Timeline's saved full timeline is
+		// one such panel, and came out as a 10x10 point page.
+		Dimension size = new Dimension(panelToRender.getWidth(), panelToRender.getHeight());
 		// A panel that was never added to a window may not have been laid out yet
 		if(size.width <= 0 || size.height <= 0)
 			size = panelToRender.getPreferredSize();
@@ -164,9 +183,14 @@ public class JPanelToImage {
 			g.setProperties(properties);
 		}
 		g.startExport();
-		// print() rather than paint(), so that Swing's double buffering is switched off and the
-		// panel draws straight into the vector output instead of into an offscreen bitmap
-		panelToRender.print(g);
+		vectorExport = true;
+		try {
+			// print() rather than paint(), so that Swing's double buffering is switched off and
+			// the panel draws straight into the vector output instead of into an offscreen bitmap
+			panelToRender.print(g);
+		} finally {
+			vectorExport = false;
+		}
 		g.endExport();
 	}
 

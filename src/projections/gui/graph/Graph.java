@@ -14,6 +14,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -23,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import projections.gui.Bubble;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
  
 public class Graph extends JPanel 
@@ -932,6 +934,20 @@ public class Graph extends JPanel
     		barWidth = 1.0;
     	}
 
+    	// When this chart is being written to a PDF or an SVG, collect one path
+    	// per value and fill each of them once at the end, instead of filling a
+    	// rectangle per (interval, value). Bars of neighbouring intervals share
+    	// an edge, and vector output is anti-aliased by whatever displays it, so
+    	// filling them one at a time leaves a hairline seam wherever two of them
+    	// meet: a flat area such as the idle band comes out finely striped. One
+    	// fill of one path has no internal edges, so the seams go away, and the
+    	// exported file gets much smaller. Java2D takes far longer over a path
+    	// with thousands of pieces than over the same rectangles filled one by
+    	// one, though, so on screen -- repainted on every resize and hover --
+    	// the rectangles are still filled as they are computed.
+    	Path2D.Float[] bars = JPanelToImage.isVectorExport() ?
+    			new Path2D.Float[numY] : null;
+
     	for (int i=0; i<numX; i++) {
     		// Work out this bar's horizontal extent once, up front. When
     		// there are more intervals than pixels most bars come out zero
@@ -967,10 +983,8 @@ public class Graph extends JPanel
 					// allready contains
 					int y = originY() - (int) (stackArray[i][k] * pixelincrementY());
 
-					g.setPaint(dataSource.getColor(k));
-
 					// using data[i] to get the height of this bar
-					g.fillRect(barX, y, barW, barH);
+					drawBar(g, bars, k, barX, y, barW, barH);
 				}
     			}
     		} else {
@@ -1003,15 +1017,20 @@ public class Graph extends JPanel
     				temp[maxIndex][0] = t;
     				temp[maxIndex][1] = t2;
     			}
-    			// now display the graph
+    			// now display the graph. The bars all stand on the axis and
+    			// are drawn tallest first, so each one is only visible down
+    			// to the top of the next shorter bar; keeping just that band
+    			// leaves the picture unchanged while letting the bars be
+    			// grouped by colour like the stacked ones above.
     			for(int k=0; k<numY; k++) {
     				int barH = (int)(temp[k][1]*pixelincrementY());
-    				if (barH <= 0) {
+    				int nextH = (k+1 < numY) ?
+    						Math.max(0, (int)(temp[k+1][1]*pixelincrementY())) : 0;
+    				if (barH <= 0 || barH <= nextH) {
     					continue;
     				}
-    				g.setPaint(dataSource.getColor((int)temp[k][0]));
     				y = originY() - barH;
-    				g.fillRect(barX, y, barW, barH);
+    				drawBar(g, bars, (int)temp[k][0], barX, y, barW, barH-nextH);
     			}
     		}
     		/*  ** UNUSED for now **
@@ -1032,10 +1051,41 @@ public class Graph extends JPanel
 	    }		
     		 */
     	}
-    	
+
+    	// Filled in value order, so that where rounding makes two slices of
+    	// one bar overlap by a pixel the later one still wins, as it did when
+    	// each rectangle was filled as it was computed.
+    	if (bars != null) {
+    		for (int k=0; k<numY; k++) {
+    			if (bars[k] != null) {
+    				g.setPaint(dataSource.getColor(k));
+    				g.fill(bars[k]);
+    			}
+    		}
+    	}
+
     	drawOverlayedPolynomial(g);
     }
-	
+
+    /** Draw one bar of a bar chart: straight away, or, if the chart is collecting
+     *  its bars to fill them by value, into the path holding that value's bars. */
+    private void drawBar(Graphics2D g, Path2D.Float[] bars, int k, int x, int y, int w, int h) {
+    	if (bars == null) {
+    		g.setPaint(dataSource.getColor(k));
+    		g.fillRect(x, y, w, h);
+    		return;
+    	}
+    	if (bars[k] == null) {
+    		bars[k] = new Path2D.Float(Path2D.WIND_NON_ZERO);
+    	}
+    	Path2D.Float bar = bars[k];
+    	bar.moveTo(x, y);
+    	bar.lineTo(x+w, y);
+    	bar.lineTo(x+w, y+h);
+    	bar.lineTo(x, y+h);
+    	bar.closePath();
+    }
+
     private void drawLineGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount();

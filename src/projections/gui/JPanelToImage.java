@@ -134,7 +134,11 @@ public class JPanelToImage {
 
 	/** Write the panel into the file in the given format. */
 	private static void write(Container panelToRender, File file, String extension) throws IOException {
-		Dimension size = panelToRender.getSize();
+		// getWidth()/getHeight() rather than getSize(): a panel that draws something bigger
+		// than itself reports its real extent by overriding those two, and getSize() would
+		// answer from the underlying fields and miss it. Timeline's saved full timeline is
+		// one such panel, and came out as a 10x10 point page.
+		Dimension size = new Dimension(panelToRender.getWidth(), panelToRender.getHeight());
 		// A panel that was never added to a window may not have been laid out yet
 		if(size.width <= 0 || size.height <= 0)
 			size = panelToRender.getPreferredSize();

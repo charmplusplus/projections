@@ -11,8 +11,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import projections.analysis.StsReader;
 
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -297,6 +301,173 @@ public class Util
 			result = result.substring(1);
 
 		return result;
+	}
+
+	/** Like listToString, but also collapses evenly strided runs into the
+	 *  "first-last:stride" form the range dialog accepts, so a selection of
+	 *  every 5th processor reads "0-115:5" instead of listing all of them. */
+	public static String listToStringWithStrides(SortedSet<Integer> c) {
+		if (c == null || c.isEmpty()) {
+			return "";
+		}
+
+		int[] v = new int[c.size()];
+		int n = 0;
+		for (Integer i : c) {
+			v[n++] = i;
+		}
+
+		StringBuilder result = new StringBuilder();
+		int i = 0;
+		while (i < n) {
+			int runEnd = i;    // last index belonging to the current run
+			int stride = 0;
+			if (i+1 < n) {
+				stride = v[i+1] - v[i];
+				runEnd = i+1;
+				while (runEnd+1 < n && v[runEnd+1] - v[runEnd] == stride) {
+					runEnd++;
+				}
+			}
+
+			int runLength = runEnd - i + 1;
+			// A two-element run is only worth collapsing when consecutive;
+			// "3,8" is no longer than "3-8:5" and is less confusing.
+			if (runLength >= 3 || (runLength == 2 && stride == 1)) {
+				if (result.length() > 0) {
+					result.append(",");
+				}
+				result.append(v[i]).append("-").append(v[runEnd]);
+				if (stride != 1) {
+					result.append(":").append(stride);
+				}
+				i = runEnd + 1;
+			} else {
+				if (result.length() > 0) {
+					result.append(",");
+				}
+				result.append(v[i]);
+				i++;
+			}
+		}
+
+		return result.toString();
+	}
+
+	/** A one line description of which processors a tool is displaying, for the
+	 *  chart header: how many PEs the run used, and which of them were picked. */
+	public static String processorSelectionString(SortedSet<Integer> selected) {
+		int totalPEs = MainWindow.runObject[myRun].getNumProcessors();
+		if (selected == null || selected.isEmpty()) {
+			return totalPEs + " PEs";
+		}
+		if (selected.size() == totalPEs) {
+			return totalPEs + " PEs (all)";
+		}
+		return selected.size() + " of " + totalPEs + " PEs: " +
+			listToStringWithStrides(selected);
+	}
+
+	/** A one line provenance description of the traced run for the chart header:
+	 *  the command that was run followed by whatever the sts file recorded about
+	 *  where and when it ran. Callers may truncate this; the most identifying
+	 *  parts come first. */
+	public static String runProvenanceString() {
+		StsReader sts = MainWindow.runObject[myRun].getSts();
+		if (sts == null) {
+			return "";
+		}
+
+		StringBuilder s = new StringBuilder(commandString(sts));
+
+		// Date first among the run details: it is what tells two runs of the
+		// same command apart, and trailing parts are the first to be dropped
+		// when the header runs out of room.
+		ZonedDateTime timestamp = sts.getTimestamp();
+		if (timestamp != null) {
+			s.append(" | ").append(timestamp.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+		}
+
+		String hostname = shortHostname(sts.getHostname());
+		if (hostname.length() > 0) {
+			s.append(" | ").append(hostname);
+		}
+
+		String machine = sts.getMachineName();
+		if (machine != null && machine.length() > 0) {
+			s.append(" | ").append(machine);
+		}
+
+		if (sts.isSMPRun()) {
+			s.append(" | ").append(sts.getSMPNodeCount()).append(" nodes x ")
+			 .append(sts.getNodeSize()).append(" PEs");
+		}
+
+		String charmVersion = sts.getCharmVersion();
+		if (charmVersion != null && charmVersion.length() > 0) {
+			s.append(" | charm ").append(charmVersion);
+		}
+
+		return s.toString();
+	}
+
+	/** The command that produced the trace, condensed for a one line header:
+	 *  every path is reduced to its filename (the directories say nothing about
+	 *  the run) and "+traceroot <dir>" is dropped, since it only says where the
+	 *  trace we are already reading was written. Falls back to the trace's base
+	 *  name when the sts file recorded no command line. */
+	private static String commandString(StsReader sts) {
+		String commandline = sts.getCommandline();
+		if (commandline == null || commandline.trim().length() == 0) {
+			String baseName = sts.getBaseName();
+			if (baseName == null) {
+				return "";
+			}
+			int slash = baseName.lastIndexOf(File.separatorChar);
+			return slash >= 0 ? baseName.substring(slash+1) : baseName;
+		}
+
+		StringBuilder s = new StringBuilder();
+		String[] tokens = commandline.trim().split("\\s+");
+		for (int i=0; i<tokens.length; i++) {
+			if (tokens[i].equals("+traceroot")) {
+				i++;    // also skip the directory it names
+				continue;
+			}
+			if (s.length() > 0) {
+				s.append(" ");
+			}
+			s.append(fileNameOf(tokens[i]));
+		}
+		return s.toString();
+	}
+
+	/** The last component of a path, so command line arguments show which file
+	 *  was used without the directories it lived in. Leaves non-paths alone. */
+	private static String fileNameOf(String token) {
+		int slash = token.lastIndexOf('/');
+		if (slash < 0 || slash == token.length()-1) {
+			return token;
+		}
+		return token.substring(slash+1);
+	}
+
+	/** The machine's name without its domain: "a993.anvil.rcac.purdue.edu"
+	 *  becomes "a993.anvil", which still says which cluster it was. */
+	private static String shortHostname(String hostname) {
+		if (hostname == null) {
+			return "";
+		}
+		hostname = hostname.trim();
+		if (hostname.endsWith(".local")) {
+			hostname = hostname.substring(0, hostname.length()-".local".length());
+		}
+		int firstDot = hostname.indexOf('.');
+		if (firstDot < 0) {
+			return hostname;
+		}
+		int secondDot = hostname.indexOf('.', firstDot+1);
+		return secondDot < 0 ? hostname : hostname.substring(0, secondDot);
 	}
 
 //     /**

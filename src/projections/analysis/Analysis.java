@@ -367,6 +367,13 @@ public class Analysis {
 	public int[][] getSumDetailData_interval_EP() {
         return intervalData.getSumDetailData_interval_EP();
     }
+	/** Messages processed per interval per entry method, over the given PEs.
+	 *  Summary detail traces only. */
+	public double[][] getSumDetailMsgsPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+        return intervalData.getSumDetailMsgsPerInterval(intervalSize, intervalStart,
+        		intervalEnd, processorList);
+    }
 	public int[][] getSumDetailData_PE_EP() {
         return intervalData.getSumDetailData_PE_EP();
     }

@@ -72,6 +72,10 @@ implements ActionListener, EntryMethodVisibility
 	private Legend legendWindow;
 	private static final int LEGEND_TOP_N = 10;
 
+	private ButtonGroup measureGroup;
+	private JRadioButton messagesButton;
+	private JRadioButton bytesButton;
+
 	private ButtonGroup yScaleGroup;
 	private JRadioButton totalsButton;
 	private JRadioButton rateButton;
@@ -87,6 +91,10 @@ implements ActionListener, EntryMethodVisibility
 	/** [interval][ep], raw counts over the selected PEs. Any per-second or
 	 *  per-PE scaling happens when the data is handed to the chart. */
 	private double[][] msgCount;
+	/** [interval][ep], bytes of those messages. All zero for a trace written
+	 *  before charm recorded message sizes, which is why the Bytes view turns
+	 *  itself off rather than drawing an empty chart. */
+	private double[][] msgBytes;
 	private boolean existsArray[];
 	private DecimalFormat _format;
 	private MyColorer colorer;
@@ -152,6 +160,16 @@ implements ActionListener, EntryMethodVisibility
 		gbc.fill = GridBagConstraints.BOTH;
 		mainPanel.setLayout(gbl);
 
+		messagesButton = new JRadioButton("Messages", true);
+		messagesButton.addActionListener(this);
+		messagesButton.setToolTipText("Number of messages each entry method processed");
+		bytesButton = new JRadioButton("Bytes");
+		bytesButton.addActionListener(this);
+		bytesButton.setToolTipText("Bytes those messages carried, envelope included; recorded only by traces written by a charm that knows how");
+		measureGroup = new ButtonGroup();
+		measureGroup.add(messagesButton);
+		measureGroup.add(bytesButton);
+
 		totalsButton = new JRadioButton("Totals per interval", true);
 		totalsButton.addActionListener(this);
 		totalsButton.setToolTipText("Each bar is the number of messages processed in its interval, summed over the selected PEs");
@@ -168,6 +186,9 @@ implements ActionListener, EntryMethodVisibility
 		yScaleGroup.add(ratePerPEButton);
 
 		yScalePanel = new JPanel();
+		Util.gblAdd(yScalePanel, new JLabel("Show:"), gbc, 0,1, 1,1, 0,0);
+		Util.gblAdd(yScalePanel, messagesButton, gbc, 1,1, 1,1, 0,0);
+		Util.gblAdd(yScalePanel, bytesButton, gbc, 2,1, 1,1, 0,0);
 		Util.gblAdd(yScalePanel, new JLabel("Y-axis scale:"), gbc, 0,0, 1,1, 0,0);
 		Util.gblAdd(yScalePanel, totalsButton, gbc, 1,0, 1,1, 0,0);
 		Util.gblAdd(yScalePanel, rateButton, gbc, 2,0, 1,1, 0,0);
@@ -233,6 +254,8 @@ implements ActionListener, EntryMethodVisibility
 	private void getData() {
 		msgCount = MainWindow.runObject[myRun].getSumDetailMsgsPerInterval(
 				intervalSize, startInterval, endInterval, processorList);
+		msgBytes = MainWindow.runObject[myRun].getSumDetailBytesPerInterval(
+				intervalSize, startInterval, endInterval, processorList);
 
 		for (int ep=0; ep<numEPs; ep++) {
 			existsArray[ep] = false;
@@ -250,20 +273,51 @@ implements ActionListener, EntryMethodVisibility
 		if (msgCount == null) {
 			return;
 		}
-		setDataSource("Messages Processed Over Time", scaleForDisplay(displayCounts()), colorer, this);
+		// A trace from a charm that did not record message sizes has none to
+		// show; say so rather than drawing an empty chart.
+		if (showingBytes() && !hasBytes()) {
+			messagesButton.setSelected(true);
+			totalCount.setText("This trace records no message sizes: its .sumd files were " +
+					"written before charm recorded them.");
+			return;
+		}
+
+		String what = showingBytes() ? "Bytes Received" : "Messages Processed";
+		setDataSource(what + " Over Time", scaleForDisplay(displayCounts()), colorer, this);
 		setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
 				startInterval*intervalSize, intervalSize);
-		setYAxis("Messages Processed" + yAxisSuffix(), "");
+		setYAxis(what + yAxisSuffix(), "");
 
-		String label = "Total messages processed: " + _format.format(totalMessages(false)) +
-				" over " + processorList.size() + " PEs";
-		double packUnpack = totalMessages(true) - totalMessages(false);
+		String label = (showingBytes() ? "Total bytes received: " : "Total messages processed: ") +
+				_format.format(total(false)) + " over " + processorList.size() + " PEs";
+		double packUnpack = total(true) - total(false);
 		if (packUnpack > 0 && !countPackUnpack()) {
-			label += "  (" + _format.format(packUnpack) + " pack/unpack runs not counted)";
+			label += "  (" + _format.format(packUnpack) +
+					(showingBytes() ? " from pack/unpack not counted)" : " pack/unpack runs not counted)");
 		}
 		totalCount.setText(label);
 		refreshLegend();
 		super.refreshGraph();
+	}
+
+	private boolean showingBytes() {
+		return bytesButton != null && bytesButton.isSelected();
+	}
+
+	/** Does this trace carry message sizes at all? charm only started writing
+	 *  them in 2026; everything older reads as zeros. */
+	private boolean hasBytes() {
+		if (msgBytes == null) {
+			return false;
+		}
+		for (int interval=0; interval<numIntervals; interval++) {
+			for (int ep=0; ep<numEPs; ep++) {
+				if (msgBytes[interval][ep] > 0) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	private boolean countPackUnpack() {
@@ -277,24 +331,31 @@ implements ActionListener, EntryMethodVisibility
 	/** The counts as the chart should show them: everything, or everything the
 	 *  application itself processed. */
 	private double[][] displayCounts() {
+		double[][] source = sourceArray();
 		if (countPackUnpack() || (packEP < 0 && unpackEP < 0)) {
-			return msgCount;
+			return source;
 		}
 		double[][] filtered = new double[numIntervals][numEPs];
 		for (int interval=0; interval<numIntervals; interval++) {
 			for (int ep=0; ep<numEPs; ep++) {
-				filtered[interval][ep] = isPackOrUnpack(ep) ? 0.0 : msgCount[interval][ep];
+				filtered[interval][ep] = isPackOrUnpack(ep) ? 0.0 : source[interval][ep];
 			}
 		}
 		return filtered;
 	}
 
-	private double totalMessages(boolean includePackUnpack) {
+	/** The raw array behind the current view. */
+	private double[][] sourceArray() {
+		return showingBytes() ? msgBytes : msgCount;
+	}
+
+	private double total(boolean includePackUnpack) {
+		double[][] source = sourceArray();
 		double total = 0;
 		for (int interval=0; interval<numIntervals; interval++) {
 			for (int ep=0; ep<numEPs; ep++) {
 				if (includePackUnpack || !isPackOrUnpack(ep)) {
-					total += msgCount[interval][ep];
+					total += source[interval][ep];
 				}
 			}
 		}
@@ -352,12 +413,14 @@ implements ActionListener, EntryMethodVisibility
 			U.humanReadableString((xVal+startInterval+1)*intervalSize);
 		rString[1] = "Chare: " + MainWindow.runObject[myRun].getEntryChareNameByIndex(yVal);
 		rString[2] = "Entry Method: " + MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-		double count = msgCount[xVal][yVal];
+		double count = sourceArray()[xVal][yVal];
+		String unit = showingBytes() ? "bytes" : "messages";
 		if (rateSelected()) {
-			rString[3] = "Rate = " + _format.format(count / rateDivisor()) + " messages/s" +
-				(perPESelected() ? "/PE" : "") + " (" + _format.format(count) + " messages)";
+			rString[3] = "Rate = " + _format.format(count / rateDivisor()) + " " + unit + "/s" +
+				(perPESelected() ? "/PE" : "") + " (" + _format.format(count) + " " + unit + ")";
 		} else {
-			rString[3] = "Messages processed: " + _format.format(count);
+			rString[3] = (showingBytes() ? "Bytes received: " : "Messages processed: ")
+					+ _format.format(count);
 		}
 		return rString;
 	}
@@ -430,11 +493,11 @@ implements ActionListener, EntryMethodVisibility
 			}
 			double total = 0;
 			for (int interval=0; interval<numIntervals; interval++) {
-				total += msgCount[interval][ep];
+				total += sourceArray()[interval][ep];
 			}
 			if (total > 0) {
 				entries.add(new LegendEntry(total,
-						_format.format(total) + " msgs  " +
+						_format.format(total) + (showingBytes() ? " bytes  " : " msgs  ") +
 						MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep),
 						MainWindow.runObject[myRun].getEntryColor(ep)));
 			}
@@ -455,7 +518,8 @@ implements ActionListener, EntryMethodVisibility
 		if (names.isEmpty()) {
 			return null;
 		}
-		return new Legend("Legend (top " + LEGEND_TOP_N + " by messages)", names, paints);
+		return new Legend("Legend (top " + LEGEND_TOP_N +
+				(showingBytes() ? " by bytes)" : " by messages)"), names, paints);
 	}
 
 	/** Restrict "Choose Entry Colors" to the entry methods that processed
@@ -506,7 +570,8 @@ implements ActionListener, EntryMethodVisibility
 			showDialog();
 		} else if (source == showLegendCheckBox) {
 			refreshLegend();
-		} else if (source == packUnpackCheckBox || source == totalsButton
+		} else if (source == packUnpackCheckBox || source == messagesButton
+				|| source == bytesButton || source == totalsButton
 				|| source == rateButton || source == ratePerPEButton) {
 			setCursor(new Cursor(Cursor.WAIT_CURSOR));
 			displayData();

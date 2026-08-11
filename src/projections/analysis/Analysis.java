@@ -374,6 +374,13 @@ public class Analysis {
         return intervalData.getSumDetailMsgsPerInterval(intervalSize, intervalStart,
         		intervalEnd, processorList);
     }
+	/** Bytes of those messages, over the given PEs. Zero throughout for a trace
+	 *  written before charm recorded message sizes in its .sumd files. */
+	public double[][] getSumDetailBytesPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+        return intervalData.getSumDetailBytesPerInterval(intervalSize, intervalStart,
+        		intervalEnd, processorList);
+    }
 	public int[][] getSumDetailData_PE_EP() {
         return intervalData.getSumDetailData_PE_EP();
     }

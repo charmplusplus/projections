@@ -31,6 +31,7 @@ public class IntervalData
     // should, as far as possible, be avoided.
     private static final int TYPE_TIME = 0;
     private static final int TYPE_NUM_MSGS = 1;
+    private static final int TYPE_MSG_BYTES = 2;
 
     // associated readers
     private static SumDetailReader summaryDetails[];
@@ -185,6 +186,24 @@ public class IntervalData
 	 *  where charm's trace-summary increments the counter. */
 	public double[][] getSumDetailMsgsPerInterval(long intervalSize, int intervalStart,
 			int intervalEnd, SortedSet<Integer> processorList) {
+		return getSumDetailPerInterval(TYPE_NUM_MSGS, intervalSize, intervalStart,
+				intervalEnd, processorList);
+	}
+
+	/** Bytes of those messages, per interval per entry method.
+	 *
+	 *  charm has only recorded this since 2026; a trace written before that has
+	 *  no such line in its .sumd files and reads as zeros throughout. The size
+	 *  is the whole message as it was sent, envelope and padding included,
+	 *  which is what a .log trace records as a message length too. */
+	public double[][] getSumDetailBytesPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		return getSumDetailPerInterval(TYPE_MSG_BYTES, intervalSize, intervalStart,
+				intervalEnd, processorList);
+	}
+
+	private double[][] getSumDetailPerInterval(int type, long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
 		int numDestIntervals = intervalEnd - intervalStart + 1;
 		double[][] msgs = new double[numDestIntervals][numEPs];
 
@@ -194,7 +213,8 @@ public class IntervalData
 		// the same as the time data, so show the same kind of progress.
 		ProgressMonitor progressBar =
 			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot,
-					"Loading message counts", "", 0, numPes);
+					(type == TYPE_MSG_BYTES) ? "Loading message sizes" : "Loading message counts",
+					"", 0, numPes);
 
 		for (Integer curPe : processorList) {
 			if (progressBar.isCanceled()) {
@@ -204,7 +224,7 @@ public class IntervalData
 			progressBar.setNote(processorCount + " of " + numPes + " PEs");
 			progressBar.setProgress(processorCount);
 
-			double[][] tempData = getData(curPe, TYPE_NUM_MSGS, intervalSize,
+			double[][] tempData = getData(curPe, type, intervalSize,
 					intervalStart, numDestIntervals);
 			for (int i = 0; i < numDestIntervals; i++) {
 				for (int ep = 0; ep < numEPs; ep++) {
@@ -289,7 +309,7 @@ public class IntervalData
 	returnData = new double[numEPs][numDestIntervals];
 	boolean discrete = false;
 
-	if (type == TYPE_NUM_MSGS) {
+	if (type == TYPE_NUM_MSGS || type == TYPE_MSG_BYTES) {
 	    discrete = true;
 	}
 	for (int ep=0; ep<tempData.length; ep++) {

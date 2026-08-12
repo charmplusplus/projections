@@ -31,6 +31,7 @@ public class IntervalData
     // should, as far as possible, be avoided.
     private static final int TYPE_TIME = 0;
     private static final int TYPE_NUM_MSGS = 1;
+    private static final int TYPE_MSG_BYTES = 2;
 
     // associated readers
     private static SumDetailReader summaryDetails[];
@@ -170,6 +171,72 @@ public class IntervalData
 		return sumDetailData_interval_EP;
 	}
 
+	/** Messages processed per interval per entry method, summed over the given
+	 *  processors.
+	 *
+	 *  A .sumd file records, beside the time each entry method spent running in
+	 *  an interval, how many times it ran there -- which is how many messages
+	 *  for it were processed, since an entry method runs once per message. The
+	 *  reader has always parsed it; nothing displayed it until now, so unlike
+	 *  the time data it is expanded on demand rather than by
+	 *  loadSumDetailIntervalData, and no tool that does not ask for it pays for
+	 *  the expansion.
+	 *
+	 *  A run spanning a bin boundary is counted in the bin it ends in, which is
+	 *  where charm's trace-summary increments the counter. */
+	public double[][] getSumDetailMsgsPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		return getSumDetailPerInterval(TYPE_NUM_MSGS, intervalSize, intervalStart,
+				intervalEnd, processorList);
+	}
+
+	/** Bytes of those messages, per interval per entry method.
+	 *
+	 *  charm has only recorded this since 2026; a trace written before that has
+	 *  no such line in its .sumd files and reads as zeros throughout. The size
+	 *  is the whole message as it was sent, envelope and padding included,
+	 *  which is what a .log trace records as a message length too. */
+	public double[][] getSumDetailBytesPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		return getSumDetailPerInterval(TYPE_MSG_BYTES, intervalSize, intervalStart,
+				intervalEnd, processorList);
+	}
+
+	private double[][] getSumDetailPerInterval(int type, long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		int numDestIntervals = intervalEnd - intervalStart + 1;
+		double[][] msgs = new double[numDestIntervals][numEPs];
+
+		int processorCount = 0;
+		int numPes = processorList.size();
+		// Expanding the run length encoding costs numPEs * numIntervals * numEPs,
+		// the same as the time data, so show the same kind of progress.
+		ProgressMonitor progressBar =
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot,
+					(type == TYPE_MSG_BYTES) ? "Loading message sizes" : "Loading message counts",
+					"", 0, numPes);
+
+		for (Integer curPe : processorList) {
+			if (progressBar.isCanceled()) {
+				progressBar.close();
+				return msgs;
+			}
+			progressBar.setNote(processorCount + " of " + numPes + " PEs");
+			progressBar.setProgress(processorCount);
+
+			double[][] tempData = getData(curPe, type, intervalSize,
+					intervalStart, numDestIntervals);
+			for (int i = 0; i < numDestIntervals; i++) {
+				for (int ep = 0; ep < numEPs; ep++) {
+					msgs[i][ep] += tempData[ep][i];
+				}
+			}
+			processorCount++;
+		}
+		progressBar.close();
+		return msgs;
+	}
+
 	public int[][] getSumDetailData_PE_EP() {
 		return sumDetailData_PE_EP;
 	}
@@ -242,7 +309,7 @@ public class IntervalData
 	returnData = new double[numEPs][numDestIntervals];
 	boolean discrete = false;
 
-	if (type == TYPE_NUM_MSGS) {
+	if (type == TYPE_NUM_MSGS || type == TYPE_MSG_BYTES) {
 	    discrete = true;
 	}
 	for (int ep=0; ep<tempData.length; ep++) {

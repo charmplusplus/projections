@@ -19,6 +19,7 @@ import javax.swing.KeyStroke;
 import projections.Tools.MessageSizeEvolution.MessageSizeEvolutionWindow;
 import projections.Tools.PerformanceCounters.PerfWindow;
 import projections.Tools.CommunicationOverTime.CommTimeWindow;
+import projections.Tools.MessagesOverTime.MessagesOverTimeWindow;
 import projections.Tools.CommunicationPerPE.CommWindow;
 import projections.Tools.Extrema.ExtremaWindow;
 import projections.Tools.Histogram.HistogramWindow;
@@ -151,7 +152,7 @@ implements ActionListener, ItemListener
 			timelinesMenuItem.setEnabled(false);
 			usageProfileMenuItem.setEnabled(true);
 			communicationMenuItem.setEnabled(false);
-			communicationVsTimeMenuItem.setEnabled(false);
+			communicationVsTimeMenuItem.setEnabled(sumDetail==1);
 			callTableMenuItem.setEnabled(false);
 			viewLogFilesMenuItem.setEnabled(false);
 			histogramsMenuItem.setEnabled(false);
@@ -382,8 +383,15 @@ implements ActionListener, ItemListener
 			else if (mi == communicationMenuItem)	
 				parent.openTool(new CommWindow(parent) );
 			
-			else if (mi == communicationVsTimeMenuItem)	
-				parent.openTool(new CommTimeWindow(parent) );
+			else if (mi == communicationVsTimeMenuItem)	{
+				// A .log trace records every message and can show sizes and
+				// senders; a summary trace has only the per-interval counts
+				// its .sumd files carry, which is a different window.
+				if (MainWindow.runObject[0].hasLogData())
+					parent.openTool(new CommTimeWindow(parent) );
+				else
+					parent.openTool(new MessagesOverTimeWindow(parent) );
+			}
 			
 			else if (mi == callTableMenuItem)	
 				parent.openTool(new CallTableWindow(parent) ); 

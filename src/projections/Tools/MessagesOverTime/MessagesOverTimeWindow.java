@@ -107,6 +107,7 @@ implements ActionListener, EntryMethodVisibility
 	 *  before charm recorded message sizes, which is why the Bytes view turns
 	 *  itself off rather than drawing an empty chart. */
 	private double[][] msgBytes;
+	private boolean bytesLoaded;
 	private boolean existsArray[];
 	/** Entry methods the user has left switched on in the chooser. Switching
 	 *  one off drops it from the chart, the totals and the legend, so the y
@@ -292,10 +293,31 @@ implements ActionListener, EntryMethodVisibility
 	private void getData() {
 		msgCount = MainWindow.runObject[myRun].getSumDetailMsgsPerInterval(
 				intervalSize, startInterval, endInterval, processorList);
-		msgBytes = MainWindow.runObject[myRun].getSumDetailBytesPerInterval(
-				intervalSize, startInterval, endInterval, processorList);
+		msgBytes = null;
+		bytesLoaded = false;
+		if (showingBytes()) {
+			// already looking at sizes when the range was reloaded: expand
+			// them here, where this still runs off the event thread
+			ensureBytes();
+		}
 		zoomFirst = 0;
 		zoomLast = numIntervals-1;
+	}
+
+	/** Expand the message sizes, once, when something first needs them.
+	 *
+	 *  Sizes cost their own pass over every PE and entry method, and a trace
+	 *  written before charm recorded them has nothing there to find: the pass
+	 *  walks empty run length data to produce an array of zeros. So it waits
+	 *  until the Bytes view is asked for. Slow enough to belong off the event
+	 *  thread -- see where this is called from. */
+	private void ensureBytes() {
+		if (bytesLoaded) {
+			return;
+		}
+		bytesLoaded = true;
+		msgBytes = MainWindow.runObject[myRun].getSumDetailBytesPerInterval(
+				intervalSize, startInterval, endInterval, processorList);
 	}
 
 	/** Which entry methods ran anywhere in the part of the range on show.
@@ -413,6 +435,7 @@ implements ActionListener, EntryMethodVisibility
 	/** Does this trace carry message sizes at all? charm only started writing
 	 *  them in 2026; everything older reads as zeros. */
 	private boolean hasBytes() {
+		ensureBytes();
 		if (msgBytes == null) {
 			return false;
 		}
@@ -454,7 +477,11 @@ implements ActionListener, EntryMethodVisibility
 
 	/** The raw array behind the current view. */
 	private double[][] sourceArray() {
-		return showingBytes() ? msgBytes : msgCount;
+		if (!showingBytes()) {
+			return msgCount;
+		}
+		ensureBytes();
+		return msgBytes;
 	}
 
 	private static final int TOTAL_SHOWN = 0;
@@ -750,6 +777,21 @@ implements ActionListener, EntryMethodVisibility
 			resetZoom();
 		} else if (source == showLegendCheckBox) {
 			refreshLegend();
+		} else if (source == bytesButton && !bytesLoaded) {
+			// first look at sizes: expand them off the event thread, or the
+			// progress bar cannot paint and the window locks up instead
+			setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			final SwingWorker worker = new SwingWorker() {
+				public Object doInBackground() {
+					ensureBytes();
+					return null;
+				}
+				public void done() {
+					displayData();
+					thisWindow.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+			};
+			worker.execute();
 		} else if (source == packUnpackCheckBox || source == messagesButton
 				|| source == bytesButton || source == totalsButton
 				|| source == rateButton || source == ratePerPEButton) {

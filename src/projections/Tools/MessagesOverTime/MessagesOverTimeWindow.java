@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -96,6 +97,12 @@ implements ActionListener, EntryMethodVisibility
 	 *  itself off rather than drawing an empty chart. */
 	private double[][] msgBytes;
 	private boolean existsArray[];
+	/** Entry methods the user has left switched on in the chooser. Switching
+	 *  one off drops it from the chart, the totals and the legend, so the y
+	 *  axis rescales to whatever is left -- which is the point of switching it
+	 *  off: one entry method with two orders of magnitude more messages than
+	 *  the rest flattens everything else into the axis. */
+	private boolean epVisible[];
 	private DecimalFormat _format;
 	private MyColorer colorer;
 
@@ -119,6 +126,8 @@ implements ActionListener, EntryMethodVisibility
 		setGraphSpecificData();
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		existsArray = new boolean[numEPs];
+		epVisible = new boolean[numEPs];
+		Arrays.fill(epVisible, true);
 		for (int ep=0; ep<numEPs; ep++) {
 			String name = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 			if ("dummy_pack_ep".equals(name)) {
@@ -289,11 +298,16 @@ implements ActionListener, EntryMethodVisibility
 		setYAxis(what + yAxisSuffix(), "");
 
 		String label = (showingBytes() ? "Total bytes received: " : "Total messages processed: ") +
-				_format.format(total(false)) + " over " + processorList.size() + " PEs";
-		double packUnpack = total(true) - total(false);
+				_format.format(total(TOTAL_SHOWN)) + " over " + processorList.size() + " PEs";
+		double packUnpack = total(TOTAL_PACK_UNPACK);
 		if (packUnpack > 0 && !countPackUnpack()) {
 			label += "  (" + _format.format(packUnpack) +
 					(showingBytes() ? " from pack/unpack not counted)" : " pack/unpack runs not counted)");
+		}
+		int hidden = hiddenCount();
+		if (hidden > 0) {
+			label += "  (" + hidden + " entry method" + (hidden == 1 ? "" : "s") + " hidden, " +
+					_format.format(total(TOTAL_HIDDEN)) + (showingBytes() ? " bytes)" : " messages)");
 		}
 		totalCount.setText(label);
 		refreshLegend();
@@ -328,20 +342,22 @@ implements ActionListener, EntryMethodVisibility
 		return ep == packEP || ep == unpackEP;
 	}
 
-	/** The counts as the chart should show them: everything, or everything the
-	 *  application itself processed. */
+	/** The counts as the chart should show them: the entry methods that are
+	 *  switched on, and the runtime's packing only if it was asked for. */
 	private double[][] displayCounts() {
 		double[][] source = sourceArray();
-		if (countPackUnpack() || (packEP < 0 && unpackEP < 0)) {
-			return source;
-		}
 		double[][] filtered = new double[numIntervals][numEPs];
 		for (int interval=0; interval<numIntervals; interval++) {
 			for (int ep=0; ep<numEPs; ep++) {
-				filtered[interval][ep] = isPackOrUnpack(ep) ? 0.0 : source[interval][ep];
+				filtered[interval][ep] = shown(ep) ? source[interval][ep] : 0.0;
 			}
 		}
 		return filtered;
+	}
+
+	/** Is this entry method part of the picture right now? */
+	private boolean shown(int ep) {
+		return epVisible[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
 	}
 
 	/** The raw array behind the current view. */
@@ -349,17 +365,44 @@ implements ActionListener, EntryMethodVisibility
 		return showingBytes() ? msgBytes : msgCount;
 	}
 
-	private double total(boolean includePackUnpack) {
+	private static final int TOTAL_SHOWN = 0;
+	private static final int TOTAL_PACK_UNPACK = 1;
+	private static final int TOTAL_HIDDEN = 2;
+
+	/** Sum over the loaded range of one group of entry methods: the ones on
+	 *  the chart, the runtime's packing, or the ones switched off. */
+	private double total(int which) {
 		double[][] source = sourceArray();
 		double total = 0;
 		for (int interval=0; interval<numIntervals; interval++) {
 			for (int ep=0; ep<numEPs; ep++) {
-				if (includePackUnpack || !isPackOrUnpack(ep)) {
+				boolean counted;
+				if (which == TOTAL_SHOWN) {
+					counted = shown(ep);
+				} else if (which == TOTAL_HIDDEN) {
+					counted = !epVisible[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
+				} else {
+					counted = isPackOrUnpack(ep);
+				}
+				if (counted) {
 					total += source[interval][ep];
 				}
 			}
 		}
 		return total;
+	}
+
+	/** How many entry methods the user has switched off, counting only ones
+	 *  that would otherwise be on the chart. */
+	private int hiddenCount() {
+		int hidden = 0;
+		for (int ep=0; ep<numEPs; ep++) {
+			if (existsArray[ep] && !epVisible[ep] &&
+					(countPackUnpack() || !isPackOrUnpack(ep))) {
+				hidden++;
+			}
+		}
+		return hidden;
 	}
 
 	private boolean rateSelected() {
@@ -488,7 +531,7 @@ implements ActionListener, EntryMethodVisibility
 		}
 		List<LegendEntry> entries = new ArrayList<LegendEntry>();
 		for (int ep=0; ep<numEPs; ep++) {
-			if (isPackOrUnpack(ep) && !countPackUnpack()) {
+			if (!shown(ep)) {
 				continue;
 			}
 			double total = 0;
@@ -523,16 +566,24 @@ implements ActionListener, EntryMethodVisibility
 	}
 
 	/** Restrict "Choose Entry Colors" to the entry methods that processed
-	 *  something in the loaded range. */
+	 *  something in the displayed range. */
 	protected EntryMethodVisibility getEntryFilter() {
 		return (msgCount != null) ? this : null;
+	}
+
+	/** That same dialog is where entry methods are switched off, so it needs
+	 *  its check box column. */
+	protected boolean entryFilterAllowsHiding() {
+		return true;
 	}
 
 	public int[] getEntriesArray() {
 		int[] present = new int[numEPs];
 		for (int ep=0; ep<numEPs; ep++) {
-			boolean shown = existsArray[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
-			present[ep] = shown ? 1 : 0;
+			// listed whether or not it is switched off, since this dialog is
+			// the only way to switch it back on
+			boolean listed = existsArray[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
+			present[ep] = listed ? 1 : 0;
 		}
 		return present;
 	}
@@ -547,18 +598,33 @@ implements ActionListener, EntryMethodVisibility
 	}
 
 	public boolean entryIsVisibleID(Integer id) {
-		return true;
+		return !inRange(id) || epVisible[id];
 	}
 
 	public void makeEntryVisibleID(Integer id) {
-		// visibility checkboxes are not shown for this tool's chooser
+		setVisibility(id, true);
 	}
 
 	public void makeEntryInvisibleID(Integer id) {
+		setVisibility(id, false);
 	}
 
+	private void setVisibility(Integer id, boolean visible) {
+		if (inRange(id)) {
+			epVisible[id] = visible;
+		}
+	}
+
+	/** Idle and overhead come through as negative ids from the shared dialog;
+	 *  this tool does not show them. */
+	private boolean inRange(Integer id) {
+		return id != null && id >= 0 && id < numEPs;
+	}
+
+	/** The chooser calls this after any visibility change. Rebuilding the
+	 *  chart is what makes the y axis follow what is left on it. */
 	public void displayMustBeRedrawn() {
-		repaint();
+		displayData();
 	}
 
 	/** Dispatch on which control was used rather than on what kind of control

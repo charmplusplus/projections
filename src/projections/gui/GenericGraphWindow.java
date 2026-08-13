@@ -136,6 +136,14 @@ implements PopUpAble, ColorUpdateNotifier
 		return null;
 	}
 
+	/** Whether that dialog also offers a "Visible" check box per entry
+	 *  method. A subclass says yes only if its filter really implements
+	 *  makeEntryVisibleID/makeEntryInvisibleID; the default chooser shows
+	 *  colors alone. */
+	protected boolean entryFilterAllowsHiding(){
+		return false;
+	}
+
 	// create a standard layout which can be called from child class or 
 	// overridden by it
 	// returns a Main Panel with vertical box layout and graphPanel attached
@@ -262,7 +270,7 @@ implements PopUpAble, ColorUpdateNotifier
 			} else if (e.getSource() == mChooseColors){
 				EntryMethodVisibility filter = getEntryFilter();
 				if (filter != null)
-					new ChooseEntriesWindow(filter, false, gw);
+					new ChooseEntriesWindow(filter, entryFilterAllowsHiding(), gw);
 				else
 					new ChooseEntriesWindow(gw);
 			} else if (e.getSource() == mLoadColors){

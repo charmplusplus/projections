@@ -672,15 +672,32 @@ implements ActionListener, EntryMethodVisibility
 		return true;
 	}
 
+	/** Messages processed per entry method over the displayed range. The
+	 *  chooser reads these as counts, not just as "present", and lists the
+	 *  busiest first: most of what is in range on a large trace is a handful
+	 *  of setup calls against millions of messages. */
 	public int[] getEntriesArray() {
-		int[] present = new int[numEPs];
+		int[] counts = new int[numEPs];
 		for (int ep=0; ep<numEPs; ep++) {
 			// listed whether or not it is switched off, since this dialog is
 			// the only way to switch it back on
-			boolean listed = existsArray[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
-			present[ep] = listed ? 1 : 0;
+			if (!existsArray[ep] || (!countPackUnpack() && isPackOrUnpack(ep))) {
+				continue;
+			}
+			double total = 0;
+			for (int interval=zoomFirst; interval<=zoomLast; interval++) {
+				total += msgCount[interval][ep];
+			}
+			// an entry method that ran at all is listed, however it rounds
+			counts[ep] = (total >= Integer.MAX_VALUE) ? Integer.MAX_VALUE :
+					Math.max(1, (int)total);
 		}
-		return present;
+		return counts;
+	}
+
+	/** Order that list by message count. */
+	public boolean sortEntriesByCount() {
+		return true;
 	}
 
 	public boolean hasEntryList() {

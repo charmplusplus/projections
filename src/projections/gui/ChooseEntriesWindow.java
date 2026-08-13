@@ -1,11 +1,14 @@
 package projections.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -20,6 +23,7 @@ import javax.swing.JTextField;
 import javax.swing.RowFilter;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableRowSorter;
 
@@ -31,6 +35,18 @@ public class ChooseEntriesWindow extends JFrame
 {
 	private EntryMethodVisibility data;
 	private Map<Integer, String> entryNames;
+	/** Per entry method counts, when the tool supplies meaningful ones. Empty
+	 *  otherwise, which is what keeps the list in entry method id order. */
+	private Map<Integer, Integer> entryCounts = new HashMap<Integer, Integer>();
+	/** Counts below this are shown greyed: present in the range, but too few
+	 *  to be anything on a chart. Derived from the largest count, since what
+	 *  counts as negligible depends on the run. */
+	private int dimBelowCount = 0;
+	/** Fixed when the window is built, so the rows never disagree with the
+	 *  columns even if the list is rebuilt later. */
+	private boolean showCountColumn = false;
+	/** A thousandth of the busiest entry method is the line. */
+	private static final int DIM_RATIO = 1000;
 	private List<List> tabledata;
 	private List<String> columnNames;
 	private boolean displayVisibilityCheckboxes;
@@ -59,19 +75,34 @@ public class ChooseEntriesWindow extends JFrame
 
 	private void onlyEntryMethodsInRange() {
 		entryNames = new TreeMap<Integer, String>();
+		entryCounts.clear();
+		dimBelowCount = 0;
+		boolean useCounts = data.sortEntriesByCount();
 		// asked for once: some tools scan their whole display to answer this
 		int[] entriesInRange = data.getEntriesArray();
+		int largest = 0;
 		for (int i = 0; i < entriesInRange.length; i++) {
-			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && entriesInRange[i]!=0)
-				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) + 
-						"::" + 
+			if (MainWindow.runObject[myRun].getSts().getEntryNames().containsKey(i) && entriesInRange[i]!=0) {
+				entryNames.put(i, MainWindow.runObject[myRun].getSts().getEntryNames().get(i) +
+						"::" +
 						MainWindow.runObject[myRun].getSts().entryChares.get(i));
+				if (useCounts) {
+					entryCounts.put(i, entriesInRange[i]);
+					if (entriesInRange[i] > largest) {
+						largest = entriesInRange[i];
+					}
+				}
+			}
 		}
+		dimBelowCount = largest / DIM_RATIO;
 		addIdleOverhead();
 	}
 
 	private void allEntryMethods() {
 		entryNames =  MainWindow.runObject[myRun].getSts().getPrettyEntryNames();
+		// nothing outside the range has a count, so this list stays in id order
+		entryCounts.clear();
+		dimBelowCount = 0;
 		addIdleOverhead();
 	}
 	
@@ -82,13 +113,33 @@ public class ChooseEntriesWindow extends JFrame
 		}
 	}
 
+	/** The entry methods in the order they should be listed: busiest first
+	 *  when the tool gave counts, otherwise by entry method id as always. */
+	private List<Integer> displayOrder() {
+		List<Integer> ids = new ArrayList<Integer>(entryNames.keySet());
+		if (entryCounts.isEmpty()) {
+			return ids;
+		}
+		Collections.sort(ids, new Comparator<Integer>() {
+			public int compare(Integer a, Integer b) {
+				int countA = entryCounts.containsKey(a) ? entryCounts.get(a) : 0;
+				int countB = entryCounts.containsKey(b) ? entryCounts.get(b) : 0;
+				if (countA != countB) {
+					return (countA < countB) ? 1 : -1;
+				}
+				return a.compareTo(b);
+			}
+		});
+		return ids;
+	}
+
 	private void makeTableData() {
 		tabledata.clear();
-		Iterator<Integer> iter = entryNames.keySet().iterator();
+		Iterator<Integer> iter = displayOrder().iterator();
 		while(iter.hasNext()){
 			Integer id = iter.next();
 			String name = entryNames.get(id);
-			List tableRow = new ArrayList(4);
+			List tableRow = new ArrayList(5);
 
 			if (displayVisibilityCheckboxes) {
 				Boolean b = data.entryIsVisibleID(id);
@@ -99,6 +150,11 @@ public class ChooseEntriesWindow extends JFrame
 
 			tableRow.add(name);
 			tableRow.add(id);
+			// after the id, so the id stays the third element that the table
+			// model and "Hide All" read the entry method out of
+			if (showCountColumn) {
+				tableRow.add(entryCounts.containsKey(id) ? entryCounts.get(id) : Integer.valueOf(0));
+			}
 			tableRow.add(c);
 
 			tabledata.add(tableRow);
@@ -109,20 +165,25 @@ public class ChooseEntriesWindow extends JFrame
 		setTitle("Choose which entry methods are displayed and their colors");
 
 
-		// create a table of the data
-		columnNames = new ArrayList<String>(4);
-		if (displayVisibilityCheckboxes)
-			columnNames.add("Visible");
-		columnNames.add("Entry Method");
-		columnNames.add("ID");
-		columnNames.add("Color");
-
 		tabledata = new ArrayList<List>();
 
+		// loaded first: whether there are counts to show decides the columns
 		if (data!=null && data.hasEntryList())
 			onlyEntryMethodsInRange();
 		else
 			allEntryMethods();
+
+		showCountColumn = !entryCounts.isEmpty();
+
+		// create a table of the data
+		columnNames = new ArrayList<String>(5);
+		if (displayVisibilityCheckboxes)
+			columnNames.add("Visible");
+		columnNames.add("Entry Method");
+		columnNames.add("ID");
+		if (showCountColumn)
+			columnNames.add("Count");
+		columnNames.add("Color");
 
 		makeTableData();
 
@@ -133,6 +194,13 @@ public class ChooseEntriesWindow extends JFrame
 
 		table.setDefaultRenderer(ClickableColorBox.class, new ColorRenderer());
 		table.setDefaultEditor(ClickableColorBox.class, new ColorEditor());
+
+		if (showCountColumn) {
+			int nameColumn = displayVisibilityCheckboxes ? 1 : 0;
+			SmallCountRenderer renderer = new SmallCountRenderer(table);
+			table.getColumnModel().getColumn(nameColumn).setCellRenderer(renderer);
+			table.getColumnModel().getColumn(nameColumn+2).setCellRenderer(renderer);
+		}
 
 		// row sorter used only for the search filter; column-click sorting
 		// stays off (the color column is not comparable)
@@ -261,25 +329,61 @@ public class ChooseEntriesWindow extends JFrame
 	}
 
 	private void initColumnSizes(JTable table) {
-		TableColumn column = null;
-
-		if (displayVisibilityCheckboxes) {
-			column = table.getColumnModel().getColumn(0);
-			column.setPreferredWidth(70);
-
-			column = table.getColumnModel().getColumn(1);
-			column.setPreferredWidth(680);
-
-			column = table.getColumnModel().getColumn(2);
-			column.setPreferredWidth(50);
+		// by name rather than by position: the count column is only there for
+		// some tools, and it shifts everything after it
+		for (int c=0; c<columnNames.size(); c++) {
+			String name = columnNames.get(c);
+			TableColumn column = table.getColumnModel().getColumn(c);
+			if (name.equals("Visible")) {
+				column.setPreferredWidth(70);
+			} else if (name.equals("Entry Method")) {
+				column.setPreferredWidth(680);
+			} else if (name.equals("ID")) {
+				column.setPreferredWidth(50);
+			} else if (name.equals("Count")) {
+				column.setPreferredWidth(90);
+			}
 		}
-		else {
-			column = table.getColumnModel().getColumn(0);
-			column.setPreferredWidth(680);
+	}
 
-			column = table.getColumnModel().getColumn(1);
-			column.setPreferredWidth(50);
+	/** Greys the entry methods whose counts are negligible next to the biggest
+	 *  one, and gives the counts thousands separators. They sort to the bottom
+	 *  of the list anyway; this says why they are down there. */
+	private class SmallCountRenderer extends DefaultTableCellRenderer {
+		private final JTable owner;
+		private final DecimalFormat format = new DecimalFormat("###,###");
+
+		SmallCountRenderer(JTable owner) {
+			this.owner = owner;
 		}
 
+		public Component getTableCellRendererComponent(JTable table, Object value,
+				boolean isSelected, boolean hasFocus, int row, int column) {
+			Component c = super.getTableCellRendererComponent(table, value,
+					isSelected, hasFocus, row, column);
+			setHorizontalAlignment((value instanceof Integer) ? RIGHT : LEFT);
+			if (value instanceof Integer) {
+				setText(format.format(value));
+			}
+			if (!isSelected) {
+				// set every time, never only for the grey ones: this renderer
+				// is one reused component whose setForeground sticks, so a
+				// single grey row would otherwise grey every row after it
+				setForeground((countOfRow(row) < dimBelowCount)
+						? Color.gray : table.getForeground());
+			}
+			return c;
+		}
+
+		/** The count behind a displayed row, which the search filter can have
+		 *  moved away from its position in the model. */
+		private int countOfRow(int row) {
+			int modelRow = owner.convertRowIndexToModel(row);
+			if (modelRow < 0 || modelRow >= tabledata.size()) {
+				return Integer.MAX_VALUE;
+			}
+			Object count = tabledata.get(modelRow).get(displayVisibilityCheckboxes ? 3 : 2);
+			return (count instanceof Integer) ? (Integer)count : Integer.MAX_VALUE;
+		}
 	}
 }

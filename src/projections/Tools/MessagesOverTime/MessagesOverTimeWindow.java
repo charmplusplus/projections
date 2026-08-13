@@ -34,6 +34,7 @@ import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
+import projections.gui.graph.Graph;
 
 /**
  *  How many messages were processed over time, from summary detail (.sumd)
@@ -67,6 +68,7 @@ implements ActionListener, EntryMethodVisibility
 	private IntervalChooserPanel intervalPanel;
 
 	private JButton setRanges;
+	private JButton resetZoom;
 	private JLabel totalCount;
 	private JCheckBox packUnpackCheckBox;
 	private JCheckBox showLegendCheckBox;
@@ -85,6 +87,15 @@ implements ActionListener, EntryMethodVisibility
 	private int startInterval;
 	private int endInterval;
 	private int numIntervals;
+	/** The slice of the loaded range that is on the chart, as row indices into
+	 *  msgCount: all of it until the user drags out something narrower.
+	 *
+	 *  Zooming re-slices what is already in memory rather than re-reading the
+	 *  trace, so it costs nothing on a run of a few thousand PEs -- but it
+	 *  cannot show finer bins than the range dialog loaded. To go below the
+	 *  interval size, load a shorter range instead. */
+	private int zoomFirst;
+	private int zoomLast;
 	private int numEPs;
 	private long intervalSize;
 	private SortedSet<Integer> processorList;
@@ -205,6 +216,10 @@ implements ActionListener, EntryMethodVisibility
 
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
+		resetZoom = new JButton("Reset Zoom");
+		resetZoom.setToolTipText("Back to the whole loaded range. Drag across the chart to zoom into part of it");
+		resetZoom.setEnabled(false);
+		resetZoom.addActionListener(this);
 		totalCount = new JLabel();
 		packUnpackCheckBox = new JCheckBox("Count pack/unpack");
 		packUnpackCheckBox.setToolTipText("Include the runtime's message packing and unpacking, which charm counts as entry method runs even though no message was delivered");
@@ -215,12 +230,26 @@ implements ActionListener, EntryMethodVisibility
 
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
+		// The gesture is not discoverable, so it is written on the window --
+		// in the control strip rather than on the chart, which gets saved to
+		// paper and should carry no instructions to a mouse.
+		JLabel zoomHint = new JLabel("Click and drag across the chart to zoom");
+		zoomHint.setFont(zoomHint.getFont().deriveFont(java.awt.Font.ITALIC));
+
 		Util.gblAdd(controlPanel, setRanges, gbc, 0,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, totalCount, gbc, 1,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, packUnpackCheckBox, gbc, 2,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, zoomHint, gbc, 1,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, resetZoom, gbc, 2,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, packUnpackCheckBox, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, totalCount, gbc, 0,1, 5,1, 0,0);
 
 		graphPanel = getMainPanel();
+		// Dragging across the chart zooms the time axis into that stretch.
+		graphCanvas.setXRangeSelectionListener(new Graph.XRangeSelectionListener() {
+			public void xRangeSelected(int startIndex, int endIndex) {
+				zoomTo(startIndex, endIndex);
+			}
+		});
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, yScalePanel, gbc, 0,2, 1,1, 0,0);
 		Util.gblAdd(mainPanel, controlPanel, gbc, 0,3, 1,0, 0,0);
@@ -265,16 +294,61 @@ implements ActionListener, EntryMethodVisibility
 				intervalSize, startInterval, endInterval, processorList);
 		msgBytes = MainWindow.runObject[myRun].getSumDetailBytesPerInterval(
 				intervalSize, startInterval, endInterval, processorList);
+		zoomFirst = 0;
+		zoomLast = numIntervals-1;
+	}
 
+	/** Which entry methods ran anywhere in the part of the range on show.
+	 *
+	 *  Recomputed for every zoom, so the colour and visibility chooser lists
+	 *  the entry methods of the window being looked at rather than of the
+	 *  whole run: on a large trace that is the difference between a handful of
+	 *  entries and several hundred. Counts, not bytes, decide it -- a message
+	 *  of no recorded size is still a message. */
+	private void computeExists() {
 		for (int ep=0; ep<numEPs; ep++) {
 			existsArray[ep] = false;
-			for (int interval=0; interval<numIntervals; interval++) {
+			for (int interval=zoomFirst; interval<=zoomLast; interval++) {
 				if (msgCount[interval][ep] > 0) {
 					existsArray[ep] = true;
 					break;
 				}
 			}
 		}
+	}
+
+	/** Number of intervals on the chart. */
+	private int zoomedIntervals() {
+		return zoomLast-zoomFirst+1;
+	}
+
+	private boolean isZoomed() {
+		return zoomFirst > 0 || zoomLast < numIntervals-1;
+	}
+
+	/** Narrow the view to the bins the user dragged out, which are indices
+	 *  into what is currently displayed, not into the loaded range. */
+	private void zoomTo(int firstShown, int lastShown) {
+		if (msgCount == null || lastShown <= firstShown) {
+			return;
+		}
+		int first = zoomFirst + Math.max(0, firstShown);
+		int last = zoomFirst + Math.min(zoomedIntervals()-1, lastShown);
+		if (last <= first) {
+			return;
+		}
+		zoomFirst = first;
+		zoomLast = last;
+		displayData();
+	}
+
+	private void resetZoom() {
+		if (msgCount == null) {
+			return;
+		}
+		zoomFirst = 0;
+		zoomLast = numIntervals-1;
+		displayData();
 	}
 
 	/** Hand the data to the chart in whichever scale is selected. */
@@ -291,14 +365,32 @@ implements ActionListener, EntryMethodVisibility
 			return;
 		}
 
+		computeExists();
+		resetZoom.setEnabled(isZoomed());
+
 		String what = showingBytes() ? "Bytes Received" : "Messages Processed";
+		// Only the zoomed slice reaches the chart, so both axes scale to it:
+		// the stacked maximum is recomputed from the data it is given, and the
+		// x axis is re-based onto the first interval on show.
 		setDataSource(what + " Over Time", scaleForDisplay(displayCounts()), colorer, this);
 		setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
-				startInterval*intervalSize, intervalSize);
+				(startInterval+zoomFirst)*intervalSize, intervalSize);
 		setYAxis(what + yAxisSuffix(), "");
 
-		String label = (showingBytes() ? "Total bytes received: " : "Total messages processed: ") +
+		String label = (showingBytes() ? "Total bytes received" : "Total messages processed") +
+				(isZoomed() ? " in view: " : ": ") +
 				_format.format(total(TOTAL_SHOWN)) + " over " + processorList.size() + " PEs";
+		// How many entry methods the chart is stacking. Most of a run's entry
+		// methods never appear, and many that do are a handful of messages
+		// against millions -- listed in the chooser, invisible on the chart --
+		// so the count is worth stating next to the total.
+		int onChart = 0;
+		for (int ep=0; ep<numEPs; ep++) {
+			if (existsArray[ep] && shown(ep)) {
+				onChart++;
+			}
+		}
+		label += ", " + onChart + " entry method" + (onChart == 1 ? "" : "s");
 		double packUnpack = total(TOTAL_PACK_UNPACK);
 		if (packUnpack > 0 && !countPackUnpack()) {
 			label += "  (" + _format.format(packUnpack) +
@@ -346,10 +438,10 @@ implements ActionListener, EntryMethodVisibility
 	 *  switched on, and the runtime's packing only if it was asked for. */
 	private double[][] displayCounts() {
 		double[][] source = sourceArray();
-		double[][] filtered = new double[numIntervals][numEPs];
-		for (int interval=0; interval<numIntervals; interval++) {
+		double[][] filtered = new double[zoomedIntervals()][numEPs];
+		for (int i=0; i<zoomedIntervals(); i++) {
 			for (int ep=0; ep<numEPs; ep++) {
-				filtered[interval][ep] = shown(ep) ? source[interval][ep] : 0.0;
+				filtered[i][ep] = shown(ep) ? source[zoomFirst+i][ep] : 0.0;
 			}
 		}
 		return filtered;
@@ -369,12 +461,12 @@ implements ActionListener, EntryMethodVisibility
 	private static final int TOTAL_PACK_UNPACK = 1;
 	private static final int TOTAL_HIDDEN = 2;
 
-	/** Sum over the loaded range of one group of entry methods: the ones on
+	/** Sum over the displayed range of one group of entry methods: the ones on
 	 *  the chart, the runtime's packing, or the ones switched off. */
 	private double total(int which) {
 		double[][] source = sourceArray();
 		double total = 0;
-		for (int interval=0; interval<numIntervals; interval++) {
+		for (int interval=zoomFirst; interval<=zoomLast; interval++) {
 			for (int ep=0; ep<numEPs; ep++) {
 				boolean counted;
 				if (which == TOTAL_SHOWN) {
@@ -447,16 +539,19 @@ implements ActionListener, EntryMethodVisibility
 
 	public String[] getPopup(int xVal, int yVal) {
 		if ((xVal < 0) || (yVal < 0) || msgCount == null ||
-				xVal >= numIntervals || yVal >= numEPs) {
+				xVal >= zoomedIntervals() || yVal >= numEPs) {
 			return null;
 		}
+		// xVal counts from the first interval on the chart, which after a zoom
+		// is not the first interval of the loaded range
+		int interval = zoomFirst + xVal;
 		String[] rString = new String[4];
 		rString[0] = "Time Interval: " +
-			U.humanReadableString((xVal+startInterval)*intervalSize) + " to " +
-			U.humanReadableString((xVal+startInterval+1)*intervalSize);
+			U.humanReadableString((interval+startInterval)*intervalSize) + " to " +
+			U.humanReadableString((interval+startInterval+1)*intervalSize);
 		rString[1] = "Chare: " + MainWindow.runObject[myRun].getEntryChareNameByIndex(yVal);
 		rString[2] = "Entry Method: " + MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-		double count = sourceArray()[xVal][yVal];
+		double count = sourceArray()[interval][yVal];
 		String unit = showingBytes() ? "bytes" : "messages";
 		if (rateSelected()) {
 			rString[3] = "Rate = " + _format.format(count / rateDivisor()) + " " + unit + "/s" +
@@ -535,7 +630,7 @@ implements ActionListener, EntryMethodVisibility
 				continue;
 			}
 			double total = 0;
-			for (int interval=0; interval<numIntervals; interval++) {
+			for (int interval=zoomFirst; interval<=zoomLast; interval++) {
 				total += sourceArray()[interval][ep];
 			}
 			if (total > 0) {
@@ -634,6 +729,8 @@ implements ActionListener, EntryMethodVisibility
 		Object source = e.getSource();
 		if (source == setRanges) {
 			showDialog();
+		} else if (source == resetZoom) {
+			resetZoom();
 		} else if (source == showLegendCheckBox) {
 			refreshLegend();
 		} else if (source == packUnpackCheckBox || source == messagesButton

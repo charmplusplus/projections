@@ -3,6 +3,7 @@ package projections.gui.graph;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -150,6 +151,27 @@ public class Graph extends JPanel
     }
 
     private java.util.List<RegionLabel> regionLabels = null;
+
+    /** Told which range of bins the user dragged out on the chart.
+     *
+     *  A tool that registers one gets a rubber band over the plot; every tool
+     *  that does not is left with the mouse behaviour it always had. What the
+     *  range means is the tool's business: the usual answer is to redraw from
+     *  that slice of its data, which rescales both axes to it. */
+    public interface XRangeSelectionListener {
+    	public void xRangeSelected(int startIndex, int endIndex);
+    }
+
+    private XRangeSelectionListener xRangeListener = null;
+    // x pixels of a drag in progress, or -1 when there is none
+    private int dragFromPixel = -1;
+    private int dragToPixel = -1;
+    /** Shorter than this and the user meant to click, not to select. */
+    private static final int MIN_DRAG_PIXELS = 4;
+
+    public void setXRangeSelectionListener(XRangeSelectionListener listener) {
+    	xRangeListener = listener;
+    }
 
     
     /** Special construgraphCanvasctor. This can only be called from a projections tool!!! */
@@ -406,19 +428,91 @@ public class Graph extends JPanel
     	fmTitleAnnotations = g.getFontMetrics(fontTitleAnnotations);
 
     	drawDisplay((Graphics2D) g);
+    	drawSelection((Graphics2D) g);
     }
 
-   
+    /** The band the user is dragging out, over the finished chart. */
+    private void drawSelection(Graphics2D g) {
+    	if (dragFromPixel < 0 || dragToPixel < 0 || dragFromPixel == dragToPixel) {
+    		return;
+    	}
+    	int left = Math.max(Math.min(dragFromPixel, dragToPixel), originX());
+    	int right = Math.min(Math.max(dragFromPixel, dragToPixel), originX()+availableWidth());
+    	if (right <= left) {
+    		return;
+    	}
+    	int top = topMargin();
+    	int height = originY() - top;
+    	Color previous = g.getColor();
+    	g.setColor(new Color(128, 128, 128, 80));
+    	g.fillRect(left, top, right-left, height);
+    	g.setColor(MainWindow.runObject[myRun].foreground);
+    	g.drawLine(left, top, left, top+height);
+    	g.drawLine(right, top, right, top+height);
+    	g.setColor(previous);
+    }
+
+    /** A pixel brought inside the plot area. */
+    private int clampToPlot(int xPos) {
+    	int lo = originX();
+    	int hi = originX() + availableWidth();
+    	return Math.max(lo, Math.min(hi, xPos));
+    }
+
+    /** The bin under a pixel, clamped to the chart instead of refused the way
+     *  getXValue does it: a drag usually ends past the last bar. */
+    private int indexAt(int xPos) {
+    	int offset = xPos - originX();
+    	if (offset < 0 || dataSource == null) {
+    		return 0;
+    	}
+    	int index = (int)(offset/pixelincrementX());
+    	int last = dataSource.getIndexCount()-1;
+    	return (index > last) ? last : index;
+    }
+
+
     public void mouseEntered(MouseEvent e) {
-    } 
+    	if (xRangeListener != null) {
+    		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+    	}
+    }
 
     public void mouseExited(MouseEvent e) {
-    } 
+    	if (xRangeListener != null) {
+    		setCursor(Cursor.getDefaultCursor());
+    	}
+    }
 
     public void mousePressed(MouseEvent e) {
-    } 
+    	if (xRangeListener == null || dataSource == null) {
+    		return;
+    	}
+    	disposeOfBubble();
+    	// clamped rather than refused, so a drag may start in the margins --
+    	// starting one exactly on the first bar is not something to ask of a
+    	// user who wants the chart from its left edge
+    	dragFromPixel = clampToPlot(e.getX());
+    	dragToPixel = dragFromPixel;
+    }
 
     public void mouseReleased(MouseEvent e) {
+    	if (dragFromPixel < 0) {
+    		return;
+    	}
+    	int from = dragFromPixel;
+    	int to = (dragToPixel >= 0) ? dragToPixel : from;
+    	dragFromPixel = -1;
+    	dragToPixel = -1;
+    	repaint();
+    	if (Math.abs(to-from) < MIN_DRAG_PIXELS) {
+    		return;
+    	}
+    	int first = indexAt(Math.min(from, to));
+    	int last = indexAt(Math.max(from, to));
+    	if (last > first) {
+    		xRangeListener.xRangeSelected(first, last);
+    	}
     }
 
 
@@ -456,6 +550,11 @@ public class Graph extends JPanel
     }
 
     public void mouseDragged(MouseEvent e) {
+    	if (dragFromPixel < 0) {
+    		return;
+    	}
+    	dragToPixel = clampToPlot(e.getX());
+    	repaint();
     }
     
 

@@ -21,15 +21,18 @@ public class MyTableModel extends AbstractTableModel implements ActionListener {
         displayVisibilityCheckboxes = checkboxesVisible;
     }
 
+    /** Decided by what the cell holds rather than by where it sits: the
+     *  columns are not the same for every tool. Only the visibility box and
+     *  the color swatch are editable -- the id column used to be as well,
+     *  which let a user type over an entry method's id to no effect. */
     public boolean isCellEditable(int row, int col) {
-        return ((displayVisibilityCheckboxes && (col == 0 || col == 3)) || col == 2);
+        Object value = getValueAt(row, col);
+        return (displayVisibilityCheckboxes && value instanceof Boolean)
+                || value instanceof ClickableColorBox;
     }
 
     public int getColumnCount() {
-        if (displayVisibilityCheckboxes)
-            return 4;
-        else
-            return 3;
+        return columnNames.size();
     }
 
     public Class getColumnClass(int c) {

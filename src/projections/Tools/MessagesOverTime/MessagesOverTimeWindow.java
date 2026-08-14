@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -20,8 +21,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
 import projections.gui.EntryMethodVisibility;
@@ -33,6 +36,7 @@ import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.Util;
+import projections.gui.graph.Graph;
 
 /**
  *  How many messages were processed over time, from summary detail (.sumd)
@@ -66,6 +70,8 @@ implements ActionListener, EntryMethodVisibility
 	private IntervalChooserPanel intervalPanel;
 
 	private JButton setRanges;
+	private JButton resetZoom;
+	private JButton smoothing;
 	private JLabel totalCount;
 	private JCheckBox packUnpackCheckBox;
 	private JCheckBox showLegendCheckBox;
@@ -84,6 +90,15 @@ implements ActionListener, EntryMethodVisibility
 	private int startInterval;
 	private int endInterval;
 	private int numIntervals;
+	/** The slice of the loaded range that is on the chart, as row indices into
+	 *  msgCount: all of it until the user drags out something narrower.
+	 *
+	 *  Zooming re-slices what is already in memory rather than re-reading the
+	 *  trace, so it costs nothing on a run of a few thousand PEs -- but it
+	 *  cannot show finer bins than the range dialog loaded. To go below the
+	 *  interval size, load a shorter range instead. */
+	private int zoomFirst;
+	private int zoomLast;
 	private int numEPs;
 	private long intervalSize;
 	private SortedSet<Integer> processorList;
@@ -95,7 +110,19 @@ implements ActionListener, EntryMethodVisibility
 	 *  before charm recorded message sizes, which is why the Bytes view turns
 	 *  itself off rather than drawing an empty chart. */
 	private double[][] msgBytes;
+	private boolean bytesLoaded;
+	/** What the chart is drawing: the displayed slice, filtered and smoothed,
+	 *  before any per-second scaling. Popups read the bar out of this. */
+	private double[][] chartArray;
+	private int smoothMode = SMOOTH_NONE;
+	private int smoothWindow = 1;
 	private boolean existsArray[];
+	/** Entry methods the user has left switched on in the chooser. Switching
+	 *  one off drops it from the chart, the totals and the legend, so the y
+	 *  axis rescales to whatever is left -- which is the point of switching it
+	 *  off: one entry method with two orders of magnitude more messages than
+	 *  the rest flattens everything else into the axis. */
+	private boolean epVisible[];
 	private DecimalFormat _format;
 	private MyColorer colorer;
 
@@ -119,6 +146,8 @@ implements ActionListener, EntryMethodVisibility
 		setGraphSpecificData();
 		numEPs = MainWindow.runObject[myRun].getNumUserEntries();
 		existsArray = new boolean[numEPs];
+		epVisible = new boolean[numEPs];
+		Arrays.fill(epVisible, true);
 		for (int ep=0; ep<numEPs; ep++) {
 			String name = MainWindow.runObject[myRun].getEntryNameByIndex(ep);
 			if ("dummy_pack_ep".equals(name)) {
@@ -196,6 +225,13 @@ implements ActionListener, EntryMethodVisibility
 
 		setRanges = new JButton("Select New Range");
 		setRanges.addActionListener(this);
+		smoothing = new JButton("Smoothing...");
+		smoothing.setToolTipText("Combine intervals, or take a moving average, to see the shape under the noise");
+		smoothing.addActionListener(this);
+		resetZoom = new JButton("Reset Zoom");
+		resetZoom.setToolTipText("Back to the whole loaded range. Drag across the chart to zoom into part of it");
+		resetZoom.setEnabled(false);
+		resetZoom.addActionListener(this);
 		totalCount = new JLabel();
 		packUnpackCheckBox = new JCheckBox("Count pack/unpack");
 		packUnpackCheckBox.setToolTipText("Include the runtime's message packing and unpacking, which charm counts as entry method runs even though no message was delivered");
@@ -206,12 +242,27 @@ implements ActionListener, EntryMethodVisibility
 
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
+		// The gesture is not discoverable, so it is written on the window --
+		// in the control strip rather than on the chart, which gets saved to
+		// paper and should carry no instructions to a mouse.
+		JLabel zoomHint = new JLabel("Click and drag across the chart to zoom");
+		zoomHint.setFont(zoomHint.getFont().deriveFont(java.awt.Font.ITALIC));
+
 		Util.gblAdd(controlPanel, setRanges, gbc, 0,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, totalCount, gbc, 1,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, packUnpackCheckBox, gbc, 2,0, 1,1, 0,0);
-		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, zoomHint, gbc, 1,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, resetZoom, gbc, 2,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, smoothing, gbc, 3,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, packUnpackCheckBox, gbc, 4,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 5,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, totalCount, gbc, 0,1, 6,1, 0,0);
 
 		graphPanel = getMainPanel();
+		// Dragging across the chart zooms the time axis into that stretch.
+		graphCanvas.setXRangeSelectionListener(new Graph.XRangeSelectionListener() {
+			public void xRangeSelected(int startIndex, int endIndex) {
+				zoomTo(startIndex, endIndex);
+			}
+		});
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,1, 1,1, 1,1);
 		Util.gblAdd(mainPanel, yScalePanel, gbc, 0,2, 1,1, 0,0);
 		Util.gblAdd(mainPanel, controlPanel, gbc, 0,3, 1,0, 0,0);
@@ -254,18 +305,156 @@ implements ActionListener, EntryMethodVisibility
 	private void getData() {
 		msgCount = MainWindow.runObject[myRun].getSumDetailMsgsPerInterval(
 				intervalSize, startInterval, endInterval, processorList);
+		msgBytes = null;
+		bytesLoaded = false;
+		if (showingBytes()) {
+			// already looking at sizes when the range was reloaded: expand
+			// them here, where this still runs off the event thread
+			ensureBytes();
+		}
+		zoomFirst = 0;
+		zoomLast = numIntervals-1;
+	}
+
+	/** Expand the message sizes, once, when something first needs them.
+	 *
+	 *  Sizes cost their own pass over every PE and entry method, and a trace
+	 *  written before charm recorded them has nothing there to find: the pass
+	 *  walks empty run length data to produce an array of zeros. So it waits
+	 *  until the Bytes view is asked for. Slow enough to belong off the event
+	 *  thread -- see where this is called from. */
+	private void ensureBytes() {
+		if (bytesLoaded) {
+			return;
+		}
+		bytesLoaded = true;
 		msgBytes = MainWindow.runObject[myRun].getSumDetailBytesPerInterval(
 				intervalSize, startInterval, endInterval, processorList);
+	}
 
+	/** Which entry methods ran anywhere in the part of the range on show.
+	 *
+	 *  Recomputed for every zoom, so the colour and visibility chooser lists
+	 *  the entry methods of the window being looked at rather than of the
+	 *  whole run: on a large trace that is the difference between a handful of
+	 *  entries and several hundred. Counts, not bytes, decide it -- a message
+	 *  of no recorded size is still a message. */
+	private void computeExists() {
 		for (int ep=0; ep<numEPs; ep++) {
 			existsArray[ep] = false;
-			for (int interval=0; interval<numIntervals; interval++) {
+			for (int interval=zoomFirst; interval<=zoomLast; interval++) {
 				if (msgCount[interval][ep] > 0) {
 					existsArray[ep] = true;
 					break;
 				}
 			}
 		}
+	}
+
+	/** Number of intervals on the chart. */
+	private int zoomedIntervals() {
+		return zoomLast-zoomFirst+1;
+	}
+
+	private boolean isZoomed() {
+		return zoomFirst > 0 || zoomLast < numIntervals-1;
+	}
+
+	/** Narrow the view to the bins the user dragged out, which are indices
+	 *  into what is currently displayed, not into the loaded range. */
+	private void zoomTo(int firstShown, int lastShown) {
+		if (msgCount == null || lastShown <= firstShown) {
+			return;
+		}
+		// the selection is in bars, which are intervals only when nothing is
+		// being combined
+		int first = zoomFirst + rowFirstInterval(Math.max(0, firstShown));
+		int last = zoomFirst + rowLastInterval(lastShown);
+		if (last <= first) {
+			return;
+		}
+		zoomFirst = first;
+		zoomLast = last;
+		displayData();
+	}
+
+	/** Ask how the intervals should be combined. Modal, and it only reads the
+	 *  window size for the mode that was chosen, so a stale number left in one
+	 *  of the fields cannot take effect behind the user's back. */
+	private void showSmoothingDialog() {
+		if (msgCount == null) {
+			return;
+		}
+		JRadioButton none = new JRadioButton("None: one bar per interval (" +
+				U.humanReadableString(intervalSize) + ")", smoothMode == SMOOTH_NONE);
+		JRadioButton combine = new JRadioButton("Combine every", smoothMode == SMOOTH_BIN);
+		JRadioButton average = new JRadioButton("Moving average over", smoothMode == SMOOTH_AVERAGE);
+		JRadioButton whole = new JRadioButton("One bar: totals over the whole visible range",
+				smoothMode == SMOOTH_WHOLE);
+		ButtonGroup group = new ButtonGroup();
+		group.add(none);
+		group.add(combine);
+		group.add(average);
+		group.add(whole);
+
+		JTextField combineField = new JTextField(String.valueOf(Math.max(2, smoothWindow)), 5);
+		JTextField averageField = new JTextField(String.valueOf(Math.max(2, smoothWindow)), 5);
+
+		GridBagConstraints gbc = new GridBagConstraints();
+		gbc.fill = GridBagConstraints.HORIZONTAL;
+		gbc.anchor = GridBagConstraints.WEST;
+		JPanel panel = new JPanel(new GridBagLayout());
+		Util.gblAdd(panel, none, gbc, 0,0, 3,1, 1,0);
+		Util.gblAdd(panel, combine, gbc, 0,1, 1,1, 0,0);
+		Util.gblAdd(panel, combineField, gbc, 1,1, 1,1, 0,0);
+		Util.gblAdd(panel, new JLabel(" intervals into one bar"), gbc, 2,1, 1,1, 1,0);
+		Util.gblAdd(panel, average, gbc, 0,2, 1,1, 0,0);
+		Util.gblAdd(panel, averageField, gbc, 1,2, 1,1, 0,0);
+		Util.gblAdd(panel, new JLabel(" intervals, one bar per interval"), gbc, 2,2, 1,1, 1,0);
+		Util.gblAdd(panel, whole, gbc, 0,3, 3,1, 1,0);
+		Util.gblAdd(panel, new JLabel(zoomedIntervals() + " intervals are on the chart"),
+				gbc, 0,4, 3,1, 1,0);
+
+		int answer = JOptionPane.showConfirmDialog(this, panel, "Smoothing",
+				JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+		if (answer != JOptionPane.OK_OPTION) {
+			return;
+		}
+		if (none.isSelected()) {
+			smoothMode = SMOOTH_NONE;
+		} else if (whole.isSelected()) {
+			smoothMode = SMOOTH_WHOLE;
+		} else {
+			boolean isAverage = average.isSelected();
+			int window = parseWindow(isAverage ? averageField : combineField);
+			if (window < 2) {
+				JOptionPane.showMessageDialog(this,
+						"A window of " + window + " leaves the chart as it is; give 2 or more intervals.",
+						"Smoothing", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			smoothMode = isAverage ? SMOOTH_AVERAGE : SMOOTH_BIN;
+			smoothWindow = window;
+		}
+		displayData();
+	}
+
+	/** The window a text field holds, or 0 if it does not hold a number. */
+	private int parseWindow(JTextField field) {
+		try {
+			return Integer.parseInt(field.getText().trim());
+		} catch (NumberFormatException e) {
+			return 0;
+		}
+	}
+
+	private void resetZoom() {
+		if (msgCount == null) {
+			return;
+		}
+		zoomFirst = 0;
+		zoomLast = numIntervals-1;
+		displayData();
 	}
 
 	/** Hand the data to the chart in whichever scale is selected. */
@@ -282,18 +471,46 @@ implements ActionListener, EntryMethodVisibility
 			return;
 		}
 
+		computeExists();
+		resetZoom.setEnabled(isZoomed());
+
 		String what = showingBytes() ? "Bytes Received" : "Messages Processed";
-		setDataSource(what + " Over Time", scaleForDisplay(displayCounts()), colorer, this);
-		setXAxis("Time (" + U.humanReadableString(intervalSize) + " resolution)", "Time",
-				startInterval*intervalSize, intervalSize);
+		// Only the zoomed slice reaches the chart, so both axes scale to it:
+		// the stacked maximum is recomputed from the data it is given, and the
+		// x axis is re-based onto the first interval on show. chartArray is
+		// kept as the chart sees it, before any per-second scaling, so popups
+		// can report the bar under the mouse rather than the raw interval.
+		chartArray = smooth(displayCounts());
+		long barSize = intervalSize*binSize();
+		setDataSource(what + " Over Time", scaleForDisplay(chartArray), colorer, this);
+		setXAxis("Time (" + U.humanReadableString(barSize) + (averaging() ? " intervals)" : " resolution)"), "Time",
+				(startInterval+zoomFirst)*intervalSize, barSize);
 		setYAxis(what + yAxisSuffix(), "");
 
-		String label = (showingBytes() ? "Total bytes received: " : "Total messages processed: ") +
-				_format.format(total(false)) + " over " + processorList.size() + " PEs";
-		double packUnpack = total(true) - total(false);
+		String label = (showingBytes() ? "Total bytes received" : "Total messages processed") +
+				(isZoomed() ? " in view: " : ": ") +
+				_format.format(total(TOTAL_SHOWN)) + " over " + processorList.size() + " PEs";
+		// How many entry methods the chart is stacking. Most of a run's entry
+		// methods never appear, and many that do are a handful of messages
+		// against millions -- listed in the chooser, invisible on the chart --
+		// so the count is worth stating next to the total.
+		int onChart = 0;
+		for (int ep=0; ep<numEPs; ep++) {
+			if (existsArray[ep] && shown(ep)) {
+				onChart++;
+			}
+		}
+		label += ", " + onChart + " entry method" + (onChart == 1 ? "" : "s");
+		label += smoothingDescription();
+		double packUnpack = total(TOTAL_PACK_UNPACK);
 		if (packUnpack > 0 && !countPackUnpack()) {
 			label += "  (" + _format.format(packUnpack) +
 					(showingBytes() ? " from pack/unpack not counted)" : " pack/unpack runs not counted)");
+		}
+		int hidden = hiddenCount();
+		if (hidden > 0) {
+			label += "  (" + hidden + " entry method" + (hidden == 1 ? "" : "s") + " hidden, " +
+					_format.format(total(TOTAL_HIDDEN)) + (showingBytes() ? " bytes)" : " messages)");
 		}
 		totalCount.setText(label);
 		refreshLegend();
@@ -307,6 +524,7 @@ implements ActionListener, EntryMethodVisibility
 	/** Does this trace carry message sizes at all? charm only started writing
 	 *  them in 2026; everything older reads as zeros. */
 	private boolean hasBytes() {
+		ensureBytes();
 		if (msgBytes == null) {
 			return false;
 		}
@@ -328,38 +546,177 @@ implements ActionListener, EntryMethodVisibility
 		return ep == packEP || ep == unpackEP;
 	}
 
-	/** The counts as the chart should show them: everything, or everything the
-	 *  application itself processed. */
+	/** The counts as the chart should show them: the entry methods that are
+	 *  switched on, and the runtime's packing only if it was asked for. */
 	private double[][] displayCounts() {
 		double[][] source = sourceArray();
-		if (countPackUnpack() || (packEP < 0 && unpackEP < 0)) {
-			return source;
-		}
-		double[][] filtered = new double[numIntervals][numEPs];
-		for (int interval=0; interval<numIntervals; interval++) {
+		double[][] filtered = new double[zoomedIntervals()][numEPs];
+		for (int i=0; i<zoomedIntervals(); i++) {
 			for (int ep=0; ep<numEPs; ep++) {
-				filtered[interval][ep] = isPackOrUnpack(ep) ? 0.0 : source[interval][ep];
+				filtered[i][ep] = shown(ep) ? source[zoomFirst+i][ep] : 0.0;
 			}
 		}
 		return filtered;
 	}
 
-	/** The raw array behind the current view. */
-	private double[][] sourceArray() {
-		return showingBytes() ? msgBytes : msgCount;
+	/** Is this entry method part of the picture right now? */
+	private boolean shown(int ep) {
+		return epVisible[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
 	}
 
-	private double total(boolean includePackUnpack) {
+	// How the per-interval numbers are combined before they are drawn. At a
+	// millisecond resolution a chart of a real run is mostly noise; combining
+	// intervals is what makes its shape visible.
+	private static final int SMOOTH_NONE = 0;
+	/** Every k intervals become one bar holding their total. */
+	private static final int SMOOTH_BIN = 1;
+	/** Each interval keeps its bar, holding the mean of the k around it. */
+	private static final int SMOOTH_AVERAGE = 2;
+	/** One bar for everything on screen: the totals of the visible range,
+	 *  which is the k = whole view case of combining. */
+	private static final int SMOOTH_WHOLE = 3;
+
+	private boolean averaging() {
+		return smoothMode == SMOOTH_AVERAGE;
+	}
+
+	/** How many source intervals go into one bar. Always 1 when averaging,
+	 *  which keeps a bar per interval and only changes what is in it. */
+	private int binSize() {
+		if (smoothMode == SMOOTH_WHOLE) {
+			return zoomedIntervals();
+		}
+		if (smoothMode == SMOOTH_BIN) {
+			return Math.max(1, Math.min(smoothWindow, zoomedIntervals()));
+		}
+		return 1;
+	}
+
+	/** Combine the displayed intervals as the smoothing setting asks.
+	 *
+	 *  Both forms are honest about what a bar means: combining sums, so a bar
+	 *  is the messages of the intervals under it, and averaging leaves the bar
+	 *  per interval and puts the local mean in it. Neither invents data at the
+	 *  edges -- a window that runs off the end is averaged over what is there. */
+	private double[][] smooth(double[][] rows) {
+		if (smoothMode == SMOOTH_NONE || rows.length == 0) {
+			return rows;
+		}
+		if (averaging()) {
+			int window = Math.max(1, Math.min(smoothWindow, rows.length));
+			if (window == 1) {
+				return rows;
+			}
+			double[][] out = new double[rows.length][numEPs];
+			int half = window/2;
+			for (int i=0; i<rows.length; i++) {
+				int from = Math.max(0, i-half);
+				int to = Math.min(rows.length-1, i+half);
+				int span = to-from+1;
+				for (int ep=0; ep<numEPs; ep++) {
+					double sum = 0;
+					for (int j=from; j<=to; j++) {
+						sum += rows[j][ep];
+					}
+					out[i][ep] = sum/span;
+				}
+			}
+			return out;
+		}
+		int bin = binSize();
+		if (bin <= 1) {
+			return rows;
+		}
+		// a partial last bin is kept: dropping it would lose messages, and
+		// the popup says which intervals each bar covers
+		int outRows = (rows.length + bin - 1)/bin;
+		double[][] out = new double[outRows][numEPs];
+		for (int i=0; i<rows.length; i++) {
+			for (int ep=0; ep<numEPs; ep++) {
+				out[i/bin][ep] += rows[i][ep];
+			}
+		}
+		return out;
+	}
+
+	/** The first displayed interval behind a bar, relative to the zoom. */
+	private int rowFirstInterval(int row) {
+		return averaging() ? row : row*binSize();
+	}
+
+	private int rowLastInterval(int row) {
+		if (averaging()) {
+			return row;
+		}
+		return Math.min(zoomedIntervals()-1, (row+1)*binSize() - 1);
+	}
+
+	private String smoothingDescription() {
+		if (smoothMode == SMOOTH_NONE || binSize() <= 1 && !averaging()) {
+			return "";
+		}
+		if (averaging()) {
+			int window = Math.max(1, Math.min(smoothWindow, zoomedIntervals()));
+			if (window <= 1) {
+				return "";
+			}
+			return "  (moving average over " + window + " intervals, " +
+					U.humanReadableString(window*intervalSize) + ")";
+		}
+		if (smoothMode == SMOOTH_WHOLE) {
+			return "  (one bar: totals over the visible range)";
+		}
+		return "  (" + binSize() + " intervals combined per bar, " +
+				U.humanReadableString(binSize()*intervalSize) + ")";
+	}
+
+	/** The raw array behind the current view. */
+	private double[][] sourceArray() {
+		if (!showingBytes()) {
+			return msgCount;
+		}
+		ensureBytes();
+		return msgBytes;
+	}
+
+	private static final int TOTAL_SHOWN = 0;
+	private static final int TOTAL_PACK_UNPACK = 1;
+	private static final int TOTAL_HIDDEN = 2;
+
+	/** Sum over the displayed range of one group of entry methods: the ones on
+	 *  the chart, the runtime's packing, or the ones switched off. */
+	private double total(int which) {
 		double[][] source = sourceArray();
 		double total = 0;
-		for (int interval=0; interval<numIntervals; interval++) {
+		for (int interval=zoomFirst; interval<=zoomLast; interval++) {
 			for (int ep=0; ep<numEPs; ep++) {
-				if (includePackUnpack || !isPackOrUnpack(ep)) {
+				boolean counted;
+				if (which == TOTAL_SHOWN) {
+					counted = shown(ep);
+				} else if (which == TOTAL_HIDDEN) {
+					counted = !epVisible[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
+				} else {
+					counted = isPackOrUnpack(ep);
+				}
+				if (counted) {
 					total += source[interval][ep];
 				}
 			}
 		}
 		return total;
+	}
+
+	/** How many entry methods the user has switched off, counting only ones
+	 *  that would otherwise be on the chart. */
+	private int hiddenCount() {
+		int hidden = 0;
+		for (int ep=0; ep<numEPs; ep++) {
+			if (existsArray[ep] && !epVisible[ep] &&
+					(countPackUnpack() || !isPackOrUnpack(ep))) {
+				hidden++;
+			}
+		}
+		return hidden;
 	}
 
 	private boolean rateSelected() {
@@ -371,8 +728,11 @@ implements ActionListener, EntryMethodVisibility
 	}
 
 	private double rateDivisor() {
-		// intervalSize is in microseconds
-		double divisor = intervalSize / 1000000.0;
+		// intervalSize is in microseconds, and a combined bar covers several
+		// intervals -- a rate has to be divided by the time the bar spans, not
+		// by the time one interval spans. An averaged bar is still one
+		// interval's worth, so it divides by one interval.
+		double divisor = intervalSize * (averaging() ? 1 : binSize()) / 1000000.0;
 		if (perPESelected()) {
 			divisor *= processorList.size();
 		}
@@ -403,21 +763,28 @@ implements ActionListener, EntryMethodVisibility
 	}
 
 	public String[] getPopup(int xVal, int yVal) {
-		if ((xVal < 0) || (yVal < 0) || msgCount == null ||
-				xVal >= numIntervals || yVal >= numEPs) {
+		if ((xVal < 0) || (yVal < 0) || chartArray == null ||
+				xVal >= chartArray.length || yVal >= numEPs) {
 			return null;
 		}
+		// xVal counts bars from the left of the chart. A bar is not an
+		// interval: the view may be zoomed, and it may be combining intervals.
+		int first = startInterval + zoomFirst + rowFirstInterval(xVal);
+		int last = startInterval + zoomFirst + rowLastInterval(xVal);
 		String[] rString = new String[4];
 		rString[0] = "Time Interval: " +
-			U.humanReadableString((xVal+startInterval)*intervalSize) + " to " +
-			U.humanReadableString((xVal+startInterval+1)*intervalSize);
+			U.humanReadableString(first*intervalSize) + " to " +
+			U.humanReadableString((last+1)*intervalSize);
 		rString[1] = "Chare: " + MainWindow.runObject[myRun].getEntryChareNameByIndex(yVal);
 		rString[2] = "Entry Method: " + MainWindow.runObject[myRun].getEntryNameByIndex(yVal);
-		double count = sourceArray()[xVal][yVal];
+		double count = chartArray[xVal][yVal];
 		String unit = showingBytes() ? "bytes" : "messages";
 		if (rateSelected()) {
 			rString[3] = "Rate = " + _format.format(count / rateDivisor()) + " " + unit + "/s" +
 				(perPESelected() ? "/PE" : "") + " (" + _format.format(count) + " " + unit + ")";
+		} else if (averaging()) {
+			rString[3] = (showingBytes() ? "Bytes received" : "Messages processed") +
+					", averaged per interval: " + _format.format(count);
 		} else {
 			rString[3] = (showingBytes() ? "Bytes received: " : "Messages processed: ")
 					+ _format.format(count);
@@ -488,11 +855,11 @@ implements ActionListener, EntryMethodVisibility
 		}
 		List<LegendEntry> entries = new ArrayList<LegendEntry>();
 		for (int ep=0; ep<numEPs; ep++) {
-			if (isPackOrUnpack(ep) && !countPackUnpack()) {
+			if (!shown(ep)) {
 				continue;
 			}
 			double total = 0;
-			for (int interval=0; interval<numIntervals; interval++) {
+			for (int interval=zoomFirst; interval<=zoomLast; interval++) {
 				total += sourceArray()[interval][ep];
 			}
 			if (total > 0) {
@@ -523,18 +890,43 @@ implements ActionListener, EntryMethodVisibility
 	}
 
 	/** Restrict "Choose Entry Colors" to the entry methods that processed
-	 *  something in the loaded range. */
+	 *  something in the displayed range. */
 	protected EntryMethodVisibility getEntryFilter() {
 		return (msgCount != null) ? this : null;
 	}
 
+	/** That same dialog is where entry methods are switched off, so it needs
+	 *  its check box column. */
+	protected boolean entryFilterAllowsHiding() {
+		return true;
+	}
+
+	/** Messages processed per entry method over the displayed range. The
+	 *  chooser reads these as counts, not just as "present", and lists the
+	 *  busiest first: most of what is in range on a large trace is a handful
+	 *  of setup calls against millions of messages. */
 	public int[] getEntriesArray() {
-		int[] present = new int[numEPs];
+		int[] counts = new int[numEPs];
 		for (int ep=0; ep<numEPs; ep++) {
-			boolean shown = existsArray[ep] && (countPackUnpack() || !isPackOrUnpack(ep));
-			present[ep] = shown ? 1 : 0;
+			// listed whether or not it is switched off, since this dialog is
+			// the only way to switch it back on
+			if (!existsArray[ep] || (!countPackUnpack() && isPackOrUnpack(ep))) {
+				continue;
+			}
+			double total = 0;
+			for (int interval=zoomFirst; interval<=zoomLast; interval++) {
+				total += msgCount[interval][ep];
+			}
+			// an entry method that ran at all is listed, however it rounds
+			counts[ep] = (total >= Integer.MAX_VALUE) ? Integer.MAX_VALUE :
+					Math.max(1, (int)total);
 		}
-		return present;
+		return counts;
+	}
+
+	/** Order that list by message count. */
+	public boolean sortEntriesByCount() {
+		return true;
 	}
 
 	public boolean hasEntryList() {
@@ -547,18 +939,33 @@ implements ActionListener, EntryMethodVisibility
 	}
 
 	public boolean entryIsVisibleID(Integer id) {
-		return true;
+		return !inRange(id) || epVisible[id];
 	}
 
 	public void makeEntryVisibleID(Integer id) {
-		// visibility checkboxes are not shown for this tool's chooser
+		setVisibility(id, true);
 	}
 
 	public void makeEntryInvisibleID(Integer id) {
+		setVisibility(id, false);
 	}
 
+	private void setVisibility(Integer id, boolean visible) {
+		if (inRange(id)) {
+			epVisible[id] = visible;
+		}
+	}
+
+	/** Idle and overhead come through as negative ids from the shared dialog;
+	 *  this tool does not show them. */
+	private boolean inRange(Integer id) {
+		return id != null && id >= 0 && id < numEPs;
+	}
+
+	/** The chooser calls this after any visibility change. Rebuilding the
+	 *  chart is what makes the y axis follow what is left on it. */
 	public void displayMustBeRedrawn() {
-		repaint();
+		displayData();
 	}
 
 	/** Dispatch on which control was used rather than on what kind of control
@@ -568,8 +975,27 @@ implements ActionListener, EntryMethodVisibility
 		Object source = e.getSource();
 		if (source == setRanges) {
 			showDialog();
+		} else if (source == resetZoom) {
+			resetZoom();
+		} else if (source == smoothing) {
+			showSmoothingDialog();
 		} else if (source == showLegendCheckBox) {
 			refreshLegend();
+		} else if (source == bytesButton && !bytesLoaded) {
+			// first look at sizes: expand them off the event thread, or the
+			// progress bar cannot paint and the window locks up instead
+			setCursor(new Cursor(Cursor.WAIT_CURSOR));
+			final SwingWorker worker = new SwingWorker() {
+				public Object doInBackground() {
+					ensureBytes();
+					return null;
+				}
+				public void done() {
+					displayData();
+					thisWindow.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+			};
+			worker.execute();
 		} else if (source == packUnpackCheckBox || source == messagesButton
 				|| source == bytesButton || source == totalsButton
 				|| source == rateButton || source == ratePerPEButton) {

@@ -515,7 +515,7 @@ class ProfileWindow extends ProjectionsWindow
         // the expanded list is wider than the canvas, pushing everything that
         // identifies the chart (including the time range below) out of sight.
         gTitles[0] = "Profile of Usage for "+Util.processorSelectionString(data.plist);
-        gTitles[1] = "(Time "+U.humanReadableString(data.begintime)+" - "+U.humanReadableString(data.endtime)+")";
+        gTitles[1] = "(Time "+U.humanReadableRange(data.begintime, data.endtime)+")";
         displayCanvas.setGraphTiltes(gTitles);
 
         String[] xNames = new String[data.plist.size()+1];

@@ -962,8 +962,7 @@ Clickable
 		SortedSet<Integer> selectedPEs =
 			(dialog != null) ? new TreeSet<Integer>(dialog.getSelectedProcessors()) : null;
 		graphCanvas.setTitleAnnotations(
-				"Time " + U.humanReadableString(loadedStartTime) +
-				" - " + U.humanReadableString(loadedEndTime),
+				"Time " + U.humanReadableRange(loadedStartTime, loadedEndTime),
 				Util.processorSelectionString(selectedPEs));
 		refreshGraph();
 	}

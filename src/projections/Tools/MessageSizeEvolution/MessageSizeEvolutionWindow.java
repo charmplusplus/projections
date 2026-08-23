@@ -290,6 +290,13 @@ public class MessageSizeEvolutionWindow
             }
         }
 
+        // Every visible cell can be zero once entry methods are switched off
+        // (Hide All, or hiding the one entry method that carried the traffic);
+        // the renderer's paint scale needs a positive maximum, so give it one
+        // and the chart comes out uniformly white instead of throwing.
+        if (maxVal <= 0)
+            maxVal = 1;
+
         chart = ChartFactory.createStackedBarChart(
                 "Message Size Evolution Chart",
                 "Message Size",

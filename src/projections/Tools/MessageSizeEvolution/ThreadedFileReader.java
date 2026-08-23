@@ -23,9 +23,9 @@ class ThreadedFileReader
     private boolean msgLogScale;
     private boolean msgCreationEvent;
 
-    private int[][]outputCounts;
+    private int[][][] outputCounts;
 
-    protected ThreadedFileReader(int[][] outputCounts, int pe, long startTime, long endTime, int timeNumBins, long timeBinSize, int msgNumBins, long msgBinSize, long msgMinBinSize, boolean msgLogScale, boolean msgCreationEvent) {
+    protected ThreadedFileReader(int[][][] outputCounts, int pe, long startTime, long endTime, int timeNumBins, long timeBinSize, int msgNumBins, long msgBinSize, long msgMinBinSize, boolean msgLogScale, boolean msgCreationEvent) {
         this.pe = pe;
         this.startTime = startTime;
         this.endTime = endTime;
@@ -40,12 +40,14 @@ class ThreadedFileReader
     }
 
     public void run() {
-        int[][] myCounts = getCounts();
+        int[][][] myCounts = getCounts();
         // in synchronized manner accumulate into global counts:
         synchronized (outputCounts) {
             for (int i = 0; i < outputCounts.length; i++) {
                 for (int j = 0; j < outputCounts[i].length; j++) {
-                        outputCounts[i][j] += myCounts[i][j];
+                    for (int ep = 0; ep < outputCounts[i][j].length; ep++) {
+                        outputCounts[i][j][ep] += myCounts[i][j][ep];
+                    }
                 }
             }
         }
@@ -57,11 +59,16 @@ class ThreadedFileReader
         return Long.SIZE - Long.numberOfLeadingZeros(value);
     }
 
-    private int[][] getCounts() {
+    private int[][][] getCounts() {
         long adjustedTime;
         long adjustedSize;
 
-        int[][] countData = new int[timeNumBins + 1][msgNumBins + 1];
+        // Counts are kept per entry method so the window can focus the chart
+        // on a chosen subset without re-reading the logs. The extra slot at
+        // the end catches events whose entry id is outside the sts table, so
+        // filtering can never silently change the total.
+        final int numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+        int[][][] countData = new int[timeNumBins + 1][msgNumBins + 1][numEPs + 1];
 
         GenericLogReader reader = new GenericLogReader(pe, MainWindow.runObject[myRun].getVersion());
         try {
@@ -90,7 +97,10 @@ class ThreadedFileReader
                             int timeTargetBin = (int) (adjustedTime / timeBinSize);
                             msgTargetBin = Math.min(msgTargetBin, msgNumBins);
                             timeTargetBin = Math.min(timeTargetBin, timeNumBins);
-                            countData[timeTargetBin][msgTargetBin] += 1;
+                            int ep = logData.entry;
+                            if (ep < 0 || ep >= numEPs)
+                                ep = numEPs;
+                            countData[timeTargetBin][msgTargetBin][ep] += 1;
                         }
                         break;
                 }

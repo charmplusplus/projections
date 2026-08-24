@@ -8,13 +8,19 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 import projections.analysis.TimedProgressThreadExecutor;
+import projections.gui.ChooseEntriesWindow;
+import projections.gui.ColorUpdateNotifier;
+import projections.gui.EntryMethodVisibility;
 import projections.gui.ProjectionsWindow;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
 import projections.gui.JPanelToImage;
 
+import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JMenuBar;
+import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 import javax.swing.JOptionPane;
 import javax.swing.JMenuItem;
@@ -24,6 +30,7 @@ import java.awt.Component;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -35,7 +42,7 @@ import java.util.List;
 
 public class MessageSizeEvolutionWindow
         extends ProjectionsWindow
-        implements ActionListener {
+        implements ActionListener, EntryMethodVisibility, ColorUpdateNotifier {
 
     private int myRun = 0;
 
@@ -48,9 +55,19 @@ public class MessageSizeEvolutionWindow
     private JFreeChart chart;
     private ChartPanel chartPanel;
 
-    // counts is indexed by msg bin index, then time bin index followed by ep id.
-    // NOTE: bin indices need not be of the same size
+    // epCounts is indexed by time bin, then msg bin, then entry method id.
+    // The extra ep slot at the end holds events whose entry id is outside
+    // the sts table; it is always displayed.
+    private int[][][] epCounts;
+    private int numEPs;
+    private boolean[] epVisible;
+
+    // What the chart shows: epCounts summed over the visible entry methods,
+    // indexed by time bin then msg bin.
     private int[][] counts;
+
+    private JButton selectEntriesButton;
+    private JLabel entriesShownLabel;
 
     private int timeNumBins;
     private long timeBinSize;
@@ -108,12 +125,16 @@ public class MessageSizeEvolutionWindow
                         System.out.println("You cannot enter a starting bin size less than 1.");
                         return null;
                     }
-                    counts = new int[timeNumBins + 1][msgNumBins + 1];
+                    numEPs = MainWindow.runObject[myRun].getNumUserEntries();
+                    epVisible = new boolean[numEPs];
+                    for (int ep = 0; ep < numEPs; ep++)
+                        epVisible[ep] = true;
+                    epCounts = new int[timeNumBins + 1][msgNumBins + 1][numEPs + 1];
 
                     // Create a list of worker threads
                     List<Runnable> readyReaders = new ArrayList<Runnable>(dialog.getSelectedProcessors().size());
                     for (Integer nextPe : dialog.getSelectedProcessors()) {
-                        readyReaders.add(new ThreadedFileReader(counts, nextPe, startTime, dialog.getEndTime(), timeNumBins, timeBinSize, msgNumBins, msgBinSize, msgMinBinSize, msgLogScale, msgCreationEvent));
+                        readyReaders.add(new ThreadedFileReader(epCounts, nextPe, startTime, dialog.getEndTime(), timeNumBins, timeBinSize, msgNumBins, msgBinSize, msgMinBinSize, msgLogScale, msgCreationEvent));
                     }
 
                     // Determine a component to show the progress bar with
@@ -133,16 +154,110 @@ public class MessageSizeEvolutionWindow
                 }
 
                 protected void done() {
-                    createPlot();
+                    // epCounts stays null when the bin sizes failed validation
+                    if (epCounts != null)
+                        createPlot();
                 }
             };
             worker.execute();
         }
     }
 
+    /** Sum the per entry method counts over the entry methods currently
+     *  switched on, into the 2D array the chart is built from. The catch-all
+     *  slot for events outside the sts table is always included. */
+    private void aggregateVisibleCounts() {
+        counts = new int[timeNumBins + 1][msgNumBins + 1];
+        for (int i = 0; i < epCounts.length; i++) {
+            for (int j = 0; j < epCounts[i].length; j++) {
+                for (int ep = 0; ep <= numEPs; ep++) {
+                    if (ep == numEPs || epVisible[ep])
+                        counts[i][j] += epCounts[i][j][ep];
+                }
+            }
+        }
+    }
+
     private void createPlot() {
         thisWindow.setVisible(false);
 
+        aggregateVisibleCounts();
+        buildChart();
+
+        Container windowPane = thisWindow.getContentPane();
+        windowPane.removeAll();
+        windowPane.setLayout(new BorderLayout());
+        windowPane.add(chartPanel, BorderLayout.CENTER);
+
+        selectEntriesButton = new JButton("Select Entry Methods");
+        selectEntriesButton.addActionListener(this);
+        entriesShownLabel = new JLabel();
+        updateEntriesShownLabel();
+        JPanel controlPanel = new JPanel(new FlowLayout());
+        controlPanel.add(selectEntriesButton);
+        controlPanel.add(entriesShownLabel);
+        windowPane.add(controlPanel, BorderLayout.SOUTH);
+
+        thisWindow.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                fitChartToWindow();
+            }
+        });
+
+        thisWindow.pack();
+        thisWindow.setVisible(true);
+    }
+
+    /** Rebuild the chart in place after an entry method was switched on or
+     *  off, leaving the window itself (and its size) alone. */
+    private void redrawPlot() {
+        aggregateVisibleCounts();
+        Container windowPane = thisWindow.getContentPane();
+        windowPane.remove(chartPanel);
+        buildChart();
+        windowPane.add(chartPanel, BorderLayout.CENTER);
+        fitChartToWindow();
+        updateEntriesShownLabel();
+        windowPane.revalidate();
+        windowPane.repaint();
+    }
+
+    /** The chart draws at the window's size rather than scaling a
+     *  fixed-size rendering. */
+    private void fitChartToWindow() {
+        chartPanel.setMaximumDrawHeight(thisWindow.getHeight());
+        chartPanel.setMaximumDrawWidth(thisWindow.getWidth());
+        chartPanel.setMinimumDrawWidth(thisWindow.getWidth());
+        chartPanel.setMinimumDrawHeight(thisWindow.getHeight());
+    }
+
+    private void updateEntriesShownLabel() {
+        int present = 0, shown = 0;
+        long[] totals = epMessageTotals();
+        for (int ep = 0; ep < numEPs; ep++) {
+            if (totals[ep] > 0) {
+                present++;
+                if (epVisible[ep])
+                    shown++;
+            }
+        }
+        entriesShownLabel.setText(shown == present ?
+                "(all " + present + " entry methods with messages shown)" :
+                "(" + shown + " of " + present + " entry methods with messages shown)");
+    }
+
+    /** Messages counted for each entry method over the whole loaded range. */
+    private long[] epMessageTotals() {
+        long[] totals = new long[numEPs];
+        for (int i = 0; i < epCounts.length; i++)
+            for (int j = 0; j < epCounts[i].length; j++)
+                for (int ep = 0; ep < numEPs; ep++)
+                    totals[ep] += epCounts[i][j][ep];
+        return totals;
+    }
+
+    private void buildChart() {
         int[][] heatMap = new int[counts.length][];
         double maxVal = Double.MIN_VALUE, minVal = Double.MAX_VALUE;
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
@@ -175,6 +290,13 @@ public class MessageSizeEvolutionWindow
             }
         }
 
+        // Every visible cell can be zero once entry methods are switched off
+        // (Hide All, or hiding the one entry method that carried the traffic);
+        // the renderer's paint scale needs a positive maximum, so give it one
+        // and the chart comes out uniformly white instead of throwing.
+        if (maxVal <= 0)
+            maxVal = 1;
+
         chart = ChartFactory.createStackedBarChart(
                 "Message Size Evolution Chart",
                 "Message Size",
@@ -197,24 +319,6 @@ public class MessageSizeEvolutionWindow
 
         chartPanel = new ChartPanel(chart);
         chart.setBackgroundPaint(Color.LIGHT_GRAY);
-
-        Container windowPane = thisWindow.getContentPane();
-        windowPane.removeAll();
-        windowPane.setLayout(new BorderLayout());
-        windowPane.add(chartPanel, BorderLayout.CENTER);
-
-        thisWindow.addComponentListener(new ComponentAdapter() {
-            @Override
-            public void componentResized(ComponentEvent e) {
-                chartPanel.setMaximumDrawHeight(e.getComponent().getHeight());
-                chartPanel.setMaximumDrawWidth(e.getComponent().getWidth());
-                chartPanel.setMinimumDrawWidth(e.getComponent().getWidth());
-                chartPanel.setMinimumDrawHeight(e.getComponent().getHeight());
-            }
-        });
-
-        thisWindow.pack();
-        thisWindow.setVisible(true);
     }
 
     protected void createMenus() {
@@ -249,5 +353,64 @@ public class MessageSizeEvolutionWindow
         else if (c == mSaveScreenshot && chartPanel != null)
             JPanelToImage.saveToFileChooserSelection(chart, chartPanel.getWidth(), chartPanel.getHeight(),
                     "Save Evolution Chart", "./MessageSizeEvolution.pdf");
+        else if (c == selectEntriesButton)
+            new ChooseEntriesWindow(this, true, this);
+    }
+
+    // ---- EntryMethodVisibility: the shared entry method chooser drives
+    // ---- which entry methods' messages the chart is built from.
+
+    /** Messages counted per entry method, so the chooser lists the busiest
+     *  first with the counts in a column of their own. */
+    public int[] getEntriesArray() {
+        long[] totals = epMessageTotals();
+        int[] entries = new int[numEPs];
+        for (int ep = 0; ep < numEPs; ep++)
+            entries[ep] = (totals[ep] >= Integer.MAX_VALUE) ?
+                    Integer.MAX_VALUE : (int) totals[ep];
+        return entries;
+    }
+
+    public boolean sortEntriesByCount() {
+        return true;
+    }
+
+    public boolean hasEntryList() {
+        return true;
+    }
+
+    /** Idle and overhead are times, not messages, so they have no place here. */
+    public boolean handleIdleOverhead() {
+        return false;
+    }
+
+    public boolean entryIsVisibleID(Integer id) {
+        return !inRange(id) || epVisible[id];
+    }
+
+    public void makeEntryVisibleID(Integer id) {
+        if (inRange(id))
+            epVisible[id] = true;
+    }
+
+    public void makeEntryInvisibleID(Integer id) {
+        if (inRange(id))
+            epVisible[id] = false;
+    }
+
+    /** Idle and overhead come through as negative ids from the shared dialog;
+     *  this tool does not show them. */
+    private boolean inRange(Integer id) {
+        return id != null && id >= 0 && id < numEPs;
+    }
+
+    public void displayMustBeRedrawn() {
+        if (epCounts != null && chartPanel != null)
+            redrawPlot();
+    }
+
+    /** The chart is a heat map, not colored by entry method, so a color
+     *  change from the chooser has nothing to repaint here. */
+    public void colorsHaveChanged() {
     }
 }

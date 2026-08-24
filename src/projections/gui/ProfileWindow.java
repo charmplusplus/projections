@@ -511,8 +511,11 @@ class ProfileWindow extends ProjectionsWindow
 
 
         String[] gTitles = new String[2];
-        gTitles[0] = "Profile of Usage for Processors "+Util.listToString(data.plist);
-        gTitles[1] = "(Time "+data.begintime/(float)1000+" ~ "+data.endtime/(float)1000+" ms)";
+        // Strided form ("0-115:5"), not the expanded list: at large PE counts
+        // the expanded list is wider than the canvas, pushing everything that
+        // identifies the chart (including the time range below) out of sight.
+        gTitles[0] = "Profile of Usage for "+Util.processorSelectionString(data.plist);
+        gTitles[1] = "(Time "+U.humanReadableRange(data.begintime, data.endtime)+")";
         displayCanvas.setGraphTiltes(gTitles);
 
         String[] xNames = new String[data.plist.size()+1];

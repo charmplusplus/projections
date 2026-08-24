@@ -94,4 +94,23 @@ public class U
 	return (int)(us/1000000)+printDecimals(us*0.000001,places)+"s";
     }
 
+    /*
+      A time range for a chart header: "start - end" with at most 3 decimal
+      places, adding digits only when the range is so narrow that the two
+      endpoints would otherwise print alike. Six decimals of a seconds value
+      is exact microseconds, so distinct endpoints always separate.
+    */
+    public static String humanReadableRange(long startUs, long endUs)
+    {
+	int places = 3;
+	String start = humanReadableString(startUs, places);
+	String end = humanReadableString(endUs, places);
+	while (start.equals(end) && startUs != endUs && places < 6) {
+	    places++;
+	    start = humanReadableString(startUs, places);
+	    end = humanReadableString(endUs, places);
+	}
+	return start + " - " + end;
+    }
+
 }

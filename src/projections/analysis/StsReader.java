@@ -116,6 +116,10 @@ public class StsReader extends ProjDefs
      * @return Matched string value, or "" if unmatched
      */
     private static String matchQuotes(StringTokenizer st) {
+        // A keyword may be present with no value at all
+        if (!st.hasMoreTokens()) {
+            return null;
+        }
         String current = st.nextToken();
         // If string doesn't start with a quote, then we've already matched
         if (!current.startsWith("\"")){
@@ -167,6 +171,9 @@ public class StsReader extends ProjDefs
 	    String Line,Name;
 	    while ((Line = InFile.readLine()) != null) {
 		StringTokenizer st = new StringTokenizer(Line);
+		if (!st.hasMoreTokens()) {
+		    continue;
+		}
 		String s1 = st.nextToken();
 		if (s1.equals("VERSION")) {
 		    version = Double.parseDouble(st.nextToken());
@@ -184,7 +191,9 @@ public class StsReader extends ProjDefs
 		} else if (s1.equals("COMMANDLINE")) {
 			commandline = matchQuotes(st);
 		} else if (s1.equals("CHARMVERSION")) {
-			charmVersion = st.nextToken();
+			if (st.hasMoreTokens()) {
+				charmVersion = st.nextToken();
+			}
 		} else if (s1.equals("USERNAME")) {
 			username = matchQuotes(st);
 		} else if (s1.equals("HOSTNAME")) {
@@ -296,6 +305,10 @@ public class StsReader extends ProjDefs
 	} catch (FileNotFoundException e) {
 	    throw new LogLoadException (FileName);
 	} catch (IOException e) {
+	    throw new LogLoadException (FileName);
+	} catch (NoSuchElementException e) {
+	    // a line ended before all of its expected values were present
+	    System.err.println("ERROR: malformed sts file " + FileName);
 	    throw new LogLoadException (FileName);
 	}	
     }

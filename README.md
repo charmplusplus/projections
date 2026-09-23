@@ -10,12 +10,15 @@ Projections is a tool to visusalize execution traces of Charm++ and AMPI applica
 ## Compiling Projections
 
 1) Make sure the JDK commands `java`, `javac` and `jar`
-   are in your path. You should use at least Java version 8,
+   are in your path. You need at least Java version 17,
    and your java and javac should be of the same version.
-   You also need [`gradle`](https://gradle.org/) and, optionally,
-   the GNU tool `make`.
+   Optionally, you also need the GNU tool `make`.
 
-2) Type `make` (or `gradle copyJarToBin` if you don't have `make`).
+   You do *not* need to install [`gradle`](https://gradle.org/): the
+   `gradlew` wrapper checked in here downloads and uses the Gradle version
+   this build is tested with.
+
+2) Type `make` (or `./gradlew copyJarToBin` if you don't have `make`).
 
 3) The following files will be located in `bin`:
 

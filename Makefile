@@ -1,12 +1,13 @@
-# Now we just use gradle to build projections
+# Now we just use gradle to build projections, via the checked-in wrapper
+# so that every machine builds with the same Gradle version.
 
 .PHONY : clean all run
 
 all bin/projections.jar:
-	gradle copyJarToBin
+	./gradlew copyJarToBin
 
 clean: 
-	gradle clean
+	./gradlew clean
 	rm -rf bin/projections.jar .gradle
 
 run: bin/projections.jar

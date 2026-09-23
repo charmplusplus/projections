@@ -22,7 +22,7 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
       - name: Build with Gradle
-        run: gradle build
+        run: ./gradlew build
       - name: Run test
         if: ${{ matrix.os == 'ubuntu-latest' }}
         run: xvfb-run -e /dev/stdout -a make test

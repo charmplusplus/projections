@@ -277,6 +277,11 @@ implements ScalePanel.StatusDisplay
 				return null;
 			}
 			public void done() {
+				if (MainWindow.runObject[myRun].getSts() == null) {
+					// initAnalysis failed and has already reported why;
+					// there is nothing to display for this file.
+					return;
+				}
 				setTitle("Projections - " + newfile);
 				updateStatusSTS(MainWindow.runObject[myRun].getSts());
 				if (MainWindow.runObject[myRun].hasSummaryData()) {

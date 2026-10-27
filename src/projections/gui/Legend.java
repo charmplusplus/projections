@@ -1,9 +1,11 @@
-package projections.Tools.TimeProfile;
+package projections.gui;
 
 
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
@@ -14,46 +16,69 @@ import java.util.List;
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-
-import projections.gui.JPanelToImage;
-import projections.gui.MainWindow;
+import javax.swing.JPanel;
 
 /** Display a legend in a new window (clickable to save image to file) */
-class Legend implements MouseListener {
+public class Legend implements MouseListener {
 	private BufferedImage image;
+	private JFrame frame;
 	private Paint fgColor;
 	private Paint bgColor;
-	
+
 	// Temporary hardcode. This variable will be assigned appropriate
 	// meaning in future versions of Projections that support multiple
 	// runs.
 	private static int myRun = 0;
-	
+
+	private String title;
 	private List<String> names;
-	
+	private List<Paint> paints;
+
 	private Font namesFont;
 	private Font legendFont;
-	
-	Legend(String title, List<String> names, List<Paint> paints){
+
+	public Legend(String title, List<String> names, List<Paint> paints){
+		this.title = title;
 		this.names = names;
-		
-		namesFont = new Font("SansSerif", Font.PLAIN, fontSizeNames() ); 
-		legendFont = new Font("SansSerif", Font.BOLD, fontSizeLegend() ); 
-		
-		// Create an image
-		image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
-		Graphics2D g = image.createGraphics();
+		this.paints = paints;
+
+		namesFont = new Font("SansSerif", Font.PLAIN, fontSizeNames() );
+		legendFont = new Font("SansSerif", Font.BOLD, fontSizeLegend() );
 
 		bgColor = MainWindow.runObject[myRun].background;
 		fgColor = MainWindow.runObject[myRun].foreground;
-				
+
+		// Create an image
+		image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D g = image.createGraphics();
+		draw(g);
+
+		// Display the thing
+		ImageIcon imageIcon = new ImageIcon(image);
+		JFrame f = new JFrame(title);
+		JLabel l = new JLabel(imageIcon);
+
+
+		l.addMouseListener(this);
+		f.getContentPane().add(l);
+		f.pack();
+		f.setVisible(true);
+		frame = f;
+
+		g.dispose();
+
+	}
+
+	/** Paint the legend. Kept separate from the displayed image so that the same drawing can
+	 *  also go straight into a PDF, which keeps it sharp at any zoom rather than a bitmap. */
+	private void draw(Graphics2D g){
 		// Clear Background
 		g.setPaint(bgColor);
 		g.fillRect(0,0,getWidth(), getHeight());
 		g.setPaint(fgColor);
 		g.drawRect(0,0,getWidth()-1, getHeight()-1);
-	
-	
+
+
 		// draw "Legend:"
 		g.setPaint(fgColor);
 		g.setFont(legendFont);
@@ -61,17 +86,17 @@ class Legend implements MouseListener {
 		int fw = fm.stringWidth(title);
 		g.drawString(title, (getWidth()-fw)/2, baselineLegend() );
 
-		
+
 		// Draw in the names of the entry methods
 		g.setFont(namesFont);
 
 		for(int i=0; i<names.size(); i++){
 			String name = names.get(i);
 			Paint paint = paints.get(i);
-			
+
 			int topPixel = topMargin() + i*lineSpacingNames();
 			int textBaseline = topPixel + lineSpacingNames()/2 + fontSizeNames()/2;
-			
+
 			// Draw colored box
 			g.setPaint(paint);
 			g.fillRect(getWidth()-rightMargin()-boxMarginR()-boxWidth(),topPixel+boxMarginsTB(),boxWidth(), lineSpacingNames()-boxMarginsTB()*2);
@@ -79,25 +104,30 @@ class Legend implements MouseListener {
 			// Draw entry method name
 			g.setPaint(fgColor);
 			g.drawString(name, leftMargin(), textBaseline );
-		
+
 		}
-		
-		
-		
-		
-		// Display the thing
-		ImageIcon imageIcon = new ImageIcon(image);
-		JFrame f = new JFrame();
-		JLabel l = new JLabel(imageIcon);
-		
-				
-		l.addMouseListener(this);
-		f.getContentPane().add(l);
-		f.pack();
-		f.setVisible(true);
-		
-		g.dispose();
-			
+	}
+
+	/** A panel that redraws the legend, used to export it as a PDF or an image. */
+	private class LegendPanel extends JPanel {
+		LegendPanel(){
+			Dimension size = new Dimension(Legend.this.getWidth(), Legend.this.getHeight());
+			setPreferredSize(size);
+			// Never added to a window, so it has to be sized by hand before being exported
+			setSize(size);
+		}
+
+		public void paintComponent(Graphics g){
+			draw((Graphics2D) g);
+		}
+	}
+
+	public JFrame getFrame() {
+		return frame;
+	}
+
+	public void dispose() {
+		frame.dispose();
 	}
 
 	private int fontSizeLegend(){
@@ -173,7 +203,7 @@ class Legend implements MouseListener {
 
 
 	public void mouseClicked(MouseEvent e) {
-		JPanelToImage.saveToFileChooserSelection(image, "Save Legend To PNG or JPG", "TimeProfileLegend.png");
+		JPanelToImage.saveToFileChooserSelection(new LegendPanel(), "Save Legend To PDF or Image", "TimeProfileLegend.pdf");
 	}
 
 

@@ -10,12 +10,15 @@ Projections is a tool to visusalize execution traces of Charm++ and AMPI applica
 ## Compiling Projections
 
 1) Make sure the JDK commands `java`, `javac` and `jar`
-   are in your path. You should use at least Java version 8,
+   are in your path. You need at least Java version 17,
    and your java and javac should be of the same version.
-   You also need [`gradle`](https://gradle.org/) and, optionally,
-   the GNU tool `make`.
+   Optionally, you also need the GNU tool `make`.
 
-2) Type `make` (or `gradle copyJarToBin` if you don't have `make`).
+   You do *not* need to install [`gradle`](https://gradle.org/): the
+   `gradlew` wrapper checked in here downloads and uses the Gradle version
+   this build is tested with.
+
+2) Type `make` (or `./gradlew copyJarToBin` if you don't have `make`).
 
 3) The following files will be located in `bin`:
 
@@ -351,3 +354,15 @@ when it is linked with the memory tracing module.
 
 Charts in some tools are produced by JFreeChart.
 Image output is performed by FreeHEP.
+
+Views such as timelines, time profiles, usage profiles and legends can be saved
+from the "Save To Image" menu of the tool window, or by clicking on a legend
+window. The save dialog offers PDF (the default) and SVG as well as the raster
+formats PNG and JPG; the format follows the extension you type, or the one
+picked in the file type list. Views that draw themselves are written into PDF
+as vector graphics, so they stay sharp at any zoom; the Overview tool saves a
+bitmap, because its display is one pixel per processor per time interval.
+
+Note that FreeHEP's own export dialog is not used, as it cannot be constructed
+on Java 9 or later: it registers its file types in a javax.imageio
+ServiceRegistry, which rejects categories outside javax.imageio.spi.

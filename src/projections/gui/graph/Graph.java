@@ -3,6 +3,7 @@ package projections.gui.graph;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -14,6 +15,7 @@ import java.awt.RenderingHints;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.Path2D;
 import java.text.DecimalFormat;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -23,6 +25,7 @@ import javax.swing.JPanel;
 import javax.swing.event.MouseInputListener;
 
 import projections.gui.Bubble;
+import projections.gui.JPanelToImage;
 import projections.gui.MainWindow;
  
 public class Graph extends JPanel 
@@ -36,16 +39,17 @@ public class Graph extends JPanel
 
 //    public static final int STACKED   = 0;  // type of the bar graph
 //    public static final int UNSTACKED = 1;  // single, multiple or stacked
-    protected static final int AREA      = 2;  // Area graph (stacked)
+    public static final int AREA      = 2;  // Area graph (stacked)
 //    public static final int SINGLE    = 3;  // take the average of all y-values
-    protected static final int BAR       = 4;  // Graph type, bar graph
-    protected static final int LINE      = 5;  // or line graph
+    public static final int BAR       = 4;  // Graph type, bar graph
+    public static final int LINE      = 5;  // or line graph
 
     private static final int X_AXIS = 0;
     private static final int Y_AXIS = 1;
     
     private int GraphType;
     private boolean GraphStacked;
+    private boolean showHorizontalGridlines = false;
     private DataSource dataSource;
     private XAxis xAxis;
     private YAxis yAxis;
@@ -55,9 +59,17 @@ public class Graph extends JPanel
     private Font fontAxisTitles;
     private Font fontChartTitle;
     private Font fontLabels;
+    private Font fontTitleAnnotations;
     private FontMetrics fmAxisTitles;
     private FontMetrics fmChartTitle;
     private FontMetrics fmLabels;
+    private FontMetrics fmTitleAnnotations;
+
+    // Optional small annotations drawn to the left and right of the chart
+    // title (provenance on the left, processor selection on the right).
+    // Either may be null. Ellipsized to whatever space the title leaves.
+    private String titleAnnotationLeft;
+    private String titleAnnotationRight;
 
     // Computed width of largest y axis label. The largest value is not necessarily the longest string
     private int maxYLabelWidth = 0;
@@ -120,6 +132,47 @@ public class Graph extends JPanel
     
     private boolean showMarkers = false;
 
+    /** A text label drawn on top of a horizontal run of bars/intervals.
+     *  Used by tools to name large single-color regions in stacked graphs. */
+    public static class RegionLabel {
+        public final double startIndex;  // first bin of the run
+        public final double endIndex;    // last bin of the run (inclusive)
+        public final double yValue;      // vertical center, in data source units
+        public final String text;
+        public final java.awt.Paint regionPaint; // color under the label, for contrast
+
+        public RegionLabel(double startIndex, double endIndex, double yValue, String text, java.awt.Paint regionPaint) {
+            this.startIndex = startIndex;
+            this.endIndex = endIndex;
+            this.yValue = yValue;
+            this.text = text;
+            this.regionPaint = regionPaint;
+        }
+    }
+
+    private java.util.List<RegionLabel> regionLabels = null;
+
+    /** Told which range of bins the user dragged out on the chart.
+     *
+     *  A tool that registers one gets a rubber band over the plot; every tool
+     *  that does not is left with the mouse behaviour it always had. What the
+     *  range means is the tool's business: the usual answer is to redraw from
+     *  that slice of its data, which rescales both axes to it. */
+    public interface XRangeSelectionListener {
+    	public void xRangeSelected(int startIndex, int endIndex);
+    }
+
+    private XRangeSelectionListener xRangeListener = null;
+    // x pixels of a drag in progress, or -1 when there is none
+    private int dragFromPixel = -1;
+    private int dragToPixel = -1;
+    /** Shorter than this and the user meant to click, not to select. */
+    private static final int MIN_DRAG_PIXELS = 4;
+
+    public void setXRangeSelectionListener(XRangeSelectionListener listener) {
+    	xRangeListener = listener;
+    }
+
     
     /** Special construgraphCanvasctor. This can only be called from a projections tool!!! */
     public Graph()
@@ -164,6 +217,9 @@ public class Graph extends JPanel
 
     	// The font used for the numbers on the x and y axes:
     	fontLabels = new Font("SansSerif",Font.PLAIN,12);
+
+    	// The font used for the annotations flanking the chart title:
+    	fontTitleAnnotations = new Font("SansSerif",Font.PLAIN,13);
     }
     
     
@@ -188,6 +244,13 @@ public class Graph extends JPanel
 	return GraphType;
     }
 
+    /** Draw light horizontal gridlines across the plot at every other
+     *  y-axis tick (helpful for sparse line graphs). Off by default. */
+    public void setHorizontalGridlines(boolean isSet)
+    {
+	showHorizontalGridlines = isSet;
+    }
+
     public void setStackGraph(boolean isSet)
     {
 	GraphStacked = isSet;
@@ -196,6 +259,12 @@ public class Graph extends JPanel
 
     public void setMarkers(TreeMap<Double, String> phaseMarkers){
     	this.phaseMarkers = phaseMarkers;
+    	repaint();
+    }
+
+    /** Set (or clear, with null) labels drawn over large regions of the graph. */
+    public void setRegionLabels(java.util.List<RegionLabel> labels){
+    	this.regionLabels = labels;
     	repaint();
     }
 
@@ -286,8 +355,14 @@ public class Graph extends JPanel
     			} else{
     				return whichBar;
     			}
-    		} 
-    	}	
+    		} else if (GraphType == LINE) {
+    			// line samples sit at interval centers; the nearest one is fine
+    			if (dataSource != null && whichBar >= 0 &&
+    					whichBar < dataSource.getIndexCount()) {
+    				return whichBar;
+    			}
+    		}
+    	}
     	return -1;
     }
 	
@@ -301,9 +376,36 @@ public class Graph extends JPanel
      *  Hence, the array looping code is adequate for now.
      */
     private int getYValue(int xVal, int yPos) {
+    	if ((GraphType == LINE) && !GraphStacked) {
+    		// unstacked lines: pick the series whose sample at xVal is
+    		// closest to the mouse, within a small pixel tolerance
+    		if ( (xVal >= 0) &&
+    				(yPos < originY()) && (yPos > topMargin()) &&
+    				(dataSource != null) &&
+    				(xVal < dataSource.getIndexCount()) ) {
+    			int numY = dataSource.getValueCount();
+    			double[] values = new double[numY];
+    			dataSource.getValues(xVal, values);
+    			int best = -1;
+    			int bestDist = 9;
+    			for (int k=0; k<numY; k++) {
+    				if (Double.isNaN(values[k])) {
+    					continue;
+    				}
+    				int y = originY() - (int)(values[k]*pixelincrementY());
+    				int dist = Math.abs(yPos - y);
+    				if (dist < bestDist) {
+    					bestDist = dist;
+    					best = k;
+    				}
+    			}
+    			return best;
+    		}
+    		return -1;
+    	}
     	if ( (xVal >= 0)  &&
-    			(yPos < originY()) && (yPos > topMargin()) && 
-    			(stackArray != null) && 
+    			(yPos < originY()) && (yPos > topMargin()) &&
+    			(stackArray != null) &&
     			(xVal < stackArray.length) ) {
     		int numY = dataSource.getValueCount();
     		int y;
@@ -313,7 +415,7 @@ public class Graph extends JPanel
     				return k;
     			}
     		}
-    	}	
+    	}
     	return -1;
     }
 
@@ -323,21 +425,94 @@ public class Graph extends JPanel
     	fmLabels = g.getFontMetrics(fontLabels);
     	fmAxisTitles = g.getFontMetrics(fontAxisTitles);
     	fmChartTitle = g.getFontMetrics(fontChartTitle);
-    	
+    	fmTitleAnnotations = g.getFontMetrics(fontTitleAnnotations);
+
     	drawDisplay((Graphics2D) g);
+    	drawSelection((Graphics2D) g);
     }
 
-   
+    /** The band the user is dragging out, over the finished chart. */
+    private void drawSelection(Graphics2D g) {
+    	if (dragFromPixel < 0 || dragToPixel < 0 || dragFromPixel == dragToPixel) {
+    		return;
+    	}
+    	int left = Math.max(Math.min(dragFromPixel, dragToPixel), originX());
+    	int right = Math.min(Math.max(dragFromPixel, dragToPixel), originX()+availableWidth());
+    	if (right <= left) {
+    		return;
+    	}
+    	int top = topMargin();
+    	int height = originY() - top;
+    	Color previous = g.getColor();
+    	g.setColor(new Color(128, 128, 128, 80));
+    	g.fillRect(left, top, right-left, height);
+    	g.setColor(MainWindow.runObject[myRun].foreground);
+    	g.drawLine(left, top, left, top+height);
+    	g.drawLine(right, top, right, top+height);
+    	g.setColor(previous);
+    }
+
+    /** A pixel brought inside the plot area. */
+    private int clampToPlot(int xPos) {
+    	int lo = originX();
+    	int hi = originX() + availableWidth();
+    	return Math.max(lo, Math.min(hi, xPos));
+    }
+
+    /** The bin under a pixel, clamped to the chart instead of refused the way
+     *  getXValue does it: a drag usually ends past the last bar. */
+    private int indexAt(int xPos) {
+    	int offset = xPos - originX();
+    	if (offset < 0 || dataSource == null) {
+    		return 0;
+    	}
+    	int index = (int)(offset/pixelincrementX());
+    	int last = dataSource.getIndexCount()-1;
+    	return (index > last) ? last : index;
+    }
+
+
     public void mouseEntered(MouseEvent e) {
-    } 
+    	if (xRangeListener != null) {
+    		setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+    	}
+    }
 
     public void mouseExited(MouseEvent e) {
-    } 
+    	if (xRangeListener != null) {
+    		setCursor(Cursor.getDefaultCursor());
+    	}
+    }
 
     public void mousePressed(MouseEvent e) {
-    } 
+    	if (xRangeListener == null || dataSource == null) {
+    		return;
+    	}
+    	disposeOfBubble();
+    	// clamped rather than refused, so a drag may start in the margins --
+    	// starting one exactly on the first bar is not something to ask of a
+    	// user who wants the chart from its left edge
+    	dragFromPixel = clampToPlot(e.getX());
+    	dragToPixel = dragFromPixel;
+    }
 
     public void mouseReleased(MouseEvent e) {
+    	if (dragFromPixel < 0) {
+    		return;
+    	}
+    	int from = dragFromPixel;
+    	int to = (dragToPixel >= 0) ? dragToPixel : from;
+    	dragFromPixel = -1;
+    	dragToPixel = -1;
+    	repaint();
+    	if (Math.abs(to-from) < MIN_DRAG_PIXELS) {
+    		return;
+    	}
+    	int first = indexAt(Math.min(from, to));
+    	int last = indexAt(Math.max(from, to));
+    	if (last > first) {
+    		xRangeListener.xRangeSelected(first, last);
+    	}
     }
 
 
@@ -375,6 +550,11 @@ public class Graph extends JPanel
     }
 
     public void mouseDragged(MouseEvent e) {
+    	if (dragFromPixel < 0) {
+    		return;
+    	}
+    	dragToPixel = clampToPlot(e.getX());
+    	repaint();
     }
     
 
@@ -414,7 +594,9 @@ public class Graph extends JPanel
     	}
 
     	if (bubble == null && showBubble) {
-    		if (GraphStacked) {
+    		// stacked graphs, and unstacked line graphs (whose getYValue
+    		// finds the nearest series), can locate the value under the mouse
+    		if (GraphStacked || GraphType == LINE) {
     			bubble = new Bubble(this, text);
     			bubble.setLocation(xPos+offset.x, yPos+offset.y);
     			bubble.setVisible(true);
@@ -459,7 +641,12 @@ public class Graph extends JPanel
     		// Width of available chart area depends on y axis label width stored in maxLabelWidth
     		setBestIncrements(Y_AXIS, pixelincrementY(), (long)maxvalueY());
     		setBestIncrements(X_AXIS, pixelincrementX(), (int)maxvalueX());
-        	
+
+    		// gridlines go under the data
+    		if (showHorizontalGridlines) {
+    			drawYGridlines(g);
+    		}
+
     		if (GraphType == BAR) {
     			drawBarGraph(g);
     		} else if (GraphType == AREA) {
@@ -472,16 +659,26 @@ public class Graph extends JPanel
     		drawYAxis(g);
     		
     		drawMarkers(g);
+    		drawRegionLabels(g);
     	}
 
     	
 
+    	// The chart data is drawn in its own colors (region labels in particular
+    	// end in whatever contrasts with the region they sit on), so restore the
+    	// foreground before the titles, which must always be readable.
+    	g.setColor(foreground);
+
     	// display Graph title
     	String graphTitle = dataSource.getTitle();
     	g.setFont(fontChartTitle);
+    	int titleWidth = fmChartTitle.stringWidth(graphTitle);
+    	int titleLeftEdge = (getWidth()-titleWidth)/2;
     	g.drawString(graphTitle,
-    			(getWidth()-fmChartTitle.stringWidth(graphTitle))/2, 
+    			titleLeftEdge,
     			chartTitleBaseline() );
+
+    	drawTitleAnnotations(g, titleLeftEdge, titleWidth);
 
     	// display xAxis title 
     	// centered along x axis line
@@ -506,6 +703,78 @@ public class Graph extends JPanel
     }
 
     
+    /** Set the small texts drawn on either side of the chart title. Either may
+     *  be null to leave that side blank. They are ellipsized to fit whatever
+     *  room the centered title leaves, so long provenance strings are safe. */
+    public void setTitleAnnotations(String left, String right){
+    	titleAnnotationLeft = left;
+    	titleAnnotationRight = right;
+    	repaint();
+    }
+
+    private void drawTitleAnnotations(Graphics2D g, int titleLeftEdge, int titleWidth){
+    	if (titleAnnotationLeft == null && titleAnnotationRight == null) {
+    		return;
+    	}
+    	final int edgeMargin = 8;
+    	final int gapFromTitle = 20;
+    	g.setFont(fontTitleAnnotations);
+
+    	if (titleAnnotationLeft != null) {
+    		String s = fitToWidth(titleAnnotationLeft, titleLeftEdge - gapFromTitle - edgeMargin);
+    		if (s != null) {
+    			g.drawString(s, edgeMargin, chartTitleBaseline());
+    		}
+    	}
+
+    	if (titleAnnotationRight != null) {
+    		int rightEdge = getWidth() - edgeMargin;
+    		String s = fitToWidth(titleAnnotationRight, rightEdge - (titleLeftEdge+titleWidth+gapFromTitle));
+    		if (s != null) {
+    			g.drawString(s, rightEdge - fmTitleAnnotations.stringWidth(s), chartTitleBaseline());
+    		}
+    	}
+    }
+
+    /** Shorten s so it fits in availableWidth pixels: trailing components (the
+     *  annotations are " | " separated, least identifying part last) are dropped
+     *  whole, and whatever remains is ellipsized. Returns null if not even a few
+     *  characters would fit. */
+    private String fitToWidth(String s, int availableWidth){
+    	if (fmTitleAnnotations.stringWidth(s) <= availableWidth) {
+    		return s;
+    	}
+
+    	final String separator = " | ";
+    	int lastSeparator = s.lastIndexOf(separator);
+    	while (lastSeparator > 0) {
+    		s = s.substring(0, lastSeparator);
+    		if (fmTitleAnnotations.stringWidth(s) <= availableWidth) {
+    			return s;
+    		}
+    		lastSeparator = s.lastIndexOf(separator);
+    	}
+
+    	final String ellipsis = "...";
+    	int room = availableWidth - fmTitleAnnotations.stringWidth(ellipsis);
+    	if (room <= 0) {
+    		return null;
+    	}
+    	int chars = 0;
+    	int width = 0;
+    	while (chars < s.length()) {
+    		width += fmTitleAnnotations.charWidth(s.charAt(chars));
+    		if (width > room) {
+    			break;
+    		}
+    		chars++;
+    	}
+    	if (chars < 3) {
+    		return null;
+    	}
+    	return s.substring(0, chars) + ellipsis;
+    }
+
     public void showMarkers(boolean b){
     	showMarkers = b;
     	repaint();
@@ -529,6 +798,58 @@ public class Graph extends JPanel
     	}    	
     }
 
+
+    private void drawRegionLabels(Graphics2D g) {
+    	if (regionLabels == null || regionLabels.isEmpty()) {
+    		return;
+    	}
+    	Font regionFont = new Font("SansSerif", Font.BOLD, 12);
+    	g.setFont(regionFont);
+    	FontMetrics fm = g.getFontMetrics(regionFont);
+    	Object oldHint = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+    	for (RegionLabel label : regionLabels) {
+    		double widthPx = (label.endIndex - label.startIndex + 1) * pixelincrementX();
+    		// Truncate the text if the region is narrow; skip if almost nothing fits
+    		String text = label.text;
+    		while (text.length() > 3 && fm.stringWidth(text) > widthPx * 0.95) {
+    			text = text.substring(0, text.length() - 2) + "\u2026";
+    		}
+    		if (fm.stringWidth(text) > widthPx * 0.95) {
+    			continue;
+    		}
+
+    		int cx = originX() + (int)(((label.startIndex + label.endIndex) / 2.0 + 0.5) * pixelincrementX());
+    		int cy = originY() - (int)(label.yValue * pixelincrementY());
+    		if (cy > originY() - fm.getHeight()/2 || cy < topMargin() + fm.getHeight()/2) {
+    			continue;
+    		}
+    		int tx = cx - fm.stringWidth(text) / 2;
+    		int ty = cy + fm.getAscent() / 2;
+
+    		// Black text on light regions, white on dark ones
+    		g.setColor(contrastingTextColor(label.regionPaint));
+    		g.drawString(text, tx, ty);
+    	}
+    	g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldHint);
+    	g.setColor(MainWindow.runObject[myRun].foreground);
+    }
+
+    /** Black or white, whichever contrasts with the given paint. */
+    private static Color contrastingTextColor(java.awt.Paint p) {
+    	Color c = null;
+    	if (p instanceof Color) {
+    		c = (Color) p;
+    	} else if (p instanceof java.awt.GradientPaint) {
+    		c = ((java.awt.GradientPaint) p).getColor1();
+    	}
+    	if (c == null) {
+    		return Color.black;
+    	}
+    	double luminance = 0.299*c.getRed() + 0.587*c.getGreen() + 0.114*c.getBlue();
+    	return luminance < 128 ? Color.white : Color.black;
+    }
 
 	private void drawXAxis(Graphics2D g) {
     	g.setColor(MainWindow.runObject[myRun].foreground);
@@ -561,6 +882,22 @@ public class Graph extends JPanel
     			g.drawLine(curx, originY()+2, curx, originY());
     		}
     	}
+    }
+
+    /** Light horizontal lines at every other y tick, in a shade that stays
+     *  subtle on either background color. */
+    private void drawYGridlines(Graphics2D g) {
+    	Color background = MainWindow.runObject[myRun].background;
+    	int luminance = (background.getRed() + background.getGreen() + background.getBlue()) / 3;
+    	g.setColor(luminance > 128 ? new Color(220, 220, 220) : new Color(70, 70, 70));
+    	int tick = 0;
+    	for (long i=0; i<=maxvalueY(); i+=valuesPerTickY, tick++) {
+    		if (i > 0 && tick % 2 == 0) {
+    			int cury = originY() - (int)(i*pixelincrementY());
+    			g.drawLine(originX(), cury, originX()+availableWidth(), cury);
+    		}
+    	}
+    	g.setColor(MainWindow.runObject[myRun].foreground);
     }
 
     private void drawYAxis(Graphics2D g) {
@@ -696,32 +1033,57 @@ public class Graph extends JPanel
     		barWidth = 1.0;
     	}
 
+    	// When this chart is being written to a PDF or an SVG, collect one path
+    	// per value and fill each of them once at the end, instead of filling a
+    	// rectangle per (interval, value). Bars of neighbouring intervals share
+    	// an edge, and vector output is anti-aliased by whatever displays it, so
+    	// filling them one at a time leaves a hairline seam wherever two of them
+    	// meet: a flat area such as the idle band comes out finely striped. One
+    	// fill of one path has no internal edges, so the seams go away, and the
+    	// exported file gets much smaller. Java2D takes far longer over a path
+    	// with thousands of pieces than over the same rectangles filled one by
+    	// one, though, so on screen -- repainted on every resize and hover --
+    	// the rectangles are still filled as they are computed.
+    	Path2D.Float[] bars = JPanelToImage.isVectorExport() ?
+    			new Path2D.Float[numY] : null;
+
     	for (int i=0; i<numX; i++) {
+    		// Work out this bar's horizontal extent once, up front. When
+    		// there are more intervals than pixels most bars come out zero
+    		// pixels wide and draw nothing, so skip them before doing any
+    		// per-value work. Likewise skip slices that round to zero
+    		// pixels tall below. Neither changes what is drawn, but on a
+    		// trace with tens of thousands of intervals and hundreds of
+    		// EPs it removes millions of no-op fillRect calls.
+    		final int barX;
+    		final int barW;
+    		if (valuesPerTickX == 1) {
+    			barX = originX() + (int) (i * pixelincrementX() +
+    					tickIncrementX / 2 - barWidth / 2);
+    			barW = (int) barWidth;
+    		} else {
+    			barX = originX() + (int) (i * pixelincrementX());
+    			barW = (int) ((i + 1) * pixelincrementX()) -
+    					(int) (i * pixelincrementX());
+    		}
+    		if (barW <= 0) {
+    			continue;
+    		}
+
     		dataSource.getValues(i, data);
     		if (GraphStacked) {
-    			int y = 0;
     			for (int k=0; k<numY; k++) {
 			        if (data[k] > 0) {
+			        	int barH = (int) (data[k] * pixelincrementY());
+			        	if (barH <= 0) {
+			        		continue;
+			        	}
 					// calculating lowerbound of box, which StackArray
 					// allready contains
-					y = originY() - (int) (stackArray[i][k] * pixelincrementY());
-
-					g.setPaint(dataSource.getColor(k));
+					int y = originY() - (int) (stackArray[i][k] * pixelincrementY());
 
 					// using data[i] to get the height of this bar
-					if (valuesPerTickX == 1) {
-						g.fillRect(originX() + (int) (i * pixelincrementX() +
-								tickIncrementX / 2 -
-								barWidth / 2), y,
-								(int) barWidth,
-								(int) (data[k] * pixelincrementY()));
-
-					} else {
-						g.fillRect(originX() + (int) (i * pixelincrementX()), y,
-								(int) ((i + 1) * pixelincrementX()) -
-								(int) (i * pixelincrementX()),
-								(int) (data[k] * pixelincrementY()));
-					}
+					drawBar(g, bars, k, barX, y, barW, barH);
 				}
     			}
     		} else {
@@ -754,22 +1116,20 @@ public class Graph extends JPanel
     				temp[maxIndex][0] = t;
     				temp[maxIndex][1] = t2;
     			}
-    			// now display the graph
+    			// now display the graph. The bars all stand on the axis and
+    			// are drawn tallest first, so each one is only visible down
+    			// to the top of the next shorter bar; keeping just that band
+    			// leaves the picture unchanged while letting the bars be
+    			// grouped by colour like the stacked ones above.
     			for(int k=0; k<numY; k++) {
-    				g.setPaint(dataSource.getColor((int)temp[k][0]));
-    				y = (originY()-(int)(temp[k][1]*pixelincrementY()));
-    				if (valuesPerTickX == 1) {
-    					g.fillRect(originX() + (int)(i*pixelincrementX() +
-    							tickIncrementX/2 -
-    							barWidth/2), y,
-    							(int)barWidth,
-    							(int)(temp[k][1]*pixelincrementY()));
-    				} else {				   
-    					g.fillRect(originX() + (int)(i*pixelincrementX()), y,
-    							(int)((i+1)*pixelincrementX()) -
-    							(int)(i*pixelincrementX()),
-    							(int)(temp[k][1]*pixelincrementY()));
+    				int barH = (int)(temp[k][1]*pixelincrementY());
+    				int nextH = (k+1 < numY) ?
+    						Math.max(0, (int)(temp[k+1][1]*pixelincrementY())) : 0;
+    				if (barH <= 0 || barH <= nextH) {
+    					continue;
     				}
+    				y = originY() - barH;
+    				drawBar(g, bars, (int)temp[k][0], barX, y, barW, barH-nextH);
     			}
     		}
     		/*  ** UNUSED for now **
@@ -790,10 +1150,41 @@ public class Graph extends JPanel
 	    }		
     		 */
     	}
-    	
+
+    	// Filled in value order, so that where rounding makes two slices of
+    	// one bar overlap by a pixel the later one still wins, as it did when
+    	// each rectangle was filled as it was computed.
+    	if (bars != null) {
+    		for (int k=0; k<numY; k++) {
+    			if (bars[k] != null) {
+    				g.setPaint(dataSource.getColor(k));
+    				g.fill(bars[k]);
+    			}
+    		}
+    	}
+
     	drawOverlayedPolynomial(g);
     }
-	
+
+    /** Draw one bar of a bar chart: straight away, or, if the chart is collecting
+     *  its bars to fill them by value, into the path holding that value's bars. */
+    private void drawBar(Graphics2D g, Path2D.Float[] bars, int k, int x, int y, int w, int h) {
+    	if (bars == null) {
+    		g.setPaint(dataSource.getColor(k));
+    		g.fillRect(x, y, w, h);
+    		return;
+    	}
+    	if (bars[k] == null) {
+    		bars[k] = new Path2D.Float(Path2D.WIND_NON_ZERO);
+    	}
+    	Path2D.Float bar = bars[k];
+    	bar.moveTo(x, y);
+    	bar.lineTo(x+w, y);
+    	bar.lineTo(x+w, y+h);
+    	bar.lineTo(x, y+h);
+    	bar.closePath();
+    }
+
     private void drawLineGraph(Graphics2D g) {
 	int xValues = dataSource.getIndexCount();
 	int yValues = dataSource.getValueCount();
@@ -802,31 +1193,43 @@ public class Graph extends JPanel
 	// x1,y1 store previous values
 	int x1 = -1;
 	int [] y1 = new int[yValues];
+	// whether the previous interval had a value for this series;
+	// NaN values mark "no data here" and break the line into segments
+	boolean [] prevValid = new boolean[yValues];
 	// x2, y2 to store present values so that line graph can be drawn
-	int x2 = 0;		
-	int [] y2 = new int[yValues];  
+	int x2 = 0;
+	int [] y2 = new int[yValues];
 
 	for (int i=0; i<yValues; i++) {
 	    y1[i] = -1;
 	}
-	// do only till the window is reached 
-	for (int i=0; i < xValues; i++) {	
+	// do only till the window is reached
+	for (int i=0; i < xValues; i++) {
 	    if (GraphStacked) {
 		data = stackArray[i];
 	    } else {
 		dataSource.getValues(i,data);
 	    }
 	    //calculate x value
-	    x2 = originX() + (int)(i*pixelincrementX()) + 
-		(int)(pixelincrementX()/2);    
-	 
+	    x2 = originX() + (int)(i*pixelincrementX()) +
+		(int)(pixelincrementX()/2);
+
 	    for (int j=0; j<yValues; j++) {
+		if (Double.isNaN(data[j])) {
+		    prevValid[j] = false;
+		    continue;
+		}
 		g.setPaint(dataSource.getColor(j));
 		y2[j] = (originY() - (int)(data[j]*pixelincrementY()));
-		//is there any other condition that needs to be checked?
-		if(x1 != -1)	
+		if (x1 != -1 && prevValid[j]) {
 		    g.drawLine(x1,y1[j],x2,y2[j]);
-		y1[j] = y2[j];		
+		} else {
+		    // start of a segment (or an isolated sample surrounded by
+		    // gaps): mark it with a dot so it stays visible
+		    g.fillOval(x2-2, y2[j]-2, 5, 5);
+		}
+		y1[j] = y2[j];
+		prevValid[j] = true;
 	    }
 	    x1 = x2;
 	}

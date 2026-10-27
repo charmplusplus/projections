@@ -23,10 +23,13 @@ import projections.analysis.LogReader;
 import projections.analysis.ProjMain;
 import projections.analysis.TimedProgressThreadExecutor;
 import projections.gui.Clickable;
+import projections.gui.EntryMethodVisibility;
 import projections.gui.GenericGraphColorer;
 import projections.gui.GenericGraphWindow;
 import projections.gui.IntervalChooserPanel;
 import projections.gui.JPanelToImage;
+import projections.gui.Legend;
+import projections.gui.graph.Graph;
 import projections.gui.MainWindow;
 import projections.gui.RangeDialog;
 import projections.gui.U;
@@ -39,7 +42,7 @@ import projections.gui.Util;
  * 
  */
 public class TimeProfileWindow extends GenericGraphWindow
-implements ActionListener, Clickable
+implements ActionListener, Clickable, EntryMethodVisibility
 {
 
 	private TimeProfileWindow thisWindow;
@@ -65,6 +68,19 @@ implements ActionListener, Clickable
 	private JCheckBox showMarkersCheckBox;
 	private JCheckBox analyzeSlopesCheckBox;
 	private JCheckBox hideMouseoversCheckBox;
+	private JCheckBox showLegendCheckBox;
+	private JCheckBox labelRegionsCheckBox;
+
+	private static final int LEGEND_TOP_N = 10;
+	private Legend legendWindow;
+
+	// Regions must sustain at least this utilization share (percentage
+	// points) for at least 1/20 of the displayed intervals to get an
+	// on-chart label.
+	private static final double REGION_LABEL_MIN_PERCENT = 25.0;
+	private static final int REGION_LABEL_MIN_FRACTION = 20;
+	// EPs currently labeled on the chart, omitted from the compact legend
+	private Set<Integer> overlaidEPs = new HashSet<Integer>();
 
 	private long intervalSize;
 	private int startInterval;
@@ -176,6 +192,16 @@ implements ActionListener, Clickable
 		hideMouseoversCheckBox.setToolTipText("Disable the displaying of information associated with the data under the mouse pointer.");
 		hideMouseoversCheckBox.addActionListener(this);
 
+		showLegendCheckBox = new JCheckBox("Show Legend (top " + LEGEND_TOP_N + ")");
+		showLegendCheckBox.setSelected(false);
+		showLegendCheckBox.setToolTipText("Movable window listing the " + LEGEND_TOP_N + " largest activities in the displayed range; drag it over an empty part of the chart. The Legend menu shows the full list.");
+		showLegendCheckBox.addActionListener(this);
+
+		labelRegionsCheckBox = new JCheckBox("Label Regions");
+		labelRegionsCheckBox.setSelected(false);
+		labelRegionsCheckBox.setToolTipText("Draw entry method names directly on large single-color regions of the chart; labeled entries are then omitted from the compact legend.");
+		labelRegionsCheckBox.addActionListener(this);
+
 		controlPanel = new JPanel();
 		controlPanel.setLayout(gbl);
 //		Util.gblAdd(controlPanel, epSelection,    gbc, 0,0, 1,1, 0,0);
@@ -183,6 +209,8 @@ implements ActionListener, Clickable
 		Util.gblAdd(controlPanel, showMarkersCheckBox, gbc, 3,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, analyzeSlopesCheckBox, gbc, 4,0, 1,1, 0,0);
 		Util.gblAdd(controlPanel, hideMouseoversCheckBox, gbc, 5,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, showLegendCheckBox, gbc, 6,0, 1,1, 0,0);
+		Util.gblAdd(controlPanel, labelRegionsCheckBox, gbc, 7,0, 1,1, 0,0);
 
 		JPanel graphPanel = getMainPanel();
 		Util.gblAdd(mainPanel, graphPanel, gbc, 0,0, 1,1, 1,1);
@@ -194,15 +222,56 @@ implements ActionListener, Clickable
 	}
 
 
+	/** Restrict "Choose Entry Colors" to the entry methods present in the
+	 *  loaded range (EntryMethodVisibility, consumed by ChooseEntriesWindow).
+	 *  Falls back to the full list until data has been loaded. */
+	protected EntryMethodVisibility getEntryFilter() {
+		return (graphData != null) ? this : null;
+	}
+
+	public int[] getEntriesArray() {
+		int[] present = new int[numEPs];
+		for (int ep=0; ep<numEPs; ep++) {
+			present[ep] = existsArray[ep] ? 1 : 0;
+		}
+		return present;
+	}
+
+	public boolean hasEntryList() {
+		return true;
+	}
+
+	public boolean handleIdleOverhead() {
+		return true;
+	}
+
+	public boolean entryIsVisibleID(Integer id) {
+		return true;
+	}
+
+	public void makeEntryVisibleID(Integer id) {
+		// visibility checkboxes are not shown for this tool's chooser
+	}
+
+	public void makeEntryInvisibleID(Integer id) {
+	}
+
+	public void displayMustBeRedrawn() {
+		repaint();
+	}
+
 	private static class SortableEPs implements Comparable{
 		private double value;
 		private String name;
 		private Paint paint;
+		// utilization-weighted mean interval; orders phase-like EPs left-to-right
+		private double centroid;
 
-		private SortableEPs(double value, String name, Paint paint){
+		private SortableEPs(double value, String name, Paint paint, double centroid){
 			this.value = value;
 			this.name = name;
 			this.paint = paint;
+			this.centroid = centroid;
 		}
 
 		public int compareTo(Object o) {
@@ -218,31 +287,129 @@ implements ActionListener, Clickable
 	}
 
 	private void generateLegend(boolean useShortenedNames){
+		makeLegend("Legend", useShortenedNames, Integer.MAX_VALUE, false, true, false, false);
+	}
+
+	/** Recompute and apply (or clear) the on-chart region labels. */
+	private void updateRegionLabels() {
+		overlaidEPs.clear();
+		if (!labelRegionsCheckBox.isSelected() || graphData == null) {
+			graphCanvas.setRegionLabels(null);
+			return;
+		}
+		List<Graph.RegionLabel> labels = new ArrayList<Graph.RegionLabel>();
+		int numIntervals = graphData.length;
+		int minRun = Math.max(2, numIntervals / REGION_LABEL_MIN_FRACTION);
+		// Only real entry methods get labels; Idle and Overhead colors are
+		// fixed and familiar to viewers.
+		for (int ep = 0; ep < numEPs; ep++) {
+			if (!stateArray[ep]) {
+				continue;
+			}
+			int runStart = -1;
+			for (int i = 0; i <= numIntervals; i++) {
+				boolean inRegion = i < numIntervals && graphData[i][ep] >= REGION_LABEL_MIN_PERCENT;
+				if (inRegion && runStart < 0) {
+					runStart = i;
+				} else if (!inRegion && runStart >= 0) {
+					int runEnd = i - 1;
+					if (runEnd - runStart + 1 >= minRun) {
+						int mid = (runStart + runEnd) / 2;
+						// Vertical center of this EP's band in the stacked bar:
+						// EPs below it in the stack are those with smaller index
+						double yBottom = 0;
+						for (int under = 0; under < ep; under++) {
+							if (stateArray[under]) {
+								yBottom += graphData[mid][under];
+							}
+						}
+						labels.add(new Graph.RegionLabel(runStart, runEnd,
+								yBottom + graphData[mid][ep] / 2.0,
+								MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep),
+								MainWindow.runObject[myRun].getEPColorMap()[ep]));
+						overlaidEPs.add(ep);
+					}
+					runStart = -1;
+				}
+			}
+		}
+		graphCanvas.setRegionLabels(labels);
+	}
+
+	/** Open (or refresh) the movable top-N legend controlled by the checkbox. */
+	private void showLegendWindow() {
+		if (graphData == null) {
+			return;
+		}
+		java.awt.Point oldLocation = null;
+		if (legendWindow != null) {
+			oldLocation = legendWindow.getFrame().getLocation();
+			legendWindow.dispose();
+		}
+		legendWindow = makeLegend("Legend (top " + LEGEND_TOP_N + ")", true, LEGEND_TOP_N, true, false, true, true);
+		if (legendWindow == null) {
+			return;
+		}
+		if (oldLocation != null) {
+			legendWindow.getFrame().setLocation(oldLocation);
+		} else {
+			legendWindow.getFrame().setLocationRelativeTo(thisWindow);
+		}
+		// Keep the checkbox in sync if the user closes the legend window directly
+		legendWindow.getFrame().addWindowListener(new java.awt.event.WindowAdapter() {
+			public void windowClosing(java.awt.event.WindowEvent e) {
+				legendWindow = null;
+				showLegendCheckBox.setSelected(false);
+			}
+		});
+	}
+
+	private void closeLegendWindow() {
+		if (legendWindow != null) {
+			Legend l = legendWindow;
+			legendWindow = null;
+			l.dispose();
+		}
+	}
+
+	private Legend makeLegend(String title, boolean useShortenedNames, int maxEntries, boolean showPercent, boolean includeIdleOverhead, boolean omitOverlaid, boolean orderByAppearance){
 
 		List<SortableEPs> l = new ArrayList<SortableEPs>();
 
 		// Accumulate data shown in graph
 		double[] sums = new double[numEPs+2];
+		double[] firstMoment = new double[numEPs+2];
 		double grandTotal = 0.0;
 		for(int i=0; i<graphData.length; i++){
 			for(int ep=0; ep<graphData[i].length; ep++){
 				sums[ep] += graphData[i][ep];
+				firstMoment[ep] += i * graphData[i][ep];
 				grandTotal += graphData[i][ep];
 			}
+		}
+		double[] centroid = new double[numEPs+2];
+		for(int ep=0; ep<numEPs+2; ep++){
+			centroid[ep] = sums[ep] > 0 ? firstMoment[ep] / sums[ep] : 0;
 		}
 
 
 		// Put data into list	
 		for (int ep=0; ep<numEPs; ep++) {
+			if(omitOverlaid && overlaidEPs.contains(ep))
+				continue;
 			if(useShortenedNames)
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getPrettyEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep], centroid[ep]));
 			else
-				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep]));
+				l.add(new SortableEPs(sums[ep], MainWindow.runObject[myRun].getEntryNameByIndex(ep), MainWindow.runObject[myRun].getEPColorMap()[ep], centroid[ep]));
 
 		}
 
-		l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor()));
-		l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor()));
+		// Idle (white) and Overhead (black) use fixed colors familiar to all
+		// viewers, so the compact legend omits them to save slots.
+		if (includeIdleOverhead) {
+			l.add(new SortableEPs(sums[numEPs], "Overhead", MainWindow.runObject[myRun].getOverheadColor(), centroid[numEPs]));
+			l.add(new SortableEPs(sums[numEPs+1], "Idle", MainWindow.runObject[myRun].getIdleColor(), centroid[numEPs+1]));
+		}
 
 
 		// sort list 
@@ -253,18 +420,38 @@ implements ActionListener, Clickable
 		List<String>  names = new ArrayList<String>();
 		List<Paint>  paints = new ArrayList<Paint>();
 
+		List<SortableEPs> selected = new ArrayList<SortableEPs>();
 		Iterator<SortableEPs> iter = l.iterator();
-		while(iter.hasNext()){
+		while(iter.hasNext() && selected.size() < maxEntries){
 			SortableEPs s = iter.next();
 			if(s.value > grandTotal * 0.005){
-				names.add(s.name);
-				paints.add(s.paint);
+				selected.add(s);
 			}
 		}
 
+		if(orderByAppearance){
+			// Left-to-right chart order for phase-like entry methods
+			Collections.sort(selected, new Comparator<SortableEPs>() {
+				public int compare(SortableEPs a, SortableEPs b) {
+					return Double.compare(a.centroid, b.centroid);
+				}
+			});
+		}
+
+		for(SortableEPs s : selected){
+			if(showPercent)
+				names.add(String.format("%.1f%%  %s", s.value * 100.0 / grandTotal, s.name));
+			else
+				names.add(s.name);
+			paints.add(s.paint);
+		}
+
+		if (names.isEmpty()) {
+			return null;
+		}
 
 		// Display the legend
-		new Legend("Legend", names, paints);
+		return new Legend(title, names, paints);
 
 	}
 
@@ -444,43 +631,95 @@ implements ActionListener, Clickable
 					}
                     //Bilge
                     if( MainWindow.runObject[myRun].hasSumDetailFiles()){
-                        //idle time calculation for sum detail
-                        double[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerInterval();
+                        // Idle comes from the .sum files while the per-EP times
+                        // come from the .sumd files. Charm's trace-summary
+                        // accumulates the two through independent code paths
+                        // (see SumLogPool::add() vs updateSummaryDetail()), and
+                        // they do not always agree: an interval's per-EP times
+                        // can overlap its reported idle by several percent, and
+                        // the per-EP times alone can even exceed the interval.
+                        // The per-EP breakdown is what this chart is about, so
+                        // trust it and give idle only the time left over,
+                        // rather than deriving a negative overhead from the
+                        // mismatch and discarding the interval.
+                        // The idle array is indexed from interval 0 of the whole
+                        // run and in the .sum files' own interval size, while
+                        // graphData[0] is the selected range's first interval,
+                        // so map through absolute time rather than assuming the
+                        // two line up.
+                        // Averaged over the selected PEs only -- the entry
+                        // method percentages above are scaled by
+                        // processorList.size(), so idle has to be on the same
+                        // footing or a PE subset makes the two irreconcilable.
+                        double[] idlePercentage = MainWindow.runObject[myRun].sumAnalyzer.getTotalIdlePercentagePerInterval(processorList);
+                        long sumIntervalSize = MainWindow.runObject[myRun].getSummaryIntervalSize();
+                        int overlapCount = 0;
+                        double worstOverlap = 0.0;
                         for(int i=0;i<numIntervals;i++){
-                            graphData[i][numEPs+1] = idlePercentage[i];
-                        }
-                        //overhead time calculation for sum detail
-                        for(int i=0;i<numIntervals;i++){
-                            graphData[i][numEPs] = 100;
+                            double epTotal = 0.0;
                             for(int j=0;j<numEPs;j++){
-                                graphData[i][numEPs] -= graphData[i][j];
+                                epTotal += graphData[i][j];
                             }
-                            graphData[i][numEPs] -= graphData[i][numEPs+1];
+                            int idleIdx = (int)(((long)(startInterval + i)) * intervalSize / sumIntervalSize);
+                            double idleHere = (idleIdx >= 0 && idleIdx < idlePercentage.length)
+                                              ? idlePercentage[idleIdx] : 0.0;
+                            double overlap = epTotal + idleHere - 100.0;
+                            if(overlap > 0.0){
+                                overlapCount++;
+                                if(overlap > worstOverlap) worstOverlap = overlap;
+                            }
+                            double idle = Math.min(idleHere,
+                                                   Math.max(0.0, 100.0 - epTotal));
+                            graphData[i][numEPs+1] = idle;
+                            graphData[i][numEPs] = Math.max(0.0, 100.0 - epTotal - idle);
                         }
-
+                        if(overlapCount > 0){
+                            System.err.println("Time Profile: in " + overlapCount + " of " +
+                                numIntervals + " intervals the .sumd entry-method times and the " +
+                                ".sum idle time overlap (worst " + String.format("%.1f", worstOverlap) +
+                                "%). Idle was reduced to fit; entry-method times are unchanged.");
+                        }
                     }
 
-					// Filter Out any bad data
+					// Filter Out any bad data. Summary traces round each EP's
+					// time within an interval, so a fully busy PE can report a
+					// few us more than the interval size, driving derived
+					// values slightly negative. Clamp such small negatives to
+					// zero; only discard intervals that are out of range by more
+					// than the 5% tolerance.
+					final double tolerance = 5.0;
+					int badIntervals = 0;
+					int firstBadInterval = -1;
 					for (int interval=0; interval<graphData.length; interval++) {
 						boolean valid = true;
 						double sumForInterval = 0.0;
 						for(int e=0; e< graphData[interval].length; e++){
+							if(graphData[interval][e] < 0.0 && graphData[interval][e] >= -tolerance){
+								graphData[interval][e] = 0.0;
+							}
 							sumForInterval += graphData[interval][e];
 							if(graphData[interval][e] < 0.0){
 								valid = false;
 							}
 						}
-						if(sumForInterval > 105.0){
+						if(sumForInterval > 100.0 + tolerance){
 							valid = false;
 						}
 
 						if(!valid){
-							System.err.println("Time Profile found bad data for interval " + interval + ". The data for bad intervals will be zero-ed out. This problem is either a log file corruption issue, or a bug in Projections.");
+							badIntervals++;
+							if(firstBadInterval < 0) firstBadInterval = interval;
 							for(int e=0; e< graphData[interval].length; e++){
 								graphData[interval][e] = 0.0;
 							}
 						}
 
+					}
+					if(badIntervals > 0){
+						System.err.println("Time Profile found bad data in " + badIntervals +
+							" of " + graphData.length + " intervals (first: " + firstBadInterval +
+							"). Those intervals were zero-ed out. This problem is either a log " +
+							"file corruption issue, or a bug in Projections.");
 					}
 					// set the exists array to accept non-zero
 					// entries only have initial state also 
@@ -506,6 +745,10 @@ implements ActionListener, Clickable
 				}
 				public void done() {
 					setOutputGraphData();
+					updateRegionLabels();
+					if (showLegendCheckBox.isSelected()) {
+						showLegendWindow();
+					}
 					thisWindow.setVisible(true);                        
 				}
 			};
@@ -578,6 +821,9 @@ implements ActionListener, Clickable
 			String xAxisLabel = "Time (" + U.humanReadableString(intervalSize) + " resolution)";
 			setXAxis(xAxisLabel, "Time", startTime, intervalSize);
 			setDataSource("Time Profile", outputData, new TimeProfileColorer(outSize, numIntervals), thisWindow);
+			// Flank the chart title with what run this is and which PEs it shows
+			graphCanvas.setTitleAnnotations(Util.runProvenanceString(),
+					Util.processorSelectionString(processorList));
 			graphCanvas.setMarkers(phaseMarkers);
 			refreshGraph();
 		}
@@ -651,6 +897,17 @@ implements ActionListener, Clickable
 			graphCanvas.showMarkers(showMarkersCheckBox.isSelected());
 		} else if (e.getSource() == hideMouseoversCheckBox) {
 			graphCanvas.showBubble(! hideMouseoversCheckBox.isSelected());
+		} else if (e.getSource() == showLegendCheckBox) {
+			if (showLegendCheckBox.isSelected()) {
+				showLegendWindow();
+			} else {
+				closeLegendWindow();
+			}
+		} else if (e.getSource() == labelRegionsCheckBox) {
+			updateRegionLabels();
+			if (showLegendCheckBox.isSelected()) {
+				showLegendWindow(); // re-filter against the labeled EPs
+			}
 		} else if (e.getSource() == setRanges) {
 			showDialog();
 		} else if(e.getSource() == mDisplayLegend){
@@ -722,7 +979,7 @@ implements ActionListener, Clickable
 
 		if(displaySlopes){
 			// create a screenshot of the 
-			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.png");
+			JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Screenshot Image", "./TimeProfileScreenshot.pdf");
 		}
 
 	}

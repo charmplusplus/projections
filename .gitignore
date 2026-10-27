@@ -1,3 +1,9 @@
 .gradle/
 bin/projections.jar
 build/
+
+# Written by Projections next to any opened trace when a window is closed
+*.projrc
+
+# macOS
+.DS_Store

@@ -100,8 +100,14 @@ public class Analysis {
   
   public Color[] entryColors;
   
-  Paint overhead = new GradientPaint(0, 0, Color.black, 15, -25, new Color(50,50,50), true);
-  Paint idle = new GradientPaint(0, 0, Color.white, 15, 25, new Color(230,230,230), true);
+  // Plain colours, not the diagonally striped gradients these used to be: the
+  // stripes read as noise in a chart, and an exported PDF or SVG turns them into
+  // a flat colour anyway (a viewer clamps a gradient rather than repeating it),
+  // so a chart that was white on screen came out grey on paper. Overhead keeps
+  // the dark grey the gradient ended on rather than becoming pure black, so that
+  // it still stands out against the black background the tools draw on.
+  Paint overhead = new Color(50,50,50);
+  Paint idle = Color.white;
   public static final int OVERHEAD_ENTRY_POINT = -2;
   public static final int IDLE_ENTRY_POINT = -1;
   
@@ -361,11 +367,28 @@ public class Analysis {
 	public int[][] getSumDetailData_interval_EP() {
         return intervalData.getSumDetailData_interval_EP();
     }
+	/** Messages processed per interval per entry method, over the given PEs.
+	 *  Summary detail traces only. */
+	public double[][] getSumDetailMsgsPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+        return intervalData.getSumDetailMsgsPerInterval(intervalSize, intervalStart,
+        		intervalEnd, processorList);
+    }
+	/** Bytes of those messages, over the given PEs. Zero throughout for a trace
+	 *  written before charm recorded message sizes in its .sumd files. */
+	public double[][] getSumDetailBytesPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+        return intervalData.getSumDetailBytesPerInterval(intervalSize, intervalStart,
+        		intervalEnd, processorList);
+    }
 	public int[][] getSumDetailData_PE_EP() {
         return intervalData.getSumDetailData_PE_EP();
     }
 	public int[][] getSumDetailData_PE_interval() {
         return intervalData.getSumDetailData_PE_interval();
+    }
+	public int[][] getSumDetailData_PE_interval_maxEP() {
+        return intervalData.getSumDetailData_PE_interval_maxEP();
     }
 
     public Color getEntryColor(int entryIdx) {
@@ -455,6 +478,34 @@ public class Analysis {
 			for (int interval = 0; interval < numIntervals; interval++) {
 				for (int entry = 0; entry < numUserEntries; entry++) {
 					data[entry] += sumDetailData[interval][entry];
+				}
+			}
+
+			// sumd files carry no idle data; average the .sum files'
+			// per-interval idle percentage over the selected range.
+			// (+2 places idle at the top of the usage profile display)
+			byte idlePercentage[][] = sumAnalyzer.getIdlePercentage();
+			if (pnum >= 0 && idlePercentage != null
+					&& pnum < idlePercentage.length && idlePercentage[pnum] != null) {
+				int sumIntervalStart = (int) (begintime / getSummaryIntervalSize());
+				int sumIntervalEnd = (int) Math.ceil(endtime / (double) getSummaryIntervalSize()) - 1;
+				double idleSum = 0.0;
+				int idleCount = 0;
+				for (int i = sumIntervalStart; i <= sumIntervalEnd && i < idlePercentage[pnum].length; i++) {
+					idleSum += idlePercentage[pnum][i];
+					idleCount++;
+				}
+				if (idleCount > 0) {
+					// The .sum idle and the .sumd per-EP times are accumulated
+					// by independent paths in charm's trace-summary and can
+					// overlap, so cap idle at whatever the entry methods leave
+					// free instead of letting the bar exceed 100%.
+					double epPercent = 0.0;
+					for (int entry = 0; entry < numUserEntries; entry++) {
+						epPercent += data[entry] * 100.0 / (endtime - begintime);
+					}
+					ret[0][numUserEntries + 2] =
+						(float) Math.min(idleSum / idleCount, Math.max(0.0, 100.0 - epPercent));
 				}
 			}
 		}

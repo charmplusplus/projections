@@ -480,8 +480,16 @@ class ProfileGraph extends JPanel
     private void drawBarGraph(Graphics2D g) {
         Color gColor = g.getColor();
         double barStartX = originX+pixelIncX/8;
-        barWidth = pixelIncX*3/4;
-        for(int i=0;i<dataSource.length;i++) {            
+        // A bar is three quarters of a processor's slot wide, but never narrower
+        // than the one pixel the display can actually show. Once there are more
+        // processors than pixels, three quarters of a slot comes to less than a
+        // pixel and truncates to zero, and nothing at all was drawn: the profile
+        // went blank somewhere above a thousand processors. Bars now touch, so
+        // the chart reads as a band across the processors the way the Overview
+        // does, and the X scale control still spreads them out for a closer
+        // look. Hit testing for the popups uses this width as well.
+        barWidth = Math.max(1.0, pixelIncX*3/4);
+        for(int i=0;i<dataSource.length;i++) {
             double barStartY = originY;            
             for(int j=0; j<dataSource[i].length; j++) {                
                 g.setColor(colorsPool[colorsMap[i][j]]);

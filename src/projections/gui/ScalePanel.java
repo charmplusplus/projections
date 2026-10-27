@@ -11,12 +11,15 @@ package projections.gui;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Panel;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class ScalePanel extends Panel
@@ -196,8 +199,15 @@ public class ScalePanel extends Panel
 		}
 	}
 	
+	/** Turns a horizontal panel coordinate into text for the tick ruler.
+	 *  Only the panel knows what its coordinates mean, so it supplies this. */
+	public static interface AxisLabeler {
+		public String label(double panelCoordinate);
+	}
+
 	private Axis hor,ver;
 	private Child child;
+	private AxisLabeler horLabeler; //null: draw tick marks without labels
 	private int lC,rC,tC,bC; //The current child clip region
 	
 	//************ Mouse actions ********
@@ -281,9 +291,17 @@ public class ScalePanel extends Panel
 		
 		int tickSize=8;//Max. tick size; inset along bot & right edges
 		int upSet=2;//Inset along top & left edges
-		
+
+		//Tick labels, if any, take a text line below the horizontal ruler
+		FontMetrics fm=null;
+		int labelSize=0;
+		if (horLabeler!=null) {
+			fm=g.getFontMetrics();
+			labelSize=fm.getHeight();
+		}
+
 		//This is the clip region
-		lC=upSet; rC=w-tickSize; tC=upSet; bC=h-tickSize;
+		lC=upSet; rC=w-tickSize; tC=upSet; bC=h-tickSize-labelSize;
 		hor.setScreenSize(rC-lC); ver.setScreenSize(bC-tC);
 		
 		g.setColor(Color.black); //Erase old image
@@ -296,13 +314,15 @@ public class ScalePanel extends Panel
 		g.drawRect(lC-1,tC-1,rC-lC+1,bC-tC+1);
 		
 		float []ticks; //Array of (pixel pos, length fraction, label) pairs
-		ticks=hor.getTicks(0,w-tickSize-upSet);
-		for (int t=0;t<ticks.length/3;t++) { //Horizontal tick marks
-			int x=lC+(int)ticks[t*3+0];
-			int len=(int)((tickSize-2)*ticks[t*3+1]);
-			g.drawLine(x,h-tickSize,x,h-tickSize+len);
+		float []horTicks=hor.getTicks(0,rC-lC);
+		for (int t=0;t<horTicks.length/3;t++) { //Horizontal tick marks
+			int x=lC+(int)horTicks[t*3+0];
+			int len=(int)((tickSize-2)*horTicks[t*3+1]);
+			g.drawLine(x,bC,x,bC+len);
 		}
-		ticks=ver.getTicks(0,h-tickSize-upSet);
+		if (fm!=null)
+			drawHorizontalLabels(g,fm,horTicks,w,bC+tickSize+fm.getAscent());
+		ticks=ver.getTicks(0,bC-tC);
 		for (int t=0;t<ticks.length/3;t++) { //Vertical tick marks
 			int y=tC+(int)ticks[t*3+0];
 			int len=(int)((tickSize-2)*ticks[t*3+1]);
@@ -317,6 +337,52 @@ public class ScalePanel extends Panel
 		child.paint(new Child.RepaintRequest(g,rC-lC,bC-tC,hor,ver));
 		drawZoomCenter(g);
 	}
+	/** Label the tick marks, longest first so that the roundest numbers get
+	 *  the available room and shorter ticks fill whatever gaps are left.
+	 *  Labels that would collide are dropped rather than overprinted, so
+	 *  zooming in reveals more of them. */
+	private void drawHorizontalLabels(final Graphics g,FontMetrics fm,
+			final float[] ticks,int w,int baseline)
+	{
+		int nTicks=ticks.length/3;
+		Integer order[]=new Integer[nTicks];
+		for (int t=0;t<nTicks;t++)
+			order[t]=t;
+		Arrays.sort(order,new Comparator<Integer>() {
+			public int compare(Integer a,Integer b) {
+				return Float.compare(ticks[b*3+1],ticks[a*3+1]);
+			}
+		});
+
+		boolean taken[]=new boolean[w+1]; //pixel columns already spoken for
+		g.setColor(Color.lightGray);
+		for (int t=0;t<nTicks;t++) {
+			int tick=order[t];
+			String label=horLabeler.label(ticks[tick*3+2]);
+			int width=fm.stringWidth(label);
+			int left=lC+(int)ticks[tick*3+0]-width/2; //centered under the tick
+			if (left<lC) left=lC;
+			if (left+width>w) left=w-width;
+			if (left<0) continue; //label wider than the window
+			int from=Math.max(0,left-4), to=Math.min(w,left+width+4);
+			boolean room=true;
+			for (int x=from;x<=to && room;x++)
+				room=!taken[x];
+			if (!room) continue;
+			g.drawString(label,left,baseline);
+			for (int x=from;x<=to;x++)
+				taken[x]=true;
+		}
+		g.setColor(Color.gray);
+	}
+
+	/** Supply a labeler to get timestamps (or whatever the panel coordinates
+	 *  mean) written under the horizontal tick marks. */
+	public void setHorizontalAxisLabeler(AxisLabeler labeler) {
+		horLabeler=labeler;
+		repaint();
+	}
+
 	//Set the initial sizes
 	public void setScales(double hVal,double vVal)
 	{

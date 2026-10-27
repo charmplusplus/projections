@@ -331,7 +331,7 @@ ItemListener {
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
-			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");		
+			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.pdf");		
 		}
 
 		else if(c == mSaveFullTimelineWhiteBG){
@@ -345,7 +345,7 @@ ItemListener {
 			// Create a panel that is rendered from the four panels we supply
 			Render2by2PanelGrid gridPanel = new Render2by2PanelGrid(upperLeftPanel, parentWindow.axisPanel, parentWindow.labelPanel, parentWindow.mainPanel);
 			// Save it to a file which is chosen by the user
-			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.png");
+			JPanelToImage.saveToFileChooserSelection(gridPanel, "Save Timeline Image", "./TimelineScreenshot.pdf");
 
 			data.setForegroundColor(oldFG);
 			data.setBackgroundColor(oldBG);
@@ -354,7 +354,7 @@ ItemListener {
 		
 
 		else if(c == mSaveScreenshot){
-			JPanelToImage.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.png");
+			JPanelToImage.saveToFileChooserSelection(parentWindow.scrollingPanel, "Save Timeline Image", "./TimelineScreenshot.pdf");
 		}
 
 		else if(c == mWhiteBG){
@@ -527,14 +527,14 @@ ItemListener {
 
 		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Save To Image");
-		mSaveScreenshot = new JMenuItem("Save Visible Screen as JPG or PNG");
+		mSaveScreenshot = new JMenuItem("Save Visible Screen as PDF or Image");
 		mSaveScreenshot.addActionListener(this);
 		saveMenu.add(mSaveScreenshot);
-		mSaveFullTimeline = new JMenuItem("Save All PE Timelines as JPG or PNG");
+		mSaveFullTimeline = new JMenuItem("Save All PE Timelines as PDF or Image");
 		mSaveFullTimeline.addActionListener(this);
 		saveMenu.add(mSaveFullTimeline);
 		mbar.add(saveMenu);
-		mSaveFullTimelineWhiteBG = new JMenuItem("Save All PE Timelines as JPG or PNG on White Background");
+		mSaveFullTimelineWhiteBG = new JMenuItem("Save All PE Timelines as PDF or Image on White Background");
 		mSaveFullTimelineWhiteBG.addActionListener(this);
 		saveMenu.add(mSaveFullTimelineWhiteBG);
 

@@ -66,8 +66,26 @@ public class GraphPanel extends JPanel
     public GraphPanel(Graph g)
     {
 	setBackground(Color.lightGray);
-	displayCanvas = g;		
+	displayCanvas = g;
 	createLayout();
+    }
+
+    /** Programmatically switch the graph type, keeping the type/stacked
+     *  controls at the bottom of the panel in sync. */
+    public void selectGraphType(int type, boolean stacked) {
+	if (type == Graph.LINE) {
+	    cbLineGraph.setSelected(true);
+	} else if (type == Graph.BAR) {
+	    cbBarGraph.setSelected(true);
+	} else if (type == Graph.AREA) {
+	    cbAreaGraph.setSelected(true);
+	    // area graphs are automatically stacked
+	    stacked = true;
+	}
+	cbStacked.setSelected(stacked);
+	cbStacked.setEnabled(type != Graph.AREA);
+	displayCanvas.setGraphType(type);
+	displayCanvas.setStackGraph(stacked);
     }
 
     private void createLayout() {

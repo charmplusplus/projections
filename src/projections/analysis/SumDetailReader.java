@@ -30,12 +30,16 @@ class SumDetailReader extends ProjectionsReader
 {
     // public static meta-tags - used to allocate space in the data array
     // based on the number of tags.
-    protected static final int NUM_TAGS = 2;
+    protected static final int NUM_TAGS = 3;
 
     // public static tags - used to access the appropriate part of the
     // array.
     private static final int TOTAL_TIME = 0;
     private static final int NUM_MSGS = 1;
+    /** Bytes of the messages counted by NUM_MSGS. Written by charm since
+     *  2026; a file without the line leaves this tag empty, which reads as
+     *  zeros. */
+    private static final int TOTAL_BYTES = 2;
 
     // header values
     private int numIntervals;
@@ -165,6 +169,8 @@ class SumDetailReader extends ProjectionsReader
 		buildTable(TOTAL_TIME);
 	    } else if (label.equals("EPCallTimePerInterval")) {
 		buildTable(NUM_MSGS);
+	    } else if (label.equals("MsgBytesPerEPperInterval")) {
+		buildTable(TOTAL_BYTES);
 	    } else {
 		// do nothing. Unrecognized labels are not an error.
 		// this allows new formats to be implemented without

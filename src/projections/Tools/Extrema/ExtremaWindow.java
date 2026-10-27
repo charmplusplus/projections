@@ -123,6 +123,11 @@ Clickable
 	private double[][] graphData;
 	private LinkedList<Integer> outlierPEs;
 
+	// The time range the loaded data covers, for the chart header; the x axis
+	// shows PEs, so nothing else on the chart says what interval was analyzed.
+	private long loadedStartTime;
+	private long loadedEndTime;
+
 
 	public ExtremaWindow(MainWindow mainWindow) {
 		super("Projections Extrema Analysis Tool - " + 
@@ -290,6 +295,8 @@ Clickable
 	private GenericGraphColorer colorer;
 
 	private void constructToolData(final  long startTime, final long endTime ) {
+		loadedStartTime = startTime;
+		loadedEndTime = endTime;
 		// construct the necessary meta-data given the selected activity
 		// type.
 		double[][] tempData;
@@ -349,7 +356,12 @@ Clickable
 
 			// Assume that each PE has the same number of EPs
 			final int numEPs = sumDetailData_PE_EP[0].length;
-			for (int pe = 0; pe < sumDetailData_PE_EP.length; pe++) {
+			// sumDetailData_PE_EP and idleTemp are indexed by absolute PE
+			// number and cover every PE in the run, while tempData has one
+			// row per *selected* PE, in selectedPEs order (the same order
+			// peNames is built in below).
+			int peIdx = 0;
+			for (Integer pe : selectedPEs) {
 				double lis[] = new double[numEPs + 2];
 				double sum = 0.0;
 				for (int ep = 0; ep < numEPs; ep++) {
@@ -357,9 +369,15 @@ Clickable
 					sum += lis[ep];
 				}
 
-				lis[numEPs] = idleTemp[pe];
-				lis[numEPs + 1] = 100.0 - sum - lis[numEPs];
-				tempData[pe] = lis;
+				// Idle comes from the .sum files and the entry method times
+				// from the .sumd files; charm accumulates the two through
+				// independent paths and they can overlap, so give idle only
+				// what the entry methods leave free instead of deriving a
+				// negative overhead from the mismatch.
+				lis[numEPs] = Math.min(idleTemp[pe], Math.max(0.0, 100.0 - sum));
+				lis[numEPs + 1] = Math.max(0.0, 100.0 - sum - lis[numEPs]);
+				tempData[peIdx] = lis;
+				peIdx++;
 			}
 		}
 
@@ -784,7 +802,9 @@ Clickable
 	// outlier analysis which will then determine which processor's
 	// log data to read.
 	private void readOutlierStats(final long startTime, final long endTime) {
-		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity); 
+		loadedStartTime = startTime;
+		loadedEndTime = endTime;
+		numActivities = MainWindow.runObject[myRun].getNumActivity(selectedActivity);
 
 		colorer = new OnlineDataColorer(numActivities);
 		
@@ -932,11 +952,18 @@ Clickable
 
 	protected void setGraphSpecificData() {
 		setXAxis("Notable PEs (Cluster Representatives and Extrema)", outlierList);
-		setYAxis(attributes[1][selectedAttribute], 
+		setYAxis(attributes[1][selectedAttribute],
 				attributes[2][selectedAttribute]);
 		setDataSource("Extrema: " + attributes[0][selectedAttribute] +
-				" (" + threshold + 
+				" (" + threshold +
 				" Extrema PEs)", graphData, colorer, this);
+		// Flank the chart title with the analyzed time range and PE selection;
+		// neither is visible anywhere else on this chart.
+		SortedSet<Integer> selectedPEs =
+			(dialog != null) ? new TreeSet<Integer>(dialog.getSelectedProcessors()) : null;
+		graphCanvas.setTitleAnnotations(
+				"Time " + U.humanReadableRange(loadedStartTime, loadedEndTime),
+				Util.processorSelectionString(selectedPEs));
 		refreshGraph();
 	}
 

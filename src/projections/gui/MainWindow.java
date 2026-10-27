@@ -454,6 +454,10 @@ implements ScalePanel.StatusDisplay
 	}
 
 	private void updateStatusSTS(StsReader sts) {
+		if (sts == null) {
+			// trace failed to load (initAnalysis already showed the error)
+			return;
+		}
 		StringBuilder builder = new StringBuilder();
 		builder.append("<html><table>");
 		builder.append(generateInfoPanelHTML("Name", sts.getBaseName()));

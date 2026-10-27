@@ -34,15 +34,18 @@ import javax.swing.SwingWorker;
 import projections.gui.ChooseEntriesWindow;
 import projections.gui.ColorMap;
 import projections.gui.ColorUpdateNotifier;
+import projections.gui.EntryMethodVisibility;
 import projections.gui.MainWindow;
 import projections.gui.ProjectionsWindow;
 import projections.gui.RangeDialog;
 import projections.gui.ScalePanel;
 import projections.gui.ScaleSlider;
+import projections.gui.U;
 import projections.gui.Util;
 
 public class OverviewWindow extends ProjectionsWindow
-implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateNotifier
+implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateNotifier,
+EntryMethodVisibility
 {
 
 	// Temporary hardcode. This variable will be assigned appropriate
@@ -64,6 +67,10 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 	protected static final int MODE_EP = 1;
 
 	private ColorMap utilColorMap;
+
+	/** Time at the left edge of the display; the panel's horizontal
+	 *  coordinates are microseconds relative to it */
+	private long displayStartTime;
 
 	private OverviewWindow thisWindow;
 
@@ -117,7 +124,16 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 		gbc.fill = GridBagConstraints.BOTH;
 		Util.gblAdd(windowPane, displayPanel, gbc, 0,0, 2,1, 2,1, 1,1,1,1);
 		scalePanel.setStatusDisplay(this);
-		
+
+		// Timestamps under the horizontal tick ruler. The panel's horizontal
+		// coordinate is microseconds from the start of the displayed range,
+		// and getTicks() already follows pan and zoom.
+		scalePanel.setHorizontalAxisLabeler(new ScalePanel.AxisLabeler() {
+			public String label(double offset) {
+				return U.humanReadableString(displayStartTime + (long)offset, 3);
+			}
+		});
+
 		
 		mChooseColors = new JButton("Choose Entry Method Colors");
 		mChooseColors.addActionListener(this);
@@ -126,7 +142,9 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 		radioPanel.setLayout(new GridBagLayout());
 		Util.gblAdd(radioPanel, new JLabel("Color By:"), gbc, 0,0, 1,1, 1,1);
 
-		if(MainWindow.runObject[myRun].hasLogFiles()){
+		// Both .log files and .sumd files carry per-entry-method data
+		if(MainWindow.runObject[myRun].hasLogFiles() ||
+				MainWindow.runObject[myRun].hasSumDetailData()){
 			colorByEntryMethod = new JRadioButton("Entry Method");
 			colorByEntryMethod.setSelected(true);
 			group.add(colorByEntryMethod);
@@ -172,6 +190,7 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 
 	private void setStlPanelData(long startTime, long endTime, SortedSet<Integer> pes){
 		double horSize, verSize;
+		displayStartTime = startTime;
 		if (pes == null) {
 			horSize=MainWindow.runObject[myRun].getTotalTime();
 			verSize=MainWindow.runObject[myRun].getNumProcessors();
@@ -256,8 +275,40 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 				showDialog();
 			}
 		} else if (evt.getSource() == mChooseColors) {
-			new ChooseEntriesWindow(this);
+			new ChooseEntriesWindow(this, false, this);
 		}
+	}
+
+
+	/** Restrict "Choose Entry Method Colors" to the entry methods actually
+	 *  drawn (EntryMethodVisibility, consumed by ChooseEntriesWindow), and
+	 *  keep Idle and Overhead out of the list: this tool always draws them
+	 *  white and black, so picking colors for them would do nothing. */
+	public int[] getEntriesArray() {
+		return stl.getEntriesPresent();
+	}
+
+	public boolean hasEntryList() {
+		return stl.getEntriesPresent() != null;
+	}
+
+	public boolean handleIdleOverhead() {
+		return false;
+	}
+
+	public boolean entryIsVisibleID(Integer id) {
+		return true;
+	}
+
+	public void makeEntryVisibleID(Integer id) {
+		// visibility checkboxes are not shown for this tool's chooser
+	}
+
+	public void makeEntryInvisibleID(Integer id) {
+	}
+
+	public void displayMustBeRedrawn() {
+		repaint();
 	}
 
 	public void mouseClicked(MouseEvent evt) {
@@ -286,7 +337,8 @@ implements MouseListener, ActionListener, ScalePanel.StatusDisplay, ColorUpdateN
 
 	/** Recieve notification that colors have been changed */
 	public void colorsHaveChanged(){
-		if (colorByEntryMethod.isSelected()){
+		// colorByEntryMethod does not exist for traces without entry method data
+		if (colorByEntryMethod != null && colorByEntryMethod.isSelected()){
 			stl.colorByEntry();
 		} else{
 			stl.colorByUtil();

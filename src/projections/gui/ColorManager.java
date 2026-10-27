@@ -9,6 +9,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.AbstractList;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 import projections.analysis.Analysis;
@@ -66,16 +70,8 @@ public class ColorManager
 						}
 
 						// Now fill in any values found in the file
-						for (int i=0; i<inputColors.length; i++) {
-							// Overwrite with any stored colors found in the file
-							String epName = names[i];
-							int k = a.getEntryIDByName(epName);
-							if(k>=0){
-//								System.out.println("Using color found in file for " + epName);
-								retColors[Analysis.PROJECTIONS][k] = inputColors[i];
-							}
-						}
-						
+						applySavedColors(names, inputColors,
+								retColors[Analysis.PROJECTIONS]);
 
 						in.close();
 						colorToReturn = retColors;
@@ -143,6 +139,97 @@ public class ColorManager
 	
 	}
 
+
+	/** Put the colors read from a color file onto this run's entry methods.
+	 *
+	 *  They are matched by name, which is what makes a color file usable across runs
+	 *  at all. An entry method's name carries its parameter list, though, and the
+	 *  placeholder parameter names the translator generates (impl_noname_5e and the
+	 *  like) are renumbered whenever the application is rebuilt. Matching on the full
+	 *  name alone therefore drops exactly the application's own entry methods -- the
+	 *  ones worth coloring -- while the runtime's stable names keep their colors, so
+	 *  the file looks as though it were ignored. Whatever the exact pass leaves over
+	 *  is matched again on the name without its parameter list, and only where that
+	 *  shorter name picks out a single entry method on each side, so that a color can
+	 *  never quietly land on the wrong method.
+	 *
+	 *  Colors are placed by position in this run's entry method list, and every entry
+	 *  method sharing a name gets the color, rather than only the first one found. */
+	private void applySavedColors(String[] names, Color[] savedColors, Color[] epColors) {
+		int numEPs = epColors.length;
+		Map<String, List<Integer>> byName = new HashMap<String, List<Integer>>();
+		Map<String, List<Integer>> byShortName = new HashMap<String, List<Integer>>();
+		for (int ep = 0; ep < numEPs; ep++) {
+			String name = a.getEntryNameByIndex(ep);
+			addTo(byName, name, ep);
+			addTo(byShortName, withoutParameters(name), ep);
+		}
+		Map<String, List<Integer>> savedByShortName = new HashMap<String, List<Integer>>();
+		for (int i = 0; i < names.length; i++) {
+			addTo(savedByShortName, withoutParameters(names[i]), i);
+		}
+
+		boolean[] colored = new boolean[numEPs];
+		int exact = 0;
+		int shortened = 0;
+		int unmatched = 0;
+		for (int i = 0; i < names.length && i < savedColors.length; i++) {
+			List<Integer> hits = byName.get(names[i]);
+			if (hits == null) {
+				continue;
+			}
+			for (Integer ep : hits) {
+				epColors[ep] = savedColors[i];
+				colored[ep] = true;
+			}
+			exact++;
+		}
+		for (int i = 0; i < names.length && i < savedColors.length; i++) {
+			if (byName.containsKey(names[i])) {
+				continue;
+			}
+			String shortName = withoutParameters(names[i]);
+			List<Integer> hits = byShortName.get(shortName);
+			List<Integer> saved = savedByShortName.get(shortName);
+			if (hits != null && hits.size() == 1 && saved.size() == 1 && !colored[hits.get(0)]) {
+				epColors[hits.get(0)] = savedColors[i];
+				colored[hits.get(0)] = true;
+				shortened++;
+			} else {
+				unmatched++;
+			}
+		}
+
+		int total = 0;
+		for (boolean c : colored) {
+			if (c) total++;
+		}
+		System.out.println("Colors from " + filename + ": " + total + " of " + numEPs +
+				" entry methods colored (" + exact + " saved names matched exactly, " +
+				shortened + " matched without their parameter list); " +
+				unmatched + " saved entries have no counterpart in this run.");
+	}
+
+	private static void addTo(Map<String, List<Integer>> map, String key, int value) {
+		if (key == null) {
+			return;
+		}
+		List<Integer> list = map.get(key);
+		if (list == null) {
+			list = new ArrayList<Integer>();
+			map.put(key, list);
+		}
+		list.add(value);
+	}
+
+	/** An entry method name with any parameter list dropped. */
+	private static String withoutParameters(String name) {
+		if (name == null) {
+			return null;
+		}
+		int paren = name.indexOf('(');
+		return (paren == -1 ? name : name.substring(0, paren)).trim();
+	}
 
 	public Color[][] defaultColorMap() {
 		Color retColors[][] = new Color[Analysis.NUM_ACTIVITIES][];

@@ -119,7 +119,7 @@ implements PopUpAble, ColorUpdateNotifier
 		
 		// Screenshot Menu
 		JMenu saveMenu = new JMenu("Save To Image");
-		mSaveScreenshot = new JMenuItem("Save Plot as Image");
+		mSaveScreenshot = new JMenuItem("Save Plot as PDF or Image");
 		mSaveScreenshot.addActionListener(new MenuHandler());
 		saveMenu.add(mSaveScreenshot);
 		menuBar.add(saveMenu);
@@ -128,6 +128,21 @@ implements PopUpAble, ColorUpdateNotifier
 	}
 
 	public abstract String[] getPopup(int xVal, int yVal);
+
+	/** Subclasses may return a filter so the "Choose Entry Colors" dialog
+	 *  lists only the entry methods present in the current view (like
+	 *  Timeline's chooser); null (the default) lists all entry methods. */
+	protected EntryMethodVisibility getEntryFilter(){
+		return null;
+	}
+
+	/** Whether that dialog also offers a "Visible" check box per entry
+	 *  method. A subclass says yes only if its filter really implements
+	 *  makeEntryVisibleID/makeEntryInvisibleID; the default chooser shows
+	 *  colors alone. */
+	protected boolean entryFilterAllowsHiding(){
+		return false;
+	}
 
 	// create a standard layout which can be called from child class or 
 	// overridden by it
@@ -139,6 +154,12 @@ implements PopUpAble, ColorUpdateNotifier
 		mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
 		mainPanel.add(graphPanel);
 		return mainPanel;
+	}
+
+	/** The panel wrapping the graph canvas, for tools that need to switch
+	 *  graph type programmatically (see GraphPanel.selectGraphType). */
+	protected GraphPanel getGraphPanel(){
+		return graphPanel;
 	}
 
 
@@ -181,7 +202,14 @@ implements PopUpAble, ColorUpdateNotifier
 			yAxis = new YAxisAuto(title,units,dataSource);
 		else
 			// create a dummy YAxis storing the title and units
-			yAxis = new YAxisFixed(title,units,0);	
+			yAxis = new YAxisFixed(title,units,0);
+	}
+
+	/** Install a fully custom y-axis (e.g. transformed scales whose tick
+	 *  labels are not the raw data values). Call after setDataSource, which
+	 *  would otherwise replace the axis with a YAxisAuto. */
+	protected void setYAxis(YAxis axis){
+		yAxis = axis;
 	}
 	
 		
@@ -240,7 +268,11 @@ implements PopUpAble, ColorUpdateNotifier
 			} else if(e.getSource() == mSaveScreenshot){
 				JPanelToImage.saveToFileChooserSelection(graphCanvas, "Save Plot To File...", "ProjectionsPlot.pdf");
 			} else if (e.getSource() == mChooseColors){
-				new ChooseEntriesWindow(gw);
+				EntryMethodVisibility filter = getEntryFilter();
+				if (filter != null)
+					new ChooseEntriesWindow(filter, entryFilterAllowsHiding(), gw);
+				else
+					new ChooseEntriesWindow(gw);
 			} else if (e.getSource() == mLoadColors){
 				try {
 					MainWindow.runObject[myRun].loadColors();

@@ -3,6 +3,8 @@ package projections.analysis;
 import java.io.IOException;
 import java.util.*;
 
+import javax.swing.ProgressMonitor;
+
 import projections.analysis.SumDetailReader.RLEBlock;
 import projections.gui.MainWindow;
 
@@ -29,6 +31,7 @@ public class IntervalData
     // should, as far as possible, be avoided.
     private static final int TYPE_TIME = 0;
     private static final int TYPE_NUM_MSGS = 1;
+    private static final int TYPE_MSG_BYTES = 2;
 
     // associated readers
     private static SumDetailReader summaryDetails[];
@@ -60,6 +63,9 @@ public class IntervalData
     private int sumDetailData_interval_EP[][] = null;
     private int sumDetailData_PE_EP[][] = null;
     private int sumDetailData_PE_interval[][] = null;
+    // [pe list index][interval] - which EP used the most time, or -1 for none.
+    // Indexed by position in the requested processor list, like systemUsageData.
+    private int sumDetailData_PE_interval_maxEP[][] = null;
 
     /**
      *  The constructor
@@ -115,29 +121,120 @@ public class IntervalData
 		sumDetailData_interval_EP = new int[numIntervals][numEPs];
 		sumDetailData_PE_EP = new int[numPEs][numEPs];
 		sumDetailData_PE_interval = new int[numPEs][numIntervals];
+		sumDetailData_PE_interval_maxEP = new int[processorList.size()][numIntervals];
 		systemUsageData = new int[3][processorList.size()][numIntervals];
 
 		int processorCount = 0;
 
+		// Expanding the RLE data costs numPEs * numIntervals * numEPs, which
+		// runs into minutes on a large trace, so show progress the same way
+		// the .sum reader does.
+		int numPes = processorList.size();
+		ProgressMonitor progressBar =
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot,
+					"Loading summary detail data", "", 0, numPes);
+
 		for (Integer curPe : processorList) {
+			if (progressBar.isCanceled()) {
+				progressBar.close();
+				return;
+			}
+			progressBar.setNote(processorCount + " of " + numPes + " PEs");
+			progressBar.setProgress(processorCount);
+
 			double[][] tempData = getData(curPe, TYPE_TIME, intervalSize, intervalStart, numIntervals);
 			for (int i = 0; i < numIntervals; i++) {
+				int maxEP = -1;
+				double maxEPTime = 0.0;
 				for (int ep = 0; ep < numEPs; ep++) {
 					sumDetailData_interval_EP[i][ep] += (int) tempData[ep][i];
 					sumDetailData_PE_EP[curPe][ep] += (int) tempData[ep][i];
 					sumDetailData_PE_interval[curPe][i] += (int) tempData[ep][i];
 					systemUsageData[1][processorCount][i] += (int) tempData[ep][i];
+					if (tempData[ep][i] > maxEPTime) {
+						maxEPTime = tempData[ep][i];
+						maxEP = ep;
+					}
 				}
+				// Overview colors each PE/interval cell by its dominant EP
+				sumDetailData_PE_interval_maxEP[processorCount][i] = maxEP;
 				// after accumulation for systemUsageData, convert to utilization percentage (0-100)
 				systemUsageData[1][processorCount][i] =
 						(int) IntervalUtils.timeToUtil(systemUsageData[1][processorCount][i], intervalSize);
 			}
 			processorCount++;
 		}
+		progressBar.close();
 	}
 
 	public int[][] getSumDetailData_interval_EP() {
 		return sumDetailData_interval_EP;
+	}
+
+	/** Messages processed per interval per entry method, summed over the given
+	 *  processors.
+	 *
+	 *  A .sumd file records, beside the time each entry method spent running in
+	 *  an interval, how many times it ran there -- which is how many messages
+	 *  for it were processed, since an entry method runs once per message. The
+	 *  reader has always parsed it; nothing displayed it until now, so unlike
+	 *  the time data it is expanded on demand rather than by
+	 *  loadSumDetailIntervalData, and no tool that does not ask for it pays for
+	 *  the expansion.
+	 *
+	 *  A run spanning a bin boundary is counted in the bin it ends in, which is
+	 *  where charm's trace-summary increments the counter. */
+	public double[][] getSumDetailMsgsPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		return getSumDetailPerInterval(TYPE_NUM_MSGS, intervalSize, intervalStart,
+				intervalEnd, processorList);
+	}
+
+	/** Bytes of those messages, per interval per entry method.
+	 *
+	 *  charm has only recorded this since 2026; a trace written before that has
+	 *  no such line in its .sumd files and reads as zeros throughout. The size
+	 *  is the whole message as it was sent, envelope and padding included,
+	 *  which is what a .log trace records as a message length too. */
+	public double[][] getSumDetailBytesPerInterval(long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		return getSumDetailPerInterval(TYPE_MSG_BYTES, intervalSize, intervalStart,
+				intervalEnd, processorList);
+	}
+
+	private double[][] getSumDetailPerInterval(int type, long intervalSize, int intervalStart,
+			int intervalEnd, SortedSet<Integer> processorList) {
+		int numDestIntervals = intervalEnd - intervalStart + 1;
+		double[][] msgs = new double[numDestIntervals][numEPs];
+
+		int processorCount = 0;
+		int numPes = processorList.size();
+		// Expanding the run length encoding costs numPEs * numIntervals * numEPs,
+		// the same as the time data, so show the same kind of progress.
+		ProgressMonitor progressBar =
+			new ProgressMonitor(MainWindow.runObject[myRun].guiRoot,
+					(type == TYPE_MSG_BYTES) ? "Loading message sizes" : "Loading message counts",
+					"", 0, numPes);
+
+		for (Integer curPe : processorList) {
+			if (progressBar.isCanceled()) {
+				progressBar.close();
+				return msgs;
+			}
+			progressBar.setNote(processorCount + " of " + numPes + " PEs");
+			progressBar.setProgress(processorCount);
+
+			double[][] tempData = getData(curPe, type, intervalSize,
+					intervalStart, numDestIntervals);
+			for (int i = 0; i < numDestIntervals; i++) {
+				for (int ep = 0; ep < numEPs; ep++) {
+					msgs[i][ep] += tempData[ep][i];
+				}
+			}
+			processorCount++;
+		}
+		progressBar.close();
+		return msgs;
 	}
 
 	public int[][] getSumDetailData_PE_EP() {
@@ -146,6 +243,10 @@ public class IntervalData
 
 	public int[][] getSumDetailData_PE_interval() {
 		return sumDetailData_PE_interval;
+	}
+
+	public int[][] getSumDetailData_PE_interval_maxEP() {
+		return sumDetailData_PE_interval_maxEP;
 	}
 
     public int[][][] getSystemUsageData() {
@@ -208,7 +309,7 @@ public class IntervalData
 	returnData = new double[numEPs][numDestIntervals];
 	boolean discrete = false;
 
-	if (type == TYPE_NUM_MSGS) {
+	if (type == TYPE_NUM_MSGS || type == TYPE_MSG_BYTES) {
 	    discrete = true;
 	}
 	for (int ep=0; ep<tempData.length; ep++) {

@@ -65,7 +65,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 
 		// Construct menu items specific to this tool
 		JMenu saveMenu = new JMenu("Save To Image");
-		mSave = new JMenuItem("Save as JPG or PNG");
+		mSave = new JMenuItem("Save as PDF or Image");
 		menuHandler mh = new menuHandler();
 		mSave.addActionListener(mh);
 		saveMenu.add(mSave);
@@ -80,7 +80,7 @@ public class TimelineRenderedWindow extends ProjectionsWindow implements MainHan
 
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == mSave){
-				JPanelToImage.saveToFileChooserSelection(combinedTimelinesPanel, "Save Timeline Image", "./TimelineScreenshot.png");
+				JPanelToImage.saveToFileChooserSelection(combinedTimelinesPanel, "Save Timeline Image", "./TimelineScreenshot.pdf");
 			}
 
 		}

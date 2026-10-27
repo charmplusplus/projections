@@ -320,6 +320,11 @@ public class LogReader
     				nLines++;
     				switch (curData.type) {
     				case BEGIN_IDLE:
+    					if (isIdle) {
+    						// Close the open idle period first, as
+    						// BEGIN_PROCESSING does for an open entry.
+    						intervalCalc(END_IDLE, 0, 0, curData.time);
+    					}
     					intervalCalc(curData.type, 0, 0, curData.time);
     					isIdle = true;
     					break;

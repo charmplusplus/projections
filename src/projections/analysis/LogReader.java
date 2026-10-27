@@ -311,6 +311,7 @@ public class LogReader
     		GenericLogReader reader = new GenericLogReader( pe, MainWindow.runObject[myRun].getVersion());
 
 		boolean isProcessing = false;
+		boolean isIdle = false;
 		LogEntry lastBeginData = null;
     		
     		try { 
@@ -318,8 +319,24 @@ public class LogReader
     				curData = reader.nextEvent();
     				nLines++;
     				switch (curData.type) {
-    				case BEGIN_IDLE: case END_IDLE:
+    				case BEGIN_IDLE:
+    					if (isIdle) {
+    						// Close the open idle period first, as
+    						// BEGIN_PROCESSING does for an open entry.
+    						intervalCalc(END_IDLE, 0, 0, curData.time);
+    					}
     					intervalCalc(curData.type, 0, 0, curData.time);
+    					isIdle = true;
+    					break;
+    				case END_IDLE:
+    					// A PE that was already idle when tracing began
+    					// logs an END_IDLE with no BEGIN_IDLE. Counting it
+    					// would leave processing at -1, and every later
+    					// interval on the PE would be dropped.
+    					if (isIdle) {
+    						intervalCalc(curData.type, 0, 0, curData.time);
+    					}
+    					isIdle = false;
     					break;
     				case CREATION:
     					intervalCalc(CREATION, curData.mtype, 
